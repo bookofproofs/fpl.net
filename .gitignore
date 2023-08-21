@@ -3,3 +3,8 @@
 ################################################################################
 
 /.vs
+/Fpl/.vs/Fpl
+/Fpl/Fpl/bin/Debug/net6.0
+/Fpl/Fpl/obj
+/Fpl/TestFplParser/bin/Debug/net6.0
+/Fpl/TestFplParser/obj
