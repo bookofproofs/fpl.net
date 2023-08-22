@@ -76,12 +76,7 @@ type Extensions =
 
 type ExtensionBlock = ExtensionBlock of Extensions * Extensions
 
-type Obj =
-    | Object of string
-    | Template of string
-    | LongTemplate of string 
-
-type Identifiers =
+type FplIdentifierType =
     | LeftClosed
     | LeftOpen 
     | RightClosed
@@ -91,32 +86,43 @@ type Identifiers =
     | WildcaredNamespaceIdentifier of string list 
     | AliasedNamespaceIdentifier of string list * string
     | IndexVariable of string * string
+    | Var of string
+    | Self of char list 
+    | ClosedOrOpenRange of (FplIdentifierType * (FplIdentifierType option * FplIdentifierType option)) * FplIdentifierType
+    | BrackedCoordList of FplIdentifierType list
+    | AliasedId of string list
+    | EntityWithCoord of FplIdentifierType * FplIdentifierType
+    | Xid of Extensions
+    | PredicateHeader 
+    | FunctionalTermHeader 
+    | Object 
+    | Template of string
+    | LongTemplate of string 
+    | RangeInType of FplIdentifierType option * FplIdentifierType option 
+    | SpecificTypeWithCoord of (FplIdentifierType * FplIdentifierType ) * (FplIdentifierType * FplIdentifierType)
 
-type UsesClause = UsesClause of Identifiers list
+
+type UsesClause = UsesClause of FplIdentifierType list
 
     
 type Predicate =
     | True
     | False
     | Undefined
-    | AliasedId of string list
-    | PredicateWithArgs of Predicate * Predicate list
+    | PredicateWithArgs of FplIdentifierType * Predicate list
     | And of Predicate list
     | Or of Predicate list
     | Impl of Predicate * Predicate
     | Iif of Predicate * Predicate
     | Xor of Predicate * Predicate
     | Not of Predicate 
-    | All of Predicate list * Predicate
-    | Exists of Predicate list * Predicate
-    | ExistsN of (string * Predicate list) * Predicate
+    | All of FplIdentifierType list * Predicate
+    | Exists of FplIdentifierType list * Predicate
+    | ExistsN of (string * FplIdentifierType list) * Predicate
     | Is
-    | EntityWithCoord of Predicate * Predicate
-    | ClosedOrOpenRange of (Identifiers * (Predicate option * Predicate option)) * Identifiers
-    | BrackedCoordList of Predicate list
-    | Self of char list 
-    | Var of string
     | ExtDigits of string
+
+
 
 type PredicateKeyword =
     | Py

@@ -56,11 +56,11 @@ let IdStartsWithSmallCase: Parser<string,unit>  = regex @"[a-z][a-z0-9A-Z_]*"
 let IdStartsWithCap: Parser<string,unit> = regex @"[A-Z][a-z0-9A-Z_]*" 
 let digits: Parser<string,unit> = regex @"\d+" 
 let digitsIdSmallCase: Parser<string, unit> = regex @"\d+[a-z][a-z0-9A-Z_]*"
-let namespaceIdentifier = sepBy1 IdStartsWithCap dot |>> Identifiers.NamespaceIdentifier
-let wildcardedNamespaceIdentifier = many1 (IdStartsWithCap .>> dot) .>> skipString "*" |>> Identifiers.WildcaredNamespaceIdentifier
+let namespaceIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifierType.NamespaceIdentifier
+let wildcardedNamespaceIdentifier = many1 (IdStartsWithCap .>> dot) .>> skipString "*" |>> FplIdentifierType.WildcaredNamespaceIdentifier
 let alias = SW .>> skipString "alias" >>. SW >>. IdStartsWithCap
-let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. alias |>> Identifiers.AliasedNamespaceIdentifier
-let variable = IdStartsWithSmallCase |>> Predicate.Var
+let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. alias |>> FplIdentifierType.AliasedNamespaceIdentifier
+let variable = IdStartsWithSmallCase |>> FplIdentifierType.Var
 let variableList = sepEndBy1 variable commaSpaces
 let argumentIdentifier = choice [
     digitsIdSmallCase
@@ -126,8 +126,8 @@ let keywordIs: Parser<_,unit> = skipString "is"
 // objects and their properties that defer the concrete
 // specification of one or more types until the definition or method is declared and instantiated by
 // client code
-let keywordTemplate: Parser<_,unit> = pstring "template"  |>> Obj.Template  
-let keywordTpl: Parser<_,unit> = pstring "tpl"   |>> Obj.Template
+let keywordTemplate: Parser<_,unit> = pstring "template"  |>> FplIdentifierType.Template  
+let keywordTpl: Parser<_,unit> = pstring "tpl"   |>> FplIdentifierType.Template
 let templateHeader = choice [
     keywordTemplate
     keywordTpl
@@ -138,16 +138,16 @@ let templateTail = choice [
     digits
 ]
 
-let longTemplateWithTail = manyStrings2 (pstring "template") templateTail |>> Obj.LongTemplate
-let shortTemplateWithTail = manyStrings2 (pstring "tpl") templateTail |>> Obj.LongTemplate
+let longTemplateWithTail = manyStrings2 (pstring "template") templateTail |>> FplIdentifierType.LongTemplate
+let shortTemplateWithTail = manyStrings2 (pstring "tpl") templateTail |>> FplIdentifierType.LongTemplate
 
 let longTemplate = choice [
     longTemplateWithTail
     shortTemplateWithTail
 ]
 
-let keywordObject: Parser<_,unit> = pstring "object" |>> Obj.Object 
-let keywordObj: Parser<_,unit> = pstring "obj" |>> Obj.Object
+let keywordObject: Parser<_,unit> = skipString "object" >>% FplIdentifierType.Object 
+let keywordObj: Parser<_,unit> = skipString "obj" >>% FplIdentifierType.Object
 
 let object = choice [
     keywordObject
@@ -200,16 +200,16 @@ let conjecture = choice [
     keywordConj
 ]
 
-let keywordPredicate: Parser<_,unit> = skipString "predicate" 
-let keywordPred: Parser<_,unit> = skipString "pred" 
+let keywordPredicate: Parser<_,unit> = skipString "predicate" >>% FplIdentifierType.PredicateHeader
+let keywordPred: Parser<_,unit> = skipString "pred" >>% FplIdentifierType.PredicateHeader
 
 let predicateHeader = choice [
     keywordPredicate
     keywordPred
 ]
 
-let keywordFunction: Parser<_,unit> = skipString "function" 
-let keywordFunc: Parser<_,unit> = skipString "func" 
+let keywordFunction: Parser<_,unit> = skipString "function" >>% FplIdentifierType.FunctionalTermHeader
+let keywordFunc: Parser<_,unit> = skipString "func" >>% FplIdentifierType.FunctionalTermHeader
 
 let functionalTermHeader = choice [
     keywordFunction
@@ -246,29 +246,29 @@ let extensionBlock = IW >>. extensionHeader >>. extensionName .>>. extensionRege
 
 
 (* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
-let xId = at >>. extensionName
+let xId = at >>. extensionName |>> FplIdentifierType.Xid
 
-let predicateIdentifier = sepBy1 IdStartsWithCap dot |>> Predicate.AliasedId
+let predicateIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifierType.AliasedId
 
-let indexValue = (IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase ) |>> Identifiers.IndexVariable
+let indexValue = (IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase ) |>> FplIdentifierType.IndexVariable
 
 let atList = many at
 
-let self = atList .>> keywordSelf |>> Predicate.Self
+let self = atList .>> keywordSelf |>> FplIdentifierType.Self
 
 let entity = choice [
     self
     variable
 ]
 
-let leftOpen = leftBracket >>. IW >>. exclamationMark >>% Identifiers.LeftOpen
-let leftClosed = leftBracket >>. IW >>% Identifiers.LeftClosed
+let leftOpen = leftBracket >>. IW >>. exclamationMark >>% FplIdentifierType.LeftOpen
+let leftClosed = leftBracket >>. IW >>% FplIdentifierType.LeftClosed
 
 let leftBound = ((attempt leftOpen) <|> leftClosed)
 
 let rightBound = choice [
-    exclamationMark >>. IW >>. rightBracket >>% Identifiers.RightOpen
-    IW >>. rightBracket >>% Identifiers.RightClosed
+    exclamationMark >>. IW >>. rightBracket >>% FplIdentifierType.RightOpen
+    IW >>. rightBracket >>% FplIdentifierType.RightClosed
 ]
  
 
@@ -282,7 +282,7 @@ let predicateList, predicateListRef = createParserForwardedToRef()
 let predicateWithArguments, predicateWithArgumentsRef = createParserForwardedToRef()
 //let paramTuple, paramTupleRef = createParserForwardedToRef()
 
-let entityWithCoord = entity .>>. coordOfEntity |>> Predicate.EntityWithCoord
+let entityWithCoord = entity .>>. coordOfEntity |>> FplIdentifierType.EntityWithCoord
 
 let assignee = choice [
     entity
@@ -294,49 +294,45 @@ let fplIdentifier = choice [
     assignee
 ]
 
-let coord = choice [
-    primePredicate
-    assignee
-]
 
-let coordList = sepEndBy1 coord commaSpaces
+let coordList = sepEndBy1 assignee commaSpaces
 
-let bracketedCoordList = (leftBracket >>. IW >>. coordList) .>> (IW >>. rightBracket) |>> Predicate.BrackedCoordList
+let bracketedCoordList = (leftBracket >>. IW >>. coordList) .>> (IW >>. rightBracket) |>> FplIdentifierType.BrackedCoordList
 
-let fplRange = ((opt coord) .>> IW .>> tilde) .>>. (IW >>. opt coord)
+let fplRange = ((opt assignee) .>> IW .>> tilde) .>>. (IW >>. opt assignee)
 
-let closedOrOpenRange = (leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound) |>> Predicate.ClosedOrOpenRange
+let closedOrOpenRange = (leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound) |>> FplIdentifierType.ClosedOrOpenRange
 
 coordOfEntityRef := choice [
     closedOrOpenRange
     bracketedCoordList
 ]
 
-//let coordInType = choice [
-//    predicateWithArguments
-//    indexValue
-//    variable
-//]
+let coordInType = choice [
+    fplIdentifier
+    indexValue
+    variable
+]
 
-//let rangeInType = opt coordInType .>> IW >>. tilde >>. IW >>. opt coordInType 
+let rangeInType = (opt coordInType .>> IW) .>>. (tilde >>. IW >>. opt coordInType) |>> FplIdentifierType.RangeInType
 
-//let specificType = choice [
-//    predicateIdentifier
-//    xId
-//    predicateHeader
-//    functionalTermHeader
-//    objectHeader
-//]
+let specificType = choice [
+    predicateIdentifier
+    xId
+    predicateHeader
+    functionalTermHeader
+    objectHeader
+]
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
-//let callModifier = choice [
-//    star
-//    plus
-//]
+let callModifier = choice [
+    star
+    plus
+]
 
-//let specificTypeWithCoord = specificType .>> IW .>>. leftBound .>>. ( rangeInType <|> coordInType ) .>>. rightBound
+let specificTypeWithCoord = ((specificType .>> IW) .>>. leftBound) .>>. (( rangeInType <|> coordInType ) .>>. rightBound) |>> FplIdentifierType.SpecificTypeWithCoord
 
-//let generalType = opt callModifier .>>. (specificTypeWithCoord <|> specificType)
+let generalType = opt callModifier .>>. (specificTypeWithCoord <|> specificType)
 
 //let parenthesisedGeneralType = generalType .>> IW >>. paramTuple
 
@@ -400,14 +396,12 @@ coordOfEntityRef := choice [
 
 predicateWithArgumentsRef := (fplIdentifier .>> spacesLeftParenSpaces) .>>. (predicateList .>> spacesRightParenSpaces) |>> Predicate.PredicateWithArgs
 
-//let isOperator = keywordIs >>. IW >>. leftParen >>. many CW >>. ( indexValue <|> fplIdentifier ) .>> IW >>. generalType .>> IW >>. rightParen
+let isOperator = optional CW >>. keywordIs >>. spacesLeftParenSpaces >>. ( indexValue <|> fplIdentifier ) .>> IW >>. generalType .>> spacesRightParenSpaces
 
 primePredicateRef := choice [
     keywordTrue
     keywordFalse
     undefined
-    fplIdentifier
-
     predicateWithArguments
     //statement
     //indexValue
