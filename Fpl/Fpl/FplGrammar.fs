@@ -9,8 +9,8 @@ let leftBrace: Parser<_, unit> = skipChar '{'
 let leftParen: Parser<_, unit> = skipChar '('
 let rightParen: Parser<_, unit> = skipChar ')'
 let comma: Parser<_, unit> = skipChar ','
-let star: Parser<char, unit> = pchar '*'
-let plus: Parser<char, unit> = pchar '+'
+let star: Parser<_, unit> = skipChar '*' >>% FplType.Many
+let plus: Parser<_, unit> = skipChar '+' >>% FplType.Many1
 let dot: Parser<_, unit> = skipChar '.'
 let colon: Parser<_, unit> = skipChar ':'
 let colonEqual: Parser<_, unit> = skipString ":="
@@ -121,9 +121,9 @@ let IdStartsWithSmallCase: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" >>=
             else (preturn s) 
     )
 
-let IdStartsWithCap: Parser<string,unit> = regex @"[A-Z][a-z0-9A-Z_]*" <?> "PascalCaseId"
+let IdStartsWithCap: Parser<string,unit> = regex @"[A-Z][a-z0-9A-Z_]*" <?> "<PascalCaseId>"
 let digits: Parser<string,unit> = regex @"\d+" <?> "digits"
-let digitsIdSmallCase: Parser<string, unit> = regex @"\d+[a-z][a-z0-9A-Z_]*" <?> "digits followed by camelCaseId"
+let digitsIdSmallCase: Parser<string, unit> = regex @"\d+[a-z][a-z0-9A-Z_]*" <?> "<digits><camelCaseId>"
 let namespaceIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifierType.NamespaceIdentifier
 let wildcardedNamespaceIdentifier = many1 (IdStartsWithCap .>> dot) .>> skipString "*" |>> FplIdentifierType.WildcaredNamespaceIdentifier
 let alias = SW .>> skipString "alias" >>. SW >>. IdStartsWithCap
@@ -146,7 +146,7 @@ let keywordUndefined: Parser<_,unit> = skipString "undefined" <|> skipString "un
 
 let keywordReturn: Parser<_,unit> = skipString "return" <|> skipString "ret"
 
-let keywordIndex: Parser<_,unit> = skipString "index" <|> skipString "ind" >>% FplType.Index
+let keywordIndex: Parser<_,unit> = skipString "index" <|> skipString "ind" >>% FplType.IndexType
 
 (* Statement-related Keywords *)
 let keywordRange: Parser<_,unit> = skipString "range"
@@ -173,16 +173,16 @@ let keywordIs: Parser<_,unit> = skipString "is"
 // objects and their properties that defer the concrete
 // specification of one or more types until the definition or method is declared and instantiated by
 // client code
-let keywordTemplate: Parser<_,unit> = (pstring "template" <|> pstring "tpl") |>> FplType.Template
+let keywordTemplate: Parser<_,unit> = (pstring "template" <|> pstring "tpl") |>> FplType.TemplateType
 
 let templateTail = choice [
     IdStartsWithCap
     digits
 ]
 
-let templateWithTail = (pstring "template" <|> pstring "tpl") >>. templateTail |>> FplType.Template
+let templateWithTail = many1Strings2 (pstring "template" <|> pstring "tpl") templateTail |>>  FplType.TemplateType
 
-let keywordObject: Parser<_,unit> = skipString "object" <|> skipString "obj" >>% FplType.Object 
+let keywordObject: Parser<_,unit> = skipString "object" <|> skipString "obj" >>% FplType.ObjectType 
 
 let objectHeader = choice [
     keywordObject
@@ -195,8 +195,8 @@ let keywordProposition: Parser<_,unit> = skipString "proposition" <|> skipString
 let keywordCorollary: Parser<_,unit> = skipString "corollary" <|> skipString "cor" 
 let keywordConjecture: Parser<_,unit> = skipString "conjecture" <|> skipString "conj" 
 
-let keywordPredicate: Parser<_,unit> = skipString "predicate" <|> skipString "pred" >>% FplType.PredicateHeader
-let keywordFunction: Parser<_,unit> = skipString "function" <|> skipString "func" >>% FplType.FunctionalTermHeader
+let keywordPredicate: Parser<_,unit> = skipString "predicate" <|> skipString "pred" >>% FplType.PredicateType
+let keywordFunction: Parser<_,unit> = skipString "function" <|> skipString "func" >>% FplType.FunctionalTermType
 
 
 let theoremLikeStatementOrConjectureHeader = choice [
@@ -228,11 +228,11 @@ let extensionBlock = IW >>. extensionHeader >>. extensionName .>>. extensionRege
 
 
 (* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
-let xId = at >>. extensionName |>> FplType.Xid <?> "extensionName"
+let xId = at >>. extensionName |>> FplType.ExtensionType <?> "@ext<PascalCaseId>"
 
 let predicateIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifierType.AliasedId
 
-let classIdentifier = sepBy1 IdStartsWithCap dot |>> FplType.ClassIdentifier
+let classIdentifier = sepBy1 IdStartsWithCap dot |>> FplType.ClassType
 
 let indexValue = (IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase ) |>> FplIdentifierType.IndexVariable
 
@@ -316,9 +316,9 @@ let callModifier = choice [
     plus
 ]
 
-let specificTypeWithCoord = ((specificType .>> IW) .>>. leftBound) .>>. (( rangeInType <|> coordInType ) .>>. rightBound) |>> FplType.SpecificTypeWithCoord
+let specificTypeWithCoord = ((specificType .>> IW) .>>. leftBound) .>>. (( rangeInType <|> coordInType ) .>>. rightBound) |>> FplType.FplTypeWithCoord
 
-let generalType = (opt callModifier) .>>. (specificTypeWithCoord <|> specificType)
+let generalType = opt callModifier .>>. ((attempt specificTypeWithCoord) <|> specificType)
 
 //let parenthesisedGeneralType = generalType .>> IW >>. paramTuple
 

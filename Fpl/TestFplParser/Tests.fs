@@ -527,4 +527,70 @@ type TestPredicates () =
         let expected = """Success: ExistsN (("3", [Var "x"]), Not (Iif (Iif (True, Iif (True, False)), Not True)))""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
+[<TestClass>]
+type TestTypes () =
 
+
+    [<TestMethod>]
+    member this.TestSpecificType1 () =
+        let result = run specificType """predicate"""
+        let actual = sprintf "%O" result
+        let expected = """Success: PredicateType""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSpecificType2 () =
+        let result = run specificType """function"""
+        let actual = sprintf "%O" result
+        let expected = """Success: FunctionalTermType""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSpecificType3 () =
+        let result = run specificType """object"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ObjectType""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSpecificType4 () =
+        let result = run specificType """tpl"""
+        let actual = sprintf "%O" result
+        let expected = """Success: TemplateType "tpl" """.Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSpecificType5 () =
+        let result = run specificType """tplSetElem"""
+        let actual = sprintf "%O" result
+        let expected = """Success: TemplateType "tplSetElem" """.Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSpecificType6 () =
+        let result = run specificType """index"""
+        let actual = sprintf "%O" result
+        let expected = """Success: IndexType""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSpecificType7 () =
+        let result = run specificType """@extNat"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ExtensionType (Extensionname "Nat")""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSpecificType8 () =
+        let result = run specificType """SomeClass"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ClassType ["SomeClass"]""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSpecificType9 () =
+        let result = run specificType """bla"""
+        let actual = sprintf "%O" result
+        let actual2 = actual.Replace("\r","")
+        let expected = "Failure:\nError in Ln: 1 Col: 1\nbla\n^\nExpecting: <PascalCaseId>, @ext<PascalCaseId>, 'func', 'function', 'ind',\n'index', 'obj', 'object', 'pred', 'predicate', 'template' or 'tpl'\n"
+        Assert.AreEqual(expected, actual2);

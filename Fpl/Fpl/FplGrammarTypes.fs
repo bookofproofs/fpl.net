@@ -96,14 +96,16 @@ type FplIdentifierType =
     | ExtDigits of string
 
 type FplType =
-    | PredicateHeader 
-    | FunctionalTermHeader 
-    | Object 
-    | Template of string
-    | Index
-    | Xid of Extensions
-    | ClassIdentifier of string list 
-    | SpecificTypeWithCoord of (FplType * FplIdentifierType ) * (FplIdentifierType * FplIdentifierType)
+    | Many 
+    | Many1 
+    | PredicateType 
+    | FunctionalTermType 
+    | ObjectType 
+    | TemplateType of string
+    | IndexType
+    | ExtensionType of Extensions
+    | ClassType of string list 
+    | FplTypeWithCoord of (FplType * FplIdentifierType ) * (FplIdentifierType * FplIdentifierType)
 
 type UsesClause = UsesClause of FplIdentifierType list
 
