@@ -9,8 +9,8 @@ let leftBrace: Parser<_, unit> = skipChar '{'
 let leftParen: Parser<_, unit> = skipChar '('
 let rightParen: Parser<_, unit> = skipChar ')'
 let comma: Parser<_, unit> = skipChar ','
-let star: Parser<_, unit> = skipChar '*'
-let plus: Parser<_, unit> = skipChar '+'
+let star: Parser<char, unit> = pchar '*'
+let plus: Parser<char, unit> = pchar '+'
 let dot: Parser<_, unit> = skipChar '.'
 let colon: Parser<_, unit> = skipChar ':'
 let colonEqual: Parser<_, unit> = skipString ":="
@@ -48,14 +48,82 @@ let commaSpaces = comma >>. spaces
 // note that this has to be inserted into:
 // the IsOperand choice
 // the PredicateOrFunctionalTerm choice
-let extDigits: Parser<_, unit> = regex @"\d+" |>> Predicate.ExtDigits
+let extDigits: Parser<_, unit> = regex @"\d+" |>> FplIdentifierType.ExtDigits
 
 (* Identifiers *)
+(* Fpl Keywords *)
 
-let IdStartsWithSmallCase: Parser<string,unit>  = regex @"[a-z][a-z0-9A-Z_]*" 
-let IdStartsWithCap: Parser<string,unit> = regex @"[A-Z][a-z0-9A-Z_]*" 
-let digits: Parser<string,unit> = regex @"\d+" 
-let digitsIdSmallCase: Parser<string, unit> = regex @"\d+[a-z][a-z0-9A-Z_]*"
+let keyWordSet =
+    System.Collections.Generic.HashSet<_>(
+        [|
+        "alias"; 
+        "all"; 
+        "and,"; 
+        "assert"; 
+        "ass"; "assume"; 
+        "ax"; 
+        "axiom"; 
+        "case";
+        "cl"; "class"; 
+        "conj"; "conjecture"; 
+        "con"; "conclusion"; 
+        "cor"; "corollary";
+        "del"; "delegate"
+        "else";
+        "end";
+        "ext";
+        "ex";
+        "false";
+        "func"; "function";
+        "iif";
+        "impl";
+        "ind"; "index";
+        "inf"; "inference";
+        "is";
+        "lem"; "lemma";
+        "loc"; "localization";
+        "loop";
+        "mand"; "mandatory";
+        "not";
+        "obj"; "object";
+        "opt"; "optional";
+        "or";
+        "post"; "postulate";
+        "pred"; "predicate";
+        "pre"; "premise";
+        "prf"; "proof";
+        "prop"; "proposition";
+        "qed";
+        "range";
+        "ret"; "return";
+        "rev"; "revoke";
+        "self";
+        "thm"; "theorem";
+        "th"; "theory";
+        "tpl"; "template";
+        "trivial";
+        "true";
+        "undef"; "undefined";
+        "uses";
+        "xor";
+        |]
+    )
+
+let fplKeyword: Parser<string,unit>  = 
+    regex @"[a-z]+" >>= (
+        fun s -> if keyWordSet.Contains(s) then (preturn s) else fail "not an FPL keyword"
+    ) 
+
+let IdStartsWithSmallCase: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" >>= (
+        fun s -> 
+            if keyWordSet.Contains(s) then fail "reserved FPL keyword" 
+            else if s.StartsWith("tpl") then fail "use of FPL templates is not allowed in this context" 
+            else (preturn s) 
+    )
+
+let IdStartsWithCap: Parser<string,unit> = regex @"[A-Z][a-z0-9A-Z_]*" <?> "PascalCaseId"
+let digits: Parser<string,unit> = regex @"\d+" <?> "digits"
+let digitsIdSmallCase: Parser<string, unit> = regex @"\d+[a-z][a-z0-9A-Z_]*" <?> "digits followed by camelCaseId"
 let namespaceIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifierType.NamespaceIdentifier
 let wildcardedNamespaceIdentifier = many1 (IdStartsWithCap .>> dot) .>> skipString "*" |>> FplIdentifierType.WildcaredNamespaceIdentifier
 let alias = SW .>> skipString "alias" >>. SW >>. IdStartsWithCap
@@ -68,38 +136,17 @@ let argumentIdentifier = choice [
 ]
 let argumentParam = slash >>. argumentIdentifier
 
-(* Fpl Keywords *)
-let keywordDel: Parser<_,unit> = skipString "del"
-let keywordInference: Parser<_,unit> = skipString "inference" 
-let keywordInf: Parser<_,unit> = skipString "inf"
+
+
+let keywordDel: Parser<_,unit> = skipString "delegate" <|> skipString "del"
+let keywordInference: Parser<_,unit> = skipString "inference" <|> skipString "inf"
 let keywordSelf: Parser<_,unit> = skipString "self"
 
-let inference = choice [
-    keywordInference
-    keywordInf
-] 
+let keywordUndefined: Parser<_,unit> = skipString "undefined" <|> skipString "undef" >>% Predicate.Undefined
 
-let keywordUndefined: Parser<_,unit> = skipString "undefined" >>% Predicate.Undefined
-let keywordUndef: Parser<_,unit> = skipString "undef" >>% Predicate.Undefined
-let undefined = choice [
-    keywordUndefined
-    keywordUndef
-] 
+let keywordReturn: Parser<_,unit> = skipString "return" <|> skipString "ret"
 
-let keywordReturn: Parser<_,unit> = skipString "return" 
-let keywordRet: Parser<_,unit> = skipString "ret" 
-let returnHeader = choice [
-    keywordReturn
-    keywordRet
-] 
-
-let keywordIndex: Parser<_,unit> = skipString "index" 
-let keywordInd: Parser<_,unit> = skipString "ind" 
-
-let indexHeader = choice [
-    keywordIndex
-    keywordInd
-] 
+let keywordIndex: Parser<_,unit> = skipString "index" <|> skipString "ind" >>% FplType.Index
 
 (* Statement-related Keywords *)
 let keywordRange: Parser<_,unit> = skipString "range"
@@ -126,103 +173,38 @@ let keywordIs: Parser<_,unit> = skipString "is"
 // objects and their properties that defer the concrete
 // specification of one or more types until the definition or method is declared and instantiated by
 // client code
-let keywordTemplate: Parser<_,unit> = pstring "template"  |>> FplIdentifierType.Template  
-let keywordTpl: Parser<_,unit> = pstring "tpl"   |>> FplIdentifierType.Template
-let templateHeader = choice [
-    keywordTemplate
-    keywordTpl
-]
+let keywordTemplate: Parser<_,unit> = (pstring "template" <|> pstring "tpl") |>> FplType.Template
 
 let templateTail = choice [
     IdStartsWithCap
     digits
 ]
 
-let longTemplateWithTail = manyStrings2 (pstring "template") templateTail |>> FplIdentifierType.LongTemplate
-let shortTemplateWithTail = manyStrings2 (pstring "tpl") templateTail |>> FplIdentifierType.LongTemplate
+let templateWithTail = (pstring "template" <|> pstring "tpl") >>. templateTail |>> FplType.Template
 
-let longTemplate = choice [
-    longTemplateWithTail
-    shortTemplateWithTail
-]
-
-let keywordObject: Parser<_,unit> = skipString "object" >>% FplIdentifierType.Object 
-let keywordObj: Parser<_,unit> = skipString "obj" >>% FplIdentifierType.Object
-
-let object = choice [
-    keywordObject
-    keywordObj
-]
+let keywordObject: Parser<_,unit> = skipString "object" <|> skipString "obj" >>% FplType.Object 
 
 let objectHeader = choice [
-    object
-    longTemplate
-    templateHeader
+    keywordObject
+    (attempt templateWithTail) <|> keywordTemplate
 ] 
 
-let keywordTheorem: Parser<_,unit> = skipString "theorem" 
-let keywordThm: Parser<_,unit> = skipString "thm" 
+let keywordTheorem: Parser<_,unit> = skipString "theorem" <|> skipString "thm" 
+let keywordLemma: Parser<_,unit> = skipString "lemma" <|> skipString "lem" 
+let keywordProposition: Parser<_,unit> = skipString "proposition" <|> skipString "prop" 
+let keywordCorollary: Parser<_,unit> = skipString "corollary" <|> skipString "cor" 
+let keywordConjecture: Parser<_,unit> = skipString "conjecture" <|> skipString "conj" 
 
-let theorem = choice [
-    keywordTheorem
-    keywordThm
-] 
+let keywordPredicate: Parser<_,unit> = skipString "predicate" <|> skipString "pred" >>% FplType.PredicateHeader
+let keywordFunction: Parser<_,unit> = skipString "function" <|> skipString "func" >>% FplType.FunctionalTermHeader
 
-let keywordLemma: Parser<_,unit> = skipString "lemma"  
-let keywordLem: Parser<_,unit>  = skipString "lem" 
 
-let lemma = choice [
-    keywordLemma
-    keywordLem
-]
-
-let keywordProposition: Parser<_,unit> = skipString "proposition" 
-let keywordProp: Parser<_,unit> = skipString "prop" 
-
-let proposition = choice [
-    keywordProposition
-    keywordProp
-]
-
-let keywordCorollary: Parser<_,unit> = skipString "corollary" 
-let keywordCor: Parser<_,unit> = skipString "cor" 
-
-let corollary = choice [
-    keywordCorollary
-    keywordCor
-]
-
-let keywordConjecture: Parser<_,unit> = skipString "conjecture" 
-let keywordConj: Parser<_,unit> = skipString "conj" 
-
-let conjecture = choice [
+let theoremLikeStatementOrConjectureHeader = choice [
     keywordConjecture
-    keywordConj
-]
-
-let keywordPredicate: Parser<_,unit> = skipString "predicate" >>% FplIdentifierType.PredicateHeader
-let keywordPred: Parser<_,unit> = skipString "pred" >>% FplIdentifierType.PredicateHeader
-
-let predicateHeader = choice [
-    keywordPredicate
-    keywordPred
-]
-
-let keywordFunction: Parser<_,unit> = skipString "function" >>% FplIdentifierType.FunctionalTermHeader
-let keywordFunc: Parser<_,unit> = skipString "func" >>% FplIdentifierType.FunctionalTermHeader
-
-let functionalTermHeader = choice [
-    keywordFunction
-    keywordFunc
-]
-
-
-let TheoremLikeStatementOrConjectureHeader = choice [
-    conjecture
-    corollary
-    proposition
-    lemma
-    theorem
+    keywordCorollary
+    keywordProposition
+    keywordLemma
+    keywordTheorem
 ]
 
 let wildcardTheoryNamespace = 
@@ -246,9 +228,11 @@ let extensionBlock = IW >>. extensionHeader >>. extensionName .>>. extensionRege
 
 
 (* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
-let xId = at >>. extensionName |>> FplIdentifierType.Xid
+let xId = at >>. extensionName |>> FplType.Xid <?> "extensionName"
 
 let predicateIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifierType.AliasedId
+
+let classIdentifier = sepBy1 IdStartsWithCap dot |>> FplType.ClassIdentifier
 
 let indexValue = (IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase ) |>> FplIdentifierType.IndexVariable
 
@@ -284,26 +268,27 @@ let predicateWithArguments, predicateWithArgumentsRef = createParserForwardedToR
 
 let entityWithCoord = entity .>>. coordOfEntity |>> FplIdentifierType.EntityWithCoord
 
-let assignee = choice [
+let coord = choice [
+    extDigits
     entity
     entityWithCoord
 ]
 
 let fplIdentifier = choice [
     predicateIdentifier
-    assignee
+    coord
 ]
 
 
-let coordList = sepEndBy1 assignee commaSpaces
+let coordList = sepEndBy1 coord commaSpaces
 
 let bracketedCoordList = (leftBracket >>. IW >>. coordList) .>> (IW >>. rightBracket) |>> FplIdentifierType.BrackedCoordList
 
-let fplRange = ((opt assignee) .>> IW .>> tilde) .>>. (IW >>. opt assignee)
+let fplRange = ((opt coord) .>> IW .>> tilde) .>>. (IW >>. opt coord)
 
 let closedOrOpenRange = (leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound) |>> FplIdentifierType.ClosedOrOpenRange
 
-coordOfEntityRef := choice [
+coordOfEntityRef.Value <- choice [
     closedOrOpenRange
     bracketedCoordList
 ]
@@ -317,11 +302,12 @@ let coordInType = choice [
 let rangeInType = (opt coordInType .>> IW) .>>. (tilde >>. IW >>. opt coordInType) |>> FplIdentifierType.RangeInType
 
 let specificType = choice [
-    predicateIdentifier
-    xId
-    predicateHeader
-    functionalTermHeader
+    keywordPredicate
+    keywordFunction
+    keywordIndex
     objectHeader
+    xId
+    classIdentifier
 ]
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
@@ -330,9 +316,9 @@ let callModifier = choice [
     plus
 ]
 
-let specificTypeWithCoord = ((specificType .>> IW) .>>. leftBound) .>>. (( rangeInType <|> coordInType ) .>>. rightBound) |>> FplIdentifierType.SpecificTypeWithCoord
+let specificTypeWithCoord = ((specificType .>> IW) .>>. leftBound) .>>. (( rangeInType <|> coordInType ) .>>. rightBound) |>> FplType.SpecificTypeWithCoord
 
-let generalType = opt callModifier .>>. (specificTypeWithCoord <|> specificType)
+let generalType = (opt callModifier) .>>. (specificTypeWithCoord <|> specificType)
 
 //let parenthesisedGeneralType = generalType .>> IW >>. paramTuple
 
@@ -401,13 +387,13 @@ let isOperator = optional CW >>. keywordIs >>. spacesLeftParenSpaces >>. ( index
 primePredicateRef := choice [
     keywordTrue
     keywordFalse
-    undefined
+    keywordUndefined
     predicateWithArguments
     //statement
     //indexValue
     //isOperator
     //argumentParam
-    extDigits
+    
 ]
 
 let conjunction = (many CW >>. keywordAnd >>. spacesLeftParenSpaces >>. predicateList) .>> spacesRightParenSpaces |>> Predicate.And

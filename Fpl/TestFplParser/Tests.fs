@@ -204,6 +204,42 @@ type TestIdentifiers () =
         let expected = """Success: RightClosed""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
+    [<TestMethod>]
+    member this.TestEntityWithCoord1 () =
+        let result = run entityWithCoord """myField[1 ~ n]"""
+        let actual = sprintf "%O" result
+        let expected = """Success: EntityWithCoord
+  (Var "myField",
+   ClosedOrOpenRange
+     ((LeftClosed, (Some (ExtDigits "1"), Some (Var "n"))), RightClosed))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestEntityWithCoord2 () =
+        let result = run entityWithCoord """theorem[from ~ to]"""
+        let actual = sprintf "%O" result
+        let actual2 = actual.Replace("\r","")
+        let expected = "Failure:\nError in Ln: 1 Col: 8\ntheorem[from ~ to]\n       ^\nreserved FPL keyword\n"
+        Assert.AreEqual(expected, actual2);
+
+    [<TestMethod>]
+    member this.TestEntityWithCoord3 () =
+        let result = run entityWithCoord """self[from ~ to]"""
+        let actual = sprintf "%O" result
+        let expected = """Success: EntityWithCoord
+  (Self [],
+   ClosedOrOpenRange
+     ((LeftClosed, (Some (Var "from"), Some (Var "to"))), RightClosed))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestEntityWithCoord4 () =
+        let result = run entityWithCoord """tplSetElem[from ~ to]"""
+        let actual = sprintf "%O" result
+        let actual2 = actual.Replace("\r","")
+        let expected = "Failure:\nError in Ln: 1 Col: 11\ntplSetElem[from ~ to]\n          ^\nuse of FPL templates is not allowed in this context\n"
+        Assert.AreEqual(expected, actual2);
+
 
 [<TestClass>]
 type TestPredicates () =

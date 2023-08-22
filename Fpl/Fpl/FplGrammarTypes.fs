@@ -92,15 +92,18 @@ type FplIdentifierType =
     | BrackedCoordList of FplIdentifierType list
     | AliasedId of string list
     | EntityWithCoord of FplIdentifierType * FplIdentifierType
-    | Xid of Extensions
+    | RangeInType of FplIdentifierType option * FplIdentifierType option 
+    | ExtDigits of string
+
+type FplType =
     | PredicateHeader 
     | FunctionalTermHeader 
     | Object 
     | Template of string
-    | LongTemplate of string 
-    | RangeInType of FplIdentifierType option * FplIdentifierType option 
-    | SpecificTypeWithCoord of (FplIdentifierType * FplIdentifierType ) * (FplIdentifierType * FplIdentifierType)
-
+    | Index
+    | Xid of Extensions
+    | ClassIdentifier of string list 
+    | SpecificTypeWithCoord of (FplType * FplIdentifierType ) * (FplIdentifierType * FplIdentifierType)
 
 type UsesClause = UsesClause of FplIdentifierType list
 
@@ -120,7 +123,6 @@ type Predicate =
     | Exists of FplIdentifierType list * Predicate
     | ExistsN of (string * FplIdentifierType list) * Predicate
     | Is
-    | ExtDigits of string
 
 
 
