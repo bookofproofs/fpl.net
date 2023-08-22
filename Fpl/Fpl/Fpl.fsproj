@@ -6,10 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="FplEbnf.txt" />
     <Compile Include="FplGrammarTypes.fs" />
     <Compile Include="FplGrammar.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
+
+  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="FParsec" Version="1.1.1" />

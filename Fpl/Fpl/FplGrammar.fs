@@ -60,8 +60,8 @@ let namespaceIdentifier = sepBy1 IdStartsWithCap dot |>> Identifiers.NamespaceId
 let wildcardedNamespaceIdentifier = many1 (IdStartsWithCap .>> dot) .>> skipString "*" |>> Identifiers.WildcaredNamespaceIdentifier
 let alias = SW .>> skipString "alias" >>. SW >>. IdStartsWithCap
 let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. alias |>> Identifiers.AliasedNamespaceIdentifier
-let variable = IdStartsWithSmallCase |>> Identifiers.Variable
-let variableList = sepEndBy1 variable (optional IW >>. comma >>. optional IW)
+let variable = IdStartsWithSmallCase |>> Predicate.Var
+let variableList = sepEndBy1 variable commaSpaces
 let argumentIdentifier = choice [
     digitsIdSmallCase
     digits
@@ -248,68 +248,69 @@ let extensionBlock = IW >>. extensionHeader >>. extensionName .>>. extensionRege
 (* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
 let xId = at >>. extensionName
 
-let predicateIdentifier = sepBy1 IdStartsWithCap dot |>> Identifiers.AliasedId
+let predicateIdentifier = sepBy1 IdStartsWithCap dot |>> Predicate.AliasedId
 
 let indexValue = (IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase ) |>> Identifiers.IndexVariable
 
 let atList = many at
 
-let self = atList .>> keywordSelf |>> Identifiers.Self
+let self = atList .>> keywordSelf |>> Predicate.Self
 
 let entity = choice [
     self
     variable
 ]
 
-let leftOpen = leftBracket >>. optional IW >>. exclamationMark >>% Bound.LeftOpen
-let leftClosed = leftBracket >>. optional IW >>% Bound.LeftClosed
+let leftOpen = leftBracket >>. IW >>. exclamationMark >>% Identifiers.LeftOpen
+let leftClosed = leftBracket >>. IW >>% Identifiers.LeftClosed
 
 let leftBound = ((attempt leftOpen) <|> leftClosed)
 
 let rightBound = choice [
-    exclamationMark >>. optional IW >>. rightBracket >>% Bound.RightOpen
-    optional IW >>. rightBracket >>% Bound.RightClosed
+    exclamationMark >>. IW >>. rightBracket >>% Identifiers.RightOpen
+    IW >>. rightBracket >>% Identifiers.RightClosed
 ]
  
 
 
 ////// resolving recursive parsers
 //let statementList, statementListRef = createParserForwardedToRef()
-//let coordOfEntity, coordOfEntityRef = createParserForwardedToRef()
+let primePredicate, primePredicateRef = createParserForwardedToRef()
+let coordOfEntity, coordOfEntityRef = createParserForwardedToRef()
 let predicate, predicateRef = createParserForwardedToRef()
 let predicateList, predicateListRef = createParserForwardedToRef()
-//let predicateWithArguments, predicateWithArgumentsRef = createParserForwardedToRef()
+let predicateWithArguments, predicateWithArgumentsRef = createParserForwardedToRef()
 //let paramTuple, paramTupleRef = createParserForwardedToRef()
 
-//let entityWithCoord = entity .>>. coordOfEntity
+let entityWithCoord = entity .>>. coordOfEntity |>> Predicate.EntityWithCoord
 
-//let assignee = choice [
-//    entityWithCoord
-//    entity
-//]
+let assignee = choice [
+    entity
+    entityWithCoord
+]
 
 let fplIdentifier = choice [
     predicateIdentifier
-    //assignee
+    assignee
 ]
 
-//let coord = choice [
-//    primePredicate
-//    assignee
-//]
+let coord = choice [
+    primePredicate
+    assignee
+]
 
-//let coordList = sepEndBy1 coord (optional IW >>. comma >>. optional IW)
+let coordList = sepEndBy1 coord commaSpaces
 
-//let bracketedCoordList = leftBracket >>. optional IW >>. coordList .>> optional IW >>. rightBracket
+let bracketedCoordList = (leftBracket >>. IW >>. coordList) .>> (IW >>. rightBracket) |>> Predicate.BrackedCoordList
 
-//let fplRange = optional coord .>> IW >>. tilde .>> IW >>. optional coord
+let fplRange = ((opt coord) .>> IW .>> tilde) .>>. (IW >>. opt coord)
 
-//let closedOrOpenRange = leftBound .>> IW >>. fplRange .>> IW >>. rightBound
+let closedOrOpenRange = (leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound) |>> Predicate.ClosedOrOpenRange
 
-//let coordOfEntityRef = choice [
-//    closedOrOpenRange
-//    bracketedCoordList
-//]
+coordOfEntityRef := choice [
+    closedOrOpenRange
+    bracketedCoordList
+]
 
 //let coordInType = choice [
 //    predicateWithArguments
@@ -317,7 +318,7 @@ let fplIdentifier = choice [
 //    variable
 //]
 
-//let rangeInType = optional coordInType .>> optional IW >>. tilde >>. optional IW >>. optional coordInType 
+//let rangeInType = opt coordInType .>> IW >>. tilde >>. IW >>. opt coordInType 
 
 //let specificType = choice [
 //    predicateIdentifier
@@ -333,11 +334,11 @@ let fplIdentifier = choice [
 //    plus
 //]
 
-//let specificTypeWithCoord = specificType .>> optional IW .>>. leftBound .>>. ( rangeInType <|> coordInType ) .>>. rightBound
+//let specificTypeWithCoord = specificType .>> IW .>>. leftBound .>>. ( rangeInType <|> coordInType ) .>>. rightBound
 
-//let generalType = optional callModifier .>>. (specificTypeWithCoord <|> specificType)
+//let generalType = opt callModifier .>>. (specificTypeWithCoord <|> specificType)
 
-//let parenthesisedGeneralType = generalType .>> optional IW >>. paramTuple
+//let parenthesisedGeneralType = generalType .>> IW >>. paramTuple
 
 //let variableType = choice [
 //    parenthesisedGeneralType
@@ -345,13 +346,13 @@ let fplIdentifier = choice [
 //    indexHeader
 //]
 
-//let namedVariableDeclaration = variableList .>> optional IW >>. colon >>. variableType
+//let namedVariableDeclaration = variableList .>> IW >>. colon >>. variableType
 
-//let namedVariableDeclarationList = sepEndBy1 namedVariableDeclaration (optional IW >>. comma >>. optional IW)
+//let namedVariableDeclarationList = sepEndBy1 namedVariableDeclaration (IW >>. comma >>. IW)
 
-//let paramTupleRef = leftParen >>. optional IW >>. namedVariableDeclarationList .>> optional IW .>> rightParen
+//let paramTupleRef = leftParen >>. IW >>. namedVariableDeclarationList .>> IW .>> rightParen
 
-//let signature = predicateIdentifier .>> optional IW >>. paramTuple |>> BlockHeader.Signature
+//let signature = predicateIdentifier .>> IW >>. paramTuple |>> BlockHeader.Signature
 
 ////(* Statements *)
 //let fplDelegateIdentifier = regex @"[a-z_]+"
@@ -397,18 +398,18 @@ let fplIdentifier = choice [
 
 //(* Predicates *)
 
-let predicateWithArgumentsRef = (fplIdentifier .>> (optional IW .>> leftParen .>> optional IW)) .>>. (predicateList .>> (optional IW .>> rightParen))
+predicateWithArgumentsRef := (fplIdentifier .>> spacesLeftParenSpaces) .>>. (predicateList .>> spacesRightParenSpaces) |>> Predicate.PredicateWithArgs
 
 //let qualifiedFplIdentifier = fplIdentifier .>>. many1 (dot >>. predicateWithArguments) >>% Predicate.Qualified
 
 //let isOperator = keywordIs >>. IW >>. leftParen >>. many CW >>. ( indexValue <|> fplIdentifier ) .>> IW >>. generalType .>> IW >>. rightParen
 
-let primePredicate = choice [
+primePredicateRef := choice [
     keywordTrue
     keywordFalse
     undefined
+    predicateWithArguments
     //qualifiedFplIdentifier
-    //predicateWithArguments
     //statement
     //indexValue
     //fplIdentifier
@@ -427,8 +428,8 @@ let equivalence = many CW >>. keywordIif >>. twoPredicatesInParens |>> Predicate
 let exclusiveOr = many CW >>. keywordXor >>. twoPredicatesInParens |>> Predicate.Xor
 let negation = many CW >>. keywordNot >>. onePredicateInParens |>> Predicate.Not
 let all = many CW >>. (keywordAll >>. SW >>. variableList) .>>. onePredicateInParens |>> Predicate.All
-let exists = many CW >>. (keywordEx >>. SW >>. variableList) .>>. onePredicateInParens |>> Predicate.Ex
-let existsTimesN = many CW >>. ((keywordEx >>. dollar >>. digits) .>>. (SW >>. variableList)) .>>. onePredicateInParens |>> Predicate.ExN
+let exists = many CW >>. (keywordEx >>. SW >>. variableList) .>>. onePredicateInParens |>> Predicate.Exists
+let existsTimesN = many CW >>. ((keywordEx >>. dollar >>. digits) .>>. (SW >>. variableList)) .>>. onePredicateInParens |>> Predicate.ExistsN
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [
@@ -444,8 +445,8 @@ let compoundPredicate = choice [
 ]
 
 predicateRef := choice [
-    primePredicate
     compoundPredicate
+    primePredicate
 ]
 
 predicateListRef := sepBy1 predicate commaSpaces 
@@ -455,7 +456,7 @@ predicateListRef := sepBy1 predicate commaSpaces
 //FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
 //The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
 //However, there is a syntactical simplification of the signature*)
-//let ruleOfInference = signature .>>. optional IW >>. premiseConclusionBlock |>> BlockHeader.Inference
+//let ruleOfInference = signature .>>. IW >>. premiseConclusionBlock |>> BlockHeader.Inference
 
 //let ruleOfInferenceList = sepEndBy1 ruleOfInference (many CW)
 

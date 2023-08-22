@@ -82,38 +82,41 @@ type Obj =
     | LongTemplate of string 
 
 type Identifiers =
-    | Self of char list 
-    | AliasedId of string list
+    | LeftClosed
+    | LeftOpen 
+    | RightClosed
+    | RightOpen 
     | Id of string
     | NamespaceIdentifier of string list
     | WildcaredNamespaceIdentifier of string list 
     | AliasedNamespaceIdentifier of string list * string
     | IndexVariable of string * string
-    | Variable of string
 
 type UsesClause = UsesClause of Identifiers list
 
-type Bound = 
-    | LeftClosed
-    | LeftOpen 
-    | RightClosed
-    | RightOpen 
     
 type Predicate =
     | True
     | False
     | Undefined
+    | AliasedId of string list
     | Qualified of Identifiers * Identifiers list
+    | PredicateWithArgs of Predicate * Predicate list
     | And of Predicate list
     | Or of Predicate list
     | Impl of Predicate * Predicate
     | Iif of Predicate * Predicate
     | Xor of Predicate * Predicate
     | Not of Predicate 
-    | All of Identifiers list * Predicate
-    | Ex of Identifiers list * Predicate
-    | ExN of (string * Identifiers list) * Predicate
+    | All of Predicate list * Predicate
+    | Exists of Predicate list * Predicate
+    | ExistsN of (string * Predicate list) * Predicate
     | Is
+    | EntityWithCoord of Predicate * Predicate
+    | ClosedOrOpenRange of (Identifiers * (Predicate option * Predicate option)) * Identifiers
+    | BrackedCoordList of Predicate list
+    | Self of char list 
+    | Var of string
 
 type PredicateKeyword =
     | Py

@@ -7,8 +7,7 @@ open Newtonsoft.Json
 
 
 [<TestClass>]
-type TestClass () =
-
+type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestWildcardTheoryNamespace () =
@@ -129,7 +128,7 @@ type TestClass () =
     member this.TestEntityVariable () =
         let result = run entity "xyz"
         let actual = sprintf "%O" result
-        let expected = """Success: Variable "xyz" """.Trim().Replace("\r","")
+        let expected = """Success: Var "xyz" """.Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
@@ -204,6 +203,11 @@ type TestClass () =
         let actual = sprintf "%O" result
         let expected = """Success: RightClosed""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
+
+
+[<TestClass>]
+type TestPredicates () =
+
 
     [<TestMethod>]
     member this.TestPrimePredicate1 () =
@@ -401,3 +405,90 @@ type TestClass () =
         let actual = sprintf "%O" result
         let expected = """Success: Not (Iif (Iif (True, Iif (True, False)), Not True))""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestAll1 () =
+        let result = run all """all x,y,z(true)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: All ([Var "x"; Var "y"; Var "z"], True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestAll2 () =
+        let result = run all """all x,y,z (not (iif ( true, not(false))))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: All ([Var "x"; Var "y"; Var "z"], Not (Iif (True, Not False)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestAll3 () =
+        let result = run all """all x,y,z (not (iif ( iif( true, false), true)))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: All ([Var "x"; Var "y"; Var "z"], Not (Iif (Iif (True, False), True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestAll4 () =
+        let result = run all """all x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: All ([Var "x"], Not (Iif (Iif (True, Iif (True, False)), Not True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestEx1 () =
+        let result = run exists """ex x,y,z(true)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Exists ([Var "x"; Var "y"; Var "z"], True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestEx2 () =
+        let result = run exists """ex x,y,z (not (iif ( true, not(false))))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Exists ([Var "x"; Var "y"; Var "z"], Not (Iif (True, Not False)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestEx3 () =
+        let result = run exists """ex x,y,z (not (iif ( iif( true, false), true)))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Exists ([Var "x"; Var "y"; Var "z"], Not (Iif (Iif (True, False), True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestEx4 () =
+        let result = run exists """ex x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Exists ([Var "x"], Not (Iif (Iif (True, Iif (True, False)), Not True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestExN1 () =
+        let result = run existsTimesN """ex$0 x,y,z(true)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ExistsN (("0", [Var "x"; Var "y"; Var "z"]), True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestExN2 () =
+        let result = run existsTimesN """ex$1 x,y,z (not (iif ( true, not(false))))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ExistsN (("1", [Var "x"; Var "y"; Var "z"]), Not (Iif (True, Not False)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestExN3 () =
+        let result = run existsTimesN """ex$2 x,y,z (not (iif ( iif( true, false), true)))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ExistsN
+  (("2", [Var "x"; Var "y"; Var "z"]), Not (Iif (Iif (True, False), True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestExN4 () =
+        let result = run existsTimesN """ex$3 x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ExistsN (("3", [Var "x"]), Not (Iif (Iif (True, Iif (True, False)), Not True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+

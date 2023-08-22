@@ -1,0 +1,562 @@
+﻿# fpl Version 1.2.0
+
+@@grammar::fpl
+@@parseinfo :: True
+
+# ----------------------------------------------------------------
+# a mathematical theory written in FPL can be split between different files having
+# the structure of the so-called theory part:
+
+    # Every theory part block starts with an optional syntax extension block, followed by
+    # optional usage of other libraries, followed by optional inference rules,
+    # followed by a an optional uses block of comma-separated FplTheoryNamespace statements,
+    # followed by a mandatory TheoryBlock, followed by an optional localization block
+    Namespace =
+        { CW }* NamespaceIdentifier
+        { CW }* NamespaceBlock
+        { CW }* $
+        ;
+
+    NamespaceBlock =
+        LeftBrace
+        { CW }* [ ExtensionBlock ]
+        { CW }* [ UsesClause ]
+        { CW }* [ RulesOfInferenceBlock ]
+        { CW }* TheoryBlock
+        { CW }* [ LocalizationBlock ]
+        { CW }* RightBrace
+        ;
+
+
+
+
+
+    # A theory block is a sequence of statements
+    TheoryBlock =
+        TheoryHeader
+        { CW }* LeftBrace
+        { CW }* [ BuildingBlockList ]
+        { CW }* RightBrace
+        ;
+
+
+
+    PremiseHeader =
+        (
+        premise
+        | pre
+        )
+        ;
+
+    ConclusionHeader =
+        (
+        conclusion
+        | con
+        )
+        ;
+
+
+
+
+    PremiseConclusionBlock =
+        LeftBrace
+        { CW }* [ VariableSpecificationList ]
+        { CW }* PremiseBlock
+        { CW }* ConclusionBlock
+        { CW }* RightBrace
+        ;
+
+    PremiseBlock =
+        PremiseHeader [ IW ] Colon { CW }* Predicate SW
+        ;
+
+    ConclusionBlock =
+        ConclusionHeader [ IW ] Colon { CW }* Predicate
+        ;
+
+    TheoryHeader =
+        (
+        theory
+        | th
+        )
+        ;
+
+
+    BuildingBlockList =
+        BuildingBlock { { CW }* BuildingBlock }*
+        ;
+
+    # FPL statements can be definitions, axioms, Theorem-proof blocks and conjectures
+    BuildingBlock =
+        (
+        Definition
+        | Axiom
+        | TheoremLikeStatementOrConjecture
+        | Proof
+        )
+        ;
+
+
+# ----------------------------------------------------------------
+# Definitions
+
+    Definition =
+        (
+        DefinitionClass
+        | DefinitionPredicate
+        | DefinitionFunctionalTerm
+        )
+        ;
+
+    # Objects can only be defined with or without inheritance from a parent class cl
+    DefinitionClass =
+        ClassSignature
+        { CW }* ObjectDefinitionBlock
+        ;
+
+    ClassSignature =
+        ClassHeader
+        SW PredicateIdentifier
+        [ IW ] Colon
+        [ IW ] Type
+        ;
+
+    ObjectDefinitionBlock =
+        LeftBrace
+        { CW }* [ VariableSpecificationList ]
+        { CW }* [ DefinitionContentList ]
+        { CW }* RightBrace
+        ;
+
+    FunctionalTermDefinitionBlock =
+        LeftBrace
+        { CW }* [ VariableSpecificationList ]
+        { CW }* [ PropertyList ]
+        { CW }* RightBrace
+        ;
+
+    DefinitionContentList =
+        DefinitionContent { { CW }* DefinitionContent }*
+        ;
+
+    DefinitionContent =
+        (
+        Property
+        | Constructor
+        )
+        ;
+
+    DefinitionFunctionalTerm =
+        FunctionalTermSignature
+        { CW }* FunctionalTermDefinitionBlock
+        ;
+
+    FunctionalTermSignature =
+        FunctionalTermHeader
+        SW Signature
+        [ IW ] Mapping
+        ;
+
+    Mapping =
+        To
+        [ IW ] VariableType
+        ;
+
+
+    VariableSpecificationList =
+        { { CW }* VariableSpecification SW }+
+        ;
+
+    VariableSpecification =
+        (
+        Statement
+        | NamedVariableDeclaration
+        )
+        ;
+
+
+
+
+    # Predicates can be defined similarly to objects, but they are not derived from a parent type and have arguments
+    DefinitionPredicate =
+        PredicateHeader
+        SW Signature
+        { CW }* PredicateDefinitionBlock
+        ;
+
+    PredicateDefinitionBlock =
+        LeftBrace
+        { CW }* [ VariableSpecificationList ]
+        { CW }* [ Predicate ]
+        { CW }* [ PropertyList ]
+        { CW }* RightBrace
+        ;
+
+    PredicateInstanceBlock =
+        LeftBrace
+        { CW }* [ VariableSpecificationList ]
+        { CW }* [ Predicate ]
+        { CW }* RightBrace
+        ;
+
+    ClassHeader =
+        (
+        class
+        | cl
+        )
+        ;
+
+
+    To =
+        "->"
+        ;
+
+
+
+
+
+
+# ----------------------------------------------------------------
+# Axioms
+
+    Axiom =
+        AxiomHeader SW Signature
+        { CW }* AxiomBlock
+        ;
+
+    AxiomHeader =
+        (
+        axiom
+        | ax
+        | postulate
+        | post
+        )
+        ;
+
+    AxiomBlock =
+        LeftBrace
+        { CW }* [ VariableSpecificationList ]
+        { CW }* [ Predicate ]
+        { CW }* RightBrace
+        ;
+
+
+# ----------------------------------------------------------------
+# Properties
+
+    PropertyList =
+        { Property }+
+        ;
+
+    Property =
+        { CW }* PropertyHeader
+        SW DefinitionProperty
+        ;
+
+    DefinitionProperty =
+        (
+        PredicateInstance
+        | FunctionalTermInstance
+        | ClassInstance
+        )
+        ;
+
+    ClassInstance =
+        VariableType
+        SW Signature
+        { CW }* InstanceBlock
+        ;
+
+    FunctionalTermInstance =
+        FunctionalTermSignature
+        { CW }* InstanceBlock
+        ;
+
+    PredicateInstance =
+        PredicateHeader
+        SW Signature
+        { CW }* PredicateInstanceBlock
+        ;
+
+    PropertyHeader =
+        (
+        mandatory
+        | mand
+        | optional
+        | opt
+        )
+        ;
+
+# ----------------------------------------------------------------
+# Constructors
+
+    Constructor =
+        Signature { CW }*
+        ConstructorBlock
+        ;
+
+    ConstructorBlock =
+        LeftBrace
+        { CW }* [ PredicateWithArguments ]
+        { CW }* [ VariableSpecificationList ]
+        { CW }* RightBrace
+        ;
+
+    InstanceBlock =
+        LeftBrace
+        { CW }* [ VariableSpecificationList ]
+        { CW }* RightBrace
+        ;
+
+
+# ----------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+# ----------------------------------------------------------------
+# Theorem-like statements
+
+    # A Theorem is a headed Signature, followed by a TheoremLikeBlock
+    TheoremLikeStatementOrConjecture =
+        TheoremLikeStatementOrConjectureHeader SW (CorollarySignature | Signature)
+        [ IW ] PremiseConclusionBlock
+        ;
+
+
+    CorollarySignature =
+        ReferencingIdentifier
+        [ IW ] ParamTuple
+        ;
+
+    CorollaryHeader =
+        (
+        corollary
+        | cor
+        )
+        ;
+
+
+# ----------------------------------------------------------------
+# Proofs
+
+    # A Proof relates to the PredicateIdentifier of the Theorem.
+    # Because proofs are named, they can stand anywhere inside the theory, not only immediately
+    # after the Theorem they prove. This is to enable the users to mix
+    # with natural language an provide a proof long after the Theorem was stated.
+    Proof =
+        ProofHeader SW ReferencingIdentifier [ IW ] ProofBlock
+        ;
+
+    ReferencingIdentifier =
+        PredicateIdentifier DollarDigitList
+        ;
+
+    DollarDigitList =
+        Dollar Digit { Dollar Digit }*
+        ;
+
+    ProofHeader =
+        (
+        proof
+        | prf
+        )
+        ;
+
+    ProofBlock =
+        LeftBrace
+        { CW }* [ VariableSpecificationList ]
+        { CW }* ProofArgumentList
+        { CW }* RightBrace
+        ;
+
+    ProofArgumentList =
+        ProofArgument { { CW }* ProofArgument }*
+        ;
+
+    ProofArgument =
+        ArgumentIdentifier Dot SW
+        [ Justification SW ]
+        ArgumentInference SW
+        ;
+
+    VDash =
+        "|-"
+        ;
+
+    AssumeHeader =
+        (
+        assume
+        | ass
+        )
+        ;
+
+    AssumedPredicate =
+        AssumeHeader
+        SW PremiseOrOtherPredicate
+        ;
+
+    DerivedPredicate =
+        VDash SW
+        (
+        Predicate
+        | qed
+        | trivial
+        )
+        ;
+
+    PremiseOrOtherPredicate =
+        (
+        PremiseHeader
+        | Predicate
+        )
+        ;
+
+    ArgumentInference =
+        (
+        AssumedPredicate
+        | DerivedPredicate
+        | Revoke
+        )
+        ;
+
+    Revoke =
+        RevokeHeader SW ArgumentParam
+        ;
+
+    RevokeHeader =
+        (
+        revoke
+        | rev
+        )
+        ;
+
+    # Referenced results can be the identifiers of Rules of References, conjectures, theorem-like statements,
+    # or axioms
+    Justification =
+        Slash PrimePredicate { [ IW ] Comma [ IW ] Slash PrimePredicate }*
+        ;
+
+
+
+    Slash =
+        "/"
+        ;
+
+
+
+
+# ----------------------------------------------------------------
+# names and identifiers
+    # PascalCase identifiers separated by points
+
+
+
+
+    NamespaceIdentifier =
+        IdStartsWithCap { Dot IdStartsWithCap }*
+        ;
+
+
+
+
+
+
+
+    # convention: All syntax production rules of FPL syntax extensions have to start with "ext", followed by
+    # a Pascal Case id.
+    # This ensures that they will not be mixed-up with original FPL ebnf productions
+    # that are all PascalCase as well as FPL keywords, that are all small case.
+
+    XId =
+        At ExtensionName
+        ;
+
+
+# -----------------------------------------------------
+# Localization
+
+    LocalizationBlock =
+        LocalizationHeader
+        { CW }* LeftBrace
+        { CW }* LocalizationList
+        { CW }* RightBrace
+        ;
+
+    LocalizationList =
+        Localization { { CW }* Localization }*
+        ;
+
+    Localization =
+        Predicate [ IW ] ColonEqual [ IW ] TranslationList [ IW ] SemiColon
+        ;
+
+    SemiColon =
+        ";"
+        ;
+
+    Tilde =
+        "~"
+        ;
+
+    TranslationList =
+        Translation { SW Translation }*
+        ;
+
+    Translation =
+        Tilde LanguageCode [ IW ] Colon [ IW ] EBNFTransl
+        ;
+
+    LanguageCode =
+        /[a-z]{3}/
+        ;
+
+    EBNFTransl =
+        EBNFTerm { [ IW ] EBNFBar [ IW ] EBNFTerm }*
+        ;
+
+    EBNFTerm =
+        EBNFFactor { SW EBNFFactor }*
+        ;
+
+    EBNFFactor =
+        (
+        Variable
+        | EBNFString
+        | LeftParen [ IW ] EBNFTransl [ IW ] RightParen
+        )
+        ;
+
+    EBNFString =
+        /\"[^\"\n]*\"/
+        ;
+
+    EBNFBar =
+        "|"
+        ;
+
+    LocalizationHeader =
+        (
+        localization
+        | loc
+        )
+        ;
+
+
+# -----------------------------------------------------
+# Extensions of the FPL language (have to be dynamic)! Lacking a pre-processor, we put the rules
+# from the Proof of Concept of FPL code manually into the EBNF of the core FPL grammar.
+
+    # note that this has to be inserted into:
+    # the IsOperand choice
+    # the PredicateOrFunctionalTerm choice
+    extDigits =
+        /\d+/
+        ;
