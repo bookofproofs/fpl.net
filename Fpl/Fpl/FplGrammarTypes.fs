@@ -100,7 +100,6 @@ type Predicate =
     | False
     | Undefined
     | AliasedId of string list
-    | Qualified of Identifiers * Identifiers list
     | PredicateWithArgs of Predicate * Predicate list
     | And of Predicate list
     | Or of Predicate list
@@ -117,6 +116,7 @@ type Predicate =
     | BrackedCoordList of Predicate list
     | Self of char list 
     | Var of string
+    | ExtDigits of string
 
 type PredicateKeyword =
     | Py

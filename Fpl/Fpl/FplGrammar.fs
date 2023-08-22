@@ -48,7 +48,7 @@ let commaSpaces = comma >>. spaces
 // note that this has to be inserted into:
 // the IsOperand choice
 // the PredicateOrFunctionalTerm choice
-let extDigits: Parser<_, unit> = regex @"\d+" 
+let extDigits: Parser<_, unit> = regex @"\d+" |>> Predicate.ExtDigits
 
 (* Identifiers *)
 
@@ -400,22 +400,20 @@ coordOfEntityRef := choice [
 
 predicateWithArgumentsRef := (fplIdentifier .>> spacesLeftParenSpaces) .>>. (predicateList .>> spacesRightParenSpaces) |>> Predicate.PredicateWithArgs
 
-//let qualifiedFplIdentifier = fplIdentifier .>>. many1 (dot >>. predicateWithArguments) >>% Predicate.Qualified
-
 //let isOperator = keywordIs >>. IW >>. leftParen >>. many CW >>. ( indexValue <|> fplIdentifier ) .>> IW >>. generalType .>> IW >>. rightParen
 
 primePredicateRef := choice [
     keywordTrue
     keywordFalse
     undefined
+    fplIdentifier
+
     predicateWithArguments
-    //qualifiedFplIdentifier
     //statement
     //indexValue
-    //fplIdentifier
     //isOperator
     //argumentParam
-    //extDigits
+    extDigits
 ]
 
 let conjunction = (many CW >>. keywordAnd >>. spacesLeftParenSpaces >>. predicateList) .>> spacesRightParenSpaces |>> Predicate.And
