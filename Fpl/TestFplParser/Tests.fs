@@ -528,185 +528,158 @@ type TestPredicates () =
         Assert.AreEqual(expected, actual);
 
 [<TestClass>]
-type TestTypes () =
+type TestClassInheritanceTypes () =
 
-
-    [<TestMethod>]
-    member this.TestSpecificType1 () =
-        let result = run specificType """predicate"""
-        let actual = sprintf "%O" result
-        let expected = """Success: PredicateType""".Trim().Replace("\r","")
-        Assert.AreEqual(expected, actual);
-
-    [<TestMethod>]
-    member this.TestSpecificType2 () =
-        let result = run specificType """function"""
-        let actual = sprintf "%O" result
-        let expected = """Success: FunctionalTermType""".Trim().Replace("\r","")
-        Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
     member this.TestSpecificType3 () =
-        let result = run specificType """object"""
+        let result = run specificClassType """object"""
         let actual = sprintf "%O" result
         let expected = """Success: ObjectType""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
     member this.TestSpecificType4 () =
-        let result = run specificType """tpl"""
+        let result = run specificClassType """tpl"""
         let actual = sprintf "%O" result
         let expected = """Success: TemplateType "tpl" """.Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
     member this.TestSpecificType5 () =
-        let result = run specificType """tplSetElem"""
+        let result = run specificClassType """tplSetElem"""
         let actual = sprintf "%O" result
         let expected = """Success: TemplateType "tplSetElem" """.Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
-    [<TestMethod>]
-    member this.TestSpecificType6 () =
-        let result = run specificType """index"""
-        let actual = sprintf "%O" result
-        let expected = """Success: IndexType""".Trim().Replace("\r","")
-        Assert.AreEqual(expected, actual);
 
-    [<TestMethod>]
     member this.TestSpecificType7 () =
-        let result = run specificType """@extNat"""
+        let result = run specificClassType """@extNat"""
         let actual = sprintf "%O" result
         let expected = """Success: ExtensionType (Extensionname "Nat")""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
     member this.TestSpecificType8 () =
-        let result = run specificType """SomeClass"""
+        let result = run specificClassType """SomeClass"""
         let actual = sprintf "%O" result
-        let expected = """Success: ClassType ["SomeClass"]""".Trim().Replace("\r","")
+        let expected = """Success: ClassHeaderType ["SomeClass"]""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
     member this.TestSpecificType9 () =
-        let result = run specificType """bla"""
+        let result = run specificClassType """bla"""
         let actual = sprintf "%O" result
         let actual2 = actual.Replace("\r","")
-        let expected = "Failure:\nError in Ln: 1 Col: 1\nbla\n^\nExpecting: <PascalCaseId>, @ext<PascalCaseId>, 'func', 'function', 'ind',\n'index', 'obj', 'object', 'pred', 'predicate', 'template' or 'tpl'\n"
+        let expected = "Failure:\nError in Ln: 1 Col: 1\nbla\n^\nExpecting: <PascalCaseId>, @ext<PascalCaseId>, 'obj', 'object', 'template' or\n'tpl'\n"
         Assert.AreEqual(expected, actual2);
 
     [<TestMethod>]
-    member this.TestGeneralType1 () =
-        let result = run generalType """+predicate"""
+    member this.TestClassType3 () =
+        let result = run classType """object[self]"""
         let actual = sprintf "%O" result
-        let expected = """Success: (Some Many1, PredicateType)""".Trim().Replace("\r","")
+        let expected = """Success: FplTypeWithCoords (ObjectType, [Self []])""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
-    member this.TestGeneralType2 () =
-        let result = run generalType """*function"""
+    member this.TestClassType3a () =
+        let result = run classType """object[SomeObject1, SomeObject2,SomeObject3]"""
         let actual = sprintf "%O" result
-        let expected = """Success: (Some Many, FunctionalTermType)""".Trim().Replace("\r","")
+        let expected = """Success: FplTypeWithCoords
+  (ObjectType,
+   [AliasedId ["SomeObject1"]; AliasedId ["SomeObject2"];
+    AliasedId ["SomeObject3"]])""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
-    member this.TestGeneralType3 () =
-        let result = run generalType """object[self]"""
+    member this.TestClassType4 () =
+        let result = run classType """tpl[from~]"""
         let actual = sprintf "%O" result
-        let expected = """Success: (None, FplTypeWithCoords (ObjectType, [Self []]))""".Trim().Replace("\r","")
+        let expected = """Success: FplTypeWithRange
+  ((TemplateType "tpl", LeftClosed),
+   (RangeInType (Some (Var "from"), None), RightClosed))""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
-    member this.TestGeneralType3a () =
-        let result = run generalType """object[self, x,y]"""
+    member this.TestClassType4a () =
+        let result = run classType """tpl[~ to]"""
         let actual = sprintf "%O" result
-        let expected = """Success: (None, FplTypeWithCoords (ObjectType, [Self []; Var "x"; Var "y"]))""".Trim().Replace("\r","")
+        let expected = """Success: FplTypeWithRange
+  ((TemplateType "tpl", LeftClosed),
+   (RangeInType (None, Some (Var "to")), RightClosed))""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
-    member this.TestGeneralType4 () =
-        let result = run generalType """tpl[from~]"""
+    member this.TestClassType4b () =
+        let result = run classType """tpl[~]"""
         let actual = sprintf "%O" result
-        let expected = """Success: (None,
- FplTypeWithRange
-   ((TemplateType "tpl", LeftClosed),
-    (RangeInType (Some (Var "from"), None), RightClosed)))""".Trim().Replace("\r","")
+        let expected = """Success: FplTypeWithRange
+  ((TemplateType "tpl", LeftClosed), (RangeInType (None, None), RightClosed))""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
-    member this.TestGeneralType4a () =
-        let result = run generalType """tpl[~ to]"""
+    member this.TestClassType5 () =
+        let result = run classType """Set[from ~ to]"""
         let actual = sprintf "%O" result
-        let expected = """Success: (None,
- FplTypeWithRange
-   ((TemplateType "tpl", LeftClosed),
-    (RangeInType (None, Some (Var "to")), RightClosed)))""".Trim().Replace("\r","")
+        let expected = """Success: FplTypeWithRange
+  ((ClassHeaderType ["Set"], LeftClosed),
+   (RangeInType (Some (Var "from"), Some (Var "to")), RightClosed))""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
-    member this.TestGeneralType4b () =
-        let result = run generalType """tpl[~]"""
+    member this.TestClassType5a () =
+        let result = run classType """Set[!from ~ to]"""
         let actual = sprintf "%O" result
-        let expected = """Success: (None,
- FplTypeWithRange
-   ((TemplateType "tpl", LeftClosed), (RangeInType (None, None), RightClosed)))""".Trim().Replace("\r","")
+        let expected = """Success: FplTypeWithRange
+  ((ClassHeaderType ["Set"], LeftOpen),
+   (RangeInType (Some (Var "from"), Some (Var "to")), RightClosed))""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
-    member this.TestGeneralType5 () =
-        let result = run generalType """Set[from ~ to]"""
+    member this.TestClassType5b () =
+        let result = run classType """Set[from ~ to!]"""
         let actual = sprintf "%O" result
-        let expected = """Success: (None,
- FplTypeWithRange
-   ((ClassType ["Set"], LeftClosed),
-    (RangeInType (Some (Var "from"), Some (Var "to")), RightClosed)))""".Trim().Replace("\r","")
+        let expected = """Success: FplTypeWithRange
+  ((ClassHeaderType ["Set"], LeftClosed),
+   (RangeInType (Some (Var "from"), Some (Var "to")), RightOpen))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+
+    [<TestMethod>]
+    member this.TestClassType7 () =
+        let result = run classType """@extNat"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ExtensionType (Extensionname "Nat")""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
-    member this.TestGeneralType5a () =
-        let result = run generalType """Set[!from ~ to]"""
+    member this.TestClassType8 () =
+        let result = run classType """SomeClass"""
         let actual = sprintf "%O" result
-        let expected = """Success: (None,
- FplTypeWithRange
-   ((ClassType ["Set"], LeftOpen),
-    (RangeInType (Some (Var "from"), Some (Var "to")), RightClosed)))""".Trim().Replace("\r","")
+        let expected = """Success: ClassHeaderType ["SomeClass"]""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
-    member this.TestGeneralType5b () =
-        let result = run generalType """Set[from ~ to!]"""
-        let actual = sprintf "%O" result
-        let expected = """Success: (None,
- FplTypeWithRange
-   ((ClassType ["Set"], LeftClosed),
-    (RangeInType (Some (Var "from"), Some (Var "to")), RightOpen)))""".Trim().Replace("\r","")
-        Assert.AreEqual(expected, actual);
-
-    [<TestMethod>]
-    member this.TestGeneralType6 () =
-        let result = run generalType """index"""
-        let actual = sprintf "%O" result
-        let expected = """Success: (None, IndexType)""".Trim().Replace("\r","")
-        Assert.AreEqual(expected, actual);
-
-    [<TestMethod>]
-    member this.TestGeneralType7 () =
-        let result = run generalType """@extNat"""
-        let actual = sprintf "%O" result
-        let expected = """Success: (None, ExtensionType (Extensionname "Nat"))""".Trim().Replace("\r","")
-        Assert.AreEqual(expected, actual);
-
-    [<TestMethod>]
-    member this.TestGeneralType8 () =
-        let result = run generalType """SomeClass"""
-        let actual = sprintf "%O" result
-        let expected = """Success: (None, ClassType ["SomeClass"])""".Trim().Replace("\r","")
-        Assert.AreEqual(expected, actual);
-
-    [<TestMethod>]
-    member this.TestGeneralType9 () =
-        let result = run generalType """bla"""
+    member this.TestClassType9 () =
+        let result = run classType """bla"""
         let actual = sprintf "%O" result
         let actual2 = actual.Replace("\r","")
-        let expected = "Failure:\nError in Ln: 1 Col: 1\nbla\n^\nExpecting: <PascalCaseId>, @ext<PascalCaseId>, '*', '+', 'func', 'function',\n'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template' or 'tpl'\n"
+        let expected = "Failure:\nError in Ln: 1 Col: 1\nbla\n^\nExpecting: <PascalCaseId>, @ext<PascalCaseId>, 'obj', 'object', 'template' or\n'tpl'\n"
         Assert.AreEqual(expected, actual2);
+
+[<TestClass>]
+type TestVariableTypes () =
+
+    [<TestMethod>]
+    member this.TestSpecificType1 () =
+        let result = run variableType """object"""
+        let actual = sprintf "%O" result
+        let expected = """Success: VariableTypeWithModifier (None, ObjectType)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSpecificType2 () =
+        let result = run variableType """obj"""
+        let actual = sprintf "%O" result
+        let expected = """Success: VariableTypeWithModifier (None, ObjectType)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);

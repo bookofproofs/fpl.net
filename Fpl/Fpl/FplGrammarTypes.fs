@@ -104,9 +104,11 @@ type FplType =
     | TemplateType of string
     | IndexType
     | ExtensionType of Extensions
-    | ClassType of string list 
+    | ClassHeaderType of string list 
     | FplTypeWithCoords of (FplType * FplIdentifierType list) 
     | FplTypeWithRange of (FplType * FplIdentifierType ) * (FplIdentifierType * FplIdentifierType)
+    | VariableTypeWithModifier of FplType option * FplType
+    | VariableType of (FplIdentifierType list * FplType) list
 
 type UsesClause = UsesClause of FplIdentifierType list
 

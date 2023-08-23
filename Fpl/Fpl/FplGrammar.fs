@@ -232,7 +232,7 @@ let xId = at >>. extensionName |>> FplType.ExtensionType <?> "@ext<PascalCaseId>
 
 let predicateIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifierType.AliasedId
 
-let classIdentifier = sepBy1 IdStartsWithCap dot |>> FplType.ClassType
+let classIdentifier = sepBy1 IdStartsWithCap dot |>> FplType.ClassHeaderType
 
 let indexValue = (IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase ) |>> FplIdentifierType.IndexVariable
 
@@ -264,7 +264,7 @@ let coordOfEntity, coordOfEntityRef = createParserForwardedToRef()
 let predicate, predicateRef = createParserForwardedToRef()
 let predicateList, predicateListRef = createParserForwardedToRef()
 let predicateWithArguments, predicateWithArgumentsRef = createParserForwardedToRef()
-//let paramTuple, paramTupleRef = createParserForwardedToRef()
+let paramTuple, paramTupleRef = createParserForwardedToRef()
 
 let entityWithCoord = entity .>>. coordOfEntity |>> FplIdentifierType.EntityWithCoord
 
@@ -308,10 +308,7 @@ let coordInTypeList = sepBy1 coordInType commaSpaces
 
 let rangeInType = (opt coordInType .>> IW) .>>. (tilde >>. IW >>. opt coordInType) |>> FplIdentifierType.RangeInType
 
-let specificType = choice [
-    keywordPredicate
-    keywordFunction
-    keywordIndex
+let specificClassType = choice [
     objectHeader
     xId
     classIdentifier
@@ -323,25 +320,32 @@ let callModifier = choice [
     plus
 ]
 
-let specificTypeWithCoord = ((specificType .>> IW) .>> leftBracket) .>>. (coordInTypeList .>> (IW >>. rightBracket)) |>> FplType.FplTypeWithCoords
-let specificTypeWithRange = ((specificType .>> IW) .>>. leftBound) .>>. (rangeInType .>>. rightBound) |>> FplType.FplTypeWithRange
+let classTypeWithCoord = ((specificClassType .>> IW) .>> leftBracket) .>>. (coordInTypeList .>> (IW >>. rightBracket)) |>> FplType.FplTypeWithCoords
+let classTypeWithRange = ((specificClassType .>> IW) .>>. leftBound) .>>. (rangeInType .>>. rightBound) |>> FplType.FplTypeWithRange
 
-let generalType = opt callModifier .>>. 
-    (((attempt specificTypeWithRange) <|> (attempt specificTypeWithCoord)) <|> specificType)
+// The classType is the last type in FPL we can derive FPL classes from.
+// It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
+// to restrict it to pure objects.
+// In contrast to variableType which can also be used for declaring variables 
+// in the scope of FPL building blocks
+let classType = (((attempt classTypeWithRange) <|> (attempt classTypeWithCoord)) <|> specificClassType)
 
-//let parenthesisedGeneralType = generalType .>> IW >>. paramTuple
+let modifieableClassType = opt callModifier .>>. classType |>> FplType.VariableTypeWithModifier
+let modifieablePredicateType = opt callModifier .>>. keywordPredicate |>> FplType.VariableTypeWithModifier
+let modifieableFunctionType = opt callModifier .>>. keywordFunction |>> FplType.VariableTypeWithModifier
+let modifieableIndexType = opt callModifier .>>. keywordIndex |>> FplType.VariableTypeWithModifier
 
-//let variableType = choice [
-//    parenthesisedGeneralType
-//    generalType
-//    indexHeader
-//]
+let variableTypeWithModifier = (((attempt modifieableIndexType) <|> attempt modifieableFunctionType) <|> attempt modifieablePredicateType) <|> modifieableClassType
 
-//let namedVariableDeclaration = variableList .>> IW >>. colon >>. variableType
+let parenthesisedType = variableTypeWithModifier .>> IW >>. paramTuple |>> FplType.VariableType
 
-//let namedVariableDeclarationList = sepEndBy1 namedVariableDeclaration (IW >>. comma >>. IW)
+let variableType = (attempt parenthesisedType) <|> variableTypeWithModifier
 
-//let paramTupleRef = leftParen >>. IW >>. namedVariableDeclarationList .>> IW .>> rightParen
+let namedVariableDeclaration = (variableList .>> IW) .>>. (colon >>. variableType)
+
+let namedVariableDeclarationList = sepEndBy1 namedVariableDeclaration commaSpaces 
+
+paramTupleRef := (leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)
 
 //let signature = predicateIdentifier .>> IW >>. paramTuple |>> BlockHeader.Signature
 
@@ -391,7 +395,7 @@ let generalType = opt callModifier .>>.
 
 predicateWithArgumentsRef := (fplIdentifier .>> spacesLeftParenSpaces) .>>. (predicateList .>> spacesRightParenSpaces) |>> Predicate.PredicateWithArgs
 
-let isOperator = optional CW >>. keywordIs >>. spacesLeftParenSpaces >>. ( indexValue <|> fplIdentifier ) .>> IW >>. generalType .>> spacesRightParenSpaces
+let isOperator = optional CW >>. keywordIs >>. spacesLeftParenSpaces >>. ( indexValue <|> fplIdentifier ) .>> IW >>. modifieableClassType .>> spacesRightParenSpaces
 
 primePredicateRef := choice [
     keywordTrue
