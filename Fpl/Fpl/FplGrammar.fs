@@ -234,7 +234,7 @@ let predicateIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifierType.Alias
 
 let classIdentifier = sepBy1 IdStartsWithCap dot |>> FplType.ClassHeaderType
 
-let indexValue = (IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase ) |>> FplIdentifierType.IndexVariable
+let indexVariable = (IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase ) |>> FplIdentifierType.IndexVariable
 
 let atList = many at
 
@@ -300,7 +300,7 @@ coordOfEntityRef.Value <- choice [
 
 let coordInType = choice [
     fplIdentifier
-    indexValue
+    indexVariable
     variable
 ]
 
@@ -339,7 +339,7 @@ let variableTypeWithModifier = (((attempt modifieableIndexType) <|> attempt modi
 
 let parenthesisedType = variableTypeWithModifier .>> IW >>. paramTuple |>> FplType.VariableType
 
-let variableType = (attempt parenthesisedType) <|> variableTypeWithModifier
+let variableType = ((attempt parenthesisedType) <|> attempt variableTypeWithModifier) <|> classType
 
 let namedVariableDeclaration = (variableList .>> IW) .>>. (colon >>. variableType)
 
@@ -395,16 +395,12 @@ paramTupleRef := (leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>>
 
 predicateWithArgumentsRef := (fplIdentifier .>> spacesLeftParenSpaces) .>>. (predicateList .>> spacesRightParenSpaces) |>> Predicate.PredicateWithArgs
 
-let isOperator = optional CW >>. keywordIs >>. spacesLeftParenSpaces >>. ( indexValue <|> fplIdentifier ) .>> IW >>. modifieableClassType .>> spacesRightParenSpaces
-
 primePredicateRef := choice [
     keywordTrue
     keywordFalse
     keywordUndefined
     predicateWithArguments
     //statement
-    //indexValue
-    //isOperator
     //argumentParam
     
 ]
@@ -421,6 +417,7 @@ let negation = many CW >>. keywordNot >>. onePredicateInParens |>> Predicate.Not
 let all = many CW >>. (keywordAll >>. SW >>. variableList) .>>. onePredicateInParens |>> Predicate.All
 let exists = many CW >>. (keywordEx >>. SW >>. variableList) .>>. onePredicateInParens |>> Predicate.Exists
 let existsTimesN = many CW >>. ((keywordEx >>. dollar >>. digits) .>>. (SW >>. variableList)) .>>. onePredicateInParens |>> Predicate.ExistsN
+let isOperator = (many CW >>. keywordIs >>. spacesLeftParenSpaces >>. coordInType) .>>. (IW >>. commaSpaces >>. variableType) .>> spacesRightParenSpaces |>> Predicate.IsOperator
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [
@@ -433,6 +430,7 @@ let compoundPredicate = choice [
     all
     exists
     existsTimesN
+    isOperator
 ]
 
 predicateRef := choice [

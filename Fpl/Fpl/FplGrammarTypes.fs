@@ -127,7 +127,7 @@ type Predicate =
     | All of FplIdentifierType list * Predicate
     | Exists of FplIdentifierType list * Predicate
     | ExistsN of (string * FplIdentifierType list) * Predicate
-    | Is
+    | IsOperator of FplIdentifierType * FplType
 
 
 
