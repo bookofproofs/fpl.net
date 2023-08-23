@@ -105,7 +105,7 @@ type FplType =
     | IndexType
     | ExtensionType of Extensions
     | ClassType of string list 
-    | FplTypeWithCoord of (FplType * FplIdentifierType ) 
+    | FplTypeWithCoords of (FplType * FplIdentifierType list) 
     | FplTypeWithRange of (FplType * FplIdentifierType ) * (FplIdentifierType * FplIdentifierType)
 
 type UsesClause = UsesClause of FplIdentifierType list

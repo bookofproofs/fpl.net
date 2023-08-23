@@ -304,6 +304,8 @@ let coordInType = choice [
     variable
 ]
 
+let coordInTypeList = sepBy1 coordInType commaSpaces
+
 let rangeInType = (opt coordInType .>> IW) .>>. (tilde >>. IW >>. opt coordInType) |>> FplIdentifierType.RangeInType
 
 let specificType = choice [
@@ -321,7 +323,7 @@ let callModifier = choice [
     plus
 ]
 
-let specificTypeWithCoord = ((specificType .>> IW) .>> leftBracket) .>>. (coordInType .>> (IW >>. rightBracket)) |>> FplType.FplTypeWithCoord
+let specificTypeWithCoord = ((specificType .>> IW) .>> leftBracket) .>>. (coordInTypeList .>> (IW >>. rightBracket)) |>> FplType.FplTypeWithCoords
 let specificTypeWithRange = ((specificType .>> IW) .>>. leftBound) .>>. (rangeInType .>>. rightBound) |>> FplType.FplTypeWithRange
 
 let generalType = opt callModifier .>>. 

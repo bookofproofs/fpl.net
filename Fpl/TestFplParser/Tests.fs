@@ -613,7 +613,14 @@ type TestTypes () =
     member this.TestGeneralType3 () =
         let result = run generalType """object[self]"""
         let actual = sprintf "%O" result
-        let expected = """Success: (None, FplTypeWithCoord (ObjectType, Self []))""".Trim().Replace("\r","")
+        let expected = """Success: (None, FplTypeWithCoords (ObjectType, [Self []]))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType3a () =
+        let result = run generalType """object[self, x,y]"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (None, FplTypeWithCoords (ObjectType, [Self []; Var "x"; Var "y"]))""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
