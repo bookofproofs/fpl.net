@@ -38,8 +38,8 @@ let CW = choice [
     LongComment
 ]
 
-let spacesRightParenSpaces = spaces >>. rightParen >>. spaces
 let spacesLeftParenSpaces = spaces >>. leftParen >>. spaces
+let spacesRightParenSpaces = spaces >>. rightParen >>. spaces
 let commaSpaces = comma >>. spaces
 
 // -----------------------------------------------------
@@ -286,6 +286,11 @@ let bracketedCoordList = (leftBracket >>. IW >>. coordList) .>> (IW >>. rightBra
 
 let fplRange = ((opt coord) .>> IW .>> tilde) .>>. (IW >>. opt coord)
 
+let leftOpenRange = choice [
+    ((leftBracket >>. IW >>. exclamationMark >>. coord) .>> IW)
+    
+]
+
 let closedOrOpenRange = (leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound) |>> FplIdentifierType.ClosedOrOpenRange
 
 coordOfEntityRef.Value <- choice [
@@ -316,9 +321,11 @@ let callModifier = choice [
     plus
 ]
 
-let specificTypeWithCoord = ((specificType .>> IW) .>>. leftBound) .>>. (( rangeInType <|> coordInType ) .>>. rightBound) |>> FplType.FplTypeWithCoord
+let specificTypeWithCoord = ((specificType .>> IW) .>> leftBracket) .>>. (coordInType .>> (IW >>. rightBracket)) |>> FplType.FplTypeWithCoord
+let specificTypeWithRange = ((specificType .>> IW) .>>. leftBound) .>>. (rangeInType .>>. rightBound) |>> FplType.FplTypeWithRange
 
-let generalType = opt callModifier .>>. ((attempt specificTypeWithCoord) <|> specificType)
+let generalType = opt callModifier .>>. 
+    (((attempt specificTypeWithRange) <|> (attempt specificTypeWithCoord)) <|> specificType)
 
 //let parenthesisedGeneralType = generalType .>> IW >>. paramTuple
 

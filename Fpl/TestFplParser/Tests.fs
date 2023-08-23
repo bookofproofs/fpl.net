@@ -594,3 +594,112 @@ type TestTypes () =
         let actual2 = actual.Replace("\r","")
         let expected = "Failure:\nError in Ln: 1 Col: 1\nbla\n^\nExpecting: <PascalCaseId>, @ext<PascalCaseId>, 'func', 'function', 'ind',\n'index', 'obj', 'object', 'pred', 'predicate', 'template' or 'tpl'\n"
         Assert.AreEqual(expected, actual2);
+
+    [<TestMethod>]
+    member this.TestGeneralType1 () =
+        let result = run generalType """+predicate"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (Some Many1, PredicateType)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType2 () =
+        let result = run generalType """*function"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (Some Many, FunctionalTermType)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType3 () =
+        let result = run generalType """object[self]"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (None, FplTypeWithCoord (ObjectType, Self []))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType4 () =
+        let result = run generalType """tpl[from~]"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (None,
+ FplTypeWithRange
+   ((TemplateType "tpl", LeftClosed),
+    (RangeInType (Some (Var "from"), None), RightClosed)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType4a () =
+        let result = run generalType """tpl[~ to]"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (None,
+ FplTypeWithRange
+   ((TemplateType "tpl", LeftClosed),
+    (RangeInType (None, Some (Var "to")), RightClosed)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType4b () =
+        let result = run generalType """tpl[~]"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (None,
+ FplTypeWithRange
+   ((TemplateType "tpl", LeftClosed), (RangeInType (None, None), RightClosed)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType5 () =
+        let result = run generalType """Set[from ~ to]"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (None,
+ FplTypeWithRange
+   ((ClassType ["Set"], LeftClosed),
+    (RangeInType (Some (Var "from"), Some (Var "to")), RightClosed)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType5a () =
+        let result = run generalType """Set[!from ~ to]"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (None,
+ FplTypeWithRange
+   ((ClassType ["Set"], LeftOpen),
+    (RangeInType (Some (Var "from"), Some (Var "to")), RightClosed)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType5b () =
+        let result = run generalType """Set[from ~ to!]"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (None,
+ FplTypeWithRange
+   ((ClassType ["Set"], LeftClosed),
+    (RangeInType (Some (Var "from"), Some (Var "to")), RightOpen)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType6 () =
+        let result = run generalType """index"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (None, IndexType)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType7 () =
+        let result = run generalType """@extNat"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (None, ExtensionType (Extensionname "Nat"))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType8 () =
+        let result = run generalType """SomeClass"""
+        let actual = sprintf "%O" result
+        let expected = """Success: (None, ClassType ["SomeClass"])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestGeneralType9 () =
+        let result = run generalType """bla"""
+        let actual = sprintf "%O" result
+        let actual2 = actual.Replace("\r","")
+        let expected = "Failure:\nError in Ln: 1 Col: 1\nbla\n^\nExpecting: <PascalCaseId>, @ext<PascalCaseId>, '*', '+', 'func', 'function',\n'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template' or 'tpl'\n"
+        Assert.AreEqual(expected, actual2);
