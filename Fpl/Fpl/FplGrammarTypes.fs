@@ -61,22 +61,13 @@ type ProofKeyword =
     | Qed 
     | Trivial
 
-type BlockHeader = 
-    | Theorem
-    | Lemma
-    | Proposition
-    | Corollary
-    | Conjecture
-    | Inference of string
-    | Signature
-
-type Extensions = 
+type Extension = 
     | Extensionname of string
     | ExtensionRegex of string
 
-type ExtensionBlock = ExtensionBlock of Extensions * Extensions
+type ExtensionBlock = ExtensionBlock of Extension * Extension
 
-type FplIdentifierType =
+type FplIdentifier =
     | LeftClosed
     | LeftOpen 
     | RightClosed
@@ -88,11 +79,11 @@ type FplIdentifierType =
     | IndexVariable of string * string
     | Var of string
     | Self of char list 
-    | ClosedOrOpenRange of (FplIdentifierType * (FplIdentifierType option * FplIdentifierType option)) * FplIdentifierType
-    | BrackedCoordList of FplIdentifierType list
+    | ClosedOrOpenRange of (FplIdentifier * (FplIdentifier option * FplIdentifier option)) * FplIdentifier
+    | BrackedCoordList of FplIdentifier list
     | AliasedId of string list
-    | EntityWithCoord of FplIdentifierType * FplIdentifierType
-    | RangeInType of FplIdentifierType option * FplIdentifierType option 
+    | EntityWithCoord of FplIdentifier * FplIdentifier
+    | RangeInType of FplIdentifier option * FplIdentifier option 
     | ExtDigits of string
 
 type FplType =
@@ -103,33 +94,42 @@ type FplType =
     | ObjectType 
     | TemplateType of string
     | IndexType
-    | ExtensionType of Extensions
+    | ExtensionType of Extension
     | ClassHeaderType of string list 
-    | FplTypeWithCoords of (FplType * FplIdentifierType list) 
-    | FplTypeWithRange of (FplType * FplIdentifierType ) * (FplIdentifierType * FplIdentifierType)
+    | FplTypeWithCoords of (FplType * FplIdentifier list) 
+    | FplTypeWithRange of (FplType * FplIdentifier ) * (FplIdentifier * FplIdentifier)
     | VariableTypeWithModifier of FplType option * FplType
-    | VariableType of (FplIdentifierType list * FplType) list
+    | VariableType of (FplIdentifier list * FplType) list 
 
-type UsesClause = UsesClause of FplIdentifierType list
-
-    
 type Predicate =
     | True
     | False
     | Undefined
-    | PredicateWithArgs of FplIdentifierType * Predicate list
+    | PredicateWithArgs of FplIdentifier * Predicate list
     | And of Predicate list
     | Or of Predicate list
     | Impl of Predicate * Predicate
     | Iif of Predicate * Predicate
     | Xor of Predicate * Predicate
     | Not of Predicate 
-    | All of FplIdentifierType list * Predicate
-    | Exists of FplIdentifierType list * Predicate
-    | ExistsN of (string * FplIdentifierType list) * Predicate
-    | IsOperator of FplIdentifierType * FplType
+    | All of FplIdentifier list * Predicate
+    | Exists of FplIdentifier list * Predicate
+    | ExistsN of (string * FplIdentifier list) * Predicate
+    | IsOperator of FplIdentifier * FplType
+
+type FplBlock = 
+    | Theorem
+    | Lemma
+    | Proposition
+    | Corollary
+    | Conjecture
+    | Inference of string
+    | Signature of FplIdentifier * (FplIdentifier list * FplType) list 
+
+type UsesClause = UsesClause of FplIdentifier list
 
 
 
 type PredicateKeyword =
     | Py
+

@@ -534,6 +534,295 @@ type TestPredicates () =
         let expected = """Success: ExistsN (("3", [Var "x"]), Not (Iif (Iif (True, Iif (True, False)), Not True)))""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
 
+    [<TestMethod>]
+    member this.TestPredicate01 () =
+        let result = run predicate """true"""
+        let actual = sprintf "%O" result
+        let expected = """Success: True""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate02 () =
+        let result = run predicate """false"""
+        let actual = sprintf "%O" result
+        let expected = """Success: False""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate03 () =
+        let result = run predicate """undef"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Undefined""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate04 () =
+        let result = run predicate """undefined"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Undefined""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate05 () =
+        let result = run predicate """and(true,false)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: And [True; False]""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate06 () =
+        let result = run predicate """and ( true, true )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: And [True; True]""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate07 () =
+        let result = run predicate """and ( true, and( true, false))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: And [True; And [True; False]]""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate08 () =
+        let result = run predicate """and ( and ( true, and( true, false)), true )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: And [And [True; And [True; False]]; True]""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+        
+    [<TestMethod>]
+    member this.TestPredicate09 () =
+        let result = run predicate """or(true,false)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Or [True; False]""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate10 () =
+        let result = run predicate """or ( true, true )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Or [True; True]""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate11 () =
+        let result = run predicate """or ( true, or( true, false))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Or [True; Or [True; False]]""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate12 () =
+        let result = run predicate """or ( or ( true, or( true, false)), true )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Or [Or [True; Or [True; False]]; True]""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate13 () =
+        let result = run predicate """impl(true,false)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Impl (True, False)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate14 () =
+        let result = run predicate """impl ( true, true )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Impl (True, True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate15 () =
+        let result = run predicate """impl ( true, impl( true, false))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Impl (True, Impl (True, False))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate16 () =
+        let result = run predicate """impl ( impl ( true, impl( true, false)), true )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Impl (Impl (True, Impl (True, False)), True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate17 () =
+        let result = run predicate """iif(true,false)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Iif (True, False)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate18 () =
+        let result = run predicate """iif ( true, true )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Iif (True, True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate19 () =
+        let result = run predicate """iif ( true, iif( true, false))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Iif (True, Iif (True, False))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate20 () =
+        let result = run predicate """iif ( iif ( true, iif( true, false)), true )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Iif (Iif (True, Iif (True, False)), True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate21 () =
+        let result = run predicate """xor(true,false)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Xor (True, False)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate22 () =
+        let result = run predicate """xor ( true, true )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Xor (True, True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate23 () =
+        let result = run predicate """xor ( true, xor( true, false))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Xor (True, Xor (True, False))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate24 () =
+        let result = run predicate """xor ( xor ( true, xor( true, false)), true )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Xor (Xor (True, Xor (True, False)), True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate25 () =
+        let result = run predicate """not(true)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Not True""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate26 () =
+        let result = run predicate """not (iif ( true, not(false)))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Not (Iif (True, Not False))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+
+    [<TestMethod>]
+    member this.TestPredicate27 () =
+        let result = run predicate """not (iif ( iif( true, false), true))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Not (Iif (Iif (True, False), True))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate28 () =
+        let result = run predicate """not(iif ( iif ( true, iif( true, false)), not(true) ))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Not (Iif (Iif (True, Iif (True, False)), Not True))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate29 () =
+        let result = run predicate """is(x, Nat)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: IsOperator (Var "x", VariableTypeWithModifier (None, ClassHeaderType ["Nat"]))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate30 () =
+        let result = run predicate """all x,y,z(true)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: All ([Var "x"; Var "y"; Var "z"], True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate31 () =
+        let result = run predicate """all x,y,z (not (iif ( true, not(false))))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: All ([Var "x"; Var "y"; Var "z"], Not (Iif (True, Not False)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate32 () =
+        let result = run predicate """all x,y,z (not (iif ( iif( true, false), true)))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: All ([Var "x"; Var "y"; Var "z"], Not (Iif (Iif (True, False), True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate33 () =
+        let result = run predicate """all x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: All ([Var "x"], Not (Iif (Iif (True, Iif (True, False)), Not True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate34 () =
+        let result = run predicate """ex x,y,z(true)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Exists ([Var "x"; Var "y"; Var "z"], True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate35 () =
+        let result = run predicate """ex x,y,z (not (iif ( true, not(false))))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Exists ([Var "x"; Var "y"; Var "z"], Not (Iif (True, Not False)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate36 () =
+        let result = run predicate """ex x,y,z (not (iif ( iif( true, false), true)))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Exists ([Var "x"; Var "y"; Var "z"], Not (Iif (Iif (True, False), True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate37 () =
+        let result = run predicate """ex x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Exists ([Var "x"], Not (Iif (Iif (True, Iif (True, False)), Not True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate38 () =
+        let result = run predicate """ex$0 x,y,z(true)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ExistsN (("0", [Var "x"; Var "y"; Var "z"]), True)""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate39 () =
+        let result = run predicate """ex$1 x,y,z (not (iif ( true, not(false))))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ExistsN (("1", [Var "x"; Var "y"; Var "z"]), Not (Iif (True, Not False)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate40 () =
+        let result = run predicate """ex$2 x,y,z (not (iif ( iif( true, false), true)))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ExistsN
+  (("2", [Var "x"; Var "y"; Var "z"]), Not (Iif (Iif (True, False), True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicate41 () =
+        let result = run predicate """ex$3 x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: ExistsN (("3", [Var "x"]), Not (Iif (Iif (True, Iif (True, False)), Not True)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
 [<TestClass>]
 type TestClassInheritanceTypes () =
 
@@ -1092,4 +1381,154 @@ type TestVariableTypes () =
    FplTypeWithRange
      ((TemplateType "tplTest", LeftClosed),
       (RangeInType (None, Some (ExtDigits "10")), RightClosed)))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+
+[<TestClass>]
+type TestFplBlocks () =
+
+
+    [<TestMethod>]
+    member this.TestSignature01 () =
+        let result = run signature """AreRelated(u,v: Set, r: BinaryRelation)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["AreRelated"],
+   [([Var "u"; Var "v"],
+     VariableTypeWithModifier (None, ClassHeaderType ["Set"]));
+    ([Var "r"],
+     VariableTypeWithModifier (None, ClassHeaderType ["BinaryRelation"]))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature02 () =
+        let result = run signature """ExistsByExample(p: pred(c: obj))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["ExistsByExample"],
+   [([Var "p"],
+     VariableType [([Var "c"], VariableTypeWithModifier (None, ObjectType))])])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature03 () =
+        let result = run signature """Zero()"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature (AliasedId ["Zero"], [])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature04 () =
+        let result = run signature """Test(a,b: tpl)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["Test"],
+   [([Var "a"; Var "b"], VariableTypeWithModifier (None, TemplateType "tpl"))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature05 () =
+        let result = run signature """TestPredicate(a,b:obj)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["TestPredicate"],
+   [([Var "a"; Var "b"], VariableTypeWithModifier (None, ObjectType))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature06 () =
+        let result = run signature """BinOp(x,y: tplSetElem)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["BinOp"],
+   [([Var "x"; Var "y"],
+     VariableTypeWithModifier (None, TemplateType "tplSetElem"))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature07 () =
+        let result = run signature """IsSubset(subset,superset: Set)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["IsSubset"],
+   [([Var "subset"; Var "superset"],
+     VariableTypeWithModifier (None, ClassHeaderType ["Set"]))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature08 () =
+        let result = run signature """SetRoster(listOfSets: *Set)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["SetRoster"],
+   [([Var "listOfSets"],
+     VariableTypeWithModifier (Some Many, ClassHeaderType ["Set"]))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature09 () =
+        let result = run signature """VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to])"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["VecAdd"],
+   [([Var "from"; Var "to"],
+     VariableTypeWithModifier (None, ClassHeaderType ["Nat"]));
+    ([Var "v"; Var "w"],
+     VariableTypeWithModifier
+       (None,
+        FplTypeWithRange
+          ((TemplateType "tplFieldElem", LeftClosed),
+           (RangeInType (Some (Var "from"), Some (Var "to")), RightClosed))))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature10 () =
+        let result = run signature """ZeroVectorN(n: Nat, field: Field)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["ZeroVectorN"],
+   [([Var "n"], VariableTypeWithModifier (None, ClassHeaderType ["Nat"]));
+    ([Var "field"], VariableTypeWithModifier (None, ClassHeaderType ["Field"]))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature11 () =
+        let result = run signature """ProceedingResults(p: +pred)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["ProceedingResults"],
+   [([Var "p"], VariableTypeWithModifier (Some Many1, PredicateType))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature12 () =
+        let result = run signature """Nat(x: @extDecimal)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["Nat"],
+   [([Var "x"],
+     VariableTypeWithModifier (None, ExtensionType (Extensionname "Decimal")))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature13 () =
+        let result = run signature """Add(n,m: Nat)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["Add"],
+   [([Var "n"; Var "m"],
+     VariableTypeWithModifier (None, ClassHeaderType ["Nat"]))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestSignature14 () =
+        let result = run signature """AlgebraicStructure(x: tplSet, ops: +Composition(args: *tplSetElem))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["AlgebraicStructure"],
+   [([Var "x"], VariableTypeWithModifier (None, TemplateType "tplSet"));
+    ([Var "ops"],
+     VariableType
+       [([Var "args"],
+         VariableTypeWithModifier (Some Many, TemplateType "tplSetElem"))])])""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);

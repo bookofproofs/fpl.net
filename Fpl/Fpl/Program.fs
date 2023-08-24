@@ -2,7 +2,7 @@
 open FplGrammar
 
 
-let result = run predicate """is ( x,Nat)"""
+let result = run namedVariableDeclaration """d: +Composition(*tplSetElem)"""
 let result1 = run variableType """*func"""
 let result1a = run variableType """*predicate"""
 let result2 = run variableType """object[self]"""

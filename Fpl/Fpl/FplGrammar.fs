@@ -48,7 +48,7 @@ let commaSpaces = comma >>. spaces
 // note that this has to be inserted into:
 // the IsOperand choice
 // the PredicateOrFunctionalTerm choice
-let extDigits: Parser<_, unit> = regex @"\d+" |>> FplIdentifierType.ExtDigits
+let extDigits: Parser<_, unit> = regex @"\d+" |>> FplIdentifier.ExtDigits
 
 (* Identifiers *)
 (* Fpl Keywords *)
@@ -124,11 +124,11 @@ let IdStartsWithSmallCase: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" >>=
 let IdStartsWithCap: Parser<string,unit> = regex @"[A-Z][a-z0-9A-Z_]*" <?> "<PascalCaseId>"
 let digits: Parser<string,unit> = regex @"\d+" <?> "digits"
 let digitsIdSmallCase: Parser<string, unit> = regex @"\d+[a-z][a-z0-9A-Z_]*" <?> "<digits><camelCaseId>"
-let namespaceIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifierType.NamespaceIdentifier
-let wildcardedNamespaceIdentifier = many1 (IdStartsWithCap .>> dot) .>> skipString "*" |>> FplIdentifierType.WildcaredNamespaceIdentifier
+let namespaceIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifier.NamespaceIdentifier
+let wildcardedNamespaceIdentifier = many1 (IdStartsWithCap .>> dot) .>> skipString "*" |>> FplIdentifier.WildcaredNamespaceIdentifier
 let alias = SW .>> skipString "alias" >>. SW >>. IdStartsWithCap
-let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. alias |>> FplIdentifierType.AliasedNamespaceIdentifier
-let variable = IdStartsWithSmallCase |>> FplIdentifierType.Var
+let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. alias |>> FplIdentifier.AliasedNamespaceIdentifier
+let variable = IdStartsWithSmallCase |>> FplIdentifier.Var
 let variableList = sepEndBy1 variable commaSpaces
 let argumentIdentifier = choice [
     digitsIdSmallCase
@@ -220,9 +220,9 @@ let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
 let extensionHeader: Parser<unit,unit> = skipString ":ext" 
 
-let extensionName = IW >>. skipString "ext" >>. IdStartsWithCap .>> IW |>> Extensions.Extensionname
+let extensionName = IW >>. skipString "ext" >>. IdStartsWithCap .>> IW |>> Extension.Extensionname
 
-let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. regex @"\/(?!:end).*" .>> IW |>> Extensions.ExtensionRegex
+let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. regex @"\/(?!:end).*" .>> IW |>> Extension.ExtensionRegex
 
 let extensionBlock = IW >>. extensionHeader >>. extensionName .>>. extensionRegex .>> extensionTail |>> ExtensionBlock.ExtensionBlock
 
@@ -230,29 +230,29 @@ let extensionBlock = IW >>. extensionHeader >>. extensionName .>>. extensionRege
 (* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
 let xId = at >>. extensionName |>> FplType.ExtensionType <?> "@ext<PascalCaseId>"
 
-let predicateIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifierType.AliasedId
+let predicateIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifier.AliasedId
 
 let classIdentifier = sepBy1 IdStartsWithCap dot |>> FplType.ClassHeaderType
 
-let indexVariable = (IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase ) |>> FplIdentifierType.IndexVariable
+let indexVariable = (IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase ) |>> FplIdentifier.IndexVariable
 
 let atList = many at
 
-let self = atList .>> keywordSelf |>> FplIdentifierType.Self
+let self = atList .>> keywordSelf |>> FplIdentifier.Self
 
 let entity = choice [
     self
     variable
 ]
 
-let leftOpen = leftBracket >>. IW >>. exclamationMark >>% FplIdentifierType.LeftOpen
-let leftClosed = leftBracket >>. IW >>% FplIdentifierType.LeftClosed
+let leftOpen = leftBracket >>. IW >>. exclamationMark >>% FplIdentifier.LeftOpen
+let leftClosed = leftBracket >>. IW >>% FplIdentifier.LeftClosed
 
 let leftBound = ((attempt leftOpen) <|> leftClosed)
 
 let rightBound = choice [
-    exclamationMark >>. IW >>. rightBracket >>% FplIdentifierType.RightOpen
-    IW >>. rightBracket >>% FplIdentifierType.RightClosed
+    exclamationMark >>. IW >>. rightBracket >>% FplIdentifier.RightOpen
+    IW >>. rightBracket >>% FplIdentifier.RightClosed
 ]
  
 
@@ -266,7 +266,7 @@ let predicateList, predicateListRef = createParserForwardedToRef()
 let predicateWithArguments, predicateWithArgumentsRef = createParserForwardedToRef()
 let paramTuple, paramTupleRef = createParserForwardedToRef()
 
-let entityWithCoord = entity .>>. coordOfEntity |>> FplIdentifierType.EntityWithCoord
+let entityWithCoord = entity .>>. coordOfEntity |>> FplIdentifier.EntityWithCoord
 
 let coord = choice [
     extDigits
@@ -282,7 +282,7 @@ let fplIdentifier = choice [
 
 let coordList = sepEndBy1 coord commaSpaces
 
-let bracketedCoordList = (leftBracket >>. IW >>. coordList) .>> (IW >>. rightBracket) |>> FplIdentifierType.BrackedCoordList
+let bracketedCoordList = (leftBracket >>. IW >>. coordList) .>> (IW >>. rightBracket) |>> FplIdentifier.BrackedCoordList
 
 let fplRange = ((opt coord) .>> IW .>> tilde) .>>. (IW >>. opt coord)
 
@@ -291,7 +291,7 @@ let leftOpenRange = choice [
     
 ]
 
-let closedOrOpenRange = (leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound) |>> FplIdentifierType.ClosedOrOpenRange
+let closedOrOpenRange = (leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound) |>> FplIdentifier.ClosedOrOpenRange
 
 coordOfEntityRef.Value <- choice [
     closedOrOpenRange
@@ -306,7 +306,7 @@ let coordInType = choice [
 
 let coordInTypeList = sepBy1 coordInType commaSpaces
 
-let rangeInType = (opt coordInType .>> IW) .>>. (tilde >>. IW >>. opt coordInType) |>> FplIdentifierType.RangeInType
+let rangeInType = (opt coordInType .>> IW) .>>. (tilde >>. IW >>. opt coordInType) |>> FplIdentifier.RangeInType
 
 let specificClassType = choice [
     objectHeader
@@ -341,13 +341,13 @@ let parenthesisedType = variableTypeWithModifier .>> IW >>. paramTuple |>> FplTy
 
 let variableType = ((attempt parenthesisedType) <|> attempt variableTypeWithModifier) <|> classType
 
-let namedVariableDeclaration = (variableList .>> IW) .>>. (colon >>. variableType)
+let namedVariableDeclaration = (variableList .>> IW) .>>. ((colon >>. IW) >>. variableType)
 
-let namedVariableDeclarationList = sepEndBy1 namedVariableDeclaration commaSpaces 
+let namedVariableDeclarationList = sepEndBy namedVariableDeclaration commaSpaces 
 
-paramTupleRef := (leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)
+paramTupleRef := (leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen) 
 
-//let signature = predicateIdentifier .>> IW >>. paramTuple |>> BlockHeader.Signature
+let signature = (predicateIdentifier .>> IW) .>>. paramTuple |>> FplBlock.Signature
 
 ////(* Statements *)
 //let fplDelegateIdentifier = regex @"[a-z_]+"
@@ -428,8 +428,7 @@ let compoundPredicate = choice [
     exclusiveOr
     negation
     all
-    exists
-    existsTimesN
+    (attempt existsTimesN) <|> exists
     isOperator
 ]
 
