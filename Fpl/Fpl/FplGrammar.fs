@@ -268,10 +268,14 @@ let paramTuple, paramTupleRef = createParserForwardedToRef()
 
 let entityWithCoord = entity .>>. coordOfEntity |>> FplIdentifier.EntityWithCoord
 
-let coord = choice [
-    extDigits
+let assignee = choice [
     entity
     entityWithCoord
+]
+
+let coord = choice [
+    extDigits
+    assignee
 ]
 
 let fplIdentifier = choice [
@@ -293,7 +297,7 @@ let leftOpenRange = choice [
 
 let closedOrOpenRange = (leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound) |>> FplIdentifier.ClosedOrOpenRange
 
-coordOfEntityRef.Value <- choice [
+coordOfEntityRef := choice [
     closedOrOpenRange
     bracketedCoordList
 ]
@@ -350,10 +354,12 @@ paramTupleRef := (leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>>
 let signature = (predicateIdentifier .>> IW) .>>. paramTuple |>> FplBlock.Signature
 
 ////(* Statements *)
-//let fplDelegateIdentifier = regex @"[a-z_]+"
-//let fplDelegate = keywordDel >>. dot >>. fplDelegateIdentifier .>> IW >>. leftParen .>> IW >>. predicateList .>> IW .>> rightParen
-//let assignmentStatement = assignee .>> IW >>. colonEqual >>. IW >>. predicate
-//let returnStatement = returnHeader >>. SW >>. predicate
+let argumentTuple = (spacesLeftParenSpaces >>. IW >>. predicateList) .>> (IW .>> spacesRightParenSpaces)  
+
+//let fplDelegateIdentifier: Parser<_, unit> = regex @"[a-z_]+"
+//let fplDelegate = (keywordDel >>. dot >>. fplDelegateIdentifier) .>>. argumentTuple
+//let assignmentStatement = (assignee .>> IW .>> colonEqual) .>>. (IW >>. predicate)
+//let returnStatement = keywordReturn >>. SW >>. predicate
 //let keysOfVariadicVariable = variable .>> dollar
 
 //let variableRange = choice [
@@ -364,12 +370,12 @@ let signature = (predicateIdentifier .>> IW) .>>. paramTuple |>> FplBlock.Signat
 
 
 //let defaultResult = keywordElse >>. IW >>. colon >>. many CW >>. statementList
-//let conditionFollowedByResult = keywordCase >>. SW >>. predicate .>> colon >>. many CW >>. statementList
+//let conditionFollowedByResult = (keywordCase >>. SW >>. predicate .>> colon) .>>. (many CW >>. statementList)
 //let conditionFollowedByResultList = sepBy1 conditionFollowedByResult ( many CW )
 
 
-//let caseStatement = keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>> many CW >>. defaultResult .>> many CW >>. rightParen
-//let rangeOrLoopBody = assignee .>> SW >>. variableRange .>> many CW >>. leftParen >>. many CW >>. statementList .>> many CW >>. rightParen
+//let caseStatement = (keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen)
+//let rangeOrLoopBody = ((assignee .>> SW) .>>. variableRange .>> many CW) .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
 //let loopStatement = keywordLoop >>. SW >>. rangeOrLoopBody
 //let rangeStatement = keywordRange >>. SW >>. rangeOrLoopBody
 
@@ -377,7 +383,8 @@ let signature = (predicateIdentifier .>> IW) .>>. paramTuple |>> FplBlock.Signat
 //// not by a predicate (i.e. with possible arguments)
 //// Difference of assertion to a mandatory property: a mandatory property introduces a completely new identifier inside
 //// the scope of a definition. An assertion uses a predicate referring to existing identifiers in the whole theory
-//let assertionStatement = keywordAssert >>. SW >>. predicate
+//// Difference of assertion to assume: the latter will be used only in the scope of proofs
+let assertionStatement = keywordAssert >>. SW >>. predicate
 
 //let statement = choice [
 //    fplDelegate
@@ -389,11 +396,11 @@ let signature = (predicateIdentifier .>> IW) .>>. paramTuple |>> FplBlock.Signat
 //    returnStatement
 //]
 
-//let statementListRef =  sepBy1 (statement .>> SW)  (many CW )
+//statementListRef :=  sepBy1 (statement .>> SW)  (many CW)
 
 //(* Predicates *)
 
-predicateWithArgumentsRef := (fplIdentifier .>> spacesLeftParenSpaces) .>>. (predicateList .>> spacesRightParenSpaces) |>> Predicate.PredicateWithArgs
+predicateWithArgumentsRef := fplIdentifier .>>. argumentTuple |>> Predicate.PredicateWithArgs
 
 primePredicateRef := choice [
     keywordTrue
