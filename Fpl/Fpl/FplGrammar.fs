@@ -258,7 +258,7 @@ let rightBound = choice [
 
 
 ////// resolving recursive parsers
-//let statementList, statementListRef = createParserForwardedToRef()
+let statementList, statementListRef = createParserForwardedToRef()
 let primePredicate, primePredicateRef = createParserForwardedToRef()
 let coordOfEntity, coordOfEntityRef = createParserForwardedToRef()
 let predicate, predicateRef = createParserForwardedToRef()
@@ -356,47 +356,47 @@ let signature = (predicateIdentifier .>> IW) .>>. paramTuple |>> FplBlock.Signat
 ////(* Statements *)
 let argumentTuple = (spacesLeftParenSpaces >>. IW >>. predicateList) .>> (IW .>> spacesRightParenSpaces)  
 
-//let fplDelegateIdentifier: Parser<_, unit> = regex @"[a-z_]+"
-//let fplDelegate = (keywordDel >>. dot >>. fplDelegateIdentifier) .>>. argumentTuple
-//let assignmentStatement = (assignee .>> IW .>> colonEqual) .>>. (IW >>. predicate)
-//let returnStatement = keywordReturn >>. SW >>. predicate
-//let keysOfVariadicVariable = variable .>> dollar
+let fplDelegateIdentifier: Parser<_, unit> = regex @"[a-z_]+" |>> FplIdentifier.DelegateId
+let fplDelegate = (keywordDel >>. dot >>. fplDelegateIdentifier) .>>. argumentTuple |>> Statement.Delegate
+let assignmentStatement = (assignee .>> IW .>> colonEqual) .>>. (IW >>. predicate) |>> Statement.Assignment
+let returnStatement = keywordReturn >>. SW >>. predicate |>> Statement.Return
+let keysOfVariadicVariable = variable .>> dollar
 
-//let variableRange = choice [
-//    keysOfVariadicVariable
-//    closedOrOpenRange
-//    assignee
-//]
-
-
-//let defaultResult = keywordElse >>. IW >>. colon >>. many CW >>. statementList
-//let conditionFollowedByResult = (keywordCase >>. SW >>. predicate .>> colon) .>>. (many CW >>. statementList)
-//let conditionFollowedByResultList = sepBy1 conditionFollowedByResult ( many CW )
+let variableRange = choice [
+    keysOfVariadicVariable
+    closedOrOpenRange
+    assignee
+]
 
 
-//let caseStatement = (keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen)
-//let rangeOrLoopBody = ((assignee .>> SW) .>>. variableRange .>> many CW) .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
-//let loopStatement = keywordLoop >>. SW >>. rangeOrLoopBody
-//let rangeStatement = keywordRange >>. SW >>. rangeOrLoopBody
+let defaultResult = keywordElse >>. IW >>. colon >>. many CW >>. statementList |>> Statement.DefaultResult
+let conditionFollowedByResult = (keywordCase >>. SW >>. predicate .>> colon) .>>. (many CW >>. statementList) |>> Statement.ConditionFollowedByResult
+let conditionFollowedByResultList = sepBy1 conditionFollowedByResult ( many CW )
+
+
+let casesStatement = (keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen) |>> Statement.Cases
+let rangeOrLoopBody = ((assignee .>> SW) .>>. variableRange .>> many CW) .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
+let loopStatement = keywordLoop >>. SW >>. rangeOrLoopBody |>> Statement.Loop
+let rangeStatement = keywordRange >>. SW >>. rangeOrLoopBody |>> Statement.Range
 
 //// Difference of assertion to an axiom: axiom's is followed by a signature of a predicate (i.e. with possible parameters),
 //// not by a predicate (i.e. with possible arguments)
 //// Difference of assertion to a mandatory property: a mandatory property introduces a completely new identifier inside
 //// the scope of a definition. An assertion uses a predicate referring to existing identifiers in the whole theory
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
-let assertionStatement = keywordAssert >>. SW >>. predicate
+let assertionStatement = keywordAssert >>. SW >>. predicate |>> Statement.Assertion
 
-//let statement = choice [
-//    fplDelegate
-//    caseStatement
-//    assertionStatement
-//    assignmentStatement
-//    rangeStatement
-//    loopStatement
-//    returnStatement
-//]
+let statement = choice [
+    fplDelegate
+    casesStatement
+    assertionStatement
+    assignmentStatement
+    rangeStatement
+    loopStatement
+    returnStatement
+]
 
-//statementListRef :=  sepBy1 (statement .>> SW)  (many CW)
+statementListRef :=  sepBy1 (statement .>> SW)  (many CW)
 
 //(* Predicates *)
 

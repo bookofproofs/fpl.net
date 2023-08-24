@@ -85,6 +85,7 @@ type FplIdentifier =
     | EntityWithCoord of FplIdentifier * FplIdentifier
     | RangeInType of FplIdentifier option * FplIdentifier option 
     | ExtDigits of string
+    | DelegateId of string 
 
 type FplType =
     | Many 
@@ -116,6 +117,17 @@ type Predicate =
     | Exists of FplIdentifier list * Predicate
     | ExistsN of (string * FplIdentifier list) * Predicate
     | IsOperator of FplIdentifier * FplType
+
+type Statement = 
+    | Assertion of Predicate
+    | Delegate of FplIdentifier * Predicate list
+    | ConditionFollowedByResult of Predicate * Statement list 
+    | DefaultResult of Statement list 
+    | Cases of Statement list * Statement
+    | Assignment of FplIdentifier * Predicate
+    | Loop of (FplIdentifier * FplIdentifier) * Statement list
+    | Range of (FplIdentifier * FplIdentifier) * Statement list
+    | Return of Predicate
 
 type FplBlock = 
     | Theorem
