@@ -193,29 +193,6 @@
 
 
 
-# ----------------------------------------------------------------
-# Axioms
-
-    Axiom =
-        AxiomHeader SW Signature
-        { CW }* AxiomBlock
-        ;
-
-    AxiomHeader =
-        (
-        axiom
-        | ax
-        | postulate
-        | post
-        )
-        ;
-
-    AxiomBlock =
-        LeftBrace
-        { CW }* [ VariableSpecificationList ]
-        { CW }* [ Predicate ]
-        { CW }* RightBrace
-        ;
 
 
 # ----------------------------------------------------------------
@@ -403,31 +380,7 @@
 
 
 
-# ----------------------------------------------------------------
-# names and identifiers
-    # PascalCase identifiers separated by points
 
-
-
-
-    NamespaceIdentifier =
-        IdStartsWithCap { Dot IdStartsWithCap }*
-        ;
-
-
-
-
-
-
-
-    # convention: All syntax production rules of FPL syntax extensions have to start with "ext", followed by
-    # a Pascal Case id.
-    # This ensures that they will not be mixed-up with original FPL ebnf productions
-    # that are all PascalCase as well as FPL keywords, that are all small case.
-
-    XId =
-        At ExtensionName
-        ;
 
 
 # -----------------------------------------------------

@@ -2,12 +2,18 @@
 open FplGrammar
 
 
-let result = run conditionFollowedByResultList """case Equal(x,0) :
-                            self := Zero()
-                        case Equal(x,1) :
-                            self := Succ(Zero())
-                        case Equal(x,2) :
-                            self := Succ(Succ(Zero()))
-    """
+let result = run axiom """axiom ZeroIsNat()
+        {
+            is(Zero,Nat)
+        }"""
 printfn "%O" result
 
+let result1 = run axiomBlock """{
+            is(Zero,Nat)
+        }"""
+printfn "%O" result1
+
+let result2 = run (leftBrace >>. many CW >>. variableSpecificationList) """{
+            is(Zero,Nat)
+        """
+printfn "%O" result2

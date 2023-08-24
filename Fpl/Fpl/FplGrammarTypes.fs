@@ -143,3 +143,6 @@ type FplBlock =
     | Corollary of ((FplIdentifier * string list) * (FplIdentifier list * FplType) list) * ((FplBlock list * Predicate) * Predicate)
     | Conjecture of FplBlock * ((FplBlock list * Predicate) * Predicate)
     | Signature of FplIdentifier * (FplIdentifier list * FplType) list
+    | Axiom of FplBlock * (FplBlock list * Predicate)
+
+

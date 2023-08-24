@@ -218,6 +218,11 @@ let extensionBlock = IW >>. extensionHeader >>. extensionName .>>. extensionRege
 
 
 (* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
+// convention: All syntax production rules of FPL syntax extensions have to start with "ext", followed by
+// a Pascal Case id.
+// This ensures that they will not be mixed-up with original FPL ebnf productions
+// that are all PascalCase as well as FPL keywords, that are all small case.
+
 let xId = at >>. extensionName |>> FplType.ExtensionType <?> "@ext<PascalCaseId>"
 
 let predicateIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifier.AliasedId
@@ -448,14 +453,17 @@ let variableSpecificationList = many (variableSpecification .>> SW)
 FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
 The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
 However, there is a syntactical simplification of the signature*)
-let premise = many CW >>. (keywordPremise >>. IW >>. colon >>. many CW >>. predicate) 
-let conclusion = many CW >>. (keywordConclusion >>. IW >>. colon >>. many CW >>. predicate) 
-let premiseConclusionBlock = (leftBrace >>. variableSpecificationList) .>>. (premise .>> many CW) .>>. (conclusion .>> many CW) .>> rightBrace
+let commentedPredicate = many CW >>. predicate
+let premise = many CW >>. (keywordPremise >>. IW >>. colon >>. commentedPredicate) 
+let conclusion = many CW >>. (keywordConclusion >>. IW >>. colon >>. commentedPredicate) 
+let leftBraceCommented = (leftBrace >>. many CW)
+let commentedRightBrace = (many CW .>> rightBrace)
+let premiseConclusionBlock = leftBraceCommented >>. variableSpecificationList .>>. (premise .>> many CW) .>>. conclusion .>> commentedRightBrace
 
 //(* FPL building blocks - rules of reference *)
 let ruleOfInference = (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.RuleOfInference
 let ruleOfInferenceList = sepEndBy1 ruleOfInference (many CW)
-let rulesOfInferenceBlock = (keywordInference >>. many CW >>. leftBrace >>. many CW >>. ruleOfInferenceList) .>> (many CW >>. rightBrace)
+let rulesOfInferenceBlock = (keywordInference >>. many CW >>. leftBrace >>. many CW >>. ruleOfInferenceList) .>> commentedRightBrace
 
 //(* FPL building blocks - Theorem-like statements and conjectures *)
 let keywordTheorem: Parser<_,unit> = skipString "theorem" <|> skipString "thm" 
@@ -473,4 +481,11 @@ let dollarDigitList = many1 (dollar >>. digits)
 let referencingIdentifier = predicateIdentifier .>>. dollarDigitList
 let corollarySignature = (referencingIdentifier .>> IW) .>>. paramTuple
 let corrolary = keywordCorollary >>. SW >>. (corollarySignature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Corollary
+
+//(* FPL building blocks - Axioms *)
+
+let keywordAxiom: Parser<_,unit> = (skipString "axiom" <|> skipString "ax") <|> (skipString "postulate" <|> skipString "post") 
+let axiomBlock = leftBraceCommented >>. variableSpecificationList .>>. commentedPredicate .>> commentedRightBrace
+
+let axiom = keywordAxiom >>. SW >>. signature .>>. (IW >>. axiomBlock) |>> FplBlock.Axiom
 
