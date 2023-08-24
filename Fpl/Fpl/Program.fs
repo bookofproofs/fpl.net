@@ -2,25 +2,12 @@
 open FplGrammar
 
 
-let result = run namedVariableDeclaration """d: +Composition(*tplSetElem)"""
-let result1 = run variableType """*func"""
-let result1a = run variableType """*predicate"""
-let result2 = run variableType """object[self]"""
-let result3 = run variableType """tpl[from~]"""
-let result3a = run variableType """tpl[~to]"""
-let result3b = run variableType """tpl[~]"""
-let result4 = run variableType """Set[from ~ to]"""
-let result5 = run variableType """index"""
-let result6 = run variableType """@extNat"""
-let result7 = run variableType """bla"""
+let result = run conditionFollowedByResultList """case Equal(x,0) :
+                            self := Zero()
+                        case Equal(x,1) :
+                            self := Succ(Zero())
+                        case Equal(x,2) :
+                            self := Succ(Succ(Zero()))
+    """
 printfn "%O" result
-printfn "%O" result1
-printfn "%O" result1a
-printfn "%O" result2
-printfn "%O" result3
-printfn "%O" result3a
-printfn "%O" result3b
-printfn "%O" result4
-printfn "%O" result5
-printfn "%O" result6
-printfn "%O" result7
+

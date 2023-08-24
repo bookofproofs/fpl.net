@@ -219,7 +219,7 @@ type TestIdentifiers () =
         let result = run entityWithCoord """theorem[from ~ to]"""
         let actual = sprintf "%O" result
         let actual2 = actual.Replace("\r","")
-        let expected = "Failure:\nError in Ln: 1 Col: 8\ntheorem[from ~ to]\n       ^\nreserved FPL keyword\n"
+        let expected = "Failure:\nError in Ln: 1 Col: 8\ntheorem[from ~ to]\n       ^\nkeyword not applicable in this context\n"
         Assert.AreEqual(expected, actual2);
 
     [<TestMethod>]
@@ -412,6 +412,14 @@ type TestPredicates () =
         let actual = sprintf "%O" result
         let expected = """Success: Xor (Xor (True, Xor (True, False)), True)""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicateWithArgs1 () =
+        let result = run predicateWithArguments """Zero()"""
+        let actual = sprintf "%O" result
+        let expected = """Success: PredicateWithArgs (AliasedId ["Zero"], [])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
 
     [<TestMethod>]
     member this.TestNot1 () =
@@ -962,6 +970,150 @@ type TestClassInheritanceTypes () =
         let actual2 = actual.Replace("\r","")
         let expected = "Failure:\nError in Ln: 1 Col: 1\nbla\n^\nExpecting: <PascalCaseId>, @ext<PascalCaseId>, 'obj', 'object', 'template' or\n'tpl'\n"
         Assert.AreEqual(expected, actual2);
+
+[<TestClass>]
+type TestStatements () =
+
+    [<TestMethod>]
+    member this.TestRange01 () =
+        let result = run rangeStatement """range proceedingResult p$
+                (
+                    assert proceedingResult
+                    a:=1
+                    b:=1
+                )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Range
+  ((Var "proceedingResult", Var "p"),
+   [Assertion (PredicateWithoutArgs (Var "proceedingResult"));
+    Assignment (Var "a", PredicateWithoutArgs (ExtDigits "1"));
+    Assignment (Var "b", PredicateWithoutArgs (ExtDigits "1"))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestLoop01 () =
+        let result = run loopStatement """loop proceedingResult p$
+                (
+                    assert proceedingResult
+                    a:=1
+                    b:=1
+                )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Loop
+  ((Var "proceedingResult", Var "p"),
+   [Assertion (PredicateWithoutArgs (Var "proceedingResult"));
+    Assignment (Var "a", PredicateWithoutArgs (ExtDigits "1"));
+    Assignment (Var "b", PredicateWithoutArgs (ExtDigits "1"))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestAssignment01 () =
+        let result = run assignmentStatement """a:= 1"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Assignment (Var "a", PredicateWithoutArgs (ExtDigits "1"))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestAssignment02 () =
+        let result = run assignmentStatement """self := Zero()"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Assignment (Self [], PredicateWithArgs (AliasedId ["Zero"], []))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestDelegate01 () =
+        let result = run fplDelegate """del.test(1,2)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Delegate
+  (DelegateId "test",
+   [PredicateWithoutArgs (ExtDigits "1"); PredicateWithoutArgs (ExtDigits "2")])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestDelegate02 () =
+        let result = run fplDelegate """del.decrement(x)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Delegate (DelegateId "decrement", [PredicateWithoutArgs (Var "x")])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+        
+    [<TestMethod>]
+    member this.TestReturn01 () =
+        let result = run returnStatement """return result"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Return (PredicateWithoutArgs (Var "result"))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+    
+    [<TestMethod>]
+    member this.TestAssertion01 () =
+        let result = run assertionStatement """assert
+                    all n
+                    (
+                        and
+                        (
+                            is(n, Set),
+                            In(n, self)
+                        )
+                    )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Assertion
+  (All
+     ([Var "n"],
+      And
+        [IsOperator
+           (Var "n", VariableTypeWithModifier (None, ClassHeaderType ["Set"]));
+         PredicateWithArgs
+           (AliasedId ["In"],
+            [PredicateWithoutArgs (Var "n"); PredicateWithoutArgs (Self [])])]))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestCases01 () =
+        let result = run casesStatement """cases
+                (
+                    |Equal(x,0) :
+                        self := Zero()
+                    | Equal(x,1) :
+                        self := Succ(Zero())
+                    | Equal(x,2) :
+                        self := Succ(Succ(Zero()))
+                    :>
+                        // else case addressed using a python delegate
+                        self := Succ(del.decrement(x))
+                )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Cases
+  ([ConditionFollowedByResult
+      (PredicateWithArgs
+         (AliasedId ["Equal"],
+          [PredicateWithoutArgs (Var "x"); PredicateWithoutArgs (ExtDigits "0")]),
+       [Assignment (Self [], PredicateWithArgs (AliasedId ["Zero"], []))]);
+    ConditionFollowedByResult
+      (PredicateWithArgs
+         (AliasedId ["Equal"],
+          [PredicateWithoutArgs (Var "x"); PredicateWithoutArgs (ExtDigits "1")]),
+       [Assignment
+          (Self [],
+           PredicateWithArgs
+             (AliasedId ["Succ"], [PredicateWithArgs (AliasedId ["Zero"], [])]))]);
+    ConditionFollowedByResult
+      (PredicateWithArgs
+         (AliasedId ["Equal"],
+          [PredicateWithoutArgs (Var "x"); PredicateWithoutArgs (ExtDigits "2")]),
+       [Assignment
+          (Self [],
+           PredicateWithArgs
+             (AliasedId ["Succ"],
+              [PredicateWithArgs
+                 (AliasedId ["Succ"],
+                  [PredicateWithArgs (AliasedId ["Zero"], [])])]))])],
+   DefaultResult
+     [Assignment
+        (Self [],
+         PredicateWithArgs
+           (AliasedId ["Succ"],
+            [PredicateWithArgs
+               (DelegateId "decrement", [PredicateWithoutArgs (Var "x")])]))])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
 
 [<TestClass>]
 type TestVariableTypes () =
@@ -1535,13 +1687,127 @@ type TestFplBlocks () =
 
     [<TestMethod>]
     member this.TestReferenceRule01 () =
-        let result = run signature """AlgebraicStructure(x: tplSet, ops: +Composition(args: *tplSetElem))"""
+        let result = run ruleOfInference """ModusPonens()
+        {
+            p,q: pred
+
+            premise:
+                and (p, impl (p,q) )
+            conclusion:
+                q
+        }"""
         let actual = sprintf "%O" result
-        let expected = """Success: Signature
-  (AliasedId ["AlgebraicStructure"],
-   [([Var "x"], VariableTypeWithModifier (None, TemplateType "tplSet"));
-    ([Var "ops"],
-     VariableType
-       [([Var "args"],
-         VariableTypeWithModifier (Some Many, TemplateType "tplSetElem"))])])""".Trim().Replace("\r","")
+        let expected = """Success: RuleOfInference
+  (Signature (AliasedId ["ModusPonens"], []),
+   (([BlockVariableDeclaration
+        ([Var "p"; Var "q"], VariableTypeWithModifier (None, PredicateType))],
+     And
+       [PredicateWithoutArgs (Var "p");
+        Impl (PredicateWithoutArgs (Var "p"), PredicateWithoutArgs (Var "q"))]),
+    PredicateWithoutArgs (Var "q")))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestReferenceRule02 () =
+        let result = run ruleOfInference """ModusTollens()
+        {
+            p,q: pred
+
+            premise:
+                and (not(q), impl(p,q) )
+            conclusion:
+                not (p)
+        }"""
+        let actual = sprintf "%O" result
+        let expected = """Success: RuleOfInference
+  (Signature (AliasedId ["ModusTollens"], []),
+   (([BlockVariableDeclaration
+        ([Var "p"; Var "q"], VariableTypeWithModifier (None, PredicateType))],
+     And
+       [Not (PredicateWithoutArgs (Var "q"));
+        Impl (PredicateWithoutArgs (Var "p"), PredicateWithoutArgs (Var "q"))]),
+    Not (PredicateWithoutArgs (Var "p"))))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestReferenceRule03 () =
+        let result = run ruleOfInference """HypotheticalSyllogism()
+        {
+            p,q,r: pred
+            premise:
+                and (impl(p,q), impl(q,r))
+            conclusion:
+                impl(p,r)
+        }"""
+        let actual = sprintf "%O" result
+        let expected = """Success: RuleOfInference
+  (Signature (AliasedId ["HypotheticalSyllogism"], []),
+   (([BlockVariableDeclaration
+        ([Var "p"; Var "q"; Var "r"],
+         VariableTypeWithModifier (None, PredicateType))],
+     And
+       [Impl (PredicateWithoutArgs (Var "p"), PredicateWithoutArgs (Var "q"));
+        Impl (PredicateWithoutArgs (Var "q"), PredicateWithoutArgs (Var "r"))]),
+    Impl (PredicateWithoutArgs (Var "p"), PredicateWithoutArgs (Var "r"))))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestReferenceRule04 () =
+        let result = run ruleOfInference """DisjunctiveSyllogism()
+        {
+            p,q: pred
+            premise:
+                and (not(p), or(p,q))
+            conclusion:
+                q
+        }"""
+        let actual = sprintf "%O" result
+        let expected = """Success: RuleOfInference
+  (Signature (AliasedId ["DisjunctiveSyllogism"], []),
+   (([BlockVariableDeclaration
+        ([Var "p"; Var "q"], VariableTypeWithModifier (None, PredicateType))],
+     And
+       [Not (PredicateWithoutArgs (Var "p"));
+        Or [PredicateWithoutArgs (Var "p"); PredicateWithoutArgs (Var "q")]]),
+    PredicateWithoutArgs (Var "q")))""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestReferenceRule05 () =
+        let result = run ruleOfInference """ProceedingResults(p: +pred)
+        {
+            proceedingResult: pred
+            premise:
+                range proceedingResult p
+                (
+                    assert proceedingResult
+                )
+            conclusion:
+                and (p)
+        }"""
+        let actual = sprintf "%O" result
+        let expected = """ """.Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestReferenceRule06 () =
+        let result = run ruleOfInference """ExistsByExample(p: pred(c: obj))
+        {
+            x: obj
+            premise:
+                p(c)
+            conclusion:
+                ex x(p(x))
+        }"""
+        let actual = sprintf "%O" result
+        let expected = """Success: RuleOfInference
+  (Signature
+     (AliasedId ["ExistsByExample"],
+      [([Var "p"],
+        VariableType [([Var "c"], VariableTypeWithModifier (None, ObjectType))])]),
+   (([BlockVariableDeclaration
+        ([Var "x"], VariableTypeWithModifier (None, ObjectType))],
+     PredicateWithArgs (Var "p", [PredicateWithoutArgs (Var "c")])),
+    Exists
+      ([Var "x"], PredicateWithArgs (Var "p", [PredicateWithoutArgs (Var "x")]))))""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);

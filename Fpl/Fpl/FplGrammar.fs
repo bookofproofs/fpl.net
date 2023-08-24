@@ -16,6 +16,7 @@ let colon: Parser<_, unit> = skipChar ':'
 let colonEqual: Parser<_, unit> = skipString ":="
 let at: Parser<char, unit> = pchar '@'
 let exclamationMark: Parser<_, unit> = skipChar '!'
+let case: Parser<_,unit> = skipChar '|'
 let leftBracket: Parser<_, unit> = skipChar '['
 let rightBracket: Parser<_, unit> = skipChar ']'
 let tilde: Parser<_, unit> = skipChar '~'
@@ -28,14 +29,14 @@ let IW = spaces
 
 let SW = spaces1
 
-let Comment: Parser<_, unit> = regex @"\/\/[^\n]*" |>> ignore
+let Comment: Parser<_, unit> = regex @"\/\/[^\n]*" |>> ignore <?> "<line-comment>"
 
-let LongComment: Parser<_, unit> = regex @"\/\*((?:.|\n)*?)\*\/" |>> ignore
+let LongComment: Parser<_, unit> = regex @"\/\*((?:.|\n)*?)\*\/" |>> ignore <?> "<multiline-comment>"
 
 let CW = choice [
-    SW
-    Comment
     LongComment
+    Comment
+    SW
 ]
 
 let spacesLeftParenSpaces = spaces >>. leftParen >>. spaces
@@ -115,11 +116,12 @@ let fplKeyword: Parser<string,unit>  =
     ) 
 
 let IdStartsWithSmallCase: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" >>= (
-        fun s -> 
-            if keyWordSet.Contains(s) then fail "reserved FPL keyword" 
-            else if s.StartsWith("tpl") then fail "use of FPL templates is not allowed in this context" 
-            else (preturn s) 
-    )
+            fun s -> 
+                if keyWordSet.Contains(s) then fail "keyword not applicable in this context" 
+                else if s.StartsWith("tpl") then fail "use of FPL templates is not allowed in this context" 
+                else (preturn s) 
+        ) 
+
 
 let IdStartsWithCap: Parser<string,unit> = regex @"[A-Z][a-z0-9A-Z_]*" <?> "<PascalCaseId>"
 let digits: Parser<string,unit> = regex @"\d+" <?> "digits"
@@ -154,8 +156,6 @@ let keywordReturn: Parser<_,unit> = skipString "return" <|> skipString "ret"
 let keywordRange: Parser<_,unit> = skipString "range"
 let keywordLoop: Parser<_,unit> = skipString "loop"
 let keywordCases: Parser<_,unit> = skipString "cases"
-let keywordCase: Parser<_,unit> = skipString "case"
-let keywordElse: Parser<_,unit> = skipString "else"
 let keywordAssert: Parser<_,unit> = skipString "assert"
 
 (* Predicate-related Keywords *)
@@ -261,18 +261,22 @@ let entityWithCoord = entity .>>. coordOfEntity |>> FplIdentifier.EntityWithCoor
 let assignee = choice [
     entity
     entityWithCoord
+    variable
 ]
 
 let coord = choice [
     extDigits
+
     assignee
 ]
 
+let fplDelegateIdentifier: Parser<_, unit> = keywordDel >>. dot >>. regex @"[a-z_]+" |>> FplIdentifier.DelegateId
+
 let fplIdentifier = choice [
     predicateIdentifier
+    fplDelegateIdentifier
     coord
 ]
-
 
 let coordList = sepEndBy1 coord commaSpaces
 
@@ -295,7 +299,6 @@ coordOfEntityRef := choice [
 let coordInType = choice [
     fplIdentifier
     indexVariable
-    variable
 ]
 
 let coordInTypeList = sepBy1 coordInType commaSpaces
@@ -336,7 +339,6 @@ let parenthesisedType = variableTypeWithModifier .>> IW >>. paramTuple |>> FplTy
 let variableType = ((attempt parenthesisedType) <|> attempt variableTypeWithModifier) <|> classType
 
 let namedVariableDeclaration = (variableList .>> IW) .>>. ((colon >>. IW) >>. variableType)
-
 let namedVariableDeclarationList = sepEndBy namedVariableDeclaration commaSpaces 
 
 paramTupleRef := (leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen) 
@@ -346,8 +348,7 @@ let signature = (predicateIdentifier .>> IW) .>>. paramTuple |>> FplBlock.Signat
 ////(* Statements *)
 let argumentTuple = (spacesLeftParenSpaces >>. IW >>. predicateList) .>> (IW .>> spacesRightParenSpaces)  
 
-let fplDelegateIdentifier: Parser<_, unit> = regex @"[a-z_]+" |>> FplIdentifier.DelegateId
-let fplDelegate = (keywordDel >>. dot >>. fplDelegateIdentifier) .>>. argumentTuple |>> Statement.Delegate
+let fplDelegate = fplDelegateIdentifier .>>. argumentTuple |>> Predicate.Delegate
 let assignmentStatement = (assignee .>> IW .>> colonEqual) .>>. (IW >>. predicate) |>> Statement.Assignment
 let returnStatement = keywordReturn >>. SW >>. predicate |>> Statement.Return
 let keysOfVariadicVariable = variable .>> dollar
@@ -358,10 +359,10 @@ let variableRange = choice [
     assignee
 ]
 
-
-let defaultResult = keywordElse >>. IW >>. colon >>. many CW >>. statementList |>> Statement.DefaultResult
-let conditionFollowedByResult = (keywordCase >>. SW >>. predicate .>> colon) .>>. (many CW >>. statementList) |>> Statement.ConditionFollowedByResult
-let conditionFollowedByResultList = sepBy1 conditionFollowedByResult ( many CW )
+let elseMark = skipString ":>"
+let defaultResult = elseMark >>. IW >>.   many CW >>. statementList |>> Statement.DefaultResult
+let conditionFollowedByResult = (case >>. IW >>. predicate .>> colon) .>>. (many CW >>. statementList) |>> Statement.ConditionFollowedByResult
+let conditionFollowedByResultList = many1 (many CW >>. conditionFollowedByResult)
 
 
 let casesStatement = (keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen) |>> Statement.Cases
@@ -377,29 +378,27 @@ let rangeStatement = keywordRange >>. SW >>. rangeOrLoopBody |>> Statement.Range
 let assertionStatement = keywordAssert >>. SW >>. predicate |>> Statement.Assertion
 
 let statement = choice [
-    fplDelegate
     casesStatement
     assertionStatement
-    assignmentStatement
     rangeStatement
     loopStatement
     returnStatement
+    assignmentStatement
 ]
 
-statementListRef :=  sepBy1 (statement .>> SW)  (many CW)
+statementListRef := many (many CW >>. statement .>> IW)
 
 //(* Predicates *)
 
 predicateWithArgumentsRef := fplIdentifier .>>. argumentTuple |>> Predicate.PredicateWithArgs
 
+let predicateWithoutArgs = fplIdentifier |>> Predicate.PredicateWithoutArgs
+
 primePredicateRef := choice [
     keywordTrue
     keywordFalse
     keywordUndefined
-    predicateWithArguments
-    //statement
-    //argumentParam
-    
+    (attempt predicateWithArguments) <|> predicateWithoutArgs    
 ]
 
 let conjunction = (many CW >>. keywordAnd >>. spacesLeftParenSpaces >>. predicateList) .>> spacesRightParenSpaces |>> Predicate.And
@@ -434,22 +433,27 @@ predicateRef := choice [
     primePredicate
 ]
 
-predicateListRef := sepBy1 predicate commaSpaces 
+predicateListRef := sepBy predicate commaSpaces 
 
 //(* FPL building blocks *)
+
+let commentedNamedVariableDeclaration = many CW >>. namedVariableDeclaration |>> FplBlock.BlockVariableDeclaration
+let commentedStatement = many CW >>. statement |>> FplBlock.BlockStatement
+
+let variableSpecification = (attempt commentedStatement) <|> (attempt commentedNamedVariableDeclaration)
+
+let variableSpecificationList = many (variableSpecification .>> SW)
 
 (*To simplify the syntax definition, we do not define separate
 FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
 The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
 However, there is a syntactical simplification of the signature*)
-let premise = (keywordPremise >>. IW >>. colon >>. many CW >>. predicate) .>> SW
-let conclusion = (keywordConclusion >>. IW >>. colon >>. many CW >>. predicate) .>> SW
-let variableDeclarationList = many CW >>. namedVariableDeclaration |>> FplBlock.VariableDeclarationList
-let varDeclarationsFollowedByStatements = variableDeclarationList .>>. statementList
-let premiseConclusionBlock = (leftBrace >>. varDeclarationsFollowedByStatements) .>>. (premise .>> many CW) .>>. (conclusion .>> many CW .>> rightBrace) 
+let premise = many CW >>. (keywordPremise >>. IW >>. colon >>. many CW >>. predicate) 
+let conclusion = many CW >>. (keywordConclusion >>. IW >>. colon >>. many CW >>. predicate) 
+let premiseConclusionBlock = (leftBrace >>. variableSpecificationList) .>>. (premise .>> many CW) .>>. (conclusion .>> many CW) .>> rightBrace
 
 //(* FPL building blocks - rules of reference *)
-let ruleOfInference = (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Inference
+let ruleOfInference = (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.RuleOfInference
 let ruleOfInferenceList = sepEndBy1 ruleOfInference (many CW)
 let rulesOfInferenceBlock = (keywordInference >>. many CW >>. leftBrace >>. many CW >>. ruleOfInferenceList) .>> (many CW >>. rightBrace)
 

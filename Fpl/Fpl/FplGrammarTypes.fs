@@ -109,6 +109,7 @@ type Predicate =
     | False
     | Undefined
     | PredicateWithArgs of FplIdentifier * Predicate list
+    | PredicateWithoutArgs of FplIdentifier
     | And of Predicate list
     | Or of Predicate list
     | Impl of Predicate * Predicate
@@ -119,10 +120,10 @@ type Predicate =
     | Exists of FplIdentifier list * Predicate
     | ExistsN of (string * FplIdentifier list) * Predicate
     | IsOperator of FplIdentifier * FplType
+    | Delegate of FplIdentifier * Predicate list
 
 type Statement = 
     | Assertion of Predicate
-    | Delegate of FplIdentifier * Predicate list
     | ConditionFollowedByResult of Predicate * Statement list 
     | DefaultResult of Statement list 
     | Cases of Statement list * Statement
@@ -132,12 +133,13 @@ type Statement =
     | Return of Predicate
 
 type FplBlock = 
-    | Inference of FplBlock * (((FplBlock * Statement list) * Predicate) * Predicate)
-    | Theorem of FplBlock * (((FplBlock * Statement list) * Predicate) * Predicate)
-    | Lemma of FplBlock * (((FplBlock * Statement list) * Predicate) * Predicate)
-    | Proposition of FplBlock * (((FplBlock * Statement list) * Predicate) * Predicate)
-    | Corollary of ((FplIdentifier * string list) * (FplIdentifier list * FplType) list) * (((FplBlock * Statement list) * Predicate) * Predicate)
-    | Conjecture of FplBlock * (((FplBlock * Statement list) * Predicate) * Predicate)
-    | VariableDeclarationList of FplIdentifier list * FplType
+    | BlockStatement of Statement
+    | BlockVariableDeclaration of (FplIdentifier list * FplType) 
+    | StatementList of Statement list
+    | RuleOfInference of FplBlock * ((FplBlock list * Predicate) * Predicate)
+    | Theorem of FplBlock * ((FplBlock list * Predicate) * Predicate)
+    | Lemma of FplBlock * ((FplBlock list * Predicate) * Predicate)
+    | Proposition of FplBlock * ((FplBlock list * Predicate) * Predicate)
+    | Corollary of ((FplIdentifier * string list) * (FplIdentifier list * FplType) list) * ((FplBlock list * Predicate) * Predicate)
+    | Conjecture of FplBlock * ((FplBlock list * Predicate) * Predicate)
     | Signature of FplIdentifier * (FplIdentifier list * FplType) list
-
