@@ -58,21 +58,7 @@
 
 
 
-    PremiseConclusionBlock =
-        LeftBrace
-        { CW }* [ VariableSpecificationList ]
-        { CW }* PremiseBlock
-        { CW }* ConclusionBlock
-        { CW }* RightBrace
-        ;
 
-    PremiseBlock =
-        PremiseHeader [ IW ] Colon { CW }* Predicate SW
-        ;
-
-    ConclusionBlock =
-        ConclusionHeader [ IW ] Colon { CW }* Predicate
-        ;
 
     TheoryHeader =
         (
@@ -163,16 +149,7 @@
         ;
 
 
-    VariableSpecificationList =
-        { { CW }* VariableSpecification SW }+
-        ;
 
-    VariableSpecification =
-        (
-        Statement
-        | NamedVariableDeclaration
-        )
-        ;
 
 
 
@@ -321,27 +298,6 @@
 
 
 
-# ----------------------------------------------------------------
-# Theorem-like statements
-
-    # A Theorem is a headed Signature, followed by a TheoremLikeBlock
-    TheoremLikeStatementOrConjecture =
-        TheoremLikeStatementOrConjectureHeader SW (CorollarySignature | Signature)
-        [ IW ] PremiseConclusionBlock
-        ;
-
-
-    CorollarySignature =
-        ReferencingIdentifier
-        [ IW ] ParamTuple
-        ;
-
-    CorollaryHeader =
-        (
-        corollary
-        | cor
-        )
-        ;
 
 
 # ----------------------------------------------------------------
@@ -355,13 +311,7 @@
         ProofHeader SW ReferencingIdentifier [ IW ] ProofBlock
         ;
 
-    ReferencingIdentifier =
-        PredicateIdentifier DollarDigitList
-        ;
 
-    DollarDigitList =
-        Dollar Digit { Dollar Digit }*
-        ;
 
     ProofHeader =
         (

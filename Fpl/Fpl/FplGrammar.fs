@@ -138,17 +138,19 @@ let argumentParam = slash >>. argumentIdentifier
 
 
 
-let keywordDel: Parser<_,unit> = skipString "delegate" <|> skipString "del"
 let keywordInference: Parser<_,unit> = skipString "inference" <|> skipString "inf"
 let keywordSelf: Parser<_,unit> = skipString "self"
-
-let keywordUndefined: Parser<_,unit> = skipString "undefined" <|> skipString "undef" >>% Predicate.Undefined
-
-let keywordReturn: Parser<_,unit> = skipString "return" <|> skipString "ret"
-
 let keywordIndex: Parser<_,unit> = skipString "index" <|> skipString "ind" >>% FplType.IndexType
 
+
+(* FplBlock-related Keywords *)
+let keywordPremise: Parser<_,unit> = skipString "premise" <|> skipString "pre"
+let keywordConclusion: Parser<_,unit> = skipString "conclusion" <|> skipString "con"
+
+
 (* Statement-related Keywords *)
+let keywordDel: Parser<_,unit> = skipString "delegate" <|> skipString "del"
+let keywordReturn: Parser<_,unit> = skipString "return" <|> skipString "ret"
 let keywordRange: Parser<_,unit> = skipString "range"
 let keywordLoop: Parser<_,unit> = skipString "loop"
 let keywordCases: Parser<_,unit> = skipString "cases"
@@ -157,6 +159,7 @@ let keywordElse: Parser<_,unit> = skipString "else"
 let keywordAssert: Parser<_,unit> = skipString "assert"
 
 (* Predicate-related Keywords *)
+let keywordUndefined: Parser<_,unit> = skipString "undefined" <|> skipString "undef" >>% Predicate.Undefined
 let keywordTrue: Parser<_,unit> = skipString "true" >>% Predicate.True  
 let keywordFalse: Parser<_,unit> = skipString "false" >>% Predicate.False  
 let keywordAnd: Parser<_,unit> = skipString "and"
@@ -168,6 +171,7 @@ let keywordNot: Parser<_,unit> = skipString "not"
 let keywordAll: Parser<_,unit> = skipString "all"
 let keywordEx: Parser<_,unit> = skipString "ex" 
 let keywordIs: Parser<_,unit> = skipString "is"
+
 
 // Via templates, FPL supports generic types, which make it possible to define abstract mathematical
 // objects and their properties that defer the concrete
@@ -189,23 +193,9 @@ let objectHeader = choice [
     (attempt templateWithTail) <|> keywordTemplate
 ] 
 
-let keywordTheorem: Parser<_,unit> = skipString "theorem" <|> skipString "thm" 
-let keywordLemma: Parser<_,unit> = skipString "lemma" <|> skipString "lem" 
-let keywordProposition: Parser<_,unit> = skipString "proposition" <|> skipString "prop" 
-let keywordCorollary: Parser<_,unit> = skipString "corollary" <|> skipString "cor" 
-let keywordConjecture: Parser<_,unit> = skipString "conjecture" <|> skipString "conj" 
-
 let keywordPredicate: Parser<_,unit> = skipString "predicate" <|> skipString "pred" >>% FplType.PredicateType
 let keywordFunction: Parser<_,unit> = skipString "function" <|> skipString "func" >>% FplType.FunctionalTermType
 
-
-let theoremLikeStatementOrConjectureHeader = choice [
-    keywordConjecture
-    keywordCorollary
-    keywordProposition
-    keywordLemma
-    keywordTheorem
-]
 
 let wildcardTheoryNamespace = 
     (attempt ((attempt aliasedNamespaceIdentifier) <|>
@@ -445,15 +435,38 @@ predicateRef := choice [
 ]
 
 predicateListRef := sepBy1 predicate commaSpaces 
+
 //(* FPL building blocks *)
 
-//(*To simplify the syntax definition, we do not define separate
-//FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
-//The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
-//However, there is a syntactical simplification of the signature*)
-//let ruleOfInference = signature .>>. IW >>. premiseConclusionBlock |>> BlockHeader.Inference
+(*To simplify the syntax definition, we do not define separate
+FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
+The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
+However, there is a syntactical simplification of the signature*)
+let premise = (keywordPremise >>. IW >>. colon >>. many CW >>. predicate) .>> SW
+let conclusion = (keywordConclusion >>. IW >>. colon >>. many CW >>. predicate) .>> SW
+let variableDeclarationList = many CW >>. namedVariableDeclaration |>> FplBlock.VariableDeclarationList
+let varDeclarationsFollowedByStatements = variableDeclarationList .>>. statementList
+let premiseConclusionBlock = (leftBrace >>. varDeclarationsFollowedByStatements) .>>. (premise .>> many CW) .>>. (conclusion .>> many CW .>> rightBrace) 
 
-//let ruleOfInferenceList = sepEndBy1 ruleOfInference (many CW)
+//(* FPL building blocks - rules of reference *)
+let ruleOfInference = (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Inference
+let ruleOfInferenceList = sepEndBy1 ruleOfInference (many CW)
+let rulesOfInferenceBlock = (keywordInference >>. many CW >>. leftBrace >>. many CW >>. ruleOfInferenceList) .>> (many CW >>. rightBrace)
 
-//let rulesOfInferenceBlock = inference >>. many CW >>. leftBrace >>. many CW >>. ruleOfInferenceList >>. many CW >>. rightBrace
+//(* FPL building blocks - Theorem-like statements and conjectures *)
+let keywordTheorem: Parser<_,unit> = skipString "theorem" <|> skipString "thm" 
+let keywordLemma: Parser<_,unit> = skipString "lemma" <|> skipString "lem" 
+let keywordProposition: Parser<_,unit> = skipString "proposition" <|> skipString "prop" 
+let keywordCorollary: Parser<_,unit> = skipString "corollary" <|> skipString "cor" 
+let keywordConjecture: Parser<_,unit> = skipString "conjecture" <|> skipString "conj" 
+
+let theorem = keywordTheorem >>. SW >>. (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Theorem
+let lemma = keywordLemma >>. SW >>. (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Lemma
+let proposition = keywordProposition >>. SW >>. (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Proposition
+let conjecture = keywordConjecture >>. SW >>. (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Conjecture
+
+let dollarDigitList = many1 (dollar >>. digits)
+let referencingIdentifier = predicateIdentifier .>>. dollarDigitList
+let corollarySignature = (referencingIdentifier .>> IW) .>>. paramTuple
+let corrolary = keywordCorollary >>. SW >>. (corollarySignature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Corollary
 

@@ -87,6 +87,8 @@ type FplIdentifier =
     | ExtDigits of string
     | DelegateId of string 
 
+type UsesClause = UsesClause of FplIdentifier list
+
 type FplType =
     | Many 
     | Many1 
@@ -130,18 +132,12 @@ type Statement =
     | Return of Predicate
 
 type FplBlock = 
-    | Theorem
-    | Lemma
-    | Proposition
-    | Corollary
-    | Conjecture
-    | Inference of string
-    | Signature of FplIdentifier * (FplIdentifier list * FplType) list 
-
-type UsesClause = UsesClause of FplIdentifier list
-
-
-
-type PredicateKeyword =
-    | Py
+    | Inference of FplBlock * (((FplBlock * Statement list) * Predicate) * Predicate)
+    | Theorem of FplBlock * (((FplBlock * Statement list) * Predicate) * Predicate)
+    | Lemma of FplBlock * (((FplBlock * Statement list) * Predicate) * Predicate)
+    | Proposition of FplBlock * (((FplBlock * Statement list) * Predicate) * Predicate)
+    | Corollary of ((FplIdentifier * string list) * (FplIdentifier list * FplType) list) * (((FplBlock * Statement list) * Predicate) * Predicate)
+    | Conjecture of FplBlock * (((FplBlock * Statement list) * Predicate) * Predicate)
+    | VariableDeclarationList of FplIdentifier list * FplType
+    | Signature of FplIdentifier * (FplIdentifier list * FplType) list
 

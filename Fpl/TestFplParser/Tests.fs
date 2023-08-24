@@ -1532,3 +1532,16 @@ type TestFplBlocks () =
        [([Var "args"],
          VariableTypeWithModifier (Some Many, TemplateType "tplSetElem"))])])""".Trim().Replace("\r","")
         Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestReferenceRule01 () =
+        let result = run signature """AlgebraicStructure(x: tplSet, ops: +Composition(args: *tplSetElem))"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Signature
+  (AliasedId ["AlgebraicStructure"],
+   [([Var "x"], VariableTypeWithModifier (None, TemplateType "tplSet"));
+    ([Var "ops"],
+     VariableType
+       [([Var "args"],
+         VariableTypeWithModifier (Some Many, TemplateType "tplSetElem"))])])""".Trim().Replace("\r","")
+        Assert.AreEqual(expected, actual);
