@@ -144,5 +144,7 @@ type FplBlock =
     | Conjecture of FplBlock * ((FplBlock list * Predicate) * Predicate)
     | Signature of FplIdentifier * (FplIdentifier list * FplType) list
     | Axiom of FplBlock * (FplBlock list * Predicate)
+    | ClassConstructorCall of Predicate option
+    | Constructor of FplBlock * (FplBlock * FplBlock list)
 
 

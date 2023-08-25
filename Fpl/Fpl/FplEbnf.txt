@@ -241,41 +241,6 @@
         )
         ;
 
-# ----------------------------------------------------------------
-# Constructors
-
-    Constructor =
-        Signature { CW }*
-        ConstructorBlock
-        ;
-
-    ConstructorBlock =
-        LeftBrace
-        { CW }* [ PredicateWithArguments ]
-        { CW }* [ VariableSpecificationList ]
-        { CW }* RightBrace
-        ;
-
-    InstanceBlock =
-        LeftBrace
-        { CW }* [ VariableSpecificationList ]
-        { CW }* RightBrace
-        ;
-
-
-# ----------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
 
 # ----------------------------------------------------------------
 # Proofs

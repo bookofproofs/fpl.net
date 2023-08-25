@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="AmmendmentsToFplGrammar.md" />
     <Content Include="FplEbnf.txt" />
     <Compile Include="FplGrammarTypes.fs" />
     <Compile Include="FplGrammar.fs" />

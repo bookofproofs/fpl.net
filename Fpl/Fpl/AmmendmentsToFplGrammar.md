@@ -10,6 +10,8 @@ The following documentation describes the amendments and provides a rationale be
 
 ## More stringent predicate syntax
 
+## Classes
+Constructors have now an anotated option (which original was also optional but not anotated) to include calls for parent class constructors.
+
 ## Self-Containment 
 
-## ...

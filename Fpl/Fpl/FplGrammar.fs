@@ -489,3 +489,11 @@ let axiomBlock = leftBraceCommented >>. variableSpecificationList .>>. commented
 
 let axiom = keywordAxiom >>. SW >>. signature .>>. (IW >>. axiomBlock) |>> FplBlock.Axiom
 
+//(* FPL building blocks - Constructors *)
+
+let instanceBlock = leftBraceCommented >>. variableSpecificationList .>> commentedRightBrace
+let callConstructorParentClass = opt predicateWithArguments |>> FplBlock.ClassConstructorCall
+let constructorBlock = leftBraceCommented >>. callConstructorParentClass .>>. variableSpecificationList .>> commentedRightBrace
+let constructor = (signature .>> IW) .>>. constructorBlock |>> FplBlock.Constructor
+
+
