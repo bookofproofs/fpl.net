@@ -1,13 +1,40 @@
-# 1 Introduction
-
-## 1.1 What is FPL?
-
-FPL, the Formal Proving Language, is a specification for an artificial language 
-that is going to serve as a universal language to formulate
+FPL, the Formal Proving Language, is a language to formulate
 mathematical definitions, theorems, and proofs independently of 
 local natural languages. 
 
-Watch the video:
+# Proof of Concept (Work-in-Progress)
+
+This repository is a Proof of Concept of FPL (PoC) based on requirements specified below.
+It is a private research project with the goal to show that FPL is capable to formulate and interpret complex mathematics in a standardized format. 
+
+Contributions are welcome. 
+
+## In progress: 
+* The FPL grammar and parser based on F# / FParsec library 
+
+## Open tasks (among others)
+* IDE extension for FPL (e.g. based on Visual Studio)
+* FPL interpreter
+
+# Getting Started
+
+## Software dependencies
+* Use F# (.NET 6.0)
+* Install the following Nuget packages:
+  * FSharp.Core by Microsoft (latest) 
+  * FParsec by Stephan Tolksdorf (latest)
+  * Microsoft.NET.Test.Sdk (latest)
+  * MSTest.TestAdapter (latest)
+## Testing
+* Open the solution in Fpl/Fpl.sln with Visual Studio (eg. Microsoft Visual Studio Community 2022)
+* Build and run the tests
+
+
+# 1 Introduction
+
+## 1.1 Motivation
+
+A motivation video for FPL:
 
 [![Watch the video](https://img.youtube.com/vi/ROCNCDRiBp0/0.jpg)](https://www.youtube.com/watch?v=ROCNCDRiBp0)
 
@@ -174,31 +201,6 @@ I identified the following High-Level Requirements for the FPL language:
 
 The paper also contains a description of a proof of concept that is based on some first FPL code examples you can
 find in this repository as well as the original syntax diagrams of the FPL grammar (version 1.0.0).
-
-# 3 Proof of Concept (Work-in-Progress)
-
-There is a proof of concept (PoC) based on the above requirements. 
-Contributions are welcome. 
-
-# In progress: 
-* The FPL grammar and parser based on F# / FParsec library 
-
-# Open tasks (among others)
-* IDE extension for FPL (e.g. based on Visual Studio)
-* FPL interpreter
-
-# 4 Getting Started
-
-## 4.1 Software dependencies
-* Use F# (.NET 6.0)
-* Install the following Nuget packages:
-  * FSharp.Core by Microsoft (latest) 
-  * FParsec by Stephan Tolksdorf (latest)
-  * Microsoft.NET.Test.Sdk (latest)
-  * MSTest.TestAdapter (latest)
-## 4.2 Testing
-* Open the solution in Fpl/Fpl.sln with Visual Studio (eg. Microsoft Visual Studio Community 2022)
-* Build and run the tests
 
 
 

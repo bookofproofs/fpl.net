@@ -1,0 +1,338 @@
+Fpl.Arithmetics.Peano
+{
+    :ext
+        extDigits : /\d+/
+    :end
+
+    uses Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel
+
+    theory
+    {
+        class Zero: obj
+        {
+        }
+
+        // definition of a functional term denoting the successor of a natural number
+        func Succ(n: Nat) -> Nat
+        {
+        }
+
+        axiom ZeroIsNat()
+        {
+            is(Zero,Nat)
+        }
+
+        axiom SuccessorExistsAndIsUnique()
+        {
+            n, successor: Nat
+            all n
+            (
+                ex$1 successor
+                (
+                    and
+                    (
+                        NotEqual(successor,n),
+                        Equal(successor,Succ(n))
+                    )
+                )
+            )
+        }
+
+        axiom ZeroIsNotSuccessor()
+        {
+            n: Nat
+            all n
+            (
+                NotEqual(Zero(), Succ(n))
+            )
+        }
+
+        axiom SuccessorIsInjective()
+        {
+            n,m: Nat
+            all n,m
+            (
+                impl
+                (
+                    Equal(Succ(n),Succ(m)),
+                    Equal(n,m)
+                )
+            )
+        }
+
+        axiom CompleteInduction()
+        {
+            n: Nat
+            p: pred
+            all p
+            (
+                impl
+                (
+                    and ( p(0), all n ( impl ( p(n), p(Succ(n)) ) ) ),
+                    all n ( p(n) )
+                )
+            )
+        }
+
+
+        // definition of a new mathematical object (natural number)
+        class Nat: obj
+        {
+            Nat(x: @extDecimal)
+            {
+                cases
+                (
+                    case Equal(x,0) :
+                        self := Zero()
+                    case Equal(x,1) :
+                        self := Succ(Zero())
+                    case Equal(x,2) :
+                        self := Succ(Succ(Zero()))
+                    else:
+                        // else case addressed using a python delegate
+                        self := Succ(py.decrement(x))
+                )
+            }
+
+            Nat(x: Int)
+            {
+                cases
+                (
+                    case IsGreaterOrEqual(x.RightMember(), x.LeftMember()):
+                        self:=x.RightMember()
+                    else:
+                        self:=undefined
+                )
+            }
+        }
+
+        pred IsGreaterOrEqual(n,m: Nat)
+        {
+            k: Nat
+            ex k ( Equal(n,Add(m,k)) )
+        }
+
+        // besides the class "Nat", we can formulate definition of the set of all natural numbers
+        class SetNat: Set
+        {
+            SetNat()
+            {
+                n: Nat
+                // Assert that elements of class "Nat" can be collected to a bigger object of class "SetNat"
+                // This requires that we can apply the "In" predicate defined in Fpl.Set.ZermeloFraenkel
+                // to object of the class "Nat". This becomes possible when we assert that every variable of the class
+                // "Nat" is a also Set.
+                // This is comparable to implementing an interface (or comparable to multiple inheritance).
+                assert
+                    all n
+                    (
+                        and
+                        (
+                            is(n, Set),
+                            In(n, self)
+                        )
+                    )
+            }
+        }
+
+        // Addition of natural numbers
+        func Add(n,m: Nat)->Nat
+        {
+            k: Nat
+            cases
+            (
+                case Equal(m,0):
+                    return n
+                case Equal(Succ(m), k):
+                    return Succ(Add(n,k))
+                else:
+                    return undef
+            )
+        }
+
+        func Add(n,m: @extDecimal)->Nat
+        {
+            py.add(n,m)
+        }
+
+
+        prop AddIsUnique(op: Add)
+        {
+            n,m: Nat
+            anotherAdd: Add
+            pre:
+                and
+                    (
+                        Equal(op(n,0),n),
+                        Equal(anotherAdd(n,0),n),
+                        Equal(op(n,Succ(m)), Succ(op(n,m))),
+                        Equal(anotherAdd(n,Succ(m)), Succ(anotherAdd(n,m)))
+                    )
+            con:
+                all n
+                (
+                    all m
+                    (
+                        Equal(op(n,m), anotherAdd(n,m))
+                    )
+                )
+        }
+
+        proof AddIsUnique$1
+        {
+            1. assume pre
+            2. |- trivial
+            3. |- and
+                    (
+                        Equal(Add(n,0),n),
+                        Equal(anotherAdd(n,0),n),
+                        Equal(Add(n,Succ(m)), Succ(Add(n,m))),
+                        Equal(anotherAdd(n,Succ(m)), Succ(anotherAdd(n,m)))
+                    )
+        }
+
+
+        func Sum(list: *Nat)->Nat
+        {
+            result, addend: Nat
+            result:=Zero()
+            loop addend list
+            (
+                result:=Add(result,addend)
+            )
+            return result
+
+            i: index
+            result:=Zero()
+            loop i list$
+            (
+                result:=Add(result,list$i)
+            )
+            return result
+        }
+
+        func Sum(from,to:Nat, arr: Nat[from~to]) -> Nat
+        {
+            i, result: Nat
+            result:=Zero()
+
+            loop i [from~to]
+            (
+                result:=Add(result,arr[i])
+            )
+            return result
+        }
+
+        func Sum(arr: Nat[~]) -> Nat
+        {
+            addend, result: Nat
+            result:=Zero()
+
+            loop addend arr
+            (
+                result:=Add(result,addend)
+            )
+            return result
+        }
+
+        func Addend(a: Nat)->Nat
+        {
+        }
+
+        func Sum(from,to:Nat, addend: Addend) -> Nat
+        {
+            i, result: Nat
+            result:=Zero()
+            loop i [from~to]
+            (
+                result:=Add(result,addend(i))
+            )
+            return result
+        }
+
+        proposition SumOfConsecutiveNumbers()
+        {
+            n, limit: Nat
+            f: Addend
+            premise:
+                loop n [Nat(1)~limit]
+                (
+                    assert Equal(f(n),n)
+                )
+            conclusion:
+                all n
+                (
+                    Equal(Sum(1,n,f),Div(Mul(n,Succ(n)),2))
+                )
+
+        }
+
+        func RealValuedFunction(x:Real) -> Real
+        {
+            assert is(self,Function)
+        }
+
+        pred IsBounded(x: Real)
+        {
+            upperBound, lowerBound: Real
+            ex upperBound, lowerBound
+            (
+                and (LowerEqual(x,upperBound), LowerEqual(lowerBound,x))
+            )
+        }
+
+        pred IsBounded(f: RealValuedFunction)
+        {
+            x: Real
+            all x
+            (
+                IsBounded(f(x))
+            )
+        }
+
+        func RiemannIntegral(from,to:Real, f: RealValuedFunction ) -> Real
+        {
+            x, result: Real
+            assert IsBounded(f)
+            result:=ZeroReal()
+            range x [from~to]
+            (
+                result:=Add(result, Mult(f(x), D(x)))
+            )
+            return result
+        }
+
+        func PowerSeries(k:Nat, arr: Real[k~] ) -> Real
+        {
+            result: Real
+            i: Nat
+            result:=ZeroReal()
+            loop i [k~]
+            (
+                result:=Add(result, Exp(arr[i],i))
+            )
+            return result
+        }
+
+        function ContinuedFraction(k:Nat, arr: Int[k~]) -> Real
+        {
+            i: Nat
+            cf: Real
+            cf:=Real(arr[k])
+            i:=Succ(k)
+            return Add( cf, Div(1 , ContinuedFraction(i, arr[i~])))
+        }
+
+        // Example of defining a constant for the natural number 100 using the
+        class N100:Set{N100(){n:Nat self:=SetBuilder(SetNat(),IsGreater(n,Nat(100))) }}
+
+    }
+
+
+}
+
+
+
+
+
+
