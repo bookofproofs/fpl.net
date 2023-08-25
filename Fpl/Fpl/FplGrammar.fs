@@ -24,6 +24,7 @@ let rightBracket: Parser<_, unit> = skipChar ']'
 let tilde: Parser<_, unit> = skipChar '~'
 let dollar: Parser<_, unit> = skipChar '$'
 let slash: Parser<_, unit> = skipChar '/'
+let toArrow: Parser<_, unit> = skipString "->"
 
 (* Whitespaces and Comments *)
 
@@ -265,15 +266,10 @@ let paramTuple, paramTupleRef = createParserForwardedToRef()
 
 let entityWithCoord = entity .>>. coordOfEntity |>> FplIdentifier.EntityWithCoord
 
-let assignee = choice [
-    entity
-    entityWithCoord
-    variable
-]
+let assignee = (attempt entityWithCoord) <|> entity
 
 let coord = choice [
     extDigits
-
     assignee
 ]
 
@@ -290,11 +286,6 @@ let coordList = sepEndBy1 coord commaSpaces
 let bracketedCoordList = (leftBracket >>. IW >>. coordList) .>> (IW >>. rightBracket) |>> FplIdentifier.BrackedCoordList
 
 let fplRange = ((opt coord) .>> IW .>> tilde) .>>. (IW >>. opt coord)
-
-let leftOpenRange = choice [
-    ((leftBracket >>. IW >>. exclamationMark >>. coord) .>> IW)
-    
-]
 
 let closedOrOpenRange = (leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound) |>> FplIdentifier.ClosedOrOpenRange
 
@@ -352,7 +343,7 @@ paramTupleRef := (leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>>
 
 let signature = (predicateIdentifier .>> IW) .>>. paramTuple |>> FplBlock.Signature
 
-////(* Statements *)
+(* Statements *)
 let argumentTuple = (spacesLeftParenSpaces >>. IW >>. predicateList) .>> (IW .>> spacesRightParenSpaces)  
 
 let fplDelegate = fplDelegateIdentifier .>>. argumentTuple |>> Predicate.Delegate
@@ -395,9 +386,11 @@ let statement = choice [
 
 statementListRef := many (many CW >>. statement .>> IW)
 
-//(* Predicates *)
+(* Predicates *)
 
 predicateWithArgumentsRef := fplIdentifier .>>. argumentTuple |>> Predicate.PredicateWithArgs
+
+let qualifiedIdentifier = fplIdentifier .>>. many1 (dot >>. predicateWithArguments) |>> Predicate.QualifiedIdentifier
 
 let predicateWithoutArgs = fplIdentifier |>> Predicate.PredicateWithoutArgs
 
@@ -405,7 +398,7 @@ primePredicateRef := choice [
     keywordTrue
     keywordFalse
     keywordUndefined
-    (attempt predicateWithArguments) <|> predicateWithoutArgs    
+    (attempt predicateWithArguments) <|> (attempt qualifiedIdentifier) <|> predicateWithoutArgs    
 ]
 
 let conjunction = (many CW >>. keywordAnd >>. spacesLeftParenSpaces >>. predicateList) .>> spacesRightParenSpaces |>> Predicate.And
@@ -442,14 +435,14 @@ predicateRef := choice [
 
 predicateListRef := sepBy predicate commaSpaces 
 
-//(* FPL building blocks *)
+(* FPL building blocks *)
 
 let commentedNamedVariableDeclaration = many CW >>. namedVariableDeclaration |>> FplBlock.BlockVariableDeclaration
 let commentedStatement = many CW >>. statement |>> FplBlock.BlockStatement
 
 let variableSpecification = (attempt commentedStatement) <|> (attempt commentedNamedVariableDeclaration)
 
-let variableSpecificationList = many (variableSpecification .>> SW)
+let variableSpecificationList = many variableSpecification
 
 (*To simplify the syntax definition, we do not define separate
 FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
@@ -462,12 +455,12 @@ let leftBraceCommented = (leftBrace >>. many CW)
 let commentedRightBrace = (many CW .>> rightBrace)
 let premiseConclusionBlock = leftBraceCommented >>. variableSpecificationList .>>. (premise .>> many CW) .>>. conclusion .>> commentedRightBrace
 
-//(* FPL building blocks - rules of reference *)
+(* FPL building blocks - rules of reference *)
 let ruleOfInference = (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.RuleOfInference
 let ruleOfInferenceList = sepEndBy1 ruleOfInference (many CW)
 let rulesOfInferenceBlock = (keywordInference >>. many CW >>. leftBrace >>. many CW >>. ruleOfInferenceList) .>> commentedRightBrace
 
-//(* FPL building blocks - Theorem-like statements and conjectures *)
+(* FPL building blocks - Theorem-like statements and conjectures *)
 let keywordTheorem: Parser<_,unit> = skipString "theorem" <|> skipString "thm" 
 let keywordLemma: Parser<_,unit> = skipString "lemma" <|> skipString "lem" 
 let keywordProposition: Parser<_,unit> = skipString "proposition" <|> skipString "prop" 
@@ -484,18 +477,34 @@ let referencingIdentifier = predicateIdentifier .>>. dollarDigitList
 let corollarySignature = (referencingIdentifier .>> IW) .>>. paramTuple
 let corrolary = keywordCorollary >>. SW >>. (corollarySignature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Corollary
 
-//(* FPL building blocks - Axioms *)
+(* FPL building blocks - Axioms *)
 
 let keywordAxiom: Parser<_,unit> = (skipString "axiom" <|> skipString "ax") <|> (skipString "postulate" <|> skipString "post") 
 let axiomBlock = leftBraceCommented >>. variableSpecificationList .>>. commentedPredicate .>> commentedRightBrace
 
 let axiom = keywordAxiom >>. SW >>. signature .>>. (IW >>. axiomBlock) |>> FplBlock.Axiom
 
-//(* FPL building blocks - Constructors *)
+(* FPL building blocks - Constructors *)
 
-let instanceBlock = leftBraceCommented >>. variableSpecificationList .>> commentedRightBrace
+let instanceBlock = leftBrace >>. many CW >>. variableSpecificationList .>> commentedRightBrace
 let callConstructorParentClass = opt predicateWithArguments |>> FplBlock.ClassConstructorCall
 let constructorBlock = leftBraceCommented >>. callConstructorParentClass .>>. variableSpecificationList .>> commentedRightBrace
 let constructor = (signature .>> IW) .>>. constructorBlock |>> FplBlock.Constructor
 
-
+(* FPL building blocks - Properties *)
+let keywordMandatory: Parser<_,unit> = (skipString "mandatory" <|> skipString "mand") >>% FplBlock.Mandatory
+let keywordOptional: Parser<_,unit> = (skipString "optional" <|> skipString "opt") >>% FplBlock.Optional
+let predicateInstanceBlock = (leftBraceCommented >>. variableSpecificationList) .>>. (commentedPredicate .>> commentedRightBrace)
+let predicateInstance = (keywordPredicate >>. SW >>. signature) .>>. (many CW >>. predicateInstanceBlock) |>> FplBlock.PredicateInstance
+let classInstance = (variableType .>> SW) .>>. signature .>>. (many CW >>. instanceBlock) |>> FplBlock.ClassInstance
+let mapping = toArrow >>. IW >>. variableType
+let functionalTermSignature = (keywordFunction >>. SW >>. signature) .>>. (IW >>. mapping)
+let functionalTermInstance = functionalTermSignature .>>. (many CW >>. instanceBlock) |>> FplBlock.FunctionalTermInstance
+let definitionProperty = choice [
+    predicateInstance
+    functionalTermInstance
+    classInstance
+]
+let propertyHeader = (many CW >>. (keywordMandatory <|> keywordOptional)) 
+let property = propertyHeader .>>. (SW >>. definitionProperty)
+let propertyList = many1 property

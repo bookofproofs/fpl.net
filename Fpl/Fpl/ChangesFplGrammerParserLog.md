@@ -1,4 +1,8 @@
-﻿# Changes in the FPL grammar and FPL parser (combined, .NET-based)
+﻿## 2.1.0
+* Parsers and test for properties added
+* Bugfixes with respect to ranges and missing qualifiedPredicates 
+
+# Changes in the FPL grammar and FPL parser (combined, .NET-based)
 
 ## 2.0.0
 In this version, the parsers, AST annotations and unit test were added for the following rules

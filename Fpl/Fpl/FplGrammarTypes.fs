@@ -121,6 +121,7 @@ type Predicate =
     | ExistsN of (string * FplIdentifier list) * Predicate
     | IsOperator of FplIdentifier * FplType
     | Delegate of FplIdentifier * Predicate list
+    | QualifiedIdentifier of FplIdentifier * Predicate list
 
 type Statement = 
     | Assertion of Predicate
@@ -146,5 +147,9 @@ type FplBlock =
     | Axiom of FplBlock * (FplBlock list * Predicate)
     | ClassConstructorCall of Predicate option
     | Constructor of FplBlock * (FplBlock * FplBlock list)
-
+    | Mandatory
+    | Optional 
+    | PredicateInstance of (FplBlock * (FplBlock list * Predicate))
+    | ClassInstance of (FplType * FplBlock) * FplBlock list 
+    | FunctionalTermInstance of (FplBlock * FplType) * FplBlock list
 

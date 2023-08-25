@@ -41,25 +41,6 @@
 
 
 
-    PremiseHeader =
-        (
-        premise
-        | pre
-        )
-        ;
-
-    ConclusionHeader =
-        (
-        conclusion
-        | con
-        )
-        ;
-
-
-
-
-
-
     TheoryHeader =
         (
         theory
@@ -137,16 +118,6 @@
         { CW }* FunctionalTermDefinitionBlock
         ;
 
-    FunctionalTermSignature =
-        FunctionalTermHeader
-        SW Signature
-        [ IW ] Mapping
-        ;
-
-    Mapping =
-        To
-        [ IW ] VariableType
-        ;
 
 
 
@@ -169,75 +140,10 @@
         { CW }* RightBrace
         ;
 
-    PredicateInstanceBlock =
-        LeftBrace
-        { CW }* [ VariableSpecificationList ]
-        { CW }* [ Predicate ]
-        { CW }* RightBrace
-        ;
-
     ClassHeader =
         (
         class
         | cl
-        )
-        ;
-
-
-    To =
-        "->"
-        ;
-
-
-
-
-
-
-
-
-# ----------------------------------------------------------------
-# Properties
-
-    PropertyList =
-        { Property }+
-        ;
-
-    Property =
-        { CW }* PropertyHeader
-        SW DefinitionProperty
-        ;
-
-    DefinitionProperty =
-        (
-        PredicateInstance
-        | FunctionalTermInstance
-        | ClassInstance
-        )
-        ;
-
-    ClassInstance =
-        VariableType
-        SW Signature
-        { CW }* InstanceBlock
-        ;
-
-    FunctionalTermInstance =
-        FunctionalTermSignature
-        { CW }* InstanceBlock
-        ;
-
-    PredicateInstance =
-        PredicateHeader
-        SW Signature
-        { CW }* PredicateInstanceBlock
-        ;
-
-    PropertyHeader =
-        (
-        mandatory
-        | mand
-        | optional
-        | opt
         )
         ;
 
