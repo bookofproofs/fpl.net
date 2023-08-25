@@ -2,6 +2,8 @@
 open FParsec
 open FplGrammarTypes
 
+(* FPL Version 2.0.0 (combined Language Grammar and working Parser version) *)
+
 (* Literals *)
 
 let rightBrace: Parser<_, unit>= skipChar '}'

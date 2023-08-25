@@ -6,8 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="AmmendmentsToFplGrammar.md" />
-    <Content Include="FplEbnf.txt" />
+    <None Include="ChangesFplGrammerParserLog.md" />
+    <None Include="DocuFplGrammarPocShiftFromPythonToFSharp.md" />
+    <Content Include="NotYetMigratedOriginalFplEbnf.txt" />
     <Compile Include="FplGrammarTypes.fs" />
     <Compile Include="FplGrammar.fs" />
     <Compile Include="Program.fs" />
