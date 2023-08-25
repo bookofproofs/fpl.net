@@ -1,16 +1,3 @@
-# What is this project about?
-The FPL Interpreter python project is part of a greater Proof of Concept project ("poc"), covering the development of the FPL grammar, the FPL parser, the FPL interpreter, and writing mathematical theories in FPL. The concept for the poc can be found [here](https://github.com/bookofproofs/fpl/blob/master/hld/FPLHighLevelDesign.pdf). The FPL parser is based on the [tatsu package](https://tatsu.readthedocs.io/en/stable/).
-
-# In which areas can you contribute?
-
-At the current stage of the project (as of January 2022), you can contribute in the following areas:
-* Improving the existing Integrated Development Environment (IDE) based on tkinter that reflects the special needs of the FPL language ([fpl/ide](https://github.com/bookofproofs/fpl/tree/master/ide)),
-* Addressing "To Do" list items (see [FPL Interpreter project](https://github.com/bookofproofs/fpl/projects/1)), including the stages "In Progress" and "Test,"
-* Identifying and specifying additional "To Do" items,
-* Writing new unit tests
-* Bug-fixing existing implementation
-* Writing or correcting a Wiki page.
-
 # How to contribute?
 It is important to coordinate the project FPL Interpreter among the team.
 * In the beginning, get in touch with the team via [Discussions](https://github.com/bookofproofs/fpl/discussions). 
