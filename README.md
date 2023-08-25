@@ -175,48 +175,30 @@ I identified the following High-Level Requirements for the FPL language:
 The paper also contains a description of a proof of concept that is based on some first FPL code examples you can
 find in this repository as well as the original syntax diagrams of the FPL grammar (version 1.0.0).
 
-# 3 Proof of Concept (Current State)
+# 3 Proof of Concept (Work-in-Progress)
 
-There is a proof of concept (POC) based on the above requirements. It currently consists of the following pieces:
+There is a proof of concept (PoC) based on the above requirements. 
+Contributions are welcome. 
 
-1. The FPL grammar in an EBNF. 
-  * [Current syntax diagrams](https://bookofproofs.github.io/FPLSyntaxDiagrams.html)
-  * [EBNF definition](https://github.com/bookofproofs/fpl/tree/master/grammar/)
-2. [FPL demo theories ](https://github.com/bookofproofs/fpl/tree/master/poc/theories/)
-3. A demo python project consisting of a parser generated using the [TatSu package](https://tatsu.readthedocs.io/en/stable/).
+# In progress: 
+* The FPL grammar and parser based on F# / FParsec library 
 
-# 4 Project 
+# Open tasks (among others)
+* IDE extension for FPL (e.g. based on Visual Studio)
+* FPL interpreter
 
-The project is still ongoing, and you are invited to collaborate. The possible open tasks are, for instance:
+# 4 Getting Started
 
-1. Along with the existing FPL **parser**, we need an appropriate FPL **interpreter** that would fulfill the semantic requirements of this specification and the PoC.
-1. We need to continue the PoC by translating real use cases of mathematics into FPL to ensure that its syntax and semantics cover all features of proof-based mathematics (PBM) we need.
-1. We need localization sections for every PoC theory.
-1. We have to implement translators from FPL to LaTeX and natural languages based on localization.
-1. We need IDEs with code completion and debugging capabilities.
-1. We have to enhance FPL interpreters to check the correctness of mathematical proofs written in FPL or auto-generate proofs in FPL.
-1. We need a conception of a byte code to pre-compile FPL theories and include libraries without having to parse and interpret them again; also, we need the corresponding FPL compilers.
-1. We need a conception of a byte code to pre-compile FPL theories and include libraries without having to parse and interpret them again; also, we need the corresponding FPL compilers.
-
-# 5 Contributing to the Project
-
-The project is still ongoing, and you are invited to collaborate. Please refer to the [contributing section](https://github.com/bookofproofs/fpl/blob/master/CONTRIBUTING.md) for details.
-
-# 6 Getting Started
-
-## 6.1 Software dependencies
-* Use python (tested with 3.10 or higher).
-* Install the following packages:
-  * pytest (7.1.3 or higher) 
-  * parameterized (0.8.1 or higher)
-  * tatsu (5.8.3 or higher) 
-  * anytree (2.8.0 or higher)
-  * z3-solver (4.11.2 or higher)
-## 6.2 Testing
-* Run the [poc tests](https://github.com/bookofproofs/fpl/tree/master/poc/tests) using pytest. (Note: In many python IDEs, there is a shortcut for doing it. For instance, in PyCharm you can just right-click the fpl/poc/tests folder and select 'Run pytest in tests'). 
-* If the tests are runnable, your repository is all set.
-## 6.3 Trying out the IDE
-* Run fpl/ide/fplide.py and open one of the FPL files in the folder [fpl/poc/theories](https://github.com/bookofproofs/fpl/tree/master/poc/theories).
+## 4.1 Software dependencies
+* Use F# (.NET 6.0)
+* Install the following Nuget packages:
+  * FSharp.Core by Microsoft (latest) 
+  * FParsec by Stephan Tolksdorf (latest)
+  * Microsoft.NET.Test.Sdk (latest)
+  * MSTest.TestAdapter (latest)
+## 4.2 Testing
+* Open the solution in Fpl/Fpl.sln with Visual Studio (eg. Microsoft Visual Studio Community 2022)
+* Build and run the tests
 
 
 
