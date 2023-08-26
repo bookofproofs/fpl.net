@@ -3,7 +3,7 @@ open System.Text.RegularExpressions
 open FParsec
 open FplGrammarTypes
 
-(* FPL Version 2.0.0 (combined Language Grammar and working Parser version) *)
+(* FPL Version 2.3.0 (combined Language Grammar and working Parser version) *)
 
 (* Literals *)
 
@@ -494,18 +494,15 @@ let definitionProperty = choice [
     classInstance
 ]
 let propertyHeader = (many CW >>. (keywordMandatory <|> keywordOptional)) 
-let property = propertyHeader .>>. (SW >>. definitionProperty)
+let property = propertyHeader .>>. (SW >>. definitionProperty) |>> FplBlock.Property
 let propertyList = many1 (many CW >>. property .>> IW)
 
 (* FPL building blocks - Proofs 
-# ----------------------------------------------------------------
-# Proofs
 
     # A Proof relates to the PredicateIdentifier of the Theorem.
     # Because proofs are named, they can stand anywhere inside the theory, not only immediately
     # after the Theorem they prove. This is to enable the users to mix
-    # with natural language an provide a proof long after the Theorem was stated.
-
+    # with natural language an provide a proof long after the theorem was stated.
 
 *)
 // justifying proof arguments can be the identifiers of Rules of References, conjectures, theorem-like statements, or axioms
@@ -537,4 +534,29 @@ let keywordProof: Parser<_,unit> = (skipString "proof" <|> skipString "prf")
 let proofBlock = (leftBraceCommented >>. variableSpecificationList) .>>. (proofArgumentList .>> commentedRightBrace)
 let proof = (keywordProof >>. SW >>. referencingIdentifier) .>>. (IW >>. proofBlock) |>> FplBlock.Proof
 
+(* FPL building blocks - Definitions *)
 
+// Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
+let predicateDefinitionBlock = (leftBraceCommented  >>. variableSpecificationList .>> many CW) .>>. (opt predicate .>> many CW) .>>. opt propertyList .>> commentedRightBrace 
+let definitionPredicate = (keywordPredicate >>. SW >>. signature .>> IW) .>>. predicateDefinitionBlock |>> FplBlock.DefinitionPredicate
+
+// Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
+let functionalTermDefinitionBlock = (leftBraceCommented  >>. variableSpecificationList .>> many CW) .>>. opt propertyList .>> commentedRightBrace
+let definitionFunctionalTerm = (functionalTermSignature .>> IW) .>>. functionalTermDefinitionBlock |>> FplBlock.DefinitionFunctionalTerm
+
+// Class definitions
+let keywordClass: Parser<_,unit> = (skipString "class" <|> skipString "cl")
+let classDefinitionContent = choice [
+    property
+    constructor
+]
+let classDefinitionContentList = many1 (many CW >>. classDefinitionContent .>> IW)
+let classDefinitionBlock = (leftBraceCommented  >>. variableSpecificationList .>> many CW) .>>. classDefinitionContentList .>> commentedRightBrace
+let classSignature = (keywordClass >>. SW >>. predicateIdentifier .>> IW) .>>. (colon >>. classType)
+let definitionClass = (classSignature .>> IW) .>>. classDefinitionBlock |>> FplBlock.DefinitionClass 
+
+let definition = choice [
+    definitionClass
+    definitionPredicate
+    definitionFunctionalTerm
+]

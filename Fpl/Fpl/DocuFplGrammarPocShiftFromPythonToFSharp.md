@@ -22,8 +22,9 @@ The following documentation describes the amendments and provides a rationale be
 
 ### Simplified Syntax for the 'cases' statement
 
-### AST-Annotation for Optional Calls of Parental Constructors in Classes
-Constructors have now an annotated option (which original was also optional but not annotated) to include calls for parent class constructors.
+### Classes 
+* AST-Annotation for optional calls of parental constructors in classes (originally also optional but not annotated as such)
+* Bugfix: Classes can only be derived from classType that now excludes functional terms and predicates (classes of FPL objects never intended to be derived from predicates or functional terms) 
 
 ### Enhancement of Proofs
 * Justifying arguments can now contain not only lists of 'primePredicate' but more general of 'predicate'
