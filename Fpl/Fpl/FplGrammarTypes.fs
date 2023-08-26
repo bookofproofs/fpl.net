@@ -122,6 +122,9 @@ type Predicate =
     | IsOperator of FplIdentifier * FplType
     | Delegate of FplIdentifier * Predicate list
     | QualifiedIdentifier of FplIdentifier * Predicate list
+    | ArgumentIdentifier of string
+    | PremiseReference
+    | Justification of Predicate list
 
 type Statement = 
     | Assertion of Predicate
@@ -132,6 +135,17 @@ type Statement =
     | Loop of (FplIdentifier * FplIdentifier) * Statement list
     | Range of (FplIdentifier * FplIdentifier) * Statement list
     | Return of Predicate
+
+
+type Proof =
+    | Trivial
+    | Qed
+    | ConclusionReference 
+    | DerivedPredicate of Predicate
+    | AssumeArgument of Predicate
+    | RevokeArgument of Predicate
+    | JustifiedArgument of Predicate * Proof
+    | Argument of Predicate * Proof
 
 type FplBlock = 
     | BlockStatement of Statement
@@ -152,4 +166,4 @@ type FplBlock =
     | PredicateInstance of (FplBlock * (FplBlock list * Predicate))
     | ClassInstance of (FplType * FplBlock) * FplBlock list 
     | FunctionalTermInstance of (FplBlock * FplType) * FplBlock list
-
+    | Proof of (FplIdentifier * string list) * (FplBlock list * Proof list)

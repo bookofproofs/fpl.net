@@ -1,4 +1,5 @@
 ﻿module FplGrammar
+open System.Text.RegularExpressions
 open FParsec
 open FplGrammarTypes
 
@@ -23,8 +24,8 @@ let leftBracket: Parser<_, unit> = skipChar '['
 let rightBracket: Parser<_, unit> = skipChar ']'
 let tilde: Parser<_, unit> = skipChar '~'
 let dollar: Parser<_, unit> = skipChar '$'
-let slash: Parser<_, unit> = skipChar '/'
 let toArrow: Parser<_, unit> = skipString "->"
+let vDash: Parser<_, unit> = skipString "|-"
 
 (* Whitespaces and Comments *)
 
@@ -52,7 +53,7 @@ let commaSpaces = comma >>. spaces
 // note that this has to be inserted into:
 // the IsOperand choice
 // the PredicateOrFunctionalTerm choice
-let extDigits: Parser<_, unit> = regex @"\d+" |>> FplIdentifier.ExtDigits
+let extDigits: Parser<_, unit> = regex @"\d+" <?> "<extDigits>" |>> FplIdentifier.ExtDigits
 
 (* Identifiers *)
 (* Fpl Keywords *)
@@ -113,35 +114,24 @@ let keyWordSet =
         |]
     )
 
-let fplKeyword: Parser<string,unit>  = 
-    regex @"[a-z]+" >>= (
-        fun s -> if keyWordSet.Contains(s) then (preturn s) else fail "not an FPL keyword"
-    ) 
-
-let IdStartsWithSmallCase: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" >>= (
-            fun s -> 
-                if keyWordSet.Contains(s) then fail "keyword not applicable in this context" 
-                else if s.StartsWith("tpl") then fail "use of FPL templates is not allowed in this context" 
-                else (preturn s) 
-        ) 
-
-
+let IdStartsWithSmallCase: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" <?> "<camelCaseId>"
 let IdStartsWithCap: Parser<string,unit> = regex @"[A-Z][a-z0-9A-Z_]*" <?> "<PascalCaseId>"
 let digits: Parser<string,unit> = regex @"\d+" <?> "digits"
-let digitsIdSmallCase: Parser<string, unit> = regex @"\d+[a-z][a-z0-9A-Z_]*" <?> "<digits><camelCaseId>"
+let argumentIdentifier = regex @"\d+([a-z][a-z0-9A-Z_])*\." <?> "<ArgumentIdentifier>" |>> Predicate.ArgumentIdentifier
 let namespaceIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifier.NamespaceIdentifier
 let wildcardedNamespaceIdentifier = many1 (IdStartsWithCap .>> dot) .>> skipString "*" |>> FplIdentifier.WildcaredNamespaceIdentifier
-let alias = SW .>> skipString "alias" >>. SW >>. IdStartsWithCap
-let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. alias |>> FplIdentifier.AliasedNamespaceIdentifier
-let variable = IdStartsWithSmallCase |>> FplIdentifier.Var
+let alias = skipString "alias" >>. SW >>. IdStartsWithCap
+let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. (IW >>. alias) |>> FplIdentifier.AliasedNamespaceIdentifier
+let tplRegex = Regex(@"^(tpl|template)(([A-Z][a-z0-9A-Z_]*)|\d*)$", RegexOptions.Compiled)
+let variableX: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" >>= (
+            fun s -> 
+                if keyWordSet.Contains(s) then fail ("Cannot use keyword '" + s + "' as a variable") 
+                else if tplRegex.IsMatch(s) then fail ("Cannot use template '" + s + "' as a variable") 
+                else (preturn s)
+        ) 
+let variable = variableX |>> FplIdentifier.Var 
+
 let variableList = sepEndBy1 variable commaSpaces
-let argumentIdentifier = choice [
-    digitsIdSmallCase
-    digits
-]
-let argumentParam = slash >>. argumentIdentifier
-
-
 
 let keywordInference: Parser<_,unit> = skipString "inference" <|> skipString "inf"
 let keywordSelf: Parser<_,unit> = skipString "self"
@@ -213,11 +203,11 @@ let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
 let extensionHeader: Parser<unit,unit> = skipString ":ext" 
 
-let extensionName = IW >>. skipString "ext" >>. IdStartsWithCap .>> IW |>> Extension.Extensionname
+let extensionName = skipString "ext" >>. IdStartsWithCap .>> IW |>> Extension.Extensionname
 
 let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. regex @"\/(?!:end).*" .>> IW |>> Extension.ExtensionRegex
 
-let extensionBlock = IW >>. extensionHeader >>. extensionName .>>. extensionRegex .>> extensionTail |>> ExtensionBlock.ExtensionBlock
+let extensionBlock = extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail |>> ExtensionBlock.ExtensionBlock
 
 
 (* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
@@ -344,7 +334,7 @@ paramTupleRef := (leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>>
 let signature = (predicateIdentifier .>> IW) .>>. paramTuple |>> FplBlock.Signature
 
 (* Statements *)
-let argumentTuple = (spacesLeftParenSpaces >>. IW >>. predicateList) .>> (IW .>> spacesRightParenSpaces)  
+let argumentTuple = (spacesLeftParenSpaces >>. predicateList) .>> (IW .>> spacesRightParenSpaces)  
 
 let fplDelegate = fplDelegateIdentifier .>>. argumentTuple |>> Predicate.Delegate
 let assignmentStatement = (assignee .>> IW .>> colonEqual) .>>. (IW >>. predicate) |>> Statement.Assignment
@@ -398,22 +388,23 @@ primePredicateRef := choice [
     keywordTrue
     keywordFalse
     keywordUndefined
-    (attempt predicateWithArguments) <|> (attempt qualifiedIdentifier) <|> predicateWithoutArgs    
+    (attempt predicateWithArguments) <|> (attempt qualifiedIdentifier) <|> argumentIdentifier <|> predicateWithoutArgs
+    
 ]
 
-let conjunction = (many CW >>. keywordAnd >>. spacesLeftParenSpaces >>. predicateList) .>> spacesRightParenSpaces |>> Predicate.And
-let disjunction = (many CW >>. keywordOr >>. spacesLeftParenSpaces >>. predicateList) .>> spacesRightParenSpaces |>> Predicate.Or
+let conjunction = (keywordAnd >>. spacesLeftParenSpaces >>. predicateList) .>> spacesRightParenSpaces |>> Predicate.And
+let disjunction = (keywordOr >>. spacesLeftParenSpaces >>. predicateList) .>> spacesRightParenSpaces |>> Predicate.Or
 
 let twoPredicatesInParens = (spacesLeftParenSpaces >>. predicate) .>>. (commaSpaces >>. predicate) .>> spacesRightParenSpaces 
 let onePredicateInParens = (spacesLeftParenSpaces >>. predicate) .>> spacesRightParenSpaces
-let implication = many CW >>. keywordImpl >>. twoPredicatesInParens |>> Predicate.Impl
-let equivalence = many CW >>. keywordIif >>. twoPredicatesInParens |>> Predicate.Iif
-let exclusiveOr = many CW >>. keywordXor >>. twoPredicatesInParens |>> Predicate.Xor
-let negation = many CW >>. keywordNot >>. onePredicateInParens |>> Predicate.Not
-let all = many CW >>. (keywordAll >>. SW >>. variableList) .>>. onePredicateInParens |>> Predicate.All
-let exists = many CW >>. (keywordEx >>. SW >>. variableList) .>>. onePredicateInParens |>> Predicate.Exists
-let existsTimesN = many CW >>. ((keywordEx >>. dollar >>. digits) .>>. (SW >>. variableList)) .>>. onePredicateInParens |>> Predicate.ExistsN
-let isOperator = (many CW >>. keywordIs >>. spacesLeftParenSpaces >>. coordInType) .>>. (IW >>. commaSpaces >>. variableType) .>> spacesRightParenSpaces |>> Predicate.IsOperator
+let implication = keywordImpl >>. twoPredicatesInParens |>> Predicate.Impl
+let equivalence = keywordIif >>. twoPredicatesInParens |>> Predicate.Iif
+let exclusiveOr = keywordXor >>. twoPredicatesInParens |>> Predicate.Xor
+let negation = keywordNot >>. onePredicateInParens |>> Predicate.Not
+let all = (keywordAll >>. SW >>. variableList) .>>. onePredicateInParens |>> Predicate.All
+let exists = (keywordEx >>. SW >>. variableList) .>>. onePredicateInParens |>> Predicate.Exists
+let existsTimesN = ((keywordEx >>. dollar >>. digits) .>>. (SW >>. variableList)) .>>. onePredicateInParens |>> Predicate.ExistsN
+let isOperator = (keywordIs >>. spacesLeftParenSpaces >>. coordInType) .>>. (commaSpaces >>. variableType) .>> spacesRightParenSpaces |>> Predicate.IsOperator
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [
@@ -428,10 +419,7 @@ let compoundPredicate = choice [
     isOperator
 ]
 
-predicateRef := choice [
-    compoundPredicate
-    primePredicate
-]
+predicateRef := (compoundPredicate <|> primePredicate) .>> IW
 
 predicateListRef := sepBy predicate commaSpaces 
 
@@ -507,4 +495,46 @@ let definitionProperty = choice [
 ]
 let propertyHeader = (many CW >>. (keywordMandatory <|> keywordOptional)) 
 let property = propertyHeader .>>. (SW >>. definitionProperty)
-let propertyList = many1 property
+let propertyList = many1 (many CW >>. property .>> IW)
+
+(* FPL building blocks - Proofs 
+# ----------------------------------------------------------------
+# Proofs
+
+    # A Proof relates to the PredicateIdentifier of the Theorem.
+    # Because proofs are named, they can stand anywhere inside the theory, not only immediately
+    # after the Theorem they prove. This is to enable the users to mix
+    # with natural language an provide a proof long after the Theorem was stated.
+
+
+*)
+// justifying proof arguments can be the identifiers of Rules of References, conjectures, theorem-like statements, or axioms
+let keywordRevoke: Parser<_,unit> = (skipString "revoke" <|> skipString "rev") >>. SW
+let revokeArgument = keywordRevoke >>. argumentIdentifier |>> Proof.RevokeArgument 
+let premiseOfToBeProvedTheorem = keywordPremise >>% Predicate.PremiseReference 
+let conclusionOfToBeProvedTheorem = keywordConclusion >>% Proof.ConclusionReference 
+let premiseOrOtherPredicate = premiseOfToBeProvedTheorem <|> predicate
+    
+let keywordAssume: Parser<_,unit> = (skipString "assume" <|> skipString "ass") 
+let assumeArgument = keywordAssume >>. SW >>. premiseOrOtherPredicate |>> Proof.AssumeArgument
+let keywordTrivial: Parser<_,unit>  = skipString "trivial" >>% Proof.Trivial
+let keywordQed: Parser<_,unit>  = skipString "qed" >>% Proof.Qed
+let derivedPredicate = predicate |>> Proof.DerivedPredicate
+let derivedArgument = choice [
+    keywordQed 
+    keywordTrivial 
+    conclusionOfToBeProvedTheorem 
+    derivedPredicate
+]
+
+let argumentInference = attempt revokeArgument <|> derivedArgument
+let justification = predicateList .>> IW |>> Predicate.Justification
+let justifiedArgument = (justification .>> vDash .>> IW) .>>. argumentInference |>> Proof.JustifiedArgument
+let argument = assumeArgument <|> justifiedArgument
+let proofArgument = (argumentIdentifier .>> IW) .>>. argument |>> Proof.Argument
+let proofArgumentList = many1 (many CW >>. proofArgument .>> IW)
+let keywordProof: Parser<_,unit> = (skipString "proof" <|> skipString "prf")
+let proofBlock = (leftBraceCommented >>. variableSpecificationList) .>>. (proofArgumentList .>> commentedRightBrace)
+let proof = (keywordProof >>. SW >>. referencingIdentifier) .>>. (IW >>. proofBlock) |>> FplBlock.Proof
+
+
