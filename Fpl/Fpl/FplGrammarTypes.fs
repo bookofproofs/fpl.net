@@ -167,3 +167,7 @@ type FplBlock =
     | ClassInstance of (FplType * FplBlock) * FplBlock list 
     | FunctionalTermInstance of (FplBlock * FplType) * FplBlock list
     | Proof of (FplIdentifier * string list) * (FplBlock list * Proof list)
+    | Property of FplBlock * FplBlock
+    | DefinitionPredicate of FplBlock * ((FplBlock list * Predicate option) * FplBlock list option)
+    | DefinitionFunctionalTerm of (FplBlock * FplType) * (FplBlock list * FplBlock list option)
+    | DefinitionClass of (FplIdentifier * FplType) * (FplBlock list * FplBlock list)

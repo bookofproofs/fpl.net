@@ -1,5 +1,11 @@
-﻿## 2.1.0
-* Parsers and test for properties added
+﻿## 2.3.0
+* Initial parsers definitions (classes, predicates, functional terms)
+
+## 2.2.0
+* Parsers for Proofs added (including tests)
+
+## 2.1.0
+* Parsers and tests for properties added
 * Bugfixes with respect to ranges and missing qualifiedPredicates and predicateLists 
 * Refactoring big 'Tests' file making one file per test class
 * Better error reporting with variable identifiers colliding with keywords or templates
