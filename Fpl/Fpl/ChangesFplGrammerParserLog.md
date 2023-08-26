@@ -1,6 +1,8 @@
 ﻿## 2.1.0
 * Parsers and test for properties added
-* Bugfixes with respect to ranges and missing qualifiedPredicates 
+* Bugfixes with respect to ranges and missing qualifiedPredicates and predicateLists 
+* Refactoring big 'Tests' file making one file per test class
+* Better error reporting with variable identifiers colliding with keywords or templates
 
 # Changes in the FPL grammar and FPL parser (combined, .NET-based)
 

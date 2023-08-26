@@ -25,6 +25,12 @@ The following documentation describes the amendments and provides a rationale be
 ### AST-Annotation for Optional Calls of Parental Constructors in Classes
 Constructors have now an annotated option (which original was also optional but not annotated) to include calls for parent class constructors.
 
+### Enhancement of Proofs
+* Justifying arguments can now contain not only lists of 'primePredicate' but more general of 'predicate'
+* Derived arguments can now also reference to the conclusion of the to-be-proven theorem
+* A simplified syntax of argumentIdentifiers (referencing via slash '/' is no more necessary)
+* Bugfix preventing syntax allowing assumptions followed by a justification (pure math standard: without justification)
+
 ### Self-Containment 
 
 

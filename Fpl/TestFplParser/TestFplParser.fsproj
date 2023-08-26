@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -8,7 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Tests.fs" />
+    <Compile Include="TestsFplBlockComponents.fs" />
+    <Compile Include="TestsVariableTypes.fs" />
+    <Compile Include="TestsClassInheritanceTypes.fs" />
+    <Compile Include="TestsStatements.fs" />
+    <Compile Include="TestsIdentifiers.fs" />
+    <Compile Include="TestsAxioms.fs" />
+    <Compile Include="TestsProperties.fs" />
+    <Compile Include="TestsProofs.fs" />
+    <Compile Include="TestsPredicatesSpecific.fs" />
+    <Compile Include="TestsPredicates.fs" />
+    <Compile Include="TestsReferenceRules.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
