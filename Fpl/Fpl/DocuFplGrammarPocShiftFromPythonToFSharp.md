@@ -55,7 +55,7 @@ The following documentation describes the syntactical amendments and provides a 
     * The order of declarations will now matter. 
     * This is unlike the previous, python-based FPL interpreter (which can be found in the repository [https://github.com/bookofproofs/fpl](https://github.com/bookofproofs/fpl)).
     * In the new FPL interpreter, checking if an FPL identifier was already declared can be done - in principle - during the parsing process. This could significantly simplify the implementation and performance of the new FPL interpreter.
-    * Nevertheless, we stick to the 'must' requirements (see [INTRO.md](https://github.com/bookofproofs/fpl.net/blob/main/)) 28 (support of overrides), 38 (support recursive linguistic constructs), and 40 (support of self-reference in definitions) that could still potentially negatively impact how complicated it is to implement the new FPL interpreter.
+    * Nevertheless, we stick to the 'must' requirements (see [INTRO.md](https://github.com/bookofproofs/fpl.net/blob/main/INTRO.md)) 28 (support of overrides), 38 (support recursive linguistic constructs), and 40 (support of self-reference in definitions) that could still potentially negatively impact how complicated it is to implement the new FPL interpreter.
 
 ### Namespaces
 * A single *.fpl file can now contain more than one namespace. This will significantly simplify later preprocessing when the FPL parser needs to include namespaces via the 'uses' keyword. 
