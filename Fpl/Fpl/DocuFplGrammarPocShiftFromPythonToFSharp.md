@@ -1,5 +1,5 @@
 ﻿# Changes in the FPL grammar
-## 2.0.0 Amendments to the FPL Grammar, major change of parser   
+## Amendments to the FPL Grammar, major change of parser   
 The original grammar until Grammar version 1.2.1 was the EBNF input for a FPL parser implemented using python and the **tatsu** parser generator.
 
 From the version 2.0 on, there are some major changes to the grammar:
