@@ -74,7 +74,6 @@ type FplIdentifier =
     | RightOpen 
     | Id of string
     | NamespaceIdentifier of string list
-    | WildcaredNamespaceIdentifier of string list 
     | AliasedNamespaceIdentifier of string list * string
     | IndexVariable of string * string
     | Var of string
@@ -86,6 +85,9 @@ type FplIdentifier =
     | RangeInType of FplIdentifier option * FplIdentifier option 
     | ExtDigits of string
     | DelegateId of string 
+    | LocalizationString of string
+    | LocalizationTerm of FplIdentifier list
+    | LocalizationTermList of FplIdentifier list
 
 type UsesClause = UsesClause of FplIdentifier list
 

@@ -3,7 +3,7 @@ open System.Text.RegularExpressions
 open FParsec
 open FplGrammarTypes
 
-(* FPL Version 2.3.0 (combined Language Grammar and working Parser version) *)
+(* FPL Version 2.4.0 (combined Language Grammar and working Parser version) *)
 
 (* Literals *)
 
@@ -23,6 +23,7 @@ let case: Parser<_,unit> = skipChar '|'
 let leftBracket: Parser<_, unit> = skipChar '['
 let rightBracket: Parser<_, unit> = skipChar ']'
 let tilde: Parser<_, unit> = skipChar '~'
+let semiColon: Parser<_, unit> = skipChar ';'
 let dollar: Parser<_, unit> = skipChar '$'
 let toArrow: Parser<_, unit> = skipString "->"
 let vDash: Parser<_, unit> = skipString "|-"
@@ -119,7 +120,6 @@ let IdStartsWithCap: Parser<string,unit> = regex @"[A-Z][a-z0-9A-Z_]*" <?> "<Pas
 let digits: Parser<string,unit> = regex @"\d+" <?> "digits"
 let argumentIdentifier = regex @"\d+([a-z][a-z0-9A-Z_])*\." <?> "<ArgumentIdentifier>" |>> Predicate.ArgumentIdentifier
 let namespaceIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifier.NamespaceIdentifier
-let wildcardedNamespaceIdentifier = many1 (IdStartsWithCap .>> dot) .>> skipString "*" |>> FplIdentifier.WildcaredNamespaceIdentifier
 let alias = skipString "alias" >>. SW >>. IdStartsWithCap
 let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. (IW >>. alias) |>> FplIdentifier.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z][a-z0-9A-Z_]*)|\d*)$", RegexOptions.Compiled)
@@ -133,7 +133,6 @@ let variable = variableX |>> FplIdentifier.Var
 
 let variableList = sepEndBy1 variable commaSpaces
 
-let keywordInference: Parser<_,unit> = skipString "inference" <|> skipString "inf"
 let keywordSelf: Parser<_,unit> = skipString "self"
 let keywordIndex: Parser<_,unit> = skipString "index" <|> skipString "ind" >>% FplType.IndexType
 
@@ -190,14 +189,11 @@ let keywordPredicate: Parser<_,unit> = skipString "predicate" <|> skipString "pr
 let keywordFunction: Parser<_,unit> = skipString "function" <|> skipString "func" >>% FplType.FunctionalTermType
 
 
-let wildcardTheoryNamespace = 
-    (attempt ((attempt aliasedNamespaceIdentifier) <|>
-    wildcardedNamespaceIdentifier) <|>    
-    namespaceIdentifier) .>> IW
+let theoryNamespace = (attempt aliasedNamespaceIdentifier <|> namespaceIdentifier) .>> IW
 
-let wildcardTheoryNamespaceList = sepEndBy1 wildcardTheoryNamespace (comma >>. IW) 
+let theoryNamespaceList = sepEndBy1 theoryNamespace (comma >>. IW) 
 
-let usesClause = skipString "uses" >>. SW >>. wildcardTheoryNamespaceList |>> UsesClause.UsesClause
+let usesClause = skipString "uses" >>. SW >>. theoryNamespaceList |>> UsesClause.UsesClause
 
 let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
@@ -263,7 +259,7 @@ let coord = choice [
     assignee
 ]
 
-let fplDelegateIdentifier: Parser<_, unit> = keywordDel >>. dot >>. regex @"[a-z_]+" |>> FplIdentifier.DelegateId
+let fplDelegateIdentifier: Parser<_, unit> = keywordDel >>. dot >>. regex @"[a-z_A-Z][a-z_A-Z0-9]+" |>> FplIdentifier.DelegateId
 
 let fplIdentifier = choice [
     predicateIdentifier
@@ -444,6 +440,7 @@ let commentedRightBrace = (many CW .>> rightBrace)
 let premiseConclusionBlock = leftBraceCommented >>. variableSpecificationList .>>. (premise .>> many CW) .>>. conclusion .>> commentedRightBrace
 
 (* FPL building blocks - rules of reference *)
+let keywordInference: Parser<_,unit> = skipString "inference" <|> skipString "inf"
 let ruleOfInference = (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.RuleOfInference
 let ruleOfInferenceList = sepEndBy1 ruleOfInference (many CW)
 let rulesOfInferenceBlock = (keywordInference >>. many CW >>. leftBrace >>. many CW >>. ruleOfInferenceList) .>> commentedRightBrace
@@ -463,7 +460,7 @@ let conjecture = keywordConjecture >>. SW >>. (signature .>> IW) .>>. premiseCon
 let dollarDigitList = many1 (dollar >>. digits)
 let referencingIdentifier = predicateIdentifier .>>. dollarDigitList
 let corollarySignature = (referencingIdentifier .>> IW) .>>. paramTuple
-let corrolary = keywordCorollary >>. SW >>. (corollarySignature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Corollary
+let corollary = keywordCorollary >>. SW >>. (corollarySignature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Corollary
 
 (* FPL building blocks - Axioms *)
 
@@ -560,3 +557,52 @@ let definition = choice [
     definitionPredicate
     definitionFunctionalTerm
 ]
+(* Gathering together all Building Blocks to a theory *)
+let keywordTheory: Parser<_,unit> = (skipString "theory" <|> skipString "th") 
+// FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
+let buildingBlock = choice [
+    definition
+    axiom
+    theorem
+    lemma
+    proposition
+    corollary
+    conjecture
+    proof
+]
+
+let buildingBlockList = many (many CW >>. buildingBlock .>> IW)
+// A theory begins with the keywordTheory followed by a block containing a (possibly empty) sequence of building blocks
+let theoryBlock = keywordTheory >>. spacesLeftParenSpaces >>. buildingBlockList .>> commentedRightBrace
+
+(* Localizations *)
+// Localizations provide a possibility to automatically translate FPL expressions into natural languages
+let keywordLocalization: Parser<_,unit> = (skipString "localization" <|> skipString "loc") 
+let localizationLanguageCode: Parser<string,unit> = regex @"[a-z]{3}" <?> "<ISO 639 language code>"
+let localizationString = regex "\"[^\"\n]*\"" <?> "<OneLineString>" |>> FplIdentifier.LocalizationString
+
+let ebnfTransl, ebnfTranslRef = createParserForwardedToRef()
+let ebnfTranslTuple = (leftParen >>. IW >>. ebnfTransl) .>> (IW .>> rightParen) 
+let ebnfFactor = choice [
+    variable
+    localizationString
+    ebnfTranslTuple
+]
+let ebnfTerm = many1 (SW >>. ebnfFactor) |>> FplIdentifier.LocalizationTerm
+ebnfTranslRef.Value <- many1 (IW >>. case >>. IW >>. ebnfTerm) |>> FplIdentifier.LocalizationTermList
+let translation = (tilde >>. localizationLanguageCode .>> IW .>> colon .>> IW) .>>. ebnfTransl
+let translationList = many (many CW >>. translation .>> IW)
+let localization = (predicate .>> IW .>> colonEqual .>> IW) .>>. (translationList .>> IW .>> semiColon)
+let localizationList = many (many CW >>. localization .>> IW)
+let localizationBlock = keywordLocalization >>. spacesLeftParenSpaces >>. localizationList .>> commentedRightBrace
+
+
+(* Namespaces *)
+let namespaceBlock = (spacesLeftParenSpaces >>. opt extensionBlock) .>>. (many CW >>. opt usesClause) .>>. (many CW >>. rulesOfInferenceBlock) .>>. (many CW >>. theoryBlock) .>>. (many CW >>. opt localizationBlock) .>> commentedRightBrace
+let fplNamespace = namespaceIdentifier .>>. (many CW >>. namespaceBlock)
+let fplNamespaceList = many1 (many CW >>. fplNamespace .>> IW)
+(* Final Parser *)
+let fplParser = fplNamespaceList .>> eof
+
+
+
