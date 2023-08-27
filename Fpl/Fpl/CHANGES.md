@@ -1,4 +1,12 @@
-﻿## 2.3.0
+﻿## 2.4.0
+* First buildable complete FPL parser (some tests still needed)
+* Initial parsers for namespaces added
+* Initial parsers for localizations added
+* A more general rule for DelegatID @"[a-z_A-Z][a-z_A-Z0-9]+
+* Wildcarded namespace identifiers discontinued 
+* Documentation [DocuFplGrammarPocShiftFromPythonToFSharp.md](https://github.com/bookofproofs/fpl.net/blob/main/Fpl/Fpl/DocuFplGrammarPocShiftFromPythonToFSharp.md) updated
+
+## 2.3.0
 * Initial parsers definitions (classes, predicates, functional terms)
 
 ## 2.2.0
@@ -27,7 +35,7 @@ Find above the change log of the new approach
 based on .NET (combined F# grammar and parser) 
 # -------------------------------------
 Find below the change log of the original FPL grammar version based on python and the tatsu parser generator.
-Please see also DocuFplGrammarPocShiftFromPythonToFSharp.md for more details.
+Please see also [DocuFplGrammarPocShiftFromPythonToFSharp.md](https://github.com/bookofproofs/fpl.net/blob/main/Fpl/Fpl/DocuFplGrammarPocShiftFromPythonToFSharp.md) for more details.
 
 ## 1.2.1
 * Correction and refinement of the rule ExtensionContent 

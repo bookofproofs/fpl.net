@@ -10,34 +10,27 @@ open Newtonsoft.Json
 type TestsIdentifiers () =
 
     [<TestMethod>]
-    member this.TestWildcardTheoryNamespace () =
-        let result = run wildcardTheoryNamespace "Fpl.Test alias MyAlias"
+    member this.TestTheoryNamespace () =
+        let result = run theoryNamespace "Fpl.Test alias MyAlias"
         let actual = sprintf "%O" result
         let expected = """Success: AliasedNamespaceIdentifier (["Fpl"; "Test"], "MyAlias")"""
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
-    member this.TestWildcardTheoryNamespace1 () =
-        let result = run wildcardTheoryNamespace "Fpl.Test.*"
-        let actual = sprintf "%O" result
-        let expected = """Success: WildcaredNamespaceIdentifier ["Fpl"; "Test"]"""
-        Assert.AreEqual(expected, actual);
-
-    [<TestMethod>]
-    member this.TestWildcardTheoryNamespace2 () =
-        let result = run wildcardTheoryNamespace "Fpl.Test"
+    member this.TestTheoryNamespace2 () =
+        let result = run theoryNamespace "Fpl.Test"
         let actual = sprintf "%O" result
         let expected = """Success: NamespaceIdentifier ["Fpl"; "Test"]"""
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
     member this.TestUsesClause () =
-        let result = run usesClause "uses Fpl.Test alias MyAlias ,Fpl.Test , Fpl.Test.*"
+        let result = run usesClause "uses Fpl.Test alias MyAlias ,Fpl.Test , Fpl.Test.Test1"
         let actual = sprintf "%O" result
         let expected = """Success: UsesClause
   [AliasedNamespaceIdentifier (["Fpl"; "Test"], "MyAlias");
    NamespaceIdentifier ["Fpl"; "Test"];
-   WildcaredNamespaceIdentifier ["Fpl"; "Test"]]""".Replace("\r","")
+   NamespaceIdentifier ["Fpl"; "Test"; "Test1"]]""".Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
