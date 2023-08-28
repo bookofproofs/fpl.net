@@ -10,6 +10,7 @@
   <ItemGroup>
     <Compile Include="TestsFplBlockComponents.fs" />
     <Compile Include="TestsVariableTypes.fs" />
+    <Compile Include="TestsDefinitionPredicates.fs" />
     <Compile Include="TestsClassInheritanceTypes.fs" />
     <Compile Include="TestsStatements.fs" />
     <Compile Include="TestsIdentifiers.fs" />

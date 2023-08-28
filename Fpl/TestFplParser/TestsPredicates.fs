@@ -7,7 +7,7 @@ open Newtonsoft.Json
 
 
 [<TestClass>]
-type TestPredicates () =
+type TestsPredicates () =
 
 
     [<TestMethod>]
