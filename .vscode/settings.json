@@ -1,3 +1,4 @@
 {
-    "dotnet-test-explorer.testProjectPath": "Fpl/TestFplParser"
+    "dotnet-test-explorer.testProjectPath": "Fpl/*",
+    "dotnet-test-explorer.treeMode": "merged"
 }

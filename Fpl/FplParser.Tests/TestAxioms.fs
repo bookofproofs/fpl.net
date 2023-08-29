@@ -1,12 +1,12 @@
-namespace TestFplParser
+namespace FplParser.Tests
 
 open FParsec
 open FplGrammar
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Newtonsoft.Json
+
 
 [<TestClass>]
-type TestsAxioms () =
+type TestAxioms () =
 
     [<TestMethod>]
     member this.TestAxiom01 () =

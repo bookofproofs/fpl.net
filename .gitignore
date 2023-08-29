@@ -4,7 +4,11 @@
 
 /.vs
 /Fpl/.vs/Fpl
-/Fpl/Fpl/bin/Debug/net6.0
+/Fpl/Fpl/bin
 /Fpl/Fpl/obj
-/Fpl/TestFplParser/bin/Debug/net6.0
-/Fpl/TestFplParser/obj
+/Fpl/FplParser.Tests/bin
+/Fpl/FplParser.Tests/obj
+/Fpl/Fpl.Tests/bin
+/Fpl/Fpl.Tests/obj
+
+.fake

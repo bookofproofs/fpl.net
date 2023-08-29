@@ -1,4 +1,4 @@
-namespace TestFplParser
+namespace FplParser.Tests
 
 open FParsec
 open FplGrammar
@@ -7,7 +7,7 @@ open Newtonsoft.Json
 
 
 [<TestClass>]
-type TestsDefinitionPredicates () =
+type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate01 () =

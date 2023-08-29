@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fpl", "Fpl\Fpl.fsproj", "{8A9C1E6F-489E-4314-83E2-AA08C1913283}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TestFplParser", "TestFplParser\TestFplParser.fsproj", "{3CD461BA-7447-452D-8D49-9FBF0AB27CD0}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplParser.Tests", "FplParser.Tests\FplParser.Tests.fsproj", "{3CD461BA-7447-452D-8D49-9FBF0AB27CD0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
