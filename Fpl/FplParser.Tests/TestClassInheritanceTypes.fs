@@ -3,7 +3,6 @@ namespace FplParser.Tests
 open FParsec
 open FplGrammar
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open Newtonsoft.Json
 
 [<TestClass>]
 type TestClassInheritanceTypes () =

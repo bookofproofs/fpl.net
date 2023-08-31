@@ -11,4 +11,6 @@
 /Fpl/Fpl.Tests/bin
 /Fpl/Fpl.Tests/obj
 
+/Fpl/Fpl/.fake
+/Fpl/fpl-vscode-extension/*.vsix
 .fake

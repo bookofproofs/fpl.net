@@ -64,18 +64,16 @@ let keyWordSet =
         [|
         "alias"; 
         "all"; 
-        "and,"; 
+        "and"; 
         "assert"; 
         "ass"; "assume"; 
-        "ax"; 
-        "axiom"; 
-        "case";
+        "ax"; "axiom";
+        "cases"; 
         "cl"; "class"; 
         "conj"; "conjecture"; 
         "con"; "conclusion"; 
         "cor"; "corollary";
         "del"; "delegate"
-        "else";
         "end";
         "ext";
         "ex";

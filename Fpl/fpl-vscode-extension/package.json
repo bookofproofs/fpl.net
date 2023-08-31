@@ -1,0 +1,35 @@
+{
+  "name": "fpl-vscode-extension",
+  "displayName": "FPL (Formal Proving Language)",
+  "description": "",
+  "version": "1.0.0",
+  "repository": "https://github.com/bookofproofs/fpl.net",
+  "publisher": "bookofproofs",
+  "license": "LICENSE.md",
+  "engines": {
+    "vscode": "^1.81.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "fpl",
+      "aliases": ["Formal Proving Language", "fpl"],
+      "extensions": [".fpl"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "fpl",
+      "scopeName": "source.fpl",
+      "path": "./syntaxes/fpl.tmLanguage.json"
+    }],
+    "themes": [
+      {
+        "label": "dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/d-color-theme.json"
+      }
+    ]
+  }
+}
