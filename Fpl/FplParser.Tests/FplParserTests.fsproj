@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <GenerateProgramFile>false</GenerateProgramFile>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="TestAxioms.fs" />
+    <Compile Include="TestFplBlockComponents.fs" />
+    <Compile Include="TestVariableTypes.fs" />
+    <Compile Include="TestDefinitionPredicates.fs" />
+    <Compile Include="TestClassInheritanceTypes.fs" />
+    <Compile Include="TestStatements.fs" />
+    <Compile Include="TestIdentifiers.fs" />
+    <Compile Include="TestProperties.fs" />
+    <Compile Include="TestProofs.fs" />
+    <Compile Include="TestPredicatesSpecific.fs" />
+    <Compile Include="TestPredicates.fs" />
+    <Compile Include="TestReferenceRules.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fpl\Fpl.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="7.0.400" />
+  </ItemGroup>
+</Project>

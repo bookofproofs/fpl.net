@@ -1,0 +1,77 @@
+{
+	"name": "dark",
+	"colors": {
+		"editor.background": "#263238",
+		"editor.foreground": "#eeffff",
+		"activityBarBadge.background": "#007acc",
+		"sideBarTitle.foreground": "#bbbbbb"
+	},
+	"tokenColors": [
+		{
+			"name": "Predicate Identifiers",
+			"scope": [
+				"predicateIdentifiers.fpl"
+			],
+			"settings": {
+				"foreground": "#06d44a"
+			}
+		},
+		{
+			"name": "Comment",
+			"scope": [
+				"longComments.fpl",
+				"shortComments.fpl"
+			],
+			"settings": {
+				"fontStyle": "italic",
+				"foreground": "#546E7A"
+			}
+		},
+		{
+			"name": "Keyword",
+			"scope": [
+				"keyword.fpl"
+			],
+			"settings": {
+				"foreground": "#C792EA"
+			}
+		},
+		{
+			"name": "inbuiltType",
+			"scope": [
+				"inbuiltType.fpl"
+			],
+			"settings": {
+				"foreground": "#55aef7"
+			}
+		},
+		{
+			"name": "Variable",
+			"scope": [
+				"variable.fpl"
+			],
+			"settings": {
+				"foreground": "#f7c63f"
+			}
+		},
+		{
+			"name": "Template",
+			"scope": [
+				"template.fpl"
+			],
+			"settings": {
+				"foreground": "#f73f6d"
+			}
+		},
+		{
+			"name": "String",
+			"scope": [
+				"string.fpl"
+			],
+			"settings": {
+				"fontStyle": "italic",
+				"foreground": "#f73f6d"
+			}
+		}
+	]
+}

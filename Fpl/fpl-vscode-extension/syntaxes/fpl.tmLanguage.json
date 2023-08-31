@@ -1,0 +1,87 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Formal Proving Language",
+	"patterns": [
+		{
+			"include": "#longComments"
+		},
+		{
+			"include": "#shortComments"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#inbuiltTypes"
+		},
+		{
+			"include": "#predicateIdentifiers"
+		},
+		{
+			"include": "#templates"
+		},
+		{
+			"include": "#variables"
+		},
+		{
+			"include": "#strings"
+		}
+
+	],
+	"repository": {
+		"longComments": {
+			"patterns": [{
+				"name": "longComments.fpl",
+				"match": "\/*((?:.|\n)*?)*\/"
+			}]
+		},
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.fpl",
+				"match": "\\b(alias|all|and|assert|ass|assume|ax|axiom|cases|cl|class|conj|conjecture|con|conclusion|cor|corollary|del|delegate|end|ex|false|iif|impl|inf|inference|is|lem|lemma|loc|localization|loop|mand|mandatory|not|opt|optional|or|post|postulate|pre|premise|prf|proof|prop|proposition|qed|range|ret|return|rev|revoke|self|thm|theorem|th|theory|trivial|true|uses|xor)\\b"
+			}]
+		},
+		"inbuiltTypes": {
+			"patterns": [{
+				"name": "inbuiltType.fpl",
+				"match": "\\b(func|function|ind|index|obj|object|pred|predicate|undef|undefined)\\b"
+			}]
+		},
+		"templates": {
+			"patterns": [{
+				"name": "template.fpl",
+				"match": "\\b((tpl|template)[A-Z][a-z0-9A-Z_]*)\\b"
+			}]
+		},
+		"variables": {
+			"patterns": [{
+				"name": "variable.fpl",
+				"match": "[a-z][a-z0-9A-Z_]*"
+			}]
+		},
+		"predicateIdentifiers": {
+			"patterns": [{
+				"name": "predicateIdentifiers.fpl",
+				"match": "[A-Z][a-z0-9A-Z_]*"
+			}]
+		},
+		"shortComments": {
+			"patterns": [{
+				"name": "shortComments.fpl",
+				"match": "\/\/[^\n]*"
+			}]
+		},
+		"strings": {
+			"name": "string.fpl",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "character.fpl",
+					"match": "."
+				}
+			]
+		}
+	},
+	"scopeName": "source.fpl"
+}
