@@ -4,6 +4,12 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
+## 1.0.1
 
-- Initial release
+- Icon addes
+- Description added
+- Categories amended
+- Keywords added
+## 1.0.0
+
+- Initial release with syntax highlighting

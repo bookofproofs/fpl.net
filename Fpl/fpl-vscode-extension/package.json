@@ -1,8 +1,9 @@
 {
   "name": "fpl-vscode-extension",
   "displayName": "FPL (Formal Proving Language)",
-  "description": "",
-  "version": "1.0.0",
+  "description": "Write mathematics independently of natural languages.",
+  "icon": "images/logo.png",
+  "version": "1.0.1",
   "repository": "https://github.com/bookofproofs/fpl.net",
   "publisher": "bookofproofs",
   "license": "LICENSE.md",
@@ -10,7 +11,10 @@
     "vscode": "^1.81.0"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages", "Education", "Other"
+  ],
+  "keywords": [
+    "mathematics", "logic", "formal", "language", "proving"
   ],
   "contributes": {
     "languages": [{
