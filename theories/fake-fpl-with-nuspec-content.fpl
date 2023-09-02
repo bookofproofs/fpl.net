@@ -5,7 +5,7 @@
     <version>$version$</version>
     <title>SomeLibrary</title>
     <authors>Somebody</authors>
-    <owners>Somebody</owners>
+    <owners>__REPLACE__</owners>
     <summary>__REPLACE__</summary>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Some library that does things I enjoy.</description>

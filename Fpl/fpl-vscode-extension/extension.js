@@ -15,14 +15,15 @@ let client;
 function activate(context) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
+    const path = require('path');
+    let serverDllRelative = path.join(__dirname, '..\\', 'FplLS', 'bin', 'Debug', 'net6.0', 'FplLS.dll');
 	console.log('"Formal Proving Language" is now active, enjoy!');
     
     let serverExe = 'dotnet';
-    let serverDll = 'path\\to\\FplServer.dll';
     
     let serverOptions = {
-        run: { command: serverExe, args: [serverDll] },
-        debug: { command: serverExe, args: [serverDll] }
+        run: { command: serverExe, args: [serverDllRelative] },
+        debug: { command: serverExe, args: [serverDllRelative] }
     };
     
     let clientOptions = {
