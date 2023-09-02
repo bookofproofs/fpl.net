@@ -4,6 +4,11 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.1.0
+
+- FPL Language Client and Server added and try to start when an fpl file is open. 
+- However, FPL Server will fail, since the path to dll is not correct
+
 ## 1.0.1
 
 - Icon addes

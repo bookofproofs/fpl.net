@@ -13,6 +13,7 @@ Currently, the extension provides a basic syntax highlighting for `.fpl` files i
 ## Requirements
 
 * VSCode version ">1.81.0"
+* .NET Cli on your system
 
 ## Extension Settings
 
@@ -21,8 +22,13 @@ None
 ## Known Issues
 
 * Syntax highlighting of comments does not work properly.
+* FPL Server will fail since the path to dll is not working 
 
 ## Release Notes
+
+### 1.1.0 
+
+* Initial Language Server with diagnostics added
 
 ### 1.0.0 
 
