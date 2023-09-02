@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>SomeLibrary</id>
+    <version>$version$</version>
+    <title>SomeLibrary</title>
+    <authors>Somebody</authors>
+    <owners>__REPLACE__</owners>
+    <summary>__REPLACE__</summary>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Some library that does things I enjoy.</description>
+    <releaseNotes />
+    <copyright>Copyright 2017</copyright>
+    <tags>PowerShell Testing</tags>
+    <contentFiles>
+      <files include="any/any/SomePS.psd1" buildAction="none" copyToOutput="true" />
+      <files include="any/any/SomePS.psm1" buildAction="none" copyToOutput="true" />
+    </contentFiles>
+  </metadata>
+  <files>
+    <file src="*.dll" target="lib\net461" />
+    <file src="*.pdb" target="lib\net461" />
+    <file src="SomePS.psd1" target="contentFiles\any\any" />
+    <file src="SomePS.psm1" target="contentFiles\any\any" />
+  </files>
+</package>

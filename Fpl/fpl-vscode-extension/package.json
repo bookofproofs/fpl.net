@@ -3,7 +3,7 @@
   "displayName": "FPL (Formal Proving Language)",
   "description": "Write mathematics independently of natural languages.",
   "icon": "images/logo.png",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "repository": "https://github.com/bookofproofs/fpl.net",
   "publisher": "bookofproofs",
   "license": "LICENSE.md",
@@ -11,29 +11,67 @@
     "vscode": "^1.81.0"
   },
   "categories": [
-    "Programming Languages", "Education", "Other"
+    "Programming Languages",
+    "Education",
+    "Other"
   ],
   "keywords": [
-    "mathematics", "logic", "formal", "language", "proving"
+    "mathematics",
+    "logic",
+    "formal",
+    "language",
+    "proving"
   ],
+  "main": "./extension.js",
   "contributes": {
-    "languages": [{
-      "id": "fpl",
-      "aliases": ["Formal Proving Language", "fpl"],
-      "extensions": [".fpl"],
-      "configuration": "./language-configuration.json"
-    }],
-    "grammars": [{
-      "language": "fpl",
-      "scopeName": "source.fpl",
-      "path": "./syntaxes/fpl.tmLanguage.json"
-    }],
+    "languages": [
+      {
+        "id": "fpl",
+        "aliases": [
+          "Formal Proving Language",
+          "fpl"
+        ],
+        "extensions": [
+          ".fpl"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "fpl",
+        "scopeName": "source.fpl",
+        "path": "./syntaxes/fpl.tmLanguage.json"
+      }
+    ],
     "themes": [
       {
         "label": "dark",
         "uiTheme": "vs-dark",
         "path": "./themes/d-color-theme.json"
       }
+    ],
+    "commands": [
+      {
+        "command": "fpl-vscode-extension.helloWorld",
+        "title": "Hello World"
+      }
     ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "vscode-languageclient": "^5.2.1",
+    "@types/vscode": "^1.81.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "eslint": "^8.47.0",
+    "glob": "^10.3.3",
+    "mocha": "^10.2.0",
+    "typescript": "^5.1.6",
+    "@vscode/test-electron": "^2.3.4"
   }
 }

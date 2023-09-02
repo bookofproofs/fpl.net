@@ -14,3 +14,7 @@
 /Fpl/Fpl/.fake
 /Fpl/fpl-vscode-extension/*.vsix
 .fake
+/Fpl/fpl-vscode-extension/node_modules
+/Fpl/FplLS/bin
+/Fpl/FplLS/obj
+/Fpl/.vs

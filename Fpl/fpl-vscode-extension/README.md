@@ -13,6 +13,7 @@ Currently, the extension provides a basic syntax highlighting for `.fpl` files i
 ## Requirements
 
 * VSCode version ">1.81.0"
+* .NET Cli on your system
 
 ## Extension Settings
 
@@ -21,8 +22,21 @@ None
 ## Known Issues
 
 * Syntax highlighting of comments does not work properly.
+* FPL Server will fail since the path to dll is not working 
 
 ## Release Notes
+
+
+### 1.1.1
+
+* Shipping initial diagnostics for windows / 64 runtime 
+* Fake diagnostics only! You can test them by opening and editing a fake .fpl file containing some nuspec code 
+* The Language Server will show diagnostics for if your nuspec contains the text '<summary>__REPLACE__</summary>'
+* Proof of Concept of a running Language Server thanks to Gary Ewan Park, Martin Björkström, and Bing AI-powered copilot :-)
+
+### 1.1.0 
+
+* Initial Language Server with diagnostics added
 
 ### 1.0.0 
 
