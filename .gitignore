@@ -14,3 +14,10 @@
 /Fpl/Fpl/.fake
 /Fpl/fpl-vscode-extension/*.vsix
 .fake
+/Fpl/fpl-vscode-extension/node_modules
+/Fpl/FplLanguageServer
+/Fpl/FplLS/bin/Debug/net6.0
+/Fpl/FplLS/obj/Debug/net6.0
+/Fpl/FplLS/obj/Release/net6.0
+/Fpl/FplLS/obj
+/Fpl/.vs
