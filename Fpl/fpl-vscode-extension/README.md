@@ -26,6 +26,14 @@ None
 
 ## Release Notes
 
+
+### 1.1.1
+
+* Shipping initial diagnostics for windows / 64 runtime 
+* Fake diagnostics only! You can test them by opening and editing a fake .fpl file containing some nuspec code 
+* The Language Server will show diagnostics for if your nuspec contains the text '<summary>__REPLACE__</summary>'
+* Proof of Concept of a running Language Server thanks to Gary Ewan Park, Martin Björkström, and Bing AI-powered copilot :-)
+
 ### 1.1.0 
 
 * Initial Language Server with diagnostics added

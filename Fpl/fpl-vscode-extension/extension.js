@@ -15,15 +15,23 @@ let client;
 function activate(context) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
+
+    // check the platform and architecture
+    let platform = process.platform;
+    let arch = process.arch;
+    var timestamp = new Date().toISOString(); console.log(timestamp + ": running on "+ platform + "/" + arch);
+
+
     const path = require('path');
-    let serverDllRelative = path.join(__dirname, '..\\', 'FplLS', 'bin', 'Debug', 'net6.0', 'FplLS.dll');
-	console.log('"Formal Proving Language" is now active, enjoy!');
+    let serverDllRelative = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'FplLS.dll');
     
-    let serverExe = 'dotnet';
+    let serverExeRelative = path.join(__dirname, 'dotnet-runtimes', platform, arch, 'dotnet');
     
+    timestamp = new Date().toISOString(); console.log(timestamp + ": trying to start FPL Language Server");
+
     let serverOptions = {
-        run: { command: serverExe, args: [serverDllRelative] },
-        debug: { command: serverExe, args: [serverDllRelative] }
+        run: { command: serverExeRelative, args: [serverDllRelative] },
+        debug: { command: serverExeRelative, args: [serverDllRelative] }
     };
     
     let clientOptions = {
@@ -51,6 +59,8 @@ function activate(context) {
 
 	context.subscriptions.push(disposableClient);
 	context.subscriptions.push(disposableCommand);
+
+    var timestamp = new Date().toISOString(); console.log(timestamp + ': "Formal Proving Language" almost ready, enjoy!');
 
 }
 // This method is called when your extension is deactivated

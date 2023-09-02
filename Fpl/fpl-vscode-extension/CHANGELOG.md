@@ -4,6 +4,9 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.1.1
+- inclusion of a dotnet runtime for windows x64 and a compiled dll lib for initial FPL Language Server 
+
 ## 1.1.0
 
 - FPL Language Client and Server added and try to start when an fpl file is open. 
