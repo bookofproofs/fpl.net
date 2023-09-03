@@ -27,6 +27,10 @@ None
 ## Release Notes
 
 
+### 1.2.0
+
+* Shipping dotnet runtime dependency for linux, windows, and macOS x64 systems via download on demand
+
 ### 1.1.1
 
 * Shipping initial diagnostics for windows / 64 runtime 
