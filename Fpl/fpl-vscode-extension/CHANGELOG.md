@@ -4,6 +4,10 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.2.0
+- dotnet runtimes for windows, linux and macOS x64 
+- extension does not include a dotnet runtime, instead, it will be downloaded on demand on a particular platform
+
 ## 1.1.1
 - inclusion of a dotnet runtime for windows x64 and a compiled dll lib for initial FPL Language Server 
 
