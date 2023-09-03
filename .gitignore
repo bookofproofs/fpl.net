@@ -18,3 +18,10 @@
 /Fpl/FplLS/bin
 /Fpl/FplLS/obj
 /Fpl/.vs
+# Un-ignore the affected subdirectory
+!/Fpl/fpl-vscode-extension/dotnet-runtimes/
+# ignore all subdirectories
+/Fpl/fpl-vscode-extension/dotnet-runtimes/**
+# un-ignore only the FplLS subdirectory
+!/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLS
+
