@@ -4,9 +4,13 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.2.1
+- Diagnostics are now not mocked but come directly from the FPL parser.
+- However, the parser has still no error recovery added and you will see at most one syntax error per .fpl file.
+
 ## 1.2.0
-- dotnet runtimes for windows, linux and macOS x64 
-- extension does not include a dotnet runtime, instead, it will be downloaded on demand on a particular platform
+- Dotnet runtimes for windows, linux and macOS x64 
+- Extension does not include a dotnet runtime, instead, it will be downloaded on demand on a particular platform
 
 ## 1.1.1
 - inclusion of a dotnet runtime for windows x64 and a compiled dll lib for initial FPL Language Server 

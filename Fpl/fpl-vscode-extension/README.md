@@ -27,6 +27,9 @@ None
 ## Release Notes
 
 
+### 1.2.1
+
+* Hooking up Fpl Parser to VSCode diagnostics
 ### 1.2.0
 
 * Shipping dotnet runtime dependency for linux, windows, and macOS x64 systems via download on demand
