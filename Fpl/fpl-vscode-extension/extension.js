@@ -1,3 +1,10 @@
+
+function log2Console(message)
+{
+    var timestamp = new Date().toISOString();
+    console.log(timestamp + ": " + message);
+}
+
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
@@ -12,14 +19,15 @@ let client;
 /**
  * @param {vscode.ExtensionContext} context
  */
-function activate(context) {
+function activate(context) 
+{
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 
     // check the platform and architecture
     let platform = process.platform;
     let arch = process.arch;
-    var timestamp = new Date().toISOString(); console.log(timestamp + ": running on "+ platform + "/" + arch);
+    log2Console("running on "+ platform + "/" + arch);
 
 
     const path = require('path');
@@ -27,7 +35,7 @@ function activate(context) {
     
     let serverExeRelative = path.join(__dirname, 'dotnet-runtimes', platform, arch, 'dotnet');
     
-    timestamp = new Date().toISOString(); console.log(timestamp + ": trying to start FPL Language Server");
+    log2Console("trying to start FPL Language Server");
 
     let serverOptions = {
         run: { command: serverExeRelative, args: [serverDllRelative] },
@@ -60,7 +68,7 @@ function activate(context) {
 	context.subscriptions.push(disposableClient);
 	context.subscriptions.push(disposableCommand);
 
-    var timestamp = new Date().toISOString(); console.log(timestamp + ': "Formal Proving Language" almost ready, enjoy!');
+    log2Console('"Formal Proving Language" almost ready, enjoy!');
 
 }
 // This method is called when your extension is deactivated
