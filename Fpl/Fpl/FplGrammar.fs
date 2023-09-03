@@ -3,7 +3,7 @@ open System.Text.RegularExpressions
 open FParsec
 open FplGrammarTypes
 
-(* FPL Version 2.4.0 (combined Language Grammar and working Parser version) *)
+(* FPL Version 2.4.1 (combined Language Grammar and working Parser version) *)
 
 (* Literals *)
 
@@ -222,10 +222,7 @@ let atList = many at
 
 let self = atList .>> keywordSelf |>> FplIdentifier.Self
 
-let entity = choice [
-    self
-    variable
-]
+let entity = (attempt (attempt self <|> indexVariable)) <|> variable
 
 let leftOpen = leftBracket >>. IW >>. exclamationMark >>% FplIdentifier.LeftOpen
 let leftClosed = leftBracket >>. IW >>% FplIdentifier.LeftClosed
@@ -253,16 +250,16 @@ let entityWithCoord = entity .>>. coordOfEntity |>> FplIdentifier.EntityWithCoor
 let assignee = (attempt entityWithCoord) <|> entity
 
 let coord = choice [
-    extDigits
     assignee
+    extDigits
 ]
 
 let fplDelegateIdentifier: Parser<_, unit> = keywordDel >>. dot >>. regex @"[a-z_A-Z][a-z_A-Z0-9]+" |>> FplIdentifier.DelegateId
 
 let fplIdentifier = choice [
-    predicateIdentifier
     fplDelegateIdentifier
     coord
+    predicateIdentifier
 ]
 
 let coordList = sepEndBy1 coord commaSpaces
@@ -273,10 +270,7 @@ let fplRange = ((opt coord) .>> IW .>> tilde) .>>. (IW >>. opt coord)
 
 let closedOrOpenRange = (leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound) |>> FplIdentifier.ClosedOrOpenRange
 
-coordOfEntityRef := choice [
-    closedOrOpenRange
-    bracketedCoordList
-]
+coordOfEntityRef := attempt closedOrOpenRange <|> bracketedCoordList
 
 let coordInType = choice [
     fplIdentifier
@@ -333,10 +327,8 @@ let argumentTuple = (spacesLeftParenSpaces >>. predicateList) .>> (IW .>> spaces
 let fplDelegate = fplDelegateIdentifier .>>. argumentTuple |>> Predicate.Delegate
 let assignmentStatement = (assignee .>> IW .>> colonEqual) .>>. (IW >>. predicate) |>> Statement.Assignment
 let returnStatement = keywordReturn >>. SW >>. predicate |>> Statement.Return
-let keysOfVariadicVariable = variable .>> dollar
 
 let variableRange = choice [
-    keysOfVariadicVariable
     closedOrOpenRange
     assignee
 ]
@@ -441,7 +433,7 @@ let premiseConclusionBlock = leftBraceCommented >>. variableSpecificationList .>
 let keywordInference: Parser<_,unit> = skipString "inference" <|> skipString "inf"
 let ruleOfInference = (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.RuleOfInference
 let ruleOfInferenceList = sepEndBy1 ruleOfInference (many CW)
-let rulesOfInferenceBlock = (keywordInference >>. many CW >>. leftBrace >>. many CW >>. ruleOfInferenceList) .>> commentedRightBrace
+let rulesOfInferenceBlock = (keywordInference >>. IW >>. leftBraceCommented >>. many CW >>. ruleOfInferenceList) .>> commentedRightBrace
 
 (* FPL building blocks - Theorem-like statements and conjectures *)
 let keywordTheorem: Parser<_,unit> = skipString "theorem" <|> skipString "thm" 
@@ -471,7 +463,7 @@ let axiom = keywordAxiom >>. SW >>. signature .>>. (IW >>. axiomBlock) |>> FplBl
 
 let instanceBlock = leftBrace >>. many CW >>. variableSpecificationList .>> commentedRightBrace
 let callConstructorParentClass = opt predicateWithArguments |>> FplBlock.ClassConstructorCall
-let constructorBlock = leftBraceCommented >>. callConstructorParentClass .>>. variableSpecificationList .>> commentedRightBrace
+let constructorBlock = leftBraceCommented >>. variableSpecificationList .>>. callConstructorParentClass  .>> commentedRightBrace
 let constructor = (signature .>> IW) .>>. constructorBlock |>> FplBlock.Constructor
 
 (* FPL building blocks - Properties *)
@@ -545,9 +537,9 @@ let classDefinitionContent = choice [
     property
     constructor
 ]
-let classDefinitionContentList = many1 (many CW >>. classDefinitionContent .>> IW)
+let classDefinitionContentList = many (many CW >>. classDefinitionContent .>> IW)
 let classDefinitionBlock = (leftBraceCommented  >>. variableSpecificationList .>> many CW) .>>. classDefinitionContentList .>> commentedRightBrace
-let classSignature = (keywordClass >>. SW >>. predicateIdentifier .>> IW) .>>. (colon >>. classType)
+let classSignature = (keywordClass >>. SW >>. predicateIdentifier .>> IW) .>>. (colon >>. IW >>. classType)
 let definitionClass = (classSignature .>> IW) .>>. classDefinitionBlock |>> FplBlock.DefinitionClass 
 
 let definition = choice [
@@ -571,7 +563,7 @@ let buildingBlock = choice [
 
 let buildingBlockList = many (many CW >>. buildingBlock .>> IW)
 // A theory begins with the keywordTheory followed by a block containing a (possibly empty) sequence of building blocks
-let theoryBlock = keywordTheory >>. spacesLeftParenSpaces >>. buildingBlockList .>> commentedRightBrace
+let theoryBlock = keywordTheory >>. IW >>. leftBraceCommented >>. buildingBlockList .>> commentedRightBrace
 
 (* Localizations *)
 // Localizations provide a possibility to automatically translate FPL expressions into natural languages
@@ -596,11 +588,10 @@ let localizationBlock = keywordLocalization >>. spacesLeftParenSpaces >>. locali
 
 
 (* Namespaces *)
-let namespaceBlock = (spacesLeftParenSpaces >>. opt extensionBlock) .>>. (many CW >>. opt usesClause) .>>. (many CW >>. rulesOfInferenceBlock) .>>. (many CW >>. theoryBlock) .>>. (many CW >>. opt localizationBlock) .>> commentedRightBrace
+let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (many CW >>. opt usesClause) .>>. (many CW >>. opt rulesOfInferenceBlock) .>>. (many CW >>. theoryBlock) .>>. (many CW >>. opt localizationBlock) .>> commentedRightBrace
 let fplNamespace = namespaceIdentifier .>>. (many CW >>. namespaceBlock)
 let fplNamespaceList = many1 (many CW >>. fplNamespace .>> IW)
 (* Final Parser *)
-let fplParser = fplNamespaceList .>> eof
-
-
+let ast = (fplNamespaceList .>> eof) |>> FplParserResult.AST
+let fplParser (input: string) = run ast input 
 
