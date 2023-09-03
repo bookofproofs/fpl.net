@@ -1,16 +1,10 @@
-﻿using Microsoft.Language.Xml;
+﻿using System.Text;
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using OmniSharp.Extensions.LanguageServer.Protocol;
 using OmniSharp.Extensions.Embedded.MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FplLS;
 
 namespace FplLS
 {
@@ -55,7 +49,7 @@ namespace FplLS
             var uri = request.TextDocument.Uri;
             var text = request.ContentChanges.FirstOrDefault()?.Text;
 
-            _bufferManager.UpdateBuffer(uri, new StringBuffer(text));
+            _bufferManager.UpdateBuffer(uri, new StringBuilder(text));
 
             _router.Window.LogInfo($"Updated buffer for document: {uri}\n{text}");
 
@@ -64,7 +58,7 @@ namespace FplLS
 
         public Task<Unit> Handle(DidOpenTextDocumentParams request, CancellationToken cancellationToken)
         {
-            _bufferManager.UpdateBuffer(request.TextDocument.Uri, new StringBuffer(request.TextDocument.Text));
+            _bufferManager.UpdateBuffer(request.TextDocument.Uri, new StringBuilder(request.TextDocument.Text));
             return Unit.Task;
         }
 

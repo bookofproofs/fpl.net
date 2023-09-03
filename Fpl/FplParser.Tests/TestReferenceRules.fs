@@ -101,7 +101,7 @@ type TestReferenceRules() =
         {
             proceedingResult: pred
             
-            range proceedingResult p$
+            range proceedingResult p
             (
                 assert proceedingResult
             )

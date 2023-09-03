@@ -10,7 +10,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestRange01 () =
-        let result = run rangeStatement """range proceedingResult p$
+        let result = run rangeStatement """range proceedingResult p
                 (
                     assert proceedingResult
                     a:=1
@@ -26,7 +26,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestLoop01 () =
-        let result = run loopStatement """loop proceedingResult p$
+        let result = run loopStatement """loop proceedingResult p
                 (
                     assert proceedingResult
                     a:=1
@@ -38,6 +38,16 @@ type TestStatements () =
    [Assertion (PredicateWithoutArgs (Var "proceedingResult"));
     Assignment (Var "a", PredicateWithoutArgs (ExtDigits "1"));
     Assignment (Var "b", PredicateWithoutArgs (ExtDigits "1"))])""".Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestLoop02 () =
+        let result = run loopStatement """loop n [Nat(1)~limit]
+            (
+            assert Equal(f(n),n)
+            )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: todo""".Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]

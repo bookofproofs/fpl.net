@@ -1,4 +1,7 @@
-﻿## 2.4.0
+﻿## 2.4.1
+* Some bugfixes regarding choice productions and braced blocks
+
+## 2.4.0
 * First buildable complete FPL parser (some tests still needed)
 * Initial parsers for namespaces added
 * Initial parsers for localizations added

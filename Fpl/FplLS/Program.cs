@@ -7,6 +7,14 @@ namespace FplLS
 {
     class Program
     {
+        /*
+        static public void Main(string[] args)
+        {
+            var result = FplGrammar.fplParser("foo");
+            Console.WriteLine(result);
+        }
+        */
+
         static async Task Main(string[] args)
         {
             var server = await LanguageServer.From(options =>
@@ -39,5 +47,6 @@ namespace FplLS
             services.AddSingleton<BufferManager>();
             services.AddSingleton<DiagnosticsHandler>();
         }
+
     }
 }

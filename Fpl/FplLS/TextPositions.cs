@@ -119,7 +119,7 @@ namespace FplLS
         /// <returns>
         ///     The equivalent <see cref="Position"/> within the text.
         /// </returns>
-        public UsingOmExtLSPM.Position GetPosition(int absolutePosition)
+        public UsingOmExtLSPM.Position GetPosition(long absolutePosition)
         {
             int targetLine = Array.BinarySearch(_lineStartPositions, absolutePosition);
             if (targetLine < 0)
@@ -144,7 +144,7 @@ namespace FplLS
         /// <returns>
         ///     The <see cref="Range"/>.
         /// </returns>
-        public UsingOmExtLSPM.Range GetRange(int absoluteStartPosition, int absoluteEndPosition)
+        public UsingOmExtLSPM.Range GetRange(long absoluteStartPosition, long absoluteEndPosition)
         {
             return new UsingOmExtLSPM.Range(
                 start: GetPosition(absoluteStartPosition),

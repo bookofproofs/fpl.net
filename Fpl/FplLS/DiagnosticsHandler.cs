@@ -1,7 +1,7 @@
-﻿using Microsoft.Language.Xml;
+﻿using System.Text;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using UsingMsLangXml = Microsoft.Language.Xml;
+using static FplGrammar;
 
 namespace FplLS
 {
@@ -9,12 +9,6 @@ namespace FplLS
     {
         private readonly ILanguageServer _languageServer;
         private readonly BufferManager _bufferManager;
-        private static readonly IReadOnlyCollection<string> TemplatedValues = new[]
-        {
-            "__replace",
-            "space_separated",
-            "tag1",
-        };
 
         public DiagnosticsHandler(ILanguageServer languageServer, BufferManager bufferManager)
         {
@@ -22,14 +16,30 @@ namespace FplLS
             _bufferManager = bufferManager;
         }
 
-        public void PublishDiagnostics(Uri uri, UsingMsLangXml.Buffer buffer)
+
+        public void PublishDiagnostics(Uri uri, StringBuilder buffer)
         {
-            var text = buffer.GetText(0, buffer.Length);
-            var abstractSyntaxTree = Parser.Parse(buffer);
+            var text = buffer.ToString();
+            var result = FplGrammar.fplParser(text);
             var textPosition = new TextPositions(text);
             var diagnostics = new List<Diagnostic>();
 
-            diagnostics.AddRange(NuspecDoesNotContainTemplatedValuesRequirement(abstractSyntaxTree, textPosition));
+            if (result.IsSuccess)
+            {
+                var ast = result;
+            } 
+            else if (result.IsFailure)
+            {
+                var failure = result as FParsec.CharParsers.ParserResult<FplGrammarTypes.FplParserResult, Microsoft.FSharp.Core.Unit>.Failure;
+                var range = textPosition.GetRange(failure.Item2.Position.Index, failure.Item2.Position.Index);
+                var diagnostic = new Diagnostic
+                {
+                    Message = failure.Item1,
+                    Severity = DiagnosticSeverity.Error,
+                    Range = range,
+                };
+                diagnostics.Add(diagnostic);    
+            }
 
             _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
             {
@@ -37,23 +47,6 @@ namespace FplLS
                 Diagnostics = diagnostics
             });
         }
-
-        private IEnumerable<Diagnostic> NuspecDoesNotContainTemplatedValuesRequirement(XmlDocumentSyntax abstractSyntaxTree, TextPositions textPositions)
-        {
-            foreach (var node in abstractSyntaxTree.DescendantNodesAndSelf().OfType<XmlTextSyntax>())
-            {
-                if (!TemplatedValues.Any(x => node.Value.Contains(x, StringComparison.OrdinalIgnoreCase)))
-                {
-                    continue;
-                }
-                var range = textPositions.GetRange(node.Start, node.End);
-                yield return new Diagnostic
-                {
-                    Message = "Templated value which should be removed",
-                    Severity = OmniSharp.Extensions.LanguageServer.Protocol.Models.DiagnosticSeverity.Error,
-                    Range = range,
-                };
-            }
-        }
+        
     }
 }

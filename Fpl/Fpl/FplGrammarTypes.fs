@@ -162,7 +162,7 @@ type FplBlock =
     | Signature of FplIdentifier * (FplIdentifier list * FplType) list
     | Axiom of FplBlock * (FplBlock list * Predicate)
     | ClassConstructorCall of Predicate option
-    | Constructor of FplBlock * (FplBlock * FplBlock list)
+    | Constructor of FplBlock * (FplBlock list * FplBlock)
     | Mandatory
     | Optional 
     | PredicateInstance of (FplBlock * (FplBlock list * Predicate))
@@ -173,3 +173,7 @@ type FplBlock =
     | DefinitionPredicate of FplBlock * ((FplBlock list * Predicate option) * FplBlock list option)
     | DefinitionFunctionalTerm of (FplBlock * FplType) * (FplBlock list * FplBlock list option)
     | DefinitionClass of (FplIdentifier * FplType) * (FplBlock list * FplBlock list)
+
+
+ type FplParserResult = 
+    | AST of (FplIdentifier * ((((ExtensionBlock option * UsesClause option) * FplBlock list option) * FplBlock list) * (Predicate * (string * FplIdentifier) list) list option)) list

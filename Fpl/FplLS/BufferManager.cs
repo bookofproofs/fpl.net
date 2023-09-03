@@ -1,6 +1,5 @@
-﻿using System;
+﻿using System.Text;
 using System.Collections.Concurrent;
-using UsingMsLangXml = Microsoft.Language.Xml;
 
 namespace FplLS
 {
@@ -9,15 +8,15 @@ namespace FplLS
 
         public EventHandler<DocumentUpdatedEventArgs> BufferUpdated;
 
-        private ConcurrentDictionary<Uri, UsingMsLangXml.Buffer> _buffers = new ConcurrentDictionary<Uri, UsingMsLangXml.Buffer>();
+        private ConcurrentDictionary<Uri, StringBuilder> _buffers = new ConcurrentDictionary<Uri, StringBuilder>();
 
-        public void UpdateBuffer(Uri uri, UsingMsLangXml.Buffer buffer)
+        public void UpdateBuffer(Uri uri, StringBuilder buffer)
         {
             _buffers.AddOrUpdate(uri, buffer, (k, v) => buffer);
             BufferUpdated?.Invoke(this, new DocumentUpdatedEventArgs(uri));
         }
 
-        public UsingMsLangXml.Buffer GetBuffer(Uri uri)
+        public StringBuilder GetBuffer(Uri uri)
         {
             return _buffers.TryGetValue(uri, out var buffer) ? buffer : null;
         }

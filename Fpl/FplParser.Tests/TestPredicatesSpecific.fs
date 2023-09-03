@@ -39,6 +39,36 @@ type TestPredicatesSpecific () =
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
+    member this.TestPrimePredicate5 () =
+        let result = run primePredicate """list$i"""
+        let actual = sprintf "%O" result
+        let expected = """Success: PredicateWithoutArgs (IndexVariable ("list", "i"))""".Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPrimePredicate6 () =
+        let result = run primePredicate """arr[i]"""
+        let actual = sprintf "%O" result
+        let expected = """Success: PredicateWithoutArgs (EntityWithCoord (Var "arr", BrackedCoordList [Var "i"]))""".Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPrimePredicate7 () =
+        let result = run primePredicate """@@self"""
+        let actual = sprintf "%O" result
+        let expected = """Success: PredicateWithoutArgs (Self ['@'; '@'])""".Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPrimePredicate8 () =
+        let result = run primePredicate """del.add(n,m)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: PredicateWithArgs
+  (DelegateId "add",
+   [PredicateWithoutArgs (Var "n"); PredicateWithoutArgs (Var "m")])""".Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
     member this.TestConjunction1 () =
         let result = run conjunction """and(true,false)"""
         let actual = sprintf "%O" result
@@ -206,6 +236,27 @@ type TestPredicatesSpecific () =
         let expected = """Success: PredicateWithArgs
   (AliasedId ["ProceedingResults"],
    [ArgumentIdentifier "1."; ArgumentIdentifier "2."])""".Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicateWithArgs4 () =
+        let result = run predicateWithArguments """Add(result,list$i)"""
+        let actual = sprintf "%O" result
+        let expected = """Success: PredicateWithArgs
+  (AliasedId ["Add"],
+   [PredicateWithoutArgs (Var "result");
+    PredicateWithoutArgs (IndexVariable ("list", "i"))])""".Replace("\r","")
+        Assert.AreEqual(expected, actual);
+
+    [<TestMethod>]
+    member this.TestPredicateWithArgs5 () =
+        let result = run predicateWithArguments """Add(result,arr[i])"""
+        let actual = sprintf "%O" result
+        let expected = """Success: PredicateWithArgs
+  (AliasedId ["Add"],
+   [PredicateWithoutArgs (Var "result");
+    PredicateWithoutArgs
+      (EntityWithCoord (Var "arr", BrackedCoordList [Var "i"]))])""".Replace("\r","")
         Assert.AreEqual(expected, actual);
 
     [<TestMethod>]
