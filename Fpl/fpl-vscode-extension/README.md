@@ -27,6 +27,9 @@ None
 ## Release Notes
 
 
+### 1.2.2
+
+* Correcting logging and installation issues
 ### 1.2.1
 
 * Hooking up Fpl Parser to VSCode diagnostics

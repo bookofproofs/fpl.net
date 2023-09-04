@@ -3,7 +3,7 @@
   "displayName": "FPL (Formal Proving Language)",
   "description": "Write mathematics independently of natural languages.",
   "icon": "images/logo.png",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "repository": "https://github.com/bookofproofs/fpl.net",
   "publisher": "bookofproofs",
   "license": "MIT",
@@ -22,7 +22,9 @@
     "language",
     "proving"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "workspaceContains:**/*.fpl"
+  ],
   "main": "./extension.js",
   "contributes": {
     "languages": [
@@ -30,7 +32,8 @@
         "id": "fpl",
         "aliases": [
           "Formal Proving Language",
-          "fpl"
+          "fpl",
+          "FPL"
         ],
         "extensions": [
           ".fpl"

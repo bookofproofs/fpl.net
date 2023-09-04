@@ -4,6 +4,9 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.2.2
+- Logging and installation issues fiexed
+
 ## 1.2.1
 - Diagnostics are now not mocked but come directly from the FPL parser.
 - However, the parser has still no error recovery added and you will see at most one syntax error per .fpl file.
