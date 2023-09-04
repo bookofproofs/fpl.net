@@ -27,7 +27,7 @@ None
 ## Release Notes
 
 
-### 1.2.2
+### 1.2.2, 1.2.3, 1.2.4
 
 * Correcting logging and installation issues
 ### 1.2.1

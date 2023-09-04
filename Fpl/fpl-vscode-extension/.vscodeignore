@@ -2,3 +2,11 @@
 .vscode-test/**
 .gitignore
 vsc-extension-quickstart.md
+# Un-ignore the affected subdirectory
+!dotnet-runtimes/
+# ignore all subdirectories
+dotnet-runtimes/*
+# un-ignore only the FplLS subdirectory and its subdirectories
+!dotnet-runtimes/FplLS/
+!dotnet-runtimes/FplLS/*
+dotnet-runtimes/win32-x64/**
