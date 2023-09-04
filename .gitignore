@@ -22,6 +22,7 @@
 !/Fpl/fpl-vscode-extension/dotnet-runtimes/
 # ignore all subdirectories
 /Fpl/fpl-vscode-extension/dotnet-runtimes/**
-# un-ignore only the FplLS subdirectory
-!/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLS
+# un-ignore only the FplLS subdirectory and its subdirectories
+!/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLS/
+!/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLS/**
 

@@ -1,3 +1,4 @@
+let outputChannel;
 
 /**
  * @param {string} message
@@ -5,22 +6,31 @@
  */
 function log2Console(message, isError) {
     var timestamp = new Date().toISOString();
+    var newMessage = timestamp + ": " + message;
     if (isError) {
+        outputChannel.appendLine("Error: " + newMessage);
         // log in red
-        console.log('\u001b[' + 31 + 'm' + timestamp + ": " + message + '\u001b[0m');
+        console.log('\u001b[' + 31 + 'm' + newMessage + '\u001b[0m');
     }
     else {
+        outputChannel.appendLine("Info: " + newMessage);
         // log in green
-        console.log('\u001b[' + 32 + 'm' + timestamp + ": " + message + '\u001b[0m');
+        console.log('\u001b[' + 32 + 'm' + newMessage + '\u001b[0m');
     }
 }
 
 /**
  * @param {string} path
  */
-function directoryOrDirExists(path) {
+function directoryOrFileExists(path) {
     const fs = require('fs');
     return fs.existsSync(path);
+}
+
+
+function removeDirectorySync(path) {
+    const fs = require('fs');
+    fs.rmdirSync(path, { recursive:true });
 }
 
 /**
@@ -137,14 +147,20 @@ function dispatchRuntime(runtimeName) {
 function acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime) {
     log2Console("trying to start FPL Language Server", false);
 
-    if (directoryOrDirExists(relPathToDotnetRuntime + '/dotnet')) {
+    const path = require('path');
+    var pathToDotNetExe = path.join(relPathToDotnetRuntime, 'dotnet.exe');
+    if (directoryOrFileExists(pathToDotNetExe)) {
         // We have a dotnet.exe runtime for this platform / architecture already in the directory relPathToDotnetRuntime
         return;
     }
     else {
         // try to find the runtime 
         const [fileUrlDir, fileUrlName] = dispatchRuntime(runtimeName);
-        // if no exception was thrown, make the download/installation directory
+        // drop the old directory (if any, for instance, the last download did not succeeded)        
+        if (directoryOrFileExists(relPathToDotnetRuntime)) {
+            removeDirectorySync(relPathToDotnetRuntime);
+        }
+        // if no exception was thrown, make the download/installation directory, because it now does not exist
         makeDirectory(relPathToDotnetRuntime);
         // and install the runtime there
         installRuntime(runtimeName, relPathToDotnetRuntime, fileUrlDir, fileUrlName);
@@ -166,7 +182,9 @@ let client;
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+    outputChannel = vscode.window.createOutputChannel('FPL Log');
     try {
+ 
         // Use the console to output diagnostic information (console.log) and errors (console.error)
         // This line of code will only be executed once when your extension is activated
 
@@ -195,11 +213,11 @@ function activate(context) {
 
         let client = new LanguageClient(
             'fpl-vscode-extension',
-            'Formal Proving Language',
+            'FPL Language Server',
             serverOptions,
             clientOptions
         );
-
+       
         let disposableClient = client.start();
 
         // The command has been defined in the package.json file
@@ -215,7 +233,8 @@ function activate(context) {
         context.subscriptions.push(disposableClient);
         context.subscriptions.push(disposableCommand);
 
-        log2Console('"Formal Proving Language" almost ready, enjoy!', false);
+        log2Console('Launching "Formal Proving Language", enjoy!', false);
+
     }
     catch (error) {
         let errorMsg = 'Installing "Formal Proving Language" failed :-(, report issue on https://github.com/bookofproofs/fpl.net';
