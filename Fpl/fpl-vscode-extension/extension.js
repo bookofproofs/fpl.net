@@ -29,19 +29,36 @@ function directoryOrFileExists(path) {
 
 
 function removeDirectorySync(path) {
-    const fs = require('fs');
-    fs.rmdirSync(path, { recursive:true });
+    return new Promise((resolve, reject) => {
+        try {
+            if (directoryOrFileExists(path)) 
+            {
+                const fs = require('fs');
+                fs.rmdirSync(path, { recursive: true });
+            }
+            resolve("directory removed");
+        }
+        catch (err)
+        {
+            reject(err);
+        }
+    });
 }
 
 /**
  * @param {string} path
  */
 function makeDirectory(path) {
-    const fs = require('fs');
-    fs.mkdir(path, (err) => {
-        if (err) { throw err; }
+    return new Promise((resolve, reject) => {
+        const fs = require('fs');
+        fs.mkdir(path, (err) => {
+            if (err) { reject(err.message); }
+            else {
+                log2Console("Directory " + path + " created successfully", false);
+                resolve("directory created");
+            }
+        });
     });
-    log2Console("Directory " + path + " created successfully", false);
 }
 
 /**
@@ -62,62 +79,66 @@ function deleteFile(pathToFile) {
  * @param {string} fileUrlName
  */
 function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
-    try {
-        log2Console('trying to install ' + runtimeName, false);
-        const https = require('https');
-        const fs = require('fs');
-        const path = require('path');
-        const tar = require('tar');
-
-        // URL of the file to download
-        let fileUrl = fileUrlDir + '/' + fileUrlName;
-
-        // Path to save the downloaded file
-        let pathToDownloadedFile = downloadPath + '/' + fileUrlName;
-
-        // Download and extract the runtime
-        let file = fs.createWriteStream(pathToDownloadedFile);
-        https.get(fileUrl, function (response) {
-            response.pipe(file);
-
-            file.on('finish', function () {
-                file.close(() => {
-                    log2Console('Runtime ' + runtimeName + ' downloaded successfully', false);
-                    
-                    if (path.extname(pathToDownloadedFile)=='.gz') {
-                        tar.x({
-                            file: pathToDownloadedFile,
-                            cwd: downloadPath
-                        });
-                        // remove the tar.gz file
-                        deleteFile(pathToDownloadedFile);
-                        log2Console('Runtime ' + runtimeName + ' installed successfully', false);
-                    }
-                    else if (path.extname(pathToDownloadedFile)=='.zip') {
-                        const unzipper = require('unzipper');
-                        // Extract the downloaded runtime zip file into the same directory and delete it after extraction
-                        fs.createReadStream(pathToDownloadedFile)
-                            .pipe(unzipper.Extract({ path: downloadPath }))
-                            .on('close', () => {
-                                // remove the zip file
-                                deleteFile(pathToDownloadedFile);
-                                log2Console('Runtime ' + runtimeName + ' installed successfully', false);
+    return new Promise((resolve, reject) => {
+        try {
+            log2Console('trying to install ' + runtimeName, false);
+            const https = require('https');
+            const fs = require('fs');
+            const path = require('path');
+            const tar = require('tar');
+    
+            // URL of the file to download
+            let fileUrl = fileUrlDir + '/' + fileUrlName;
+    
+            // Path to save the downloaded file
+            let pathToDownloadedFile = downloadPath + '/' + fileUrlName;
+    
+            // Download and extract the runtime
+            let file = fs.createWriteStream(pathToDownloadedFile);
+            https.get(fileUrl, function (response) {
+                response.pipe(file);
+    
+                file.on('finish', function () {
+                    file.close(() => {
+                        log2Console('Runtime ' + runtimeName + ' downloaded successfully', false);
+                        
+                        if (path.extname(pathToDownloadedFile)=='.gz') {
+                            tar.x({
+                                file: pathToDownloadedFile,
+                                cwd: downloadPath
                             });
-                    }
-                    else
-                    {
-                        throw new Error("No decompression algorithm found for downloaded file "+pathToDownloadedFile);
-                    }
-                    return;
+                            // remove the tar.gz file
+                            deleteFile(pathToDownloadedFile);
+                            log2Console('runtime ' + runtimeName + ' installed successfully', false);
+                            resolve('runtime ' + runtimeName + ' installed successfully');
+                        }
+                        else if (path.extname(pathToDownloadedFile)=='.zip') {
+                            const unzipper = require('unzipper');
+                            // Extract the downloaded runtime zip file into the same directory and delete it after extraction
+                            fs.createReadStream(pathToDownloadedFile)
+                                .pipe(unzipper.Extract({ path: downloadPath }))
+                                .on('close', () => {
+                                    // remove the zip file
+                                    deleteFile(pathToDownloadedFile);
+                                    log2Console('runtime ' + runtimeName + ' installed successfully', false);
+                                    resolve('runtime ' + runtimeName + ' installed successfully');
+                                });
+                        }
+                        else
+                        {
+                            reject("no decompression algorithm found for downloaded file "+pathToDownloadedFile);
+                        }
+                        return;
+                    });
                 });
+                return;
             });
-            return;
-        });
-    }
-    catch (error) {
-        log2Console(error, true);
-        throw error;
-    }
+        }
+        catch (error) {
+            log2Console(error.message, true);
+            reject(error.message);
+        }
+    });
 }
 
 /**
@@ -145,26 +166,39 @@ function dispatchRuntime(runtimeName) {
  * @param {string} relPathToDotnetRuntime
  */
 function acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime) {
-    log2Console("trying to start FPL Language Server", false);
-
-    const path = require('path');
-    var pathToDotNetExe = path.join(relPathToDotnetRuntime, 'dotnet.exe');
-    if (directoryOrFileExists(pathToDotNetExe)) {
-        // We have a dotnet.exe runtime for this platform / architecture already in the directory relPathToDotnetRuntime
-        return;
-    }
-    else {
-        // try to find the runtime 
-        const [fileUrlDir, fileUrlName] = dispatchRuntime(runtimeName);
-        // drop the old directory (if any, for instance, the last download did not succeeded)        
-        if (directoryOrFileExists(relPathToDotnetRuntime)) {
-            removeDirectorySync(relPathToDotnetRuntime);
+    return new Promise((resolve, reject) => {
+        let condition;
+        const path = require('path');
+        var pathToDotNetExe = path.join(relPathToDotnetRuntime, 'dotnet.exe');
+        if (directoryOrFileExists(pathToDotNetExe) ) {
+            // We have a dotnet.exe runtime for this platform / architecture already in the directory relPathToDotnetRuntime
+            resolve('dotnet runtime acquired successfully');
         }
-        // if no exception was thrown, make the download/installation directory, because it now does not exist
-        makeDirectory(relPathToDotnetRuntime);
-        // and install the runtime there
-        installRuntime(runtimeName, relPathToDotnetRuntime, fileUrlDir, fileUrlName);
-    }
+        else {
+            // try to find the runtime 
+            const [fileUrlDir, fileUrlName] = dispatchRuntime(runtimeName);
+            const removeDirectoryPromise = removeDirectorySync(relPathToDotnetRuntime);
+            // drop the old directory (if any, for instance, the last download did not succeeded)        
+            removeDirectoryPromise.then((message) => {
+                // if no exception was thrown, create the download/installation directory, because it now does not exist
+                const makeDirectoryPromise = makeDirectory(relPathToDotnetRuntime);
+                makeDirectoryPromise.then((message) => {
+                    // and install the runtime there
+                    const installRuntimePromice = installRuntime(runtimeName, relPathToDotnetRuntime, fileUrlDir, fileUrlName);
+                    installRuntimePromice.then((message) => {
+        
+                        resolve('dotnet runtime acquired properly');
+                    }).catch((message) => {
+                        reject(message);
+                    });
+                }).catch((message) => {
+                    reject(message);
+                });
+            }).catch((message) => {     
+                reject(message);
+            });
+        }
+    });
 }
 
 // The module 'vscode' contains the VS Code extensibility API
@@ -200,40 +234,42 @@ function activate(context) {
         let relPathToDotnetRuntime = path.join(__dirname, 'dotnet-runtimes', runtimeName);
         let relPathToDotnet = path.join(relPathToDotnetRuntime, 'dotnet');
 
-        const result = acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime);
+        const acquireDotNetRuntimePromise = acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime);
 
-        let serverOptions = {
-            run: { command: relPathToDotnet, args: [relPathToserverDll] },
-            debug: { command: relPathToDotnet, args: [relPathToserverDll] }
-        };
-
-        let clientOptions = {
-            documentSelector: [{ scheme: 'file', language: 'fpl' }]
-        };
-
-        let client = new LanguageClient(
-            'fpl-vscode-extension',
-            'FPL Language Server',
-            serverOptions,
-            clientOptions
-        );
-       
-        let disposableClient = client.start();
-
-        // The command has been defined in the package.json file
-        // Now provide the implementation of the command with  registerCommand
-        // The commandId parameter must match the command field in package.json
-        let disposableCommand = vscode.commands.registerCommand('fpl-vscode-extension.helloWorld', function () {
-            // The code you place here will be executed every time your command is executed
-
-            // Display a message box to the user
-            vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
+        acquireDotNetRuntimePromise.then(() => {
+            let serverOptions = {
+                run: { command: relPathToDotnet, args: [relPathToserverDll] },
+                debug: { command: relPathToDotnet, args: [relPathToserverDll] }
+            };
+    
+            let clientOptions = {
+                documentSelector: [{ scheme: 'file', language: 'fpl' }]
+            };
+    
+            client = new LanguageClient(
+                'fpl-vscode-extension',
+                'FPL Language Server',
+                serverOptions,
+                clientOptions
+            );
+           
+            let disposableClient = client.start();
+    
+            // The command has been defined in the package.json file
+            // Now provide the implementation of the command with  registerCommand
+            // The commandId parameter must match the command field in package.json
+            let disposableCommand = vscode.commands.registerCommand('fpl-vscode-extension.helloWorld', function () {
+                // The code you place here will be executed every time your command is executed
+    
+                // Display a message box to the user
+                vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
+            });
+    
+            context.subscriptions.push(disposableClient);
+            context.subscriptions.push(disposableCommand);
+    
+            log2Console('Launching "Formal Proving Language", enjoy!', false);
         });
-
-        context.subscriptions.push(disposableClient);
-        context.subscriptions.push(disposableCommand);
-
-        log2Console('Launching "Formal Proving Language", enjoy!', false);
 
     }
     catch (error) {
