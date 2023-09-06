@@ -3,8 +3,6 @@ open System.Text.RegularExpressions
 open FParsec
 open FplGrammarTypes
 
-(* FPL Version 2.4.1 (combined Language Grammar and working Parser version) *)
-
 (* Literals *)
 
 let rightBrace: Parser<_, unit>= skipChar '}'
@@ -34,13 +32,13 @@ let IW = spaces
 
 let SW = spaces1
 
-let Comment: Parser<_, unit> = regex @"\/\/[^\n]*" |>> ignore <?> "<line-comment>"
+let inlineComment: Parser<_, unit> = pstring "//" >>. skipManyTill anyChar (skipNewline <|> eof) |>> ignore <?> "<line-comment>"
 
-let LongComment: Parser<_, unit> = regex @"\/\*((?:.|\n)*?)\*\/" |>> ignore <?> "<multiline-comment>"
+let blockComment: Parser<_, unit> = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) |>> ignore <?> "<multiline-comment>"
 
 let CW = choice [
-    LongComment
-    Comment
+    blockComment
+    inlineComment
     SW
 ]
 
@@ -113,8 +111,14 @@ let keyWordSet =
         |]
     )
 
-let IdStartsWithSmallCase: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" <?> "<camelCaseId>"
-let IdStartsWithCap: Parser<string,unit> = regex @"[A-Z][a-z0-9A-Z_]*" <?> "<PascalCaseId>"
+let isLowercaseLetter c = c >= 'a' && c <= 'z'
+let isUppercaseLetter c = c >= 'A' && c <= 'Z'
+let isDigit c = c >= '0' && c <= '9'
+let isUnderscore c = c = '_'
+let IdStartsWithSmallCase: Parser<string, unit> =
+    many1Satisfy2L isLowercaseLetter (fun c -> isLowercaseLetter c || isUppercaseLetter c || isDigit c || isUnderscore c) "<camelCaseId>"
+let IdStartsWithCap: Parser<string,unit> = 
+    many1Satisfy2L isUppercaseLetter (fun c -> isLowercaseLetter c || isUppercaseLetter c || isDigit c || isUnderscore c) "<PascalCaseId>"
 let digits: Parser<string,unit> = regex @"\d+" <?> "digits"
 let argumentIdentifier = regex @"\d+([a-z][a-z0-9A-Z_])*\." <?> "<ArgumentIdentifier>" |>> Predicate.ArgumentIdentifier
 let namespaceIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifier.NamespaceIdentifier
@@ -339,7 +343,7 @@ let conditionFollowedByResult = (case >>. IW >>. predicate .>> colon) .>>. (many
 let conditionFollowedByResultList = many1 (many CW >>. conditionFollowedByResult)
 
 
-let casesStatement = (keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen) |>> Statement.Cases
+let casesStatement = ((keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen)) <?> "<cases statement>" |>> Statement.Cases
 let rangeOrLoopBody = ((assignee .>> SW) .>>. variableRange .>> many CW) .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
 let loopStatement = keywordLoop >>. SW >>. rangeOrLoopBody |>> Statement.Loop
 let rangeStatement = keywordRange >>. SW >>. rangeOrLoopBody |>> Statement.Range
@@ -351,14 +355,15 @@ let rangeStatement = keywordRange >>. SW >>. rangeOrLoopBody |>> Statement.Range
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = keywordAssert >>. SW >>. predicate |>> Statement.Assertion
 
-let statement = choice [
-    casesStatement
-    assertionStatement
-    rangeStatement
-    loopStatement
-    returnStatement
-    assignmentStatement
-]
+let statement = 
+    (choice [
+        casesStatement
+        assertionStatement
+        rangeStatement
+        loopStatement
+        returnStatement
+        assignmentStatement
+    ]) <?> "<statement>"
 
 statementListRef := many (many CW >>. statement .>> IW)
 
