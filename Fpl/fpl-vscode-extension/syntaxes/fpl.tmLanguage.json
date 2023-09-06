@@ -22,9 +22,6 @@
 		},
 		{
 			"include": "#variables"
-		},
-		{
-			"include": "#strings"
 		}
 
 	],
@@ -32,7 +29,8 @@
 		"longComments": {
 			"patterns": [{
 				"name": "longComments.fpl",
-				"match": "\/*((?:.|\n)*?)*\/"
+				"begin": "/\\*",
+				"end": "\\*/"
 			}]
 		},
 		"keywords": {
@@ -68,19 +66,8 @@
 		"shortComments": {
 			"patterns": [{
 				"name": "shortComments.fpl",
-				"match": "\/\/[^\n]*"
+				"match": "(//).*\\n?"
 			}]
-		},
-		"strings": {
-			"name": "string.fpl",
-			"begin": "\"",
-			"end": "\"",
-			"patterns": [
-				{
-					"name": "character.fpl",
-					"match": "."
-				}
-			]
 		}
 	},
 	"scopeName": "source.fpl"

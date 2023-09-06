@@ -1,4 +1,7 @@
-﻿## 2.4.1
+﻿## 2.4.2
+* Parser for block and inline comments replaced
+
+## 2.4.1
 * Some bugfixes regarding choice productions and braced blocks
 
 ## 2.4.0

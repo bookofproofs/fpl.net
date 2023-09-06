@@ -3,8 +3,6 @@ open System.Text.RegularExpressions
 open FParsec
 open FplGrammarTypes
 
-(* FPL Version 2.4.1 (combined Language Grammar and working Parser version) *)
-
 (* Literals *)
 
 let rightBrace: Parser<_, unit>= skipChar '}'

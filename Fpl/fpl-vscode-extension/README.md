@@ -21,11 +21,13 @@ None
 
 ## Known Issues
 
-* Syntax highlighting of comments does not work properly.
-* FPL Server will fail since the path to dll is not working 
+* None
 
 ## Release Notes
 
+### 1.2.6
+
+* Bugfix syntax highlighting for comments
 
 ### 1.2.2, 1.2.3, 1.2.4, 1.2.5
 
