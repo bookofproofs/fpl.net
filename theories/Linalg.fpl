@@ -1,7 +1,7 @@
 Fpl.LinAlg
 {
-    uses Fpl.Commons, Fpl.Commons.Structures, Fpl.SetTheory.ZermeloFraenkel, Fpl.Algebra.Structures
-
+    uses {Fpl.Commons, Fpl.Commons.Structures, Fpl.SetTheory.ZermeloFraenkel, Fpl.Algebra.Structures}
+    inf {}
     theory
     {
 
@@ -68,6 +68,7 @@ Fpl.LinAlg
             }
         }
     }
+    loc {}
 }
 
 

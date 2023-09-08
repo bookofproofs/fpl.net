@@ -7,6 +7,10 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
 type TestReferenceRules() =
+    let replaceWhiteSpace (input: string) =
+        let whiteSpaceChars = [|' '; '\t'; '\n'; '\r'|]
+        input.Split(whiteSpaceChars)
+            |> String.concat ""
 
     [<TestMethod>]
     member this.TestReferenceRule01 () =
@@ -27,8 +31,8 @@ type TestReferenceRules() =
      And
        [PredicateWithoutArgs (Var "p");
         Impl (PredicateWithoutArgs (Var "p"), PredicateWithoutArgs (Var "q"))]),
-    PredicateWithoutArgs (Var "q")))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+    PredicateWithoutArgs (Var "q")))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestReferenceRule02 () =
@@ -49,8 +53,8 @@ type TestReferenceRules() =
      And
        [Not (PredicateWithoutArgs (Var "q"));
         Impl (PredicateWithoutArgs (Var "p"), PredicateWithoutArgs (Var "q"))]),
-    Not (PredicateWithoutArgs (Var "p"))))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+    Not (PredicateWithoutArgs (Var "p"))))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestReferenceRule03 () =
@@ -71,8 +75,8 @@ type TestReferenceRules() =
      And
        [Impl (PredicateWithoutArgs (Var "p"), PredicateWithoutArgs (Var "q"));
         Impl (PredicateWithoutArgs (Var "q"), PredicateWithoutArgs (Var "r"))]),
-    Impl (PredicateWithoutArgs (Var "p"), PredicateWithoutArgs (Var "r"))))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+    Impl (PredicateWithoutArgs (Var "p"), PredicateWithoutArgs (Var "r"))))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestReferenceRule04 () =
@@ -92,8 +96,8 @@ type TestReferenceRules() =
      And
        [Not (PredicateWithoutArgs (Var "p"));
         Or [PredicateWithoutArgs (Var "p"); PredicateWithoutArgs (Var "q")]]),
-    PredicateWithoutArgs (Var "q")))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+    PredicateWithoutArgs (Var "q")))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestReferenceRule05 () =
@@ -121,8 +125,30 @@ type TestReferenceRules() =
         (Range
            ((Var "proceedingResult", Var "p"),
             [Assertion (PredicateWithoutArgs (Var "proceedingResult"))]))],
-     Undefined), And [PredicateWithoutArgs (Var "p")]))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+     Undefined), And [PredicateWithoutArgs (Var "p")]))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.TestReferenceRule05a () =
+        let result = run ruleOfInference """ProceedingResults(p: +pred)
+        {
+            proceedingResult: pred
+            premise: all proceedingResult p ( proceedingResult )
+            conclusion: and (p)
+        }"""
+        let actual = sprintf "%O" result
+        let expected = """Success: RuleOfInference
+  (Signature
+     (AliasedId ["ProceedingResults"],
+      [([Var "p"], VariableTypeWithModifier (Some Many1, PredicateType))]),
+   (([BlockVariableDeclaration
+        ([Var "proceedingResult"],
+         VariableTypeWithModifier (None, PredicateType))],
+     AllAssert
+       ((Var "proceedingResult", Var "p"),
+        PredicateWithoutArgs (Var "proceedingResult"))),
+    And [PredicateWithoutArgs (Var "p")]))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestReferenceRule06 () =
@@ -144,5 +170,5 @@ type TestReferenceRules() =
         ([Var "x"], VariableTypeWithModifier (None, ObjectType))],
      PredicateWithArgs (Var "p", [PredicateWithoutArgs (Var "c")])),
     Exists
-      ([Var "x"], PredicateWithArgs (Var "p", [PredicateWithoutArgs (Var "x")]))))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+      ([Var "x"], PredicateWithArgs (Var "p", [PredicateWithoutArgs (Var "x")]))))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);

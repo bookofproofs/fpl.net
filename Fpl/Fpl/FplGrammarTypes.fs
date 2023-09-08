@@ -1,66 +1,5 @@
 ﻿module FplGrammarTypes
 
-type StatementKeyword =
-    | Range
-    | Loop
-    | Else
-    | Case
-    | Cases
-    | Assert 
-    | Return 
-    | Ret
-
-type DefinitionKeyword =
-    | Predicate 
-    | Pred 
-    | Function 
-    | Func 
-    | Object 
-    | Obj 
-    | Class 
-    | Cl
-    | Template 
-    | Tpl 
-    | Index 
-    | Ind
-
-type AxiomKeyword =
-    | Axiom
-    | Ax
-    | Postulate
-    | Post
-
-type OtherKeyword = 
-    | Localization 
-    | Loc
-    | Uses 
-    | Alias 
-    | Theory 
-    | Th 
-    | Premise 
-    | Pre 
-    | Conclusion 
-    | Con 
-    | End 
-    | Ext
-    
-type PropertyKeyword = 
-    | Mandatory 
-    | Mand
-    | Optional
-    | Opt
-
-
-type ProofKeyword = 
-    | Proof
-    | Prf 
-    | Assume 
-    | Ass 
-    | Revoke 
-    | Rev 
-    | Qed 
-    | Trivial
-
 type Extension = 
     | Extensionname of string
     | ExtensionRegex of string
@@ -84,6 +23,7 @@ type FplIdentifier =
     | EntityWithCoord of FplIdentifier * FplIdentifier
     | RangeInType of FplIdentifier option * FplIdentifier option 
     | ExtDigits of string
+    | DollarDigits of string
     | DelegateId of string 
     | LocalizationString of string
     | LocalizationTerm of FplIdentifier list
@@ -119,14 +59,16 @@ type Predicate =
     | Xor of Predicate * Predicate
     | Not of Predicate 
     | All of FplIdentifier list * Predicate
+    | AllAssert of (FplIdentifier * FplIdentifier) * Predicate 
     | Exists of FplIdentifier list * Predicate
-    | ExistsN of (string * FplIdentifier list) * Predicate
+    | ExistsN of (FplIdentifier * FplIdentifier list) * Predicate
     | IsOperator of FplIdentifier * FplType
     | Delegate of FplIdentifier * Predicate list
     | QualifiedIdentifier of FplIdentifier * Predicate list
     | ArgumentIdentifier of string
     | PremiseReference
     | Justification of Predicate list
+
 
 type Statement = 
     | Assertion of Predicate
@@ -157,7 +99,7 @@ type FplBlock =
     | Theorem of FplBlock * ((FplBlock list * Predicate) * Predicate)
     | Lemma of FplBlock * ((FplBlock list * Predicate) * Predicate)
     | Proposition of FplBlock * ((FplBlock list * Predicate) * Predicate)
-    | Corollary of ((FplIdentifier * string list) * (FplIdentifier list * FplType) list) * ((FplBlock list * Predicate) * Predicate)
+    | Corollary of ((FplIdentifier * FplIdentifier list) * (FplIdentifier list * FplType) list) * ((FplBlock list * Predicate) * Predicate)
     | Conjecture of FplBlock * ((FplBlock list * Predicate) * Predicate)
     | Signature of FplIdentifier * (FplIdentifier list * FplType) list
     | Axiom of FplBlock * (FplBlock list * Predicate)
@@ -168,7 +110,7 @@ type FplBlock =
     | PredicateInstance of (FplBlock * (FplBlock list * Predicate))
     | ClassInstance of (FplType * FplBlock) * FplBlock list 
     | FunctionalTermInstance of (FplBlock * FplType) * FplBlock list
-    | Proof of (FplIdentifier * string list) * (FplBlock list * Proof list)
+    | Proof of (FplIdentifier * FplIdentifier list) * (FplBlock list * Proof list)
     | Property of FplBlock * FplBlock
     | DefinitionPredicate of FplBlock * ((FplBlock list * Predicate option) * FplBlock list option)
     | DefinitionFunctionalTerm of (FplBlock * FplType) * (FplBlock list * FplBlock list option)
@@ -176,4 +118,5 @@ type FplBlock =
 
 
  type FplParserResult = 
-    | AST of (FplIdentifier * ((((ExtensionBlock option * UsesClause option) * FplBlock list option) * FplBlock list) * (Predicate * (string * FplIdentifier) list) list option)) list
+    | AST of (FplIdentifier * ((((ExtensionBlock option * UsesClause) * FplBlock list) * FplBlock list) * (Predicate * (string * FplIdentifier) list) list)) list
+

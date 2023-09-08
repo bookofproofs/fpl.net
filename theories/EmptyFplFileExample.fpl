@@ -1,0 +1,6 @@
+TestNamescpace {
+    uses {}
+    inference {}
+    theory {}
+    localization {}
+}

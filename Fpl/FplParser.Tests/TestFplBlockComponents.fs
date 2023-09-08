@@ -6,7 +6,10 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
 type TestFplBlockComponentes () =
-
+    let replaceWhiteSpace (input: string) =
+        let whiteSpaceChars = [|' '; '\t'; '\n'; '\r'|]
+        input.Split(whiteSpaceChars)
+            |> String.concat ""
 
     [<TestMethod>]
     member this.TestSignature01 () =
@@ -17,8 +20,8 @@ type TestFplBlockComponentes () =
    [([Var "u"; Var "v"],
      VariableTypeWithModifier (None, ClassHeaderType ["Set"]));
     ([Var "r"],
-     VariableTypeWithModifier (None, ClassHeaderType ["BinaryRelation"]))])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+     VariableTypeWithModifier (None, ClassHeaderType ["BinaryRelation"]))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature02 () =
@@ -27,15 +30,15 @@ type TestFplBlockComponentes () =
         let expected = """Success: Signature
   (AliasedId ["ExistsByExample"],
    [([Var "p"],
-     VariableType [([Var "c"], VariableTypeWithModifier (None, ObjectType))])])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+     VariableType [([Var "c"], VariableTypeWithModifier (None, ObjectType))])])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature03 () =
         let result = run signature """Zero()"""
         let actual = sprintf "%O" result
-        let expected = """Success: Signature (AliasedId ["Zero"], [])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+        let expected = """Success: Signature (AliasedId ["Zero"], [])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature04 () =
@@ -43,8 +46,8 @@ type TestFplBlockComponentes () =
         let actual = sprintf "%O" result
         let expected = """Success: Signature
   (AliasedId ["Test"],
-   [([Var "a"; Var "b"], VariableTypeWithModifier (None, TemplateType "tpl"))])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+   [([Var "a"; Var "b"], VariableTypeWithModifier (None, TemplateType "tpl"))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature05 () =
@@ -52,8 +55,8 @@ type TestFplBlockComponentes () =
         let actual = sprintf "%O" result
         let expected = """Success: Signature
   (AliasedId ["TestPredicate"],
-   [([Var "a"; Var "b"], VariableTypeWithModifier (None, ObjectType))])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+   [([Var "a"; Var "b"], VariableTypeWithModifier (None, ObjectType))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature06 () =
@@ -62,8 +65,8 @@ type TestFplBlockComponentes () =
         let expected = """Success: Signature
   (AliasedId ["BinOp"],
    [([Var "x"; Var "y"],
-     VariableTypeWithModifier (None, TemplateType "tplSetElem"))])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+     VariableTypeWithModifier (None, TemplateType "tplSetElem"))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature07 () =
@@ -72,8 +75,8 @@ type TestFplBlockComponentes () =
         let expected = """Success: Signature
   (AliasedId ["IsSubset"],
    [([Var "subset"; Var "superset"],
-     VariableTypeWithModifier (None, ClassHeaderType ["Set"]))])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+     VariableTypeWithModifier (None, ClassHeaderType ["Set"]))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature08 () =
@@ -82,8 +85,8 @@ type TestFplBlockComponentes () =
         let expected = """Success: Signature
   (AliasedId ["SetRoster"],
    [([Var "listOfSets"],
-     VariableTypeWithModifier (Some Many, ClassHeaderType ["Set"]))])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+     VariableTypeWithModifier (Some Many, ClassHeaderType ["Set"]))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature09 () =
@@ -98,8 +101,8 @@ type TestFplBlockComponentes () =
        (None,
         FplTypeWithRange
           ((TemplateType "tplFieldElem", LeftClosed),
-           (RangeInType (Some (Var "from"), Some (Var "to")), RightClosed))))])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+           (RangeInType (Some (Var "from"), Some (Var "to")), RightClosed))))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature10 () =
@@ -108,8 +111,8 @@ type TestFplBlockComponentes () =
         let expected = """Success: Signature
   (AliasedId ["ZeroVectorN"],
    [([Var "n"], VariableTypeWithModifier (None, ClassHeaderType ["Nat"]));
-    ([Var "field"], VariableTypeWithModifier (None, ClassHeaderType ["Field"]))])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+    ([Var "field"], VariableTypeWithModifier (None, ClassHeaderType ["Field"]))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature11 () =
@@ -117,8 +120,8 @@ type TestFplBlockComponentes () =
         let actual = sprintf "%O" result
         let expected = """Success: Signature
   (AliasedId ["ProceedingResults"],
-   [([Var "p"], VariableTypeWithModifier (Some Many1, PredicateType))])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+   [([Var "p"], VariableTypeWithModifier (Some Many1, PredicateType))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature12 () =
@@ -127,8 +130,8 @@ type TestFplBlockComponentes () =
         let expected = """Success: Signature
   (AliasedId ["Nat"],
    [([Var "x"],
-     VariableTypeWithModifier (None, ExtensionType (Extensionname "Decimal")))])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+     VariableTypeWithModifier (None, ExtensionType (Extensionname "Decimal")))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature13 () =
@@ -137,8 +140,8 @@ type TestFplBlockComponentes () =
         let expected = """Success: Signature
   (AliasedId ["Add"],
    [([Var "n"; Var "m"],
-     VariableTypeWithModifier (None, ClassHeaderType ["Nat"]))])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+     VariableTypeWithModifier (None, ClassHeaderType ["Nat"]))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSignature14 () =
@@ -150,6 +153,6 @@ type TestFplBlockComponentes () =
     ([Var "ops"],
      VariableType
        [([Var "args"],
-         VariableTypeWithModifier (Some Many, TemplateType "tplSetElem"))])])""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+         VariableTypeWithModifier (Some Many, TemplateType "tplSetElem"))])])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 

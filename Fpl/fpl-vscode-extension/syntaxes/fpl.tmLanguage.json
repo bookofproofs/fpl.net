@@ -22,6 +22,9 @@
 		},
 		{
 			"include": "#variables"
+		},
+		{
+			"include": "#strings"
 		}
 
 	],
@@ -68,6 +71,17 @@
 				"name": "shortComments.fpl",
 				"match": "(//).*\\n?"
 			}]
+		},
+		"strings": {
+			"name": "string.fpl",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "character.fpl",
+					"match": "."
+				}
+			]
 		}
 	},
 	"scopeName": "source.fpl"

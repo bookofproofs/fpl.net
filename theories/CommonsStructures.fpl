@@ -1,6 +1,7 @@
 Fpl.Commons.Structures
 {
-    uses Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel, Fpl.Arithmetics.Peano
+    uses { Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel, Fpl.Arithmetics.Peano }
+    inf {}
 
     theory
     {
@@ -96,9 +97,9 @@ Fpl.Commons.Structures
                             In(tupleElem,@self),
                             and (
                                 is(tupleElem,Tuple[myFrom~myLength]),
-                                loop i [1~myLength]
+                                all i [1~myLength]
                                 (
-                                    assert In(tupleElem[i],@self[i])
+                                    In(tupleElem[i],@self[i])
                                 )
                             )
                         )
@@ -283,7 +284,7 @@ Fpl.Commons.Structures
 
 
     }
-
+    loc {}
 }
 
 

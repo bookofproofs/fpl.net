@@ -1,6 +1,7 @@
 Fpl.Algebra.Structures
 {
-    uses Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel
+    uses { Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel }
+    inference { }
 
     theory
     {
@@ -80,9 +81,15 @@ Fpl.Algebra.Structures
                 )
             }
 
-            optional tplSetElem LeftNeutralElement()
+            optional func LeftNeutralElement() -> tplSetElem
             {
-                assert IsLeftNeutralElement(self)
+                e: tplSetElem
+                assert 
+                    ex e
+                    (
+                        IsLeftNeutralElement(e)
+                    )
+                return e
             }
 
             optional tplSetElem RightNeutralElement()
@@ -125,18 +132,13 @@ Fpl.Algebra.Structures
                 // definition! This, means that the In predicate has a non-transitive model
                 // this is comparable to implementing an interface (or comparable to multiple inheritance).
                 // The interpreter only asserts the types tplSet, and tplSetElement to be sets
-				assert is (x,Set)
-				loop arg args 
-				(
-					assert is(arg,Set)
-				)
-
-
-                assert
-                    all a
-                    (
-                        impl ( is(a,tplSetElem), In(a,myCarrierSet) )
+				assert 
+                    and (
+                        is (x,Set),
+                        all arg args (is (arg, Set)),
+                        all a (impl ( is(a,tplSetElem), In(a,myCarrierSet) ))
                     )
+
             }
 
             mandatory func NthOp(n: index) -> Composition
@@ -205,16 +207,16 @@ Fpl.Algebra.Structures
             ) -> tplSetElem
         {
             assert In(y,x)
-				cases
+            cases
             (
-                case Equal(n,0):
-                    return m.NeutralElem()
-                else:
+                | Equal(n,0):
+                    return m.NeutralElem();
+                else
                     return
                         op(
                             y,
                             Exp( m(y,op), y, Sub(n,1))
-                          )
+                        )
             )
 
         }
@@ -507,9 +509,8 @@ Fpl.Algebra.Structures
             }
         }
    }
+   localization {}
 }
-
-
 
 
 

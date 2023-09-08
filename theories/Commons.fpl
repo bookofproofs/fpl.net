@@ -1,5 +1,6 @@
 Fpl.Commons
 {
+    uses {}
     inference
     {
         ModusPonens()
@@ -43,10 +44,11 @@ Fpl.Commons
         ProceedingResults(p: +pred)
         {
             proceedingResult: pred
+            loop a b (assert a)
             premise:
-                range proceedingResult p
+                all proceedingResult p
                 (
-                    assert proceedingResult
+                    proceedingResult
                 )
             conclusion:
                 and (p)
