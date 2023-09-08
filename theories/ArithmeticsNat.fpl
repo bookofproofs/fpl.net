@@ -4,7 +4,8 @@ Fpl.Arithmetics.Peano
         extDigits : /\d+/
     :end
 
-    uses Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel
+    uses { Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel }
+    inf {}
 
     theory
     {
@@ -82,13 +83,13 @@ Fpl.Arithmetics.Peano
             {
                 cases
                 (
-                    case Equal(x,0) :
+                    | Equal(x,0) :
                         self := Zero()
-                    case Equal(x,1) :
+                    | Equal(x,1) :
                         self := Succ(Zero())
-                    case Equal(x,2) :
-                        self := Succ(Succ(Zero()))
-                    else:
+                    | Equal(x,2) :
+                        self := Succ(Succ(Zero()));
+                    else
                         // else case addressed using a python delegate
                         self := Succ(py.decrement(x))
                 )
@@ -98,9 +99,9 @@ Fpl.Arithmetics.Peano
             {
                 cases
                 (
-                    case IsGreaterOrEqual(x.RightMember(), x.LeftMember()):
-                        self:=x.RightMember()
-                    else:
+                    | IsGreaterOrEqual(x.RightMember(), x.LeftMember()):
+                        self:=x.RightMember();
+                    else
                         self:=undefined
                 )
             }
@@ -141,18 +142,18 @@ Fpl.Arithmetics.Peano
             k: Nat
             cases
             (
-                case Equal(m,0):
+                | Equal(m,0):
                     return n
-                case Equal(Succ(m), k):
-                    return Succ(Add(n,k))
-                else:
+                | Equal(Succ(m), k):
+                    return Succ(Add(n,k));
+                else
                     return undef
             )
         }
 
         func Add(n,m: @extDecimal)->Nat
         {
-            py.add(n,m)
+            return delegate.add(n,m)
         }
 
 
@@ -204,7 +205,7 @@ Fpl.Arithmetics.Peano
 
             i: index
             result:=Zero()
-            loop i list$
+            loop i list
             (
                 result:=Add(result,list$i)
             )
@@ -254,11 +255,11 @@ Fpl.Arithmetics.Peano
         {
             n, limit: Nat
             f: Addend
-            premise:
-                loop n [Nat(1)~limit]
-                (
-                    assert Equal(f(n),n)
-                )
+            loop n [1~limit]
+            (
+                assert Equal(f(n),n)
+            )
+            premise: undef
             conclusion:
                 all n
                 (
@@ -328,7 +329,7 @@ Fpl.Arithmetics.Peano
 
     }
 
-
+    loc {}
 }
 
 

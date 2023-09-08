@@ -6,6 +6,10 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
 type TestProperties () =
+    let replaceWhiteSpace (input: string) =
+        let whiteSpaceChars = [|' '; '\t'; '\n'; '\r'|]
+        input.Split(whiteSpaceChars)
+            |> String.concat ""
 
     [<TestMethod>]
     member this.TestProperty01 () =
@@ -52,8 +56,8 @@ type TestProperties () =
                       (Var "w",
                        ClosedOrOpenRange
                          ((LeftClosed, (Some (Var "from"), Some (Var "to"))),
-                          RightClosed)))])))]))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+                          RightClosed)))])))]))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestProperty02 () =
@@ -67,8 +71,8 @@ type TestProperties () =
    ClassInstance
      ((VariableTypeWithModifier (None, ClassHeaderType ["Nat"]),
        Signature (AliasedId ["Length"], [])),
-      [BlockStatement (Return (PredicateWithoutArgs (Var "myLength")))]))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+      [BlockStatement (Return (PredicateWithoutArgs (Var "myLength")))]))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestProperty03 () =
@@ -85,8 +89,8 @@ type TestProperties () =
          (AliasedId ["Coord"],
           [([Var "i"], VariableTypeWithModifier (None, ClassHeaderType ["Nat"]))])),
       [BlockStatement
-         (Return (PredicateWithArgs (Self [], [PredicateWithoutArgs (Var "i")])))]))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+         (Return (PredicateWithArgs (Self [], [PredicateWithoutArgs (Var "i")])))]))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestProperty04 () =
@@ -105,8 +109,8 @@ type TestProperties () =
             (Self [],
              QualifiedIdentifier
                (Var "myOp",
-                [PredicateWithArgs (AliasedId ["NeutralElement"], [])])))]))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+                [PredicateWithArgs (AliasedId ["NeutralElement"], [])])))]))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestProperty05 () =
@@ -154,8 +158,8 @@ type TestProperties () =
                     QualifiedIdentifier
                       (Self [],
                        [PredicateWithArgs (AliasedId ["NeutralElem"], [])])])]));
-       BlockStatement (Return (PredicateWithoutArgs (Var "val")))]))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+       BlockStatement (Return (PredicateWithoutArgs (Var "val")))]))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestProperty06 () =
@@ -196,8 +200,8 @@ type TestProperties () =
                     (Self ['@'],
                      [PredicateWithoutArgs (Var "a");
                       PredicateWithoutArgs (Var "b")]);
-                  PredicateWithoutArgs (Var "c")])])))))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+                  PredicateWithoutArgs (Var "c")])])))))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestProperty07 () =
@@ -218,8 +222,8 @@ type TestProperties () =
           [PredicateWithArgs
              (Self ['@'],
               [PredicateWithoutArgs (Var "e"); PredicateWithoutArgs (Var "x")]);
-           PredicateWithoutArgs (Var "x")]))))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+           PredicateWithoutArgs (Var "x")]))))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestProperty08 () =
@@ -241,8 +245,8 @@ type TestProperties () =
              [PredicateWithoutArgs (Var "e")]);
           PredicateWithArgs
             (AliasedId ["IsRightNeutralElement"],
-             [PredicateWithoutArgs (Var "e")])])))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+             [PredicateWithoutArgs (Var "e")])])))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestProperty09 () =
@@ -265,8 +269,8 @@ type TestProperties () =
          ([Var "e"],
           PredicateWithArgs
             (AliasedId ["IsLeftNeutralElement"],
-             [PredicateWithoutArgs (Var "e")])))))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+             [PredicateWithoutArgs (Var "e")])))))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestProperty10 () =
@@ -288,5 +292,35 @@ type TestProperties () =
        Exists
          ([Var "e"],
           PredicateWithArgs
-            (AliasedId ["IsNeutralElement"], [PredicateWithoutArgs (Var "e")])))))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+            (AliasedId ["IsNeutralElement"], [PredicateWithoutArgs (Var "e")])))))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.TestProperty11 () =
+        let result = run property """optional func LeftNeutralElement() -> tplSetElem
+            {
+                e: tplSetElem
+                assert 
+                    ex e
+                    (
+                        IsLeftNeutralElement(e)
+                    )
+                return e
+            }"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Property
+  (Optional,
+   FunctionalTermInstance
+     ((Signature (AliasedId ["LeftNeutralElement"], []),
+       VariableTypeWithModifier (None, TemplateType "tplSetElem")),
+      [BlockVariableDeclaration
+         ([Var "e"], VariableTypeWithModifier (None, TemplateType "tplSetElem"));
+       BlockStatement
+         (Assertion
+            (Exists
+               ([Var "e"],
+                PredicateWithArgs
+                  (AliasedId ["IsLeftNeutralElement"],
+                   [PredicateWithoutArgs (Var "e")]))));
+       BlockStatement (Return (PredicateWithoutArgs (Var "e")))]))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);

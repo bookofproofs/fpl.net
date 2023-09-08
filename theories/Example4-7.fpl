@@ -1,5 +1,6 @@
 T
 {
+    uses {}
     inference
     {
         ModusPonens()
@@ -15,9 +16,9 @@ T
         {
             proceedingResult: pred
             premise:
-                loop proceedingResult p
+                all proceedingResult p
                 (
-                    assert proceedingResult
+                    proceedingResult
                 )
             conclusion:
                 and (p)
@@ -97,16 +98,18 @@ T
             c:C
             x,y,z: obj
 
-            1. /GreaterAB |- Greater(a,b)
-            2. /GreaterBC |- Greater(b,c)
-            3. /ProceedingResults(/1,/2) |- and (Greater(a,b), Greater(b,c))
-            4. /3, /GreaterTransitive |- impl ( and (Greater(a,b), Greater(b,c)), Greater(a,c) )
-            5. /4, /ModusPonens |- Greater(a,c)
-            6. /ProceedingResults(/5,/1) |- and (Greater(a,c), Greater(a,b))
-            7. /6, /ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) )
+            1. GreaterAB |- Greater(a,b)
+            2. GreaterBC |- Greater(b,c)
+            3. ProceedingResults(1.,2.) |- and (Greater(a,b), Greater(b,c))
+            4. 3., GreaterTransitive |- impl ( and (Greater(a,b), Greater(b,c)), Greater(a,c) )
+            5. 4., ModusPonens |- Greater(a,c)
+            6. ProceedingResults(5.,1.) |- and (Greater(a,c), Greater(a,b))
+            7. 6., ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) )
 			8. |- qed
         }
    }
+
+   loc {}
 
 }
 

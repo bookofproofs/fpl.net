@@ -72,6 +72,7 @@ let keyWordSet =
         "con"; "conclusion"; 
         "cor"; "corollary";
         "del"; "delegate"
+        "else";
         "end";
         "ext";
         "ex";
@@ -119,18 +120,19 @@ let IdStartsWithSmallCase: Parser<string, unit> =
     many1Satisfy2L isLowercaseLetter (fun c -> isLowercaseLetter c || isUppercaseLetter c || isDigit c || isUnderscore c) "<camelCaseId>"
 let IdStartsWithCap: Parser<string,unit> = 
     many1Satisfy2L isUppercaseLetter (fun c -> isLowercaseLetter c || isUppercaseLetter c || isDigit c || isUnderscore c) "<PascalCaseId>"
-let digits: Parser<string,unit> = regex @"\d+" <?> "digits"
+let digits: Parser<string,unit> = regex @"\d+" <?> "<digits>"
+let dollarDigits = dollar >>. digits |>> FplIdentifier.DollarDigits
 let argumentIdentifier = regex @"\d+([a-z][a-z0-9A-Z_])*\." <?> "<ArgumentIdentifier>" |>> Predicate.ArgumentIdentifier
 let namespaceIdentifier = sepBy1 IdStartsWithCap dot |>> FplIdentifier.NamespaceIdentifier
 let alias = skipString "alias" >>. SW >>. IdStartsWithCap
 let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. (IW >>. alias) |>> FplIdentifier.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z][a-z0-9A-Z_]*)|\d*)$", RegexOptions.Compiled)
-let variableX: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" >>= (
-            fun s -> 
-                if keyWordSet.Contains(s) then fail ("Cannot use keyword '" + s + "' as a variable") 
-                else if tplRegex.IsMatch(s) then fail ("Cannot use template '" + s + "' as a variable") 
-                else (preturn s)
-        ) 
+let variableX: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" >>= 
+    ( fun s -> 
+        if keyWordSet.Contains(s) then fail ("Cannot use keyword '" + s + "' as a variable") 
+        else if tplRegex.IsMatch(s) then fail ("Cannot use template '" + s + "' as a variable") 
+        else (preturn s)
+    ) <?> "<variable>"
 let variable = variableX |>> FplIdentifier.Var 
 
 let variableList = sepEndBy1 variable commaSpaces
@@ -193,9 +195,9 @@ let keywordFunction: Parser<_,unit> = skipString "function" <|> skipString "func
 
 let theoryNamespace = (attempt aliasedNamespaceIdentifier <|> namespaceIdentifier) .>> IW
 
-let theoryNamespaceList = sepEndBy1 theoryNamespace (comma >>. IW) 
+let theoryNamespaceList = sepEndBy theoryNamespace (comma >>. IW) 
 
-let usesClause = skipString "uses" >>. SW >>. theoryNamespaceList |>> UsesClause.UsesClause
+let usesClause = skipString "uses" >>. IW >>. leftBrace >>. IW >>. theoryNamespaceList .>> IW .>> rightBrace |>> UsesClause.UsesClause
 
 let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
@@ -256,6 +258,7 @@ let assignee = (attempt entityWithCoord) <|> entity
 let coord = choice [
     assignee
     extDigits
+    dollarDigits
 ]
 
 let fplDelegateIdentifier: Parser<_, unit> = keywordDel >>. dot >>. regex @"[a-z_A-Z][a-z_A-Z0-9]+" |>> FplIdentifier.DelegateId
@@ -274,7 +277,7 @@ let fplRange = ((opt coord) .>> IW .>> tilde) .>>. (IW >>. opt coord)
 
 let closedOrOpenRange = (leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound) |>> FplIdentifier.ClosedOrOpenRange
 
-coordOfEntityRef := attempt closedOrOpenRange <|> bracketedCoordList
+coordOfEntityRef.Value <- attempt closedOrOpenRange <|> bracketedCoordList
 
 let coordInType = choice [
     fplIdentifier
@@ -321,7 +324,7 @@ let variableType = ((attempt parenthesisedType) <|> attempt variableTypeWithModi
 let namedVariableDeclaration = (variableList .>> IW) .>>. ((colon >>. IW) >>. variableType)
 let namedVariableDeclarationList = sepEndBy namedVariableDeclaration commaSpaces 
 
-paramTupleRef := (leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen) 
+paramTupleRef.Value <- (leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen) 
 
 let signature = (predicateIdentifier .>> IW) .>>. paramTuple |>> FplBlock.Signature
 
@@ -337,14 +340,18 @@ let variableRange = choice [
     assignee
 ]
 
-let elseMark = skipString ":>"
-let defaultResult = elseMark >>. IW >>.   many CW >>. statementList |>> Statement.DefaultResult
+let leftBraceCommented = (leftBrace >>. many CW)
+let commentedRightBrace = (many CW .>> rightBrace)
+
+let elseKeyword = skipString "else"
+let defaultResult = elseKeyword >>. IW >>. many CW >>. statementList |>> Statement.DefaultResult
 let conditionFollowedByResult = (case >>. IW >>. predicate .>> colon) .>>. (many CW >>. statementList) |>> Statement.ConditionFollowedByResult
 let conditionFollowedByResultList = many1 (many CW >>. conditionFollowedByResult)
 
 
-let casesStatement = ((keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen)) <?> "<cases statement>" |>> Statement.Cases
-let rangeOrLoopBody = ((assignee .>> SW) .>>. variableRange .>> many CW) .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
+let casesStatement = ((keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>> semiColon .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen)) <?> "<cases statement>" |>> Statement.Cases
+let assigneeWithVariableRange = ((assignee .>> SW) .>>. variableRange .>> many CW)
+let rangeOrLoopBody = assigneeWithVariableRange .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
 let loopStatement = keywordLoop >>. SW >>. rangeOrLoopBody |>> Statement.Loop
 let rangeStatement = keywordRange >>. SW >>. rangeOrLoopBody |>> Statement.Range
 
@@ -365,17 +372,17 @@ let statement =
         assignmentStatement
     ]) <?> "<statement>"
 
-statementListRef := many (many CW >>. statement .>> IW)
+statementListRef.Value <- many (many CW >>. statement .>> IW)
 
 (* Predicates *)
 
-predicateWithArgumentsRef := fplIdentifier .>>. argumentTuple |>> Predicate.PredicateWithArgs
+predicateWithArgumentsRef.Value <- fplIdentifier .>>. argumentTuple |>> Predicate.PredicateWithArgs
 
 let qualifiedIdentifier = fplIdentifier .>>. many1 (dot >>. predicateWithArguments) |>> Predicate.QualifiedIdentifier
 
 let predicateWithoutArgs = fplIdentifier |>> Predicate.PredicateWithoutArgs
 
-primePredicateRef := choice [
+primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
     keywordUndefined
@@ -393,8 +400,9 @@ let equivalence = keywordIif >>. twoPredicatesInParens |>> Predicate.Iif
 let exclusiveOr = keywordXor >>. twoPredicatesInParens |>> Predicate.Xor
 let negation = keywordNot >>. onePredicateInParens |>> Predicate.Not
 let all = (keywordAll >>. SW >>. variableList) .>>. onePredicateInParens |>> Predicate.All
+let allAssert = (keywordAll >>. SW >>. assigneeWithVariableRange) .>>. onePredicateInParens |>> Predicate.AllAssert
 let exists = (keywordEx >>. SW >>. variableList) .>>. onePredicateInParens |>> Predicate.Exists
-let existsTimesN = ((keywordEx >>. dollar >>. digits) .>>. (SW >>. variableList)) .>>. onePredicateInParens |>> Predicate.ExistsN
+let existsTimesN = ((keywordEx >>. dollarDigits) .>>. (SW >>. variableList)) .>>. onePredicateInParens |>> Predicate.ExistsN
 let isOperator = (keywordIs >>. spacesLeftParenSpaces >>. coordInType) .>>. (commaSpaces >>. variableType) .>> spacesRightParenSpaces |>> Predicate.IsOperator
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
@@ -405,19 +413,20 @@ let compoundPredicate = choice [
     equivalence
     exclusiveOr
     negation
-    all
+    (attempt allAssert) <|> all
     (attempt existsTimesN) <|> exists
     isOperator
 ]
 
-predicateRef := (compoundPredicate <|> primePredicate) .>> IW
+predicateRef.Value <- (compoundPredicate <|> primePredicate) .>> IW
 
-predicateListRef := sepBy predicate commaSpaces 
+predicateListRef.Value <- sepBy predicate commaSpaces 
 
 (* FPL building blocks *)
 
-let commentedNamedVariableDeclaration = many CW >>. namedVariableDeclaration |>> FplBlock.BlockVariableDeclaration
 let commentedStatement = many CW >>. statement |>> FplBlock.BlockStatement
+
+let commentedNamedVariableDeclaration = many CW >>. namedVariableDeclaration |>> FplBlock.BlockVariableDeclaration
 
 let variableSpecification = (attempt commentedStatement) <|> (attempt commentedNamedVariableDeclaration)
 
@@ -430,14 +439,12 @@ However, there is a syntactical simplification of the signature*)
 let commentedPredicate = many CW >>. predicate
 let premise = many CW >>. (keywordPremise >>. IW >>. colon >>. commentedPredicate) 
 let conclusion = many CW >>. (keywordConclusion >>. IW >>. colon >>. commentedPredicate) 
-let leftBraceCommented = (leftBrace >>. many CW)
-let commentedRightBrace = (many CW .>> rightBrace)
 let premiseConclusionBlock = leftBraceCommented >>. variableSpecificationList .>>. (premise .>> many CW) .>>. conclusion .>> commentedRightBrace
 
 (* FPL building blocks - rules of reference *)
 let keywordInference: Parser<_,unit> = skipString "inference" <|> skipString "inf"
 let ruleOfInference = (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.RuleOfInference
-let ruleOfInferenceList = sepEndBy1 ruleOfInference (many CW)
+let ruleOfInferenceList = many (many CW >>. ruleOfInference .>> IW)
 let rulesOfInferenceBlock = (keywordInference >>. IW >>. leftBraceCommented >>. many CW >>. ruleOfInferenceList) .>> commentedRightBrace
 
 (* FPL building blocks - Theorem-like statements and conjectures *)
@@ -452,7 +459,7 @@ let lemma = keywordLemma >>. SW >>. (signature .>> IW) .>>. premiseConclusionBlo
 let proposition = keywordProposition >>. SW >>. (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Proposition
 let conjecture = keywordConjecture >>. SW >>. (signature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Conjecture
 
-let dollarDigitList = many1 (dollar >>. digits)
+let dollarDigitList = many1 dollarDigits
 let referencingIdentifier = predicateIdentifier .>>. dollarDigitList
 let corollarySignature = (referencingIdentifier .>> IW) .>>. paramTuple
 let corollary = keywordCorollary >>. SW >>. (corollarySignature .>> IW) .>>. premiseConclusionBlock |>> FplBlock.Corollary
@@ -582,18 +589,18 @@ let ebnfFactor = choice [
     variable
     localizationString
     ebnfTranslTuple
-]
-let ebnfTerm = many1 (SW >>. ebnfFactor) |>> FplIdentifier.LocalizationTerm
-ebnfTranslRef.Value <- many1 (IW >>. case >>. IW >>. ebnfTerm) |>> FplIdentifier.LocalizationTermList
+] 
+let ebnfTerm = many1 (ebnfFactor .>> SW) |>> FplIdentifier.LocalizationTerm
+ebnfTranslRef.Value <- sepEndBy1 ebnfTerm (IW >>. case >>. IW) |>> FplIdentifier.LocalizationTermList
 let translation = (tilde >>. localizationLanguageCode .>> IW .>> colon .>> IW) .>>. ebnfTransl
 let translationList = many (many CW >>. translation .>> IW)
 let localization = (predicate .>> IW .>> colonEqual .>> IW) .>>. (translationList .>> IW .>> semiColon)
 let localizationList = many (many CW >>. localization .>> IW)
-let localizationBlock = keywordLocalization >>. spacesLeftParenSpaces >>. localizationList .>> commentedRightBrace
+let localizationBlock = keywordLocalization >>. IW >>. leftBraceCommented >>. localizationList .>> commentedRightBrace
 
 
 (* Namespaces *)
-let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (many CW >>. opt usesClause) .>>. (many CW >>. opt rulesOfInferenceBlock) .>>. (many CW >>. theoryBlock) .>>. (many CW >>. opt localizationBlock) .>> commentedRightBrace
+let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (many CW >>. usesClause) .>>. (many CW >>. rulesOfInferenceBlock) .>>. (many CW >>. theoryBlock) .>>. (many CW >>. localizationBlock) .>> commentedRightBrace
 let fplNamespace = namespaceIdentifier .>>. (many CW >>. namespaceBlock)
 let fplNamespaceList = many1 (many CW >>. fplNamespace .>> IW)
 (* Final Parser *)

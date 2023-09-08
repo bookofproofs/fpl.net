@@ -4,7 +4,7 @@ The original grammar until Grammar version 1.2.1 was the EBNF input for an FPL p
 
 From the version 2.0 on, there are some major changes to the grammar:
 * The FPL parser is being implemented from scratch, based on .NET (concretely the F# FParsec library). 
-* Consequently, there is no separate EBNF input file. 
+* Consequently, there is no separate EBNF input file, since the grammar is programmed building up on parsers written using FParsec.
 * There are amendments to the FPL syntax in the new implementation.
 
 The following documentation describes the syntactical amendments and provides a rationale behind each.
@@ -17,26 +17,28 @@ The following documentation describes the syntactical amendments and provides a 
 ### Error recovery
 * Both the original tatsu parser generator and the new, FParsec-based parsers do not provide in-built error recovery
 * However, the Fparsec-based parser provides more programmatic control. 
-* Error recovery can be added to the FPL parser more easily.
+* Error recovery can be added to the FPL parser more easily but is not available still.
 
 ### More stringent predicate syntax
 * Giving up mixing up statements and index variables being not predicative in the choice rule of Prime predicates 
 * This mixing is now only possible for the isOperator.
+* The `all` compound predicate now allows iterating through contents variadic variables containing predicates. For instance, for the types `a: pred b: +pred`,   instead of writing a loop - assert statement construct like `loop a b (assert a)` we can also write `all a b (a)`. This way, the expression becomes a predicate, not a statement in the AST, allowing to interpret it appropriately.
 
 ### Better handling of keywords and generic templates
 * Better recognition and error reporting of conflicts between variable names and keywords 
 * Better recognition and error reporting of conflicts between variable names and template names
 
-### Keyword 'delegate' or 'del' instead of 'py'
-* The original Python 'py' prefix followed pythonic delegates like 'py.some_delegate_name(x,y,z)' are now replaced by the more general prefix 'del' or 'delegate'
-* The names for the delegates are now generalized from the original regex @"[a-z_]*" to @"[a-z_A-Z][a-z_A-Z0-9]+"
+### Keyword `delegate` or `del` instead of `py`
+* The original Python `py` prefix followed pythonic delegates like `py.some_delegate_name(x,y,z)` are now replaced by the more general prefix `del` or `delegate`
+* The names for the delegates are now generalized from the original regex `@"[a-z_]*"` to `@"[a-z_A-Z][a-z_A-Z0-9]+"`
 
-### Simplified Syntax for the 'cases' statement
-* The keywords 'case' and 'else' are now discontinued and replaced by the literals '|' and ":>"
+### Simplified Syntax for the `cases` statement
+* The keyword `case` is now discontinued and replaced by the literal `|`
+* The sequence of cases starting by the literal `|` must end by a semicolon
+* After this semicolon, the else case does not require a colon, instead of `else:` we simply write `else`.
 * Rationale: 
-    * Simplified syntax since 'case' is likely to be mistaken for the existing keyword 'cases'
-    * '|' is intuitively similar to the BNF or regex 'OR' character 
-    * Simplified recognition of the end of each 'case' and the 'else' block since the literals '|' and ":>" do not conflict with small-case variable names of predicates that may be in each 'case' and the 'else' block.
+    * Simplified syntax since `case` is likely to be mistaken for the existing keyword `cases`
+    * `|` is intuitively similar to the BNF or regex 'OR' character 
     * Improved readability
 
 ### Classes 
@@ -46,9 +48,46 @@ The following documentation describes the syntactical amendments and provides a 
 ### Enhancement of Proofs
 * Justifying arguments can now contain not only lists of 'primePredicate' but more general of 'predicate'
 * Derived arguments can now also reference the conclusion of the to-be-proven theorem
-* A simplified syntax of referencing argumentIdentifiers (referencing via slash '/' is no longer necessary). Now, restating the same identifier is enough.
+* A simplified syntax of referencing argumentIdentifiers (referencing via slash `/` is no longer necessary). Now, restating the same identifier is enough.
 * Bugfix preventing syntax allowing assumptions followed by a justification (pure math standard: without justification)
-* Improved readability
+* Improved readability, for instance, instead of 
+```
+    proof Example4$1
+    {
+        a:A
+        b:B
+        c:C
+        x,y,z: obj
+
+        1. /GreaterAB |- Greater(a,b)
+        2. /GreaterBC |- Greater(b,c)
+        3. /ProceedingResults(/1,/2) |- and (Greater(a,b), Greater(b,c))
+        4. /3, /GreaterTransitive |- impl ( and (Greater(a,b), Greater(b,c)), Greater(a,c) )
+        5. /4, /ModusPonens |- Greater(a,c)
+        6. /ProceedingResults(/5,/1) |- and (Greater(a,c), Greater(a,b))
+        7. /6, /ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) )
+	8. |- qed
+    }
+```
+* we can write 
+```        
+    proof Example4$1
+    {
+        a:A
+        b:B
+        c:C
+        x,y,z: obj
+
+        1. GreaterAB |- Greater(a,b)
+        2. GreaterBC |- Greater(b,c)
+        3. ProceedingResults(1.,2.) |- and (Greater(a,b), Greater(b,c))
+        4. 3., GreaterTransitive |- impl ( and (Greater(a,b), Greater(b,c)), Greater(a,c) )
+        5. 4., ModusPonens |- Greater(a,c)
+        6. ProceedingResults(5.,1.) |- and (Greater(a,c), Greater(a,b))
+        7. 6., ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) )
+	8. |- qed
+    }
+```
 
 ### Self-Containment 
 * This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:
@@ -58,9 +97,25 @@ The following documentation describes the syntactical amendments and provides a 
     * Nevertheless, we stick to the 'must' requirements (see [INTRO.md](https://github.com/bookofproofs/fpl.net/blob/main/INTRO.md)) 28 (support of overrides), 38 (support recursive linguistic constructs), and 40 (support of self-reference in definitions) that could still potentially negatively impact how complicated it is to implement the new FPL interpreter.
 
 ### Namespaces
-* A single *.fpl file can now contain more than one namespace. This will significantly simplify later preprocessing when the FPL parser needs to include namespaces via the 'uses' keyword. 
+* A single *.fpl file can now contain more than one namespace. This will significantly simplify later preprocessing when the FPL parser needs to include namespaces via the `uses` keyword. 
 * Moreover, it provides more flexibility to end-users
-* Since 'order of declarations now matter' (see Self-Containment above), we have to discontinue the possibility of including FPL namespaces using wildcards like in 'Fpl.Commons.*') since it may be undecidable in which order they have to be included.
+* Since 'order of declarations now matter' (see Self-Containment above), we have to discontinue the possibility of including FPL namespaces using wildcards like in `Fpl.Commons.*`) since it may be undecidable in which order they have to be included.
+* The `uses` clause has a separate block enclosed by `{` and `}` so it is not necessary to repeate the `uses` keyword in each line.
+* The `uses` clause has to be made explicitly, even if it is empty. The same holds for the inference block and the localization block. Thus, an empty, syntactically correct namespace in FPL looks now like this: 
+
+```
+    TestNamescpace {
+        uses {}
+        inference {}
+        theory {}
+        localization {}
+    }
+```
+
+### Extensions of FPL  
+* In the Proof of Concept for the syntax of FPL, we have only one extension for digit literals to identify them in FPL with a mathematical definition of natural numbers. These literals are 0, 1, 2, ...
+* In previous versions of the FPL grammar (before 2.4.2), there was a conflict in the syntax between these symbols and the symbols for using inbuilt index values. Now, the latter start with a dollar: $0, $1, $2, ....
+* This difference will make it easier in the FPL interpreter to disambiguate the two.
 
 ## Amendments to the FPL interpreter 
 ### Amendments resulting from the FPL parser

@@ -6,6 +6,10 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
 type TestDefinitionPredicates () =
+    let replaceWhiteSpace (input: string) =
+        let whiteSpaceChars = [|' '; '\t'; '\n'; '\r'|]
+        input.Split(whiteSpaceChars)
+            |> String.concat ""
 
     [<TestMethod>]
     member this.TestDefinitionPredicate01 () =
@@ -31,8 +35,8 @@ type TestDefinitionPredicates () =
                PredicateWithArgs
                  (AliasedId ["Add"],
                   [PredicateWithoutArgs (Var "m");
-                   PredicateWithoutArgs (Var "k")])])))), None))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+                   PredicateWithoutArgs (Var "k")])])))), None))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestDefinitionPredicate02 () =
@@ -63,8 +67,8 @@ type TestDefinitionPredicates () =
               PredicateWithArgs
                 (AliasedId ["LowerEqual"],
                  [PredicateWithoutArgs (Var "lowerBound");
-                  PredicateWithoutArgs (Var "x")])]))), None))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+                  PredicateWithoutArgs (Var "x")])]))), None))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestDefinitionPredicate03 () =
@@ -92,8 +96,7 @@ type TestDefinitionPredicates () =
              (AliasedId ["IsBounded"],
               [PredicateWithArgs (Var "f", [PredicateWithoutArgs (Var "x")])])))),
     None))"""
-        let exp1 = expected.Replace("\r","")
-        Assert.AreEqual(exp1, actual);
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestDefinitionPredicate04 () =
@@ -124,8 +127,7 @@ type TestDefinitionPredicates () =
              (PredicateWithArgs (Var "p", [PredicateWithoutArgs (Var "a")]),
               PredicateWithArgs (Var "p", [PredicateWithoutArgs (Var "b")]))))),
     None))"""
-        let exp1 = expected.Replace("\r","")
-        Assert.AreEqual(exp1, actual);
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
 
     [<TestMethod>]
@@ -149,8 +151,7 @@ type TestDefinitionPredicates () =
              (AliasedId ["Equal"],
               [PredicateWithoutArgs (Var "x"); PredicateWithoutArgs (Var "y")])))),
     None))"""
-        let exp1 = expected.Replace("\r","")
-        Assert.AreEqual(exp1, actual);
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestDefinitionPredicate06 () =
@@ -221,8 +222,7 @@ type TestDefinitionPredicates () =
                    QualifiedIdentifier
                      (Var "r", [PredicateWithArgs (AliasedId ["Codomain"], [])])])]))],
      None), None))"""
-        let exp1 = expected.Replace("\r","")
-        Assert.AreEqual(exp1, actual);
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestDefinitionPredicate07 () =
@@ -235,8 +235,8 @@ type TestDefinitionPredicates () =
   (Signature
      (AliasedId ["Greater"],
       [([Var "x"; Var "y"], VariableTypeWithModifier (None, ObjectType))]),
-   (([], None), None))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+   (([], None), None))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestDefinitionPredicate08 () =
@@ -267,8 +267,8 @@ type TestDefinitionPredicates () =
               PredicateWithArgs
                 (AliasedId ["In"],
                  [PredicateWithoutArgs (Var "z");
-                  PredicateWithoutArgs (Var "potentialPowerSet")]))))), None))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+                  PredicateWithoutArgs (Var "potentialPowerSet")]))))), None))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestDefinitionPredicate09 () =
@@ -298,7 +298,7 @@ type TestDefinitionPredicates () =
               PredicateWithArgs
                 (AliasedId ["In"],
                  [PredicateWithoutArgs (Var "u");
-                  PredicateWithoutArgs (Var "superSet")]))))), None))""".Replace("\r","")
-        Assert.AreEqual(expected, actual);
+                  PredicateWithoutArgs (Var "superSet")]))))), None))"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
         

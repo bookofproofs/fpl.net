@@ -1,5 +1,10 @@
 ﻿## 2.4.2
 * Parser for block and inline comments replaced
+* Making the uses clause, the inference blocks, and the localization blocks explicit
+* Distinguishing in the syntax between index values $1,$2, ... and the FPL extension for natural numbers 1,2,...
+* Adding the allAssert compound predicate
+* Bugfixes in the syntax of localizations 
+* Some unit tests added
 
 ## 2.4.1
 * Some bugfixes regarding choice productions and braced blocks
