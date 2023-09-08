@@ -25,6 +25,10 @@ None
 
 ## Release Notes
 
+### 1.2.7
+
+- Update FPL Language Server to reflect FPL grammar 2.4.2
+
 ### 1.2.6
 
 * Bugfix syntax highlighting for comments

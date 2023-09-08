@@ -4,6 +4,9 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.2.7
+- Update FPL Language Server to reflect FPL grammar 2.4.2
+
 ## 1.2.6
 - Correcting syntax highlighting issues for comments
 
