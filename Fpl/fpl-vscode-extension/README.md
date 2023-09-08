@@ -12,8 +12,7 @@ Currently, the extension provides a basic syntax highlighting for `.fpl` files i
 
 ## Requirements
 
-* VSCode version ">1.81.0"
-* .NET Cli on your system
+VSCode version ">1.81.0"
 
 ## Extension Settings
 
@@ -25,9 +24,13 @@ None
 
 ## Release Notes
 
+### 1.2.8
+
+* Support for standard color themes
+
 ### 1.2.7
 
-- Update FPL Language Server to reflect FPL grammar 2.4.2
+* Update FPL Language Server to reflect FPL grammar 2.4.2
 
 ### 1.2.6
 
