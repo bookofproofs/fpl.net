@@ -31,44 +31,44 @@
 	"repository": {
 		"longComments": {
 			"patterns": [{
-				"name": "longComments.fpl",
+				"name": "longComments.fpl comment",
 				"begin": "/\\*",
 				"end": "\\*/"
 			}]
 		},
 		"keywords": {
 			"patterns": [{
-				"name": "keyword.fpl",
-				"match": "\\b(alias|all|and|assert|ass|assume|ax|axiom|cases|cl|class|conj|conjecture|con|conclusion|cor|corollary|del|delegate|end|ex|false|iif|impl|inf|inference|is|lem|lemma|loc|localization|loop|mand|mandatory|not|opt|optional|or|post|postulate|pre|premise|prf|proof|prop|proposition|qed|range|ret|return|rev|revoke|self|thm|theorem|th|theory|trivial|true|uses|xor)\\b"
+				"name": "keyword.fpl keyword",
+				"match": "\\b(all|and|assert|ass|assume|cases|con|conclusion|del|delegate|end|ex|false|iif|impl|is|loop|not|or|pre|premise|qed|range|ret|return|rev|revoke|self|trivial|true|xor)\\b"
 			}]
 		},
 		"inbuiltTypes": {
 			"patterns": [{
-				"name": "inbuiltType.fpl",
-				"match": "\\b(func|function|ind|index|obj|object|pred|predicate|undef|undefined)\\b"
+				"name": "inbuiltType.fpl punctuation",
+				"match": "\\b(alias|ax|axiom|cl|class|conj|conjecture|cor|corollary|func|function|ind|index|inf|inference|lem|lemma|loc|localization|mand|mandatory|obj|object|opt|optional|post|postulate|pred|predicate|prf|proof|prop|proposition|thm|theorem|th|theory|uses|undef|undefined)\\b"
 			}]
 		},
 		"templates": {
 			"patterns": [{
-				"name": "template.fpl",
+				"name": "template.fpl entity.name.function",
 				"match": "\\b((tpl|template)[A-Z][a-z0-9A-Z_]*)\\b"
 			}]
 		},
 		"variables": {
 			"patterns": [{
-				"name": "variable.fpl",
+				"name": "variable.fpl variable",
 				"match": "[a-z][a-z0-9A-Z_]*"
 			}]
 		},
 		"predicateIdentifiers": {
 			"patterns": [{
-				"name": "predicateIdentifiers.fpl",
+				"name": "predicateIdentifiers.fpl entity.name.type",
 				"match": "[A-Z][a-z0-9A-Z_]*"
 			}]
 		},
 		"shortComments": {
 			"patterns": [{
-				"name": "shortComments.fpl",
+				"name": "shortComments.fpl comment",
 				"match": "(//).*\\n?"
 			}]
 		},
@@ -78,7 +78,7 @@
 			"end": "\"",
 			"patterns": [
 				{
-					"name": "character.fpl",
+					"name": "character.fpl string",
 					"match": "."
 				}
 			]

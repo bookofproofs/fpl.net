@@ -128,11 +128,11 @@ let alias = skipString "alias" >>. SW >>. IdStartsWithCap
 let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. (IW >>. alias) |>> FplIdentifier.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z][a-z0-9A-Z_]*)|\d*)$", RegexOptions.Compiled)
 let variableX: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" >>= 
-    ( fun s -> 
-        if keyWordSet.Contains(s) then fail ("Cannot use keyword '" + s + "' as a variable") 
-        else if tplRegex.IsMatch(s) then fail ("Cannot use template '" + s + "' as a variable") 
-        else (preturn s)
-    ) <?> "<variable>"
+                                        ( fun s -> 
+                                            if keyWordSet.Contains(s) then fail ("Cannot use keyword '" + s + "' as a variable") 
+                                            else if tplRegex.IsMatch(s) then fail ("Cannot use template '" + s + "' as a variable") 
+                                            else (preturn s)
+                                        ) <?> "<variable>"
 let variable = variableX |>> FplIdentifier.Var 
 
 let variableList = sepEndBy1 variable commaSpaces
