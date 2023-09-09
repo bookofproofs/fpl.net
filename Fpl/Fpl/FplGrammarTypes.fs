@@ -1,6 +1,7 @@
 ﻿module FplGrammarTypes
 
 type SyntaxNode =
+    // literal types
     | LeftBrace of unit option
     | RightBrace of unit option
     | LeftParen of unit option
@@ -21,6 +22,8 @@ type SyntaxNode =
     | Dollar of unit option
     | Map of unit option
     | VDash of unit option
+    // whitespace and comment types
+    | CW of unit option
     | Error
 
 type Extension = 

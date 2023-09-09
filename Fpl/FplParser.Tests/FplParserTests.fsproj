@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+      <Compile Include="TestComments.fs" />
       <Compile Include="TestLiterals.fs" />
       <Compile Include="TestLocalizations.fs" />
       <Compile Include="TestAxioms.fs" />

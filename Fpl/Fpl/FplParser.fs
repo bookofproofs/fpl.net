@@ -24,3 +24,14 @@ let semiColon = expect (skipChar ';') "expecting ';'" |>> SyntaxNode.Semicolon
 let dollar = expect (skipChar '$') "expecting '$'" |>> SyntaxNode.Dollar
 let map = expect (skipString "->") "expecting map '->'" |>> SyntaxNode.Map
 let vDash = expect (skipString "|-") "expecting '|-'" |>> SyntaxNode.VDash
+
+(* Whitespaces and Comments *)
+let IW = spaces
+let SW = spaces1
+let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline <|> eof) |>> ignore <?> "<line-comment>"
+let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) |>> ignore <?> "<multiline-comment>"
+let CW = expect (choice [ 
+            SW 
+            blockComment 
+            inlineComment 
+         ]) "expecting whitespace, inline comment, or block comment" |>> SyntaxNode.CW
