@@ -1,5 +1,28 @@
 ﻿module FplGrammarTypes
 
+type SyntaxNode =
+    | LeftBrace of unit option
+    | RightBrace of unit option
+    | LeftParen of unit option
+    | RightParen of unit option
+    | LeftBracket of unit option
+    | RightBracket of unit option
+    | Comma of unit option
+    | Star of unit option
+    | Plus of unit option
+    | Dot of unit option
+    | Colon of unit option
+    | ColonEqual of unit option
+    | At of unit option
+    | ExclamationMark of unit option
+    | Case of unit option
+    | Tilde of unit option
+    | Semicolon of unit option
+    | Dollar of unit option
+    | Map of unit option
+    | VDash of unit option
+    | Error
+
 type Extension = 
     | Extensionname of string
     | ExtensionRegex of string
