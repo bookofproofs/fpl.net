@@ -23,7 +23,13 @@ type SyntaxNode =
     | Map of unit option
     | VDash of unit option
     // whitespace and comment types
-    | CW of unit option
+    | BlockCommentStart of unit option
+    | BlockCommentEnd of unit option
+    | BlockComment of unit option
+    | InlineCommentStart of unit option
+    | InlineComment of unit option
+    | SignificantWS of unit option
+    | CW of SyntaxNode option
     | Error
 
 type Extension = 

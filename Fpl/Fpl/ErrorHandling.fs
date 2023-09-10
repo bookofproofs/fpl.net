@@ -89,3 +89,4 @@ let tryParse parser streamName input =
     | ParserResult.Failure(_) as f -> failwithf "Parser failed! %A" f
     | ParserResult.Success(r, s, _) -> (r, s.Diagnostics)
 
+

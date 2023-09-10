@@ -3,6 +3,16 @@ open FplGrammarTypes
 open ErrorHandling
 open FParsec
 
+(* IMPORTANT NOTE: This is the unstable and incomplete new version of the FPL parser,
+where we are trying to add error recovery. 
+
+
+For the current stable version see FplGrammar.fs that has no error recovery in it.
+
+This version is unstable because some of the unit tests in Fpl/FplParserTests/TestComments.fs fail.
+This version is incomplete because it only covers a tiny bit of the FPL grammar.
+*)
+
 (* Literals *)
 let leftBrace = expect (skipString "{") "missing opening '{'" |>> SyntaxNode.LeftBrace
 let rightBrace = expect (skipString "}") "missing closing '}'" |>> SyntaxNode.RightBrace
@@ -24,14 +34,13 @@ let semiColon = expect (skipChar ';') "expecting ';'" |>> SyntaxNode.Semicolon
 let dollar = expect (skipChar '$') "expecting '$'" |>> SyntaxNode.Dollar
 let map = expect (skipString "->") "expecting map '->'" |>> SyntaxNode.Map
 let vDash = expect (skipString "|-") "expecting '|-'" |>> SyntaxNode.VDash
+let inlineCommentStart = expect (skipString "//") "expecting '//'" |>> SyntaxNode.InlineCommentStart
+let blockCommentStart = expect (skipString "/*") "expecting '/*'" |>> SyntaxNode.BlockCommentStart
+let blockCommentEnd = skipString "*/"  
 
 (* Whitespaces and Comments *)
 let IW = spaces
-let SW = spaces1
-let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline <|> eof) |>> ignore <?> "<line-comment>"
-let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) |>> ignore <?> "<multiline-comment>"
-let CW = expect (choice [ 
-            SW 
-            blockComment 
-            inlineComment 
-         ]) "expecting whitespace, inline comment, or block comment" |>> SyntaxNode.CW
+let SW = expect spaces1 "whitespace" |>> SyntaxNode.SignificantWS
+let inlineComment = expect (inlineCommentStart >>. skipManyTill anyChar (skipNewline <|> eof)) "inlineComment" |>> SyntaxNode.InlineComment
+let blockComment = expect (blockCommentStart >>. (skipManyTill anyChar blockCommentEnd)) "missing closing '*/'" |>> SyntaxNode.BlockComment
+let CW = expect (attempt ((attempt SW) <|> blockComment) <|> inlineComment ) "expecting whitespace, inlineComment, or blockComment" |>> SyntaxNode.CW
