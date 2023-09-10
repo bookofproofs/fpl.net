@@ -3,6 +3,13 @@ open System.Text.RegularExpressions
 open FParsec
 open FplGrammarTypes
 
+(* This is the last stable version of the FPL parser 
+that is currently hooked up with the FPL language server for VS Code. 
+It has no error recovery.
+There is another unstable pre-version of a new FPL parser in FplParser.fs
+with an attempt to add error recovery.
+*)
+
 (* Literals *)
 
 let rightBrace: Parser<_, unit>= skipChar '}'
