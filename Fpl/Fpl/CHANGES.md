@@ -1,4 +1,7 @@
-﻿## 2.4.2
+﻿## 2.4.3
+* Hook up error diagnostics stemming from what later will become error recovery in F# to the language server in C#.
+
+## 2.4.2
 * Parser for block and inline comments replaced
 * Making the uses clause, the inference blocks, and the localization blocks explicit
 * Distinguishing in the syntax between index values $1,$2, ... and the FPL extension for natural numbers 1,2,...

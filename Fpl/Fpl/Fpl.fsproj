@@ -9,11 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="FplGrammarTypes.fs" />
+    <Compile Include="ErrRecovery.fs" />
     <None Include="CHANGES.md" />
     <None Include="DocuFplGrammarPocShiftFromPythonToFSharp.md" />
-    <Compile Include="FplGrammarTypes.fs" />
-    <Compile Include="ErrorHandling.fs" />
-    <Compile Include="FplParser.fs" />
     <Compile Include="FplGrammar.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

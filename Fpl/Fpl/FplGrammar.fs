@@ -1,14 +1,8 @@
 ﻿module FplGrammar
 open System.Text.RegularExpressions
-open FParsec
 open FplGrammarTypes
-
-(* This is the last stable version of the FPL parser 
-that is currently hooked up with the FPL language server for VS Code. 
-It has no error recovery.
-There is another unstable pre-version of a new FPL parser in FplParser.fs
-with an attempt to add error recovery.
-*)
+open ErrRecovery
+open FParsec
 
 (* Literals *)
 
@@ -611,6 +605,6 @@ let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (many CW >
 let fplNamespace = namespaceIdentifier .>>. (many CW >>. namespaceBlock)
 let fplNamespaceList = many1 (many CW >>. fplNamespace .>> IW)
 (* Final Parser *)
-let ast = (fplNamespaceList .>> eof) |>> FplParserResult.AST
-let fplParser (input: string) = run ast input 
-
+let ast = (fplNamespaceList .>> eof) |>> Ast.AST
+let fplParser (input: string) = tryParse ast "recovery failed;" ad input 
+let parserDiagnostics = ad

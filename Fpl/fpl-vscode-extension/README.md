@@ -24,6 +24,10 @@ None
 
 ## Release Notes
 
+### 1.2.9
+
+* Emitting error diagnostics directly from FplParser
+
 ### 1.2.8
 
 * Support for standard color themes
