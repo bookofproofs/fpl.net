@@ -1,6 +1,7 @@
-﻿open FplGrammarTypes
-open ErrorHandling
-open FplParser
+﻿open Flop
+open FplGrammarTypes
+open ErrRecovery
+open FplGrammar
 open FParsec
 
 
@@ -9,9 +10,5 @@ open FParsec
 // ~~~~~~~~~~~~~ The Parser ~~~~~~~~~~~~~~~~~~
 
 
+main
 
-
-
-let result = tryParse vDash "s|-"
-
-printfn "%O" result
