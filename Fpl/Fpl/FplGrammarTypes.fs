@@ -1,11 +1,5 @@
 ﻿module FplGrammarTypes
 
-type Ast = 
-    | Escape // used to replace AST subnodes when we recover from an error
-    | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from
-    | Empty // used to mark empty inner inputs between enclosing ones 
-
-
 type Extension = 
     | Extensionname of string
     | ExtensionRegex of string
@@ -123,6 +117,9 @@ type FplBlock =
     | DefinitionClass of (FplIdentifier * FplType) * (FplBlock list * FplBlock list)
 
 
- type FplParserResult = 
+type Ast = 
     | AST of (FplIdentifier * ((((ExtensionBlock option * UsesClause) * FplBlock list) * FplBlock list) * (Predicate * (string * FplIdentifier) list) list)) list
+    | Escape // used to replace AST subnodes when we recover from an error
+    | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from
+    | Empty // used to mark empty inner inputs between enclosing ones 
 

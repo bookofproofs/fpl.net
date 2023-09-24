@@ -4,6 +4,9 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.2.9
+* Update DLL library for the Language Server 
+
 ## 1.2.8
 - Support for standard color themes
 
@@ -14,7 +17,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Correcting syntax highlighting issues for comments
 
 ## 1.2.2, 1.2.3, 1.2.4, 1.2.5
-- Logging and installation issues fiexed
+- Logging and installation issues fixed
 
 ## 1.2.1
 - Diagnostics are now not mocked but come directly from the FPL parser.

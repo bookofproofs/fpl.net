@@ -14,10 +14,28 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 *)
 
-type DiagnosticEmitter = Parser | Interpreter 
-type DiagnosticSeverity = Error | Warning | Severity | Hint 
-type DiagnosticMessage = DiagnosticMessage of string
+type DiagnosticEmitter = FplParser | FplInterpreter 
+type DiagnosticSeverity = Error | Warning | Hint | Information
+type DiagnosticMessage = 
+    | DiagnosticMessage of string
+    member this.Value = 
+        match this with 
+        | DiagnosticMessage(value) -> value
 type Diagnostic = Diagnostic of DiagnosticEmitter * DiagnosticSeverity * Position * DiagnosticMessage
+    with 
+    member this.Emitter with get() = 
+        match this with 
+        | Diagnostic(emitter, _, _, _) -> emitter
+    member this.Severity with get() = 
+        match this with 
+        | Diagnostic(_, severity, _, _) -> severity
+    member this.Position with get() = 
+        match this with 
+        | Diagnostic(_, _, position, _) -> position
+    member this.Message with get() = 
+        match this with 
+        | Diagnostic(_, _, _, message) -> message
+
 type Diagnostics () =
     let myList = new List<Diagnostic>()
     member this.List with get() = myList
@@ -29,7 +47,7 @@ type Diagnostics () =
         myList
         |> Seq.map string
         |> String.concat "\n"
-    member this.Clear = myList.Clear
+    member this.Clear() = myList.Clear()
 
 let ad = Diagnostics() 
 
@@ -42,7 +60,7 @@ let tryParse globalParser expectMessage (ad:Diagnostics) input =
         result 
     | Failure(errorMsg, restInput, userState) -> 
         let diagnosticMsg = DiagnosticMessage (expectMessage + " " + errorMsg)
-        let diagnostic = Diagnostic (DiagnosticEmitter.Parser, DiagnosticSeverity.Error,restInput.Position,diagnosticMsg)
+        let diagnostic = Diagnostic (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error,restInput.Position,diagnosticMsg)
         ad.AddDiagnostic diagnostic
         Ast.Error
 
@@ -56,14 +74,14 @@ let emitDiagnostics (ad:Diagnostics) escapeParser msg =
         getPosition .>>. escapeParser
         |>> fun (pos, escape) -> (pos, escape)
     positionedEscapeParser >>= fun (pos, escape) ->
-    let diagnostic = Diagnostic (DiagnosticEmitter.Parser, DiagnosticSeverity.Error,pos,errorMsg)
+    let diagnostic = Diagnostic (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error,pos,errorMsg)
     ad.AddDiagnostic diagnostic
     preturn () >>% Ast.Escape
     
 /// Emits diagnostics at the current position.
 let emitDiagnostics1 (ad:Diagnostics) (msg:string) pos =
     let errorMsg = DiagnosticMessage msg
-    let diagnostic = Diagnostic (DiagnosticEmitter.Parser, DiagnosticSeverity.Error,pos,errorMsg)
+    let diagnostic = Diagnostic (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error,pos,errorMsg)
     ad.AddDiagnostic diagnostic
     preturn ()
 
