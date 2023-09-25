@@ -6,10 +6,9 @@ type Ast =
     | ExtDigits of string
     | DollarDigits of string
     | PascalCaseId of string
-    | DottedId of string list
-    | NamespaceIdentifier of Ast
+    | NamespaceIdentifier of Ast list
     | AliasedNamespaceIdentifier of string list * Ast
-    | PredicateIdentifier of Ast
+    | PredicateIdentifier of Ast list
     | DelegateId of string 
     | Alias of string
     | Self of char list 
@@ -35,7 +34,7 @@ type Ast =
     | Many1 
     | TemplateType of string
     | ObjectType 
-    | ClassHeaderType of Ast 
+    | ClassHeaderType of Ast list
     | PredicateType 
     | FunctionalTermType 
     | IndexType
@@ -115,4 +114,4 @@ type Ast =
     | Escape // used to replace AST subnodes when we recover from an error
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from
     | Empty // used to mark empty inner inputs between enclosing ones 
-
+    | Sequence of Ast list

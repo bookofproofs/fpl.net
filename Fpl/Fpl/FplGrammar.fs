@@ -115,17 +115,19 @@ let keyWordSet =
     )
 
 let IdStartsWithSmallCase = regex @"[A-Z][a-z0-9A-Z_]*"
-let IdStartsWithCap = regex @"[A-Z][a-z0-9A-Z_]*" 
-let PascaCaseId = IdStartsWithCap |>> Ast.PascalCaseId
+let IdStartsWithCap = regex @"[A-Z][a-z0-9A-Z_]*" <?> "PascalCaseId"
+let pascalCaseId = IdStartsWithCap |>> Ast.PascalCaseId 
 let dollarDigits = dollar >>. digits |>> Ast.DollarDigits
 let argumentIdentifier = regex @"\d+([a-z][a-z0-9A-Z_])*\." <?> "<ArgumentIdentifier>" |>> Ast.ArgumentIdentifier
 
-// err recovery modification 
-let dottedId = sepBy1 IdStartsWithCap dot |>> Ast.DottedId
-let namespaceIdentifier = dottedId |>> Ast.NamespaceIdentifier
+// error recovery for namespaceIdentifier with escape parsers [spaces1; leftBrace; eof]
+let namespaceIdentifier = sequenceDiagnostics pascalCaseId dot [spaces1; leftBrace; eof] ad "expected PascalCaseId" |>> Ast.NamespaceIdentifier
+// error recovery for predicateIdentifier with escape parsers [spaces1; leftParen; eof]
+let predicateIdentifier = sequenceDiagnostics pascalCaseId dot [spaces1; leftParen; eof] ad "expected PascalCaseId" |>> Ast.PredicateIdentifier 
+// error recovery for classIdentifier with escape parsers [spaces1; leftBracket; eof]
+let classIdentifier= sequenceDiagnostics pascalCaseId dot [spaces1; leftBracket; eof] ad "expected PascalCaseId" |>> Ast.ClassHeaderType
+
 let alias = skipString "alias" >>. SW >>. IdStartsWithCap |>> Ast.Alias
-// err recovery modification 
-// let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. (IW >>. alias) |>> FplIdentifier.AliasedNamespaceIdentifier
 let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. (IW >>. alias) |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z][a-z0-9A-Z_]*)|\d*)$", RegexOptions.Compiled)
 let variableX: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" >>= 
@@ -215,10 +217,6 @@ let extensionBlock = extensionHeader >>. IW >>. extensionName .>>. extensionRege
 // that are all PascalCase as well as FPL keywords, that are all small case.
 
 let xId = at >>. extensionName |>> Ast.ExtensionType <?> "@ext<PascalCaseId>"
-
-let predicateIdentifier = dottedId |>> Ast.PredicateIdentifier 
-
-let classIdentifier = dottedId |>> Ast.ClassHeaderType
 
 let indexVariable = (IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase ) |>> Ast.IndexVariable
 

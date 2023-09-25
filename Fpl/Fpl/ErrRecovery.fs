@@ -51,6 +51,7 @@ type Diagnostics () =
 
 let ad = Diagnostics() 
 
+
 /// Emit any errors occurring in the globalParser
 /// This is to make sure that the parser will always emit diagnostics, 
 /// even if the error recovery fails on a global level (and so does the parser).
@@ -86,6 +87,19 @@ let emitDiagnostics1 (ad:Diagnostics) (msg:string) pos =
     ad.AddDiagnostic diagnostic
     preturn ()
 
+
+let many1SepTrailing p (pName:string) sep (sepName:string) (ad:Diagnostics) = 
+    let trailingSep' = 
+        let result = many1 (p .>> sep)
+        result >>= fun r -> 
+        getPosition >>= fun pos -> 
+        let msg = "expecting p after sep"
+        emitDiagnostics1 ad msg pos |> ignore
+        preturn r
+    
+    let normal = sepBy1 p sep 
+    attempt trailingSep' <|> normal
+
 /// A helper parser that skips any characters until innerSeparator would succeed,
 /// but where innerSeparator does not consume any input, 
 /// unless, at the same position, outerSeparator occurs.
@@ -105,11 +119,26 @@ let skipUntilLookaheadSeparatorListFail innerSeparator outerSeparators =
     |> List.map (fun outerSeparator -> attempt (skipUntilLookaheadSeparatorFail innerSeparator outerSeparator))
     |> List.reduce (<|>)
     
+
+/// A helper parser that returns a choice of p or a version of p emitting diagnostics 
+/// if something else was matched until a separator of p was reached
+let _sequenceDiagnostics (p:Parser<_,_>) (innerSeparator:Parser<_,_>) (sepList:Parser<_,_> list) (ad:Diagnostics) (msg:string) = 
+    let breakCondition = skipUntilLookaheadSeparatorListFail innerSeparator sepList
+    p <|> emitDiagnostics ad breakCondition msg
+
+/// A helper parser that returns a choice of p or a version of p emitting diagnostics 
+/// if something else was matched until a separator of p was reached
+let sequenceDiagnostics1 (p:Parser<_,_>) (innerSeparator:Parser<_,_>) (sepList:Parser<_,_> list) (ad:Diagnostics) (msg:string) = 
+    let result = _sequenceDiagnostics p innerSeparator sepList ad msg
+    sepBy1 result innerSeparator
+
+let canConsume p = lookAhead p 
+
 /// A helper parser that returns a choice of p or a version of p emitting diagnostics 
 /// if something else was matched until a separator of p was reached
 let sequenceDiagnostics (p:Parser<_,_>) (innerSeparator:Parser<_,_>) (sepList:Parser<_,_> list) (ad:Diagnostics) (msg:string) = 
-    let breakCondition = skipUntilLookaheadSeparatorListFail innerSeparator sepList
-    p <|> emitDiagnostics ad breakCondition msg
+    lookAhead p >>. sequenceDiagnostics1 p innerSeparator sepList ad msg
+    <|> preturn [Ast.Empty] 
 
 let abc a b c (aName:string) (bName:string) (cName:string) (ad:Diagnostics) =
     let aMissing = 
