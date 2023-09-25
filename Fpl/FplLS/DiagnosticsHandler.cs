@@ -24,7 +24,7 @@ namespace FplLS
             var parserDiagnostics = FplGrammar.parserDiagnostics;
             parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
             var ast = FplGrammar.fplParser(sourceCode);
-            var diagnostics = CastDiagnostics(parserDiagnostics.List, new TextPositions(sourceCode));
+            var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
 
             _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
             {
@@ -39,7 +39,7 @@ namespace FplLS
         /// <param name="diagnostics">Input list</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted list</returns>
-        public List<Diagnostic> CastDiagnostics(List<ErrRecovery.Diagnostic> listDiagnostics, TextPositions tp)
+        public List<Diagnostic> CastDiagnostics(HashSet<ErrRecovery.Diagnostic> listDiagnostics, TextPositions tp)
         {
             var sb = new StringBuilder();
             var castedListDiagnostics = new List<Diagnostic>();

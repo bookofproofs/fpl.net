@@ -36,18 +36,22 @@ type Diagnostic = Diagnostic of DiagnosticEmitter * DiagnosticSeverity * Positio
         match this with 
         | Diagnostic(_, _, _, message) -> message
 
+
 type Diagnostics () =
-    let myList = new List<Diagnostic>()
-    member this.List with get() = myList
-    member this.AddDiagnostic d = myList.Add(d)
+    let myHashset = new HashSet<Diagnostic>()
+    member this.Collection with get() = myHashset
+    member this.AddDiagnostic d = 
+        if not (myHashset.Contains(d)) then 
+            myHashset.Add(d) |> ignore
+            
     member this.PrintDiagnostics = 
-        for d in myList do printfn "%O" d
+        for d in myHashset do printfn "%O" d
         printfn "%s" "^------------------------^\n" 
     member this.DiagnosticsToString = 
-        myList
+        myHashset
         |> Seq.map string
         |> String.concat "\n"
-    member this.Clear() = myList.Clear()
+    member this.Clear() = myHashset.Clear()
 
 let ad = Diagnostics() 
 
