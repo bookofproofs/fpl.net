@@ -132,6 +132,16 @@ let sequenceDiagnostics (p:Parser<_,_>) (innerSeparator:Parser<_,_>) (sepList:Pa
     lookAhead p >>. sequenceDiagnostics1 p innerSeparator sepList ad msg
     <|> preturn [Ast.Empty] 
 
+
+let alternative p (pName:string) pError (ad:Diagnostics) = 
+    let pErrorDiagnostic = 
+        pError >>= fun r -> 
+        getPosition >>= fun pos -> 
+        let msg = "expecting " + pName
+        emitDiagnostics1 ad msg pos |> ignore
+        preturn r 
+    p <|> pErrorDiagnostic
+
 let abc a b c (aName:string) (bName:string) (cName:string) (ad:Diagnostics) =
     let aMissing = 
         getPosition >>= fun pos -> 

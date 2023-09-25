@@ -36,7 +36,8 @@ type TestErrRecovery () =
         let input = """Fpl.x.Common"""
         let result = tryParse namespaceIdentifier "recovery failed;" ad input
         let actual = sprintf "%O" result
-        let expected = """NamespaceIdentifier [PascalCaseId "Fpl"; Escape; PascalCaseId "Common"]"""
+        let expected = """NamespaceIdentifier
+  [PascalCaseId "Fpl"; PascalCaseId "x"; PascalCaseId "Common"]"""
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
@@ -46,7 +47,7 @@ type TestErrRecovery () =
         let result = tryParse namespaceIdentifier "recovery failed;" ad input
         let actualDiags = ad.DiagnosticsToString
         let expectedDiags = """Diagnostic
-  (FplParser, Error, (Ln: 1, Col: 5), DiagnosticMessage "expected PascalCaseId")"""
+  (FplParser, Error, (Ln: 1, Col: 6), DiagnosticMessage "expecting PascalCaseId")"""
         Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
 
     [<TestMethod>]

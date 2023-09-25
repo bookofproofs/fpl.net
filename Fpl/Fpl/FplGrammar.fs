@@ -116,7 +116,7 @@ let keyWordSet =
 
 let IdStartsWithSmallCase = regex @"[a-z][a-z0-9A-Z_]*"
 let IdStartsWithCap = regex @"[A-Z][a-z0-9A-Z_]*" <?> "PascalCaseId"
-let pascalCaseId = IdStartsWithCap |>> Ast.PascalCaseId 
+let pascalCaseId = alternative IdStartsWithCap "PascalCaseId" (regex @"[a-z0-9_@\-][a-z0-9A-Z_]*") ad |>> Ast.PascalCaseId 
 let dollarDigits = dollar >>. digits |>> Ast.DollarDigits
 let argumentIdentifier = regex @"\d+([a-z][a-z0-9A-Z_])*\." <?> "<ArgumentIdentifier>" |>> Ast.ArgumentIdentifier
 
