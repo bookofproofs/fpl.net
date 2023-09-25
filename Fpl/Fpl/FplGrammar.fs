@@ -114,7 +114,7 @@ let keyWordSet =
         |]
     )
 
-let IdStartsWithSmallCase = regex @"[A-Z][a-z0-9A-Z_]*"
+let IdStartsWithSmallCase = regex @"[a-z][a-z0-9A-Z_]*"
 let IdStartsWithCap = regex @"[A-Z][a-z0-9A-Z_]*" <?> "PascalCaseId"
 let pascalCaseId = IdStartsWithCap |>> Ast.PascalCaseId 
 let dollarDigits = dollar >>. digits |>> Ast.DollarDigits
@@ -130,7 +130,7 @@ let classIdentifier= sequenceDiagnostics pascalCaseId dot [spaces; leftBracket; 
 let alias = skipString "alias" >>. SW >>. IdStartsWithCap |>> Ast.Alias
 let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. (IW >>. alias) |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z][a-z0-9A-Z_]*)|\d*)$", RegexOptions.Compiled)
-let variableX: Parser<string,unit> = regex @"[a-z][a-z0-9A-Z_]*" >>= 
+let variableX: Parser<string,unit> = IdStartsWithSmallCase >>= 
                                         ( fun s -> 
                                             if keyWordSet.Contains(s) then fail ("Cannot use keyword '" + s + "' as a variable") 
                                             else if tplRegex.IsMatch(s) then fail ("Cannot use template '" + s + "' as a variable") 
