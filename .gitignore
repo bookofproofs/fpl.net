@@ -25,4 +25,4 @@
 # un-ignore only the FplLS subdirectory and its subdirectories
 !/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLS/
 !/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLS/**
-
+copydlls.bat

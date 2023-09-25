@@ -78,6 +78,7 @@ let emitDiagnostics (ad:Diagnostics) escapeParser msg =
     ad.AddDiagnostic diagnostic
     preturn () >>% Ast.Escape
     
+
 /// Emits diagnostics at the current position.
 let emitDiagnostics1 (ad:Diagnostics) (msg:string) pos =
     let errorMsg = DiagnosticMessage msg
@@ -90,6 +91,25 @@ let emitDiagnostics1 (ad:Diagnostics) (msg:string) pos =
 /// unless, at the same position, outerSeparator occurs.
 let skipUntilLookaheadSeparatorFail innerSeparator outerSeparator = 
     skipMany (notFollowedBy (attempt innerSeparator <|> outerSeparator) >>. anyChar)
+
+/// A helper parser that skips any characters until innerSeparator would succeed,
+/// but where innerSeparator does not consume any input.
+let skipUntilLookaheadSeparator innerSeparator = 
+    skipMany (notFollowedBy innerSeparator >>. anyChar)
+
+/// A helper parser that skips any characters until innerSeparator would succeed,
+/// but where innerSeparator does not consume any input, 
+/// unless, at the same position, one of a listed outerSeparators occurs.
+let skipUntilLookaheadSeparatorListFail innerSeparator outerSeparators = 
+    outerSeparators
+    |> List.map (fun outerSeparator -> attempt (skipUntilLookaheadSeparatorFail innerSeparator outerSeparator))
+    |> List.reduce (<|>)
+    
+/// A helper parser that returns a choice of p or a version of p emitting diagnostics 
+/// if something else was matched until a separator of p was reached
+let sequenceDiagnostics (p:Parser<_,_>) (innerSeparator:Parser<_,_>) (sepList:Parser<_,_> list) (ad:Diagnostics) (msg:string) = 
+    let breakCondition = skipUntilLookaheadSeparatorListFail innerSeparator sepList
+    p <|> emitDiagnostics ad breakCondition msg
 
 let abc a b c (aName:string) (bName:string) (cName:string) (ad:Diagnostics) =
     let aMissing = 
@@ -124,11 +144,6 @@ let (<!>) (p: Parser<_,_>) label : Parser<_,_> =
         let reply = p stream
         printfn "%A: Leaving %s (%A)" stream.Position label reply.Status
         reply
-
-/// A helper parser that skips any characters until innerSeparator would succeed,
-/// but where innerSeparator does not consume any input.
-let skipUntilLookaheadSeparator innerSeparator = 
-    skipMany (notFollowedBy innerSeparator >>. anyChar)
 
 /// A helper parser that skips any characters until innerSeparator would succeed,
 /// but where innerSeparator does not consume any input, 
