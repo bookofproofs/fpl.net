@@ -120,12 +120,12 @@ let pascalCaseId = IdStartsWithCap |>> Ast.PascalCaseId
 let dollarDigits = dollar >>. digits |>> Ast.DollarDigits
 let argumentIdentifier = regex @"\d+([a-z][a-z0-9A-Z_])*\." <?> "<ArgumentIdentifier>" |>> Ast.ArgumentIdentifier
 
-// error recovery for namespaceIdentifier with escape parsers [spaces1; leftBrace; eof]
-let namespaceIdentifier = sequenceDiagnostics pascalCaseId dot [spaces1; leftBrace; eof] ad "expected PascalCaseId" |>> Ast.NamespaceIdentifier
-// error recovery for predicateIdentifier with escape parsers [spaces1; leftParen; eof]
-let predicateIdentifier = sequenceDiagnostics pascalCaseId dot [spaces1; leftParen; eof] ad "expected PascalCaseId" |>> Ast.PredicateIdentifier 
-// error recovery for classIdentifier with escape parsers [spaces1; leftBracket; eof]
-let classIdentifier= sequenceDiagnostics pascalCaseId dot [spaces1; leftBracket; eof] ad "expected PascalCaseId" |>> Ast.ClassHeaderType
+// error recovery for namespaceIdentifier with escape parsers [spaces; leftBrace; eof]
+let namespaceIdentifier = sequenceDiagnostics pascalCaseId dot [spaces; leftBrace; eof] ad "expected PascalCaseId" |>> Ast.NamespaceIdentifier
+// error recovery for predicateIdentifier with escape parsers [spaces; leftParen; eof]
+let predicateIdentifier = sequenceDiagnostics pascalCaseId dot [spaces; leftParen; eof] ad "expected PascalCaseId" |>> Ast.PredicateIdentifier 
+// error recovery for classIdentifier with escape parsers [spaces; leftBracket; eof]
+let classIdentifier= sequenceDiagnostics pascalCaseId dot [spaces; leftBracket; eof] ad "expected PascalCaseId" |>> Ast.ClassHeaderType
 
 let alias = skipString "alias" >>. SW >>. IdStartsWithCap |>> Ast.Alias
 let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. (IW >>. alias) |>> Ast.AliasedNamespaceIdentifier
