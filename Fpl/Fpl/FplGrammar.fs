@@ -114,11 +114,13 @@ let keyWordSet =
         |]
     )
 
-let IdStartsWithSmallCase = regex @"[a-z][a-z0-9A-Z_]*"
-let IdStartsWithCap = regex @"[A-Z][a-z0-9A-Z_]*" <?> "PascalCaseId"
-let pascalCaseId = alternative IdStartsWithCap "PascalCaseId" (regex @"[a-z0-9_@\-][a-z0-9A-Z_]*") ad |>> Ast.PascalCaseId 
+let IdStartsWithSmallCase = regex @"[a-z]\w*"
+let idStartsWithCap = regex @"[A-Z]\w*" <?> "PascalCaseId"
+// error recovery for pascalCaseId
+let idStartsWithCapAlternatives = [(regex @"[a-z0-9_@\-]\w*")]
+let pascalCaseId = alternative idStartsWithCap "PascalCaseId" idStartsWithCapAlternatives ad |>> Ast.PascalCaseId 
 let dollarDigits = dollar >>. digits |>> Ast.DollarDigits
-let argumentIdentifier = regex @"\d+([a-z][a-z0-9A-Z_])*\." <?> "<ArgumentIdentifier>" |>> Ast.ArgumentIdentifier
+let argumentIdentifier = regex @"\d+([a-z]\w)*\." <?> "<ArgumentIdentifier>" |>> Ast.ArgumentIdentifier
 
 // error recovery for namespaceIdentifier with escape parsers [spaces; leftBrace; eof]
 let namespaceIdentifier = sequenceDiagnostics pascalCaseId dot [spaces; leftBrace; eof] ad "expected PascalCaseId" |>> Ast.NamespaceIdentifier
@@ -127,8 +129,14 @@ let predicateIdentifier = sequenceDiagnostics pascalCaseId dot [spaces; leftPare
 // error recovery for classIdentifier with escape parsers [spaces; leftBracket; eof]
 let classIdentifier= sequenceDiagnostics pascalCaseId dot [spaces; leftBracket; eof] ad "expected PascalCaseId" |>> Ast.ClassHeaderType
 
-let alias = skipString "alias" >>. SW >>. IdStartsWithCap |>> Ast.Alias
-let aliasedNamespaceIdentifier = sepBy1 IdStartsWithCap dot .>>. (IW >>. alias) |>> Ast.AliasedNamespaceIdentifier
+// error recover for alias
+let aliasKeyword = keywordAlternative "alias" // handle typos in alias
+let skipAlias = aliasKeyword 
+let aliasAlternativesOther = combineWithParserList (skipAlias .>> IW) (>>.) idStartsWithCapAlternatives 
+let aliasAlternatives = aliasAlternativesOther @ [(pstring "alias" .>> IW)] 
+let alias = alternative (skipAlias >>. SW >>. idStartsWithCap) "PascalCaseId" aliasAlternatives ad |>> Ast.Alias
+
+let aliasedNamespaceIdentifier = (namespaceIdentifier .>> SW) .>>. alias |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z][a-z0-9A-Z_]*)|\d*)$", RegexOptions.Compiled)
 let variableX: Parser<string,unit> = IdStartsWithSmallCase >>= 
                                         ( fun s -> 
@@ -178,7 +186,7 @@ let keywordIs: Parser<_,unit> = skipString "is"
 // client code
 let keywordTemplate: Parser<_,unit> = (pstring "template" <|> pstring "tpl") |>> Ast.TemplateType
 
-let templateTail = choice [ IdStartsWithCap; digits ]
+let templateTail = choice [ idStartsWithCap; digits ]
 
 let templateWithTail = many1Strings2 (pstring "template" <|> pstring "tpl") templateTail |>>  Ast.TemplateType
 
@@ -203,7 +211,7 @@ let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
 let extensionHeader: Parser<unit,unit> = skipString ":ext" 
 
-let extensionName = skipString "ext" >>. IdStartsWithCap .>> IW |>> Ast.Extensionname
+let extensionName = skipString "ext" >>. idStartsWithCap .>> IW |>> Ast.Extensionname
 
 let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. regex @"\/(?!:end).*" .>> IW |>> Ast.ExtensionRegex
 

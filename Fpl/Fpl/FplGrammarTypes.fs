@@ -7,7 +7,7 @@ type Ast =
     | DollarDigits of string
     | PascalCaseId of string
     | NamespaceIdentifier of Ast list
-    | AliasedNamespaceIdentifier of string list * Ast
+    | AliasedNamespaceIdentifier of Ast * Ast
     | PredicateIdentifier of Ast list
     | DelegateId of string 
     | Alias of string
@@ -112,6 +112,7 @@ type Ast =
 
     | AST of (Ast * ((((Ast option * Ast) * Ast list) * Ast list) * (Ast * (string * Ast) list) list)) list
     | Escape // used to replace AST subnodes when we recover from an error
+    | SomeString of string // used to replace AST for strings subnodes when we recover from an error
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from
     | Empty // used to mark empty inner inputs between enclosing ones 
     | Sequence of Ast list

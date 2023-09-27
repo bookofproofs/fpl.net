@@ -133,14 +133,36 @@ let sequenceDiagnostics (p:Parser<_,_>) (innerSeparator:Parser<_,_>) (sepList:Pa
     <|> preturn [Ast.Empty] 
 
 
-let alternative p (pName:string) pError (ad:Diagnostics) = 
-    let pErrorDiagnostic = 
-        pError >>= fun r -> 
+/// A helper parser combining each parser a list of parsers `q` with a given parser `p` by the 
+/// parser combinator `op` and returning a new list of parsers of the form `p op qi` where 
+/// `qi` are the elements of `q`.
+let combineWithParserList (p:Parser<_,_>) op (q:Parser<_,_> list) = List.map (fun qi -> op p qi) q
+
+/// Creates a diagnostic alternative for a parser `p`. Attempts `p`. If it succeeds, the 
+/// input stream will be consumed by `p`. Otherwise, the parser will attempt every alternative parser
+/// from a given list of parsers `pErrorParsers`. If any of these parsers succeeds, it will consume
+/// the input stream correspondingly and emit the diagnostics `expecting <pName>`.
+/// If neither `p` nor one of the alternative parsers succeed, the parser will change the user stated by failing.
+let alternative p (pName:string) (pErrorParsers:Parser<_,_> list) (ad:Diagnostics) = 
+    let pErrorDiagnostic pError = 
+        attempt pError >>= fun r -> 
         getPosition >>= fun pos -> 
         let msg = "expecting " + pName
         emitDiagnostics1 ad msg pos |> ignore
-        preturn r 
-    p <|> pErrorDiagnostic
+        preturn r
+    attempt p <|>
+    (pErrorParsers
+    |> List.map pErrorDiagnostic
+    |> List.reduce (<|>))
+    // make sure the alternative will at least change the user state by failing the parser if 
+    // no alternative was applicable
+    <|> fail "no alternative found"
+
+
+/// Creates a diagnostic alternative for a particular keyword  
+let keywordAlternative (keyword:string) = 
+    // create an alternative of the keyword with a word regex
+    alternative (pstring keyword) (sprintf "'%s' keyword" keyword) [(regex @"\w+")] ad
 
 let abc a b c (aName:string) (bName:string) (cName:string) (ad:Diagnostics) =
     let aMissing = 
