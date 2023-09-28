@@ -103,6 +103,215 @@ type TestErrRecovery () =
         Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
 
     [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier01 () =
+        let input = """A alias B"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """AliasedNamespaceIdentifier (NamespaceIdentifier [PascalCaseId "A"], Alias "B")"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier01Diag () =
+        ad.Clear()
+        let input = """A alias B"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier02 () =
+        let input = """A alias b"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """AliasedNamespaceIdentifier (NamespaceIdentifier [PascalCaseId "A"], Alias "b")"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier02Diag () =
+        ad.Clear()
+        let input = """A alias b"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 10),
+   DiagnosticMessage "expecting PascalCaseId")"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier03 () =
+        let input = """a alias B"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """AliasedNamespaceIdentifier (NamespaceIdentifier [PascalCaseId "a"], Alias "B")"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier03Diag () =
+        ad.Clear()
+        let input = """a alias B"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 2), DiagnosticMessage "expecting PascalCaseId")"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier04 () =
+        let input = """a alias b"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """AliasedNamespaceIdentifier (NamespaceIdentifier [PascalCaseId "a"], Alias "b")"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier04Diag () =
+        ad.Clear()
+        let input = """a alias b"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 2), DiagnosticMessage "expecting PascalCaseId")
+Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 10),
+   DiagnosticMessage "expecting PascalCaseId")"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier05 () =
+        let input = """A alias """
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """AliasedNamespaceIdentifier
+  (NamespaceIdentifier [PascalCaseId "A"], Alias "alias")"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier05Diag () =
+        ad.Clear()
+        let input = """A alias """
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 9), DiagnosticMessage "expecting PascalCaseId")"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier06 () =
+        let input = """A alias"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """AliasedNamespaceIdentifier
+  (NamespaceIdentifier [PascalCaseId "A"], Alias "alias")"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier06Diag () =
+        ad.Clear()
+        let input = """A alias"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 8), DiagnosticMessage "expecting PascalCaseId")"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier08 () =
+        let input = """a alias"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """AliasedNamespaceIdentifier
+  (NamespaceIdentifier [PascalCaseId "a"], Alias "alias")"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier08Diag () =
+        ad.Clear()
+        let input = """a alias"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 2), DiagnosticMessage "expecting PascalCaseId")
+Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 8), DiagnosticMessage "expecting PascalCaseId")"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier09 () =
+        let input = """a alias """
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """AliasedNamespaceIdentifier
+  (NamespaceIdentifier [PascalCaseId "a"], Alias "alias")"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier09Diag () =
+        ad.Clear()
+        let input = """a alias """
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 2), DiagnosticMessage "expecting PascalCaseId")
+Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 9), DiagnosticMessage "expecting PascalCaseId")"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier12 () =
+        let input = """ alias b"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """AliasedNamespaceIdentifier (NamespaceIdentifier [Empty], Alias "b")"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier12Diag () =
+        ad.Clear()
+        let input = """ alias b"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 9), DiagnosticMessage "expecting PascalCaseId")"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier14 () =
+        let input = """ alias """
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """AliasedNamespaceIdentifier (NamespaceIdentifier [Empty], Alias "alias")"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier14Diag () =
+        ad.Clear()
+        let input = """ alias """
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 8), DiagnosticMessage "expecting PascalCaseId")"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier15 () =
+        let input = """ alias"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """AliasedNamespaceIdentifier (NamespaceIdentifier [Empty], Alias "alias")"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_AliasedNamespaceIdentifier15Diag () =
+        ad.Clear()
+        let input = """ alias"""
+        let result = tryParse aliasedNamespaceIdentifier "recovery failed;" ad input
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 7), DiagnosticMessage "expecting PascalCaseId")"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
     [<DataRow ("Adi")>]
     [<DataRow ("aAdi")>]
     [<DataRow ("zAdi")>]
@@ -172,6 +381,67 @@ type TestErrRecovery () =
         Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
 
     [<TestMethod>]
+    member this.Test_UsesClause01 () =
+        let input = "uses {A, B alias Adi}"
+        let result = tryParse usesClause "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """UsesClause
+  [NamespaceIdentifier [PascalCaseId "A"];
+   AliasedNamespaceIdentifier
+     (NamespaceIdentifier [PascalCaseId "B"], Alias "Adi")]"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_UsesClause01Diag () =
+        ad.Clear()
+        let input = "uses {A, B alias Adi,}"
+        let result = tryParse usesClause "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
+
+    [<TestMethod>]
+    member this.Test_TheoryNamespace01 () =
+        let input = ""
+        let result = tryParse theoryNamespace "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """NamespaceIdentifier[Empty]"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_TheoryNamespace01Diag () =
+        ad.Clear()
+        let input = ""
+        let result = tryParse theoryNamespace "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """xxx"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, actualDiags)
+
+    [<TestMethod>]
+    member this.Test_UsesClause02 () =
+        let input = "uses {A, B alias Adi,}"
+        let result = tryParse usesClause "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let expected = """UsesClause
+  [NamespaceIdentifier [PascalCaseId "A"];
+   AliasedNamespaceIdentifier
+     (NamespaceIdentifier [PascalCaseId "B"], Alias "Adi");
+   NamespaceIdentifier [Empty]]"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
+    member this.Test_UsesClause02Diag () =
+        ad.Clear()
+        let input = "uses {A, B alias Adi,}"
+        let result = tryParse usesClause "recovery failed;" ad input
+        let actual = sprintf "%O" result
+        let actualDiags = ad.DiagnosticsToString
+        let expectedDiags = """xxx"""
+        Assert.AreEqual(replaceWhiteSpace expectedDiags, actualDiags)
+
+    [<TestMethod>]
     member this.Test_AliasAlternativeOK () =
         let input = "alias Adi"
         let result = tryParse alias "recovery failed;" ad input
@@ -202,20 +472,20 @@ type TestErrRecovery () =
         Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
 
     [<TestMethod>]
-    [<DataRow ("bla ","Adi")>]
-    [<DataRow ("alias ","Adi")>]
-    [<DataRow ("alias ", "aAdi")>]
-    [<DataRow ("alias ", "zAdi")>]
-    [<DataRow ("alias ", "_Adi")>]
-    [<DataRow ("alias ", "@Adi")>]
-    [<DataRow ("alias ", "-Adi")>]
-    [<DataRow ("alias ", "0Adi")>]
-    [<DataRow ("alias ", "9Adi")>]
-    member this.Test_AliasAlternative (param:string, param1:string) =
+    [<DataRow ("bla ","Adi", 8)>]
+    [<DataRow ("alias ","Adi", 10)>]
+    [<DataRow ("alias ", "aAdi", 11)>]
+    [<DataRow ("alias ", "zAdi", 11)>]
+    [<DataRow ("alias ", "_Adi", 11)>]
+    [<DataRow ("alias ", "@Adi", 11)>]
+    [<DataRow ("alias ", "-Adi", 11)>]
+    [<DataRow ("alias ", "0Adi", 11)>]
+    [<DataRow ("alias ", "9Adi", 11)>]
+    member this.Test_AliasAlternative (param:string, param1:string, ind:int) =
         let input = param + param1
         let result = tryParse alias "recovery failed;" ad input
         let actual = sprintf "%O" result
-        let expected = sprintf """Alias "%s" """ param1
+        let expected = sprintf """Alias (((Ln: 1, Col: 1), (Ln: 1, Col: %i)), "%s")""" ind param1
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]

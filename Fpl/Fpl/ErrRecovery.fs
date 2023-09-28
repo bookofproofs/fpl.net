@@ -3,6 +3,7 @@ open System.Collections.Generic
 open FParsec
 open FplGrammarTypes
 
+
 (* MIT License
 
 Copyright (c) 2023 bookofproofs
@@ -35,7 +36,6 @@ type Diagnostic = Diagnostic of DiagnosticEmitter * DiagnosticSeverity * Positio
     member this.Message with get() = 
         match this with 
         | Diagnostic(_, _, _, message) -> message
-
 
 type Diagnostics () =
     let myHashset = new HashSet<Diagnostic>()
@@ -130,7 +130,7 @@ let sequenceDiagnostics1 (p:Parser<_,_>) (innerSeparator:Parser<_,_>) (outerSepa
 /// Similar to `sequenceDiagnostics1` except that it matches also zero occurrences of `p`, returning a `[Ast.Empty]`.
 let sequenceDiagnostics (p:Parser<_,_>) (innerSeparator:Parser<_,_>) (sepList:Parser<_,_> list) (ad:Diagnostics) (msg:string) = 
     lookAhead p >>. sequenceDiagnostics1 p innerSeparator sepList ad msg
-    <|> preturn [Ast.Empty] 
+    <|> preturn [Ast.Empty1] 
 
 
 /// A helper parser combining each parser a list of parsers `q` with a given parser `p` by the 
