@@ -20,12 +20,26 @@ type TestAxioms () =
         }"""
         let actual = sprintf "%O" result
         let expected = """Success: Axiom
-  (Signature (AliasedId ["ZeroIsNat"], []),
-   ([],
-    IsOperator
-      (AliasedId ["Zero"],
-       VariableTypeWithModifier (None, ClassHeaderType ["Nat"]))))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+  (((Ln: 1, Col: 1), (Ln: 4, Col: 10)),
+   (Signature
+      (((Ln: 1, Col: 7), (Ln: 2, Col: 9)),
+       (PredicateIdentifier
+          (((Ln: 1, Col: 7), (Ln: 1, Col: 16)),
+           [PascalCaseId (((Ln: 1, Col: 7), (Ln: 1, Col: 16)), "ZeroIsNat")]),
+        [])),
+    ([],
+     IsOperator
+       (((Ln: 3, Col: 13), (Ln: 4, Col: 9)),
+        (PredicateIdentifier
+           (((Ln: 3, Col: 16), (Ln: 3, Col: 20)),
+            [PascalCaseId (((Ln: 3, Col: 16), (Ln: 3, Col: 20)), "Zero")]),
+         VariableTypeWithModifier
+           (((Ln: 3, Col: 21), (Ln: 3, Col: 24)),
+            (None,
+             ClassHeaderType
+               (((Ln: 3, Col: 21), (Ln: 3, Col: 24)),
+                [PascalCaseId (((Ln: 3, Col: 21), (Ln: 3, Col: 24)), "Nat")]))))))))"""
+        Assert.AreEqual(replaceWhiteSpace expected,  actual);
 
     [<TestMethod>]
     member this.TestAxiom02 () =
@@ -64,7 +78,7 @@ type TestAxioms () =
                     [PredicateWithoutArgs (Var "successor");
                      PredicateWithArgs
                        (AliasedId ["Succ"], [PredicateWithoutArgs (Var "n")])])]))))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        Assert.AreEqual(replaceWhiteSpace expected,  actual);
 
     [<TestMethod>]
     member this.TestAxiom03 () =
@@ -88,7 +102,7 @@ type TestAxioms () =
           [PredicateWithArgs (AliasedId ["Zero"], []);
            PredicateWithArgs
              (AliasedId ["Succ"], [PredicateWithoutArgs (Var "n")])]))))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        Assert.AreEqual(replaceWhiteSpace expected,  actual);
 
     [<TestMethod>]
     member this.TestAxiom04 () =
@@ -122,7 +136,7 @@ type TestAxioms () =
           PredicateWithArgs
             (AliasedId ["Equal"],
              [PredicateWithoutArgs (Var "n"); PredicateWithoutArgs (Var "m")])))))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        Assert.AreEqual(replaceWhiteSpace expected,  actual);
 
     [<TestMethod>]
     member this.TestAxiom05 () =
@@ -162,7 +176,7 @@ type TestAxioms () =
           All
             ([Var "n"],
              PredicateWithArgs (Var "p", [PredicateWithoutArgs (Var "n")]))))))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        Assert.AreEqual(replaceWhiteSpace expected,  actual);
 
     [<TestMethod>]
     member this.TestAxiom06 () =
@@ -183,7 +197,7 @@ type TestAxioms () =
       ([Var "x"],
        PredicateWithArgs
          (AliasedId ["IsEmpty"], [PredicateWithoutArgs (Var "x")]))))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        Assert.AreEqual(replaceWhiteSpace expected,  actual);
 
     [<TestMethod>]
     member this.TestAxiom07 () =
@@ -222,4 +236,4 @@ type TestAxioms () =
           PredicateWithArgs
             (AliasedId ["Equal"],
              [PredicateWithoutArgs (Var "x"); PredicateWithoutArgs (Var "y")])))))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        Assert.AreEqual(replaceWhiteSpace expected,  actual);

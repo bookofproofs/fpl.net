@@ -99,7 +99,8 @@ type TestErrRecovery () =
         let input = """"""
         let result = tryParse namespaceIdentifier "recovery failed;" ad input
         let actualDiags = ad.DiagnosticsToString
-        let expectedDiags = """"""
+        let expectedDiags = """Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 1), DiagnosticMessage "no input consumed")"""
         Assert.AreEqual(replaceWhiteSpace expectedDiags, replaceWhiteSpace actualDiags)
 
     [<TestMethod>]

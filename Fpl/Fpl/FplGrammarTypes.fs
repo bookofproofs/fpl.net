@@ -6,12 +6,13 @@ open FParsec
 /// parsing was done
 type Positions = Position * Position 
 
+
 type Ast = 
     // Identifiers
     | Digits of Positions * string
     | ExtDigits of Positions * string
     | DollarDigits of Positions * string
-    | PascalCaseId of Positions * string
+    | PascalCaseId of string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast)
     | PredicateIdentifier of Positions * Ast list
@@ -44,7 +45,7 @@ type Ast =
     | PredicateType 
     | FunctionalTermType 
     | IndexType
-    | VariableType of Positions * (Ast list * Ast) list 
+    | VariableType of Positions * Ast
     | VariableTypeWithModifier of Positions * (Ast option * Ast)
     | FplTypeWithCoords of Positions * (Ast * Ast list) 
     | FplTypeWithRange of Positions * ((Ast * Ast ) * (Ast * Ast))
@@ -56,7 +57,6 @@ type Ast =
     | False of Positions * unit
     | Undefined of Positions * unit
     | PredicateWithArgs of Positions * (Ast * Ast list)
-    | PredicateWithoutArgs of Positions * Ast
     | And of Positions * Ast list
     | Or of Positions * Ast list
     | Impl of Positions * (Ast * Ast)
@@ -83,29 +83,30 @@ type Ast =
     | Range of Positions * ((Ast * Ast) * Ast list)
     | Return of Positions * Ast
     // FPL Blocks
-    | BlockStatement of Positions * Ast
-    | BlockVariableDeclaration of Positions * (Ast list * Ast) 
     | StatementList of Positions * Ast list
-    | SignatureWithPreConBlock of Ast * ((Ast list * Ast) * Ast)
+    | SignatureWithPreConBlock of Ast * ((Ast * Ast) * Ast)
     | RuleOfInference of Positions * Ast
     | Theorem of Positions * Ast
     | Lemma of Positions * Ast
     | Proposition of Positions * Ast
-    | Corollary of Positions * (((Ast * Ast list) * (Ast list * Ast) list) * ((Ast list * Ast) * Ast))
+    | Corollary of Positions * (((Ast * Ast list) * Ast) * ((Ast * Ast) * Ast))
     | Conjecture of Positions * Ast
-    | Signature of Positions * (Ast * (Ast list * Ast) list)
-    | Axiom of Positions * (Ast * (Ast list * Ast))
+    | NamedVarDecl of Positions * (Ast list * Ast) 
+    | VariableSpecification of Positions * Ast list
+    | ParamTuple of Positions * Ast list
+    | Signature of Positions * (Ast * Ast)
+    | Axiom of Positions * (Ast * (Ast * Ast))
     | ClassConstructorCall of Positions * Ast option
-    | Constructor of Positions * (Ast * (Ast list * Ast))
+    | Constructor of Positions * (Ast * (Ast * Ast))
     | Mandatory
     | Optional 
-    | PredicateInstance of Positions * (Ast * (Ast list * Ast))
-    | ClassInstance of Positions * ((Ast * Ast) * Ast list )
-    | FunctionalTermInstance of Positions * ((Ast * Ast) * Ast list)
+    | PredicateInstance of Positions * (Ast * (Ast * Ast))
+    | ClassInstance of Positions * ((Ast * Ast) * Ast)
+    | FunctionalTermInstance of Positions * ((Ast * Ast) * Ast)
     | Property of Positions * (Ast * Ast)
-    | DefinitionPredicate of Positions * (Ast * ((Ast list * Ast option) * Ast list option))
-    | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast list * Ast list option))
-    | DefinitionClass of Positions * ((Ast * Ast) * (Ast list * Ast list))
+    | DefinitionPredicate of Positions * (Ast * ((Ast * Ast option) * Ast list option))
+    | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
+    | DefinitionClass of Positions * ((Ast * Ast) * (Ast * Ast list))
     // Proofs
     | Trivial of Positions * unit
     | Qed of Positions * unit
@@ -115,12 +116,12 @@ type Ast =
     | RevokeArgument of Positions * Ast
     | JustifiedArgument of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
-    | Proof of Positions * ((Ast * Ast list) * (Ast list * Ast list))
-
-    | AST of Positions * ((Ast * ((((Ast option * Ast) * Ast list) * Ast list) * (Ast * (string * Ast) list) list)) list)
+    | Proof of Positions * ((Ast * Ast list) * (Ast * Ast list))
+    | Namespace of Positions * (Ast * ((((Ast option * Ast option) * Ast list option) * Ast list) * (Ast * (string * Ast) list) list option))
+    | AST of Positions * Ast list
     | Escape // used to replace AST subnodes when we recover from an error
     | SomeString of string // used to replace AST for strings subnodes when we recover from an error
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from
     | Empty // used to mark empty inner inputs between enclosing ones 
     | Sequence of Positions * Ast list
-    | Empty1 
+

@@ -130,7 +130,7 @@ let sequenceDiagnostics1 (p:Parser<_,_>) (innerSeparator:Parser<_,_>) (outerSepa
 /// Similar to `sequenceDiagnostics1` except that it matches also zero occurrences of `p`, returning a `[Ast.Empty]`.
 let sequenceDiagnostics (p:Parser<_,_>) (innerSeparator:Parser<_,_>) (sepList:Parser<_,_> list) (ad:Diagnostics) (msg:string) = 
     lookAhead p >>. sequenceDiagnostics1 p innerSeparator sepList ad msg
-    <|> preturn [Ast.Empty1] 
+    <|> preturn [Ast.Empty] 
 
 
 /// A helper parser combining each parser a list of parsers `q` with a given parser `p` by the 
