@@ -100,7 +100,7 @@ namespace FplLS
                     string pattern = @"(.*\n)(\s*)\^";
 
                     string result = Regex.Replace(match.Value, pattern,
-                        m => m.Groups[1].Value.Substring(0, m.Groups[2].Value.Length) + "<-----",
+                        m => m.Groups[1].Value.Substring(0, m.Groups[2].Value.Length) + "<---?",
                         RegexOptions.Multiline);
                     sb.Append(result);
                 }

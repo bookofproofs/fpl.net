@@ -92,9 +92,8 @@ type Ast =
     | Corollary of Positions * (((Ast * Ast list) * Ast) * ((Ast * Ast) * Ast))
     | Conjecture of Positions * Ast
     | NamedVarDecl of Positions * (Ast list * Ast) 
-    | ParamList of Ast list 
     | VariableSpecification of Positions * Ast list
-    | ParamTuple of Positions * Ast
+    | ParamTuple of Positions * Ast list
     | Signature of Positions * (Ast * Ast)
     | Axiom of Positions * (Ast * (Ast * Ast))
     | ClassConstructorCall of Positions * Ast option

@@ -145,7 +145,7 @@ let combineWithParserList (p:Parser<_,_>) op (q:Parser<_,_> list) = List.map (fu
 /// If neither `p` nor one of the alternative parsers succeed, the parser will change the user stated by failing.
 let alternative p (pName:string) (pErrorParsers:Parser<_,_> list) (ad:Diagnostics) = 
     let pErrorDiagnostic pError = 
-        attempt pError >>= fun r -> 
+        pError >>= fun r -> 
         getPosition >>= fun pos -> 
         let msg = "expecting " + pName
         emitDiagnostics1 ad msg pos |> ignore
@@ -163,7 +163,7 @@ let alternative p (pName:string) (pErrorParsers:Parser<_,_> list) (ad:Diagnostic
 let alternativePre p (pName:string) (pErrorParsers:Parser<_,_> list) (ad:Diagnostics) = 
     let pErrorDiagnostic pError = 
         getPosition >>= fun pos -> 
-        attempt pError >>= fun r -> 
+        pError >>= fun r -> 
         let msg = "expecting " + pName
         emitDiagnostics1 ad msg pos |> ignore
         preturn r

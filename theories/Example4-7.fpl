@@ -1,6 +1,5 @@
 T
 {
-    uses {}
     inference
     {
         ModusPonens()
@@ -108,9 +107,6 @@ T
 			8. |- qed
         }
    }
-
-   loc {}
-
 }
 
 

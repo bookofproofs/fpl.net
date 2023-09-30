@@ -4,8 +4,7 @@ open FplGrammar
 open FParsec
 
 
-let input = """~pol: x ( "nie równa się" | "nie równe" ) y"""
-//let input = """~ger: x "ist ungleich" y"""
+let input = """ """
 
-let result = run translation input
+let result = run predicate input
 printf "%O" result

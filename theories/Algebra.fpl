@@ -1,7 +1,6 @@
 Fpl.Algebra.Structures
 {
     uses { Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel }
-    inference { }
 
     theory
     {
@@ -509,7 +508,6 @@ Fpl.Algebra.Structures
             }
         }
    }
-   localization {}
 }
 
 

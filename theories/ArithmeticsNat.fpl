@@ -5,7 +5,6 @@ Fpl.Arithmetics.Peano
     :end
 
     uses { Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel }
-    inf {}
 
     theory
     {
@@ -328,8 +327,6 @@ Fpl.Arithmetics.Peano
         class N100:Set{N100(){n:Nat self:=SetBuilder(SetNat(),IsGreater(n,Nat(100))) }}
 
     }
-
-    loc {}
 }
 
 

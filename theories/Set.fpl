@@ -1,7 +1,6 @@
 Fpl.SetTheory.ZermeloFraenkel
 {
     uses {Fpl.Commons}
-    inf {}
     theory
     {
         class Set: obj
@@ -237,7 +236,4 @@ Fpl.SetTheory.ZermeloFraenkel
 
 
     }
-
-
-    loc {}
 }
