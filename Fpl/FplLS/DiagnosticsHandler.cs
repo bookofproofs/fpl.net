@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using static FplGrammar;
+using static Microsoft.FSharp.Core.ByRefKinds;
 
 namespace FplLS
 {
@@ -92,7 +93,16 @@ namespace FplLS
                 {
                     // we only need the remaining error message 
                     sb.AppendLine(); // and a new line to position the caret ^ in the error message properly.
-                    sb.Append(match.Value);
+
+                    // Replace in match.Value any line followed by a line starting with "   ^" by the
+                    // its substring with the length is the number of spaces of the line with the caret.
+                    // We need this, because vscode will not display the spaces correctly in the diagnostic window
+                    string pattern = @"(.*\n)(\s*)\^";
+
+                    string result = Regex.Replace(match.Value, pattern,
+                        m => m.Groups[1].Value.Substring(0, m.Groups[2].Value.Length),
+                        RegexOptions.Multiline);
+                    sb.Append(result);
                 }
                 else
                 {

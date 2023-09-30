@@ -352,10 +352,13 @@ let parenthesisedType = positions (variableTypeWithModifier .>> IW >>. paramTupl
 
 let variableType = ((attempt parenthesisedType) <|> attempt variableTypeWithModifier) <|> classType
 
-let namedVariableDeclaration = positions ((variableList .>> IW) .>>. ((colon >>. IW) >>. variableType)) <?> "named variable declaration"|>> Ast.NamedVarDecl
-let namedVariableDeclarationList = sepEndBy namedVariableDeclaration comma
+// err recovery namedVariableDeclaration 
 
-paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) <?> "tuple of parameters" |>> Ast.ParamTuple
+let namedVariableDeclaration = positions ((variableList .>> IW) .>>. ((colon >>. IW) >>. variableType)) <?> "named variable declaration"|>> Ast.NamedVarDecl
+let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
+let namedVariableDeclarationListMod = sequenceDiagnostics namedVariableDeclaration comma [rightParen] ad "variable declaration expected"
+
+paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationListMod) .>> (IW .>> rightParen)) <?> "tuple of parameters" |>> Ast.ParamTuple
 
 let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) <?> "PascalCaseId followed by a tuple of parameters" |>> Ast.Signature
 
