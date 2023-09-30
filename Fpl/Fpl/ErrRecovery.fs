@@ -220,13 +220,11 @@ let keywordAlternative (keyword:string) (optionalMsg:string)=
     // create an alternative of the keyword with a word regex
     altMsg (pstring keyword) (sprintf "'%s' keyword" keyword + optionalMsg) [(regex @"\w+")] 
 
-/// Creates a diagnostic alternative for a particular keyword. 
-/// If `optionalMsg` is a non-empty string, it will be concatenated to the standard
-/// error message `"expected keyword <some keyword>"`, e.g. `optionalMsg= " or <put your alternative here>"`
-let keywordAlternativesI (keyword:string) (keywordShort:string) (optionalMsg:string) = 
+/// Creates a diagnostic alternative for two keyword alternatives (a long and a short version). 
+let keywordAlternativesI (keyword:string) (keywordShort:string) = 
     // create an alternative of the keyword with a word regex
     let ignoreWord = skipMany1Satisfy (fun c -> System.Char.IsLetterOrDigit(c) || c = '_')
-    altMsg (skipString keyword <|> skipString keywordShort) (sprintf "keywords '%s' or '%s'%s" keyword keywordShort optionalMsg) [ignoreWord] 
+    altMsg (skipString keyword <|> skipString keywordShort) (sprintf "keywords '%s' or '%s'" keyword keywordShort) [ignoreWord] 
 
 /// Creates a diagnostic alternative for a particular character
 let charAlternative (c:char) = 
