@@ -150,7 +150,7 @@ let alternative p (pName:string) (pErrorParsers:Parser<_,_> list) (ad:Diagnostic
         let msg = "expecting " + pName
         emitDiagnostics1 ad msg pos |> ignore
         preturn r
-    attempt p <|>
+    p <|>
     (pErrorParsers
     |> List.map pErrorDiagnostic
     |> List.reduce (<|>))
@@ -167,7 +167,7 @@ let alternativePre p (pName:string) (pErrorParsers:Parser<_,_> list) (ad:Diagnos
         let msg = "expecting " + pName
         emitDiagnostics1 ad msg pos |> ignore
         preturn r
-    attempt p <|>
+    p <|>
     (pErrorParsers
     |> List.map pErrorDiagnostic
     |> List.reduce (<|>))
@@ -218,7 +218,15 @@ let altTypoMsgIPre (p:Parser<unit,_>) (msg:string)  =
 /// error message `"expected keyword <some keyword>"`, e.g. `optionalMsg= " or <put your alternative here>"`
 let keywordAlternative (keyword:string) (optionalMsg:string)= 
     // create an alternative of the keyword with a word regex
-    altMsgPre (pstring keyword) (sprintf "'%s' keyword" keyword + optionalMsg) [(regex @"\w+")] 
+    altMsg (pstring keyword) (sprintf "'%s' keyword" keyword + optionalMsg) [(regex @"\w+")] 
+
+/// Creates a diagnostic alternative for a particular keyword. 
+/// If `optionalMsg` is a non-empty string, it will be concatenated to the standard
+/// error message `"expected keyword <some keyword>"`, e.g. `optionalMsg= " or <put your alternative here>"`
+let keywordAlternativesI (keyword:string) (keywordShort:string) (optionalMsg:string) = 
+    // create an alternative of the keyword with a word regex
+    let ignoreWord = skipMany1Satisfy (fun c -> System.Char.IsLetterOrDigit(c) || c = '_')
+    altMsg (skipString keyword <|> skipString keywordShort) (sprintf "keywords '%s' or '%s'%s" keyword keywordShort optionalMsg) [ignoreWord] 
 
 /// Creates a diagnostic alternative for a particular character
 let charAlternative (c:char) = 

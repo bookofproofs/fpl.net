@@ -474,7 +474,7 @@ let conclusion = many CW >>. (keywordConclusion >>. IW >>. colon >>. commentedPr
 let premiseConclusionBlock = leftBraceCommented >>. variableSpecificationList .>>. (premise .>> many CW) .>>. conclusion .>> commentedRightBrace
 
 (* FPL building blocks - rules of reference *)
-let keywordInference: Parser<_,unit> = skipString "inference" <|> skipString "inf"
+let keywordInference = keywordAlternativesI "inference" "inf" ""
 let signatureWithPremiseConclusionBlock = (signature .>> IW) .>>. premiseConclusionBlock |>> Ast.SignatureWithPreConBlock
 let ruleOfInference = positions signatureWithPremiseConclusionBlock <?> "rule of inference" |>> Ast.RuleOfInference
 let ruleOfInferenceList = many1 (many CW >>. ruleOfInference .>> IW)
