@@ -474,11 +474,13 @@ let conclusion = many CW >>. (keywordConclusion >>. IW >>. colon >>. commentedPr
 let premiseConclusionBlock = leftBraceCommented >>. variableSpecificationList .>>. (premise .>> many CW) .>>. conclusion .>> commentedRightBrace
 
 (* FPL building blocks - rules of reference *)
+// error recovery inference block
 let keywordInference = keywordAlternativesI "inference" "inf" 
 let signatureWithPremiseConclusionBlock = (signature .>> IW) .>>. premiseConclusionBlock |>> Ast.SignatureWithPreConBlock
 let ruleOfInference = positions signatureWithPremiseConclusionBlock <?> "rule of inference" |>> Ast.RuleOfInference
-let ruleOfInferenceList = many1 (many CW >>. ruleOfInference .>> IW)
-let rulesOfInferenceBlock = (keywordInference >>. IW >>. leftBraceCommented >>. many CW >>. ruleOfInferenceList) .>> commentedRightBrace
+//let ruleOfInferenceList = many1 (many CW >>. ruleOfInference .>> IW)
+let ruleOfInferenceListMod = sequenceDiagnostics1 (many CW >>. ruleOfInference .>> IW) spaces1 [rightBrace] ad "expecting rule of inference (start with a PascalCaseId followed by a tuple of parameters)" 
+let rulesOfInferenceBlock = (keywordInference >>. IW >>. leftBraceCommented >>. many CW >>. ruleOfInferenceListMod) .>> commentedRightBrace
 
 (* FPL building blocks - Theorem-like statements and conjectures *)
 let keywordTheorem: Parser<_,unit> = skipString "theorem" <|> skipString "thm" 
