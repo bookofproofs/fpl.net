@@ -361,7 +361,7 @@ Diagnostic
     [<DataRow ("bar")>]
     [<DataRow ("baz")>]
     member this.Test_KeywordAlternative (typo:string) =
-        let keyword = keywordAlternative "alias" |>> Ast.SomeString
+        let keyword = keywordAlternative "alias" ""|>> Ast.SomeString
         let result = tryParse keyword "recovery failed;" ad typo
         let actual = sprintf "%O" result
         let expected = sprintf """SomeString "%s" """ typo
@@ -373,7 +373,7 @@ Diagnostic
     [<DataRow ("baz")>]
     member this.Test_KeywordAlternativeDiag (typo:string) =
         ad.Clear()
-        let keyword = keywordAlternative "alias" |>> Ast.SomeString
+        let keyword = keywordAlternative "alias" ""|>> Ast.SomeString
         let result = tryParse keyword "recovery failed;" ad typo
         let actualDiags = ad.DiagnosticsToString
         let expectedDiags = """Diagnostic

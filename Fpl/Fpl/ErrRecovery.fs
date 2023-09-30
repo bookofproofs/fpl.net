@@ -158,11 +158,72 @@ let alternative p (pName:string) (pErrorParsers:Parser<_,_> list) (ad:Diagnostic
     // no alternative was applicable
     <|> fail "no alternative found"
 
+/// Like `alternative` but the diagnostic position will be at the beginning 
+/// (and not at the end) of some alternative.
+let alternativePre p (pName:string) (pErrorParsers:Parser<_,_> list) (ad:Diagnostics) = 
+    let pErrorDiagnostic pError = 
+        getPosition >>= fun pos -> 
+        attempt pError >>= fun r -> 
+        let msg = "expecting " + pName
+        emitDiagnostics1 ad msg pos |> ignore
+        preturn r
+    attempt p <|>
+    (pErrorParsers
+    |> List.map pErrorDiagnostic
+    |> List.reduce (<|>))
+    // make sure the alternative will at least change the user state by failing the parser if 
+    // no alternative was applicable
+    <|> fail "no alternative found"
 
-/// Creates a diagnostic alternative for a particular keyword  
-let keywordAlternative (keyword:string) = 
+/// Creates a diagnostic alternative for a parser `p` with a diagnostic 
+/// message `msg` and a list of alternative parsers `others`.
+let altMsg (p:Parser<_,_>) (msg:string) (others:Parser<_,_> list) = 
     // create an alternative of the keyword with a word regex
-    alternative (pstring keyword) (sprintf "'%s' keyword" keyword) [(regex @"\w+")] ad
+    alternative p msg others ad
+
+/// Like `altMsg` but the diagnostic position will be at the beginning 
+/// (and not at the end) of some alternative.
+let altMsgPre (p:Parser<_,_>) (msg:string) (others:Parser<_,_> list) = 
+    // create an alternative of the keyword with a word regex
+    alternativePre p msg others ad
+
+/// Creates a diagnostic alternative for a string parser `p` with a diagnostic 
+/// message `msg` and some typos, including words `"\w+"` or concatenations of `()[]{}@`.
+let altTypoMsg (p:Parser<string,_>) (msg:string)  = 
+    // create an alternative of p with a word regex
+    alternative p msg [(regex @"\w+|[\{\}\[\]\(\)@]+")] ad
+
+/// Like `altTypoMsg` but the diagnostic position will be at the beginning 
+/// (and not at the end) of some alternative.
+let altTypoMsgPre (p:Parser<string,_>) (msg:string)  = 
+    // create an alternative of p with a word regex
+    alternativePre p msg [(regex @"\w+|[\{\}\[\]\(\)@]+")] ad
+
+/// Creates a diagnostic alternative for an ignored string parser `p` with a diagnostic 
+/// message `msg` and some typos, including words `"\w+"` or concatenations of `()[]{}@`.
+let altTypoMsgI (p:Parser<unit,_>) (msg:string)  = 
+    // create an alternative of the keyword with a word regex
+    let ignoreWord = skipMany1Satisfy (fun c -> System.Char.IsLetterOrDigit(c) || c = '_' || c = '{' || c = '}' || c = '[' || c = ']' || c = '(' || c = ')'  || c = '@')
+    alternative p msg [ignoreWord] ad
+
+/// Like `altTypoMsgI` but the diagnostic position will be at the beginning 
+/// (and not at the end) of some alternative.
+let altTypoMsgIPre (p:Parser<unit,_>) (msg:string)  = 
+    // create an alternative of the keyword with a word regex
+    let ignoreWord = skipMany1Satisfy (fun c -> System.Char.IsLetterOrDigit(c) || c = '_' || c = '{' || c = '}' || c = '[' || c = ']' || c = '(' || c = ')'  || c = '@')
+    alternativePre p msg [ignoreWord] ad
+
+/// Creates a diagnostic alternative for a particular keyword. 
+/// If `optionalMsg` is a non-empty string, it will be concatenated to the standard
+/// error message `"expected keyword <some keyword>"`, e.g. `optionalMsg= " or <put your alternative here>"`
+let keywordAlternative (keyword:string) (optionalMsg:string)= 
+    // create an alternative of the keyword with a word regex
+    altMsgPre (pstring keyword) (sprintf "'%s' keyword" keyword + optionalMsg) [(regex @"\w+")] 
+
+/// Creates a diagnostic alternative for a particular character
+let charAlternative (c:char) = 
+    // create an alternative of the keyword with a word regex
+    altMsgPre (pchar c) (sprintf "'%c' " c) [(anyOf "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")]
 
 let abc a b c (aName:string) (bName:string) (cName:string) (ad:Diagnostics) =
     let aMissing = 

@@ -30,8 +30,8 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 
 (* Literals *)
 
-let rightBrace: Parser<_, unit>= skipChar '}' >>. spaces
-let leftBrace: Parser<_, unit> = skipChar '{' >>. spaces
+let rightBrace: Parser<_, unit>= altTypoMsgI (skipString "}") "closing '}'" 
+let leftBrace: Parser<_, unit> = altTypoMsgIPre (skipString "{") "opening '{'" >>. spaces
 let leftParen: Parser<_, unit> = skipChar '(' >>. spaces
 let rightParen: Parser<_, unit> = skipChar ')' 
 let comma: Parser<_, unit> = skipChar ',' >>. spaces
@@ -154,7 +154,7 @@ let predicateIdentifier = positions (sequenceDiagnostics pascalCaseId dot [space
 let classIdentifier= positions (sequenceDiagnostics1 pascalCaseId dot [spaces; leftBracket; eof] ad "expected PascalCaseId") <?> "class identifier"|>> Ast.ClassHeaderType
 
 // error recover for alias
-let aliasKeyword = keywordAlternative "alias" // handle typos in alias
+let aliasKeyword = keywordAlternative "alias" " or closing '}'"// handle typos in alias
 let skipAlias = aliasKeyword 
 let aliasAlternativesOther = combineWithParserList (skipAlias .>> IW) (>>.) idStartsWithCapAlternatives 
 let aliasAlternatives = aliasAlternativesOther @ [(pstring "alias" .>> IW)] 
@@ -232,7 +232,7 @@ let theoryNamespace = (attempt aliasedNamespaceIdentifier <|> namespaceIdentifie
 let theoryNamespaceList = sepBy1 theoryNamespace comma
 let theoryNamespaceListMod = sequenceDiagnostics1 theoryNamespace comma [rightBrace] ad "namespace or aliased namespace" 
 
-let usesClause = positions (skipString "uses" >>. IW >>. leftBrace >>. IW >>. theoryNamespaceListMod .>> IW .>> rightBrace) <?> "uses clause" |>> Ast.UsesClause
+let usesClause = positions (keywordAlternative "uses" "" >>. IW >>. leftBrace >>. IW >>. theoryNamespaceListMod .>> IW .>> rightBrace) <?> "uses clause" |>> Ast.UsesClause
 
 let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
