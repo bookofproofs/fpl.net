@@ -30,8 +30,8 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 
 (* Literals *)
 
-let rightBrace: Parser<_, unit>= altTypoMsgI (skipString "}") "closing '}'" 
 let leftBrace: Parser<_, unit> = altTypoMsgIPre (skipString "{") "opening '{'" >>. spaces
+let rightBrace: Parser<_, unit>= altTypoMsgI (skipString "}") "closing '}'" 
 let leftParen: Parser<_, unit> = skipChar '(' >>. spaces
 let rightParen: Parser<_, unit> = skipChar ')' 
 let comma: Parser<_, unit> = skipChar ',' >>. spaces
@@ -150,6 +150,7 @@ let namespaceIdentifier = positions (sequenceDiagnostics1 pascalCaseId dot [spac
 let optionalnamespaceIdentifier = positions (sequenceDiagnostics pascalCaseId dot [spaces; leftBrace; eof] ad "expected PascalCaseId") <?> "namespace identifier" |>> Ast.NamespaceIdentifier
 // error recovery for predicateIdentifier with escape parsers [spaces; leftParen; eof]
 let predicateIdentifier = positions (sequenceDiagnostics pascalCaseId dot [spaces; leftParen; eof] ad "expected PascalCaseId") <?> "user-defined identifier" |>> Ast.PredicateIdentifier 
+let signatureIdentifier = positions (sequenceDiagnostics1 pascalCaseId dot [spaces; leftParen; leftBrace; rightBrace] ad "expected PascalCaseId followed by a tuple of parameters") |>> Ast.PredicateIdentifier 
 // error recovery for classIdentifier with escape parsers [spaces; leftBracket; eof]
 let classIdentifier= positions (sequenceDiagnostics1 pascalCaseId dot [spaces; leftBracket; eof] ad "expected PascalCaseId") <?> "class identifier"|>> Ast.ClassHeaderType
 
@@ -353,14 +354,18 @@ let parenthesisedType = positions (variableTypeWithModifier .>> IW >>. paramTupl
 let variableType = ((attempt parenthesisedType) <|> attempt variableTypeWithModifier) <|> classType
 
 // err recovery namedVariableDeclaration 
+let namedVariableDeclaration = positions ((variableList .>> IW) .>>. ((colon >>. IW) >>. variableType)) <?> "named variable declaration" |>> Ast.NamedVarDecl
 
-let namedVariableDeclaration = positions ((variableList .>> IW) .>>. ((colon >>. IW) >>. variableType)) <?> "named variable declaration"|>> Ast.NamedVarDecl
-let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
-let namedVariableDeclarationListMod = sequenceDiagnostics namedVariableDeclaration comma [rightParen] ad "variable declaration expected"
+let namedVariableDeclarationBreakCondition = skipUntilLookaheadSeparatorListFail comma [rightParen; rightBrace]
+let namedVariableDeclarationBreakConditionErrRec = emitDiagnostics ad namedVariableDeclarationBreakCondition "variable declaration expected"
 
-paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationListMod) .>> (IW .>> rightParen)) <?> "tuple of parameters" |>> Ast.ParamTuple
+let namedVariableDeclarationList = sepBy (namedVariableDeclaration <|> namedVariableDeclarationBreakConditionErrRec) comma |>> Ast.ParamList 
+// let namedVariableDeclarationListMod = sequenceDiagnostics namedVariableDeclaration comma [rightParen; rightBrace] ad "variable declaration expected" |>> Ast.ParamList 
 
-let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) <?> "PascalCaseId followed by a tuple of parameters" |>> Ast.Signature
+// paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationListMod) .>> (IW .>> rightParen)) <?> "tuple of parameters" |>> Ast.ParamTuple
+paramTupleRef.Value <- positions (abc (leftParen >>. IW) namedVariableDeclarationList (IW .>> rightParen) "(" "parameter list" ")" ad) <?> "tuple of parameters" |>> Ast.ParamTuple
+
+let signature = positions ((signatureIdentifier .>> IW) .>>. paramTuple) |>> Ast.Signature
 
 (* Statements *)
 let argumentTuple = (spacesLeftParenSpaces >>. predicateList) .>> (IW .>> spacesRightParenSpaces)  
