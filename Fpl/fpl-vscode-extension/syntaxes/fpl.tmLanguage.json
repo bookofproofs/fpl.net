@@ -51,7 +51,7 @@
 		"templates": {
 			"patterns": [{
 				"name": "template.fpl entity.name.function",
-				"match": "\\b((tpl|template)[A-Z][a-z0-9A-Z_]*)\\b"
+				"match": "\\b((tpl|template)(\\d*|([A-Z][a-z0-9A-Z_]*)*))\\b"
 			}]
 		},
 		"variables": {

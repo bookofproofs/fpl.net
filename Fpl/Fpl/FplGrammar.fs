@@ -30,26 +30,26 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 
 (* Literals *)
 
-let leftBrace: Parser<_, unit> = skipChar '{' >>. spaces 
-let rightBrace: Parser<_, unit>= skipChar '}' 
-let leftParen: Parser<_, unit> = skipChar '(' >>. spaces 
-let rightParen: Parser<_, unit> = skipChar ')' 
-let comma: Parser<_, unit> = skipChar ',' >>. spaces 
-let star: Parser<_, unit> = skipChar '*' >>% Ast.Many
-let plus: Parser<_, unit> = skipChar '+' >>% Ast.Many1
-let dot: Parser<_, unit> = skipChar '.'
-let colon: Parser<_, unit> = skipChar ':' >>. spaces
-let colonEqual: Parser<_, unit> = skipString ":="
-let at: Parser<char, unit> = pchar '@'
-let exclamationMark: Parser<_, unit> = skipChar '!'
-let case: Parser<_,unit> = skipChar '|'
-let leftBracket: Parser<_, unit> = skipChar '['
-let rightBracket: Parser<_, unit> = skipChar ']'
-let tilde: Parser<_, unit> = skipChar '~'
-let semiColon: Parser<_, unit> = skipChar ';'
-let dollar: Parser<_, unit> = skipChar '$'
-let toArrow: Parser<_, unit> = skipString "->"
-let vDash: Parser<_, unit> = skipString "|-"
+let leftBrace = skipChar '{' >>. spaces 
+let rightBrace = skipChar '}' 
+let leftParen = skipChar '(' >>. spaces 
+let rightParen = skipChar ')' 
+let comma = skipChar ',' >>. spaces 
+let star = skipChar '*' >>% Ast.Many
+let plus = skipChar '+' >>% Ast.Many1
+let dot = skipChar '.'
+let colon = skipChar ':' >>. spaces
+let colonEqual = skipString ":="
+let at = pchar '@'
+let exclamationMark = skipChar '!'
+let case = skipChar '|'
+let leftBracket = skipChar '['
+let rightBracket = skipChar ']'
+let tilde = skipChar '~'
+let semiColon = skipChar ';'
+let dollar = skipChar '$'
+let toArrow = skipString "->"
+let vDash = skipString "|-"
 
 (* Whitespaces and Comments *)
 
@@ -57,9 +57,9 @@ let IW = spaces
 
 let SW = spaces1
 
-let inlineComment: Parser<_, unit> = pstring "//" >>. skipManyTill anyChar (skipNewline <|> eof) |>> ignore <?> "<line-comment>"
+let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline <|> eof) |>> ignore <?> "<line-comment>"
 
-let blockComment: Parser<_, unit> = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) |>> ignore <?> "<multiline-comment>"
+let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) |>> ignore <?> "<multiline-comment>"
 
 let CW = choice [
     blockComment
@@ -76,8 +76,8 @@ let spacesRightParenSpaces = spaces >>. rightParen >>. spaces
 // note that this has to be inserted into:
 // the IsOperand choice
 // the PredicateOrFunctionalTerm choice
-let digits = regex @"\d+" 
-let extDigits: Parser<_, unit> = positions (digits) <?> "digits" |>> Ast.ExtDigits
+let digits = regex @"\d+" <?> "<digits>" 
+let extDigits: Parser<_, unit> = positions (digits) |>> Ast.ExtDigits
 
 (* Identifiers *)
 (* Fpl Keywords *)
@@ -138,8 +138,8 @@ let keyWordSet =
     )
 
 let IdStartsWithSmallCase = regex @"[a-z]\w*"
-let idStartsWithCap = (regex @"[A-Z]\w*")
-let pascalCaseId = idStartsWithCap <?> "<PascalCaseId>" |>> Ast.PascalCaseId
+let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
+let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
 let dollarDigits = positions (dollar >>. digits) <?> "<'$' followed by digits>" |>> Ast.DollarDigits
 let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "argument identifier" |>> Ast.ArgumentIdentifier
 
@@ -160,59 +160,59 @@ let variableX: Parser<string,unit> = IdStartsWithSmallCase >>=
                                         ) <?> "<variable>"
 let variable = positions variableX <?> "<variable>" |>> Ast.Var 
 
-let variableList = sepEndBy1 variable comma
+let variableList = sepBy1 variable comma
 
-let keywordSelf: Parser<_,unit> = skipString "self"
-let keywordIndex: Parser<_,unit> = skipString "index" <|> skipString "ind" <?> "<'index' or 'ind' keyword>" >>% Ast.IndexType
+let keywordSelf = skipString "self" <?> "<'self' keyword>"
+let keywordIndex = skipString "index" <|> skipString "ind" <?> "<'index' or 'ind' keyword>" >>% Ast.IndexType
 
 
 (* FplBlock-related Keywords *)
-let keywordPremise: Parser<_,unit> = (skipString "premise" <|> skipString "pre") >>. IW <?> "<'premise' or 'pre' keyword>"
-let keywordConclusion: Parser<_,unit> = (skipString "conclusion" <|> skipString "con") >>. IW <?> "<'conclusion' or 'con' keyword>"
+let keywordPremise = (skipString "premise" <|> skipString "pre") >>. IW <?> "<'premise' or 'pre' keyword>"
+let keywordConclusion = (skipString "conclusion" <|> skipString "con") >>. IW <?> "<'conclusion' or 'con' keyword>"
 
 
 (* Statement-related Keywords *)
-let keywordDel: Parser<_,unit> = skipString "delegate" <|> skipString "del" <?> "<'delegate' or 'del' keyword>"
-let keywordReturn: Parser<_,unit> = skipString "return" <|> skipString "ret" <?> "<'return' or 'ret' keyword>"
-let keywordRange: Parser<_,unit> = skipString "range" <?> "<'range' keyword>"
-let keywordLoop: Parser<_,unit> = skipString "loop" <?> "<'loop' keyword>"
-let keywordCases: Parser<_,unit> = skipString "cases" <?> "<'cases' keyword>"
-let keywordAssert: Parser<_,unit> = skipString "assert" <?> "<'assert' keyword>"
+let keywordDel = skipString "delegate" <|> skipString "del" <?> "<'delegate' or 'del' keyword>"
+let keywordReturn = skipString "return" <|> skipString "ret" <?> "<'return' or 'ret' keyword>"
+let keywordRange = skipString "range" <?> "<'range' keyword>"
+let keywordLoop = skipString "loop" <?> "<'loop' keyword>"
+let keywordCases = skipString "cases" <?> "<'cases' keyword>"
+let keywordAssert = skipString "assert" <?> "<'assert' keyword>"
 
 (* Predicate-related Keywords *)
-let keywordUndefined: Parser<_,unit> = positions (skipString "undefined" <|> skipString "undef") <?> "<'undefined' or 'undef' keyword>" |>> Ast.Undefined
-let keywordTrue: Parser<_,unit> = positions (skipString "true") <?> "<'true' keyword>" |>> Ast.True  
-let keywordFalse: Parser<_,unit> = positions (skipString "false") <?> "<'false' keyword>" |>> Ast.False  
-let keywordAnd: Parser<_,unit> = skipString "and" <?> "<'and' keyword>"
-let keywordOr: Parser<_,unit> = skipString "or" <?> "<'or' keyword>"
-let keywordImpl: Parser<_,unit> = skipString "impl" <?> "<'impl' keyword>"
-let keywordIif: Parser<_,unit> = skipString "iif" <?> "<'iif' keyword>"
-let keywordXor: Parser<_,unit> = skipString "xor" <?> "<'xor' keyword>"
-let keywordNot: Parser<_,unit> = skipString "not" <?> "<'not' keyword>"
-let keywordAll: Parser<_,unit> = skipString "all" <?> "<'all' keyword>"
-let keywordEx: Parser<_,unit> = skipString "ex" <?> "<'ex' keyword>"
-let keywordIs: Parser<_,unit> = skipString "is" <?> "<'is' keyword>"
+let keywordUndefined = positions (skipString "undefined" <|> skipString "undef") <?> "<'undefined' or 'undef' keyword>" |>> Ast.Undefined
+let keywordTrue = positions (skipString "true") <?> "<'true' keyword>" |>> Ast.True  
+let keywordFalse = positions (skipString "false") <?> "<'false' keyword>" |>> Ast.False  
+let keywordAnd = skipString "and" <?> "<'and' keyword>"
+let keywordOr = skipString "or" <?> "<'or' keyword>"
+let keywordImpl = skipString "impl" <?> "<'impl' keyword>"
+let keywordIif = skipString "iif" <?> "<'iif' keyword>"
+let keywordXor = skipString "xor" <?> "<'xor' keyword>"
+let keywordNot = skipString "not" <?> "<'not' keyword>"
+let keywordAll = skipString "all" <?> "<'all' keyword>"
+let keywordEx = skipString "ex" <?> "<'ex' keyword>"
+let keywordIs = skipString "is" <?> "<'is' keyword>"
 
 
 // Via templates, FPL supports generic types, which make it possible to define abstract mathematical
 // objects and their properties that defer the concrete
 // specification of one or more types until the definition or method is declared and instantiated by
 // client code
-let keywordTemplate: Parser<_,unit> = positions (pstring "template" <|> pstring "tpl") <?> "<'template' or 'tpl' keyword, optionally concatenated with some digits or a PascalCaseID>" |>> Ast.TemplateType
+let keywordTemplate = positions (pstring "template" <|> pstring "tpl") <?> "<'template' or 'tpl' keyword>" |>> Ast.TemplateType
 
 let templateTail = choice [ idStartsWithCap; digits ]
 
-let templateWithTail = positions (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) <?> "'template' or 'tpl' followed by digits or a PascalCaseId" |>>  Ast.TemplateType
+let templateWithTail = positions (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) <?> "<'template' or 'tpl' keyword, followed by digits or a PascalCaseId>" |>>  Ast.TemplateType
 
-let keywordObject: Parser<_,unit> = skipString "object" <|> skipString "obj" <?> "<'object' or 'obj' keyword>" >>% Ast.ObjectType 
+let keywordObject = skipString "object" <|> skipString "obj" <?> "<'object' or 'obj' keyword>" >>% Ast.ObjectType 
 
 let objectHeader = choice [
     keywordObject
     (attempt templateWithTail) <|> keywordTemplate
 ] 
 
-let keywordPredicate: Parser<_,unit> = skipString "predicate" <|> skipString "pred" <?> "<'predicate' or 'pred' keyword>" >>% Ast.PredicateType
-let keywordFunction: Parser<_,unit> = skipString "function" <|> skipString "func" <?> "<'function' or 'func' keyword>" >>% Ast.FunctionalTermType
+let keywordPredicate = skipString "predicate" <|> skipString "pred" <?> "<'predicate' or 'pred' keyword>" >>% Ast.PredicateType
+let keywordFunction = skipString "function" <|> skipString "func" <?> "<'function' or 'func' keyword>" >>% Ast.FunctionalTermType
 
 
 let theoryNamespace = (attempt aliasedNamespaceIdentifier <|> namespaceIdentifier) .>> IW <?> "<namespace or aliased namespace (starting with a PascalCaseId)>"
@@ -226,7 +226,7 @@ let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
 let extensionHeader: Parser<unit,unit> = skipString ":ext" 
 
-let extensionName = positions (skipString "ext" >>. idStartsWithCap .>> IW) <?> "'ext' followed by PascalCaseId"|>> Ast.Extensionname
+let extensionName = positions (skipString "ext" >>. idStartsWithCap .>> IW) <?> "<'ext' followed by PascalCaseId>"|>> Ast.Extensionname
 
 let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. regex @"\/(?!:end).*" .>> IW |>> Ast.ExtensionRegex
 
@@ -239,7 +239,7 @@ let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. ex
 // This ensures that they will not be mixed-up with original FPL ebnf productions
 // that are all PascalCase as well as FPL keywords, that are all small case.
 
-let xId = positions (at >>. extensionName) <?> "'@ext' followed by PascalCaseId" |>> Ast.ExtensionType 
+let xId = positions (at >>. extensionName) <?> "<'@ext', followed by PascalCaseId>" |>> Ast.ExtensionType 
 
 let indexVariable = positions ((IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase )) <?> "index variable" |>> Ast.IndexVariable
 
@@ -314,13 +314,10 @@ let specificClassType = choice [
 ]
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
-let callModifier = choice [
-    star
-    plus
-]
+let callModifier = opt (choice [ star;  plus ]) <?> "<optional '*' or '+'>"
 
-let classTypeWithCoord = positions (((specificClassType .>> IW) .>> leftBracket) .>>. (coordInTypeList .>> (IW >>. rightBracket))) <?> "type with coordinates" |>> Ast.FplTypeWithCoords
-let classTypeWithRange = positions (((specificClassType .>> IW) .>>. leftBound) .>>. (rangeInType .>>. rightBound)) <?> "type with range" |>> Ast.FplTypeWithRange
+let classTypeWithCoord = positions (((specificClassType .>> IW) .>> leftBracket) .>>. (coordInTypeList .>> (IW >>. rightBracket))) <?> "<class identifier with coordinates>" |>> Ast.FplTypeWithCoords
+let classTypeWithRange = positions (((specificClassType .>> IW) .>>. leftBound) .>>. (rangeInType .>>. rightBound)) <?> "<class identifier with range>" |>> Ast.FplTypeWithRange
 
 // The classType is the last type in FPL we can derive FPL classes from.
 // It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
@@ -329,19 +326,19 @@ let classTypeWithRange = positions (((specificClassType .>> IW) .>>. leftBound) 
 // in the scope of FPL building blocks
 let classType = (((attempt classTypeWithRange) <|> (attempt classTypeWithCoord)) <|> specificClassType)
 
-let modifieableClassType = positions (opt callModifier .>>. classType) <?> "optional '+' or '*' followed by a class type" |>> Ast.VariableTypeWithModifier
-let modifieablePredicateType = positions (opt callModifier .>>. keywordPredicate) <?> "optional '+' or '*' followed by 'predicate' or 'pred'" |>> Ast.VariableTypeWithModifier
-let modifieableFunctionType = positions (opt callModifier .>>. keywordFunction) <?> "optional '+' or '*' followed by 'function' or 'func'" |>> Ast.VariableTypeWithModifier
-let modifieableIndexType = positions (opt callModifier .>>. keywordIndex) <?> "optional '+' or '*' followed by 'index' or 'ind'" |>> Ast.VariableTypeWithModifier
+let modifieableClassType = positions (callModifier .>>. classType) |>> Ast.VariableTypeWithModifier
+let modifieablePredicateType = positions (callModifier .>>. keywordPredicate) |>> Ast.VariableTypeWithModifier
+let modifieableFunctionType = positions (callModifier .>>. keywordFunction) |>> Ast.VariableTypeWithModifier
+let modifieableIndexType = positions (callModifier .>>. keywordIndex) |>> Ast.VariableTypeWithModifier
 
 let variableTypeWithModifier = (((attempt modifieableIndexType) <|> attempt modifieableFunctionType) <|> attempt modifieablePredicateType) <|> modifieableClassType
 
-let parenthesisedType = positions (variableTypeWithModifier .>> IW >>. paramTuple) <?> "variable type" |>> Ast.VariableType
+let parenthesisedType = positions (variableTypeWithModifier .>> IW >>. paramTuple) |>> Ast.VariableType
 
-let variableType = ((attempt parenthesisedType) <|> attempt variableTypeWithModifier) <|> classType
+let variableType = (((attempt parenthesisedType) <|> attempt variableTypeWithModifier) <|> classType) .>> IW
 
-let namedVariableDeclaration = positions ((variableList .>> IW) .>>. ((colon >>. IW) >>. variableType)) <?> "<variable declaration>, start with some variable" |>> Ast.NamedVarDecl
-let namedVariableDeclarationList = sepBy namedVariableDeclaration comma 
+let namedVariableDeclaration = positions ((variableList .>> IW) .>>. ((colon >>. IW) >>. variableType)) |>> Ast.NamedVarDecl
+let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
 
 paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) <?> "<tuple of parameters (open with '(')>" |>> Ast.ParamTuple
 let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) |>> Ast.Signature
@@ -469,11 +466,11 @@ let ruleOfInferenceList = many1 (many CW >>. ruleOfInference .>> IW) <?> "<list 
 let rulesOfInferenceBlock = (keywordInference >>. IW >>. leftBraceCommented >>. many CW >>. ruleOfInferenceList) .>> commentedRightBrace
 
 (* FPL building blocks - Theorem-like statements and conjectures *)
-let keywordTheorem: Parser<_,unit> = skipString "theorem" <|> skipString "thm" <?> "<'theorem' or 'thm' keyword>"
-let keywordLemma: Parser<_,unit> = skipString "lemma" <|> skipString "lem" <?> "<'lemma' or 'lem' keyword>"
-let keywordProposition: Parser<_,unit> = skipString "proposition" <|> skipString "prop" <?> "<'proposition' or 'prop' keyword>"
-let keywordCorollary: Parser<_,unit> = skipString "corollary" <|> skipString "cor" <?> "<'corollary' or 'cor' keyword>"
-let keywordConjecture: Parser<_,unit> = skipString "conjecture" <|> skipString "conj" <?> "<'conjecture' or 'conj' keyword>"
+let keywordTheorem = skipString "theorem" <|> skipString "thm" <?> "<'theorem' or 'thm' keyword>"
+let keywordLemma = skipString "lemma" <|> skipString "lem" <?> "<'lemma' or 'lem' keyword>"
+let keywordProposition = skipString "proposition" <|> skipString "prop" <?> "<'proposition' or 'prop' keyword>"
+let keywordCorollary = skipString "corollary" <|> skipString "cor" <?> "<'corollary' or 'cor' keyword>"
+let keywordConjecture = skipString "conjecture" <|> skipString "conj" <?> "<'conjecture' or 'conj' keyword>"
 
 let theorem = positions (keywordTheorem >>. SW >>. signatureWithPremiseConclusionBlock) |>> Ast.Theorem
 let lemma = positions (keywordLemma >>. SW >>. signatureWithPremiseConclusionBlock) |>> Ast.Lemma
@@ -487,7 +484,7 @@ let corollary = positions (keywordCorollary >>. SW >>. (corollarySignature .>> I
 
 (* FPL building blocks - Axioms *)
 
-let keywordAxiom: Parser<_,unit> = (skipString "axiom" <|> skipString "ax" <|> skipString "postulate" <|> skipString "post")  <?> "<'axiom', 'ax', 'postulate', or 'post' keyword>"
+let keywordAxiom = (skipString "axiom" <|> skipString "ax" <|> skipString "postulate" <|> skipString "post")  <?> "<'axiom', 'ax', 'postulate', or 'post' keyword>"
 let axiomBlock = leftBraceCommented >>. variableSpecificationList .>>. commentedPredicate .>> commentedRightBrace
 
 let axiom = positions (keywordAxiom >>. SW >>. signature .>>. (IW >>. axiomBlock)) |>> Ast.Axiom
@@ -500,8 +497,8 @@ let constructorBlock = leftBraceCommented >>. variableSpecificationList .>>. cal
 let constructor = positions ((signature .>> IW) .>>. constructorBlock) <?> "<constructor, named after the class>" |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
-let keywordMandatory: Parser<_,unit> = positions (skipString "mandatory" <|> skipString "mand") <?> "<'mandatory' or 'mand' keyword>" >>% Ast.Mandatory
-let keywordOptional: Parser<_,unit> = positions (skipString "optional" <|> skipString "opt") <?> "<'optional' or 'opt' keyword>" >>% Ast.Optional
+let keywordMandatory = positions (skipString "mandatory" <|> skipString "mand") <?> "<'mandatory' or 'mand' keyword>" >>% Ast.Mandatory
+let keywordOptional = positions (skipString "optional" <|> skipString "opt") <?> "<'optional' or 'opt' keyword>" >>% Ast.Optional
 let predicateInstanceBlock = (leftBraceCommented >>. variableSpecificationList) .>>. (commentedPredicate .>> commentedRightBrace)
 let predicateInstance = positions ((keywordPredicate >>. SW >>. signature) .>>. (many CW >>. predicateInstanceBlock)) |>> Ast.PredicateInstance
 let classInstance = positions ((variableType .>> SW) .>>. signature .>>. (many CW >>. instanceBlock)) |>> Ast.ClassInstance
@@ -526,16 +523,16 @@ let propertyList = many1 (many CW >>. property .>> IW)
 
 *)
 // justifying proof arguments can be the identifiers of Rules of References, conjectures, theorem-like statements, or axioms
-let keywordRevoke: Parser<_,unit> = (skipString "revoke" <|> skipString "rev") <?> "<'revoke' or 'rev' keyword>" 
+let keywordRevoke = (skipString "revoke" <|> skipString "rev") <?> "<'revoke' or 'rev' keyword>" 
 let revokeArgument = positions (keywordRevoke >>. SW >>. argumentIdentifier) |>> Ast.RevokeArgument 
 let premiseOfToBeProvedTheorem = positions keywordPremise <?> "<'premise' or 'prem' keyword>" |>> Ast.PremiseReference 
 let conclusionOfToBeProvedTheorem = positions keywordConclusion <?> "<'conclusion' or 'con' keyword>" |>> Ast.ConclusionReference 
 let premiseOrOtherPredicate = premiseOfToBeProvedTheorem <|> predicate
     
-let keywordAssume: Parser<_,unit> = (skipString "assume" <|> skipString "ass") <?> "<'assume' or 'ass' keyword>"
+let keywordAssume = (skipString "assume" <|> skipString "ass") <?> "<'assume' or 'ass' keyword>"
 let assumeArgument = positions (keywordAssume >>. SW >>. premiseOrOtherPredicate) |>> Ast.AssumeArgument
-let keywordTrivial: Parser<_,unit>  = positions (skipString "trivial") <?> "'trivial'" <?> "<'trivial' keyword>" |>> Ast.Trivial
-let keywordQed: Parser<_,unit>  = positions (skipString "qed") <?> "<'qed' keyword>" |>> Ast.Qed
+let keywordTrivial  = positions (skipString "trivial") <?> "'trivial'" <?> "<'trivial' keyword>" |>> Ast.Trivial
+let keywordQed  = positions (skipString "qed") <?> "<'qed' keyword>" |>> Ast.Qed
 let derivedPredicate = predicate |>> Ast.DerivedPredicate
 let derivedArgument = choice [
     keywordQed 
@@ -550,7 +547,7 @@ let justifiedArgument = positions ((justification .>> vDash .>> IW) .>>. argumen
 let argument = assumeArgument <|> justifiedArgument
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. argument) <?> "argument" |>> Ast.Argument
 let proofArgumentList = many1 (many CW >>. proofArgument .>> IW)
-let keywordProof: Parser<_,unit> = (skipString "proof" <|> skipString "prf") <?> "<'proof' or 'prf' keyword>"
+let keywordProof = (skipString "proof" <|> skipString "prf") <?> "<'proof' or 'prf' keyword>"
 let proofBlock = (leftBraceCommented >>. variableSpecificationList) .>>. (proofArgumentList .>> commentedRightBrace)
 let proof = positions ((keywordProof >>. SW >>. referencingIdentifier) .>>. (IW >>. proofBlock)) |>> Ast.Proof
 
@@ -565,7 +562,7 @@ let functionalTermDefinitionBlock = (leftBraceCommented  >>. variableSpecificati
 let definitionFunctionalTerm = positions ((functionalTermSignature .>> IW) .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
-let keywordClass: Parser<_,unit> = (skipString "class" <|> skipString "cl") <?> "<'class' or 'cl' keyword>"
+let keywordClass = (skipString "class" <|> skipString "cl") <?> "<'class' or 'cl' keyword>"
 let classDefinitionContent = choice [
     property
     constructor
@@ -581,7 +578,7 @@ let definition = choice [
     definitionFunctionalTerm
 ]
 (* Gathering together all Building Blocks to a theory *)
-let keywordTheory: Parser<_,unit> = (skipString "theory" <|> skipString "th") 
+let keywordTheory = (skipString "theory" <|> skipString "th") 
 // FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
 let buildingBlock = choice [
     definition
@@ -600,7 +597,7 @@ let theoryBlock = keywordTheory >>. IW >>. leftBraceCommented >>. buildingBlockL
 
 (* Localizations *)
 // Localizations provide a possibility to automatically translate FPL expressions into natural languages
-let keywordLocalization: Parser<_,unit> = (skipString "localization" <|> skipString "loc") 
+let keywordLocalization = (skipString "localization" <|> skipString "loc") 
 let localizationLanguageCode: Parser<string,unit> = regex @"[a-z]{3}" <?> "<ISO 639 language code>"
 let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<\"language-specific string\">" |>> Ast.LocalizationString
 

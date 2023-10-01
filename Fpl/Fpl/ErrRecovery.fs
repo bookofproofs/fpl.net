@@ -297,4 +297,21 @@ let tryParseOther p msg (ad:Diagnostics) =
             let diagnostic = Diagnostic (DiagnosticEmitter.Parser, DiagnosticSeverity.Error,restInput.Position,diagnosticMsg)
             ad.AddDiagnostic diagnostic
             preturn Ast.Error
+
+
+if correction by choice results in the same error message then, the choice was wrong 
+=> to avoid infinite loops, try another 'nonempty string' in the error message 
+=> otherwise fail with the message infinite loop in error recovery at 'choice'
+
+the error messages must be tested for all possible productions in the grammar, the test criteria are:
+1) every path has to show one or  more 'choices'
+2) watch out for paths with a message for a single 'choice' where actually more choices are possible. This 
+can happen e.g. in pList .>> q if the pList is a separated list and the parser matches a single element 
+of the list, now expecting q. Actually, we expect q or a separator from pList. The error might be that 
+your pList is probably accepting an optional separator at the end and you might consider it an error in your grammar to correct it.
+
+
+
+
+
 *)
