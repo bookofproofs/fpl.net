@@ -41,11 +41,14 @@ let dot = skipChar '.'
 let colon = skipChar ':' >>. spaces
 let colonEqual = skipString ":="
 let at = pchar '@'
-let exclamationMark = skipChar '!'
 let case = skipChar '|'
-let leftBracket = skipChar '['
-let rightBracket = skipChar ']' >>. spaces
-let tilde = skipChar '~'
+let leftBracket = skipChar '[' >>. spaces 
+let leftClosedBracket = skipChar '[' >>. spaces <?> "<(closed) left bound '['>"
+let leftOpenBracket = skipString "[!" >>. spaces <?> "<(open) left bound '[!'>"
+let rightBracket = skipChar ']' >>. spaces 
+let rightOpenBracket = skipString "!]" >>. spaces <?> "<(open) right bound '!]'>" 
+let rightClosedBracket = skipString "]" >>. spaces <?> "<(closed) right bound ']'>" 
+let tilde = skipChar '~' .>> spaces
 let semiColon = skipChar ';'
 let dollar = skipChar '$'
 let toArrow = skipString "->"
@@ -163,7 +166,7 @@ let variable = positions variableX .>> IW <?> "<variable>" |>> Ast.Var
 let variableList = sepBy1 variable comma
 
 let keywordSelf = skipString "self" .>> IW <?> "<'self' keyword>"
-let keywordIndex = skipString "index" <|> skipString "ind" <?> "<'index' or 'ind' keyword>" >>% Ast.IndexType
+let keywordIndex = (skipString "index" <|> skipString "ind") .>> IW <?> "<'index' or 'ind' keyword>" >>% Ast.IndexType
 
 
 (* FplBlock-related Keywords *)
@@ -173,38 +176,38 @@ let keywordConclusion = (skipString "conclusion" <|> skipString "con") >>. IW <?
 
 (* Statement-related Keywords *)
 let keywordDel = skipString "delegate" <|> skipString "del" <?> "<'delegate' or 'del' keyword>"
-let keywordReturn = skipString "return" <|> skipString "ret" <?> "<'return' or 'ret' keyword>"
-let keywordRange = skipString "range" <?> "<'range' keyword>"
-let keywordLoop = skipString "loop" <?> "<'loop' keyword>"
-let keywordCases = skipString "cases" <?> "<'cases' keyword>"
-let keywordAssert = skipString "assert" <?> "<'assert' keyword>"
+let keywordReturn = (skipString "return" <|> skipString "ret") .>> IW <?> "<'return' or 'ret' keyword>"
+let keywordRange = skipString "range" .>> IW <?> "<'range' keyword>"
+let keywordLoop = skipString "loop" .>> IW <?> "<'loop' keyword>"
+let keywordCases = skipString "cases" .>> IW <?> "<'cases' keyword>"
+let keywordAssert = skipString "assert" .>> IW <?> "<'assert' keyword>"
 
 (* Predicate-related Keywords *)
-let keywordUndefined = positions (skipString "undefined" <|> skipString "undef") <?> "<'undefined' or 'undef' keyword>" |>> Ast.Undefined
-let keywordTrue = positions (skipString "true") <?> "<'true' keyword>" |>> Ast.True  
-let keywordFalse = positions (skipString "false") <?> "<'false' keyword>" |>> Ast.False  
-let keywordAnd = skipString "and" <?> "<'and' keyword>"
-let keywordOr = skipString "or" <?> "<'or' keyword>"
-let keywordImpl = skipString "impl" <?> "<'impl' keyword>"
-let keywordIif = skipString "iif" <?> "<'iif' keyword>"
-let keywordXor = skipString "xor" <?> "<'xor' keyword>"
-let keywordNot = skipString "not" <?> "<'not' keyword>"
-let keywordAll = skipString "all" <?> "<'all' keyword>"
-let keywordEx = skipString "ex" <?> "<'ex' keyword>"
-let keywordIs = skipString "is" <?> "<'is' keyword>"
+let keywordUndefined = positions (skipString "undefined" <|> skipString "undef") .>> IW <?> "<'undefined' or 'undef' keyword>" |>> Ast.Undefined
+let keywordTrue = positions (skipString "true") .>> IW <?> "<'true' keyword>" |>> Ast.True  
+let keywordFalse = positions (skipString "false") .>> IW <?> "<'false' keyword>" |>> Ast.False  
+let keywordAnd = skipString "and" .>> IW <?> "<'and' keyword>"
+let keywordOr = skipString "or" .>> IW <?> "<'or' keyword>"
+let keywordImpl = skipString "impl" .>> IW <?> "<'impl' keyword>"
+let keywordIif = skipString "iif" .>> IW <?> "<'iif' keyword>"
+let keywordXor = skipString "xor" .>> IW <?> "<'xor' keyword>"
+let keywordNot = skipString "not" .>> IW <?> "<'not' keyword>"
+let keywordAll = skipString "all" .>> IW <?> "<'all' keyword>"
+let keywordEx = skipString "ex" .>> IW <?> "<'ex' keyword>"
+let keywordIs = skipString "is" .>> IW <?> "<'is' keyword>"
 
 
 // Via templates, FPL supports generic types, which make it possible to define abstract mathematical
 // objects and their properties that defer the concrete
 // specification of one or more types until the definition or method is declared and instantiated by
 // client code
-let keywordTemplate = positions (pstring "template" <|> pstring "tpl") <?> "<'template' or 'tpl' keyword>" |>> Ast.TemplateType
+let keywordTemplate = positions (pstring "template" <|> pstring "tpl") .>> IW <?> "<'template' or 'tpl' keyword>" |>> Ast.TemplateType
 
 let templateTail = choice [ idStartsWithCap; digits ]
 
-let templateWithTail = positions (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) <?> "<'template' or 'tpl' keyword, followed by digits or a PascalCaseId>" |>>  Ast.TemplateType
+let templateWithTail = positions (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) .>> IW <?> "<'template' or 'tpl' keyword, followed by digits or a PascalCaseId>" |>>  Ast.TemplateType
 
-let keywordObject = skipString "object" <|> skipString "obj" <?> "<'object' or 'obj' keyword>" >>% Ast.ObjectType 
+let keywordObject = (skipString "object" <|> skipString "obj") .>> IW <?> "<'object' or 'obj' keyword>" >>% Ast.ObjectType 
 
 let objectHeader = choice [
     keywordObject
@@ -245,22 +248,19 @@ let indexVariable = positions ((IdStartsWithSmallCase .>> dollar) .>>. ( digits 
 
 let atList = many at
 
-let self = positions (atList .>> keywordSelf) <?> "@...@self" |>> Ast.Self
+let self = positions (atList .>> keywordSelf) |>> Ast.Self
 
 let entity = (attempt (attempt self <|> indexVariable)) <|> variable
 
-let leftOpen = positions (leftBracket >>. IW >>. exclamationMark) <?> "opening [!" >>% Ast.LeftOpen
-let leftClosed = positions (leftBracket >>. IW) <?> "opening [" >>% Ast.LeftClosed
+let leftOpen = positions leftOpenBracket >>% Ast.LeftOpen
+let leftClosed = positions leftClosedBracket >>% Ast.LeftClosed
 
-let leftBound = ((attempt leftOpen) <|> leftClosed)
+let rightOpen = positions rightOpenBracket >>% Ast.RightOpen
+let rightClosed = positions rightClosedBracket >>% Ast.RightClosed
 
-let rightBound = choice [
-    positions (exclamationMark >>. IW >>. rightBracket) <?> "closing !]" >>% Ast.RightOpen
-    positions (IW >>. rightBracket) <?> "closing ]" >>% Ast.RightClosed
-]
+let leftBound = leftOpen <|> leftClosed
+let rightBound = rightOpen <|> rightClosed
  
-
-
 ////// resolving recursive parsers
 let statementList, statementListRef = createParserForwardedToRef()
 let primePredicate, primePredicateRef = createParserForwardedToRef()
@@ -270,7 +270,7 @@ let predicateList, predicateListRef = createParserForwardedToRef()
 let predicateWithArguments, predicateWithArgumentsRef = createParserForwardedToRef()
 let paramTuple, paramTupleRef = createParserForwardedToRef()
 
-let entityWithCoord = positions (entity .>>. coordOfEntity) <?> "entity with some coordinates" |>> Ast.EntityWithCoord
+let entityWithCoord = positions (entity .>>. coordOfEntity) |>> Ast.EntityWithCoord
 
 let assignee = (attempt entityWithCoord) <|> entity
 
@@ -284,34 +284,35 @@ let fplIdentifier = choice [ fplDelegateIdentifier ; coord; predicateIdentifier 
 
 let coordList = sepEndBy1 coord comma
 
-let bracketedCoordList = positions ((leftBracket >>. IW >>. coordList) .>> (IW >>. rightBracket)) <?> "bracketed list of coordinates" |>> Ast.BrackedCoordList
+let bracketedCoords = positions (leftBracket >>. coordList .>> rightBracket) |>> Ast.BrackedCoordList
 
-let fplRange = ((opt coord) .>> IW .>> tilde) .>>. (IW >>. opt coord)
+let fplRange = (opt coord.>> tilde >>. opt coord) .>> IW
 
-let closedOrOpenRange = positions ((leftBound .>> IW) .>>. fplRange .>>. (IW >>. rightBound)) <?> "bracketed range" |>> Ast.ClosedOrOpenRange
+let boundedRange = positions (leftBound .>>. fplRange .>>. rightBound) |>> Ast.ClosedOrOpenRange
 
-coordOfEntityRef.Value <- attempt closedOrOpenRange <|> bracketedCoordList
+coordOfEntityRef.Value <- choice [boundedRange ; bracketedCoords]
 
 let coordInType = choice [ fplIdentifier; indexVariable ] 
 
 let coordInTypeList = (sepBy1 coordInType comma) .>> IW
 
-let rangeInType = positions ((opt coordInType .>> IW) .>>. (tilde >>. IW >>. opt coordInType)) <?> "bracketed range of types" |>> Ast.RangeInType
+let rangeInType = positions ((opt coordInType .>> tilde) .>>. opt coordInType) |>> Ast.RangeInType
 
 let specificClassType = choice [ objectHeader; xId; classIdentifier ] .>> IW
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
 let callModifier = opt (choice [ star;  plus ]) <?> "<optional '*' or '+'>"
 
-let classTypeWithCoord = positions ((specificClassType .>> leftBracket) .>>. (coordInTypeList .>> rightBracket)) <?> "<class identifier with coordinates>" |>> Ast.FplTypeWithCoords
-let classTypeWithRange = positions ((specificClassType .>>. leftBound) .>>. (rangeInType .>>. rightBound)) <?> "<class identifier with range>" |>> Ast.FplTypeWithRange
+let bracketedCoordsInType = positions (leftBracket >>. coordInTypeList .>> rightBracket) <?> "<class identifier with coordinates>" |>> Ast.BracketedCoordsInType
+let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) <?> "<class identifier with range>" |>> Ast.BoundedRangeInType
 
 // The classType is the last type in FPL we can derive FPL classes from.
 // It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
 // to restrict it to pure objects.
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
-let classType = (((attempt classTypeWithRange) <|> (attempt classTypeWithCoord)) <|> specificClassType) <?> "<class identifier with optional range, or optional coordinatates>"
+let bracketModifier = choice [boundedRangeInType ; bracketedCoordsInType]
+let classType = positions (specificClassType .>>. opt bracketModifier) <?> "<class identifier with optional range, or optional coordinatates>"|>> Ast.ClassType
 
 let modifieableClassType = positions (callModifier .>>. classType) |>> Ast.VariableTypeWithModifier
 let modifieablePredicateType = positions (callModifier .>>. keywordPredicate) |>> Ast.VariableTypeWithModifier
@@ -338,7 +339,7 @@ let assignmentStatement = positions ((assignee .>> IW .>> colonEqual) .>>. (IW >
 let returnStatement = positions (keywordReturn >>. SW >>. predicate) <?> "return statement" |>> Ast.Return
 
 let variableRange = choice [
-    closedOrOpenRange
+    boundedRange
     assignee
 ]
 
@@ -372,7 +373,7 @@ let statement =
         loopStatement
         returnStatement
         assignmentStatement
-    ]) <?> "<statement>"
+    ])
 
 statementListRef.Value <- many (many CW >>. statement .>> IW)
 
@@ -531,9 +532,9 @@ let argumentInference = attempt revokeArgument <|> derivedArgument
 let justification = positions (predicateList .>> IW) <?> "justification" |>> Ast.Justification
 let justifiedArgument = positions ((justification .>> vDash .>> IW) .>>. argumentInference) <?> "justified argument" |>> Ast.JustifiedArgument
 let argument = assumeArgument <|> justifiedArgument
-let proofArgument = positions ((argumentIdentifier .>> IW) .>>. argument) <?> "argument" |>> Ast.Argument
-let proofArgumentList = many1 (many CW >>. proofArgument .>> IW)
-let keywordProof = (skipString "proof" <|> skipString "prf") <?> "<'proof' or 'prf' keyword>"
+let proofArgument = positions ((argumentIdentifier .>> IW) .>>. argument) .>> IW <?> "argument" |>> Ast.Argument
+let proofArgumentList = many1 (many CW >>. proofArgument)
+let keywordProof = (skipString "proof" <|> skipString "prf") .>> IW <?> "<'proof' or 'prf' keyword>"
 let proofBlock = (leftBraceCommented >>. variableSpecificationList) .>>. (proofArgumentList .>> commentedRightBrace)
 let proof = positions ((keywordProof >>. SW >>. referencingIdentifier) .>>. (IW >>. proofBlock)) |>> Ast.Proof
 

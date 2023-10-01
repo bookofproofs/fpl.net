@@ -33,7 +33,7 @@ type Ast =
     | RightClosed
     | RightOpen 
     | Id of string
-    | ClosedOrOpenRange of Positions * ((Ast * (Ast option * Ast option)) * Ast)
+    | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | BrackedCoordList of Positions * Ast list
     | RangeInType of Positions * (Ast option * Ast option) 
     // Types
@@ -47,8 +47,9 @@ type Ast =
     | IndexType
     | VariableType of Positions * Ast
     | VariableTypeWithModifier of Positions * (Ast option * Ast)
-    | FplTypeWithCoords of Positions * (Ast * Ast list) 
-    | FplTypeWithRange of Positions * ((Ast * Ast ) * (Ast * Ast))
+    | BracketedCoordsInType of Positions * Ast list 
+    | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
+    | ClassType of Positions * (Ast * Ast option)
     // Variables
     | Var of Positions * string
     | IndexVariable of Positions * (string * string)

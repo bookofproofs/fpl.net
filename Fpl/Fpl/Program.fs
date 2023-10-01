@@ -4,7 +4,7 @@ open FplGrammar
 open FParsec
 
 
-let input = "P["
+let input = "[! "
 
-let result = run (classType .>> eof) input
+let result = run (leftBound .>> eof) input
 printf "%O" result
