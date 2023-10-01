@@ -1,125 +1,128 @@
 ﻿module FplGrammarTypes
+open FParsec
 
-type Extension = 
-    | Extensionname of string
+/// our FPL grammar needs starting and ending position for each Ast node since we
+/// will need these information for the diagnostics of the interpreter even after the 
+/// parsing was done
+type Positions = Position * Position 
+
+
+type Ast = 
+    // Identifiers
+    | Digits of Positions * string
+    | ExtDigits of Positions * string
+    | DollarDigits of Positions * string
+    | PascalCaseId of string
+    | NamespaceIdentifier of Positions * Ast list
+    | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
+    | PredicateIdentifier of Positions * Ast list
+    | DelegateId of Positions * string 
+    | Alias of Positions * string
+    | Self of Positions * char list 
+    | LocalizationString of Positions * string
+    | LocalizationTerm of Positions * Ast list
+    | LocalizationTermList of Positions * Ast list
+    | EntityWithCoord of Positions * (Ast * Ast)
+    | Extensionname of Positions * string
     | ExtensionRegex of string
-
-type ExtensionBlock = ExtensionBlock of Extension * Extension
-
-type FplIdentifier =
+    | ExtensionType of Positions * Ast 
+    | ExtensionBlock of Positions * (Ast * Ast)
+    | UsesClause of Positions * Ast list
     | LeftClosed
     | LeftOpen 
     | RightClosed
     | RightOpen 
     | Id of string
-    | NamespaceIdentifier of string list
-    | AliasedNamespaceIdentifier of string list * string
-    | IndexVariable of string * string
-    | Var of string
-    | Self of char list 
-    | ClosedOrOpenRange of (FplIdentifier * (FplIdentifier option * FplIdentifier option)) * FplIdentifier
-    | BrackedCoordList of FplIdentifier list
-    | AliasedId of string list
-    | EntityWithCoord of FplIdentifier * FplIdentifier
-    | RangeInType of FplIdentifier option * FplIdentifier option 
-    | ExtDigits of string
-    | DollarDigits of string
-    | DelegateId of string 
-    | LocalizationString of string
-    | LocalizationTerm of FplIdentifier list
-    | LocalizationTermList of FplIdentifier list
-
-type UsesClause = UsesClause of FplIdentifier list
-
-type FplType =
+    | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
+    | BrackedCoordList of Positions * Ast list
+    | RangeInType of Positions * (Ast option * Ast option) 
+    // Types
     | Many 
     | Many1 
+    | TemplateType of Positions * string
+    | ObjectType 
+    | ClassIdentifier of Positions * Ast
     | PredicateType 
     | FunctionalTermType 
-    | ObjectType 
-    | TemplateType of string
     | IndexType
-    | ExtensionType of Extension
-    | ClassHeaderType of string list 
-    | FplTypeWithCoords of (FplType * FplIdentifier list) 
-    | FplTypeWithRange of (FplType * FplIdentifier ) * (FplIdentifier * FplIdentifier)
-    | VariableTypeWithModifier of FplType option * FplType
-    | VariableType of (FplIdentifier list * FplType) list 
-
-type Predicate =
-    | True
-    | False
-    | Undefined
-    | PredicateWithArgs of FplIdentifier * Predicate list
-    | PredicateWithoutArgs of FplIdentifier
-    | And of Predicate list
-    | Or of Predicate list
-    | Impl of Predicate * Predicate
-    | Iif of Predicate * Predicate
-    | Xor of Predicate * Predicate
-    | Not of Predicate 
-    | All of FplIdentifier list * Predicate
-    | AllAssert of (FplIdentifier * FplIdentifier) * Predicate 
-    | Exists of FplIdentifier list * Predicate
-    | ExistsN of (FplIdentifier * FplIdentifier list) * Predicate
-    | IsOperator of FplIdentifier * FplType
-    | Delegate of FplIdentifier * Predicate list
-    | QualifiedIdentifier of FplIdentifier * Predicate list
-    | ArgumentIdentifier of string
-    | PremiseReference
-    | Justification of Predicate list
-
-
-type Statement = 
-    | Assertion of Predicate
-    | ConditionFollowedByResult of Predicate * Statement list 
-    | DefaultResult of Statement list 
-    | Cases of Statement list * Statement
-    | Assignment of FplIdentifier * Predicate
-    | Loop of (FplIdentifier * FplIdentifier) * Statement list
-    | Range of (FplIdentifier * FplIdentifier) * Statement list
-    | Return of Predicate
-
-
-type Proof =
-    | Trivial
-    | Qed
-    | ConclusionReference 
-    | DerivedPredicate of Predicate
-    | AssumeArgument of Predicate
-    | RevokeArgument of Predicate
-    | JustifiedArgument of Predicate * Proof
-    | Argument of Predicate * Proof
-
-type FplBlock = 
-    | BlockStatement of Statement
-    | BlockVariableDeclaration of (FplIdentifier list * FplType) 
-    | StatementList of Statement list
-    | RuleOfInference of FplBlock * ((FplBlock list * Predicate) * Predicate)
-    | Theorem of FplBlock * ((FplBlock list * Predicate) * Predicate)
-    | Lemma of FplBlock * ((FplBlock list * Predicate) * Predicate)
-    | Proposition of FplBlock * ((FplBlock list * Predicate) * Predicate)
-    | Corollary of ((FplIdentifier * FplIdentifier list) * (FplIdentifier list * FplType) list) * ((FplBlock list * Predicate) * Predicate)
-    | Conjecture of FplBlock * ((FplBlock list * Predicate) * Predicate)
-    | Signature of FplIdentifier * (FplIdentifier list * FplType) list
-    | Axiom of FplBlock * (FplBlock list * Predicate)
-    | ClassConstructorCall of Predicate option
-    | Constructor of FplBlock * (FplBlock list * FplBlock)
+    | VariableType of Positions * Ast
+    | VariableTypeWithModifier of Positions * (Ast option * Ast)
+    | BracketedCoordsInType of Positions * Ast list 
+    | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
+    | ClassType of Positions * (Ast * Ast option)
+    // Variables
+    | Var of Positions * string
+    | IndexVariable of Positions * (string * string)
+    // Predicates
+    | True of Positions * unit
+    | False of Positions * unit
+    | Undefined of Positions * unit
+    | PredicateWithArgs of Positions * (Ast * Ast list)
+    | And of Positions * Ast list
+    | Or of Positions * Ast list
+    | Impl of Positions * (Ast * Ast)
+    | Iif of Positions * (Ast * Ast)
+    | Xor of Positions * (Ast * Ast)
+    | Not of Positions * Ast
+    | All of Positions * (Ast list * Ast)
+    | AllAssert of Positions * ((Ast * Ast) * Ast)
+    | Exists of Positions * (Ast list * Ast)
+    | ExistsN of Positions * ((Ast * Ast list) * Ast)
+    | IsOperator of Positions * (Ast * Ast)
+    | Delegate of Positions * (Ast * Ast list)
+    | QualifiedIdentifier of Positions * (Ast * Ast list)
+    | ArgumentIdentifier of Positions * string
+    | PremiseReference of Positions * unit
+    | Justification of Positions * Ast list
+    // Statements
+    | Assertion of Positions * Ast
+    | ConditionFollowedByResult of Positions * (Ast * Ast list)
+    | DefaultResult of Positions * Ast list 
+    | Cases of Positions * (Ast list * Ast)
+    | Assignment of Positions * (Ast * Ast)
+    | Loop of Positions * ((Ast * Ast) * Ast list)
+    | Range of Positions * ((Ast * Ast) * Ast list)
+    | Return of Positions * Ast
+    // FPL Blocks
+    | StatementList of Positions * Ast list
+    | SignatureWithPreConBlock of Ast * ((Ast * Ast) * Ast)
+    | RuleOfInference of Positions * Ast
+    | Theorem of Positions * Ast
+    | Lemma of Positions * Ast
+    | Proposition of Positions * Ast
+    | Corollary of Positions * (((Ast * Ast list) * Ast) * ((Ast * Ast) * Ast))
+    | Conjecture of Positions * Ast
+    | NamedVarDecl of Positions * (Ast list * Ast) 
+    | VariableSpecification of Positions * Ast list
+    | ParamTuple of Positions * Ast list
+    | Signature of Positions * (Ast * Ast)
+    | Axiom of Positions * (Ast * (Ast * Ast))
+    | ClassConstructorCall of Positions * Ast option
+    | Constructor of Positions * (Ast * (Ast * Ast))
     | Mandatory
     | Optional 
-    | PredicateInstance of (FplBlock * (FplBlock list * Predicate))
-    | ClassInstance of (FplType * FplBlock) * FplBlock list 
-    | FunctionalTermInstance of (FplBlock * FplType) * FplBlock list
-    | Proof of (FplIdentifier * FplIdentifier list) * (FplBlock list * Proof list)
-    | Property of FplBlock * FplBlock
-    | DefinitionPredicate of FplBlock * ((FplBlock list * Predicate option) * FplBlock list option)
-    | DefinitionFunctionalTerm of (FplBlock * FplType) * (FplBlock list * FplBlock list option)
-    | DefinitionClass of (FplIdentifier * FplType) * (FplBlock list * FplBlock list)
-
-
-type Ast = 
-    | AST of (FplIdentifier * ((((ExtensionBlock option * UsesClause) * FplBlock list) * FplBlock list) * (Predicate * (string * FplIdentifier) list) list)) list
+    | PredicateInstance of Positions * (Ast * (Ast * Ast))
+    | ClassInstance of Positions * ((Ast * Ast) * Ast)
+    | FunctionalTermInstance of Positions * ((Ast * Ast) * Ast)
+    | Property of Positions * (Ast * Ast)
+    | DefinitionPredicate of Positions * (Ast * ((Ast * Ast option) * Ast list option))
+    | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
+    | DefinitionClass of Positions * ((Ast * Ast) * (Ast * Ast list))
+    // Proofs
+    | Trivial of Positions * unit
+    | Qed of Positions * unit
+    | ConclusionReference of Positions * unit
+    | DerivedPredicate of Ast
+    | AssumeArgument of Positions * Ast
+    | RevokeArgument of Positions * Ast
+    | JustifiedArgument of Positions * (Ast * Ast)
+    | Argument of Positions * (Ast * Ast)
+    | Proof of Positions * ((Ast * Ast list) * (Ast * Ast list))
+    | Namespace of Positions * (Ast * ((((Ast option * Ast option) * Ast list option) * Ast list) * (Ast * (string * Ast) list) list option))
+    | AST of Positions * Ast list
     | Escape // used to replace AST subnodes when we recover from an error
+    | SomeString of string // used to replace AST for strings subnodes when we recover from an error
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from
     | Empty // used to mark empty inner inputs between enclosing ones 
+    | Sequence of Positions * Ast list
 

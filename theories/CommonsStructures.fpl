@@ -1,7 +1,6 @@
 Fpl.Commons.Structures
 {
     uses { Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel, Fpl.Arithmetics.Peano }
-    inf {}
 
     theory
     {
@@ -284,7 +283,6 @@ Fpl.Commons.Structures
 
 
     }
-    loc {}
 }
 
 
