@@ -24,6 +24,10 @@ None
 
 ## Release Notes
 
+### 1.2.10
+* Improved syntax error messages from the FPL parser
+* Bugfix in syntax highlighting of generics in FPL
+
 ### 1.2.9
 
 * Emitting error diagnostics directly from FplParser
