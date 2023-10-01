@@ -146,9 +146,8 @@ let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
 let dollarDigits = positions (dollar >>. digits) <?> "<'$' followed by digits>" |>> Ast.DollarDigits
 let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "argument identifier" |>> Ast.ArgumentIdentifier
 
-let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) <?> "<namespace identifier, starting with a PascalCaseID>" |>> Ast.NamespaceIdentifier
-let predicateIdentifier = positions (sepBy1 pascalCaseId dot) <?> "<user-defined identifier, starting with a PascalCaseID>" |>> Ast.PredicateIdentifier 
-let classIdentifier = positions (sepBy1 pascalCaseId dot) <?> "<class identifier, starting with a PascalCaseID>"|>> Ast.ClassHeaderType
+let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) <?> "<fpl namespace identifier, starting with a PascalCaseId>" |>> Ast.NamespaceIdentifier
+let predicateIdentifier = positions (sepBy1 pascalCaseId dot) <?> "<fpl identifier, starting with a PascalCaseId>" |>> Ast.PredicateIdentifier 
 
 let aliasKeyword = skipString "alias" <?> "<'alias' keyword>" 
 let alias = positions (aliasKeyword >>. SW >>. idStartsWithCap) <?> "<aliased namespace>" |>> Ast.Alias
@@ -298,13 +297,13 @@ let coordInTypeList = (sepBy1 coordInType comma) .>> IW
 
 let rangeInType = positions ((opt coordInType .>> tilde) .>>. opt coordInType) |>> Ast.RangeInType
 
-let specificClassType = choice [ objectHeader; xId; classIdentifier ] .>> IW
+let specificClassType = choice [ objectHeader; xId; predicateIdentifier ] .>> IW
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
 let callModifier = opt (choice [ star;  plus ]) <?> "<optional '*' or '+'>"
 
-let bracketedCoordsInType = positions (leftBracket >>. coordInTypeList .>> rightBracket) <?> "<class identifier with coordinates>" |>> Ast.BracketedCoordsInType
-let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) <?> "<class identifier with range>" |>> Ast.BoundedRangeInType
+let bracketedCoordsInType = positions (leftBracket >>. coordInTypeList .>> rightBracket) |>> Ast.BracketedCoordsInType
+let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) |>> Ast.BoundedRangeInType
 
 // The classType is the last type in FPL we can derive FPL classes from.
 // It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
@@ -312,7 +311,7 @@ let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) 
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
 let bracketModifier = choice [boundedRangeInType ; bracketedCoordsInType]
-let classType = positions (specificClassType .>>. opt bracketModifier) <?> "<class identifier with optional range, or optional coordinatates>"|>> Ast.ClassType
+let classType = positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
 let modifieableClassType = positions (callModifier .>>. classType) |>> Ast.VariableTypeWithModifier
 let modifieablePredicateType = positions (callModifier .>>. keywordPredicate) |>> Ast.VariableTypeWithModifier

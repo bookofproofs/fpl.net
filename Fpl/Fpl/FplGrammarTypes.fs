@@ -41,7 +41,7 @@ type Ast =
     | Many1 
     | TemplateType of Positions * string
     | ObjectType 
-    | ClassHeaderType of Positions * Ast list
+    | ClassIdentifier of Positions * Ast
     | PredicateType 
     | FunctionalTermType 
     | IndexType
