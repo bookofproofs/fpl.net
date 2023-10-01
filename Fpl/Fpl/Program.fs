@@ -4,7 +4,7 @@ open FplGrammar
 open FParsec
 
 
-let input = "[! "
+let input = "result:=Add(result,arr[i])"
 
-let result = run (leftBound .>> eof) input
+let result = run (assignmentStatement .>> eof) input
 printf "%O" result

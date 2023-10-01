@@ -14,7 +14,7 @@ type Ast =
     | DollarDigits of Positions * string
     | PascalCaseId of string
     | NamespaceIdentifier of Positions * Ast list
-    | AliasedNamespaceIdentifier of Positions * (Ast * Ast)
+    | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
     | PredicateIdentifier of Positions * Ast list
     | DelegateId of Positions * string 
     | Alias of Positions * string

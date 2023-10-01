@@ -1,6 +1,5 @@
 Fpl.Commons
 {
-    uses {}
     inference
     {
         ModusPonens()
