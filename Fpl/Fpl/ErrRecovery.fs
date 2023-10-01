@@ -306,11 +306,13 @@ if correction by choice results in the same error message then, the choice was w
 the error messages must be tested for all possible productions in the grammar, the test criteria are:
 1) every path has to show one or  more 'choices'
 2) watch out for paths with a message for a single 'choice' where actually more choices are possible. This 
-can happen e.g. in pList .>> q if the pList is a separated list and the parser matches a single element 
-of the list, now expecting q. Actually, we expect q or a separator from pList. The error might be that 
-your pList is probably accepting an optional separator at the end and you might consider it an error in your grammar to correct it.
-
-
+can happen e.g. in `pList .>> q` if the `pList` is a separated list and the parser matches a single element 
+of the list, now expecting `q`. Actually, we expect `q` or a separator from `pList`. The error might be that 
+your `pList` is probably accepting an optional separator at the end and you might consider it an error in your grammar to correct it.
+It can also happen if you have a parser p without insignificant trailing spaces and use e.g. like `(p .>> spaces) .>> q`. 
+Then FParsec will not not show the beginning of `q` as an option after `p`, unless you move the trailing spaces into the definition of `p`.
+It can also happen if your `choice` parsers include elements proceeded by the `attempt` parser. Then FParsec
+will show only the remaining `choice' parsers without `attempt` as an option.
 
 
 

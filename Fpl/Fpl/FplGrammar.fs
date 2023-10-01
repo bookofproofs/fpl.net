@@ -44,7 +44,7 @@ let at = pchar '@'
 let exclamationMark = skipChar '!'
 let case = skipChar '|'
 let leftBracket = skipChar '['
-let rightBracket = skipChar ']'
+let rightBracket = skipChar ']' >>. spaces
 let tilde = skipChar '~'
 let semiColon = skipChar ';'
 let dollar = skipChar '$'
@@ -158,11 +158,11 @@ let variableX: Parser<string,unit> = IdStartsWithSmallCase >>=
                                             else if tplRegex.IsMatch(s) then fail ("Cannot use template '" + s + "' as a variable") 
                                             else (preturn s)
                                         ) <?> "<variable>"
-let variable = positions variableX <?> "<variable>" |>> Ast.Var 
+let variable = positions variableX .>> IW <?> "<variable>" |>> Ast.Var 
 
 let variableList = sepBy1 variable comma
 
-let keywordSelf = skipString "self" <?> "<'self' keyword>"
+let keywordSelf = skipString "self" .>> IW <?> "<'self' keyword>"
 let keywordIndex = skipString "index" <|> skipString "ind" <?> "<'index' or 'ind' keyword>" >>% Ast.IndexType
 
 
@@ -241,7 +241,7 @@ let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. ex
 
 let xId = positions (at >>. extensionName) <?> "<'@ext', followed by PascalCaseId>" |>> Ast.ExtensionType 
 
-let indexVariable = positions ((IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase )) <?> "index variable" |>> Ast.IndexVariable
+let indexVariable = positions ((IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase )) .>> IW <?> "index variable" |>> Ast.IndexVariable
 
 let atList = many at
 
@@ -274,19 +274,13 @@ let entityWithCoord = positions (entity .>>. coordOfEntity) <?> "entity with som
 
 let assignee = (attempt entityWithCoord) <|> entity
 
-let coord = choice [
-    assignee
-    extDigits
-    dollarDigits
-]
+let coord = choice [ assignee; extDigits; dollarDigits ]
 
-let fplDelegateIdentifier: Parser<_, unit> = positions (keywordDel >>. dot >>. regex @"[a-z_A-Z]\w+") <?> "delegate identifier, i.e. 'delegate' or 'del' followed by '.' and some identifier" |>> Ast.DelegateId
+let word = regex @"\w+" <?> "<word>" .>> IW
+let fplDelegateIdentifier = positions (keywordDel >>. dot >>. word) |>> Ast.DelegateId
 
-let fplIdentifier = choice [
-    fplDelegateIdentifier
-    coord
-    predicateIdentifier
-]
+let fplIdentifier = choice [ fplDelegateIdentifier ; coord; predicateIdentifier ]
+
 
 let coordList = sepEndBy1 coord comma
 
@@ -298,40 +292,33 @@ let closedOrOpenRange = positions ((leftBound .>> IW) .>>. fplRange .>>. (IW >>.
 
 coordOfEntityRef.Value <- attempt closedOrOpenRange <|> bracketedCoordList
 
-let coordInType = choice [
-    fplIdentifier
-    indexVariable
-]
+let coordInType = choice [ fplIdentifier; indexVariable ] 
 
-let coordInTypeList = sepBy1 coordInType comma
+let coordInTypeList = (sepBy1 coordInType comma) .>> IW
 
 let rangeInType = positions ((opt coordInType .>> IW) .>>. (tilde >>. IW >>. opt coordInType)) <?> "bracketed range of types" |>> Ast.RangeInType
 
-let specificClassType = choice [
-    objectHeader
-    xId
-    classIdentifier
-]
+let specificClassType = choice [ objectHeader; xId; classIdentifier ] .>> IW
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
 let callModifier = opt (choice [ star;  plus ]) <?> "<optional '*' or '+'>"
 
-let classTypeWithCoord = positions (((specificClassType .>> IW) .>> leftBracket) .>>. (coordInTypeList .>> (IW >>. rightBracket))) <?> "<class identifier with coordinates>" |>> Ast.FplTypeWithCoords
-let classTypeWithRange = positions (((specificClassType .>> IW) .>>. leftBound) .>>. (rangeInType .>>. rightBound)) <?> "<class identifier with range>" |>> Ast.FplTypeWithRange
+let classTypeWithCoord = positions ((specificClassType .>> leftBracket) .>>. (coordInTypeList .>> rightBracket)) <?> "<class identifier with coordinates>" |>> Ast.FplTypeWithCoords
+let classTypeWithRange = positions ((specificClassType .>>. leftBound) .>>. (rangeInType .>>. rightBound)) <?> "<class identifier with range>" |>> Ast.FplTypeWithRange
 
 // The classType is the last type in FPL we can derive FPL classes from.
 // It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
 // to restrict it to pure objects.
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
-let classType = (((attempt classTypeWithRange) <|> (attempt classTypeWithCoord)) <|> specificClassType)
+let classType = (((attempt classTypeWithRange) <|> (attempt classTypeWithCoord)) <|> specificClassType) <?> "<class identifier with optional range, or optional coordinatates>"
 
 let modifieableClassType = positions (callModifier .>>. classType) |>> Ast.VariableTypeWithModifier
 let modifieablePredicateType = positions (callModifier .>>. keywordPredicate) |>> Ast.VariableTypeWithModifier
 let modifieableFunctionType = positions (callModifier .>>. keywordFunction) |>> Ast.VariableTypeWithModifier
 let modifieableIndexType = positions (callModifier .>>. keywordIndex) |>> Ast.VariableTypeWithModifier
 
-let variableTypeWithModifier = (((attempt modifieableIndexType) <|> attempt modifieableFunctionType) <|> attempt modifieablePredicateType) <|> modifieableClassType
+let variableTypeWithModifier = (((attempt modifieableIndexType) <|> attempt modifieableFunctionType) <|> attempt modifieablePredicateType) <|> modifieableClassType 
 
 let parenthesisedType = positions (variableTypeWithModifier .>> IW >>. paramTuple) |>> Ast.VariableType
 
@@ -458,7 +445,6 @@ let conclusion = many CW >>. (keywordConclusion >>. colon >>. predicate)
 let premiseConclusionBlock = leftBraceCommented >>. variableSpecificationList .>>. premise .>>. conclusion .>> commentedRightBrace
 
 (* FPL building blocks - rules of reference *)
-// error recovery inference block
 let keywordInference = (skipString "inference" <|> skipString "inf") <?> "<'inference' or 'inf' keyword>"
 let signatureWithPremiseConclusionBlock = (signature .>> IW) .>>. premiseConclusionBlock |>> Ast.SignatureWithPreConBlock
 let ruleOfInference = positions signatureWithPremiseConclusionBlock <?> "<rule of inference (starting with a PascalCaseId)>" |>> Ast.RuleOfInference

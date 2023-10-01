@@ -1,5 +1,5 @@
 TestNamescpace {
     theory {
-        ax P(x,y,x:function
+        ax P(x,y,x:P[!x~x]
     }
 }
