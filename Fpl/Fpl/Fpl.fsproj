@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="FplGrammarCommons.fs" />
     <Compile Include="FplGrammarTypes.fs" />
     <Compile Include="ErrRecovery.fs" />
     <None Include="CHANGES.md" />

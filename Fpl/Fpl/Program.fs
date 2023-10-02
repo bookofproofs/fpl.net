@@ -4,7 +4,13 @@ open FplGrammar
 open FParsec
 
 
-let input = "result:=Add(result,arr[i])"
+let input = "TestNamescpace {
+    d
+    theory {
+        P
+    }
+}"
+let result = fplParser input
 
-let result = run (assignmentStatement .>> eof) input
 printf "%O" result
+ad.PrintDiagnostics

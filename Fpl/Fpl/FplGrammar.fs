@@ -1,5 +1,6 @@
 ﻿module FplGrammar
 open System.Text.RegularExpressions
+open FplGrammarCommons
 open FplGrammarTypes
 open ErrRecovery
 open FParsec
@@ -76,62 +77,7 @@ let digits = regex @"\d+" <?> "<digits>"
 let extDigits: Parser<_, unit> = positions (digits) |>> Ast.ExtDigits
 
 (* Identifiers *)
-(* Fpl Keywords *)
 
-let keyWordSet =
-    System.Collections.Generic.HashSet<_>(
-        [|
-        "alias"; 
-        "all"; 
-        "and"; 
-        "assert"; 
-        "ass"; "assume"; 
-        "ax"; "axiom";
-        "cases"; 
-        "cl"; "class"; 
-        "conj"; "conjecture"; 
-        "con"; "conclusion"; 
-        "cor"; "corollary";
-        "del"; "delegate"
-        "else";
-        "end";
-        "ext";
-        "ex";
-        "false";
-        "func"; "function";
-        "iif";
-        "impl";
-        "ind"; "index";
-        "inf"; "inference";
-        "is";
-        "lem"; "lemma";
-        "loc"; "localization";
-        "loop";
-        "mand"; "mandatory";
-        "not";
-        "obj"; "object";
-        "opt"; "optional";
-        "or";
-        "post"; "postulate";
-        "pred"; "predicate";
-        "pre"; "premise";
-        "prf"; "proof";
-        "prop"; "proposition";
-        "qed";
-        "range";
-        "ret"; "return";
-        "rev"; "revoke";
-        "self";
-        "thm"; "theorem";
-        "th"; "theory";
-        "tpl"; "template";
-        "trivial";
-        "true";
-        "undef"; "undefined";
-        "uses";
-        "xor";
-        |]
-    )
 
 let IdStartsWithSmallCase = regex @"[a-z]\w*" 
 let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
@@ -139,12 +85,12 @@ let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
 let dollarDigits = positions (dollar >>. digits) |>> Ast.DollarDigits
 let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 
-let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl namespace identifier>" |>> Ast.NamespaceIdentifier
-let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl identifier>" |>> Ast.PredicateIdentifier 
+let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl namespace identifier, e.g. 'NameSpace'>" |>> Ast.NamespaceIdentifier
+let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl identifier, e.g. 'Ident'>" |>> Ast.PredicateIdentifier 
 
 let alias = positions (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
 
-let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) <?> "<aliased namespace identifier>" |>> Ast.AliasedNamespaceIdentifier
+let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) <?> "<aliased namespace identifier, e.g. 'Ident alias Id'>" |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z]\w*)|\d*)$", RegexOptions.Compiled)
 let variableX: Parser<string,unit> = IdStartsWithSmallCase >>= 
                                         ( fun s -> 
@@ -600,5 +546,9 @@ let fplNamespace = positions (namespaceIdentifier .>>. (many CW >>. namespaceBlo
 let fplNamespaceList = many1 (many CW >>. fplNamespace .>> IW)
 (* Final Parser *)
 let ast =  positions (fplNamespaceList .>> eof) <?> "fpl code" |>> Ast.AST
-let fplParser (input: string) = tryParse ast "recovery failed;" ad input 
+
+let pos1 = Position("", 1, 1, 1)
+let pos0 = Position("", 0, 0, 0)
+let fplParser (input: string) = tryParse' ast "recovery failed;" input pos1 pos0
+// let fplParser (input: string) = tryParse ast, "recovery failed;", input
 let parserDiagnostics = ad
