@@ -76,10 +76,108 @@ let ad = Diagnostics()
 
 let private _position: Parser<_,_> = fun stream -> Reply stream.Position
 
+/// A helper function replacing a list of strings into a HashSet
+let listToHashSet (list: string list) =
+    System.Collections.Generic.HashSet<string>(list)
+
+/// A helper function looking for all quoted substrings in a diagnostic error message
+let findQuotedSubstrings (input: string) =
+    let regex = System.Text.RegularExpressions.Regex("'(.*?)'")
+
+    regex.Matches(input)
+    |> Seq.cast<System.Text.RegularExpressions.Match>
+    |> Seq.map (fun m -> m.Groups.[1].Value)
+    |> List.ofSeq
+
+
+/// Returns the first list element from `candidates` that is contained in `source`.
+let findRecoveryString (source: HashSet<string>) (candidates: string list) =
+    candidates |> List.tryFind (fun candidate -> source.Contains(candidate))
+
+/// adds an offset parser Position to a given Position
+let private addPos (pos: Position) (offset: Position) =
+    let newColumn =
+        if offset.Line = 0 then
+            pos.Column
+        else
+            pos.Column + offset.Column
+
+    Position(pos.StreamName, pos.Index + offset.Index, pos.Line + offset.Line, newColumn)
+
+let private _zeroOffsetPos = Position("", 0,0,0)
+
+/// subtracts an offset parser Position from a given Position
+let private subtractPos (pos: Position) (offset: Position) =
+    let newColumn =
+        if offset.Line = 0 then
+            pos.Column
+        else
+            pos.Column - offset.Column
+
+    Position(pos.StreamName, pos.Index + offset.Index, pos.Line - offset.Line, newColumn)
+
+           
 /// Emit any errors occurring in the globalParser
 /// This is to make sure that the parser will always emit diagnostics,
 /// even if the error recovery fails on a global level (and so does the parser).
-let tryParse globalParser expectMessage (ad: Diagnostics) input =
+let rec tryParse globalParser (expectedMessage:string) (input:string) (lastRemainingInput: string) (lastRecoveryText: string)=
+    match run globalParser input with
+    | Success(result, restInput, userState) -> 
+        // return the result the remaining input
+        let remainingInput = input.Substring(int userState.Index, input.Length - int userState.Index)
+        (result, remainingInput, "")
+    | Failure(errorMsg, restInput, userState) ->
+        let quotedSubstrings = findQuotedSubstrings errorMsg |> listToHashSet
+        let recoveryWith = [ "NameSpace"; "uses"; "RefNs"; "th" ;"{"; "pred"; "}"; "Ident"; "("; ")" ]
+        let nextRecoveryString = findRecoveryString quotedSubstrings recoveryWith
+
+        match nextRecoveryString with
+        | None ->
+            // return Error if no nextRecoveryString was found
+            let diagnosticMsg =
+                DiagnosticMessage(
+                    expectedMessage
+                    + " no element of "
+                    + recoveryWith.ToString()
+                    + " found in "
+                    + errorMsg
+                )
+            let diagnostic =
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
+
+            ad.AddDiagnostic diagnostic
+            let remainingInput = input.Substring(int restInput.Position.Index, input.Length - int restInput.Position.Index)
+            (Ast.Error, remainingInput, "<not found>")
+        | _ ->
+            let ( newInput, newRecoveryText, remainingInput ) =
+                manipulateString input restInput.Position lastRecoveryText (nextRecoveryString |> Option.get) 
+
+            if not (newRecoveryText.StartsWith(lastRecoveryText)) || lastRecoveryText = "" then 
+                // emit diagnostic if there is a new remainingInput
+                let diagnosticMsg = DiagnosticMessage(expectedMessage + " " + errorMsg)
+                let diagnostic =
+                    // this is to ensure that the input insertions of error recovery remain invisible to the user 
+                    // so that when double-clicking the error, the IDE will go to the right position in the source code
+                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
+                ad.AddDiagnostic diagnostic
+                printf "\nindex:%i, line:%i, column:%i" restInput.Position.Index restInput.Position.Line restInput.Position.Column
+            tryParse globalParser expectedMessage newInput remainingInput newRecoveryText 
+
+
+(*
+// Other parser combinators that might become useful for other grammars but proved unnecessary in this study:
+/// A simple helper function for printing trace information to the console (taken from FParsec Docs)
+let (<!>) (p: Parser<_,_>) label : Parser<_,_> =
+    fun stream ->
+        printfn "%A: Entering %s" stream.Position label
+        let reply = p stream
+        printfn "%A: Leaving %s (%A)" stream.Position label reply.Status
+        reply
+
+/// Emit any errors occurring in the globalParser
+/// This is to make sure that the parser will always emit diagnostics,
+/// even if the error recovery fails on a global level (and so does the parser).
+let tryParse' globalParser expectMessage (ad: Diagnostics) input =
     match run globalParser input with
     | Success(result, restInput, userState) -> result
     | Failure(errorMsg, restInput, userState) ->
@@ -347,16 +445,6 @@ let abc a b c (aName: string) (bName: string) (cName: string) (ad: Diagnostics) 
     <|> (attempt (a >>. b .>> c) <|> cMissing)
     <|> (attempt aMissing <|> acMissing)
 
-(*
-// Other parser combinators that might become useful for other grammars but proved unnecessary in this study:
-/// A simple helper function for printing trace information to the console (taken from FParsec Docs)
-let (<!>) (p: Parser<_,_>) label : Parser<_,_> =
-    fun stream ->
-        printfn "%A: Entering %s" stream.Position label
-        let reply = p stream
-        printfn "%A: Leaving %s (%A)" stream.Position label reply.Status
-        reply
-
 /// A helper parser that skips any characters until innerSeparator would succeed,
 /// but where innerSeparator does not consume any input, 
 /// unless, at the same position, one of a listed outerSeparators occurs.
@@ -391,178 +479,6 @@ let tryParseOther p msg (ad:Diagnostics) =
             preturn Ast.Error
 
 
-if correction by choice results in the same error message then, the choice was wrong 
-=> to avoid infinite loops, try another 'nonempty string' in the error message 
-=> otherwise fail with the message infinite loop in error recovery at 'choice'
-
-the error messages must be tested for all possible productions in the grammar, the test criteria are:
-1) every path has to show one or  more 'choices'
-2) watch out for paths with a message for a single 'choice' where actually more choices are possible. This 
-can happen e.g. in `pList .>> q` if the `pList` is a separated list and the parser matches a single element 
-of the list, now expecting `q`. Actually, we expect `q` or a separator from `pList`. The error might be that 
-your `pList` is probably accepting an optional separator at the end and you might consider it an error in your grammar to correct it.
-It can also happen if you have a parser p without insignificant trailing spaces and use e.g. like `(p .>> spaces) .>> q`. 
-Then FParsec will not not show the beginning of `q` as an option after `p`, unless you move the trailing spaces into the definition of `p`.
-It can also happen if your `choice` parsers include elements proceeded by the `attempt` parser. Then FParsec
-will show only the remaining `choice' parsers without `attempt` as an option.
-
-
-
 *)
 
-type EditType = Replace | Insert
 
-let getEditType (input: string) (pos: Position) (text: string) =
-    if pos.Index < 0 || pos.Index > input.Length then 
-        failwith "Position is out of range"
-    if pos.Index = input.Length then
-        EditType.Insert
-    else
-        let substr = input.Substring(int pos.Index,50)
-        if startsWithFplKeyword substr then
-            EditType.Insert
-        elif substr.StartsWith("}") || substr.StartsWith(")") then  
-            EditType.Insert
-        else
-            EditType.Replace
-
-/// A helper function injecting a given text into an input stream at a given position.
-/// The function assumes that the Line and Column members of pos represent existing lines and columns
-/// in the input. Remember to handle exceptions when calling this function.
-let replace (input: string) (pos: Position) (text: string) =
-    let newLineChar = '\n' // replace by another character if needed
-    let newIndex = pos.Index + int64 text.Length
-    let newLines = text |> Seq.filter ((=) newLineChar) |> Seq.length |> int64
-
-    let lastLineLength =
-        text.LastIndexOf(newLineChar)
-        |> fun i -> if i = -1 then text.Length else text.Length - i - 1
-
-    let newColumn = pos.Column + int64 lastLineLength
-    let newPosition = Position(pos.StreamName, newIndex, pos.Line + newLines, newColumn)
-
-    if pos.Index < 0 || pos.Index > input.Length then
-        failwith "Position is out of range"
-    elif pos.Index = input.Length then
-        (input.Insert(int pos.Index, text), newPosition)
-    else
-        let charAtPos = input.[int pos.Index]
-
-        if System.Char.IsWhiteSpace(charAtPos) || charAtPos = '}' then
-            (input.Insert(int pos.Index, text), newPosition)
-        else
-            (input.Remove(int pos.Index, 1).Insert(int pos.Index, text), newPosition)
-
-/// A helper function replacing a list of strings into a HashSet
-let listToHashSet (list: string list) =
-    System.Collections.Generic.HashSet<string>(list)
-
-/// A helper function looking for all quoted substrings in a diagnostic error message
-let findQuotedSubstrings (input: string) =
-    let regex = System.Text.RegularExpressions.Regex("'(.*?)'")
-
-    regex.Matches(input)
-    |> Seq.cast<System.Text.RegularExpressions.Match>
-    |> Seq.map (fun m -> m.Groups.[1].Value)
-    |> List.ofSeq
-
-
-/// Returns the first list element from `candidates` that is contained in `source`.
-let findRecoveryString (source: HashSet<string>) (candidates: string list) =
-    candidates |> List.tryFind (fun candidate -> source.Contains(candidate))
-
-/// adds an offset parser Position to a given Position
-let private addPos (pos: Position) (offset: Position) =
-    let newColumn =
-        if offset.Line = 0 then
-            pos.Column
-        else
-            pos.Column + offset.Column
-
-    Position(pos.StreamName, pos.Index + offset.Index, pos.Line + offset.Line, newColumn)
-
-let private _zeroOffsetPos = Position("", 0,0,0)
-
-/// subtracts an offset parser Position from a given Position
-let private subtractPos (pos: Position) (offset: Position) =
-    let newColumn =
-        if offset.Line = 0 then
-            pos.Column
-        else
-            pos.Column - offset.Column
-
-    Position(pos.StreamName, pos.Index + offset.Index, pos.Line - offset.Line, newColumn)
-
-let private emitDiagnosticsOnError (restInput:ParserError) (lastRecPos:Position) (lastOffsetPos: Position) (diagnosticMsg:DiagnosticMessage) =
-    // if the new parsing position at the failure is greater than the last recovery position
-    if Position.Compare(restInput.Position, lastRecPos) > 0 then
-        // emit diagnostics at the error position minus the offset
-        let newPos = subtractPos restInput.Position lastOffsetPos
-        let diagnostic =
-            // this is to ensure that the input insertions of error recovery remain invisible to the user 
-            // so that when double-clicking the error, the IDE will go to the right position in the source code
-            Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, newPos, diagnosticMsg)
-        ad.AddDiagnostic diagnostic
-        // return the corrected error position 
-        (newPos, _zeroOffsetPos)
-    elif lastOffsetPos.Index = 0 then
-        // emit diagnostic if the offset is still 0
-        let diagnostic =
-            // emit diagnostics at the error position 
-            // this is to ensure that the input insertions of error recovery remain invisible to the user 
-            // so that when double-clicking the error, the IDE will go to the right position in the source code
-            Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error,restInput.Position, diagnosticMsg)
-        ad.AddDiagnostic diagnostic
-        // return the actual error position 
-        (restInput.Position, _zeroOffsetPos)
-    else
-        // else do not emit any diagnostics
-        // instead, calculate the new  
-        (restInput.Position, _zeroOffsetPos)
-
-
-             
-/// Emit any errors occurring in the globalParser
-/// This is to make sure that the parser will always emit diagnostics,
-/// even if the error recovery fails on a global level (and so does the parser).
-let rec tryParse' globalParser expectedMessage input (lastOrigPos: Position) (lastOffsetPos: Position) =
-    printf "test"
-    match run globalParser input with
-    | Success(result, restInput, userState) -> 
-        let newLastOrigPos = subtractPos userState lastOffsetPos
-        // return the result with a by the offset corrected last orig position and a _zeroOffsetPos
-        (result, newLastOrigPos, _zeroOffsetPos)
-    | Failure(errorMsg, restInput, userState) ->
-        // calculate the position until which the parser should have successfully parsed the corrected input
-        // (this is an assertion since we insert only stuff the parser was awaiting according to its own error messages)
-        let lastRecPos = addPos lastOrigPos lastOffsetPos
-        let diagnosticMsg = DiagnosticMessage(expectedMessage + " " + errorMsg)
-
-        let (newLastOrig, newLastOffsetPos) = emitDiagnosticsOnError restInput lastRecPos lastOffsetPos diagnosticMsg
-
-
-        let quotedSubstrings = findQuotedSubstrings errorMsg |> listToHashSet
-        let recoveryWith = [ "NameSpace"; "uses"; "th" ;"{"; "}"; "pred"; "Ident"; "("; ")" ]
-        let nextRecoveryString = findRecoveryString quotedSubstrings recoveryWith
-
-        match nextRecoveryString with
-        | None ->
-            // return Error if no nextRecoveryString was found
-            let diagnosticMsg =
-                DiagnosticMessage(
-                    expectedMessage
-                    + " no element of "
-                    + recoveryWith.ToString()
-                    + " found in "
-                    + errorMsg
-                )
-            let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
-
-            ad.AddDiagnostic diagnostic
-            (Ast.Error, restInput.Position, _zeroOffsetPos)
-        | _ ->
-            let (newInput, posOffset) =
-                replace input restInput.Position (nextRecoveryString |> Option.get)
-
-            tryParse' globalParser expectedMessage newInput lastOrigPos posOffset

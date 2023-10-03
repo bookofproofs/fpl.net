@@ -155,7 +155,7 @@ let keywordPredicate = (skipString "predicate" <|> skipString "pred") .>> IW >>%
 let keywordFunction = (skipString "function" <|> skipString "func") .>> IW >>% Ast.FunctionalTermType
 
 
-let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW <?> "<namespace or aliased namespace>"
+let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW <?> "<namespace or aliased namespace, e.g. 'RefNs'>"
 
 let theoryNamespaceList = sepBy1 theoryNamespace comma 
 
@@ -547,8 +547,6 @@ let fplNamespaceList = many1 (many CW >>. fplNamespace .>> IW)
 (* Final Parser *)
 let ast =  positions (fplNamespaceList .>> eof) <?> "fpl code" |>> Ast.AST
 
-let pos1 = Position("", 1, 1, 1)
-let pos0 = Position("", 0, 0, 0)
-let fplParser (input: string) = tryParse' ast "recovery failed;" input pos1 pos0
-// let fplParser (input: string) = tryParse ast, "recovery failed;", input
+let fplParser (input: string) = tryParse ast "recovery failed;" input input ""
+// let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
 let parserDiagnostics = ad

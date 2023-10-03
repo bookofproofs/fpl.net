@@ -2,15 +2,15 @@
 
 open FParsec
 open FplGrammarCommons
+open ErrRecovery
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
 [<TestClass>]
-type TestErrRecovery () =
+type TestErrRecovery() =
     let replaceWhiteSpace (input: string) =
-        let whiteSpaceChars = [|' '; '\t'; '\n'; '\r'|]
-        input.Split(whiteSpaceChars)
-            |> String.concat ""
+        let whiteSpaceChars = [| ' '; '\t'; '\n'; '\r' |]
+        input.Split(whiteSpaceChars) |> String.concat ""
 
     [<TestMethod>]
     [<DataRow("and")>]
@@ -19,9 +19,9 @@ type TestErrRecovery () =
     [<DataRow("and\t")>]
     [<DataRow("and(")>]
     [<DataRow("theory{")>]
-    member this.TestStartWithFplKeyword (test:string) =
+    member this.TestStartWithFplKeyword(test: string) =
         let result = startsWithFplKeyword test
-        Assert.IsTrue(result);
+        Assert.IsTrue(result)
 
     [<TestMethod>]
     [<DataRow("xxx")>]
@@ -30,7 +30,7 @@ type TestErrRecovery () =
     [<DataRow("xxx\t")>]
     [<DataRow("xxx(")>]
     [<DataRow("xxx{")>]
-    member this.TestNotStartWithFplKeyword (test:string) =
+    member this.TestNotStartWithFplKeyword(test: string) =
         let result = startsWithFplKeyword test
-        Assert.IsFalse(result);
-    
+        Assert.IsFalse(result)
+
