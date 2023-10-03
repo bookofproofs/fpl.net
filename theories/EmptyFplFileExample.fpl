@@ -1,9 +1,9 @@
 TestNamescpace {
+    :ext 
+        extD: /\d+/ 
+    :end
+
     theory {
-        ax Od() {
-            tpl
-        }
-        c
 
     }
 }

@@ -74,7 +74,7 @@ type Diagnostics() =
 
 let ad = Diagnostics()
 
-let private _position: Parser<_,_> = fun stream -> Reply stream.Position
+let private _position: Parser<_, _> = fun stream -> Reply stream.Position
 
 /// A helper function replacing a list of strings into a HashSet
 let listToHashSet (list: string list) =
@@ -104,7 +104,7 @@ let private addPos (pos: Position) (offset: Position) =
 
     Position(pos.StreamName, pos.Index + offset.Index, pos.Line + offset.Line, newColumn)
 
-let private _zeroOffsetPos = Position("", 0,0,0)
+let private _zeroOffsetPos = Position("", 0, 0, 0)
 
 /// subtracts an offset parser Position from a given Position
 let private subtractPos (pos: Position) (offset: Position) =
@@ -116,60 +116,95 @@ let private subtractPos (pos: Position) (offset: Position) =
 
     Position(pos.StreamName, pos.Index + offset.Index, pos.Line - offset.Line, newColumn)
 
-           
+
 /// Emit any errors occurring in the globalParser
 /// This is to make sure that the parser will always emit diagnostics,
 /// even if the error recovery fails on a global level (and so does the parser).
-let rec tryParse globalParser (input:string) (lastRemainingInput: string) (lastRecoveryText: string) (cumulativeIndexOffset:int64)=
+let rec tryParse
+    globalParser
+    (input: string)
+    (lastRemainingInput: string)
+    (lastRecoveryText: string)
+    (cumulativeIndexOffset: int64)
+    =
     match run globalParser input with
-    | Success(result, restInput, userState) -> 
+    | Success(result, restInput, userState) ->
         // return the result the remaining input
-        let remainingInput = input.Substring(int userState.Index, input.Length - int userState.Index)
+        let remainingInput =
+            input.Substring(int userState.Index, input.Length - int userState.Index)
+
         (result, remainingInput, "")
     | Failure(errorMsg, restInput, userState) ->
         let quotedSubstrings = findQuotedSubstrings errorMsg |> listToHashSet
-        let recoveryWith = [ "NameSpace"; "uses"; "RefNs"; "th" ;"{"; "pred"; "}"; "Ident"; "("; ")"; "x" ]
+
+        let recoveryWith =
+            [ "ExampleNameSpace"
+              "SomeId"
+              ":"
+              "uses"
+              "RefNs"
+              "th"
+              "{"
+              "pred"
+              "}"
+              "ExampleId"
+              "("
+              ")"
+              "x"
+              " " ]
+
         let nextRecoveryString = findRecoveryString quotedSubstrings recoveryWith
 
         match nextRecoveryString with
         | None ->
             // return Error if no nextRecoveryString was found
-            let diagnosticMsg =
-                DiagnosticMessage(
-                    " no element of "
-                    + recoveryWith.ToString()
-                    + " found in "
-                    + errorMsg
-                )
+            let diagnosticMsg = DiagnosticMessage("Cannot recover from " + errorMsg)
+
             let diagnostic =
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
 
             ad.AddDiagnostic diagnostic
-            let remainingInput = input.Substring(int restInput.Position.Index, input.Length - int restInput.Position.Index)
+
+            let remainingInput =
+                input.Substring(int restInput.Position.Index, input.Length - int restInput.Position.Index)
+
             (Ast.Error, remainingInput, "<not found>")
         | _ ->
-            let ( newInput, newRecoveryText, remainingInput, newIndexOffset ) =
-                manipulateString input restInput.Position lastRecoveryText (nextRecoveryString |> Option.get) cumulativeIndexOffset
+            let (newInput, newRecoveryText, remainingInput, newIndexOffset) =
+                manipulateString
+                    input
+                    restInput.Position
+                    lastRecoveryText
+                    (nextRecoveryString |> Option.get)
+                    cumulativeIndexOffset
 
-            if not (newRecoveryText.StartsWith(lastRecoveryText)) || lastRecoveryText = "" then 
+            if not (newRecoveryText.StartsWith(lastRecoveryText)) || lastRecoveryText = "" then
                 // emit diagnostic if there is a new remainingInput
                 let diagnosticMsg = DiagnosticMessage(replaceFParsecErrMsgForFplParser errorMsg)
+
                 let diagnostic =
-                    // this is to ensure that the input insertions of error recovery remain invisible to the user 
+                    // this is to ensure that the input insertions of error recovery remain invisible to the user
                     // so that when double-clicking the error, the IDE will go to the right position in the source code
-                    let correctedErrorPosition = 
+                    let correctedErrorPosition =
                         if lastRecoveryText = "" then
                             restInput.Position
                         else
-                            Position ( 
-                                restInput.Position.StreamName,  
+                            Position(
+                                restInput.Position.StreamName,
                                 restInput.Position.Index - newIndexOffset,
                                 restInput.Position.Line,
                                 restInput.Position.Column
-                                )
-                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedErrorPosition, diagnosticMsg)
+                            )
+
+                    Diagnostic(
+                        DiagnosticEmitter.FplParser,
+                        DiagnosticSeverity.Error,
+                        correctedErrorPosition,
+                        diagnosticMsg
+                    )
+
                 ad.AddDiagnostic diagnostic
-                
+
             tryParse globalParser newInput remainingInput newRecoveryText newIndexOffset
 
 
@@ -481,5 +516,3 @@ let tryParseOther p msg (ad:Diagnostics) =
 
 
 *)
-
-

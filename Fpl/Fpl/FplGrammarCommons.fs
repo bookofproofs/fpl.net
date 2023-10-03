@@ -1,5 +1,6 @@
 ﻿module FplGrammarCommons
 
+open System
 open FParsec
 open System.Collections.Generic
 open System.Text.RegularExpressions
@@ -165,19 +166,23 @@ let manipulateString (input: string) (pos: Position) (lastRecoveryText: string) 
 
 /// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
 let replaceFParsecErrMsgForFplParser (input: string) =
+    let lines = input.Split('\n')
+    let firstLine = lines.[1]
+    let caretLine = lines.[2]
+    let restOfLines = lines.[3..]
+    
+    // Find the position of the caret
+    let caretPosition = caretLine.IndexOf('^')
+    
+    // Extract the significant characters
+    let significantCharacters = Regex.Match(firstLine.Substring(caretPosition), @"\S+").Value
+    
+    // Replace the significant characters with quoted version in the first line
+    let quotedFirstLine = sprintf "'%s'" significantCharacters
+    
+    // Trim all lines from the third line onwards and join them back together with newline characters
+    let newLines = restOfLines |> Array.map (fun line -> line.Trim())
+    
+    // Join the transformed first line and the rest of the lines with a newline character to form the final output
+    quotedFirstLine + "\n" + String.Join("\n", newLines)
 
-    let regex = Regex(@"(?<=\n).*", RegexOptions.Singleline)
-    let matchPrefix = regex.Match(input)
-
-    if matchPrefix.Success then
-        let pattern = @"(.*\n)(\s*)\^"
-        
-        let evaluator (m: Match) =
-            "'" + m.Groups.[1].Value.Substring(0, m.Groups.[2].Value.Length + 1).Trim() + "'"
-
-        let mpValue = matchPrefix.Value
-        let newErrMsg = Regex.Replace(mpValue, pattern, evaluator, RegexOptions.Multiline)
-        newErrMsg
-    else
-        // re-return input if the input looks like something else
-        input

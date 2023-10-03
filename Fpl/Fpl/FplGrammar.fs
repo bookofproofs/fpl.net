@@ -57,15 +57,15 @@ let vDash = skipString "|-"
 
 (* Whitespaces and Comments *)
 
-let IW = spaces <?> "<whitespace>"
+let IW = spaces <?> "' '"
 
-let SW = spaces1 <?> "<significant whitespace>"
+let SW = spaces1 <?> "' '"
 
 let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline <|> eof) |>> ignore 
 
 let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) |>> ignore 
 
-let CW = choice [ blockComment; inlineComment; SW ] <?> "<whitespace, block or inline comment>"
+let CW = choice [ blockComment; inlineComment; SW ] <?> "' ', <block or inline comment>"
 
 // -----------------------------------------------------
 // Extensions of the FPL language (have to be dynamic)! Lacking a pre-processor, we put the rules
@@ -80,12 +80,13 @@ let extDigits: Parser<_, unit> = positions (digits) |>> Ast.ExtDigits
 
 
 let IdStartsWithSmallCase = regex @"[a-z]\w*" 
-let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<Pascal-case id, e.g. 'ExampleId'>"
+let idStartsWithCapExtension = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"  // no recovery example to prevent infinite loops
+let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId, e.g. 'SomeId'>"
 let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
 let dollarDigits = positions (dollar >>. digits) |>> Ast.DollarDigits
 let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "<argument identifier, e.g. '1.'>" |>> Ast.ArgumentIdentifier
 
-let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl namespace identifier, e.g. 'ExampleNameSpace'>" |>> Ast.NamespaceIdentifier
+let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl namespace identifier, e.g. 'RefNs'>" |>> Ast.NamespaceIdentifier
 let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl identifier, e.g. 'ExampleId'>" |>> Ast.PredicateIdentifier 
 
 let alias = positions (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
@@ -166,11 +167,11 @@ let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
 let extensionHeader: Parser<unit,unit> = skipString ":ext" 
 
-let extensionName = positions (skipString "ext" >>. idStartsWithCap .>> IW) |>> Ast.Extensionname
+let extensionName = positions (skipString "ext" >>. idStartsWithCapExtension .>> IW) |>> Ast.Extensionname
 
-let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. regex @"\/(?!:end).*" .>> IW <?> "<extension>" |>> Ast.ExtensionRegex
+let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. regex @"\/(?!:end).*" .>> IW |>> Ast.ExtensionRegex
 
-let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail) <?> "<extension, ': /\d+/ :end'>" |>> Ast.ExtensionBlock
+let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail) |>> Ast.ExtensionBlock
 
 
 (* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
