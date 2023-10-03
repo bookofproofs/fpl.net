@@ -108,7 +108,7 @@ let manipulateString (input: string) (pos: Position) (lastRecoveryText: string) 
         failwith "Position is out of range"
     if text.Contains('\n') then
         failwith "Cannot handle multi-line text"
-    // text with a whitespace left and right
+    // text with a trailing whitespace 
     let textWithWS =  text + " "
     let insertionOffset = int64 (textWithWS.Length)
     if pos.Index = input.Length then
@@ -124,18 +124,29 @@ let manipulateString (input: string) (pos: Position) (lastRecoveryText: string) 
         
         let post = input.Substring(intInd, input.Length - intInd)
 
+        // avoid false positives by inserting to many opening and closing braces, parentheses, or brackets
+        let corrTextWithWS =
+            if textWithWS.StartsWith("{") && post.StartsWith("}") then
+                textWithWS + "} "
+            elif textWithWS.StartsWith("(") && post.StartsWith(")") then
+                textWithWS + ") "
+            elif textWithWS.StartsWith("[") && post.StartsWith("]") then
+                textWithWS + "] "
+            else
+                textWithWS
+
         // new recovery Text depends on whether the input ended the lastRecText 
         // we also provide a correction of the index counting exactly one additional whitespace inserted in case
         // we have start a new recovery text.
         let (newRecText, corrIndex) = 
             if pre.EndsWith(lastRecoveryText.TrimEnd()) then
-                (lastRecoveryText + textWithWS, int64 0)
+                (lastRecoveryText + corrTextWithWS, int64 0)
             else
-                (textWithWS, int64 1)
+                (corrTextWithWS, int64 1)
 
         if pre.EndsWith(',') || startsWithFplKeyword post || startsWithParentheses post then
             // insert text with a trailing whitespace
-            let remainingInput = textWithWS + optTrailingWs + post
+            let remainingInput = corrTextWithWS + optTrailingWs + post
             let newInput = pre + " " + remainingInput
             ( newInput, newRecText, remainingInput.TrimStart(), cumulativeIndexOffset + insertionOffset - corrIndex )
         else
@@ -143,12 +154,12 @@ let manipulateString (input: string) (pos: Position) (lastRecoveryText: string) 
             if Regex.IsMatch(post, @"^\w") then
                 // if the beginning is a word, replace this word
                 let replacementOffset = int64 (Regex.Match(post, @"^\w+").Value.Length)
-                let remainingInput = Regex.Replace(post, @"^\w+", textWithWS)
+                let remainingInput = Regex.Replace(post, @"^\w+", corrTextWithWS)
                 let newInput = pre + optTrailingWs + remainingInput
                 ( newInput, newRecText, remainingInput.TrimStart(), cumulativeIndexOffset + insertionOffset - replacementOffset - corrIndex )
             else
                 // if the beginning starts with any other character
-                let remainingInput = textWithWS + post.[1..]
+                let remainingInput = corrTextWithWS + post.[1..]
                 let newInput = pre + optTrailingWs + remainingInput
                 ( newInput, newRecText, remainingInput.TrimStart(), cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex )
 

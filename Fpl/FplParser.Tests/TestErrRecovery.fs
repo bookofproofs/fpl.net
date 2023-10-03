@@ -19,6 +19,13 @@ type TestErrRecovery() =
     }
 }"""
 
+    let input001 = """TestNamescpace {
+    x
+    theory {
+        y
+    }
+}"""
+
     [<TestMethod>]
     [<DataRow("and")>]
     [<DataRow("and ")>]
@@ -42,7 +49,7 @@ type TestErrRecovery() =
         Assert.IsFalse(result)
 
     [<TestMethod>]
-    member this.TestTryParse001Diag () =
+    member this.TestTryParse000Diag () =
         let result = fplParser input000
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
@@ -52,5 +59,28 @@ type TestErrRecovery() =
 Expecting: <whitespace, block or inline comment>, extension block, 'inf',
 'inference', 'th', 'theory' or 'uses'
 ")"""
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParse001Diag () =
+        let result = fplParser input001
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+      (FplParser, Error, (Ln: 2, Col: 5),
+       DiagnosticMessage
+         "'x'
+    Expecting: <whitespace, block or inline comment>, extension block, 'inf',
+    'inference', 'th', 'theory' or 'uses'
+    ")
+    Diagnostic
+      (FplParser, Error, (Ln: 4, Col: 9),
+       DiagnosticMessage
+         "'y'
+    Expecting: <whitespace, block or inline comment>, 'ax', 'axiom', 'cl', 'class',
+    'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma',
+    'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition'
+    , 'theorem', 'thm' or '}'
+    ")"""
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
