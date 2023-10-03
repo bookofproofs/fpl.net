@@ -73,36 +73,36 @@ let CW = choice [ blockComment; inlineComment; SW ] <?> "<whitespace, block or i
 // note that this has to be inserted into:
 // the IsOperand choice
 // the PredicateOrFunctionalTerm choice
-let digits = regex @"\d+" <?> "<digits>" 
+let digits = regex @"\d+" <?> "<digits, e.g. '42'>" 
 let extDigits: Parser<_, unit> = positions (digits) |>> Ast.ExtDigits
 
 (* Identifiers *)
 
 
 let IdStartsWithSmallCase = regex @"[a-z]\w*" 
-let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
+let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<Pascal-case id, e.g. 'ExampleId'>"
 let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
 let dollarDigits = positions (dollar >>. digits) |>> Ast.DollarDigits
-let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
+let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "<argument identifier, e.g. '1.'>" |>> Ast.ArgumentIdentifier
 
-let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl namespace identifier, e.g. 'NameSpace'>" |>> Ast.NamespaceIdentifier
-let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl identifier, e.g. 'Ident'>" |>> Ast.PredicateIdentifier 
+let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl namespace identifier, e.g. 'ExampleNameSpace'>" |>> Ast.NamespaceIdentifier
+let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl identifier, e.g. 'ExampleId'>" |>> Ast.PredicateIdentifier 
 
 let alias = positions (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
 
-let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) <?> "<aliased namespace identifier, e.g. 'Ident alias Id'>" |>> Ast.AliasedNamespaceIdentifier
+let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) <?> "<aliased namespace identifier, e.g. 'ExampleId alias Id'>" |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z]\w*)|\d*)$", RegexOptions.Compiled)
 let variableX: Parser<string,unit> = IdStartsWithSmallCase >>= 
                                         ( fun s -> 
-                                            if keyWordSet.Contains(s) then fail ("Cannot use keyword '" + s + "' as a variable") 
-                                            else if tplRegex.IsMatch(s) then fail ("Cannot use template '" + s + "' as a variable") 
+                                            if keyWordSet.Contains(s) then fail ("Cannot use keyword " + s + " as a variable, use e.g. 'x' instead") 
+                                            else if tplRegex.IsMatch(s) then fail ("Cannot use template " + s + " as a variable, use e.g. 'x' instead") 
                                             else (preturn s)
-                                        ) <?> "<variable>"
-let variable = positions variableX <?> "<variable>" |>> Ast.Var 
+                                        ) 
+let variable = positions variableX <?> "<variable, e.g. 'x'>" |>> Ast.Var 
 
 let variableList = sepBy1 (variable .>> IW) comma
 
-let keywordSelf = skipString "self"  
+let keywordSelf = skipString "self" .>> IW
 let keywordIndex = (skipString "index" <|> skipString "ind") .>> IW  >>% Ast.IndexType
 
 
@@ -170,7 +170,7 @@ let extensionName = positions (skipString "ext" >>. idStartsWithCap .>> IW) |>> 
 
 let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. regex @"\/(?!:end).*" .>> IW <?> "<extension>" |>> Ast.ExtensionRegex
 
-let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail) <?> "extension block" |>> Ast.ExtensionBlock
+let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail) <?> "<extension block>" |>> Ast.ExtensionBlock
 
 
 (* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
@@ -181,7 +181,7 @@ let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. ex
 
 let xId = positions (at >>. extensionName) |>> Ast.ExtensionType 
 
-let indexVariable = positions ((IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase )) <?> "<indexed variable>" |>> Ast.IndexVariable
+let indexVariable = positions ((IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase )) <?> "<indexed variable, e.g. 'x$n'>" |>> Ast.IndexVariable
 
 let atList = many at
 

@@ -175,7 +175,8 @@ let replaceFParsecErrMsgForFplParser (input: string) =
         let evaluator (m: Match) =
             "'" + m.Groups.[1].Value.Substring(0, m.Groups.[2].Value.Length + 1).Trim() + "'"
 
-        let newErrMsg = Regex.Replace(matchPrefix.Value, pattern, evaluator, RegexOptions.Multiline)
+        let mpValue = matchPrefix.Value
+        let newErrMsg = Regex.Replace(mpValue, pattern, evaluator, RegexOptions.Multiline)
         newErrMsg
     else
         // re-return input if the input looks like something else

@@ -128,7 +128,7 @@ let rec tryParse globalParser (input:string) (lastRemainingInput: string) (lastR
         (result, remainingInput, "")
     | Failure(errorMsg, restInput, userState) ->
         let quotedSubstrings = findQuotedSubstrings errorMsg |> listToHashSet
-        let recoveryWith = [ "NameSpace"; "uses"; "RefNs"; "th" ;"{"; "pred"; "}"; "Ident"; "("; ")" ]
+        let recoveryWith = [ "NameSpace"; "uses"; "RefNs"; "th" ;"{"; "pred"; "}"; "Ident"; "("; ")"; "x" ]
         let nextRecoveryString = findRecoveryString quotedSubstrings recoveryWith
 
         match nextRecoveryString with
@@ -217,15 +217,7 @@ let emitDiagnostics (ad: Diagnostics) escapeParser msg =
         preturn () >>% Ast.Escape
 
 
-/// Emits diagnostics at the current position.
-let emitDiagnostics1 (ad: Diagnostics) (msg: string) pos =
-    let errorMsg = DiagnosticMessage msg
 
-    let diagnostic =
-        Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, pos, errorMsg)
-
-    ad.AddDiagnostic diagnostic
-    preturn () |> ignore
 
 /// A helper parser that skips any characters until innerSeparator would succeed,
 /// but where innerSeparator does not consume any input,

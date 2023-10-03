@@ -4,11 +4,12 @@ open FplGrammar
 open FParsec
 
 
-let input = """TestNamescpace {
-    x
-    theory {
-        P
-    }
+let input = """TestNamescpace {   
+    theory {       
+        pred I() {
+            x: pred
+        }
+    } 
 }"""
 let result = fplParser input
 

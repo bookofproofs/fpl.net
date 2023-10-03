@@ -1,3 +1,9 @@
 TestNamescpace {
-    theory {}
+    theory {
+        ax Od() {
+            tpl
+        }
+        c
+
+    }
 }
