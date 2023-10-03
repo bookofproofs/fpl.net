@@ -55,9 +55,7 @@ type TestErrRecovery() =
         let expectedDiag = """Diagnostic
   (FplParser, Error, (Ln: 2, Col: 5),
    DiagnosticMessage
-     "recovery failed; Error in Ln: 2 Col: 5
-    x
-    ^
+     "x<?
 Expecting: <whitespace, block or inline comment>, extension block, 'inf',
 'inference', 'th', 'theory' or 'uses'
 ")"""
