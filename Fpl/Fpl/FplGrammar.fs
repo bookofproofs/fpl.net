@@ -547,6 +547,6 @@ let fplNamespaceList = many1 (many CW >>. fplNamespace .>> IW)
 (* Final Parser *)
 let ast =  positions (fplNamespaceList .>> eof) <?> "fpl code" |>> Ast.AST
 
-let fplParser (input: string) = tryParse ast "recovery failed;" input input "" (int64 0)
+let fplParser (input: string) = tryParse ast input input "" (int64 0)
 // let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
 let parserDiagnostics = ad

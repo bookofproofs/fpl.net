@@ -152,3 +152,10 @@ let manipulateString (input: string) (pos: Position) (lastRecoveryText: string) 
                 let remainingInput = textWithWS + post.[1..]
                 let newInput = pre + optTrailingWs + remainingInput
                 ( newInput, newRecText, remainingInput.TrimStart(), cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex )
+
+/// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
+let replaceLines (input: string) =
+    let pattern = @"(.*\n)(\s*)\^"
+    let evaluator (m: Match) =
+        m.Groups.[1].Value.Substring(0, m.Groups.[2].Value.Length + 1).TrimEnd() + "<?"
+    Regex.Replace(input, pattern, evaluator, RegexOptions.Multiline)

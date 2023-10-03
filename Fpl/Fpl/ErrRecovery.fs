@@ -120,7 +120,7 @@ let private subtractPos (pos: Position) (offset: Position) =
 /// Emit any errors occurring in the globalParser
 /// This is to make sure that the parser will always emit diagnostics,
 /// even if the error recovery fails on a global level (and so does the parser).
-let rec tryParse globalParser (expectedMessage:string) (input:string) (lastRemainingInput: string) (lastRecoveryText: string) (cumulativeIndexOffset:int64)=
+let rec tryParse globalParser (input:string) (lastRemainingInput: string) (lastRecoveryText: string) (cumulativeIndexOffset:int64)=
     match run globalParser input with
     | Success(result, restInput, userState) -> 
         // return the result the remaining input
@@ -136,8 +136,7 @@ let rec tryParse globalParser (expectedMessage:string) (input:string) (lastRemai
             // return Error if no nextRecoveryString was found
             let diagnosticMsg =
                 DiagnosticMessage(
-                    expectedMessage
-                    + " no element of "
+                    " no element of "
                     + recoveryWith.ToString()
                     + " found in "
                     + errorMsg
@@ -154,7 +153,7 @@ let rec tryParse globalParser (expectedMessage:string) (input:string) (lastRemai
 
             if not (newRecoveryText.StartsWith(lastRecoveryText)) || lastRecoveryText = "" then 
                 // emit diagnostic if there is a new remainingInput
-                let diagnosticMsg = DiagnosticMessage(expectedMessage + " " + errorMsg)
+                let diagnosticMsg = DiagnosticMessage(errorMsg)
                 let diagnostic =
                     // this is to ensure that the input insertions of error recovery remain invisible to the user 
                     // so that when double-clicking the error, the IDE will go to the right position in the source code
@@ -171,7 +170,7 @@ let rec tryParse globalParser (expectedMessage:string) (input:string) (lastRemai
                     Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedErrorPosition, diagnosticMsg)
                 ad.AddDiagnostic diagnostic
                 
-            tryParse globalParser expectedMessage newInput remainingInput newRecoveryText newIndexOffset
+            tryParse globalParser newInput remainingInput newRecoveryText newIndexOffset
 
 
 (*
