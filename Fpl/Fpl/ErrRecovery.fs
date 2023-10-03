@@ -120,7 +120,7 @@ let private subtractPos (pos: Position) (offset: Position) =
 /// Emit any errors occurring in the globalParser
 /// This is to make sure that the parser will always emit diagnostics,
 /// even if the error recovery fails on a global level (and so does the parser).
-let rec tryParse globalParser (expectedMessage:string) (input:string) (lastRemainingInput: string) (lastRecoveryText: string)=
+let rec tryParse globalParser (expectedMessage:string) (input:string) (lastRemainingInput: string) (lastRecoveryText: string) (cumulativeIndexOffset:int64)=
     match run globalParser input with
     | Success(result, restInput, userState) -> 
         // return the result the remaining input
@@ -149,8 +149,8 @@ let rec tryParse globalParser (expectedMessage:string) (input:string) (lastRemai
             let remainingInput = input.Substring(int restInput.Position.Index, input.Length - int restInput.Position.Index)
             (Ast.Error, remainingInput, "<not found>")
         | _ ->
-            let ( newInput, newRecoveryText, remainingInput ) =
-                manipulateString input restInput.Position lastRecoveryText (nextRecoveryString |> Option.get) 
+            let ( newInput, newRecoveryText, remainingInput, newIndexOffset ) =
+                manipulateString input restInput.Position lastRecoveryText (nextRecoveryString |> Option.get) cumulativeIndexOffset
 
             if not (newRecoveryText.StartsWith(lastRecoveryText)) || lastRecoveryText = "" then 
                 // emit diagnostic if there is a new remainingInput
@@ -158,10 +158,20 @@ let rec tryParse globalParser (expectedMessage:string) (input:string) (lastRemai
                 let diagnostic =
                     // this is to ensure that the input insertions of error recovery remain invisible to the user 
                     // so that when double-clicking the error, the IDE will go to the right position in the source code
-                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
+                    let correctedErrorPosition = 
+                        if lastRecoveryText = "" then
+                            restInput.Position
+                        else
+                            Position ( 
+                                restInput.Position.StreamName,  
+                                restInput.Position.Index - newIndexOffset,
+                                restInput.Position.Line,
+                                restInput.Position.Column
+                                )
+                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedErrorPosition, diagnosticMsg)
                 ad.AddDiagnostic diagnostic
-                printf "\nindex:%i, line:%i, column:%i" restInput.Position.Index restInput.Position.Line restInput.Position.Column
-            tryParse globalParser expectedMessage newInput remainingInput newRecoveryText 
+                
+            tryParse globalParser expectedMessage newInput remainingInput newRecoveryText newIndexOffset
 
 
 (*
