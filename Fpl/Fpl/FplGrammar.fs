@@ -170,7 +170,7 @@ let extensionName = positions (skipString "ext" >>. idStartsWithCap .>> IW) |>> 
 
 let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. regex @"\/(?!:end).*" .>> IW <?> "<extension>" |>> Ast.ExtensionRegex
 
-let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail) <?> "<extension block>" |>> Ast.ExtensionBlock
+let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail) <?> "<extension, ': /\d+/ :end'>" |>> Ast.ExtensionBlock
 
 
 (* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
