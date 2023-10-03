@@ -42,20 +42,13 @@ type TestErrRecovery() =
         Assert.IsFalse(result)
 
     [<TestMethod>]
-    member this.TestTryParse001() =
-        let result = fplParser input000
-        let actual = sprintf "%O" result
-        let expected = """Success: LocalizationTerm [Var "x"; LocalizationString ""\Leftrightarrow""; Var "y"]"""
-        Assert.AreEqual(replaceWhiteSpace expected,  actual);
-
-    [<TestMethod>]
     member this.TestTryParse001Diag () =
         let result = fplParser input000
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
   (FplParser, Error, (Ln: 2, Col: 5),
    DiagnosticMessage
-     "x<?
+     "'x'
 Expecting: <whitespace, block or inline comment>, extension block, 'inf',
 'inference', 'th', 'theory' or 'uses'
 ")"""

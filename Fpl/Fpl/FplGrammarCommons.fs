@@ -1,7 +1,6 @@
 ﻿module FplGrammarCommons
 
 open FParsec
-open System.Linq
 open System.Collections.Generic
 open System.Text.RegularExpressions
 
@@ -154,7 +153,7 @@ let manipulateString (input: string) (pos: Position) (lastRecoveryText: string) 
                 ( newInput, newRecText, remainingInput.TrimStart(), cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex )
 
 /// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
-let replaceFParsecErrMsg (input: string) =
+let replaceFParsecErrMsgForFplParser (input: string) =
 
     let regex = Regex(@"(?<=\n).*", RegexOptions.Singleline)
     let matchPrefix = regex.Match(input)
@@ -163,7 +162,7 @@ let replaceFParsecErrMsg (input: string) =
         let pattern = @"(.*\n)(\s*)\^"
         
         let evaluator (m: Match) =
-            m.Groups.[1].Value.Substring(0, m.Groups.[2].Value.Length + 1).Trim() + "<?"
+            "'" + m.Groups.[1].Value.Substring(0, m.Groups.[2].Value.Length + 1).Trim() + "'"
 
         let newErrMsg = Regex.Replace(matchPrefix.Value, pattern, evaluator, RegexOptions.Multiline)
         newErrMsg

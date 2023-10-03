@@ -153,7 +153,7 @@ let rec tryParse globalParser (input:string) (lastRemainingInput: string) (lastR
 
             if not (newRecoveryText.StartsWith(lastRecoveryText)) || lastRecoveryText = "" then 
                 // emit diagnostic if there is a new remainingInput
-                let diagnosticMsg = DiagnosticMessage(replaceFParsecErrMsg errorMsg)
+                let diagnosticMsg = DiagnosticMessage(replaceFParsecErrMsgForFplParser errorMsg)
                 let diagnostic =
                     // this is to ensure that the input insertions of error recovery remain invisible to the user 
                     // so that when double-clicking the error, the IDE will go to the right position in the source code
