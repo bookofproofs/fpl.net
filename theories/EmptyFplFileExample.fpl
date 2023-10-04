@@ -1,8 +1,13 @@
 TestNamescpace {
-    :ext 
-        extD: /\d+/ 
-    :end
 
+    inf {
+        D()
+        {
+            pre:true
+            con:false
+        }
+    }
+d
     theory {
 
     }

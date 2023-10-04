@@ -93,12 +93,27 @@ let alias = positions (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Al
 
 let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) <?> "<aliased namespace identifier, e.g. 'ExampleId alias Id'>" |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z]\w*)|\d*)$", RegexOptions.Compiled)
+
+
+let withBacktrackedError p: Parser<_,_> =
+    fun stream ->
+        let mutable oldState = stream.State
+        match p stream with
+        | Success(result, restInput, userState) ->
+            Reply(result, restInput)
+        | _ ->
+            Reply(oldState)
+
 let variableX: Parser<string,unit> = IdStartsWithSmallCase >>= 
                                         ( fun s -> 
-                                            if keyWordSet.Contains(s) then fail ("Cannot use keyword " + s + " as a variable, use e.g. 'x' instead") 
-                                            else if tplRegex.IsMatch(s) then fail ("Cannot use template " + s + " as a variable, use e.g. 'x' instead") 
-                                            else (preturn s)
+                                            if keyWordSet.Contains(s) then 
+                                                fail (sprintf "Cannot use keyword %s as a variable.'%s'" s invalidSymbol)
+                                            else if tplRegex.IsMatch(s) then 
+                                                fail (sprintf "Cannot use template %s as a variable.'%s'" s invalidSymbol) 
+                                            else 
+                                            (preturn s)
                                         ) 
+
 let variable = positions variableX <?> "<variable, e.g. 'x'>" |>> Ast.Var 
 
 let variableList = sepBy1 (variable .>> IW) comma
@@ -548,6 +563,6 @@ let fplNamespaceList = many1 (many CW >>. fplNamespace .>> IW)
 (* Final Parser *)
 let ast =  positions (fplNamespaceList .>> eof) <?> "fpl code" |>> Ast.AST
 
-let fplParser (input: string) = tryParse ast input input "" (int64 0)
+let fplParser (input: string) = tryParse ast input "" (int64 0)
 // let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
 let parserDiagnostics = ad

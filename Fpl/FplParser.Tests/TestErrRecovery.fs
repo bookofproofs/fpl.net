@@ -364,25 +364,161 @@ Expecting: ' ', <block or inline comment>, 'ax', 'axiom', 'cl', 'class', 'conj'
         Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
 
     [<TestMethod>]
-    member this.TestTryParseP003Diag () =
+    member this.TestTryParseInference000Diag () =
         ad.Clear()
         let input = """TestNamescpace {
-    uses {  R}
-    theory {
-        ax I () {}
+    i
+    theory {   
+        pred I()
     }
 }"""
         let result = fplParser input
         let actual = sprintf "%O" result
-        let expectedDiag = """Diagnostic
-  (FplParser, Error, (Ln: 4, Col: 18),
-   DiagnosticMessage
-     "'ax I () {}'
-Expecting: <argument identifier>, <digits>, <fpl identifier, e.g. 'Ident'>,
-<indexed variable>, <variable>, <whitespace, block or inline comment>, '@',
-'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif',
-'impl', 'is', 'loop', 'not', 'or', 'range', 'ret', 'return', 'self', 'true',
-'undef', 'undefined' or 'xor'
-")"""
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseInference001Diag () =
+        ad.Clear()
+        let input = """TestNamescpace {
+    inf
+    theory {   
+        pred I()
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseInference002Diag () =
+        ad.Clear()
+        let input = """TestNamescpace {
+    inf {
+    theory {   
+        pred I()
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseInference003Diag () =
+        ad.Clear()
+        let input = """TestNamescpace {
+    inf {
+        x
+    theory {   
+        pred I()
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseInference004Diag () =
+        ad.Clear()
+        let input = """TestNamescpace {
+    inf {
+        D
+    theory {   
+        pred I()
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseInference005Diag () =
+        ad.Clear()
+        let input = """TestNamescpace {
+    inf {
+        D(
+    theory {   
+        pred I()
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseInference006Diag () =
+        ad.Clear()
+        let input = """TestNamescpace {
+    inf {
+        D()
+    theory {   
+        pred I()
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseInference007Diag () =
+        ad.Clear()
+        let input = """TestNamescpace {
+    inf {
+        D() {
+    theory {   
+        pred I()
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseInference008Diag () =
+        ad.Clear()
+        let input = """TestNamescpace {
+    inf {
+        D() {
+        }
+    theory {   
+        pred I()
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseInference009Diag () =
+        ad.Clear()
+        let input = """TestNamescpace {
+    inf {
+        D() {
+        }
+    }
+    theory {   
+        pred I()
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);

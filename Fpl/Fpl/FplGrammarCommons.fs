@@ -7,6 +7,9 @@ open System.Text.RegularExpressions
 
 (* This module contains information needed by both, the error recovery module and the parser *)
 
+(* A symbol that does not occur in the syntax of FPL to be used as error recovery code *)
+let invalidSymbol = "§"
+
 (* Fpl Keywords *)
 let keyWordSet =
     HashSet<_>(
@@ -94,36 +97,70 @@ let startsWithFplKeyword (s: string) =
         Regex.IsMatch(s, @"^" + Regex.Escape(element) + @"[\s\(\)\{\}]")
         || s.Equals(element))
 
+/// Checks if the string `s` ends with an FPL keyword proceeded by any whitespace character
+/// If so, this keyword will be returned (`string -> string option`)
+let endsWithFplKeyword (s: string) =
+    keyWordSet
+    |> Seq.tryFind (fun element -> Regex.IsMatch(s, @"(\s)" + Regex.Escape(element) + @"$") || s.Equals(element))
+
 /// Checks if the string `s` starts with one of the characters '(',')','{','}'
 let startsWithParentheses (s: string) = Regex.IsMatch(s, @"^[\s\(\)\{\}]")
 
-/// A low-level helper function for FPL error recovery that manipulates a string `input` at a given Parsing position 
+
+/// A low-level helper funtion splitting an `input` string at a given Parsing position `pos`
+/// depending on text to be later injected at that position
+let splitStringByTextAtPosition (input:string) (text:string) (pos:Position) = 
+    let intIndTry = int pos.Index
+    let preWithOptTrailingWSTry = input.Substring(0, intIndTry)
+    let preTry = preWithOptTrailingWSTry.TrimEnd()
+
+    let (pre, intInd, preWithOptTrailingWS) =
+        let keywordAtTheend = endsWithFplKeyword preTry
+
+        match keywordAtTheend with
+        | Some str ->
+            if text = invalidSymbol then
+                let preWithOptTrailingWS = input.Substring(0, intIndTry - str.Length - 1)
+                (preTry.Substring(0, preTry.Length - str.Length).TrimEnd(), intIndTry - str.Length - 1, preWithOptTrailingWS)
+            else
+                (preTry, intIndTry, preWithOptTrailingWSTry)
+        | None -> (preTry, intIndTry, preWithOptTrailingWSTry)
+
+    let optTrailingWs =
+        preWithOptTrailingWS.Substring(pre.Length, preWithOptTrailingWS.Length - pre.Length)
+
+    let post = input.Substring(intInd, input.Length - intInd)
+    (pre, optTrailingWs, post)
+
+/// A low-level helper function for FPL error recovery that manipulates a string `input` at a given Parsing position
 /// `pos' by either replacing or inserting this position by the value of `text` with a trailing space after it.
 /// (With the idea that we will retrieve the value of `text` from FPL parser's error message).
 /// The function returns a tuple consisting of the resulting new `input` string that can now be re-parsed,
 /// the lastRecoveryText
 /// and an offset position by which all the remaining input string was shifted by the manipulation.
 /// (With the idea that we will use this offset later to correct the positions of any new error diagnostics.
-let manipulateString (input: string) (pos: Position) (lastRecoveryText: string) (text:string) (cumulativeIndexOffset:int64) =
+let manipulateString
+    (input: string)
+    (pos: Position)
+    (lastRecoveryText: string)
+    (text: string)
+    (cumulativeIndexOffset: int64)
+    =
     if pos.Index < 0 || pos.Index > input.Length then
         failwith "Position is out of range"
-    if text.Contains('\n') then
+
+    if text.Contains(System.Environment.NewLine) then
         failwith "Cannot handle multi-line text"
-    // text with a trailing whitespace 
-    let textWithWS =  text + " "
+    // text with a trailing whitespace
+    let textWithWS = text + " "
     let insertionOffset = int64 (textWithWS.Length)
+
     if pos.Index = input.Length then
-        let newInput = input + textWithWS 
-        let newRecText = textWithWS 
-        let remainingInput = ""
-        ( newInput, newRecText, remainingInput, cumulativeIndexOffset + insertionOffset )
+        let newInput = input + textWithWS
+        let newRecText = textWithWS
+        (newInput, newRecText, cumulativeIndexOffset + insertionOffset)
     else
-        let intInd = int pos.Index
-        let preWithOptTrailingWS = input.Substring(0, intInd)
-        let pre = preWithOptTrailingWS.TrimEnd()
-        let optTrailingWs = preWithOptTrailingWS.Substring(pre.Length, preWithOptTrailingWS.Length-pre.Length)
-        
-        let post = input.Substring(intInd, input.Length - intInd)
+        let (pre, optTrailingWs, post) = splitStringByTextAtPosition input text pos
 
         // avoid false positives by inserting to many opening and closing braces, parentheses, or brackets
         let corrTextWithWS =
@@ -135,34 +172,45 @@ let manipulateString (input: string) (pos: Position) (lastRecoveryText: string) 
                 textWithWS + "] "
             else
                 textWithWS
-
-        // new recovery Text depends on whether the input ended the lastRecText 
+        // new recovery Text depends on whether the input ended the lastRecText
         // we also provide a correction of the index counting exactly one additional whitespace inserted in case
-        // we have start a new recovery text.
-        let (newRecText, corrIndex) = 
+        // we have started a new recovery text.
+        let (newRecText, corrIndex) =
             if pre.EndsWith(lastRecoveryText.TrimEnd()) then
                 (lastRecoveryText + corrTextWithWS, int64 0)
             else
                 (corrTextWithWS, int64 1)
 
-        if pre.EndsWith(',') || startsWithFplKeyword post || startsWithParentheses post then
-            // insert text with a trailing whitespace
-            let remainingInput = corrTextWithWS + optTrailingWs + post
-            let newInput = pre + " " + remainingInput
-            ( newInput, newRecText, remainingInput.TrimStart(), cumulativeIndexOffset + insertionOffset - corrIndex )
-        else
-            // replace the beginning of post by text.
-            if Regex.IsMatch(post, @"^\w") then
+        if text <> invalidSymbol then
+            if pre.EndsWith(',') || startsWithFplKeyword post || startsWithParentheses post then
+                // insert text with a trailing whitespace
+                let newInput = pre + " " + corrTextWithWS + optTrailingWs + post
+                (newInput, newRecText, cumulativeIndexOffset + insertionOffset - corrIndex)
+            else if
+                // replace the beginning of post by text.
+                Regex.IsMatch(post, @"^\w")
+            then
                 // if the beginning is a word, replace this word
                 let replacementOffset = int64 (Regex.Match(post, @"^\w+").Value.Length)
-                let remainingInput = Regex.Replace(post, @"^\w+", corrTextWithWS)
-                let newInput = pre + optTrailingWs + remainingInput
-                ( newInput, newRecText, remainingInput.TrimStart(), cumulativeIndexOffset + insertionOffset - replacementOffset - corrIndex )
+                let newInput = pre + optTrailingWs + Regex.Replace(post, @"^\w+", corrTextWithWS)
+
+                (newInput,
+                 newRecText,
+                 cumulativeIndexOffset + insertionOffset - replacementOffset - corrIndex)
             else
                 // if the beginning starts with any other character
-                let remainingInput = corrTextWithWS + post.[1..]
-                let newInput = pre + optTrailingWs + remainingInput
-                ( newInput, newRecText, remainingInput.TrimStart(), cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex )
+                let newInput = pre + optTrailingWs + corrTextWithWS + post.[1..]
+
+                (newInput,
+                 newRecText,
+                 cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex)
+        else
+                // if the beginning starts with any other character
+                let newInput = pre + optTrailingWs + corrTextWithWS + post.[1..]
+
+                (newInput,
+                 newRecText,
+                 cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex)
 
 /// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
 let replaceFParsecErrMsgForFplParser (input: string) =
@@ -170,19 +218,19 @@ let replaceFParsecErrMsgForFplParser (input: string) =
     let firstLine = lines.[1]
     let caretLine = lines.[2]
     let restOfLines = lines.[3..]
-    
+
     // Find the position of the caret
     let caretPosition = caretLine.IndexOf('^')
-    
+
     // Extract the significant characters
-    let significantCharacters = Regex.Match(firstLine.Substring(caretPosition), @"\S+").Value
-    
+    let significantCharacters =
+        Regex.Match(firstLine.Substring(caretPosition), @"\S+").Value
+
     // Replace the significant characters with quoted version in the first line
     let quotedFirstLine = sprintf "'%s'" significantCharacters
-    
+
     // Trim all lines from the third line onwards and join them back together with newline characters
     let newLines = restOfLines |> Array.map (fun line -> line.Trim())
-    
+
     // Join the transformed first line and the rest of the lines with a newline character to form the final output
     quotedFirstLine + "\n" + String.Join("\n", newLines)
-
