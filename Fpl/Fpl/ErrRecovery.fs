@@ -1,6 +1,6 @@
 ﻿module ErrRecovery
 
-open System
+open System.Text.RegularExpressions
 open System.Collections.Generic
 open FParsec
 open FplGrammarCommons
@@ -90,6 +90,30 @@ let findQuotedSubstrings (input: string) =
     |> List.ofSeq
 
 
+let retrieveExpectedParserChoices (errMsg:string) =
+    if errMsg.Contains("Cannot use ") then 
+        "'" + invalidSymbol + "'"
+    else
+        let newErrMsgSplit = errMsg.Split("Expecting: ")
+        let last = Array.last newErrMsgSplit
+        last.Replace("or ",",").Replace(System.Environment.NewLine, " ").Trim()
+        |> fun s -> s.Split([|','|])
+        |> Array.map (fun s -> s.Trim())
+        |> Array.sort
+        |> String.concat ", "
+
+let mapErrMsgToRecText (errMsg: string) =
+    let result choices =
+        let keyFound, text = recoveryMap.TryGetValue(choices)
+        if keyFound then
+            (Some choices, Some text)
+        else
+            (Some choices, None)
+
+    result (retrieveExpectedParserChoices errMsg)
+
+
+
 /// Returns the first list element from `candidates` that is contained in `source`.
 let findRecoveryString (source: HashSet<string>) (candidates: string list) =
     candidates |> List.tryFind (fun candidate -> source.Contains(candidate))
@@ -120,64 +144,50 @@ let private subtractPos (pos: Position) (offset: Position) =
 /// Emit any errors occurring in the globalParser
 /// This is to make sure that the parser will always emit diagnostics,
 /// even if the error recovery fails on a global level (and so does the parser).
-let rec tryParse
-    globalParser
-    (input: string)
-    (lastRecoveryText: string)
-    (cumulativeIndexOffset: int64)
-    =
+let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumulativeIndexOffset: int64) =
     match run globalParser input with
     | Success(result, restInput, userState) ->
 
         (result, "")
     | Failure(errorMsg, restInput, userState) ->
-        let quotedSubstrings = findQuotedSubstrings errorMsg |> listToHashSet
+        let (choices, nextRecoveryString) = mapErrMsgToRecText errorMsg
 
-        // a list of recover strings (pls. do not change the order)
-        // elements of which the error recovery will try different tokens out to 
-        // make progress while recovering from an error
-        let recoveryWith =
-            [ "§"
-              "ExampleNameSpace"
-              "SomeId"
-              ":"
-              "uses"
-              "RefNs"
-              "th"
-              "{"
-              "pred"
-              "}"
-              "ExampleId"
-              "("
-              ")"
-              "x"
-              " " ]
-
-        let nextRecoveryString = findRecoveryString quotedSubstrings recoveryWith
-
-        match nextRecoveryString with
-        | None ->
-            // return Error if no nextRecoveryString was found
-            let diagnosticMsg = DiagnosticMessage("Cannot recover from " + errorMsg)
+        match (choices, nextRecoveryString) with
+        | (None, None) ->
+            // this case should never happen because mapErrMsgToRecText never returns this
+            let diagnosticMsg =
+                DiagnosticMessage(errorMsg + System.Environment.NewLine + "(unknown parser choice or no recovery string provided)")
 
             let diagnostic =
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
 
             ad.AddDiagnostic diagnostic
-
             (Ast.Error, "<not found>")
-        | Some recStr ->
+        | (Some cho, None) -> 
+            let diagnosticMsg = DiagnosticMessage("Expecting: " + cho + System.Environment.NewLine + "(unknown parser choice)")
+
+            let diagnostic =
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
+
+            ad.AddDiagnostic diagnostic
+            (Ast.Error, "<not found>")
+        | (None, Some recStr) ->
+            // this case should never happen because mapErrMsgToRecText never returns this
+            let diagnosticMsg = DiagnosticMessage(errorMsg + System.Environment.NewLine + "(unknown error)")
+
+            let diagnostic =
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
+
+            ad.AddDiagnostic diagnostic
+            (Ast.Error, "<not found>")
+            
+        | (Some cho, Some recStr) ->
             let (newInput, newRecoveryText, newIndexOffset) =
-                manipulateString
-                    input
-                    restInput.Position
-                    lastRecoveryText
-                    recStr
-                    cumulativeIndexOffset
+                manipulateString input recStr restInput.Position lastRecoveryText cumulativeIndexOffset
 
             if not (newRecoveryText.StartsWith(lastRecoveryText)) || lastRecoveryText = "" then
                 // emit diagnostic if there is a new remainingInput
-                let diagnosticMsg = DiagnosticMessage(replaceFParsecErrMsgForFplParser errorMsg)
+                let diagnosticMsg = DiagnosticMessage("Expecting: " + cho + System.Environment.NewLine)
 
                 let diagnostic =
                     // this is to ensure that the input insertions of error recovery remain invisible to the user
@@ -203,5 +213,3 @@ let rec tryParse
                 ad.AddDiagnostic diagnostic
 
             tryParse globalParser newInput newRecoveryText newIndexOffset
-
-

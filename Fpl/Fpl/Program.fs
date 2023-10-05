@@ -5,7 +5,13 @@ open FplGrammar
 open FParsec
 
 
-let input = """T { : theory { } }"""
+let input = """		input	"TestNamespace {
+:ext T : /d/ :end     
+theory {
+cl S : obj {    // control error
+}
+}"	string
+"""
 let result = fplParser input
 
 printf "%O" result

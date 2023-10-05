@@ -90,6 +90,32 @@ let keyWordSet =
            "xor" |]
     )
 
+let recoveryMap = dict [
+    ("':ext', 'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>", ":ext")
+    ("':'", ":")
+    ("<PascalCaseId>", "T")
+    ("<extension regex>", "/d/")
+    ("<block comment>, <fpl identifier>, <inline comment>, <significant whitespace>", "T")
+    ("'}', <block comment>, <fpl identifier>, <inline comment>, <significant whitespace>", "}")
+    ("'th' or 'theory', <block comment>, <inline comment>, <significant whitespace>", "th")
+    ("'(', <whitespace>", "(")
+    ("':end'", ":end")
+    ("'{'", "{")
+    ("'" + invalidSymbol + "'", invalidSymbol)
+    ("')', <variable>, <whitespace>", ")")
+    ("'@', 'assert', 'cases', 'loop', 'pre', 'premise', 'range', 'ret', 'return', 'self', <block comment>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "pre")
+    ("' ' or ':'", ":")
+    ("'}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
+    ("'con', 'conclusion', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "con")
+    ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <argument identifier>, <digits>, <fpl identifier>, <indexed variable>, <variable>", "true")
+    ("' ', <fpl identifier>, '@', 'obj', 'object', 'template' or 'tpl'", "obj")
+    ("' ', <block or inline comment>, <argument identifier>, <digits>, <fpl identifier>, <indexed variable>, <variable>, '@', 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'mand', 'mandatory', 'not', 'opt', 'optional', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor' or '}'", "true")
+    ("' ', ' ', <block or inline comment>, 'mand', 'mandatory', 'opt', 'optional' or '}'", "}")
+    ("' ', <(closed) left bound '['>, <(open) left bound '[!'>, '[' or '{'", "{")
+    ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>", "}")
+    ("' ', <block or inline comment>, 'loc', 'localization' or '}'", "}")
+]
+
 /// Checks if the string `s` starts with an FPL Keyword followed by any whitespace character.
 let startsWithFplKeyword (s: string) =
     keyWordSet
@@ -141,26 +167,25 @@ let splitStringByTextAtPosition (input:string) (text:string) (pos:Position) =
 /// (With the idea that we will use this offset later to correct the positions of any new error diagnostics.
 let manipulateString
     (input: string)
+    (text: string)
     (pos: Position)
     (lastRecoveryText: string)
-    (text: string)
     (cumulativeIndexOffset: int64)
     =
     if pos.Index < 0 || pos.Index > input.Length then
         failwith "Position is out of range"
 
-    if text.Contains(System.Environment.NewLine) then
-        failwith "Cannot handle multi-line text"
     // text with a trailing whitespace
     let textWithWS = text + " "
     let insertionOffset = int64 (textWithWS.Length)
 
+    let (pre, optTrailingWs, post) = splitStringByTextAtPosition input text pos
+    
     if pos.Index = input.Length then
         let newInput = input + textWithWS
         let newRecText = textWithWS
         (newInput, newRecText, cumulativeIndexOffset + insertionOffset)
     else
-        let (pre, optTrailingWs, post) = splitStringByTextAtPosition input text pos
 
         // avoid false positives by inserting to many opening and closing braces, parentheses, or brackets
         let corrTextWithWS =
@@ -181,36 +206,25 @@ let manipulateString
             else
                 (corrTextWithWS, int64 1)
 
-        if text <> invalidSymbol then
-            if pre.EndsWith(',') || startsWithFplKeyword post || startsWithParentheses post then
-                // insert text with a trailing whitespace
-                let newInput = pre + " " + corrTextWithWS + optTrailingWs + post
-                (newInput, newRecText, cumulativeIndexOffset + insertionOffset - corrIndex)
-            else if
-                // replace the beginning of post by text.
-                Regex.IsMatch(post, @"^\w")
-            then
-                // if the beginning is a word, replace this word
-                let replacementOffset = int64 (Regex.Match(post, @"^\w+").Value.Length)
-                let newInput = pre + optTrailingWs + Regex.Replace(post, @"^\w+", corrTextWithWS)
+        if text = invalidSymbol || pre.EndsWith(',') || startsWithFplKeyword post || startsWithParentheses post || post.StartsWith("//") || post.StartsWith("/*") then
+            // insert text with a trailing whitespace
+            let newInput = pre + " " + corrTextWithWS + optTrailingWs + post
+            (newInput, newRecText, cumulativeIndexOffset + insertionOffset - corrIndex)
+        elif Regex.IsMatch(post, @"^\w") then
+            // if the beginning is a word, replace this word
+            let replacementOffset = int64 (Regex.Match(post, @"^\w+").Value.Length)
+            let newInput = pre + optTrailingWs + Regex.Replace(post, @"^\w+", corrTextWithWS)
 
-                (newInput,
-                 newRecText,
-                 cumulativeIndexOffset + insertionOffset - replacementOffset - corrIndex)
-            else
-                // if the beginning starts with any other character
-                let newInput = pre + optTrailingWs + corrTextWithWS + post.[1..]
-
-                (newInput,
-                 newRecText,
-                 cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex)
+            (newInput,
+                newRecText,
+                cumulativeIndexOffset + insertionOffset - replacementOffset - corrIndex)
         else
-                // if the beginning starts with any other character
-                let newInput = pre + optTrailingWs + corrTextWithWS + post.[1..]
+            // if the beginning starts with any other character
+            let newInput = pre + optTrailingWs + corrTextWithWS + post.[1..]
 
-                (newInput,
-                 newRecText,
-                 cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex)
+            (newInput,
+                newRecText,
+                cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex)
 
 /// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
 let replaceFParsecErrMsgForFplParser (input: string) =

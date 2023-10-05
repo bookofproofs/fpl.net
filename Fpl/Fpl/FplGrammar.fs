@@ -57,15 +57,15 @@ let vDash = skipString "|-"
 
 (* Whitespaces and Comments *)
 
-let IW = spaces <?> "' '"
+let IW = spaces <?> "<whitespace>"
 
-let SW = spaces1 <?> "' '"
+let SW = spaces1 <?> "<significant whitespace>"
 
 let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline <|> eof) |>> ignore 
 
 let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) |>> ignore 
 
-let CW = choice [ blockComment; inlineComment; SW ] <?> "' ', <block or inline comment>"
+let CW = choice [ blockComment; inlineComment; SW ] <?> "<significant whitespace>, <block comment>, <inline comment>"
 
 // -----------------------------------------------------
 // Extensions of the FPL language (have to be dynamic)! Lacking a pre-processor, we put the rules
@@ -73,25 +73,24 @@ let CW = choice [ blockComment; inlineComment; SW ] <?> "' ', <block or inline c
 // note that this has to be inserted into:
 // the IsOperand choice
 // the PredicateOrFunctionalTerm choice
-let digits = regex @"\d+" <?> "<digits, e.g. '42'>" 
+let digits = regex @"\d+" <?> "<digits>" 
 let extDigits: Parser<_, unit> = positions (digits) |>> Ast.ExtDigits
 
 (* Identifiers *)
 
 
 let IdStartsWithSmallCase = regex @"[a-z]\w*" 
-let idStartsWithCapExtension = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"  // no recovery example to prevent infinite loops
-let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId, e.g. 'SomeId'>"
+let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
 let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
 let dollarDigits = positions (dollar >>. digits) |>> Ast.DollarDigits
-let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "<argument identifier, e.g. '1.'>" |>> Ast.ArgumentIdentifier
+let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 
-let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl namespace identifier, e.g. 'RefNs'>" |>> Ast.NamespaceIdentifier
-let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl identifier, e.g. 'ExampleId'>" |>> Ast.PredicateIdentifier 
+let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl namespace identifier>" |>> Ast.NamespaceIdentifier
+let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl identifier>" |>> Ast.PredicateIdentifier 
 
 let alias = positions (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
 
-let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) <?> "<aliased namespace identifier, e.g. 'ExampleId alias Id'>" |>> Ast.AliasedNamespaceIdentifier
+let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) <?> "<aliased namespace identifier>" |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z]\w*)|\d*)$", RegexOptions.Compiled)
 
 
@@ -107,14 +106,14 @@ let withBacktrackedError p: Parser<_,_> =
 let variableX: Parser<string,unit> = IdStartsWithSmallCase >>= 
                                         ( fun s -> 
                                             if keyWordSet.Contains(s) then 
-                                                fail (sprintf "Cannot use keyword %s as a variable.'%s'" s invalidSymbol)
+                                                fail (sprintf "Cannot use keyword '%s' as a variable" s)
                                             else if tplRegex.IsMatch(s) then 
-                                                fail (sprintf "Cannot use template %s as a variable.'%s'" s invalidSymbol) 
+                                                fail (sprintf "Cannot use template '%s' as a variable" s) 
                                             else 
                                             (preturn s)
                                         ) 
 
-let variable = positions variableX <?> "<variable, e.g. 'x'>" |>> Ast.Var 
+let variable = positions variableX <?> "<variable>" |>> Ast.Var 
 
 let variableList = sepBy1 (variable .>> IW) comma
 
@@ -171,7 +170,7 @@ let keywordPredicate = (skipString "predicate" <|> skipString "pred") .>> IW >>%
 let keywordFunction = (skipString "function" <|> skipString "func") .>> IW >>% Ast.FunctionalTermType
 
 
-let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW <?> "<namespace or aliased namespace, e.g. 'RefNs'>"
+let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW <?> "<namespace or aliased namespace>"
 
 let theoryNamespaceList = sepBy1 theoryNamespace comma 
 
@@ -182,9 +181,10 @@ let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
 let extensionHeader: Parser<unit,unit> = skipString ":ext" 
 
-let extensionName = positions (skipString "ext" >>. idStartsWithCapExtension .>> IW) |>> Ast.Extensionname
+let extensionName = positions (idStartsWithCap .>> IW) |>> Ast.Extensionname
 
-let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. regex @"\/(?!:end).*" .>> IW |>> Ast.ExtensionRegex
+let extReg = regex "\/.*\/\s" <?> "<extension regex>"
+let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. extReg .>> IW |>> Ast.ExtensionRegex
 
 let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail) |>> Ast.ExtensionBlock
 
@@ -197,7 +197,7 @@ let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. ex
 
 let xId = positions (at >>. extensionName) |>> Ast.ExtensionType 
 
-let indexVariable = positions ((IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase )) <?> "<indexed variable, e.g. 'x$n'>" |>> Ast.IndexVariable
+let indexVariable = positions ((IdStartsWithSmallCase .>> dollar) .>>. ( digits <|> IdStartsWithSmallCase )) <?> "<indexed variable>" |>> Ast.IndexVariable
 
 let atList = many at
 
@@ -558,10 +558,9 @@ let localizationBlock = keywordLocalization >>. IW >>. leftBraceCommented >>. lo
 
 (* Namespaces *)
 let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (many CW >>. opt usesClause) .>>. (many CW >>. opt rulesOfInferenceBlock) .>>. (many CW >>. theoryBlock) .>>. (many CW >>. opt localizationBlock) .>> commentedRightBrace
-let fplNamespace = positions (namespaceIdentifier .>>. (many CW >>. namespaceBlock)) |>> Ast.Namespace
-let fplNamespaceList = many1 (many CW >>. fplNamespace .>> IW)
+let fplNamespace = positions (namespaceIdentifier .>>. (many CW >>. namespaceBlock)) .>> IW |>> Ast.Namespace
 (* Final Parser *)
-let ast =  positions (fplNamespaceList .>> eof) <?> "fpl code" |>> Ast.AST
+let ast =  positions fplNamespace <?> "fpl code" |>> Ast.AST
 
 let fplParser (input: string) = tryParse ast input "" (int64 0)
 // let fplParser (input: string) = tryParse' ast "recovery failed;" ad input

@@ -119,7 +119,7 @@ type Ast =
     | Argument of Positions * (Ast * Ast)
     | Proof of Positions * ((Ast * Ast list) * (Ast * Ast list))
     | Namespace of Positions * (Ast * ((((Ast option * Ast option) * Ast list option) * Ast list) * (Ast * (string * Ast) list) list option))
-    | AST of Positions * Ast list
+    | AST of Positions * Ast
     | Escape // used to replace AST subnodes when we recover from an error
     | SomeString of string // used to replace AST for strings subnodes when we recover from an error
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from
