@@ -185,7 +185,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             let (newInput, newRecoveryText, newIndexOffset) =
                 manipulateString input recStr restInput.Position lastRecoveryText cumulativeIndexOffset
 
-            if not (newRecoveryText.StartsWith(lastRecoveryText)) || lastRecoveryText = "" then
+            if not (newRecoveryText.StartsWith(lastRecoveryText.Replace(invalidSymbol,recStr))) || lastRecoveryText = "" then
                 // emit diagnostic if there is a new remainingInput
                 let diagnosticMsg = DiagnosticMessage("Expecting: " + cho + System.Environment.NewLine)
 

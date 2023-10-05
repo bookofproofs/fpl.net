@@ -57,3 +57,17 @@ type TestErrRecoveryLowLevel() =
         let (actNewInput, newRecoveryText, newIndexOffset) = manipulateString input text pos "" (int64 0)
         Assert.AreEqual(expNewInput, actNewInput)
         Assert.AreEqual(expNewOffset, newIndexOffset)
+
+    [<TestMethod>]
+    [<DataRow("T { inf { T ( § theory { } }", ")", 14, "{ T ( § ", "{ T ( ) ")>]
+    member this.TestManipulateStringRecoveryString
+        (
+            input: string,
+            text: string,
+            ind: int64,
+            lastRecoveryText,
+            expRecoveryText
+        ) =
+        let pos = Position("", ind, 0, 0)
+        let (actNewInput, newRecoveryText, newIndexOffset) = manipulateString input text pos lastRecoveryText (int64 0)
+        Assert.AreEqual(expRecoveryText, newRecoveryText)

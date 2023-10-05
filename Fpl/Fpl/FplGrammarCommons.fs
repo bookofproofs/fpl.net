@@ -201,7 +201,10 @@ let manipulateString
         // we also provide a correction of the index counting exactly one additional whitespace inserted in case
         // we have started a new recovery text.
         let (newRecText, corrIndex) =
-            if pre.EndsWith(lastRecoveryText.TrimEnd()) then
+            let invalidSymbolWS = invalidSymbol + " "
+            if lastRecoveryText.EndsWith(invalidSymbolWS) then
+                (lastRecoveryText.Replace(invalidSymbolWS, corrTextWithWS), int64 0)
+            elif pre.EndsWith(lastRecoveryText.TrimEnd()) then
                 (lastRecoveryText + corrTextWithWS, int64 0)
             else
                 (corrTextWithWS, int64 1)
@@ -227,8 +230,8 @@ let manipulateString
                 cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex)
 
 /// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
-let replaceFParsecErrMsgForFplParser (input: string) =
-    let lines = input.Split('\n')
+let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) =
+    let lines = errMsg.Split(Environment.NewLine)
     let firstLine = lines.[1]
     let caretLine = lines.[2]
     let restOfLines = lines.[3..]
@@ -243,8 +246,5 @@ let replaceFParsecErrMsgForFplParser (input: string) =
     // Replace the significant characters with quoted version in the first line
     let quotedFirstLine = sprintf "'%s'" significantCharacters
 
-    // Trim all lines from the third line onwards and join them back together with newline characters
-    let newLines = restOfLines |> Array.map (fun line -> line.Trim())
-
     // Join the transformed first line and the rest of the lines with a newline character to form the final output
-    quotedFirstLine + "\n" + String.Join("\n", newLines)
+    quotedFirstLine + Environment.NewLine + choices
