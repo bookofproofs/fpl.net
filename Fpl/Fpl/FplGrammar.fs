@@ -61,11 +61,11 @@ let IW = spaces <?> "<whitespace>"
 
 let SW = spaces1 <?> "<significant whitespace>"
 
-let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline <|> eof) |>> ignore 
+let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline <|> eof) <?> "<inline comment>" |>> ignore 
 
-let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) |>> ignore 
+let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) <?> "<block comment>" |>> ignore 
 
-let CW = choice [ blockComment; inlineComment; SW ] <?> "<significant whitespace>, <block comment>, <inline comment>"
+let CW = choice [ blockComment; inlineComment; SW ]
 
 // -----------------------------------------------------
 // Extensions of the FPL language (have to be dynamic)! Lacking a pre-processor, we put the rules
@@ -85,12 +85,12 @@ let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
 let dollarDigits = positions (dollar >>. digits) |>> Ast.DollarDigits
 let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 
-let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl namespace identifier>" |>> Ast.NamespaceIdentifier
-let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl identifier>" |>> Ast.PredicateIdentifier 
+let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
+let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.PredicateIdentifier 
 
 let alias = positions (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
 
-let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) <?> "<aliased namespace identifier>" |>> Ast.AliasedNamespaceIdentifier
+let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z]\w*)|\d*)$", RegexOptions.Compiled)
 
 
@@ -106,9 +106,9 @@ let withBacktrackedError p: Parser<_,_> =
 let variableX: Parser<string,unit> = IdStartsWithSmallCase >>= 
                                         ( fun s -> 
                                             if keyWordSet.Contains(s) then 
-                                                fail (sprintf "Cannot use keyword '%s' as a variable" s)
+                                                fail (sprintf "Cannot use keyword '%s' as a variable." s)
                                             else if tplRegex.IsMatch(s) then 
-                                                fail (sprintf "Cannot use template '%s' as a variable" s) 
+                                                fail (sprintf "Cannot use template '%s' as a variable." s) 
                                             else 
                                             (preturn s)
                                         ) 
@@ -170,7 +170,7 @@ let keywordPredicate = (skipString "predicate" <|> skipString "pred") .>> IW >>%
 let keywordFunction = (skipString "function" <|> skipString "func") .>> IW >>% Ast.FunctionalTermType
 
 
-let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW <?> "<namespace or aliased namespace>"
+let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
 
 let theoryNamespaceList = sepBy1 theoryNamespace comma 
 

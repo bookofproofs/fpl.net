@@ -25,7 +25,6 @@ type TestErrRecoveryLowLevel() =
     [<DataRow("T {  \t \t : theory { } }", "inf", 9, "T {", "  \t \t ", ": theory { } }")>]
     [<DataRow("T { inf { theory { pred I() } }", "ExampleId", 10, "T { inf {", " ", "theory { pred I() } }")>]
     [<DataRow("T { inf { ExampleId  theory { pred I() } }", "§", 21, "T { inf { ExampleId", "  ", "theory { pred I() } }")>]
-
     member this.TestSplitStringByTextAtPosition
         (
             input: string,

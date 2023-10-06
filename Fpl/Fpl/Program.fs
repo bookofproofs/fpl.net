@@ -5,24 +5,21 @@ open FplGrammar
 open FParsec
 
 
-let input = """		input	"TestNamespace {
-:ext T : /d/ :end     
-theory {
-cl S : obj {    // control error
-}
-}"	string
-"""
+let input = """TestNamescpace {
+    inf
+    theory {   
+        y
+    }
+}"""
 let result = fplParser input
 
 printf "%O" result
 ad.PrintDiagnostics
 
 
+ad.Clear()
+let origResult = tryParse' ast "recovery failed;" ad input
+printf "%O" origResult
+ad.PrintDiagnostics
 
-let tryKeyword s =
-    let result = run variableX s
-    match result with
-    | Success(a,b,c) ->
-        true
-    | Failure(a,b,c) ->
-        false   
+

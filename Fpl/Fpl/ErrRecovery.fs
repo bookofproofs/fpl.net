@@ -1,5 +1,6 @@
 ﻿module ErrRecovery
 
+open System
 open System.Text.RegularExpressions
 open System.Collections.Generic
 open FParsec
@@ -90,56 +91,79 @@ let findQuotedSubstrings (input: string) =
     |> List.ofSeq
 
 
+let wrapEveryNthComma (str: string) (n:int) =
+    str.Split(", ")
+    |> Array.mapi (fun i s -> if i <> 0 && i % n = 0 then Environment.NewLine + s.Trim() else s.Trim())
+    |> String.concat ", "
+
+/// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
+let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) =
+    let lines = errMsg.Split(Environment.NewLine)
+    let firstLine = lines.[1]
+    let caretLine = lines.[2]
+
+    // Find the position of the caret
+    let caretPosition = caretLine.IndexOf('^')
+
+    // Extract the significant characters
+    let significantCharacters =
+        Regex.Match(firstLine.Substring(caretPosition), @"\S+").Value
+
+    // Replace the significant characters with quoted version in the first line
+    let quotedFirstLine = sprintf "'%s'" significantCharacters
+
+    // Join the transformed first line and the rest of the lines with a newline character to form the final output
+    if errMsg.Contains("Cannot use ") then
+        lines[3] // return only the line containing the relevant message with "Cannot use ..."
+    else
+        // els return a line with a quoted string that caused the error followed by a sorted list of syntactically
+        // corrected choices
+        quotedFirstLine + Environment.NewLine + "Expecting: " + (wrapEveryNthComma choices 8)
+
 let retrieveExpectedParserChoices (errMsg:string) =
     if errMsg.Contains("Cannot use ") then 
-        "'" + invalidSymbol + "'"
+       "'" + invalidSymbol + "'"
     else
-        let newErrMsgSplit = errMsg.Split("Expecting: ")
-        let last = Array.last newErrMsgSplit
-        last.Replace("or ",",").Replace(System.Environment.NewLine, " ").Trim()
-        |> fun s -> s.Split([|','|])
-        |> Array.map (fun s -> s.Trim())
-        |> Array.sort
+        let errMsgMod = errMsg.Replace(Environment.NewLine, " ")
+        let regex = System.Text.RegularExpressions.Regex("Expecting: (.*)")
+        let matches = regex.Matches(errMsgMod)
+        let hashSet = System.Collections.Generic.HashSet<string>()
+        for m in matches do
+            let s = m.Groups.[1].Value.Split([|" or "; ", "|], System.StringSplitOptions.RemoveEmptyEntries)
+            let trimmedS = s |> Array.map (fun str -> str.Trim())
+            let hs = System.Collections.Generic.HashSet<string>(trimmedS)
+            hashSet.UnionWith(hs) |> ignore
+        hashSet
+        |> Seq.toList
+        |> List.sort
         |> String.concat ", "
 
 let mapErrMsgToRecText (errMsg: string) =
-    let result choices =
+    let recText choices =
         let keyFound, text = recoveryMap.TryGetValue(choices)
         if keyFound then
-            (Some choices, Some text)
+            (Some text)
         else
-            (Some choices, None)
-
-    result (retrieveExpectedParserChoices errMsg)
-
-
+            (None)
+    let choices = retrieveExpectedParserChoices errMsg
+    let text = recText choices
+    (Some choices, text, replaceFParsecErrMsgForFplParser errMsg choices)
 
 /// Returns the first list element from `candidates` that is contained in `source`.
 let findRecoveryString (source: HashSet<string>) (candidates: string list) =
     candidates |> List.tryFind (fun candidate -> source.Contains(candidate))
 
-/// adds an offset parser Position to a given Position
-let private addPos (pos: Position) (offset: Position) =
-    let newColumn =
-        if offset.Line = 0 then
-            pos.Column
-        else
-            pos.Column + offset.Column
+let tryParse' globalParser expectMessage (ad: Diagnostics) input =
+    match run globalParser input with
+    | Success(result, restInput, userState) -> result
+    | Failure(errorMsg, restInput, userState) ->
+        let diagnosticMsg = DiagnosticMessage(expectMessage + " " + errorMsg)
 
-    Position(pos.StreamName, pos.Index + offset.Index, pos.Line + offset.Line, newColumn)
+        let diagnostic =
+            Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
 
-let private _zeroOffsetPos = Position("", 0, 0, 0)
-
-/// subtracts an offset parser Position from a given Position
-let private subtractPos (pos: Position) (offset: Position) =
-    let newColumn =
-        if offset.Line = 0 then
-            pos.Column
-        else
-            pos.Column - offset.Column
-
-    Position(pos.StreamName, pos.Index + offset.Index, pos.Line - offset.Line, newColumn)
-
+        ad.AddDiagnostic diagnostic
+        Ast.Error
 
 /// Emit any errors occurring in the globalParser
 /// This is to make sure that the parser will always emit diagnostics,
@@ -150,7 +174,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
 
         (result, "")
     | Failure(errorMsg, restInput, userState) ->
-        let (choices, nextRecoveryString) = mapErrMsgToRecText errorMsg
+        let (choices, nextRecoveryString, newErrMsg) = mapErrMsgToRecText errorMsg
 
         match (choices, nextRecoveryString) with
         | (None, None) ->
@@ -164,7 +188,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             ad.AddDiagnostic diagnostic
             (Ast.Error, "<not found>")
         | (Some cho, None) -> 
-            let diagnosticMsg = DiagnosticMessage("Expecting: " + cho + System.Environment.NewLine + "(unknown parser choice)")
+            let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine + "(unknown parser choice)")
 
             let diagnostic =
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
@@ -187,7 +211,8 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
 
             if not (newRecoveryText.StartsWith(lastRecoveryText.Replace(invalidSymbol,recStr))) || lastRecoveryText = "" then
                 // emit diagnostic if there is a new remainingInput
-                let diagnosticMsg = DiagnosticMessage("Expecting: " + cho + System.Environment.NewLine)
+
+                let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine)
 
                 let diagnostic =
                     // this is to ensure that the input insertions of error recovery remain invisible to the user

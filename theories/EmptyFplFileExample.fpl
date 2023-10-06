@@ -1,14 +1,1 @@
-TestNamescpace {
-
-    inf {
-        D()
-        {
-            pre:true
-            con:false
-        }
-    }
-d
-    theory {
-
-    }
-}
+TestNamescpace { inf {  D(  theory { d  } }

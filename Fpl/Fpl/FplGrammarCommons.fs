@@ -1,6 +1,5 @@
 ﻿module FplGrammarCommons
 
-open System
 open FParsec
 open System.Collections.Generic
 open System.Text.RegularExpressions
@@ -91,29 +90,29 @@ let keyWordSet =
     )
 
 let recoveryMap = dict [
-    ("':ext', 'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>", ":ext")
     ("':'", ":")
-    ("<PascalCaseId>", "T")
-    ("<extension regex>", "/d/")
-    ("<block comment>, <fpl identifier>, <inline comment>, <significant whitespace>", "T")
-    ("'}', <block comment>, <fpl identifier>, <inline comment>, <significant whitespace>", "}")
-    ("'th' or 'theory', <block comment>, <inline comment>, <significant whitespace>", "th")
-    ("'(', <whitespace>", "(")
+    ("',', 'alias', '}', <whitespace>", "}")
+    ("',', '}'", "}")
     ("':end'", ":end")
-    ("'{'", "{")
+    ("':ext', 'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>", ":ext")
     ("'" + invalidSymbol + "'", invalidSymbol)
+    ("'(', <whitespace>", "(")
     ("')', <variable>, <whitespace>", ")")
-    ("'@', 'assert', 'cases', 'loop', 'pre', 'premise', 'range', 'ret', 'return', 'self', <block comment>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "pre")
-    ("' ' or ':'", ":")
+    ("'{'", "{")
+    ("'}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>", "}")
     ("'}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
+    ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <variable>", "true")
+    ("'@', 'assert', 'cases', 'loop', 'pre', 'premise', 'range', 'ret', 'return', 'self', <block comment>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "pre")
+    ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>", "pred")
     ("'con', 'conclusion', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "con")
-    ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <argument identifier>, <digits>, <fpl identifier>, <indexed variable>, <variable>", "true")
-    ("' ', <fpl identifier>, '@', 'obj', 'object', 'template' or 'tpl'", "obj")
-    ("' ', <block or inline comment>, <argument identifier>, <digits>, <fpl identifier>, <indexed variable>, <variable>, '@', 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'mand', 'mandatory', 'not', 'opt', 'optional', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor' or '}'", "true")
-    ("' ', ' ', <block or inline comment>, 'mand', 'mandatory', 'opt', 'optional' or '}'", "}")
-    ("' ', <(closed) left bound '['>, <(open) left bound '[!'>, '[' or '{'", "{")
-    ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>", "}")
-    ("' ', <block or inline comment>, 'loc', 'localization' or '}'", "}")
+    ("'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>", "loc")
+    ("'th' or 'theory', <block comment>, <inline comment>, <significant whitespace>", "th")
+    ("<aliased namespace>, <namespace>, <whitespace>", "T")
+    ("<block comment>, <fpl identifier>, <inline comment>, <significant whitespace>", "T")
+    ("<extension regex>", "/d/")
+    ("<PascalCaseId>", "T")
+    ("<PascalCaseId>, <whitespace>", "T")
+    ("<PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>", "T")
 ]
 
 /// Checks if the string `s` starts with an FPL Keyword followed by any whitespace character.
@@ -132,13 +131,22 @@ let endsWithFplKeyword (s: string) =
 /// Checks if the string `s` starts with one of the characters '(',')','{','}'
 let startsWithParentheses (s: string) = Regex.IsMatch(s, @"^[\s\(\)\{\}]")
 
+/// A low-level helper function checking if a string starts with a given regex 
+/// and returning the length of the first match or 0:
+let checkRegex (regexPattern: string) (input: string) =
+    let m = System.Text.RegularExpressions.Regex.Match(input, regexPattern)
+    if m.Success && m.Index = 0 then
+        m.Length
+    else
+        0
 
-/// A low-level helper funtion splitting an `input` string at a given Parsing position `pos`
+/// A low-level helper function splitting an `input` string at a given Parsing position `pos`
 /// depending on text to be later injected at that position
 let splitStringByTextAtPosition (input:string) (text:string) (pos:Position) = 
     let intIndTry = int pos.Index
     let preWithOptTrailingWSTry = input.Substring(0, intIndTry)
     let preTry = preWithOptTrailingWSTry.TrimEnd()
+
 
     let (pre, intInd, preWithOptTrailingWS) =
         let keywordAtTheend = endsWithFplKeyword preTry
@@ -156,7 +164,23 @@ let splitStringByTextAtPosition (input:string) (text:string) (pos:Position) =
         preWithOptTrailingWS.Substring(pre.Length, preWithOptTrailingWS.Length - pre.Length)
 
     let post = input.Substring(intInd, input.Length - intInd)
-    (pre, optTrailingWs, post)
+    
+    let lengthOfFollowingInlineComment = checkRegex "\/\/[^\n]*\s*" post
+    if lengthOfFollowingInlineComment = 0 then 
+        let lengthOfFollowingBlockComment = checkRegex "\/\*((?:.|\n)*?)\*\/\s*" post
+        if lengthOfFollowingBlockComment = 0 then
+            (pre, optTrailingWs, post)
+        else
+            let a = input.Substring(intInd, lengthOfFollowingBlockComment)
+            let b = post.Substring(lengthOfFollowingBlockComment)
+            (pre, optTrailingWs + a, b)
+    else
+        let a = input.Substring(intInd, lengthOfFollowingInlineComment)
+        let b = post.Substring(lengthOfFollowingInlineComment)
+        (pre, optTrailingWs + a, b)
+    
+
+
 
 /// A low-level helper function for FPL error recovery that manipulates a string `input` at a given Parsing position
 /// `pos' by either replacing or inserting this position by the value of `text` with a trailing space after it.
@@ -229,22 +253,3 @@ let manipulateString
                 newRecText,
                 cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex)
 
-/// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
-let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) =
-    let lines = errMsg.Split(Environment.NewLine)
-    let firstLine = lines.[1]
-    let caretLine = lines.[2]
-    let restOfLines = lines.[3..]
-
-    // Find the position of the caret
-    let caretPosition = caretLine.IndexOf('^')
-
-    // Extract the significant characters
-    let significantCharacters =
-        Regex.Match(firstLine.Substring(caretPosition), @"\S+").Value
-
-    // Replace the significant characters with quoted version in the first line
-    let quotedFirstLine = sprintf "'%s'" significantCharacters
-
-    // Join the transformed first line and the rest of the lines with a newline character to form the final output
-    quotedFirstLine + Environment.NewLine + choices
