@@ -144,7 +144,7 @@ let checkRegex (regexPattern: string) (input: string) =
 
 /// A low-level helper function splitting an `input` string at a given Parsing position `pos`
 /// depending on text to be later injected at that position
-let splitStringByTextAtPosition (input:string) (text:string) (pos:Position) = 
+let splitStringByTextAtPosition (input:string) (text:string) (pos:Position) =
     let ind1 = int pos.Index
     let preWithOptTrailingWS1 = input.Substring(0, ind1)
     let pre1 = preWithOptTrailingWS1.TrimEnd()
@@ -158,7 +158,7 @@ let splitStringByTextAtPosition (input:string) (text:string) (pos:Position) =
         | Some str ->
             if text = invalidSymbol then
                 let preWithOptTrailingWS = input.Substring(0, ind1 - str.Length - 1)
-                (pre1.Substring(0, pre1.Length - str.Length).TrimEnd(), ind1 - str.Length - 1, preWithOptTrailingWS1)
+                (preWithOptTrailingWS.TrimEnd(), ind1 - str.Length - 1, preWithOptTrailingWS)
             else
                 (pre1, ind1, preWithOptTrailingWS1)
         | None -> (pre1, ind1, preWithOptTrailingWS1)
