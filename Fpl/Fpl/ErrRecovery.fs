@@ -222,7 +222,8 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             let (newInput, newRecoveryText, newIndexOffset) =
                 manipulateString input recStr restInput.Position lastRecoveryText cumulativeIndexOffset
 
-            if not (newRecoveryText.StartsWith(lastRecoveryText.Replace(invalidSymbol,recStr))) || lastRecoveryText = "" then
+            let lastRecoveryTextMod = lastRecoveryText.Replace(invalidSymbol,recStr)
+            if (not (newRecoveryText.StartsWith(lastRecoveryTextMod))) || lastRecoveryText = "" then
                 // emit diagnostic if there is a new remainingInput
 
                 let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine)
@@ -231,14 +232,21 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                     // this is to ensure that the input insertions of error recovery remain invisible to the user
                     // so that when double-clicking the error, the IDE will go to the right position in the source code
                     let correctedErrorPosition =
-                        if lastRecoveryText = "" then
+                        if newRecoveryText = "§ " then
+                            Position(
+                                restInput.Position.StreamName,
+                                restInput.Position.Index + newIndexOffset - (int64 2),
+                                restInput.Position.Line,
+                                restInput.Position.Column 
+                            )
+                        elif lastRecoveryText = "" then
                             restInput.Position
                         else
                             Position(
                                 restInput.Position.StreamName,
-                                restInput.Position.Index - newIndexOffset,
+                                restInput.Position.Index + newIndexOffset,
                                 restInput.Position.Line,
-                                restInput.Position.Column
+                                restInput.Position.Column 
                             )
 
                     Diagnostic(

@@ -170,7 +170,7 @@ let splitStringByTextAtPosition (input:string) (text:string) (pos:Position) =
     let optTrailingWs =
         preWithOptTrailingWS.Substring(pre.Length, preWithOptTrailingWS.Length - pre.Length)
 
-    let post = input.Substring(intInd, input.Length - intInd)
+    let post = input.Substring(intInd, input.Length - intInd ).TrimStart()
     
     let lengthOfFollowingInlineComment = checkRegex "\/\/[^\n]*\s*" post
     if lengthOfFollowingInlineComment = 0 then 
@@ -231,7 +231,7 @@ let manipulateString
         // new recovery Text depends on whether the input ended the lastRecText
         // we also provide a correction of the index counting exactly one additional whitespace inserted in case
         // we have started a new recovery text.
-        let (newRecText, corrIndex) =
+        let (newRecText, corrIndexPre) =
             let invalidSymbolWS = invalidSymbol + " "
             if lastRecoveryText.EndsWith(invalidSymbolWS) then
                 (lastRecoveryText.Replace(invalidSymbolWS, corrTextWithWS), int64 0)
@@ -241,10 +241,11 @@ let manipulateString
                 (corrTextWithWS, int64 1)
 
         let lengthKeyword = int64 (lengthOfStartingFplKeyword post)
+        let corrIndex = corrIndexPre + lengthKeyword 
         if text = invalidSymbol || pre.EndsWith(',') || lengthKeyword>0 || startsWithParentheses post || post.StartsWith("//") || post.StartsWith("/*") then
             // insert text with a trailing whitespace
             let newInput = pre + " " + corrTextWithWS + optTrailingWs + post
-            (newInput, newRecText, cumulativeIndexOffset + insertionOffset - corrIndex - lengthKeyword)
+            (newInput, newRecText, cumulativeIndexOffset + insertionOffset - corrIndex)
         elif Regex.IsMatch(post, @"^\w") then
             // if the beginning is a word, replace this word
             let replacementOffset = int64 (Regex.Match(post, @"^\w+").Value.Length)

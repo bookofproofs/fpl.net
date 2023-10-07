@@ -9,7 +9,6 @@ type Positions = Position * Position
 
 type Ast = 
     // Identifiers
-    | Digits of Positions * string
     | ExtDigits of Positions * string
     | DollarDigits of Positions * string
     | PascalCaseId of string
