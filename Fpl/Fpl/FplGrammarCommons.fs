@@ -101,6 +101,7 @@ let recoveryMap = dict [
     ("'{'", "{")
     ("'}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>", "}")
     ("'}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
+    ("'}', <block comment>, <inline comment>, <significant whitespace>", "}")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <variable>", "true")
     ("'@', 'assert', 'cases', 'loop', 'pre', 'premise', 'range', 'ret', 'return', 'self', <block comment>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "pre")
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>", "pred")
@@ -201,7 +202,6 @@ let manipulateString
     (text: string)
     (pos: Position)
     (lastRecoveryText: string)
-    (cumulativeIndexOffset: int64)
     =
     if pos.Index < 0 || pos.Index > input.Length then
         failwith "Position is out of range"
@@ -215,7 +215,7 @@ let manipulateString
     if pos.Index = input.Length then
         let newInput = input + textWithWS
         let newRecText = textWithWS
-        (newInput, newRecText, cumulativeIndexOffset + insertionOffset)
+        (newInput, newRecText, insertionOffset, int64 0)
     else
 
         // avoid false positives by inserting to many opening and closing braces, parentheses, or brackets
@@ -231,7 +231,7 @@ let manipulateString
         // new recovery Text depends on whether the input ended the lastRecText
         // we also provide a correction of the index counting exactly one additional whitespace inserted in case
         // we have started a new recovery text.
-        let (newRecText, corrIndexPre) =
+        let (newRecText, corrIndex) =
             let invalidSymbolWS = invalidSymbol + " "
             if lastRecoveryText.EndsWith(invalidSymbolWS) then
                 (lastRecoveryText.Replace(invalidSymbolWS, corrTextWithWS), int64 0)
@@ -241,11 +241,10 @@ let manipulateString
                 (corrTextWithWS, int64 1)
 
         let lengthKeyword = int64 (lengthOfStartingFplKeyword post)
-        let corrIndex = corrIndexPre + lengthKeyword 
         if text = invalidSymbol || pre.EndsWith(',') || lengthKeyword>0 || startsWithParentheses post || post.StartsWith("//") || post.StartsWith("/*") then
             // insert text with a trailing whitespace
             let newInput = pre + " " + corrTextWithWS + optTrailingWs + post
-            (newInput, newRecText, cumulativeIndexOffset + insertionOffset - corrIndex)
+            (newInput, newRecText, insertionOffset  - corrIndex, lengthKeyword)
         elif Regex.IsMatch(post, @"^\w") then
             // if the beginning is a word, replace this word
             let replacementOffset = int64 (Regex.Match(post, @"^\w+").Value.Length)
@@ -253,12 +252,12 @@ let manipulateString
 
             (newInput,
                 newRecText,
-                cumulativeIndexOffset + insertionOffset - replacementOffset - corrIndex)
+                insertionOffset - replacementOffset - corrIndex, lengthKeyword)
         else
             // if the beginning starts with any other character
             let newInput = pre + optTrailingWs + corrTextWithWS + post.[1..]
 
             (newInput,
                 newRecText,
-                cumulativeIndexOffset + insertionOffset - int64 1 - corrIndex)
+                insertionOffset - int64 1 - corrIndex, lengthKeyword)
 

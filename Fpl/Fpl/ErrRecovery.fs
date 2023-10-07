@@ -219,10 +219,11 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             (Ast.Error, "<not found>")
             
         | (Some cho, Some recStr) ->
-            let (newInput, newRecoveryText, newIndexOffset) =
-                manipulateString input recStr restInput.Position lastRecoveryText cumulativeIndexOffset
+            let (newInput, newRecoveryText, newOffset, keyWordLength) =
+                manipulateString input recStr restInput.Position lastRecoveryText
 
             let lastRecoveryTextMod = lastRecoveryText.Replace(invalidSymbol,recStr)
+            let mutable newIndexOffset = cumulativeIndexOffset + newOffset
             if (not (newRecoveryText.StartsWith(lastRecoveryTextMod))) || lastRecoveryText = "" then
                 // emit diagnostic if there is a new remainingInput
 
@@ -233,9 +234,10 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                     // so that when double-clicking the error, the IDE will go to the right position in the source code
                     let correctedErrorPosition =
                         if newRecoveryText = "§ " then
+                            let newIndexOffset = newIndexOffset - keyWordLength - int64 2
                             Position(
                                 restInput.Position.StreamName,
-                                restInput.Position.Index + newIndexOffset - (int64 2),
+                                restInput.Position.Index + newIndexOffset,
                                 restInput.Position.Line,
                                 restInput.Position.Column 
                             )
@@ -244,7 +246,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                         else
                             Position(
                                 restInput.Position.StreamName,
-                                restInput.Position.Index + newIndexOffset,
+                                restInput.Position.Index - newIndexOffset,
                                 restInput.Position.Line,
                                 restInput.Position.Column 
                             )
@@ -258,4 +260,5 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
 
                 ad.AddDiagnostic diagnostic
 
-            tryParse globalParser newInput newRecoveryText newIndexOffset
+
+            tryParse globalParser newInput newRecoveryText newIndexOffset 
