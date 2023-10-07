@@ -20,7 +20,7 @@ type TestErrRecoveryLowLevel() =
         Assert.AreEqual(expPost, actPost)
 
     [<TestMethod>]
-    [<DataRow("T { inf { D() { pre : true con : true      }  theory { y} }", "}", 46, "T { inf { D() { pre : true con : true }", "        ", "theory { y} }")>]
+    [<DataRow("T { inf { D() { pre : true con : true      }  theory { y} }", "}", 46, "T { inf { D() { pre : true con : true      }", "  ", "theory { y} }")>]
     [<DataRow("T { : theory { } }", "inf", 4, "T {", " ", ": theory { } }")>]
     [<DataRow("T {  \t: theory { } }", "inf", 6, "T {", "  \t", ": theory { } }")>]
     [<DataRow("T {  \t \t : theory { } }", "inf", 9, "T {", "  \t \t ", ": theory { } }")>]
@@ -44,7 +44,7 @@ type TestErrRecoveryLowLevel() =
     [<TestMethod>]
     [<DataRow("", "", 0, " ", 1)>]
     [<DataRow("T { : theory { } }", "inf", 4, "T { inf  theory { } }", 3)>]
-    [<DataRow("T { inf { T () { theory { } }", "§", 17, "T { inf { T () { §  theory { } }", 2)>]
+    [<DataRow("T { inf { T () { theory { } }", "§", 17, "T { inf { T () { §  theory { } }", 3)>]
     member this.TestManipulateString
         (
             input: string,

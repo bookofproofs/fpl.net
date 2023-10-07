@@ -208,14 +208,13 @@ let manipulateString
 
     // text with a trailing whitespace
     let textWithWS = text + " "
-    let insertionOffset = int64 (textWithWS.Length)
 
     let (pre, optTrailingWs, post) = splitStringByTextAtPosition input text pos
     
     if pos.Index = input.Length then
         let newInput = input + textWithWS
         let newRecText = textWithWS
-        (newInput, newRecText, insertionOffset, int64 0)
+        (newInput, newRecText, int64 (newInput.Length - input.Length), int64 0)
     else
 
         // avoid false positives by inserting to many opening and closing braces, parentheses, or brackets
@@ -231,33 +230,32 @@ let manipulateString
         // new recovery Text depends on whether the input ended the lastRecText
         // we also provide a correction of the index counting exactly one additional whitespace inserted in case
         // we have started a new recovery text.
-        let (newRecText, corrIndex) =
+        let newRecText =
             let invalidSymbolWS = invalidSymbol + " "
             if lastRecoveryText.EndsWith(invalidSymbolWS) then
-                (lastRecoveryText.Replace(invalidSymbolWS, corrTextWithWS), int64 0)
-            elif pre.EndsWith(lastRecoveryText.TrimEnd()) then
-                (lastRecoveryText + corrTextWithWS, int64 0)
+                lastRecoveryText.Replace(invalidSymbolWS, corrTextWithWS)
+            elif lastRecoveryText<>"" && pre.EndsWith(lastRecoveryText.TrimEnd()) then
+                lastRecoveryText + corrTextWithWS 
             else
-                (corrTextWithWS, int64 1)
+                corrTextWithWS
 
         let lengthKeyword = int64 (lengthOfStartingFplKeyword post)
         if text = invalidSymbol || pre.EndsWith(',') || lengthKeyword>0 || startsWithParentheses post || post.StartsWith("//") || post.StartsWith("/*") then
             // insert text with a trailing whitespace
             let newInput = pre + " " + corrTextWithWS + optTrailingWs + post
-            (newInput, newRecText, insertionOffset  - corrIndex, lengthKeyword)
+            (newInput, newRecText, int64 (newInput.Length - input.Length), lengthKeyword)
         elif Regex.IsMatch(post, @"^\w") then
             // if the beginning is a word, replace this word
-            let replacementOffset = int64 (Regex.Match(post, @"^\w+").Value.Length)
             let newInput = pre + optTrailingWs + Regex.Replace(post, @"^\w+", corrTextWithWS)
 
             (newInput,
                 newRecText,
-                insertionOffset - replacementOffset - corrIndex, lengthKeyword)
+                int64 (newInput.Length - input.Length), lengthKeyword)
         else
             // if the beginning starts with any other character
             let newInput = pre + optTrailingWs + corrTextWithWS + post.[1..]
 
             (newInput,
                 newRecText,
-                insertionOffset - int64 1 - corrIndex, lengthKeyword)
+                int64 (newInput.Length - input.Length), lengthKeyword)
 

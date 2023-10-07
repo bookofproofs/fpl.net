@@ -223,7 +223,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 manipulateString input recStr restInput.Position lastRecoveryText
 
             let lastRecoveryTextMod = lastRecoveryText.Replace(invalidSymbol,recStr)
-            let mutable newIndexOffset = cumulativeIndexOffset + newOffset
+            let newIndexOffset = cumulativeIndexOffset + newOffset
             if (not (newRecoveryText.StartsWith(lastRecoveryTextMod))) || lastRecoveryText = "" then
                 // emit diagnostic if there is a new remainingInput
 
@@ -246,7 +246,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                         else
                             Position(
                                 restInput.Position.StreamName,
-                                restInput.Position.Index - newIndexOffset,
+                                restInput.Position.Index - cumulativeIndexOffset,
                                 restInput.Position.Line,
                                 restInput.Position.Column 
                             )
