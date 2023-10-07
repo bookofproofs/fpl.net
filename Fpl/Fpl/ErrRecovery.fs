@@ -113,30 +113,43 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) =
     let quotedFirstLine = sprintf "'%s'" significantCharacters
 
     // Join the transformed first line and the rest of the lines with a newline character to form the final output
-    if errMsg.Contains("Cannot use ") then
-        lines[3] // return only the line containing the relevant message with "Cannot use ..."
+    if errMsg.Contains("<variable, got ") then
+        lines[3] // return only the line containing the relevant message with "Expecting <variable, got ..."
     else
         // els return a line with a quoted string that caused the error followed by a sorted list of syntactically
         // corrected choices
         quotedFirstLine + Environment.NewLine + "Expecting: " + (wrapEveryNthComma choices 8)
 
+let split = [|" or "; "or "; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine|]
+let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
 let retrieveExpectedParserChoices (errMsg:string) =
-    if errMsg.Contains("Cannot use ") then 
-       "'" + invalidSymbol + "'"
-    else
-        let errMsgMod = errMsg.Replace(Environment.NewLine, " ")
-        let regex = System.Text.RegularExpressions.Regex("Expecting: (.*)")
-        let matches = regex.Matches(errMsgMod)
-        let hashSet = System.Collections.Generic.HashSet<string>()
-        for m in matches do
-            let s = m.Groups.[1].Value.Split([|" or "; ", "|], System.StringSplitOptions.RemoveEmptyEntries)
-            let trimmedS = s |> Array.map (fun str -> str.Trim())
+    // replace accidental new lines injected by FParsec into FPL parser labels that start by "<" and end by ">"
+    // to avoid them from being split apart later
+    let replacement (m:Match) = m.Value.Replace(Environment.NewLine, " ")
+    let errMsgMod = Regex.Replace(errMsg, "(?<=<)[^>]*", MatchEvaluator(replacement))
+    // now, look in this manipulated error FParsec message by looking for groups 
+    // starting with "Expecting: " and followed by an enumeration of choices
+    let regex = Regex(groupRegex)
+    let matches = regex.Matches(errMsgMod)
+    // now, we extract all choices so they contain only those parts of the matched group that
+    // are choice enumerations relevant for us.
+    let hashSet = System.Collections.Generic.HashSet<string>()
+    for m in matches do
+        for g in m.Groups do
+            let s = g.Value.Split(split, System.StringSplitOptions.RemoveEmptyEntries)
+            let trimmedS = 
+                s 
+                |> Array.map (fun str -> str.Trim() ) // trim all strings
+                |> Array.filter (fun str -> str.Length > 0) // ignore all empty strings
+                |> Array.map (fun str -> if str.EndsWith(",") then str.Substring(0, str.Length - 1) else str) // remove incidental trailing commas 
+                |> Array.filter (fun str -> (str.StartsWith("<") && str.EndsWith(">")) || (str.StartsWith("'") && str.EndsWith("'"))) // filter out all split elements that are not quoted or start with "<"
             let hs = System.Collections.Generic.HashSet<string>(trimmedS)
             hashSet.UnionWith(hs) |> ignore
-        hashSet
-        |> Seq.toList
-        |> List.sort
-        |> String.concat ", "
+    // return the choices as a comma-separated list of alphabetically sorted choices
+    hashSet
+    |> Seq.toList
+    |> List.sort
+    |> String.concat ", "
 
 let mapErrMsgToRecText (errMsg: string) =
     let recText choices =

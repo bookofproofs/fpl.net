@@ -106,9 +106,9 @@ let withBacktrackedError p: Parser<_,_> =
 let variableX: Parser<string,unit> = IdStartsWithSmallCase >>= 
                                         ( fun s -> 
                                             if keyWordSet.Contains(s) then 
-                                                fail (sprintf "Cannot use keyword '%s' as a variable." s)
+                                                fail ("Expecting: <variable (got keyword)>")
                                             else if tplRegex.IsMatch(s) then 
-                                                fail (sprintf "Cannot use template '%s' as a variable." s) 
+                                                fail ("Expecting: <variable (got template)>") 
                                             else 
                                             (preturn s)
                                         ) 

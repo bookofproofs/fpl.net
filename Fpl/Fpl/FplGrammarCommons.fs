@@ -106,6 +106,7 @@ let recoveryMap = dict [
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>", "pred")
     ("'con', 'conclusion', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "con")
     ("'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>", "loc")
+    ("'pre', 'premise', <block comment>, <inline comment>, <significant whitespace>, <variable (got keyword)>", "pre")
     ("'th' or 'theory', <block comment>, <inline comment>, <significant whitespace>", "th")
     ("<aliased namespace>, <namespace>, <whitespace>", "T")
     ("<block comment>, <fpl identifier>, <inline comment>, <significant whitespace>", "T")
@@ -113,6 +114,7 @@ let recoveryMap = dict [
     ("<PascalCaseId>", "T")
     ("<PascalCaseId>, <whitespace>", "T")
     ("<PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>", "T")
+    ("<variable (got keyword)>", invalidSymbol)
 ]
 
 /// Checks if the string `s` starts with an FPL Keyword followed by any whitespace character.
@@ -143,22 +145,23 @@ let checkRegex (regexPattern: string) (input: string) =
 /// A low-level helper function splitting an `input` string at a given Parsing position `pos`
 /// depending on text to be later injected at that position
 let splitStringByTextAtPosition (input:string) (text:string) (pos:Position) = 
-    let intIndTry = int pos.Index
-    let preWithOptTrailingWSTry = input.Substring(0, intIndTry)
-    let preTry = preWithOptTrailingWSTry.TrimEnd()
-
-
+    let ind1 = int pos.Index
+    let preWithOptTrailingWS1 = input.Substring(0, ind1)
+    let pre1 = preWithOptTrailingWS1.TrimEnd()
+    let optTrailingWs1 =
+        preWithOptTrailingWS1.Substring(pre1.Length, preWithOptTrailingWS1.Length - pre1.Length)
+    
     let (pre, intInd, preWithOptTrailingWS) =
-        let keywordAtTheend = endsWithFplKeyword preTry
+        let keywordAtTheend = endsWithFplKeyword pre1
 
         match keywordAtTheend with
         | Some str ->
             if text = invalidSymbol then
-                let preWithOptTrailingWS = input.Substring(0, intIndTry - str.Length - 1)
-                (preTry.Substring(0, preTry.Length - str.Length).TrimEnd(), intIndTry - str.Length - 1, preWithOptTrailingWS)
+                let preWithOptTrailingWS = input.Substring(0, ind1 - str.Length - 1)
+                (pre1.Substring(0, pre1.Length - str.Length).TrimEnd(), ind1 - str.Length - 1, preWithOptTrailingWS1)
             else
-                (preTry, intIndTry, preWithOptTrailingWSTry)
-        | None -> (preTry, intIndTry, preWithOptTrailingWSTry)
+                (pre1, ind1, preWithOptTrailingWS1)
+        | None -> (pre1, ind1, preWithOptTrailingWS1)
 
     let optTrailingWs =
         preWithOptTrailingWS.Substring(pre.Length, preWithOptTrailingWS.Length - pre.Length)

@@ -505,7 +505,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
 
     [<TestMethod>]
     member this.TestTryParseInference002Diag () =
@@ -534,7 +534,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
 
     [<TestMethod>]
     member this.TestTryParseInference003Diag () =
@@ -564,7 +564,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
 
     [<TestMethod>]
     member this.TestTryParseInference004Diag () =
@@ -593,7 +593,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
 
     [<TestMethod>]
     member this.TestTryParseInference005Diag () =
@@ -665,19 +665,20 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         let result = fplParser input
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
-      (FplParser, Error, (Ln: 4, Col: 5),
-       DiagnosticMessage
-         "Expecting: <block comment>, <inline comment>, <significant whitespace>, 'pre'
-    ")
-    Diagnostic
-      (FplParser, Error, (Ln: 5, Col: 9),
-       DiagnosticMessage
-         "'y'
-    Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
-    'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
-    'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
-    <inline comment>, <significant whitespace>
-    ")"""
+  (FplParser, Error, (Ln: 4, Col: 5),
+   DiagnosticMessage
+     "'theory'
+Expecting: 'pre', 'premise', <block comment>, <inline comment>, <significant whitespace>, <variable (got keyword)>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 9),
+   DiagnosticMessage
+     "'y'
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
+'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
+'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
+<inline comment>, <significant whitespace>
+")"""
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
 
@@ -694,7 +695,28 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 }"""
         let result = fplParser input
         let actual = sprintf "%O" result
-        let expectedDiag = """ """
+        let expectedDiag = """Diagnostic
+      (FplParser, Error, (Ln: 4, Col: 9),
+       DiagnosticMessage
+         "'}'
+    Expecting: '@', 'assert', 'cases', 'loop', 'pre', 'premise', 'range', 'ret', 
+    'return', 'self', <block comment>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>
+    ")
+    Diagnostic
+      (FplParser, Error, (Ln: 5, Col: 5),
+       DiagnosticMessage
+         "'theory'
+    Expecting: '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+    ")
+    Diagnostic
+      (FplParser, Error, (Ln: 6, Col: 9),
+       DiagnosticMessage
+         "'y'
+    Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
+    'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
+    'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
+    <inline comment>, <significant whitespace>
+    ")"""
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
 
@@ -703,9 +725,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         ad.Clear()
         let input = """TestNamescpace {
     inf {
-        D() {
-        }
-    }
+        D() { pre: true con: true }
     theory {   
         y
     }

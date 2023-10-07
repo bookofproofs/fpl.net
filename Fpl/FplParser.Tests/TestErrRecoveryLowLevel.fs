@@ -20,6 +20,7 @@ type TestErrRecoveryLowLevel() =
         Assert.AreEqual(expPost, actPost)
 
     [<TestMethod>]
+    [<DataRow("T { inf { D() { pre : true con : true      }  theory { y} }", "}", 46, "T { inf { D() { pre : true con : true }", "        ", "theory { y} }")>]
     [<DataRow("T { : theory { } }", "inf", 4, "T {", " ", ": theory { } }")>]
     [<DataRow("T {  \t: theory { } }", "inf", 6, "T {", "  \t", ": theory { } }")>]
     [<DataRow("T {  \t \t : theory { } }", "inf", 9, "T {", "  \t \t ", ": theory { } }")>]
@@ -70,3 +71,54 @@ type TestErrRecoveryLowLevel() =
         let pos = Position("", ind, 0, 0)
         let (actNewInput, newRecoveryText, newIndexOffset) = manipulateString input text pos lastRecoveryText (int64 0)
         Assert.AreEqual(expRecoveryText, newRecoveryText)
+
+
+    [<TestMethod>]
+    [<DataRow("""""", "")>]
+    [<DataRow("""Error in Ln: 3 Col: 5
+    theory {   
+    ^
+Expecting: <PascalCaseId>, <block comment>, <inline comment> or <significant
+whitespace>
+""", "<PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>")>]
+    [<DataRow("""Error in Ln: 4 Col: 5
+    theory {
+    ^
+Expecting: <block comment>, <inline comment>, <significant whitespace>, 'pre'
+or 'premise'
+or 'ddd',
+ddd
+
+
+The parser backtracked after:
+  Error in Ln: 4 Col: 11
+      theory {
+            ^
+  Expecting: <variable (got keyword 'theory')>""", "'ddd', 'pre', 'premise', <block comment>, <inline comment>, <significant whitespace>, <variable (got keyword 'theory')>")>]
+    [<DataRow(""" Error in Ln: 4 Col: 9
+        y
+        ^
+Expecting: <block comment>, <inline comment>, <significant whitespace>, 'ax',
+'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func',
+'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf',
+'proof', 'prop', 'proposition', 'theorem', 'thm' or '}'""", "'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>")>]
+    [<DataRow("""Error in Ln: 4 Col: 5
+    theory {
+    ^
+Expecting: <block comment>, <inline comment>, <significant whitespace>, 'pre'
+or 'premise'
+
+The parser backtracked after:
+  Error in Ln: 4 Col: 11
+      theory {
+            ^
+  Expecting: <variable (got keyword)>
+""", "'pre', 'premise', <block comment>, <inline comment>, <significant whitespace>, <variable (got keyword)>")>]
+    [<DataRow(""" Error in Ln: 2 Col: 5
+    x
+    ^
+Expecting: <block comment>, <inline comment>, <significant whitespace>, ':ext',
+'inf', 'inference', 'th', 'theory' or 'uses'""", "':ext', 'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>")>]
+    member this.TestRetrieveExpectedParserChoices(fParsecErrMsg:string, expected:string) = 
+        let actual = retrieveExpectedParserChoices fParsecErrMsg
+        Assert.AreEqual(expected, actual)
