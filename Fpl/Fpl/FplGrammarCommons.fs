@@ -117,12 +117,16 @@ let recoveryMap = dict [
     ("<variable (got keyword)>", invalidSymbol)
 ]
 
-/// Checks if the string `s` starts with an FPL Keyword followed by any whitespace character.
-let startsWithFplKeyword (s: string) =
+/// Returns 0 if the string `s` does not start with an FPL keyword followed by any whitespace character.
+/// otherwise, it returns the length of the keyword.
+let lengthOfStartingFplKeyword (s: string) =
     keyWordSet
-    |> Seq.exists (fun element ->
+    |> Seq.tryFind (fun element ->
         Regex.IsMatch(s, @"^" + Regex.Escape(element) + @"[\s\(\)\{\}]")
         || s.Equals(element))
+    |> function
+    | Some keyword -> keyword.Length
+    | None -> 0
 
 /// Checks if the string `s` ends with an FPL keyword proceeded by any whitespace character
 /// If so, this keyword will be returned (`string -> string option`)
@@ -236,10 +240,11 @@ let manipulateString
             else
                 (corrTextWithWS, int64 1)
 
-        if text = invalidSymbol || pre.EndsWith(',') || startsWithFplKeyword post || startsWithParentheses post || post.StartsWith("//") || post.StartsWith("/*") then
+        let lengthKeyword = int64 (lengthOfStartingFplKeyword post)
+        if text = invalidSymbol || pre.EndsWith(',') || lengthKeyword>0 || startsWithParentheses post || post.StartsWith("//") || post.StartsWith("/*") then
             // insert text with a trailing whitespace
             let newInput = pre + " " + corrTextWithWS + optTrailingWs + post
-            (newInput, newRecText, cumulativeIndexOffset + insertionOffset - corrIndex)
+            (newInput, newRecText, cumulativeIndexOffset + insertionOffset - corrIndex - lengthKeyword)
         elif Regex.IsMatch(post, @"^\w") then
             // if the beginning is a word, replace this word
             let replacementOffset = int64 (Regex.Match(post, @"^\w+").Value.Length)

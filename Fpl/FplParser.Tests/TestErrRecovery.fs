@@ -21,8 +21,8 @@ type TestErrRecovery() =
     [<DataRow("and(")>]
     [<DataRow("theory{")>]
     member this.TestStartWithFplKeyword(test: string) =
-        let result = startsWithFplKeyword test
-        Assert.IsTrue(result)
+        let result = lengthOfStartingFplKeyword test
+        Assert.AreNotEqual(0, result)
 
     [<TestMethod>]
     [<DataRow("xxx")>]
@@ -32,8 +32,8 @@ type TestErrRecovery() =
     [<DataRow("xxx(")>]
     [<DataRow("xxx{")>]
     member this.TestNotStartWithFplKeyword(test: string) =
-        let result = startsWithFplKeyword test
-        Assert.IsFalse(result)
+        let result = lengthOfStartingFplKeyword test
+        Assert.AreEqual(0, result)
 
     [<TestMethod>]
     member this.TestTryParseExtension000Diag () =
