@@ -79,6 +79,12 @@ type TestErrRecoveryLowLevel() =
 
     [<TestMethod>]
     [<DataRow("""""", "")>]
+    [<DataRow("""Error in Ln: 3 Col: 56
+    D(x:tpl) { pre : true con : true } }           )
+    ^
+    Expecting: <block comment>, <inline comment>, <significant whitespace>, 'th' or
+    'theory'
+    """, "'th', 'theory', <block comment>, <inline comment>, <significant whitespace>")>]
     [<DataRow("""Error, (Ln: 5, Col: 5),
    DiagnosticMessage
      "recovery failed; Error in Ln: 5 Col: 5

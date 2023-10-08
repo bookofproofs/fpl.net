@@ -103,27 +103,33 @@ let recoveryMap = dict [
     ("'(', ';', '|', '~', <\"language-specific string\">, <block comment>, <inline comment>, <significant whitespace>, <variable>, <whitespace>", ";")
     ("'(', <\"language-specific string\">, <variable>", "\"\\operatorname{true}\"")
     ("'(', <whitespace>", "(")
+    ("')', ',', '[', <(closed) left bound '['>, <(open) left bound '[!'>, <PascalCaseId>, <digits>, <whitespace>", ")")
     ("')', <variable>, <whitespace>", ")")
     ("'[', '{', <(closed) left bound '['>, <(open) left bound '[!'>, <whitespace>", "{")
+    ("'{', <whitespace>", "{")
     ("'{'", "{")
     ("'}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
     ("'}', <block comment>, <inline comment>, <significant whitespace>", "}")
     ("'}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>", "}")
+    ("'@', 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'mand', 'mandatory', 'not', 'opt', 'optional', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor', '}', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "true")
     ("'@', 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'not', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "true")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', '}', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "}")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "true")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <variable>", "true")
     ("'@', 'assert', 'cases', 'loop', 'pre', 'premise', 'range', 'ret', 'return', 'self', <block comment>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "pre")
-    ("'@', 'obj', 'object', 'tpl', <PascalCaseId>, <whitespace>", "obj")
+    ("'@', 'del', 'delegate', 'self', '~', <PascalCaseId>, <digits>, <indexed variable>, <variable>", "~")
+    ("'@', 'del', 'delegate', 'self', <(closed) right bound ']'>, <(open) right bound '!]'>, <PascalCaseId>, <digits>, <indexed variable>, <variable>", "]")
     ("'@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
+    ("'@', 'obj', 'object', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
     ("'*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
     ("'*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>", "obj")
     ("'~', <block comment>, <inline comment>, <significant whitespace>", "~")
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>", "pred")
     ("'con', 'conclusion', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "con")
     ("'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>", "loc")
+    ("'mand', 'mandatory', 'opt', 'optional', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
     ("'pre', 'premise', <block comment>, <inline comment>, <significant whitespace>, <variable (got keyword)>", "pre")
-    ("'th' or 'theory', <block comment>, <inline comment>, <significant whitespace>", "th")
+    ("'th', 'theory', <block comment>, <inline comment>, <significant whitespace>", "th")
     ("<aliased namespace>, <namespace>, <whitespace>", "T")
     ("<block comment>, <fpl identifier>, <inline comment>, <significant whitespace>", "T")
     ("<extension regex>", "/d/")
@@ -133,6 +139,7 @@ let recoveryMap = dict [
     ("<PascalCaseId>", "T")
     ("<variable (got keyword)>", invalidSymbol)
     ("<variable>", "x")
+
 ]
 
 /// Checks if the string `s` starts with one of the characters '(',')','{','}'
@@ -233,18 +240,23 @@ let manipulateString
         let newRecText = lastRecoveryText + textWithWS
         (newInput, newRecText, int64 (newInput.Length - input.Length), int64 0)
     else
-
         // avoid false positives by inserting to many opening and closing braces, parentheses, or brackets
         let corrTextWithWS =
-            if textWithWS.StartsWith("{") && post.StartsWith("}") then
-                textWithWS + "} "
-            elif textWithWS.StartsWith("(") && post.StartsWith(")") then
-                textWithWS + ") "
-            elif textWithWS.StartsWith("[") && post.StartsWith("]") then
-                textWithWS + "] "
+            if lastRecoveryText.Length < 100 then 
+                if textWithWS.StartsWith("{") && post.StartsWith("}") then
+                    textWithWS + "} "
+                elif textWithWS.StartsWith("(") && post.StartsWith(")") then
+                    textWithWS + ") "
+                elif textWithWS.StartsWith("[") && post.StartsWith("]") then
+                    textWithWS + "] "
+                else
+                    textWithWS
             else
+                // avoid infinite loops when inserting closing brackets/parentheses/braces
+                // did not succeed because the lastRecoveryText would otherwise get too (or infinitely) long 
                 textWithWS
-        // new recovery Text depends on whether the input ended the lastRecText
+
+            // new recovery Text depends on whether the input ended the lastRecText
         // we also provide a correction of the index counting exactly one additional whitespace inserted in case
         // we have started a new recovery text.
         let newRecText =

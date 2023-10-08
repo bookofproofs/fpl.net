@@ -512,7 +512,7 @@ let definition = choice [
     definitionFunctionalTerm
 ]
 (* Gathering together all Building Blocks to a theory *)
-let keywordTheory = (skipString "theory" <|> skipString "th") 
+let keywordTheory = (skipString "theory" <|> skipString "th") >>. IW
 // FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
 let buildingBlock = choice [
     definition
