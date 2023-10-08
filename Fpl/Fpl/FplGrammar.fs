@@ -61,7 +61,7 @@ let IW = spaces <?> "<whitespace>"
 
 let SW = spaces1 <?> "<significant whitespace>"
 
-let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline <|> eof) <?> "<inline comment>" |>> ignore 
+let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline) <?> "<inline comment>" |>> ignore 
 
 let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) <?> "<block comment>" |>> ignore 
 

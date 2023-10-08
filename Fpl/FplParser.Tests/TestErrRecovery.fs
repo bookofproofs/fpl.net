@@ -228,7 +228,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseUses001Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     uses
     theory {
         y
@@ -256,7 +256,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseUses002Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     uses {  
     theory {
         y
@@ -284,7 +284,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseUses003Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     uses {  R
     theory {
         y
@@ -312,7 +312,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseUses004Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     uses {  R a
     theory {
         y
@@ -340,7 +340,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseUses005Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     uses {  R alias
     theory {
         y
@@ -368,7 +368,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseUses006Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     uses {  R alias s
     theory {
         y
@@ -396,7 +396,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseUses007Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     uses {  R alias I
     theory {
         y
@@ -424,7 +424,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseUses009Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     uses {  a alias I }
     theory {
         y
@@ -452,7 +452,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseInference000Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     i
     theory {   
         y
@@ -482,7 +482,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseInference001Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     inf
     theory {   
         y
@@ -510,7 +510,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseInference002Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     inf {
     theory {   
         y
@@ -539,7 +539,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseInference003Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     inf {
         x
     theory {   
@@ -569,7 +569,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseInference004Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     inf {
         D
     theory {   
@@ -598,7 +598,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseInference005Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     inf {
         D(
     theory {   
@@ -627,7 +627,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseInference006Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     inf {
         D()
     theory {   
@@ -656,7 +656,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseInference007Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     inf {
         D() {
     theory {   
@@ -686,7 +686,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseInference008Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     inf {
         D() {
         }
@@ -724,7 +724,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseInference009Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     inf {
         D() { pre: true con: true }
     theory {   
@@ -755,7 +755,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     [<TestMethod>]
     member this.TestTryParseInference010Diag () =
         ad.Clear()
-        let input = """TestNamescpace {
+        let input = """TestNamespace {
     inf {
         D() { pre: true con: true } }
     theory {   
@@ -775,3 +775,182 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 ")"""
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseAxiom000Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        a
+    }
+    y
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 3, Col: 9),
+   DiagnosticMessage
+     "'a'
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
+'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
+'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
+<inline comment>, <significant whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseAxiom001Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        ax
+    }
+    y
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 4, Col: 5),
+   DiagnosticMessage "'}'
+Expecting: <PascalCaseId>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseAxiom002Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        ax T
+    }
+    y    
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 4, Col: 5),
+   DiagnosticMessage "'}'
+Expecting: '(', <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseAxiom003Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        ax T (
+    }
+    y
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 4, Col: 5),
+   DiagnosticMessage "'}'
+Expecting: ')', <variable>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseAxiom004Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        ax T ()
+    }
+    y
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 4, Col: 5), DiagnosticMessage "'}'
+Expecting: '{'
+")
+Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseAxiom005Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        ax T () 
+        {
+    }
+    y
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseAxiom006Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        ax T () 
+        {
+            true
+    }
+    y
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+
+    [<TestMethod>]
+    member this.TestTryParseAxiom007Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        ax T () 
+        {
+            true
+        }
+    }
+    y
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);

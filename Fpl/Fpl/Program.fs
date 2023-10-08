@@ -5,7 +5,13 @@ open FplGrammar
 open FParsec
 
 
-let input = "TestNamescpace { inf {  D(  theory  { d  } }"
+let input = "TestNamespace {
+    theory {   
+        ax T () 
+        {
+    }
+    y
+}"
 let result = fplParser input
 
 printf "%O" result

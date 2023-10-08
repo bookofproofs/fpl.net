@@ -224,7 +224,10 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
 
             let lastRecoveryTextMod = lastRecoveryText.Replace(invalidSymbol,recStr)
             let newIndexOffset = cumulativeIndexOffset + newOffset
-            if (not (newRecoveryText.StartsWith(lastRecoveryTextMod))) || lastRecoveryText = "" then
+            if (not (newRecoveryText.StartsWith(lastRecoveryTextMod))
+                // prevent false positives when inserting a missing predicate into { }
+                && not (newRecoveryText="true " && lastRecoveryTextMod.EndsWith("{ } ")) 
+            ) || lastRecoveryText = "" then
                 // emit diagnostic if there is a new remainingInput
 
                 let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine)
