@@ -267,12 +267,7 @@ let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) 
 let bracketModifier = choice [boundedRangeInType ; bracketedCoordsInType]
 let classType = positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
-let modifieableClassType = positions (callModifier .>>. classType) |>> Ast.VariableTypeWithModifier
-let modifieablePredicateType = positions (callModifier .>>. keywordPredicate) |>> Ast.VariableTypeWithModifier
-let modifieableFunctionType = positions (callModifier .>>. keywordFunction) |>> Ast.VariableTypeWithModifier
-let modifieableIndexType = positions (callModifier .>>. keywordIndex) |>> Ast.VariableTypeWithModifier
-
-let variableTypeWithModifier = (((attempt modifieableIndexType) <|> attempt modifieableFunctionType) <|> attempt modifieablePredicateType) <|> modifieableClassType 
+let variableTypeWithModifier = positions (callModifier .>>. choice [ keywordIndex; keywordFunction; keywordPredicate; classType ]) |>> Ast.VariableTypeWithModifier
 
 let parenthesisedType = positions (variableTypeWithModifier .>> IW >>. paramTuple) |>> Ast.VariableType
 

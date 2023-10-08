@@ -1386,7 +1386,8 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 3, Col: 13),
    DiagnosticMessage
      "'*'
-Expecting: '@', 'obj', 'object', 'template', 'tpl', <PascalCaseId>, <whitespace>
+Expecting: '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 
+'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 10, Col: 9),
@@ -1457,7 +1458,8 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 3, Col: 13),
    DiagnosticMessage
      "'+'
-Expecting: '@', 'obj', 'object', 'template', 'tpl', <PascalCaseId>, <whitespace>
+Expecting: '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 
+'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 10, Col: 9),
