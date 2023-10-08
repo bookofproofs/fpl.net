@@ -1,7 +1,7 @@
 Fpl.Arithmetics.Peano
 {
     :ext
-        extDigits : /\d+/
+        Digits : /\d+/
     :end
 
     uses { Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel }
@@ -78,7 +78,7 @@ Fpl.Arithmetics.Peano
         // definition of a new mathematical object (natural number)
         class Nat: obj
         {
-            Nat(x: @extDecimal)
+            Nat(x: @Digits)
             {
                 cases
                 (
@@ -150,7 +150,7 @@ Fpl.Arithmetics.Peano
             )
         }
 
-        func Add(n,m: @extDecimal)->Nat
+        func Add(n,m: @Digits)->Nat
         {
             return delegate.add(n,m)
         }

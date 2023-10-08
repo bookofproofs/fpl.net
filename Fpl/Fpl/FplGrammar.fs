@@ -1,5 +1,6 @@
 ﻿module FplGrammar
 open System.Text.RegularExpressions
+open FplGrammarCommons
 open FplGrammarTypes
 open ErrRecovery
 open FParsec
@@ -60,11 +61,11 @@ let IW = spaces <?> "<whitespace>"
 
 let SW = spaces1 <?> "<significant whitespace>"
 
-let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline <|> eof) |>> ignore 
+let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline) <?> "<inline comment>" |>> ignore 
 
-let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) |>> ignore 
+let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) <?> "<block comment>" |>> ignore 
 
-let CW = choice [ blockComment; inlineComment; SW ] <?> "<whitespace, block or inline comment>"
+let CW = choice [ blockComment; inlineComment; SW ]
 
 // -----------------------------------------------------
 // Extensions of the FPL language (have to be dynamic)! Lacking a pre-processor, we put the rules
@@ -76,62 +77,7 @@ let digits = regex @"\d+" <?> "<digits>"
 let extDigits: Parser<_, unit> = positions (digits) |>> Ast.ExtDigits
 
 (* Identifiers *)
-(* Fpl Keywords *)
 
-let keyWordSet =
-    System.Collections.Generic.HashSet<_>(
-        [|
-        "alias"; 
-        "all"; 
-        "and"; 
-        "assert"; 
-        "ass"; "assume"; 
-        "ax"; "axiom";
-        "cases"; 
-        "cl"; "class"; 
-        "conj"; "conjecture"; 
-        "con"; "conclusion"; 
-        "cor"; "corollary";
-        "del"; "delegate"
-        "else";
-        "end";
-        "ext";
-        "ex";
-        "false";
-        "func"; "function";
-        "iif";
-        "impl";
-        "ind"; "index";
-        "inf"; "inference";
-        "is";
-        "lem"; "lemma";
-        "loc"; "localization";
-        "loop";
-        "mand"; "mandatory";
-        "not";
-        "obj"; "object";
-        "opt"; "optional";
-        "or";
-        "post"; "postulate";
-        "pred"; "predicate";
-        "pre"; "premise";
-        "prf"; "proof";
-        "prop"; "proposition";
-        "qed";
-        "range";
-        "ret"; "return";
-        "rev"; "revoke";
-        "self";
-        "thm"; "theorem";
-        "th"; "theory";
-        "tpl"; "template";
-        "trivial";
-        "true";
-        "undef"; "undefined";
-        "uses";
-        "xor";
-        |]
-    )
 
 let IdStartsWithSmallCase = regex @"[a-z]\w*" 
 let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
@@ -139,24 +85,39 @@ let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
 let dollarDigits = positions (dollar >>. digits) |>> Ast.DollarDigits
 let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 
-let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl namespace identifier>" |>> Ast.NamespaceIdentifier
-let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW <?> "<fpl identifier>" |>> Ast.PredicateIdentifier 
+let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
+let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.PredicateIdentifier 
 
 let alias = positions (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
 
-let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) <?> "<aliased namespace identifier>" |>> Ast.AliasedNamespaceIdentifier
+let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z]\w*)|\d*)$", RegexOptions.Compiled)
+
+
+let withBacktrackedError p: Parser<_,_> =
+    fun stream ->
+        let mutable oldState = stream.State
+        match p stream with
+        | Success(result, restInput, userState) ->
+            Reply(result, restInput)
+        | _ ->
+            Reply(oldState)
+
 let variableX: Parser<string,unit> = IdStartsWithSmallCase >>= 
                                         ( fun s -> 
-                                            if keyWordSet.Contains(s) then fail ("Cannot use keyword '" + s + "' as a variable") 
-                                            else if tplRegex.IsMatch(s) then fail ("Cannot use template '" + s + "' as a variable") 
-                                            else (preturn s)
-                                        ) <?> "<variable>"
+                                            if keyWordSet.Contains(s) then 
+                                                fail ("Expecting: <variable (got keyword)>")
+                                            else if tplRegex.IsMatch(s) then 
+                                                fail ("Expecting: <variable (got template)>") 
+                                            else 
+                                            (preturn s)
+                                        ) 
+
 let variable = positions variableX <?> "<variable>" |>> Ast.Var 
 
 let variableList = sepBy1 (variable .>> IW) comma
 
-let keywordSelf = skipString "self"  
+let keywordSelf = skipString "self" .>> IW
 let keywordIndex = (skipString "index" <|> skipString "ind") .>> IW  >>% Ast.IndexType
 
 
@@ -209,7 +170,7 @@ let keywordPredicate = (skipString "predicate" <|> skipString "pred") .>> IW >>%
 let keywordFunction = (skipString "function" <|> skipString "func") .>> IW >>% Ast.FunctionalTermType
 
 
-let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW <?> "<namespace or aliased namespace>"
+let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
 
 let theoryNamespaceList = sepBy1 theoryNamespace comma 
 
@@ -220,11 +181,12 @@ let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
 let extensionHeader: Parser<unit,unit> = skipString ":ext" 
 
-let extensionName = positions (skipString "ext" >>. idStartsWithCap .>> IW) |>> Ast.Extensionname
+let extensionName = positions (idStartsWithCap .>> IW) |>> Ast.Extensionname
 
-let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. regex @"\/(?!:end).*" .>> IW <?> "<extension>" |>> Ast.ExtensionRegex
+let extReg = regex "\/.*\/\s" <?> "<extension regex>"
+let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. extReg .>> IW |>> Ast.ExtensionRegex
 
-let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail) <?> "extension block" |>> Ast.ExtensionBlock
+let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail) |>> Ast.ExtensionBlock
 
 
 (* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
@@ -302,15 +264,10 @@ let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) 
 // to restrict it to pure objects.
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
-let bracketModifier = choice [boundedRangeInType ; bracketedCoordsInType]
+let bracketModifier = attempt boundedRangeInType <|> bracketedCoordsInType
 let classType = positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
-let modifieableClassType = positions (callModifier .>>. classType) |>> Ast.VariableTypeWithModifier
-let modifieablePredicateType = positions (callModifier .>>. keywordPredicate) |>> Ast.VariableTypeWithModifier
-let modifieableFunctionType = positions (callModifier .>>. keywordFunction) |>> Ast.VariableTypeWithModifier
-let modifieableIndexType = positions (callModifier .>>. keywordIndex) |>> Ast.VariableTypeWithModifier
-
-let variableTypeWithModifier = (((attempt modifieableIndexType) <|> attempt modifieableFunctionType) <|> attempt modifieablePredicateType) <|> modifieableClassType 
+let variableTypeWithModifier = positions (callModifier .>>. choice [ keywordIndex; keywordFunction; keywordPredicate; classType ]) |>> Ast.VariableTypeWithModifier
 
 let parenthesisedType = positions (variableTypeWithModifier .>> IW >>. paramTuple) |>> Ast.VariableType
 
@@ -555,7 +512,7 @@ let definition = choice [
     definitionFunctionalTerm
 ]
 (* Gathering together all Building Blocks to a theory *)
-let keywordTheory = (skipString "theory" <|> skipString "th") 
+let keywordTheory = (skipString "theory" <|> skipString "th") >>. IW
 // FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
 let buildingBlock = choice [
     definition
@@ -596,9 +553,10 @@ let localizationBlock = keywordLocalization >>. IW >>. leftBraceCommented >>. lo
 
 (* Namespaces *)
 let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (many CW >>. opt usesClause) .>>. (many CW >>. opt rulesOfInferenceBlock) .>>. (many CW >>. theoryBlock) .>>. (many CW >>. opt localizationBlock) .>> commentedRightBrace
-let fplNamespace = positions (namespaceIdentifier .>>. (many CW >>. namespaceBlock)) |>> Ast.Namespace
-let fplNamespaceList = many1 (many CW >>. fplNamespace .>> IW)
+let fplNamespace = positions (namespaceIdentifier .>>. (many CW >>. namespaceBlock)) .>> IW |>> Ast.Namespace
 (* Final Parser *)
-let ast =  positions (fplNamespaceList .>> eof) <?> "fpl code" |>> Ast.AST
-let fplParser (input: string) = tryParse ast "recovery failed;" ad input 
+let ast =  positions fplNamespace <?> "fpl code" |>> Ast.AST
+
+let fplParser (input: string) = tryParse ast input "" (int64 0)
+// let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
 let parserDiagnostics = ad

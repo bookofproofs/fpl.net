@@ -79,42 +79,10 @@ namespace FplLS
             sb.Append(CastDiagnosticSource(diagnostic));
             sb.Append(diagnostic.Severity.ToString());
             sb.Append(": ");
-            var diagMsg = diagnostic.Message.Value;
-            if (diagMsg.StartsWith("recovery failed;"))
-            {
-                // for all errors where the error recovery failed,
-                // skip the first line in the standard FParsec Error message 
-                // that contains the text "Error in Ln: 1 Col: 1,..." 
-                // we do not need it since it is already in the diagnostic object 
-                // and will be shown in the IDE properly anyway
-                Regex regex = new Regex(@"(?<=\n).*", RegexOptions.Singleline);
-                Match match = regex.Match(diagMsg);
-                if (match.Success)
-                {
-                    // we only need the remaining error message 
-                    sb.AppendLine(); // and a new line to position the caret ^ in the error message properly.
 
-                    // Replace in match.Value any line followed by a line starting with "   ^" by the
-                    // its substring with the length is the number of spaces of the line with the caret.
-                    // We need this, because vscode will not display the spaces correctly in the diagnostic window
-                    string pattern = @"(.*\n)(\s*)\^";
+            // fall back if there was no match of a skipped first line
+            sb.Append(diagnostic.Message.Value);
 
-                    string result = Regex.Replace(match.Value, pattern,
-                        m => m.Groups[1].Value.Substring(0, m.Groups[2].Value.Length) + "<---?",
-                        RegexOptions.Multiline);
-                    sb.Append(result);
-                }
-                else
-                {
-                    // fall back if there was no match of a skipped first line
-                    sb.Append(diagnostic.Message.Value);
-                }
-            }
-            else
-            {
-                // fall back for all other errors where the error recovery succeeded
-                sb.Append(diagnostic.Message.Value);
-            }
             return sb.ToString();
         }
         /// <summary>
