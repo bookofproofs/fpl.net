@@ -6,10 +6,16 @@ open FParsec
 
 
 let input = "TestNamespace {
-    theory {   
-        a
+    inf {
+        D(x:tpl[   x , y  ] )
+        {
+            pre:true
+            con:true
+        }
     }
-    y
+    theory {   
+        y
+    }
 }"
 
 let result = fplParser input

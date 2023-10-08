@@ -264,7 +264,7 @@ let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) 
 // to restrict it to pure objects.
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
-let bracketModifier = choice [boundedRangeInType ; bracketedCoordsInType]
+let bracketModifier = attempt boundedRangeInType <|> bracketedCoordsInType
 let classType = positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
 let variableTypeWithModifier = positions (callModifier .>>. choice [ keywordIndex; keywordFunction; keywordPredicate; classType ]) |>> Ast.VariableTypeWithModifier

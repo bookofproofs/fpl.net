@@ -92,6 +92,7 @@ let keyWordSet =
 let recoveryMap = dict [
     ("'->'", "->")
     ("',', ':', <whitespace>", ":")
+    ("',', ']', <whitespace>", "]")
     ("',', '}'", "}")
     ("',', 'alias', '}', <whitespace>", "}")
     ("':', <whitespace>", ":")
@@ -104,6 +105,7 @@ let recoveryMap = dict [
     ("'(', <\"language-specific string\">, <variable>", "\"\\operatorname{true}\"")
     ("'(', <whitespace>", "(")
     ("')', ',', '[', <(closed) left bound '['>, <(open) left bound '[!'>, <PascalCaseId>, <digits>, <whitespace>", ")")
+    ("')', ',', <whitespace>", ")")
     ("')', <variable>, <whitespace>", ")")
     ("'[', '{', <(closed) left bound '['>, <(open) left bound '[!'>, <whitespace>", "{")
     ("'{', <whitespace>", "{")
@@ -119,6 +121,8 @@ let recoveryMap = dict [
     ("'@', 'assert', 'cases', 'loop', 'pre', 'premise', 'range', 'ret', 'return', 'self', <block comment>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "pre")
     ("'@', 'del', 'delegate', 'self', '~', <PascalCaseId>, <digits>, <indexed variable>, <variable>", "~")
     ("'@', 'del', 'delegate', 'self', <(closed) right bound ']'>, <(open) right bound '!]'>, <PascalCaseId>, <digits>, <indexed variable>, <variable>", "]")
+    ("'@', 'del', 'delegate', 'self', <PascalCaseId>, <digits>, <indexed variable>, <variable>", "x")
+    ("'@', 'del', 'delegate', 'self', <PascalCaseId>, <digits>, <indexed variable>, <variable>", "x")
     ("'@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
     ("'@', 'obj', 'object', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
     ("'*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
@@ -139,7 +143,6 @@ let recoveryMap = dict [
     ("<PascalCaseId>", "T")
     ("<variable (got keyword)>", invalidSymbol)
     ("<variable>", "x")
-
 ]
 
 /// Checks if the string `s` starts with one of the characters '(',')','{','}'

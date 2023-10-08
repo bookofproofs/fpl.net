@@ -1732,8 +1732,7 @@ Diagnostic
   (FplParser, Error, (Ln: 3, Col: 18),
    DiagnosticMessage
      "')'
-Expecting: '@', 'del', 'delegate', 'self', '~', <PascalCaseId>, <digits>, <indexed variable>, 
-<variable>
+Expecting: '@', 'del', 'delegate', 'self', <PascalCaseId>, <digits>, <indexed variable>, <variable>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 10, Col: 9),
@@ -1781,6 +1780,6 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 

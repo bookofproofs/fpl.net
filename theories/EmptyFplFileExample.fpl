@@ -1,6 +1,6 @@
 TestNamespace {
     inf {
-        D(x: )
+        D(x:tpl[!x~x!] )
         {
             pre:true
             con:true
