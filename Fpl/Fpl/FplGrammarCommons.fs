@@ -91,6 +91,7 @@ let keyWordSet =
 
 let recoveryMap = dict [
     ("':'", ":")
+    ("':', <whitespace>", ":")
     ("'->'", "->")
     ("'[', '{', <(closed) left bound '['>, <(open) left bound '[!'>, <whitespace>", "{")
     ("'*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>", "obj")
@@ -110,6 +111,7 @@ let recoveryMap = dict [
     ("'}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>", "}")
     ("'}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
     ("'}', <block comment>, <inline comment>, <significant whitespace>", "}")
+    ("'@', 'obj', 'object', 'tpl', <PascalCaseId>, <whitespace>", "obj")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <variable>", "true")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "true")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', '}', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "}")
