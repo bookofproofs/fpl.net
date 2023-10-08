@@ -5,12 +5,14 @@ open FplGrammar
 open FParsec
 
 
-let input = "TestNamespace {
-    theory {   
-        func A
-    }
-    y
-}"
+let input = "TestNamescpace { theory { 
+    
+    theorem T() {
+  s
+}
+
+
+  } }"
 
 let result = fplParser input
 

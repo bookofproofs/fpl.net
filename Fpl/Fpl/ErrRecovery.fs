@@ -125,7 +125,7 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) =
         // corrected choices
         quotedFirstLine + Environment.NewLine + "Expecting: " + (wrapEveryNthComma choices 8)
 
-let split = [|" or "; "or "; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine|]
+let split = [|" or "; "or" + Environment.NewLine ; "or "; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine|]
 let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
 let retrieveExpectedParserChoices (errMsg:string) =
     // replace accidental new lines injected by FParsec into FPL parser labels that start by "<" and end by ">"

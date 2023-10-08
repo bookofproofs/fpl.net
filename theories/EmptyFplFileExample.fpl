@@ -1,9 +1,7 @@
 TestNamescpace { theory { 
     
-    func
-
-T() {
-    true
+    theorem T() {
+  ret
 }
 
 
