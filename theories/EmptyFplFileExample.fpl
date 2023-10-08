@@ -1,1 +1,10 @@
-TestNamescpace { inf {  D(  theory { d  } }
+TestNamescpace { theory { 
+    
+    func
+
+T() {
+    true
+}
+
+
+  } }

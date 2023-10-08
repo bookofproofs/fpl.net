@@ -109,6 +109,7 @@ let recoveryMap = dict [
     ("'}', <block comment>, <inline comment>, <significant whitespace>", "}")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <variable>", "true")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "true")
+    ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', '}', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "}")
     ("'@', 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'not', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "true")
     ("'@', 'assert', 'cases', 'loop', 'pre', 'premise', 'range', 'ret', 'return', 'self', <block comment>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "pre")
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>", "pred")
@@ -124,6 +125,9 @@ let recoveryMap = dict [
     ("<PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>", "T")
     ("<variable (got keyword)>", invalidSymbol)
 ]
+
+/// Checks if the string `s` starts with one of the characters '(',')','{','}'
+let startsWithParentheses (s: string) = Regex.IsMatch(s, @"^[\s\(\)\{\}]")
 
 /// Returns 0 if the string `s` does not start with an FPL keyword followed by any whitespace character.
 /// otherwise, it returns the length of the keyword.
@@ -141,9 +145,6 @@ let lengthOfStartingFplKeyword (s: string) =
 let endsWithFplKeyword (s: string) =
     keyWordSet
     |> Seq.tryFind (fun element -> Regex.IsMatch(s, @"(\s)" + Regex.Escape(element) + @"$") || s.Equals(element))
-
-/// Checks if the string `s` starts with one of the characters '(',')','{','}'
-let startsWithParentheses (s: string) = Regex.IsMatch(s, @"^[\s\(\)\{\}]")
 
 /// A low-level helper function checking if a string starts with a given regex 
 /// and returning the length of the first match or 0:
@@ -220,7 +221,7 @@ let manipulateString
     
     if pos.Index = input.Length then
         let newInput = input + textWithWS
-        let newRecText = textWithWS
+        let newRecText = lastRecoveryText + textWithWS
         (newInput, newRecText, int64 (newInput.Length - input.Length), int64 0)
     else
 

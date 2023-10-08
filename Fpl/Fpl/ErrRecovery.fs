@@ -68,7 +68,7 @@ type Diagnostics() =
         for d in myHashset do
             printfn "%O" d
 
-        printfn "%s" "^------------------------^\n"
+        printfn "%s" "\n^------------------------^\n"
 
     member this.DiagnosticsToString = myHashset |> Seq.map string |> String.concat "\n"
     member this.Clear() = myHashset.Clear()
@@ -107,7 +107,12 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) =
 
     // Extract the significant characters
     let significantCharacters =
-        Regex.Match(firstLine.Substring(caretPosition), @"\S+").Value
+        let search = Regex.Match(firstLine.Substring(caretPosition), @"\S+").Value
+        if search = "" then 
+            firstLine.Trim()
+        else
+            search
+
 
     // Replace the significant characters with quoted version in the first line
     let quotedFirstLine = sprintf "'%s'" significantCharacters
@@ -201,7 +206,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             ad.AddDiagnostic diagnostic
             (Ast.Error, "<not found>")
         | (Some cho, None) -> 
-            let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine + "(unknown parser choice)")
+            let diagnosticMsg = DiagnosticMessage(cho + System.Environment.NewLine + "(unknown parser choice)")
 
             let diagnostic =
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
@@ -227,7 +232,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             if (not (newRecoveryText.StartsWith(lastRecoveryTextMod))
                 // prevent false positives when inserting a missing predicate into { }
                 && not (newRecoveryText="true " && lastRecoveryTextMod.EndsWith("{ } ")) 
-            ) || lastRecoveryText = "" then
+            ) || (lastRecoveryText = "" && ((newErrMsg.Split("Expecting:")[0]).Length <= 10)) then
                 // emit diagnostic if there is a new remainingInput
 
                 let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine)

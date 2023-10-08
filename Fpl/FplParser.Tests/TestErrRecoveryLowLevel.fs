@@ -9,6 +9,10 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
 type TestErrRecoveryLowLevel() =
+    let replaceWhiteSpace (input: string) =
+        let whiteSpaceChars = [|' '; '\t'; '\n'; '\r'|]
+        input.Split(whiteSpaceChars)
+            |> String.concat ""
 
     member this.TestSplitStringByTextAtPosition_Pre(expPre: string, actPre: string) =
         Assert.AreEqual(expPre, actPre)
@@ -75,6 +79,16 @@ type TestErrRecoveryLowLevel() =
 
     [<TestMethod>]
     [<DataRow("""""", "")>]
+    [<DataRow("""Error, (Ln: 5, Col: 5),
+   DiagnosticMessage
+     "recovery failed; Error in Ln: 5 Col: 5
+    }
+    ^
+Expecting: <PascalCaseId>, <argument identifier>, <block comment>, <digits>,
+<indexed variable>, <inline comment>, <significant whitespace>, <variable>, '@'
+, 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif',
+'impl', 'is', 'loop', 'not', 'or', 'range', 'ret', 'return', 'self', 'true',
+'undef', 'undefined' or 'xor'""", "'@', 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'not', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>")>]
     [<DataRow("""Error in Ln: 3 Col: 5
     theory {   
     ^
@@ -122,3 +136,20 @@ Expecting: <block comment>, <inline comment>, <significant whitespace>, ':ext',
     member this.TestRetrieveExpectedParserChoices(fParsecErrMsg:string, expected:string) = 
         let actual = retrieveExpectedParserChoices fParsecErrMsg
         Assert.AreEqual(expected, actual)
+
+    [<TestMethod>]
+    [<DataRow("""Error in Ln: 7 Col: 2
+    }
+     ^
+    Note: The error occurred at the end of the input stream.
+    Expecting: <block comment>, <inline comment>, <significant whitespace>, 'loc',
+    'localization' or '}'""", "<xxx>", "'}'
+    Expecting: <xxx>")>]
+    member this.TestReplaceFParsecErrMsgForFplParser
+        (
+            input: string,
+            inputChoices: string,
+            expected: string
+        ) =
+        let actual = replaceFParsecErrMsgForFplParser input inputChoices
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)

@@ -911,14 +911,29 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     theory {   
         ax T () 
         {
+        }
     }
     y
 }"""
         let result = fplParser input
         let actual = sprintf "%O" result
-        let expectedDiag = """ """
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 9),
+   DiagnosticMessage
+     "'}'
+Expecting: '@', 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 
+'false', 'iif', 'impl', 'is', 'loop', 'not', 'or', 'range', 
+'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, 
+<argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 7, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
 
     [<TestMethod>]
     member this.TestTryParseAxiom006Diag () =
@@ -928,14 +943,20 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
         ax T () 
         {
             true
+        }
     }
     y
 }"""
         let result = fplParser input
         let actual = sprintf "%O" result
-        let expectedDiag = """ """
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 8, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
 
     [<TestMethod>]
     member this.TestTryParseAxiom007Diag () =
@@ -951,6 +972,11 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
 }"""
         let result = fplParser input
         let actual = sprintf "%O" result
-        let expectedDiag = """ """
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 8, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag);
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag);
