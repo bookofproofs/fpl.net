@@ -138,6 +138,18 @@ Expecting: <block comment>, <inline comment>, <significant whitespace>, ':ext',
         Assert.AreEqual(expected, actual)
 
     [<TestMethod>]
+    [<DataRow("""Error in Ln: 3 Col: 14
+        D(x: +  )
+             ^
+Expecting: <PascalCaseId>, <whitespace>, '@', 'obj', 'object', 'template' or
+'tpl'
+
+The parser backtracked after:
+  Error in Ln: 3 Col: 15
+          D(x: +  )
+                ^
+  Expecting: <PascalCaseId>, '@', 'obj', 'object', 'template' or 'tpl'""", "<xxx>", "'+'
+  Expecting:<xxx>")>]
     [<DataRow("""Error in Ln: 7 Col: 2
     }
      ^

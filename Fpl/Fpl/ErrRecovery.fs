@@ -113,7 +113,6 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) =
         else
             search
 
-
     // Replace the significant characters with quoted version in the first line
     let quotedFirstLine = sprintf "'%s'" significantCharacters
 
@@ -246,6 +245,13 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                             Position(
                                 restInput.Position.StreamName,
                                 restInput.Position.Index + newIndexOffset,
+                                restInput.Position.Line,
+                                restInput.Position.Column 
+                            )
+                        elif errorMsg.Contains("The parser backtracked after") then
+                            Position(
+                                restInput.Position.StreamName,
+                                restInput.Position.Index + (int64 1),
                                 restInput.Position.Line,
                                 restInput.Position.Column 
                             )

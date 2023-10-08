@@ -1364,3 +1364,229 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 ")"""
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+
+    [<TestMethod>]
+    member this.TestTryParseVarDecl003aDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    inf {
+        D(x:* )
+        {
+            pre:true
+            con:true
+        }
+    }
+    theory {   
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+
+    [<TestMethod>]
+    member this.TestTryParseVarDecl003_Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    inf {
+        D(x:, )
+        {
+            pre:true
+            con:true
+        }
+    }
+    theory {   
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 3, Col: 13),
+   DiagnosticMessage
+     "','
+Expecting: '*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 
+'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 10, Col: 9),
+   DiagnosticMessage
+     "'y'
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
+'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
+'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
+<inline comment>, <significant whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+
+    [<TestMethod>]
+    member this.TestTryParseVarDecl003bDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    inf {
+        D(x:+ )
+        {
+            pre:true
+            con:true
+        }
+    }
+    theory {   
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+
+    [<TestMethod>]
+    member this.TestTryParseVarDecl003cDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    inf {
+        D(x:@ )
+        {
+            pre:true
+            con:true
+        }
+    }
+    theory {   
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+
+    [<TestMethod>]
+    member this.TestTryParseVarDecl003dDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    inf {
+        D(x:func )
+        {
+            pre:true
+            con:true
+        }
+    }
+    theory {   
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+
+    [<TestMethod>]
+    member this.TestTryParseVarDecl003eDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    inf {
+        D(x:ind )
+        {
+            pre:true
+            con:true
+        }
+    }
+    theory {   
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+
+    [<TestMethod>]
+    member this.TestTryParseVarDecl003fDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    inf {
+        D(x:obj )
+        {
+            pre:true
+            con:true
+        }
+    }
+    theory {   
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+
+    [<TestMethod>]
+    member this.TestTryParseVarDecl003gDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    inf {
+        D(x:pred )
+        {
+            pre:true
+            con:true
+        }
+    }
+    theory {   
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+
+    [<TestMethod>]
+    member this.TestTryParseVarDecl003hDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    inf {
+        D(x:tpl )
+        {
+            pre:true
+            con:true
+        }
+    }
+    theory {   
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+
+    [<TestMethod>]
+    member this.TestTryParseVarDecl003iDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    inf {
+        D(x:T )
+        {
+            pre:true
+            con:true
+        }
+    }
+    theory {   
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """ """
+        let actualDiag = ad.DiagnosticsToString
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+

@@ -1,8 +1,12 @@
-TestNamescpace { theory { 
-    
-    theorem T() {
-  ret
+TestNamespace {
+    inf {
+        D(x: )
+        {
+            pre:true
+            con:true
+        }
+    }
+    theory {   
+        y
+    }
 }
-
-
-  } }
