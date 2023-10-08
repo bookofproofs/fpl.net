@@ -91,6 +91,9 @@ let keyWordSet =
 
 let recoveryMap = dict [
     ("':'", ":")
+    ("'->'", "->")
+    ("'[', '{', <(closed) left bound '['>, <(open) left bound '[!'>, <whitespace>", "{")
+    ("'*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>", "obj")
     ("',', 'alias', '}', <whitespace>", "}")
     ("'(', <\"language-specific string\">, <variable>", "\"\\operatorname{true}\"")
     ("'(', ';', '|', '~', <\"language-specific string\">, <block comment>, <inline comment>, <significant whitespace>, <variable>, <whitespace>", ";")

@@ -7,10 +7,10 @@ open FParsec
 
 let input = "TestNamespace {
     theory {   
-    ax T () 
-    { true }
-    pred T ( ) { }     
-    } loc { true := ~ tex : \"\\operatorname{true}\" ; "
+        func A
+    }
+    y
+}"
 
 let result = fplParser input
 
@@ -24,7 +24,3 @@ let origResult = tryParse' ast "recovery failed;" ad input
 printf "%O" origResult
 ad.PrintDiagnostics
 
-
-let strings = ["@"; "}"; "<PascalCase"]
-
-printf "%A" (List.sort strings)
