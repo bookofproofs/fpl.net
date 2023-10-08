@@ -1698,9 +1698,18 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 }"""
         let result = fplParser input
         let actual = sprintf "%O" result
-        let expectedDiag = """ """
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 3, Col: 16),
+   DiagnosticMessage
+     "'.'
+Expecting: ')', ',', '[', <(closed) left bound '['>, <(open) left bound '[!'>, <PascalCaseId>, <digits>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 3, Col: 147),
+   DiagnosticMessage "
+(recovery failed due to likely infinite loop)")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag,  actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003i001Diag () =

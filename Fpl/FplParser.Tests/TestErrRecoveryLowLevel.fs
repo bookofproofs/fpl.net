@@ -58,7 +58,7 @@ type TestErrRecoveryLowLevel() =
             expNewOffset
         ) =
         let pos = Position("", ind, 0, 0)
-        let (actNewInput, newRecoveryText, newIndexOffset, keywordLength) = manipulateString input text pos "" 
+        let (actNewInput, newRecoveryText, newIndexOffset, keywordLength, fatalError) = manipulateString input text pos "" 
         Assert.AreEqual(expNewInput, actNewInput)
         Assert.AreEqual(expNewOffset, newIndexOffset)
 
@@ -73,7 +73,7 @@ type TestErrRecoveryLowLevel() =
             expRecoveryText
         ) =
         let pos = Position("", ind, 0, 0)
-        let (actNewInput, newRecoveryText, newIndexOffset, keywordLength) = manipulateString input text pos lastRecoveryText 
+        let (actNewInput, newRecoveryText, newIndexOffset, keywordLength, fatalError) = manipulateString input text pos lastRecoveryText 
         Assert.AreEqual(expRecoveryText, newRecoveryText)
 
 

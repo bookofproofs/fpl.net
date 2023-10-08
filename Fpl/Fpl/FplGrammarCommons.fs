@@ -228,63 +228,64 @@ let manipulateString
     (lastRecoveryText: string)
     =
     if pos.Index < 0 || pos.Index > input.Length then
-        failwith "Position is out of range"
-
-    // text with a trailing whitespace
-    let textWithWS = text + " "
-
-    let (pre, optTrailingWs, post) = splitStringByTextAtPosition input text pos
-    
-    if pos.Index = input.Length then
-        let newInput = input + textWithWS
-        let newRecText = lastRecoveryText + textWithWS
-        (newInput, newRecText, int64 (newInput.Length - input.Length), int64 0)
+        // position out of range
+        (input, text, int64 0, int64 0, true)
     else
-        // avoid false positives by inserting to many opening and closing braces, parentheses, or brackets
-        let corrTextWithWS =
-            if lastRecoveryText.Length < 100 then 
-                if textWithWS.StartsWith("{") && post.StartsWith("}") then
-                    textWithWS + "} "
-                elif textWithWS.StartsWith("(") && post.StartsWith(")") then
-                    textWithWS + ") "
-                elif textWithWS.StartsWith("[") && post.StartsWith("]") then
-                    textWithWS + "] "
-                else
-                    textWithWS
-            else
-                // avoid infinite loops when inserting closing brackets/parentheses/braces
-                // did not succeed because the lastRecoveryText would otherwise get too (or infinitely) long 
-                textWithWS
+        // text with a trailing whitespace
+        let textWithWS = text + " "
 
-            // new recovery Text depends on whether the input ended the lastRecText
-        // we also provide a correction of the index counting exactly one additional whitespace inserted in case
-        // we have started a new recovery text.
-        let newRecText =
-            let invalidSymbolWS = invalidSymbol + " "
-            if lastRecoveryText.EndsWith(invalidSymbolWS) then
-                lastRecoveryText.Replace(invalidSymbolWS, corrTextWithWS)
-            elif lastRecoveryText<>"" && pre.EndsWith(lastRecoveryText.TrimEnd()) then
-                lastRecoveryText + corrTextWithWS 
-            else
-                corrTextWithWS
-
-        let lengthKeyword = int64 (lengthOfStartingFplKeyword post)
-        if text = invalidSymbol || pre.EndsWith(',') || lengthKeyword>0 || startsWithParentheses post || post.StartsWith("//") || post.StartsWith("/*") then
-            // insert text with a trailing whitespace
-            let newInput = pre + " " + corrTextWithWS + optTrailingWs + post
-            (newInput, newRecText, int64 (newInput.Length - input.Length), lengthKeyword)
-        elif Regex.IsMatch(post, @"^\w") then
-            // if the beginning is a word, replace this word
-            let newInput = pre + optTrailingWs + Regex.Replace(post, @"^\w+", corrTextWithWS)
-
-            (newInput,
-                newRecText,
-                int64 (newInput.Length - input.Length), lengthKeyword)
+        let (pre, optTrailingWs, post) = splitStringByTextAtPosition input text pos
+    
+        if pos.Index = input.Length then
+            let newInput = input + textWithWS
+            let newRecText = lastRecoveryText + textWithWS
+            (newInput, newRecText, int64 (newInput.Length - input.Length), int64 0, false)
         else
-            // if the beginning starts with any other character
-            let newInput = pre + optTrailingWs + corrTextWithWS + post.[1..]
+            // avoid false positives by inserting to many opening and closing braces, parentheses, or brackets
+            let corrTextWithWS, fatalErrorOccured =
+                if lastRecoveryText.Length < 100 then 
+                    if textWithWS.StartsWith("{") && post.StartsWith("}") then
+                        textWithWS + "} ", false
+                    elif textWithWS.StartsWith("(") && post.StartsWith(")") then
+                        textWithWS + ") ", false
+                    elif textWithWS.StartsWith("[") && post.StartsWith("]") then
+                        textWithWS + "] ", false
+                    else
+                        textWithWS, false
+                else
+                    // avoid infinite loops when inserting closing brackets/parentheses/braces
+                    // did not succeed because the lastRecoveryText would otherwise get too (or infinitely) long 
+                    textWithWS, true
 
-            (newInput,
-                newRecText,
-                int64 (newInput.Length - input.Length), lengthKeyword)
+                // new recovery Text depends on whether the input ended the lastRecText
+            // we also provide a correction of the index counting exactly one additional whitespace inserted in case
+            // we have started a new recovery text.
+            let newRecText =
+                let invalidSymbolWS = invalidSymbol + " "
+                if lastRecoveryText.EndsWith(invalidSymbolWS) then
+                    lastRecoveryText.Replace(invalidSymbolWS, corrTextWithWS)
+                elif lastRecoveryText<>"" && pre.EndsWith(lastRecoveryText.TrimEnd()) then
+                    lastRecoveryText + corrTextWithWS 
+                else
+                    corrTextWithWS
+
+            let lengthKeyword = int64 (lengthOfStartingFplKeyword post)
+            if text = invalidSymbol || pre.EndsWith(',') || lengthKeyword>0 || startsWithParentheses post || post.StartsWith("//") || post.StartsWith("/*") then
+                // insert text with a trailing whitespace
+                let newInput = pre + " " + corrTextWithWS + optTrailingWs + post
+                (newInput, newRecText, int64 (newInput.Length - input.Length), lengthKeyword, fatalErrorOccured)
+            elif Regex.IsMatch(post, @"^\w") then
+                // if the beginning is a word, replace this word
+                let newInput = pre + optTrailingWs + Regex.Replace(post, @"^\w+", corrTextWithWS)
+
+                (newInput,
+                    newRecText,
+                    int64 (newInput.Length - input.Length), lengthKeyword, fatalErrorOccured)
+            else
+                // if the beginning starts with any other character
+                let newInput = pre + optTrailingWs + corrTextWithWS + post.[1..]
+
+                (newInput,
+                    newRecText,
+                    int64 (newInput.Length - input.Length), lengthKeyword, fatalErrorOccured)
 

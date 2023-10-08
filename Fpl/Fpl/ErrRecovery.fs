@@ -189,7 +189,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
     match run globalParser input with
     | Success(result, restInput, userState) ->
 
-        (result, "")
+        result
     | Failure(errorMsg, restInput, userState) ->
         let (choices, nextRecoveryString, newErrMsg) = mapErrMsgToRecText errorMsg
 
@@ -203,7 +203,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
 
             ad.AddDiagnostic diagnostic
-            (Ast.Error, "<not found>")
+            Ast.Error
         | (Some cho, None) -> 
             let diagnosticMsg = DiagnosticMessage(cho + System.Environment.NewLine + "(unknown parser choice)")
 
@@ -211,7 +211,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
 
             ad.AddDiagnostic diagnostic
-            (Ast.Error, "<not found>")
+            Ast.Error
         | (None, Some recStr) ->
             // this case should never happen because mapErrMsgToRecText never returns this
             let diagnosticMsg = DiagnosticMessage(errorMsg + System.Environment.NewLine + "(unknown error)")
@@ -220,59 +220,67 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
 
             ad.AddDiagnostic diagnostic
-            (Ast.Error, "<not found>")
+            Ast.Error
             
         | (Some cho, Some recStr) ->
-            let (newInput, newRecoveryText, newOffset, keyWordLength) =
+            let (newInput, newRecoveryText, newOffset, keyWordLength, fatalError) =
                 manipulateString input recStr restInput.Position lastRecoveryText
-
-            let lastRecoveryTextMod = lastRecoveryText.Replace(invalidSymbol,recStr)
-            let newIndexOffset = cumulativeIndexOffset + newOffset
-            if (not (newRecoveryText.StartsWith(lastRecoveryTextMod))
-                // prevent false positives when inserting a missing predicate into { }
-                && not (newRecoveryText="true " && lastRecoveryTextMod.EndsWith("{ } ")) 
-            ) || (lastRecoveryText = "" && ((newErrMsg.Split("Expecting:")[0]).Length <= 10)) then
-                // emit diagnostic if there is a new remainingInput
-
-                let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine)
+            if fatalError then
+                let diagnosticMsg = DiagnosticMessage(System.Environment.NewLine + "(recovery failed due to likely infinite loop)")
 
                 let diagnostic =
-                    // this is to ensure that the input insertions of error recovery remain invisible to the user
-                    // so that when double-clicking the error, the IDE will go to the right position in the source code
-                    let correctedErrorPosition =
-                        if newRecoveryText = "§ " then
-                            let newIndexOffset = newIndexOffset - keyWordLength - int64 2
-                            Position(
-                                restInput.Position.StreamName,
-                                restInput.Position.Index + newIndexOffset,
-                                restInput.Position.Line,
-                                restInput.Position.Column 
-                            )
-                        elif errorMsg.Contains("The parser backtracked after") then
-                            Position(
-                                restInput.Position.StreamName,
-                                restInput.Position.Index + (int64 1),
-                                restInput.Position.Line,
-                                restInput.Position.Column 
-                            )
-                        elif lastRecoveryText = "" then
-                            restInput.Position
-                        else
-                            Position(
-                                restInput.Position.StreamName,
-                                restInput.Position.Index - cumulativeIndexOffset,
-                                restInput.Position.Line,
-                                restInput.Position.Column 
-                            )
-
-                    Diagnostic(
-                        DiagnosticEmitter.FplParser,
-                        DiagnosticSeverity.Error,
-                        correctedErrorPosition,
-                        diagnosticMsg
-                    )
+                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
 
                 ad.AddDiagnostic diagnostic
+                Ast.Error
+            else
+                let lastRecoveryTextMod = lastRecoveryText.Replace(invalidSymbol,recStr)
+                let newIndexOffset = cumulativeIndexOffset + newOffset
+                if (not (newRecoveryText.StartsWith(lastRecoveryTextMod))
+                    // prevent false positives when inserting a missing predicate into { }
+                    && not (newRecoveryText="true " && lastRecoveryTextMod.EndsWith("{ } ")) 
+                ) || (lastRecoveryText = "" && ((newErrMsg.Split("Expecting:")[0]).Length <= 10)) then
+                    // emit diagnostic if there is a new remainingInput
+
+                    let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine)
+
+                    let diagnostic =
+                        // this is to ensure that the input insertions of error recovery remain invisible to the user
+                        // so that when double-clicking the error, the IDE will go to the right position in the source code
+                        let correctedErrorPosition =
+                            if newRecoveryText = "§ " then
+                                let newIndexOffset = newIndexOffset - keyWordLength - int64 2
+                                Position(
+                                    restInput.Position.StreamName,
+                                    restInput.Position.Index + newIndexOffset,
+                                    restInput.Position.Line,
+                                    restInput.Position.Column 
+                                )
+                            elif errorMsg.Contains("The parser backtracked after") then
+                                Position(
+                                    restInput.Position.StreamName,
+                                    restInput.Position.Index + (int64 1),
+                                    restInput.Position.Line,
+                                    restInput.Position.Column 
+                                )
+                            elif lastRecoveryText = "" then
+                                restInput.Position
+                            else
+                                Position(
+                                    restInput.Position.StreamName,
+                                    restInput.Position.Index - cumulativeIndexOffset,
+                                    restInput.Position.Line,
+                                    restInput.Position.Column 
+                                )
+
+                        Diagnostic(
+                            DiagnosticEmitter.FplParser,
+                            DiagnosticSeverity.Error,
+                            correctedErrorPosition,
+                            diagnosticMsg
+                        )
+
+                    ad.AddDiagnostic diagnostic
 
 
-            tryParse globalParser newInput newRecoveryText newIndexOffset 
+                tryParse globalParser newInput newRecoveryText newIndexOffset 
