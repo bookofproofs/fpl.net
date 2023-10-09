@@ -239,7 +239,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 if (not (newRecoveryText.StartsWith(lastRecoveryTextMod))
                     // prevent false positives when inserting a missing predicate into { }
                     && not (newRecoveryText="true " && lastRecoveryTextMod.EndsWith("{ } ")) 
-                ) || (lastRecoveryText = "" && ((newErrMsg.Split("Expecting:")[0]).Length <= 10)) then
+                ) || lastRecoveryText = "" then
                     // emit diagnostic if there is a new remainingInput
 
                     let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine)

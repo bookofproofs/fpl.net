@@ -23,19 +23,26 @@ namespace FplLS
                     .WithOutput(Console.OpenStandardOutput())
                     .WithLoggerFactory(new LoggerFactory())
                     .AddDefaultLoggingProvider()
-                    .WithMinimumLogLevel(LogLevel.Trace)
+                    .WithMinimumLogLevel(LogLevel.Error)
                     .WithServices(ConfigureServices)
                     .WithHandler<TextDocumentSyncHandler>()
                     .OnInitialize((s, _) =>
                     {
-                        var serviceProvider = (s as LanguageServer).Services;
-                        var bufferManager = serviceProvider.GetService<BufferManager>();
-                        var diagnosticsHandler = serviceProvider.GetService<DiagnosticsHandler>();
+                        if (s is LanguageServer languageServer)
+                        {
+                            var serviceProvider = languageServer.Services;
+                            var bufferManager = serviceProvider.GetService<BufferManager>();
+                            var diagnosticsHandler = serviceProvider.GetService<DiagnosticsHandler>();
 
-                        // Hook up diagnostics
-                        bufferManager.BufferUpdated += (__, x) => diagnosticsHandler.PublishDiagnostics(x.Uri, bufferManager.GetBuffer(x.Uri));
+                            // Hook up diagnostics
+                            bufferManager.BufferUpdated += (__, x) => diagnosticsHandler.PublishDiagnostics(x.Uri, bufferManager.GetBuffer(x.Uri));
 
-                        return Task.CompletedTask;
+                            return Task.CompletedTask;
+                        }
+                        else
+                        {
+                            throw new Exception("Failed to cast s to LanguageServer");
+                        }
                     })
                 );
 

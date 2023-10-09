@@ -6,7 +6,7 @@ namespace FplLS
     public class BufferManager
     {
 
-        public EventHandler<DocumentUpdatedEventArgs> BufferUpdated;
+        public EventHandler<DocumentUpdatedEventArgs>? BufferUpdated;
 
         private ConcurrentDictionary<Uri, StringBuilder> _buffers = new ConcurrentDictionary<Uri, StringBuilder>();
 
@@ -16,7 +16,7 @@ namespace FplLS
             BufferUpdated?.Invoke(this, new DocumentUpdatedEventArgs(uri));
         }
 
-        public StringBuilder GetBuffer(Uri uri)
+        public StringBuilder? GetBuffer(Uri uri)
         {
             return _buffers.TryGetValue(uri, out var buffer) ? buffer : null;
         }

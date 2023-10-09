@@ -19,19 +19,25 @@ namespace FplLS
         }
 
 
-        public void PublishDiagnostics(Uri uri, StringBuilder buffer)
+        public void PublishDiagnostics(Uri uri, StringBuilder? buffer)
         {
-            var sourceCode = buffer.ToString();
-            var parserDiagnostics = FplGrammar.parserDiagnostics;
-            parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
-            var ast = FplGrammar.fplParser(sourceCode);
-            var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
-
-            _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
+            if (buffer != null)
             {
-                Uri = uri,
-                Diagnostics = diagnostics
-            });
+                var sourceCode = buffer.ToString();
+                var parserDiagnostics = FplGrammar.parserDiagnostics;
+                parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
+                var ast = FplGrammar.fplParser(sourceCode);
+                var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
+                _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
+                {
+                    Uri = uri,
+                    Diagnostics = diagnostics
+                });
+            }
+            else
+            {
+                throw new NullReferenceException("buffer parameter was unexpectedly null");
+            }
         }
 
         /// <summary>

@@ -1,12 +1,9 @@
 TestNamespace {
-    inf {
-        D(x:tpl[!x~x!] )
-        {
-            pre:true
-            con:true
-        }
-    }
     theory {   
-        y
+            func pddddd
+            (
+            )  tplSass
+        {
+        }
     }
 }

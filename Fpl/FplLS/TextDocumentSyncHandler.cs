@@ -20,7 +20,7 @@ namespace FplLS
             }
         );
 
-        private SynchronizationCapability _capability;
+        private SynchronizationCapability? _capability;
 
         public TextDocumentSyncHandler(ILanguageServer router, BufferManager bufferManager)
         {

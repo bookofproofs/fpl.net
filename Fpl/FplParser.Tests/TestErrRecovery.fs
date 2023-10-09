@@ -1764,11 +1764,10 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         let result = fplParser input
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
-  (FplParser, Error, (Ln: 3, Col: 19),
+  (FplParser, Error, (Ln: 3, Col: 17),
    DiagnosticMessage
-     "')'
-Expecting: '@', 'del', 'delegate', 'self', '~', <PascalCaseId>, <digits>, <indexed variable>, 
-<variable>
+     "'!'
+Expecting: '@', 'del', 'delegate', 'self', <PascalCaseId>, <digits>, <indexed variable>, <variable>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 10, Col: 9),
@@ -1780,6 +1779,6 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
 
 

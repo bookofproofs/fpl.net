@@ -1,20 +1,15 @@
-﻿open FplGrammarTypes
-open FplGrammarCommons
-open ErrRecovery
+﻿open ErrRecovery
 open FplGrammar
 open FParsec
 
 
 let input = "TestNamespace {
-    inf {
-        D(x:tpl[   x , y  ] )
-        {
-            pre:true
-            con:true
-        }
-    }
     theory {   
-        y
+            func pdddddd
+            (
+            )  tplSass
+        {
+        }
     }
 }"
 
