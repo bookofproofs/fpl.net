@@ -18,7 +18,7 @@ Fpl.Commons.Structures
                 loop elem listOfTpl
                 (
                     i:=Succ(i)
-                    self[i]:=elem
+                    self<i>:=elem
                 )
                 myLength:=i
             }
@@ -64,7 +64,7 @@ Fpl.Commons.Structures
                 loop setItem setList
                 (
                     i:=Succ(i)
-                    self[i]:=setItem
+                    self<i>:=setItem
                 )
                 myFrom := Nat(1)
                 myLength:=i
@@ -98,7 +98,7 @@ Fpl.Commons.Structures
                                 is(tupleElem,Tuple[myFrom~myLength]),
                                 all i [1~myLength]
                                 (
-                                    In(tupleElem[i],@self[i])
+                                    In(tupleElem<i>,@self<i>)
                                 )
                             )
                         )

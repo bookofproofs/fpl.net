@@ -4,12 +4,15 @@ open FParsec
 
 
 let input = "TestNamespace {
-    theory {   
-            func pdddddd
-            (
-            )  tplSass
+    inf {
+        D(x:tpl[< )
         {
+            pre:true
+            con:true
         }
+    }
+    theory {   
+        y
     }
 }"
 

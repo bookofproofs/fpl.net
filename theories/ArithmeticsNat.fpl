@@ -218,7 +218,7 @@ Fpl.Arithmetics.Peano
 
             loop i [from~to]
             (
-                result:=Add(result,arr[i])
+                result:=Add(result,arr<i>)
             )
             return result
         }
@@ -309,7 +309,7 @@ Fpl.Arithmetics.Peano
             result:=ZeroReal()
             loop i [k~]
             (
-                result:=Add(result, Exp(arr[i],i))
+                result:=Add(result, Exp(arr<i>,i))
             )
             return result
         }
@@ -318,7 +318,7 @@ Fpl.Arithmetics.Peano
         {
             i: Nat
             cf: Real
-            cf:=Real(arr[k])
+            cf:=Real(arr<k>)
             i:=Succ(k)
             return Add( cf, Div(1 , ContinuedFraction(i, arr[i~])))
         }

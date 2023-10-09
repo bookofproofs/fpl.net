@@ -43,13 +43,13 @@ let colon = skipChar ':' >>. spaces
 let colonEqual = skipString ":="
 let at = pchar '@'
 let case = skipChar '|'
-let leftBracket = skipChar '[' >>. spaces 
+let leftBracket = skipChar '<' >>. spaces 
+let rightBracket = skipChar '>' >>. spaces  
 let leftClosedBracket = skipChar '[' >>. spaces <?> "<(closed) left bound '['>"
 let leftOpenBracket = skipString "[!" >>. spaces <?> "<(open) left bound '[!'>"
-let rightBracket = skipChar ']' 
 let rightOpenBracket = skipString "!]" >>. spaces <?> "<(open) right bound '!]'>" 
-let rightClosedBracket = skipString "]" >>. spaces <?> "<(closed) right bound ']'>" 
-let tilde = skipChar '~' .>> spaces
+let rightClosedBracket = skipChar ']' >>. spaces <?> "<(closed) right bound ']'>" 
+let tilde = skipChar '~' .>> spaces >>. spaces
 let semiColon = skipChar ';'
 let dollar = skipChar '$'
 let toArrow = skipString "->"
@@ -243,7 +243,7 @@ let fplRange = (opt coord.>> tilde >>. opt coord) .>> IW
 
 let boundedRange = positions (leftBound .>>. fplRange .>>. rightBound) |>> Ast.ClosedOrOpenRange
 
-coordOfEntityRef.Value <- choice [attempt boundedRange ; bracketedCoords]
+coordOfEntityRef.Value <- choice [boundedRange ; bracketedCoords]
 
 let coordInType = choice [ fplIdentifier; indexVariable ] .>> IW 
 
@@ -264,7 +264,7 @@ let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) 
 // to restrict it to pure objects.
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
-let bracketModifier = attempt boundedRangeInType <|> bracketedCoordsInType
+let bracketModifier = boundedRangeInType <|> bracketedCoordsInType
 let classType = positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
 let variableTypeWithModifier = positions (callModifier .>>. choice [ keywordIndex; keywordFunction; keywordPredicate; classType ]) |>> Ast.VariableTypeWithModifier

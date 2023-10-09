@@ -62,7 +62,7 @@ Fpl.LinAlg
                 i: Nat
                 range i [1~n]
                 (
-                    self[i]:=field.AdditiveGroup().NeutralElement()
+                    self<i>:=field.AdditiveGroup().NeutralElement()
                 )
             }
         }
