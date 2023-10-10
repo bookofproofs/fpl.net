@@ -21,6 +21,13 @@ type TestPredicates () =
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
+    member this.TestPredicate01a () =
+        let result = run primePredicate """true"""
+        let actual = sprintf "%O" result
+        let expected = """Success: True"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
     member this.TestPredicate02 () =
         let result = run predicate """false"""
         let actual = sprintf "%O" result

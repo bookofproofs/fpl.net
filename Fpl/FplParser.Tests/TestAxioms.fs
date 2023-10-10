@@ -39,7 +39,7 @@ type TestAxioms () =
              ClassHeaderType
                (((Ln: 3, Col: 21), (Ln: 3, Col: 24)),
                 [PascalCaseId (((Ln: 3, Col: 21), (Ln: 3, Col: 24)), "Nat")]))))))))"""
-        Assert.AreEqual(replaceWhiteSpace expected,  actual);
+        Assert.AreEqual(replaceWhiteSpace expected, actual);
 
     [<TestMethod>]
     member this.TestAxiom02 () =

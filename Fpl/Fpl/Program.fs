@@ -5,12 +5,8 @@ open FParsec
 
 let input = "TestNamespace {
     inf {
-        D(x:tpl[< )
-        {
-            pre:true
-            con:true
+        D() {
         }
-    }
     theory {   
         y
     }
@@ -27,4 +23,5 @@ ad.Clear()
 let origResult = tryParse' ast "recovery failed;" ad input
 printf "%O" origResult
 ad.PrintDiagnostics
+
 

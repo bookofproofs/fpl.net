@@ -222,21 +222,21 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs1 () =
-        let result = run predicateWithArguments """Zero()"""
+        let result = run predicateWithQualification """Zero()"""
         let actual = sprintf "%O" result
         let expected = """Success: PredicateWithArgs (AliasedId ["Zero"], [])"""
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestPredicateWithArgs2 () =
-        let result = run predicateWithArguments """self(i)"""
+        let result = run predicateWithQualification """self(i)"""
         let actual = sprintf "%O" result
         let expected = """Success: PredicateWithArgs (Self [], [PredicateWithoutArgs (Var "i")])"""
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestPredicateWithArgs3 () =
-        let result = run predicateWithArguments """ProceedingResults(1.,2.)"""
+        let result = run predicateWithQualification """ProceedingResults(1.,2.)"""
         let actual = sprintf "%O" result
         let expected = """Success: PredicateWithArgs
   (AliasedId ["ProceedingResults"],
@@ -245,7 +245,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs4 () =
-        let result = run predicateWithArguments """Add(result,list$i)"""
+        let result = run predicateWithQualification """Add(result,list$i)"""
         let actual = sprintf "%O" result
         let expected = """Success: PredicateWithArgs
   (AliasedId ["Add"],
@@ -255,7 +255,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs5 () =
-        let result = run predicateWithArguments """Add(result,arr[i])"""
+        let result = run predicateWithQualification """Add(result,arr[i])"""
         let actual = sprintf "%O" result
         let expected = """Success: PredicateWithArgs
   (AliasedId ["Add"],
@@ -266,7 +266,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestQualifiedIdentifier1 () =
-        let result = run qualifiedIdentifier """myOp.NeutralElement()"""
+        let result = run predicateWithQualification """myOp.NeutralElement()"""
         let actual = sprintf "%O" result
         let expected = """Success: QualifiedIdentifier
   (Var "myOp", [PredicateWithArgs (AliasedId ["NeutralElement"], [])])"""
@@ -274,7 +274,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestQualifiedIdentifier2 () =
-        let result = run qualifiedIdentifier """myOp.NeutralElement().SomeProperty()"""
+        let result = run predicateWithQualification """myOp.NeutralElement().SomeProperty()"""
         let actual = sprintf "%O" result
         let expected = """Success: QualifiedIdentifier
   (Var "myOp",

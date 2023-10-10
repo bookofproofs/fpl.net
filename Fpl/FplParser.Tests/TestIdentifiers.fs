@@ -118,7 +118,7 @@ type TestIdentifiers () =
     member this.TestEntityAtSelf () =
         let result = run entity "@self"
         let actual = sprintf "%O" result
-        let expected = """Success: Self ['@']"""
+        let expected = """<Success:Self(((Ln:1,Col:1),(Ln:1,Col:6)),['@'])"""
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
@@ -202,7 +202,7 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestEntityWithCoord1 () =
-        let result = run entityWithCoord """myField[1 ~ n]"""
+        let result = run predicateWithQualification """myField[1 ~ n]"""
         let actual = sprintf "%O" result
         let expected = """Success: EntityWithCoord
   (Var "myField",
@@ -212,7 +212,7 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestEntityWithCoord2 () =
-        let result = run entityWithCoord """theorem[from ~ to]"""
+        let result = run predicateWithQualification """theorem[from ~ to]"""
         let actual = sprintf "%O" result
         let actual2 = actual
         let expected = "Failure:
@@ -224,7 +224,7 @@ Cannot use keyword 'theorem' as a variable"
 
     [<TestMethod>]
     member this.TestEntityWithCoord3 () =
-        let result = run entityWithCoord """self[from ~ to]"""
+        let result = run predicateWithQualification """self[from ~ to]"""
         let actual = sprintf "%O" result
         let expected = """Success: EntityWithCoord
   (Self [],
@@ -234,7 +234,7 @@ Cannot use keyword 'theorem' as a variable"
 
     [<TestMethod>]
     member this.TestEntityWithCoord4 () =
-        let result = run entityWithCoord """tplSetElem[from ~ to]"""
+        let result = run predicateWithQualification """tplSetElem[from ~ to]"""
         let actual = sprintf "%O" result
         let expected = "Failure:
     Error in Ln: 1 Col: 11
@@ -245,7 +245,7 @@ Cannot use keyword 'theorem' as a variable"
 
     [<TestMethod>]
     member this.TestEntityWithCoord5 () =
-        let result = run entityWithCoord """tpls[from ~ to]"""
+        let result = run predicateWithQualification """tpls[from ~ to]"""
         let actual = sprintf "%O" result
         let expected = """Success: EntityWithCoord
   (Var "tpls",

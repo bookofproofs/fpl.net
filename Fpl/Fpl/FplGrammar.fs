@@ -36,8 +36,8 @@ let rightBrace = skipChar '}'
 let leftParen = skipChar '(' >>. spaces 
 let rightParen = skipChar ')' 
 let comma = skipChar ',' >>. spaces 
-let star = skipChar '*' >>% Ast.Many
-let plus = skipChar '+' >>% Ast.Many1
+let star = skipChar '*' >>. spaces >>% Ast.Many
+let plus = skipChar '+' >>. spaces >>% Ast.Many1
 let dot = skipChar '.'
 let colon = skipChar ':' >>. spaces
 let colonEqual = skipString ":="
@@ -137,7 +137,7 @@ let keywordAssert = skipString "assert" .>> IW
 (* Predicate-related Keywords *)
 let keywordUndefined = positions (skipString "undefined" <|> skipString "undef") .>> IW |>> Ast.Undefined
 let keywordTrue = positions (skipString "true") .>> IW  |>> Ast.True  
-let keywordFalse = positions (skipString "false") .>> IW |>> Ast.False  
+let keywordFalse = positions (skipString "false") .>> IW |>>  Ast.False  
 let keywordAnd = skipString "and" .>> IW 
 let keywordOr = skipString "or" .>> IW 
 let keywordImpl = skipString "impl" .>> IW 
@@ -217,23 +217,18 @@ let rightBound = rightOpen <|> rightClosed
 ////// resolving recursive parsers
 let statementList, statementListRef = createParserForwardedToRef()
 let primePredicate, primePredicateRef = createParserForwardedToRef()
-let coordOfEntity, coordOfEntityRef = createParserForwardedToRef()
 let predicate, predicateRef = createParserForwardedToRef()
 let predicateList, predicateListRef = createParserForwardedToRef()
 let predicateList1, predicateList1Ref = createParserForwardedToRef()
-let predicateWithArguments, predicateWithArgumentsRef = createParserForwardedToRef()
+let predicateWithQualification, predicateWithQualificationRef = createParserForwardedToRef()
 let paramTuple, paramTupleRef = createParserForwardedToRef()
 
-let entityWithCoord = positions (entity .>>. coordOfEntity) |>> Ast.EntityWithCoord
-
-let assignee = (attempt entityWithCoord) <|> entity
-
-let coord = choice [ assignee; extDigits; dollarDigits ] .>> IW 
+let coord = choice [ entity; extDigits; dollarDigits ] .>> IW 
 
 let word = regex @"\w+" <?> "<word>" .>> IW
 let fplDelegateIdentifier = positions (keywordDel >>. dot >>. word) .>> IW |>> Ast.DelegateId
 
-let fplIdentifier = choice [ fplDelegateIdentifier; assignee; extDigits; predicateIdentifier ]
+let fplIdentifier = choice [ fplDelegateIdentifier; entity; extDigits; predicateIdentifier ]
 
 let coordList = (sepBy1 coord comma) .>> IW
 
@@ -242,8 +237,6 @@ let bracketedCoords = positions (leftBracket >>. coordList .>> rightBracket) |>>
 let fplRange = (opt coord.>> tilde >>. opt coord) .>> IW
 
 let boundedRange = positions (leftBound .>>. fplRange .>>. rightBound) |>> Ast.ClosedOrOpenRange
-
-coordOfEntityRef.Value <- choice [boundedRange ; bracketedCoords]
 
 let coordInType = choice [ fplIdentifier; indexVariable ] .>> IW 
 
@@ -254,7 +247,7 @@ let rangeInType = positions ((opt coordInType .>> tilde) .>>. opt coordInType) |
 let specificClassType = choice [ objectHeader; xId; predicateIdentifier ] .>> IW
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
-let callModifier = opt (choice [ star;  plus ])
+let callModifier = opt (choice [ star;  plus ] ) 
 
 let bracketedCoordsInType = positions (leftBracket >>. coordInTypeList .>> rightBracket) |>> Ast.BracketedCoordsInType
 let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) |>> Ast.BoundedRangeInType
@@ -269,9 +262,9 @@ let classType = positions (specificClassType .>>. opt bracketModifier) |>> Ast.C
 
 let variableTypeWithModifier = positions (callModifier .>>. choice [ keywordIndex; keywordFunction; keywordPredicate; classType ]) |>> Ast.VariableTypeWithModifier
 
-let parenthesisedType = positions (variableTypeWithModifier .>> IW >>. paramTuple) |>> Ast.VariableType
+let parenthesisedType = positions (variableTypeWithModifier .>> IW >>. opt paramTuple) |>> Ast.VariableType
 
-let variableType = (((attempt parenthesisedType) <|> attempt variableTypeWithModifier) <|> classType) .>> IW
+let variableType = choice [ parenthesisedType ; variableTypeWithModifier ; classType ] .>> IW
 
 let namedVariableDeclaration = positions ((variableList .>> IW) .>>. ((colon >>. IW) >>. variableType)) |>> Ast.NamedVarDecl
 let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
@@ -280,13 +273,13 @@ paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclaration
 let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) |>> Ast.Signature
 
 (* Statements *)
-let argumentTuple = (leftParen >>. predicateList) .>> (IW .>> rightParen)  
+let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen))  |>> Ast.ArgumentTuple
 
 let fplDelegate = positions (fplDelegateIdentifier .>>. argumentTuple) |>> Ast.Delegate
-let assignmentStatement = positions ((assignee .>> IW .>> colonEqual) .>>. (IW >>. predicate)) |>> Ast.Assignment
+let assignmentStatement = positions ((predicateWithQualification .>> IW .>> colonEqual) .>>. (IW >>. predicate)) |>> Ast.Assignment
 let returnStatement = positions (keywordReturn >>. predicate) |>> Ast.Return
 
-let variableRange = choice [ assignee ; boundedRange]
+let variableRange = choice [ predicateWithQualification ; boundedRange]
 
 let leftBraceCommented = (leftBrace >>. many CW)
 let commentedRightBrace = (many CW .>> rightBrace)
@@ -298,9 +291,9 @@ let conditionFollowedByResultList = many1 (many CW >>. conditionFollowedByResult
 
 
 let casesStatement = positions (((keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>> semiColon .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen))) |>> Ast.Cases
-let assigneeIn = assignee .>> SW
-let assigneeWithVariableRange = ( assigneeIn .>>. variableRange) .>> IW
-let rangeOrLoopBody = assigneeWithVariableRange .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
+let entityIn = entity .>> SW
+let entityInVariableRange = ( entityIn .>>. variableRange) .>> IW
+let rangeOrLoopBody = entityInVariableRange .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
 let loopStatement = positions (keywordLoop >>. rangeOrLoopBody) |>> Ast.Loop
 let rangeStatement = positions (keywordRange >>. rangeOrLoopBody) |>> Ast.Range
 
@@ -325,18 +318,17 @@ statementListRef.Value <- many (many CW >>. statement .>> IW)
 
 (* Predicates *)
 
-predicateWithArgumentsRef.Value <- positions (fplIdentifier .>>. argumentTuple) |>> Ast.PredicateWithArgs
-
-let qualifiedIdentifier = positions (fplIdentifier .>>. many1 (dot >>. predicateWithArguments)) |>> Ast.QualifiedIdentifier
+let dotted = dot >>. predicateWithQualification
+let qualification = choice [argumentTuple ; dotted ; boundedRange ; bracketedCoords]
+predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) |>> Ast.PredicateWithQualification
 
 primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
     keywordUndefined
-    (attempt predicateWithArguments) 
-    <|> (attempt qualifiedIdentifier) 
-    <|> argumentIdentifier
-    <|> fplIdentifier
+    attempt argumentIdentifier
+    predicateWithQualification
+    fplIdentifier
     
 ]
 
@@ -350,7 +342,7 @@ let equivalence = positions (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
 let exclusiveOr = positions (keywordXor >>. twoPredicatesInParens) |>> Ast.Xor
 let negation = positions (keywordNot >>. onePredicateInParens) |>> Ast.Not
 let all = positions ((keywordAll >>. variableList) .>>. onePredicateInParens) |>> Ast.All
-let allAssert = positions ((keywordAll >>. assigneeWithVariableRange) .>>. onePredicateInParens) |>> Ast.AllAssert
+let allAssert = positions ((keywordAll >>. entityInVariableRange) .>>. onePredicateInParens) |>> Ast.AllAssert
 let exists = positions ((keywordEx >>. variableList) .>>. onePredicateInParens) |>> Ast.Exists
 let existsTimesN = positions (((keywordEx >>. dollarDigits) .>>. (SW >>. variableList)) .>>. onePredicateInParens) |>> Ast.ExistsN
 let isOperator = positions ((keywordIs >>. leftParen >>. coordInType) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
@@ -426,7 +418,7 @@ let axiom = positions (keywordAxiom >>. signature .>>. (IW >>. axiomBlock)) |>> 
 (* FPL building blocks - Constructors *)
 
 let instanceBlock = leftBrace >>. many CW >>. variableSpecificationList .>> commentedRightBrace
-let callConstructorParentClass = positions (opt predicateWithArguments) |>> Ast.ClassConstructorCall
+let callConstructorParentClass = positions (opt predicateWithQualification) |>> Ast.ClassConstructorCall
 let constructorBlock = leftBraceCommented >>. variableSpecificationList .>>. callConstructorParentClass  .>> commentedRightBrace
 let constructor = positions ((signature .>> IW) .>>. constructorBlock) |>> Ast.Constructor
 

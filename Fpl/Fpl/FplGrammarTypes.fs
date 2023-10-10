@@ -21,7 +21,6 @@ type Ast =
     | LocalizationString of Positions * string
     | LocalizationTerm of Positions * Ast list
     | LocalizationTermList of Positions * Ast list
-    | EntityWithCoord of Positions * (Ast * Ast)
     | Extensionname of Positions * string
     | ExtensionRegex of string
     | ExtensionType of Positions * Ast 
@@ -44,7 +43,7 @@ type Ast =
     | PredicateType 
     | FunctionalTermType 
     | IndexType
-    | VariableType of Positions * Ast
+    | VariableType of Positions * Ast option
     | VariableTypeWithModifier of Positions * (Ast option * Ast)
     | BracketedCoordsInType of Positions * Ast list 
     | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
@@ -54,9 +53,9 @@ type Ast =
     | IndexVariable of Positions * (string * string)
     // Predicates
     | True of Positions * unit
-    | False of Positions * unit
+    | False of Positions * unit 
     | Undefined of Positions * unit
-    | PredicateWithArgs of Positions * (Ast * Ast list)
+    | PredicateWithQualification of Positions * (Ast * Ast option) 
     | And of Positions * Ast list
     | Or of Positions * Ast list
     | Impl of Positions * (Ast * Ast)
@@ -68,11 +67,11 @@ type Ast =
     | Exists of Positions * (Ast list * Ast)
     | ExistsN of Positions * ((Ast * Ast list) * Ast)
     | IsOperator of Positions * (Ast * Ast)
-    | Delegate of Positions * (Ast * Ast list)
-    | QualifiedIdentifier of Positions * (Ast * Ast list)
+    | Delegate of Positions * (Ast * Ast)
     | ArgumentIdentifier of Positions * string
     | PremiseReference of Positions * unit
     | Justification of Positions * Ast list
+    | ArgumentTuple of Positions * Ast list
     // Statements
     | Assertion of Positions * Ast
     | ConditionFollowedByResult of Positions * (Ast * Ast list)
