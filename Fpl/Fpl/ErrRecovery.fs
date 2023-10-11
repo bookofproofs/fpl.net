@@ -97,13 +97,26 @@ let wrapEveryNthComma (str: string) (n:int) =
     |> String.concat ", "
 
 /// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
-let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) =
+let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Position)=
     let lines = errMsg.Split(Environment.NewLine)
     let firstLine = lines.[1]
     let caretLine = lines.[2]
 
+    let carretPos = caretLine.IndexOf('^')
     // Find the position of the caret
-    let caretPosition = caretLine.IndexOf('^')
+    let caretPosition, newPos = 
+        if errMsg.Contains("<variable (got") then
+            let pre = firstLine.Substring(0,carretPos).TrimEnd()
+            let keywordLength = lengthOfEndingFplKeyword pre
+            let np = Position(
+                        pos.StreamName,
+                        pos.Index - (int64 keywordLength),
+                        pos.Line,
+                        pos.Column - (int64 keywordLength)
+                    )
+            carretPos - keywordLength, np
+        else
+            carretPos, pos
 
     // Extract the significant characters
     let significantCharacters =
@@ -116,13 +129,7 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) =
     // Replace the significant characters with quoted version in the first line
     let quotedFirstLine = sprintf "'%s'" significantCharacters
 
-    // Join the transformed first line and the rest of the lines with a newline character to form the final output
-    if errMsg.Contains("<variable, got ") then
-        lines[3] // return only the line containing the relevant message with "Expecting <variable, got ..."
-    else
-        // els return a line with a quoted string that caused the error followed by a sorted list of syntactically
-        // corrected choices
-        quotedFirstLine + Environment.NewLine + "Expecting: " + (wrapEveryNthComma choices 8)
+    quotedFirstLine + Environment.NewLine + "Expecting: " + (wrapEveryNthComma choices 8), newPos
 
 let split = [|" or "; "or" + Environment.NewLine ; "or\r" ; "or "; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine|]
 let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
@@ -155,16 +162,71 @@ let retrieveExpectedParserChoices (errMsg:string) =
     |> List.sort
     |> String.concat ", "
 
-let mapErrMsgToRecText (errMsg: string) =
+
+let getLineOffset (input: string) (line:int)=
+    let lines = input.Split(Environment.NewLine)
+    let lengthLineSep = Environment.NewLine.Length
+    let mutable offset = 0
+    for i in 0..(line - 2) do
+        offset <- offset + lines.[i].Length + lengthLineSep
+    offset
+
+let getLineAndColumn (input: string) =
+    let regex = System.Text.RegularExpressions.Regex("Error in Ln: (\\d+) Col: (\\d+)")
+    let m = regex.Match(input)
+    if m.Success then
+        let line = int m.Groups.[1].Value
+        let column = int m.Groups.[2].Value
+        Some(line, column)
+    else
+        None
+
+let getLastSubstringAfterSeparator (input:string) (sep:string) =
+    let substrings = input.Split(sep)
+    if substrings.Length > 0 then
+        substrings.[substrings.Length - 1].Trim()
+    else
+        ""
+
+let extractBacktrackingFreeErrMsgAndPos (input: string) (errMsg: string) (pos:Position) =
+    let backtrackingFreeErrMsg = getLastSubstringAfterSeparator errMsg "backtracked after:"
+    let lineColumn = getLineAndColumn backtrackingFreeErrMsg
+    match lineColumn with
+    | Some(line, column) -> 
+        let index = column + getLineOffset input line - 1
+        let backtrackingFreePos = Position(
+                                    pos.StreamName,
+                                    index,
+                                    line,
+                                    column 
+                                )
+        (backtrackingFreeErrMsg, backtrackingFreePos)
+    | None ->
+        (errMsg, pos)
+
+/// A low-level error recovery function mapping error messages to tuples
+/// consisting of some parser choices, a pick from this choices and a replace
+/// error message that is formatted suitable for the VS Code Problems window.
+let mapErrMsgToRecText (input: string) (errMsg: string) (pos:Position) =
     let recText choices =
         let keyFound, text = recoveryMap.TryGetValue(choices)
         if keyFound then
-            (Some text)
+            Some text
         else
-            (None)
-    let choices = retrieveExpectedParserChoices errMsg
+            None
+    // extract from errMsg only this part that is contained in the last 
+    // part of the FParsec error message after any before FParsec started any 
+    // backtracking to find another syntax error. We consider those
+    // "other syntax errors" irrelevant for a correct error recovery process 
+    // because we want to report only those errors that the user 
+    // is most likely to handle while typing FPL source code.
+    let backtrackingFreeErrMsg,  backtrackingFreePos = extractBacktrackingFreeErrMsgAndPos input errMsg pos 
+    let test = input.Substring(int backtrackingFreePos.Index)
+
+    let choices = retrieveExpectedParserChoices backtrackingFreeErrMsg
     let text = recText choices
-    (Some choices, text, replaceFParsecErrMsgForFplParser errMsg choices)
+    let newErrMsg, modifiedPos = replaceFParsecErrMsgForFplParser backtrackingFreeErrMsg choices backtrackingFreePos
+    (Some choices, text, newErrMsg, modifiedPos)
 
 /// Returns the first list element from `candidates` that is contained in `source`.
 let findRecoveryString (source: HashSet<string>) (candidates: string list) =
@@ -191,7 +253,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
 
         result
     | Failure(errorMsg, restInput, userState) ->
-        let (choices, nextRecoveryString, newErrMsg) = mapErrMsgToRecText errorMsg
+        let (choices, nextRecoveryString, newErrMsg, backtrackingFreePos) = mapErrMsgToRecText input errorMsg restInput.Position
 
         match (choices, nextRecoveryString) with
         | (None, None) ->
@@ -200,15 +262,15 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 DiagnosticMessage(errorMsg + System.Environment.NewLine + "(unknown parser choice or no recovery string provided)")
 
             let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
 
             ad.AddDiagnostic diagnostic
             Ast.Error
         | (Some cho, None) -> 
-            let diagnosticMsg = DiagnosticMessage(cho + System.Environment.NewLine + "(unknown parser choice)")
+            let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine + "(unknown parser choice)")
 
             let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
 
             ad.AddDiagnostic diagnostic
             Ast.Error
@@ -217,19 +279,19 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             let diagnosticMsg = DiagnosticMessage(errorMsg + System.Environment.NewLine + "(unknown error)")
 
             let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
 
             ad.AddDiagnostic diagnostic
             Ast.Error
             
         | (Some cho, Some recStr) ->
             let (newInput, newRecoveryText, newOffset, keyWordLength, fatalError) =
-                manipulateString input recStr restInput.Position lastRecoveryText
+                manipulateString input recStr backtrackingFreePos lastRecoveryText
             if fatalError then
                 let diagnosticMsg = DiagnosticMessage(System.Environment.NewLine + "(recovery failed due to likely infinite loop)")
 
                 let diagnostic =
-                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
+                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
 
                 ad.AddDiagnostic diagnostic
                 Ast.Error
@@ -251,26 +313,26 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                             if newRecoveryText = "§ " then
                                 let newIndexOffset = newIndexOffset - keyWordLength - int64 2
                                 Position(
-                                    restInput.Position.StreamName,
-                                    restInput.Position.Index + newIndexOffset,
-                                    restInput.Position.Line,
-                                    restInput.Position.Column 
+                                    backtrackingFreePos.StreamName,
+                                    backtrackingFreePos.Index + newIndexOffset,
+                                    backtrackingFreePos.Line,
+                                    backtrackingFreePos.Column 
                                 )
                             elif errorMsg.Contains("The parser backtracked after") then
                                 Position(
-                                    restInput.Position.StreamName,
-                                    restInput.Position.Index + (int64 1),
-                                    restInput.Position.Line,
-                                    restInput.Position.Column 
+                                    backtrackingFreePos.StreamName,
+                                    backtrackingFreePos.Index + (int64 1),
+                                    backtrackingFreePos.Line,
+                                    backtrackingFreePos.Column 
                                 )
                             elif lastRecoveryText = "" then
-                                restInput.Position
+                                backtrackingFreePos
                             else
                                 Position(
-                                    restInput.Position.StreamName,
-                                    restInput.Position.Index - cumulativeIndexOffset,
-                                    restInput.Position.Line,
-                                    restInput.Position.Column 
+                                    backtrackingFreePos.StreamName,
+                                    backtrackingFreePos.Index - cumulativeIndexOffset,
+                                    backtrackingFreePos.Line,
+                                    backtrackingFreePos.Column 
                                 )
 
                         Diagnostic(

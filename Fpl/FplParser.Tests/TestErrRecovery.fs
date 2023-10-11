@@ -608,8 +608,8 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         let result = fplParser input
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
-  (FplParser, Error, (Ln: 4, Col: 11),
-   DiagnosticMessage "'{'
+  (FplParser, Error, (Ln: 4, Col: 5),
+   DiagnosticMessage "'theory'
 Expecting: <variable (got keyword)>
 ")
 Diagnostic
@@ -667,9 +667,8 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
   (FplParser, Error, (Ln: 4, Col: 5),
-   DiagnosticMessage
-     "'theory'
-Expecting: 'pre', 'premise', <block comment>, <inline comment>, <significant whitespace>, <variable (got keyword)>
+   DiagnosticMessage "'theory'
+Expecting: <variable (got keyword)>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 5, Col: 9),

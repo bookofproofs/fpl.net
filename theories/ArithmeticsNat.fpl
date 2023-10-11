@@ -309,7 +309,7 @@ Fpl.Arithmetics.Peano
             result:=ZeroReal()
             loop i [k~]
             (
-                result:=Add(result, Exp(arr[i],i))
+                result:=Add(result, Exp(arr<i>,i))
             )
             return result
         }

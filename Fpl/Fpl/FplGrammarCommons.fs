@@ -92,55 +92,41 @@ let keyWordSet =
 let recoveryMap = dict [
     ("'->'", "->")
     ("',', ':', <whitespace>", ":")
-    ("',', '>', <whitespace>", ">")
     ("',', '}'", "}")
+    ("',', '>', <whitespace>", ">")
     ("',', 'alias', '}', <whitespace>", "}")
     ("':', <whitespace>", ":")
     ("':'", ":")
     ("':=', <whitespace>", ":=")
     ("':end'", ":end")
     ("':ext', 'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>", ":ext")
-    ("'" + invalidSymbol + "'", invalidSymbol)
-    ("'(', '<', '{', <(closed) left bound '['>, <(open) left bound '[!'>, <whitespace>", "{")
-    ("'(', ')', ',', '<', <(closed) left bound '['>, <(open) left bound '[!'>, <PascalCaseId>, <digits>, <whitespace>", ",")
     ("'(', ';', '|', '~', <\"language-specific string\">, <block comment>, <inline comment>, <significant whitespace>, <variable>, <whitespace>", ";")
+    ("'(', ')', ',', '<', <(closed) left bound '['>, <(open) left bound '[!'>, <PascalCaseId>, <digits>, <whitespace>", ",")
+    ("'(', '<', '{', <(closed) left bound '['>, <(open) left bound '[!'>, <whitespace>", "{")
     ("'(', <\"language-specific string\">, <variable>", "\"\\operatorname{true}\"")
     ("'(', <whitespace>", "(")
-    ("')', ',', '<', <(closed) left bound '['>, <(open) left bound '[!'>, <PascalCaseId>, <digits>, <whitespace>", "<")
-    ("')', ',', '@', 'del', 'delegate', 'self', '~', <PascalCaseId>, <digits>, <indexed variable>, <variable>, <whitespace>", "~")
-    ("')', ',', <whitespace>", ")")
     ("')', <variable>, <whitespace>", ")")
-    ("'<', '{', <(closed) left bound '['>, <(open) left bound '[!'>, <whitespace>", "{")
-    ("'{', <whitespace>", "{")
     ("'{'", "{")
     ("'}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
     ("'}', <block comment>, <inline comment>, <significant whitespace>", "}")
     ("'}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>", "}")
-    ("'@', 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'mand', 'mandatory', 'not', 'opt', 'optional', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor', '}', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "true")
     ("'@', 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'not', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "true")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', '}', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "}")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "true")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <variable>", "true")
-    ("'@', 'assert', 'cases', 'loop', 'pre', 'premise', 'range', 'ret', 'return', 'self', <block comment>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "pre")
     ("'@', 'assert', 'cases', 'del', 'delegate', 'loop', 'pre', 'premise', 'range', 'ret', 'return', 'self', <PascalCaseId>, <block comment>, <digits>, <indexed variable>, <inline comment>, <significant whitespace>, <variable>", "pre")
     ("'@', 'del', 'delegate', 'self', '~', <PascalCaseId>, <digits>, <indexed variable>, <variable>", "~")
     ("'@', 'del', 'delegate', 'self', <(closed) right bound ']'>, <(open) right bound '!]'>, <PascalCaseId>, <digits>, <indexed variable>, <variable>", "]")
     ("'@', 'del', 'delegate', 'self', <PascalCaseId>, <digits>, <indexed variable>, <variable>", "x")
-    ("'@', 'del', 'delegate', 'self', <PascalCaseId>, <digits>, <indexed variable>, <variable>", "x")
-    ("'@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
     ("'@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>", "obj")
     ("'@', 'obj', 'object', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
     ("'*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
     ("'*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>", "obj")
     ("'~', <block comment>, <inline comment>, <significant whitespace>", "~")
+    ("'~', <whitespace>", "~")
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>", "pred")
     ("'con', 'conclusion', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "con")
     ("'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>", "loc")
-    ("'mand', 'mandatory', 'opt', 'optional', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
-    ("'pre', 'premise', <block comment>, <inline comment>, <significant whitespace>, <variable (got keyword)>", "pre")
-    ("'th', 'theory', <block comment>, <inline comment>, <significant whitespace>", "th")
-    ("<aliased namespace>, <namespace>, <whitespace>", "T")
-    ("<block comment>, <fpl identifier>, <inline comment>, <significant whitespace>", "T")
     ("<extension regex>", "/d/")
     ("<ISO 639 language code>", "tex")
     ("<PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>", "T")
@@ -148,6 +134,8 @@ let recoveryMap = dict [
     ("<PascalCaseId>", "T")
     ("<variable (got keyword)>", invalidSymbol)
     ("<variable>", "x")
+    ("'$', '@', 'self', <(closed) right bound ']'>, <(open) right bound '!]'>, <digits>, <indexed variable>, <variable>, <whitespace>","x")
+    ("<(closed) right bound ']'>, <(open) right bound '!]'>, <whitespace>", "]")
 ]
 
 /// Checks if the string `s` starts with one of the characters '(',')','{','}'
@@ -158,7 +146,18 @@ let startsWithParentheses (s: string) = Regex.IsMatch(s, @"^[\s\(\)\{\}]")
 let lengthOfStartingFplKeyword (s: string) =
     keyWordSet
     |> Seq.tryFind (fun element ->
-        Regex.IsMatch(s, @"^" + Regex.Escape(element) + @"[\s\(\)\{\}]")
+        Regex.IsMatch(s, @"^" + Regex.Escape(element) + @"[\s\(\)\{\}\[\]]")
+        || s.Equals(element))
+    |> function
+    | Some keyword -> keyword.Length
+    | None -> 0
+
+/// Returns 0 if the string `s` does not end with any whitespace character followed by an FPL keyword.
+/// otherwise, it returns the length of the keyword.
+let lengthOfEndingFplKeyword (s: string) =
+    keyWordSet
+    |> Seq.tryFind (fun element ->
+        Regex.IsMatch(s, "[\s\(\)\{\}\[\]]" + Regex.Escape(element) + "$")
         || s.Equals(element))
     |> function
     | Some keyword -> keyword.Length

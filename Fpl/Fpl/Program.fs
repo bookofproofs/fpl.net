@@ -6,11 +6,11 @@ open FParsec
 let input = "TestNamespace {
     inf {
         D() {
-        }
     theory {   
         y
     }
 }"
+
 
 let result = fplParser input
 
@@ -23,5 +23,6 @@ ad.Clear()
 let origResult = tryParse' ast "recovery failed;" ad input
 printf "%O" origResult
 ad.PrintDiagnostics
+
 
 
