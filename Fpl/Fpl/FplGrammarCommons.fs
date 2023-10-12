@@ -322,7 +322,14 @@ let manipulateString
                     int64 (newInput.Length - input.Length), lengthKeyword, fatalErrorOccured)
             else
                 // if the beginning starts with any other character
-                let newInput = pre + optTrailingWs + corrTextWithWS + post.[1..]
+                let postAfterRemovingWrongChar = post.[1..].TrimStart()
+                let newInput =
+                    if postAfterRemovingWrongChar.StartsWith(text) then
+                        // if now, post starts with what was expected, do not replace the word
+                        // by text with trailing spaces
+                        pre + optTrailingWs + postAfterRemovingWrongChar
+                    else
+                        pre + optTrailingWs + corrTextWithWS + post.[1..]
 
                 (newInput,
                     newRecText,

@@ -287,6 +287,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
         | (Some cho, Some recStr) ->
             let (newInput, newRecoveryText, newOffset, keyWordLength, fatalError) =
                 manipulateString input recStr backtrackingFreePos lastRecoveryText
+            
             if fatalError then
                 let diagnosticMsg = DiagnosticMessage(System.Environment.NewLine + "(recovery failed due to likely infinite loop)")
 
@@ -298,7 +299,8 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             else
                 let lastRecoveryTextMod = lastRecoveryText.Replace(invalidSymbol,recStr)
                 let newIndexOffset = cumulativeIndexOffset + newOffset
-                if (not (newRecoveryText.StartsWith(lastRecoveryTextMod))
+                
+                if ((not (newRecoveryText.StartsWith(lastRecoveryTextMod)) || newRecoveryText="{ pred ") 
                     // prevent false positives when inserting a missing predicate into { }
                     && not (newRecoveryText="true " && lastRecoveryTextMod.EndsWith("{ } ")) 
                 ) || lastRecoveryText = "" then

@@ -3,8 +3,8 @@ open FplGrammar
 open FParsec
 
 
-let input = " TestNamespace.x.D {
-    theory {   
+let input = "TestNamespace.D   ,  {
+        theory {   
         y
     }
 }"
