@@ -29,6 +29,20 @@ type TestStatements () =
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
+    member this.TestRange02 () =
+        let result = run rangeStatement """range i [1~n]
+                (
+                    self<i>:=field.AdditiveGroup().NeutralElement()
+                )"""
+        let actual = sprintf "%O" result
+        let expected = """Success: Range
+  ((Var "proceedingResult", Var "p"),
+   [Assertion (PredicateWithoutArgs (Var "proceedingResult"));
+    Assignment (Var "a", PredicateWithoutArgs (ExtDigits "1"));
+    Assignment (Var "b", PredicateWithoutArgs (ExtDigits "1"))])"""
+        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+
+    [<TestMethod>]
     member this.TestLoop01 () =
         let result = run loopStatement """loop proceedingResult p
                 (

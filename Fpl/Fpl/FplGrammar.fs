@@ -273,7 +273,7 @@ paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclaration
 let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) |>> Ast.Signature
 
 (* Statements *)
-let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen))  |>> Ast.ArgumentTuple
+let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen))  |>> Ast.ArgumentTuple <!> "argumentTuple"
 
 let fplDelegate = positions (fplDelegateIdentifier .>>. argumentTuple) |>> Ast.Delegate
 let assignmentStatement = positions ((predicateWithQualification .>> IW .>> colonEqual) .>>. (IW >>. predicate)) |>> Ast.Assignment
@@ -318,9 +318,9 @@ statementListRef.Value <- many (many CW >>. statement .>> IW)
 
 (* Predicates *)
 
-let dotted = dot >>. predicateWithQualification
-let qualification = choice [argumentTuple ; dotted ; boundedRange ; bracketedCoords]
-predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) |>> Ast.PredicateWithQualification
+let dotted = dot >>. predicateWithQualification 
+let qualification = choice [boundedRange ; bracketedCoords ; argumentTuple] 
+predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) .>>. opt dotted |>> Ast.PredicateWithQualification 
 
 primePredicateRef.Value <- choice [
     keywordTrue
@@ -547,7 +547,7 @@ let localizationBlock = keywordLocalization >>. IW >>. leftBraceCommented >>. lo
 let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (many CW >>. opt usesClause) .>>. (many CW >>. opt rulesOfInferenceBlock) .>>. (many CW >>. theoryBlock) .>>. (many CW >>. opt localizationBlock) .>> commentedRightBrace
 let fplNamespace = positions (namespaceIdentifier .>>. (many CW >>. namespaceBlock)) .>> IW |>> Ast.Namespace
 (* Final Parser *)
-let ast =  positions fplNamespace <?> "fpl code" |>> Ast.AST
+let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
 let fplParser (input: string) = tryParse ast input "" (int64 0)
 // let fplParser (input: string) = tryParse' ast "recovery failed;" ad input

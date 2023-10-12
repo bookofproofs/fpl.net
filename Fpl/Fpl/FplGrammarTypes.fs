@@ -55,7 +55,7 @@ type Ast =
     | True of Positions * unit
     | False of Positions * unit 
     | Undefined of Positions * unit
-    | PredicateWithQualification of Positions * (Ast * Ast option) 
+    | PredicateWithQualification of (Positions * (Ast * Ast option)) * Ast option
     | And of Positions * Ast list
     | Or of Positions * Ast list
     | Impl of Positions * (Ast * Ast)

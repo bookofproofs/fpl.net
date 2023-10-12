@@ -111,6 +111,7 @@ let recoveryMap = dict [
     ("')', ',', <whitespace>", ")")
     ("')', <variable>, <whitespace>", ")")
     ("'{', <whitespace>", "{")
+    ("'{', <block comment>, <inline comment>, <significant whitespace>", "{")
     ("'{'", "{")
     ("'}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
     ("'}', <block comment>, <inline comment>, <significant whitespace>", "}")
@@ -128,6 +129,7 @@ let recoveryMap = dict [
     ("'@', 'del', 'delegate', 'self', <PascalCaseId>, <digits>, <indexed variable>, <variable>", "x")
     ("'@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
     ("'@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>", "obj")
+    ("'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>", "inf")
     ("'@', 'obj', 'object', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
     ("'*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>", "obj")
     ("'*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>", "obj")
@@ -298,7 +300,22 @@ let manipulateString
                 (newInput, newRecText, int64 (newInput.Length - input.Length), lengthKeyword, fatalErrorOccured)
             elif Regex.IsMatch(post, @"^\w") then
                 // if the beginning is a word, replace this word
-                let newInput = pre + optTrailingWs + Regex.Replace(post, @"^\w+", corrTextWithWS)
+                let newInput = 
+                    if (text = "T" || text = "x") && Regex.IsMatch(post,@"^\w+\.") then
+                        // if post begins after the replacement with a dot
+                        // and the replacement is a PascalCaseId "T" or a variable "x" then
+                        // replace it without trailing spaces
+                        pre + optTrailingWs + Regex.Replace(post, @"^\w+", text)
+                    else
+                        // else, try to simply remove the extra word
+                        let postAfterRemovingWrongWord = Regex.Replace(post, @"^\w+", "").TrimStart()
+                        if postAfterRemovingWrongWord.StartsWith(text) then
+                            // if now, post starts with what was expected, do not replace the word
+                            // by text with trailing spaces
+                            pre + optTrailingWs + postAfterRemovingWrongWord
+                        else
+                            // else replace the wrong word by by text with trailing spaces
+                            pre + optTrailingWs + Regex.Replace(post, @"^\w+", corrTextWithWS)
 
                 (newInput,
                     newRecText,
