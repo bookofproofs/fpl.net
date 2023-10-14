@@ -5,16 +5,19 @@ Fpl.SetTheory.ZermeloFraenkel
     {
         class Set: obj
         {
+            intrinsic
         }
 
         // "in relation" ("is element of") relation
         pred In(x,y: Set)
         {
+            intrinsic
         }
 
         pred IsEmpty(x: Set)
         {
-            y: Set
+            dec: y: Set;
+            spec:;
 			
             all y
             (
@@ -25,7 +28,8 @@ Fpl.SetTheory.ZermeloFraenkel
         // existence of an empty set
         axiom EmptySetExists()
         {
-            x: Set
+            dec:x: Set;
+            spec:;
             ex x
             (
                 IsEmpty(x)
@@ -35,16 +39,21 @@ Fpl.SetTheory.ZermeloFraenkel
         // introduction of a new mathematical object
         class EmptySet: Set
         {
+            dec:;
+            spec:;
             EmptySet()
             {
-                assert IsEmpty(self)
+                dec:;
+                spec:
+                assert IsEmpty(self);
             }
         }
 
         // relation between a subset and a superset
         pred IsSubset(subset,superset: Set)
         {
-            u: Set
+            dec:u: Set;
+            spec:;
             all u
             (
                 impl (In(u, subset), In(u, superset))
@@ -54,16 +63,21 @@ Fpl.SetTheory.ZermeloFraenkel
         // introduction of a new mathematical object that is a subset of a superset
         class Subset: Set
         {
+            dec:;
+            spec:;
             Subset(superSet: Set)
             {
-                assert IsSubset(self, superSet)
+                dec:;
+                spec:
+                assert IsSubset(self, superSet);
             }
         }
 
         // extensionality
         axiom Extensionality()
         {
-            x,y: Set
+            dec:x,y: Set;
+            spec:;
             all x,y
             (
                 impl
@@ -82,14 +96,17 @@ Fpl.SetTheory.ZermeloFraenkel
         class SetRoster: Set
         {
             // to support enumerating set elements, e.g. SetRoster(1,2,3)
+            dec:;
+            spec:;
             SetRoster(listOfSets:* Set)
             {
-                elem: Set
+                dec:elem: Set;
+                spec:
 
                 loop elem listOfSets
                 (
                     assert In(elem, self)
-                )
+                );
             }
 
         }
@@ -97,8 +114,11 @@ Fpl.SetTheory.ZermeloFraenkel
         // Schema of separation axioms
         axiom SchemaSeparation()
         {
-            p: pred
-            x,y: Set
+            dec:
+                p: pred
+                x,y: Set
+                ;
+            spec:;
             all p, x
             (
                 ex y
@@ -114,8 +134,12 @@ Fpl.SetTheory.ZermeloFraenkel
         class SetBuilder: Set
         {
             // to support set builder notation, ex. all "even" natural numbers like SetBuilder(n: Nat, Even(n))
+            dec:;
+            spec:;
             SetBuilder(x: Set, p: pred(u: Set, o:* obj))
             {
+                dec:;
+                spec:
                 assert
                     all u
                     (
@@ -125,13 +149,15 @@ Fpl.SetTheory.ZermeloFraenkel
                             and ( In(u,x), p(u,o) )
                         )
                     )
+                ;
             }
         }
 
         // For any two sets $x,y$ there exists a set $z$ containing them as elements.
         axiom Pairing()
         {
-            x,y,z,w: Set
+            dec:x,y,z,w: Set;
+            spec:;
             all x,y
             (
                 ex z
@@ -155,7 +181,8 @@ Fpl.SetTheory.ZermeloFraenkel
         // for every set x there is a set containing all elements of the elements of x
         axiom Union()
         {
-            x,y,z,w: Set
+            dec:x,y,z,w: Set;
+            spec:;
             all x
             (
                 ex y
@@ -174,7 +201,8 @@ Fpl.SetTheory.ZermeloFraenkel
 
         pred IsPowerSet(ofSet, potentialPowerSet: Set)
         {
-            z: Set
+            dec:z: Set;
+            spec:;
             all z
             (
                 impl (Subset(z,ofSet), In(z, potentialPowerSet))
@@ -184,15 +212,21 @@ Fpl.SetTheory.ZermeloFraenkel
         // including the PowerSet function
         func PowerSet(x: Set) -> Set
         {
-            y: Set
-            assert IsPowerSet(x,y)
-            return y
+            dec:
+                y: Set
+                ;
+            spec:
+                assert IsPowerSet(x,y)
+                ;
+                y
         }
 
         // for every set x there is a set y containing all subsets of x as its elements
         axiom PowerSetExistsForAllSets()
         {
-            x,y: Set
+            dec:
+            x,y: Set;
+            spec:;
             all x
             (
                 ex y
@@ -205,7 +239,8 @@ Fpl.SetTheory.ZermeloFraenkel
         // introducing a set union function
         func SetUnion(x,y: Set) -> Set
         {
-            z, union: Set
+            dec:z, union: Set;
+            spec:
             assert
                 all z
                 (
@@ -215,19 +250,23 @@ Fpl.SetTheory.ZermeloFraenkel
                         In(z,union)
                     )
                 )
-            return union
+            ;
+            union
         }
 
         // introducing a singleton function
         func Singleton(x: Set) -> Set
         {
-            return SetRoster(x)
+            dec:;
+            spec:;
+            SetRoster(x)
         }
 
         // alternative 2: adds SetUnion notation capability to this theory (as predicate)
         pred Union(x,superSet: Set)
         {
-            u: Set
+            dec:u: Set;
+            spec:;
             all u
             (
                 impl (In(u, x), In(u, superSet))

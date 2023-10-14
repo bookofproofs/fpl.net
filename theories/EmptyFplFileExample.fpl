@@ -2,7 +2,7 @@ TestNamespace {
     theory {   
         pred T()
         {
-            x:*
+            decl {x:*}
             true
         }
         y

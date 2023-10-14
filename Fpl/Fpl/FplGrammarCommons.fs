@@ -34,6 +34,8 @@ let keyWordSet =
            "conclusion"
            "cor"
            "corollary"
+           "dec"
+           "declaration"
            "del"
            "delegate"
            "else"
@@ -47,6 +49,8 @@ let keyWordSet =
            "impl"
            "ind"
            "index"
+           "intr"
+           "intrinsic"
            "inf"
            "inference"
            "is"
@@ -80,6 +84,8 @@ let keyWordSet =
            "rev"
            "revoke"
            "self"
+           "spec"
+           "specification"
            "thm"
            "theorem"
            "th"
@@ -122,8 +128,8 @@ let recoveryMap = dict [
     ("'{'", "{")
     ("'}', <PascalCaseId>, <significant whitespace>", "}")
     ("'}', <significant whitespace>", "}")
-    ("'@', 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'mand', 'mandatory', 'not', 'opt', 'optional', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor', '}', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <significant whitespace>, <variable>", "true")
-    ("'@', 'all', 'and', 'assert', 'cases', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'not', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <significant whitespace>, <variable>", "true")
+    ("'@', 'all', 'and', 'assert', 'cases', 'decl', 'declaration', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'mand', 'mandatory', 'not', 'opt', 'optional', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor', '}', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <significant whitespace>, <variable>", "decl")
+    ("'@', 'all', 'and', 'assert', 'cases', 'decl', 'declaration', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'loop', 'not', 'or', 'range', 'ret', 'return', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <significant whitespace>, <variable>", "decl")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', '}', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <significant whitespace>, <variable>", "}")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <significant whitespace>, <variable>", "true")
     ("'@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <indexed variable>, <variable>", "true")
@@ -141,6 +147,7 @@ let recoveryMap = dict [
     ("'$', '@', 'self', <(closed) right bound ']'>, <(open) right bound '!]'>, <digits>, <indexed variable>, <variable>", "x")
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <significant whitespace>", "pred")
     ("'con', 'conclusion', <significant whitespace>", "con")
+    ("'decl', 'declaration', '{', <significant whitespace>", "decl")
     ("'inf', 'inference', 'th', 'theory', 'uses', <significant whitespace>", "inf")
     ("'loc', 'localization', '}', <significant whitespace>", "loc")
     ("'mand', 'mandatory', 'opt', 'optional', '}', <significant whitespace>", "}")

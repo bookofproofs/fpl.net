@@ -4,7 +4,8 @@ T
     {
         ModusPonens()
         {
-            p,q: pred
+            dec: p,q: pred;
+            spec:;
             premise:
                 and (p, impl (p,q) )
             conclusion:
@@ -13,7 +14,8 @@ T
 
         ProceedingResults(p:+ pred)
         {
-            proceedingResult: pred
+            dec: proceedingResult: pred;
+            spec:;
             premise:
                 all proceedingResult p
                 (
@@ -25,7 +27,8 @@ T
 
         ExistsByExample(p: pred(c: obj, other:* obj))
         {
-            x: obj
+            dec: x: obj;
+            spec:;
             premise:
                 p(c, other)
             conclusion:
@@ -39,38 +42,47 @@ T
 
         class A: obj
         {
+            intrinsic
         }
 
         class B: obj
         {
+            intrinsic
         }
 
         class C: obj
         {
+            intrinsic
         }
 
         pred Greater(x,y: obj)
         {
-
+            intrinsic
         }
 
         axiom GreaterAB()
         {
-            a: A
-            b: B
+            dec: 
+                a: A
+                b: B;
+            spec:;
             Greater(a,b)
         }
 
         axiom GreaterBC()
         {
-            b: B
-            c: C
+            dec:
+                b: B
+                c: C;
+            spec:;
             Greater(b,c)
         }
 
         axiom GreaterTransitive()
         {
-            x,y,z: obj
+            dec:
+                x,y,z: obj;
+            spec:;
             impl
             (
                 and
@@ -84,7 +96,9 @@ T
 
         lemma Example4()
         {
-            x,y,z: obj
+            dec:
+                x,y,z: obj;
+            spec:;
             pre: undefined
             con:
                 ex x ( and (Greater(x,y), Greater(x,z)) )
@@ -92,11 +106,13 @@ T
 
         proof Example4$1
         {
-            a:A
-            b:B
-            c:C
-            x,y,z: obj
-
+            dec:
+                a:A
+                b:B
+                c:C
+                x,y,z: obj
+            ;
+            spec:;
             1. GreaterAB |- Greater(a,b)
             2. GreaterBC |- Greater(b,c)
             3. ProceedingResults(1.,2.) |- and (Greater(a,b), Greater(b,c))

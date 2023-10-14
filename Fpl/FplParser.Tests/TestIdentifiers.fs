@@ -53,14 +53,14 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestIndexVariable1 () =
-        let result = run indexVariable "x$123"
+        let result = run variable "x<123>"
         let actual = sprintf "%O" result
         let expected = """Success: IndexVariable ("x", "123")"""
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestIndexVariable2 () =
-        let result = run indexVariable "x$y"
+        let result = run variable "x<y>"
         let actual = sprintf "%O" result
         let expected = """Success: IndexVariable ("x", "y")"""
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);

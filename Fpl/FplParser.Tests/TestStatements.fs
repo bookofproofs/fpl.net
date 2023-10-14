@@ -125,13 +125,7 @@ type TestStatements () =
         let expected = """Success: Delegate (DelegateId "decrement", [PredicateWithoutArgs (Var "x")])"""
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
         
-    [<TestMethod>]
-    member this.TestReturn01 () =
-        let result = run returnStatement """return result"""
-        let actual = sprintf "%O" result
-        let expected = """Success: Return (PredicateWithoutArgs (Var "result"))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
-    
+   
     [<TestMethod>]
     member this.TestAssertion01 () =
         let result = run assertionStatement """assert

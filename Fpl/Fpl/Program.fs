@@ -5,23 +5,9 @@ open FParsec
 
 let input = "TestNamespace {
     theory {   
-        pred T()
-        {
-            x:* 
-            true
-        }
-        y
+        ax
     }
-}"
-
-let input1 = "TestNamespace {
-    theory {   
-        cl T:obj
-        {
-            x:* true
-        }
-        y
-    }
+    y
 }"
 
 let result = fplParser input
@@ -36,12 +22,29 @@ let origResult = tryParse' ast "recovery failed;" ad input
 printf "%O" origResult
 ad.PrintDiagnostics
 
-ad.Clear()
-let origResult1 = tryParse' ast "recovery failed;" ad input1
-printf "%O" origResult1
-ad.PrintDiagnostics
+let i = "class AlgebraicStructure: obj
+        {
 
+            dec:
+            myCarrierSet: tplSet
+            myOps:+ Composition(myElem:* tplSetElem)
+            ;
+            
+            AlgebraicStructure(x: tplSet, ops:+ Composition(args:* tplSetElem))
+            {
 
-let input3 = "P"
-let res = run variableType input3
-printf "%O" res
+                a: obj
+                arg: index
+				myOps := ops
+                myCarrierSet := x
+
+				assert 
+                    and (
+                        is (x,Set),
+                        all arg args (is (arg, Set)),
+                        all a (impl ( is(a,tplSetElem), In(a,myCarrierSet) ))
+                    )
+
+            }"
+let r = run definitionClass i
+printf "%O" r

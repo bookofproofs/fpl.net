@@ -1036,7 +1036,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag,  actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseAxiom002Diag () =

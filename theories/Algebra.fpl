@@ -6,15 +6,18 @@ Fpl.Algebra.Structures
     {
 
         /* Binary operation. Note that the generic type "tplSetElem" limits a Binary operation to be closed
-           inside a type, however, it still might be not closed inside a particular set of elements of this type.
-           we will therefore need another predicate to ensure, but defining it will require the the context
-           of a particular set. It is, therefore, not possible to define the closure for a binary operation without this
-           broader context. */
+           with respect to this particular type. 
+           However, it still might not be closed inside a particular set of elements of this type.
+           Do to this, we would need another predicate to ensure it, but defining it would require a the context
+           of a particular set. It is, therefore, not possible to define the closure for a binary operation at this stage. */
         func BinOp(x,y: tplSetElem) -> tplSetElem
         {
+            intrinsic
             optional pred IsAssociative()
             {
-                a,b,c: tplSetElem
+                dec:a,b,c: tplSetElem;
+                spec:;
+
                 all a,b,c
                 (
                     Equal
@@ -27,7 +30,8 @@ Fpl.Algebra.Structures
 
             optional pred IsCommutative()
             {
-                a,b: tplSetElem
+                dec: a,b: tplSetElem;
+                spec:;
                 all a,b
                 (
                     Equal
@@ -55,7 +59,8 @@ Fpl.Algebra.Structures
 
             optional pred HasLeftNeutralElement()
             {
-                e: tplSetElem
+                dec: e: tplSetElem;
+                spec:;
                 ex e
                 (
                     IsLeftNeutralElement(e)
@@ -64,7 +69,7 @@ Fpl.Algebra.Structures
 
             optional pred HasRightNeutralElement()
             {
-                e: tplSetElem
+                dec:e: tplSetElem;
                 ex e
                 (
                     IsRightNeutralElement(e)
@@ -73,7 +78,7 @@ Fpl.Algebra.Structures
 
             optional pred HasNeutralElement()
             {
-                e: tplSetElem
+                dec:e: tplSetElem;
                 ex e
                 (
                     IsNeutralElement(e)
@@ -82,30 +87,35 @@ Fpl.Algebra.Structures
 
             optional func LeftNeutralElement() -> tplSetElem
             {
-                e: tplSetElem
+                dec:e: tplSetElem;
+                spec:
                 assert 
                     ex e
                     (
                         IsLeftNeutralElement(e)
-                    )
+                    );
                 return e
             }
 
             optional tplSetElem RightNeutralElement()
             {
+                spec:
                 assert IsRightNeutralElement(self)
+                ;
             }
 
             optional tplSetElem NeutralElement()
             {
+                spec:
                 assert IsNeutralElement(self)
+                ;
             }
 
         }
 
         func Composition(operands:* tplSetElem) -> tplSetElem
         {
-
+            intrinsic
         }
 
         /* an algebraic structure is derived from a set type with at least one binary operation
@@ -115,14 +125,18 @@ Fpl.Algebra.Structures
         class AlgebraicStructure: obj
         {
 
+            dec:
             myCarrierSet: tplSet
             myOps:+ Composition(myElem:* tplSetElem)
-
+            ;
+            
             AlgebraicStructure(x: tplSet, ops:+ Composition(args:* tplSetElem))
             {
 
-                a: obj
+                dec:a: obj
                 arg: index
+                ;
+                spec:
 				myOps := ops
                 myCarrierSet := x
 
@@ -137,6 +151,7 @@ Fpl.Algebra.Structures
                         all arg args (is (arg, Set)),
                         all a (impl ( is(a,tplSetElem), In(a,myCarrierSet) ))
                     )
+                ;
 
             }
 
@@ -148,7 +163,8 @@ Fpl.Algebra.Structures
             // Every algebraic structure will have a mandatory property called CarrierSet of type Set.
             mandatory Set CarrierSet()
             {
-                self:=myCarrierSet
+                spec:
+                self:=myCarrierSet;
             }
 
 
@@ -161,7 +177,7 @@ Fpl.Algebra.Structures
 
             Magma(x: tplSet, op: BinOp)
             {
-                self:=AlgebraicStructure(x,op)
+                spec:self:=AlgebraicStructure(x,op);
             }
         }
 
@@ -170,8 +186,10 @@ Fpl.Algebra.Structures
         {
             Semigroup(x: tplSet, op: BinOp)
             {
-                self:= Magma (x,op)
-                assert self.Op().IsAssociative()
+                spec:
+                    self:= Magma (x,op)
+                    assert self.Op().IsAssociative()
+                ;
             }
 
         }
@@ -181,18 +199,24 @@ Fpl.Algebra.Structures
         // Note how we use "full-qualified" parameters to ensure that the type "tpl" will be of exactly the  same ty
         class Monoid: Semigroup
         {
-            myOp: BinOp(a,b: tplSetElem)
+            dec:
+                myOp: BinOp(a,b: tplSetElem)
+            ;
 
             Monoid(x: tplSet, op: BinOp)
             {
-                self:=Semigroup(x,op)
-                myOp:=op
-                assert myOp.HasNeutralElement()
+                spec:
+                    self:=Semigroup(x,op)
+                    myOp:=op
+                    assert myOp.HasNeutralElement()
+                ;
             }
 
             mandatory tplSetElem NeutralElem()
             {
-                self:=myOp.NeutralElement()
+                spec:
+                    self:=myOp.NeutralElement()
+                ;
             }
         }
 
@@ -205,18 +229,19 @@ Fpl.Algebra.Structures
             n: Nat
             ) -> tplSetElem
         {
+            spec:
             assert In(y,x)
             cases
             (
                 | Equal(n,0):
-                    return m.NeutralElem();
+                    m.NeutralElem();
                 else
-                    return
-                        op(
-                            y,
-                            Exp( m(y,op), y, Sub(n,1))
-                        )
+                    op(
+                        y,
+                        Exp( m(y,op), y, Sub(n,1))
+                    )
             )
+            ;
 
         }
 
