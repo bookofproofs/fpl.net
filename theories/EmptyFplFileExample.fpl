@@ -1,9 +1,10 @@
 TestNamespace {
     theory {   
-            func pddddd
-            (
-            )  tplSass
+        pred T()
         {
+            x:*
+            true
         }
+        y
     }
 }

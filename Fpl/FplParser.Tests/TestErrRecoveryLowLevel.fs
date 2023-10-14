@@ -140,7 +140,7 @@ The parser backtracked after:
 Expecting: <block comment>, <inline comment>, <significant whitespace>, ':ext',
 'inf', 'inference', 'th', 'theory' or 'uses'""", "':ext', 'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>")>]
     member this.TestRetrieveExpectedParserChoices(fParsecErrMsg:string, expected:string) = 
-        let actual = retrieveExpectedParserChoices fParsecErrMsg
+        let actual, actualModCW = retrieveExpectedParserChoices fParsecErrMsg
         Assert.AreEqual(expected, actual)
 
     [<TestMethod>]

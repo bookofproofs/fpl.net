@@ -157,10 +157,18 @@ let retrieveExpectedParserChoices (errMsg:string) =
             let hs = System.Collections.Generic.HashSet<string>(trimmedS)
             hashSet.UnionWith(hs) |> ignore
     // return the choices as a comma-separated list of alphabetically sorted choices
-    hashSet
-    |> Seq.toList
-    |> List.sort
-    |> String.concat ", "
+    let choices = 
+        hashSet
+        |> Seq.toList
+        |> List.sort
+        |> String.concat ", "
+    let choicesModCW = 
+        hashSet
+        |> Seq.toList
+        |> List.sort
+        |> List.filter (fun str -> str<>labelWhitespace && str<>labelBlockComment && str<>labelInlineComment ) // filter out all elements that will never become choices for error recovery
+        |> String.concat ", "
+    choices, choicesModCW
 
 
 let getLineOffset (input: string) (line:int)=
@@ -223,8 +231,8 @@ let mapErrMsgToRecText (input: string) (errMsg: string) (pos:Position) =
     let backtrackingFreeErrMsg,  backtrackingFreePos = extractBacktrackingFreeErrMsgAndPos input errMsg pos 
     let test = input.Substring(int backtrackingFreePos.Index)
 
-    let choices = retrieveExpectedParserChoices backtrackingFreeErrMsg
-    let text = recText choices
+    let choices, choicesModCW = retrieveExpectedParserChoices backtrackingFreeErrMsg
+    let text = recText choicesModCW
     let newErrMsg, modifiedPos = replaceFParsecErrMsgForFplParser backtrackingFreeErrMsg choices backtrackingFreePos
     (Some choices, text, newErrMsg, modifiedPos)
 

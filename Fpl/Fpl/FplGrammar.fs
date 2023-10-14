@@ -57,13 +57,13 @@ let vDash = skipString "|-"
 
 (* Whitespaces and Comments *)
 
-let IW = spaces <?> "<whitespace>"
+let IW = spaces <?> labelWhitespace
 
 let SW = spaces1 <?> "<significant whitespace>"
 
-let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline) <?> "<inline comment>" |>> ignore 
+let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline) <?> labelInlineComment |>> ignore 
 
-let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) <?> "<block comment>" |>> ignore 
+let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) <?> labelBlockComment |>> ignore 
 
 let CW = choice [ blockComment; inlineComment; SW ]
 
@@ -273,7 +273,7 @@ paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclaration
 let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) |>> Ast.Signature
 
 (* Statements *)
-let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen))  |>> Ast.ArgumentTuple <!> "argumentTuple"
+let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen))  |>> Ast.ArgumentTuple 
 
 let fplDelegate = positions (fplDelegateIdentifier .>>. argumentTuple) |>> Ast.Delegate
 let assignmentStatement = positions ((predicateWithQualification .>> IW .>> colonEqual) .>>. (IW >>. predicate)) |>> Ast.Assignment
