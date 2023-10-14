@@ -1,4 +1,4 @@
-﻿module FplGrammar
+﻿module FplParser
 open System.Text.RegularExpressions
 open FplGrammarCommons
 open FplGrammarTypes

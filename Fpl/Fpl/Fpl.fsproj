@@ -14,7 +14,7 @@
     <Compile Include="ErrRecovery.fs" />
     <None Include="CHANGES.md" />
     <None Include="DocuFplGrammarPocShiftFromPythonToFSharp.md" />
-    <Compile Include="FplGrammar.fs" />
+    <Compile Include="FplParser.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using static FplGrammar;
+using static FplParser;
 using static Microsoft.FSharp.Core.ByRefKinds;
 
 namespace FplLS
@@ -24,9 +24,9 @@ namespace FplLS
             if (buffer != null)
             {
                 var sourceCode = buffer.ToString();
-                var parserDiagnostics = FplGrammar.parserDiagnostics;
+                var parserDiagnostics = FplParser.parserDiagnostics;
                 parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
-                var ast = FplGrammar.fplParser(sourceCode);
+                var ast = FplParser.fplParser(sourceCode);
                 var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
                 _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
                 {
