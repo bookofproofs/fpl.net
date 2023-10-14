@@ -36,11 +36,11 @@ let rightBrace = skipChar '}'
 let leftParen = skipChar '(' >>. spaces 
 let rightParen = skipChar ')' 
 let comma = skipChar ',' >>. spaces 
-let star = skipChar '*' >>. spaces >>% Ast.Many
-let plus = skipChar '+' >>. spaces >>% Ast.Many1
 let dot = skipChar '.'
-let colon = skipChar ':' >>. spaces
-let colonEqual = skipString ":="
+let colon = skipChar ':' >>. spaces >>% Ast.One
+let colonStar = skipString ":*" >>. spaces >>% Ast.Many
+let colonPlus = skipString ":+" >>. spaces >>% Ast.Many1
+let colonEqual = skipString ":=" >>. spaces 
 let at = pchar '@'
 let case = skipChar '|'
 let leftBracket = skipChar '<' >>. spaces 
@@ -115,7 +115,7 @@ let variableX: Parser<string,unit> = IdStartsWithSmallCase >>=
 
 let variable = positions variableX <?> "<variable>" |>> Ast.Var 
 
-let variableList = sepBy1 (variable .>> IW) comma
+let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
 let keywordSelf = skipString "self" .>> IW
 let keywordIndex = (skipString "index" <|> skipString "ind") .>> IW  >>% Ast.IndexType
@@ -247,7 +247,7 @@ let rangeInType = positions ((opt coordInType .>> tilde) .>>. opt coordInType) |
 let specificClassType = choice [ objectHeader; xId; predicateIdentifier ] .>> IW
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
-let callModifier = opt (choice [ star;  plus ] ) 
+let varDeclModifier = choice [ colonStar; colonPlus; colon ] >>. IW
 
 let bracketedCoordsInType = positions (leftBracket >>. coordInTypeList .>> rightBracket) |>> Ast.BracketedCoordsInType
 let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) |>> Ast.BoundedRangeInType
@@ -260,13 +260,11 @@ let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) 
 let bracketModifier = boundedRangeInType <|> bracketedCoordsInType
 let classType = positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
-let variableTypeWithModifier = positions (callModifier .>>. choice [ keywordIndex; keywordFunction; keywordPredicate; classType ]) |>> Ast.VariableTypeWithModifier
+let simpleVariableType = positions (choice [ keywordIndex; keywordFunction; keywordPredicate; classType ] .>> IW) |>> Ast.SimpleVariableType
 
-let parenthesisedType = positions (variableTypeWithModifier .>> IW >>. opt paramTuple) |>> Ast.VariableType
+let variableType = positions (simpleVariableType .>>. opt paramTuple .>> IW) |>> Ast.VariableType
 
-let variableType = choice [ parenthesisedType ; variableTypeWithModifier ; classType ] .>> IW
-
-let namedVariableDeclaration = positions ((variableList .>> IW) .>>. ((colon >>. IW) >>. variableType)) |>> Ast.NamedVarDecl
+let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType) |>> Ast.NamedVarDecl
 let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
 
 paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) |>> Ast.ParamTuple
@@ -276,7 +274,7 @@ let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) |>> Ast
 let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen))  |>> Ast.ArgumentTuple 
 
 let fplDelegate = positions (fplDelegateIdentifier .>>. argumentTuple) |>> Ast.Delegate
-let assignmentStatement = positions ((predicateWithQualification .>> IW .>> colonEqual) .>>. (IW >>. predicate)) |>> Ast.Assignment
+let assignmentStatement = positions ((predicateWithQualification .>> IW .>> colonEqual) .>>. predicate) |>> Ast.Assignment
 let returnStatement = positions (keywordReturn >>. predicate) |>> Ast.Return
 
 let variableRange = choice [ predicateWithQualification ; boundedRange]
@@ -538,7 +536,7 @@ let ebnfTerm = positions (sepEndBy1 ebnfFactor SW) |>> Ast.LocalizationTerm
 ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.LocalizationTermList
 let translation = (tilde >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl
 let translationList = many1 (many CW >>. translation .>> IW)
-let localization = (predicate .>> IW .>> colonEqual .>> IW) .>>. (translationList .>> IW .>> semiColon)
+let localization = (predicate .>> IW .>> colonEqual) .>>. (translationList .>> IW .>> semiColon)
 let localizationList = many1 (many CW >>. localization .>> IW)
 let localizationBlock = keywordLocalization >>. IW >>. leftBraceCommented >>. localizationList .>> commentedRightBrace
 

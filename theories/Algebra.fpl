@@ -103,7 +103,7 @@ Fpl.Algebra.Structures
 
         }
 
-        func Composition(operands: *tplSetElem) -> tplSetElem
+        func Composition(operands:* tplSetElem) -> tplSetElem
         {
 
         }
@@ -116,9 +116,9 @@ Fpl.Algebra.Structures
         {
 
             myCarrierSet: tplSet
-            myOps: +Composition(myElem: *tplSetElem)
+            myOps:+ Composition(myElem:* tplSetElem)
 
-            AlgebraicStructure(x: tplSet, ops: +Composition(args: *tplSetElem))
+            AlgebraicStructure(x: tplSet, ops:+ Composition(args:* tplSetElem))
             {
 
                 a: obj

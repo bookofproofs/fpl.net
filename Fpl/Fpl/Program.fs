@@ -42,4 +42,6 @@ printf "%O" origResult1
 ad.PrintDiagnostics
 
 
-let input3 = "variableType"
+let input3 = "P"
+let res = run variableType input3
+printf "%O" res

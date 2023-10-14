@@ -35,6 +35,7 @@ type Ast =
     | BrackedCoordList of Positions * Ast list
     | RangeInType of Positions * (Ast option * Ast option) 
     // Types
+    | One 
     | Many 
     | Many1 
     | TemplateType of Positions * string
@@ -43,8 +44,8 @@ type Ast =
     | PredicateType 
     | FunctionalTermType 
     | IndexType
-    | VariableType of Positions * Ast option
-    | VariableTypeWithModifier of Positions * (Ast option * Ast)
+    | VariableType of Positions * (Ast * Ast option)
+    | SimpleVariableType of Positions * Ast 
     | BracketedCoordsInType of Positions * Ast list 
     | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
     | ClassType of Positions * (Ast * Ast option)
@@ -90,8 +91,8 @@ type Ast =
     | Proposition of Positions * Ast
     | Corollary of Positions * (((Ast * Ast list) * Ast) * ((Ast * Ast) * Ast))
     | Conjecture of Positions * Ast
-    | NamedVarDecl of Positions * (Ast list * Ast) 
-    | VariableSpecification of Positions * Ast list
+    | NamedVarDecl of Positions * ((Ast list * unit) * Ast) 
+    | VariableSpecification of Positions * Ast list 
     | ParamTuple of Positions * Ast list
     | Signature of Positions * (Ast * Ast)
     | Axiom of Positions * (Ast * (Ast * Ast))

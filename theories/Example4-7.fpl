@@ -11,7 +11,7 @@ T
                 q
         }
 
-        ProceedingResults(p: +pred)
+        ProceedingResults(p:+ pred)
         {
             proceedingResult: pred
             premise:
@@ -23,7 +23,7 @@ T
                 and (p)
         }
 
-        ExistsByExample(p: pred(c: obj, other: *obj))
+        ExistsByExample(p: pred(c: obj, other:* obj))
         {
             x: obj
             premise:

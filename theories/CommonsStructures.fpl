@@ -10,7 +10,7 @@ Fpl.Commons.Structures
         {
             myLength: Nat
 
-            Tuple(listOfTpl: +tpl)
+            Tuple(listOfTpl:+ tpl)
             {
                 elem: tpl
                 i: Nat
@@ -56,7 +56,7 @@ Fpl.Commons.Structures
             myLength: Nat
             myFrom: Nat
 
-            CartesianProduct(setList: +Set)
+            CartesianProduct(setList:+ Set)
             {
                 setItem: Set
                 i: Nat
@@ -112,7 +112,7 @@ Fpl.Commons.Structures
         {
             myArity: Nat
 
-            Relation(setList: +Set)
+            Relation(setList:+ Set)
             {
                 cartProd : CartesianProduct
                 cartProd := CartesianProduct(setList)

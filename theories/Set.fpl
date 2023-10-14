@@ -82,7 +82,7 @@ Fpl.SetTheory.ZermeloFraenkel
         class SetRoster: Set
         {
             // to support enumerating set elements, e.g. SetRoster(1,2,3)
-            SetRoster(listOfSets: *Set)
+            SetRoster(listOfSets:* Set)
             {
                 elem: Set
 
@@ -114,7 +114,7 @@ Fpl.SetTheory.ZermeloFraenkel
         class SetBuilder: Set
         {
             // to support set builder notation, ex. all "even" natural numbers like SetBuilder(n: Nat, Even(n))
-            SetBuilder(x: Set, p: pred(u: Set, o: *obj))
+            SetBuilder(x: Set, p: pred(u: Set, o:* obj))
             {
                 assert
                     all u
