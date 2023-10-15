@@ -22,17 +22,19 @@ let origResult = tryParse' ast "recovery failed;" ad input
 printf "%O" origResult
 ad.PrintDiagnostics
 
-(*
-let i = "cases
-            (
-                | Equal(n,0):
-                    return m.NeutralElem();
-                else
-                    return op(
-                        y,
-                        Exp( m(y,op), y, Sub(n,1))
-                    )
-            )"
-let r = run casesStatement i
+
+let i = "pred T()
+        {
+            x,
+            true
+        }"
+let r = run definitionPredicate i
 printf "%O" r
-*)
+
+let i1 = "func T() ->S
+        {
+            x,
+            true
+        }"
+let r1 = run definitionFunctionalTerm i1
+printf "%O" r1

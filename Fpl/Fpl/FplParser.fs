@@ -372,8 +372,8 @@ let commentedStatement = many CW >>. statement .>> IW
 let varSpecBlock = positions (many CW >>. keywordSpecification >>. colon >>. (many commentedStatement .>> IW) .>> semiColon) .>> IW |>> Ast.VarSpecBlock
 
 
-let varDeclOrSpecList = opt (many1 (varDeclBlock <|> varSpecBlock))
-
+let varDeclOrSpecListMand = many1 (varDeclBlock <|> varSpecBlock)
+let varDeclOrSpecList = opt varDeclOrSpecListMand
 (*To simplify the syntax definition, we do not define separate
 FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
 The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
@@ -412,7 +412,7 @@ let corollary = positions (keywordCorollary >>. corollarySignature .>>. premiseC
 let keywordAxiom = (skipString "axiom" <|> skipString "ax" <|> skipString "postulate" <|> skipString "post") >>. IW
 let axiomBlock = leftBraceCommented >>. varDeclOrSpecList .>>. commentedPredicate .>> commentedRightBrace
 
-let axiom = positions (keywordAxiom >>. (signature .>> IW) .>>. axiomBlock) |>> Ast.Axiom
+let axiom = positions (keywordAxiom >>. signature .>>. axiomBlock) |>> Ast.Axiom
 
 (* FPL building blocks - Constructors *)
 
@@ -435,11 +435,11 @@ let predicateInstance = positions (keywordPredicate >>. signature .>>. (many CW 
 let classInstanceBlock = leftBraceCommented >>. (keywordIntrinsic <|> classContent) .>> commentedRightBrace
 let classInstance = positions (variableType .>>. signature .>>. classInstanceBlock) |>> Ast.ClassInstance
 let mapping = toArrow >>. IW >>. variableType
-let functionalTermSignature = (keywordFunction >>. signature) .>>. (IW >>. mapping)
+let functionalTermSignature = (keywordFunction >>. signature) .>>. (IW >>. mapping) .>> IW 
 
 let funcContent = varDeclOrSpecList .>>. (keywordReturn >>. predicateWithQualification .>> IW) |>> Ast.DefFunctionContent
 let functionalTermInstanceBlock = leftBraceCommented >>. (keywordIntrinsic <|> funcContent) .>> commentedRightBrace
-let functionalTermInstance = positions (functionalTermSignature .>> IW .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
+let functionalTermInstance = positions (functionalTermSignature .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
 
 let definitionProperty = choice [
     predicateInstance

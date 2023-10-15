@@ -308,10 +308,16 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 let lastRecoveryTextMod = lastRecoveryText.Replace(invalidSymbol,recStr)
                 let newIndexOffset = cumulativeIndexOffset + newOffset
                 
-                if ((not (newRecoveryText.StartsWith(lastRecoveryTextMod)) || newRecoveryText="{ pred " || newRecoveryText="T T ") 
-                    // prevent false positives when inserting a missing predicate into { }
-                    && not (newRecoveryText="true " && lastRecoveryTextMod.EndsWith("{ } ")) 
-                ) || lastRecoveryText = "" then
+                let cond1 = not (newRecoveryText.StartsWith(lastRecoveryTextMod))
+                let cond2 = newRecoveryText="{ pred "
+                let cond3 = newRecoveryText="T T "
+                let cond3a = newRecoveryText="T { "
+                let cond4 = not (lastRecoveryTextMod.EndsWith("{ } "))
+                let cond5 = not (lastRecoveryTextMod.EndsWith("{ ")) 
+                let cond0 = lastRecoveryText = ""
+                // emit diagnostics using a heuristics while preventing false positives 
+                let conditionForEmittingDiagnostics = cond0 || ( ( cond1 || cond2 || cond3 || cond3a) && cond4 && cond5 ) 
+                if conditionForEmittingDiagnostics then
                     // emit diagnostic if there is a new remainingInput
 
                     let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine)

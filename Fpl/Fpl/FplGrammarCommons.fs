@@ -107,6 +107,7 @@ let recoveryMap = dict [
     ("',', '>'", ">")
     ("',', 'alias', '}'", "}")
     ("':', ':*', ':+'", ":")
+    ("';', <significant whitespace>, <variable>", ";")
     ("':'", ":")
     ("':='", ":=")
     ("':end'", ":end")
@@ -141,9 +142,10 @@ let recoveryMap = dict [
     ("'$', '(', '.', '<', 'mand', 'mandatory', 'opt', 'optional', '}', <(closed) left bound '['>, <(open) left bound '[!'>, <significant whitespace>", "}")
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <significant whitespace>", "pred")
     ("'con', 'conclusion', <significant whitespace>", "con")
-    ("'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 'spec', 'specification', '}', <PascalCaseId>, <significant whitespace>", "intr")
+    ("'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 'spec', 'specification', '}', <PascalCaseId>, <significant whitespace>", "}")
     ("'dec', 'declaration', 'intr', 'intrinsic', 'ret', 'return', 'spec', 'specification', <significant whitespace>", "intr")
     ("'dec', 'declaration', 'pre', 'premise', 'spec', 'specification', <significant whitespace>", "pre")
+    ("'inf', 'inference', 'th', 'theory', 'uses', <significant whitespace>", "uses")
     ("'loc', 'localization', '}', <significant whitespace>", "loc")
     ("'mand', 'mandatory', 'opt', 'optional', '}', <significant whitespace>", "}")
     ("'th', 'theory', <significant whitespace>", "th")
@@ -294,7 +296,7 @@ let manipulateString
                     else
                         pre + " " + corrTextWithWS + optTrailingWs + post
                 (newInput, lastRecoveryText + corrTextWithWS, int64 (newInput.Length - input.Length), lengthKeyword, fatalErrorOccured)
-            elif postStartsWithParenthesis then
+            elif postStartsWithParenthesis || text = "{" then
                 // insert text with a trailing whitespace
                 let newInput = 
                     if pre.EndsWith(".") then
@@ -311,8 +313,8 @@ let manipulateString
                         // replace it without trailing spaces
                         pre + optTrailingWs + Regex.Replace(post, @"^\w+", text)
                     else
-                        // else, try to simply remove the extra word
-                        let postAfterRemovingWrongWord = Regex.Replace(post, @"^\w+", "").TrimStart()
+                        // else, try to simply remove the extra word and any optional trailing commas
+                        let postAfterRemovingWrongWord = Regex.Replace(post, @"^\w+[\S]*", "").TrimStart()
                         if postAfterRemovingWrongWord.StartsWith(text) then
                             // if now, post starts with what was expected, do not replace the word
                             // by text with trailing spaces
