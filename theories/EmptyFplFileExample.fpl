@@ -1,6 +1,6 @@
 TestNamespace {
     theory {   
-        pred T()
+        func T() ->S
         {
             x,
             true

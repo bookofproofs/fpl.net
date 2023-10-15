@@ -32,8 +32,10 @@ Fpl.LinAlg
                 spec:
                     self[from ~ to]:=addInField(v[from ~ to],w[from ~ to])
                 ;
+                return self[from ~ to]
 	        }
-
+            
+            
         }
 		
         lemma VecAddIsCommutative()

@@ -5,9 +5,13 @@ open FParsec
 
 let input = "TestNamespace {
     theory {   
-        func
+        func T() ->S
+        {
+            x,
+            true
+        }
+        y
     }
-    y
 }"
 
 let result = fplParser input

@@ -372,8 +372,7 @@ let commentedStatement = many CW >>. statement .>> IW
 let varSpecBlock = positions (many CW >>. keywordSpecification >>. colon >>. (many commentedStatement .>> IW) .>> semiColon) .>> IW |>> Ast.VarSpecBlock
 
 
-let varDeclOrSpecListMand = many1 (varDeclBlock <|> varSpecBlock)
-let varDeclOrSpecList = opt varDeclOrSpecListMand
+let varDeclOrSpecList = opt (many1 (varDeclBlock <|> varSpecBlock))
 (*To simplify the syntax definition, we do not define separate
 FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
 The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
