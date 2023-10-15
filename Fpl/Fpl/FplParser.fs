@@ -280,13 +280,15 @@ let variableRange = choice [ entity ; boundedRange]
 let leftBraceCommented = (leftBrace >>. many CW)
 let commentedRightBrace = (many CW .>> rightBrace) 
 
+let keywordReturn = many CW >>. (skipString "return" <|> skipString "ret") .>> many CW 
+
 let elseKeyword = skipString "else"
 let defaultResult = positions (elseKeyword >>. IW >>. many CW >>. statementList) |>> Ast.DefaultResult
 let conditionFollowedByResult = positions ((case >>. IW >>. predicate .>> colon) .>>. (many CW >>. statementList)) |>> Ast.ConditionFollowedByResult
 let conditionFollowedByResultList = many1 (many CW >>. conditionFollowedByResult)
 
 
-let casesStatement = positions (((keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>> semiColon .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen))) |>> Ast.Cases
+let casesStatement = positions (((keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>>  semiColon .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen))) |>> Ast.Cases
 let entityInVariableRange = ( entity .>>. variableRange) .>> IW
 let rangeOrLoopBody = entityInVariableRange .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
 let loopStatement = positions (keywordLoop >>. rangeOrLoopBody) |>> Ast.Loop
@@ -424,7 +426,6 @@ let constructorBlock = leftBraceCommented >>. classContent .>>. callConstructorP
 let constructor = positions (signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
-let keywordReturn = many CW >>. (skipString "return" <|> skipString "ret") .>> many CW 
 let keywordMandatory = positions (skipString "mandatory" <|> skipString "mand") .>> IW >>% Ast.Mandatory
 let keywordOptional = positions (skipString "optional" <|> skipString "opt") .>> IW >>% Ast.Optional
 
@@ -559,6 +560,6 @@ let fplNamespace = positions (namespaceIdentifier .>>. (many CW >>. namespaceBlo
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
-// let fplParser (input: string) = tryParse ast input "" (int64 0)
-let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
+let fplParser (input: string) = tryParse ast input "" (int64 0)
+//let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
 let parserDiagnostics = ad

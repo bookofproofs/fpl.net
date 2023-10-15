@@ -5,7 +5,7 @@ open FParsec
 
 let input = "TestNamespace {
     theory {   
-        ax
+        func
     }
     y
 }"
@@ -22,29 +22,17 @@ let origResult = tryParse' ast "recovery failed;" ad input
 printf "%O" origResult
 ad.PrintDiagnostics
 
-let i = "class AlgebraicStructure: obj
-        {
-
-            dec:
-            myCarrierSet: tplSet
-            myOps:+ Composition(myElem:* tplSetElem)
-            ;
-            
-            AlgebraicStructure(x: tplSet, ops:+ Composition(args:* tplSetElem))
-            {
-
-                a: obj
-                arg: index
-				myOps := ops
-                myCarrierSet := x
-
-				assert 
-                    and (
-                        is (x,Set),
-                        all arg args (is (arg, Set)),
-                        all a (impl ( is(a,tplSetElem), In(a,myCarrierSet) ))
+(*
+let i = "cases
+            (
+                | Equal(n,0):
+                    return m.NeutralElem();
+                else
+                    return op(
+                        y,
+                        Exp( m(y,op), y, Sub(n,1))
                     )
-
-            }"
-let r = run definitionClass i
+            )"
+let r = run casesStatement i
 printf "%O" r
+*)
