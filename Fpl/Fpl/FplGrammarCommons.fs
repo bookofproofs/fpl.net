@@ -116,6 +116,7 @@ let recoveryMap = dict [
     ("'(', ';', '<', <(closed) left bound '['>, <(open) left bound '[!'>, <significant whitespace>, <variable>", ";")
     ("'(', ';', '|', '~', <\"language-specific string\">, <significant whitespace>, <variable>", ";")
     ("'(', ';', <significant whitespace>, <variable>", ";")
+    ("'(', '.'", "(")
     ("'(', '.', ';', '<', <(closed) left bound '['>, <(open) left bound '[!'>, <significant whitespace>, <variable>", ";")
     ("'(', '.', '<', 'con', 'conclusion', <(closed) left bound '['>, <(open) left bound '[!'>, <significant whitespace>", "con")
     ("'(', ')', ',', '.', '<', <(closed) left bound '['>, <(open) left bound '[!'>", ",")
