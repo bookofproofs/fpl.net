@@ -112,6 +112,7 @@ let recoveryMap = dict [
     ("':='", ":=")
     ("':end'", ":end")
     ("':ext', 'inf', 'inference', 'th', 'theory', 'uses', <significant whitespace>", ":ext")
+    ("'<', '{', <(closed) left bound '['>, <(open) left bound '[!'>", "{")
     ("'(', ';', <significant whitespace>, <variable>", ";")
     ("'(', '.', ';', '<', <(closed) left bound '['>, <(open) left bound '[!'>, <significant whitespace>, <variable>", ";")
     ("'(', ';', '<', <(closed) left bound '['>, <(open) left bound '[!'>, <PascalCaseId>, <significant whitespace>, <variable>", ";")

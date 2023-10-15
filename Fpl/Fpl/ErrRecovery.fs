@@ -311,14 +311,20 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 let cond1 = not (newRecoveryText.StartsWith(lastRecoveryTextMod))
                 let cond2 = newRecoveryText="{ pred "
                 let cond3 = newRecoveryText="T T "
-                let cond3a = newRecoveryText="T { "
-                let cond4 = not (lastRecoveryTextMod.EndsWith("{ } "))
+                let cond4 = newRecoveryText="T { "
                 let cond5 = not (lastRecoveryTextMod.EndsWith("{ ")) 
                 let cond6 = lastRecoveryTextMod.EndsWith("( ) { ")
-                let cond7 = not (newRecoveryText = "} " && lastRecoveryText = "intr ")
+                let cond7 = not (newRecoveryText = "} ")
+                let cond8 = not (lastRecoveryText = "intr ")
                 let cond0 = lastRecoveryText = ""
                 // emit diagnostics using a heuristics while preventing false positives 
-                let conditionForEmittingDiagnostics = cond0 || ( ( cond1 || cond2 || cond3 || cond3a) && cond4 && (cond5 || cond6) && cond7) 
+                let conditionForEmittingDiagnostics = 
+                    cond0 
+                    || ( 
+                            ( cond1 || cond2 || cond3 || cond4) 
+                            && (cond5 || cond6) 
+                            && (cond7 || cond8)
+                       ) 
                 if conditionForEmittingDiagnostics then
                     // emit diagnostic if there is a new remainingInput
 
