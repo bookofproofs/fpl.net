@@ -493,7 +493,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         let expectedDiag = """Diagnostic
   (FplParser, Error, (Ln: 3, Col: 5),
    DiagnosticMessage "'theory'
-Expecting: '{'
+Expecting: '{', <whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 4, Col: 9),
@@ -667,8 +667,10 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
   (FplParser, Error, (Ln: 4, Col: 5),
-   DiagnosticMessage "'theory'
-Expecting: <variable (got keyword)>
+   DiagnosticMessage
+     "'theory'
+Expecting: 'dec', 'declaration', 'pre', 'premise', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 5, Col: 9),
@@ -699,15 +701,8 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 4, Col: 9),
    DiagnosticMessage
      "'}'
-Expecting: '@', 'assert', 'cases', 'del', 'delegate', 'loop', 'pre', 'premise', 
-'range', 'ret', 'return', 'self', <PascalCaseId>, <block comment>, <digits>, <indexed variable>, 
-<inline comment>, <significant whitespace>, <variable>
-")
-Diagnostic
-  (FplParser, Error, (Ln: 5, Col: 5),
-   DiagnosticMessage
-     "'theory'
-Expecting: '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'pre', 'premise', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 6, Col: 9),
@@ -737,7 +732,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 4, Col: 5),
    DiagnosticMessage
      "'theory'
-Expecting: '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>, <whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 5, Col: 9),
@@ -847,6 +842,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 Expecting: <PascalCaseId>
 ")
 Diagnostic
+  (FplParser, Error, (Ln: 1, Col: 19),
+   DiagnosticMessage "'{'
+Expecting: <PascalCaseId>
+")
+Diagnostic
   (FplParser, Error, (Ln: 3, Col: 9),
    DiagnosticMessage
      "'y'
@@ -874,12 +874,6 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 Expecting: <PascalCaseId>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 2, Col: 9),
-   DiagnosticMessage
-     "'theory'
-Expecting: '{', <block comment>, <inline comment>, <significant whitespace>
-")
-Diagnostic
   (FplParser, Error, (Ln: 3, Col: 9),
    DiagnosticMessage
      "'y'
@@ -887,11 +881,6 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
 <inline comment>, <significant whitespace>
-")
-Diagnostic
-  (FplParser, Error, (Ln: 4, Col: 5),
-   DiagnosticMessage "'}'
-Expecting: <PascalCaseId>
 ")"""
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
@@ -920,11 +909,6 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
 <inline comment>, <significant whitespace>
-")
-Diagnostic
-  (FplParser, Error, (Ln: 4, Col: 5),
-   DiagnosticMessage "'}'
-Expecting: <PascalCaseId>
 ")"""
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
@@ -953,11 +937,6 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
 <inline comment>, <significant whitespace>
-")
-Diagnostic
-  (FplParser, Error, (Ln: 4, Col: 5),
-   DiagnosticMessage "'}'
-Expecting: <PascalCaseId>
 ")"""
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
@@ -1213,7 +1192,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseFunction001Diag () =
@@ -1232,20 +1211,13 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
 Expecting: '(', <whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 3, Col: 29),
-   DiagnosticMessage
-     "'}'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'ret', 'return', 'spec', 'specification', 
-<block comment>, <inline comment>, <significant whitespace>
-")
-Diagnostic
   (FplParser, Error, (Ln: 5, Col: 5),
    DiagnosticMessage
      "'y'
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseFunction002Diag () =
@@ -1284,8 +1256,9 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
         let result = fplParser input
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
-  (FplParser, Error, (Ln: 4, Col: 5), DiagnosticMessage "'}'
-Expecting: '->'
+  (FplParser, Error, (Ln: 4, Col: 5),
+   DiagnosticMessage "'}'
+Expecting: '->', <whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 5, Col: 5),
@@ -1311,8 +1284,8 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
   (FplParser, Error, (Ln: 4, Col: 5),
    DiagnosticMessage
      "'}'
-Expecting: '*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 
-'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>
+Expecting: '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 
+'predicate', 'template', 'tpl', <PascalCaseId>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 5, Col: 5),
@@ -1362,16 +1335,23 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
         let result = fplParser input
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 5),
+   DiagnosticMessage
+     "'}'
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'ret', 'return', 'spec', 'specification', 
+<block comment>, <inline comment>, <significant whitespace>
+")
+Diagnostic
   (FplParser, Error, (Ln: 6, Col: 5),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
-<inline comment>, <significant whitespace>
+<inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClasses000Diag () =
@@ -1497,7 +1477,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
         let expectedDiag = """Diagnostic
   (FplParser, Error, (Ln: 3, Col: 12),
    DiagnosticMessage "')'
-Expecting: ',', ':', <whitespace>
+Expecting: ',', ':', ':*', ':+', <whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 10, Col: 9),
@@ -1566,8 +1546,8 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 3, Col: 14),
    DiagnosticMessage
      "')'
-Expecting: '*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 
-'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>
+Expecting: '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 
+'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 10, Col: 9),
@@ -1603,7 +1583,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
    DiagnosticMessage
      "')'
 Expecting: '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 
-'predicate', 'template', 'tpl', <PascalCaseId>
+'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 10, Col: 9),
@@ -1638,8 +1618,8 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 3, Col: 13),
    DiagnosticMessage
      "','
-Expecting: '*', '+', '@', 'func', 'function', 'ind', 'index', 'obj', 
-'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>
+Expecting: '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 
+'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 10, Col: 9),
@@ -1671,21 +1651,21 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         let result = fplParser input
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
-      (FplParser, Error, (Ln: 3, Col: 15),
-       DiagnosticMessage
-         "')'
-    Expecting: '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 
-    'predicate', 'template', 'tpl', <PascalCaseId>
-    ")
-    Diagnostic
-      (FplParser, Error, (Ln: 10, Col: 9),
-       DiagnosticMessage
-         "'y'
-    Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
-    'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
-    'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
-    <inline comment>, <significant whitespace>
-    ")"""
+  (FplParser, Error, (Ln: 3, Col: 15),
+   DiagnosticMessage
+     "')'
+Expecting: '@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 
+'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 10, Col: 9),
+   DiagnosticMessage
+     "'y'
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
+'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
+'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
+<inline comment>, <significant whitespace>
+")"""
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
 
@@ -2021,8 +2001,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 3, Col: 19),
    DiagnosticMessage
      "')'
-Expecting: '@', 'del', 'delegate', 'self', '~', <PascalCaseId>, <digits>, <indexed variable>, 
-<variable>
+Expecting: '@', 'self', '~', <PascalCaseId>, <digits>, <variable>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 10, Col: 9),
@@ -2054,20 +2033,20 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         let result = fplParser input
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
-      (FplParser, Error, (Ln: 3, Col: 18),
-       DiagnosticMessage
-         "')'
-    Expecting: '@', 'del', 'delegate', 'self', <PascalCaseId>, <digits>, <indexed variable>, <variable>
-    ")
-    Diagnostic
-      (FplParser, Error, (Ln: 10, Col: 9),
-       DiagnosticMessage
-         "'y'
-    Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
-    'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
-    'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
-    <inline comment>, <significant whitespace>
-    ")"""
+  (FplParser, Error, (Ln: 3, Col: 18),
+   DiagnosticMessage
+     "')'
+Expecting: '@', 'self', <PascalCaseId>, <digits>, <variable>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 10, Col: 9),
+   DiagnosticMessage
+     "'y'
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
+'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
+'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
+<inline comment>, <significant whitespace>
+")"""
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
 

@@ -317,7 +317,7 @@ statementListRef.Value <- many (many CW >>. statement .>> IW)
 
 let dotted = dot >>. predicateWithQualification 
 let qualification = choice [boundedRange ; bracketedCoords ; argumentTuple] 
-predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) .>>. opt dotted <!> "predicateWithQualification" |>> Ast.PredicateWithQualification 
+predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) .>>. opt dotted |>> Ast.PredicateWithQualification 
 
 primePredicateRef.Value <- choice [
     keywordTrue
@@ -365,11 +365,11 @@ predicateList1Ref.Value <- sepBy1 predicate comma
 (* FPL building blocks *)
 let keywordDeclaration = (skipString "declaration" <|> skipString "dec") .>> IW 
 let commentedNamedVariableDeclaration = many CW >>. namedVariableDeclaration
-let varDeclBlock = positions (many CW >>. keywordDeclaration >>. colon >>. (many commentedNamedVariableDeclaration .>> IW) .>> semiColon) .>> IW <!> "varDeclBlock" |>> Ast.VarDeclBlock 
+let varDeclBlock = positions (many CW >>. keywordDeclaration >>. colon >>. (many commentedNamedVariableDeclaration .>> IW) .>> semiColon) .>> IW |>> Ast.VarDeclBlock 
 
 let keywordSpecification = (skipString "specification" <|> skipString "spec") .>> IW 
 let commentedStatement = many CW >>. statement .>> IW
-let varSpecBlock = positions (many CW >>. keywordSpecification >>. colon >>. (many commentedStatement .>> IW) .>> semiColon) .>> IW <!> "varSpecBlock" |>> Ast.VarSpecBlock
+let varSpecBlock = positions (many CW >>. keywordSpecification >>. colon >>. (many commentedStatement .>> IW) .>> semiColon) .>> IW |>> Ast.VarSpecBlock
 
 
 let varDeclOrSpecList = opt (many1 (varDeclBlock <|> varSpecBlock))
@@ -420,9 +420,9 @@ let keywordIntrinsic = (skipString "intrinsic" <|> skipString "intr") .>> IW >>%
 
 let predContent = varDeclOrSpecList .>>. commentedPredicate |>> Ast.DefPredicateContent
 
-let callConstructorParentClass = positions (opt (predicateIdentifier .>>. argumentTuple)) <!> "callConstructorParentClass" |>> Ast.ClassConstructorCall
+let callConstructorParentClass = positions (opt (predicateIdentifier .>>. argumentTuple)) |>> Ast.ClassConstructorCall
 let classContent = varDeclOrSpecList |>> Ast.DefClassContent
-let constructorBlock = leftBraceCommented >>. classContent .>>. callConstructorParentClass .>> commentedRightBrace <!> "constructorBlock"
+let constructorBlock = leftBraceCommented >>. classContent .>>. callConstructorParentClass .>> commentedRightBrace 
 let constructor = positions (signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
@@ -437,7 +437,7 @@ let classInstance = positions (variableType .>>. signature .>>. classInstanceBlo
 let mapping = toArrow >>. IW >>. variableType
 let functionalTermSignature = (keywordFunction >>. signature) .>>. (IW >>. mapping)
 
-let funcContent = varDeclOrSpecList .>>. (keywordReturn >>. predicateWithQualification .>> IW) <!> "funcContent" |>> Ast.DefFunctionContent
+let funcContent = varDeclOrSpecList .>>. (keywordReturn >>. predicateWithQualification .>> IW) |>> Ast.DefFunctionContent
 let functionalTermInstanceBlock = leftBraceCommented >>. (keywordIntrinsic <|> funcContent) .>> commentedRightBrace
 let functionalTermInstance = positions (functionalTermSignature .>> IW .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
 
@@ -447,7 +447,7 @@ let definitionProperty = choice [
     classInstance
 ]
 let propertyHeader = (many CW >>. (keywordMandatory <|> keywordOptional)) 
-let property = positions (propertyHeader .>>. definitionProperty) <!> "property" |>> Ast.Property
+let property = positions (propertyHeader .>>. definitionProperty) |>> Ast.Property
 let propertyList = opt (many1 (many CW >>. property .>> IW)) 
 
 (* FPL building blocks - Proofs 
@@ -505,9 +505,9 @@ let classDefinitionContent = choice [
 ]
 let classDefinitionContentList = many (many CW >>. classDefinitionContent .>> IW)
 let classCompleteContent = classContent .>>. classDefinitionContentList |>> Ast.DefClassCompleteContent
-let classDefinitionBlock = leftBraceCommented  >>. (keywordIntrinsic <|> classCompleteContent) .>> commentedRightBrace  <!> "classDefinitionBlock"
+let classDefinitionBlock = leftBraceCommented  >>. (keywordIntrinsic <|> classCompleteContent) .>> commentedRightBrace
 let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. varDeclModifier .>>. classType
-let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) <!> "definitionClass" |>> Ast.DefinitionClass 
+let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let definition = choice [
     definitionClass

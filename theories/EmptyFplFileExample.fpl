@@ -1,10 +1,12 @@
 TestNamespace {
-    theory {   
-        pred T()
+    inf {
+        D(x:T)
         {
-            decl {x:*}
-            true
+            pre:true
+            con:true
         }
+    }
+    theory {   
         y
     }
 }

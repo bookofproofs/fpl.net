@@ -308,7 +308,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 let lastRecoveryTextMod = lastRecoveryText.Replace(invalidSymbol,recStr)
                 let newIndexOffset = cumulativeIndexOffset + newOffset
                 
-                if ((not (newRecoveryText.StartsWith(lastRecoveryTextMod)) || newRecoveryText="{ pred ") 
+                if ((not (newRecoveryText.StartsWith(lastRecoveryTextMod)) || newRecoveryText="{ pred " || newRecoveryText="T T ") 
                     // prevent false positives when inserting a missing predicate into { }
                     && not (newRecoveryText="true " && lastRecoveryTextMod.EndsWith("{ } ")) 
                 ) || lastRecoveryText = "" then
