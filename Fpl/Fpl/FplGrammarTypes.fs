@@ -112,7 +112,7 @@ type Ast =
     | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | DefFunctionContent of Ast list option * Ast
     | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
-    | DefClassContent of Ast list option 
+    | DefClassContent of Ast list 
     | DefClassCompleteContent of Ast * Ast list
     | DefinitionClass of Positions * (((Ast * Ast) * Ast) * Ast)
 

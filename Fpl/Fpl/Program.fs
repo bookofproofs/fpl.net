@@ -5,10 +5,9 @@ open FParsec
 
 let input = "TestNamespace {
     theory {   
-        func T() ->S
+        cl T:obj
         {
-            x,
-            true
+            x::
         }
         y
     }
@@ -27,18 +26,9 @@ printf "%O" origResult
 ad.PrintDiagnostics
 
 
-let i = "pred T()
+let i = "cl A:obj 
         {
-            x,
-            true
-        }"
-let r = run definitionPredicate i
+    }"
+let r = run definitionClass i
 printf "%O" r
 
-let i1 = "func T() ->S
-        {
-            x,
-            true
-        }"
-let r1 = run definitionFunctionalTerm i1
-printf "%O" r1

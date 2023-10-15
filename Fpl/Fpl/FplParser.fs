@@ -372,7 +372,8 @@ let commentedStatement = many CW >>. statement .>> IW
 let varSpecBlock = positions (many CW >>. keywordSpecification >>. colon >>. (many commentedStatement .>> IW) .>> semiColon) .>> IW |>> Ast.VarSpecBlock
 
 
-let varDeclOrSpecList = opt (many1 (varDeclBlock <|> varSpecBlock))
+let varDeclOrSpecListMand = many1 (varDeclBlock <|> varSpecBlock)
+let varDeclOrSpecList = opt varDeclOrSpecListMand
 (*To simplify the syntax definition, we do not define separate
 FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
 The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
@@ -420,7 +421,7 @@ let keywordIntrinsic = (skipString "intrinsic" <|> skipString "intr") .>> IW >>%
 let predContent = varDeclOrSpecList .>>. commentedPredicate |>> Ast.DefPredicateContent
 
 let callConstructorParentClass = positions (opt (predicateIdentifier .>>. argumentTuple)) |>> Ast.ClassConstructorCall
-let classContent = varDeclOrSpecList |>> Ast.DefClassContent
+let classContent = varDeclOrSpecListMand |>> Ast.DefClassContent
 let constructorBlock = leftBraceCommented >>. classContent .>>. callConstructorParentClass .>> commentedRightBrace 
 let constructor = positions (signature .>>. constructorBlock) |>> Ast.Constructor
 
@@ -503,8 +504,8 @@ let classDefinitionContent = choice [
     constructor
 ]
 let classDefinitionContentList = many (many CW >>. classDefinitionContent .>> IW)
-let classCompleteContent = classContent .>>. classDefinitionContentList |>> Ast.DefClassCompleteContent
-let classDefinitionBlock = leftBraceCommented  >>. (keywordIntrinsic <|> classCompleteContent) .>> commentedRightBrace
+let classCompleteContent = (keywordIntrinsic <|> classContent) .>>. classDefinitionContentList |>> Ast.DefClassCompleteContent
+let classDefinitionBlock = leftBraceCommented  >>. classCompleteContent .>> commentedRightBrace
 let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. varDeclModifier .>>. classType
 let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 

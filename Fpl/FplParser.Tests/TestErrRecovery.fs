@@ -1345,6 +1345,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
 <inline comment>, <significant whitespace>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 7, Col: 50),
+   DiagnosticMessage
+     "Expecting: '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
         Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
@@ -1445,6 +1450,13 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
         let result = fplParser input
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 9),
+   DiagnosticMessage
+     "'}'
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
+")
+Diagnostic
   (FplParser, Error, (Ln: 7, Col: 5),
    DiagnosticMessage
      "'y'
@@ -3208,11 +3220,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x,'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3241,11 +3253,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3274,11 +3286,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:*'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3307,11 +3319,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x::'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3340,11 +3352,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:+'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3373,11 +3385,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:@'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3406,11 +3418,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:func:'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3439,11 +3451,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:ind:'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3472,11 +3484,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:obj:'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3505,11 +3517,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:pred:'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3538,11 +3550,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:tpl:'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3571,11 +3583,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:T:'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3604,11 +3616,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:tpl.'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3637,11 +3649,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:tpl['
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3670,11 +3682,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:tpl[!'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3703,11 +3715,11 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 13),
    DiagnosticMessage
      "'x:tpl<'
-Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 
-'spec', 'specification', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 6, Col: 9),
+  (FplParser, Error, (Ln: 7, Col: 9),
    DiagnosticMessage
      "'y'
 Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
@@ -3982,9 +3994,29 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
 }"""
         let result = fplParser input
         let actual = sprintf "%O" result
-        let expectedDiag = """ """
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 5),
+   DiagnosticMessage
+     "'}'
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 6, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
+'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
+'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
+<inline comment>, <significant whitespace>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 7, Col: 50),
+   DiagnosticMessage
+     "Expecting: '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass007Diag () =
@@ -3993,15 +4025,21 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     theory {   
         cl A:obj 
         {
+            dec:;
         }
     }
     y
 }"""
         let result = fplParser input
         let actual = sprintf "%O" result
-        let expectedDiag = """ """
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 8, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass008Diag () =
@@ -4017,7 +4055,19 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
 }"""
         let result = fplParser input
         let actual = sprintf "%O" result
-        let expectedDiag = """ """
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 13),
+   DiagnosticMessage
+     "'#'
+Expecting: 'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <block comment>, <inline comment>, 
+<significant whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 8, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
 

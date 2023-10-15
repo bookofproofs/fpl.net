@@ -317,9 +317,10 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 let cond7 = not (newRecoveryText = "} ")
                 let cond8 = not (lastRecoveryText = "intr ")
                 let cond0 = lastRecoveryText = ""
+                let cond0a = errorMsg.Contains("The error occurred at the end of the input stream") && recStr = "}" && errorMsg.Contains("Expecting: <block comment>, <inline comment>, <significant whitespace> or '}'")
                 // emit diagnostics using a heuristics while preventing false positives 
                 let conditionForEmittingDiagnostics = 
-                    cond0 
+                    cond0 || cond0a
                     || ( 
                             ( cond1 || cond2 || cond3 || cond4) 
                             && (cond5 || cond6) 
@@ -328,8 +329,11 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 if conditionForEmittingDiagnostics then
                     // emit diagnostic if there is a new remainingInput
 
-                    let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine)
-
+                    let diagnosticMsg = 
+                        if cond0a then
+                            DiagnosticMessage("Expecting: '}', <block comment>, <inline comment>, <significant whitespace>" + System.Environment.NewLine)
+                        else
+                            DiagnosticMessage(newErrMsg + System.Environment.NewLine)
                     let diagnostic =
                         // this is to ensure that the input insertions of error recovery remain invisible to the user
                         // so that when double-clicking the error, the IDE will go to the right position in the source code

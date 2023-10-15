@@ -1,10 +1,7 @@
 TestNamespace {
     theory {   
-        func T() ->S
+        cl A:obj 
         {
-            x,
-            true
-        }
-        y
     }
+    y
 }
