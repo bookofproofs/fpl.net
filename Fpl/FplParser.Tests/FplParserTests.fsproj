@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+      <Compile Include="TestConstructors.fs" />
       <Compile Include="TestErrRecoveryLowLevel.fs" />
       <Compile Include="TestErrRecovery.fs" />
       <Compile Include="TestLocalizations.fs" />

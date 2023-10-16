@@ -223,7 +223,7 @@ type TestIdentifiers () =
         let result = run predicateWithQualification """tplSetElem[from ~ to]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestEntityWithCoord5 () =

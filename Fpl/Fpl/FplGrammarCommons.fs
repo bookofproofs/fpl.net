@@ -148,6 +148,7 @@ let recoveryMap = dict [
     ("'$', '(', '.', '<', 'mand', 'mandatory', 'opt', 'optional', '}', <(closed) left bound '['>, <(open) left bound '[!'>, <significant whitespace>", "}")
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <significant whitespace>", "pred")
     ("'con', 'conclusion', <significant whitespace>", "con")
+    ("'dec', 'declaration', 'spec', 'specification', <significant whitespace>", "dec")
     ("'dec', 'declaration', 'intr', 'intrinsic', 'mand', 'mandatory', 'opt', 'optional', 'spec', 'specification', '}', <PascalCaseId>, <significant whitespace>", "}")
     ("'dec', 'declaration', 'intr', 'intrinsic', 'ret', 'return', 'spec', 'specification', <significant whitespace>", "intr")
     ("'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <significant whitespace>", "intr")
