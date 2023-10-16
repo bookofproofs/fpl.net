@@ -324,6 +324,7 @@ primePredicateRef.Value <- choice [
     keywordFalse
     keywordUndefined
     attempt argumentIdentifier
+    fplDelegate
     predicateWithQualification
     fplIdentifier
     
@@ -420,14 +421,14 @@ let keywordIntrinsic = (skipString "intrinsic" <|> skipString "intr") .>> IW >>%
 
 let predContent = varDeclOrSpecList .>>. commentedPredicate |>> Ast.DefPredicateContent
 
-let callConstructorParentClass = positions (opt (predicateIdentifier .>>. argumentTuple)) |>> Ast.ClassConstructorCall
+let callConstructorParentClass = many1 (positions (self >>. dot >>. specificClassType .>>. argumentTuple .>> IW) ) |>> Ast.ParentConstructorCalls
 let classContent = varDeclOrSpecListMand |>> Ast.DefClassContent
-let constructorBlock = leftBraceCommented >>. classContent .>>. callConstructorParentClass .>> commentedRightBrace 
+let constructorBlock = leftBraceCommented >>. varDeclOrSpecList .>>. callConstructorParentClass .>> commentedRightBrace 
 let constructor = positions (signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
-let keywordMandatory = positions (skipString "mandatory" <|> skipString "mand") .>> IW >>% Ast.Mandatory
 let keywordOptional = positions (skipString "optional" <|> skipString "opt") .>> IW >>% Ast.Optional
+let keywordMandatory = positions (skipString "mandatory" <|> skipString "mand") .>> IW >>% Ast.Optional
 
 let predInstanceBlock = leftBraceCommented >>. (keywordIntrinsic <|> predContent) .>> commentedRightBrace
 let predicateInstance = positions (keywordPredicate >>. signature .>>. (many CW >>. predInstanceBlock)) |>> Ast.PredicateInstance
@@ -446,7 +447,7 @@ let definitionProperty = choice [
     functionalTermInstance
     classInstance
 ]
-let propertyHeader = (many CW >>. (keywordMandatory <|> keywordOptional)) 
+let propertyHeader = many CW >>. (keywordOptional <|> keywordMandatory)
 let property = positions (propertyHeader .>>. definitionProperty) |>> Ast.Property
 let propertyList = opt (many1 (many CW >>. property .>> IW)) 
 
@@ -499,14 +500,14 @@ let definitionFunctionalTerm = positions ((functionalTermSignature .>> IW) .>>. 
 
 // Class definitions
 let keywordClass = (skipString "class" <|> skipString "cl") >>. IW
-let classDefinitionContent = choice [
-    property
-    constructor
-]
-let classDefinitionContentList = many (many CW >>. classDefinitionContent .>> IW)
-let classCompleteContent = (keywordIntrinsic <|> classContent) .>>. classDefinitionContentList |>> Ast.DefClassCompleteContent
-let classDefinitionBlock = leftBraceCommented  >>. classCompleteContent .>> commentedRightBrace
-let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. varDeclModifier .>>. classType
+
+let constructorList = many1 (many CW >>. constructor .>> IW)
+let classCompleteContent = varDeclOrSpecList .>>. constructorList .>>. propertyList |>> Ast.DefClassCompleteContent
+let classDefinitionBlock = leftBraceCommented  >>. (keywordIntrinsic <|> classCompleteContent) .>> commentedRightBrace
+let classTypeWithModifier = positions (varDeclModifier .>>. classType .>> IW) |>> Ast.ClassTypeWithModifier
+let classTypeWithModifierList = sepBy1 classTypeWithModifier comma
+
+let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. classTypeWithModifierList
 let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let definition = choice [

@@ -50,6 +50,7 @@ type Ast =
     | BracketedCoordsInType of Positions * Ast list 
     | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
     | ClassType of Positions * (Ast * Ast option)
+    | ClassTypeWithModifier of Positions * (Ast * Ast)
     // Variables
     | Var of Positions * string
     | IndexVariable of Positions * (Ast * Ast list option)
@@ -100,8 +101,8 @@ type Ast =
     | ParamTuple of Positions * Ast list
     | Signature of Positions * (Ast * Ast)
     | Axiom of Positions * (Ast * (Ast list option * Ast))
-    | ClassConstructorCall of Positions * ((Ast * Ast) option)
-    | Constructor of Positions * (Ast * (Ast * Ast))
+    | ParentConstructorCalls of (Positions * (Ast * Ast)) list
+    | Constructor of Positions * (Ast * (Ast list option * Ast))
     | Mandatory
     | Optional 
     | PredicateInstance of Positions * (Ast * Ast) 
@@ -113,8 +114,8 @@ type Ast =
     | DefFunctionContent of Ast list option * Ast
     | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
     | DefClassContent of Ast list 
-    | DefClassCompleteContent of Ast * Ast list
-    | DefinitionClass of Positions * (((Ast * Ast) * Ast) * Ast)
+    | DefClassCompleteContent of (Ast list option * Ast list) * Ast list option
+    | DefinitionClass of Positions * ((Ast * Ast list) * Ast)
 
     // Proofs
     | Trivial of Positions * unit
