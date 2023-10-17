@@ -151,4 +151,286 @@ type TestDefinitionPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<TestMethod>]
+    member this.TestDefinitionPredicate10 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be empty
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate10a () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be empty with dec
+            dec:;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate10b () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be empty with spec
+            spec:;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate10c () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be empty with some spec or dec
+            spec:;
+            dec:;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate11 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some proceeding spec or dec
+            spec:;
+            dec:;
+            intrinsic
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate11a () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some proceeding spec or dec
+            dec:;
+            intrinsic
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate11b () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some proceeding spec or dec
+            spec:;
+            intrinsic
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))   
         
+    [<TestMethod>]
+    member this.TestDefinitionPredicate12 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate can be intrinsic 
+            intrinsic
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate12a () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate can be intrinsic with some following comments
+            intrinsic
+            // a comment
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate12b () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some following declarations or specifications
+            intrinsic
+            dec:;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate12c () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some following declarations or specifications
+            intrinsic
+            dec:;
+            spec:;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate12d () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some following declarations or specifications
+            intrinsic
+            spec:;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate13 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate can be intrinsic with some following properties 
+            intrinsic
+
+            mand func T() -> obj
+	        {
+	            dec:;
+                spec:;
+                return x
+	        } 
+
+            optional pred T() 
+	        {
+                true
+	        } 
+
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate14 () =
+        let result = run definitionPredicate """pred T()
+        {
+            mand func T() -> obj
+	        {
+	            dec:;
+                spec:;
+                return x
+	        } 
+
+            // a predicate cannot be intrinsic with some proceeding properties 
+            intrinsic
+
+
+            optional pred T() 
+	        {
+                true
+	        } 
+
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))       
+
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate15 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate with some proceeding declarations or specifications
+            dec:;
+            spec:;
+            true
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate16 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate with some proceeding declarations or specifications
+            dec:;
+            true
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate17 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate with some proceeding declarations or specifications
+            spec:;
+            true
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate18 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate 
+            true
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate19 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate with some succeeding properties
+            true 
+
+
+            mand func T() -> obj
+	        {
+	            dec:;
+                spec:;
+                return x
+	        } 
+
+            optional pred T() 
+	        {
+                true
+	        } 
+
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate20 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // properties cannot succeed a predicate within a predicate definition
+            optional pred T() 
+	        {
+                true
+	        } 
+
+
+            true 
+
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+

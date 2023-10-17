@@ -65,13 +65,6 @@ type TestPredicatesSpecific () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestPrimePredicate8 () =
-        let result = run primePredicate """del.add(n,m)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
     member this.TestConjunction1 () =
         let result = run conjunction """and(true,false)"""
         let actual = sprintf "%O" result
@@ -241,7 +234,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs4 () =
-        let result = run predicateWithQualification """Add(result,list$i)"""
+        let result = run predicateWithQualification """Add(result,list!i)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -361,28 +354,28 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestExN1 () =
-        let result = run existsTimesN """ex$0 x,y,z(true)"""
+        let result = run existsTimesN """ex!0 x,y,z(true)"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExN2 () =
-        let result = run existsTimesN """ex$1 x,y,z (not (iif ( true, not(false))))"""
+        let result = run existsTimesN """ex!1 x,y,z (not (iif ( true, not(false))))"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExN3 () =
-        let result = run existsTimesN """ex$2 x,y,z (not (iif ( iif( true, false), true)))"""
+        let result = run existsTimesN """ex!2 x,y,z (not (iif ( iif( true, false), true)))"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExN4 () =
-        let result = run existsTimesN """ex$3 x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let result = run existsTimesN """ex!3 x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

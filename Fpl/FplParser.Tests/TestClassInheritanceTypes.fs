@@ -97,14 +97,14 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType5a () =
-        let result = run classType """Set[!from ~ to]"""
+        let result = run classType """Set[(from ~ to]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType5b () =
-        let result = run classType """Set[from ~ to!]"""
+        let result = run classType """Set[from ~ to)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

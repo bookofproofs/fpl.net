@@ -75,7 +75,8 @@ type TestClasses () =
             spec:;
             FieldPowerN() 
             {
-                self.obj()
+                self!obj()
+                self
             }
         }"""
         let actual = sprintf "%O" result
@@ -86,16 +87,32 @@ type TestClasses () =
     member this.TestClass02a () =
         let result = run definitionClass """class FieldPowerN: Set
         {
-            // A class with a constructor
+            // A class with a constructor and a self reference
             dec:;
             FieldPowerN() 
             {
-                self.obj()
+                self!obj()
+                self
             }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestClass02a0 () =
+        let result = run definitionClass """class FieldPowerN: Set
+        {
+            // A class with a constructor and a self reference but without self
+            dec:;
+            FieldPowerN() 
+            {
+                self!obj()
+            }
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClass02b () =
@@ -105,7 +122,8 @@ type TestClasses () =
             spec:;
             FieldPowerN() 
             {
-                self.obj()
+                self!obj()
+                self
             }
         }"""
         let actual = sprintf "%O" result
@@ -113,18 +131,48 @@ type TestClasses () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
+    member this.TestClass02b0 () =
+        let result = run definitionClass """class FieldPowerN: Set
+        {
+            // A class with a constructor but without self
+            spec:;
+            FieldPowerN() 
+            {
+                self!obj()
+            }
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
     member this.TestClass02c () =
         let result = run definitionClass """class FieldPowerN: Set
         {
-            // A class with a constructor
+            // A class with a constructor 
             FieldPowerN() 
             {
-                self.obj()
+                self!obj()
+                self
             }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestClass02c0 () =
+        let result = run definitionClass """class FieldPowerN: Set
+        {
+            // A class with a constructor but without self
+            FieldPowerN() 
+            {
+                self!obj()
+            }
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClass03 () =
@@ -133,11 +181,13 @@ type TestClasses () =
             // A class with more than one constructor
             FieldPowerN() 
             {
-                self.obj()
+                self!obj()
+                self
             }
             FieldPowerN() 
             {
-                self.T1()
+                self!T1()
+                self
             }
         }"""
         let actual = sprintf "%O" result
@@ -151,12 +201,14 @@ type TestClasses () =
             // A class with more than one constructor and some properties
             FieldPowerN() 
             {
-                self.obj()
+                self!obj()
+                self
             }
 
             FieldPowerN() 
             {
-                self.T1()
+                self!T1()
+                self
             }
 
             mand func T() -> obj
@@ -217,7 +269,8 @@ type TestClasses () =
 
             FieldPowerN() 
             {
-                self.T1()
+                self!T1()
+                self
             }
 
             optional pred T() 
@@ -261,3 +314,39 @@ type TestClasses () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestClass06 () =
+        let result = run definitionClass """class FieldPowerN: Typ1
+        {
+            // An intrinsic class with a following comment
+            intrinsic
+            // comment
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestClass07 () =
+        let result = run definitionClass """class FieldPowerN: Typ1
+        {
+            // An intrinsic class some following properties
+            intrinsic
+
+            mand func T() -> obj
+	        {
+	            dec:;
+                spec:;
+                return x
+	        } 
+
+            optional pred T() 
+	        {
+                true
+	        } 
+
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))       

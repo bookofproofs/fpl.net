@@ -324,28 +324,28 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate43 () =
-        let result = run predicate """ex$0 x,y,z(true)"""
+        let result = run predicate """ex!0 x,y,z(true)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate44 () =
-        let result = run predicate """ex$1 x,y,z (not (iif ( true, not(false))))"""
+        let result = run predicate """ex!1 x,y,z (not (iif ( true, not(false))))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate45 () =
-        let result = run predicate """ex$2 x,y,z (not (iif ( iif( true, false), true)))"""
+        let result = run predicate """ex!2 x,y,z (not (iif ( iif( true, false), true)))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate46 () =
-        let result = run predicate """ex$3 x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let result = run predicate """ex!3 x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -359,10 +359,17 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate48 () =
-        let result = run predicate """all arg args 
+        let result = run predicate """all arg in args 
 				(
 					is(arg,Set)
 				)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicate49 () =
+        let result = run predicate """delegate.abc(x,y,z)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

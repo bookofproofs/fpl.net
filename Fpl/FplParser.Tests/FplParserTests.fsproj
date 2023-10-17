@@ -9,8 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+      <Compile Include="TestDefinitionFunctionalTerms.fs" />
+      <Compile Include="TestClassInstanceProperties.fs" />
       <Compile Include="TestPredicateInstanceProperties.fs" />
-      <Compile Include="TestClasses.fs" />
+      <Compile Include="TestDefinitionClasses.fs" />
       <Compile Include="TestConstructors.fs" />
       <Compile Include="TestErrRecoveryLowLevel.fs" />
       <Compile Include="TestErrRecovery.fs" />

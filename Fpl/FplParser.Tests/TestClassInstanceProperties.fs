@@ -1,27 +1,27 @@
-namespace FplParser.Tests
+﻿namespace FplParser.Tests
 
 open FParsec
 open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
-type TestPredicateInstanceProperties () =
+type TestClassInstanceProperties () =
 
     [<TestMethod>]
-    member this.TestPredicateInstance01 () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance01 () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance without a predicate is not allowed
+                // a class instance without a predicate is not allowed
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance01a () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance01a () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance without a predicate is not allowed
+                // a class instance without a predicate is not allowed
                 dec:;
 	        }"""
         let actual = sprintf "%O" result
@@ -29,10 +29,10 @@ type TestPredicateInstanceProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance01b () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance01b () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance without a predicate is not allowed
+                // a class instance without a predicate is not allowed
                 spec:;
 	        }"""
         let actual = sprintf "%O" result
@@ -40,10 +40,10 @@ type TestPredicateInstanceProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance01c () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance01c () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance without a predicate is not allowed
+                // a class instance without a predicate is not allowed
                 dec:;
                 spec:;
 	        }"""
@@ -52,10 +52,10 @@ type TestPredicateInstanceProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance01d () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance01d () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance without a predicate is not allowed
+                // a class instance without a predicate is not allowed
                 dec:;
                 spec:;
                 return x
@@ -65,10 +65,10 @@ type TestPredicateInstanceProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance01e () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance01e () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance without a predicate is not allowed
+                // a class instance without a predicate is not allowed
                 dec:;
                 return x
 	        }"""
@@ -77,10 +77,10 @@ type TestPredicateInstanceProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance01f () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance01f () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance without a predicate is not allowed
+                // a class instance without a predicate is not allowed
                 return x
 	        }"""
         let actual = sprintf "%O" result
@@ -88,86 +88,86 @@ type TestPredicateInstanceProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance2a () =
-        let result = run property """optional pred X() 
+    member this.TestClassInstance2a () =
+        let result = run property """optional T X() 
 	        {
-                // a predicate instance with a return statement 
+                // a class instance with a self at the end
                 dec:;
                 spec:;
-                true
+                self
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance2b () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance2b () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance with a return statement 
+                // a class instance with a self at the end
                 dec:;
                 spec:;
-                true
+                self
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance2c () =
-        let result = run property """optional pred X() 
+    member this.TestClassInstance2c () =
+        let result = run property """optional T X() 
 	        {
-                // a predicate instance with a return statement 
+                // a class instance with a self at the end 
                 spec:;
-                true
+                self
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance2d () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance2d () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance with a return statement 
+                // a class instance with a self at the end 
                 spec:;
-                true
+                self
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance2e () =
-        let result = run property """optional pred X() 
+    member this.TestClassInstance2e () =
+        let result = run property """optional T X() 
 	        {
-                // a predicate instance with a return statement 
+                // a class instance with a self at the end
                 dec:;
-                true
+                self
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance2f () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance2f () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance with a return statement 
+                // a class instance with a self at the end 
                 dec:;
-                true
+                self
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance3 () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance3 () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance with a return statement and 
+                // a class instance with a a self at the end and 
                 // some other content following it is not allowed
-                true
+                self
                 // except comments
 	        }"""
         let actual = sprintf "%O" result
@@ -175,12 +175,12 @@ type TestPredicateInstanceProperties () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance3a () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance3a () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance with a return statement and 
+                // a class instance with a self at the end and 
                 // some other content following it is not allowed
-                true
+                self
                 spec:;
 	        }"""
         let actual = sprintf "%O" result
@@ -188,26 +188,14 @@ type TestPredicateInstanceProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestPredicateInstance3b () =
-        let result = run property """mand pred X() 
+    member this.TestClassInstance3b () =
+        let result = run property """mand T X() 
 	        {
-                // a predicate instance with a return statement and 
+                // a class instance with a self at the end and 
                 // some other content following it is not allowed
-                true
+                self
                 dec:;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
-
-    [<TestMethod>]
-    member this.TestPredicateInstance4 () =
-        let result = run property """mand pred X() 
-	        {
-                // a predicate instance can be intrinsic
-                intr
-
-	        }"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))

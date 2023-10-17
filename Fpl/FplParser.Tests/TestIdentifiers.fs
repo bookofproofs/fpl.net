@@ -171,14 +171,14 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestBoundRightOpen () =
-        let result = run rightBound """!]"""
+        let result = run rightBound """)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestBoundRightOpen1 () =
-        let result = run rightBound """!]"""
+        let result = run rightBound """)] """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

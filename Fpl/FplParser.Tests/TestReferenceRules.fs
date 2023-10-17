@@ -76,7 +76,7 @@ type TestReferenceRules() =
         {
             dec: proceedingResult: pred;
             spec:
-                loop proceedingResult p
+                for proceedingResult in p
                 (
                     assert proceedingResult
                 )
@@ -93,7 +93,7 @@ type TestReferenceRules() =
         let result = run ruleOfInference """ProceedingResults(p:+ pred)
         {
             dec: proceedingResult: pred;
-            premise: all proceedingResult p ( proceedingResult )
+            premise: all proceedingResult in p ( proceedingResult )
             conclusion: and (p)
         }"""
         let actual = sprintf "%O" result

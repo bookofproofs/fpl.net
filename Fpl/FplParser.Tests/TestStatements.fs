@@ -14,7 +14,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestRange01 () =
-        let result = run rangeStatement """range proceedingResult p
+        let result = run forStatement """for proceedingResult in p
                 (
                     assert proceedingResult
                     a:=1
@@ -26,7 +26,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestRange02 () =
-        let result = run rangeStatement """range i [1~n]
+        let result = run forStatement """for i in [1~n]
                 (
                     self<i>:=field.AdditiveGroup().NeutralElement()
                 )"""
@@ -36,7 +36,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestLoop01 () =
-        let result = run loopStatement """loop proceedingResult p
+        let result = run forStatement """for proceedingResult in    p
                 (
                     assert proceedingResult
                     a:=1
@@ -48,7 +48,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestLoop02 () =
-        let result = run loopStatement """loop n [1~4]
+        let result = run forStatement """for    n in[1~4]
             (
             assert Equal(f(n),n)
             )"""
@@ -58,7 +58,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestLoop03 () =
-        let result = run loopStatement """loop n [$1~$4]
+        let result = run forStatement """for n in [!1~!4]
             (
             assert Equal(f(n),n)
             )"""
@@ -120,7 +120,7 @@ type TestStatements () =
                         self := Succ(Zero())
                     | Equal(x,2) :
                         self := Succ(Succ(Zero()))
-                        ;
+                    ;
                     else
                         // else case addressed using a python delegate
                         self := Succ(del.decrement(x))

@@ -93,8 +93,9 @@ type TestConstructors () =
             {
                 // constructors must contain the call(s) of the parent constructors
                 // of all parent classes of the class; the call's syntax starts
-                // with self followed by a dotted name of the classes constructor
-                self.AlgebraicStructure(x,op)
+                // with self followed by an exclamation mark and name of the classes constructor
+                self!AlgebraicStructure(x,op)
+                self
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -106,10 +107,11 @@ type TestConstructors () =
             {
                 // constructors must contain the call(s) of the parent constructors
                 // of all parent classes of the class; the call's syntax starts
-                // with self followed by a dotted name of the classes constructor
+                // with self followed by an exclamation mark and name of the classes constructor
                 dec:;
                 spec:;
-                self.AlgebraicStructure(x,op)
+                self!AlgebraicStructure(x,op)
+                self
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -121,7 +123,7 @@ type TestConstructors () =
             {
                 dec:;
                 spec:;
-                self // incomplete (syntax error)
+                self 
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -145,21 +147,23 @@ type TestConstructors () =
             {
                 dec:;
                 spec:;
-                self.obj() 
+                self!obj() 
+                // incomplete ( self missing)
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestConstructor05 () =
         let result = run constructor """Magma(x: tplSet, op: BinOp)
             {
                 // calls to multiple parental constructors possible (multi-inheritance)
-                self.obj() 
-                self.T1(x) 
-                self.T2(op) 
+                self!obj() 
+                self!T1(x) 
+                self!T2(op) 
+                // incomplete ( self missing)
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))

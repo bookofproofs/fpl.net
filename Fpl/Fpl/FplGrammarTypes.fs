@@ -11,14 +11,15 @@ type Ast =
     // Identifiers
     | Digits of string
     | ExtDigits of Positions * Ast
-    | DollarDigits of Positions * Ast
+    | ExclamationDigits of Positions * Ast
     | PascalCaseId of string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
     | PredicateIdentifier of Positions * Ast list
     | DelegateId of Positions * string 
     | Alias of Positions * string
-    | Self of Positions * char list 
+    | SelfAts of Positions * char list 
+    | Self of Positions * unit
     | LocalizationString of Positions * string
     | LocalizationTerm of Positions * Ast list
     | LocalizationTermList of Positions * Ast list
@@ -82,8 +83,7 @@ type Ast =
     | DefaultResult of Positions * Ast list 
     | Cases of Positions * (Ast list * Ast)
     | Assignment of Positions * (Ast * Ast)
-    | Loop of Positions * ((Ast * Ast) * Ast list)
-    | Range of Positions * ((Ast * Ast) * Ast list)
+    | ForIn of Positions * ((Ast * Ast) * Ast list)
     | Return of Positions * Ast
     // FPL Blocks
     | Intrinsic
@@ -102,7 +102,7 @@ type Ast =
     | Signature of Positions * (Ast * Ast)
     | Axiom of Positions * (Ast * (Ast list option * Ast))
     | ParentConstructorCalls of (Positions * (Ast * Ast)) list
-    | Constructor of Positions * (Ast * (Ast list option * Ast))
+    | Constructor of Positions * (Ast * ((Ast list option * Ast) * Ast))
     | Mandatory
     | Optional 
     | PredicateInstance of Positions * (Ast * Ast) 
@@ -113,9 +113,9 @@ type Ast =
     | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | DefFunctionContent of Ast list option * Ast
     | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
-    | DefClassContent of Ast list 
-    | DefClassCompleteContent of (Ast list option * Ast list) * Ast list option
-    | DefinitionClass of Positions * ((Ast * Ast list) * Ast)
+    | DefClassContent of Ast list option * Ast
+    | DefClassCompleteContent of Ast list option * Ast list
+    | DefinitionClass of Positions * ((Ast * Ast list) * (Ast * Ast list option))
 
     // Proofs
     | Trivial of Positions * unit

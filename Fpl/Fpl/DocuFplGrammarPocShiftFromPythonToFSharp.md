@@ -10,14 +10,21 @@ From the version 2.0 on, there are some major changes to the grammar:
 The following documentation describes the syntactical amendments and provides a rationale behind each.
 
 ### General improvements to the AST
-* Consequent structuring of the AST using annotations 
+* Consequent structuring of the AST using F# types 
 * Skipping rule names not needed in the AST is now done automatically in FParsec
-* A more careful placement of whitespace and comments
+* A stricter syntax  
+* A more careful placement of whitespace, comments
 
 ### Error recovery
-* Both the original tatsu parser generator and the new, FParsec-based parsers do not provide in-built error recovery
+* Both the original tatsu parser generator and the new, FParsec-based parsers do not provide in-built error recovery.
 * However, the Fparsec-based parser provides more programmatic control. 
-* Error recovery can be added to the FPL parser more easily but is not available still.
+* An experimental approach to error recovery is being added to the FPL parser.
+
+### Changes to the Grammar (Details)
+#### Uses clause
+The uses clause now requires a separate block. 
+
+
 
 ### More stringent predicate syntax
 * Giving up mixing up statements and index variables being not predicative in the choice rule of Prime predicates 

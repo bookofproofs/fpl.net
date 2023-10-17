@@ -29,7 +29,7 @@ type TestAxioms () =
             dec: n, successor: Nat;
             all n
             (
-                ex$1 successor
+                ex!1 successor
                 (
                     and
                     (
