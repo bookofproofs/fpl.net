@@ -4,8 +4,7 @@ Fpl.Commons
     {
         ModusPonens()
         {
-            dec:p,q: pred;
-            spec:;
+            p,q: pred
 
             premise:
                 and (p, impl (p,q) )
@@ -15,8 +14,7 @@ Fpl.Commons
 
         ModusTollens()
         {
-            dec:p,q: pred;
-            spec:;
+            p,q: pred
 
             premise:
                 and (not(q), impl(p,q) )
@@ -26,8 +24,7 @@ Fpl.Commons
 
         HypotheticalSyllogism()
         {
-            dec:p,q,r: pred;
-            spec:;
+            p,q,r: pred
             premise:
                 and (impl(p,q), impl(q,r))
             conclusion:
@@ -36,24 +33,20 @@ Fpl.Commons
 
         DisjunctiveSyllogism()
         {
-            dec:p,q: pred;
-            spec:;
+            p,q: pred
             premise:
                 and (not(p), or(p,q))
             conclusion:
                 q
         }
 
-        ProceedingResults(p:+ pred)
+        ProceedingResults(p: +pred)
         {
-            dec:proceedingResult: pred;
-            spec:
-                loop a b (assert a)
-                ;
+            proceedingResult: pred
             premise:
-                all proceedingResult p
+                range proceedingResult p
                 (
-                    proceedingResult
+                    assert proceedingResult
                 )
             conclusion:
                 and (p)
@@ -61,8 +54,7 @@ Fpl.Commons
 
         ExistsByExample(p: pred(c: obj))
         {
-            dec:x: obj;
-            spec:;
+            x: obj
             premise:
                 p(c)
             conclusion:
@@ -75,8 +67,7 @@ Fpl.Commons
     {
         pred Equal(a,b: tpl)
         {
-            dec:p: pred;
-            spec:;
+            p: pred 
 
 			all p
 			(
@@ -131,21 +122,8 @@ Fpl.Commons
             ~tex: x "\neq" y
             ~eng: x "is unequal" y
             ~ger: x "ist ungleich" y
-            ~pol: x  "nie równa się" | "nie równe" y
+            ~pol: x ( "nie równa się" | "nie równe" ) y
             ;
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -167,3 +167,26 @@ type TestConstructors () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestConstructor06 () =
+        let result = run constructor """FieldPowerN
+            (
+                field : Field,
+                n: Nat
+            )
+            {
+    			spec:
+                    myField := field
+                    addInField := myField.AddOp()
+                    mulInField := myField.MulOp()
+                    assert NotEqual(n, Zero())
+                    self:=SetBuilder( myField[1 ~ n], true)
+                ;
+				self!obj()
+                self
+            }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+

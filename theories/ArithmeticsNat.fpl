@@ -1,10 +1,10 @@
 Fpl.Arithmetics.Peano
 {
     :ext
-        Digits : /\d+/
+        extDigits : /\d+/
     :end
 
-    uses { Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel }
+    uses Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel
 
     theory
     {
@@ -78,17 +78,17 @@ Fpl.Arithmetics.Peano
         // definition of a new mathematical object (natural number)
         class Nat: obj
         {
-            Nat(x: @Digits)
+            Nat(x: @extDecimal)
             {
                 cases
                 (
-                    | Equal(x,0) :
+                    case Equal(x,0) :
                         self := Zero()
-                    | Equal(x,1) :
+                    case Equal(x,1) :
                         self := Succ(Zero())
-                    | Equal(x,2) :
-                        self := Succ(Succ(Zero()));
-                    else
+                    case Equal(x,2) :
+                        self := Succ(Succ(Zero()))
+                    else:
                         // else case addressed using a python delegate
                         self := Succ(py.decrement(x))
                 )
@@ -98,9 +98,9 @@ Fpl.Arithmetics.Peano
             {
                 cases
                 (
-                    | IsGreaterOrEqual(x.RightMember(), x.LeftMember()):
-                        self:=x.RightMember();
-                    else
+                    case IsGreaterOrEqual(x.RightMember(), x.LeftMember()):
+                        self:=x.RightMember()
+                    else:
                         self:=undefined
                 )
             }
@@ -141,18 +141,18 @@ Fpl.Arithmetics.Peano
             k: Nat
             cases
             (
-                | Equal(m,0):
+                case Equal(m,0):
                     return n
-                | Equal(Succ(m), k):
-                    return Succ(Add(n,k));
-                else
+                case Equal(Succ(m), k):
+                    return Succ(Add(n,k))
+                else:
                     return undef
             )
         }
 
-        func Add(n,m: @Digits)->Nat
+        func Add(n,m: @extDecimal)->Nat
         {
-            return delegate.add(n,m)
+            py.add(n,m)
         }
 
 
@@ -204,7 +204,7 @@ Fpl.Arithmetics.Peano
 
             i: index
             result:=Zero()
-            loop i list
+            loop i list$
             (
                 result:=Add(result,list$i)
             )
@@ -218,7 +218,7 @@ Fpl.Arithmetics.Peano
 
             loop i [from~to]
             (
-                result:=Add(result,arr<i>)
+                result:=Add(result,arr[i])
             )
             return result
         }
@@ -254,11 +254,11 @@ Fpl.Arithmetics.Peano
         {
             n, limit: Nat
             f: Addend
-            loop n [1~limit]
-            (
-                assert Equal(f(n),n)
-            )
-            premise: undef
+            premise:
+                loop n [Nat(1)~limit]
+                (
+                    assert Equal(f(n),n)
+                )
             conclusion:
                 all n
                 (
@@ -309,7 +309,7 @@ Fpl.Arithmetics.Peano
             result:=ZeroReal()
             loop i [k~]
             (
-                result:=Add(result, Exp(arr<i>,i))
+                result:=Add(result, Exp(arr[i],i))
             )
             return result
         }
@@ -318,7 +318,7 @@ Fpl.Arithmetics.Peano
         {
             i: Nat
             cf: Real
-            cf:=Real(arr<k>)
+            cf:=Real(arr[k])
             i:=Succ(k)
             return Add( cf, Div(1 , ContinuedFraction(i, arr[i~])))
         }
@@ -327,6 +327,8 @@ Fpl.Arithmetics.Peano
         class N100:Set{N100(){n:Nat self:=SetBuilder(SetNat(),IsGreater(n,Nat(100))) }}
 
     }
+
+
 }
 
 

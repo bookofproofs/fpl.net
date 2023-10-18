@@ -41,6 +41,7 @@ let colon = skipChar ':' >>. spaces >>% Ast.One
 let colonStar = skipString ":*" >>. spaces >>% Ast.Many
 let colonPlus = skipString ":+" >>. spaces >>% Ast.Many1
 let colonEqual = skipString ":=" >>. spaces 
+let equals = skipString "=" >>. spaces
 let at = pchar '@'
 let case = skipChar '|'
 let leftBracket = skipChar '<' >>. spaces 
@@ -175,7 +176,7 @@ let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
 let theoryNamespaceList = sepBy1 theoryNamespace comma 
 
 let keywordUses = (skipString "uses" .>> IW)
-let usesClause = positions (keywordUses >>. leftBrace >>. IW >>. theoryNamespaceList .>> rightBrace) |>> Ast.UsesClause
+let usesClause = positions (keywordUses >>. theoryNamespaceList) |>> Ast.UsesClause
 
 let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
@@ -323,9 +324,8 @@ primePredicateRef.Value <- choice [
     keywordFalse
     keywordUndefined
     attempt argumentIdentifier
-    fplDelegate
+    fplDelegate 
     predicateWithQualification
-    fplIdentifier
 ]
 
 let conjunction = positions ((keywordAnd >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.And
@@ -343,8 +343,12 @@ let exists = positions ((keywordEx >>. variableList) .>>. onePredicateInParens) 
 let existsTimesN = positions (((keywordEx >>. exclamationDigits) .>>. (SW >>. variableList)) .>>. onePredicateInParens) |>> Ast.ExistsN
 let isOperator = positions ((keywordIs >>. leftParen >>. coordInType) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
+// equality operator
+let equalityComparison = (leftBracket >>. sepBy1 predicate equals .>> rightBracket) |>> Ast.EqualityComparison
+
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [
+    equalityComparison
     conjunction
     disjunction
     implication
@@ -356,7 +360,9 @@ let compoundPredicate = choice [
     isOperator
 ]
 
-predicateRef.Value <- ((compoundPredicate <|> primePredicate) .>> IW)
+
+
+predicateRef.Value <- choice [compoundPredicate; primePredicate] .>> IW 
 
 predicateListRef.Value <- sepBy predicate comma
 predicateList1Ref.Value <- sepBy1 predicate comma

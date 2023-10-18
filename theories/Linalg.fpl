@@ -1,55 +1,54 @@
 Fpl.LinAlg
 {
-    uses {Fpl.Commons, Fpl.Commons.Structures, Fpl.SetTheory.ZermeloFraenkel, Fpl.Algebra.Structures}
+    uses Fpl.Commons, Fpl.Commons.Structures, Fpl.SetTheory.ZermeloFraenkel, Fpl.Algebra.Structures
+
     theory
     {
 
         class FieldPowerN: Set
         {
 			dec:
-            myField: Field
-			addInField: BinOp
-			mulInField: BinOp
+                myField: Field
+                addInField: BinOp
+                mulInField: BinOp
             ;
+
             FieldPowerN
             (
                 field : Field,
                 n: Nat
             )
             {
-                dec:;
-                spec: 
+    			spec:
                     myField := field
                     addInField := myField.AddOp()
                     mulInField := myField.MulOp()
                     assert NotEqual(n, Zero())
-                    self:=SetBuilder( myField[1 ~ n], true);
+                    self:=SetBuilder( myField[1 ~ n], true)
+                ;
+				self!Set()
+                self
+
             }
 
 	        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
 	        {
-	            dec:;
-                spec:
-                    self[from ~ to]:=addInField(v[from ~ to],w[from ~ to])
-                ;
-                return self[from ~ to]
+	            self[from ~ to]:=addInField(v[from ~ to],w[from ~ to])
 	        }
-            
-            
+
         }
 		
         lemma VecAddIsCommutative()
         {
-            dec:
-                to: Nat
-                x,y: tplFieldElem[1~to]
-                fieldPowerN: FieldPowerN
-                    (
-                    field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
-                    n:Nat
-                    )
-                vecAdd: VecAdd(v,w: tplFieldElem[from~to]);
-            spec:;
+            from, to: Nat
+            from := Nat(1)
+            x,y: tplFieldElem[from~to]
+            fieldPowerN: FieldPowerN
+                (
+                field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
+                n:Nat
+                )
+            vecAdd: VecAdd(v,w: tplFieldElem[from~to])
             pre:
                 and
                 (
@@ -62,30 +61,16 @@ Fpl.LinAlg
 
         class ZeroVectorN: Tuple
         {
-            dec:;
-            spec:;
             ZeroVectorN(n: Nat, field: Field)
             {
-                dec:
-                i: Nat;
-                spec:
+                from: Nat
+                from := Nat(1)
+                i: Nat
                 range i [1~n]
                 (
-                    self<i>:=field.AdditiveGroup().NeutralElement()
-                );
+                    self[i]:=field.AdditiveGroup().NeutralElement()
+                )
             }
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -77,6 +77,7 @@ type Ast =
     | PremiseReference of Positions * unit
     | Justification of Positions * Ast list
     | ArgumentTuple of Positions * Ast list
+    | EqualityComparison of Ast list
     // Statements
     | Assertion of Positions * Ast
     | ConditionFollowedByResult of Positions * (Ast * Ast list)

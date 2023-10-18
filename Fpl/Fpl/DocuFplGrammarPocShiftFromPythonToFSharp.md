@@ -21,10 +21,101 @@ The following documentation describes the syntactical amendments and provides a 
 * An experimental approach to error recovery is being added to the FPL parser.
 
 ### Changes to the Grammar (Details)
-#### Uses clause
-The uses clause now requires a separate block. 
+#### 1) In-block Variable Declarations and Statements
+In FPL, you can declare variables of building blocks both in their signatures or in their body. The declarations in the body must be started by a new keyword `declaration` (or `dec`) and ended by a semicolon `;`. The statements in the body must be started by a new keyword `declaration` (or `dec` and ended by a semicolon `;`.
 
+*Before*
+``` 
+{
+    // some declarations
+    myField: Field 
+    addInField: BinOp
+    mulInField: BinOp
+    // some statements
+    myField := field
+    addInField := myField.AddOp()
+    mulInField := myField.MulOp()
+}
+``` 
+*Now*
+``` 
+{
+    dec: 
+        myField: Field 
+        addInField: BinOp
+        mulInField: BinOp
+    ; 
 
+    spec: 
+        myField := field
+        addInField := myField.AddOp()
+        mulInField := myField.MulOp()
+    ; 
+}
+``` 
+This is a trade-off between simplicity of syntax and a more strict syntax. In FPL, what has to come after the declarations and specifications depends on the kind of a building block (see syntax changes below). 
+
+#### 2) Classes allow multiple inheritance
+
+In previous version of the grammar, polymorphism of mathematical object could only be achieved by using the `is` operator and asserting that the object is of some additional type than the type of the single parent class. Now, this is simplified because we can add as many types to the class as necessary.
+
+*Before*
+``` 
+class A :B
+{
+    A() 
+    {
+        assert is(self,C)
+    }
+    ...
+}
+``` 
+*Now*
+``` 
+class A :B, :C
+{
+...
+}
+``` 
+
+#### 3) Syntax of class constructors
+
+The syntax of constructors requires two explicit things - a list of calls of parental constructors and the keyword `self` as the last expression in the constructor. These two additional components disambiguate the representation of the class object after the constructor has been executed. The call (or more calls) toe each of the parental constructors cannot be omitted. Thus, the new syntax helps on the syntactical level to make sure that every property of the parental class(es) is added to the representation of the class.
+
+*Before*
+``` 
+class SomeClass: ParentClass
+{
+	// private variables of the class
+    myField: Field
+
+    // constructor
+    SomeClass(field : Field)
+    {
+        myField := field
+    }
+}
+``` 
+*Now*
+``` 
+class SomeClass: ParentClass
+{
+	// private variables of the class
+    dec:
+        myField: Field
+    ;
+
+    // constructor
+    SomeClass(field : Field)
+    {
+    	spec:
+            myField := field
+        ;
+		self!ParentClass()
+        self
+    }
+}
+``` 
 
 ### More stringent predicate syntax
 * Giving up mixing up statements and index variables being not predicative in the choice rule of Prime predicates 

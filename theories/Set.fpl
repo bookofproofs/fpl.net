@@ -1,23 +1,21 @@
 Fpl.SetTheory.ZermeloFraenkel
 {
-    uses {Fpl.Commons}
+    uses Fpl.Commons
+
     theory
     {
         class Set: obj
         {
-            intrinsic
         }
 
         // "in relation" ("is element of") relation
         pred In(x,y: Set)
         {
-            intrinsic
         }
 
         pred IsEmpty(x: Set)
         {
-            dec: y: Set;
-            spec:;
+            y: Set
 			
             all y
             (
@@ -28,8 +26,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // existence of an empty set
         axiom EmptySetExists()
         {
-            dec:x: Set;
-            spec:;
+            x: Set
             ex x
             (
                 IsEmpty(x)
@@ -39,21 +36,16 @@ Fpl.SetTheory.ZermeloFraenkel
         // introduction of a new mathematical object
         class EmptySet: Set
         {
-            dec:;
-            spec:;
             EmptySet()
             {
-                dec:;
-                spec:
-                assert IsEmpty(self);
+                assert IsEmpty(self)
             }
         }
 
         // relation between a subset and a superset
         pred IsSubset(subset,superset: Set)
         {
-            dec:u: Set;
-            spec:;
+            u: Set
             all u
             (
                 impl (In(u, subset), In(u, superset))
@@ -63,21 +55,16 @@ Fpl.SetTheory.ZermeloFraenkel
         // introduction of a new mathematical object that is a subset of a superset
         class Subset: Set
         {
-            dec:;
-            spec:;
             Subset(superSet: Set)
             {
-                dec:;
-                spec:
-                assert IsSubset(self, superSet);
+                assert IsSubset(self, superSet)
             }
         }
 
         // extensionality
         axiom Extensionality()
         {
-            dec:x,y: Set;
-            spec:;
+            x,y: Set
             all x,y
             (
                 impl
@@ -96,17 +83,14 @@ Fpl.SetTheory.ZermeloFraenkel
         class SetRoster: Set
         {
             // to support enumerating set elements, e.g. SetRoster(1,2,3)
-            dec:;
-            spec:;
-            SetRoster(listOfSets:* Set)
+            SetRoster(listOfSets: *Set)
             {
-                dec:elem: Set;
-                spec:
+                elem: Set
 
                 loop elem listOfSets
                 (
                     assert In(elem, self)
-                );
+                )
             }
 
         }
@@ -114,11 +98,8 @@ Fpl.SetTheory.ZermeloFraenkel
         // Schema of separation axioms
         axiom SchemaSeparation()
         {
-            dec:
-                p: pred
-                x,y: Set
-                ;
-            spec:;
+            p: pred
+            x,y: Set
             all p, x
             (
                 ex y
@@ -134,12 +115,8 @@ Fpl.SetTheory.ZermeloFraenkel
         class SetBuilder: Set
         {
             // to support set builder notation, ex. all "even" natural numbers like SetBuilder(n: Nat, Even(n))
-            dec:;
-            spec:;
-            SetBuilder(x: Set, p: pred(u: Set, o:* obj))
+            SetBuilder(x: Set, p: pred(u: Set, o: *obj))
             {
-                dec:;
-                spec:
                 assert
                     all u
                     (
@@ -149,15 +126,13 @@ Fpl.SetTheory.ZermeloFraenkel
                             and ( In(u,x), p(u,o) )
                         )
                     )
-                ;
             }
         }
 
         // For any two sets $x,y$ there exists a set $z$ containing them as elements.
         axiom Pairing()
         {
-            dec:x,y,z,w: Set;
-            spec:;
+            x,y,z,w: Set
             all x,y
             (
                 ex z
@@ -181,8 +156,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // for every set x there is a set containing all elements of the elements of x
         axiom Union()
         {
-            dec:x,y,z,w: Set;
-            spec:;
+            x,y,z,w: Set
             all x
             (
                 ex y
@@ -201,8 +175,7 @@ Fpl.SetTheory.ZermeloFraenkel
 
         pred IsPowerSet(ofSet, potentialPowerSet: Set)
         {
-            dec:z: Set;
-            spec:;
+            z: Set
             all z
             (
                 impl (Subset(z,ofSet), In(z, potentialPowerSet))
@@ -212,21 +185,15 @@ Fpl.SetTheory.ZermeloFraenkel
         // including the PowerSet function
         func PowerSet(x: Set) -> Set
         {
-            dec:
-                y: Set
-                ;
-            spec:
-                assert IsPowerSet(x,y)
-                ;
-                y
+            y: Set
+            assert IsPowerSet(x,y)
+            return y
         }
 
         // for every set x there is a set y containing all subsets of x as its elements
         axiom PowerSetExistsForAllSets()
         {
-            dec:
-            x,y: Set;
-            spec:;
+            x,y: Set
             all x
             (
                 ex y
@@ -239,8 +206,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // introducing a set union function
         func SetUnion(x,y: Set) -> Set
         {
-            dec:z, union: Set;
-            spec:
+            z, union: Set
             assert
                 all z
                 (
@@ -250,23 +216,19 @@ Fpl.SetTheory.ZermeloFraenkel
                         In(z,union)
                     )
                 )
-            ;
-            union
+            return union
         }
 
         // introducing a singleton function
         func Singleton(x: Set) -> Set
         {
-            dec:;
-            spec:;
-            SetRoster(x)
+            return SetRoster(x)
         }
 
         // alternative 2: adds SetUnion notation capability to this theory (as predicate)
         pred Union(x,superSet: Set)
         {
-            dec:u: Set;
-            spec:;
+            u: Set
             all u
             (
                 impl (In(u, x), In(u, superSet))
@@ -275,4 +237,7 @@ Fpl.SetTheory.ZermeloFraenkel
 
 
     }
+
+
+
 }

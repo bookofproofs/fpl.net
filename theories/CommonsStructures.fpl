@@ -1,6 +1,6 @@
 Fpl.Commons.Structures
 {
-    uses { Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel, Fpl.Arithmetics.Peano }
+    uses Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel, Fpl.Arithmetics.Peano
 
     theory
     {
@@ -10,7 +10,7 @@ Fpl.Commons.Structures
         {
             myLength: Nat
 
-            Tuple(listOfTpl:+ tpl)
+            Tuple(listOfTpl: +tpl)
             {
                 elem: tpl
                 i: Nat
@@ -18,7 +18,7 @@ Fpl.Commons.Structures
                 loop elem listOfTpl
                 (
                     i:=Succ(i)
-                    self<i>:=elem
+                    self[i]:=elem
                 )
                 myLength:=i
             }
@@ -56,7 +56,7 @@ Fpl.Commons.Structures
             myLength: Nat
             myFrom: Nat
 
-            CartesianProduct(setList:+ Set)
+            CartesianProduct(setList: +Set)
             {
                 setItem: Set
                 i: Nat
@@ -64,7 +64,7 @@ Fpl.Commons.Structures
                 loop setItem setList
                 (
                     i:=Succ(i)
-                    self<i>:=setItem
+                    self[i]:=setItem
                 )
                 myFrom := Nat(1)
                 myLength:=i
@@ -96,9 +96,9 @@ Fpl.Commons.Structures
                             In(tupleElem,@self),
                             and (
                                 is(tupleElem,Tuple[myFrom~myLength]),
-                                all i [1~myLength]
+                                loop i [1~myLength]
                                 (
-                                    In(tupleElem<i>,@self<i>)
+                                    assert In(tupleElem[i],@self[i])
                                 )
                             )
                         )
@@ -112,7 +112,7 @@ Fpl.Commons.Structures
         {
             myArity: Nat
 
-            Relation(setList:+ Set)
+            Relation(setList: +Set)
             {
                 cartProd : CartesianProduct
                 cartProd := CartesianProduct(setList)
@@ -283,9 +283,5 @@ Fpl.Commons.Structures
 
 
     }
+
 }
-
-
-
-
-

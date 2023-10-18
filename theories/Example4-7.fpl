@@ -4,31 +4,28 @@ T
     {
         ModusPonens()
         {
-            dec: p,q: pred;
-            spec:;
+            p,q: pred
             premise:
                 and (p, impl (p,q) )
             conclusion:
                 q
         }
 
-        ProceedingResults(p:+ pred)
+        ProceedingResults(p: +pred)
         {
-            dec: proceedingResult: pred;
-            spec:;
+            proceedingResult: pred
             premise:
-                all proceedingResult p
+                loop proceedingResult p
                 (
-                    proceedingResult
+                    assert proceedingResult
                 )
             conclusion:
                 and (p)
         }
 
-        ExistsByExample(p: pred(c: obj, other:* obj))
+        ExistsByExample(p: pred(c: obj, other: *obj))
         {
-            dec: x: obj;
-            spec:;
+            x: obj
             premise:
                 p(c, other)
             conclusion:
@@ -42,47 +39,38 @@ T
 
         class A: obj
         {
-            intrinsic
         }
 
         class B: obj
         {
-            intrinsic
         }
 
         class C: obj
         {
-            intrinsic
         }
 
         pred Greater(x,y: obj)
         {
-            intrinsic
+
         }
 
         axiom GreaterAB()
         {
-            dec: 
-                a: A
-                b: B;
-            spec:;
+            a: A
+            b: B
             Greater(a,b)
         }
 
         axiom GreaterBC()
         {
-            dec:
-                b: B
-                c: C;
-            spec:;
+            b: B
+            c: C
             Greater(b,c)
         }
 
         axiom GreaterTransitive()
         {
-            dec:
-                x,y,z: obj;
-            spec:;
+            x,y,z: obj
             impl
             (
                 and
@@ -96,9 +84,7 @@ T
 
         lemma Example4()
         {
-            dec:
-                x,y,z: obj;
-            spec:;
+            x,y,z: obj
             pre: undefined
             con:
                 ex x ( and (Greater(x,y), Greater(x,z)) )
@@ -106,31 +92,20 @@ T
 
         proof Example4$1
         {
-            dec:
-                a:A
-                b:B
-                c:C
-                x,y,z: obj
-            ;
-            spec:;
-            1. GreaterAB |- Greater(a,b)
-            2. GreaterBC |- Greater(b,c)
-            3. ProceedingResults(1.,2.) |- and (Greater(a,b), Greater(b,c))
-            4. 3., GreaterTransitive |- impl ( and (Greater(a,b), Greater(b,c)), Greater(a,c) )
-            5. 4., ModusPonens |- Greater(a,c)
-            6. ProceedingResults(5.,1.) |- and (Greater(a,c), Greater(a,b))
-            7. 6., ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) )
+            a:A
+            b:B
+            c:C
+            x,y,z: obj
+
+            1. /GreaterAB |- Greater(a,b)
+            2. /GreaterBC |- Greater(b,c)
+            3. /ProceedingResults(/1,/2) |- and (Greater(a,b), Greater(b,c))
+            4. /3, /GreaterTransitive |- impl ( and (Greater(a,b), Greater(b,c)), Greater(a,c) )
+            5. /4, /ModusPonens |- Greater(a,c)
+            6. /ProceedingResults(/5,/1) |- and (Greater(a,c), Greater(a,b))
+            7. /6, /ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) )
 			8. |- qed
         }
    }
+
 }
-
-
-
-
-
-
-
-
-
-
