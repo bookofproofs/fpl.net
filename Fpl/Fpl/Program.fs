@@ -5,12 +5,12 @@ open FParsec
 
 let input = "TestNamespace {
     theory {   
-        cl T:obj
+        ax T () 
         {
-            x::
+            intr
         }
-        y
     }
+    y
 }"
 
 let result = fplParser input

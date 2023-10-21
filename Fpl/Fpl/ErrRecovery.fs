@@ -64,6 +64,9 @@ type Diagnostics() =
         if not (myHashset.Contains(d)) then
             myHashset.Add(d) |> ignore
 
+    member this.CountDiagnostics  =
+        myHashset.Count
+
     member this.PrintDiagnostics =
         for d in myHashset do
             printfn "%O" d
@@ -339,7 +342,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                         // so that when double-clicking the error, the IDE will go to the right position in the source code
                         let correctedErrorPosition =
                             if newRecoveryText = "§ " then
-                                let newIndexOffset = newIndexOffset - keyWordLength - int64 2
+                                let newIndexOffset = newIndexOffset - int64 3
                                 Position(
                                     backtrackingFreePos.StreamName,
                                     backtrackingFreePos.Index + newIndexOffset,
@@ -382,3 +385,15 @@ let (<!>) (p: Parser<_,_>) label : Parser<_,_> =
         let reply = p stream
         printfn "%A: Leaving %s (%A)" stream.Position label reply.Status
         reply
+
+
+/// Taken from https://www.quanttec.com/fparsec/users-guide/looking-ahead-and-backtracking.html#parser-predicates
+let resultSatisfies predicate msg (p: Parser<_,_>) : Parser<_,_> =
+    let error = messageError msg
+    fun stream ->
+      let state = stream.State
+      let reply = p stream
+      if reply.Status <> Ok || predicate reply.Result then reply
+      else
+          stream.BacktrackTo(state) // backtrack to beginning
+          Reply(Primitives.Error, error)

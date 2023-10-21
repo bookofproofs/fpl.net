@@ -564,6 +564,6 @@ let fplNamespace = positions (namespaceIdentifier .>>. (many CW >>. namespaceBlo
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
-//let fplParser (input: string) = tryParse ast input "" (int64 0)
-let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
+let fplParser (input: string) = tryParse ast input "" (int64 0)
+//let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
 let parserDiagnostics = ad

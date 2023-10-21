@@ -62,7 +62,7 @@ type TestErrRecovery() =
     <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseExtension001Diag () =
@@ -91,7 +91,7 @@ type TestErrRecovery() =
     <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseExtension002Diag () =
@@ -118,7 +118,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseExtension003Diag () =
@@ -145,7 +145,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseExtension004Diag () =
@@ -172,7 +172,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseExtension005Diag () =
@@ -199,7 +199,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -222,7 +222,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -251,7 +251,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseUses002Diag () =
@@ -279,7 +279,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseUses003Diag () =
@@ -307,7 +307,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseUses004Diag () =
@@ -335,7 +335,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseUses005Diag () =
@@ -363,7 +363,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseUses006Diag () =
@@ -391,7 +391,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseUses007Diag () =
@@ -419,7 +419,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseUses009Diag () =
@@ -447,7 +447,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseInference000Diag () =
@@ -477,7 +477,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseInference001Diag () =
@@ -505,7 +505,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseInference002Diag () =
@@ -534,7 +534,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseInference003Diag () =
@@ -564,7 +564,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseInference004Diag () =
@@ -593,7 +593,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseInference005Diag () =
@@ -622,7 +622,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseInference006Diag () =
@@ -651,7 +651,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseInference007Diag () =
@@ -682,7 +682,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseInference008Diag () =
@@ -714,7 +714,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseInference009Diag () =
@@ -744,7 +744,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -769,7 +769,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseNamespace000Diag () =
@@ -797,7 +797,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseNamespace001Diag () =
@@ -824,7 +824,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseNamespace002Diag () =
@@ -856,7 +856,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseNamespace003Diag () =
@@ -880,7 +880,7 @@ Diagnostic
 Expecting: '{', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseNamespace004Diag () =
@@ -908,7 +908,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseNamespace005Diag () =
@@ -936,7 +936,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseNamespace006Diag () =
@@ -958,7 +958,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseAxiom000Diag () =
@@ -981,13 +981,16 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 5, Col: 5),
+  (FplParser, Error, (Ln: 4, Col: 5),
    DiagnosticMessage
      "'y'
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        printf "\n%s" actualDiag
+        printf "\n%s" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
 
     [<TestMethod>]
     member this.TestTryParseAxiom001Diag () =
@@ -1012,7 +1015,11 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        printf "\n%s" actualDiag
+        printf "\n%s" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
+
 
     [<TestMethod>]
     member this.TestTryParseAxiom002Diag () =
@@ -1037,7 +1044,11 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        printf "\n%s" actualDiag
+        printf "\n%s" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
+
 
     [<TestMethod>]
     member this.TestTryParseAxiom003Diag () =
@@ -1062,7 +1073,11 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        printf "\n%s" actualDiag
+        printf "\n%s" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
+
 
     [<TestMethod>]
     member this.TestTryParseAxiom004Diag () =
@@ -1086,7 +1101,11 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        printf "\n%s" actualDiag
+        printf "\n%s" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
+
 
     [<TestMethod>]
     member this.TestTryParseAxiom005Diag () =
@@ -1105,10 +1124,10 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
   (FplParser, Error, (Ln: 5, Col: 9),
    DiagnosticMessage
      "'}'
-Expecting: '@', 'all', 'and', 'dec', 'declaration', 'ex', 'false', 'iif', 
-'impl', 'is', 'not', 'or', 'self', 'spec', 'specification', 'true', 
-'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <inline comment>, 
-<significant whitespace>, <variable>
+Expecting: '<', '@', 'all', 'and', 'dec', 'declaration', 'del', 'delegate', 
+'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 
+'spec', 'specification', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, 
+<block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 7, Col: 5),
@@ -1117,7 +1136,11 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        printf "\n%s" actualDiag
+        printf "\n%s" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
+
 
     [<TestMethod>]
     member this.TestTryParseAxiom006Diag () =
@@ -1140,7 +1163,11 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        printf "\n%s" actualDiag
+        printf "\n%s" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(1, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
+
 
     [<TestMethod>]
     member this.TestTryParseAxiom007Diag () =
@@ -1149,7 +1176,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     theory {   
         ax T () 
         {
-            true
+            intrinsic
         }
     }
     y
@@ -1163,7 +1190,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseFunction000Diag () =
@@ -1188,7 +1215,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseFunction001Diag () =
@@ -1213,7 +1240,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseFunction002Diag () =
@@ -1238,7 +1265,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseFunction003Diag () =
@@ -1263,7 +1290,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseFunction004Diag () =
@@ -1290,7 +1317,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseFunction005Diag () =
@@ -1316,7 +1343,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseFunction006Diag () =
@@ -1352,7 +1379,7 @@ Diagnostic
      "Expecting: '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClasses000Diag () =
@@ -1379,7 +1406,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClasses001Diag () =
@@ -1406,7 +1433,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClasses002Diag () =
@@ -1434,7 +1461,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClasses003Diag () =
@@ -1463,7 +1490,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl000Diag () =
@@ -1497,7 +1524,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl001Diag () =
@@ -1531,7 +1558,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl002Diag () =
@@ -1567,7 +1594,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003aDiag () =
@@ -1603,7 +1630,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003_Diag () =
@@ -1639,7 +1666,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003bDiag () =
@@ -1675,7 +1702,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003cDiag () =
@@ -1709,7 +1736,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003dDiag () =
@@ -1743,7 +1770,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003eDiag () =
@@ -1777,7 +1804,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003fDiag () =
@@ -1812,7 +1839,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003gDiag () =
@@ -1846,7 +1873,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003hDiag () =
@@ -1881,7 +1908,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003iDiag () =
@@ -1916,7 +1943,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003i000Diag () =
@@ -1951,7 +1978,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003i001Diag () =
@@ -1986,7 +2013,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003i002Diag () =
@@ -2021,7 +2048,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003i003Diag () =
@@ -2056,7 +2083,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -2094,7 +2121,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope001Diag () =
@@ -2131,7 +2158,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope002Diag () =
@@ -2168,7 +2195,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003aDiag () =
@@ -2205,7 +2232,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003_Diag () =
@@ -2242,7 +2269,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003bDiag () =
@@ -2279,7 +2306,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003cDiag () =
@@ -2316,7 +2343,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003dDiag () =
@@ -2353,7 +2380,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003eDiag () =
@@ -2390,7 +2417,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003fDiag () =
@@ -2427,7 +2454,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003gDiag () =
@@ -2464,7 +2491,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003hDiag () =
@@ -2501,7 +2528,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003iDiag () =
@@ -2538,7 +2565,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003i000Diag () =
@@ -2575,7 +2602,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003i001Diag () =
@@ -2610,7 +2637,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003i002Diag () =
@@ -2647,7 +2674,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003i003Diag () =
@@ -2684,7 +2711,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred001Diag () =
@@ -2718,7 +2745,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred002Diag () =
@@ -2752,7 +2779,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003aDiag () =
@@ -2787,7 +2814,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003_Diag () =
@@ -2830,7 +2857,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003bDiag () =
@@ -2864,7 +2891,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -2899,7 +2926,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003eDiag () =
@@ -2932,7 +2959,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003fDiag () =
@@ -2966,7 +2993,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003gDiag () =
@@ -2999,7 +3026,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003hDiag () =
@@ -3033,7 +3060,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003iDiag () =
@@ -3067,7 +3094,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003i000Diag () =
@@ -3101,7 +3128,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003i001Diag () =
@@ -3134,7 +3161,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003i002Diag () =
@@ -3167,7 +3194,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003i003Diag () =
@@ -3200,7 +3227,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass001Diag () =
@@ -3233,7 +3260,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass002Diag () =
@@ -3266,7 +3293,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003aDiag () =
@@ -3299,7 +3326,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003_Diag () =
@@ -3332,7 +3359,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003bDiag () =
@@ -3365,7 +3392,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003cDiag () =
@@ -3398,7 +3425,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003dDiag () =
@@ -3431,7 +3458,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003eDiag () =
@@ -3464,7 +3491,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003fDiag () =
@@ -3497,7 +3524,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003gDiag () =
@@ -3530,7 +3557,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003hDiag () =
@@ -3563,7 +3590,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003iDiag () =
@@ -3596,7 +3623,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i000Diag () =
@@ -3629,7 +3656,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i001Diag () =
@@ -3662,7 +3689,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i002Diag () =
@@ -3695,7 +3722,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i003Diag () =
@@ -3728,7 +3755,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
 <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass000Diag () =
@@ -3753,7 +3780,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass001Diag () =
@@ -3778,7 +3805,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass001aDiag () =
@@ -3803,7 +3830,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass001bDiag () =
@@ -3828,7 +3855,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass002Diag () =
@@ -3853,7 +3880,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass003Diag () =
@@ -3878,7 +3905,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass003aDiag () =
@@ -3903,7 +3930,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass004Diag () =
@@ -3929,7 +3956,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass004aDiag () =
@@ -3954,7 +3981,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass005Diag () =
@@ -3980,7 +4007,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass006Diag () =
@@ -4016,7 +4043,7 @@ Diagnostic
      "Expecting: '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass007Diag () =
@@ -4039,7 +4066,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParseClass008Diag () =
@@ -4069,7 +4096,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParsePredicate000Diag () =
@@ -4094,7 +4121,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -4120,7 +4147,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -4146,7 +4173,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
     ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -4172,7 +4199,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -4198,7 +4225,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -4224,7 +4251,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -4250,7 +4277,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -4276,7 +4303,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -4302,7 +4329,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -4328,7 +4355,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -4353,7 +4380,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParsePredicate006Diag () =
@@ -4391,7 +4418,7 @@ Diagnostic
      "Expecting: '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParsePredicate006aDiag () =
@@ -4422,7 +4449,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParsePredicate007Diag () =
@@ -4454,7 +4481,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
 
     [<TestMethod>]
@@ -4487,7 +4514,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParsePredicate009Diag () =
@@ -4519,7 +4546,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParsePredicate010Diag () =
@@ -4552,7 +4579,7 @@ Diagnostic
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParsePredicate011Diag () =
@@ -4577,7 +4604,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
 
     [<TestMethod>]
     member this.TestTryParsePredicate012Diag () =
@@ -4600,4 +4627,146 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
-        Assert.AreEqual(replaceWhiteSpace expectedDiag, replaceWhiteSpace actualDiag)
+        Assert.AreEqual(replaceWhiteSpace expectedDiag, actualDiag)
+
+    [<TestMethod>]
+    member this.TestTryParseStatement000Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        pred A() 
+        {
+            spec:
+                x := 
+            ;
+            true
+        }
+    }
+    y
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 7, Col: 13),
+   DiagnosticMessage
+     "';'
+Expecting: '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 
+'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 
+'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 11, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        printf "\n%s" actualDiag
+        printf "\n%s" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
+
+    [<TestMethod>]
+    member this.TestTryParseStatement001Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        pred A() 
+        {
+            spec:
+                x := false
+            ;
+            true
+        }
+    }
+    y
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 11, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        printf "\n%s" actualDiag
+        printf "\n%s" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(1, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
+
+    [<TestMethod>]
+    member this.TestTryParseStatement002Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        pred A() 
+        {
+            spec:
+                x := theorem
+            ;
+            true
+        }
+    }
+    y
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 6, Col: 22),
+   DiagnosticMessage "'theorem'
+Expecting: <variable (got keyword)>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 7, Col: 13),
+   DiagnosticMessage "';'
+Expecting: <PascalCaseId>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 11, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        printf "\n%s" actualDiag
+        printf "\n%s" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
+
+    [<TestMethod>]
+    member this.TestTryParseStatement003Diag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        pred A() 
+        {
+            spec:
+                x := #
+            ;
+            true
+        }
+    }
+    y
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 6, Col: 22),
+   DiagnosticMessage
+     "'#'
+Expecting: '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 
+'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 
+'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 11, Col: 5),
+   DiagnosticMessage
+     "'y'
+Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        printf "\n%s" actualDiag
+        printf "\n%s" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))

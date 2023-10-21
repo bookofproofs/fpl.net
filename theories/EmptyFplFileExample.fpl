@@ -1,7 +1,9 @@
 TestNamespace {
     theory {   
-        cl A:obj 
+        ax T () 
         {
+            intrinsic
+        }
     }
     y
 }
