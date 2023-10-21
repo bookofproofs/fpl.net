@@ -336,7 +336,7 @@ let exclusiveOr = positions (keywordXor >>. twoPredicatesInParens) |>> Ast.Xor
 let negation = positions (keywordNot >>. onePredicateInParens) |>> Ast.Not
 let all = positions ((keywordAll >>. variableList) .>>. onePredicateInParens) |>> Ast.All
 let allAssert = positions ((keywordAll >>. entityInVariableRange) .>>. onePredicateInParens) |>> Ast.AllAssert
-let exists = positions ((keywordEx >>. variableList) .>>. onePredicateInParens) |>> Ast.Exists
+let existsTimesN = positions (((keywordEx >>. exclamationDigits) .>>. (SW >>. entityOptvariableListInVariableRangeList)) .>>. onePredicateInParens) |>> Ast.ExistsN
 let existsTimesN = positions (((keywordEx >>. exclamationDigits) .>>. (SW >>. variableList)) .>>. onePredicateInParens) |>> Ast.ExistsN
 let isOperator = positions ((keywordIs >>. leftParen >>. coordInType) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
