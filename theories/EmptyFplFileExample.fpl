@@ -1,10 +1,26 @@
 TestNamespace {
     theory {   
-        pred T()
+        class Tuple : obj
         {
-            x!ddd, 
-            true
+            dec:
+                myLength: Nat
+            ;
+            Tuple(listOfTpl:+ tpl)
+            {
+                dec:
+                elem: tpl
+                i: Nat
+                ;
+                spec: 
+                    i:= Zero()
+                    for elem in listOfTpl
+                    (
+                        i:=Succ(i)
+                        self[i~]:=elem
+                    )
+                    myLength:=i
+                ;
+            }
         }
-        y
     }
 }

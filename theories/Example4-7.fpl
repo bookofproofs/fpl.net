@@ -4,28 +4,35 @@ T
     {
         ModusPonens()
         {
-            p,q: pred
+            dec:
+                p,q: pred
+            ;
             premise:
                 and (p, impl (p,q) )
             conclusion:
                 q
         }
 
-        ProceedingResults(p: +pred)
+        ProceedingResults(p:+ pred)
         {
-            proceedingResult: pred
-            premise:
-                loop proceedingResult p
+            dec:
+                proceedingResult: pred
+            ;
+            premise: 
+                all proceedingResult in p
                 (
-                    assert proceedingResult
+                    proceedingResult
                 )
+
             conclusion:
                 and (p)
         }
 
         ExistsByExample(p: pred(c: obj, other: *obj))
         {
-            x: obj
+            dec:
+                x: obj
+            ;
             premise:
                 p(c, other)
             conclusion:

@@ -96,6 +96,9 @@ let keyWordSet =
 let recoveryMap = dict [
     ("'->', <whitespace>", "->")
     ("',', ':', ':*', ':+', <whitespace>", ":")
+    ("'!', '(', ')', ',', '.', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>", ")")
+    ("'!', '~', <whitespace>", "~")
+    //("'!', '@', 'self', <(closed) right bound ']'>, <(open) right bound ')]'>, <digits>, <variable>, <whitespace>")
     ("',', '<', '{', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>", "{")
     ("',', '>', <whitespace>", ">")
     ("',', 'alias', 'inf', 'inference', 'th', 'theory', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "inf")
@@ -103,6 +106,7 @@ let recoveryMap = dict [
     ("';', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self', <PascalCaseId>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>, <whitespace>", ";")
     ("':', ':*', ':+', <whitespace>", ":")
     ("':'", ":")
+    ("':', <whitespace>", ":")
     ("':=', <whitespace>", ":=")
     ("':end'", ":end")
     ("':ext', 'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>", ":ext")
@@ -112,18 +116,28 @@ let recoveryMap = dict [
     ("'(', ';', '<', <(closed) left bound '['>, <(open) left bound '[('>, <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>, <variable>, <whitespace>", ";")
     ("'(', ';', '|', '~', <\"language-specific string\">, <block comment>, <inline comment>, <significant whitespace>, <variable>, <whitespace>", ";")
     ("'(', ';', <block comment>, <inline comment>, <significant whitespace>, <variable>, <whitespace>", ";")
+    ("'(', '.', '<', 'con', 'conclusion', <(closed) left bound '['>, <(open) left bound '[('>, <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "con")
     ("'(', '.', ';', '<', <(closed) left bound '['>, <(open) left bound '[('>, <block comment>, <inline comment>, <significant whitespace>, <variable>, <whitespace>", ";")
+    ("'(', ',', <whitespace>", "(")
     ("'(', '.', <whitespace>", "(")
     ("'(', ')', ',', '.', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>", ",")
     ("'(', ')', ',', '<', <(closed) left bound '['>, <(open) left bound '[('>, <PascalCaseId>, <whitespace>", ",")
     ("'(', ')', ',', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>", ",")
     ("'(', ')', ',', <whitespace>", ",")
     ("'(', '<', '{', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>", "{")
+    ("'(', '.', ':=', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>", ":=")
+    ("'(', <\"language-specific string\">, <variable (got keyword)>, <whitespace>", "\"\\operatorname{true}\"")
     ("'(', <\"language-specific string\">, <variable>", "\"\\operatorname{true}\"")
+    ("'(', ';', '|', '~', <\"language-specific string\">, <block comment>, <inline comment>, <significant whitespace>, <variable (got keyword)>, <whitespace>", ";")
     ("'(', <whitespace>", "(")
+    ("')', ',', <whitespace>", ")")
     ("')', '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable>, <whitespace>", ")")
+    ("')', '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable (got keyword)>, <whitespace>", "true")
     ("')', <variable (got keyword)>, <whitespace>", ")")
     ("')', <variable>, <whitespace>", ")")
+    ("')', <whitespace>", ")")
+    ("')'", ")")
+    ("')', '|', <significant whitespace>, <whitespace>", ")")
     ("'{', <block comment>, <inline comment>, <significant whitespace>", "{")
     ("'{', <whitespace>", "{")
     ("'{'", "{")
@@ -149,7 +163,9 @@ let recoveryMap = dict [
     ("'~', <block comment>, <inline comment>, <significant whitespace>", "~")
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>", "}")
+    ("'con', 'conclusion', <block comment>, <inline comment>, <significant whitespace>", "con")
     ("'con', 'conclusion', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "con")
+    ("'dec', 'declaration', 'self!', 'spec', 'specification', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "spec")
     ("'dec', 'declaration', 'intr', 'intrinsic', 'ret', 'return', 'spec', 'specification', <block comment>, <inline comment>, <significant whitespace>", "intr")
     ("'dec', 'declaration', 'intr', 'intrinsic', 'spec', 'specification', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>", "intr")
     ("'dec', 'declaration', 'pre', 'premise', 'spec', 'specification', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "pre")
@@ -159,6 +175,8 @@ let recoveryMap = dict [
     ("'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>", "uses")
     ("'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>", "loc")
     ("'mand', 'mandatory', 'opt', 'optional', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
+    ("'mand', 'mandatory', 'opt', 'optional', '}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
+    ("'mand', 'mandatory', 'opt', 'optional', '}', <block comment>, <inline comment>, <significant whitespace>", "}")
     ("'self!', 'self', <block comment>, <inline comment>, <significant whitespace>", "self")
     ("'th', 'theory', <block comment>, <inline comment>, <significant whitespace>", "th")
     ("<(closed) right bound ']'>, <(open) right bound ')]'>, <whitespace>", "]")
@@ -297,8 +315,14 @@ let manipulateString
 
             let postStartsWithParenthesis = startsWithParentheses post
 
-            let lengthKeyword = int64 (lengthOfStartingFplKeyword post)
-            if text = invalidSymbol || pre.EndsWith(',') || post.StartsWith("//") || post.StartsWith("/*") then
+            let cond1 = text = invalidSymbol
+            let cond1a = text = "~" 
+            let cond1b = post.StartsWith("]")
+            let cond2 = pre.EndsWith(',')
+            let cond3 = post.StartsWith("//")
+            let cond4 = post.StartsWith("/*")
+
+            if cond1 || (cond1a && cond1b) || cond2 || cond3 || cond4 then
                 // insert text with a trailing whitespace
                 let newInput = 
                     if pre.EndsWith(".") then

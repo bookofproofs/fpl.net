@@ -33,22 +33,25 @@ Fpl.LinAlg
 
 	        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
 	        {
-	            self[from ~ to]:=addInField(v[from ~ to],w[from ~ to])
+			    spec:
+    	            self[from ~ to]:=addInField(v[from ~ to],w[from ~ to])
+                ;
 	        }
 
         }
 		
         lemma VecAddIsCommutative()
         {
-            from, to: Nat
-            from := Nat(1)
-            x,y: tplFieldElem[from~to]
-            fieldPowerN: FieldPowerN
-                (
-                field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
-                n:Nat
-                )
-            vecAdd: VecAdd(v,w: tplFieldElem[from~to])
+            dec:
+                to: Nat
+                x,y: tplFieldElem[1~to]
+                fieldPowerN: FieldPowerN
+                    (
+                    field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
+                    n:Nat
+                    )
+                vecAdd: VecAdd(v,w: tplFieldElem[from~to])
+            ;
             pre:
                 and
                 (
@@ -63,13 +66,15 @@ Fpl.LinAlg
         {
             ZeroVectorN(n: Nat, field: Field)
             {
-                from: Nat
-                from := Nat(1)
-                i: Nat
-                range i [1~n]
-                (
-                    self[i]:=field.AdditiveGroup().NeutralElement()
-                )
+                dec:
+                    i: Nat
+                ;
+                spec:
+                    range i [1~n]
+                    (
+                        self[i]:=field.AdditiveGroup().NeutralElement()
+                    )
+                ;
             }
         }
     }

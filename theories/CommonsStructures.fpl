@@ -8,19 +8,24 @@ Fpl.Commons.Structures
         // defines a fixed length tuple template using a generic type tplIndex for an index in a range
         class Tuple : obj
         {
-            myLength: Nat
-
-            Tuple(listOfTpl: +tpl)
+            dec:
+                myLength: Nat
+            ;
+            Tuple(listOfTpl:+ tpl)
             {
+                dec:
                 elem: tpl
                 i: Nat
-                i:= Zero()
-                loop elem listOfTpl
-                (
-                    i:=Succ(i)
-                    self[i]:=elem
-                )
-                myLength:=i
+                ;
+                spec: 
+                    i:= Zero()
+                    for elem in listOfTpl
+                    (
+                        i:=Succ(i)
+                        self[i]:=elem
+                    )
+                    myLength:=i
+                ;
             }
 
             Tuple(from, length:Nat, arr: tpl[from ~ length])

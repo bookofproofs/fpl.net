@@ -263,7 +263,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
         | (None, None) ->
             // this case should never happen because mapErrMsgToRecText never returns this
             let diagnosticMsg =
-                DiagnosticMessage(errorMsg + System.Environment.NewLine + "(unknown parser choice or no recovery string provided)")
+                DiagnosticMessage(errorMsg + Environment.NewLine + "(unknown parser choice or no recovery string provided)")
 
             let diagnostic =
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
@@ -271,7 +271,8 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             ad.AddDiagnostic diagnostic
             Ast.Error
         | (Some cho, None) -> 
-            let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine + "(unknown parser choice)")
+            let diagnosticMsg = DiagnosticMessage(newErrMsg + Environment.NewLine + "(unknown parser choice)")
+
             let diagnostic =
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
 
@@ -279,7 +280,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             Ast.Error
         | (None, Some recStr) ->
             // this case should never happen because mapErrMsgToRecText never returns this
-            let diagnosticMsg = DiagnosticMessage(errorMsg + System.Environment.NewLine + "(unknown error)")
+            let diagnosticMsg = DiagnosticMessage(errorMsg + Environment.NewLine + "(unknown error)")
 
             let diagnostic =
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
@@ -292,7 +293,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 manipulateString input recStr backtrackingFreePos lastRecoveryText
             
             if fatalError then
-                let diagnosticMsg = DiagnosticMessage(System.Environment.NewLine + "(recovery failed due to likely infinite loop)")
+                let diagnosticMsg = DiagnosticMessage(Environment.NewLine + "(recovery failed due to likely infinite loop)")
 
                 let diagnostic =
                     Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
@@ -323,9 +324,9 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
 
                     let diagnosticMsg = 
                         if cond0a then
-                            DiagnosticMessage("Expecting: '}', <block comment>, <inline comment>, <significant whitespace>" + System.Environment.NewLine)
+                            DiagnosticMessage("Expecting: '}', <block comment>, <inline comment>, <significant whitespace>" + Environment.NewLine)
                         else
-                            DiagnosticMessage(newErrMsg + System.Environment.NewLine)
+                            DiagnosticMessage(newErrMsg + Environment.NewLine)
                     let diagnostic =
                         // this is to ensure that the input insertions of error recovery remain invisible to the user
                         // so that when double-clicking the error, the IDE will go to the right position in the source code

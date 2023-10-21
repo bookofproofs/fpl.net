@@ -1,28 +1,28 @@
 ﻿# Changes in FPL 
-## Amendments to the FPL Grammar, major change of the FPL parser   
-The original grammar until Grammar version 1.2.1 was the EBNF input for an FPL parser implemented using Python and the **tatsu** parser generator.
+## Amendments to the FPL grammar, major change of the FPL parser   
+The original grammar until version 1.2.1 was the EBNF input for an FPL parser implemented using Python and the **tatsu** parser generator.
 
 From the version 2.0 on, there are some major changes to the grammar:
-* The FPL parser is being implemented from scratch, based on .NET (concretely the F# FParsec library). 
-* Consequently, there is no separate EBNF input file, since the grammar is programmed building up on parsers written using FParsec.
+* The FPL parser was implemented from scratch, based on .NET (concretely the F# FParsec library). 
+* Consequently, there is no separate EBNF input file, since the grammar results from FParsec parsers building upon each other.
 * There are amendments to the FPL syntax in the new implementation.
 
-The following documentation describes the syntactical amendments and provides a rationale behind each.
+The following documentation describes the syntax amendments and provides a rationale behind each.
 
-### General improvements to the AST
+### General improvements of the Abstract Syntax Tree (AST)
 * Consequent structuring of the AST using F# types 
-* Skipping rule names not needed in the AST is now done automatically in FParsec
+* Skipping rule names not needed in the AST as specified in the FParsec parser
 * A stricter syntax  
-* A more careful placement of whitespace, comments
+* A more careful placement of whitespace and comments.
 
 ### Error recovery
-* Both the original tatsu parser generator and the new, FParsec-based parsers do not provide in-built error recovery.
+* Both the original tatsu parser and the new, FParsec-based parser do not provide in-built error recovery.
 * However, the Fparsec-based parser provides more programmatic control. 
-* An experimental approach to error recovery is being added to the FPL parser.
+* An experimental approach to error recovery was added to the FPL parser.
 
 ### Changes to the Grammar (Details)
 #### 1) In-block Variable Declarations and Statements
-In FPL, you can declare variables of building blocks both in their signatures or in their body. The declarations in the body must be started by a new keyword `declaration` (or `dec`) and ended by a semicolon `;`. The statements in the body must be started by a new keyword `declaration` (or `dec` and ended by a semicolon `;`.
+In FPL, you can declare variables of building blocks both in their signatures or in their body. The declarations in the body must be started by a new keyword `declaration` (or `dec`) and ended by a semicolon `;`. The statements in the body must be started by a new keyword `specification` (or `spec` and ended by a semicolon `;`.
 
 *Before*
 ``` 
@@ -53,7 +53,7 @@ In FPL, you can declare variables of building blocks both in their signatures or
     ; 
 }
 ``` 
-This is a trade-off between simplicity of syntax and a more strict syntax. In FPL, what has to come after the declarations and specifications depends on the kind of a building block (see syntax changes below). 
+This is a trade-off between simplicity of syntax and a stricter syntax with respect to what comes after variable declarations and specifications. In FPL, this depends on the kind of a building block. For instance, functional terms require a return statement while predicates require a predicate. With the new annotations `dec` and `spec` it becomes much more easier to recognize missing linguistic components, because this recognition can be done already in the parser on the syntactical level and have not be dealt with by the interpreter. These additional syntax changes will be discussed below. 
 
 #### 2) Classes allow multiple inheritance
 
