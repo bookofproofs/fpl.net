@@ -4714,13 +4714,11 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
   (FplParser, Error, (Ln: 6, Col: 22),
-   DiagnosticMessage "'theorem'
-Expecting: <variable (got keyword)>
-")
-Diagnostic
-  (FplParser, Error, (Ln: 7, Col: 13),
-   DiagnosticMessage "';'
-Expecting: <PascalCaseId>
+   DiagnosticMessage
+     "'theorem'
+Expecting: '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 
+'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 
+'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable (got keyword)>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 11, Col: 5),
@@ -4731,7 +4729,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
         let actualDiag = ad.DiagnosticsToString
         printf "\n%s" actualDiag
         printf "\n%s" (replaceWhiteSpace actualDiag)
-        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.AreEqual(2, ad.CountDiagnostics)
         Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
 
     [<TestMethod>]

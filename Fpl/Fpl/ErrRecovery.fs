@@ -134,7 +134,7 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Pos
 
     quotedFirstLine + Environment.NewLine + "Expecting: " + (wrapEveryNthComma choices 8), newPos
 
-let split = [|" or "; "or" + Environment.NewLine ; "or\r" ; "or "; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine|]
+let split = [|" or "; "or" + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
 let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
 let retrieveExpectedParserChoices (errMsg:string) =
     // replace accidental new lines injected by FParsec into FPL parser labels that start by "<" and end by ">"
@@ -296,7 +296,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             Ast.Error
             
         | (Some cho, Some recStr) ->
-            let (newInput, newRecoveryText, newOffset, keyWordLength, fatalError) =
+            let (newInput, newRecoveryText, newOffset, fatalError) =
                 manipulateString input recStr backtrackingFreePos lastRecoveryText
             
             if fatalError then

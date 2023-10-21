@@ -104,17 +104,14 @@ let withBacktrackedError p: Parser<_,_> =
         | _ ->
             Reply(oldState)
 
-let variableX: Parser<string,unit> = IdStartsWithSmallCase >>= 
-                                        ( fun s -> 
-                                            if keyWordSet.Contains(s) then 
-                                                fail ("Expecting: <variable (got keyword)>")
-                                            else if tplRegex.IsMatch(s) then 
-                                                fail ("Expecting: <variable (got template)>") 
-                                            else 
-                                            (preturn s)
-                                        ) 
+let variableX: Parser<string,unit> = 
+    IdStartsWithSmallCase 
+    <?> "<variable>" 
+    |> resultSatisfies (fun s -> keyWordSet.Contains(s) |> not) "Expecting: <variable (got keyword)>" 
+    |> resultSatisfies (fun s -> tplRegex.IsMatch(s) |> not) "Expecting: <variable (got template)>"
+    >>= (fun s -> preturn s) 
 
-let variable = positions variableX <?> "<variable>" |>> Ast.Var 
+let variable = positions variableX |>> Ast.Var 
 
 let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 

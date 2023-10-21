@@ -58,7 +58,7 @@ type TestErrRecoveryLowLevel() =
             expNewOffset
         ) =
         let pos = Position("", ind, 0, 0)
-        let (actNewInput, newRecoveryText, newIndexOffset, keywordLength, fatalError) = manipulateString input text pos "" 
+        let (actNewInput, newRecoveryText, newIndexOffset, fatalError) = manipulateString input text pos "" 
         Assert.AreEqual(expNewInput, actNewInput)
         Assert.AreEqual(expNewOffset, newIndexOffset)
 
@@ -73,7 +73,7 @@ type TestErrRecoveryLowLevel() =
             expRecoveryText
         ) =
         let pos = Position("", ind, 0, 0)
-        let (actNewInput, newRecoveryText, newIndexOffset, keywordLength, fatalError) = manipulateString input text pos lastRecoveryText 
+        let (actNewInput, newRecoveryText, newIndexOffset, fatalError) = manipulateString input text pos lastRecoveryText 
         Assert.AreEqual(expRecoveryText, newRecoveryText)
 
 
@@ -139,6 +139,18 @@ The parser backtracked after:
     ^
 Expecting: <block comment>, <inline comment>, <significant whitespace>, ':ext',
 'inf', 'inference', 'th', 'theory' or 'uses'""", "':ext', 'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>")>]
+    [<DataRow("""Failure:
+Error in Ln: 1 Col: 6
+dec: tpl: Nat;
+     ^
+Expecting: <block comment>, <inline comment>, <significant whitespace>,
+<whitespace> or ';'
+Other error messages:
+  Expecting: <variable (got template)>""", "';', <block comment>, <inline comment>, <significant whitespace>, <variable (got template)>, <whitespace>")>]    
+    [<DataRow("""Error in Ln: 6 Col: 22
+                x := theorem
+                     ^
+Expecting: <PascalCaseId>, <argument identifier>, <digits>, '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined' or 'xor' Other error messages:   Expecting: <variable (got keyword)>""", "'<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable (got keyword)>")>]    
     member this.TestRetrieveExpectedParserChoices(fParsecErrMsg:string, expected:string) = 
         let actual, actualModCW = retrieveExpectedParserChoices fParsecErrMsg
         Assert.AreEqual(expected, actual)

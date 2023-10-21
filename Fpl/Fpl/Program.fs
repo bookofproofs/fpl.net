@@ -26,9 +26,9 @@ printf "%O" origResult
 ad.PrintDiagnostics
 
 
-let i = "cl A:obj 
-        {
-    }"
-let r = run definitionClass i
-printf "%O" r
+let i = "dec: tpl: Nat;"
+let r = run varDeclBlock i
 
+let errMsg = sprintf "%O" r
+printf ">>>%s<<<" errMsg
+printf "%A" (retrieveExpectedParserChoices errMsg)

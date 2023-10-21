@@ -90,8 +90,6 @@ let keyWordSet =
            "theorem"
            "th"
            "theory"
-           "tpl"
-           "template"
            "trivial"
            "true"
            "undef"
@@ -108,6 +106,8 @@ let recoveryMap = dict [
     //("',', '>'", ">")
     //("',', 'alias', '}'", "}")
     ("';', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self', <PascalCaseId>, <digits>, <significant whitespace>, <variable>", ";")
+    ("';', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self', <PascalCaseId>, <digits>, <significant whitespace>, <variable (got keyword)>", ";")
+    //("';', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self', <PascalCaseId>, <digits>, <significant whitespace>, <variable>", ";")
     //("':', ':*', ':+'", ":")
     ("':'", ":")
     ("':='", ":=")
@@ -124,12 +124,15 @@ let recoveryMap = dict [
     //("'(', ')', ',', '<', <(closed) left bound '['>, <(open) left bound '[!'>, <PascalCaseId>", ",")
     //("'(', ')', ',', '<', <(closed) left bound '['>, <(open) left bound '[!'>", ",")
     //("'(', ')', ','", ",")
+    ("'<', '@', 'all', 'and', 'dec', 'declaration', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'spec', 'specification', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <significant whitespace>, <variable (got keyword)>", "true")
     ("'<', '@', 'all', 'and', 'dec', 'declaration', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'spec', 'specification', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <significant whitespace>, <variable>", "true")
-    ("'<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable>", "1")
+    ("'<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable (got keyword)>", "true")
+    ("'<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable>", "true")
     ("'<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <significant whitespace>, <variable>", "true")
     //("'(', '<', '{', <(closed) left bound '['>, <(open) left bound '[!'>", "{")
     ("'(', <\"language-specific string\">, <variable>", "\"\\operatorname{true}\"")
     ("'('", "(")
+    ("')', <variable (got keyword)>", ")")
     ("')', <variable>", ")")
     //("'{', <significant whitespace>", "{")
     ("'{'", "{")
@@ -271,7 +274,7 @@ let manipulateString
     =
     if pos.Index < 0 || pos.Index > input.Length then
         // position out of range
-        (input, text, int64 0, int64 0, true)
+        (input, text, int64 0, true)
     else
         // text with a trailing whitespace
 
@@ -281,7 +284,7 @@ let manipulateString
         if pos.Index = input.Length then
             let newInput = input + textWithWS
             let newRecText = lastRecoveryText + textWithWS
-            (newInput, newRecText, int64 (newInput.Length - input.Length), int64 0, false)
+            (newInput, newRecText, int64 (newInput.Length - input.Length), false)
         else
             // avoid false positives by inserting to many opening and closing braces, parentheses, or brackets
             let corrTextWithWS, fatalErrorOccured =
@@ -302,14 +305,14 @@ let manipulateString
             let postStartsWithParenthesis = startsWithParentheses post
 
             let lengthKeyword = int64 (lengthOfStartingFplKeyword post)
-            if text = invalidSymbol || pre.EndsWith(',') || lengthKeyword>0 || post.StartsWith("//") || post.StartsWith("/*") then
+            if text = invalidSymbol || pre.EndsWith(',') || post.StartsWith("//") || post.StartsWith("/*") then
                 // insert text with a trailing whitespace
                 let newInput = 
                     if pre.EndsWith(".") then
                         pre + corrTextWithWS + optTrailingWs + post
                     else
                         pre + " " + corrTextWithWS + optTrailingWs + post
-                (newInput, lastRecoveryText + corrTextWithWS, int64 (newInput.Length - input.Length), lengthKeyword, fatalErrorOccured)
+                (newInput, lastRecoveryText + corrTextWithWS, int64 (newInput.Length - input.Length), fatalErrorOccured)
             elif postStartsWithParenthesis || text = "{" then
                 // insert text with a trailing whitespace
                 let newInput = 
@@ -317,7 +320,7 @@ let manipulateString
                         pre + corrTextWithWS + optTrailingWs + post
                     else
                         pre + " " + corrTextWithWS + optTrailingWs + post
-                (newInput, lastRecoveryText + corrTextWithWS, int64 (newInput.Length - input.Length), lengthKeyword, fatalErrorOccured)
+                (newInput, lastRecoveryText + corrTextWithWS, int64 (newInput.Length - input.Length), fatalErrorOccured)
             elif Regex.IsMatch(post, @"^\w") then
                 // if the beginning is a word, replace this word
                 let newInput = 
@@ -345,7 +348,7 @@ let manipulateString
 
                 (newInput,
                     newRecText,
-                    int64 (newInput.Length - input.Length), lengthKeyword, fatalErrorOccured)
+                    int64 (newInput.Length - input.Length), fatalErrorOccured)
             else
                 // if the beginning starts with any other character
                 let postAfterRemovingWrongChar = post.[1..].TrimStart()
@@ -365,5 +368,5 @@ let manipulateString
 
                 (newInput,
                     newRecText,
-                    int64 (newInput.Length - input.Length), lengthKeyword, fatalErrorOccured)
+                    int64 (newInput.Length - input.Length), fatalErrorOccured)
 
