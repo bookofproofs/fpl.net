@@ -165,13 +165,7 @@ let retrieveExpectedParserChoices (errMsg:string) =
         |> Seq.toList
         |> List.sort
         |> String.concat ", "
-    let choicesModCW = 
-        hashSet
-        |> Seq.toList
-        |> List.sort
-        |> List.filter (fun str -> str<>labelWhitespace && str<>labelBlockComment && str<>labelInlineComment ) // filter out all elements that will never become choices for error recovery
-        |> String.concat ", "
-    choices, choicesModCW
+    choices
 
 
 let getLineOffset (input: string) (line:int)=
@@ -232,10 +226,9 @@ let mapErrMsgToRecText (input: string) (errMsg: string) (pos:Position) =
     // because we want to report only those errors that the user 
     // is most likely to handle while typing FPL source code.
     let backtrackingFreeErrMsg,  backtrackingFreePos = extractBacktrackingFreeErrMsgAndPos input errMsg pos 
-    let test = input.Substring(int backtrackingFreePos.Index)
 
-    let choices, choicesModCW = retrieveExpectedParserChoices backtrackingFreeErrMsg
-    let text = recText choicesModCW
+    let choices = retrieveExpectedParserChoices backtrackingFreeErrMsg
+    let text = recText choices
     let newErrMsg, modifiedPos = replaceFParsecErrMsgForFplParser backtrackingFreeErrMsg choices backtrackingFreePos
     (Some choices, text, newErrMsg, modifiedPos)
 
@@ -279,7 +272,6 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             Ast.Error
         | (Some cho, None) -> 
             let diagnosticMsg = DiagnosticMessage(newErrMsg + System.Environment.NewLine + "(unknown parser choice)")
-
             let diagnostic =
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
 
@@ -317,8 +309,6 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 let cond4 = newRecoveryText="T { "
                 let cond5 = not (lastRecoveryTextMod.EndsWith("{ ")) 
                 let cond6 = lastRecoveryTextMod.EndsWith("( ) { ")
-                let cond7 = not (newRecoveryText = "} ")
-                let cond8 = not (lastRecoveryText = "intr ")
                 let cond0 = lastRecoveryText = ""
                 let cond0a = errorMsg.Contains("The error occurred at the end of the input stream") && recStr = "}" && errorMsg.Contains("Expecting: <block comment>, <inline comment>, <significant whitespace> or '}'")
                 // emit diagnostics using a heuristics while preventing false positives 
@@ -327,7 +317,6 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                     || ( 
                             ( cond1 || cond2 || cond3 || cond4) 
                             && (cond5 || cond6) 
-                            && (cond7 || cond8)
                        ) 
                 if conditionForEmittingDiagnostics then
                     // emit diagnostic if there is a new remainingInput

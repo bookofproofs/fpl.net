@@ -58,13 +58,13 @@ let vDash = skipString "|-"
 
 (* Whitespaces and Comments *)
 
-let IW = spaces <?> labelWhitespace
+let IW = spaces <?> "<whitespace>"
 
 let SW = spaces1 <?> "<significant whitespace>"
 
-let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline) <?> labelInlineComment |>> ignore 
+let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline) <?> "<inline comment>" |>> ignore 
 
-let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) <?> labelBlockComment |>> ignore 
+let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) <?> "<block comment>" |>> ignore 
 
 let CW = choice [ blockComment; inlineComment; SW ]
 
@@ -413,7 +413,7 @@ let corollary = positions (keywordCorollary >>. corollarySignature .>>. premiseC
 let keywordAxiom = (skipString "axiom" <|> skipString "ax" <|> skipString "postulate" <|> skipString "post") >>. IW
 let axiomBlock = leftBraceCommented >>. varDeclOrSpecList .>>. commentedPredicate .>> commentedRightBrace
 
-let axiom = positions (keywordAxiom >>. signature .>>. axiomBlock) |>> Ast.Axiom
+let axiom = positions (keywordAxiom >>. signature .>> IW .>>. axiomBlock) |>> Ast.Axiom
 
 (* FPL building blocks - Constructors *)
 

@@ -152,7 +152,7 @@ Other error messages:
                      ^
 Expecting: <PascalCaseId>, <argument identifier>, <digits>, '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined' or 'xor' Other error messages:   Expecting: <variable (got keyword)>""", "'<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable (got keyword)>")>]    
     member this.TestRetrieveExpectedParserChoices(fParsecErrMsg:string, expected:string) = 
-        let actual, actualModCW = retrieveExpectedParserChoices fParsecErrMsg
+        let actual = retrieveExpectedParserChoices fParsecErrMsg
         Assert.AreEqual(expected, actual)
 
     [<TestMethod>]

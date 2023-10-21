@@ -1,9 +1,10 @@
 TestNamespace {
     theory {   
-        ax T () 
+        pred T()
         {
-            intrinsic
+            x!ddd, 
+            true
         }
+        y
     }
-    y
 }
