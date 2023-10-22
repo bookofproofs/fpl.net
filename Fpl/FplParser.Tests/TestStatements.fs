@@ -13,29 +13,7 @@ type TestStatements () =
             |> String.concat ""
 
     [<TestMethod>]
-    member this.TestRange01 () =
-        let result = run forStatement """for proceedingResult in p
-                (
-                    assert proceedingResult
-                    a:=1
-                    b:=1
-                )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestRange02 () =
-        let result = run forStatement """for i in [1~n]
-                (
-                    self<i>:=field.AdditiveGroup().NeutralElement()
-                )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestLoop01 () =
+    member this.TestFor01 () =
         let result = run forStatement """for proceedingResult in    p
                 (
                     assert proceedingResult
@@ -47,7 +25,7 @@ type TestStatements () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestLoop02 () =
+    member this.TestFor02 () =
         let result = run forStatement """for    n in[1~4]
             (
             assert Equal(f(n),n)
@@ -57,11 +35,51 @@ type TestStatements () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestLoop03 () =
+    member this.TestFor03 () =
         let result = run forStatement """for n in [!1~!4]
             (
             assert Equal(f(n),n)
             )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestFor04 () =
+        let result = run forStatement """for p in pred
+                (
+                    assert p
+                )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestFor05 () =
+        let result = run forStatement """for i in func
+                (
+                    self<i>:=field.AdditiveGroup().NeutralElement()
+                )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestFor06 () =
+        let result = run forStatement """for i in tplA
+                (
+                    i:=a
+                )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestFor07 () =
+        let result = run forStatement """for i in Nat
+                (
+                    i:=a
+                )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -67,9 +67,9 @@ type Ast =
     | Iif of Positions * (Ast * Ast)
     | Xor of Positions * (Ast * Ast)
     | Not of Positions * Ast
-    | All of Positions * (Ast list * Ast)
-    | AllAssert of Positions * ((Ast * Ast) * Ast)
-    | Exists of Positions * (Ast list * Ast)
+    | Domain of Positions * Ast
+    | All of Positions * ((Ast * Ast option) list * Ast)
+    | Exists of Positions * ((Ast * Ast option) list * Ast)
     | ExistsN of Positions * ((Ast * Ast list) * Ast)
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Positions * (Ast * Ast)

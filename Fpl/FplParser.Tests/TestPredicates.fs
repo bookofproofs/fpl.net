@@ -324,28 +324,28 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate43 () =
-        let result = run predicate """ex!0 x,y,z(true)"""
+        let result = run predicate """exn!0 x,y,z(true)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate44 () =
-        let result = run predicate """ex!1 x,y,z (not (iif ( true, not(false))))"""
+        let result = run predicate """exn!1 x,y,z (not (iif ( true, not(false))))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate45 () =
-        let result = run predicate """ex!2 x,y,z (not (iif ( iif( true, false), true)))"""
+        let result = run predicate """exn!2 x,y,z (not (iif ( iif( true, false), true)))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate46 () =
-        let result = run predicate """ex!3 x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let result = run predicate """exn!3 x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -391,6 +391,34 @@ type TestPredicates () =
     [<TestMethod>]
     member this.TestPredicate52 () =
         let result = run predicate """<z = true = and(x,y)>"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicate53 () =
+        let result = run predicate """all x in [a~b], y in c, z (and (a,b,c))"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicate54 () =
+        let result = run predicate """all x in Real, y in pred, z in func (and (a,b,c))"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicate55 () =
+        let result = run predicate """ex x in [a~b], y in c, z (and (a,b,c))"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicate56 () =
+        let result = run predicate """ex x in Real, y in pred, z in func (and (a,b,c))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

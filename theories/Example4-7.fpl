@@ -21,14 +21,14 @@ T
             premise: 
                 all proceedingResult in p
                 (
-                    proceedingResult
+                    assert proceedingResult
                 )
 
             conclusion:
                 and (p)
         }
 
-        ExistsByExample(p: pred(c: obj, other: *obj))
+        ExistsByExample(p: pred(c: obj, other:* obj))
         {
             dec:
                 x: obj
@@ -63,21 +63,27 @@ T
 
         axiom GreaterAB()
         {
-            a: A
-            b: B
+            dec:
+                a: A
+                b: B
+            ;
             Greater(a,b)
         }
 
         axiom GreaterBC()
         {
-            b: B
-            c: C
+            dec:
+                b: B
+                c: C
+            ;
             Greater(b,c)
         }
 
         axiom GreaterTransitive()
         {
-            x,y,z: obj
+            dec:
+                x,y,z: obj
+            ;
             impl
             (
                 and
@@ -91,13 +97,15 @@ T
 
         lemma Example4()
         {
+            dec:
             x,y,z: obj
+            ;
             pre: undefined
             con:
                 ex x ( and (Greater(x,y), Greater(x,z)) )
         }
 
-        proof Example4$1
+        proof Example4!1
         {
             a:A
             b:B

@@ -144,6 +144,7 @@ let keywordXor = skipString "xor" .>> IW
 let keywordNot = skipString "not" .>> IW 
 let keywordAll = skipString "all" .>> IW 
 let keywordEx = skipString "ex" .>> IW
+let keywordExN = skipString "exn" .>> IW
 let keywordIs = skipString "is" .>> IW 
 
 
@@ -288,8 +289,13 @@ let conditionFollowedByResultList = many1 (many CW >>. conditionFollowedByResult
 
 
 let casesStatement = positions (((keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>>  semiColon .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen))) |>> Ast.Cases
-let entityInVariableRange = ( entity .>>. (keywordIn >>. variableRange)) .>> IW
-let forInBody = entityInVariableRange .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
+
+let inDomain = positions (keywordIn >>. (simpleVariableType <|> variableRange)) |>> Ast.Domain
+let entityInOptDomain = ( entity .>>. opt inDomain) .>> IW
+let entityInOptDomainList = (sepBy1 entityInOptDomain comma) .>> IW
+
+let entityInDomain = ( entity .>>. inDomain ) .>> IW
+let forInBody = entityInDomain .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
 let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 
 //// Difference of assertion to an axiom: axiom's is followed by a signature of a predicate (i.e. with possible parameters),
@@ -334,10 +340,9 @@ let implication = positions (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
 let equivalence = positions (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
 let exclusiveOr = positions (keywordXor >>. twoPredicatesInParens) |>> Ast.Xor
 let negation = positions (keywordNot >>. onePredicateInParens) |>> Ast.Not
-let all = positions ((keywordAll >>. variableList) .>>. onePredicateInParens) |>> Ast.All
-let allAssert = positions ((keywordAll >>. entityInVariableRange) .>>. onePredicateInParens) |>> Ast.AllAssert
-let existsTimesN = positions (((keywordEx >>. exclamationDigits) .>>. (SW >>. entityOptvariableListInVariableRangeList)) .>>. onePredicateInParens) |>> Ast.ExistsN
-let existsTimesN = positions (((keywordEx >>. exclamationDigits) .>>. (SW >>. variableList)) .>>. onePredicateInParens) |>> Ast.ExistsN
+let all = positions ((keywordAll >>. entityInOptDomainList) .>>. onePredicateInParens) |>> Ast.All
+let exists = positions ((keywordEx >>. entityInOptDomainList) .>>. onePredicateInParens) |>> Ast.Exists
+let existsTimesN = positions (((keywordExN >>. exclamationDigits) .>>. (SW >>. variableList)) .>>. onePredicateInParens) |>> Ast.ExistsN
 let isOperator = positions ((keywordIs >>. leftParen >>. coordInType) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // equality operator
@@ -352,8 +357,9 @@ let compoundPredicate = choice [
     equivalence
     exclusiveOr
     negation
-    (attempt allAssert) <|> all
-    (attempt existsTimesN) <|> exists
+    all
+    existsTimesN
+    exists
     isOperator
 ]
 
