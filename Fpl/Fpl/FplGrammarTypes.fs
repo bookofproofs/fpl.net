@@ -12,6 +12,7 @@ type Ast =
     | Digits of string
     | ExtDigits of Positions * Ast
     | ExclamationDigits of Positions * Ast
+    | ExclamationVarOrDigits of Positions * Ast
     | PascalCaseId of string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)

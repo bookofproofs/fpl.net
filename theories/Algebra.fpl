@@ -154,13 +154,16 @@ Fpl.Algebra.Structures
 
             mandatory func NthOp(n: index) -> Composition
             {
-                return myOps$n
+                return myOps!n
             }
 
             // Every algebraic structure will have a mandatory property called CarrierSet of type Set.
             mandatory Set CarrierSet()
             {
-                self:=myCarrierSet
+                spec: 
+                    self:=myCarrierSet
+                ;
+                self
             }
 
 
@@ -173,7 +176,9 @@ Fpl.Algebra.Structures
 
             Magma(x: tplSet, op: BinOp)
             {
-                self!AlgebraicStructure(x,op)
+                spec:
+                    self!AlgebraicStructure(x,op)
+                ;
                 self
             }
         }
@@ -185,8 +190,8 @@ Fpl.Algebra.Structures
             {
                 spec: 
                     assert op.IsAssociative()
+                    self!Magma(x,op)
                 ;
-                self!Magma(x,op)
                 self
             }
 
@@ -204,14 +209,17 @@ Fpl.Algebra.Structures
                 spec: 
                     myOp:=op
                     assert myOp.HasNeutralElement()
+                    self!Semigroup(x,op)
                 ;
-                self!Semigroup(x,op)
                 self
             }
 
             mandatory tplSetElem NeutralElem()
             {
-                self:=myOp.NeutralElement()
+                spec:
+                    self:=myOp.NeutralElement()
+                ;
+                self
             }
         }
 
@@ -229,10 +237,8 @@ Fpl.Algebra.Structures
                 assert In(y,x)
                     cases
                 (
-                    case Equal(n,0):
-                        result := m.NeutralElem()
-                    else:
-                        result :=
+                    | Equal(n,0): result := m.NeutralElem()
+                    ; else result :=
                             op(
                                 y,
                                 Exp( m(y,op), y, Sub(n,1))
@@ -278,12 +284,14 @@ Fpl.Algebra.Structures
                 dec:
                      val: tplSetElem
                 ;
+                spec:
                 assert
                     and
                     (
                         Equal( myOp(x,val), self.NeutralElem()),
                         Equal( myOp(val,x), self.NeutralElem())
                     )
+                ;
                 ret val
             }
         }
@@ -341,12 +349,18 @@ Fpl.Algebra.Structures
 
             mandatory CommutativeGroup AdditiveGroup()
             {
-                return CommutativeGroup(myX, myAdd)
+                spec:
+                    self:= CommutativeGroup(myX, myAdd)
+                ;
+                self
             }
 
             mandatory Semigroup MultiplicativeSemiGroup()
             {
-                return CommutativeGroup(myX, myMul)
+                spec:
+                    self:= CommutativeGroup(myX, myMul)
+                ;
+                self
             }
 
             mandatory pred RightDistributive()
@@ -396,7 +410,10 @@ Fpl.Algebra.Structures
 
             mandatory Monoid MultiplicativeMonoid()
             {
-                return Monoid(self.CarrierSet(), self.Mul())
+                spec:
+                    self:= Monoid(self.CarrierSet(), self.Mul())
+                ;
+                self
             }
         }
 
@@ -425,7 +442,10 @@ Fpl.Algebra.Structures
 
             mandatory CommutativeGroup MultiplicativeGroup()
             {
-                return CommutativeGroup(self.CarrierSet(), self.Mul())
+                spec:
+                    self:= CommutativeGroup(self.CarrierSet(), self.Mul())
+                ;
+                self
             }
 
             mandatory pred OneUnequalZero()
@@ -454,11 +474,13 @@ Fpl.Algebra.Structures
         // Vector addition
         func AddVec(x,y: tplVector) -> tplVector
         {
+            intr
         }
 
         // Scalar Multiplication
         func ScalarMul(x: tplFieldElem, y: tplVector) -> tplVector
         {
+            intr
         }
 
         // Vector space over a field
@@ -503,7 +525,10 @@ Fpl.Algebra.Structures
             // let's call it with the identifier "Space"
             mandatory CommutativeGroup Space()
             {
-                self:=CommutativeGroup(mySpace, myFieldAdd)
+                spec:
+                    self:=CommutativeGroup(mySpace, myFieldAdd)
+                ;
+                self
             }
 
             mandatory Field MyField()

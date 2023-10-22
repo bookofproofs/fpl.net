@@ -1,7 +1,7 @@
 Fpl.Arithmetics.Peano
 {
     :ext
-        extDigits : /\d+/
+        Digits : /\d+/
     :end
 
     uses Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel
@@ -10,11 +10,13 @@ Fpl.Arithmetics.Peano
     {
         class Zero: obj
         {
+            intr
         }
 
         // definition of a functional term denoting the successor of a natural number
         func Succ(n: Nat) -> Nat
         {
+            intr
         }
 
         axiom ZeroIsNat()
@@ -27,7 +29,7 @@ Fpl.Arithmetics.Peano
             dec: n, successor: Nat;
             all n
             (
-                ex$1 successor
+                exn!1 successor
                 (
                     and
                     (
@@ -80,20 +82,18 @@ Fpl.Arithmetics.Peano
         // definition of a new mathematical object (natural number)
         class Nat: obj
         {
-            Nat(x: @extDecimal)
+            Nat(x: @Digits)
             {
-                cases
-                (
-                    case Equal(x,0) :
-                        self := Zero()
-                    case Equal(x,1) :
-                        self := Succ(Zero())
-                    case Equal(x,2) :
-                        self := Succ(Succ(Zero()))
-                    else:
-                        // else case addressed using a python delegate
-                        self := Succ(py.decrement(x))
-                )
+                spec:
+                    cases
+                    (
+                        | <x = 0> : self := Zero() 
+                        | <x = 1> : self := Succ(Zero())
+                        | <x = 2> : self := Succ(Succ(Zero()))
+                        ; else self := Succ(delegate.decrement(x))  
+                    )
+                ;
+                self
             }
 
             Nat(x: Int)
@@ -101,13 +101,11 @@ Fpl.Arithmetics.Peano
                 spec:
                     cases
                     (
-                        case IsGreaterOrEqual(x.RightMember(), x.LeftMember()):
-                            self:=x.RightMember()
-                        else:
-                            self:=undefined
+                        | IsGreaterOrEqual(x.RightMember(), x.LeftMember()): self:=x.RightMember()
+                        ; else self:=undefined
                     )
+                    self!obj()
                 ;
-                self!obj()
                 self
             }
         }
@@ -124,12 +122,12 @@ Fpl.Arithmetics.Peano
             SetNat()
             {
                 dec: n: Nat;
-                // Assert that elements of class "Nat" can be collected to a bigger object of class "SetNat"
-                // This requires that we can apply the "In" predicate defined in Fpl.Set.ZermeloFraenkel
-                // to object of the class "Nat". This becomes possible when we assert that every variable of the class
-                // "Nat" is a also Set.
-                // This is comparable to implementing an interface (or comparable to multiple inheritance).
                 spec:
+                    // Assert that elements of class "Nat" can be collected to a bigger object of class "SetNat"
+                    // This requires that we can apply the "In" predicate defined in Fpl.Set.ZermeloFraenkel
+                    // to object of the class "Nat". This becomes possible when we assert that every variable of the class
+                    // "Nat" is a also Set.
+                    // This is comparable to implementing an interface (or comparable to multiple inheritance).
                     assert
                         all n
                         (
@@ -139,8 +137,8 @@ Fpl.Arithmetics.Peano
                                 In(n, self)
                             )
                         )
+                    self!Set()
                 ;
-                self!Set()
                 self
             }
         }
@@ -148,23 +146,23 @@ Fpl.Arithmetics.Peano
         // Addition of natural numbers
         func Add(n,m: Nat)->Nat
         {
-            dec: k: Nat;
+            dec: 
+                result, k: Nat
+            ;
             spec:
             cases
             (
-                case Equal(m,0):
-                    return n
-                case Equal(Succ(m), k):
-                    return Succ(Add(n,k))
-                else:
-                    return undef
+                | <m = 0>: result:= n
+                | <Succ(m) = k>: result:= Succ(Add(n,k))
+                ; else result:= undef
             )
             ;
+            return result
         }
 
-        func Add(n,m: @extDecimal)->Nat
+        func Add(n,m: @Decimal)->Nat
         {
-            py.add(n,m)
+            return delegate.add(n,m)
         }
 
 
@@ -192,7 +190,7 @@ Fpl.Arithmetics.Peano
                 )
         }
 
-        proof AddIsUnique$1
+        proof AddIsUnique!1
         {
             1. assume pre
             2. |- trivial
@@ -213,7 +211,7 @@ Fpl.Arithmetics.Peano
             ;
             spec:
                 result:=Zero()
-                loop addend list
+                for addend in list
                 (
                     result:=Add(result,addend)
                 )
@@ -228,9 +226,9 @@ Fpl.Arithmetics.Peano
             ;
             spec:
                 result:=Zero()
-                loop i list$
+                for i in list
                 (
-                    result:=Add(result,list$i)
+                    result:=Add(result,list<i>)
                 )
             ; 
             return result
@@ -244,9 +242,9 @@ Fpl.Arithmetics.Peano
             spec:
                 result:=Zero()
 
-                loop i [from~to]
+                for i in [from~to]
                 (
-                    result:=Add(result,arr[i])
+                    result:=Add(result,arr<i>)
                 )
             ;
             return result
@@ -259,7 +257,7 @@ Fpl.Arithmetics.Peano
             ;
             spec:
                 result:=Zero()
-                loop addend arr
+                for addend in arr
                 (
                     result:=Add(result,addend)
                 )
@@ -269,6 +267,7 @@ Fpl.Arithmetics.Peano
 
         func Addend(a: Nat)->Nat
         {
+            intr
         }
 
         func Sum(from,to:Nat, addend: Addend) -> Nat
@@ -278,7 +277,7 @@ Fpl.Arithmetics.Peano
             ;
             spec:
                 result:=Zero()
-                loop i [from~to]
+                for i in [from~to]
                 (
                     result:=Add(result,addend(i))
                 )
@@ -293,14 +292,14 @@ Fpl.Arithmetics.Peano
                 f: Addend
             ;
             premise:
-                loop n [Nat(1)~limit]
+                all n in [1~limit]
                 (
-                    assert Equal(f(n),n)
+                    <f(n) = n>
                 )
             conclusion:
                 all n
                 (
-                    Equal(Sum(1,n,f),Div(Mul(n,Succ(n)),2))
+                    <Sum(1,n,f) = Div(Mul(n,Succ(n)),2)>
                 )
 
         }
@@ -310,6 +309,7 @@ Fpl.Arithmetics.Peano
             spec:
                 assert is(self,Function)
             ;
+            return self
         }
 
         pred IsBounded(x: Real)
@@ -342,7 +342,7 @@ Fpl.Arithmetics.Peano
             spec:
                 assert IsBounded(f)
                 result:=ZeroReal()
-                range x [from~to]
+                for x in [from~to]
                 (
                     result:=Add(result, Mult(f(x), D(x)))
                 )
@@ -358,9 +358,9 @@ Fpl.Arithmetics.Peano
             ;
             spec:
                 result:=ZeroReal()
-                loop i [k~]
+                for i in [k~]
                 (
-                    result:=Add(result, Exp(arr[i],i))
+                    result:=Add(result, Exp(arr<i>,i))
                 )
             ;
             return result
@@ -368,17 +368,19 @@ Fpl.Arithmetics.Peano
 
         function ContinuedFraction(k:Nat, arr: Int[k~]) -> Real
         {
-            spec:
+            dec:
                 i: Nat
                 cf: Real
-                cf:=Real(arr[k])
+            ;
+            spec:
+                cf:=Real(arr<k>)
                 i:=Succ(k)
             ;
             return Add( cf, Div(1 , ContinuedFraction(i, arr[i~])))
         }
 
         // Example of defining a constant for the natural number 100 using the
-        class N100:Set{N100(){n:Nat self:=SetBuilder(SetNat(),IsGreater(n,Nat(100))) }}
+        class N100:Set{N100(){dec: n:Nat; spec: self!Set() self:=SetBuilder(SetNat(),IsGreater(n,Nat(100))); self }}
 
     }
 

@@ -83,7 +83,6 @@ let extDigits: Parser<_, unit> = positions (digits) |>> Ast.ExtDigits
 let IdStartsWithSmallCase = regex @"[a-z]\w*" 
 let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
 let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
-let exclamationDigits = positions (exclamationMark >>. digits) |>> Ast.ExclamationDigits
 let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 
 let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
@@ -196,14 +195,17 @@ let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. ex
 
 let xId = positions (at >>. extensionName) |>> Ast.ExtensionType 
 
-let indexed = opt (many1 (exclamationMark >>. (variable <|> digits)))
+let exclamationDigits = positions (exclamationMark >>. digits) |>> Ast.ExclamationDigits
+let exclamationVarOrDigits = positions (exclamationMark >>. (variable <|> digits)) |>> Ast.ExclamationVarOrDigits
+
+let indexed = opt (many1 (exclamationVarOrDigits))
 let indexVariable = positions (variable .>>. indexed) .>> IW |>> Ast.IndexVariable
 
 let atList = many at
 
 let self = positions (atList .>> keywordSelf) |>> Ast.SelfAts
 
-let entity = choice [ self ; indexVariable ]
+let entity = choice [ self ; exclamationVarOrDigits; indexVariable ]
 
 let leftOpen = positions leftOpenBracket >>% Ast.LeftOpen
 let leftClosed = positions leftClosedBracket >>% Ast.LeftClosed
@@ -223,7 +225,8 @@ let predicateList1, predicateList1Ref = createParserForwardedToRef()
 let predicateWithQualification, predicateWithQualificationRef = createParserForwardedToRef()
 let paramTuple, paramTupleRef = createParserForwardedToRef()
 
-let coord = choice [ entity; extDigits; exclamationDigits ] .>> IW 
+
+let coord = choice [ entity; extDigits; exclamationVarOrDigits ] .>> IW 
 
 let fplIdentifier = choice [ entity; extDigits; predicateIdentifier ]
 

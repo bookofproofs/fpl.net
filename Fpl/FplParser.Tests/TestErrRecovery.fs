@@ -3618,36 +3618,25 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         let result = fplParser input
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
-      (FplParser, Error, (Ln: 5, Col: 24),
-       DiagnosticMessage
-         "'!'
-    Expecting: '@', 'self', '~', <PascalCaseId>, <digits>, <variable>
-    ")
-    Diagnostic
-      (FplParser, Error, (Ln: 5, Col: 27),
-       DiagnosticMessage
-         "';'
-    Expecting: '@', 'self', <(closed) right bound ']'>, <(open) right bound ')]'>, <PascalCaseId>, <digits>, <variable>
-    ")
-    Diagnostic
-      (FplParser, Error, (Ln: 6, Col: 13),
-       DiagnosticMessage
-         "'true'
-    Expecting: <(closed) right bound ']'>, <(open) right bound ')]'>, <whitespace>
-    ")
-    Diagnostic
-      (FplParser, Error, (Ln: 8, Col: 9),
-       DiagnosticMessage
-         "'y'
-    Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
-    'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
-    'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
-    <inline comment>, <significant whitespace>, <whitespace>
-    ")"""
+  (FplParser, Error, (Ln: 5, Col: 25),
+   DiagnosticMessage "';'
+Expecting: <digits>, <variable>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 6, Col: 13),
+   DiagnosticMessage "'true'
+Expecting: '~'
+")
+Diagnostic
+  (FplParser, Error, (Ln: 8, Col: 9),
+   DiagnosticMessage
+     "'y'
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>
+")"""
         let actualDiag = ad.DiagnosticsToString
         printf "\n>>%s<<" actualDiag
         printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
-        Assert.AreEqual(4, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'ax','axiom','cl','class','conj','conjecture','cor','corollary','func','function','lem','lemma','post','postulate','pred','predicate','prf','proof','prop','proposition','theorem','thm','}',<blockcomment>,<inlinecomment>,<significantwhitespace>,<whitespace>")"""))
 
 

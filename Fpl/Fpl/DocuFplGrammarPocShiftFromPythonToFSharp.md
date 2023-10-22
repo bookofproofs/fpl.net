@@ -60,6 +60,12 @@ This is a trade-off between simplicity of syntax and a stricter syntax with resp
 
 In previous version of the grammar, polymorphism of mathematical object could only be achieved by using the `is` operator and asserting that the object is of some additional type than the type of the single parent class. Now, this is simplified because we can add as many types to the class as necessary.
 
+The AST-Annotation for optional calls of parental constructors in classes (originally also optional but not annotated as such)
+
+Bugfix: Classes can only be derived from classType that now excludes functional terms and predicates (classes of FPL objects never intended to be derived from predicates or functional terms) 
+
+
+
 *Before*
 ``` 
 class A :B
@@ -288,39 +294,114 @@ In previous versions, the square brackets `[`, `]` were used for both, coordinat
     )
 ``` 
 
+#### 10) Delegates 
 
-### More stringent predicate syntax
-* Giving up mixing up statements and index variables being not predicative in the choice rule of Prime predicates 
-* This mixing is now only possible for the isOperator.
-* The `all` compound predicate now allows iterating through contents variadic variables containing predicates. For instance, for the types `a: pred b: +pred`,   instead of writing a loop - assert statement construct like `loop a b (assert a)` we can also write `all a b (a)`. This way, the expression becomes a predicate, not a statement in the AST, allowing to interpret it appropriately.
-
-### Better handling of keywords and generic templates
-* Better recognition and error reporting of conflicts between variable names and keywords 
-* Better recognition and error reporting of conflicts between variable names and template names
-
-### Keyword `delegate` or `del` instead of `py`
 * The original Python `py` prefix followed pythonic delegates like `py.some_delegate_name(x,y,z)` are now replaced by the more general prefix `del` or `delegate`
 * The names for the delegates are now generalized from the original regex `@"[a-z_]*"` to `@"[a-z_A-Z][a-z_A-Z0-9]+"`
 
-### Simplified Syntax for the `cases` statement
-* The keyword `case` is now discontinued and replaced by the literal `|`
-* The sequence of cases starting by the literal `|` must end by a semicolon
-* After this semicolon, the else case does not require a colon, instead of `else:` we simply write `else`.
-* Rationale: 
-    * Simplified syntax since `case` is likely to be mistaken for the existing keyword `cases`
-    * `|` is intuitively similar to the BNF or regex 'OR' character 
-    * Improved readability
+*Before*
+``` 
+    py.decrement(x)
 
-### Classes 
-* AST-Annotation for optional calls of parental constructors in classes (originally also optional but not annotated as such)
-* Bugfix: Classes can only be derived from classType that now excludes functional terms and predicates (classes of FPL objects never intended to be derived from predicates or functional terms) 
+``` 
+*Now*
+``` 
+    delegate.decrement(x)
+``` 
 
-### Enhancement of Proofs
+#### 11) Syntax of extensions vs. syntax of indexed variables
+
+Extensions can be used in FPL (among others) to introduce symbols "0,1,2" ... etc for the purpose of identifying them with concrete mathematical objects, like natural numbers. 
+FPL has no in-built type "natural number". Instead, we can define natural numbers for instance using the Peano axioms and then identifying the class of objects "Natural number" with the (otherwise meaningless) symbols "0,1,2,..." Nevertheless, FPL has in-built index type using the same symbols. 
+
+To disambiguate the two usages, the following changes in the FPL syntax have been performed:
+
+* Simplification of the extension syntax:
+*Before*
+``` 
+    :ext
+        extDigits : /\d+/
+    :end
+
+    // other stuff ...
+    
+    // constructor identifying the introduce digit symbols with natural numbers
+    Nat(x: @extDigits)
+    {
+        ...
+    }
+
+``` 
+
+*Now*
+``` 
+    :ext
+        Digits : /\d+/
+    :end
+
+    Nat(x: @Digits)
+    {
+        ...
+    }
+``` 
+
+* Indexing is done via `!` instead of `$`
+*Before*
+``` 
+    n$1 // (n subindex 1)
+    n$m$k // (n subindex m subindex k)
+``` 
+
+*Now*
+``` 
+    n!1
+    n!m!k
+``` 
+* The symbols `!1`, `!2`, ... and `!<variable>" have always the predefined type `index` and never the type of the extension.
+* In proof-based mathematics, there are use cases where extensions symbols `1,2,3,...` (for instance those identified with natural numbers) have to be used as index variables. In those cases, FPL allows the coordinate notation.
+
+``` 
+    n<1>
+    n<m,k>
+``` 
+* Left- and Right-open ranges contain both indexes and extensions
+*Before*
+``` 
+    // boundaries cannot be disambiguated between index type and extension type
+    [1~5] // (closed range with boundaries 1 and 5)
+    [!1~5] // (left-open range with boundaries 1 and 5)
+    [1~5!] // (right-open range with boundaries 1 and 5)
+    [!1~5!] // (left- and right-open range with boundaries 1 and 5)
+
+``` 
+
+*Now*
+``` 
+    // boundaries can be disambiguated 
+    // extension type 
+    [1~5] // (closed range with boundaries 1 and 5 )
+    [(1~5] // (left-open range with boundaries 1 and 5)
+    [1~5)] // (right-open range with boundaries 1 and 5)
+    [(1~5)] // (left- and right-open range with boundaries 1 and 5)
+
+    // boundaries can be disambiguated 
+    // index type 
+    [!1~!5] // (closed range with boundaries 1 and 5 )
+    [(!1~!5] // (left-open range with boundaries 1 and 5)
+    [!1~!5)] // (right-open range with boundaries 1 and 5)
+    [(!1~!5)] // (left- and right-open range with boundaries 1 and 5)
+
+``` 
+
+#### 12) Simplified syntax of proofs
+The following changes have been made:
 * Justifying arguments can now contain not only lists of 'primePredicate' but more general of 'predicate'
 * Derived arguments can now also reference the conclusion of the to-be-proven theorem
 * A simplified syntax of referencing argumentIdentifiers (referencing via slash `/` is no longer necessary). Now, restating the same identifier is enough.
 * Bugfix preventing syntax allowing assumptions followed by a justification (pure math standard: without justification)
 * Improved readability, for instance, instead of 
+
+*Before*
 ```
     proof Example4$1
     {
@@ -339,15 +420,16 @@ In previous versions, the square brackets `[`, `]` were used for both, coordinat
 	8. |- qed
     }
 ```
-* we can write 
+*Now*
 ```        
-    proof Example4$1
+    proof Example4!1
     {
-        a:A
-        b:B
-        c:C
-        x,y,z: obj
-
+        dec: 
+            a:A
+            b:B
+            c:C
+            x,y,z: obj
+        ;
         1. GreaterAB |- Greater(a,b)
         2. GreaterBC |- Greater(b,c)
         3. ProceedingResults(1.,2.) |- and (Greater(a,b), Greater(b,c))
@@ -355,9 +437,59 @@ In previous versions, the square brackets `[`, `]` were used for both, coordinat
         5. 4., ModusPonens |- Greater(a,c)
         6. ProceedingResults(5.,1.) |- and (Greater(a,c), Greater(a,b))
         7. 6., ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) )
-	8. |- qed
+        8. |- qed
     }
 ```
+
+#### 12) Simplified syntax of the `cases` statement
+* The keyword `case` is now discontinued and replaced by the literal `|`
+* The sequence of cases starting by the literal `|` must end by a semicolon
+* After this semicolon, the else case does not require a colon, instead of `else:` we simply write `else`.
+* Rationale: 
+    * Simplified syntax since `case` is likely to be mistaken for the existing keyword `cases`
+    * `|` is intuitively similar to the BNF or regex 'OR' character 
+    * Improved readability
+
+*Before*
+```
+    cases
+    (
+        case Equal(x,0) :
+            self := Zero()
+        case Equal(x,1) :
+            self := Succ(Zero())
+        case Equal(x,2) :
+            self := Succ(Succ(Zero()))
+        else:
+            // else case addressed using a python delegate
+            self := Succ(delegate.decrement(x))
+    )
+```
+*Now*
+```        
+    cases
+    (
+        | <x = 0> : self := Zero()
+        | <x = 1> : self := Succ(Zero())
+        | <x = 2> : self := Succ(Succ(Zero()))
+        ; else self := Succ(delegate.decrement(x))
+    )
+```
+
+### More stringent predicate syntax
+* Giving up mixing up statements and index variables being not predicative in the choice rule of Prime predicates 
+* This mixing is now only possible for the isOperator.
+* The `all` compound predicate now allows iterating through contents variadic variables containing predicates. For instance, for the types `a: pred b: +pred`,   instead of writing a loop - assert statement construct like `loop a b (assert a)` we can also write `all a b (a)`. This way, the expression becomes a predicate, not a statement in the AST, allowing to interpret it appropriately.
+
+### Better handling of keywords and generic templates
+* Better recognition and error reporting of conflicts between variable names and keywords 
+* Better recognition and error reporting of conflicts between variable names and template names
+
+
+### Simplified Syntax for the `cases` statement
+
+
+
 
 ### Self-Containment 
 * This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:
