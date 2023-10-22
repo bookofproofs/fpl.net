@@ -29,7 +29,6 @@ type TestErrRecoveryLowLevel() =
     [<DataRow("T {  \t: theory { } }", "inf", 6, "T {", "  \t", ": theory { } }")>]
     [<DataRow("T {  \t \t : theory { } }", "inf", 9, "T {", "  \t \t ", ": theory { } }")>]
     [<DataRow("T { inf { theory { pred I() } }", "ExampleId", 10, "T { inf {", " ", "theory { pred I() } }")>]
-    [<DataRow("T { inf { ExampleId  theory { pred I() } }", "§", 21, "T { inf { ExampleId", "  ", "theory { pred I() } }")>]
     member this.TestSplitStringByTextAtPosition
         (
             input: string,
@@ -48,7 +47,6 @@ type TestErrRecoveryLowLevel() =
     [<TestMethod>]
     [<DataRow("", "", 0, " ", 1)>]
     [<DataRow("T { : theory { } }", "inf", 4, "T { inf  theory { } }", 3)>]
-    [<DataRow("T { inf { T () { theory { } }", "§", 17, "T { inf { T () { §  theory { } }", 3)>]
     member this.TestManipulateString
         (
             input: string,
@@ -62,19 +60,6 @@ type TestErrRecoveryLowLevel() =
         Assert.AreEqual(expNewInput, actNewInput)
         Assert.AreEqual(expNewOffset, newIndexOffset)
 
-    [<TestMethod>]
-    [<DataRow("T { inf { T ( § theory { } }", ")", 14, "{ T ( § ", "{ T ( ) ")>]
-    member this.TestManipulateStringRecoveryString
-        (
-            input: string,
-            text: string,
-            ind: int64,
-            lastRecoveryText,
-            expRecoveryText
-        ) =
-        let pos = Position("", ind, 0, 0)
-        let (actNewInput, newRecoveryText, newIndexOffset, fatalError) = manipulateString input text pos lastRecoveryText 
-        Assert.AreEqual(expRecoveryText, newRecoveryText)
 
 
     [<TestMethod>]

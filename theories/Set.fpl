@@ -15,8 +15,9 @@ Fpl.SetTheory.ZermeloFraenkel
 
         pred IsEmpty(x: Set)
         {
-            y: Set
-			
+            dec:
+                y: Set
+			;
             all y
             (
                 not ( In(y, x) )
@@ -26,7 +27,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // existence of an empty set
         axiom EmptySetExists()
         {
-            x: Set
+            dec:x: Set;
             ex x
             (
                 IsEmpty(x)
@@ -45,7 +46,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // relation between a subset and a superset
         pred IsSubset(subset,superset: Set)
         {
-            u: Set
+            dec: u: Set ;
             all u
             (
                 impl (In(u, subset), In(u, superset))
@@ -64,7 +65,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // extensionality
         axiom Extensionality()
         {
-            x,y: Set
+            dec: x,y: Set ;
             all x,y
             (
                 impl
@@ -83,14 +84,15 @@ Fpl.SetTheory.ZermeloFraenkel
         class SetRoster: Set
         {
             // to support enumerating set elements, e.g. SetRoster(1,2,3)
-            SetRoster(listOfSets: *Set)
+            SetRoster(listOfSets:* Set)
             {
-                elem: Set
-
-                loop elem listOfSets
-                (
-                    assert In(elem, self)
-                )
+                dec: elem: Set;
+                spec:
+                    for elem in listOfSets
+                    (
+                        assert In(elem, self)
+                    )
+                ;
             }
 
         }
@@ -98,8 +100,10 @@ Fpl.SetTheory.ZermeloFraenkel
         // Schema of separation axioms
         axiom SchemaSeparation()
         {
-            p: pred
-            x,y: Set
+            dec:
+                p: pred
+                x,y: Set
+            ;
             all p, x
             (
                 ex y
@@ -115,7 +119,7 @@ Fpl.SetTheory.ZermeloFraenkel
         class SetBuilder: Set
         {
             // to support set builder notation, ex. all "even" natural numbers like SetBuilder(n: Nat, Even(n))
-            SetBuilder(x: Set, p: pred(u: Set, o: *obj))
+            SetBuilder(x: Set, p: pred(u: Set, o:* obj))
             {
                 assert
                     all u
@@ -132,7 +136,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // For any two sets $x,y$ there exists a set $z$ containing them as elements.
         axiom Pairing()
         {
-            x,y,z,w: Set
+            dec: x,y,z,w: Set;
             all x,y
             (
                 ex z
@@ -156,7 +160,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // for every set x there is a set containing all elements of the elements of x
         axiom Union()
         {
-            x,y,z,w: Set
+            dec: x,y,z,w: Set;
             all x
             (
                 ex y
@@ -175,7 +179,7 @@ Fpl.SetTheory.ZermeloFraenkel
 
         pred IsPowerSet(ofSet, potentialPowerSet: Set)
         {
-            z: Set
+            dec: z: Set;
             all z
             (
                 impl (Subset(z,ofSet), In(z, potentialPowerSet))
@@ -185,7 +189,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // including the PowerSet function
         func PowerSet(x: Set) -> Set
         {
-            y: Set
+            dec: y: Set;
             assert IsPowerSet(x,y)
             return y
         }
@@ -193,7 +197,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // for every set x there is a set y containing all subsets of x as its elements
         axiom PowerSetExistsForAllSets()
         {
-            x,y: Set
+            dec: x,y: Set;
             all x
             (
                 ex y
@@ -206,7 +210,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // introducing a set union function
         func SetUnion(x,y: Set) -> Set
         {
-            z, union: Set
+            dec: z, union: Set;
             assert
                 all z
                 (
@@ -228,7 +232,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // alternative 2: adds SetUnion notation capability to this theory (as predicate)
         pred Union(x,superSet: Set)
         {
-            u: Set
+            dec: u: Set;
             all u
             (
                 impl (In(u, x), In(u, superSet))

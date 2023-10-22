@@ -132,7 +132,7 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Pos
     // Replace the significant characters with quoted version in the first line
     let quotedFirstLine = sprintf "'%s'" significantCharacters
 
-    quotedFirstLine + Environment.NewLine + "Expecting: " + (wrapEveryNthComma choices 8), newPos
+    quotedFirstLine + Environment.NewLine + "Expecting: " + (wrapEveryNthComma choices 80), newPos
 
 let split = [|" or "; "or" + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
 let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
@@ -251,13 +251,21 @@ let tryParse' globalParser expectMessage (ad: Diagnostics) input =
 /// Emit any errors occurring in the globalParser
 /// This is to make sure that the parser will always emit diagnostics,
 /// even if the error recovery fails on a global level (and so does the parser).
-let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumulativeIndexOffset: int64) =
+let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumulativeIndexOffset: int64) (maxNumbOffRecCalls: int) =
+    let tooManyRecCalls = maxNumbOffRecCalls > 100
     match run globalParser input with
     | Success(result, restInput, userState) ->
 
         result
     | Failure(errorMsg, restInput, userState) ->
         let (choices, nextRecoveryString, newErrMsg, backtrackingFreePos) = mapErrMsgToRecText input errorMsg restInput.Position
+
+        let corrErrPos = Position(
+                                    backtrackingFreePos.StreamName,
+                                    backtrackingFreePos.Index - cumulativeIndexOffset,
+                                    backtrackingFreePos.Line,
+                                    backtrackingFreePos.Column 
+                                )
 
         match (choices, nextRecoveryString) with
         | (None, None) ->
@@ -266,7 +274,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                 DiagnosticMessage(errorMsg + Environment.NewLine + "(unknown parser choice or no recovery string provided)")
 
             let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg)
 
             ad.AddDiagnostic diagnostic
             Ast.Error
@@ -274,7 +282,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             let diagnosticMsg = DiagnosticMessage(newErrMsg + Environment.NewLine + "(unknown parser choice)")
 
             let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg)
 
             ad.AddDiagnostic diagnostic
             Ast.Error
@@ -283,7 +291,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             let diagnosticMsg = DiagnosticMessage(errorMsg + Environment.NewLine + "(unknown error)")
 
             let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg)
 
             ad.AddDiagnostic diagnostic
             Ast.Error
@@ -292,24 +300,23 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             let (newInput, newRecoveryText, newOffset, fatalError) =
                 manipulateString input recStr backtrackingFreePos lastRecoveryText
             
-            if fatalError then
+            if fatalError || tooManyRecCalls then
                 let diagnosticMsg = DiagnosticMessage(Environment.NewLine + "(recovery failed due to likely infinite loop)")
 
                 let diagnostic =
-                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, backtrackingFreePos, diagnosticMsg)
+                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg)
 
                 ad.AddDiagnostic diagnostic
                 Ast.Error
             else
-                let lastRecoveryTextMod = lastRecoveryText.Replace(invalidSymbol,recStr)
                 let newIndexOffset = cumulativeIndexOffset + newOffset
                 
-                let cond1 = not (newRecoveryText.StartsWith(lastRecoveryTextMod))
+                let cond1 = not (newRecoveryText.StartsWith(lastRecoveryText))
                 let cond2 = newRecoveryText="{ pred "
                 let cond3 = newRecoveryText="T T "
                 let cond4 = newRecoveryText="T { "
-                let cond5 = not (lastRecoveryTextMod.EndsWith("{ ")) 
-                let cond6 = lastRecoveryTextMod.EndsWith("( ) { ")
+                let cond5 = not (lastRecoveryText.EndsWith("{ ")) 
+                let cond6 = lastRecoveryText.EndsWith("( ) { ")
                 let cond0 = lastRecoveryText = ""
                 let cond0a = errorMsg.Contains("The error occurred at the end of the input stream") && recStr = "}" && errorMsg.Contains("Expecting: <block comment>, <inline comment>, <significant whitespace> or '}'")
                 // emit diagnostics using a heuristics while preventing false positives 
@@ -331,15 +338,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                         // this is to ensure that the input insertions of error recovery remain invisible to the user
                         // so that when double-clicking the error, the IDE will go to the right position in the source code
                         let correctedErrorPosition =
-                            if newRecoveryText = "§ " then
-                                let newIndexOffset = newIndexOffset - int64 3
-                                Position(
-                                    backtrackingFreePos.StreamName,
-                                    backtrackingFreePos.Index + newIndexOffset,
-                                    backtrackingFreePos.Line,
-                                    backtrackingFreePos.Column 
-                                )
-                            elif errorMsg.Contains("The parser backtracked after") then
+                            if errorMsg.Contains("The parser backtracked after") then
                                 Position(
                                     backtrackingFreePos.StreamName,
                                     backtrackingFreePos.Index + (int64 1),
@@ -349,12 +348,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                             elif lastRecoveryText = "" then
                                 backtrackingFreePos
                             else
-                                Position(
-                                    backtrackingFreePos.StreamName,
-                                    backtrackingFreePos.Index - cumulativeIndexOffset,
-                                    backtrackingFreePos.Line,
-                                    backtrackingFreePos.Column 
-                                )
+                                corrErrPos
 
                         Diagnostic(
                             DiagnosticEmitter.FplParser,
@@ -366,7 +360,7 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                     ad.AddDiagnostic diagnostic
 
 
-                tryParse globalParser newInput newRecoveryText newIndexOffset 
+                tryParse globalParser newInput newRecoveryText newIndexOffset (maxNumbOffRecCalls+1)
 
 /// A simple helper function for printing trace information to the console (taken from FParsec Docs)
 let (<!>) (p: Parser<_,_>) label : Parser<_,_> =

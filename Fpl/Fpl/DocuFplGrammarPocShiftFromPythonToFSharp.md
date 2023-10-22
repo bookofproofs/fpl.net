@@ -111,7 +111,7 @@ class SomeClass: ParentClass
     	spec:
             myField := field
         ;
-		self!ParentClass()
+        self!ParentClass()
         self
     }
 }

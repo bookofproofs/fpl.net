@@ -24,7 +24,7 @@ Fpl.Arithmetics.Peano
 
         axiom SuccessorExistsAndIsUnique()
         {
-            n, successor: Nat
+            dec: n, successor: Nat;
             all n
             (
                 ex$1 successor
@@ -40,7 +40,7 @@ Fpl.Arithmetics.Peano
 
         axiom ZeroIsNotSuccessor()
         {
-            n: Nat
+            dec: n: Nat;
             all n
             (
                 NotEqual(Zero(), Succ(n))
@@ -49,7 +49,7 @@ Fpl.Arithmetics.Peano
 
         axiom SuccessorIsInjective()
         {
-            n,m: Nat
+            dec: n,m: Nat;
             all n,m
             (
                 impl
@@ -62,8 +62,10 @@ Fpl.Arithmetics.Peano
 
         axiom CompleteInduction()
         {
-            n: Nat
-            p: pred
+            dec: 
+                n: Nat
+                p: pred
+            ;
             all p
             (
                 impl
@@ -96,19 +98,23 @@ Fpl.Arithmetics.Peano
 
             Nat(x: Int)
             {
-                cases
-                (
-                    case IsGreaterOrEqual(x.RightMember(), x.LeftMember()):
-                        self:=x.RightMember()
-                    else:
-                        self:=undefined
-                )
+                spec:
+                    cases
+                    (
+                        case IsGreaterOrEqual(x.RightMember(), x.LeftMember()):
+                            self:=x.RightMember()
+                        else:
+                            self:=undefined
+                    )
+                ;
+                self!obj()
+                self
             }
         }
 
         pred IsGreaterOrEqual(n,m: Nat)
         {
-            k: Nat
+            dec: k: Nat;
             ex k ( Equal(n,Add(m,k)) )
         }
 
@@ -117,28 +123,33 @@ Fpl.Arithmetics.Peano
         {
             SetNat()
             {
-                n: Nat
+                dec: n: Nat;
                 // Assert that elements of class "Nat" can be collected to a bigger object of class "SetNat"
                 // This requires that we can apply the "In" predicate defined in Fpl.Set.ZermeloFraenkel
                 // to object of the class "Nat". This becomes possible when we assert that every variable of the class
                 // "Nat" is a also Set.
                 // This is comparable to implementing an interface (or comparable to multiple inheritance).
-                assert
-                    all n
-                    (
-                        and
+                spec:
+                    assert
+                        all n
                         (
-                            is(n, Set),
-                            In(n, self)
+                            and
+                            (
+                                is(n, Set),
+                                In(n, self)
+                            )
                         )
-                    )
+                ;
+                self!Set()
+                self
             }
         }
 
         // Addition of natural numbers
         func Add(n,m: Nat)->Nat
         {
-            k: Nat
+            dec: k: Nat;
+            spec:
             cases
             (
                 case Equal(m,0):
@@ -148,6 +159,7 @@ Fpl.Arithmetics.Peano
                 else:
                     return undef
             )
+            ;
         }
 
         func Add(n,m: @extDecimal)->Nat
@@ -158,8 +170,10 @@ Fpl.Arithmetics.Peano
 
         prop AddIsUnique(op: Add)
         {
-            n,m: Nat
-            anotherAdd: Add
+            dec: 
+                n,m: Nat
+                anotherAdd: Add
+            ;
             pre:
                 and
                     (
@@ -192,46 +206,64 @@ Fpl.Arithmetics.Peano
         }
 
 
-        func Sum(list: *Nat)->Nat
+        func Sum(list:* Nat)->Nat
         {
-            result, addend: Nat
-            result:=Zero()
-            loop addend list
-            (
-                result:=Add(result,addend)
-            )
+            dec: 
+                result, addend: Nat
+            ;
+            spec:
+                result:=Zero()
+                loop addend list
+                (
+                    result:=Add(result,addend)
+                )
+            ;
             return result
+        }
 
-            i: index
-            result:=Zero()
-            loop i list$
-            (
-                result:=Add(result,list$i)
-            )
+        func Sum(list:* Nat)->Nat
+        {
+            dec: 
+                i: index
+            ;
+            spec:
+                result:=Zero()
+                loop i list$
+                (
+                    result:=Add(result,list$i)
+                )
+            ; 
             return result
         }
 
         func Sum(from,to:Nat, arr: Nat[from~to]) -> Nat
         {
-            i, result: Nat
-            result:=Zero()
+            dec:
+                i, result: Nat
+            ;
+            spec:
+                result:=Zero()
 
-            loop i [from~to]
-            (
-                result:=Add(result,arr[i])
-            )
+                loop i [from~to]
+                (
+                    result:=Add(result,arr[i])
+                )
+            ;
             return result
         }
 
         func Sum(arr: Nat[~]) -> Nat
         {
-            addend, result: Nat
-            result:=Zero()
-
-            loop addend arr
-            (
-                result:=Add(result,addend)
-            )
+            dec:
+                addend, result: Nat
+            ;
+            spec:
+                result:=Zero()
+                loop addend arr
+                (
+                    result:=Add(result,addend)
+                )
+            ;
             return result
         }
 
@@ -241,19 +273,25 @@ Fpl.Arithmetics.Peano
 
         func Sum(from,to:Nat, addend: Addend) -> Nat
         {
-            i, result: Nat
-            result:=Zero()
-            loop i [from~to]
-            (
-                result:=Add(result,addend(i))
-            )
+            dec:
+                i, result: Nat
+            ;
+            spec:
+                result:=Zero()
+                loop i [from~to]
+                (
+                    result:=Add(result,addend(i))
+                )
+            ;
             return result
         }
 
         proposition SumOfConsecutiveNumbers()
         {
-            n, limit: Nat
-            f: Addend
+            dec:
+                n, limit: Nat
+                f: Addend
+            ;
             premise:
                 loop n [Nat(1)~limit]
                 (
@@ -269,12 +307,16 @@ Fpl.Arithmetics.Peano
 
         func RealValuedFunction(x:Real) -> Real
         {
-            assert is(self,Function)
+            spec:
+                assert is(self,Function)
+            ;
         }
 
         pred IsBounded(x: Real)
         {
-            upperBound, lowerBound: Real
+            dec: 
+                upperBound, lowerBound: Real
+            ;
             ex upperBound, lowerBound
             (
                 and (LowerEqual(x,upperBound), LowerEqual(lowerBound,x))
@@ -283,7 +325,9 @@ Fpl.Arithmetics.Peano
 
         pred IsBounded(f: RealValuedFunction)
         {
-            x: Real
+            dec:
+                x: Real
+            ;
             all x
             (
                 IsBounded(f(x))
@@ -292,34 +336,44 @@ Fpl.Arithmetics.Peano
 
         func RiemannIntegral(from,to:Real, f: RealValuedFunction ) -> Real
         {
-            x, result: Real
-            assert IsBounded(f)
-            result:=ZeroReal()
-            range x [from~to]
-            (
-                result:=Add(result, Mult(f(x), D(x)))
-            )
+            dec:
+                x, result: Real
+            ;
+            spec:
+                assert IsBounded(f)
+                result:=ZeroReal()
+                range x [from~to]
+                (
+                    result:=Add(result, Mult(f(x), D(x)))
+                )
+            ;
             return result
         }
 
         func PowerSeries(k:Nat, arr: Real[k~] ) -> Real
         {
-            result: Real
-            i: Nat
-            result:=ZeroReal()
-            loop i [k~]
-            (
-                result:=Add(result, Exp(arr[i],i))
-            )
+            dec: 
+                result: Real
+                i: Nat
+            ;
+            spec:
+                result:=ZeroReal()
+                loop i [k~]
+                (
+                    result:=Add(result, Exp(arr[i],i))
+                )
+            ;
             return result
         }
 
         function ContinuedFraction(k:Nat, arr: Int[k~]) -> Real
         {
-            i: Nat
-            cf: Real
-            cf:=Real(arr[k])
-            i:=Succ(k)
+            spec:
+                i: Nat
+                cf: Real
+                cf:=Real(arr[k])
+                i:=Succ(k)
+            ;
             return Add( cf, Div(1 , ContinuedFraction(i, arr[i~])))
         }
 

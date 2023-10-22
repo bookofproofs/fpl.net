@@ -6,9 +6,6 @@ open System.Text.RegularExpressions
 
 (* This module contains information needed by both, the error recovery module and the parser *)
 
-(* A symbol that does not occur in the syntax of FPL to be used as error recovery code *)
-let invalidSymbol = "§"
-
 (* Fpl Keywords *)
 let keyWordSet =
     HashSet<_>(
@@ -129,8 +126,13 @@ let recoveryMap = dict [
     ("'(', ')', ',', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>", ",")
     ("'(', ')', ',', <whitespace>", ",")
     ("'(', '<', '{', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>", "{")
+    ("'(', <\"language-specific string\">, <variable>, <whitespace>", "\"\\operatorname{true}\"")
     ("'(', <\"language-specific string\">, <variable (got keyword)>, <whitespace>", "\"\\operatorname{true}\"")
+    ("'(', <\"language-specific string\">, <variable (got keyword)>", "\"\\operatorname{true}\"")
+    ("'(', ')', '|', <\"language-specific string\">, <variable>, <whitespace>", "\"\\operatorname{true}\"")
+    ("'(', ')', '|', <\"language-specific string\">, <variable (got keyword)>, <whitespace>", "\"\\operatorname{true}\"")
     ("'(', <\"language-specific string\">, <variable>", "\"\\operatorname{true}\"")
+    ("'!', '(', '.', ':=', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>", ":=")
     ("'(', <whitespace>", "(")
     ("')', ',', <whitespace>", ")")
     ("')', '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'exn', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable (got keyword)>, <whitespace>", "true")
@@ -145,12 +147,14 @@ let recoveryMap = dict [
     ("'{'", "{")
     ("'}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
     ("'}', <block comment>, <inline comment>, <significant whitespace>", "}")
+    ("'}', <argument identifier>, <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
     ("'}', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
     ("'@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>, <whitespace>", "T")
     ("'@', 'func', 'function', 'ind', 'index', 'obj', 'object', 'pred', 'predicate', 'template', 'tpl', <PascalCaseId>", "T")
     ("'@', 'obj', 'object', 'template', 'tpl', <PascalCaseId>, <whitespace>", "T")
     ("'@', 'obj', 'object', 'template', 'tpl', <PascalCaseId>", "T")
     ("'@', 'self', '~', <PascalCaseId>, <digits>, <variable>", "~")
+    ("'@', 'self', <variable>, <whitespace>", "self")
     ("'@', 'self', <(closed) right bound ']'>, <(open) right bound ')]'>, <PascalCaseId>, <digits>, <variable (got keyword)>", "]")
     ("'@', 'self', <(closed) right bound ']'>, <(open) right bound ')]'>, <PascalCaseId>, <digits>, <variable>", "x")
     ("'@', 'self', <PascalCaseId>, <digits>, <variable>", "x")
@@ -162,6 +166,8 @@ let recoveryMap = dict [
     ("'<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'exn', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>", "true")
     ("'<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'exn', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable (got keyword)>", "true")
     ("'<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'exn', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable>", "true")
+    ("'<', '@', 'all', 'and', 'ass', 'assume', 'del', 'delegate', 'ex', 'exn', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', '|-', <PascalCaseId>, <argument identifier>, <digits>, <variable>, <whitespace>", "true")
+    ("'<', '@', 'all', 'and', 'con', 'conclusion', 'del', 'delegate', 'ex', 'exn', 'false', 'iif', 'impl', 'is', 'not', 'or', 'qed', 'rev', 'revoke', 'self', 'trivial', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable>", "true")
     ("'~', <block comment>, <inline comment>, <significant whitespace>", "~")
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
     ("'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>", "}")
@@ -175,6 +181,9 @@ let recoveryMap = dict [
     ("'dec', 'declaration', 'self!', 'spec', 'specification', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "spec")
     ("'dec', 'declaration', 'self!', 'spec', 'specification', <block comment>, <inline comment>, <significant whitespace>", "self!")
     ("'dec', 'declaration', 'spec', 'specification', <PascalCaseId>, <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "T")
+    ("'dec', 'declaration', 'spec', 'specification', <argument identifier>, <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "1.")
+    ("'dec', 'declaration', 'ret', 'return', 'spec', 'specification', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "ret")
+    ("'dec', 'declaration', 'intr', 'intrinsic', 'self', 'spec', 'specification', <block comment>, <inline comment>, <significant whitespace>", "self")
     ("'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>", "uses")
     ("'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>", "loc")
     ("'mand', 'mandatory', 'opt', 'optional', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")
@@ -189,6 +198,7 @@ let recoveryMap = dict [
     ("<PascalCaseId>, <whitespace>", "T")
     ("<PascalCaseId>", "T")
     ("<variable>", "x")
+    ("',', '|-', <whitespace>", "|-")
 ]
 
 /// Checks if the string `s` starts with one of the characters '(',')','{','}'
@@ -243,12 +253,9 @@ let splitStringByTextAtPosition (input:string) (text:string) (pos:Position) =
 
         match keywordAtTheend with
         | Some str ->
-            if text = invalidSymbol then
-                let preWithOptTrailingWS = input.Substring(0, ind1 - str.Length - 1)
-                (preWithOptTrailingWS.TrimEnd(), ind1 - str.Length - 1, preWithOptTrailingWS)
-            else
-                (pre1, ind1, preWithOptTrailingWS1)
-        | None -> (pre1, ind1, preWithOptTrailingWS1)
+            (pre1, ind1, preWithOptTrailingWS1)
+        | None -> 
+            (pre1, ind1, preWithOptTrailingWS1)
 
     let optTrailingWs =
         preWithOptTrailingWS.Substring(pre.Length, preWithOptTrailingWS.Length - pre.Length)
@@ -271,8 +278,6 @@ let splitStringByTextAtPosition (input:string) (text:string) (pos:Position) =
     
 
 
-let invalidSymbolWS = invalidSymbol + " "
-
 /// A low-level helper function for FPL error recovery that manipulates a string `input` at a given Parsing position
 /// `pos' by either replacing or inserting this position by the value of `text` with a trailing space after it.
 /// (With the idea that we will retrieve the value of `text` from FPL parser's error message).
@@ -293,8 +298,8 @@ let manipulateString
         // text with a trailing whitespace
 
         let (pre, optTrailingWs, post) = splitStringByTextAtPosition input text pos
-    
         let textWithWS = text + " "
+
         if pos.Index = input.Length then
             let newInput = input + textWithWS
             let newRecText = lastRecoveryText + textWithWS
@@ -318,14 +323,13 @@ let manipulateString
 
             let postStartsWithParenthesis = startsWithParentheses post
 
-            let cond1 = text = invalidSymbol
             let cond1a = text = "~" 
             let cond1b = post.StartsWith("]")
             let cond2 = pre.EndsWith(',')
             let cond3 = post.StartsWith("//")
             let cond4 = post.StartsWith("/*")
 
-            if cond1 || (cond1a && cond1b) || cond2 || cond3 || cond4 then
+            if (cond1a && cond1b) || cond2 || cond3 || cond4 then
                 // insert text with a trailing whitespace
                 let newInput = 
                     if pre.EndsWith(".") then
@@ -360,14 +364,9 @@ let manipulateString
                             // else replace the wrong word by by text with trailing spaces
                             pre + optTrailingWs + Regex.Replace(post, @"^\w+[\S]*", corrTextWithWS)
 
-                let newRecText = 
-                    if lastRecoveryText.EndsWith(invalidSymbolWS) then
-                        lastRecoveryText.Replace(invalidSymbolWS, corrTextWithWS)
-                    else
-                        corrTextWithWS
 
                 (newInput,
-                    newRecText,
+                    corrTextWithWS,
                     int64 (newInput.Length - input.Length), fatalErrorOccured)
             else
                 // if the beginning starts with any other character
@@ -380,13 +379,7 @@ let manipulateString
                     else
                         pre + optTrailingWs + corrTextWithWS + post.[1..]
 
-                let newRecText = 
-                    if lastRecoveryText.EndsWith(invalidSymbolWS) then
-                        lastRecoveryText.Replace(invalidSymbolWS, corrTextWithWS)
-                    else
-                        corrTextWithWS
-
                 (newInput,
-                    newRecText,
+                    corrTextWithWS,
                     int64 (newInput.Length - input.Length), fatalErrorOccured)
 

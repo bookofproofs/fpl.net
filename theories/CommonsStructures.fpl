@@ -26,12 +26,19 @@ Fpl.Commons.Structures
                     )
                     myLength:=i
                 ;
+                self!obj()
+                self
             }
 
             Tuple(from, length:Nat, arr: tpl[from ~ length])
             {
-                self:=arr
-                myLength:=length
+                
+                spec:
+                    self:=arr
+                    myLength:=length
+                ;
+                self!obj()
+                self
             }
 
             mandatory Nat Length()
@@ -46,7 +53,11 @@ Fpl.Commons.Structures
         {
             UnlimitedTupleFrom(from:Nat, x: tpl[from~])
             {
-                self:=x
+                spec:
+                    self:=x
+                ;
+                self!obj()
+                self
             }
 
             mandatory tpl Coord(i: Nat)
@@ -61,24 +72,34 @@ Fpl.Commons.Structures
             myLength: Nat
             myFrom: Nat
 
-            CartesianProduct(setList: +Set)
+            CartesianProduct(setList:+ Set)
             {
-                setItem: Set
-                i: Nat
-                i:= Zero()
-                loop setItem setList
-                (
-                    i:=Succ(i)
-                    self[i]:=setItem
-                )
-                myFrom := Nat(1)
-                myLength:=i
+                dec:
+                    setItem: Set
+                ;
+                spec:
+                    i: Nat
+                    i:= Zero()
+                    loop setItem setList
+                    (
+                        i:=Succ(i)
+                        self[i]:=setItem
+                    )
+                    myFrom := Nat(1)
+                    myLength:=i
+                ;
+                self!Set()
+                self
             }
 
             CartesianProduct(from, to: Nat, setArray: Set[from ~ to])
             {
-                self:=setArray
-                myLength:=to
+                spec:
+                    self:=setArray
+                    myLength:=to
+                ;
+                self!Set()
+                self
             }
 
             mandatory Nat Length()
@@ -88,9 +109,10 @@ Fpl.Commons.Structures
 
             mandatory pred AllTuplesIn()
             {
-                tupleElem: Set
-                i: Nat
-
+                dec:
+                    tupleElem: Set
+                    i: Nat
+                ;
                 and
                 (
                     is(@self,Set),
@@ -115,15 +137,20 @@ Fpl.Commons.Structures
 
         class Relation: Set
         {
-            myArity: Nat
+            dec: 
+                myArity: Nat
+            ;
 
-            Relation(setList: +Set)
+            Relation(setList:+ Set)
             {
-                cartProd : CartesianProduct
-                cartProd := CartesianProduct(setList)
-                myArity := cartProd.Length()
-                self := Subset(cartProd)
-
+                spec:
+                    cartProd : CartesianProduct
+                    cartProd := CartesianProduct(setList)
+                    myArity := cartProd.Length()
+                    self := Subset(cartProd)
+                ;
+                self!Set()
+                self
             }
 
             mandatory Nat Arity()
@@ -134,14 +161,19 @@ Fpl.Commons.Structures
 
         class BinaryRelation: Relation
         {
-            myDomain, myCodomain: Set
+            dec: 
+                myDomain, myCodomain: Set
+            ;
 
 
             BinaryRelation(x,y: Set)
             {
-                self:=Relation(2,x,y)
-                myDomain:=x
-                myCodomain:=y
+                spec:
+                    myDomain:=x
+                    myCodomain:=y
+                ;
+                self!Relation(2,x,y)
+                self
             }
 
             mandatory Set Domain()
@@ -269,9 +301,11 @@ Fpl.Commons.Structures
         {
             Function(x,y: Set)
             {
-                self:=BinaryRelation(x,y)
-                assert self.LeftTotal()
-                assert self.RightUnique()
+                spec:
+                    assert self.LeftTotal()
+                    assert self.RightUnique()
+                ;
+                self!BinaryRelation(x,y)
             }
         }
 

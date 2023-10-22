@@ -5,12 +5,9 @@ open FParsec
 
 let input = "TestNamespace {
     theory {   
-        pred T()
+        pred T(p: +obj)
         {
-            all proceedingResult in p
-            (
-                assert proceedingResult
-            )
+            true
         }
     }
 }"
