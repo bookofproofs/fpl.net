@@ -261,7 +261,7 @@ let simpleVariableType = positions (choice [ keywordIndex; keywordFunction; keyw
 
 let variableType = positions (simpleVariableType .>>. opt paramTuple .>> IW) |>> Ast.VariableType
 
-let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType) |>> Ast.NamedVarDecl
+let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType .>> many CW) |>> Ast.NamedVarDecl
 let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
 
 paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) |>> Ast.ParamTuple
@@ -290,12 +290,13 @@ let conditionFollowedByResultList = many1 (many CW >>. conditionFollowedByResult
 
 let casesStatement = positions (((keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>>  semiColon .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen))) |>> Ast.Cases
 
-let inDomain = positions (keywordIn >>. (simpleVariableType <|> variableRange)) |>> Ast.Domain
+let inDomain = positions (keywordIn >>. (simpleVariableType <|> variableRange) .>> many CW) |>> Ast.Domain
 let entityInOptDomain = ( entity .>>. opt inDomain) .>> IW
 let entityInOptDomainList = (sepBy1 entityInOptDomain comma) .>> IW
 
 let entityInDomain = ( entity .>>. inDomain ) .>> IW
-let forInBody = entityInDomain .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
+let entityInVariableRange = ( entity .>>. (keywordIn >>. variableRange)) .>> IW
+let forInBody = (entityInVariableRange .>> many CW) .>>. (leftParen >>. many CW >>. statementList) .>> (many CW >>. rightParen)
 let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 
 //// Difference of assertion to an axiom: axiom's is followed by a signature of a predicate (i.e. with possible parameters),
@@ -305,8 +306,11 @@ let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = positions (keywordAssert >>. predicate) |>> Ast.Assertion
 
+let callConstructorParentClass = positions (keywordSelfExclamation >>. specificClassType .>>. argumentTuple .>> many CW) |>> Ast.ParentConstructorCall
+
 let statement = 
     (choice [
+        callConstructorParentClass
         casesStatement
         assertionStatement
         forStatement
@@ -427,9 +431,8 @@ let keywordIntrinsic = (skipString "intrinsic" <|> skipString "intr") .>> many C
 
 let predContent = varDeclOrSpecList .>>. commentedPredicate |>> Ast.DefPredicateContent
 
-let callConstructorParentClass = many1 (positions (keywordSelfExclamation >>. specificClassType .>>. argumentTuple .>> many CW) ) |>> Ast.ParentConstructorCalls
 let classContent = varDeclOrSpecList .>>. keywordSelf |>> Ast.DefClassContent
-let constructorBlock = leftBraceCommented >>. varDeclOrSpecList .>>. callConstructorParentClass .>>. keywordSelf .>> commentedRightBrace 
+let constructorBlock = leftBraceCommented >>. varDeclOrSpecList .>>. keywordSelf .>> commentedRightBrace 
 let constructor = positions (signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
@@ -567,6 +570,6 @@ let fplNamespace = positions (namespaceIdentifier .>>. (many CW >>. namespaceBlo
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
-let fplParser (input: string) = tryParse ast input "" (int64 0) 1
+let fplParser (input: string) = tryParse ast input "" (int64 0) 1 
 //let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
 let parserDiagnostics = ad

@@ -21,7 +21,7 @@ T
             premise: 
                 all proceedingResult in p
                 (
-                    assert proceedingResult
+                    proceedingResult
                 )
 
             conclusion:
@@ -46,19 +46,22 @@ T
 
         class A: obj
         {
+            intr
         }
 
         class B: obj
         {
+            intr
         }
 
         class C: obj
         {
+            intr
         }
 
         pred Greater(x,y: obj)
         {
-
+            intr
         }
 
         axiom GreaterAB()
@@ -98,7 +101,7 @@ T
         lemma Example4()
         {
             dec:
-            x,y,z: obj
+                x,y,z: obj
             ;
             pre: undefined
             con:

@@ -75,7 +75,7 @@ type TestClasses () =
             spec:;
             FieldPowerN() 
             {
-                self!obj()
+                spec: self!obj() ;
                 self
             }
         }"""
@@ -91,7 +91,7 @@ type TestClasses () =
             dec:;
             FieldPowerN() 
             {
-                self!obj()
+                spec: self!obj() ;
                 self
             }
         }"""
@@ -122,7 +122,7 @@ type TestClasses () =
             spec:;
             FieldPowerN() 
             {
-                self!obj()
+                spec: self!obj() ;
                 self
             }
         }"""
@@ -152,7 +152,7 @@ type TestClasses () =
             // A class with a constructor 
             FieldPowerN() 
             {
-                self!obj()
+                spec: self!obj() ;
                 self
             }
         }"""
@@ -181,12 +181,12 @@ type TestClasses () =
             // A class with more than one constructor
             FieldPowerN() 
             {
-                self!obj()
+                spec: self!obj() ;
                 self
             }
             FieldPowerN() 
             {
-                self!T1()
+                spec: self!T1() ;
                 self
             }
         }"""
@@ -201,13 +201,13 @@ type TestClasses () =
             // A class with more than one constructor and some properties
             FieldPowerN() 
             {
-                self!obj()
+                spec: self!obj() ;
                 self
             }
 
             FieldPowerN() 
             {
-                self!T1()
+                spec: self!T1() ;
                 self
             }
 
@@ -269,7 +269,7 @@ type TestClasses () =
 
             FieldPowerN() 
             {
-                self!T1()
+                spec: self!T1() ;
                 self
             }
 

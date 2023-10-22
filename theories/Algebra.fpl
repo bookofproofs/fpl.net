@@ -12,10 +12,12 @@ Fpl.Algebra.Structures
            broader context. */
         func BinOp(x,y: tplSetElem) -> tplSetElem
         {
-            
+            intr
             optional pred IsAssociative()
             {
-                a,b,c: tplSetElem
+                dec:
+                    a,b,c: tplSetElem
+                ;
                 all a,b,c
                 (
                     Equal
@@ -84,23 +86,26 @@ Fpl.Algebra.Structures
             optional tplSetElem LeftNeutralElement()
             {
                 spec: assert IsLeftNeutralElement(self);
+                self
             }
 
             optional tplSetElem RightNeutralElement()
             {
                 spec: assert IsRightNeutralElement(self);
+                self
             }
 
             optional tplSetElem NeutralElement()
             {
                 spec: assert IsNeutralElement(self);
+                self
             }
 
         }
 
         func Composition(operands:* tplSetElem) -> tplSetElem
         {
-
+            intrinsic
         }
 
         /* an algebraic structure is derived from a set type with at least one binary operation
@@ -120,30 +125,29 @@ Fpl.Algebra.Structures
                 dec:
                     a: obj
                     arg: index
+                ;
+                spec:
                     myOps := ops
                     myCarrierSet := x
-                ;
 
-                // Assert that all types used in the declaration of AlgebraicStructure
-                // can be treated like they were sets, even if they are not derived from the type "Set" in their original
-                // definition! This, means that the In predicate has a non-transitive model
-                // this is comparable to implementing an interface (or comparable to multiple inheritance).
-                // The interpreter only asserts the types tplSet, and tplSetElement to be sets
-				spec:
+                    // Assert that all types used in the declaration of AlgebraicStructure
+                    // can be treated like they were sets, even if they are not derived from the type "Set" in their original
+                    // definition! This, means that the In predicate has a non-transitive model
+                    // this is comparable to implementing an interface (or comparable to multiple inheritance).
+                    // The interpreter only asserts the types tplSet, and tplSetElement to be sets
                     assert is (x,Set)
-                    loop arg args 
+                    for arg in args 
                     (
                         assert is(arg,Set)
                     )
-
 
                     assert
                         all a
                         (
                             impl ( is(a,tplSetElem), In(a,myCarrierSet) )
                         )
+                    self!obj()
                 ;
-                self!obj()
                 self
 
             }
@@ -220,18 +224,22 @@ Fpl.Algebra.Structures
             n: Nat
             ) -> tplSetElem
         {
-            assert In(y,x)
-				cases
-            (
-                case Equal(n,0):
-                    return m.NeutralElem()
-                else:
-                    return
-                        op(
-                            y,
-                            Exp( m(y,op), y, Sub(n,1))
-                          )
-            )
+            dec: result:tplSetElem ;
+            spec:
+                assert In(y,x)
+                    cases
+                (
+                    case Equal(n,0):
+                        result := m.NeutralElem()
+                    else:
+                        result :=
+                            op(
+                                y,
+                                Exp( m(y,op), y, Sub(n,1))
+                            )
+                )
+            ;
+            return result
 
         }
 
@@ -242,14 +250,18 @@ Fpl.Algebra.Structures
 
             Group(x: tplSet, op: BinOp)
             {
-                spec:myOp:=op;
-                self!Monoid (x,op)
+                spec:
+                    myOp:=op
+                    self!Monoid (x,op)
+                ;
                 self
             }
 
             mandatory pred InverseExistsForAllElements()
             {
-                x1,x2: tplSetElem
+                dec: 
+                    x1,x2: tplSetElem
+                ;
                 all x1
                 (
                     ex x2
@@ -263,7 +275,9 @@ Fpl.Algebra.Structures
             // we can refer to this functionality as group.InverseOf(x)
             mandatory func InverseOf(x: tplSetElem) -> tplSetElem
             {
-                dec: val: tplSetElem;
+                dec:
+                     val: tplSetElem
+                ;
                 assert
                     and
                     (
@@ -280,8 +294,8 @@ Fpl.Algebra.Structures
             {
                 spec:
                     assert op.IsCommutative()
+                    self!Group(x,op)
                 ;
-                self!Group(x,op)
                 self                
             }
         }
@@ -303,8 +317,8 @@ Fpl.Algebra.Structures
                     myX:= x
                     myAdd:=add
                     myMul:=mul
+                    self!AlgebraicStructure(x, add, mul)
                 ;
-                self!AlgebraicStructure(x, add, mul)
                 self
             }
 
@@ -374,7 +388,9 @@ Fpl.Algebra.Structures
 
             UnitRing(x: tpl, add, mul: BinOp)
             {
-                self!Ring(x,add,mul)
+                spec:
+                    self!Ring(x,add,mul)
+                ;
                 self
             }
 
@@ -390,9 +406,9 @@ Fpl.Algebra.Structures
             {
                 spec: 
                     assert mul.IsCommutative() 
+                    self!UnitRing(x,add,mul)
                 ;
-                self!UnitRing(x,add,mul)
-                
+                self            
             }
         }
 
@@ -401,7 +417,9 @@ Fpl.Algebra.Structures
 
             Field(x: tpl, add,mul: BinOp)
             {
-                self!CommutativeUnitRing(x,add,mul)
+                spec: 
+                    self!CommutativeUnitRing(x,add,mul)
+                ;
                 self
             }
 
@@ -468,6 +486,7 @@ Fpl.Algebra.Structures
                 )
             {
                 spec:
+                    self!obj()
                     mySpace:= space
                     myFieldAdd:= fieldAdd
                     myFieldMul:= fieldMul
@@ -476,7 +495,6 @@ Fpl.Algebra.Structures
                     myVecAdd:=vecAdd
                     myField:= field
                 ;
-                self!obj()
                 self
             }
 

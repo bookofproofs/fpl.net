@@ -8,8 +8,8 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 type TestFunctionalTermProperties () =
 
     [<TestMethod>]
-    member this.TestClassInstance01 () =
-        let result = run property """func X() -> Y
+    member this.TestFunctionalTermInstance01 () =
+        let result = run property """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
 	        }"""
@@ -18,8 +18,8 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestClassInstance01a () =
-        let result = run property """func X() -> Y
+    member this.TestFunctionalTermInstance01a () =
+        let result = run property """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
                 dec:;
@@ -29,8 +29,8 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestClassInstance01b () =
-        let result = run property """func X() -> Y
+    member this.TestFunctionalTermInstance01b () =
+        let result = run property """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
                 spec:;
@@ -40,8 +40,8 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestClassInstance01c () =
-        let result = run property """func X() -> Y
+    member this.TestFunctionalTermInstance01c () =
+        let result = run property """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
                 dec:;
@@ -52,8 +52,8 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestClassInstance01d () =
-        let result = run property """func X() -> Y
+    member this.TestFunctionalTermInstance01d () =
+        let result = run property """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
                 dec:;
@@ -65,8 +65,8 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestClassInstance01e () =
-        let result = run property """func X() -> Y
+    member this.TestFunctionalTermInstance01e () =
+        let result = run property """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
                 dec:;
@@ -77,8 +77,8 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestClassInstance01f () =
-        let result = run property """func X() -> Y
+    member this.TestFunctionalTermInstance01f () =
+        let result = run property """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
                 x
@@ -88,7 +88,7 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestClassInstance2a () =
+    member this.TestFunctionalTermInstance2a () =
         let result = run property """optional func X() -> Y
 	        {
                 // a function term instance with a return statement 
@@ -101,7 +101,7 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestClassInstance2b () =
+    member this.TestFunctionalTermInstance2b () =
         let result = run property """mand func X() -> Y
 	        {
                 // a function term instance with a return statement 
@@ -114,7 +114,7 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestClassInstance2c () =
+    member this.TestFunctionalTermInstance2c () =
         let result = run property """optional func X() -> Y
 	        {
                 // a function term instance with a return statement 
@@ -126,7 +126,7 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestClassInstance2d () =
+    member this.TestFunctionalTermInstance2d () =
         let result = run property """mand func X() -> Y
 	        {
                 // a function term instance with a return statement 
@@ -138,7 +138,7 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestClassInstance2e () =
+    member this.TestFunctionalTermInstance2e () =
         let result = run property """optional func X() -> Y
 	        {
                 // a function term instance with a return statement 
@@ -150,7 +150,7 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestClassInstance2f () =
+    member this.TestFunctionalTermInstance2f () =
         let result = run property """mand func X() -> Y
 	        {
                 // a function term instance with a return statement 
@@ -162,7 +162,7 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestClassInstance3 () =
+    member this.TestFunctionalTermInstance3 () =
         let result = run property """mand func X() -> Y
 	        {
                 // a function term instance with a return statement and 
@@ -175,7 +175,7 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestClassInstance3a () =
+    member this.TestFunctionalTermInstance3a () =
         let result = run property """func X() -> Y
 	        {
                 // a function term instance with a return statement and 
@@ -188,13 +188,25 @@ type TestFunctionalTermProperties () =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestClassInstance3b () =
+    member this.TestFunctionalTermInstance3b () =
         let result = run property """func X() -> Y
 	        {
                 // a function term instance with a return statement and 
                 // some other content following it is not allowed
                 return x
                 dec:;
+	        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestFunctionalTermInstance4 () =
+        let result = run property """mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
+	        {
+			    spec:
+    	            self[from ~ to]:=addInField(v[from ~ to],w[from ~ to])
+                ;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual

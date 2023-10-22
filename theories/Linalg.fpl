@@ -25,18 +25,22 @@ Fpl.LinAlg
                     mulInField := myField.MulOp()
                     assert NotEqual(n, Zero())
                     self:=SetBuilder( myField[1 ~ n], true)
+    				self!Set()
                 ;
-				self!Set()
                 self
 
             }
 
-	        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
-	        {
-			    spec:
-    	            self[from ~ to]:=addInField(v[from ~ to],w[from ~ to])
+            mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
+            {
+                dec: 
+                    result: tplFieldElem[from ~ to] 
                 ;
-	        }
+                spec:
+                    result := addInField(v[from ~ to],w[from ~ to])
+                ;
+                return result
+            }
 
         }
 		
@@ -67,15 +71,15 @@ Fpl.LinAlg
             ZeroVectorN(n: Nat, field: Field)
             {
                 dec:
-                    i: Nat
+                    i: Nat 
                 ;
                 spec:
-                    range i [1~n]
+                    for i in [1~n] 
                     (
-                        self[i]:=field.AdditiveGroup().NeutralElement()
+                        self<i>:=field.AdditiveGroup().NeutralElement()
                     )
+                    self!Tuple()
                 ;
-                self!Tuple()
                 self
             }
         }

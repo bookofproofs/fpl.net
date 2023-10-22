@@ -42,11 +42,10 @@ Fpl.Commons
 
         ProceedingResults(p:+ pred)
         {
-            proceedingResult: pred
             premise:
-                range proceedingResult p
+                all proceedingResult in p
                 (
-                    assert proceedingResult
+                    proceedingResult
                 )
             conclusion:
                 and (p)
@@ -54,7 +53,7 @@ Fpl.Commons
 
         ExistsByExample(p: pred(c: obj))
         {
-            x: obj
+            dec: x: obj;
             premise:
                 p(c)
             conclusion:
@@ -65,26 +64,10 @@ Fpl.Commons
 
     theory
     {
-        pred Equal(a,b: tpl)
-        {
-            p: pred 
-
-			all p
-			(
-				iif
-				(
-					p(a),
-					p(b)
-				)
-			)
-        }
 
         pred NotEqual(x,y: tpl)
         {
-            not
-            (
-                Equal(x,y)
-            )
+            not ( <x = y> )
         }
 
 

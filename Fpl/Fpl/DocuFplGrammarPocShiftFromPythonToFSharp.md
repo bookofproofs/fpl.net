@@ -21,6 +21,7 @@ The following documentation describes the syntax amendments and provides a ratio
 * An experimental approach to error recovery was added to the FPL parser.
 
 ### Changes to the Grammar (Details)
+
 #### 1) In-block Variable Declarations and Statements
 In FPL, you can declare variables of building blocks both in their signatures or in their body. The declarations in the body must be started by a new keyword `declaration` (or `dec`) and ended by a semicolon `;`. The statements in the body must be started by a new keyword `specification` (or `spec` and ended by a semicolon `;`.
 
@@ -80,7 +81,7 @@ class A :B, :C
 
 #### 3) Syntax of class constructors
 
-The syntax of constructors requires two explicit things - a list of calls of parental constructors and the keyword `self` as the last expression in the constructor. These two additional components disambiguate the representation of the class object after the constructor has been executed. The call (or more calls) toe each of the parental constructors cannot be omitted. Thus, the new syntax helps on the syntactical level to make sure that every property of the parental class(es) is added to the representation of the class.
+The syntax of constructors allows calls of parental constructors in the `specification`, their syntax starts with `self!" followed by the parent class identifier and related parameters like in `self!ParentClass(first, second)` . Moreover, the keyword `self` has as the last expression in the constructor. These two additional components disambiguate the representation of the class object after the constructor has been executed. 
 
 *Before*
 ``` 
@@ -110,12 +111,183 @@ class SomeClass: ParentClass
     {
     	spec:
             myField := field
+            self!ParentClass()
         ;
-        self!ParentClass()
         self
     }
 }
 ``` 
+
+#### 4) Explicit intrinsic definitions
+
+*Before*
+``` 
+class Set: obj
+{
+}
+``` 
+*Now*
+``` 
+class Set: obj
+{
+    intrinsic
+}
+``` 
+In intrinsic definitions of classes, predicates, functional terms, and related properties of this kind, the new keyword `intrinsic` (short form `intr`) has to be used explicitly. This prevents the definition of being empty just because the end-user left the body of a definition unintentionally.
+
+#### 5) `assert` becomes a statement (not a predicate)
+
+*Before*
+``` 
+all x ( assert p(x) )
+``` 
+*Now*
+``` 
+all x ( p(x) )
+``` 
+The `assert` statement cannot be used, where FPL expects a predicate. Using `assert` is still possible in the context where statements are expected, in particular in the `specification` section. 
+
+
+#### 6) `for` loop replaces `loop` and `range`
+
+In the original version of FPL grammar, loops could be constructed using the `loop` and the `range` keywords with pretty the same syntax. Now, this is unified using the `for` keyword. Moreover, the `in` keyword makes the statement more readable.
+
+*Before*
+``` 
+    range i [1~n]
+    (
+        // do something
+    )
+
+    loop i [1~n]
+    (
+        // do something
+    )
+
+``` 
+*Now*
+``` 
+    for i in [1~n]
+    (
+        // do something
+    )
+``` 
+
+#### 7) New `exn` keyword  
+
+The existence quantor accepting a number of allowed occurrences gets an own keyword `exn`, disambiguating it from the general quantor `ex`.
+
+*Before*
+``` 
+    ex$1 x ( p (x) ) // there exists exactly one x ...
+
+``` 
+*Now*
+``` 
+    exn!1 x ( p (x) ) // there exists exactly one x ...
+``` 
+
+This disambiguation helps to formulate the FPL grammar without `attempt` parsers which would otherwise distort error positions shown during error recovery that occur inside the predicate.
+
+#### 8) In-built equality predicate
+
+The original FPL language had not inbuilt equality predicate, relying on the second-order logic definition of equality that would have otherwise be provided in the language itself
+
+``` 
+    pred Equal(a,b: tpl)
+    {
+        dec: p: pred ;
+
+		all p
+		(
+			iif
+			(
+				p(a),
+				p(b)
+			)
+		)
+    }
+``` 
+
+However, this approach seems not feasible from the implementation point of view because such a predicate would be hard if not impossible to interpret. Moreover, the equality sign `=` in the infix notation is so common in proof-based mathematics that it is preferable to FPL expressions using the user-defined `Equal` predicate.
+
+In the new FPL syntax version, we introduce an inbuilt equality sign and allow infix notation for equality. Nevertheless, infix notation together with the error recovery mechanism in the new FPL parser
+  requires disambiguation in the form that equality comparison have to be enclosed by some other characters that cannot be mixed up with other literals or predicates in FPL. We chose the enclosing characters `<` and `>` for this purpose:
+
+*Before*
+``` 
+    Equals (x,y) 
+
+``` 
+*Now*
+``` 
+    <x = y>
+``` 
+
+Of course, the equality predicate can be placed everywhere any predicate can be used in FPL, for instance, it can be nested within other predicates. 
+
+#### 9) Domains are now allowed in the quantors `all`, `ex`, and `exn`.
+
+In the original version of FPL grammar, free variables used in quantors had to be first declared with a specific type and could then be only listed after the quantor and before the predicate of the quantor. In the new version of the FPL grammar, type declarations can be made implicit by using allowing the `in` keyword. 
+
+*Before*
+``` 
+    dec: 
+        x: Nat 
+    ;
+    all x ( p(x) ) // for all p of type Nat, the predicate p(x) holds
+
+``` 
+*Now*
+``` 
+    all x in Nat ( p (x) ) 
+``` 
+
+ The syntax is similar to the `for` statement, i.e. it also allows variadic variables and ranges, but it is more flexible since it not only also allows types but also can be enumerated, for instance this the free variables `x` and `n` do not have to be declared. Their type will be inferred from how they are used in the `all` quantor:
+
+``` 
+    all x in Nat, n in [1~m] 
+    ( 
+        p (x,n) 
+    ) 
+
+``` 
+
+Also, expressions in second-order logic predicates are allowed:
+
+``` 
+    axiom SchemaSeparation()
+    {
+        all p in pred, x,y in Set
+        (
+            ex y in Set
+            (
+                <y = SetBuilder(x,p)>
+            )
+        )
+    }
+``` 
+
+#### 10) Disambiguation of coordinate lists and ranges
+
+In previous versions, the square brackets `[`, `]` were used for both, coordinate lists and ranges. In the new version, coordinates have to be placed in angle brackets `<` and `>`. This disambiguates the grammar for to improve the inbuilt error recovery mechanism.
+
+*Before*
+``` 
+    for i in [1~n]  // <- range
+    (
+        a[i,j]:= b // <- coordinates
+    )
+
+``` 
+*Now*
+``` 
+    for i in [1~n]  // <- range
+    (
+        a<i,j>:= b // <- coordinates
+    )
+``` 
+
 
 ### More stringent predicate syntax
 * Giving up mixing up statements and index variables being not predicative in the choice rule of Prime predicates 

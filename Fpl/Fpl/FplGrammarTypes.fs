@@ -102,8 +102,8 @@ type Ast =
     | ParamTuple of Positions * Ast list
     | Signature of Positions * (Ast * Ast)
     | Axiom of Positions * (Ast * (Ast list option * Ast))
-    | ParentConstructorCalls of (Positions * (Ast * Ast)) list
-    | Constructor of Positions * (Ast * ((Ast list option * Ast) * Ast))
+    | ParentConstructorCall of Positions * (Ast * Ast)
+    | Constructor of Positions * (Ast * (Ast list option * Ast)) 
     | Mandatory
     | Optional 
     | PredicateInstance of Positions * (Ast * Ast) 

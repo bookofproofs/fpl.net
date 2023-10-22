@@ -94,7 +94,7 @@ type TestConstructors () =
                 // constructors must contain the call(s) of the parent constructors
                 // of all parent classes of the class; the call's syntax starts
                 // with self followed by an exclamation mark and name of the classes constructor
-                self!AlgebraicStructure(x,op)
+                spec: self!AlgebraicStructure(x,op);
                 self
             }"""
         let actual = sprintf "%O" result
@@ -109,8 +109,9 @@ type TestConstructors () =
                 // of all parent classes of the class; the call's syntax starts
                 // with self followed by an exclamation mark and name of the classes constructor
                 dec:;
-                spec:;
-                self!AlgebraicStructure(x,op)
+                spec:
+                    self!AlgebraicStructure(x,op)
+                ;
                 self
             }"""
         let actual = sprintf "%O" result
@@ -127,7 +128,7 @@ type TestConstructors () =
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestConstructor03b () =
@@ -182,8 +183,8 @@ type TestConstructors () =
                     mulInField := myField.MulOp()
                     assert NotEqual(n, Zero())
                     self:=SetBuilder( myField[1 ~ n], true)
+    				self!obj()
                 ;
-				self!obj()
                 self
             }"""
         let actual = sprintf "%O" result

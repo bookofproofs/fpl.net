@@ -6,19 +6,18 @@ Fpl.SetTheory.ZermeloFraenkel
     {
         class Set: obj
         {
+            intr
         }
 
         // "in relation" ("is element of") relation
         pred In(x,y: Set)
         {
+            intr
         }
 
         pred IsEmpty(x: Set)
         {
-            dec:
-                y: Set
-			;
-            all y
+            all y in Set
             (
                 not ( In(y, x) )
             )
@@ -27,8 +26,7 @@ Fpl.SetTheory.ZermeloFraenkel
         // existence of an empty set
         axiom EmptySetExists()
         {
-            dec:x: Set;
-            ex x
+            ex x in Set
             (
                 IsEmpty(x)
             )
@@ -39,15 +37,18 @@ Fpl.SetTheory.ZermeloFraenkel
         {
             EmptySet()
             {
-                assert IsEmpty(self)
+                spec: 
+                    self!obj()
+                    assert IsEmpty(self) 
+                ;
+                self
             }
         }
 
         // relation between a subset and a superset
         pred IsSubset(subset,superset: Set)
         {
-            dec: u: Set ;
-            all u
+            all u in Set
             (
                 impl (In(u, subset), In(u, superset))
             )
@@ -58,15 +59,18 @@ Fpl.SetTheory.ZermeloFraenkel
         {
             Subset(superSet: Set)
             {
-                assert IsSubset(self, superSet)
+                spec:
+                    self!Set()
+                    assert IsSubset(self, superSet)
+                ;
+                self
             }
         }
 
         // extensionality
         axiom Extensionality()
         {
-            dec: x,y: Set ;
-            all x,y
+            all x,y in Set
             (
                 impl
                 (
@@ -88,11 +92,13 @@ Fpl.SetTheory.ZermeloFraenkel
             {
                 dec: elem: Set;
                 spec:
+                    self!Set()
                     for elem in listOfSets
                     (
                         assert In(elem, self)
                     )
                 ;
+                self
             }
 
         }
@@ -121,6 +127,7 @@ Fpl.SetTheory.ZermeloFraenkel
             // to support set builder notation, ex. all "even" natural numbers like SetBuilder(n: Nat, Even(n))
             SetBuilder(x: Set, p: pred(u: Set, o:* obj))
             {
+                spec:
                 assert
                     all u
                     (
@@ -130,6 +137,8 @@ Fpl.SetTheory.ZermeloFraenkel
                             and ( In(u,x), p(u,o) )
                         )
                     )
+                ;
+                self
             }
         }
 
@@ -190,7 +199,9 @@ Fpl.SetTheory.ZermeloFraenkel
         func PowerSet(x: Set) -> Set
         {
             dec: y: Set;
-            assert IsPowerSet(x,y)
+            spec:
+                assert IsPowerSet(x,y)
+            ;
             return y
         }
 
@@ -211,15 +222,17 @@ Fpl.SetTheory.ZermeloFraenkel
         func SetUnion(x,y: Set) -> Set
         {
             dec: z, union: Set;
-            assert
-                all z
-                (
-                    iif
+            spec:
+                assert
+                    all z
                     (
-                        or (In(z,x), In(z,y)),
-                        In(z,union)
+                        iif
+                        (
+                            or (In(z,x), In(z,y)),
+                            In(z,union)
+                        )
                     )
-                )
+            ;
             return union
         }
 

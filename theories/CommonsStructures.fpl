@@ -25,8 +25,8 @@ Fpl.Commons.Structures
                         self[i]:=elem
                     )
                     myLength:=i
+                    self!obj()
                 ;
-                self!obj()
                 self
             }
 
@@ -36,8 +36,8 @@ Fpl.Commons.Structures
                 spec:
                     self:=arr
                     myLength:=length
+                    self!obj()
                 ;
-                self!obj()
                 self
             }
 
@@ -55,8 +55,8 @@ Fpl.Commons.Structures
             {
                 spec:
                     self:=x
+                    self!obj()
                 ;
-                self!obj()
                 self
             }
 
@@ -97,8 +97,8 @@ Fpl.Commons.Structures
                 spec:
                     self:=setArray
                     myLength:=to
+                    self!Set()
                 ;
-                self!Set()
                 self
             }
 
