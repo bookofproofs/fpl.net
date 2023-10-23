@@ -8,16 +8,14 @@ Fpl.Commons.Structures
         // defines a fixed length tuple template using a generic type tplIndex for an index in a range
         class Tuple : obj
         {
-            dec:
-                myLength: Nat
+            dec
+                ~myLength: Nat
             ;
             Tuple(listOfTpl:+ tpl)
             {
-                dec:
-                elem: tpl
-                i: Nat
-                ;
-                spec: 
+                dec 
+                    ~elem: tpl
+                    ~i: Nat
                     i:= Zero()
                     for elem in listOfTpl
                     (
@@ -33,7 +31,7 @@ Fpl.Commons.Structures
             Tuple(from, length:Nat, arr: tpl[from ~ length])
             {
                 
-                spec:
+                dec
                     self:=arr
                     myLength:=length
                     self!obj()
@@ -43,7 +41,7 @@ Fpl.Commons.Structures
 
             mandatory Nat Length()
             {
-                spec:
+                dec
                     self:= myLength
                 ;
                 self
@@ -54,13 +52,13 @@ Fpl.Commons.Structures
         // defines a tuple template starting from a specific index with an arbitrary length
         class UnlimitedTupleFrom: obj
         {
-            dec: 
-                myX: tpl[from~]
+            dec 
+                ~myX: tpl[from~]
             ;
 
             UnlimitedTupleFrom(from:index, x: tpl[from~])
             {
-                spec:
+                dec
                     self!obj()
                     myX:=x
                 ;
@@ -69,7 +67,7 @@ Fpl.Commons.Structures
 
             mandatory tpl Coord(i: Nat)
             {
-                spec:
+                dec
                     self:=x<i>
                 ;
                 self
@@ -79,18 +77,16 @@ Fpl.Commons.Structures
         class CartesianProduct: Set
         {
 
-            dec:
-                myLength: Nat
-                myFrom: Nat
+            dec
+                ~myLength: Nat
+                ~myFrom: Nat
             ;
 
             CartesianProduct(setList:+ Set)
             {
-                dec:
-                    setItem: Set
-                    i: Nat
-                ;
-                spec:
+                dec
+                    ~setItem: Set
+                    ~i: Nat
                     self!Set()
                     i:= Zero()
                     for setItem in setList
@@ -106,7 +102,7 @@ Fpl.Commons.Structures
 
             CartesianProduct(from, to: Nat, setArray: Set[from ~ to])
             {
-                spec:
+                dec
                     self:=setArray
                     myLength:=to
                     self!Set()
@@ -116,7 +112,7 @@ Fpl.Commons.Structures
 
             mandatory Nat Length()
             {
-                spec: 
+                dec
                     self:= myLength 
                 ;
                 self
@@ -124,9 +120,9 @@ Fpl.Commons.Structures
 
             mandatory pred AllTuplesIn()
             {
-                dec:
-                    tupleElem: Set
-                    i: Nat
+                dec
+                    ~tupleElem: Set
+                    ~i: Nat
                 ;
                 and
                 (
@@ -152,16 +148,14 @@ Fpl.Commons.Structures
 
         class Relation: Set
         {
-            dec: 
-                myArity: Nat
+            dec 
+                ~myArity: Nat
             ;
 
             Relation(setList:+ Set)
             {
-                dec:
-                    cartProd : CartesianProduct
-                ;
-                spec:
+                dec
+                    ~cartProd : CartesianProduct
                     self!Set()
                     cartProd := CartesianProduct(setList)
                     myArity := cartProd.Length()
@@ -172,21 +166,21 @@ Fpl.Commons.Structures
 
             mandatory Nat Arity()
             {
-                spec: self:= myArity;
+                dec self:= myArity;
                 self
             }
         }
 
         class BinaryRelation: Relation
         {
-            dec: 
-                myDomain, myCodomain: Set
+            dec 
+                ~myDomain, myCodomain: Set
             ;
 
 
             BinaryRelation(x,y: Set)
             {
-                spec:
+                dec
                     self!Relation(2,x,y)
                     myDomain:=x
                     myCodomain:=y
@@ -196,7 +190,7 @@ Fpl.Commons.Structures
 
             mandatory Set Domain()
             {
-                spec:
+                dec
                     self:=myDomain
                 ;
                 self
@@ -204,7 +198,7 @@ Fpl.Commons.Structures
 
             mandatory Set CoDomain()
             {
-                spec:
+                dec
                     self:=myCodomain
                 ;
                 self
@@ -303,10 +297,8 @@ Fpl.Commons.Structures
 
         pred AreRelated(u,v: Set, r: BinaryRelation)
         {
-            dec:
-            tuple: Tuple[1~2]
-            ;
-            spec:
+            dec
+                ~tuple: Tuple[1~2]
                 tuple:=Tuple(u,v)
             ;
             and
@@ -321,7 +313,7 @@ Fpl.Commons.Structures
         {
             Function(x,y: Set)
             {
-                spec:
+                dec
                     self!BinaryRelation(x,y)
                     assert self.LeftTotal()
                     assert self.RightUnique()
@@ -334,7 +326,7 @@ Fpl.Commons.Structures
         {
             EquivalenceRelation(x,y: Set)
             {
-                spec:
+                dec
                     self:=BinaryRelation(x,y)
                     assert self.Reflexive()
                     assert self.Symmetric()

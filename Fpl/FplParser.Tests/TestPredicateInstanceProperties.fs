@@ -92,8 +92,7 @@ type TestPredicateInstanceProperties () =
         let result = run property """optional pred X() 
 	        {
                 // a predicate instance with a return statement 
-                dec:;
-                spec:;
+                dec ~a:obj;
                 true
 	        }"""
         let actual = sprintf "%O" result
@@ -105,8 +104,7 @@ type TestPredicateInstanceProperties () =
         let result = run property """mand pred X() 
 	        {
                 // a predicate instance with a return statement 
-                dec:;
-                spec:;
+                dec ~a:obj;
                 true
 	        }"""
         let actual = sprintf "%O" result
@@ -118,7 +116,7 @@ type TestPredicateInstanceProperties () =
         let result = run property """optional pred X() 
 	        {
                 // a predicate instance with a return statement 
-                spec:;
+                dec ~a:obj;
                 true
 	        }"""
         let actual = sprintf "%O" result
@@ -130,7 +128,7 @@ type TestPredicateInstanceProperties () =
         let result = run property """mand pred X() 
 	        {
                 // a predicate instance with a return statement 
-                spec:;
+                dec ~a:obj;
                 true
 	        }"""
         let actual = sprintf "%O" result
@@ -142,7 +140,7 @@ type TestPredicateInstanceProperties () =
         let result = run property """optional pred X() 
 	        {
                 // a predicate instance with a return statement 
-                dec:;
+                dec ~a:obj;
                 true
 	        }"""
         let actual = sprintf "%O" result
@@ -154,7 +152,7 @@ type TestPredicateInstanceProperties () =
         let result = run property """mand pred X() 
 	        {
                 // a predicate instance with a return statement 
-                dec:;
+                dec ~a:obj;
                 true
 	        }"""
         let actual = sprintf "%O" result

@@ -22,13 +22,14 @@ The following documentation describes the syntax amendments and provides a ratio
 
 ### Changes to the Grammar (Details)
 
-#### 1) In-block Variable Declarations and Statements
-In FPL, you can declare variables of building blocks both in their signatures or in their body. The declarations in the body must be started by a new keyword `declaration` (or `dec`) and ended by a semicolon `;`. The statements in the body must be started by a new keyword `specification` (or `spec` and ended by a semicolon `;`.
+#### 1) In-block Variable Type Declarations and Statements
+In FPL, you can declare variable types of building blocks both in their signatures or in their body. Moreover, in the body also statements using variables are possible.
+  The body type declarations and statements must be started by a new keyword `declaration` (or `dec`) and ended by a semicolon `;`. 
 
 *Before*
 ``` 
 {
-    // some declarations
+    // some type declarations
     myField: Field 
     addInField: BinOp
     mulInField: BinOp
@@ -41,20 +42,22 @@ In FPL, you can declare variables of building blocks both in their signatures or
 *Now*
 ``` 
 {
-    dec: 
-        myField: Field 
-        addInField: BinOp
-        mulInField: BinOp
-    ; 
-
-    spec: 
+    dec
+        // some type declarations
+        ~myField: Field 
+        ~addInField: BinOp
+        ~mulInField: BinOp
+    
+        // some statements
         myField := field
         addInField := myField.AddOp()
         mulInField := myField.MulOp()
     ; 
 }
 ``` 
-This is a trade-off between simplicity of syntax and a stricter syntax with respect to what comes after variable declarations and specifications. In FPL, this depends on the kind of a building block. For instance, functional terms require a return statement while predicates require a predicate. With the new annotations `dec` and `spec` it becomes much more easier to recognize missing linguistic components, because this recognition can be done already in the parser on the syntactical level and have not be dealt with by the interpreter. These additional syntax changes will be discussed below. 
+This is a trade-off between simplicity of syntax and a stricter syntax with respect to the distinction of type declarations and statements, and with respect to what comes after them in the building block. In FPL, this depends on the kind of a building block. For instance, functional terms require a return statement while predicates require a predicate. With the new enclosing annotations `dec` and `;` it becomes much more easier to recognize missing linguistic components, because this recognition can be done already in the parser on the syntactical level and have not be dealt with by the interpreter. These additional syntax changes will be discussed below. 
+
+The `~` at the beginning of type declarations is necessary to distinguish between them and statements starting with a variable (like the assignment statement). The FParsec parser would allow to get rid of this additional syntactical sugar using the `attempt` parser, but at the cost of a less intuitive error recovery messaging: If the syntax error occurred somewhere deep in the type declaration, the position of the reported error would point not to the error but to the beginning of the attempted type declaration. Thus, the `~` at the beginning of each type declaration is a trade-off between to-be-avoided syntax complexity and to-be-avoided `attempt` parsers for better error recovery messages.
 
 #### 2) Classes allow multiple inheritance
 

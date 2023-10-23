@@ -26,7 +26,9 @@ type TestAxioms () =
     member this.TestAxiom02 () =
         let result = run axiom """axiom SuccessorExistsAndIsUnique()
         {
-            dec: n, successor: Nat;
+            dec
+                ~ n, successor: Nat
+            ;
             all n
             (
                 exn!1 successor
@@ -47,7 +49,7 @@ type TestAxioms () =
     member this.TestAxiom03 () =
         let result = run axiom """axiom ZeroIsNotSuccessor()
         {
-            dec: n: Nat;
+            dec ~n: Nat;
             all n
             (
                 NotEqual(Zero(), Succ(n))
@@ -63,7 +65,7 @@ type TestAxioms () =
     member this.TestAxiom04 () =
         let result = run axiom """axiom SuccessorIsInjective()
         {
-            dec: n,m: Nat;
+            dec ~n,m: Nat;
             all n,m
             (
                 impl
@@ -82,10 +84,10 @@ type TestAxioms () =
     member this.TestAxiom05 () =
         let result = run axiom """axiom CompleteInduction()
         {
-            dec: 
-                n: Nat
-                p: pred
-                ;
+            dec 
+                ~n: Nat
+                ~p: pred
+            ;
             all p
             (
                 impl
@@ -104,7 +106,7 @@ type TestAxioms () =
     member this.TestAxiom06 () =
         let result = run axiom """axiom EmptySetExists()
         {
-            dec: x: Set;
+            dec ~x: Set;
             ex x
             (
                 IsEmpty(x)
@@ -119,7 +121,7 @@ type TestAxioms () =
     member this.TestAxiom07 () =
         let result = run axiom """axiom Extensionality()
         {
-            dec: x,y: Set ;
+            dec ~x,y: Set ;
             all x,y
             (
                 impl

@@ -4,8 +4,8 @@ T
     {
         ModusPonens()
         {
-            dec:
-                p,q: pred
+            dec
+                ~p,q: pred
             ;
             premise:
                 and (p, impl (p,q) )
@@ -15,8 +15,8 @@ T
 
         ProceedingResults(p:+ pred)
         {
-            dec:
-                proceedingResult: pred
+            dec
+                ~proceedingResult: pred
             ;
             premise: 
                 all proceedingResult in p
@@ -30,8 +30,8 @@ T
 
         ExistsByExample(p: pred(c: obj, other:* obj))
         {
-            dec:
-                x: obj
+            dec
+                ~x: obj
             ;
             premise:
                 p(c, other)
@@ -66,26 +66,26 @@ T
 
         axiom GreaterAB()
         {
-            dec:
-                a: A
-                b: B
+            dec
+                ~a: A
+                ~b: B
             ;
             Greater(a,b)
         }
 
         axiom GreaterBC()
         {
-            dec:
-                b: B
-                c: C
+            dec
+                ~b: B
+                ~c: C
             ;
             Greater(b,c)
         }
 
         axiom GreaterTransitive()
         {
-            dec:
-                x,y,z: obj
+            dec
+                ~x,y,z: obj
             ;
             impl
             (
@@ -100,8 +100,8 @@ T
 
         lemma Example4()
         {
-            dec:
-                x,y,z: obj
+            dec
+                ~x,y,z: obj
             ;
             pre: undefined
             con:
@@ -110,11 +110,11 @@ T
 
         proof Example4!1
         {
-            dec: 
-                a:A
-                b:B
-                c:C
-                x,y,z: obj
+            dec
+                ~a:A
+                ~b:B
+                ~c:C
+                ~x,y,z: obj
             ;
             1. GreaterAB |- Greater(a,b)
             2. GreaterBC |- Greater(b,c)

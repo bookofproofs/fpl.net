@@ -94,7 +94,7 @@ type TestConstructors () =
                 // constructors must contain the call(s) of the parent constructors
                 // of all parent classes of the class; the call's syntax starts
                 // with self followed by an exclamation mark and name of the classes constructor
-                spec: self!AlgebraicStructure(x,op);
+                dec ~a:obj  self!AlgebraicStructure(x,op);
                 self
             }"""
         let actual = sprintf "%O" result
@@ -108,8 +108,7 @@ type TestConstructors () =
                 // constructors must contain the call(s) of the parent constructors
                 // of all parent classes of the class; the call's syntax starts
                 // with self followed by an exclamation mark and name of the classes constructor
-                dec:;
-                spec:
+                dec ~a:obj
                     self!AlgebraicStructure(x,op)
                 ;
                 self
@@ -122,8 +121,7 @@ type TestConstructors () =
     member this.TestConstructor03a () =
         let result = run constructor """Magma(x: tplSet, op: BinOp)
             {
-                dec:;
-                spec:;
+                dec ~a:obj;
                 self 
             }"""
         let actual = sprintf "%O" result
@@ -177,7 +175,7 @@ type TestConstructors () =
                 n: Nat
             )
             {
-    			spec:
+    			dec ~a:obj
                     myField := field
                     addInField := myField.AddOp()
                     mulInField := myField.MulOp()

@@ -92,8 +92,7 @@ type TestClassInstanceProperties () =
         let result = run property """optional T X() 
 	        {
                 // a class instance with a self at the end
-                dec:;
-                spec:;
+                dec ~a:obj;
                 self
 	        }"""
         let actual = sprintf "%O" result
@@ -105,8 +104,7 @@ type TestClassInstanceProperties () =
         let result = run property """mand T X() 
 	        {
                 // a class instance with a self at the end
-                dec:;
-                spec:;
+                dec ~a:obj;
                 self
 	        }"""
         let actual = sprintf "%O" result
@@ -118,7 +116,7 @@ type TestClassInstanceProperties () =
         let result = run property """optional T X() 
 	        {
                 // a class instance with a self at the end 
-                spec:;
+                dec ~a:obj;
                 self
 	        }"""
         let actual = sprintf "%O" result
@@ -130,7 +128,7 @@ type TestClassInstanceProperties () =
         let result = run property """mand T X() 
 	        {
                 // a class instance with a self at the end 
-                spec:;
+                dec ~a:obj;
                 self
 	        }"""
         let actual = sprintf "%O" result
@@ -142,7 +140,7 @@ type TestClassInstanceProperties () =
         let result = run property """optional T X() 
 	        {
                 // a class instance with a self at the end
-                dec:;
+                dec ~a:obj;
                 self
 	        }"""
         let actual = sprintf "%O" result
@@ -154,7 +152,7 @@ type TestClassInstanceProperties () =
         let result = run property """mand T X() 
 	        {
                 // a class instance with a self at the end 
-                dec:;
+                dec ~a:obj;
                 self
 	        }"""
         let actual = sprintf "%O" result

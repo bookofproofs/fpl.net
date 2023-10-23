@@ -51,7 +51,7 @@ let leftClosedBracket = skipChar '[' >>. spaces <?> "<(closed) left bound '['>"
 let leftOpenBracket = skipString "[(" >>. spaces <?> "<(open) left bound '[('>"
 let rightOpenBracket = skipString ")]" >>. spaces <?> "<(open) right bound ')]'>" 
 let rightClosedBracket = skipChar ']' >>. spaces <?> "<(closed) right bound ']'>" 
-let tilde = skipChar '~' .>> spaces >>. spaces
+let tilde = skipChar '~' .>> spaces
 let semiColon = skipChar ';' >>. spaces
 let exclamationMark = skipChar '!'
 let toArrow = skipString "->"
@@ -379,15 +379,12 @@ predicateList1Ref.Value <- sepBy1 predicate comma
 
 (* FPL building blocks *)
 let keywordDeclaration = (skipString "declaration" <|> skipString "dec") .>> IW 
-let commentedNamedVariableDeclaration = many CW >>. namedVariableDeclaration
-let varDeclBlock = positions (many CW >>. keywordDeclaration >>. colon >>. (many commentedNamedVariableDeclaration .>> IW) .>> semiColon) .>> IW |>> Ast.VarDeclBlock 
-
-let keywordSpecification = (skipString "specification" <|> skipString "spec") .>> IW 
+let commentedNamedVariableDeclaration = many CW >>. tilde >>. namedVariableDeclaration
 let commentedStatement = many CW >>. statement .>> IW
-let varSpecBlock = positions (many CW >>. keywordSpecification >>. colon >>. (many commentedStatement .>> IW) .>> semiColon) .>> IW |>> Ast.VarSpecBlock
 
+let varDeclBlock = positions (many CW >>. keywordDeclaration >>. (many (commentedNamedVariableDeclaration <|> commentedStatement) .>> IW) .>> semiColon) .>> IW |>> Ast.VarDeclBlock 
 
-let varDeclOrSpecList = opt (many1 (varDeclBlock <|> varSpecBlock))
+let varDeclOrSpecList = opt (many1 (varDeclBlock))
 (*To simplify the syntax definition, we do not define separate
 FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
 The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.

@@ -58,8 +58,9 @@ type TestClasses () =
         let result = run definitionClass """class FieldPowerN: Set
         {
             // intrinsic classes with declarations or specifications not allowed
-            dec:;
-            spec:;
+            dec d:Nat 
+            d:=1
+            ;
             intr
         }"""
         let actual = sprintf "%O" result
@@ -70,12 +71,9 @@ type TestClasses () =
     member this.TestClass02 () =
         let result = run definitionClass """class FieldPowerN: Set
         {
-            // A class with a constructor
-            dec:;
-            spec:;
-            FieldPowerN() 
+            FieldPowerN()
             {
-                spec: self!obj() ;
+                dec self!obj() ;
                 self
             }
         }"""
@@ -88,10 +86,10 @@ type TestClasses () =
         let result = run definitionClass """class FieldPowerN: Set
         {
             // A class with a constructor and a self reference
-            dec:;
+            dec ~x: obj;
             FieldPowerN() 
             {
-                spec: self!obj() ;
+                dec self!obj() ;
                 self
             }
         }"""
@@ -119,10 +117,10 @@ type TestClasses () =
         let result = run definitionClass """class FieldPowerN: Set
         {
             // A class with a constructor
-            spec:;
+            dec ~a:obj;
             FieldPowerN() 
             {
-                spec: self!obj() ;
+                dec self!obj() ;
                 self
             }
         }"""
@@ -152,7 +150,7 @@ type TestClasses () =
             // A class with a constructor 
             FieldPowerN() 
             {
-                spec: self!obj() ;
+                dec self!obj() ;
                 self
             }
         }"""
@@ -181,12 +179,12 @@ type TestClasses () =
             // A class with more than one constructor
             FieldPowerN() 
             {
-                spec: self!obj() ;
+                dec self!obj() ;
                 self
             }
             FieldPowerN() 
             {
-                spec: self!T1() ;
+                dec self!T1() ;
                 self
             }
         }"""
@@ -201,20 +199,19 @@ type TestClasses () =
             // A class with more than one constructor and some properties
             FieldPowerN() 
             {
-                spec: self!obj() ;
+                dec self!obj() ;
                 self
             }
 
             FieldPowerN() 
             {
-                spec: self!T1() ;
+                dec self!T1() ;
                 self
             }
 
             mand func T() -> obj
 	        {
-	            dec:;
-                spec:;
+	            dec ~a:obj;
                 return x
 	        } 
 
@@ -269,7 +266,7 @@ type TestClasses () =
 
             FieldPowerN() 
             {
-                spec: self!T1() ;
+                dec self!T1() ;
                 self
             }
 
@@ -336,8 +333,7 @@ type TestClasses () =
 
             mand func T() -> obj
 	        {
-	            dec:;
-                spec:;
+	            dec ~a:obj;
                 return x
 	        } 
 

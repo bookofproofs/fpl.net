@@ -11,8 +11,8 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm01 () =
         let result = run definitionFunctionalTerm """func LeftNeutralElement() -> tplSetElem
         {
-            dec:e: tplSetElem;
-            spec:
+            dec ~a:obj ~ e: tplSetElem
+
             assert 
                 ex e
                 (
@@ -48,10 +48,8 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm04 () =
         let result = run definitionFunctionalTerm """func Sum(list:* Nat)->Nat
         {
-            dec: 
+            dec ~a:obj ~  
                 result, addend: Nat
-            ;
-            spec:
                 result:=Zero()
                 for addend in list
                 (
@@ -69,10 +67,8 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm05 () =
         let result = run definitionFunctionalTerm """func Sum(list:* Nat)->Nat
         {
-            dec: 
+            dec ~a:obj ~  
                 i: index
-            ;
-            spec:
                 result:=Zero()
                 for i in list
                 (
@@ -89,10 +85,9 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm06 () =
         let result = run definitionFunctionalTerm """func Sum(from,to:Nat, arr: Nat[from~to]) -> Nat
         {
-            dec:
+            dec ~a:obj ~ 
                 i, result: Nat
-            ;
-            spec:
+            
                 result:=Zero()
                 for  i in[from~to]
                 (
@@ -109,10 +104,9 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm07 () =
         let result = run definitionFunctionalTerm """func Sum(arr: Nat[~]) -> Nat
         {
-            dec:
+            dec ~a:obj ~ 
                 addend, result: Nat
-            ;
-            spec:
+            
                 result:=Zero()
                 for addend in arr
                 (
@@ -139,10 +133,9 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm09 () =
         let result = run definitionFunctionalTerm """func PowerSet(x: Set) -> Set
         {
-            dec:
+            dec ~a:obj ~ 
                 y: Set
-                ;
-            spec:
+            
                 assert IsPowerSet(x,y)
                 ;
             return y
@@ -301,8 +294,7 @@ type TestDefinitionFunctionalTerms01 () =
 
             mand func T() -> obj
 	        {
-	            dec:;
-                spec:;
+	            dec ~a:obj;
                 return x
 	        } 
 
@@ -347,8 +339,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run definitionFunctionalTerm """func T() -> obj
         {
             // a functional term with some proceeding declarations or specifications
-            dec:;
-            spec:;
+            dec ~a:obj;
             return x
         }"""
         let actual = sprintf "%O" result
@@ -360,7 +351,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run definitionFunctionalTerm """func T() -> obj
         {
             // a functional term with some proceeding declarations or specifications
-            dec:;
+            dec ~a:obj;
             return x
         }"""
         let actual = sprintf "%O" result
@@ -372,7 +363,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run definitionFunctionalTerm """func T() -> obj
         {
             // a functional term with some proceeding declarations or specifications
-            spec:;
+            dec ~a:obj;
             return x
         }"""
         let actual = sprintf "%O" result
@@ -401,8 +392,7 @@ type TestDefinitionFunctionalTerms01 () =
 
             mand func T() -> obj
 	        {
-	            dec:;
-                spec:;
+	            dec ~a:obj ;
                 return x
 	        } 
 

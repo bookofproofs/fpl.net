@@ -15,10 +15,7 @@ Fpl.Algebra.Structures
             intr
             optional pred IsAssociative()
             {
-                dec:
-                    a,b,c: tplSetElem
-                ;
-                all a,b,c
+                all a,b,c in tplSetElem
                 (
                     Equal
                     (
@@ -30,8 +27,7 @@ Fpl.Algebra.Structures
 
             optional pred IsCommutative()
             {
-                dec: a,b: tplSetElem;
-                all a,b
+                all a,b in tplSetElem
                 (
                     Equal
                     (
@@ -58,8 +54,7 @@ Fpl.Algebra.Structures
 
             optional pred HasLeftNeutralElement()
             {
-                dec: e: tplSetElem;
-                ex e
+                ex e in tplSetElem
                 (
                     IsLeftNeutralElement(e)
                 )
@@ -67,8 +62,7 @@ Fpl.Algebra.Structures
 
             optional pred HasRightNeutralElement()
             {
-                dec: e: tplSetElem;
-                ex e
+                ex e in tplSetElem
                 (
                     IsRightNeutralElement(e)
                 )
@@ -76,8 +70,7 @@ Fpl.Algebra.Structures
 
             optional pred HasNeutralElement()
             {
-                dec: e: tplSetElem;
-                ex e
+                ex e in tplSetElem
                 (
                     IsNeutralElement(e)
                 )
@@ -85,19 +78,19 @@ Fpl.Algebra.Structures
 
             optional tplSetElem LeftNeutralElement()
             {
-                spec: assert IsLeftNeutralElement(self);
+                dec assert IsLeftNeutralElement(self);
                 self
             }
 
             optional tplSetElem RightNeutralElement()
             {
-                spec: assert IsRightNeutralElement(self);
+                dec assert IsRightNeutralElement(self);
                 self
             }
 
             optional tplSetElem NeutralElement()
             {
-                spec: assert IsNeutralElement(self);
+                dec assert IsNeutralElement(self);
                 self
             }
 
@@ -115,18 +108,16 @@ Fpl.Algebra.Structures
         class AlgebraicStructure: obj
         {
 
-            dec:
-                myCarrierSet: tplSet
-                myOps:+ Composition(myElem:* tplSetElem)
+            dec
+                ~myCarrierSet: tplSet
+                ~myOps:+ Composition(myElem:* tplSetElem)
             ;
 
             AlgebraicStructure(x: tplSet, ops:+ Composition(args:* tplSetElem))
             {
-                dec:
-                    a: obj
-                    arg: index
-                ;
-                spec:
+                dec
+                    ~a: obj
+                    ~arg: index
                     myOps := ops
                     myCarrierSet := x
 

@@ -7,10 +7,10 @@ Fpl.LinAlg
 
         class FieldPowerN: Set
         {
-			dec:
-                myField: Field
-                addInField: BinOp
-                mulInField: BinOp
+			dec
+                ~myField: Field
+                ~addInField: BinOp
+                ~mulInField: BinOp
             ;
 
             FieldPowerN
@@ -19,7 +19,7 @@ Fpl.LinAlg
                 n: Nat
             )
             {
-    			spec:
+    			dec
                     myField := field
                     addInField := myField.AddOp()
                     mulInField := myField.MulOp()
@@ -33,10 +33,8 @@ Fpl.LinAlg
 
             mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
             {
-                dec: 
-                    result: tplFieldElem[from ~ to] 
-                ;
-                spec:
+                dec
+                    ~result: tplFieldElem[from ~ to] 
                     result := addInField(v[from ~ to],w[from ~ to])
                 ;
                 return result
@@ -46,15 +44,15 @@ Fpl.LinAlg
 		
         lemma VecAddIsCommutative()
         {
-            dec:
-                to: Nat
-                x,y: tplFieldElem[1~to]
-                fieldPowerN: FieldPowerN
+            dec
+                ~to: Nat
+                ~x,y: tplFieldElem[1~to]
+                ~fieldPowerN: FieldPowerN
                     (
                     field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
                     n:Nat
                     )
-                vecAdd: VecAdd(v,w: tplFieldElem[from~to])
+                ~vecAdd: VecAdd(v,w: tplFieldElem[from~to])
             ;
             pre:
                 and
@@ -70,10 +68,8 @@ Fpl.LinAlg
         {
             ZeroVectorN(n: Nat, field: Field)
             {
-                dec:
-                    i: Nat 
-                ;
-                spec:
+                dec
+                    ~i: Nat 
                     for i in [1~n] 
                     (
                         self<i>:=field.AdditiveGroup().NeutralElement()

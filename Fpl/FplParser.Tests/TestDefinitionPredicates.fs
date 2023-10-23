@@ -15,7 +15,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate01 () =
         let result = run definitionPredicate """pred IsGreaterOrEqual(n,m: Nat)
         {
-            dec: k: Nat;
+            dec ~a:obj ~  k: Nat;
             ex k ( Equal(n,Add(m,k)) )
         }"""
         let actual = sprintf "%O" result
@@ -26,7 +26,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate02 () =
         let result = run definitionPredicate """pred IsBounded(x: Real)
         {
-            dec: upperBound, lowerBound: Real;
+            dec ~a:obj ~  upperBound, lowerBound: Real;
             ex upperBound, lowerBound
             (
                 and (LowerEqual(x,upperBound), LowerEqual(lowerBound,x))
@@ -40,7 +40,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate03 () =
         let result = run definitionPredicate """pred IsBounded(f: RealValuedFunction)
         {
-            dec: x: Real;
+            dec ~a:obj ~  x: Real;
             all x
             (
                 IsBounded(f(x))
@@ -55,7 +55,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate04 () =
         let result = run definitionPredicate """pred Equal(a,b: tpl)
         {
-            dec: p: pred;
+            dec ~a:obj ~  p: pred;
 
 			all p
 			(
@@ -88,17 +88,11 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate06 () =
         let result = run definitionPredicate """pred AreRelated(u,v: Set, r: BinaryRelation)
         {
-            dec: 
+            dec ~a:obj ~  
                 one, two:Nat
-                ;
-            spec:
                 one := Nat(1)
                 two := Nat(2)
-                ;
-            dec: 
-                tuple: Tuple[one~two]
-                ;
-            spec:
+                ~tuple: Tuple[one~two]
                 tuple:=Tuple(u,v)
                 ;
             
@@ -127,7 +121,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate08 () =
         let result = run definitionPredicate """pred IsPowerSet(ofSet, potentialPowerSet: Set)
         {
-            dec: z: Set;
+            dec ~a:obj ~  z: Set;
             all z
             (
                 impl (Subset(z,ofSet), In(z, potentialPowerSet))
@@ -141,7 +135,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate09 () =
         let result = run definitionPredicate """pred Union(x,superSet: Set)
         {
-            dec: u: Set;
+            dec ~a:obj ~  u: Set;
             all u
             (
                 impl (In(u, x), In(u, superSet))
@@ -301,8 +295,7 @@ type TestDefinitionPredicates () =
 
             mand func T() -> obj
 	        {
-	            dec:;
-                spec:;
+	            dec ~a:obj;
                 return x
 	        } 
 
@@ -347,8 +340,7 @@ type TestDefinitionPredicates () =
         let result = run definitionPredicate """pred T()
         {
             // a predicate with some proceeding declarations or specifications
-            dec:;
-            spec:;
+            dec ~a:obj;
             true
         }"""
         let actual = sprintf "%O" result
@@ -360,19 +352,19 @@ type TestDefinitionPredicates () =
         let result = run definitionPredicate """pred T()
         {
             // a predicate with some proceeding declarations or specifications
-            dec:;
+            dec ~a:obj ~ ;
             true
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestDefinitionPredicate17 () =
         let result = run definitionPredicate """pred T()
         {
             // a predicate with some proceeding declarations or specifications
-            spec:;
+            dec ~a:obj;
             true
         }"""
         let actual = sprintf "%O" result
@@ -401,8 +393,7 @@ type TestDefinitionPredicates () =
 
             mand func T() -> obj
 	        {
-	            dec:;
-                spec:;
+	            dec ~a:obj;
                 return x
 	        } 
 

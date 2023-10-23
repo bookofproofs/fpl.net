@@ -99,7 +99,6 @@ type Ast =
     | Corollary of Positions * (((Ast * Ast list) * Ast) * ((Ast list option * Ast) * Ast))
     | Conjecture of Positions * Ast
     | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
-    | VarSpecBlock of Positions * Ast list 
     | ParamTuple of Positions * Ast list
     | Signature of Positions * (Ast * Ast)
     | Axiom of Positions * (Ast * (Ast list option * Ast))

@@ -2386,7 +2386,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     inf {
         D()
         {
-            dec: x ;
+            dec ~x ;
             pre:true
             con:true
         }
@@ -3093,7 +3093,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec: x, ; 
+            dec ~x, ; 
             true
         }
         y
@@ -3141,7 +3141,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec: x: ;
+            dec ~x: ;
             true
         }
         y
@@ -3179,7 +3179,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec: x:*
+            dec ~x:*
             ; 
             true
         }
@@ -3218,7 +3218,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec: x:, ; 
+            dec ~x:, ; 
             true
         }
         y
@@ -3256,7 +3256,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec:x:+ ;
+            dec ~x:+ ;
             true
         }
         y
@@ -3302,120 +3302,8 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec:x:func: 
+            dec ~x:func: 
             ;
-            true
-        }
-        y
-    }
-}"""
-        let result = fplParser input
-        let actual = sprintf "%O" result
-        let expectedDiag = """Diagnostic
-  (FplParser, Error, (Ln: 5, Col: 23),
-   DiagnosticMessage
-     "':'
-Expecting: '(', ';', <block comment>, <inline comment>, <significant whitespace>, <variable>, <whitespace>
-")
-Diagnostic
-  (FplParser, Error, (Ln: 8, Col: 9),
-   DiagnosticMessage
-     "'y'
-Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
-'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
-'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
-<inline comment>, <significant whitespace>, <whitespace>
-")"""
-        let actualDiag = ad.DiagnosticsToString
-        printf "\n>>%s<<" actualDiag
-        printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
-        Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'ax','axiom','cl','class','conj','conjecture','cor','corollary','func','function','lem','lemma','post','postulate','pred','predicate','prf','proof','prop','proposition','theorem','thm','}',<blockcomment>,<inlinecomment>,<significantwhitespace>,<whitespace>")"""))
-
-
-    [<TestMethod>]
-    member this.TestTryParseVarDeclInScopePred003eDiag () =
-        ad.Clear()
-        let input = """TestNamespace {
-    theory {   
-        pred T()
-        {
-            dec:x:ind: ;
-            true
-        }
-        y
-    }
-}"""
-        let result = fplParser input
-        let actual = sprintf "%O" result
-        let expectedDiag = """Diagnostic
-  (FplParser, Error, (Ln: 5, Col: 22),
-   DiagnosticMessage
-     "':'
-Expecting: '(', ';', <block comment>, <inline comment>, <significant whitespace>, <variable>, <whitespace>
-")
-Diagnostic
-  (FplParser, Error, (Ln: 8, Col: 9),
-   DiagnosticMessage
-     "'y'
-Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
-'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
-'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
-<inline comment>, <significant whitespace>, <whitespace>
-")"""
-        let actualDiag = ad.DiagnosticsToString
-        printf "\n>>%s<<" actualDiag
-        printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
-        Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'ax','axiom','cl','class','conj','conjecture','cor','corollary','func','function','lem','lemma','post','postulate','pred','predicate','prf','proof','prop','proposition','theorem','thm','}',<blockcomment>,<inlinecomment>,<significantwhitespace>,<whitespace>")"""))
-
-
-    [<TestMethod>]
-    member this.TestTryParseVarDeclInScopePred003fDiag () =
-        ad.Clear()
-        let input = """TestNamespace {
-    theory {   
-        pred T()
-        {
-            dec: x:obj: ;
-            true
-        }
-        y
-    }
-}"""
-        let result = fplParser input
-        let actual = sprintf "%O" result
-        let expectedDiag = """Diagnostic
-  (FplParser, Error, (Ln: 5, Col: 23),
-   DiagnosticMessage
-     "':'
-Expecting: '(', ';', '<', <(closed) left bound '['>, <(open) left bound '[!'>, <block comment>, <inline comment>, <significant whitespace>, 
-<variable>, <whitespace>
-")
-Diagnostic
-  (FplParser, Error, (Ln: 8, Col: 9),
-   DiagnosticMessage
-     "'y'
-Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
-'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
-'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
-<inline comment>, <significant whitespace>, <whitespace>
-")"""
-        let actualDiag = ad.DiagnosticsToString
-        printf "\n>>%s<<" actualDiag
-        printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
-        Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'ax','axiom','cl','class','conj','conjecture','cor','corollary','func','function','lem','lemma','post','postulate','pred','predicate','prf','proof','prop','proposition','theorem','thm','}',<blockcomment>,<inlinecomment>,<significantwhitespace>,<whitespace>")"""))
-
-
-    [<TestMethod>]
-    member this.TestTryParseVarDeclInScopePred003gDiag () =
-        ad.Clear()
-        let input = """TestNamespace {
-    theory {   
-        pred T()
-        {
-            dec: x:pred: ;
             true
         }
         y
@@ -3427,21 +3315,144 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 24),
    DiagnosticMessage
      "':'
-Expecting: '(', ';', <block comment>, <inline comment>, <significant whitespace>, <variable>, <whitespace>
+Expecting: '!', '(', ';', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self!', 'self', '~', <PascalCaseId>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 6, Col: 13),
+   DiagnosticMessage
+     "';'
+Expecting: '(', '.', ':=', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 9, Col: 9),
+   DiagnosticMessage
+     "'y'
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        printf "\n>>%s<<" actualDiag
+        printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'ax','axiom','cl','class','conj','conjecture','cor','corollary','func','function','lem','lemma','post','postulate','pred','predicate','prf','proof','prop','proposition','theorem','thm','}',<blockcomment>,<inlinecomment>,<significantwhitespace>,<whitespace>")"""))
+
+
+    [<TestMethod>]
+    member this.TestTryParseVarDeclInScopePred003eDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        pred T()
+        {
+            dec~x:ind: ;
+            true
+        }
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 22),
+   DiagnosticMessage
+     "':'
+Expecting: '!', '(', ';', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self!', 'self', '~', <PascalCaseId>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 28),
+   DiagnosticMessage
+     "';'
+Expecting: '(', '.', ':=', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 8, Col: 9),
    DiagnosticMessage
      "'y'
-Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
-'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
-'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
-<inline comment>, <significant whitespace>, <whitespace>
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
         printf "\n>>%s<<" actualDiag
         printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'ax','axiom','cl','class','conj','conjecture','cor','corollary','func','function','lem','lemma','post','postulate','pred','predicate','prf','proof','prop','proposition','theorem','thm','}',<blockcomment>,<inlinecomment>,<significantwhitespace>,<whitespace>")"""))
+
+
+    [<TestMethod>]
+    member this.TestTryParseVarDeclInScopePred003fDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        pred T()
+        {
+            dec~x:obj: ;
+            true
+        }
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+      (FplParser, Error, (Ln: 5, Col: 22),
+       DiagnosticMessage
+         "':'
+    Expecting: '!', '(', ';', '<', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self!', 'self', '~', <(closed) left bound '['>, <(open) left bound '[('>, <PascalCaseId>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>, <whitespace>
+    ")
+    Diagnostic
+      (FplParser, Error, (Ln: 5, Col: 28),
+       DiagnosticMessage
+         "';'
+    Expecting: '(', '.', ':=', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>
+    ")
+    Diagnostic
+      (FplParser, Error, (Ln: 8, Col: 9),
+       DiagnosticMessage
+         "'y'
+    Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>
+    ")"""
+        let actualDiag = ad.DiagnosticsToString
+        printf "\n>>%s<<" actualDiag
+        printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'ax','axiom','cl','class','conj','conjecture','cor','corollary','func','function','lem','lemma','post','postulate','pred','predicate','prf','proof','prop','proposition','theorem','thm','}',<blockcomment>,<inlinecomment>,<significantwhitespace>,<whitespace>")"""))
+
+
+    [<TestMethod>]
+    member this.TestTryParseVarDeclInScopePred003gDiag () =
+        ad.Clear()
+        let input = """TestNamespace {
+    theory {   
+        pred T()
+        {
+            dec~ x:pred: ;
+            true
+        }
+        y
+    }
+}"""
+        let result = fplParser input
+        let actual = sprintf "%O" result
+        let expectedDiag = """Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 24),
+   DiagnosticMessage
+     "':'
+Expecting: '!', '(', ';', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self!', 'self', '~', <PascalCaseId>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 30),
+   DiagnosticMessage
+     "';'
+Expecting: '(', '.', ':=', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 8, Col: 9),
+   DiagnosticMessage
+     "'y'
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>
+")"""
+        let actualDiag = ad.DiagnosticsToString
+        printf "\n>>%s<<" actualDiag
+        printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'ax','axiom','cl','class','conj','conjecture','cor','corollary','func','function','lem','lemma','post','postulate','pred','predicate','prf','proof','prop','proposition','theorem','thm','}',<blockcomment>,<inlinecomment>,<significantwhitespace>,<whitespace>")"""))
 
 
@@ -3452,7 +3463,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec: x:tpl: ;
+            dec ~x:tpl: ;
             true
         }
         y
@@ -3461,25 +3472,27 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         let result = fplParser input
         let actual = sprintf "%O" result
         let expectedDiag = """Diagnostic
-      (FplParser, Error, (Ln: 5, Col: 23),
-       DiagnosticMessage
-         "':'
-    Expecting: '(', ';', '<', <(closed) left bound '['>, <(open) left bound '[('>, <PascalCaseId>, <block comment>, <inline comment>, 
-    <significant whitespace>, <variable>, <whitespace>
-    ")
-    Diagnostic
-      (FplParser, Error, (Ln: 8, Col: 9),
-       DiagnosticMessage
-         "'y'
-    Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
-    'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
-    'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
-    <inline comment>, <significant whitespace>, <whitespace>
-    ")"""
+  (FplParser, Error, (Ln: 5, Col: 23),
+   DiagnosticMessage
+     "':'
+Expecting: '!', '(', ';', '<', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self!', 'self', '~', <(closed) left bound '['>, <(open) left bound '[('>, <PascalCaseId>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 29),
+   DiagnosticMessage
+     "';'
+Expecting: '(', '.', ':=', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 8, Col: 9),
+   DiagnosticMessage
+     "'y'
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>
+")"""
         let actualDiag = ad.DiagnosticsToString
         printf "\n>>%s<<" actualDiag
         printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'ax','axiom','cl','class','conj','conjecture','cor','corollary','func','function','lem','lemma','post','postulate','pred','predicate','prf','proof','prop','proposition','theorem','thm','}',<blockcomment>,<inlinecomment>,<significantwhitespace>,<whitespace>")"""))
 
 
@@ -3490,7 +3503,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec: x:T: ;
+            dec ~x:T: ;
             true
         }
         y
@@ -3528,7 +3541,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec: x:tpl. ;
+            dec ~x:tpl. ;
             true
         }
         y
@@ -3540,22 +3553,24 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
   (FplParser, Error, (Ln: 5, Col: 23),
    DiagnosticMessage
      "'.'
-Expecting: '(', ';', '<', <(closed) left bound '['>, <(open) left bound '[!'>, <PascalCaseId>, <block comment>, <inline comment>, 
-<significant whitespace>, <variable>, <whitespace>
+Expecting: '!', '(', ';', '<', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self!', 'self', '~', <(closed) left bound '['>, <(open) left bound '[('>, <PascalCaseId>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>, <whitespace>
+")
+Diagnostic
+  (FplParser, Error, (Ln: 5, Col: 29),
+   DiagnosticMessage
+     "';'
+Expecting: '(', '.', ':=', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>
 ")
 Diagnostic
   (FplParser, Error, (Ln: 8, Col: 9),
    DiagnosticMessage
      "'y'
-Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 
-'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 
-'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, 
-<inline comment>, <significant whitespace>, <whitespace>
+Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary', 'func', 'function', 'lem', 'lemma', 'post', 'postulate', 'pred', 'predicate', 'prf', 'proof', 'prop', 'proposition', 'theorem', 'thm', '}', <block comment>, <inline comment>, <significant whitespace>, <whitespace>
 ")"""
         let actualDiag = ad.DiagnosticsToString
         printf "\n>>%s<<" actualDiag
         printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'ax','axiom','cl','class','conj','conjecture','cor','corollary','func','function','lem','lemma','post','postulate','pred','predicate','prf','proof','prop','proposition','theorem','thm','}',<blockcomment>,<inlinecomment>,<significantwhitespace>,<whitespace>")"""))
 
 
@@ -3566,7 +3581,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec: x:tpl[ ;
+            dec ~x:tpl[ ;
             true
         }
         y
@@ -3609,7 +3624,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec: x:tpl[! ;
+            dec ~x:tpl[! ;
             true
         }
         y
@@ -3647,7 +3662,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     theory {   
         pred T()
         {
-            dec: x:tpl< ;
+            dec ~x:tpl< ;
             true
         }
         y
@@ -4605,7 +4620,7 @@ Diagnostic
     theory {   
         cl A:obj 
         {
-            dec:;
+            dec ~a:obj ;
         }
     }
     y
@@ -5056,7 +5071,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     theory {   
         pred A() 
         {
-            dec:;
+            dec ~a:obj;
         }
     }
     y
@@ -5162,8 +5177,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     theory {   
         pred A() 
         {
-            dec:;
-            spec:;
+            dec ~a:obj;
         }
     }
     y
@@ -5198,8 +5212,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     theory {   
         pred A() 
         {
-            dec:;
-            spec:;
+            dec ~a: obj;
             true
         }
     }
@@ -5252,7 +5265,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     theory {   
         pred A() 
         {
-            spec:
+            dec
                 x := 
             ;
             true
@@ -5289,7 +5302,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     theory {   
         pred A() 
         {
-            spec:
+            dec
                 x := false
             ;
             true
@@ -5318,7 +5331,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     theory {   
         pred A() 
         {
-            spec:
+            dec 
                 x := theorem
             ;
             true
@@ -5355,7 +5368,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     theory {   
         pred A() 
         {
-            spec:
+            dec
                 x := #
             ;
             true
