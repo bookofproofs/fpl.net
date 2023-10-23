@@ -33,7 +33,7 @@ type TestConstructors () =
         let result = run constructor """Magma(x: tplSet, op: BinOp)
             {
                 // constructors are not allowed to be empty and only contain specifications
-                spec: x:= 1 ;
+                dec x:= 1 ;
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -67,7 +67,7 @@ type TestConstructors () =
         let result = run constructor """Magma(x: tplSet, op: BinOp)
             {
                 // constructors are not allowed to be intrinsic
-                spec:;
+                dec ~a:obj ;
                 intr
             }"""
         let actual = sprintf "%O" result
@@ -79,8 +79,7 @@ type TestConstructors () =
         let result = run constructor """Magma(x: tplSet, op: BinOp)
             {
                 // constructors are not allowed to be intrinsic
-                dec:;
-                spec:;
+                dec ~a:obj ;
                 intr
             }"""
         let actual = sprintf "%O" result
@@ -132,9 +131,9 @@ type TestConstructors () =
     member this.TestConstructor03b () =
         let result = run constructor """Magma(x: tplSet, op: BinOp)
             {
-                dec:;
-                spec:;
-                self. // incomplete (syntax error)
+                dec ~a:obj 
+                    self! // incomplete (syntax error)
+                ;
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -144,9 +143,9 @@ type TestConstructors () =
     member this.TestConstructor04 () =
         let result = run constructor """Magma(x: tplSet, op: BinOp)
             {
-                dec:;
-                spec:;
-                self!obj() 
+                dec ~a:obj
+                self!obj()
+                ;
                 // incomplete ( self missing)
             }"""
         let actual = sprintf "%O" result
@@ -158,9 +157,12 @@ type TestConstructors () =
         let result = run constructor """Magma(x: tplSet, op: BinOp)
             {
                 // calls to multiple parental constructors possible (multi-inheritance)
-                self!obj() 
-                self!T1(x) 
-                self!T2(op) 
+                dec 
+                    ~a:obj
+                    self!obj() 
+                    self!T1(x) 
+                    self!T2(op) 
+                ;
                 // incomplete ( self missing)
             }"""
         let actual = sprintf "%O" result

@@ -46,7 +46,7 @@ type TestClasses () =
         let result = run definitionClass """class FieldPowerN: Set
         {
             // intrinsic classes with declarations or specifications not allowed
-            spec:;
+            dec ~a:obj;
             intr
         }"""
         let actual = sprintf "%O" result
@@ -133,10 +133,10 @@ type TestClasses () =
         let result = run definitionClass """class FieldPowerN: Set
         {
             // A class with a constructor but without self
-            spec:;
+            dec ~a:obj;
             FieldPowerN() 
             {
-                self!obj()
+                dec self!obj() ;
             }
         }"""
         let actual = sprintf "%O" result
@@ -232,7 +232,11 @@ type TestClasses () =
             // A class with more than one constructor and some properties
             FieldPowerN() 
             {
-                self.obj()
+                dec 
+                    ~a:obj
+                    self.obj()
+                    ;
+                self
             }
 
             optional pred T() 
@@ -242,13 +246,15 @@ type TestClasses () =
 
             FieldPowerN() 
             {
-                self.T1()
+                dec
+                    self.T1()
+                ;
+                self
             }
 
             mand func T() -> obj
 	        {
-	            dec:;
-                spec:;
+	            dec ~a:obj;
                 return x
 	        } 
 
@@ -293,7 +299,11 @@ type TestClasses () =
 
             FieldPowerN() 
             {
-                self.T1()
+                dec 
+                    ~a:obj
+                    self.T1()
+                ;
+                self
             }
         }"""
         let actual = sprintf "%O" result

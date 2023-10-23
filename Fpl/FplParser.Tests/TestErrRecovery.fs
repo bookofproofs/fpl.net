@@ -5142,7 +5142,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     theory {   
         pred A() 
         {
-            spec:;
+            dec ~a:obj;
         }
     }
     y
@@ -5279,12 +5279,10 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
   (FplParser, Error, (Ln: 7, Col: 13),
    DiagnosticMessage
      "';'
-Expecting: '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 
-'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 
-'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable>
+Expecting: '!', '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'exn', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable>
 ")
 Diagnostic
-  (FplParser, Error, (Ln: 11, Col: 5),
+  (FplParser, Error, (Ln: 10, Col: 5),
    DiagnosticMessage
      "'y'
 Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <significant whitespace>

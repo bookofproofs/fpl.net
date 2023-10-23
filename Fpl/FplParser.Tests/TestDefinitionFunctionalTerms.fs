@@ -170,7 +170,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run definitionFunctionalTerm """func T() -> obj
         {
             // a functional term cannot be empty with spec
-            spec:;
+            dec ~a:obj;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -181,8 +181,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run definitionFunctionalTerm """func T() -> obj
         {
             // a functional term cannot be empty with some spec or dec
-            spec:;
-            dec:;
+            dec ~a:obj;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -193,8 +192,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run definitionFunctionalTerm """func T() -> obj
         {
             // a functional term cannot be intrinsic with some proceeding spec or dec
-            spec:;
-            dec:;
+            dec ~a:obj;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -218,7 +216,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run definitionFunctionalTerm """func T() -> obj
         {
             // a functional term cannot be intrinsic with some proceeding spec or dec
-            spec:;
+            dec ~a:obj;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -266,7 +264,7 @@ type TestDefinitionFunctionalTerms01 () =
         {
             // a functional term cannot be intrinsic with some following declarations or specifications
             intrinsic
-            dec:;
+            dec ~a:obj;
             spec:;
         }"""
         let actual = sprintf "%O" result
@@ -279,7 +277,7 @@ type TestDefinitionFunctionalTerms01 () =
         {
             // a functional term cannot be intrinsic with some following declarations or specifications
             intrinsic
-            spec:;
+            dec ~a:obj;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -314,8 +312,7 @@ type TestDefinitionFunctionalTerms01 () =
         {
             mand func T() -> obj
 	        {
-	            dec:;
-                spec:;
+	            dec ~a:obj;
                 return x
 	        } 
 

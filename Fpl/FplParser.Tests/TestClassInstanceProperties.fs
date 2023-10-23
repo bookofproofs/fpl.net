@@ -33,7 +33,7 @@ type TestClassInstanceProperties () =
         let result = run property """mand T X() 
 	        {
                 // a class instance without a predicate is not allowed
-                spec:;
+                dec ~a:obj ;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -44,8 +44,7 @@ type TestClassInstanceProperties () =
         let result = run property """mand T X() 
 	        {
                 // a class instance without a predicate is not allowed
-                dec:;
-                spec:;
+                dec ~a:obj ;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -56,8 +55,7 @@ type TestClassInstanceProperties () =
         let result = run property """mand T X() 
 	        {
                 // a class instance without a predicate is not allowed
-                dec:;
-                spec:;
+                dec ~a:obj ;
                 return x
 	        }"""
         let actual = sprintf "%O" result
@@ -179,7 +177,7 @@ type TestClassInstanceProperties () =
                 // a class instance with a self at the end and 
                 // some other content following it is not allowed
                 self
-                spec:;
+                dec ~a:obj ;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual

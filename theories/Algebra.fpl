@@ -151,7 +151,7 @@ Fpl.Algebra.Structures
             // Every algebraic structure will have a mandatory property called CarrierSet of type Set.
             mandatory Set CarrierSet()
             {
-                spec: 
+                dec 
                     self:=myCarrierSet
                 ;
                 self
@@ -167,7 +167,7 @@ Fpl.Algebra.Structures
 
             Magma(x: tplSet, op: BinOp)
             {
-                spec:
+                dec
                     self!AlgebraicStructure(x,op)
                 ;
                 self
@@ -179,7 +179,7 @@ Fpl.Algebra.Structures
         {
             Semigroup(x: tplSet, op: BinOp)
             {
-                spec: 
+                dec 
                     assert op.IsAssociative()
                     self!Magma(x,op)
                 ;
@@ -193,11 +193,11 @@ Fpl.Algebra.Structures
         // Note how we use "full-qualified" parameters to ensure that the type "tpl" will be of exactly the  same ty
         class Monoid: Semigroup
         {
-            dec: myOp: BinOp(a,b: tplSetElem);
+            dec ~myOp: BinOp(a,b: tplSetElem);
 
             Monoid(x: tplSet, op: BinOp)
             {
-                spec: 
+                dec 
                     myOp:=op
                     assert myOp.HasNeutralElement()
                     self!Semigroup(x,op)
@@ -207,7 +207,7 @@ Fpl.Algebra.Structures
 
             mandatory tplSetElem NeutralElem()
             {
-                spec:
+                dec
                     self:=myOp.NeutralElement()
                 ;
                 self
@@ -223,8 +223,8 @@ Fpl.Algebra.Structures
             n: Nat
             ) -> tplSetElem
         {
-            dec: result:tplSetElem ;
-            spec:
+            dec 
+                ~result:tplSetElem 
                 assert In(y,x)
                     cases
                 (
@@ -243,11 +243,11 @@ Fpl.Algebra.Structures
         // a group is a monoid, in which an inverse element exists for all elements
         class Group: Monoid
         {
-            dec: myOp: BinOp(a,b: tplSetElem);
+            dec ~myOp: BinOp(a,b: tplSetElem);
 
             Group(x: tplSet, op: BinOp)
             {
-                spec:
+                dec
                     myOp:=op
                     self!Monoid (x,op)
                 ;
@@ -256,12 +256,9 @@ Fpl.Algebra.Structures
 
             mandatory pred InverseExistsForAllElements()
             {
-                dec: 
-                    x1,x2: tplSetElem
-                ;
-                all x1
+                all x1 in tplSetElem
                 (
-                    ex x2
+                    ex x2 in tplSetElem
                     (
                         Equal( myOp(x1,x2), self.NeutralElem() )
                     )
@@ -272,16 +269,14 @@ Fpl.Algebra.Structures
             // we can refer to this functionality as group.InverseOf(x)
             mandatory func InverseOf(x: tplSetElem) -> tplSetElem
             {
-                dec:
-                     val: tplSetElem
-                ;
-                spec:
-                assert
-                    and
-                    (
-                        Equal( myOp(x,val), self.NeutralElem()),
-                        Equal( myOp(val,x), self.NeutralElem())
-                    )
+                dec
+                     ~val: tplSetElem
+                    assert
+                        and
+                        (
+                            Equal( myOp(x,val), self.NeutralElem()),
+                            Equal( myOp(val,x), self.NeutralElem())
+                        )
                 ;
                 ret val
             }
@@ -291,7 +286,7 @@ Fpl.Algebra.Structures
         {
             CommutativeGroup(x: tpl, op: BinOp)
             {
-                spec:
+                dec
                     assert op.IsCommutative()
                     self!Group(x,op)
                 ;
@@ -301,9 +296,9 @@ Fpl.Algebra.Structures
 
         class Ring: AlgebraicStructure
         {
-            dec: 
-                myX : tpl
-                myAdd,myMul : BinOp
+            dec 
+                ~myX : tpl
+                ~myAdd,myMul : BinOp
             ;
 
             Ring (
@@ -312,7 +307,7 @@ Fpl.Algebra.Structures
                 mul: BinOp
             )
             {
-                spec: 
+                dec 
                     myX:= x
                     myAdd:=add
                     myMul:=mul
@@ -323,7 +318,7 @@ Fpl.Algebra.Structures
 
 			mandatory func Add(a,b:tplElem)->tplElem
 			{
-				spec:
+				dec
                     assert and(In(a, myX), In(b, myX))
                 ;
 				return myAdd(a,b)
@@ -332,7 +327,7 @@ Fpl.Algebra.Structures
 
             mandatory func Mul(a,b:tplElem)->tplElem
             {
-                spec:
+                dec
                     assert and(In(a, myX), In(b, myX))
                 ;
                 return myMul(a,b)
@@ -340,7 +335,7 @@ Fpl.Algebra.Structures
 
             mandatory CommutativeGroup AdditiveGroup()
             {
-                spec:
+                dec
                     self:= CommutativeGroup(myX, myAdd)
                 ;
                 self
@@ -348,7 +343,7 @@ Fpl.Algebra.Structures
 
             mandatory Semigroup MultiplicativeSemiGroup()
             {
-                spec:
+                dec
                     self:= CommutativeGroup(myX, myMul)
                 ;
                 self
@@ -356,8 +351,7 @@ Fpl.Algebra.Structures
 
             mandatory pred RightDistributive()
             {
-                dec: a,b,c: tplElem;
-                all a,b,c
+                all a,b,c in tplElem
                 (
                     Equal(
                         myMul(myAdd(a,b),c),
@@ -368,8 +362,7 @@ Fpl.Algebra.Structures
 
             mandatory pred LeftDistributive()
             {
-                dec: a,b,c: tplElem;
-                all a,b,c
+                all a,b,c in tplElem
                 (
                     Equal(
                         myMul(a,myAdd(b,c)),
@@ -393,7 +386,7 @@ Fpl.Algebra.Structures
 
             UnitRing(x: tpl, add, mul: BinOp)
             {
-                spec:
+                dec
                     self!Ring(x,add,mul)
                 ;
                 self
@@ -401,7 +394,7 @@ Fpl.Algebra.Structures
 
             mandatory Monoid MultiplicativeMonoid()
             {
-                spec:
+                dec
                     self:= Monoid(self.CarrierSet(), self.Mul())
                 ;
                 self
@@ -412,7 +405,7 @@ Fpl.Algebra.Structures
         {
             CommutativeUnitRing(x: tpl, add, mul: BinOp)
             {
-                spec: 
+                dec 
                     assert mul.IsCommutative() 
                     self!UnitRing(x,add,mul)
                 ;
@@ -425,7 +418,7 @@ Fpl.Algebra.Structures
 
             Field(x: tpl, add,mul: BinOp)
             {
-                spec: 
+                dec 
                     self!CommutativeUnitRing(x,add,mul)
                 ;
                 self
@@ -433,7 +426,7 @@ Fpl.Algebra.Structures
 
             mandatory CommutativeGroup MultiplicativeGroup()
             {
-                spec:
+                dec
                     self:= CommutativeGroup(self.CarrierSet(), self.Mul())
                 ;
                 self
@@ -449,8 +442,7 @@ Fpl.Algebra.Structures
 
             mandatory pred CollectElements()
             {
-                dec: elem: tplElem;
-                all elem
+                all elem in tplElem
                 (
                     and
                     (
@@ -477,13 +469,13 @@ Fpl.Algebra.Structures
         // Vector space over a field
         class VectorSpaceOverField : obj
         {
-            dec: 
-                mySpace: NonemptySet
-                myFieldAdd, myFieldMul: BinOp
-                myFieldSet: tplFieldSet
-                myScalarMul: ScalarMul 
-                myVecAdd: AddVec 
-                myField: Field
+            dec
+                ~mySpace: NonemptySet
+                ~myFieldAdd, myFieldMul: BinOp
+                ~myFieldSet: tplFieldSet
+                ~myScalarMul: ScalarMul 
+                ~myVecAdd: AddVec 
+                ~myField: Field
             ;
             VectorSpaceOverField
                 (
@@ -498,7 +490,7 @@ Fpl.Algebra.Structures
                     scalarMul: ScalarMul (a: tplFieldElement,v1: tplVector)
                 )
             {
-                spec:
+                dec
                     self!obj()
                     mySpace:= space
                     myFieldAdd:= fieldAdd
@@ -516,7 +508,7 @@ Fpl.Algebra.Structures
             // let's call it with the identifier "Space"
             mandatory CommutativeGroup Space()
             {
-                spec:
+                dec
                     self:=CommutativeGroup(mySpace, myFieldAdd)
                 ;
                 self
@@ -524,7 +516,7 @@ Fpl.Algebra.Structures
 
             mandatory Field MyField()
             {
-                spec:
+                dec
                     self:=myField
                 ;
                 self
@@ -532,12 +524,7 @@ Fpl.Algebra.Structures
 
             mandatory pred ScalarMulIsRightDistributive()
             {
-                dec: 
-                    u,w: tplVector
-                    a: tplFieldElement
-                ;
-                
-                all u,w,a
+                all u,w in tplVector, a in tplFieldElement
                 (
                     Equal(
                         myScalarMul(myVecAdd(u,w),a),
@@ -548,11 +535,7 @@ Fpl.Algebra.Structures
 
             mandatory pred ScalarMulIsLeftDistributive()
             {
-                dec: 
-                    u,w: tplVector
-                    a: tplFieldElement
-                ;
-                all a,u,w
+                all u,w in tplVector, a in tplFieldElement
                 (
                     Equal
                     (
@@ -564,11 +547,7 @@ Fpl.Algebra.Structures
 
             mandatory pred ScalarMulIsIsAssociative()
             {
-                dec: 
-                    u: tplVector
-                    a, b: tplFieldElement
-                ;
-                all a,b,u
+                all a,b in tplFieldElement, u in tplVector
                 (
                     Equal
                     (
@@ -580,14 +559,11 @@ Fpl.Algebra.Structures
 
             mandatory pred ScalarMulNorm()
             {
-                dec:
-                    u: tplVector
-                    one: tplFieldElement
-                ;
-                spec:
+                dec
+                    ~one: tplFieldElement
                     one := myField.MultiplicativeGroup().NeutralElement()
                 ;
-                all u
+                all u in tplVector
                 (
                     Equal( myScalarMul(one,u), u)
                 )

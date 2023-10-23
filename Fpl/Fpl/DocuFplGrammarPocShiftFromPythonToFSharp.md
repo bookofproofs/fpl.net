@@ -118,7 +118,7 @@ class SomeClass: ParentClass
     // constructor
     SomeClass(field : Field)
     {
-    	spec:
+    	dec
             myField := field
             self!ParentClass()
         ;

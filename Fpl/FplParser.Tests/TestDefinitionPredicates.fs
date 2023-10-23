@@ -171,7 +171,7 @@ type TestDefinitionPredicates () =
         let result = run definitionPredicate """pred T()
         {
             // a predicate cannot be empty with spec
-            spec:;
+            dec ~a:obj;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -182,8 +182,7 @@ type TestDefinitionPredicates () =
         let result = run definitionPredicate """pred T()
         {
             // a predicate cannot be empty with some spec or dec
-            spec:;
-            dec:;
+            dec ~a:obj;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -194,8 +193,7 @@ type TestDefinitionPredicates () =
         let result = run definitionPredicate """pred T()
         {
             // a predicate cannot be intrinsic with some proceeding spec or dec
-            spec:;
-            dec:;
+            dec ~a:obj;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -219,7 +217,7 @@ type TestDefinitionPredicates () =
         let result = run definitionPredicate """pred T()
         {
             // a predicate cannot be intrinsic with some proceeding spec or dec
-            spec:;
+            dec ~a:obj;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -267,8 +265,7 @@ type TestDefinitionPredicates () =
         {
             // a predicate cannot be intrinsic with some following declarations or specifications
             intrinsic
-            dec:;
-            spec:;
+            dec ~a:obj;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -280,7 +277,7 @@ type TestDefinitionPredicates () =
         {
             // a predicate cannot be intrinsic with some following declarations or specifications
             intrinsic
-            spec:;
+            dec ~a:obj;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -315,8 +312,7 @@ type TestDefinitionPredicates () =
         {
             mand func T() -> obj
 	        {
-	            dec:;
-                spec:;
+	            dec ~a:obj;
                 return x
 	        } 
 

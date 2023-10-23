@@ -26,10 +26,9 @@ Fpl.Arithmetics.Peano
 
         axiom SuccessorExistsAndIsUnique()
         {
-            dec: n, successor: Nat;
-            all n
+            all n in Nat
             (
-                exn!1 successor
+                exn!1 successor in Nat
                 (
                     and
                     (
@@ -42,8 +41,7 @@ Fpl.Arithmetics.Peano
 
         axiom ZeroIsNotSuccessor()
         {
-            dec: n: Nat;
-            all n
+            all n in Nat
             (
                 NotEqual(Zero(), Succ(n))
             )
@@ -51,8 +49,7 @@ Fpl.Arithmetics.Peano
 
         axiom SuccessorIsInjective()
         {
-            dec: n,m: Nat;
-            all n,m
+            all n,m in Nat
             (
                 impl
                 (
@@ -64,11 +61,10 @@ Fpl.Arithmetics.Peano
 
         axiom CompleteInduction()
         {
-            dec: 
-                n: Nat
-                p: pred
+            dec 
+                ~n: Nat
             ;
-            all p
+            all p in pred
             (
                 impl
                 (
@@ -84,7 +80,7 @@ Fpl.Arithmetics.Peano
         {
             Nat(x: @Digits)
             {
-                spec:
+                dec
                     cases
                     (
                         | <x = 0> : self := Zero() 
@@ -98,7 +94,7 @@ Fpl.Arithmetics.Peano
 
             Nat(x: Int)
             {
-                spec:
+                dec
                     cases
                     (
                         | IsGreaterOrEqual(x.RightMember(), x.LeftMember()): self:=x.RightMember()
@@ -112,8 +108,7 @@ Fpl.Arithmetics.Peano
 
         pred IsGreaterOrEqual(n,m: Nat)
         {
-            dec: k: Nat;
-            ex k ( Equal(n,Add(m,k)) )
+            ex k in Nat ( <n = Add(m,k)> )
         }
 
         // besides the class "Nat", we can formulate definition of the set of all natural numbers
@@ -121,8 +116,8 @@ Fpl.Arithmetics.Peano
         {
             SetNat()
             {
-                dec: n: Nat;
-                spec:
+                dec 
+                    ~n: Nat
                     // Assert that elements of class "Nat" can be collected to a bigger object of class "SetNat"
                     // This requires that we can apply the "In" predicate defined in Fpl.Set.ZermeloFraenkel
                     // to object of the class "Nat". This becomes possible when we assert that every variable of the class
@@ -146,16 +141,14 @@ Fpl.Arithmetics.Peano
         // Addition of natural numbers
         func Add(n,m: Nat)->Nat
         {
-            dec: 
-                result, k: Nat
-            ;
-            spec:
-            cases
-            (
-                | <m = 0>: result:= n
-                | <Succ(m) = k>: result:= Succ(Add(n,k))
-                ? result:= undef
-            )
+            dec
+                ~result, k: Nat
+                cases
+                (
+                    | <m = 0>: result:= n
+                    | <Succ(m) = k>: result:= Succ(Add(n,k))
+                    ? result:= undef
+                )
             ;
             return result
         }
@@ -168,9 +161,9 @@ Fpl.Arithmetics.Peano
 
         prop AddIsUnique(op: Add)
         {
-            dec: 
-                n,m: Nat
-                anotherAdd: Add
+            dec
+                ~n,m: Nat
+                ~anotherAdd: Add
             ;
             pre:
                 and
@@ -206,10 +199,8 @@ Fpl.Arithmetics.Peano
 
         func Sum(list:* Nat)->Nat
         {
-            dec: 
-                result, addend: Nat
-            ;
-            spec:
+            dec 
+                ~result, addend: Nat
                 result:=Zero()
                 for addend in list
                 (
@@ -221,10 +212,8 @@ Fpl.Arithmetics.Peano
 
         func Sum(list:* Nat)->Nat
         {
-            dec: 
-                i: index
-            ;
-            spec:
+            dec
+                ~i: index
                 result:=Zero()
                 for i in list
                 (
@@ -236,10 +225,8 @@ Fpl.Arithmetics.Peano
 
         func Sum(from,to:Nat, arr: Nat[from~to]) -> Nat
         {
-            dec:
-                i, result: Nat
-            ;
-            spec:
+            dec
+                ~i, result: Nat
                 result:=Zero()
 
                 for i in [from~to]
@@ -252,10 +239,8 @@ Fpl.Arithmetics.Peano
 
         func Sum(arr: Nat[~]) -> Nat
         {
-            dec:
-                addend, result: Nat
-            ;
-            spec:
+            dec
+                ~addend, result: Nat
                 result:=Zero()
                 for addend in arr
                 (
@@ -272,10 +257,8 @@ Fpl.Arithmetics.Peano
 
         func Sum(from,to:Nat, addend: Addend) -> Nat
         {
-            dec:
-                i, result: Nat
-            ;
-            spec:
+            dec
+                ~i, result: Nat
                 result:=Zero()
                 for i in [from~to]
                 (
@@ -287,9 +270,9 @@ Fpl.Arithmetics.Peano
 
         proposition SumOfConsecutiveNumbers()
         {
-            dec:
-                n, limit: Nat
-                f: Addend
+            dec
+                ~n, limit: Nat
+                ~f: Addend
             ;
             premise:
                 all n in [1~limit]
@@ -306,7 +289,7 @@ Fpl.Arithmetics.Peano
 
         func RealValuedFunction(x:Real) -> Real
         {
-            spec:
+            dec
                 assert is(self,Function)
             ;
             return self
@@ -314,10 +297,7 @@ Fpl.Arithmetics.Peano
 
         pred IsBounded(x: Real)
         {
-            dec: 
-                upperBound, lowerBound: Real
-            ;
-            ex upperBound, lowerBound
+            ex upperBound, lowerBound in Real
             (
                 and (LowerEqual(x,upperBound), LowerEqual(lowerBound,x))
             )
@@ -325,10 +305,7 @@ Fpl.Arithmetics.Peano
 
         pred IsBounded(f: RealValuedFunction)
         {
-            dec:
-                x: Real
-            ;
-            all x
+            all x in Real
             (
                 IsBounded(f(x))
             )
@@ -336,10 +313,8 @@ Fpl.Arithmetics.Peano
 
         func RiemannIntegral(from,to:Real, f: RealValuedFunction ) -> Real
         {
-            dec:
-                x, result: Real
-            ;
-            spec:
+            dec
+                ~x, result: Real
                 assert IsBounded(f)
                 result:=ZeroReal()
                 for x in [from~to]
@@ -352,11 +327,9 @@ Fpl.Arithmetics.Peano
 
         func PowerSeries(k:Nat, arr: Real[k~] ) -> Real
         {
-            dec: 
-                result: Real
-                i: Nat
-            ;
-            spec:
+            dec
+                ~result: Real
+                ~i: Nat
                 result:=ZeroReal()
                 for i in [k~]
                 (
@@ -368,11 +341,9 @@ Fpl.Arithmetics.Peano
 
         function ContinuedFraction(k:Nat, arr: Int[k~]) -> Real
         {
-            dec:
-                i: Nat
-                cf: Real
-            ;
-            spec:
+            dec
+                ~i: Nat
+                ~cf: Real
                 cf:=Real(arr<k>)
                 i:=Succ(k)
             ;
@@ -380,7 +351,7 @@ Fpl.Arithmetics.Peano
         }
 
         // Example of defining a constant for the natural number 100 using the
-        class N100:Set{N100(){dec: n:Nat; spec: self!Set() self:=SetBuilder(SetNat(),IsGreater(n,Nat(100))); self }}
+        class N100:Set{N100(){dec ~n:Nat  self!Set() self:=SetBuilder(SetNat(),IsGreater(n,100)); self }}
 
     }
 

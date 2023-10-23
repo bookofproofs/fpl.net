@@ -33,7 +33,7 @@ type TestPredicateInstanceProperties () =
         let result = run property """mand pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
-                spec:;
+                dec ~a:obj;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -44,8 +44,7 @@ type TestPredicateInstanceProperties () =
         let result = run property """mand pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
-                dec:;
-                spec:;
+                dec ~a:obj;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -56,8 +55,7 @@ type TestPredicateInstanceProperties () =
         let result = run property """mand pred X() 
 	        {
                 // a predicate instance without a predicate is not allowed
-                dec:;
-                spec:;
+                dec ~a:obj;
                 return x
 	        }"""
         let actual = sprintf "%O" result
@@ -179,7 +177,7 @@ type TestPredicateInstanceProperties () =
                 // a predicate instance with a return statement and 
                 // some other content following it is not allowed
                 true
-                spec:;
+                dec ~a:obj;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual

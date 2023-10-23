@@ -378,11 +378,9 @@ predicateListRef.Value <- sepBy predicate comma
 predicateList1Ref.Value <- sepBy1 predicate comma
 
 (* FPL building blocks *)
-let keywordDeclaration = (skipString "declaration" <|> skipString "dec") .>> IW 
-let commentedNamedVariableDeclaration = CW >>. tilde >>. namedVariableDeclaration
-let commentedStatement = CW >>. statement .>> IW
+let keywordDeclaration = (skipString "declaration" <|> skipString "dec") .>> CW 
 
-let varDeclBlock = positions (CW >>. keywordDeclaration >>. (many (commentedNamedVariableDeclaration <|> commentedStatement) .>> IW) .>> semiColon) .>> IW |>> Ast.VarDeclBlock 
+let varDeclBlock = positions (CW >>. keywordDeclaration >>. (many ((tilde >>. namedVariableDeclaration <|> statement) .>> CW)) .>> semiColon) .>> CW |>> Ast.VarDeclBlock 
 
 let varDeclOrSpecList = opt (many1 (varDeclBlock))
 (*To simplify the syntax definition, we do not define separate
@@ -501,23 +499,23 @@ let proof = positions ((keywordProof >>. referencingIdentifier) .>>. (IW >>. pro
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let predicateDefinitionBlock = leftBraceCommented  >>. ((keywordIntrinsic <|> predContent) .>> CW) .>>. propertyList .>> commentedRightBrace 
-let definitionPredicate = positions (keywordPredicate >>. signature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
+let definitionPredicate = positions (keywordPredicate >>. (signature .>> CW) .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let functionalTermDefinitionBlock = leftBraceCommented  >>. ((keywordIntrinsic <|> funcContent) .>> CW) .>>. propertyList .>> commentedRightBrace
-let definitionFunctionalTerm = positions ((functionalTermSignature .>> IW) .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
+let definitionFunctionalTerm = positions ((functionalTermSignature .>> CW) .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
 let keywordClass = (skipString "class" <|> skipString "cl") >>. IW
 
-let constructorList = many1 (CW >>. constructor .>> IW)
+let constructorList = many1 (constructor .>> CW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
 let classDefinitionBlock = leftBraceCommented  >>. ((keywordIntrinsic <|> classCompleteContent) .>> CW) .>>. propertyList .>> commentedRightBrace
 let classTypeWithModifier = positions (varDeclModifier .>>. classType .>> IW) |>> Ast.ClassTypeWithModifier
 let classTypeWithModifierList = sepBy1 classTypeWithModifier comma
 
 let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. classTypeWithModifierList
-let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
+let definitionClass = positions ((classSignature .>> CW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let definition = choice [
     definitionClass

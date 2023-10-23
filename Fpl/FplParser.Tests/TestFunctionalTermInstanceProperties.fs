@@ -33,7 +33,7 @@ type TestFunctionalTermProperties () =
         let result = run property """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
-                spec:;
+                dec ~a:obj;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -56,8 +56,7 @@ type TestFunctionalTermProperties () =
         let result = run property """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
-                dec:;
-                spec:;
+                dec ~a:obj;
                 x
 	        }"""
         let actual = sprintf "%O" result
@@ -179,7 +178,7 @@ type TestFunctionalTermProperties () =
                 // a function term instance with a return statement and 
                 // some other content following it is not allowed
                 return x
-                spec:;
+                dec ~a:obj;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -202,7 +201,7 @@ type TestFunctionalTermProperties () =
     member this.TestFunctionalTermInstance4 () =
         let result = run property """mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
 	        {
-			    spec:
+			    dec ~a:obj
     	            self[from ~ to]:=addInField(v[from ~ to],w[from ~ to])
                 ;
 	        }"""
