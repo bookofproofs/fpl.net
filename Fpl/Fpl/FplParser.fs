@@ -294,8 +294,9 @@ let conditionFollowedByResultList = many1 (CW >>. conditionFollowedByResult)
 let casesStatement = positions (((keywordCases >>. CW >>. leftParen >>. CW >>. conditionFollowedByResultList .>>  elseCase .>> CW) .>>. (defaultResult .>> CW .>> rightParen))) |>> Ast.Cases
 
 let inDomain = positions (keywordIn >>. (simpleVariableType <|> variableRange) .>> CW) |>> Ast.Domain
-let entityInOptDomain = ( entity .>>. opt inDomain) .>> IW
-let entityInOptDomainList = (sepBy1 entityInOptDomain comma) .>> IW
+let variableInOptDomain = ( (variable .>> IW) .>>. opt inDomain) .>> IW
+let variableListInOptDomain = ( variableList .>>. opt inDomain) .>> IW
+let variableListInOptDomainList = (sepBy1 variableListInOptDomain comma) .>> IW
 
 let entityInDomain = ( entity .>>. inDomain ) .>> IW
 let entityInVariableRange = ( entity .>>. (keywordIn >>. variableRange)) .>> IW
@@ -347,9 +348,10 @@ let implication = positions (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
 let equivalence = positions (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
 let exclusiveOr = positions (keywordXor >>. twoPredicatesInParens) |>> Ast.Xor
 let negation = positions (keywordNot >>. onePredicateInParens) |>> Ast.Not
-let all = positions ((keywordAll >>. entityInOptDomainList) .>>. onePredicateInParens) |>> Ast.All
-let exists = positions ((keywordEx >>. entityInOptDomainList) .>>. onePredicateInParens) |>> Ast.Exists
-let existsTimesN = positions (((keywordExN >>. exclamationDigits) .>>. (SW >>. variableList)) .>>. onePredicateInParens) |>> Ast.ExistsN
+let all = positions ((keywordAll >>. variableListInOptDomainList) .>>. onePredicateInParens) |>> Ast.All
+let exists = positions ((keywordEx >>. variableListInOptDomainList) .>>. onePredicateInParens) |>> Ast.Exists
+
+let existsTimesN = positions (((keywordExN >>. exclamationDigits .>> SW) .>>. variableInOptDomain) .>>. onePredicateInParens) |>> Ast.ExistsN
 let isOperator = positions ((keywordIs >>. leftParen >>. coordInType) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // equality operator

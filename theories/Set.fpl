@@ -79,7 +79,7 @@ Fpl.SetTheory.ZermeloFraenkel
                         IsSubset(x,y),
                         IsSubset(y,x)
                     ),
-                    Equal(x,y)
+                    < x = y >
                 )
             )
         }
@@ -114,7 +114,7 @@ Fpl.SetTheory.ZermeloFraenkel
             (
                 ex y
                 (
-                    Equal(y,SetBuilder(x,p))
+                    < y = SetBuilder(x,p) >
                 )
             )
         }
@@ -156,8 +156,8 @@ Fpl.SetTheory.ZermeloFraenkel
                             In(w,z),
                             or
                             (
-                                Equal(w,x),
-                                Equal(w,y)
+                                < w = x >,
+                                < w = y >
                             )
                         )
                     )

@@ -382,14 +382,14 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestExN1 () =
-        let result = run existsTimesN """exn!0 x,y,z(true)"""
+        let result = run existsTimesN """exn!0 x (true)"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExN2 () =
-        let result = run existsTimesN """exn!1 x,y,z (not (iif ( true, not(false))))"""
+        let result = run existsTimesN """exn!1 x in Nat (not (iif ( true, not(false))))"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -399,7 +399,7 @@ type TestPredicatesSpecific () =
         let result = run existsTimesN """exn!2 x,y,z (not (iif ( iif( true, false), true)))"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestExN4 () =

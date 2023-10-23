@@ -218,7 +218,7 @@ Fpl.Commons.Structures
                             AreRelated(v,w1,@self),
                             AreRelated(v,w2,@self)
                         ),
-                        Equals(w1,w2)
+                        < w1 = w2 >
                     )
                 )
             }
@@ -237,7 +237,7 @@ Fpl.Commons.Structures
                             AreRelated(v1,w,@self),
                             AreRelated(v2,w,@self)
                         ),
-                        Equals(v1,v2)
+                        < v1 = v2 >
                     )
                 )
             }

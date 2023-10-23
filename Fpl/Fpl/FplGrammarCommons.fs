@@ -216,6 +216,7 @@ let recoveryMap = dict [
     ("'(', <\"language-specific string\">, <variable>, <whitespace>", "\"\\operatorname{true}\"")
     ("'(', <\"language-specific string\">, <variable>", "\"\\operatorname{true}\"")
     ("'(', <whitespace>", "(")
+    ("'(', 'in', <whitespace>", "in")
     ("')', ',', <whitespace>", ")")
     ("')', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self!', 'self', <PascalCaseId>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable (got keyword)>", "self")
     ("')', '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'exn', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable (got keyword)>, <whitespace>", ")")

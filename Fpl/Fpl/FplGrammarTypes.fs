@@ -69,9 +69,9 @@ type Ast =
     | Xor of Positions * (Ast * Ast)
     | Not of Positions * Ast
     | Domain of Positions * Ast
-    | All of Positions * ((Ast * Ast option) list * Ast)
-    | Exists of Positions * ((Ast * Ast option) list * Ast)
-    | ExistsN of Positions * ((Ast * Ast list) * Ast)
+    | All of Positions * ((Ast list * Ast option) list * Ast)
+    | Exists of Positions * ((Ast list * Ast option) list * Ast)
+    | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Positions * (Ast * Ast)
     | ArgumentIdentifier of Positions * string

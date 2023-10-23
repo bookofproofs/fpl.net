@@ -327,21 +327,21 @@ type TestPredicates () =
         let result = run predicate """exn!0 x,y,z(true)"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestPredicate44 () =
-        let result = run predicate """exn!1 x,y,z (not (iif ( true, not(false))))"""
+        let result = run predicate """exn!1 x in Nat (not (iif ( true, not(false))))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate45 () =
-        let result = run predicate """exn!2 x,y,z (not (iif ( iif( true, false), true)))"""
+        let result = run predicate """exn!2 x in Nat,y (not (iif ( iif( true, false), true)))"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestPredicate46 () =

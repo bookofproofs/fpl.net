@@ -33,7 +33,7 @@ Fpl.Arithmetics.Peano
                     and
                     (
                         NotEqual(successor,n),
-                        Equal(successor,Succ(n))
+                        <successor = Succ(n)>
                     )
                 )
             )
@@ -53,8 +53,8 @@ Fpl.Arithmetics.Peano
             (
                 impl
                 (
-                    Equal(Succ(n),Succ(m)),
-                    Equal(n,m)
+                    < Succ(n) = Succ(m) >, 
+                    < n = m >
                 )
             )
         }
@@ -168,17 +168,17 @@ Fpl.Arithmetics.Peano
             pre:
                 and
                     (
-                        Equal(op(n,0),n),
-                        Equal(anotherAdd(n,0),n),
-                        Equal(op(n,Succ(m)), Succ(op(n,m))),
-                        Equal(anotherAdd(n,Succ(m)), Succ(anotherAdd(n,m)))
+                        < op(n,0) = n >,
+                        < anotherAdd(n,0) = n >,
+                        < op(n,Succ(m)) = Succ(op(n,m)) >,
+                        < anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) >
                     )
             con:
                 all n
                 (
                     all m
                     (
-                        Equal(op(n,m), anotherAdd(n,m))
+                        < op(n,m) = anotherAdd(n,m) >
                     )
                 )
         }
@@ -189,10 +189,10 @@ Fpl.Arithmetics.Peano
             2. |- trivial
             3. |- and
                     (
-                        Equal(Add(n,0),n),
-                        Equal(anotherAdd(n,0),n),
-                        Equal(Add(n,Succ(m)), Succ(Add(n,m))),
-                        Equal(anotherAdd(n,Succ(m)), Succ(anotherAdd(n,m)))
+                        < Add(n,0) = n >,
+                        < anotherAdd(n,0) = n >,
+                        < Add(n,Succ(m)) = Succ(Add(n,m)) >,
+                        < anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) >
                     )
         }
 

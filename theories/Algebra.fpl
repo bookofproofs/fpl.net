@@ -15,36 +15,22 @@ Fpl.Algebra.Structures
             intr
             optional pred IsAssociative()
             {
-                all a,b,c in tplSetElem
-                (
-                    Equal
-                    (
-                        @self(a,@self(b,c)),
-                        @self(@self(a,b),c)
-                    )
-                )
+                all a,b,c in tplSetElem (  <@self(a,@self(b,c)) = @self(@self(a,b),c)>  )
             }
 
             optional pred IsCommutative()
             {
-                all a,b in tplSetElem
-                (
-                    Equal
-                    (
-                        @self(a,b),
-                        @self(b,a)
-                    )
-                )
+                all a,b in tplSetElem ( <@self(a,b) = @self(b,a)> )
             }
 
             optional pred IsLeftNeutralElement(e: tplSetElem)
             {
-                Equal(@self(e,x), x)
+                all x in tplSetElem ( <@self(e,x) = x> )
             }
 
             optional pred IsRightNeutralElement(e: tplSetElem)
             {
-                Equal(@self(x,e), x)
+                all x in tplSetElem ( <@self(x,e) = x> )
             }
 
             optional pred IsNeutralElement(e: tplSetElem)
@@ -54,26 +40,17 @@ Fpl.Algebra.Structures
 
             optional pred HasLeftNeutralElement()
             {
-                ex e in tplSetElem
-                (
-                    IsLeftNeutralElement(e)
-                )
+                ex e in tplSetElem ( IsLeftNeutralElement(e) )
             }
 
             optional pred HasRightNeutralElement()
             {
-                ex e in tplSetElem
-                (
-                    IsRightNeutralElement(e)
-                )
+                ex e in tplSetElem ( IsRightNeutralElement(e) )
             }
 
             optional pred HasNeutralElement()
             {
-                ex e in tplSetElem
-                (
-                    IsNeutralElement(e)
-                )
+                ex e in tplSetElem ( IsNeutralElement(e) )
             }
 
             optional tplSetElem LeftNeutralElement()
@@ -228,7 +205,7 @@ Fpl.Algebra.Structures
                 assert In(y,x)
                     cases
                 (
-                    | Equal(n,0): result := m.NeutralElem()
+                    | <n = 0>: result := m.NeutralElem()
                     ? result :=
                             op(
                                 y,
@@ -274,8 +251,8 @@ Fpl.Algebra.Structures
                     assert
                         and
                         (
-                            Equal( myOp(x,val), self.NeutralElem()),
-                            Equal( myOp(val,x), self.NeutralElem())
+                            <myOp(x,val) = self.NeutralElem()>,
+                            <myOp(val,x) = self.NeutralElem()>
                         )
                 ;
                 ret val
@@ -353,10 +330,7 @@ Fpl.Algebra.Structures
             {
                 all a,b,c in tplElem
                 (
-                    Equal(
-                        myMul(myAdd(a,b),c),
-                        myAdd(myMul(a,c),myMul(b,c))
-                    )
+                    < myMul(myAdd(a,b),c) = myAdd(myMul(a,c),myMul(b,c)) >
                 )
             }
 
@@ -364,10 +338,7 @@ Fpl.Algebra.Structures
             {
                 all a,b,c in tplElem
                 (
-                    Equal(
-                        myMul(a,myAdd(b,c)),
-                        myAdd(myMul(a,b),myMul(a,c))
-                    )
+                    < myMul(a,myAdd(b,c)) = myAdd(myMul(a,b),myMul(a,c)) >
                 )
             }
 
@@ -526,10 +497,7 @@ Fpl.Algebra.Structures
             {
                 all u,w in tplVector, a in tplFieldElement
                 (
-                    Equal(
-                        myScalarMul(myVecAdd(u,w),a),
-                        myVecAdd(myScalarMul(u,a),myScalarMul(w,a))
-                    )
+                    < myScalarMul(myVecAdd(u,w),a) = myVecAdd(myScalarMul(u,a),myScalarMul(w,a)) >
                 )
             }
 
@@ -537,11 +505,7 @@ Fpl.Algebra.Structures
             {
                 all u,w in tplVector, a in tplFieldElement
                 (
-                    Equal
-                    (
-                        myScalarMul(a,myVecAdd(u,w)),
-                        myVecAdd(myScalarMul(a,u),myScalarMul(a,w))
-                    )
+                    < myScalarMul(a,myVecAdd(u,w)) = myVecAdd(myScalarMul(a,u),myScalarMul(a,w)) >
                 )
             }
 
@@ -549,11 +513,7 @@ Fpl.Algebra.Structures
             {
                 all a,b in tplFieldElement, u in tplVector
                 (
-                    Equal
-                    (
-                        myScalarMul(myFieldMul(a,b),u),
-                        myScalarMul(a,myScalarMul(b,u))
-                    )
+                    < myScalarMul(myFieldMul(a,b),u) = myScalarMul(a,myScalarMul(b,u)) >
                 )
             }
 
@@ -565,7 +525,7 @@ Fpl.Algebra.Structures
                 ;
                 all u in tplVector
                 (
-                    Equal( myScalarMul(one,u), u)
+                    < myScalarMul(one,u) =  u >
                 )
             }
         }
