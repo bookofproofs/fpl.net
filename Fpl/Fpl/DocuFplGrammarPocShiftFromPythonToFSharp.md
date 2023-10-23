@@ -443,8 +443,8 @@ The following changes have been made:
 
 #### 12) Simplified syntax of the `cases` statement
 * The keyword `case` is now discontinued and replaced by the literal `|`
-* The sequence of cases starting by the literal `|` must end by a semicolon
-* After this semicolon, the else case does not require a colon, instead of `else:` we simply write `else`.
+* The sequence of cases starting by the literal `|` must end by a `?` which denotes the default case.
+* Thus, we use `?` instead of `else:`.
 * Rationale: 
     * Simplified syntax since `case` is likely to be mistaken for the existing keyword `cases`
     * `|` is intuitively similar to the BNF or regex 'OR' character 
@@ -454,15 +454,10 @@ The following changes have been made:
 ```
     cases
     (
-        case Equal(x,0) :
-            self := Zero()
-        case Equal(x,1) :
-            self := Succ(Zero())
-        case Equal(x,2) :
-            self := Succ(Succ(Zero()))
-        else:
-            // else case addressed using a python delegate
-            self := Succ(delegate.decrement(x))
+        case Equal(x,0) : self := Zero()
+        case Equal(x,1) : self := Succ(Zero())
+        case Equal(x,2) : self := Succ(Succ(Zero()))
+        else: self := Succ(delegate.decrement(x))
     )
 ```
 *Now*
@@ -472,7 +467,7 @@ The following changes have been made:
         | <x = 0> : self := Zero()
         | <x = 1> : self := Succ(Zero())
         | <x = 2> : self := Succ(Succ(Zero()))
-        ; else self := Succ(delegate.decrement(x))
+        ? self := Succ(delegate.decrement(x))
     )
 ```
 

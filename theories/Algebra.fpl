@@ -238,7 +238,7 @@ Fpl.Algebra.Structures
                     cases
                 (
                     | Equal(n,0): result := m.NeutralElem()
-                    ; else result :=
+                    ? result :=
                             op(
                                 y,
                                 Exp( m(y,op), y, Sub(n,1))
@@ -533,7 +533,10 @@ Fpl.Algebra.Structures
 
             mandatory Field MyField()
             {
-                self:=myField
+                spec:
+                    self:=myField
+                ;
+                self
             }
 
             mandatory pred ScalarMulIsRightDistributive()

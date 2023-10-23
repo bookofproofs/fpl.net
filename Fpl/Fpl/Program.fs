@@ -5,9 +5,9 @@ open FParsec
 
 let input = "TestNamespace {
     theory {   
-        pred T(p: +obj)
+        cl T:obj
         {
-            true
+            T() { self }
         }
     }
 }"

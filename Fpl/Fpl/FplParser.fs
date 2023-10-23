@@ -43,7 +43,8 @@ let colonPlus = skipString ":+" >>. spaces >>% Ast.Many1
 let colonEqual = skipString ":=" >>. spaces 
 let equals = skipString "=" >>. spaces
 let at = pchar '@'
-let case = skipChar '|'
+let case = skipChar '|' >>. spaces
+let elseCase = skipChar '?' >>. spaces
 let leftBracket = skipChar '<' >>. spaces 
 let rightBracket = skipChar '>' >>. spaces  
 let leftClosedBracket = skipChar '[' >>. spaces <?> "<(closed) left bound '['>"
@@ -285,13 +286,12 @@ let commentedRightBrace = (many CW .>> rightBrace)
 
 let keywordReturn = many CW >>. (skipString "return" <|> skipString "ret") .>> many CW 
 
-let elseKeyword = skipString "else"
-let defaultResult = positions (elseKeyword >>. IW >>. many CW >>. statementList) |>> Ast.DefaultResult
+let defaultResult = positions (many CW >>. statementList) |>> Ast.DefaultResult
 let conditionFollowedByResult = positions ((case >>. IW >>. predicate .>> colon) .>>. (many CW >>. statementList)) |>> Ast.ConditionFollowedByResult
 let conditionFollowedByResultList = many1 (many CW >>. conditionFollowedByResult)
 
 
-let casesStatement = positions (((keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>>  semiColon .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen))) |>> Ast.Cases
+let casesStatement = positions (((keywordCases >>. many CW >>. leftParen >>. many CW >>. conditionFollowedByResultList .>>  elseCase .>> many CW) .>>. (defaultResult .>> many CW .>> rightParen))) |>> Ast.Cases
 
 let inDomain = positions (keywordIn >>. (simpleVariableType <|> variableRange) .>> many CW) |>> Ast.Domain
 let entityInOptDomain = ( entity .>>. opt inDomain) .>> IW
@@ -321,7 +321,7 @@ let statement =
         fplDelegate
     ])
 
-statementListRef.Value <- many (many CW >>. statement .>> IW)
+statementListRef.Value <- many (many CW >>. statement .>> many CW)
 
 (* Predicates *)
 
@@ -461,7 +461,7 @@ let definitionProperty = choice [
 ]
 let propertyHeader = many CW >>. (keywordOptional <|> keywordMandatory)
 let property = positions (propertyHeader .>>. definitionProperty) |>> Ast.Property
-let propertyList = opt (many1 (many CW >>. property .>> IW)) 
+let propertyList = opt (many1 (property .>> many CW)) 
 
 (* FPL building blocks - Proofs 
 
@@ -503,19 +503,19 @@ let proof = positions ((keywordProof >>. referencingIdentifier) .>>. (IW >>. pro
 (* FPL building blocks - Definitions *)
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
-let predicateDefinitionBlock = leftBraceCommented  >>. (keywordIntrinsic <|> predContent) .>>. propertyList .>> commentedRightBrace 
+let predicateDefinitionBlock = leftBraceCommented  >>. ((keywordIntrinsic <|> predContent) .>> many CW) .>>. propertyList .>> commentedRightBrace 
 let definitionPredicate = positions (keywordPredicate >>. signature .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
-let functionalTermDefinitionBlock = leftBraceCommented  >>. (keywordIntrinsic <|> funcContent) .>>. propertyList .>> commentedRightBrace
+let functionalTermDefinitionBlock = leftBraceCommented  >>. ((keywordIntrinsic <|> funcContent) .>> many CW) .>>. propertyList .>> commentedRightBrace
 let definitionFunctionalTerm = positions ((functionalTermSignature .>> IW) .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
 let keywordClass = (skipString "class" <|> skipString "cl") >>. IW
 
 let constructorList = many1 (many CW >>. constructor .>> IW)
-let classCompleteContent = varDeclOrSpecList .>>. constructorList |>> Ast.DefClassCompleteContent
-let classDefinitionBlock = leftBraceCommented  >>. (keywordIntrinsic <|> classCompleteContent) .>>. propertyList .>> commentedRightBrace
+let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
+let classDefinitionBlock = leftBraceCommented  >>. ((keywordIntrinsic <|> classCompleteContent) .>> many CW) .>>. propertyList .>> commentedRightBrace
 let classTypeWithModifier = positions (varDeclModifier .>>. classType .>> IW) |>> Ast.ClassTypeWithModifier
 let classTypeWithModifierList = sepBy1 classTypeWithModifier comma
 

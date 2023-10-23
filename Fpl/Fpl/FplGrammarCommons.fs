@@ -107,6 +107,7 @@ let recoveryMap = dict [
     ("':ext', 'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>", ":ext")
     ("'!', ';', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self!', 'self', <PascalCaseId>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>, <whitespace>", ";")
     ("'!', ';', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self', <PascalCaseId>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>, <whitespace>", ";")
+    ("'!', '?', '@', 'assert', 'cases', 'del', 'delegate', 'for', 'self!', 'self', '|', <PascalCaseId>, <block comment>, <digits>, <inline comment>, <significant whitespace>, <variable>, <whitespace>", "?")
     ("'!', '.', <whitespace>", "!")
     ("'!', '(', '.', ':=', '<', <(closed) left bound '['>, <(open) left bound '[('>, <whitespace>", ":=")
     ("'!', '(', '.', '<', '}', <(closed) left bound '['>, <(open) left bound '[('>, <block comment>, <inline comment>, <significant whitespace>, <whitespace>", "}")

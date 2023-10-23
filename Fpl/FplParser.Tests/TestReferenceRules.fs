@@ -4,7 +4,6 @@ open FParsec
 open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
-
 [<TestClass>]
 type TestReferenceRules() =
     let replaceWhiteSpace (input: string) =

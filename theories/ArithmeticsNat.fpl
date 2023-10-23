@@ -90,7 +90,7 @@ Fpl.Arithmetics.Peano
                         | <x = 0> : self := Zero() 
                         | <x = 1> : self := Succ(Zero())
                         | <x = 2> : self := Succ(Succ(Zero()))
-                        ; else self := Succ(delegate.decrement(x))  
+                        ? self := Succ(delegate.decrement(x))  
                     )
                 ;
                 self
@@ -102,7 +102,7 @@ Fpl.Arithmetics.Peano
                     cases
                     (
                         | IsGreaterOrEqual(x.RightMember(), x.LeftMember()): self:=x.RightMember()
-                        ; else self:=undefined
+                        ? self:=undefined
                     )
                     self!obj()
                 ;
@@ -154,7 +154,7 @@ Fpl.Arithmetics.Peano
             (
                 | <m = 0>: result:= n
                 | <Succ(m) = k>: result:= Succ(Add(n,k))
-                ; else result:= undef
+                ? result:= undef
             )
             ;
             return result

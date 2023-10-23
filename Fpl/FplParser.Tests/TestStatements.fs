@@ -98,11 +98,63 @@ type TestStatements () =
                         self := Succ(Zero())
                     | Equal(x,2) :
                         self := Succ(Succ(Zero()))
-                    ;
-                    else
-                        // else case addressed using a python delegate
+                    ? // else case addressed using a python delegate
                         self := Succ(del.decrement(x))
                 )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCases02 () =
+        let result = run casesStatement """cases
+                (
+                    | Equal(n,0): result := m.NeutralElem()
+                    ? result :=
+                            op(
+                                y,
+                                Exp( m(y,op), y, Sub(n,1))
+                            )
+                )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCases03 () =
+        let result = run casesStatement """cases
+                    (
+                        | <x = 0> : self := Zero() 
+                        | <x = 1> : self := Succ(Zero())
+                        | <x = 2> : self := Succ(Succ(Zero()))
+                        ? self := Succ(delegate.decrement(x))  
+                    )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCases04 () =
+        let result = run casesStatement """cases
+                    (
+                        | IsGreaterOrEqual(x.RightMember(), x.LeftMember()): self:=x.RightMember()
+                        ? self:=undefined
+                    )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCases05 () =
+        let result = run casesStatement """cases
+            (
+                | <m = 0>: result:= n
+                | <Succ(m) = k>: result:= Succ(Add(n,k))
+                ? result:= undef
+            )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+
+

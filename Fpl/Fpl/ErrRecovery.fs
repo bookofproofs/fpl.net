@@ -94,11 +94,6 @@ let findQuotedSubstrings (input: string) =
     |> List.ofSeq
 
 
-let wrapEveryNthComma (str: string) (n:int) =
-    str.Split(", ")
-    |> Array.mapi (fun i s -> if i <> 0 && i % n = 0 then Environment.NewLine + s.Trim() else s.Trim())
-    |> String.concat ", "
-
 /// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
 let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Position)=
     let lines = errMsg.Split(Environment.NewLine)
@@ -132,7 +127,7 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Pos
     // Replace the significant characters with quoted version in the first line
     let quotedFirstLine = sprintf "'%s'" significantCharacters
 
-    quotedFirstLine + Environment.NewLine + "Expecting: " + (wrapEveryNthComma choices 80), newPos
+    quotedFirstLine + Environment.NewLine + "Expecting: " + choices, newPos
 
 let split = [|" or "; "or" + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
 let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"

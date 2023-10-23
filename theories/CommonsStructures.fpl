@@ -22,7 +22,7 @@ Fpl.Commons.Structures
                     for elem in listOfTpl
                     (
                         i:=Succ(i)
-                        self[i]:=elem
+                        self<i>:=elem
                     )
                     myLength:=i
                     self!obj()
@@ -140,7 +140,7 @@ Fpl.Commons.Structures
                                 is(tupleElem,Tuple[myFrom~myLength]),
                                 all i in [1~myLength]
                                 (
-                                    In(tupleElem[i],@self[i])
+                                    In(tupleElem<i>,@self<i>)
                                 )
                             )
                         )
