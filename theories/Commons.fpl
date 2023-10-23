@@ -4,7 +4,7 @@ Fpl.Commons
     {
         ModusPonens()
         {
-            dec: p,q: pred;
+            dec ~p,q: pred;
 
             premise:
                 and (p, impl (p,q) )
@@ -14,7 +14,7 @@ Fpl.Commons
 
         ModusTollens()
         {
-            dec: p,q: pred;
+            dec ~p,q: pred;
 
             premise:
                 and (not(q), impl(p,q) )
@@ -24,7 +24,7 @@ Fpl.Commons
 
         HypotheticalSyllogism()
         {
-            dec: p,q,r: pred;
+            dec ~p,q,r: pred;
             premise:
                 and (impl(p,q), impl(q,r))
             conclusion:
@@ -33,7 +33,7 @@ Fpl.Commons
 
         DisjunctiveSyllogism()
         {
-            dec: p,q: pred;
+            dec ~p,q: pred;
             premise:
                 and (not(p), or(p,q))
             conclusion:
@@ -53,7 +53,7 @@ Fpl.Commons
 
         ExistsByExample(p: pred(c: obj))
         {
-            dec: x: obj;
+            dec ~x: obj;
             premise:
                 p(c)
             conclusion:
