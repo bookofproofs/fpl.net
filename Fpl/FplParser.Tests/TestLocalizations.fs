@@ -70,7 +70,7 @@ type TestLocalizations () =
 
     [<TestMethod>]
     member this.TestLocalization01 () =
-        let result = run localization """not(x) :=
+        let result = run localization """loc not(x) :=
             ~tex: "\neg(" x ")"
             ~eng: "not " x
             ~ger: "nicht " x
@@ -81,7 +81,7 @@ type TestLocalizations () =
 
     [<TestMethod>]
     member this.TestLocalization02 () =
-        let result = run localization """iif(x,y) :=
+        let result = run localization """loc iif(x,y) :=
             // comment
             ~tex: x "\Leftrightarrow" y
             // comment
@@ -95,7 +95,7 @@ type TestLocalizations () =
 
     [<TestMethod>]
     member this.TestLocalization03 () =
-        let result = run localization """NotEqual(x,y) :=
+        let result = run localization """loc NotEqual(x,y) :=
             ~tex: x "\neq" y
             ~eng: x "is unequal" y
             ~ger: x "ist ungleich" y

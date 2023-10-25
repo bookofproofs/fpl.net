@@ -93,6 +93,7 @@ type Ast =
     | StatementList of Positions * Ast list
     | SignatureWithPreConBlock of Ast * ((Ast list option * Ast) * Ast)
     | RuleOfInference of Positions * Ast
+    | Localization of Positions * (Ast * (string * Ast) list)
     | Theorem of Positions * Ast
     | Lemma of Positions * Ast
     | Proposition of Positions * Ast
@@ -128,7 +129,7 @@ type Ast =
     | JustifiedArgument of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
     | Proof of Positions * ((Ast * Ast list) * (Ast list option * Ast list))
-    | Namespace of Positions * (Ast * ((((Ast option * Ast option) * Ast list option) * Ast list) * (Ast * (string * Ast) list) list option))
+    | Namespace of Positions * (Ast * ((Ast option * Ast option) * Ast list))
     | AST of Positions * Ast
     | Escape // used to replace AST subnodes when we recover from an error
     | SomeString of string // used to replace AST for strings subnodes when we recover from an error

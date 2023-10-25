@@ -13,7 +13,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule01 () =
-        let result = run ruleOfInference """ModusPonens()
+        let result = run ruleOfInference """inf ModusPonens()
         {
             dec ~a:obj ~p,q: pred;
 
@@ -28,7 +28,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule02 () =
-        let result = run ruleOfInference """ModusTollens()
+        let result = run ruleOfInference """inference ModusTollens()
         {
             dec ~a:obj ~p,q: pred;
 
@@ -43,7 +43,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule03 () =
-        let result = run ruleOfInference """HypotheticalSyllogism()
+        let result = run ruleOfInference """inf HypotheticalSyllogism()
         {
             dec ~a:obj ~ p,q,r: pred;
             premise:
@@ -57,7 +57,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule04 () =
-        let result = run ruleOfInference """DisjunctiveSyllogism()
+        let result = run ruleOfInference """inference DisjunctiveSyllogism()
         {
             dec ~a:obj ~p,q: pred;
             premise:
@@ -71,7 +71,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule05 () =
-        let result = run ruleOfInference """ProceedingResults(p:+ pred)
+        let result = run ruleOfInference """inf ProceedingResults(p:+ pred)
         {
             dec ~a:obj ~ proceedingResult: pred
 
@@ -89,7 +89,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule05a () =
-        let result = run ruleOfInference """ProceedingResults(p:+ pred)
+        let result = run ruleOfInference """inference ProceedingResults(p:+ pred)
         {
             dec ~a:obj ~  proceedingResult: pred;
             premise: all proceedingResult in p ( proceedingResult )
@@ -101,7 +101,7 @@ type TestReferenceRules() =
 
     [<TestMethod>]
     member this.TestReferenceRule06 () =
-        let result = run ruleOfInference """ExistsByExample(p: pred(c: obj))
+        let result = run ruleOfInference """inf ExistsByExample(p: pred(c: obj))
         {
             dec ~a:obj ~ x: obj;
             premise:

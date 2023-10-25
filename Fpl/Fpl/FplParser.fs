@@ -397,9 +397,7 @@ let premiseConclusionBlock = leftBraceCommented >>. varDeclOrSpecList .>>. premi
 (* FPL building blocks - rules of reference *)
 let keywordInference = (skipString "inference" <|> skipString "inf") .>> IW 
 let signatureWithPremiseConclusionBlock = signature .>>. premiseConclusionBlock |>> Ast.SignatureWithPreConBlock
-let ruleOfInference = positions signatureWithPremiseConclusionBlock |>> Ast.RuleOfInference
-let ruleOfInferenceList = many1 (CW >>. ruleOfInference .>> IW) 
-let rulesOfInferenceBlock = (keywordInference >>. IW >>. leftBraceCommented >>. CW >>. ruleOfInferenceList) .>> commentedRightBrace
+let ruleOfInference = positions (keywordInference >>. signatureWithPremiseConclusionBlock) |>> Ast.RuleOfInference
 
 (* FPL building blocks - Theorem-like statements and conjectures *)
 let keywordTheorem = (skipString "theorem" <|> skipString "thm") .>> IW
@@ -519,32 +517,17 @@ let classTypeWithModifierList = sepBy1 classTypeWithModifier comma
 let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. classTypeWithModifierList
 let definitionClass = positions ((classSignature .>> CW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
-let definition = choice [
+let keywordDefinition = (skipString "definition" <|> skipString "def") >>. IW
+let definition = keywordDefinition >>. choice [
     definitionClass
     definitionPredicate
     definitionFunctionalTerm
 ]
 (* Gathering together all Building Blocks to a theory *)
-let keywordTheory = (skipString "theory" <|> skipString "th") >>. IW
-// FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
-let buildingBlock = choice [
-    definition
-    axiom
-    theorem
-    lemma
-    proposition
-    corollary
-    conjecture
-    proof
-]
-
-let buildingBlockList = many (CW >>. buildingBlock .>> IW)
-// A theory begins with the keywordTheory followed by a block containing a (possibly empty) sequence of building blocks
-let theoryBlock = keywordTheory >>. IW >>. leftBraceCommented >>. buildingBlockList .>> commentedRightBrace
 
 (* Localizations *)
 // Localizations provide a possibility to automatically translate FPL expressions into natural languages
-let keywordLocalization = (skipString "localization" <|> skipString "loc") 
+let keywordLocalization = (skipString "localization" <|> skipString "loc") >>. IW
 let localizationLanguageCode: Parser<string,unit> = regex @"[a-z]{3}" <?> "<ISO 639 language code>"
 let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<\"language-specific string\">" |>> Ast.LocalizationString
 
@@ -559,17 +542,30 @@ let ebnfTerm = positions (sepEndBy1 ebnfFactor SW) |>> Ast.LocalizationTerm
 ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.LocalizationTermList
 let translation = (tilde >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl
 let translationList = many1 (CW >>. translation .>> IW)
-let localization = (predicate .>> IW .>> colonEqual) .>>. (translationList .>> IW .>> semiColon)
-let localizationList = many1 (CW >>. localization .>> IW)
-let localizationBlock = keywordLocalization >>. IW >>. leftBraceCommented >>. localizationList .>> commentedRightBrace
+let localization = positions (keywordLocalization >>. (predicate .>> IW .>> colonEqual) .>>. (translationList .>> IW .>> semiColon)) .>> IW |>> Ast.Localization
 
+// FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
+let buildingBlock = choice [
+    definition
+    axiom
+    theorem
+    lemma
+    proposition
+    corollary
+    conjecture
+    proof
+    ruleOfInference
+    localization
+]
+
+let buildingBlockList = many (CW >>. buildingBlock .>> IW)
 
 (* Namespaces *)
-let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (CW >>. opt usesClause) .>>. (CW >>. opt rulesOfInferenceBlock) .>>. (CW >>. theoryBlock) .>>. (CW >>. opt localizationBlock) .>> commentedRightBrace
+let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (CW >>. opt usesClause) .>>. (CW >>. buildingBlockList) .>> commentedRightBrace
 let fplNamespace = positions (namespaceIdentifier .>>. (CW >>. namespaceBlock)) .>> IW |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
-let fplParser (input: string) = tryParse ast input "" (int64 0) 1 
-//let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
+//let fplParser (input: string) = tryParse ast input "" (int64 0) 1 
+let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
 let parserDiagnostics = ad

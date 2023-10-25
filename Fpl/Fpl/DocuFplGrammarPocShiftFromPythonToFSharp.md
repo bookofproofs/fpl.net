@@ -22,7 +22,27 @@ The following documentation describes the syntax amendments and provides a ratio
 
 ### Changes to the Grammar (Details)
 
-#### 1) In-block Variable Type Declarations and Statements
+#### 1) No more extra blocks for inference, theories and localizations
+
+In the original FPL version, a namespace contained three types of sub-blocks: the optional `inference` and `localization` blocks and a mandatory `theory` block. Inside these blocks, there were syntactical differences with respect to whether a building block, like a theorem or an inference rule required a prefix keyword or not. For instance, inference rules had no prefix inside their `inference` block while theorems, axioms and proof building blocks required the corresponding keyword inside the `theory` block. 
+
+In the current version, the extrac sub-blocks  `inference`, `localization`, and `theory` were abandoned. Instead, each building block has a unique prefix keyword:
+
+* Every inference rules starts with the keyword `inference` (short-form `inf`),
+* Every localization starts with the keyword `localization` (short-form `loc`),
+* Every class definition starts the keyword `definition` (short-form `def`), followed as previously by the keyword `class` (short-form `cl`), 
+* Every predicate definition starts the keyword `definition` (short-form `def`), followed as previously by the keyword `function` (short-form `func`), 
+* Every functional term definition starts the keyword `definition` (short-form `def`), followed as previously by the keyword `predicate` (short-form `pred`), 
+* All other building blocks keywords remained unchanged, i.e.:
+    * axioms are started by the keyword `axiom` (short-form `ax`) or `postulate` (short-form `post`),
+    * theorems are started by the keyword `theorem` (short-form `thm`),
+    * propositions are started by the keyword `proposition` (short-form `prop`),
+    * lemmas are started by the keyword `lemma` (short-form `lem`), 
+    * corollaries are started by the keyword `corollary` (short-form `cor`),
+    * conjectures are started by the keyword `conjecture` (short-form `conj`), and 
+    * proofs are started by the keyword `proof` (short-form `prf`). 
+    
+#### 2) In-block Variable Type Declarations and Statements
 In FPL, you can declare variable types of building blocks both in their signatures or in their body. Moreover, in the body also statements using variables are possible.
   The body type declarations and statements must be started by a new keyword `declaration` (or `dec`) and ended by a semicolon `;`. 
 
@@ -59,7 +79,7 @@ This is a trade-off between simplicity of syntax and a stricter syntax with resp
 
 The `~` at the beginning of type declarations is necessary to distinguish between them and statements starting with a variable (like the assignment statement). The FParsec parser would allow to get rid of this additional syntactical sugar using the `attempt` parser, but at the cost of a less intuitive error recovery messaging: If the syntax error occurred somewhere deep in the type declaration, the position of the reported error would point not to the error but to the beginning of the attempted type declaration. Thus, the `~` at the beginning of each type declaration is a trade-off between to-be-avoided syntax complexity and to-be-avoided `attempt` parsers for better error recovery messages.
 
-#### 2) Classes allow multiple inheritance
+#### 3) Classes allow multiple inheritance
 
 In previous version of the grammar, polymorphism of mathematical object could only be achieved by using the `is` operator and asserting that the object is of some additional type than the type of the single parent class. Now, this is simplified because we can add as many types to the class as necessary.
 
@@ -88,7 +108,7 @@ class A :B, :C
 }
 ``` 
 
-#### 3) Syntax of class constructors
+#### 4) Syntax of class constructors
 
 The syntax of constructors allows calls of parental constructors in the `specification`, their syntax starts with `self!" followed by the parent class identifier and related parameters like in `self!ParentClass(first, second)` . Moreover, the keyword `self` has as the last expression in the constructor. These two additional components disambiguate the representation of the class object after the constructor has been executed. 
 
@@ -127,7 +147,7 @@ class SomeClass: ParentClass
 }
 ``` 
 
-#### 4) Explicit intrinsic definitions
+#### 5) Explicit intrinsic definitions
 
 *Before*
 ``` 
@@ -144,7 +164,7 @@ class Set: obj
 ``` 
 In intrinsic definitions of classes, predicates, functional terms, and related properties of this kind, the new keyword `intrinsic` (short form `intr`) has to be used explicitly. This prevents the definition of being empty just because the end-user left the body of a definition unintentionally.
 
-#### 5) `assert` becomes a statement (not a predicate)
+#### 6) `assert` becomes a statement (not a predicate)
 
 *Before*
 ``` 
@@ -157,7 +177,7 @@ all x ( p(x) )
 The `assert` statement cannot be used, where FPL expects a predicate. Using `assert` is still possible in the context where statements are expected, in particular in the `specification` section. 
 
 
-#### 6) `for` loop replaces `loop` and `range`
+#### 7) `for` loop replaces `loop` and `range`
 
 In the original version of FPL grammar, loops could be constructed using the `loop` and the `range` keywords with pretty the same syntax. Now, this is unified using the `for` keyword. Moreover, the `in` keyword makes the statement more readable.
 
@@ -182,7 +202,7 @@ In the original version of FPL grammar, loops could be constructed using the `lo
     )
 ``` 
 
-#### 7) New `exn` keyword  
+#### 8) New `exn` keyword  
 
 The existence quantor accepting a number of allowed occurrences gets an own keyword `exn`, disambiguating it from the general quantor `ex`.
 
@@ -198,7 +218,7 @@ The existence quantor accepting a number of allowed occurrences gets an own keyw
 
 This disambiguation helps to formulate the FPL grammar without `attempt` parsers which would otherwise distort error positions shown during error recovery that occur inside the predicate.
 
-#### 8) In-built equality predicate
+#### 9) In-built equality predicate
 
 The original FPL language had not inbuilt equality predicate, relying on the second-order logic definition of equality that would have otherwise be provided in the language itself
 
@@ -235,7 +255,7 @@ In the new FPL syntax version, we introduce an inbuilt equality sign and allow i
 
 Of course, the equality predicate can be placed everywhere any predicate can be used in FPL, for instance, it can be nested within other predicates. 
 
-#### 9) Domains are now allowed in the quantors `all`, `ex`, and `exn`.
+#### 10) Domains are now allowed in the quantors `all`, `ex`, and `exn`.
 
 In the original version of FPL grammar, free variables used in quantors had to be first declared with a specific type and could then be only listed after the quantor and before the predicate of the quantor. In the new version of the FPL grammar, type declarations can be made implicit by using allowing the `in` keyword. 
 
@@ -277,7 +297,7 @@ Also, expressions in second-order logic predicates are allowed:
     }
 ``` 
 
-#### 10) Disambiguation of coordinate lists and ranges
+#### 11) Disambiguation of coordinate lists and ranges
 
 In previous versions, the square brackets `[`, `]` were used for both, coordinate lists and ranges. In the new version, coordinates have to be placed in angle brackets `<` and `>`. This disambiguates the grammar for to improve the inbuilt error recovery mechanism.
 
@@ -297,7 +317,7 @@ In previous versions, the square brackets `[`, `]` were used for both, coordinat
     )
 ``` 
 
-#### 10) Delegates 
+#### 12) Delegates 
 
 * The original Python `py` prefix followed pythonic delegates like `py.some_delegate_name(x,y,z)` are now replaced by the more general prefix `del` or `delegate`
 * The names for the delegates are now generalized from the original regex `@"[a-z_]*"` to `@"[a-z_A-Z][a-z_A-Z0-9]+"`
@@ -312,7 +332,7 @@ In previous versions, the square brackets `[`, `]` were used for both, coordinat
     delegate.decrement(x)
 ``` 
 
-#### 11) Syntax of extensions vs. syntax of indexed variables
+#### 13) Syntax of extensions vs. syntax of indexed variables
 
 Extensions can be used in FPL (among others) to introduce symbols "0,1,2" ... etc for the purpose of identifying them with concrete mathematical objects, like natural numbers. 
 FPL has no in-built type "natural number". Instead, we can define natural numbers for instance using the Peano axioms and then identifying the class of objects "Natural number" with the (otherwise meaningless) symbols "0,1,2,..." Nevertheless, FPL has in-built index type using the same symbols. 
@@ -396,7 +416,7 @@ To disambiguate the two usages, the following changes in the FPL syntax have bee
 
 ``` 
 
-#### 12) Simplified syntax of proofs
+#### 14) Simplified syntax of proofs
 The following changes have been made:
 * Justifying arguments can now contain not only lists of 'primePredicate' but more general of 'predicate'
 * Derived arguments can now also reference the conclusion of the to-be-proven theorem
@@ -444,7 +464,7 @@ The following changes have been made:
     }
 ```
 
-#### 12) Simplified syntax of the `cases` statement
+#### 15) Simplified syntax of the `cases` statement
 * The keyword `case` is now discontinued and replaced by the literal `|`
 * The sequence of cases starting by the literal `|` must end by a `?` which denotes the default case.
 * Thus, we use `?` instead of `else:`.

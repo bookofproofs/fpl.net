@@ -2,8 +2,4 @@ Fpl.Geometry.Euclidean
 {
     uses Fpl.Commons
 
-    theory
-    {
-
-    }
 }
