@@ -430,8 +430,9 @@ let keywordIntrinsic = (skipString "intrinsic" <|> skipString "intr") .>> CW >>%
 let predContent = varDeclOrSpecList .>>. commentedPredicate |>> Ast.DefPredicateContent
 
 let classContent = varDeclOrSpecList .>>. keywordSelf |>> Ast.DefClassContent
+let keywordConstructor = (skipString "constructor" <|> skipString "ctor") .>> IW
 let constructorBlock = leftBraceCommented >>. varDeclOrSpecList .>>. keywordSelf .>> commentedRightBrace 
-let constructor = positions (signature .>>. constructorBlock) |>> Ast.Constructor
+let constructor = positions (keywordConstructor >>. signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
 let keywordOptional = positions (skipString "optional" <|> skipString "opt") .>> IW >>% Ast.Optional

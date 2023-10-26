@@ -88,7 +88,7 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor02 () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
                 // constructors must contain the call(s) of the parent constructors
                 // of all parent classes of the class; the call's syntax starts
@@ -102,7 +102,7 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor03 () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        let result = run constructor """constructor Magma(x: tplSet, op: BinOp)
             {
                 // constructors must contain the call(s) of the parent constructors
                 // of all parent classes of the class; the call's syntax starts
@@ -118,7 +118,7 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor03a () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj;
                 self 
@@ -171,7 +171,7 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor06 () =
-        let result = run constructor """FieldPowerN
+        let result = run constructor """ctor FieldPowerN
             (
                 field : Field,
                 n: Nat

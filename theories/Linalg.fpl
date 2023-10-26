@@ -11,7 +11,7 @@ Fpl.LinAlg
             ~mulInField: BinOp
         ;
 
-        FieldPowerN
+        ctor FieldPowerN
         (
             field : Field,
             n: Nat
@@ -64,7 +64,7 @@ Fpl.LinAlg
 
     def class ZeroVectorN: Tuple
     {
-        ZeroVectorN(n: Nat, field: Field)
+        ctor ZeroVectorN(n: Nat, field: Field)
         {
             dec
                 ~i: Nat 

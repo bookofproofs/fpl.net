@@ -33,7 +33,7 @@ Fpl.SetTheory.ZermeloFraenkel
     // introduction of a new mathematical object
     def class EmptySet: Set
     {
-        EmptySet()
+        ctor EmptySet()
         {
             dec 
                 self!obj()
@@ -55,7 +55,7 @@ Fpl.SetTheory.ZermeloFraenkel
     // introduction of a new mathematical object that is a subset of a superset
     def class Subset: Set
     {
-        Subset(superSet: Set)
+        ctor Subset(superSet: Set)
         {
             dec
                 self!Set()
@@ -86,7 +86,7 @@ Fpl.SetTheory.ZermeloFraenkel
     def class SetRoster: Set
     {
         // to support enumerating set elements, e.g. SetRoster(1,2,3)
-        SetRoster(listOfSets:* Set)
+        ctor SetRoster(listOfSets:* Set)
         {
             dec 
                 ~elem: Set
@@ -123,7 +123,7 @@ Fpl.SetTheory.ZermeloFraenkel
     def class SetBuilder: Set
     {
         // to support set builder notation, ex. all "even" natural numbers like SetBuilder(n: Nat, Even(n))
-        SetBuilder(x: Set, p: pred(u: Set, o:* obj))
+        ctor SetBuilder(x: Set, p: pred(u: Set, o:* obj))
         {
             dec
             assert

@@ -169,3 +169,62 @@ The parser backtracked after:
         let pos = Position("",0,0,0)
         let actual, pos = replaceFParsecErrMsgForFplParser input inputChoices pos
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
+
+    [<TestMethod>]
+    [<DataRow("""// definition of a functional term denoting the successor of a natural number
+        function T() -> Real { intr }
+
+        // definition of a new mathematical object (natural number)
+        function T() -> Real { intr }
+
+        pred IsGreaterOrEqual(n,m: Nat)
+        {
+            ex k in Nat ( <n = Add(m,k)> )
+        }
+
+        // besides the class "Nat", we can formulate definition of the set of all natural numbers
+        class SetNat: Set
+        {
+            SetNat()
+            {
+                dec 
+                    ~n: Nat
+                    // Assert that elements of class "Nat" can be collected to a bigger object of class "SetNat"
+                    // This requires that we can apply the "In" predicate defined in Fpl.Set.ZermeloFraenkel
+                    // to object of the class "Nat". This becomes possible when we assert that every variable of the class
+                    // "Nat" is a also Set.
+                    // This is comparable to implementing an interface (or comparable to multiple inheritance).
+                    self!Set()
+                ;
+                self
+            }
+        }
+
+        // Addition of natural numbers
+        function T() -> Real { intr }
+        /* This is 
+        a 
+
+        test
+        */
+
+        /* This is 
+        another
+
+        test
+        */
+        function T() -> Real { intr }
+
+        // Example of defining a constant for the natural number 100 using the
+        class N100:Set{N100(){dec ~n:Nat  self!Set() self:=SetBuilder(SetNat(),IsGreater(n,100)); self }}""", 1605, 46)>]
+    [<DataRow("",0,1)>]
+    member this.TestReplaceFplComments
+        (
+            input: string,
+            expectedLength: int,
+            expectedNumbLines: int
+        ) =
+        let r = removeFplComments input 
+        // printfn "%i, %i, %i, %i" input.Length r.Length (input.Split('\n').Length) (r.Split('\n').Length)
+        Assert.AreEqual(expectedLength, r.Length)
+        Assert.AreEqual(expectedNumbLines, r.Split('\n').Length)

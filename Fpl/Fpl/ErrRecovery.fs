@@ -372,3 +372,19 @@ let resultSatisfies predicate msg (p: Parser<_,_>) : Parser<_,_> =
       else
           stream.BacktrackTo(state) // backtrack to beginning
           Reply(Primitives.Error, error)
+
+/// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines
+let replaceLinesWithSpaces (input: string) (pattern: string) =
+    let regex = new Regex(pattern, RegexOptions.Multiline)
+    let evaluator = MatchEvaluator(fun (m: Match) -> 
+        m.Value.Split(Environment.NewLine)
+        |> Array.map (fun line -> String.replicate line.Length " ")
+        |> String.concat Environment.NewLine
+    )
+    regex.Replace(input, evaluator)
+
+/// Replaces in the `input` all FPL comments by spaces while preserving the new lines
+let removeFplComments (input:string) = 
+    let r1 = replaceLinesWithSpaces input "\/\/[^\n]*" // replace inline comments
+    replaceLinesWithSpaces r1 "\/\*((?:.|\n)*?)\*\/" // replace block comments
+

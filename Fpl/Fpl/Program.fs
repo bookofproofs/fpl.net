@@ -33,24 +33,6 @@ let r = run predicate i
 printf "%O" r
 
 
-open System.Text.RegularExpressions
-
-let replaceWithSpaces (inputString: string) (pattern: string) =
-    let regex = new Regex(pattern)
-    let evaluator = MatchEvaluator(fun (m: Match) -> String.replicate m.Value.Length " ")
-    regex.Replace(inputString, evaluator)
-
-
-let replaceLinesWithSpaces (inputString: string) (pattern: string) =
-    let regex = new Regex(pattern, RegexOptions.Multiline)
-    let evaluator = MatchEvaluator(fun (m: Match) -> 
-        m.Value.Split(System.Environment.NewLine)
-        |> Array.map (fun line -> String.replicate line.Length " ")
-        |> String.concat System.Environment.NewLine
-    )
-    regex.Replace(inputString, evaluator)
-
-// Usage:
 let s1 = """class Zero: obj
         {
             intr

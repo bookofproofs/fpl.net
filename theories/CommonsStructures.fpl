@@ -10,7 +10,7 @@ Fpl.Commons.Structures
         dec
             ~myLength: Nat
         ;
-        Tuple(listOfTpl:+ tpl)
+        ctor Tuple(listOfTpl:+ tpl)
         {
             dec 
                 ~elem: tpl
@@ -27,7 +27,7 @@ Fpl.Commons.Structures
             self
         }
 
-        Tuple(from, length:Nat, arr: tpl[from ~ length])
+        ctor Tuple(from, length:Nat, arr: tpl[from ~ length])
         {
             
             dec
@@ -55,7 +55,7 @@ Fpl.Commons.Structures
             ~myX: tpl[from~]
         ;
 
-        UnlimitedTupleFrom(from:index, x: tpl[from~])
+        constructor UnlimitedTupleFrom(from:index, x: tpl[from~])
         {
             dec
                 self!obj()
@@ -81,7 +81,7 @@ Fpl.Commons.Structures
             ~myFrom: Nat
         ;
 
-        CartesianProduct(setList:+ Set)
+        constructor CartesianProduct(setList:+ Set)
         {
             dec
                 ~setItem: Set
@@ -99,7 +99,7 @@ Fpl.Commons.Structures
             self
         }
 
-        CartesianProduct(from, to: Nat, setArray: Set[from ~ to])
+        ctor CartesianProduct(from, to: Nat, setArray: Set[from ~ to])
         {
             dec
                 self:=setArray
@@ -151,7 +151,7 @@ Fpl.Commons.Structures
             ~myArity: Nat
         ;
 
-        Relation(setList:+ Set)
+        ctor Relation(setList:+ Set)
         {
             dec
                 ~cartProd : CartesianProduct
@@ -177,7 +177,7 @@ Fpl.Commons.Structures
         ;
 
 
-        BinaryRelation(x,y: Set)
+        ctor BinaryRelation(x,y: Set)
         {
             dec
                 self!Relation(2,x,y)
@@ -310,7 +310,7 @@ Fpl.Commons.Structures
 
     definition class Function: BinaryRelation
     {
-        Function(x,y: Set)
+        ctor Function(x,y: Set)
         {
             dec
                 self!BinaryRelation(x,y)
@@ -323,7 +323,7 @@ Fpl.Commons.Structures
 
     definition class EquivalenceRelation: BinaryRelation
     {
-        EquivalenceRelation(x,y: Set)
+        ctor EquivalenceRelation(x,y: Set)
         {
             dec
                 self:=BinaryRelation(x,y)

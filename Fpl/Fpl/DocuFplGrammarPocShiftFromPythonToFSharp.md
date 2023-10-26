@@ -494,48 +494,58 @@ The following changes have been made:
     )
 ```
 
-### More stringent predicate syntax
-* Giving up mixing up statements and index variables being not predicative in the choice rule of Prime predicates 
-* This mixing is now only possible for the isOperator.
-* The `all` compound predicate now allows iterating through contents variadic variables containing predicates. For instance, for the types `a: pred b: +pred`,   instead of writing a loop - assert statement construct like `loop a b (assert a)` we can also write `all a b (a)`. This way, the expression becomes a predicate, not a statement in the AST, allowing to interpret it appropriately.
+#### 16) New keyword `constructor` (short-form `ctor`)
+In order to simplify the error recovery process, we introduce an additional keyword `constructor` (short-form `ctor`) that now proceeds the constructors of classes.
 
-### Better handling of keywords and generic templates
-* Better recognition and error reporting of conflicts between variable names and keywords 
-* Better recognition and error reporting of conflicts between variable names and template names
-
-
-### Simplified Syntax for the `cases` statement
-
-
-
-
-### Self-Containment 
-* This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:
-    * The order of declarations will now matter. 
-    * This is unlike the previous, python-based FPL interpreter (which can be found in the repository [https://github.com/bookofproofs/fpl](https://github.com/bookofproofs/fpl)).
-    * In the new FPL interpreter, checking if an FPL identifier was already declared can be done - in principle - during the parsing process. This could significantly simplify the implementation and performance of the new FPL interpreter.
-    * Nevertheless, we stick to the 'must' requirements (see [INTRO.md](https://github.com/bookofproofs/fpl.net/blob/main/INTRO.md)) 28 (support of overrides), 38 (support recursive linguistic constructs), and 40 (support of self-reference in definitions) that could still potentially negatively impact how complicated it is to implement the new FPL interpreter.
-
-### Namespaces
-* A single *.fpl file can now contain more than one namespace. This will significantly simplify later preprocessing when the FPL parser needs to include namespaces via the `uses` keyword. 
-* Moreover, it provides more flexibility to end-users
-* Since 'order of declarations now matter' (see Self-Containment above), we have to discontinue the possibility of including FPL namespaces using wildcards like in `Fpl.Commons.*`) since it may be undecidable in which order they have to be included.
-* The `uses` clause has a separate block enclosed by `{` and `}` so it is not necessary to repeate the `uses` keyword in each line.
-* The `uses` clause has to be made explicitly, even if it is empty. The same holds for the inference block and the localization block. Thus, an empty, syntactically correct namespace in FPL looks now like this: 
-
+*Before*
 ```
-    TestNamescpace {
-        uses {}
-        inference {}
-        theory {}
-        localization {}
+    def class ZeroVectorN: Tuple
+    {
+        ZeroVectorN(n: Nat, field: Field)
+        {
+            dec
+                ~i: Nat 
+                self!Tuple()
+                for i in [1~n] 
+                (
+                    self<i>:=field.AdditiveGroup().NeutralElement()
+                )
+            ;
+            self
+        }
+    }
+```
+*Now*
+```        
+    def class ZeroVectorN: Tuple
+    {
+        ctor ZeroVectorN(n: Nat, field: Field)
+        {
+            dec
+                ~i: Nat 
+                self!Tuple()
+                for i in [1~n] 
+                (
+                    self<i>:=field.AdditiveGroup().NeutralElement()
+                )
+            ;
+            self
+        }
     }
 ```
 
-### Extensions of FPL  
-* In the Proof of Concept for the syntax of FPL, we have only one extension for digit literals to identify them in FPL with a mathematical definition of natural numbers. These literals are 0, 1, 2, ...
-* In previous versions of the FPL grammar (before 2.4.2), there was a conflict in the syntax between these symbols and the symbols for using inbuilt index values. Now, the latter start with a dollar: $0, $1, $2, ....
-* This difference will make it easier in the FPL interpreter to disambiguate the two.
+#### 17) Recognition of misplaced keywords and generic types
+The recognition and error reporting of misplaced keywords (for instance, conflicts between variable names and keywords or variable and templates has been improved.
+
+
+#### 18) Self-Containment 
+This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:
+
+* The order of declarations will now matter. 
+* This is unlike the previous, python-based FPL interpreter (which can be found in the repository [https://github.com/bookofproofs/fpl](https://github.com/bookofproofs/fpl)).
+* In the new FPL interpreter, checking if an FPL identifier was already declared can be done - in principle - during the parsing process. This could significantly simplify the implementation and performance of the new FPL interpreter.
+* Nevertheless, we stick to the 'must' requirements (see [INTRO.md](https://github.com/bookofproofs/fpl.net/blob/main/INTRO.md)) 28 (support of overrides), 38 (support recursive linguistic constructs), and 40 (support of self-reference in definitions) that could still potentially negatively impact how complicated it is to implement the new FPL interpreter.
+
 
 ## Amendments to the FPL interpreter 
 ### Amendments resulting from the FPL parser

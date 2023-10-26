@@ -89,7 +89,7 @@ Fpl.Algebra.Structures
             ~myOps:+ Composition(myElem:* tplSetElem)
         ;
 
-        AlgebraicStructure(x: tplSet, ops:+ Composition(args:* tplSetElem))
+        ctor AlgebraicStructure(x: tplSet, ops:+ Composition(args:* tplSetElem))
         {
             dec
                 ~a: obj
@@ -141,7 +141,7 @@ Fpl.Algebra.Structures
     def class Magma: AlgebraicStructure
     {
 
-        Magma(x: tplSet, op: BinOp)
+        ctor Magma(x: tplSet, op: BinOp)
         {
             dec
                 self!AlgebraicStructure(x,op)
@@ -153,7 +153,7 @@ Fpl.Algebra.Structures
     // a semigroup is a magma whose binary operation is associative using "non-full-qualified" parameters
     def class Semigroup: Magma
     {
-        Semigroup(x: tplSet, op: BinOp)
+        ctor Semigroup(x: tplSet, op: BinOp)
         {
             dec 
                 assert op.IsAssociative()
@@ -171,7 +171,7 @@ Fpl.Algebra.Structures
     {
         dec ~myOp: BinOp(a,b: tplSetElem);
 
-        Monoid(x: tplSet, op: BinOp)
+        ctor Monoid(x: tplSet, op: BinOp)
         {
             dec 
                 myOp:=op
@@ -221,7 +221,7 @@ Fpl.Algebra.Structures
     {
         dec ~myOp: BinOp(a,b: tplSetElem);
 
-        Group(x: tplSet, op: BinOp)
+        ctor Group(x: tplSet, op: BinOp)
         {
             dec
                 myOp:=op
@@ -260,7 +260,7 @@ Fpl.Algebra.Structures
 
     def class CommutativeGroup: Group
     {
-        CommutativeGroup(x: tpl, op: BinOp)
+        ctor CommutativeGroup(x: tpl, op: BinOp)
         {
             dec
                 assert op.IsCommutative()
@@ -277,7 +277,7 @@ Fpl.Algebra.Structures
             ~myAdd,myMul : BinOp
         ;
 
-        Ring (
+        ctor Ring (
             x: tpl,
             add: BinOp,
             mul: BinOp
@@ -354,7 +354,7 @@ Fpl.Algebra.Structures
     def class UnitRing: Ring
     {
 
-        UnitRing(x: tpl, add, mul: BinOp)
+        ctor UnitRing(x: tpl, add, mul: BinOp)
         {
             dec
                 self!Ring(x,add,mul)
@@ -373,7 +373,7 @@ Fpl.Algebra.Structures
 
     def class CommutativeUnitRing: UnitRing
     {
-        CommutativeUnitRing(x: tpl, add, mul: BinOp)
+        ctor CommutativeUnitRing(x: tpl, add, mul: BinOp)
         {
             dec 
                 assert mul.IsCommutative() 
@@ -386,7 +386,7 @@ Fpl.Algebra.Structures
     def class Field: CommutativeUnitRing
     {
 
-        Field(x: tpl, add,mul: BinOp)
+        ctor Field(x: tpl, add,mul: BinOp)
         {
             dec 
                 self!CommutativeUnitRing(x,add,mul)
@@ -447,7 +447,7 @@ Fpl.Algebra.Structures
             ~myVecAdd: AddVec 
             ~myField: Field
         ;
-        VectorSpaceOverField
+        ctor VectorSpaceOverField
             (
                 space: NonemptySet,
                     field: Field

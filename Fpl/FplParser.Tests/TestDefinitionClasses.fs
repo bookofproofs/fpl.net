@@ -71,7 +71,7 @@ type TestClasses () =
     member this.TestClass02 () =
         let result = run definitionClass """class FieldPowerN: Set
         {
-            FieldPowerN()
+            ctor FieldPowerN()
             {
                 dec self!obj() ;
                 self
@@ -87,7 +87,7 @@ type TestClasses () =
         {
             // A class with a constructor and a self reference
             dec ~x: obj;
-            FieldPowerN() 
+            constructor FieldPowerN() 
             {
                 dec self!obj() ;
                 self
@@ -118,7 +118,7 @@ type TestClasses () =
         {
             // A class with a constructor
             dec ~a:obj;
-            FieldPowerN() 
+            ctor FieldPowerN() 
             {
                 dec self!obj() ;
                 self
@@ -148,7 +148,7 @@ type TestClasses () =
         let result = run definitionClass """class FieldPowerN: Set
         {
             // A class with a constructor 
-            FieldPowerN() 
+            ctor FieldPowerN() 
             {
                 dec self!obj() ;
                 self
@@ -177,12 +177,12 @@ type TestClasses () =
         let result = run definitionClass """class FieldPowerN: Set
         {
             // A class with more than one constructor
-            FieldPowerN() 
+            ctor FieldPowerN() 
             {
                 dec self!obj() ;
                 self
             }
-            FieldPowerN() 
+            constructor FieldPowerN() 
             {
                 dec self!T1() ;
                 self
@@ -197,13 +197,13 @@ type TestClasses () =
         let result = run definitionClass """class FieldPowerN: Set
         {
             // A class with more than one constructor and some properties
-            FieldPowerN() 
+            ctor FieldPowerN() 
             {
                 dec self!obj() ;
                 self
             }
 
-            FieldPowerN() 
+            ctor FieldPowerN() 
             {
                 dec self!T1() ;
                 self
@@ -270,7 +270,7 @@ type TestClasses () =
         {
             // A class with a constructor and a property 
 
-            FieldPowerN() 
+            ctor FieldPowerN() 
             {
                 dec self!T1() ;
                 self

@@ -769,7 +769,7 @@ type TestPlacingComments () =
                 y:=1
                 z:=1
             ;
-            T() { self}
+            ctor T() { self}
 
             optional func X() -> Y { intr }
             optional func X() -> Y { intr }
@@ -790,7 +790,7 @@ type TestPlacingComments () =
                 y:=1
                 z:=1
             ;
-            T() { self}
+            ctor T() { self}
 
             optional func X() -> Y { intr }
             optional func X() -> Y { intr }
@@ -811,7 +811,7 @@ type TestPlacingComments () =
                 y:=1
                 z:=1
             ;
-            T() { self}
+            ctor T() { self}
 
             optional func X() -> Y { intr }
             optional func X() -> Y { intr }
@@ -832,7 +832,7 @@ type TestPlacingComments () =
                 y:=1
                 z:=1
             ;
-            T() { self}
+            ctor T() { self}
 
             optional func X() -> Y { intr }
             optional func X() -> Y { intr }
@@ -853,7 +853,7 @@ type TestPlacingComments () =
                 y:=1
                 z:=1
             ;
-            T() { self}
+            ctor T() { self}
 
             optional func X() -> Y { intr }
             optional func X() -> Y { intr }
@@ -874,7 +874,7 @@ type TestPlacingComments () =
                 y:=1
                 z:=1
             ;
-            T() { self}
+            ctor T() { self}
 
             optional func X() -> Y { intr }
             optional func X() -> Y { intr }
@@ -895,7 +895,7 @@ type TestPlacingComments () =
                 // comment
                 z:=1
             ;
-            T() { self}
+            ctor T() { self}
 
             optional func X() -> Y { intr }
             optional func X() -> Y { intr }
@@ -916,7 +916,7 @@ type TestPlacingComments () =
                 z:=1
                 // comment
             ;
-            T() { self}
+            ctor T() { self}
 
             optional func X() -> Y { intr }
             optional func X() -> Y { intr }
@@ -937,7 +937,7 @@ type TestPlacingComments () =
                 z:=1
             ;
             // comment
-            T() { self}
+            ctor T() { self}
 
             optional func X() -> Y { intr }
             optional func X() -> Y { intr }
@@ -957,7 +957,7 @@ type TestPlacingComments () =
                 y:=1
                 z:=1
             ;
-            T() { self}
+            ctor T() { self}
 
             // comment
             optional func X() -> Y { intr }
@@ -978,7 +978,7 @@ type TestPlacingComments () =
                 y:=1
                 z:=1
             ;
-            T() { self}
+            ctor T() { self}
 
             optional func X() -> Y { intr }
             optional func X() -> Y { intr }
