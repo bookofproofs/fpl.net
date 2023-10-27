@@ -570,3 +570,33 @@ let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 //let fplParser (input: string) = tryParse ast input "" (int64 0) 1 
 let fplParser (input: string) = tryParse' ast "recovery failed;" ad input
 let parserDiagnostics = ad
+
+let fplParserDef (input: string) = tryParse definition input "" (int64 0) 1 
+let fplParserProperty (input: string) = tryParse property input "" (int64 0) 1 
+let fplParserAxiom (input: string) = tryParse axiom input "" (int64 0) 1 
+let fplParserTheorem (input: string) = tryParse theorem input "" (int64 0) 1 
+let fplParserProposition (input: string) = tryParse proposition input "" (int64 0) 1 
+let fplParserLemma (input: string) = tryParse lemma input "" (int64 0) 1 
+let fplParserCorollary (input: string) = tryParse corollary input "" (int64 0) 1 
+let fplParserConjecture (input: string) = tryParse conjecture input "" (int64 0) 1 
+let fplParserDeclaration (input: string) = tryParse varDeclBlock input "" (int64 0) 1 
+let fplParserConstructor (input: string) = tryParse constructor input "" (int64 0) 1 
+let fplParserProof (input: string) = tryParse proof input "" (int64 0) 1 
+let fplParserInference (input: string) = tryParse ruleOfInference input "" (int64 0) 1 
+let fplParserLocalization (input: string) = tryParse localization input "" (int64 0) 1 
+
+(*
+let fplParserDef (input: string) = tryParse' definition "recovery failed;" ad input
+let fplParserProperty (input: string) = tryParse' property "recovery failed;" ad input
+let fplParserAxiom (input: string) = tryParse' axiom "recovery failed;" ad input
+let fplParserTheorem (input: string) = tryParse' theorem "recovery failed;" ad input
+let fplParserProposition (input: string) = tryParse' proposition "recovery failed;" ad input
+let fplParserLemma (input: string) = tryParse' lemma "recovery failed;" ad input
+let fplParserCorollary (input: string) = tryParse' corollary "recovery failed;" ad input
+let fplParserConjecture (input: string) = tryParse' conjecture "recovery failed;" ad input
+let fplParserDeclaration (input: string) = tryParse' varDeclBlock "recovery failed;" ad input
+let fplParserConstructor (input: string) = tryParse' constructor "recovery failed;" ad input
+let fplParserProof (input: string) = tryParse' proof "recovery failed;" ad input
+let fplParserInference (input: string) = tryParse' ruleOfInference "recovery failed;" ad input
+let fplParserLocalization (input: string) = tryParse' localization "recovery failed;" ad input
+*)

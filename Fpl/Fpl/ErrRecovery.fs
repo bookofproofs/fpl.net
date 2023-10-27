@@ -388,3 +388,9 @@ let removeFplComments (input:string) =
     let r1 = replaceLinesWithSpaces input "\/\/[^\n]*" // replace inline comments
     replaceLinesWithSpaces r1 "\/\*((?:.|\n)*?)\*\/" // replace block comments
 
+let preParsePreProcess (input:string) = 
+    removeFplComments input
+
+
+
+
