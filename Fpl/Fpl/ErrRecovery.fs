@@ -20,6 +20,9 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 *)
 
+type DiagnosticCode = 
+    DiagnosticCode of string
+
 type DiagnosticEmitter =
     | FplParser
     | FplInterpreter
@@ -38,47 +41,59 @@ type DiagnosticMessage =
         | DiagnosticMessage(value) -> value
 
 type Diagnostic =
-    | Diagnostic of DiagnosticEmitter * DiagnosticSeverity * Position * DiagnosticMessage
+    | Diagnostic of DiagnosticEmitter * DiagnosticSeverity * Position * DiagnosticMessage * DiagnosticCode
 
     member this.Emitter =
         match this with
-        | Diagnostic(emitter, _, _, _) -> emitter
+        | Diagnostic(emitter, _, _, _, _) -> emitter
 
     member this.Severity =
         match this with
-        | Diagnostic(_, severity, _, _) -> severity
+        | Diagnostic(_, severity, _, _, _) -> severity
 
     member this.Position =
         match this with
-        | Diagnostic(_, _, position, _) -> position
+        | Diagnostic(_, _, position, _, _) -> position
 
     member this.Message =
         match this with
-        | Diagnostic(_, _, _, message) -> message
+        | Diagnostic(_, _, _, message, _) -> message
+
+    member this.Code =
+        match this with
+        | Diagnostic(_, _, _, _, code) -> code
 
 type Diagnostics() =
-    let myHashset = new HashSet<Diagnostic>()
-    member this.Collection = myHashset
+    let myDictionary = new Dictionary<string, Diagnostic>()
+    member this.Collection = 
+        myDictionary
+        |> Seq.map (fun kvp -> (kvp.Key, kvp.Value))
+        |> Seq.sortBy fst
+        |> Seq.map snd
+        |> Seq.toList
 
-    member this.AddDiagnostic d =
-        if not (myHashset.Contains(d)) then
-            myHashset.Add(d) |> ignore
+    member this.AddDiagnostic (d:Diagnostic) =
+        let keyOfd = (sprintf "%07d" d.Position.Index) + d.Emitter.ToString()
+        if not (myDictionary.ContainsKey(keyOfd)) then
+            myDictionary.Add(keyOfd, d) |> ignore
 
     member this.CountDiagnostics  =
-        myHashset.Count
+        myDictionary.Count
 
     member this.PrintDiagnostics =
-        for d in myHashset do
+        for d in this.Collection do
             printfn "%O" d
 
         printfn "%s" "\n^------------------------^\n"
 
-    member this.DiagnosticsToString = myHashset |> Seq.map string |> String.concat "\n"
-    member this.Clear() = myHashset.Clear()
+    member this.DiagnosticsToString = myDictionary |> Seq.map string |> String.concat "\n"
+    member this.Clear() = myDictionary.Clear()
 
 let ad = Diagnostics()
 
 let private _position: Parser<_, _> = fun stream -> Reply stream.Position
+
+
 
 /// A helper function replacing a list of strings into a HashSet
 let listToHashSet (list: string list) =
@@ -231,17 +246,44 @@ let mapErrMsgToRecText (input: string) (errMsg: string) (pos:Position) =
 let findRecoveryString (source: HashSet<string>) (candidates: string list) =
     candidates |> List.tryFind (fun candidate -> source.Contains(candidate))
 
-let tryParse' globalParser expectMessage (ad: Diagnostics) input =
-    match run globalParser input with
-    | Success(result, restInput, userState) -> result
-    | Failure(errorMsg, restInput, userState) ->
-        let diagnosticMsg = DiagnosticMessage(expectMessage + " " + errorMsg)
+/// A low-level error recovery function mapping error messages to tuples
+/// consisting of some parser choices, a pick from this choices and a replace
+/// error message that is formatted suitable for the VS Code Problems window.
+let mapErrMsgToRecText' (input: string) (errMsg: string) (pos:Position) =
+    // extract from errMsg only this part that is contained in the last 
+    // part of the FParsec error message after any before FParsec started any 
+    // backtracking to find another syntax error. We consider those
+    // "other syntax errors" irrelevant for a correct error recovery process 
+    // because we want to report only those errors that the user 
+    // is most likely to handle while typing FPL source code.
+    let backtrackingFreeErrMsg,  backtrackingFreePos = extractBacktrackingFreeErrMsgAndPos input errMsg pos 
 
+    let choices = retrieveExpectedParserChoices backtrackingFreeErrMsg
+    let newErrMsg, modifiedPos = replaceFParsecErrMsgForFplParser backtrackingFreeErrMsg choices backtrackingFreePos
+    (Some choices, newErrMsg, modifiedPos)
+
+
+let tryParse' someParser (ad: Diagnostics) input corrIndex (code:string)=
+    match run someParser input with
+    | Success(result, restInput, userState) -> 
+        result, int userState.Index
+    | Failure(errorMsg, restInput, userState) ->
+        let (choices, newErrMsg, backtrackingFreePos) = mapErrMsgToRecText' input errorMsg restInput.Position
+
+        let correctedPosition = 
+            Position(
+                restInput.Position.StreamName,
+                restInput.Position.Index + (int64 corrIndex),
+                restInput.Position.Line,
+                restInput.Position.Column 
+            )
+        let diagnosticMsg = DiagnosticMessage(newErrMsg)
+        let diagnosticCode = DiagnosticCode(code)
         let diagnostic =
-            Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg)
+            Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
 
         ad.AddDiagnostic diagnostic
-        Ast.Error
+        Ast.Error, int diagnostic.Position.Index
 
 /// Emit any errors occurring in the globalParser
 /// This is to make sure that the parser will always emit diagnostics,
@@ -267,26 +309,28 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
             // this case should never happen because mapErrMsgToRecText never returns this
             let diagnosticMsg =
                 DiagnosticMessage(errorMsg + Environment.NewLine + "(unknown parser choice or no recovery string provided)")
-
+            let diagnosticCode = DiagnosticCode("testCode")
             let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg)
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg, diagnosticCode)
 
             ad.AddDiagnostic diagnostic
             Ast.Error
         | (Some cho, None) -> 
             let diagnosticMsg = DiagnosticMessage(newErrMsg + Environment.NewLine + "(unknown parser choice)")
+            let diagnosticCode = DiagnosticCode("testCode")
 
             let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg)
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg, diagnosticCode)
 
             ad.AddDiagnostic diagnostic
             Ast.Error
         | (None, Some recStr) ->
             // this case should never happen because mapErrMsgToRecText never returns this
             let diagnosticMsg = DiagnosticMessage(errorMsg + Environment.NewLine + "(unknown error)")
+            let diagnosticCode = DiagnosticCode("testCode")
 
             let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg)
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg, diagnosticCode)
 
             ad.AddDiagnostic diagnostic
             Ast.Error
@@ -345,7 +389,8 @@ let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumula
                             DiagnosticEmitter.FplParser,
                             DiagnosticSeverity.Error,
                             correctedErrorPosition,
-                            diagnosticMsg
+                            diagnosticMsg,
+                            DiagnosticCode("testCode")
                         )
 
                     ad.AddDiagnostic diagnostic
@@ -391,6 +436,16 @@ let removeFplComments (input:string) =
 let preParsePreProcess (input:string) = 
     removeFplComments input
 
-
-
+let stringMatches (inputString: string) =
+    let pattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc)\s+"
+    let regex = new Regex(pattern)
+    let matchList = regex.Matches(inputString) |> Seq.cast<Match> |> Seq.toList
+    let rec collectMatches matchList index =
+        
+        match (matchList:Match list) with
+        | [] -> 
+            (index, inputString.Substring(index)) :: []
+        | m::ms ->
+            (index, inputString.Substring(index)) :: collectMatches ms m.Index
+    collectMatches matchList 0 
 

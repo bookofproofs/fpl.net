@@ -1,9 +1,8 @@
 ﻿using System.Text;
-using System.Text.RegularExpressions;
+using Microsoft.FSharp.Collections;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using static FplParser;
-using static Microsoft.FSharp.Core.ByRefKinds;
 
 namespace FplLS
 {
@@ -46,7 +45,7 @@ namespace FplLS
         /// <param name="diagnostics">Input list</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted list</returns>
-        public List<Diagnostic> CastDiagnostics(HashSet<ErrRecovery.Diagnostic> listDiagnostics, TextPositions tp)
+        public List<Diagnostic> CastDiagnostics(FSharpList<ErrRecovery.Diagnostic> listDiagnostics, TextPositions tp)
         {
             var sb = new StringBuilder();
             var castedListDiagnostics = new List<Diagnostic>();
@@ -70,6 +69,7 @@ namespace FplLS
             castedDiagnostic.Severity = CastSeverity(diagnostic.Severity);
             castedDiagnostic.Message = CastMessage(diagnostic, sb);
             castedDiagnostic.Range = tp.GetRange(diagnostic.Position.Index, diagnostic.Position.Index);
+            castedDiagnostic.Code = CastCode(diagnostic.Code);
             return castedDiagnostic;
         }
 
@@ -141,6 +141,11 @@ namespace FplLS
                 throw new NotImplementedException(severity.ToString());
             }
             return castedSeverity;
+        }
+
+        private DiagnosticCode CastCode(ErrRecovery.DiagnosticCode code)
+        {
+            return new DiagnosticCode(code.ToString());
         }
     }
 }
