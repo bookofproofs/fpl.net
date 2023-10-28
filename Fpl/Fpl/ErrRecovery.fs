@@ -21,7 +21,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 type DiagnosticCode = 
-    DiagnosticCode of string
+    | DiagnosticCode of string
+
+    member this.Value =
+        match this with
+        | DiagnosticCode(value) -> value
+
+    member this.CodeMessage = 
+        match this.CodeMessage with 
+        | "DEF000" -> "Syntax error in definition"
+        | "PRP000" -> "Syntax error in property"
+        | "AXI000" -> "Syntax error in axiom"
+        | "THM000" -> "Syntax error in theorem"
+        | "CNJ000" -> "Syntax error in conjecture"
+        | "VAR000" -> "Syntax error in variable declaration and/or specification"
+        | "CTR000" -> "Syntax error in constructor"
+        | "PRF000" -> "Syntax error in proof"
+        | "INF000" -> "Syntax error in rule of inference"
+        | "LOC000" -> "Syntax error in localization"
+        | "USE000" -> "Syntax error in uses clause"
+        | "SYN000" -> "Other syntax error"
+        | _ -> failwith ("Unknown code " + this.Value)
 
 type DiagnosticEmitter =
     | FplParser
@@ -86,28 +106,12 @@ type Diagnostics() =
 
         printfn "%s" "\n^------------------------^\n"
 
-    member this.DiagnosticsToString = myDictionary |> Seq.map string |> String.concat "\n"
+    member this.DiagnosticsToString = this.Collection |> Seq.map string |> String.concat "\n"
     member this.Clear() = myDictionary.Clear()
 
 let ad = Diagnostics()
 
 let private _position: Parser<_, _> = fun stream -> Reply stream.Position
-
-
-
-/// A helper function replacing a list of strings into a HashSet
-let listToHashSet (list: string list) =
-    System.Collections.Generic.HashSet<string>(list)
-
-/// A helper function looking for all quoted substrings in a diagnostic error message
-let findQuotedSubstrings (input: string) =
-    let regex = System.Text.RegularExpressions.Regex("'(.*?)'")
-
-    regex.Matches(input)
-    |> Seq.cast<System.Text.RegularExpressions.Match>
-    |> Seq.map (fun m -> m.Groups.[1].Value)
-    |> List.ofSeq
-
 
 /// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
 let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Position)=
@@ -223,33 +227,6 @@ let extractBacktrackingFreeErrMsgAndPos (input: string) (errMsg: string) (pos:Po
 /// consisting of some parser choices, a pick from this choices and a replace
 /// error message that is formatted suitable for the VS Code Problems window.
 let mapErrMsgToRecText (input: string) (errMsg: string) (pos:Position) =
-    let recText choices =
-        let keyFound, text = recoveryMap.TryGetValue(choices)
-        if keyFound then
-            Some text
-        else
-            None
-    // extract from errMsg only this part that is contained in the last 
-    // part of the FParsec error message after any before FParsec started any 
-    // backtracking to find another syntax error. We consider those
-    // "other syntax errors" irrelevant for a correct error recovery process 
-    // because we want to report only those errors that the user 
-    // is most likely to handle while typing FPL source code.
-    let backtrackingFreeErrMsg,  backtrackingFreePos = extractBacktrackingFreeErrMsgAndPos input errMsg pos 
-
-    let choices = retrieveExpectedParserChoices backtrackingFreeErrMsg
-    let text = recText choices
-    let newErrMsg, modifiedPos = replaceFParsecErrMsgForFplParser backtrackingFreeErrMsg choices backtrackingFreePos
-    (Some choices, text, newErrMsg, modifiedPos)
-
-/// Returns the first list element from `candidates` that is contained in `source`.
-let findRecoveryString (source: HashSet<string>) (candidates: string list) =
-    candidates |> List.tryFind (fun candidate -> source.Contains(candidate))
-
-/// A low-level error recovery function mapping error messages to tuples
-/// consisting of some parser choices, a pick from this choices and a replace
-/// error message that is formatted suitable for the VS Code Problems window.
-let mapErrMsgToRecText' (input: string) (errMsg: string) (pos:Position) =
     // extract from errMsg only this part that is contained in the last 
     // part of the FParsec error message after any before FParsec started any 
     // backtracking to find another syntax error. We consider those
@@ -263,12 +240,12 @@ let mapErrMsgToRecText' (input: string) (errMsg: string) (pos:Position) =
     (Some choices, newErrMsg, modifiedPos)
 
 
-let tryParse' someParser (ad: Diagnostics) input corrIndex (code:string)=
+let tryParse someParser (ad: Diagnostics) input corrIndex (code:string)=
     match run someParser input with
     | Success(result, restInput, userState) -> 
         result, int userState.Index
     | Failure(errorMsg, restInput, userState) ->
-        let (choices, newErrMsg, backtrackingFreePos) = mapErrMsgToRecText' input errorMsg restInput.Position
+        let (choices, newErrMsg, backtrackingFreePos) = mapErrMsgToRecText input errorMsg restInput.Position
 
         let correctedPosition = 
             Position(
@@ -284,119 +261,6 @@ let tryParse' someParser (ad: Diagnostics) input corrIndex (code:string)=
 
         ad.AddDiagnostic diagnostic
         Ast.Error, int diagnostic.Position.Index
-
-/// Emit any errors occurring in the globalParser
-/// This is to make sure that the parser will always emit diagnostics,
-/// even if the error recovery fails on a global level (and so does the parser).
-let rec tryParse globalParser (input: string) (lastRecoveryText: string) (cumulativeIndexOffset: int64) (maxNumbOffRecCalls: int) =
-    let tooManyRecCalls = maxNumbOffRecCalls > 50
-    match run globalParser input with
-    | Success(result, restInput, userState) ->
-
-        result
-    | Failure(errorMsg, restInput, userState) ->
-        let (choices, nextRecoveryString, newErrMsg, backtrackingFreePos) = mapErrMsgToRecText input errorMsg restInput.Position
-
-        let corrErrPos = Position(
-                                    backtrackingFreePos.StreamName,
-                                    backtrackingFreePos.Index - cumulativeIndexOffset,
-                                    backtrackingFreePos.Line,
-                                    backtrackingFreePos.Column 
-                                )
-
-        match (choices, nextRecoveryString) with
-        | (None, None) ->
-            // this case should never happen because mapErrMsgToRecText never returns this
-            let diagnosticMsg =
-                DiagnosticMessage(errorMsg + Environment.NewLine + "(unknown parser choice or no recovery string provided)")
-            let diagnosticCode = DiagnosticCode("testCode")
-            let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg, diagnosticCode)
-
-            ad.AddDiagnostic diagnostic
-            Ast.Error
-        | (Some cho, None) -> 
-            let diagnosticMsg = DiagnosticMessage(newErrMsg + Environment.NewLine + "(unknown parser choice)")
-            let diagnosticCode = DiagnosticCode("testCode")
-
-            let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg, diagnosticCode)
-
-            ad.AddDiagnostic diagnostic
-            Ast.Error
-        | (None, Some recStr) ->
-            // this case should never happen because mapErrMsgToRecText never returns this
-            let diagnosticMsg = DiagnosticMessage(errorMsg + Environment.NewLine + "(unknown error)")
-            let diagnosticCode = DiagnosticCode("testCode")
-
-            let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, corrErrPos, diagnosticMsg, diagnosticCode)
-
-            ad.AddDiagnostic diagnostic
-            Ast.Error
-            
-        | (Some cho, Some recStr) ->
-            let (newInput, newRecoveryText, newOffset, fatalError) =
-                manipulateString input recStr backtrackingFreePos lastRecoveryText
-            
-            let newIndexOffset = cumulativeIndexOffset + newOffset
-
-            if fatalError || tooManyRecCalls then
-                // (recovery failed due to likely infinite loop)
-                // we just ignore this run
-                Ast.Error
-            else
-                
-                let cond1 = not (newRecoveryText.StartsWith(lastRecoveryText))
-                let cond2 = newRecoveryText="{ pred "
-                let cond3 = newRecoveryText="T T "
-                let cond4 = newRecoveryText="T { "
-                let cond5 = not (lastRecoveryText.EndsWith("{ ")) 
-                let cond6 = lastRecoveryText.EndsWith("( ) { ")
-                let cond0 = lastRecoveryText = ""
-                let cond0a = errorMsg.Contains("The error occurred at the end of the input stream") && recStr = "}" && errorMsg.Contains("Expecting: <block comment>, <inline comment>, <significant whitespace> or '}'")
-                // emit diagnostics using a heuristics while preventing false positives 
-                let conditionForEmittingDiagnostics = 
-                    cond0 || cond0a
-                    || ( 
-                            ( cond1 || cond2 || cond3 || cond4) 
-                            && (cond5 || cond6) 
-                       ) 
-                if conditionForEmittingDiagnostics then
-                    // emit diagnostic if there is a new remainingInput
-
-                    let correctedErrorPosition =
-                                    if errorMsg.Contains("The parser backtracked after") then
-                                        Position(
-                                            backtrackingFreePos.StreamName,
-                                            backtrackingFreePos.Index + (int64 1),
-                                            backtrackingFreePos.Line,
-                                            backtrackingFreePos.Column 
-                                        )
-                                    elif lastRecoveryText = "" then
-                                        backtrackingFreePos
-                                    else
-                                        corrErrPos
-                    let diagnosticMsg = 
-                        if cond0a then
-                            DiagnosticMessage("Expecting: '}', <block comment>, <inline comment>, <significant whitespace>" + Environment.NewLine)
-                        else
-                            DiagnosticMessage(newErrMsg + Environment.NewLine)
-                    let diagnostic =
-                        // this is to ensure that the input insertions of error recovery remain invisible to the user
-                        // so that when double-clicking the error, the IDE will go to the right position in the source code
-                        Diagnostic(
-                            DiagnosticEmitter.FplParser,
-                            DiagnosticSeverity.Error,
-                            correctedErrorPosition,
-                            diagnosticMsg,
-                            DiagnosticCode("testCode")
-                        )
-
-                    ad.AddDiagnostic diagnostic
-
-
-                tryParse globalParser newInput newRecoveryText newIndexOffset (maxNumbOffRecCalls+1) 
 
 /// A simple helper function for printing trace information to the console (taken from FParsec Docs)
 let (<!>) (p: Parser<_,_>) label : Parser<_,_> =

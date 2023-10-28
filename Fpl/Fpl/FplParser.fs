@@ -567,26 +567,28 @@ let fplNamespace = positions (namespaceIdentifier .>>. (CW >>. namespaceBlock)) 
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
-let fplParserDef (input: string) (index:int) = tryParse' definition ad input index "DEF000"
-let fplParserProperty (input: string) (index:int) = tryParse' property ad input index "PRP000"
-let fplParserAxiom (input: string)  (index:int) = tryParse' axiom ad input index "AXI000"
-let fplParserTheorem (input: string)  (index:int) = tryParse' theorem ad input index "THM000"
-let fplParserProposition (input: string)  (index:int) = tryParse' proposition ad input index "THM000"
-let fplParserLemma (input: string) (index:int)  = tryParse' lemma ad input index "THM000"
-let fplParserCorollary (input: string) (index:int)  = tryParse' corollary ad input index "THM000"
-let fplParserConjecture (input: string) (index:int)  = tryParse' conjecture ad input index "CNJ000"
-let fplParserDeclaration (input: string) (index:int)  = tryParse' varDeclBlock ad input index "VAR000"
-let fplParserConstructor (input: string) (index:int)  = tryParse' constructor ad input index "CTR000"
-let fplParserProof (input: string) (index:int)  = tryParse' proof ad input index "PRF000"
-let fplParserInference (input: string) (index:int)  = tryParse' ruleOfInference ad input index "INF000"
-let fplParserLocalization (input: string) (index:int)  = tryParse' localization ad input index "LOC000"
+let fplParserDef (input: string) (index:int) = tryParse definition ad input index "DEF000"
+let fplParserProperty (input: string) (index:int) = tryParse property ad input index "PRP000"
+let fplParserAxiom (input: string)  (index:int) = tryParse axiom ad input index "AXI000"
+let fplParserTheorem (input: string)  (index:int) = tryParse theorem ad input index "THM000"
+let fplParserProposition (input: string)  (index:int) = tryParse proposition ad input index "THM000"
+let fplParserLemma (input: string) (index:int)  = tryParse lemma ad input index "THM000"
+let fplParserCorollary (input: string) (index:int)  = tryParse corollary ad input index "THM000"
+let fplParserConjecture (input: string) (index:int)  = tryParse conjecture ad input index "CNJ000"
+let fplParserDeclaration (input: string) (index:int)  = tryParse varDeclBlock ad input index "VAR000"
+let fplParserConstructor (input: string) (index:int)  = tryParse constructor ad input index "CTR000"
+let fplParserProof (input: string) (index:int)  = tryParse proof ad input index "PRF000"
+let fplParserInference (input: string) (index:int)  = tryParse ruleOfInference ad input index "INF000"
+let fplParserLocalization (input: string) (index:int)  = tryParse localization ad input index "LOC000"
+let fplUsesClause (input: string) (index:int)  = tryParse usesClause ad input index "USE000"
 
 //let fplParser (input: string) = tryParse ast input "" (int64 0) 1 
-let fplParserAst (input: string) (index:int) = tryParse' ast ad input index "SYN000"
+let fplParserAst (input: string) (index:int) = tryParse ast ad input index "SYN000"
 
 let fplParser (input:string) = 
     let matchList = stringMatches input
     let mutable lastSuccessfullIndex = 0
+    let parserLastPos (_, lastIndex) =  lastSuccessfullIndex <- lastIndex
     let result = fplParserAst input 0
     match result with
     | Ast.Error, lastIndex -> 
@@ -595,32 +597,32 @@ let fplParser (input:string) =
             if index > lastSuccessfullIndex then
                 match subString with
                 | v when v.StartsWith("definition") || v.StartsWith("def") 
-                    -> fplParserDef v index |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserDef v index |> parserLastPos
                 | v when v.StartsWith("mand") || v.StartsWith("opt") 
-                    -> fplParserProperty v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserProperty v index |> parserLastPos
                 | v when v.StartsWith("ax") || v.StartsWith("post") 
-                    -> fplParserAxiom v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserAxiom v index |> parserLastPos
                 | v when v.StartsWith("theorem") || v.StartsWith("thm") 
-                    -> fplParserTheorem v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserTheorem v index |> parserLastPos
                 | v when v.StartsWith("prop")
-                    -> fplParserProposition v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserProposition v index |> parserLastPos
                 | v when v.StartsWith("lem") 
-                    -> fplParserLemma v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserLemma v index |> parserLastPos
                 | v when v.StartsWith("cor") 
-                    -> fplParserCorollary v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserCorollary v index |> parserLastPos
                 | v when v.StartsWith("conj") 
-                    -> fplParserConjecture v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserConjecture v index |> parserLastPos
                 | v when v.StartsWith("dec") 
-                    -> fplParserDeclaration v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserDeclaration v index |> parserLastPos
                 | v when v.StartsWith("constructor") || v.StartsWith("ctor") 
-                    -> fplParserConstructor v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserConstructor v index |> parserLastPos
                 | v when v.StartsWith("proof") || v.StartsWith("prf") 
-                    -> fplParserProof v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserProof v index |> parserLastPos
                 | v when v.StartsWith("inf") 
-                    -> fplParserInference v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserInference v index |> parserLastPos
                 | v when v.StartsWith("loc") 
-                    -> fplParserLocalization v index  |> (fun (_, li) -> lastSuccessfullIndex <- li)
-                | _ -> fplParserAst subString index |> (fun (_, li) -> lastSuccessfullIndex <- li)
+                    -> fplParserLocalization v index |> parserLastPos
+                | _ -> fplParserAst subString index |> parserLastPos
                 |> ignore
     | _ -> 
         ()

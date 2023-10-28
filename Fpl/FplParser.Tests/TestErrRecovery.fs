@@ -14,28 +14,6 @@ type TestErrRecovery() =
         input.Split(whiteSpaceChars) |> String.concat ""
 
     [<TestMethod>]
-    [<DataRow("and")>]
-    [<DataRow("and ")>]
-    [<DataRow("and\n")>]
-    [<DataRow("and\t")>]
-    [<DataRow("and(")>]
-    [<DataRow("theory{")>]
-    member this.TestStartWithFplKeyword(test: string) =
-        let result = lengthOfStartingFplKeyword test
-        Assert.AreNotEqual(0, result)
-
-    [<TestMethod>]
-    [<DataRow("xxx")>]
-    [<DataRow("xxx ")>]
-    [<DataRow("xxx\n")>]
-    [<DataRow("xxx\t")>]
-    [<DataRow("xxx(")>]
-    [<DataRow("xxx{")>]
-    member this.TestNotStartWithFplKeyword(test: string) =
-        let result = lengthOfStartingFplKeyword test
-        Assert.AreEqual(0, result)
-
-    [<TestMethod>]
     member this.TestTryParseExtension000Diag () =
         ad.Clear()
         let result = fplParser """TestNamespace {
@@ -1133,10 +1111,9 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
     member this.TestTryParseAxiom000Diag () =
         ad.Clear()
         let input = """TestNamespace {
-    theory {   
+       
         a
-    }
-    y
+        y
 }"""
         let result = fplParser input
         let actual = sprintf "%O" result

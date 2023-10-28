@@ -82,8 +82,7 @@ namespace FplLS
         private string CastMessage(ErrRecovery.Diagnostic diagnostic, StringBuilder sb)
         {
             sb.Clear();
-            sb.Append(CastDiagnosticSource(diagnostic));
-            sb.Append(diagnostic.Severity.ToString());
+            sb.Append(CastDiagnosticCodeMessage(diagnostic));
             sb.Append(": ");
 
             // fall back if there was no match of a skipped first line
@@ -92,25 +91,14 @@ namespace FplLS
             return sb.ToString();
         }
         /// <summary>
-        /// Returns a prefix depending on the emitter of the diagnostic.
+        /// Returns a message depending on the code of the diagnostic.
         /// </summary>
         /// <param name="diagnostic">Input diagnostic</param>
         /// <returns>"semantics " if emitter was Interpreter, "syntax " if emitter was Parser</returns>
         /// <exception cref="NotImplementedException"></exception>
-        private string CastDiagnosticSource(ErrRecovery.Diagnostic diagnostic)
+        private string CastDiagnosticCodeMessage(ErrRecovery.Diagnostic diagnostic)
         {
-            if (diagnostic.Emitter.IsFplInterpreter)
-            {
-                return "Semantics ";
-            }
-            else if (diagnostic.Emitter.IsFplParser) 
-            {
-                return "Syntax ";
-            }
-            else
-            {
-                throw new NotImplementedException(diagnostic.Emitter.ToString());
-            }
+            return diagnostic.Code.CodeMessage;
         }
         /// <summary>
         /// Casts an F# ErrReccovery module severity into the OmniSharp's DiagnosticSeverity

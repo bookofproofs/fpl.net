@@ -23,44 +23,6 @@ type TestErrRecoveryLowLevel() =
     member this.TestSplitStringByTextAtPosition_Post(expPost: string, actPost: string) =
         Assert.AreEqual(expPost, actPost)
 
-    [<TestMethod>]
-    [<DataRow("T { inf { D() { pre : true con : true      }  theory { y} }", "}", 46, "T { inf { D() { pre : true con : true      }", "  ", "theory { y} }")>]
-    [<DataRow("T { : theory { } }", "inf", 4, "T {", " ", ": theory { } }")>]
-    [<DataRow("T {  \t: theory { } }", "inf", 6, "T {", "  \t", ": theory { } }")>]
-    [<DataRow("T {  \t \t : theory { } }", "inf", 9, "T {", "  \t \t ", ": theory { } }")>]
-    [<DataRow("T { inf { theory { pred I() } }", "ExampleId", 10, "T { inf {", " ", "theory { pred I() } }")>]
-    member this.TestSplitStringByTextAtPosition
-        (
-            input: string,
-            text: string,
-            ind: int64,
-            expPre: string,
-            expOptTrailingWs: string,
-            expPost: string
-        ) =
-        let pos = Position("", ind, 0, 0)
-        let (actPre, actExptOptTrailingWs, actPost) = splitStringByTextAtPosition input text pos
-        this.TestSplitStringByTextAtPosition_Pre(expPre, actPre)
-        this.TestSplitStringByTextAtPosition_OptTrailingWs(expOptTrailingWs, actExptOptTrailingWs)
-        this.TestSplitStringByTextAtPosition_Post(expPost, actPost)
-
-    [<TestMethod>]
-    [<DataRow("", "", 0, " ", 1)>]
-    [<DataRow("T { : theory { } }", "inf", 4, "T { inf  theory { } }", 3)>]
-    member this.TestManipulateString
-        (
-            input: string,
-            text: string,
-            ind: int64,
-            expNewInput,
-            expNewOffset
-        ) =
-        let pos = Position("", ind, 0, 0)
-        let (actNewInput, newRecoveryText, newIndexOffset, fatalError) = manipulateString input text pos "" 
-        Assert.AreEqual(expNewInput, actNewInput)
-        Assert.AreEqual(expNewOffset, newIndexOffset)
-
-
 
     [<TestMethod>]
     [<DataRow("""""", "")>]

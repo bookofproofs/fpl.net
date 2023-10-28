@@ -29,7 +29,7 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestUsesClause () =
-        let result = run usesClause "uses  Fpl.Test alias MyAlias ,Fpl.Test , Fpl.Test.Test1 "
+        let result = run usesClause "uses  Fpl.Test alias MyAlias , Fpl.Test , Fpl.Test.Test1 "
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
