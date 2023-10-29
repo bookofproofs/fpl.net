@@ -127,10 +127,10 @@ let keywordConclusion = (skipString "conclusion" <|> skipString "con") >>. IW
 
 (* Statement-related Keywords *)
 let keywordDel = skipString "delegate" <|> skipString "del" 
-let keywordFor = skipString "for" .>> IW 
-let keywordIn = skipString "in" .>> IW 
-let keywordCases = skipString "cases" .>> IW 
-let keywordAssert = skipString "assert" .>> IW
+let keywordFor = skipString "for" .>> SW 
+let keywordIn = skipString "in" .>> SW 
+let keywordCases = skipString "cases" .>> SW 
+let keywordAssert = skipString "assert" .>> SW
 
 (* Predicate-related Keywords *)
 let keywordUndefined = positions (skipString "undefined" <|> skipString "undef") .>> IW |>> Ast.Undefined
@@ -171,10 +171,8 @@ let keywordFunction = (skipString "function" <|> skipString "func") .>> IW >>% A
 
 let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
 
-let theoryNamespaceList = sepBy1 theoryNamespace comma 
-
-let keywordUses = (skipString "uses" .>> IW)
-let usesClause = positions (keywordUses >>. theoryNamespaceList) |>> Ast.UsesClause
+let keywordUses = (skipString "uses") .>> SW
+let usesClause = positions (keywordUses >>. theoryNamespace) |>> Ast.UsesClause
 
 let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
@@ -380,11 +378,11 @@ predicateListRef.Value <- sepBy predicate comma
 predicateList1Ref.Value <- sepBy1 predicate comma
 
 (* FPL building blocks *)
-let keywordDeclaration = (skipString "declaration" <|> skipString "dec") .>> CW 
+let keywordDeclaration = (skipString "declaration" <|> skipString "dec") .>> SW 
 
 let varDeclBlock = positions (CW >>. keywordDeclaration >>. (many ((tilde >>. namedVariableDeclaration <|> statement) .>> CW)) .>> semiColon) .>> CW |>> Ast.VarDeclBlock 
 
-let varDeclOrSpecList = opt (many1 (varDeclBlock))
+let varDeclOrSpecList = opt (many1 (varDeclBlock)) 
 (*To simplify the syntax definition, we do not define separate
 FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
 The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
@@ -395,16 +393,16 @@ let conclusion = CW >>. (keywordConclusion >>. colon >>. predicate)
 let premiseConclusionBlock = leftBraceCommented >>. varDeclOrSpecList .>>. premise .>>. conclusion .>> commentedRightBrace
 
 (* FPL building blocks - rules of reference *)
-let keywordInference = (skipString "inference" <|> skipString "inf") .>> IW 
+let keywordInference = (skipString "inference" <|> skipString "inf") .>> SW 
 let signatureWithPremiseConclusionBlock = signature .>>. premiseConclusionBlock |>> Ast.SignatureWithPreConBlock
 let ruleOfInference = positions (keywordInference >>. signatureWithPremiseConclusionBlock) |>> Ast.RuleOfInference
 
 (* FPL building blocks - Theorem-like statements and conjectures *)
-let keywordTheorem = (skipString "theorem" <|> skipString "thm") .>> IW
-let keywordLemma = (skipString "lemma" <|> skipString "lem") .>> IW
-let keywordProposition = (skipString "proposition" <|> skipString "prop") .>> IW
-let keywordCorollary = (skipString "corollary" <|> skipString "cor") .>> IW
-let keywordConjecture = (skipString "conjecture" <|> skipString "conj") .>> IW
+let keywordTheorem = (skipString "theorem" <|> skipString "thm") .>> SW
+let keywordLemma = (skipString "lemma" <|> skipString "lem") .>> SW
+let keywordProposition = (skipString "proposition" <|> skipString "prop") .>> SW
+let keywordCorollary = (skipString "corollary" <|> skipString "cor") .>> SW
+let keywordConjecture = (skipString "conjecture" <|> skipString "conj") .>> SW
 
 let theorem = positions (keywordTheorem >>. signatureWithPremiseConclusionBlock) |>> Ast.Theorem
 let lemma = positions (keywordLemma >>. signatureWithPremiseConclusionBlock) |>> Ast.Lemma
@@ -418,7 +416,7 @@ let corollary = positions (keywordCorollary >>. corollarySignature .>>. premiseC
 
 (* FPL building blocks - Axioms *)
 
-let keywordAxiom = (skipString "axiom" <|> skipString "ax" <|> skipString "postulate" <|> skipString "post") >>. IW
+let keywordAxiom = (skipString "axiom" <|> skipString "ax" <|> skipString "postulate" <|> skipString "post") >>. SW
 let axiomBlock = leftBraceCommented >>. varDeclOrSpecList .>>. commentedPredicate .>> commentedRightBrace
 
 let axiom = positions (keywordAxiom >>. signature .>> IW .>>. axiomBlock) |>> Ast.Axiom
@@ -430,13 +428,13 @@ let keywordIntrinsic = (skipString "intrinsic" <|> skipString "intr") .>> CW >>%
 let predContent = varDeclOrSpecList .>>. commentedPredicate |>> Ast.DefPredicateContent
 
 let classContent = varDeclOrSpecList .>>. keywordSelf |>> Ast.DefClassContent
-let keywordConstructor = (skipString "constructor" <|> skipString "ctor") .>> IW
+let keywordConstructor = (skipString "constructor" <|> skipString "ctor") .>> SW
 let constructorBlock = leftBraceCommented >>. varDeclOrSpecList .>>. keywordSelf .>> commentedRightBrace 
 let constructor = positions (keywordConstructor >>. signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
-let keywordOptional = positions (skipString "optional" <|> skipString "opt") .>> IW >>% Ast.Optional
-let keywordMandatory = positions (skipString "mandatory" <|> skipString "mand") .>> IW >>% Ast.Optional
+let keywordOptional = positions (skipString "optional" <|> skipString "opt") .>> SW >>% Ast.Optional
+let keywordMandatory = positions (skipString "mandatory" <|> skipString "mand") .>> SW >>% Ast.Optional
 
 let predInstanceBlock = leftBraceCommented >>. (keywordIntrinsic <|> predContent) .>> commentedRightBrace
 let predicateInstance = positions (keywordPredicate >>. signature .>>. (CW >>. predInstanceBlock)) |>> Ast.PredicateInstance
@@ -468,13 +466,13 @@ let propertyList = opt (many1 (property .>> CW))
 
 *)
 // justifying proof arguments can be the identifiers of Rules of References, conjectures, theorem-like statements, or axioms
-let keywordRevoke = (skipString "revoke" <|> skipString "rev") .>> IW 
+let keywordRevoke = (skipString "revoke" <|> skipString "rev") .>> SW 
 let revokeArgument = positions (keywordRevoke >>. argumentIdentifier) |>> Ast.RevokeArgument 
 let premiseOfToBeProvedTheorem = positions keywordPremise |>> Ast.PremiseReference 
 let conclusionOfToBeProvedTheorem = positions keywordConclusion |>> Ast.ConclusionReference 
 let premiseOrOtherPredicate = premiseOfToBeProvedTheorem <|> predicate
     
-let keywordAssume = skipString "assume" <|> skipString "ass" .>> IW 
+let keywordAssume = skipString "assume" <|> skipString "ass" .>> SW 
 let assumeArgument = positions (keywordAssume >>. premiseOrOtherPredicate) |>> Ast.AssumeArgument
 let keywordTrivial  = positions (skipString "trivial") .>> IW |>> Ast.Trivial
 let keywordQed  = positions (skipString "qed") .>> IW |>> Ast.Qed
@@ -492,7 +490,7 @@ let justifiedArgument = positions ((justification .>> vDash .>> IW) .>>. argumen
 let argument = assumeArgument <|> justifiedArgument
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. argument) .>> IW |>> Ast.Argument
 let proofArgumentList = many1 (CW >>. proofArgument)
-let keywordProof = (skipString "proof" <|> skipString "prf") .>> IW 
+let keywordProof = (skipString "proof" <|> skipString "prf") .>> SW 
 let proofBlock = (leftBraceCommented >>. varDeclOrSpecList) .>>. (proofArgumentList .>> commentedRightBrace)
 let proof = positions ((keywordProof >>. referencingIdentifier) .>>. (IW >>. proofBlock)) |>> Ast.Proof
 
@@ -507,7 +505,7 @@ let functionalTermDefinitionBlock = leftBraceCommented  >>. ((keywordIntrinsic <
 let definitionFunctionalTerm = positions ((functionalTermSignature .>> CW) .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
-let keywordClass = (skipString "class" <|> skipString "cl") >>. IW
+let keywordClass = (skipString "class" <|> skipString "cl") >>. SW
 
 let constructorList = many1 (constructor .>> CW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
@@ -518,7 +516,7 @@ let classTypeWithModifierList = sepBy1 classTypeWithModifier comma
 let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. classTypeWithModifierList
 let definitionClass = positions ((classSignature .>> CW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
-let keywordDefinition = (skipString "definition" <|> skipString "def") >>. IW
+let keywordDefinition = (skipString "definition" <|> skipString "def") >>. SW
 let definition = keywordDefinition >>. choice [
     definitionClass
     definitionPredicate
@@ -528,7 +526,7 @@ let definition = keywordDefinition >>. choice [
 
 (* Localizations *)
 // Localizations provide a possibility to automatically translate FPL expressions into natural languages
-let keywordLocalization = (skipString "localization" <|> skipString "loc") >>. IW
+let keywordLocalization = (skipString "localization" <|> skipString "loc") >>. SW
 let localizationLanguageCode: Parser<string,unit> = regex @"[a-z]{3}" <?> "<ISO 639 language code>"
 let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<\"language-specific string\">" |>> Ast.LocalizationString
 
@@ -557,79 +555,66 @@ let buildingBlock = choice [
     proof
     ruleOfInference
     localization
+    usesClause
 ]
 
 let buildingBlockList = many (CW >>. buildingBlock .>> IW)
 
 (* Namespaces *)
-let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (CW >>. opt usesClause) .>>. (CW >>. buildingBlockList) .>> commentedRightBrace
+let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (CW >>. buildingBlockList) .>> commentedRightBrace
 let fplNamespace = positions (namespaceIdentifier .>>. (CW >>. namespaceBlock)) .>> IW |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
-
-let fplParserDef (input: string) (startIndexOfInput:int) (maxIndex:int) = tryParse definition ad input startIndexOfInput maxIndex "DEF000" -1
-let fplParserProperty (input: string) (startIndexOfInput:int) (maxIndex:int) = tryParse property ad input startIndexOfInput maxIndex "PRP000" -1
-let fplParserAxiom (input: string)  (startIndexOfInput:int) (maxIndex:int) = tryParse axiom ad input startIndexOfInput maxIndex "AXI000" -1
-let fplParserTheorem (input: string)  (startIndexOfInput:int) (maxIndex:int) = tryParse theorem ad input startIndexOfInput maxIndex "THM000" -1
-let fplParserProposition (input: string)  (startIndexOfInput:int) (maxIndex:int) = tryParse proposition ad input startIndexOfInput maxIndex "THM000" -1
-let fplParserLemma (input: string) (startIndexOfInput:int) (maxIndex:int) = tryParse lemma ad input startIndexOfInput maxIndex "THM000" -1
-let fplParserCorollary (input: string) (startIndexOfInput:int) (maxIndex:int) = tryParse corollary ad input startIndexOfInput maxIndex "THM000" -1
-let fplParserConjecture (input: string) (startIndexOfInput:int) (maxIndex:int) = tryParse conjecture ad input startIndexOfInput maxIndex "CNJ000" -1
-let fplParserDeclaration (input: string) (startIndexOfInput:int) (maxIndex:int) = tryParse varDeclBlock ad input startIndexOfInput maxIndex "VAR000" -1
-let fplParserConstructor (input: string) (startIndexOfInput:int) (maxIndex:int) = tryParse constructor ad input startIndexOfInput maxIndex "CTR000" -1
-let fplParserProof (input: string) (startIndexOfInput:int) (maxIndex:int) = tryParse proof ad input startIndexOfInput maxIndex "PRF000" -1
-let fplParserInference (input: string) (startIndexOfInput:int) (maxIndex:int) = tryParse ruleOfInference ad input startIndexOfInput maxIndex "INF000" -1
-let fplParserLocalization (input: string) (startIndexOfInput:int) (maxIndex:int) = tryParse localization ad input startIndexOfInput maxIndex "LOC000" -1
-let fplUsesClause (input: string) (startIndexOfInput:int) (maxIndex:int) = tryParse usesClause ad input startIndexOfInput maxIndex "USE000" -1
 
 //let fplParser (input: string) = tryParse ast input "" (int64 0) 1 
 let fplParserAst (input: string) = tryParse ast ad input 0 input.Length "SYN000" -1
 
 let fplParser (input:string) = 
     let matchArray = stringMatches input
-    let mutable lastSuccessfullIndex = 0
-    let parserLastPos (_, lastIndex) =  lastSuccessfullIndex <- lastIndex
     for i in [0..matchArray.Length-1] do
         let index, subString = matchArray[i]
-        let maxIndex = 
+        let nextIndex = 
             if i + 1 < matchArray.Length-1 then
                 let nextIndex, s = matchArray[i+1]
                 nextIndex
             else
                 subString.Length
-        if index > lastSuccessfullIndex then
+        if index > 0 then
             match subString with
             | v when v.StartsWith("definition") || v.StartsWith("def") 
-                -> fplParserDef v index maxIndex |> parserLastPos
+                -> tryParse definition ad v index nextIndex "DEF000" -1 
             | v when v.StartsWith("mand") || v.StartsWith("opt") 
-                -> fplParserProperty v index maxIndex |> parserLastPos
+                -> tryParse property ad v index nextIndex "PRP000" -1 
             | v when v.StartsWith("ax") || v.StartsWith("post") 
-                -> fplParserAxiom v index maxIndex |> parserLastPos
+                -> tryParse axiom ad v index nextIndex "AXI000" -1 
             | v when v.StartsWith("theorem") || v.StartsWith("thm") 
-                -> fplParserTheorem v index maxIndex |> parserLastPos
+                -> tryParse theorem ad v index nextIndex "THM000" -1 
             | v when v.StartsWith("prop")
-                -> fplParserProposition v index maxIndex |> parserLastPos
+                -> tryParse proposition ad v index nextIndex "THM000" -1 
             | v when v.StartsWith("lem") 
-                -> fplParserLemma v index maxIndex |> parserLastPos
+                -> tryParse lemma ad v index nextIndex "THM000" -1 
             | v when v.StartsWith("cor") 
-                -> fplParserCorollary v index maxIndex |> parserLastPos
+                -> tryParse corollary ad v index nextIndex "COR000" -1 
             | v when v.StartsWith("conj") 
-                -> fplParserConjecture v index maxIndex |> parserLastPos
+                -> tryParse conjecture ad v index nextIndex "CNJ000" -1
             | v when v.StartsWith("dec") 
-                -> fplParserDeclaration v index maxIndex |> parserLastPos
+                -> tryParse varDeclBlock ad v index nextIndex "VAR000" -1 
             | v when v.StartsWith("constructor") || v.StartsWith("ctor") 
-                -> fplParserConstructor v index maxIndex |> parserLastPos
+                -> tryParse constructor ad v index nextIndex "CTR000" -1 
             | v when v.StartsWith("proof") || v.StartsWith("prf") 
-                -> fplParserProof v index maxIndex |> parserLastPos
+                -> tryParse proof ad v index nextIndex "PRF000" -1 
             | v when v.StartsWith("inf") 
-                -> fplParserInference v index maxIndex |> parserLastPos
+                -> tryParse ruleOfInference ad v index nextIndex "INF000" -1 
             | v when v.StartsWith("loc") 
-                -> fplParserLocalization v index maxIndex |> parserLastPos
-            | _ -> fplParserAst subString |> parserLastPos
+                -> tryParse localization ad v index nextIndex "LOC000" -1 
+            | v when v.StartsWith("uses") 
+                -> tryParse usesClause ad v index nextIndex "USE000" -1 
+            | v when v.StartsWith("and")  || v.StartsWith("or") || v.StartsWith("impl") || v.StartsWith("iif") || v.StartsWith("xor") || v.StartsWith("not") || v.StartsWith("all") || v.StartsWith("ex") || v.StartsWith("is")   
+                -> tryParse compoundPredicate ad v index nextIndex "PRE000" -1 
+            | _ -> tryParse ast ad input index nextIndex "SYN000" -1 
             |> ignore
     fplParserAst input 
 
 let parserDiagnostics = ad
-
 
 

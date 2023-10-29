@@ -1,12 +1,15 @@
-Fpl.LinAlg
+Fpl.LinAlg 
 {
-    uses Fpl.Commons, Fpl.Commons.Structures, Fpl.SetTheory.ZermeloFraenkel, Fpl.Algebra.Structures
+    uses Fpl.Commons 
+    uses Fpl.Commons.Structures 
+    uses Fpl.SetTheory.ZermeloFraenkel
+    uses Fpl.Algebra.Structures 
 
 
-    def class FieldPowerN: Set
+    def class FieldPowerN: Sets 
     {
         dec
-            ~myField: Field
+            ~myField: Field 
             ~addInField: BinOp
             ~mulInField: BinOp
         ;
@@ -17,11 +20,11 @@ Fpl.LinAlg
             n: Nat
         )
         {
-            dec
+            dec s
                 myField := field
                 addInField := myField.AddOp()
                 mulInField := myField.MulOp()
-                assert NotEqual(n, Zero())
+                assert NotEqual(n, Zero(),)
                 self:=SetBuilder( myField[1 ~ n], true)
                 self!Set()
             ;
@@ -31,7 +34,7 @@ Fpl.LinAlg
 
         mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
         {
-            decs
+            dec
                 ~result: tplFieldElem[from ~ to] 
                 result := addInField(v[from ~ to],w[from ~ to])
             ;
@@ -40,6 +43,7 @@ Fpl.LinAlg
 
     }
     
+
     lemma VecAddIsCommutative()
     {
         dec

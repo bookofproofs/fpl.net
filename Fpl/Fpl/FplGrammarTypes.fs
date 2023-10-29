@@ -28,7 +28,7 @@ type Ast =
     | ExtensionRegex of string
     | ExtensionType of Positions * Ast 
     | ExtensionBlock of Positions * (Ast * Ast)
-    | UsesClause of Positions * Ast list
+    | UsesClause of Positions * Ast
     | LeftClosed
     | LeftOpen 
     | RightClosed
@@ -129,7 +129,7 @@ type Ast =
     | JustifiedArgument of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
     | Proof of Positions * ((Ast * Ast list) * (Ast list option * Ast list))
-    | Namespace of Positions * (Ast * ((Ast option * Ast option) * Ast list))
+    | Namespace of Positions * (Ast * (Ast option * Ast list))
     | AST of Positions * Ast
     | Escape // used to replace AST subnodes when we recover from an error
     | SomeString of string // used to replace AST for strings subnodes when we recover from an error

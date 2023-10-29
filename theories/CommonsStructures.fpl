@@ -1,6 +1,8 @@
 Fpl.Commons.Structures
 {
-    uses Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel, Fpl.Arithmetics.Peano
+    uses Fpl.Commons 
+    uses Fpl.SetTheory.ZermeloFraenkel 
+    uses Fpl.Arithmetics.Peano
 
 
 
@@ -119,23 +121,23 @@ Fpl.Commons.Structures
 
         mandatory pred AllTuplesIn()
         {
-            dec
+            dec 
                 ~tupleElem: Set
                 ~i: Nat
             ;
-            and
+            and 
             (
                 is(@self,Set),
                 all tupleElem
                 (
-                    impl
+                    impl 
                     (
                         In(tupleElem,@self),
                         and (
                             is(tupleElem,Tuple[myFrom~myLength]),
-                            all i in [1~myLength]
+                            all i in [1~myLength] 
                             (
-                                In(tupleElem<i>,@self<i>)
+                                In(tupleElem<i>,@self<i>) 
                             )
                         )
                     )

@@ -129,7 +129,7 @@ The parser backtracked after:
             expected: string
         ) =
         let pos = Position("",0,0,0)
-        let actual, pos = replaceFParsecErrMsgForFplParser input inputChoices pos
+        let actual = replaceFParsecErrMsgForFplParser input inputChoices pos
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
 
     [<TestMethod>]

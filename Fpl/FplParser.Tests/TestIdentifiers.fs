@@ -29,21 +29,21 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestUsesClause () =
-        let result = run usesClause "uses  Fpl.Test alias MyAlias , Fpl.Test , Fpl.Test.Test1 "
+        let result = run buildingBlockList "uses  Fpl.Test alias MyAlias uses Fpl.Test uses Fpl.Test.Test1 "
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestUsesClause01 () =
-        let result = run usesClause "uses Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel"
+        let result = run buildingBlockList "uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestUsesClause02 () =
-        let result = run usesClause "uses Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel alias ZF, Fpl.Arithmetics.Peano alias A"
+        let result = run buildingBlockList "uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel alias ZF uses  Fpl.Arithmetics.Peano alias A"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

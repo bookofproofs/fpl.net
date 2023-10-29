@@ -41,6 +41,7 @@ type DiagnosticCode =
         | "PRP000" -> "Syntax error in property" + ": " + this.OrigMsg 
         | "AXI000" -> "Syntax error in axiom" + ": " + this.OrigMsg 
         | "THM000" -> "Syntax error in theorem" + ": " + this.OrigMsg 
+        | "COR000" -> "Syntax error in corollary" + ": " + this.OrigMsg 
         | "CNJ000" -> "Syntax error in conjecture" + ": " + this.OrigMsg 
         | "VAR000" -> "Syntax error in variable declaration and/or specification" + ": " + this.OrigMsg 
         | "CTR000" -> "Syntax error in constructor" + ": " + this.OrigMsg 
@@ -48,6 +49,7 @@ type DiagnosticCode =
         | "INF000" -> "Syntax error in rule of inference" + ": " + this.OrigMsg 
         | "LOC000" -> "Syntax error in localization" + ": " + this.OrigMsg 
         | "USE000" -> "Syntax error in uses clause" + ": " + this.OrigMsg 
+        | "PRE000" -> "Syntax error in predicate" + ": " + this.OrigMsg 
         | "SYN000" -> "Other syntax error" + ": " + this.OrigMsg 
         | _ -> failwith ("Unknown code " + this.Code)
 
@@ -140,9 +142,9 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Pos
         // Replace the significant characters with quoted version in the first line
         let quotedFirstLine = sprintf "'%s'" significantCharacters
 
-        quotedFirstLine + Environment.NewLine + "Expecting: " + choices, pos
+        quotedFirstLine + Environment.NewLine + "Expecting: " + choices
     else
-        errMsg, pos
+        errMsg
 
 let split = [|" or "; "or" + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
 let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
@@ -232,8 +234,8 @@ let mapErrMsgToRecText (input: string) (errMsg: string) (pos:Position) =
     let backtrackingFreeErrMsg,  backtrackingFreePos = extractBacktrackingFreeErrMsgAndPos input errMsg pos 
 
     let choices = retrieveExpectedParserChoices backtrackingFreeErrMsg
-    let newErrMsg, modifiedPos = replaceFParsecErrMsgForFplParser backtrackingFreeErrMsg choices backtrackingFreePos
-    (Some choices, newErrMsg, modifiedPos)
+    let newErrMsg = replaceFParsecErrMsgForFplParser backtrackingFreeErrMsg choices backtrackingFreePos
+    newErrMsg
 
 /// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines
 let replaceLinesWithSpaces (input: string) (pattern: string) =
@@ -261,7 +263,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput maxIndex (
     | Success(result, restInput, userState) -> 
         result, int userState.Index
     | Failure(errorMsg, restInput, userState) ->
-        let (choices, newErrMsg, backtrackingFreePos) = mapErrMsgToRecText input errorMsg restInput.Position
+        let newErrMsg = mapErrMsgToRecText input errorMsg restInput.Position
 
         let correctedPosition = 
             Position(
@@ -276,13 +278,19 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput maxIndex (
             Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
 
         ad.AddDiagnostic diagnostic
-        if lastCorrectedPosition = correctedPosition.Index || correctedPosition.Index >= maxIndex || (restInput.Position.Index >= startIndexOfInput && startIndexOfInput > 0) then
-            Ast.Error, int diagnostic.Position.Index
+        let cond0 = lastCorrectedPosition = correctedPosition.Index
+        let cond1 = restInput.Position.Index < maxIndex
+        let cond2 = startIndexOfInput <= restInput.Position.Index 
+        let cond2a = not (restInput.Position.Index < maxIndex)
+        let cond3 = (int64 0 < startIndexOfInput)
+        let cond = cond0 || cond1 || (cond2 && cond2a && cond3)
+        if cond then
+            Ast.Error, int maxIndex
         else
             let preErrorString = input.Substring(0, int restInput.Position.Index)
             let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
 
-            tryParse someParser ad (preErrorString + postErrorString) startIndexOfInput maxIndex code correctedPosition.Index
+            tryParse someParser ad (preErrorString + postErrorString) startIndexOfInput maxIndex code correctedPosition.Index 
 
 /// A simple helper function for printing trace information to the console (taken from FParsec Docs)
 let (<!>) (p: Parser<_,_>) label : Parser<_,_> =
@@ -308,9 +316,9 @@ let preParsePreProcess (input:string) =
     removeFplComments input
 
 let stringMatches (inputString: string) =
-    let pattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc)\s+"
+    let pattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is)\W"
     let regex = new Regex(pattern)
-    let matchList = regex.Matches(inputString) |> Seq.cast<Match> |> Seq.toList
+    let matchList = regex.Matches(preParsePreProcess inputString) |> Seq.cast<Match> |> Seq.toList
     let rec collectMatches matchList index =
         
         match (matchList:Match list) with
@@ -320,4 +328,12 @@ let stringMatches (inputString: string) =
             (index, inputString.Substring(index)) :: collectMatches ms m.Index
     collectMatches matchList 0 
     |> List.toArray
+    |> Array.filter (fun (i, s) -> 
+            let preCharacter = 
+                if i > 0 then
+                    inputString.Substring(i - 1, 1)
+                else
+                    "#"
+            Regex.IsMatch(preCharacter, "\W")
+        )
 

@@ -89,7 +89,7 @@ type TestDefinitionFunctionalTerms01 () =
                 i, result: Nat
             
                 result:=Zero()
-                for  i in[from~to]
+                for  i in [from~to]
                 (
                     result:=Add(result,arr<i>)
                 )

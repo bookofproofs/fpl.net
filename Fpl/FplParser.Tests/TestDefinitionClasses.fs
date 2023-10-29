@@ -58,10 +58,22 @@ type TestClasses () =
         let result = run definitionClass """class FieldPowerN: Set
         {
             // intrinsic classes with declarations or specifications not allowed
-            dec d:Nat 
+            dec ~d:Nat 
             d:=1
             ;
             intr
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestClass01d () =
+        let result = run definitionClass """class FieldPowerN: Set
+        {
+            // intrinsic classes with declarations or specifications not allowed
+            decs 
+
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
