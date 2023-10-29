@@ -226,9 +226,9 @@ type TestDefinitionPredicates () =
         
     [<TestMethod>]
     member this.TestDefinitionPredicate12 () =
+        // a predicate can be intrinsic 
         let result = run definitionPredicate """pred T()
         {
-            // a predicate can be intrinsic 
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -237,11 +237,10 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate12a () =
+        // a predicate can be intrinsic 
         let result = run definitionPredicate """pred T()
         {
-            // a predicate can be intrinsic with some following comments
-            intrinsic
-            // a comment
+            intr
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -285,9 +284,9 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate13 () =
+        // a predicate can be intrinsic with some following properties 
         let result = run definitionPredicate """pred T()
         {
-            // a predicate can be intrinsic with some following properties 
             intrinsic
 
             mand func T() -> obj
@@ -333,9 +332,9 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate15 () =
+        // a predicate with some proceeding declarations or specifications
         let result = run definitionPredicate """pred T()
         {
-            // a predicate with some proceeding declarations or specifications
             dec ~a:obj;
             true
         }"""
@@ -357,9 +356,9 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate17 () =
+        // a predicate with some proceeding declarations or specifications
         let result = run definitionPredicate """pred T()
         {
-            // a predicate with some proceeding declarations or specifications
             dec ~a:obj;
             true
         }"""
@@ -369,9 +368,9 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate18 () =
+        // a predicate 
         let result = run definitionPredicate """pred T()
         {
-            // a predicate 
             true
         }"""
         let actual = sprintf "%O" result
@@ -381,9 +380,9 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate19 () =
+        // a predicate with some succeeding properties
         let result = run definitionPredicate """pred T()
         {
-            // a predicate with some succeeding properties
             true 
 
 

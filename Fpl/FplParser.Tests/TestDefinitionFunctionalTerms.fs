@@ -225,9 +225,9 @@ type TestDefinitionFunctionalTerms01 () =
         
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm12 () =
+        // a functional term can be intrinsic 
         let result = run definitionFunctionalTerm """func T() -> obj
         {
-            // a functional term can be intrinsic 
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -236,11 +236,10 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm12a () =
+        // a functional term can be intrinsic 
         let result = run definitionFunctionalTerm """func T() -> obj
         {
-            // a functional term can be intrinsic with some following comments
-            intrinsic
-            // a comment
+            intr
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -285,9 +284,9 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm13 () =
+        // a functional term can be intrinsic with some following properties 
         let result = run definitionFunctionalTerm """func T() -> obj
         {
-            // a functional term can be intrinsic with some following properties 
             intrinsic
 
             mand func T() -> obj
@@ -333,9 +332,9 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm15 () =
+        // a functional term with some proceeding declarations or specifications
         let result = run definitionFunctionalTerm """func T() -> obj
         {
-            // a functional term with some proceeding declarations or specifications
             dec ~a:obj;
             return x
         }"""
@@ -345,9 +344,9 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm16 () =
+        // a functional term with some proceeding declarations or specifications
         let result = run definitionFunctionalTerm """func T() -> obj
         {
-            // a functional term with some proceeding declarations or specifications
             dec ~a:obj;
             return x
         }"""
@@ -357,9 +356,9 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm17 () =
+        // a functional term with some proceeding declarations or specifications
         let result = run definitionFunctionalTerm """func T() -> obj
         {
-            // a functional term with some proceeding declarations or specifications
             dec ~a:obj;
             return x
         }"""
@@ -369,9 +368,9 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm18 () =
+        // a functional term 
         let result = run definitionFunctionalTerm """func T() -> obj
         {
-            // a functional term 
             return x
         }"""
         let actual = sprintf "%O" result
@@ -381,9 +380,9 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm19 () =
+        // a functional term with some succeeding properties
         let result = run definitionFunctionalTerm """func T() -> obj
         {
-            // a functional term with some succeeding properties
             return x 
 
 
@@ -405,9 +404,9 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm20 () =
+        // properties cannot succeed a return statement within a functional term definition
         let result = run definitionFunctionalTerm """func T() -> obj
         {
-            // properties cannot succeed a return statement within a functional term definition
             optional pred T() 
 	        {
                 true

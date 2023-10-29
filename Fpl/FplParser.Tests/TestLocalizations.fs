@@ -81,12 +81,10 @@ type TestLocalizations () =
 
     [<TestMethod>]
     member this.TestLocalization02 () =
+        // comment
         let result = run localization """loc iif(x,y) :=
-            // comment
             ~tex: x "\Leftrightarrow" y
-            // comment
             ~eng: x " if and only if " y
-            // comment
             ~ger: x " dann und nur dann wenn " y
             ;"""
         let actual = sprintf "%O" result

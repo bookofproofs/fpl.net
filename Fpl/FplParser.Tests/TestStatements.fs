@@ -90,6 +90,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestCases01 () =
+        // else case addressed using a python delegate
         let result = run casesStatement """cases
                 (
                     | Equal(x,0) :
@@ -98,8 +99,7 @@ type TestStatements () =
                         self := Succ(Zero())
                     | Equal(x,2) :
                         self := Succ(Succ(Zero()))
-                    ? // else case addressed using a python delegate
-                        self := Succ(del.decrement(x))
+                    ? self := Succ(del.decrement(x))
                 )"""
         let actual = sprintf "%O" result
         printf "%O" actual

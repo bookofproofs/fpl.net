@@ -1141,11 +1141,9 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
     [<TestMethod>]
     member this.TestTryParseAxiom001Diag () =
         ad.Clear()
-        let input = """TestNamespace {
-    theory {   
+        let input = """T {
         ax
-    }
-    y
+        y
 }"""
         let result = fplParser input
         let actual = sprintf "%O" result

@@ -88,11 +88,11 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor02 () =
+        // constructors must contain the call(s) of the parent constructors
+        // of all parent classes of the class; the call's syntax starts
+        // with self followed by an exclamation mark and name of the classes constructor
         let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
-                // constructors must contain the call(s) of the parent constructors
-                // of all parent classes of the class; the call's syntax starts
-                // with self followed by an exclamation mark and name of the classes constructor
                 dec ~a:obj  self!AlgebraicStructure(x,op);
                 self
             }"""
@@ -102,11 +102,11 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor03 () =
+        // constructors must contain the call(s) of the parent constructors
+        // of all parent classes of the class; the call's syntax starts
+        // with self followed by an exclamation mark and name of the classes constructor
         let result = run constructor """constructor Magma(x: tplSet, op: BinOp)
             {
-                // constructors must contain the call(s) of the parent constructors
-                // of all parent classes of the class; the call's syntax starts
-                // with self followed by an exclamation mark and name of the classes constructor
                 dec ~a:obj
                     self!AlgebraicStructure(x,op)
                 ;

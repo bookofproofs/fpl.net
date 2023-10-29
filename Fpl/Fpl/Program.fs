@@ -5,13 +5,10 @@ open FParsec
 open System.Text.RegularExpressions
 
 
-let input = """    loc NotEqual(x,y) :=
-        ~tex: x "\neq" y 
-        ~eng: x "is unequal" y 
-        ~ger: x "ist ungleich" y
-        ~pol: x ( "nie równa się" | "nie równe" ) y
-        ;
-"""
+let input = """T{
+    ax
+    s
+}"""
 
 let result = fplParser input
 

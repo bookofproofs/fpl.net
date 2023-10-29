@@ -63,12 +63,6 @@ let IW = spaces <?> "<whitespace>"
 
 let SW = spaces1 <?> "<significant whitespace>"
 
-let inlineComment = pstring "//" >>. skipManyTill anyChar (skipNewline) <?> "<inline comment>" |>> ignore 
-
-let blockComment = (pstring "/*" >>. (skipManyTill anyChar (pstring "*/"))) <?> "<block comment>" |>> ignore 
-
-let CW = many (choice [ blockComment; inlineComment; SW ])
-
 // -----------------------------------------------------
 // Extensions of the FPL language (have to be dynamic)! Lacking a pre-processor, we put the rules
 // from the Proof of Concept of FPL code manually into the EBNF of the core FPL grammar.
@@ -263,7 +257,7 @@ let simpleVariableType = positions (choice [ keywordIndex; keywordFunction; keyw
 
 let variableType = positions (simpleVariableType .>>. opt paramTuple .>> IW) |>> Ast.VariableType
 
-let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType .>> CW) |>> Ast.NamedVarDecl
+let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
 
 paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) |>> Ast.ParamTuple
@@ -279,26 +273,25 @@ let assignmentStatement = positions ((predicateWithQualification .>> IW .>> colo
 
 let variableRange = choice [ entity ; boundedRange] 
 
-let leftBraceCommented = (leftBrace >>. CW)
-let commentedRightBrace = (CW .>> rightBrace) 
+let spacesRightBrace = (IW .>> rightBrace) 
 
-let keywordReturn = CW >>. (skipString "return" <|> skipString "ret") .>> CW 
+let keywordReturn = IW >>. (skipString "return" <|> skipString "ret") .>> IW 
 
-let defaultResult = positions (CW >>. statementList) |>> Ast.DefaultResult
-let conditionFollowedByResult = positions ((case >>. predicate .>> colon) .>>. (CW >>. statementList)) |>> Ast.ConditionFollowedByResult
-let conditionFollowedByResultList = many1 (CW >>. conditionFollowedByResult)
+let defaultResult = positions (IW >>. statementList) |>> Ast.DefaultResult
+let conditionFollowedByResult = positions ((case >>. predicate .>> colon) .>>. (IW >>. statementList)) |>> Ast.ConditionFollowedByResult
+let conditionFollowedByResultList = many1 (IW >>. conditionFollowedByResult)
 
-let elseStatement = elseCase >>. CW >>. defaultResult .>> CW
-let casesStatement = positions (((keywordCases >>. CW >>. leftParen >>. CW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
+let elseStatement = elseCase >>. IW >>. defaultResult .>> IW
+let casesStatement = positions (((keywordCases >>. IW >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
 
-let inDomain = positions (keywordIn >>. (simpleVariableType <|> variableRange) .>> CW) |>> Ast.Domain
+let inDomain = positions (keywordIn >>. (simpleVariableType <|> variableRange) .>> IW) |>> Ast.Domain
 let variableInOptDomain = ( (variable .>> IW) .>>. opt inDomain) .>> IW
 let variableListInOptDomain = ( variableList .>>. opt inDomain) .>> IW
 let variableListInOptDomainList = (sepBy1 variableListInOptDomain comma) .>> IW
 
 let entityInDomain = ( entity .>>. inDomain ) .>> IW
 let entityInVariableRange = ( entity .>>. (keywordIn >>. variableRange)) .>> IW
-let forInBody = (entityInVariableRange .>> CW) .>>. (leftParen >>. CW >>. statementList) .>> (CW >>. rightParen)
+let forInBody = (entityInVariableRange .>> IW) .>>. (leftParen >>. IW >>. statementList) .>> (IW >>. rightParen)
 let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 
 //// Difference of assertion to an axiom: axiom's is followed by a signature of a predicate (i.e. with possible parameters),
@@ -308,7 +301,7 @@ let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = positions (keywordAssert >>. predicate) |>> Ast.Assertion
 
-let callConstructorParentClass = positions (keywordSelfExclamation >>. specificClassType .>>. argumentTuple .>> CW) |>> Ast.ParentConstructorCall
+let callConstructorParentClass = positions (keywordSelfExclamation >>. specificClassType .>>. argumentTuple .>> IW) |>> Ast.ParentConstructorCall
 
 let statement = 
     (choice [
@@ -320,7 +313,7 @@ let statement =
         fplDelegate
     ])
 
-statementListRef.Value <- many (CW >>. statement .>> CW)
+statementListRef.Value <- many (IW >>. statement .>> IW)
 
 (* Predicates *)
 
@@ -380,17 +373,17 @@ predicateList1Ref.Value <- sepBy1 predicate comma
 (* FPL building blocks *)
 let keywordDeclaration = (skipString "declaration" <|> skipString "dec") .>> SW 
 
-let varDeclBlock = positions (CW >>. keywordDeclaration >>. (many ((tilde >>. namedVariableDeclaration <|> statement) .>> CW)) .>> semiColon) .>> CW |>> Ast.VarDeclBlock 
+let varDeclBlock = positions (IW >>. keywordDeclaration >>. (many ((tilde >>. namedVariableDeclaration <|> statement) .>> IW)) .>> semiColon) .>> IW |>> Ast.VarDeclBlock 
 
 let varDeclOrSpecList = opt (many1 (varDeclBlock)) 
 (*To simplify the syntax definition, we do not define separate
 FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
 The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
 However, there is a syntactical simplification of the signature*)
-let commentedPredicate = CW >>. predicate
-let premise = CW >>. (keywordPremise >>. colon >>. predicate) 
-let conclusion = CW >>. (keywordConclusion >>. colon >>. predicate) 
-let premiseConclusionBlock = leftBraceCommented >>. varDeclOrSpecList .>>. premise .>>. conclusion .>> commentedRightBrace
+let spacesPredicate = IW >>. predicate
+let premise = IW >>. (keywordPremise >>. colon >>. predicate) 
+let conclusion = IW >>. (keywordConclusion >>. colon >>. predicate) 
+let premiseConclusionBlock = leftBrace >>. varDeclOrSpecList .>>. premise .>>. conclusion .>> spacesRightBrace
 
 (* FPL building blocks - rules of reference *)
 let keywordInference = (skipString "inference" <|> skipString "inf") .>> SW 
@@ -417,35 +410,35 @@ let corollary = positions (keywordCorollary >>. corollarySignature .>>. premiseC
 (* FPL building blocks - Axioms *)
 
 let keywordAxiom = (skipString "axiom" <|> skipString "ax" <|> skipString "postulate" <|> skipString "post") >>. SW
-let axiomBlock = leftBraceCommented >>. varDeclOrSpecList .>>. commentedPredicate .>> commentedRightBrace
+let axiomBlock = leftBrace >>. varDeclOrSpecList .>>. spacesPredicate .>> spacesRightBrace
 
 let axiom = positions (keywordAxiom >>. signature .>> IW .>>. axiomBlock) |>> Ast.Axiom
 
 (* FPL building blocks - Constructors *)
 
-let keywordIntrinsic = (skipString "intrinsic" <|> skipString "intr") .>> CW >>% Ast.Intrinsic
+let keywordIntrinsic = (skipString "intrinsic" <|> skipString "intr") .>> IW >>% Ast.Intrinsic
 
-let predContent = varDeclOrSpecList .>>. commentedPredicate |>> Ast.DefPredicateContent
+let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateContent
 
 let classContent = varDeclOrSpecList .>>. keywordSelf |>> Ast.DefClassContent
 let keywordConstructor = (skipString "constructor" <|> skipString "ctor") .>> SW
-let constructorBlock = leftBraceCommented >>. varDeclOrSpecList .>>. keywordSelf .>> commentedRightBrace 
+let constructorBlock = leftBrace >>. varDeclOrSpecList .>>. keywordSelf .>> spacesRightBrace 
 let constructor = positions (keywordConstructor >>. signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
 let keywordOptional = positions (skipString "optional" <|> skipString "opt") .>> SW >>% Ast.Optional
 let keywordMandatory = positions (skipString "mandatory" <|> skipString "mand") .>> SW >>% Ast.Optional
 
-let predInstanceBlock = leftBraceCommented >>. (keywordIntrinsic <|> predContent) .>> commentedRightBrace
-let predicateInstance = positions (keywordPredicate >>. signature .>>. (CW >>. predInstanceBlock)) |>> Ast.PredicateInstance
+let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
+let predicateInstance = positions (keywordPredicate >>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
 
-let classInstanceBlock = leftBraceCommented >>. (keywordIntrinsic <|> classContent) .>> commentedRightBrace
+let classInstanceBlock = leftBrace >>. (keywordIntrinsic <|> classContent) .>> spacesRightBrace
 let classInstance = positions (variableType .>>. signature .>>. classInstanceBlock) |>> Ast.ClassInstance
 let mapping = toArrow >>. IW >>. variableType
 let functionalTermSignature = (keywordFunction >>. signature) .>>. (IW >>. mapping) .>> IW 
 
 let funcContent = varDeclOrSpecList .>>. (keywordReturn >>. (fplDelegate <|> predicateWithQualification) .>> IW) |>> Ast.DefFunctionContent
-let functionalTermInstanceBlock = leftBraceCommented >>. (keywordIntrinsic <|> funcContent) .>> commentedRightBrace
+let functionalTermInstanceBlock = leftBrace >>. (keywordIntrinsic <|> funcContent) .>> spacesRightBrace
 let functionalTermInstance = positions (functionalTermSignature .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
 
 let definitionProperty = choice [
@@ -453,9 +446,9 @@ let definitionProperty = choice [
     functionalTermInstance
     classInstance
 ]
-let propertyHeader = CW >>. (keywordOptional <|> keywordMandatory)
+let propertyHeader = IW >>. (keywordOptional <|> keywordMandatory)
 let property = positions (propertyHeader .>>. definitionProperty) |>> Ast.Property
-let propertyList = opt (many1 (property .>> CW)) 
+let propertyList = opt (many1 (property .>> IW)) 
 
 (* FPL building blocks - Proofs 
 
@@ -489,32 +482,32 @@ let justification = positions (predicateList .>> IW) |>> Ast.Justification
 let justifiedArgument = positions (justification .>>. argumentInference) |>> Ast.JustifiedArgument
 let argument = assumeArgument <|> justifiedArgument
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. argument) .>> IW |>> Ast.Argument
-let proofArgumentList = many1 (CW >>. proofArgument)
+let proofArgumentList = many1 (IW >>. proofArgument)
 let keywordProof = (skipString "proof" <|> skipString "prf") .>> SW 
-let proofBlock = (leftBraceCommented >>. varDeclOrSpecList) .>>. (proofArgumentList .>> commentedRightBrace)
+let proofBlock = (leftBrace >>. varDeclOrSpecList) .>>. (proofArgumentList .>> spacesRightBrace)
 let proof = positions ((keywordProof >>. referencingIdentifier) .>>. (IW >>. proofBlock)) |>> Ast.Proof
 
 (* FPL building blocks - Definitions *)
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
-let predicateDefinitionBlock = leftBraceCommented  >>. ((keywordIntrinsic <|> predContent) .>> CW) .>>. propertyList .>> commentedRightBrace 
-let definitionPredicate = positions (keywordPredicate >>. (signature .>> CW) .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
+let predicateDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace 
+let definitionPredicate = positions (keywordPredicate >>. (signature .>> IW) .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
-let functionalTermDefinitionBlock = leftBraceCommented  >>. ((keywordIntrinsic <|> funcContent) .>> CW) .>>. propertyList .>> commentedRightBrace
-let definitionFunctionalTerm = positions ((functionalTermSignature .>> CW) .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
+let functionalTermDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace
+let definitionFunctionalTerm = positions ((functionalTermSignature .>> IW) .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
 let keywordClass = (skipString "class" <|> skipString "cl") >>. SW
 
-let constructorList = many1 (constructor .>> CW)
+let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
-let classDefinitionBlock = leftBraceCommented  >>. ((keywordIntrinsic <|> classCompleteContent) .>> CW) .>>. propertyList .>> commentedRightBrace
+let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace
 let classTypeWithModifier = positions (varDeclModifier .>>. classType .>> IW) |>> Ast.ClassTypeWithModifier
 let classTypeWithModifierList = sepBy1 classTypeWithModifier comma
 
 let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. classTypeWithModifierList
-let definitionClass = positions ((classSignature .>> CW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
+let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString "definition" <|> skipString "def") >>. SW
 let definition = keywordDefinition >>. choice [
@@ -540,7 +533,7 @@ let ebnfFactor = choice [
 let ebnfTerm = positions (sepEndBy1 ebnfFactor SW) |>> Ast.LocalizationTerm
 ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. comma >>. IW)) |>> Ast.LocalizationTermList
 let translation = (tilde >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl
-let translationList = many1 (CW >>. translation .>> IW)
+let translationList = many1 (IW >>. translation .>> IW)
 let localization = positions (keywordLocalization >>. (predicate .>> IW .>> colonEqual) .>>. (translationList .>> IW .>> semiColon)) .>> IW |>> Ast.Localization
 
 // FPL building blocks can be definitions, axioms, Theorem-proof blocks and conjectures
@@ -558,18 +551,19 @@ let buildingBlock = choice [
     usesClause
 ]
 
-let buildingBlockList = many (CW >>. buildingBlock .>> IW)
+let buildingBlockList = many (IW >>. buildingBlock .>> IW)
 
 (* Namespaces *)
-let namespaceBlock = (leftBraceCommented >>. opt extensionBlock) .>>. (CW >>. buildingBlockList) .>> commentedRightBrace
-let fplNamespace = positions (namespaceIdentifier .>>. (CW >>. namespaceBlock)) .>> IW |>> Ast.Namespace
+let namespaceBlock = (leftBrace >>. opt extensionBlock) .>>. (IW >>. buildingBlockList) .>> spacesRightBrace
+let fplNamespace = positions (namespaceIdentifier .>>. (IW >>. namespaceBlock)) .>> IW |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
 let fplParserAst (input: string) = tryParse ast ad input 0 input.Length "SYN000" -1
 
 let fplParser (input:string) = 
-    let matchArray = stringMatches input errRecPattern
+    let preProcessedInput = preParsePreProcess input
+    let matchArray = stringMatches preProcessedInput errRecPattern
     for i in [0..matchArray.Length-1] do
         let index, subString = matchArray[i]
         let nextIndex = 
@@ -620,7 +614,10 @@ let fplParser (input:string) =
                 -> tryParse elseStatement ad v index nextIndex "DCS000" -1 
             | _ -> tryParse ast ad input index nextIndex "SYN000" -1 
             |> ignore
-    fplParserAst input 
+        else
+            tryParse ast ad input index nextIndex "SYN000" -1 
+            |> ignore
+    fplParserAst preProcessedInput 
 
 let parserDiagnostics = ad
 

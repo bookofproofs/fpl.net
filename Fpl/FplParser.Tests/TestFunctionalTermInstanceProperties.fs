@@ -77,9 +77,9 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance01f () =
+        // a function term instance without a return statement is not allowed
         let result = run property """mand func X() -> Y
 	        {
-                // a function term instance without a return statement is not allowed
                 x
 	        }"""
         let actual = sprintf "%O" result
@@ -88,9 +88,9 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance2a () =
+        // a function term instance with a return statement 
         let result = run property """optional func X() -> Y
 	        {
-                // a function term instance with a return statement 
                 dec ~a:obj;
                 return x
 	        }"""
@@ -100,9 +100,9 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance2b () =
+        // a function term instance with a return statement 
         let result = run property """mand func X() -> Y
 	        {
-                // a function term instance with a return statement 
                 dec ~a:obj;
                 return x
 	        }"""
@@ -112,9 +112,9 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance2c () =
+        // a function term instance with a return statement 
         let result = run property """optional func X() -> Y
 	        {
-                // a function term instance with a return statement 
                 dec ~a:obj;
                 return x
 	        }"""
@@ -124,9 +124,9 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance2d () =
+        // a function term instance with a return statement 
         let result = run property """mand func X() -> Y
 	        {
-                // a function term instance with a return statement 
                 dec ~a:obj;
                 return x
 	        }"""
@@ -136,9 +136,9 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance2e () =
+        // a function term instance with a return statement 
         let result = run property """optional func X() -> Y
 	        {
-                // a function term instance with a return statement 
                 dec ~a:obj;
                 return x
 	        }"""
@@ -148,9 +148,9 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance2f () =
+        // a function term instance with a return statement 
         let result = run property """mand func X() -> Y
 	        {
-                // a function term instance with a return statement 
                 dec ~a:obj;
                 return x
 	        }"""
@@ -160,23 +160,23 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance3 () =
+        // a function term instance with a return statement and 
+        // some other content following it is not allowed
         let result = run property """mand func X() -> Y
 	        {
-                // a function term instance with a return statement and 
-                // some other content following it is not allowed
                 return x
-                // except comments
+                dec ~a:obj;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance3a () =
+        // a function term instance with a return statement and 
+        // some other content following it is not allowed
         let result = run property """func X() -> Y
 	        {
-                // a function term instance with a return statement and 
-                // some other content following it is not allowed
                 return x
                 dec ~a:obj;
 	        }"""
@@ -186,12 +186,12 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance3b () =
+        // a function term instance with a return statement and 
+        // some other content following it is not allowed
         let result = run property """func X() -> Y
 	        {
-                // a function term instance with a return statement and 
-                // some other content following it is not allowed
                 return x
-                dec:;
+                dec a:ind;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual

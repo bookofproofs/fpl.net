@@ -2,22 +2,20 @@ Fpl.Commons.Structures
 {
     uses Fpl.Commons 
     uses Fpl.SetTheory.ZermeloFraenkel 
-    uses Fpl.Arithmetics.Peano
-
-
+    uses Fpl.Arithmetics.Peano 
 
     // defines a fixed length tuple template using a generic type tplIndex for an index in a range
     definition class Tuple : obj
     {
-        dec
+        dec 
             ~myLength: Nat
         ;
         ctor Tuple(listOfTpl:+ tpl)
         {
             dec 
                 ~elem: tpl
-                ~i: Nat
-                i:= Zero()
+                ~i: Nat 
+                i:= Zero() 
                 for elem in listOfTpl
                 (
                     i:=Succ(i)
@@ -32,7 +30,7 @@ Fpl.Commons.Structures
         ctor Tuple(from, length:Nat, arr: tpl[from ~ length])
         {
             
-            dec
+            dec 
                 self:=arr
                 myLength:=length
                 self!obj()

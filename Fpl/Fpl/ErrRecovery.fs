@@ -251,6 +251,7 @@ let replaceFirstNonWhitespace str =
     regex.Replace(str, replacement, 1)
 
 let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput maxIndex (code:string) lastCorrectedPosition =
+   
     match run someParser input with
     | Success(result, restInput, userState) -> 
         result, int userState.Index
@@ -273,16 +274,15 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput maxIndex (
         let cond0 = lastCorrectedPosition = correctedPosition.Index
         let cond1 = restInput.Position.Index < maxIndex
         let cond2 = startIndexOfInput <= restInput.Position.Index 
-        let cond2a = not (restInput.Position.Index < maxIndex)
-        let cond3 = (int64 0 < startIndexOfInput)
-        let cond = cond0 || cond1 || (cond2 && cond2a && cond3)
+        let cond3 = (int64 0 <= startIndexOfInput)
+        let cond = cond1 && (cond0 || (cond2 && cond3))
         if cond then
-            Ast.Error, int maxIndex
-        else
             let preErrorString = input.Substring(0, int restInput.Position.Index)
             let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
 
             tryParse someParser ad (preErrorString + postErrorString) startIndexOfInput maxIndex code correctedPosition.Index 
+        else
+            Ast.Error, int maxIndex
 
 /// A simple helper function for printing trace information to the console (taken from FParsec Docs)
 let (<!>) (p: Parser<_,_>) label : Parser<_,_> =
@@ -321,7 +321,7 @@ let preParsePreProcess (input:string) =
 /// in the remaining source code. For instance, if "for" is the pattern than " for" will match, but "_for" will not.
 let stringMatches (inputString: string) (pattern: string) =
     let regex = new Regex(pattern)
-    let matchList = regex.Matches(preParsePreProcess inputString) |> Seq.cast<Match> |> Seq.toList
+    let matchList = regex.Matches(inputString) |> Seq.cast<Match> |> Seq.toList
     let rec collectMatches matchList index =
         
         match (matchList:Match list) with
