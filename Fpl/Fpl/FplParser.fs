@@ -285,11 +285,11 @@ let commentedRightBrace = (CW .>> rightBrace)
 let keywordReturn = CW >>. (skipString "return" <|> skipString "ret") .>> CW 
 
 let defaultResult = positions (CW >>. statementList) |>> Ast.DefaultResult
-let conditionFollowedByResult = positions ((case >>. IW >>. predicate .>> colon) .>>. (CW >>. statementList)) |>> Ast.ConditionFollowedByResult
+let conditionFollowedByResult = positions ((case >>. predicate .>> colon) .>>. (CW >>. statementList)) |>> Ast.ConditionFollowedByResult
 let conditionFollowedByResultList = many1 (CW >>. conditionFollowedByResult)
 
-
-let casesStatement = positions (((keywordCases >>. CW >>. leftParen >>. CW >>. conditionFollowedByResultList .>>  elseCase .>> CW) .>>. (defaultResult .>> CW .>> rightParen))) |>> Ast.Cases
+let elseStatement = elseCase >>. CW >>. defaultResult .>> CW
+let casesStatement = positions (((keywordCases >>. CW >>. leftParen >>. CW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
 
 let inDomain = positions (keywordIn >>. (simpleVariableType <|> variableRange) .>> CW) |>> Ast.Domain
 let variableInOptDomain = ( (variable .>> IW) .>>. opt inDomain) .>> IW
@@ -484,9 +484,9 @@ let derivedArgument = choice [
     derivedPredicate
 ]
 
-let argumentInference = attempt revokeArgument <|> derivedArgument
+let argumentInference = vDash >>. IW >>. (revokeArgument <|> derivedArgument)
 let justification = positions (predicateList .>> IW) |>> Ast.Justification
-let justifiedArgument = positions ((justification .>> vDash .>> IW) .>>. argumentInference) |>> Ast.JustifiedArgument
+let justifiedArgument = positions (justification .>>. argumentInference) |>> Ast.JustifiedArgument
 let argument = assumeArgument <|> justifiedArgument
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. argument) .>> IW |>> Ast.Argument
 let proofArgumentList = many1 (CW >>. proofArgument)
@@ -538,7 +538,7 @@ let ebnfFactor = choice [
     ebnfTranslTuple
 ] 
 let ebnfTerm = positions (sepEndBy1 ebnfFactor SW) |>> Ast.LocalizationTerm
-ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.LocalizationTermList
+ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. comma >>. IW)) |>> Ast.LocalizationTermList
 let translation = (tilde >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl
 let translationList = many1 (CW >>. translation .>> IW)
 let localization = positions (keywordLocalization >>. (predicate .>> IW .>> colonEqual) .>>. (translationList .>> IW .>> semiColon)) .>> IW |>> Ast.Localization
@@ -566,7 +566,6 @@ let fplNamespace = positions (namespaceIdentifier .>>. (CW >>. namespaceBlock)) 
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
-//let fplParser (input: string) = tryParse ast input "" (int64 0) 1 
 let fplParserAst (input: string) = tryParse ast ad input 0 input.Length "SYN000" -1
 
 let fplParser (input:string) = 
@@ -596,9 +595,9 @@ let fplParser (input:string) =
             | v when v.StartsWith("cor") 
                 -> tryParse corollary ad v index nextIndex "COR000" -1 
             | v when v.StartsWith("conj") 
-                -> tryParse conjecture ad v index nextIndex "CNJ000" -1
+                -> tryParse conjecture ad v index nextIndex "CNJ000" -1 
             | v when v.StartsWith("dec") 
-                -> tryParse varDeclBlock ad v index nextIndex "VAR000" -1 
+                -> tryParse varDeclBlock ad v index nextIndex "VAR000" -1  
             | v when v.StartsWith("constructor") || v.StartsWith("ctor") 
                 -> tryParse constructor ad v index nextIndex "CTR000" -1 
             | v when v.StartsWith("proof") || v.StartsWith("prf") 
@@ -613,6 +612,12 @@ let fplParser (input:string) =
                 -> tryParse compoundPredicate ad v index nextIndex "PRE000" -1 
             | v when v.StartsWith("assert")  || v.StartsWith("cases") || v.StartsWith("self!") || v.StartsWith("for") || v.StartsWith("del")  
                 -> tryParse statement ad v index nextIndex "SMT000" -1 
+            | v when v.StartsWith("|-") 
+                -> tryParse argumentInference ad v index nextIndex "AGI000" -1 
+            | v when v.StartsWith("|") 
+                -> tryParse conditionFollowedByResult ad v index nextIndex "CAS000" -1 
+            | v when v.StartsWith("?") 
+                -> tryParse elseStatement ad v index nextIndex "DCS000" -1 
             | _ -> tryParse ast ad input index nextIndex "SYN000" -1 
             |> ignore
     fplParserAst input 

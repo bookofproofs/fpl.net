@@ -68,7 +68,7 @@ Fpl.Arithmetics.Peano
             impl
             (
                 and ( p(0), all n ( impl ( p(n), p(Succ(n)) ) ) ),
-                all n ( p(n) )s
+                all n ( p(n) )
             )
         )
     }
@@ -82,10 +82,10 @@ Fpl.Arithmetics.Peano
             dec
                 cases
                 (
-                    | <x = 0> : self := Zero() s
-                    | <x = 1> : self := Succ(Zero()) s
-                    | <x = 2> : self := Succ(Succ(Zero())) s
-                    ? self := Succ(delegate.decrement(x))  s
+                    | <x = 0> : self := Zero() 
+                    | <x = 1> : self := Succ(Zero()) 
+                    | <x = 2> : self := Succ(Succ(Zero())) 
+                    ? self := Succ(delegate.decrement(x))  
                 )
             ;
             self

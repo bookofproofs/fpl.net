@@ -1,19 +1,17 @@
-﻿open ErrRecovery
+﻿open FplGrammarCommons
+open ErrRecovery
 open FplParser
 open FParsec
 open System.Text.RegularExpressions
 
 
-let input = "T  uses Fpl.Commons s
-    uses Fpl.Commons.Structures 
-    uses Fpl.SetTheory.ZermeloFraenkel
-    uses Fpl.Algebra.Structures 
-    }
-
-}
-
-
-"
+let input = """    loc NotEqual(x,y) :=
+        ~tex: x "\neq" y 
+        ~eng: x "is unequal" y 
+        ~ger: x "ist ungleich" y
+        ~pol: x ( "nie równa się" | "nie równe" ) y
+        ;
+"""
 
 let result = fplParser input
 
@@ -21,3 +19,5 @@ printf "%O" result
 ad.PrintDiagnostics
 
 printf "\n--------------------------------\n"
+
+printf "%s" (removeStrings input)

@@ -99,7 +99,7 @@ type TestLocalizations () =
             ~tex: x "\neq" y
             ~eng: x "is unequal" y
             ~ger: x "ist ungleich" y
-            ~pol: x ( "nie równa się" | "nie równe" ) y
+            ~pol: x ( "nie równa się" , "nie równe" ) y
             ;"""
         let actual = sprintf "%O" result
         printf "%O" actual

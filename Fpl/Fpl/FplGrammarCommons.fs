@@ -1,6 +1,6 @@
 ﻿module FplGrammarCommons
 
-open FParsec
+open System
 open System.Collections.Generic
 open System.Text.RegularExpressions
 
@@ -93,16 +93,26 @@ let keyWordSet =
            "xor" |]
     )
 
-/// Returns 0 if the string `s` does not end with any whitespace character followed by an FPL keyword.
-/// otherwise, it returns the length of the keyword.
-let lengthOfEndingFplKeyword (s: string) =
-    keyWordSet
-    |> Seq.tryFind (fun element ->
-        Regex.IsMatch(s, "[\s\(\)\{\}\[\]]" + Regex.Escape(element) + "$")
-        || s.Equals(element))
-    |> function
-    | Some keyword -> keyword.Length
-    | None -> 0
+let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?)\W"
 
+/// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines
+let replaceLinesWithSpaces (input: string) (pattern: string) =
+    let regex = new Regex(pattern, RegexOptions.Multiline)
+    let evaluator = MatchEvaluator(fun (m: Match) -> 
+        m.Value.Split(Environment.NewLine)
+        |> Array.map (fun line -> String.replicate line.Length " ")
+        |> String.concat Environment.NewLine
+    )
+    regex.Replace(input, evaluator)
 
-let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del)\W"
+/// Replaces in the `input` all FPL comments by spaces while preserving the new lines
+let removeFplComments (input:string) = 
+    let r1 = replaceLinesWithSpaces input "\/\/[^\n]*" // replace inline comments
+    replaceLinesWithSpaces r1 "\/\*((?:.|\n)*?)\*\/" // replace block comments
+
+/// Replaces in the `input` all strings by spaces while preserving the new lines
+let removeStrings (input:string) =
+    let regex = new Regex("\"[^\"" + Environment.NewLine + "]*\"")
+    let replacement = MatchEvaluator(fun m -> "\"" + String.replicate (m.Value.Length - 2) " " + "\"")
+    regex.Replace(input, replacement)
+

@@ -32,27 +32,33 @@ type DiagnosticCode =
         | DiagnosticCode(code, msg) -> msg
 
     member this.CodeMessage = 
-        match this.Code with 
-        | "DEF000" -> 
-            if this.OrigMsg.StartsWith("':'") then 
-                ("Syntax error in definition" + ": " + this.OrigMsg).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
-            else
-                "Syntax error in definition" + ": " + this.OrigMsg 
-        | "PRP000" -> "Syntax error in property" + ": " + this.OrigMsg 
-        | "AXI000" -> "Syntax error in axiom" + ": " + this.OrigMsg 
-        | "THM000" -> "Syntax error in theorem" + ": " + this.OrigMsg 
-        | "COR000" -> "Syntax error in corollary" + ": " + this.OrigMsg 
-        | "CNJ000" -> "Syntax error in conjecture" + ": " + this.OrigMsg 
-        | "VAR000" -> "Syntax error in variable declaration and/or specification" + ": " + this.OrigMsg 
-        | "CTR000" -> "Syntax error in constructor" + ": " + this.OrigMsg 
-        | "PRF000" -> "Syntax error in proof" + ": " + this.OrigMsg 
-        | "INF000" -> "Syntax error in rule of inference" + ": " + this.OrigMsg 
-        | "LOC000" -> "Syntax error in localization" + ": " + this.OrigMsg 
-        | "USE000" -> "Syntax error in uses clause" + ": " + this.OrigMsg 
-        | "PRE000" -> "Syntax error in predicate" + ": " + this.OrigMsg 
-        | "SMT000" -> "Syntax error in statement" + ": " + this.OrigMsg 
-        | "SYN000" -> "Other syntax error" + ": " + this.OrigMsg 
-        | _ -> failwith ("Unknown code " + this.Code)
+        let tranlatedCode = 
+            match this.Code with 
+            | "DEF000" -> 
+                if this.OrigMsg.StartsWith("':'") then 
+                    ("Syntax error in definition" + ": " + this.OrigMsg).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
+                else
+                    "Syntax error in definition" 
+            | "PRP000" -> "Syntax error in property" 
+            | "AXI000" -> "Syntax error in axiom" 
+            | "THM000" -> "Syntax error in theorem" 
+            | "COR000" -> "Syntax error in corollary" 
+            | "CNJ000" -> "Syntax error in conjecture" 
+            | "VAR000" -> "Syntax error in variable declaration and/or specification" 
+            | "CTR000" -> "Syntax error in constructor" 
+            | "PRF000" -> "Syntax error in proof" 
+            | "INF000" -> "Syntax error in rule of inference" 
+            | "LOC000" -> "Syntax error in localization" 
+            | "USE000" -> "Syntax error in uses clause" 
+            | "PRE000" -> "Syntax error in predicate" 
+            | "SMT000" -> "Syntax error in statement" 
+            | "AGI000" -> "Syntax error in argument inference" 
+            | "CAS000" -> "Syntax error in case condition block" 
+            | "DCS000" -> "Syntax error in default case block" 
+            | "SYN000" -> "Other syntax error" 
+            | _ -> failwith ("Unknown code " + this.Code)
+        tranlatedCode + ": " + this.OrigMsg 
+
 
 type DiagnosticEmitter =
     | FplParser
@@ -238,25 +244,6 @@ let mapErrMsgToRecText (input: string) (errMsg: string) (pos:Position) =
     let newErrMsg = replaceFParsecErrMsgForFplParser backtrackingFreeErrMsg choices backtrackingFreePos
     newErrMsg
 
-/// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines
-let replaceLinesWithSpaces (input: string) (pattern: string) =
-    let regex = new Regex(pattern, RegexOptions.Multiline)
-    let evaluator = MatchEvaluator(fun (m: Match) -> 
-        m.Value.Split(Environment.NewLine)
-        |> Array.map (fun line -> String.replicate line.Length " ")
-        |> String.concat Environment.NewLine
-    )
-    regex.Replace(input, evaluator)
-
-/// Replaces in the `input` all FPL comments by spaces while preserving the new lines
-let removeFplComments (input:string) = 
-    let r1 = replaceLinesWithSpaces input "\/\/[^\n]*" // replace inline comments
-    replaceLinesWithSpaces r1 "\/\*((?:.|\n)*?)\*\/" // replace block comments
-
-/// Replaces in the `input` all strings by spaces while preserving the new lines
-let removeStrings (input:string) =
-    replaceLinesWithSpaces input "\"[^\"\n]*\"" // replace inline comments
-
 /// Replaces in the `input` all starting non-whitespace characters by as many spaces 
 let replaceFirstNonWhitespace str =
     let regex = new Regex("\\S+")
@@ -329,7 +316,7 @@ let preParsePreProcess (input:string) =
 
 /// Returns an array of tuples with (position,regexMmatch) of string matches based on an error-recovery regex pattern 
 /// The pattern has to start with non-whitespace characters (e.g. keywords or other strings that are distinctive for the language)
-7// we want to provide with emitting error recovery messages
+/// we want to provide with emitting error recovery messages
 /// The array will be filtered to include only those matches that really start with that pattern, i.e. are proceeded some whitespace character 
 /// in the remaining source code. For instance, if "for" is the pattern than " for" will match, but "_for" will not.
 let stringMatches (inputString: string) (pattern: string) =

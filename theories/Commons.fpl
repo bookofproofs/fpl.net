@@ -94,8 +94,8 @@ Fpl.Commons
         ;
 
     loc NotEqual(x,y) :=
-        ~tex: x "\neq" y
-        ~eng: x "is unequal" y
+        ~tex: x "\neq" y 
+        ~eng: x "is unequal" y 
         ~ger: x "ist ungleich" y
         ~pol: x ( "nie równa się" | "nie równe" ) y
         ;

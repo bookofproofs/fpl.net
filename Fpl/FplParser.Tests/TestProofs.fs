@@ -148,42 +148,42 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestArgumentInference01 () =
-        let result = run argumentInference """qed"""
+        let result = run argumentInference """|- qed"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgumentInference02 () =
-        let result = run argumentInference """trivial"""
+        let result = run argumentInference """|- trivial"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgumentInference03 () =
-        let result = run argumentInference """con"""
+        let result = run argumentInference """|- con"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgumentInference04 () =
-        let result = run argumentInference """conclusion"""
+        let result = run argumentInference """|- conclusion"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgumentInference05 () =
-        let result = run argumentInference """and(a,b)"""
+        let result = run argumentInference """|- and(a,b)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgumentInference06 () =
-        let result = run argumentInference """revoke 2."""
+        let result = run argumentInference """|- revoke 2."""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
