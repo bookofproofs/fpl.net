@@ -83,11 +83,6 @@ namespace FplLS
         {
             sb.Clear();
             sb.Append(CastDiagnosticCodeMessage(diagnostic));
-            sb.Append(": ");
-
-            // fall back if there was no match of a skipped first line
-            sb.Append(diagnostic.Message.Value);
-
             return sb.ToString();
         }
         /// <summary>

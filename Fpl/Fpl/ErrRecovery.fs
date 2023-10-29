@@ -21,27 +21,35 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 type DiagnosticCode = 
-    | DiagnosticCode of string
+    | DiagnosticCode of string * string
 
-    member this.Value =
+    member this.Code =
         match this with
-        | DiagnosticCode(value) -> value
+        | DiagnosticCode(code, msg) -> code
+
+    member this.OrigMsg =
+        match this with
+        | DiagnosticCode(code, msg) -> msg
 
     member this.CodeMessage = 
-        match this.CodeMessage with 
-        | "DEF000" -> "Syntax error in definition"
-        | "PRP000" -> "Syntax error in property"
-        | "AXI000" -> "Syntax error in axiom"
-        | "THM000" -> "Syntax error in theorem"
-        | "CNJ000" -> "Syntax error in conjecture"
-        | "VAR000" -> "Syntax error in variable declaration and/or specification"
-        | "CTR000" -> "Syntax error in constructor"
-        | "PRF000" -> "Syntax error in proof"
-        | "INF000" -> "Syntax error in rule of inference"
-        | "LOC000" -> "Syntax error in localization"
-        | "USE000" -> "Syntax error in uses clause"
-        | "SYN000" -> "Other syntax error"
-        | _ -> failwith ("Unknown code " + this.Value)
+        match this.Code with 
+        | "DEF000" -> 
+            if this.OrigMsg.StartsWith("':'") then 
+                ("Syntax error in definition" + ": " + this.OrigMsg).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
+            else
+                "Syntax error in definition" + ": " + this.OrigMsg 
+        | "PRP000" -> "Syntax error in property" + ": " + this.OrigMsg 
+        | "AXI000" -> "Syntax error in axiom" + ": " + this.OrigMsg 
+        | "THM000" -> "Syntax error in theorem" + ": " + this.OrigMsg 
+        | "CNJ000" -> "Syntax error in conjecture" + ": " + this.OrigMsg 
+        | "VAR000" -> "Syntax error in variable declaration and/or specification" + ": " + this.OrigMsg 
+        | "CTR000" -> "Syntax error in constructor" + ": " + this.OrigMsg 
+        | "PRF000" -> "Syntax error in proof" + ": " + this.OrigMsg 
+        | "INF000" -> "Syntax error in rule of inference" + ": " + this.OrigMsg 
+        | "LOC000" -> "Syntax error in localization" + ": " + this.OrigMsg 
+        | "USE000" -> "Syntax error in uses clause" + ": " + this.OrigMsg 
+        | "SYN000" -> "Other syntax error" + ": " + this.OrigMsg 
+        | _ -> failwith ("Unknown code " + this.Code)
 
 type DiagnosticEmitter =
     | FplParser
@@ -120,33 +128,21 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Pos
     let caretLine = lines.[2]
 
     let carretPos = caretLine.IndexOf('^')
-    // Find the position of the caret
-    let caretPosition, newPos = 
-        if errMsg.Contains("<variable (got") then
-            let pre = firstLine.Substring(0,carretPos).TrimEnd()
-            let keywordLength = lengthOfEndingFplKeyword pre
-            let np = Position(
-                        pos.StreamName,
-                        pos.Index - (int64 keywordLength),
-                        pos.Line,
-                        pos.Column - (int64 keywordLength)
-                    )
-            carretPos - keywordLength, np
-        else
-            carretPos, pos
+    if carretPos>=0 then
+        // Extract the significant characters
+        let significantCharacters =
+            let search = Regex.Match(firstLine.Substring(carretPos), @"\S+").Value
+            if search = "" then 
+                firstLine.Trim()
+            else
+                search
 
-    // Extract the significant characters
-    let significantCharacters =
-        let search = Regex.Match(firstLine.Substring(caretPosition), @"\S+").Value
-        if search = "" then 
-            firstLine.Trim()
-        else
-            search
+        // Replace the significant characters with quoted version in the first line
+        let quotedFirstLine = sprintf "'%s'" significantCharacters
 
-    // Replace the significant characters with quoted version in the first line
-    let quotedFirstLine = sprintf "'%s'" significantCharacters
-
-    quotedFirstLine + Environment.NewLine + "Expecting: " + choices, newPos
+        quotedFirstLine + Environment.NewLine + "Expecting: " + choices, pos
+    else
+        errMsg, pos
 
 let split = [|" or "; "or" + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
 let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
@@ -239,8 +235,28 @@ let mapErrMsgToRecText (input: string) (errMsg: string) (pos:Position) =
     let newErrMsg, modifiedPos = replaceFParsecErrMsgForFplParser backtrackingFreeErrMsg choices backtrackingFreePos
     (Some choices, newErrMsg, modifiedPos)
 
+/// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines
+let replaceLinesWithSpaces (input: string) (pattern: string) =
+    let regex = new Regex(pattern, RegexOptions.Multiline)
+    let evaluator = MatchEvaluator(fun (m: Match) -> 
+        m.Value.Split(Environment.NewLine)
+        |> Array.map (fun line -> String.replicate line.Length " ")
+        |> String.concat Environment.NewLine
+    )
+    regex.Replace(input, evaluator)
 
-let tryParse someParser (ad: Diagnostics) input corrIndex (code:string)=
+/// Replaces in the `input` all FPL comments by spaces while preserving the new lines
+let removeFplComments (input:string) = 
+    let r1 = replaceLinesWithSpaces input "\/\/[^\n]*" // replace inline comments
+    replaceLinesWithSpaces r1 "\/\*((?:.|\n)*?)\*\/" // replace block comments
+
+/// Rplaces in the `input` all starting non-whitespace characters by as many spaces 
+let replaceFirstNonWhitespace str =
+    let regex = new Regex("\\S+")
+    let replacement = MatchEvaluator(fun m -> String.replicate m.Value.Length " ")
+    regex.Replace(str, replacement, 1)
+
+let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput maxIndex (code:string) lastCorrectedPosition =
     match run someParser input with
     | Success(result, restInput, userState) -> 
         result, int userState.Index
@@ -250,17 +266,23 @@ let tryParse someParser (ad: Diagnostics) input corrIndex (code:string)=
         let correctedPosition = 
             Position(
                 restInput.Position.StreamName,
-                restInput.Position.Index + (int64 corrIndex),
+                restInput.Position.Index + (int64 startIndexOfInput),
                 restInput.Position.Line,
                 restInput.Position.Column 
             )
-        let diagnosticMsg = DiagnosticMessage(newErrMsg)
-        let diagnosticCode = DiagnosticCode(code)
+        let diagnosticCode = DiagnosticCode(code, newErrMsg)
+        let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
         let diagnostic =
             Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
 
         ad.AddDiagnostic diagnostic
-        Ast.Error, int diagnostic.Position.Index
+        if lastCorrectedPosition = correctedPosition.Index || correctedPosition.Index >= maxIndex || (restInput.Position.Index >= startIndexOfInput && startIndexOfInput > 0) then
+            Ast.Error, int diagnostic.Position.Index
+        else
+            let preErrorString = input.Substring(0, int restInput.Position.Index)
+            let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
+
+            tryParse someParser ad (preErrorString + postErrorString) startIndexOfInput maxIndex code correctedPosition.Index
 
 /// A simple helper function for printing trace information to the console (taken from FParsec Docs)
 let (<!>) (p: Parser<_,_>) label : Parser<_,_> =
@@ -282,21 +304,6 @@ let resultSatisfies predicate msg (p: Parser<_,_>) : Parser<_,_> =
           stream.BacktrackTo(state) // backtrack to beginning
           Reply(Primitives.Error, error)
 
-/// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines
-let replaceLinesWithSpaces (input: string) (pattern: string) =
-    let regex = new Regex(pattern, RegexOptions.Multiline)
-    let evaluator = MatchEvaluator(fun (m: Match) -> 
-        m.Value.Split(Environment.NewLine)
-        |> Array.map (fun line -> String.replicate line.Length " ")
-        |> String.concat Environment.NewLine
-    )
-    regex.Replace(input, evaluator)
-
-/// Replaces in the `input` all FPL comments by spaces while preserving the new lines
-let removeFplComments (input:string) = 
-    let r1 = replaceLinesWithSpaces input "\/\/[^\n]*" // replace inline comments
-    replaceLinesWithSpaces r1 "\/\*((?:.|\n)*?)\*\/" // replace block comments
-
 let preParsePreProcess (input:string) = 
     removeFplComments input
 
@@ -312,4 +319,5 @@ let stringMatches (inputString: string) =
         | m::ms ->
             (index, inputString.Substring(index)) :: collectMatches ms m.Index
     collectMatches matchList 0 
+    |> List.toArray
 

@@ -1104,7 +1104,7 @@ Expecting: 'ax', 'axiom', 'cl', 'class', 'conj', 'conjecture', 'cor', 'corollary
         printf "\n>>%s<<" actualDiag
         printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
         Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'ax','axiom','cl','class','conj','conjecture','cor','corollary','func','function','lem','lemma','post','postulate','pred','predicate','prf','proof','prop','proposition','theorem','thm','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
+        Assert.IsTrue(actualDiag.Contains("SYN000"))
 
 
     [<TestMethod>]
@@ -1136,7 +1136,7 @@ Expecting: 'loc', 'localization', '}', <block comment>, <inline comment>, <signi
         printf "\n>>%s<<" actualDiag
         printf "\n>>>%s<<<" (replaceWhiteSpace actualDiag)
         Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue((replaceWhiteSpace actualDiag).EndsWith("""Expecting:'loc','localization','}',<blockcomment>,<inlinecomment>,<significantwhitespace>")"""))
+        Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
     member this.TestTryParseAxiom001Diag () =

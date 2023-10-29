@@ -29,7 +29,7 @@ Fpl.LinAlg
 
         }
 
-        mand func sVecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
+        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
         {
             decs
                 ~result: tplFieldElem[from ~ to] 
