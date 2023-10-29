@@ -1,6 +1,7 @@
 Fpl.Algebra.Structures
 {
-    uses Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel
+    uses Fpl.Commons
+    uses Fpl.SetTheory.ZermeloFraenkel
 
 
 

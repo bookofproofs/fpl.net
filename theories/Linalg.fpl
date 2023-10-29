@@ -20,11 +20,11 @@ Fpl.LinAlg
             n: Nat
         )
         {
-            dec s
+            dec 
                 myField := field
                 addInField := myField.AddOp()
                 mulInField := myField.MulOp()
-                assert NotEqual(n, Zero(),)
+                assert NotEqual(n, Zero())
                 self:=SetBuilder( myField[1 ~ n], true)
                 self!Set()
             ;

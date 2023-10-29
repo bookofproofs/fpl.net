@@ -104,3 +104,5 @@ let lengthOfEndingFplKeyword (s: string) =
     | Some keyword -> keyword.Length
     | None -> 0
 
+
+let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del)\W"

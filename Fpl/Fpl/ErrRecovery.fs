@@ -50,6 +50,7 @@ type DiagnosticCode =
         | "LOC000" -> "Syntax error in localization" + ": " + this.OrigMsg 
         | "USE000" -> "Syntax error in uses clause" + ": " + this.OrigMsg 
         | "PRE000" -> "Syntax error in predicate" + ": " + this.OrigMsg 
+        | "SMT000" -> "Syntax error in statement" + ": " + this.OrigMsg 
         | "SYN000" -> "Other syntax error" + ": " + this.OrigMsg 
         | _ -> failwith ("Unknown code " + this.Code)
 
@@ -252,7 +253,11 @@ let removeFplComments (input:string) =
     let r1 = replaceLinesWithSpaces input "\/\/[^\n]*" // replace inline comments
     replaceLinesWithSpaces r1 "\/\*((?:.|\n)*?)\*\/" // replace block comments
 
-/// Rplaces in the `input` all starting non-whitespace characters by as many spaces 
+/// Replaces in the `input` all strings by spaces while preserving the new lines
+let removeStrings (input:string) =
+    replaceLinesWithSpaces input "\"[^\"\n]*\"" // replace inline comments
+
+/// Replaces in the `input` all starting non-whitespace characters by as many spaces 
 let replaceFirstNonWhitespace str =
     let regex = new Regex("\\S+")
     let replacement = MatchEvaluator(fun m -> String.replicate m.Value.Length " ")
@@ -312,11 +317,22 @@ let resultSatisfies predicate msg (p: Parser<_,_>) : Parser<_,_> =
           stream.BacktrackTo(state) // backtrack to beginning
           Reply(Primitives.Error, error)
 
+/// Replaces all comments and strings in a FPL source code by spaces with as many line breaks as in the replacements.
+/// This significantly simplifies the grammar because we do not have to parse comments and inject them everywhere in the grammar the could be possible.
+/// The string replacement, on the other hand, prevents false positives in the error recovery mechanism in user-defined 
+/// localization strings that would otherwise emit diagnostics for regex matches inside those user-defined strings.
 let preParsePreProcess (input:string) = 
-    removeFplComments input
+    input
+    |> removeFplComments 
+    |> removeStrings
 
-let stringMatches (inputString: string) =
-    let pattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is)\W"
+
+/// Returns an array of tuples with (position,regexMmatch) of string matches based on an error-recovery regex pattern 
+/// The pattern has to start with non-whitespace characters (e.g. keywords or other strings that are distinctive for the language)
+7// we want to provide with emitting error recovery messages
+/// The array will be filtered to include only those matches that really start with that pattern, i.e. are proceeded some whitespace character 
+/// in the remaining source code. For instance, if "for" is the pattern than " for" will match, but "_for" will not.
+let stringMatches (inputString: string) (pattern: string) =
     let regex = new Regex(pattern)
     let matchList = regex.Matches(preParsePreProcess inputString) |> Seq.cast<Match> |> Seq.toList
     let rec collectMatches matchList index =

@@ -570,7 +570,7 @@ let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 let fplParserAst (input: string) = tryParse ast ad input 0 input.Length "SYN000" -1
 
 let fplParser (input:string) = 
-    let matchArray = stringMatches input
+    let matchArray = stringMatches input errRecPattern
     for i in [0..matchArray.Length-1] do
         let index, subString = matchArray[i]
         let nextIndex = 
@@ -611,10 +611,11 @@ let fplParser (input:string) =
                 -> tryParse usesClause ad v index nextIndex "USE000" -1 
             | v when v.StartsWith("and")  || v.StartsWith("or") || v.StartsWith("impl") || v.StartsWith("iif") || v.StartsWith("xor") || v.StartsWith("not") || v.StartsWith("all") || v.StartsWith("ex") || v.StartsWith("is")   
                 -> tryParse compoundPredicate ad v index nextIndex "PRE000" -1 
+            | v when v.StartsWith("assert")  || v.StartsWith("cases") || v.StartsWith("self!") || v.StartsWith("for") || v.StartsWith("del")  
+                -> tryParse statement ad v index nextIndex "SMT000" -1 
             | _ -> tryParse ast ad input index nextIndex "SYN000" -1 
             |> ignore
     fplParserAst input 
 
 let parserDiagnostics = ad
-
 

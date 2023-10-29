@@ -22,12 +22,13 @@ The following documentation describes the syntax amendments and provides a ratio
 
 ### Changes to the Grammar (Details)
 
-#### 1) No more extra blocks for inference, theories and localizations
+#### 1) No more extra blocks for uses, inference, theories and localizations
 
-In the original FPL version, a namespace contained three types of sub-blocks: the optional `inference` and `localization` blocks and a mandatory `theory` block. Inside these blocks, there were syntactical differences with respect to whether a building block, like a theorem or an inference rule required a prefix keyword or not. For instance, inference rules had no prefix inside their `inference` block while theorems, axioms and proof building blocks required the corresponding keyword inside the `theory` block. 
+In the original FPL version, a namespace contained four types of sections: the optional `uses` clause, the `inference` and `localization` blocks and a mandatory `theory` block. Inside the blocks, there were syntactical differences with respect to whether a building block, like a theorem or an inference rule required a prefix keyword or not. For instance, inference rules had no prefix inside their `inference` block while theorems, axioms and proof building blocks required the corresponding keyword inside the `theory` block. Moreover, the `uses` clause did not contain a block but was a comma-separated list 
 
-In the current version, the extrac sub-blocks  `inference`, `localization`, and `theory` were abandoned. Instead, each building block has a unique prefix keyword:
+In the current version, the extra sub-blocks  `inference`, `localization`, and `theory` as well as comma-separation in the `uses` clause were abandoned. Instead, each building block has a unique prefix keyword:
 
+* Every namespace that could be referred to in a comma-separated list in the `uses` clause of previous FPL grammar versions now requires a separate `uses` keyword,
 * Every inference rules starts with the keyword `inference` (short-form `inf`),
 * Every localization starts with the keyword `localization` (short-form `loc`),
 * Every class definition starts the keyword `definition` (short-form `def`), followed as previously by the keyword `class` (short-form `cl`), 
