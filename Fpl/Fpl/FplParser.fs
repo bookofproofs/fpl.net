@@ -562,22 +562,22 @@ let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 let fplParserAst (input: string) = tryParse ast ad input 0 input.Length "SYN000" -1
 
 
-let calculateCurrentContext (matchArray:(int *string)[]) i = 
-    let index, subString = matchArray[i]
-    if i + 1 < matchArray.Length-1 then
-        let nextIndex, s = matchArray[i+1]
+let calculateCurrentContext (matchList:List<(int *string)>) i = 
+    let index, subString = matchList[i]
+    if i + 1 < matchList.Length-1 then
+        let nextIndex, s = matchList[i+1]
         index, nextIndex, subString
     else
         index, subString.Length, subString
 
 let fplParser (input:string) = 
     let preProcessedInput = preParsePreProcess input
-    let matchArray = stringMatches preProcessedInput errRecPattern
-    let index, nextIndex, subString = calculateCurrentContext matchArray 0
+    let matchList = stringMatches preProcessedInput errRecPattern
+    let index, nextIndex, subString = calculateCurrentContext matchList 0
     let parseResult, pIndex = tryParse ast ad subString index nextIndex "SYN000" -1 
     let mutable lastParserIndex = pIndex
-    for i in [1..matchArray.Length-1] do
-        let index, nextIndex, subString = calculateCurrentContext matchArray i
+    for i in [1..matchList.Length-1] do
+        let index, nextIndex, subString = calculateCurrentContext matchList i
         if (int64 -1 < lastParserIndex) && (lastParserIndex < index) then
             // the last parsing process hasn't not consumed all the input between index and nextIndex
             ()

@@ -325,10 +325,10 @@ let preParsePreProcess (input:string) =
     |> removeStrings
 
 
-/// Returns an array of tuples with (position,regexMmatch) of string matches based on an error-recovery regex pattern 
+/// Returns a list of tuples with (position,regexMmatch) of string matches based on an error-recovery regex pattern 
 /// The pattern has to start with non-whitespace characters (e.g. keywords or other strings that are distinctive for the language)
 /// we want to provide with emitting error recovery messages
-/// The array will be filtered to include only those matches that really start with that pattern, i.e. are proceeded some whitespace character 
+/// The list will be filtered to include only those matches that really start with that pattern, i.e. are proceeded some whitespace character 
 /// in the remaining source code. For instance, if "for" is the pattern than " for" will match, but "_for" will not.
 let stringMatches (inputString: string) (pattern: string) =
     let regex = new Regex(pattern)
@@ -341,8 +341,7 @@ let stringMatches (inputString: string) (pattern: string) =
         | m::ms ->
             (index, inputString.Substring(index)) :: collectMatches ms m.Index
     collectMatches matchList 0 
-    |> List.toArray
-    |> Array.filter (fun (i, s) -> 
+    |> List.filter (fun (i, s) -> 
             let preCharacter = 
                 if i > 0 then
                     inputString.Substring(i - 1, 1)
