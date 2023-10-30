@@ -16,12 +16,12 @@ let input = """Fpl.LinAlg
     def class FieldPowerN: Sets 
     {
         dec
-            ~myField: Field s
+            ~myField: Field 
             ~addInField: BinOp 
             ~mulInField: BinOp 
         ;
 
-        ctor FieldPowerN
+        s ctor FieldPowerN
         (
             field : Field,
             n: Nat
