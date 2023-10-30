@@ -250,39 +250,50 @@ let replaceFirstNonWhitespace str =
     let replacement = MatchEvaluator(fun m -> String.replicate m.Value.Length " ")
     regex.Replace(str, replacement, 1)
 
-let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput maxIndex (code:string) lastCorrectedPosition =
+
+let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex (code:string) lastCorrectedIndex =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
-        result, int userState.Index
+        // In the success case, we always return the current parser position in the input
+        result, (userState.Index + startIndexOfInput)
     | Failure(errorMsg, restInput, userState) ->
-        let newErrMsg = mapErrMsgToRecText input errorMsg restInput.Position
-
-        let correctedPosition = 
-            Position(
-                restInput.Position.StreamName,
-                restInput.Position.Index + (int64 startIndexOfInput),
-                restInput.Position.Line,
-                restInput.Position.Column 
-            )
-        let diagnosticCode = DiagnosticCode(code, newErrMsg)
-        let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
-        let diagnostic =
-            Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
-
-        ad.AddDiagnostic diagnostic
-        let cond0 = lastCorrectedPosition = correctedPosition.Index
-        let cond1 = restInput.Position.Index < maxIndex
-        let cond2 = startIndexOfInput <= restInput.Position.Index 
-        let cond3 = (int64 0 <= startIndexOfInput)
-        let cond = cond1 && (cond0 || (cond2 && cond3))
+        // calculate the index in the original input because the error index points to the input that might be a 
+        // substring of the original input
+        let correctedIndex = restInput.Position.Index + startIndexOfInput
+        // since we call the function with lastCorrectedIndex=-1 that is impossible, the following condition checks if 
+        // the recursive call have had altered the corrected position, if not, we have to break the recursion
+        // since in this case, the error cannot be changed by removing first non-white characters from the remaining input
+        let cond0 = lastCorrectedIndex <> correctedIndex 
+        // the index of the error must not exceed the next index. If it does, we have to break the recursion
+        let cond1 = correctedIndex < int64 nextIndex
+        let cond = cond0 && cond1 
         if cond then
+            let newErrMsg = mapErrMsgToRecText input errorMsg restInput.Position
+            let correctedPosition = 
+                Position(
+                    restInput.Position.StreamName,
+                    correctedIndex,
+                    restInput.Position.Line,
+                    restInput.Position.Column 
+                )
+            let diagnosticCode = DiagnosticCode(code, newErrMsg)
+            let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
+            let diagnostic =
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
+            ad.AddDiagnostic diagnostic
+            
+            // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
             let preErrorString = input.Substring(0, int restInput.Position.Index)
             let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
-
-            tryParse someParser ad (preErrorString + postErrorString) startIndexOfInput maxIndex code correctedPosition.Index 
+            // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
+            // and cond1 are still met.
+            tryParse someParser ad (preErrorString + postErrorString) startIndexOfInput nextIndex code correctedIndex 
         else
-            Ast.Error, int maxIndex
+            // We return -1 if in the first recursive call the error position did not met the conditions cond0 and cond1
+            // Otherwise, we return an error position of the previous error in the recurive call that still 
+            // did satisfy the conditions cond0 and cond1. These conditions don't have to be met by the current error position.
+            Ast.Error, lastCorrectedIndex
 
 /// A simple helper function for printing trace information to the console (taken from FParsec Docs)
 let (<!>) (p: Parser<_,_>) label : Parser<_,_> =

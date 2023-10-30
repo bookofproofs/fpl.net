@@ -561,63 +561,86 @@ let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
 let fplParserAst (input: string) = tryParse ast ad input 0 input.Length "SYN000" -1
 
+
+let calculateCurrentContext (matchArray:(int *string)[]) i = 
+    let index, subString = matchArray[i]
+    if i + 1 < matchArray.Length-1 then
+        let nextIndex, s = matchArray[i+1]
+        index, nextIndex, subString
+    else
+        index, subString.Length, subString
+
 let fplParser (input:string) = 
     let preProcessedInput = preParsePreProcess input
     let matchArray = stringMatches preProcessedInput errRecPattern
-    for i in [0..matchArray.Length-1] do
-        let index, subString = matchArray[i]
-        let nextIndex = 
-            if i + 1 < matchArray.Length-1 then
-                let nextIndex, s = matchArray[i+1]
-                nextIndex
-            else
-                subString.Length
-        if index > 0 then
+    let index, nextIndex, subString = calculateCurrentContext matchArray 0
+    let parseResult, pIndex = tryParse ast ad subString index nextIndex "SYN000" -1 
+    let mutable lastParserIndex = pIndex
+    for i in [1..matchArray.Length-1] do
+        let index, nextIndex, subString = calculateCurrentContext matchArray i
+        if int64 index >= lastParserIndex then
             match subString with
             | v when v.StartsWith("definition") || v.StartsWith("def") 
                 -> tryParse definition ad v index nextIndex "DEF000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("mand") || v.StartsWith("opt") 
                 -> tryParse property ad v index nextIndex "PRP000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("ax") || v.StartsWith("post") 
                 -> tryParse axiom ad v index nextIndex "AXI000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("theorem") || v.StartsWith("thm") 
-                -> tryParse theorem ad v index nextIndex "THM000" -1 
+                ->  tryParse theorem ad v index nextIndex "THM000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("prop")
                 -> tryParse proposition ad v index nextIndex "THM000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("lem") 
                 -> tryParse lemma ad v index nextIndex "THM000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("cor") 
                 -> tryParse corollary ad v index nextIndex "COR000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("conj") 
                 -> tryParse conjecture ad v index nextIndex "CNJ000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("dec") 
-                -> tryParse varDeclBlock ad v index nextIndex "VAR000" -1  
+                -> tryParse varDeclBlock ad v index nextIndex "VAR000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("constructor") || v.StartsWith("ctor") 
                 -> tryParse constructor ad v index nextIndex "CTR000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("proof") || v.StartsWith("prf") 
                 -> tryParse proof ad v index nextIndex "PRF000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("inf") 
                 -> tryParse ruleOfInference ad v index nextIndex "INF000" -1 
+                |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("loc") 
                 -> tryParse localization ad v index nextIndex "LOC000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("uses") 
                 -> tryParse usesClause ad v index nextIndex "USE000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("and")  || v.StartsWith("or") || v.StartsWith("impl") || v.StartsWith("iif") || v.StartsWith("xor") || v.StartsWith("not") || v.StartsWith("all") || v.StartsWith("ex") || v.StartsWith("is")   
                 -> tryParse compoundPredicate ad v index nextIndex "PRE000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("assert")  || v.StartsWith("cases") || v.StartsWith("self!") || v.StartsWith("for") || v.StartsWith("del")  
                 -> tryParse statement ad v index nextIndex "SMT000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("|-") 
                 -> tryParse argumentInference ad v index nextIndex "AGI000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("|") 
                 -> tryParse conditionFollowedByResult ad v index nextIndex "CAS000" -1 
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
             | v when v.StartsWith("?") 
                 -> tryParse elseStatement ad v index nextIndex "DCS000" -1 
-            | _ -> tryParse ast ad input index nextIndex "SYN000" -1 
-            |> ignore
+                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
+            | v -> ()
         else
-            tryParse ast ad input index nextIndex "SYN000" -1 
-            |> ignore
-    fplParserAst preProcessedInput 
+            ()
+    parseResult
 
 let parserDiagnostics = ad
 
