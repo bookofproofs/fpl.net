@@ -21,42 +21,29 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 type DiagnosticCode = 
-    | DiagnosticCode of string * string
+    | DiagnosticCode of string * string * string
 
     member this.Code =
         match this with
-        | DiagnosticCode(code, msg) -> code
+        | DiagnosticCode(code, msg, stdMsg) -> code
 
     member this.OrigMsg =
         match this with
-        | DiagnosticCode(code, msg) -> msg
+        | DiagnosticCode(code, msg, stdMsg) -> msg
+
+    member this.StdMsg =
+        match this with
+        | DiagnosticCode(code, msg, stdMsg) -> stdMsg
 
     member this.CodeMessage = 
         let tranlatedCode = 
             match this.Code with 
             | "DEF000" -> 
                 if this.OrigMsg.StartsWith("':'") then 
-                    ("Syntax error in definition" + ": " + this.OrigMsg).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
+                    (this.StdMsg + ": " + this.OrigMsg).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
                 else
-                    "Syntax error in definition" 
-            | "PRP000" -> "Syntax error in property" 
-            | "AXI000" -> "Syntax error in axiom" 
-            | "THM000" -> "Syntax error in theorem" 
-            | "COR000" -> "Syntax error in corollary" 
-            | "CNJ000" -> "Syntax error in conjecture" 
-            | "VAR000" -> "Syntax error in variable declaration and/or specification" 
-            | "CTR000" -> "Syntax error in constructor" 
-            | "PRF000" -> "Syntax error in proof" 
-            | "INF000" -> "Syntax error in rule of inference" 
-            | "LOC000" -> "Syntax error in localization" 
-            | "USE000" -> "Syntax error in uses clause" 
-            | "PRE000" -> "Syntax error in predicate" 
-            | "SMT000" -> "Syntax error in statement" 
-            | "AGI000" -> "Syntax error in argument inference" 
-            | "CAS000" -> "Syntax error in case condition block" 
-            | "DCS000" -> "Syntax error in default case block" 
-            | "SYN000" -> "Other syntax error" 
-            | _ -> failwith ("Unknown code " + this.Code)
+                    this.StdMsg 
+            | _ -> this.StdMsg
         tranlatedCode + ": " + this.OrigMsg 
 
 
@@ -251,7 +238,7 @@ let replaceFirstNonWhitespace str =
     regex.Replace(str, replacement, 1)
 
 
-let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex (code:string) lastCorrectedIndex =
+let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex (code:string) (stdMsg:string) lastCorrectedIndex =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -277,7 +264,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
                     restInput.Position.Line,
                     restInput.Position.Column 
                 )
-            let diagnosticCode = DiagnosticCode(code, newErrMsg)
+            let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
             let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
             let diagnostic =
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
@@ -288,10 +275,10 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
             let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
             // and cond1 are still met.
-            tryParse someParser ad (preErrorString + postErrorString) startIndexOfInput nextIndex code correctedIndex 
+            tryParse someParser ad (preErrorString + postErrorString) startIndexOfInput nextIndex code stdMsg correctedIndex 
         else
             // We return -1 if in the first recursive call the error position did not met the conditions cond0 and cond1
-            // Otherwise, we return an error position of the previous error in the recurive call that still 
+            // Otherwise, we return an error position of the previous error in the recursive call that still 
             // did satisfy the conditions cond0 and cond1. These conditions don't have to be met by the current error position.
             Ast.Error, lastCorrectedIndex
 

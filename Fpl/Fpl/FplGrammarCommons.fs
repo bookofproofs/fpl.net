@@ -81,8 +81,6 @@ let keyWordSet =
            "rev"
            "revoke"
            "self"
-           "spec"
-           "specification"
            "thm"
            "theorem"
            "trivial"
@@ -92,8 +90,6 @@ let keyWordSet =
            "uses"
            "xor" |]
     )
-
-let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?)\W"
 
 /// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines
 let replaceLinesWithSpaces (input: string) (pattern: string) =

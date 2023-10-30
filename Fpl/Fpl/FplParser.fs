@@ -437,7 +437,8 @@ let classInstance = positions (variableType .>>. signature .>>. classInstanceBlo
 let mapping = toArrow >>. IW >>. variableType
 let functionalTermSignature = (keywordFunction >>. signature) .>>. (IW >>. mapping) .>> IW 
 
-let funcContent = varDeclOrSpecList .>>. (keywordReturn >>. (fplDelegate <|> predicateWithQualification) .>> IW) |>> Ast.DefFunctionContent
+let returnStatement = positions (keywordReturn >>. (fplDelegate <|> predicateWithQualification)) .>> IW |>> Ast.Return
+let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
 let functionalTermInstanceBlock = leftBrace >>. (keywordIntrinsic <|> funcContent) .>> spacesRightBrace
 let functionalTermInstance = positions (functionalTermSignature .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
 
@@ -559,7 +560,10 @@ let fplNamespace = positions (namespaceIdentifier .>>. (IW >>. namespaceBlock)) 
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
-let fplParserAst (input: string) = tryParse ast ad input 0 input.Length "SYN000" -1
+let stdErrInfo = ("SYN000", "Other syntax error", [], ast)
+let stdCode, stdErr, _, stdParser = stdErrInfo
+
+let fplParserAst (input: string) = tryParse stdParser ad input 0 input.Length stdCode stdErr -1
 
 
 let calculateCurrentContext (matchList:List<(int *string)>) i = 
@@ -570,11 +574,48 @@ let calculateCurrentContext (matchList:List<(int *string)>) i =
     else
         index, subString.Length, subString
 
+
+let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:"
+
+let errInformation = [
+    ("DEF000", "Syntax error in definition", ["def"], definition)
+    ("PRP000", "Syntax error in property", ["mand"; "opt"], property)
+    ("AXI000", "Syntax error in axiom", ["ax"; "post"], axiom)
+    ("THM000", "Syntax error in theorem", ["theorem"; "thm"], theorem)
+    ("COR000", "Syntax error in corollary", ["theorem"; "cor"], corollary)
+    ("LEM000", "Syntax error in lemma", ["lem"], lemma)
+    ("PPS000", "Syntax error in proposition", ["prop"], proposition)
+    ("CNJ000", "Syntax error in conjecture", ["conj"], conjecture)
+    ("VAR000", "Syntax error in variable declaration and/or specification", ["dec"], varDeclBlock)
+    ("CTR000", "Syntax error in constructor", ["constructor"; "ctor"], constructor)
+    ("PRF000", "Syntax error in proof", ["proof"; "prf"], proof)
+    ("INF000", "Syntax error in rule of inference", ["inf"], ruleOfInference)
+    ("LOC000", "Syntax error in rule of localization", ["loc"], localization)
+    ("USE000", "Syntax error in uses clause", ["uses"], usesClause)
+    ("PRE000", "Syntax error in predicate", ["and"; "or"; "impl"; "iif"; "xor"; "not"; "all"; "ex"; "is"], compoundPredicate)
+    ("SMT000", "Syntax error in statement", ["assert"; "cases"; "self!"; "for"; "del"], statement)
+    ("AGI000", "Syntax error in proof argument", ["|-"], argumentInference)
+    ("CAS000", "Syntax error in case block", ["|"], conditionFollowedByResult)
+    ("DCS000", "Syntax error in default case block", ["?"], elseStatement)
+    ("ASS000", "Syntax error in assumption", ["ass"], assumeArgument)
+    ("REV000", "Syntax error in revokation", ["rev"], revokeArgument)
+    ("RET000", "Syntax error in return statement", ["ret"], returnStatement)
+    ("PRE000", "Syntax error in premise", ["pre"], premise)
+    ("CON000", "Syntax error in conclusion", ["con"], conclusion)
+]
+
+/// Finds the error information tuple based on a prefix of a string from the errInformation list. 
+/// If no prefix matches than the SYN000 tuple will be returned.
+let findErrInfoTuple (str:string) =
+    match List.tryFind (fun (_, _, prefixes, _) -> List.exists (fun prefix -> str.StartsWith(prefix : string)) prefixes) errInformation with
+    | Some tuple -> tuple
+    | None -> stdErrInfo
+
 let fplParser (input:string) = 
     let preProcessedInput = preParsePreProcess input
     let matchList = stringMatches preProcessedInput errRecPattern
     let index, nextIndex, subString = calculateCurrentContext matchList 0
-    let parseResult, pIndex = tryParse ast ad subString index nextIndex "SYN000" -1 
+    let parseResult, pIndex = tryParse stdParser ad subString index nextIndex stdCode stdErr -1 
     let mutable lastParserIndex = pIndex
     for i in [1..matchList.Length-1] do
         let index, nextIndex, subString = calculateCurrentContext matchList i
@@ -582,69 +623,10 @@ let fplParser (input:string) =
             // the last parsing process hasn't not consumed all the input between index and nextIndex
             ()
         else
-            if int64 index >= lastParserIndex then
-                match subString with
-                | v when v.StartsWith("definition") || v.StartsWith("def") 
-                    -> tryParse definition ad v index nextIndex "DEF000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("mand") || v.StartsWith("opt") 
-                    -> tryParse property ad v index nextIndex "PRP000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("ax") || v.StartsWith("post") 
-                    -> tryParse axiom ad v index nextIndex "AXI000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("theorem") || v.StartsWith("thm") 
-                    ->  tryParse theorem ad v index nextIndex "THM000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("prop")
-                    -> tryParse proposition ad v index nextIndex "THM000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("lem") 
-                    -> tryParse lemma ad v index nextIndex "THM000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("cor") 
-                    -> tryParse corollary ad v index nextIndex "COR000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("conj") 
-                    -> tryParse conjecture ad v index nextIndex "CNJ000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("dec") 
-                    -> tryParse varDeclBlock ad v index nextIndex "VAR000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("constructor") || v.StartsWith("ctor") 
-                    -> tryParse constructor ad v index nextIndex "CTR000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("proof") || v.StartsWith("prf") 
-                    -> tryParse proof ad v index nextIndex "PRF000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("inf") 
-                    -> tryParse ruleOfInference ad v index nextIndex "INF000" -1 
-                    |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("loc") 
-                    -> tryParse localization ad v index nextIndex "LOC000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("uses") 
-                    -> tryParse usesClause ad v index nextIndex "USE000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("and")  || v.StartsWith("or") || v.StartsWith("impl") || v.StartsWith("iif") || v.StartsWith("xor") || v.StartsWith("not") || v.StartsWith("all") || v.StartsWith("ex") || v.StartsWith("is")   
-                    -> tryParse compoundPredicate ad v index nextIndex "PRE000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("assert")  || v.StartsWith("cases") || v.StartsWith("self!") || v.StartsWith("for") || v.StartsWith("del")  
-                    -> tryParse statement ad v index nextIndex "SMT000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("|-") 
-                    -> tryParse argumentInference ad v index nextIndex "AGI000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("|") 
-                    -> tryParse conditionFollowedByResult ad v index nextIndex "CAS000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v when v.StartsWith("?") 
-                    -> tryParse elseStatement ad v index nextIndex "DCS000" -1 
-                        |> (fun (_, pIndex) -> lastParserIndex <- pIndex)
-                | v -> ()
-            else
-                ()
-    let finalParseResult, finalIndex = tryParse ast ad input 0 input.Length "SYN000" -1 
+            let code, stdMsg, prefixList, errRecParser = findErrInfoTuple subString
+            let pResult, pIndex = tryParse errRecParser ad subString index nextIndex code stdMsg -1
+            lastParserIndex <- pIndex
+    let finalParseResult, finalIndex = tryParse stdParser ad input 0 input.Length stdCode stdErr -1 
     finalParseResult
 
 let parserDiagnostics = ad
