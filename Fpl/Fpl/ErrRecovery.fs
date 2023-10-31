@@ -97,7 +97,7 @@ type Diagnostics() =
         |> Seq.toList
 
     member this.AddDiagnostic (d:Diagnostic) =
-        let keyOfd = (sprintf "%07d" d.Position.Index) + d.Emitter.ToString()
+        let keyOfd = (sprintf "%07d" d.Position.Index) + d.Code.Code
         if not (myDictionary.ContainsKey(keyOfd)) then
             myDictionary.Add(keyOfd, d) |> ignore
 
@@ -284,6 +284,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
 
 
 let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput code stdMsg =
+    
     if input.Trim() <> "" then
          match run someParser input with
             | Success(result, restInput, userState) -> 
@@ -307,11 +308,13 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                 let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
                 let diagnostic =
                     Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
+
                 ad.AddDiagnostic diagnostic
             
                 // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
                 let preErrorString = input.Substring(0, int restInput.Position.Index)
                 let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
+
                 // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
                 // and cond1 are still met.
                 if restInput.Position.Index < input.Length then

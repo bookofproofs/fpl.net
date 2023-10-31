@@ -9,14 +9,14 @@ Fpl.LinAlg
     def class FieldPowerN: Sets 
     {
         dec
-            ~myField: Field  s
+            ~myField: Field  
             ~addInField: BinOp 
             ~mulInField: BinOp 
         ;
 
-        s ctor FieldPowerN
+        ctor FieldPowerN
         (
-            field : Field,
+            field : Field, 
             n: Nat
         )
         {
@@ -32,7 +32,7 @@ Fpl.LinAlg
 
         }
 
-        s mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
+        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
         {
             dec
                 ~result: tplFieldElem[from ~ to] 
@@ -66,7 +66,7 @@ Fpl.LinAlg
             vecAdd.IsCommutative()
     }
 
-    s def class ZeroVectorN: Tuple
+    def class ZeroVectorN: Tuple
     {
         ctor ZeroVectorN(n: Nat, field: Field)
         {

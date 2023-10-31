@@ -613,8 +613,7 @@ let findErrInfoTuple (str:string) =
 let fplParser (input:string) = 
     let preProcessedInput = preParsePreProcess input
     let matchList = stringMatches preProcessedInput errRecPattern
-    let index, nextIndex, subString = calculateCurrentContext matchList 0
-    let parseResult, pIndex = tryParse stdParser ad subString index nextIndex stdCode stdErr -1 
+    let parseResult, pIndex = fplParserAst input
     let mutable lastParserIndex = pIndex
     let mutable lastParser = stdParser
     let mutable lastCode = ""
@@ -623,13 +622,10 @@ let fplParser (input:string) =
         let index, nextIndex, subString = calculateCurrentContext matchList i
         if (int64 -1 < lastParserIndex) && (lastParserIndex < index) then
             // the last parsing process hasn't not consumed all the input between index and nextIndex
-            
-            
             let remainingChunk = input.Substring(int lastParserIndex, (index - int lastParserIndex))
             // emit error messages for for this chunk of input string using the last parser  
             tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex lastCode lastMsg
             lastParserIndex <- nextIndex
-            
         else
             let code, stdMsg, prefixList, errRecParser = findErrInfoTuple subString
             let pResult, pIndex = tryParse errRecParser ad subString index nextIndex code stdMsg -1
@@ -637,7 +633,9 @@ let fplParser (input:string) =
             lastParser <- errRecParser
             lastCode <- code
             lastMsg <- stdMsg
-    fplParserAst input
+    // Fall back: make sure, the input is syntax-error-free by running the original FPL parser (i.e. the one without error recovery).
+    // At the same time, it will discover any error that was omitted be the above discovery mechanism.
+    parseResult
 
 let parserDiagnostics = ad
 
