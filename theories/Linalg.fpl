@@ -13,7 +13,7 @@ Fpl.LinAlg
             ~addInField: BinOp 
             ~mulInField: BinOp 
         ;
-s
+
         ctor FieldPowerN
         (
             field : Field, 

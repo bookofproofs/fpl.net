@@ -128,7 +128,7 @@ namespace FplLS
 
         private DiagnosticCode CastCode(ErrRecovery.DiagnosticCode code)
         {
-            return new DiagnosticCode(code.ToString());
+            return new DiagnosticCode(code.Code.ToString());
         }
     }
 }

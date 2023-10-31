@@ -237,7 +237,7 @@ let replaceFirstNonWhitespace str =
     let replacement = MatchEvaluator(fun m -> String.replicate m.Value.Length " ")
     regex.Replace(str, replacement, 1)
 
-/// If the source code is not syntax-error-free, this function will find the first error and emit it
+/// If the source code is not syntax-error-free, this function will find the first error and emit it.
 let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:string) =
    
     match run someParser input with
@@ -254,6 +254,10 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
 
         Ast.Error, restInput.Position.Index
 
+/// This function emits diagnostics for someParser if it fails and tries to do so consuming more and more input by replacing the error
+/// position with spaces as long as the parser reaches a position where another parser should be 
+/// applied according to the applied synchronizing tokens. The recursive call stop also in rare cases, 
+/// in which this strategy would fail because the error occurs at the same position in consecutive recursive calls of the function.
 let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex (code:string) (stdMsg:string) lastCorrectedIndex =
    
     match run someParser input with
@@ -299,6 +303,8 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
             Ast.Error, lastCorrectedIndex, false
 
 
+/// This function emits diagnostics for chunks of input between the end of parsing result of someParser and the starting index
+/// where another parser should be applied according to the applied synchronizing tokens.
 let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput nextIndex code stdMsg =
     
     if input.Trim() <> "" then
@@ -337,6 +343,22 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                     if restInput.Position.Index < input.Length then
                         tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput nextIndex code stdMsg 
         
+/// Generate an ast on a best-effort basis, no matter if there are syntax errors, without emitting any diagnostics
+let rec tryGetAst someParser input =
+    match run someParser input with
+    | Success(result, restInput, userState) -> 
+        // In the success case, we always return the current parser position in the input
+        result
+    | Failure(errorMsg, restInput, userState) ->
+        // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
+        let preErrorString = input.Substring(0, int restInput.Position.Index)
+        let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
+        if restInput.Position.Index < input.Length then 
+            tryGetAst someParser (preErrorString + postErrorString) 
+        else
+            // only if the error occurs at the end of the input, the ast generation fails
+            Ast.Error
+
 
 
 /// A simple helper function for printing trace information to the console (taken from FParsec Docs)

@@ -20,7 +20,7 @@ let input = """Fpl.LinAlg
             ~addInField: BinOp 
             ~mulInField: BinOp 
         ;
-s
+
         ctor FieldPowerN
         (
             field : Field, 
@@ -29,20 +29,20 @@ s
         {
             dec 
                 myField := field 
-                addInField := myField.AddOp()
-                mulInField := myField.MulOp()
+                addInField := myField.AddOp() 
+                mulInField := myField.MulOp() 
                 assert NotEqual(n, Zero())
                 self:=SetBuilder( myField[1 ~ n], true)
                 self!Set()
             ;
-            self
+            self 
 
         }
 
-        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to])   -> tplFieldElem[from ~ to]
+        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to])  s -> tplFieldElem[from ~ to]
         {
-            dec
-                ~result: tplFieldElem[from ~ to] 
+            dec s
+                ~result: tplFieldElem[from ~ to]  
                 result := addInField(v[from ~ to],w[from ~ to])
             ;
             return result
@@ -51,43 +51,6 @@ s
     }
   
 
-    lemma VecAddIsCommutative()
-    {
-        dec
-            ~to: Nat
-            ~x,y: tplFieldElem[1~to]
-            ~fieldPowerN: FieldPowerN
-                (
-                field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
-                n:Nat
-                )
-            ~vecAdd: VecAdd(v,w: tplFieldElem[from~to])
-        ;
-        pre:
-            and
-            (
-                In(x, fieldPowerN),
-                In(y, fieldPowerN)
-            )
-        con:
-            vecAdd.IsCommutative()
-    }
-
-    def class ZeroVectorN: Tuple
-    {
-        ctor ZeroVectorN(n: Nat, field: Field)
-        {
-            dec
-                ~i: Nat 
-                for i in [1~n] 
-                (
-                    self<i>:=field.AdditiveGroup().NeutralElement()
-                )
-                self!Tuple()
-            ;
-            self
-        }
-    }
      
 }
 
