@@ -627,8 +627,8 @@ let fplParser (input:string) =
     let parseResult, pIndex = tryParseFirstError stdParser ad input stdCode stdErrMsg 
     let mutable lastParserIndex = int64 0
     let mutable lastParser = stdParser
-    let mutable lastCode = stdCode
-    let mutable lastMsg = stdErrMsg
+    let mutable lastCode = ""
+    let mutable lastMsg = ""
     let mutable lastSuccess = true
     if parseResult = Ast.Error then
         let mutable lastSuccess = false
@@ -636,15 +636,15 @@ let fplParser (input:string) =
         let firstIndex = findFirstIndexInMatches matchList pIndex input.Length
         for i in [firstIndex..matchList.Length-1] do
             let index, nextIndex, subString = calculateCurrentContext matchList i
-            // find the next error info tuple based on the current substring
-            let code, errMsg, prefixList, errRecParser = findErrInfoTuple subString
-            if (int64 -1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess && code=lastCode then
+            if (int64 -1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess then
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
                 let remainingChunk = input.Substring(int lastParserIndex, int (index - lastParserIndex))
                 // emit error messages for for this chunk of input string using the last parser  
                 tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg
-                lastParserIndex <- max nextIndex pIndex
+                lastParserIndex <- nextIndex
             else
+                // otherwise, find the next error info tuple based on the current substring
+                let code, errMsg, prefixList, errRecParser = findErrInfoTuple subString
                 // try to parse substring using the parser from the error info and emitting diagnostics (if any)
                 let pResult, pIndex, pSuccess = tryParse errRecParser ad subString index nextIndex code errMsg -1
                 lastParserIndex <- pIndex
@@ -652,8 +652,9 @@ let fplParser (input:string) =
                 lastCode <- code
                 lastMsg <- errMsg
                 lastSuccess <- pSuccess
-    // Return an ast on a best effort basis even if there were some errors but without emitting diagnostics any more 
-    tryGetAst stdParser input 
+    // Return an ast on a best effort basis even if there were some errors 
+    tryParse stdParser ad input 0 input.Length stdCode stdErrMsg -1
+    //tryGetAst stdParser input 
 
 let parserDiagnostics = ad
 
