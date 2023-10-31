@@ -629,12 +629,14 @@ let fplParser (input:string) =
     let mutable lastParser = stdParser
     let mutable lastCode = ""
     let mutable lastMsg = ""
+    let mutable lastSuccess = true
     if parseResult = Ast.Error then
+        let mutable lastSuccess = false
         // skip parsing any matches until the first error index (stored in pIndex)
         let firstIndex = findFirstIndexInMatches matchList pIndex input.Length
         for i in [firstIndex..matchList.Length-1] do
             let index, nextIndex, subString = calculateCurrentContext matchList i
-            if (int64 -1 < lastParserIndex) && (lastParserIndex < index) then
+            if (int64 -1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess then
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
                 let remainingChunk = input.Substring(int lastParserIndex, int (index - lastParserIndex))
                 // emit error messages for for this chunk of input string using the last parser  
@@ -644,11 +646,12 @@ let fplParser (input:string) =
                 // otherwise, find the next error info tuple based on the current substring
                 let code, errMsg, prefixList, errRecParser = findErrInfoTuple subString
                 // try to parse substring using the parser from the error info and emitting diagnostics (if any)
-                let pResult, pIndex = tryParse errRecParser ad subString index nextIndex code errMsg -1
+                let pResult, pIndex, pSuccess = tryParse errRecParser ad subString index nextIndex code errMsg -1
                 lastParserIndex <- pIndex
                 lastParser <- errRecParser
                 lastCode <- code
                 lastMsg <- errMsg
+                lastSuccess <- pSuccess
     // Return an ast on a best effort basis even if there were some errors  
     tryParse stdParser ad input 0 input.Length stdCode stdErrMsg -1
 

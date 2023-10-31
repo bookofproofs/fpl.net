@@ -259,7 +259,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
     match run someParser input with
     | Success(result, restInput, userState) -> 
         // In the success case, we always return the current parser position in the input
-        result, (userState.Index + startIndexOfInput)
+        result, (userState.Index + startIndexOfInput), true
     | Failure(errorMsg, restInput, userState) ->
         // calculate the index in the original input because the error index points to the input that might be a 
         // substring of the original input
@@ -296,7 +296,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
             // We return -1 if in the first recursive call the error position did not met the conditions cond0 and cond1
             // Otherwise, we return an error position of the previous error in the recursive call that still 
             // did satisfy the conditions cond0 and cond1. These conditions don't have to be met by the current error position.
-            Ast.Error, lastCorrectedIndex
+            Ast.Error, lastCorrectedIndex, false
 
 
 let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput nextIndex code stdMsg =
