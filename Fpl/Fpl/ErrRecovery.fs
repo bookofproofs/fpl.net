@@ -282,6 +282,43 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
             // did satisfy the conditions cond0 and cond1. These conditions don't have to be met by the current error position.
             Ast.Error, lastCorrectedIndex
 
+
+let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput code stdMsg =
+    if input.Trim() <> "" then
+         match run someParser input with
+            | Success(result, restInput, userState) -> 
+                let preErrorString = input.Substring(0, int userState.Index)
+                let postErrorString = replaceFirstNonWhitespace (input.Substring(int userState.Index))
+                if userState.Index < input.Length then
+                    tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput code stdMsg
+            | Failure(errorMsg, restInput, userState) ->
+                // calculate the index in the original input because the error index points to the input that might be a 
+                // substring of the original input
+                let correctedIndex = restInput.Position.Index + startIndexOfInput
+                let newErrMsg = mapErrMsgToRecText input errorMsg restInput.Position
+                let correctedPosition = 
+                    Position(
+                        restInput.Position.StreamName,
+                        correctedIndex,
+                        restInput.Position.Line,
+                        restInput.Position.Column 
+                    )
+                let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
+                let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
+                let diagnostic =
+                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
+                ad.AddDiagnostic diagnostic
+            
+                // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
+                let preErrorString = input.Substring(0, int restInput.Position.Index)
+                let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
+                // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
+                // and cond1 are still met.
+                if restInput.Position.Index < input.Length then
+                    tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput code stdMsg 
+        
+
+
 /// A simple helper function for printing trace information to the console (taken from FParsec Docs)
 let (<!>) (p: Parser<_,_>) label : Parser<_,_> =
     fun stream ->

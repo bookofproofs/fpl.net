@@ -565,7 +565,6 @@ let stdCode, stdErr, _, stdParser = stdErrInfo
 
 let fplParserAst (input: string) = tryParse stdParser ad input 0 input.Length stdCode stdErr -1
 
-
 let calculateCurrentContext (matchList:List<(int *string)>) i = 
     let index, subString = matchList[i]
     if i + 1 < matchList.Length-1 then
@@ -617,17 +616,28 @@ let fplParser (input:string) =
     let index, nextIndex, subString = calculateCurrentContext matchList 0
     let parseResult, pIndex = tryParse stdParser ad subString index nextIndex stdCode stdErr -1 
     let mutable lastParserIndex = pIndex
+    let mutable lastParser = stdParser
+    let mutable lastCode = ""
+    let mutable lastMsg = ""
     for i in [1..matchList.Length-1] do
         let index, nextIndex, subString = calculateCurrentContext matchList i
         if (int64 -1 < lastParserIndex) && (lastParserIndex < index) then
             // the last parsing process hasn't not consumed all the input between index and nextIndex
-            ()
+            
+            
+            let remainingChunk = input.Substring(int lastParserIndex, (index - int lastParserIndex))
+            // emit error messages for for this chunk of input string using the last parser  
+            tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex lastCode lastMsg
+            lastParserIndex <- nextIndex
+            
         else
             let code, stdMsg, prefixList, errRecParser = findErrInfoTuple subString
             let pResult, pIndex = tryParse errRecParser ad subString index nextIndex code stdMsg -1
             lastParserIndex <- pIndex
-    let finalParseResult, finalIndex = tryParse stdParser ad input 0 input.Length stdCode stdErr -1 
-    finalParseResult
+            lastParser <- errRecParser
+            lastCode <- code
+            lastMsg <- stdMsg
+    fplParserAst input
 
 let parserDiagnostics = ad
 

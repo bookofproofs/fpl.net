@@ -21,7 +21,7 @@ let input = """Fpl.LinAlg
             ~mulInField: BinOp 
         ;
 
-        s ctor FieldPowerN
+        ctor FieldPowerN
         (
             field : Field,
             n: Nat
@@ -72,23 +72,7 @@ let input = """Fpl.LinAlg
         con:
             vecAdd.IsCommutative()
     }
-
-    def class ZeroVectorN: Tuple
-    {
-        ctor ZeroVectorN(n: Nat, field: Field)
-        {
-            dec
-                ~i: Nat 
-                for i in [1~n] 
-                (
-                    self<i>:=field.AdditiveGroup().NeutralElement()
-                )
-                self!Tuple()
-            ;
-            self
-        }
-    }
-}
+ }
 """
 
 let result = fplParser input
