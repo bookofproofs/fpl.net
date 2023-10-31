@@ -21,7 +21,7 @@ let input = """Fpl.LinAlg
             ~mulInField: BinOp 
         ;
 
-        ctor FieldPowerN
+ s       ctor FieldPowerN
         (
             field : Field,
             n: Nat
@@ -47,31 +47,11 @@ let input = """Fpl.LinAlg
             ;
             return result
         }
-        s
+
     }
     
 
-    lemma VecAddIsCommutative()
-    {
-        dec
-            ~to: Nat
-            ~x,y: tplFieldElem[1~to]
-            ~fieldPowerN: FieldPowerN
-                (
-                field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
-                n:Nat
-                )
-            ~vecAdd: VecAdd(v,w: tplFieldElem[from~to])
-        ;
-        pre:
-            and
-            (
-                In(x, fieldPowerN),
-                In(y, fieldPowerN)
-            )
-        con:
-            vecAdd.IsCommutative()
-    }
+
  }
 """
 

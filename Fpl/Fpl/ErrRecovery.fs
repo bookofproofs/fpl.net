@@ -97,7 +97,7 @@ type Diagnostics() =
         |> Seq.toList
 
     member this.AddDiagnostic (d:Diagnostic) =
-        let keyOfd = (sprintf "%07d" d.Position.Index) + d.Code.Code
+        let keyOfd = (sprintf "%07d" d.Position.Index) + d.Emitter.ToString()
         if not (myDictionary.ContainsKey(keyOfd)) then
             myDictionary.Add(keyOfd, d) |> ignore
 
@@ -238,6 +238,15 @@ let replaceFirstNonWhitespace str =
     regex.Replace(str, replacement, 1)
 
 
+let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:string) =
+   
+    match run someParser input with
+    | Success(result, restInput, userState) -> 
+        // In the success case, we always return the current parser position in the input
+        result, (userState.Index)
+    | Failure(errorMsg, restInput, userState) ->
+        Ast.Error, restInput.Position.Index
+
 let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex (code:string) (stdMsg:string) lastCorrectedIndex =
    
     match run someParser input with
@@ -253,7 +262,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
         // since in this case, the error cannot be changed by removing first non-white characters from the remaining input
         let cond0 = lastCorrectedIndex <> correctedIndex 
         // the index of the error must not exceed the next index. If it does, we have to break the recursion
-        let cond1 = correctedIndex < int64 nextIndex
+        let cond1 = correctedIndex < nextIndex
         let cond = cond0 && cond1 
         if cond then
             let newErrMsg = mapErrMsgToRecText input errorMsg restInput.Position
@@ -283,7 +292,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
             Ast.Error, lastCorrectedIndex
 
 
-let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput code stdMsg =
+let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput nextIndex code stdMsg =
     
     if input.Trim() <> "" then
          match run someParser input with
@@ -291,34 +300,35 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                 let preErrorString = input.Substring(0, int userState.Index)
                 let postErrorString = replaceFirstNonWhitespace (input.Substring(int userState.Index))
                 if userState.Index < input.Length then
-                    tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput code stdMsg
+                    tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput nextIndex code stdMsg
             | Failure(errorMsg, restInput, userState) ->
                 // calculate the index in the original input because the error index points to the input that might be a 
                 // substring of the original input
                 let correctedIndex = restInput.Position.Index + startIndexOfInput
-                let newErrMsg = mapErrMsgToRecText input errorMsg restInput.Position
-                let correctedPosition = 
-                    Position(
-                        restInput.Position.StreamName,
-                        correctedIndex,
-                        restInput.Position.Line,
-                        restInput.Position.Column 
-                    )
-                let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
-                let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
-                let diagnostic =
-                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
+                if correctedIndex < nextIndex then 
+                    let newErrMsg = mapErrMsgToRecText input errorMsg restInput.Position
+                    let correctedPosition = 
+                        Position(
+                            restInput.Position.StreamName,
+                            correctedIndex,
+                            restInput.Position.Line,
+                            restInput.Position.Column 
+                        )
+                    let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
+                    let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
+                    let diagnostic =
+                        Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
 
-                ad.AddDiagnostic diagnostic
+                    ad.AddDiagnostic diagnostic
             
-                // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
-                let preErrorString = input.Substring(0, int restInput.Position.Index)
-                let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
+                    // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
+                    let preErrorString = input.Substring(0, int restInput.Position.Index)
+                    let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
 
-                // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
-                // and cond1 are still met.
-                if restInput.Position.Index < input.Length then
-                    tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput code stdMsg 
+                    // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
+                    // and cond1 are still met.
+                    if restInput.Position.Index < input.Length then
+                        tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput nextIndex code stdMsg 
         
 
 
@@ -364,14 +374,14 @@ let stringMatches (inputString: string) (pattern: string) =
         
         match (matchList:Match list) with
         | [] -> 
-            (index, inputString.Substring(index)) :: []
+            (int64 index, inputString.Substring(index)) :: []
         | m::ms ->
-            (index, inputString.Substring(index)) :: collectMatches ms m.Index
+            (int64 index, inputString.Substring(index)) :: collectMatches ms m.Index
     collectMatches matchList 0 
     |> List.filter (fun (i, s) -> 
             let preCharacter = 
                 if i > 0 then
-                    inputString.Substring(i - 1, 1)
+                    inputString.Substring(int (i - int64 1), 1)
                 else
                     "#"
             Regex.IsMatch(preCharacter, "\W")

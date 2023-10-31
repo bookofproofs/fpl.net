@@ -563,15 +563,13 @@ let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 let stdErrInfo = ("SYN000", "Other syntax error", [], ast)
 let stdCode, stdErr, _, stdParser = stdErrInfo
 
-let fplParserAst (input: string) = tryParse stdParser ad input 0 input.Length stdCode stdErr -1
-
-let calculateCurrentContext (matchList:List<(int *string)>) i = 
+let calculateCurrentContext (matchList:List<(int64 *string)>) i = 
     let index, subString = matchList[i]
     if i + 1 < matchList.Length-1 then
         let nextIndex, s = matchList[i+1]
         index, nextIndex, subString
     else
-        index, subString.Length, subString
+        index, int64 subString.Length, subString
 
 
 let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:"
@@ -610,31 +608,46 @@ let findErrInfoTuple (str:string) =
     | Some tuple -> tuple
     | None -> stdErrInfo
 
+
+let findFirstIndexInMatches (matchList:List<int64*string>) pIndex kMax =
+    let rec loop i =
+        if i >= matchList.Length then 
+            kMax
+        else 
+            let (index, _) = matchList.[i]
+            if index > pIndex then 
+                i
+            else 
+                loop (i + 1)
+    loop 0
+
 let fplParser (input:string) = 
     let preProcessedInput = preParsePreProcess input
     let matchList = stringMatches preProcessedInput errRecPattern
-    let parseResult, pIndex = fplParserAst input
-    let mutable lastParserIndex = pIndex
+    let parseResult, pIndex = tryParseFirstError stdParser ad input stdCode stdErr 
+    let mutable lastParserIndex = int64 0
     let mutable lastParser = stdParser
     let mutable lastCode = ""
     let mutable lastMsg = ""
-    for i in [1..matchList.Length-1] do
-        let index, nextIndex, subString = calculateCurrentContext matchList i
-        if (int64 -1 < lastParserIndex) && (lastParserIndex < index) then
-            // the last parsing process hasn't not consumed all the input between index and nextIndex
-            let remainingChunk = input.Substring(int lastParserIndex, (index - int lastParserIndex))
-            // emit error messages for for this chunk of input string using the last parser  
-            tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex lastCode lastMsg
-            lastParserIndex <- nextIndex
-        else
-            let code, stdMsg, prefixList, errRecParser = findErrInfoTuple subString
-            let pResult, pIndex = tryParse errRecParser ad subString index nextIndex code stdMsg -1
-            lastParserIndex <- pIndex
-            lastParser <- errRecParser
-            lastCode <- code
-            lastMsg <- stdMsg
-    // Fall back: make sure, the input is syntax-error-free by running the original FPL parser (i.e. the one without error recovery).
-    // At the same time, it will discover any error that was omitted be the above discovery mechanism.
+    if parseResult = Ast.Error then
+        let firstIndex = findFirstIndexInMatches matchList pIndex input.Length
+        for i in [firstIndex..matchList.Length-1] do
+            let index, nextIndex, subString = calculateCurrentContext matchList i
+            if (int64 -1 < lastParserIndex) && (lastParserIndex < index) then
+                // the last parsing process hasn't not consumed all the input between index and nextIndex
+                let remainingChunk = input.Substring(int lastParserIndex, int (index - lastParserIndex))
+                // emit error messages for for this chunk of input string using the last parser  
+                tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg
+                lastParserIndex <- nextIndex
+            else
+                let code, stdMsg, prefixList, errRecParser = findErrInfoTuple subString
+                let pResult, pIndex = tryParse errRecParser ad subString index nextIndex code stdMsg -1
+                lastParserIndex <- pIndex
+                lastParser <- errRecParser
+                lastCode <- code
+                lastMsg <- stdMsg
+        // Fall back: make sure, the input is syntax-error-free by running the original FPL parser (i.e. the one without error recovery).
+        // At the same time, it will discover any error that was omitted be the above discovery mechanism.
     parseResult
 
 let parserDiagnostics = ad
