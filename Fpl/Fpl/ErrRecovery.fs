@@ -237,7 +237,7 @@ let replaceFirstNonWhitespace str =
     let replacement = MatchEvaluator(fun m -> String.replicate m.Value.Length " ")
     regex.Replace(str, replacement, 1)
 
-
+/// If the source code is not syntax-error-free, this function will find the first error and emit it
 let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:string) =
    
     match run someParser input with
@@ -245,6 +245,13 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
         // In the success case, we always return the current parser position in the input
         result, (userState.Index)
     | Failure(errorMsg, restInput, userState) ->
+        let newErrMsg = mapErrMsgToRecText input errorMsg restInput.Position
+        let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
+        let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
+        let diagnostic =
+            Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode)
+        ad.AddDiagnostic diagnostic
+
         Ast.Error, restInput.Position.Index
 
 let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex (code:string) (stdMsg:string) lastCorrectedIndex =

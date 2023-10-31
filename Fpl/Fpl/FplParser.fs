@@ -561,7 +561,7 @@ let fplNamespace = positions (namespaceIdentifier .>>. (IW >>. namespaceBlock)) 
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
 let stdErrInfo = ("SYN000", "Other syntax error", [], ast)
-let stdCode, stdErr, _, stdParser = stdErrInfo
+let stdCode, stdErrMsg, _, stdParser = stdErrInfo
 
 let calculateCurrentContext (matchList:List<(int64 *string)>) i = 
     let index, subString = matchList[i]
@@ -624,31 +624,33 @@ let findFirstIndexInMatches (matchList:List<int64*string>) pIndex kMax =
 let fplParser (input:string) = 
     let preProcessedInput = preParsePreProcess input
     let matchList = stringMatches preProcessedInput errRecPattern
-    let parseResult, pIndex = tryParseFirstError stdParser ad input stdCode stdErr 
+    let parseResult, pIndex = tryParseFirstError stdParser ad input stdCode stdErrMsg 
     let mutable lastParserIndex = int64 0
     let mutable lastParser = stdParser
     let mutable lastCode = ""
     let mutable lastMsg = ""
     if parseResult = Ast.Error then
+        // skip parsing any matches until the first error index (stored in pIndex)
         let firstIndex = findFirstIndexInMatches matchList pIndex input.Length
         for i in [firstIndex..matchList.Length-1] do
             let index, nextIndex, subString = calculateCurrentContext matchList i
             if (int64 -1 < lastParserIndex) && (lastParserIndex < index) then
-                // the last parsing process hasn't not consumed all the input between index and nextIndex
+                // the last parsing process hasn't consumed all the input between lastParserIndex and index
                 let remainingChunk = input.Substring(int lastParserIndex, int (index - lastParserIndex))
                 // emit error messages for for this chunk of input string using the last parser  
                 tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg
                 lastParserIndex <- nextIndex
             else
-                let code, stdMsg, prefixList, errRecParser = findErrInfoTuple subString
-                let pResult, pIndex = tryParse errRecParser ad subString index nextIndex code stdMsg -1
+                // otherwise, find the next error info tuple based on the current substring
+                let code, errMsg, prefixList, errRecParser = findErrInfoTuple subString
+                // try to parse substring using the parser from the error info and emitting diagnostics (if any)
+                let pResult, pIndex = tryParse errRecParser ad subString index nextIndex code errMsg -1
                 lastParserIndex <- pIndex
                 lastParser <- errRecParser
                 lastCode <- code
-                lastMsg <- stdMsg
-        // Fall back: make sure, the input is syntax-error-free by running the original FPL parser (i.e. the one without error recovery).
-        // At the same time, it will discover any error that was omitted be the above discovery mechanism.
-    parseResult
+                lastMsg <- errMsg
+    // Return an ast on a best effort basis even if there were some errors  
+    tryParse stdParser ad input 0 input.Length stdCode stdErrMsg -1
 
 let parserDiagnostics = ad
 

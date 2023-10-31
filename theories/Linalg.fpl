@@ -13,15 +13,15 @@ Fpl.LinAlg
             ~addInField: BinOp 
             ~mulInField: BinOp 
         ;
-
+s
         ctor FieldPowerN
         (
             field : Field, 
-            n: Nat
+            n: Nat 
         )
         {
             dec 
-                myField := field
+                myField := field 
                 addInField := myField.AddOp()
                 mulInField := myField.MulOp()
                 assert NotEqual(n, Zero())
@@ -32,7 +32,7 @@ Fpl.LinAlg
 
         }
 
-        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
+        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to])   -> tplFieldElem[from ~ to]
         {
             dec
                 ~result: tplFieldElem[from ~ to] 
@@ -42,7 +42,7 @@ Fpl.LinAlg
         }
 
     }
-    
+  
 
     lemma VecAddIsCommutative()
     {
@@ -81,4 +81,5 @@ Fpl.LinAlg
             self
         }
     }
+     
 }

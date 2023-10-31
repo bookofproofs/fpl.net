@@ -16,19 +16,19 @@ let input = """Fpl.LinAlg
     def class FieldPowerN: Sets 
     {
         dec
-            ~myField: Field 
+            ~myField: Field  
             ~addInField: BinOp 
             ~mulInField: BinOp 
         ;
-
- s       ctor FieldPowerN
+s
+        ctor FieldPowerN
         (
-            field : Field,
-            n: Nat
+            field : Field, 
+            n: Nat 
         )
         {
             dec 
-                myField := field
+                myField := field 
                 addInField := myField.AddOp()
                 mulInField := myField.MulOp()
                 assert NotEqual(n, Zero())
@@ -39,7 +39,7 @@ let input = """Fpl.LinAlg
 
         }
 
-        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
+        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to])   -> tplFieldElem[from ~ to]
         {
             dec
                 ~result: tplFieldElem[from ~ to] 
@@ -49,10 +49,48 @@ let input = """Fpl.LinAlg
         }
 
     }
-    
+  
 
+    lemma VecAddIsCommutative()
+    {
+        dec
+            ~to: Nat
+            ~x,y: tplFieldElem[1~to]
+            ~fieldPowerN: FieldPowerN
+                (
+                field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
+                n:Nat
+                )
+            ~vecAdd: VecAdd(v,w: tplFieldElem[from~to])
+        ;
+        pre:
+            and
+            (
+                In(x, fieldPowerN),
+                In(y, fieldPowerN)
+            )
+        con:
+            vecAdd.IsCommutative()
+    }
 
- }
+    def class ZeroVectorN: Tuple
+    {
+        ctor ZeroVectorN(n: Nat, field: Field)
+        {
+            dec
+                ~i: Nat 
+                for i in [1~n] 
+                (
+                    self<i>:=field.AdditiveGroup().NeutralElement()
+                )
+                self!Tuple()
+            ;
+            self
+        }
+    }
+     
+}
+
 """
 
 let result = fplParser input
