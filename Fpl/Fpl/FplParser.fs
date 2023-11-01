@@ -644,12 +644,14 @@ let fplParser (input:string) =
     let preProcessedInput = preParsePreProcess input
     let matchList = stringMatches' preProcessedInput errRecPattern
 
+    let overlayList = new System.Collections.Generic.List<Interval>()
+
     let parseResult, pIndex = tryParseFirstError stdParser ad input stdCode stdErrMsg 
-    let mutable lastParserIndex = int64 0
+
+    let mutable lastParserIndex = 0
     let mutable lastParser = stdParser
     let mutable lastCode = ""
     let mutable lastMsg = ""
-    let mutable lastSuccess = true
     if parseResult = Ast.Error then
         let mutable lastSuccess = false
         // skip parsing any matches until the first error index (stored in pIndex)
@@ -657,17 +659,19 @@ let fplParser (input:string) =
         for i in [firstIndex..matchList.Count-1] do
             let index, nextIndex = calculateCurrentContext' matchList i
             let subString = input.Substring(index)
-            if (int64 -1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess then
+            if (-1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess then
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
                 let remainingChunk = input.Substring(int lastParserIndex, (index - int lastParserIndex))
                 // emit error messages for for this chunk of input string using the last parser  
                 tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg
+                overlayList.Add(Interval(lastParserIndex, nextIndex))
                 lastParserIndex <- nextIndex
             else
                 // otherwise, find the next error info tuple based on the current substring
                 let code, errMsg, prefixList, errRecParser = findErrInfoTuple subString
                 // try to parse substring using the parser from the error info and emitting diagnostics (if any)
                 let pResult, pIndex, pSuccess = tryParse errRecParser ad subString index nextIndex code errMsg -1
+                overlayList.Add(Interval(index, pIndex))
                 lastParserIndex <- pIndex
                 lastParser <- errRecParser
                 lastCode <- code

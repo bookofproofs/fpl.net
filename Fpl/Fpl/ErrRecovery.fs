@@ -115,6 +115,17 @@ type Diagnostics() =
 
 let ad = Diagnostics()
 
+type Interval = 
+    | Interval of int * int 
+
+    member this.Start =
+        match this with
+        | Interval(startIndex, _) -> startIndex    
+
+    member this.End =
+        match this with
+        | Interval(_, endIndex) -> endIndex
+
 let private _position: Parser<_, _> = fun stream -> Reply stream.Position
 
 /// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
@@ -243,7 +254,7 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
     match run someParser input with
     | Success(result, restInput, userState) -> 
         // In the success case, we always return the current parser position in the input
-        result, (userState.Index)
+        result, (int userState.Index)
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg = mapErrMsgToRecText input errorMsg restInput.Position
         let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
@@ -252,7 +263,7 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
             Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode)
         ad.AddDiagnostic diagnostic
 
-        Ast.Error, restInput.Position.Index
+        Ast.Error, int restInput.Position.Index
 
 /// This function emits diagnostics for someParser if it fails and tries to do so consuming more and more input by replacing the error
 /// position with spaces as long as the parser reaches a position where another parser should be 
@@ -263,11 +274,11 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
     match run someParser input with
     | Success(result, restInput, userState) -> 
         // In the success case, we always return the current parser position in the input
-        result, (userState.Index + startIndexOfInput), true
+        result, (int userState.Index + startIndexOfInput), true
     | Failure(errorMsg, restInput, userState) ->
         // calculate the index in the original input because the error index points to the input that might be a 
         // substring of the original input
-        let correctedIndex = restInput.Position.Index + startIndexOfInput
+        let correctedIndex = int restInput.Position.Index + startIndexOfInput
         // since we call the function with lastCorrectedIndex=-1 that is impossible, the following condition checks if 
         // the recursive call have had altered the corrected position, if not, we have to break the recursion
         // since in this case, the error cannot be changed by removing first non-white characters from the remaining input
@@ -343,22 +354,13 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                     if restInput.Position.Index < input.Length then
                         tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput nextIndex code stdMsg 
         
-/// Generate an ast on a best-effort basis, no matter if there are syntax errors, without emitting any diagnostics
-let rec tryGetAst someParser input =
-    match run someParser input with
-    | Success(result, restInput, userState) -> 
-        // In the success case, we always return the current parser position in the input
-        result
-    | Failure(errorMsg, restInput, userState) ->
-        // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
-        let preErrorString = input.Substring(0, int restInput.Position.Index)
-        let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
-        if restInput.Position.Index < input.Length then 
-            tryGetAst someParser (preErrorString + postErrorString) 
-        else
-            // only if the error occurs at the end of the input, the ast generation fails
-            Ast.Error
 
+let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) num = 
+    intervals.TrueForAll(
+        fun interval -> 
+            match interval with
+            | Interval(s,e) -> num < s || num > e
+        )
 
 
 /// A simple helper function for printing trace information to the console (taken from FParsec Docs)

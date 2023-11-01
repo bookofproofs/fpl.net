@@ -12,11 +12,11 @@ let input = """Fpl.LinAlg
     uses Fpl.SetTheory.ZermeloFraenkel
     uses Fpl.Algebra.Structures 
 
-s s s
+
     def class FieldPowerN: Sets 
     {
         dec
-            ~myField: Field   
+            ~myField: Field  s
             ~addInField: BinOp 
             ~mulInField: BinOp 
         ;
