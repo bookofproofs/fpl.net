@@ -12,11 +12,11 @@ let input = """Fpl.LinAlg
     uses Fpl.SetTheory.ZermeloFraenkel
     uses Fpl.Algebra.Structures 
 
-
+s s s
     def class FieldPowerN: Sets 
     {
         dec
-            ~myField: Field  
+            ~myField: Field   
             ~addInField: BinOp 
             ~mulInField: BinOp 
         ;
@@ -31,7 +31,7 @@ let input = """Fpl.LinAlg
                 myField := field 
                 addInField := myField.AddOp() 
                 mulInField := myField.MulOp() 
-                assert NotEqual(n, Zero())
+                assert NotEqual(n, Zero()) 
                 self:=SetBuilder( myField[1 ~ n], true)
                 self!Set()
             ;
@@ -39,9 +39,9 @@ let input = """Fpl.LinAlg
 
         }
 
-        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to])  s -> tplFieldElem[from ~ to]
+        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to])   -> tplFieldElem[from ~ to]
         {
-            dec s
+            dec 
                 ~result: tplFieldElem[from ~ to]  
                 result := addInField(v[from ~ to],w[from ~ to])
             ;
@@ -53,6 +53,8 @@ let input = """Fpl.LinAlg
 
      
 }
+
+
 
 """
 

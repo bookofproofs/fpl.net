@@ -416,3 +416,34 @@ let stringMatches (inputString: string) (pattern: string) =
             Regex.IsMatch(preCharacter, "\W")
         )
 
+let stringMatches' (input: string) (pattern: string) =
+    let regex = new Regex(pattern)
+    let matches = regex.Matches(input)
+    let list = new List<int>()
+    list.Add(0)
+    for m in matches do
+        let character = input.Substring(m.Index, 1)
+        if Regex.IsMatch(character, "\w") then
+            // If the matched pattern starts with a word-character, 
+            // filter only those matches that have a non-word character before the matched pattern.
+            // E.g., the match 'lem' will be matched, if found in ' lem' or ',lem' but not if found in 'tplFieldElem' or 'elem'
+            let preCharacter = 
+                if m.Index > 0 then
+                    input.Substring(m.Index-1, 1)
+                else
+                    "#"
+            if Regex.IsMatch(preCharacter, "\W") then
+                list.Add(m.Index)
+        else
+            // If the matched pattern starts with a non-word-character, 
+            // filter only those matches that have a whitespace character before the matched pattern.
+            // E.g., the match '|' will added, if found in ' |' or '\n|' but not if found in 'n|' or ',|'
+            let preCharacter = 
+                if m.Index > 0 then
+                    input.Substring(m.Index-1, 1)
+                else
+                    " "
+            if Regex.IsMatch(preCharacter, "\s") then
+                list.Add(m.Index)
+    list.Add(input.Length)
+    list

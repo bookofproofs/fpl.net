@@ -571,6 +571,13 @@ let calculateCurrentContext (matchList:List<(int64 *string)>) i =
     else
         index, int64 subString.Length, subString
 
+let calculateCurrentContext' (matchList:System.Collections.Generic.List<int>) i = 
+    let index = matchList[i]
+    if i + 1 < matchList.Count - 1 then
+        let nextIndex = matchList[i+1]
+        index, nextIndex
+    else
+        index, index
 
 let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:"
 
@@ -621,9 +628,22 @@ let findFirstIndexInMatches (matchList:List<int64*string>) pIndex kMax =
                 loop (i + 1)
     loop 0
 
+let findFirstIndexInMatches' (matchList:System.Collections.Generic.List<int>) pIndex kMax =
+    let rec loop i =
+        if i >= matchList.Count then 
+            kMax
+        else 
+            let index = matchList[i]
+            if index > pIndex then 
+                i
+            else 
+                loop (i + 1)
+    loop 0
+
 let fplParser (input:string) = 
     let preProcessedInput = preParsePreProcess input
-    let matchList = stringMatches preProcessedInput errRecPattern
+    let matchList = stringMatches' preProcessedInput errRecPattern
+
     let parseResult, pIndex = tryParseFirstError stdParser ad input stdCode stdErrMsg 
     let mutable lastParserIndex = int64 0
     let mutable lastParser = stdParser
@@ -633,12 +653,13 @@ let fplParser (input:string) =
     if parseResult = Ast.Error then
         let mutable lastSuccess = false
         // skip parsing any matches until the first error index (stored in pIndex)
-        let firstIndex = findFirstIndexInMatches matchList pIndex input.Length
-        for i in [firstIndex..matchList.Length-1] do
-            let index, nextIndex, subString = calculateCurrentContext matchList i
+        let firstIndex = findFirstIndexInMatches' matchList (int pIndex) input.Length
+        for i in [firstIndex..matchList.Count-1] do
+            let index, nextIndex = calculateCurrentContext' matchList i
+            let subString = input.Substring(index)
             if (int64 -1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess then
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
-                let remainingChunk = input.Substring(int lastParserIndex, int (index - lastParserIndex))
+                let remainingChunk = input.Substring(int lastParserIndex, (index - int lastParserIndex))
                 // emit error messages for for this chunk of input string using the last parser  
                 tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg
                 lastParserIndex <- nextIndex
