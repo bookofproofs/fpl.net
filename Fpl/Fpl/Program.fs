@@ -52,11 +52,7 @@ let input = """Fpl.LinAlg
   
 
      
-}
-
-
-
-"""
+}"""
 
 let result = fplParser input
 

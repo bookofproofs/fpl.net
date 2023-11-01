@@ -363,6 +363,53 @@ let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) nu
         )
 
 
+let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (stdMsg:string) (intervals:System.Collections.Generic.List<Interval>) =
+   
+    match run someParser input with
+    | Success(result, restInput, userState) -> 
+        // In the success case, we still try to parse further, if the string is longer than the successfully parsed string
+        if userState.Index < input.Length then
+            // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
+            let preErrorString = input.Substring(0, int userState.Index)
+            let postErrorString = replaceFirstNonWhitespace (input.Substring(int userState.Index))
+            // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions 
+            // are still met.
+            let newInput = (preErrorString + postErrorString)
+            tryParseRemainingOnly someParser ad newInput code stdMsg intervals
+    | Failure(errorMsg, restInput, userState) ->
+        if isNotInAnyInterval intervals (int restInput.Position.Index) then
+            let newErrMsg = mapErrMsgToRecText input errorMsg restInput.Position
+            let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
+            let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
+            let diagnostic =
+                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode)
+            ad.AddDiagnostic diagnostic
+            
+        if restInput.Position.Index < input.Length then
+            // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
+            let preErrorString = input.Substring(0, int restInput.Position.Index)
+            let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
+            // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions are still met.
+            let newInput = (preErrorString + postErrorString)
+            tryParseRemainingOnly someParser ad newInput code stdMsg intervals
+
+/// Generate an ast on a best-effort basis, no matter if there are syntax errors, without emitting any diagnostics
+let rec tryGetAst someParser input =
+    match run someParser input with
+    | Success(result, restInput, userState) -> 
+        // In the success case, we always return the current parser position in the input
+        result
+    | Failure(errorMsg, restInput, userState) ->
+        // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
+        let preErrorString = input.Substring(0, int restInput.Position.Index)
+        let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
+        if restInput.Position.Index < input.Length then 
+            tryGetAst someParser (preErrorString + postErrorString) 
+        else
+            // only if the error occurs at the end of the input, the ast generation fails
+            Ast.Error
+
+
 /// A simple helper function for printing trace information to the console (taken from FParsec Docs)
 let (<!>) (p: Parser<_,_>) label : Parser<_,_> =
     fun stream ->

@@ -644,7 +644,7 @@ let fplParser (input:string) =
     let preProcessedInput = preParsePreProcess input
     let matchList = stringMatches' preProcessedInput errRecPattern
 
-    let overlayList = new System.Collections.Generic.List<Interval>()
+    let intervals = new System.Collections.Generic.List<Interval>()
 
     let parseResult, pIndex = tryParseFirstError stdParser ad input stdCode stdErrMsg 
 
@@ -664,22 +664,23 @@ let fplParser (input:string) =
                 let remainingChunk = input.Substring(int lastParserIndex, (index - int lastParserIndex))
                 // emit error messages for for this chunk of input string using the last parser  
                 tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg
-                overlayList.Add(Interval(lastParserIndex, nextIndex))
+                intervals.Add(Interval(lastParserIndex, nextIndex))
                 lastParserIndex <- nextIndex
             else
                 // otherwise, find the next error info tuple based on the current substring
                 let code, errMsg, prefixList, errRecParser = findErrInfoTuple subString
                 // try to parse substring using the parser from the error info and emitting diagnostics (if any)
                 let pResult, pIndex, pSuccess = tryParse errRecParser ad subString index nextIndex code errMsg -1
-                overlayList.Add(Interval(index, pIndex))
+                intervals.Add(Interval(index, pIndex))
                 lastParserIndex <- pIndex
                 lastParser <- errRecParser
                 lastCode <- code
                 lastMsg <- errMsg
                 lastSuccess <- pSuccess
+    // emit diagnostics for any error positions that are not overlayed by the intervals
+    tryParseRemainingOnly stdParser ad input stdCode stdErrMsg intervals
     // Return an ast on a best effort basis even if there were some errors 
-    tryParse stdParser ad input 0 input.Length stdCode stdErrMsg -1
-    //tryGetAst stdParser input 
+    tryGetAst stdParser input 
 
 let parserDiagnostics = ad
 
