@@ -5,18 +5,17 @@ open FParsec
 open System.Text.RegularExpressions
 
 
-let input = """Fpl. 
+let input = """Fpl
 {
     uses Fpl.Commons 
     uses Fpl.Commons.Structures 
     uses Fpl.SetTheory.ZermeloFraenkel
     uses Fpl.Algebra.Structures 
 
-
     def class FieldPowerN: Sets 
     {
         dec
-            ~myField: Field  
+            ~myField: Field   
             ~addInField: BinOp 
             ~mulInField: BinOp 
         ;
@@ -52,7 +51,15 @@ let input = """Fpl.
   
 
      
-}"""
+}
+
+dec
+selfs
+
+dec
+field
+
+"""
 
 let result = fplParser input
 

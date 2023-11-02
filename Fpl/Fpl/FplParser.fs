@@ -563,15 +563,7 @@ let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 let stdErrInfo = ("SYN000", "Other syntax error", [], ast)
 let stdCode, stdErrMsg, _, stdParser = stdErrInfo
 
-let calculateCurrentContext (matchList:List<(int64 *string)>) i = 
-    let index, subString = matchList[i]
-    if i + 1 < matchList.Length-1 then
-        let nextIndex, s = matchList[i+1]
-        index, nextIndex, subString
-    else
-        index, int64 subString.Length, subString
-
-let calculateCurrentContext' (matchList:System.Collections.Generic.List<int>) i = 
+let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i = 
     let index = matchList[i]
     if i + 1 < matchList.Count - 1 then
         let nextIndex = matchList[i+1]
@@ -616,19 +608,7 @@ let findErrInfoTuple (str:string) =
     | None -> stdErrInfo
 
 
-let findFirstIndexInMatches (matchList:List<int64*string>) pIndex kMax =
-    let rec loop i =
-        if i >= matchList.Length then 
-            kMax
-        else 
-            let (index, _) = matchList.[i]
-            if index > pIndex then 
-                i
-            else 
-                loop (i + 1)
-    loop 0
-
-let findFirstIndexInMatches' (matchList:System.Collections.Generic.List<int>) pIndex kMax =
+let findFirstIndexInMatches (matchList:System.Collections.Generic.List<int>) pIndex kMax =
     let rec loop i =
         if i >= matchList.Count then 
             kMax
@@ -655,9 +635,9 @@ let fplParser (input:string) =
     if parseResult = Ast.Error then
         let mutable lastSuccess = false
         // skip parsing any matches until the first error index (stored in pIndex)
-        let firstIndex = findFirstIndexInMatches' matchList (int pIndex) input.Length
+        let firstIndex = findFirstIndexInMatches matchList (int pIndex) input.Length
         for i in [firstIndex..matchList.Count-1] do
-            let index, nextIndex = calculateCurrentContext' matchList i
+            let index, nextIndex = calculateCurrentContext matchList i
             let subString = input.Substring(index)
             if (-1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess then
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
