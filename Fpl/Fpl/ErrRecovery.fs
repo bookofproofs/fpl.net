@@ -269,7 +269,7 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
 /// position with spaces as long as the parser reaches a position where another parser should be 
 /// applied according to the applied synchronizing tokens. The recursive call stop also in rare cases, 
 /// in which this strategy would fail because the error occurs at the same position in consecutive recursive calls of the function.
-let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex (code:string) (stdMsg:string) lastCorrectedIndex =
+let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex code stdMsg lastCorrectedIndex =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -316,15 +316,16 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
 
 /// This function emits diagnostics for chunks of input between the end of parsing result of someParser and the starting index
 /// where another parser should be applied according to the applied synchronizing tokens.
-let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput nextIndex code stdMsg =
+let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput nextIndex code stdMsg lastCorrectedIndex =
     
     if input.Trim() <> "" then
          match run someParser input with
             | Success(result, restInput, userState) -> 
+                let correctedIndex = userState.Index + startIndexOfInput
                 let preErrorString = input.Substring(0, int userState.Index)
                 let postErrorString = replaceFirstNonWhitespace (input.Substring(int userState.Index))
                 if userState.Index < input.Length then
-                    tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput nextIndex code stdMsg
+                    tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput nextIndex code stdMsg correctedIndex
             | Failure(errorMsg, restInput, userState) ->
                 // calculate the index in the original input because the error index points to the input that might be a 
                 // substring of the original input
@@ -351,8 +352,8 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
 
                     // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
                     // and cond1 are still met.
-                    if restInput.Position.Index < input.Length then
-                        tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput nextIndex code stdMsg 
+                    if restInput.Position.Index < input.Length && lastCorrectedIndex <> correctedIndex then
+                        tryParseRemainingChunk someParser ad (preErrorString + postErrorString) startIndexOfInput nextIndex code stdMsg correctedIndex
         
 
 let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) num = 
@@ -363,7 +364,7 @@ let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) nu
         )
 
 
-let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (stdMsg:string) (intervals:System.Collections.Generic.List<Interval>) =
+let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (stdMsg:string) (intervals:System.Collections.Generic.List<Interval>) lastCorrectedIndex =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -375,7 +376,7 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions 
             // are still met.
             let newInput = (preErrorString + postErrorString)
-            tryParseRemainingOnly someParser ad newInput code stdMsg intervals
+            tryParseRemainingOnly someParser ad newInput code stdMsg intervals userState.Index
     | Failure(errorMsg, restInput, userState) ->
         if isNotInAnyInterval intervals (int restInput.Position.Index) then
             let newErrMsg = mapErrMsgToRecText input errorMsg restInput.Position
@@ -385,16 +386,16 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
                 Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode)
             ad.AddDiagnostic diagnostic
             
-        if restInput.Position.Index < input.Length then
+        if restInput.Position.Index < input.Length && restInput.Position.Index <> lastCorrectedIndex then
             // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
             let preErrorString = input.Substring(0, int restInput.Position.Index)
             let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions are still met.
             let newInput = (preErrorString + postErrorString)
-            tryParseRemainingOnly someParser ad newInput code stdMsg intervals
+            tryParseRemainingOnly someParser ad newInput code stdMsg intervals restInput.Position.Index
 
 /// Generate an ast on a best-effort basis, no matter if there are syntax errors, without emitting any diagnostics
-let rec tryGetAst someParser input =
+let rec tryGetAst someParser input lastCorrectedIndex =
     match run someParser input with
     | Success(result, restInput, userState) -> 
         // In the success case, we always return the current parser position in the input
@@ -403,8 +404,9 @@ let rec tryGetAst someParser input =
         // replace the input by removing the first non-whitespace characters from the remaining input, starting from the error index
         let preErrorString = input.Substring(0, int restInput.Position.Index)
         let postErrorString = replaceFirstNonWhitespace (input.Substring(int restInput.Position.Index))
-        if restInput.Position.Index < input.Length then 
-            tryGetAst someParser (preErrorString + postErrorString) 
+        if restInput.Position.Index < input.Length && restInput.Position.Index <> lastCorrectedIndex then 
+            let newInput = (preErrorString + postErrorString)
+            tryGetAst someParser newInput restInput.Position.Index
         else
             // only if the error occurs at the end of the input, the ast generation fails
             Ast.Error

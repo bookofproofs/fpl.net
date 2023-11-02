@@ -5,7 +5,7 @@ open FParsec
 open System.Text.RegularExpressions
 
 
-let input = """Fpl.LinAlg 
+let input = """Fpl. 
 {
     uses Fpl.Commons 
     uses Fpl.Commons.Structures 
@@ -16,7 +16,7 @@ let input = """Fpl.LinAlg
     def class FieldPowerN: Sets 
     {
         dec
-            ~myField: Field  s
+            ~myField: Field  
             ~addInField: BinOp 
             ~mulInField: BinOp 
         ;

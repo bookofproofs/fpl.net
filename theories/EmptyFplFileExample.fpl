@@ -1,4 +1,4 @@
-Fpl.LinAlg 
+Fpl
 {
     uses Fpl.Commons 
     uses Fpl.Commons.Structures 
@@ -8,7 +8,7 @@ Fpl.LinAlg
     def class FieldPowerN: Sets 
     {
         dec
-            ~myField: Field   s
+            ~myField: Field   
             ~addInField: BinOp 
             ~mulInField: BinOp 
         ;
@@ -45,3 +45,10 @@ Fpl.LinAlg
 
      
 }
+
+dec
+selfs
+
+dec
+field
+

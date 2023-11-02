@@ -663,7 +663,7 @@ let fplParser (input:string) =
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
                 let remainingChunk = input.Substring(int lastParserIndex, (index - int lastParserIndex))
                 // emit error messages for for this chunk of input string using the last parser  
-                tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg
+                tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg -1
                 intervals.Add(Interval(lastParserIndex, nextIndex))
                 lastParserIndex <- nextIndex
             else
@@ -678,9 +678,9 @@ let fplParser (input:string) =
                 lastMsg <- errMsg
                 lastSuccess <- pSuccess
     // emit diagnostics for any error positions that are not overlayed by the intervals
-    tryParseRemainingOnly stdParser ad input stdCode stdErrMsg intervals
+    tryParseRemainingOnly stdParser ad input stdCode stdErrMsg intervals -1
     // Return an ast on a best effort basis even if there were some errors 
-    tryGetAst stdParser input 
+    tryGetAst stdParser input -1
 
 let parserDiagnostics = ad
 
