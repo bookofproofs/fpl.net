@@ -562,6 +562,8 @@ let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
 let stdErrInfo = ("SYN000", "Other syntax error", [], ast)
 let stdCode, stdErrMsg, _, stdParser = stdErrInfo
+let stdErrInfo1 = ("SYN001", "Characters found after namespace", [], ast)
+let stdCode1, stdErrMsg1, _, stdParser1 = stdErrInfo1
 
 let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i = 
     let index = matchList[i]
@@ -620,6 +622,13 @@ let findFirstIndexInMatches (matchList:System.Collections.Generic.List<int>) pIn
                 loop (i + 1)
     loop 0
 
+let maxIntervalBound (intervals:System.Collections.Generic.List<Interval>) =
+    let mutable maxBound = -1
+    for interval in intervals do
+        if interval.End > maxBound then
+            maxBound <- interval.End
+    maxBound
+
 let fplParser (input:string) = 
     let preProcessedInput = preParsePreProcess input
     let matchList = stringMatches' preProcessedInput errRecPattern
@@ -627,6 +636,7 @@ let fplParser (input:string) =
     let intervals = new System.Collections.Generic.List<Interval>()
 
     let parseResult, pIndex = tryParseFirstError stdParser ad input stdCode stdErrMsg 
+    intervals.Add(Interval(0, pIndex))
 
     let mutable lastParserIndex = 0
     let mutable lastParser = stdParser
@@ -660,7 +670,12 @@ let fplParser (input:string) =
     // emit diagnostics for any error positions that are not overlayed by the intervals
     tryParseRemainingOnly stdParser ad input stdCode stdErrMsg intervals -1
     // Return an ast on a best effort basis even if there were some errors 
-    tryGetAst stdParser input -1
+    let resultingAst = tryGetAst stdParser input -1
+
+    let maxBound = maxIntervalBound intervals
+    tryParseRemainingChunk stdParser1 ad (input.Substring(maxBound)) maxBound (input.Length) stdCode1 stdErrMsg1 -1
+    resultingAst
+
 
 let parserDiagnostics = ad
 
