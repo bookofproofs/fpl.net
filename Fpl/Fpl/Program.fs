@@ -5,22 +5,37 @@ open FParsec
 open System.Text.RegularExpressions
 
 
-let input = """Fpl
+let input = """Fpl 
 {
+    s def class FieldPowerN: Sets 
+    {
+        ctor FieldPowerN ()
+        {
+            dec 
+                myField := field s
+                self:=SetBuilder( myField[1 ~ n], true) 
+                self!Set() 
+            ;
+            self 
+
+        }
+    }
+
     def class FieldPowerN: Sets 
     {
         ctor FieldPowerN ()
         {
             dec 
                 myField := field s
-                self:=SetBuilder( myField[1 ~ n], true)
-                self!Set()
+                self:=SetBuilder( myField[1 ~ n], true) 
+                self!Set() 
             ;
             self 
 
         }
     }
 }
+
 """
 
 let result = fplParser input

@@ -653,14 +653,14 @@ let fplParser (input:string) =
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
                 let remainingChunk = input.Substring(int lastParserIndex, (index - int lastParserIndex))
                 // emit error messages for for this chunk of input string using the last parser  
-                tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg -1
+                tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg -1 ""
                 intervals.Add(Interval(lastParserIndex, nextIndex))
                 lastParserIndex <- nextIndex
             else
                 // otherwise, find the next error info tuple based on the current substring
                 let code, errMsg, prefixList, errRecParser = findErrInfoTuple subString
                 // try to parse substring using the parser from the error info and emitting diagnostics (if any)
-                let pResult, pIndex, pSuccess = tryParse errRecParser ad subString index nextIndex code errMsg -1
+                let pResult, pIndex, pSuccess = tryParse errRecParser ad subString index nextIndex code errMsg -1 ""
                 intervals.Add(Interval(index, pIndex))
                 lastParserIndex <- pIndex
                 lastParser <- errRecParser
@@ -677,7 +677,7 @@ let fplParser (input:string) =
     if not (remaingString.EndsWith("}")) then
         // prevent emitting "false-positive" errors of characters found after namespase using the heuristic that 
         // the last character of a namespace is "}" and then looks "good"
-        tryParseRemainingChunk stdParser1 ad (input.Substring(maxBound)) maxBound (input.Length) stdCode1 stdErrMsg1 -1
+        tryParseRemainingChunk stdParser1 ad (input.Substring(maxBound)) maxBound (input.Length) stdCode1 stdErrMsg1 -1 ""
     resultingAst
 
 
