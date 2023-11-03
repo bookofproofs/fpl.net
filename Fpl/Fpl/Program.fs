@@ -12,7 +12,7 @@ let input = """Fpl
         ctor FieldPowerN ()
         {
             dec 
-                myField. := field 
+                myField := field s
                 self:=SetBuilder( myField[1 ~ n], true)
                 self!Set()
             ;

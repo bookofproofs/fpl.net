@@ -668,7 +668,7 @@ let fplParser (input:string) =
                 lastMsg <- errMsg
                 lastSuccess <- pSuccess
     // emit diagnostics for any error positions that are not overlayed by the intervals
-    tryParseRemainingOnly stdParser ad input stdCode stdErrMsg intervals -1
+    tryParseRemainingOnly stdParser ad input stdCode stdErrMsg intervals -1 ""
     // Return an ast on a best effort basis even if there were some errors 
     let resultingAst = tryGetAst stdParser input -1
 

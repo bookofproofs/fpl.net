@@ -1,13 +1,27 @@
-Fpl
+Fpl 
 {
+    s def class FieldPowerN: Sets 
+    {
+        ctor FieldPowerN ()
+        {
+            dec 
+                myField := field s
+                self:=SetBuilder( myField[1 ~ n], true) 
+                self!Set() 
+            ;
+            self 
+
+        }
+    }
+
     def class FieldPowerN: Sets 
     {
         ctor FieldPowerN ()
         {
             dec 
-                myField. := field 
-                self:=SetBuilder( myField[1 ~ n], true)
-                self!Set()
+                myField := field s
+                self:=SetBuilder( myField[1 ~ n], true) 
+                self!Set() 
             ;
             self 
 
