@@ -7,12 +7,12 @@ open System.Text.RegularExpressions
 
 let input = """Fpl 
 {
-    s def class FieldPowerN: Sets 
+s     def class FieldPowerN: Sets 
     {
         ctor FieldPowerN ()
         {
             dec 
-                myField := field s
+                myField := field 
                 self:=SetBuilder( myField[1 ~ n], true) 
                 self!Set() 
             ;
@@ -20,13 +20,13 @@ let input = """Fpl
 
         }
     }
-
+s
     def class FieldPowerN: Sets 
     {
         ctor FieldPowerN ()
         {
             dec 
-                myField := field s
+                myField := field 
                 self:=SetBuilder( myField[1 ~ n], true) 
                 self!Set() 
             ;
@@ -35,7 +35,6 @@ let input = """Fpl
         }
     }
 }
-
 """
 
 let result = fplParser input

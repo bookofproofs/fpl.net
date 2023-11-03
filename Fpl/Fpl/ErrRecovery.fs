@@ -106,11 +106,17 @@ type Diagnostics() =
 
     member this.PrintDiagnostics =
         for d in this.Collection do
-            printfn "%O" d
+            printfn "%O" d.Code.CodeMessage
 
         printfn "%s" "\n^------------------------^\n"
 
-    member this.DiagnosticsToString = this.Collection |> Seq.map string |> String.concat "\n"
+    member this.DiagnosticsToString = 
+        this.Collection 
+        |> Seq.map (fun d -> 
+            d.Emitter.ToString() + ":" +
+            d.Code.Code + ":" +
+            d.Code.CodeMessage) 
+        |> String.concat "\n"
     member this.Clear() = myDictionary.Clear()
 
 let ad = Diagnostics()
@@ -375,7 +381,7 @@ let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) nu
     intervals.TrueForAll(
         fun interval -> 
             match interval with
-            | Interval(s,e) -> num < s || num > e
+            | Interval(s,e) -> num < s || num >= e
         )
 
 
@@ -393,7 +399,12 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         if isNotInAnyInterval intervals (int restInput.Position.Index) then
-            if choices<>lastChoices then
+            let stringBetweenRecursiveCalls = 
+                if lastCorrectedIndex >= 0 then
+                    input.Substring(int lastCorrectedIndex, int restInput.Position.Index - int lastCorrectedIndex)
+                else
+                    "#"
+            if choices<>lastChoices || stringBetweenRecursiveCalls.Contains(Environment.NewLine) then
                 let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
                 let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
                 let diagnostic =
