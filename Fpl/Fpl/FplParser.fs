@@ -673,7 +673,11 @@ let fplParser (input:string) =
     let resultingAst = tryGetAst stdParser input -1
 
     let maxBound = maxIntervalBound intervals
-    tryParseRemainingChunk stdParser1 ad (input.Substring(maxBound)) maxBound (input.Length) stdCode1 stdErrMsg1 -1
+    let remaingString = input.Substring(maxBound).TrimEnd()
+    if not (remaingString.EndsWith("}")) then
+        // prevent emitting "false-positive" errors of characters found after namespase using the heuristic that 
+        // the last character of a namespace is "}" and then looks "good"
+        tryParseRemainingChunk stdParser1 ad (input.Substring(maxBound)) maxBound (input.Length) stdCode1 stdErrMsg1 -1
     resultingAst
 
 
