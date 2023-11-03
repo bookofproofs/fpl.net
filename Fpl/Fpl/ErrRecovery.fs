@@ -250,10 +250,20 @@ let replaceFirstNonWhitespace str =
 
 
 let inputStringManipulator (input:string) errorIndex = 
-    let preErrorString = input.Substring(0, errorIndex)
-    let postErrorString = replaceFirstNonWhitespace (input.Substring(errorIndex))
-    let newInput = preErrorString + postErrorString
-    newInput
+    if errorIndex > 0 then 
+        let characterBeforeError = input.Substring(errorIndex-1,1)
+        if characterBeforeError = "." then
+            let preErrorString = input.Substring(0, errorIndex - 1) // strip the point at the end
+            let postErrorString = input.Substring(errorIndex) // and do not change the remainder of the string
+            let newInput = preErrorString + postErrorString
+            newInput
+        else
+            let preErrorString = input.Substring(0, errorIndex)
+            let postErrorString = replaceFirstNonWhitespace (input.Substring(errorIndex)) // strip the starting non-whitespace characters from the string
+            let newInput = preErrorString + postErrorString
+            newInput
+    else
+        replaceFirstNonWhitespace (input)
 
 /// If the source code is not syntax-error-free, this function will find the first error and emit it.
 let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:string) =
@@ -445,27 +455,8 @@ let preParsePreProcess (input:string) =
 /// we want to provide with emitting error recovery messages
 /// The list will be filtered to include only those matches that really start with that pattern, i.e. are proceeded some whitespace character 
 /// in the remaining source code. For instance, if "for" is the pattern than " for" will match, but "_for" will not.
-let stringMatches (inputString: string) (pattern: string) =
-    let regex = new Regex(pattern)
-    let matchList = regex.Matches(inputString) |> Seq.cast<Match> |> Seq.toList
-    let rec collectMatches matchList index =
-        
-        match (matchList:Match list) with
-        | [] -> 
-            (int64 index, inputString.Substring(index)) :: []
-        | m::ms ->
-            (int64 index, inputString.Substring(index)) :: collectMatches ms m.Index
-    collectMatches matchList 0 
-    |> List.filter (fun (i, s) -> 
-            let preCharacter = 
-                if i > 0 then
-                    inputString.Substring(int (i - int64 1), 1)
-                else
-                    "#"
-            Regex.IsMatch(preCharacter, "\W")
-        )
 
-let stringMatches' (input: string) (pattern: string) =
+let stringMatches (input: string) (pattern: string) =
     let regex = new Regex(pattern)
     let matches = regex.Matches(input)
     let list = new List<int>()

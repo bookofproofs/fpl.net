@@ -631,7 +631,7 @@ let maxIntervalBound (intervals:System.Collections.Generic.List<Interval>) =
 
 let fplParser (input:string) = 
     let preProcessedInput = preParsePreProcess input
-    let matchList = stringMatches' preProcessedInput errRecPattern
+    let matchList = stringMatches preProcessedInput errRecPattern
 
     let intervals = new System.Collections.Generic.List<Interval>()
 
@@ -640,8 +640,8 @@ let fplParser (input:string) =
 
     let mutable lastParserIndex = 0
     let mutable lastParser = stdParser
-    let mutable lastCode = ""
-    let mutable lastMsg = ""
+    let mutable lastCode = stdCode
+    let mutable lastMsg = stdErrMsg
     if parseResult = Ast.Error then
         let mutable lastSuccess = false
         // skip parsing any matches until the first error index (stored in pIndex)
@@ -649,7 +649,7 @@ let fplParser (input:string) =
         for i in [firstIndex..matchList.Count-1] do
             let index, nextIndex = calculateCurrentContext matchList i
             let subString = input.Substring(index)
-            if (-1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess then
+            if (-1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess && lastCode <> stdCode then
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
                 let remainingChunk = input.Substring(int lastParserIndex, (index - int lastParserIndex))
                 // emit error messages for for this chunk of input string using the last parser  
