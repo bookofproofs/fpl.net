@@ -56,14 +56,14 @@ type TestLocalizations () =
 
     [<TestMethod>]
     member this.TestTranslation01 () =
-        let result = run translation """~tex: x "\Leftrightarrow" y """
+        let result = run translation """!tex: x "\Leftrightarrow" y """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestTranslation02 () =
-        let result = run translation """~tex: x "\Leftrightarrow" y | x "\Rightarrow" y """
+        let result = run translation """!tex: x "\Leftrightarrow" y | x "\Rightarrow" y """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -71,9 +71,9 @@ type TestLocalizations () =
     [<TestMethod>]
     member this.TestLocalization01 () =
         let result = run localization """loc not(x) :=
-            ~tex: "\neg(" x ")"
-            ~eng: "not " x
-            ~ger: "nicht " x
+            !tex: "\neg(" x ")"
+            !eng: "not " x
+            !ger: "nicht " x
             ; """
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -83,9 +83,9 @@ type TestLocalizations () =
     member this.TestLocalization02 () =
         // comment
         let result = run localization """loc iif(x,y) :=
-            ~tex: x "\Leftrightarrow" y
-            ~eng: x " if and only if " y
-            ~ger: x " dann und nur dann wenn " y
+            !tex: x "\Leftrightarrow" y
+            !eng: x " if and only if " y
+            !ger: x " dann und nur dann wenn " y
             ;"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -94,10 +94,10 @@ type TestLocalizations () =
     [<TestMethod>]
     member this.TestLocalization03 () =
         let result = run localization """loc NotEqual(x,y) :=
-            ~tex: x "\neq" y
-            ~eng: x "is unequal" y
-            ~ger: x "ist ungleich" y
-            ~pol: x ( "nie równa się" , "nie równe" ) y
+            !tex: x "\neq" y
+            !eng: x "is unequal" y
+            !ger: x "ist ungleich" y
+            !pol: x ( "nie równa się" , "nie równe" ) y
             ;"""
         let actual = sprintf "%O" result
         printf "%O" actual

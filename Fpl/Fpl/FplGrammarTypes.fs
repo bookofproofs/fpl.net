@@ -24,6 +24,7 @@ type Ast =
     | LocalizationString of Positions * string
     | LocalizationTerm of Positions * Ast list
     | LocalizationTermList of Positions * Ast list
+    | Translation of string * Ast
     | Extensionname of Positions * string
     | ExtensionRegex of string
     | ExtensionType of Positions * Ast 
@@ -93,7 +94,7 @@ type Ast =
     | StatementList of Positions * Ast list
     | SignatureWithPreConBlock of Ast * ((Ast list option * Ast) * Ast)
     | RuleOfInference of Positions * Ast
-    | Localization of Positions * (Ast * (string * Ast) list)
+    | Localization of Positions * (Ast * Ast list)
     | Theorem of Positions * Ast
     | Lemma of Positions * Ast
     | Proposition of Positions * Ast

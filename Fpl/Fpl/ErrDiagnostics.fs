@@ -423,20 +423,21 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
             tryParseRemainingOnly someParser ad newInput code stdMsg intervals userState.Index ""
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
+        let stringBetweenRecursiveCalls = 
+            if lastCorrectedIndex >= 0 then
+                input.Substring(int lastCorrectedIndex, int restInput.Position.Index - int lastCorrectedIndex)
+            else
+                "#"
+        let cond = choices<>lastChoices || stringBetweenRecursiveCalls.Contains(Environment.NewLine)
         if isNotInAnyInterval intervals (int restInput.Position.Index) then
-            let stringBetweenRecursiveCalls = 
-                if lastCorrectedIndex >= 0 then
-                    input.Substring(int lastCorrectedIndex, int restInput.Position.Index - int lastCorrectedIndex)
-                else
-                    "#"
-            if choices<>lastChoices || stringBetweenRecursiveCalls.Contains(Environment.NewLine) then
+            if cond then
                 let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
                 let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
                 let diagnostic =
                     Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode)
                 ad.AddDiagnostic diagnostic
             
-        if restInput.Position.Index < input.Length && restInput.Position.Index <> lastCorrectedIndex && choices<>lastChoices then
+        if restInput.Position.Index < input.Length && restInput.Position.Index <> lastCorrectedIndex && cond then
             // replace the input by manipulating the input string depending on the error position
             let newInput = inputStringManipulator input (int restInput.Position.Index)
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions are still met.

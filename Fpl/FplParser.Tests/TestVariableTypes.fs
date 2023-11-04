@@ -119,14 +119,14 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType016 () =
-        let result = run variableType """obj[~]"""
+        let result = run variableType """obj[,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType017 () =
-        let result = run variableType """function[~]"""
+        let result = run variableType """function[,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -140,7 +140,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType019 () =
-        let result = run variableType """predicate[~]"""
+        let result = run variableType """predicate[,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -189,21 +189,21 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType026 () =
-        let result = run variableType """tpl[~]"""
+        let result = run variableType """tpl[,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType027 () =
-        let result = run variableType """templateTest[(1~2]"""
+        let result = run variableType """templateTest[(1,2]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType028 () =
-        let result = run variableType """tplTest[(~]"""
+        let result = run variableType """tplTest[(,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -217,28 +217,28 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType030 () =
-        let result = run variableType """obj[~1]"""
+        let result = run variableType """obj[,1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType031 () =
-        let result = run variableType """function[~1)]"""
+        let result = run variableType """function[,1)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType032 () =
-        let result = run variableType """func[~1!]"""
+        let result = run variableType """func[,1!]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType033 () =
-        let result = run variableType """predicate[~1!]"""
+        let result = run variableType """predicate[,1!]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -259,7 +259,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType036 () =
-        let result = run variableType """ind[~]"""
+        let result = run variableType """ind[,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -287,7 +287,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType040 () =
-        let result = run variableType """tpl [1~2]"""
+        let result = run variableType """tpl [1,2]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -315,28 +315,28 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType044 () =
-        let result = run variableType """obj[x~y]"""
+        let result = run variableType """obj[x,y]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType045 () =
-        let result = run variableType """function[~]"""
+        let result = run variableType """function[,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType046 () =
-        let result = run variableType """func[1~]"""
+        let result = run variableType """func[1,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType047 () =
-        let result = run variableType """predicate[~2]"""
+        let result = run variableType """predicate[,2]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -350,7 +350,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType049 () =
-        let result = run variableType """index[~]"""
+        let result = run variableType """index[,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -364,21 +364,21 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType051 () =
-        let result = run variableType """SomeClass [~ SomeOtherClass]"""
+        let result = run variableType """SomeClass [, SomeOtherClass]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"));
 
     [<TestMethod>]
     member this.TestVariableType052 () =
-        let result = run variableType """@Nat[1~2]"""
+        let result = run variableType """@Nat[1,2]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType053 () =
-        let result = run variableType """template[1~n]"""
+        let result = run variableType """template[1,n]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -392,14 +392,14 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType055 () =
-        let result = run variableType """templateTest[0~]"""
+        let result = run variableType """templateTest[0,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType056 () =
-        let result = run variableType """tplTest[~10]"""
+        let result = run variableType """tplTest[,10]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

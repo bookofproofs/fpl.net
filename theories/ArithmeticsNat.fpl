@@ -222,13 +222,13 @@ Fpl.Arithmetics.Peano
         return result
     }
 
-    def func Sum(from,to:Nat, arr: Nat[from~to]) -> Nat
+    def func Sum(from,to:Nat, arr: Nat[from,to]) -> Nat
     {
         dec
             ~i, result: Nat
             result:=Zero()
 
-            for i in [from~to]
+            for i in [from,to]
             (
                 result:=Add(result,arr<i>)
             )
@@ -236,7 +236,7 @@ Fpl.Arithmetics.Peano
         return result
     }
 
-    def func Sum(arr: Nat[~]) -> Nat
+    def func Sum(arr: Nat[,]) -> Nat
     {
         dec
             ~addend, result: Nat
@@ -259,7 +259,7 @@ Fpl.Arithmetics.Peano
         dec
             ~i, result: Nat
             result:=Zero()
-            for i in [from~to]
+            for i in [from,to]
             (
                 result:=Add(result,addend(i))
             )
@@ -274,7 +274,7 @@ Fpl.Arithmetics.Peano
             ~f: Addend
         ;
         premise:
-            all n in [1~limit]
+            all n in [1,limit]
             (
                 <f(n) = n>
             )
@@ -316,7 +316,7 @@ Fpl.Arithmetics.Peano
             ~x, result: Real
             assert IsBounded(f)
             result:=ZeroReal()
-            for x in [from~to]
+            for x in [from,to]
             (
                 result:=Add(result, Mult(f(x), D(x)))
             )
@@ -324,13 +324,13 @@ Fpl.Arithmetics.Peano
         return result
     }
 
-    def func PowerSeries(k:Nat, arr: Real[k~] ) -> Real
+    def func PowerSeries(k:Nat, arr: Real[k,] ) -> Real
     {
         dec
             ~result: Real
             ~i: Nat
             result:=ZeroReal()
-            for i in [k~]
+            for i in [k,]
             (
                 result:=Add(result, Exp(arr<i>,i))
             )
@@ -338,7 +338,7 @@ Fpl.Arithmetics.Peano
         return result
     }
 
-    def function ContinuedFraction(k:Nat, arr: Int[k~]) -> Real
+    def function ContinuedFraction(k:Nat, arr: Int[k,]) -> Real
     {
         dec
             ~i: Nat
@@ -346,7 +346,7 @@ Fpl.Arithmetics.Peano
             cf:=Real(arr<k>)
             i:=Succ(k)
         ;
-        return Add( cf, Div(1 , ContinuedFraction(i, arr[i~])))
+        return Add( cf, Div(1 , ContinuedFraction(i, arr[i,])))
     }
 
     // Example of defining a constant for the natural number 100 using the

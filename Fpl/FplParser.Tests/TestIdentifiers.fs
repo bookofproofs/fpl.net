@@ -213,35 +213,35 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestEntityWithCoord1 () =
-        let result = run predicateWithQualification """myField[1 ~ n]"""
+        let result = run predicateWithQualification """myField[1 , n]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntityWithCoord2 () =
-        let result = run predicateWithQualification """theorem[from ~ to]"""
+        let result = run predicateWithQualification """theorem[from , to]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestEntityWithCoord3 () =
-        let result = run predicateWithQualification """self[from ~ to]"""
+        let result = run predicateWithQualification """self[from , to]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntityWithCoord4 () =
-        let result = run predicateWithQualification """tplSetElem[from ~ to]"""
+        let result = run predicateWithQualification """tplSetElem[from , to]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestEntityWithCoord5 () =
-        let result = run predicateWithQualification """tpls[from ~ to]"""
+        let result = run predicateWithQualification """tpls[from , to]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -27,7 +27,7 @@ Fpl.Commons.Structures
             self
         }
 
-        ctor Tuple(from, length:Nat, arr: tpl[from ~ length])
+        ctor Tuple(from, length:Nat, arr: tpl[from , length])
         {
             
             dec 
@@ -52,10 +52,10 @@ Fpl.Commons.Structures
     definition class UnlimitedTupleFrom: obj
     {
         dec 
-            ~myX: tpl[from~]
+            ~myX: tpl[from,]
         ;
 
-        constructor UnlimitedTupleFrom(from:index, x: tpl[from~])
+        constructor UnlimitedTupleFrom(from:index, x: tpl[from,])
         {
             dec
                 self!obj()
@@ -99,7 +99,7 @@ Fpl.Commons.Structures
             self
         }
 
-        ctor CartesianProduct(from, to: Nat, setArray: Set[from ~ to])
+        ctor CartesianProduct(from, to: Nat, setArray: Set[from , to])
         {
             dec
                 self:=setArray
@@ -132,8 +132,8 @@ Fpl.Commons.Structures
                     (
                         In(tupleElem,@self),
                         and (
-                            is(tupleElem,Tuple[myFrom~myLength]),
-                            all i in [1~myLength] 
+                            is(tupleElem,Tuple[myFrom,myLength]),
+                            all i in [1,myLength] 
                             (
                                 In(tupleElem<i>,@self<i>) 
                             )
@@ -297,7 +297,7 @@ Fpl.Commons.Structures
     def pred AreRelated(u,v: Set, r: BinaryRelation)
     {
         dec
-            ~tuple: Tuple[1~2]
+            ~tuple: Tuple[1,2]
             tuple:=Tuple(u,v)
         ;
         and

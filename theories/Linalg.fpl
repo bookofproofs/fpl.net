@@ -25,18 +25,18 @@ Fpl.LinAlg
                 addInField := myField.AddOp()
                 mulInField := myField.MulOp()
                 assert NotEqual(n, Zero())
-                self:=SetBuilder( myField[1 ~ n], true)
+                self:=SetBuilder( myField[1 , n], true)
                 self!Set()
             ;
             self
 
         }
 
-        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to])   -> tplFieldElem[from ~ to]
+        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from , to])   -> tplFieldElem[from , to]
         {
             dec
-                ~result: tplFieldElem[from ~ to] 
-                result := addInField(v[from ~ to],w[from ~ to])
+                ~result: tplFieldElem[from , to] 
+                result := addInField(v[from , to],w[from , to])
             ;
             return result
         }
@@ -48,13 +48,13 @@ Fpl.LinAlg
     {
         dec
             ~to: Nat
-            ~x,y: tplFieldElem[1~to]
+            ~x,y: tplFieldElem[1,to]
             ~fieldPowerN: FieldPowerN
                 (
                 field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
                 n:Nat
                 )
-            ~vecAdd: VecAdd(v,w: tplFieldElem[from~to])
+            ~vecAdd: VecAdd(v,w: tplFieldElem[from,to])
         ;
         pre:
             and
@@ -72,7 +72,7 @@ Fpl.LinAlg
         {
             dec
                 ~i: Nat 
-                for i in [1~n] 
+                for i in [1,n] 
                 (
                     self<i>:=field.AdditiveGroup().NeutralElement()
                 )

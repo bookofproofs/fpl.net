@@ -538,10 +538,12 @@ In order to simplify the error recovery process, we introduce an additional keyw
 #### 17) Recognition of misplaced keywords and generic types
 The recognition and error reporting of misplaced keywords (for instance, conflicts between variable names and keywords or variable and templates has been improved.
 
-#### 18) Choices within localization strings
-The separator between choices of localization strings was changed from `|` to `,` to prevent false positives when emitting error recovery diagnostics for case conditions (see 15).
+#### 18) Changes in localizations
+* The separator between choices of localization strings was changed from `|` to `,` to prevent false positives when emitting error recovery diagnostics for case conditions (see 15).
+* The separator between translations was changed from `~` to `!` to prevent false positives when 
+  emitting error recovery diagnostics for variable declarations (see 2).
 
-#### 19) Self-Containment 
+#### 20) Self-Containment 
 This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:
 
 * The order of declarations will now matter. 

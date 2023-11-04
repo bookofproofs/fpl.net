@@ -92,7 +92,7 @@ type TestDefinitionPredicates () =
                 one, two:Nat
                 one := Nat(1)
                 two := Nat(2)
-                ~tuple: Tuple[one~two]
+                ~tuple: Tuple[one,two]
                 tuple:=Tuple(u,v)
                 ;
             

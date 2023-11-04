@@ -227,7 +227,7 @@ let coordList = (sepBy1 coord comma) .>> IW
 
 let bracketedCoords = positions (leftBracket >>. coordList .>> rightBracket) |>> Ast.BrackedCoordList
 
-let fplRange = (opt coord.>> tilde >>. opt coord) .>> IW
+let fplRange = (opt coord.>> comma >>. opt coord) .>> IW
 
 let boundedRange = positions (leftBound .>>. fplRange .>>. rightBound) |>> Ast.ClosedOrOpenRange
 
@@ -235,7 +235,7 @@ let coordInType = choice [ fplIdentifier; indexVariable ] .>> IW
 
 let coordInTypeList = (sepBy1 coordInType comma) .>> IW 
 
-let rangeInType = positions ((opt coordInType .>> tilde) .>>. opt coordInType) |>> Ast.RangeInType
+let rangeInType = positions ((opt coordInType .>> comma) .>>. opt coordInType) |>> Ast.RangeInType
 
 let specificClassType = choice [ objectHeader; xId; predicateIdentifier ] .>> IW
 
@@ -373,7 +373,8 @@ predicateList1Ref.Value <- sepBy1 predicate comma
 (* FPL building blocks *)
 let keywordDeclaration = (skipString "declaration" <|> skipString "dec") .>> SW 
 
-let varDeclBlock = positions (IW >>. keywordDeclaration >>. (many ((tilde >>. namedVariableDeclaration <|> statement) .>> IW)) .>> semiColon) .>> IW |>> Ast.VarDeclBlock 
+let varDecl = tilde >>. namedVariableDeclaration
+let varDeclBlock = positions (IW >>. keywordDeclaration >>. (many ((varDecl <|> statement) .>> IW)) .>> semiColon) .>> IW |>> Ast.VarDeclBlock 
 
 let varDeclOrSpecList = opt (many1 (varDeclBlock)) 
 (*To simplify the syntax definition, we do not define separate
@@ -533,7 +534,7 @@ let ebnfFactor = choice [
 ] 
 let ebnfTerm = positions (sepEndBy1 ebnfFactor SW) |>> Ast.LocalizationTerm
 ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. comma >>. IW)) |>> Ast.LocalizationTermList
-let translation = (tilde >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl
+let translation = (exclamationMark >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl |>> Ast.Translation
 let translationList = many1 (IW >>. translation .>> IW)
 let localization = positions (keywordLocalization >>. (predicate .>> IW .>> colonEqual) .>>. (translationList .>> IW .>> semiColon)) .>> IW |>> Ast.Localization
 
@@ -573,7 +574,7 @@ let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i =
     else
         index, index
 
-let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:"
+let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:|(~|\!)[a-z]"
 
 let errInformation = [
     ("DEF000", "Syntax error in definition", ["def"], definition)
@@ -600,6 +601,8 @@ let errInformation = [
     ("RET000", "Syntax error in return statement", ["ret"], returnStatement)
     ("PRE000", "Syntax error in premise", ["pre"], premise)
     ("CON000", "Syntax error in conclusion", ["con"], conclusion)
+    ("TRL000", "Syntax error in translation", ["!"], translation)
+    ("TYD000", "Syntax error in type declaration", ["~"], varDecl)
 ]
 
 /// Finds the error information tuple based on a prefix of a string from the errInformation list. 

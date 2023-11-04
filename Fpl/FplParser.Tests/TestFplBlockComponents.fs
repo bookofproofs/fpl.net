@@ -69,7 +69,7 @@ type TestFplBlockComponentes () =
 
     [<TestMethod>]
     member this.TestSignature09 () =
-        let result = run signature """VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to])"""
+        let result = run signature """VecAdd(from,to: Nat, v,w: tplFieldElem[from , to])"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
