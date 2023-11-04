@@ -14,8 +14,8 @@
       <Compile Include="TestPredicateInstanceProperties.fs" />
       <Compile Include="TestDefinitionClasses.fs" />
       <Compile Include="TestConstructors.fs" />
-      <Compile Include="TestErrRecoveryLowLevel.fs" />
-      <Compile Include="TestErrRecovery.fs" />
+      <Compile Include="TestErrDiagnosticsLowLevel.fs" />
+      <Compile Include="TestErrDiagnostics.fs" />
       <Compile Include="TestLocalizations.fs" />
       <Compile Include="TestAxioms.fs" />
       <Compile Include="TestFplBlockComponents.fs" />

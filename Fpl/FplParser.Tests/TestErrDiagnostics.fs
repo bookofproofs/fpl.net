@@ -2,13 +2,13 @@
 
 open FParsec
 open FplGrammarCommons
-open ErrRecovery
+open ErrDiagnostics
 open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
 [<TestClass>]
-type TestErrRecovery() =
+type TestErrDiagnostics() =
     let replaceWhiteSpace (input: string) =
         let whiteSpaceChars = [| ' '; '\t'; '\n'; '\r' |]
         input.Split(whiteSpaceChars) |> String.concat ""

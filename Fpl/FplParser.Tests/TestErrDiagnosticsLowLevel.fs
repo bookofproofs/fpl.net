@@ -2,7 +2,7 @@
 
 open FParsec
 open FplGrammarCommons
-open ErrRecovery
+open ErrDiagnostics
 open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 

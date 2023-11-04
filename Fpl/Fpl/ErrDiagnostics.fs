@@ -1,5 +1,4 @@
-﻿module ErrRecovery
-
+﻿module ErrDiagnostics
 open System
 open System.Text.RegularExpressions
 open System.Collections.Generic
@@ -18,6 +17,24 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+*)
+
+(*
+This module provides some general functionality to emit error diagnostics in a language.
+
+We call it `ErrDiagnostics` and not `ErrRecovery`, because it does not change the original parser's grammar that would 
+be otherwise the case. Instead, it depends on synchronizing tokens defined in the particular language. In this repository,
+the synchronizing tokens are defined in the module FplParser `errRecPattern` constant. Moreover, there are some
+standard error messages depending on which synchronizing token was found defined in the module FplParser in `errInformation`.
+
+We tried to keep the functions in this module as independent of the language and grammar in use as possible.
+Nevertheless, some of the functions contained in this module at least partly depend on the grammar of the language 
+and the way Visual Studio Code displays error diagnostics in its "Problems" window.
+
+If you decide to reuse this code for your language and other IDEs, please consider customizing (in particular) the following functions for your environment: 
+`type DiagnosticCode`, `replaceFParsecErrMsgForFplParser`, `inputStringManipulator`, `preParsePreProcess`, and `stringMatches`.
+
 *)
 
 type DiagnosticCode = 
@@ -36,6 +53,7 @@ type DiagnosticCode =
         | DiagnosticCode(code, msg, stdMsg) -> stdMsg
 
     member this.CodeMessage = 
+        // improves the error message for a special case in FPL, return this.StdMsg in your case
         let tranlatedCode = 
             match this.Code with 
             | "DEF000" -> 
@@ -48,6 +66,7 @@ type DiagnosticCode =
 
 
 type DiagnosticEmitter =
+    // replace your language-specific emitters here
     | FplParser
     | FplInterpreter
 
@@ -135,6 +154,7 @@ type Interval =
 let private _position: Parser<_, _> = fun stream -> Reply stream.Position
 
 /// A helper replacing the FParsec error string by a string that can be better displayed in the VSCode problem window
+/// For other IDEs, a change of this function might be required
 let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Position)=
     let lines = errMsg.Split(Environment.NewLine)
     let firstLine = lines.[1]
@@ -216,6 +236,10 @@ let getLastSubstringAfterSeparator (input:string) (sep:string) =
     else
         ""
 
+/// If the parser's error message contains a FParsec backtracking message, this function will 
+/// correct the error position of the error to that of the backtracking error and also extract the 
+/// backtracking error message, ignoring the more global FParsec's error message.
+/// We need this function to make the error diagnostics more intuitive.
 let extractBacktrackingFreeErrMsgAndPos (input: string) (errMsg: string) (pos:Position) =
     let backtrackingFreeErrMsg = getLastSubstringAfterSeparator errMsg "backtracked after:"
     let lineColumn = getLineAndColumn backtrackingFreeErrMsg
@@ -385,6 +409,7 @@ let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) nu
         )
 
 
+/// Emits diagnostics for the error positions (if any) that are not overlapped by the intervals
 let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (stdMsg:string) (intervals:System.Collections.Generic.List<Interval>) lastCorrectedIndex lastChoices =
    
     match run someParser input with

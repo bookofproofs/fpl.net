@@ -2,7 +2,7 @@
 open System.Text.RegularExpressions
 open FplGrammarCommons
 open FplGrammarTypes
-open ErrRecovery
+open ErrDiagnostics
 open FParsec
 
 

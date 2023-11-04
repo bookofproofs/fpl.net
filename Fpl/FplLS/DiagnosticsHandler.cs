@@ -45,11 +45,11 @@ namespace FplLS
         /// <param name="diagnostics">Input list</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted list</returns>
-        public List<Diagnostic> CastDiagnostics(FSharpList<ErrRecovery.Diagnostic> listDiagnostics, TextPositions tp)
+        public List<Diagnostic> CastDiagnostics(FSharpList<ErrDiagnostics.Diagnostic> listDiagnostics, TextPositions tp)
         {
             var sb = new StringBuilder();
             var castedListDiagnostics = new List<Diagnostic>();
-            foreach (ErrRecovery.Diagnostic diagnostic in listDiagnostics)
+            foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics)
             {
                 castedListDiagnostics.Add(CastDiagnostic(diagnostic, tp, sb));
             }
@@ -62,7 +62,7 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted diagnostic</returns>
-        public Diagnostic CastDiagnostic(ErrRecovery.Diagnostic diagnostic, TextPositions tp, StringBuilder sb)
+        public Diagnostic CastDiagnostic(ErrDiagnostics.Diagnostic diagnostic, TextPositions tp, StringBuilder sb)
         {
             var castedDiagnostic = new Diagnostic();
             castedDiagnostic.Source = diagnostic.Emitter.ToString();
@@ -79,7 +79,7 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <param name="sb">A reference to a string builder object that we do not want to recreate all the time for performance reasons.</param>
         /// <returns>A custom diagnostic message.</returns>
-        private string CastMessage(ErrRecovery.Diagnostic diagnostic, StringBuilder sb)
+        private string CastMessage(ErrDiagnostics.Diagnostic diagnostic, StringBuilder sb)
         {
             sb.Clear();
             sb.Append(CastDiagnosticCodeMessage(diagnostic));
@@ -91,7 +91,7 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <returns>"semantics " if emitter was Interpreter, "syntax " if emitter was Parser</returns>
         /// <exception cref="NotImplementedException"></exception>
-        private string CastDiagnosticCodeMessage(ErrRecovery.Diagnostic diagnostic)
+        private string CastDiagnosticCodeMessage(ErrDiagnostics.Diagnostic diagnostic)
         {
             return diagnostic.Code.CodeMessage;
         }
@@ -100,7 +100,7 @@ namespace FplLS
         /// </summary>
         /// <param name="severity">Input severity</param>
         /// <returns>Casted severity</returns>
-        private DiagnosticSeverity CastSeverity(ErrRecovery.DiagnosticSeverity severity)
+        private DiagnosticSeverity CastSeverity(ErrDiagnostics.DiagnosticSeverity severity)
         {
             DiagnosticSeverity castedSeverity = new DiagnosticSeverity();
             if (severity.IsError)
@@ -126,7 +126,7 @@ namespace FplLS
             return castedSeverity;
         }
 
-        private DiagnosticCode CastCode(ErrRecovery.DiagnosticCode code)
+        private DiagnosticCode CastCode(ErrDiagnostics.DiagnosticCode code)
         {
             return new DiagnosticCode(code.Code.ToString());
         }

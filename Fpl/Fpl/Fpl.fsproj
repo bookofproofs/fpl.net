@@ -11,7 +11,7 @@
   <ItemGroup>
     <Compile Include="FplGrammarCommons.fs" />
     <Compile Include="FplGrammarTypes.fs" />
-    <Compile Include="ErrRecovery.fs" />
+    <Compile Include="ErrDiagnostics.fs" />
     <None Include="CHANGES.md" />
     <None Include="DocuFplGrammarPocShiftFromPythonToFSharp.md" />
     <Compile Include="FplParser.fs" />

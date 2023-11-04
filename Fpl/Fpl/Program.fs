@@ -1,5 +1,5 @@
 ﻿open FplGrammarCommons
-open ErrRecovery
+open ErrDiagnostics
 open FplParser
 open FParsec
 open System.Text.RegularExpressions
