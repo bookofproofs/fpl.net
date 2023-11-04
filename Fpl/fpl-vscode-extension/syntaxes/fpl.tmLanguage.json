@@ -39,13 +39,13 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.fpl keyword",
-				"match": "\\b(all|and|assert|ass|assume|cases|con|conclusion|del|delegate|end|ex|ext|false|iif|impl|is|loop|not|or|pre|premise|qed|range|ret|return|rev|revoke|self|trivial|true|xor)\\b"
+				"match": "\\b(all|and|assert|assume|ass|cases|conclusion|con|declaration|dec|delegate|del|end|exn|ex|ext|false|for|iif|impl|in|intrinsic|intr|is|not|or|premise|pre|qed|return|ret|revoke|rev|self|trivial|true|xor)\\b"
 			}]
 		},
 		"inbuiltTypes": {
 			"patterns": [{
 				"name": "inbuiltType.fpl punctuation",
-				"match": "\\b(alias|ax|axiom|cl|class|conj|conjecture|cor|corollary|func|function|ind|index|inf|inference|lem|lemma|loc|localization|mand|mandatory|obj|object|opt|optional|post|postulate|pred|predicate|prf|proof|prop|proposition|thm|theorem|th|theory|uses|undef|undefined)\\b"
+				"match": "\\b(alias|axiom|ax|class|cl|conjecture|conj|constructor|corollary|cor|ctor|definition|def|function|func|index|ind|inference|inf|lemma|lem|localization|loc|mandatory|mand|object|obj|optional|opt|postulate|post|predicate|pred|proof|prf|proposition|prop|theorem|thm|uses|undefined|undef)\\b"
 			}]
 		},
 		"templates": {

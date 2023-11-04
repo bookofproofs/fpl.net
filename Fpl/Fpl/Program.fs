@@ -1,22 +1,16 @@
-﻿open FplGrammarTypes
-open FplGrammarCommons
-open ErrRecovery
-open FplGrammar
+﻿open FplGrammarCommons
+open ErrDiagnostics
+open FplParser
 open FParsec
+open System.Text.RegularExpressions
 
 
-let input = "TestNamespace {
-    inf {
-        D(x:tpl[   x , y  ] )
-        {
-            pre:true
-            con:true
-        }
-    }
-    theory {   
+let input = """TestNamespace {
+    inf 
+        D() { pre: true con: true } }
         y
-    }
-}"
+}
+"""
 
 let result = fplParser input
 
@@ -24,9 +18,4 @@ printf "%O" result
 ad.PrintDiagnostics
 
 printf "\n--------------------------------\n"
-
-ad.Clear()
-let origResult = tryParse' ast "recovery failed;" ad input
-printf "%O" origResult
-ad.PrintDiagnostics
 

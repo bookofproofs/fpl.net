@@ -1,9 +1,8 @@
 ﻿using System.Text;
-using System.Text.RegularExpressions;
+using Microsoft.FSharp.Collections;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using static FplGrammar;
-using static Microsoft.FSharp.Core.ByRefKinds;
+using static FplParser;
 
 namespace FplLS
 {
@@ -19,19 +18,25 @@ namespace FplLS
         }
 
 
-        public void PublishDiagnostics(Uri uri, StringBuilder buffer)
+        public void PublishDiagnostics(Uri uri, StringBuilder? buffer)
         {
-            var sourceCode = buffer.ToString();
-            var parserDiagnostics = FplGrammar.parserDiagnostics;
-            parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
-            var ast = FplGrammar.fplParser(sourceCode);
-            var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
-
-            _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
+            if (buffer != null)
             {
-                Uri = uri,
-                Diagnostics = diagnostics
-            });
+                var sourceCode = buffer.ToString();
+                var parserDiagnostics = FplParser.parserDiagnostics;
+                parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
+                var ast = FplParser.fplParser(sourceCode);
+                var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
+                _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
+                {
+                    Uri = uri,
+                    Diagnostics = diagnostics
+                });
+            }
+            else
+            {
+                throw new NullReferenceException("buffer parameter was unexpectedly null");
+            }
         }
 
         /// <summary>
@@ -40,11 +45,11 @@ namespace FplLS
         /// <param name="diagnostics">Input list</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted list</returns>
-        public List<Diagnostic> CastDiagnostics(HashSet<ErrRecovery.Diagnostic> listDiagnostics, TextPositions tp)
+        public List<Diagnostic> CastDiagnostics(FSharpList<ErrDiagnostics.Diagnostic> listDiagnostics, TextPositions tp)
         {
             var sb = new StringBuilder();
             var castedListDiagnostics = new List<Diagnostic>();
-            foreach (ErrRecovery.Diagnostic diagnostic in listDiagnostics)
+            foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics)
             {
                 castedListDiagnostics.Add(CastDiagnostic(diagnostic, tp, sb));
             }
@@ -57,13 +62,14 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted diagnostic</returns>
-        public Diagnostic CastDiagnostic(ErrRecovery.Diagnostic diagnostic, TextPositions tp, StringBuilder sb)
+        public Diagnostic CastDiagnostic(ErrDiagnostics.Diagnostic diagnostic, TextPositions tp, StringBuilder sb)
         {
             var castedDiagnostic = new Diagnostic();
             castedDiagnostic.Source = diagnostic.Emitter.ToString();
             castedDiagnostic.Severity = CastSeverity(diagnostic.Severity);
             castedDiagnostic.Message = CastMessage(diagnostic, sb);
             castedDiagnostic.Range = tp.GetRange(diagnostic.Position.Index, diagnostic.Position.Index);
+            castedDiagnostic.Code = CastCode(diagnostic.Code);
             return castedDiagnostic;
         }
 
@@ -73,45 +79,28 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <param name="sb">A reference to a string builder object that we do not want to recreate all the time for performance reasons.</param>
         /// <returns>A custom diagnostic message.</returns>
-        private string CastMessage(ErrRecovery.Diagnostic diagnostic, StringBuilder sb)
+        private string CastMessage(ErrDiagnostics.Diagnostic diagnostic, StringBuilder sb)
         {
             sb.Clear();
-            sb.Append(CastDiagnosticSource(diagnostic));
-            sb.Append(diagnostic.Severity.ToString());
-            sb.Append(": ");
-
-            // fall back if there was no match of a skipped first line
-            sb.Append(diagnostic.Message.Value);
-
+            sb.Append(CastDiagnosticCodeMessage(diagnostic));
             return sb.ToString();
         }
         /// <summary>
-        /// Returns a prefix depending on the emitter of the diagnostic.
+        /// Returns a message depending on the code of the diagnostic.
         /// </summary>
         /// <param name="diagnostic">Input diagnostic</param>
         /// <returns>"semantics " if emitter was Interpreter, "syntax " if emitter was Parser</returns>
         /// <exception cref="NotImplementedException"></exception>
-        private string CastDiagnosticSource(ErrRecovery.Diagnostic diagnostic)
+        private string CastDiagnosticCodeMessage(ErrDiagnostics.Diagnostic diagnostic)
         {
-            if (diagnostic.Emitter.IsFplInterpreter)
-            {
-                return "Semantics ";
-            }
-            else if (diagnostic.Emitter.IsFplParser) 
-            {
-                return "Syntax ";
-            }
-            else
-            {
-                throw new NotImplementedException(diagnostic.Emitter.ToString());
-            }
+            return diagnostic.Code.CodeMessage;
         }
         /// <summary>
         /// Casts an F# ErrReccovery module severity into the OmniSharp's DiagnosticSeverity
         /// </summary>
         /// <param name="severity">Input severity</param>
         /// <returns>Casted severity</returns>
-        private DiagnosticSeverity CastSeverity(ErrRecovery.DiagnosticSeverity severity)
+        private DiagnosticSeverity CastSeverity(ErrDiagnostics.DiagnosticSeverity severity)
         {
             DiagnosticSeverity castedSeverity = new DiagnosticSeverity();
             if (severity.IsError)
@@ -135,6 +124,11 @@ namespace FplLS
                 throw new NotImplementedException(severity.ToString());
             }
             return castedSeverity;
+        }
+
+        private DiagnosticCode CastCode(ErrDiagnostics.DiagnosticCode code)
+        {
+            return new DiagnosticCode(code.Code.ToString());
         }
     }
 }

@@ -1,291 +1,340 @@
 Fpl.Commons.Structures
 {
-    uses { Fpl.Commons, Fpl.SetTheory.ZermeloFraenkel, Fpl.Arithmetics.Peano }
+    uses Fpl.Commons 
+    uses Fpl.SetTheory.ZermeloFraenkel 
+    uses Fpl.Arithmetics.Peano 
 
-    theory
+    // defines a fixed length tuple template using a generic type tplIndex for an index in a range
+    definition class Tuple : obj
     {
-
-        // defines a fixed length tuple template using a generic type tplIndex for an index in a range
-        class Tuple : obj
+        dec 
+            ~myLength: Nat
+        ;
+        ctor Tuple(listOfTpl:+ tpl)
         {
-            myLength: Nat
-
-            Tuple(listOfTpl: +tpl)
-            {
-                elem: tpl
-                i: Nat
-                i:= Zero()
-                loop elem listOfTpl
+            dec 
+                ~elem: tpl
+                ~i: Nat 
+                i:= Zero() 
+                for elem in listOfTpl
                 (
                     i:=Succ(i)
-                    self[i]:=elem
+                    self<i>:=elem
                 )
                 myLength:=i
-            }
+                self!obj()
+            ;
+            self
+        }
 
-            Tuple(from, length:Nat, arr: tpl[from ~ length])
-            {
+        ctor Tuple(from, length:Nat, arr: tpl[from , length])
+        {
+            
+            dec 
                 self:=arr
                 myLength:=length
-            }
-
-            mandatory Nat Length()
-            {
-                return myLength
-            }
-
+                self!obj()
+            ;
+            self
         }
 
-        // defines a tuple template starting from a specific index with an arbitrary length
-        class UnlimitedTupleFrom: obj
+        mandatory Nat Length()
         {
-            UnlimitedTupleFrom(from:Nat, x: tpl[from~])
-            {
-                self:=x
-            }
-
-            mandatory tpl Coord(i: Nat)
-            {
-                return self(i)
-            }
+            dec
+                self:= myLength
+            ;
+            self
         }
 
-        class CartesianProduct: Set
+    }
+
+    // defines a tuple template starting from a specific index with an arbitrary length
+    definition class UnlimitedTupleFrom: obj
+    {
+        dec 
+            ~myX: tpl[from,]
+        ;
+
+        constructor UnlimitedTupleFrom(from:index, x: tpl[from,])
         {
+            dec
+                self!obj()
+                myX:=x
+            ;
+            self
+        }
 
-            myLength: Nat
-            myFrom: Nat
+        mandatory tpl Coord(i: Nat)
+        {
+            dec
+                self:=x<i>
+            ;
+            self
+        }
+    }
 
-            CartesianProduct(setList: +Set)
-            {
-                setItem: Set
-                i: Nat
+    def class CartesianProduct: Set
+    {
+
+        dec
+            ~myLength: Nat
+            ~myFrom: Nat
+        ;
+
+        constructor CartesianProduct(setList:+ Set)
+        {
+            dec
+                ~setItem: Set
+                ~i: Nat
+                self!Set()
                 i:= Zero()
-                loop setItem setList
+                for setItem in setList
                 (
                     i:=Succ(i)
-                    self[i]:=setItem
+                    self<i>:=setItem
                 )
                 myFrom := Nat(1)
                 myLength:=i
-            }
+            ;
+            self
+        }
 
-            CartesianProduct(from, to: Nat, setArray: Set[from ~ to])
-            {
+        ctor CartesianProduct(from, to: Nat, setArray: Set[from , to])
+        {
+            dec
                 self:=setArray
                 myLength:=to
-            }
+                self!Set()
+            ;
+            self
+        }
 
-            mandatory Nat Length()
-            {
-                return myLength
-            }
+        mandatory Nat Length()
+        {
+            dec
+                self:= myLength 
+            ;
+            self
+        }
 
-            mandatory pred AllTuplesIn()
-            {
-                tupleElem: Set
-                i: Nat
-
-                and
+        mandatory pred AllTuplesIn()
+        {
+            dec 
+                ~tupleElem: Set
+                ~i: Nat
+            ;
+            and 
+            (
+                is(@self,Set),
+                all tupleElem
                 (
-                    is(@self,Set),
-                    all tupleElem
+                    impl 
                     (
-                        impl
-                        (
-                            In(tupleElem,@self),
-                            and (
-                                is(tupleElem,Tuple[myFrom~myLength]),
-                                all i [1~myLength]
-                                (
-                                    In(tupleElem[i],@self[i])
-                                )
+                        In(tupleElem,@self),
+                        and (
+                            is(tupleElem,Tuple[myFrom,myLength]),
+                            all i in [1,myLength] 
+                            (
+                                In(tupleElem<i>,@self<i>) 
                             )
                         )
                     )
                 )
-            }
-
+            )
         }
 
-        class Relation: Set
-        {
-            myArity: Nat
+    }
 
-            Relation(setList: +Set)
-            {
-                cartProd : CartesianProduct
+    def class Relation: Set
+    {
+        dec 
+            ~myArity: Nat
+        ;
+
+        ctor Relation(setList:+ Set)
+        {
+            dec
+                ~cartProd : CartesianProduct
+                self!Set()
                 cartProd := CartesianProduct(setList)
                 myArity := cartProd.Length()
                 self := Subset(cartProd)
-
-            }
-
-            mandatory Nat Arity()
-            {
-                return myArity
-            }
+            ;
+            self
         }
 
-        class BinaryRelation: Relation
+        mandatory Nat Arity()
         {
-            myDomain, myCodomain: Set
+            dec self:= myArity;
+            self
+        }
+    }
+
+    def class BinaryRelation: Relation
+    {
+        dec 
+            ~myDomain, myCodomain: Set
+        ;
 
 
-            BinaryRelation(x,y: Set)
-            {
-                self:=Relation(2,x,y)
+        ctor BinaryRelation(x,y: Set)
+        {
+            dec
+                self!Relation(2,x,y)
                 myDomain:=x
                 myCodomain:=y
-            }
-
-            mandatory Set Domain()
-            {
-                return myDomain
-            }
-
-            mandatory Set CoDomain()
-            {
-                return myCodomain
-            }
-
-            optional pred RightUnique()
-            {
-                v,w1,w2: Set
-                all v,w1,w2
-                (
-                    impl
-                    (
-                        and
-                        (
-                            In(v,Domain()),
-                            In(w1,CoDomain()),
-                            In(w2,CoDomain()),
-                            AreRelated(v,w1,@self),
-                            AreRelated(v,w2,@self)
-                        ),
-                        Equals(w1,w2)
-                    )
-                )
-            }
-
-            optional pred LeftUnique()
-            {
-                v1,v2,w: Set
-                all v1,v2,w
-                (
-                    impl
-                    (
-                        and
-                        (
-                            In(v1,Domain()),
-                            In(v2,Domain()),
-                            In(w,CoDomain()),
-                            AreRelated(v1,w,@self),
-                            AreRelated(v2,w,@self)
-                        ),
-                        Equals(v1,v2)
-                    )
-                )
-            }
-
-            optional pred Injective()
-            {
-                LeftUnique()
-            }
-
-            optional pred Unique()
-            {
-                and (LeftUnique(), RightUnique())
-            }
-
-            optional pred RightTotal()
-            {
-                v,w: Set
-                all w
-                (
-                    ex v
-                    (
-                        and
-                        (
-                            In(v,Domain()),
-                            In(w,CoDomain()),
-                            AreRelated(v,w,@self)
-                        )
-                    )
-                )
-            }
-
-            optional pred Surjective()
-            {
-                RightTotal()
-            }
-
-            optional pred LeftTotal()
-            {
-                v,w: Set
-                all v
-                (
-                    ex w
-                    (
-                        and
-                        (
-                            In(v,Domain()),
-                            In(w,CoDomain()),
-                            AreRelated(v,w,@self)
-                        )
-                    )
-                )
-            }
-
-            optional pred Total()
-            {
-                and (LeftTotal(), RightTotal())
-            }
+            ;
+            self
         }
 
-        pred AreRelated(u,v: Set, r: BinaryRelation)
+        mandatory Set Domain()
         {
-            one, two:Nat
-            one := Nat(1)
-            two := Nat(2)
-            tuple: Tuple[one~two]
+            dec
+                self:=myDomain
+            ;
+            self
+        }
+
+        mandatory Set CoDomain()
+        {
+            dec
+                self:=myCodomain
+            ;
+            self
+        }
+
+        optional pred RightUnique()
+        {
+            all v,w1,w2 in Set
+            (
+                impl
+                (
+                    and
+                    (
+                        In(v,Domain()),
+                        In(w1,CoDomain()),
+                        In(w2,CoDomain()),
+                        AreRelated(v,w1,@self),
+                        AreRelated(v,w2,@self)
+                    ),
+                    < w1 = w2 >
+                )
+            )
+        }
+
+        optional pred LeftUnique()
+        {
+            all v1,v2,w in Set
+            (
+                impl
+                (
+                    and
+                    (
+                        In(v1,Domain()),
+                        In(v2,Domain()),
+                        In(w,CoDomain()),
+                        AreRelated(v1,w,@self),
+                        AreRelated(v2,w,@self)
+                    ),
+                    < v1 = v2 >
+                )
+            )
+        }
+
+        optional pred Injective()
+        {
+            LeftUnique()
+        }
+
+        optional pred Unique()
+        {
+            and (LeftUnique(), RightUnique())
+        }
+
+        optional pred RightTotal()
+        {
+            all w in Set
+            (
+                ex v in Set
+                (
+                    and
+                    (
+                        In(v,Domain()),
+                        In(w,CoDomain()),
+                        AreRelated(v,w,@self)
+                    )
+                )
+            )
+        }
+
+        optional pred Surjective()
+        {
+            RightTotal()
+        }
+
+        optional pred LeftTotal()
+        {
+            all v in Set
+            (
+                ex w in Set
+                (
+                    and
+                    (
+                        In(v,Domain()),
+                        In(w,CoDomain()),
+                        AreRelated(v,w,@self)
+                    )
+                )
+            )
+        }
+
+        optional pred Total()
+        {
+            and (LeftTotal(), RightTotal())
+        }
+    }
+
+    def pred AreRelated(u,v: Set, r: BinaryRelation)
+    {
+        dec
+            ~tuple: Tuple[1,2]
             tuple:=Tuple(u,v)
-            assert
-                and
-                (
-                    In(tuple,r),
-                    In(u,r.Domain()),
-                    In(v,r.Codomain())
-                )
-        }
+        ;
+        and
+        (
+            In(tuple,r),
+            In(u,r.Domain()),
+            In(v,r.Codomain())
+        )
+    }
 
-        class Function: BinaryRelation
+    definition class Function: BinaryRelation
+    {
+        ctor Function(x,y: Set)
         {
-            Function(x,y: Set)
-            {
-                self:=BinaryRelation(x,y)
+            dec
+                self!BinaryRelation(x,y)
                 assert self.LeftTotal()
                 assert self.RightUnique()
-            }
+            ;
+            self
         }
+    }
 
-        class EquivalenceRelation: BinaryRelation
+    definition class EquivalenceRelation: BinaryRelation
+    {
+        ctor EquivalenceRelation(x,y: Set)
         {
-            EquivalenceRelation(x,y: Set)
-            {
+            dec
                 self:=BinaryRelation(x,y)
                 assert self.Reflexive()
                 assert self.Symmetric()
                 assert self.Transitive()
-            }
+            ;
+            self
         }
-
-
     }
+
+
 }
-
-
-
-
 

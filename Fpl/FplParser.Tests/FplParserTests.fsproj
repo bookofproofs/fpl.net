@@ -9,8 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <Compile Include="TestErrRecoveryLowLevel.fs" />
-      <Compile Include="TestErrRecovery.fs" />
+      <Compile Include="TestDefinitionFunctionalTerms.fs" />
+      <Compile Include="TestClassInstanceProperties.fs" />
+      <Compile Include="TestPredicateInstanceProperties.fs" />
+      <Compile Include="TestDefinitionClasses.fs" />
+      <Compile Include="TestConstructors.fs" />
+      <Compile Include="TestErrDiagnosticsLowLevel.fs" />
+      <Compile Include="TestErrDiagnostics.fs" />
       <Compile Include="TestLocalizations.fs" />
       <Compile Include="TestAxioms.fs" />
       <Compile Include="TestFplBlockComponents.fs" />
@@ -19,7 +24,7 @@
       <Compile Include="TestClassInheritanceTypes.fs" />
       <Compile Include="TestStatements.fs" />
       <Compile Include="TestIdentifiers.fs" />
-      <Compile Include="TestProperties.fs" />
+      <Compile Include="TestFunctionalTermInstanceProperties.fs" />
       <Compile Include="TestProofs.fs" />
       <Compile Include="TestPredicatesSpecific.fs" />
       <Compile Include="TestPredicates.fs" />

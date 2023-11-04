@@ -2,8 +2,8 @@
 
 open FParsec
 open FplGrammarCommons
-open ErrRecovery
-open FplGrammar
+open ErrDiagnostics
+open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -22,59 +22,6 @@ type TestErrRecoveryLowLevel() =
 
     member this.TestSplitStringByTextAtPosition_Post(expPost: string, actPost: string) =
         Assert.AreEqual(expPost, actPost)
-
-    [<TestMethod>]
-    [<DataRow("T { inf { D() { pre : true con : true      }  theory { y} }", "}", 46, "T { inf { D() { pre : true con : true      }", "  ", "theory { y} }")>]
-    [<DataRow("T { : theory { } }", "inf", 4, "T {", " ", ": theory { } }")>]
-    [<DataRow("T {  \t: theory { } }", "inf", 6, "T {", "  \t", ": theory { } }")>]
-    [<DataRow("T {  \t \t : theory { } }", "inf", 9, "T {", "  \t \t ", ": theory { } }")>]
-    [<DataRow("T { inf { theory { pred I() } }", "ExampleId", 10, "T { inf {", " ", "theory { pred I() } }")>]
-    [<DataRow("T { inf { ExampleId  theory { pred I() } }", "§", 21, "T { inf { ExampleId", "  ", "theory { pred I() } }")>]
-    member this.TestSplitStringByTextAtPosition
-        (
-            input: string,
-            text: string,
-            ind: int64,
-            expPre: string,
-            expOptTrailingWs: string,
-            expPost: string
-        ) =
-        let pos = Position("", ind, 0, 0)
-        let (actPre, actExptOptTrailingWs, actPost) = splitStringByTextAtPosition input text pos
-        this.TestSplitStringByTextAtPosition_Pre(expPre, actPre)
-        this.TestSplitStringByTextAtPosition_OptTrailingWs(expOptTrailingWs, actExptOptTrailingWs)
-        this.TestSplitStringByTextAtPosition_Post(expPost, actPost)
-
-    [<TestMethod>]
-    [<DataRow("", "", 0, " ", 1)>]
-    [<DataRow("T { : theory { } }", "inf", 4, "T { inf  theory { } }", 3)>]
-    [<DataRow("T { inf { T () { theory { } }", "§", 17, "T { inf { T () { §  theory { } }", 3)>]
-    member this.TestManipulateString
-        (
-            input: string,
-            text: string,
-            ind: int64,
-            expNewInput,
-            expNewOffset
-        ) =
-        let pos = Position("", ind, 0, 0)
-        let (actNewInput, newRecoveryText, newIndexOffset, keywordLength, fatalError) = manipulateString input text pos "" 
-        Assert.AreEqual(expNewInput, actNewInput)
-        Assert.AreEqual(expNewOffset, newIndexOffset)
-
-    [<TestMethod>]
-    [<DataRow("T { inf { T ( § theory { } }", ")", 14, "{ T ( § ", "{ T ( ) ")>]
-    member this.TestManipulateStringRecoveryString
-        (
-            input: string,
-            text: string,
-            ind: int64,
-            lastRecoveryText,
-            expRecoveryText
-        ) =
-        let pos = Position("", ind, 0, 0)
-        let (actNewInput, newRecoveryText, newIndexOffset, keywordLength, fatalError) = manipulateString input text pos lastRecoveryText 
-        Assert.AreEqual(expRecoveryText, newRecoveryText)
 
 
     [<TestMethod>]
@@ -139,6 +86,18 @@ The parser backtracked after:
     ^
 Expecting: <block comment>, <inline comment>, <significant whitespace>, ':ext',
 'inf', 'inference', 'th', 'theory' or 'uses'""", "':ext', 'inf', 'inference', 'th', 'theory', 'uses', <block comment>, <inline comment>, <significant whitespace>")>]
+    [<DataRow("""Failure:
+Error in Ln: 1 Col: 6
+dec: tpl: Nat;
+     ^
+Expecting: <block comment>, <inline comment>, <significant whitespace>,
+<whitespace> or ';'
+Other error messages:
+  Expecting: <variable (got template)>""", "';', <block comment>, <inline comment>, <significant whitespace>, <variable (got template)>, <whitespace>")>]    
+    [<DataRow("""Error in Ln: 6 Col: 22
+                x := theorem
+                     ^
+Expecting: <PascalCaseId>, <argument identifier>, <digits>, '<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined' or 'xor' Other error messages:   Expecting: <variable (got keyword)>""", "'<', '@', 'all', 'and', 'del', 'delegate', 'ex', 'false', 'iif', 'impl', 'is', 'not', 'or', 'self', 'true', 'undef', 'undefined', 'xor', <PascalCaseId>, <argument identifier>, <digits>, <variable (got keyword)>")>]    
     member this.TestRetrieveExpectedParserChoices(fParsecErrMsg:string, expected:string) = 
         let actual = retrieveExpectedParserChoices fParsecErrMsg
         Assert.AreEqual(expected, actual)
@@ -169,5 +128,65 @@ The parser backtracked after:
             inputChoices: string,
             expected: string
         ) =
-        let actual = replaceFParsecErrMsgForFplParser input inputChoices
+        let pos = Position("",0,0,0)
+        let actual = replaceFParsecErrMsgForFplParser input inputChoices pos
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
+
+    [<TestMethod>]
+    [<DataRow("""// definition of a functional term denoting the successor of a natural number
+        function T() -> Real { intr }
+
+        // definition of a new mathematical object (natural number)
+        function T() -> Real { intr }
+
+        pred IsGreaterOrEqual(n,m: Nat)
+        {
+            ex k in Nat ( <n = Add(m,k)> )
+        }
+
+        // besides the class "Nat", we can formulate definition of the set of all natural numbers
+        class SetNat: Set
+        {
+            SetNat()
+            {
+                dec 
+                    ~n: Nat
+                    // Assert that elements of class "Nat" can be collected to a bigger object of class "SetNat"
+                    // This requires that we can apply the "In" predicate defined in Fpl.Set.ZermeloFraenkel
+                    // to object of the class "Nat". This becomes possible when we assert that every variable of the class
+                    // "Nat" is a also Set.
+                    // This is comparable to implementing an interface (or comparable to multiple inheritance).
+                    self!Set()
+                ;
+                self
+            }
+        }
+
+        // Addition of natural numbers
+        function T() -> Real { intr }
+        /* This is 
+        a 
+
+        test
+        */
+
+        /* This is 
+        another
+
+        test
+        */
+        function T() -> Real { intr }
+
+        // Example of defining a constant for the natural number 100 using the
+        class N100:Set{N100(){dec ~n:Nat  self!Set() self:=SetBuilder(SetNat(),IsGreater(n,100)); self }}""", 1605, 46)>]
+    [<DataRow("",0,1)>]
+    member this.TestReplaceFplComments
+        (
+            input: string,
+            expectedLength: int,
+            expectedNumbLines: int
+        ) =
+        let r = removeFplComments input 
+        // printfn "%i, %i, %i, %i" input.Length r.Length (input.Split('\n').Length) (r.Split('\n').Length)
+        Assert.AreEqual(expectedLength, r.Length)
+        Assert.AreEqual(expectedNumbLines, r.Split('\n').Length)

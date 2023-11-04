@@ -1,12 +1,52 @@
-TestNamespace {
-    inf {
-        D(x:tpl[!x~x!] )
+Fpl 
+{
+    def class FieldPowerN: Sets 
+    {
+        ctor FieldPowerN ()
         {
-            pre:true
-            con:true
+            dec 
+                ~a:obj 
+                ~a:obj 
+                ~a:obj 
+                ~a:obj 
+                myField := field 
+                self:=SetBuilder( myField[1 , n], true) 
+                self!Set() 
+            ;
+            self 
+
         }
     }
-    theory {   
-        y
+
+    def class FieldPowerN: Sets 
+    {
+        ctor FieldPowerN ()
+        {
+            dec 
+                myField := field 
+                self:=SetBuilder( myField[1 , n], true) 
+                self!Set() 
+            ;
+            self 
+
+        }
+    }
+
+
+    def class FieldPowerN: Sets 
+    {
+        ctor FieldPowerN ()
+        {
+            dec 
+                myField := field 
+                self:=SetBuilder( myField[1 , n], true) 
+                self!Set() 
+            ;
+            self 
+
+        }
     }
 }
+
+
+

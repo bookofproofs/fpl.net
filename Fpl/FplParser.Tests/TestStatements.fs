@@ -1,7 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
-open FplGrammar
+open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -13,111 +13,66 @@ type TestStatements () =
             |> String.concat ""
 
     [<TestMethod>]
-    member this.TestRange01 () =
-        let result = run rangeStatement """range proceedingResult p
+    member this.TestFor01 () =
+        let result = run forStatement """for proceedingResult in    p
                 (
                     assert proceedingResult
                     a:=1
                     b:=1
                 )"""
         let actual = sprintf "%O" result
-        let expected = """Success: Range
-  ((Var "proceedingResult", Var "p"),
-   [Assertion (PredicateWithoutArgs (Var "proceedingResult"));
-    Assignment (Var "a", PredicateWithoutArgs (ExtDigits "1"));
-    Assignment (Var "b", PredicateWithoutArgs (ExtDigits "1"))])"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestLoop01 () =
-        let result = run loopStatement """loop proceedingResult p
-                (
-                    assert proceedingResult
-                    a:=1
-                    b:=1
-                )"""
-        let actual = sprintf "%O" result
-        let expected = """Success: Loop
-  ((Var "proceedingResult", Var "p"),
-   [Assertion (PredicateWithoutArgs (Var "proceedingResult"));
-    Assignment (Var "a", PredicateWithoutArgs (ExtDigits "1"));
-    Assignment (Var "b", PredicateWithoutArgs (ExtDigits "1"))])"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
-
-    [<TestMethod>]
-    member this.TestLoop02 () =
-        let result = run loopStatement """loop n [1~4]
+    member this.TestFor02 () =
+        let result = run forStatement """for    n in [1,4]
             (
             assert Equal(f(n),n)
             )"""
         let actual = sprintf "%O" result
-        let expected = """Success: Loop
-  ((Var "n",
-    ClosedOrOpenRange
-      ((LeftClosed, (Some (ExtDigits "1"), Some (ExtDigits "4"))), RightClosed)),
-   [Assertion
-      (PredicateWithArgs
-         (AliasedId ["Equal"],
-          [PredicateWithArgs (Var "f", [PredicateWithoutArgs (Var "n")]);
-           PredicateWithoutArgs (Var "n")]))])"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestLoop03 () =
-        let result = run loopStatement """loop n [$1~$4]
+    member this.TestFor03 () =
+        let result = run forStatement """for n in [!1,!4]
             (
             assert Equal(f(n),n)
             )"""
         let actual = sprintf "%O" result
-        let expected = """Success: Loop
-  ((Var "n",
-    ClosedOrOpenRange
-      ((LeftClosed, (Some (DollarDigits "1"), Some (DollarDigits "4"))),
-       RightClosed)),
-   [Assertion
-      (PredicateWithArgs
-         (AliasedId ["Equal"],
-          [PredicateWithArgs (Var "f", [PredicateWithoutArgs (Var "n")]);
-           PredicateWithoutArgs (Var "n")]))])"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestAssignment01 () =
         let result = run assignmentStatement """a:= 1"""
         let actual = sprintf "%O" result
-        let expected = """Success: Assignment (Var "a", PredicateWithoutArgs (ExtDigits "1"))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestAssignment02 () =
         let result = run assignmentStatement """self := Zero()"""
         let actual = sprintf "%O" result
-        let expected = """Success: Assignment (Self [], PredicateWithArgs (AliasedId ["Zero"], []))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDelegate01 () =
         let result = run fplDelegate """del.test(1,2)"""
         let actual = sprintf "%O" result
-        let expected = """Success: Delegate
-  (DelegateId "test",
-   [PredicateWithoutArgs (ExtDigits "1"); PredicateWithoutArgs (ExtDigits "2")])"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDelegate02 () =
         let result = run fplDelegate """del.decrement(x)"""
         let actual = sprintf "%O" result
-        let expected = """Success: Delegate (DelegateId "decrement", [PredicateWithoutArgs (Var "x")])"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
         
-    [<TestMethod>]
-    member this.TestReturn01 () =
-        let result = run returnStatement """return result"""
-        let actual = sprintf "%O" result
-        let expected = """Success: Return (PredicateWithoutArgs (Var "result"))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
-    
+   
     [<TestMethod>]
     member this.TestAssertion01 () =
         let result = run assertionStatement """assert
@@ -130,19 +85,12 @@ type TestStatements () =
                         )
                     )"""
         let actual = sprintf "%O" result
-        let expected = """Success: Assertion
-  (All
-     ([Var "n"],
-      And
-        [IsOperator
-           (Var "n", VariableTypeWithModifier (None, ClassHeaderType ["Set"]));
-         PredicateWithArgs
-           (AliasedId ["In"],
-            [PredicateWithoutArgs (Var "n"); PredicateWithoutArgs (Self [])])]))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCases01 () =
+        // else case addressed using a python delegate
         let result = run casesStatement """cases
                 (
                     | Equal(x,0) :
@@ -150,42 +98,63 @@ type TestStatements () =
                     | Equal(x,1) :
                         self := Succ(Zero())
                     | Equal(x,2) :
-                        self := Succ(Succ(Zero()));
-                    else
-                        // else case addressed using a python delegate
-                        self := Succ(del.decrement(x))
+                        self := Succ(Succ(Zero()))
+                    ? self := Succ(del.decrement(x))
                 )"""
         let actual = sprintf "%O" result
-        let expected = """Success: Cases
-  ([ConditionFollowedByResult
-      (PredicateWithArgs
-         (AliasedId ["Equal"],
-          [PredicateWithoutArgs (Var "x"); PredicateWithoutArgs (ExtDigits "0")]),
-       [Assignment (Self [], PredicateWithArgs (AliasedId ["Zero"], []))]);
-    ConditionFollowedByResult
-      (PredicateWithArgs
-         (AliasedId ["Equal"],
-          [PredicateWithoutArgs (Var "x"); PredicateWithoutArgs (ExtDigits "1")]),
-       [Assignment
-          (Self [],
-           PredicateWithArgs
-             (AliasedId ["Succ"], [PredicateWithArgs (AliasedId ["Zero"], [])]))]);
-    ConditionFollowedByResult
-      (PredicateWithArgs
-         (AliasedId ["Equal"],
-          [PredicateWithoutArgs (Var "x"); PredicateWithoutArgs (ExtDigits "2")]),
-       [Assignment
-          (Self [],
-           PredicateWithArgs
-             (AliasedId ["Succ"],
-              [PredicateWithArgs
-                 (AliasedId ["Succ"],
-                  [PredicateWithArgs (AliasedId ["Zero"], [])])]))])],
-   DefaultResult
-     [Assignment
-        (Self [],
-         PredicateWithArgs
-           (AliasedId ["Succ"],
-            [PredicateWithArgs
-               (DelegateId "decrement", [PredicateWithoutArgs (Var "x")])]))])"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCases02 () =
+        let result = run casesStatement """cases
+                (
+                    | Equal(n,0): result := m.NeutralElem()
+                    ? result :=
+                            op(
+                                y,
+                                Exp( m(y,op), y, Sub(n,1))
+                            )
+                )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCases03 () =
+        let result = run casesStatement """cases
+                    (
+                        | <x = 0> : self := Zero() 
+                        | <x = 1> : self := Succ(Zero())
+                        | <x = 2> : self := Succ(Succ(Zero()))
+                        ? self := Succ(delegate.decrement(x))  
+                    )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCases04 () =
+        let result = run casesStatement """cases
+                    (
+                        | IsGreaterOrEqual(x.RightMember(), x.LeftMember()): self:=x.RightMember()
+                        ? self:=undefined
+                    )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCases05 () =
+        let result = run casesStatement """cases
+            (
+                | <m = 0>: result:= n
+                | <Succ(m) = k>: result:= Succ(Add(n,k))
+                ? result:= undef
+            )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+
+

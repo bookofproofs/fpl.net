@@ -1,143 +1,102 @@
 Fpl.Commons
 {
-    inference
+    inf ModusPonens()
     {
-        ModusPonens()
-        {
-            p,q: pred
+        dec ~p,q: pred;
 
-            premise:
-                and (p, impl (p,q) )
-            conclusion:
-                q
-        }
-
-        ModusTollens()
-        {
-            p,q: pred
-
-            premise:
-                and (not(q), impl(p,q) )
-            conclusion:
-                not (p)
-        }
-
-        HypotheticalSyllogism()
-        {
-            p,q,r: pred
-            premise:
-                and (impl(p,q), impl(q,r))
-            conclusion:
-                impl(p,r)
-        }
-
-        DisjunctiveSyllogism()
-        {
-            p,q: pred
-            premise:
-                and (not(p), or(p,q))
-            conclusion:
-                q
-        }
-
-        ProceedingResults(p: +pred)
-        {
-            proceedingResult: pred
-            loop a b (assert a)
-            premise:
-                all proceedingResult p
-                (
-                    proceedingResult
-                )
-            conclusion:
-                and (p)
-        }
-
-        ExistsByExample(p: pred(c: obj))
-        {
-            x: obj
-            premise:
-                p(c)
-            conclusion:
-                ex x(p(x))
-        }
-
+        premise:
+            and (p, impl (p,q) )
+        conclusion:
+            q
     }
 
-    theory
+    inf ModusTollens()
     {
-        pred Equal(a,b: tpl)
-        {
-            p: pred 
+        dec ~p,q: pred;
 
-			all p
-			(
-				iif
-				(
-					p(a),
-					p(b)
-				)
-			)
-        }
+        premise:
+            and (not(q), impl(p,q) )
+        conclusion:
+            not (p)
+    }
 
-        pred NotEqual(x,y: tpl)
-        {
-            not
+    inf HypotheticalSyllogism()
+    {
+        dec ~p,q,r: pred;
+        premise:
+            and (impl(p,q), impl(q,r))
+        conclusion:
+            impl(p,r)
+    }
+
+    inf DisjunctiveSyllogism()
+    {
+        dec ~p,q: pred;
+        premise:
+            and (not(p), or(p,q))
+        conclusion:
+            q
+    }
+
+    inf ProceedingResults(p:+ pred)
+    {
+        premise:
+            all proceedingResult in p
             (
-                Equal(x,y)
+                proceedingResult
             )
-        }
-
-
+        conclusion:
+            and (p)
     }
 
-    localization
+    inf ExistsByExample(p: pred(c: obj))
     {
-        iif(x,y) :=
-            ~tex: x "\Leftrightarrow" y
-            ~eng: x " if and only if " y
-            ~ger: x " dann und nur dann wenn " y
-            ;
-
-        not(x) :=
-            ~tex: "\neg(" x ")"
-            ~eng: "not " x
-            ~ger: "nicht " x
-            ;
-
-        and(p,q) :=
-            ~tex: p "\wedge" q
-            ~eng: p " and " q
-            ~ger: p " und " q
-            ;
-
-        Equal(x,y) :=
-            ~tex: x "=" y
-            ~eng: x " equals " y
-            ~ger: x " ist gleich " y
-            ~ita: x " è uguale a " y
-            ~pol: x " równa się " y
-            ;
-
-        NotEqual(x,y) :=
-            ~tex: x "\neq" y
-            ~eng: x "is unequal" y
-            ~ger: x "ist ungleich" y
-            ~pol: x  "nie równa się" | "nie równe" y
-            ;
+        dec ~x: obj;
+        premise:  
+            p(c)
+        conclusion: 
+            ex x(p(x))
     }
 
+
+    def pred NotEqual(x,y: tpl)
+    {
+        not ( <x = y> )
+    }
+
+
+
+
+    localization iif(x,y) :=
+        !tex: x "\Leftrightarrow" y
+        !eng: x " if and only if " y
+        !ger: x " dann und nur dann wenn " y
+        ;
+
+    loc not(x) :=
+        !tex: "\neg(" x ")"
+        !eng: "not " x
+        !ger: "nicht " x
+        ;
+
+    loc and(p,q) :=
+        !tex: p "\wedge" q
+        !eng: p " and " q
+        !ger: p " und " q
+        ;
+
+    loc Equal(x,y) :=
+        !tex: x "=" y
+        !eng: x " equals " y
+        !ger: x " ist gleich " y
+        !ita: x " è uguale a " y
+        !pol: x " równa się " y
+        ;
+
+    loc NotEqual(x,y) :=
+        !tex: x "\neq" y 
+        !eng: x "is unequal" y 
+        !ger: x "ist ungleich" y 
+        !pol: x ( "nie równa się" , "nie równe" ) y 
+        ;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

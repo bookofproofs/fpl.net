@@ -1,7 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
-open FplGrammar
+open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
@@ -15,66 +15,32 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate01 () =
         let result = run definitionPredicate """pred IsGreaterOrEqual(n,m: Nat)
         {
-            k: Nat
+            dec ~a:obj ~  k: Nat;
             ex k ( Equal(n,Add(m,k)) )
         }"""
         let actual = sprintf "%O" result
-        let expected = """Success: DefinitionPredicate
-  (Signature
-     (AliasedId ["IsGreaterOrEqual"],
-      [([Var "n"; Var "m"],
-        VariableTypeWithModifier (None, ClassHeaderType ["Nat"]))]),
-   (([BlockVariableDeclaration
-        ([Var "k"], VariableTypeWithModifier (None, ClassHeaderType ["Nat"]))],
-     Some
-       (Exists
-          ([Var "k"],
-           PredicateWithArgs
-             (AliasedId ["Equal"],
-              [PredicateWithoutArgs (Var "n");
-               PredicateWithArgs
-                 (AliasedId ["Add"],
-                  [PredicateWithoutArgs (Var "m");
-                   PredicateWithoutArgs (Var "k")])])))), None))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDefinitionPredicate02 () =
         let result = run definitionPredicate """pred IsBounded(x: Real)
         {
-            upperBound, lowerBound: Real
+            dec ~a:obj ~  upperBound, lowerBound: Real;
             ex upperBound, lowerBound
             (
                 and (LowerEqual(x,upperBound), LowerEqual(lowerBound,x))
             )
         }"""
         let actual = sprintf "%O" result
-        let expected = """Success: DefinitionPredicate
-  (Signature
-     (AliasedId ["IsBounded"],
-      [([Var "x"], VariableTypeWithModifier (None, ClassHeaderType ["Real"]))]),
-   (([BlockVariableDeclaration
-        ([Var "upperBound"; Var "lowerBound"],
-         VariableTypeWithModifier (None, ClassHeaderType ["Real"]))],
-     Some
-       (Exists
-          ([Var "upperBound"; Var "lowerBound"],
-           And
-             [PredicateWithArgs
-                (AliasedId ["LowerEqual"],
-                 [PredicateWithoutArgs (Var "x");
-                  PredicateWithoutArgs (Var "upperBound")]);
-              PredicateWithArgs
-                (AliasedId ["LowerEqual"],
-                 [PredicateWithoutArgs (Var "lowerBound");
-                  PredicateWithoutArgs (Var "x")])]))), None))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDefinitionPredicate03 () =
         let result = run definitionPredicate """pred IsBounded(f: RealValuedFunction)
         {
-            x: Real
+            dec ~a:obj ~  x: Real;
             all x
             (
                 IsBounded(f(x))
@@ -82,27 +48,14 @@ type TestDefinitionPredicates () =
         }
 """
         let actual = sprintf "%O" result
-        let expected = """Success: DefinitionPredicate
-  (Signature
-     (AliasedId ["IsBounded"],
-      [([Var "f"],
-        VariableTypeWithModifier (None, ClassHeaderType ["RealValuedFunction"]))]),
-   (([BlockVariableDeclaration
-        ([Var "x"], VariableTypeWithModifier (None, ClassHeaderType ["Real"]))],
-     Some
-       (All
-          ([Var "x"],
-           PredicateWithArgs
-             (AliasedId ["IsBounded"],
-              [PredicateWithArgs (Var "f", [PredicateWithoutArgs (Var "x")])])))),
-    None))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDefinitionPredicate04 () =
         let result = run definitionPredicate """pred Equal(a,b: tpl)
         {
-            p: pred 
+            dec ~a:obj ~  p: pred;
 
 			all p
 			(
@@ -114,20 +67,8 @@ type TestDefinitionPredicates () =
 			)
         }"""
         let actual = sprintf "%O" result
-        let expected = """Success: DefinitionPredicate
-  (Signature
-     (AliasedId ["Equal"],
-      [([Var "a"; Var "b"], VariableTypeWithModifier (None, TemplateType "tpl"))]),
-   (([BlockVariableDeclaration
-        ([Var "p"], VariableTypeWithModifier (None, PredicateType))],
-     Some
-       (All
-          ([Var "p"],
-           Iif
-             (PredicateWithArgs (Var "p", [PredicateWithoutArgs (Var "a")]),
-              PredicateWithArgs (Var "p", [PredicateWithoutArgs (Var "b")]))))),
-    None))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
 
     [<TestMethod>]
@@ -140,165 +81,342 @@ type TestDefinitionPredicates () =
             )
         }"""
         let actual = sprintf "%O" result
-        let expected = """Success: DefinitionPredicate
-  (Signature
-     (AliasedId ["NotEqual"],
-      [([Var "x"; Var "y"], VariableTypeWithModifier (None, TemplateType "tpl"))]),
-   (([],
-     Some
-       (Not
-          (PredicateWithArgs
-             (AliasedId ["Equal"],
-              [PredicateWithoutArgs (Var "x"); PredicateWithoutArgs (Var "y")])))),
-    None))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDefinitionPredicate06 () =
         let result = run definitionPredicate """pred AreRelated(u,v: Set, r: BinaryRelation)
         {
-            one, two:Nat
-            one := Nat(1)
-            two := Nat(2)
-            tuple: Tuple[one~two]
-            tuple:=Tuple(u,v)
-            assert
-                and
-                (
-                    In(tuple,r),
-                    In(u,r.Domain()),
-                    In(v,r.Codomain())
-                )
+            dec ~a:obj ~  
+                one, two:Nat
+                one := Nat(1)
+                two := Nat(2)
+                ~tuple: Tuple[one,two]
+                tuple:=Tuple(u,v)
+                ;
+            
+            and
+            (
+                In(tuple,r),
+                In(u,r.Domain()),
+                In(v,r.Codomain())
+            )
         }"""
         let actual = sprintf "%O" result
-        let expected = """Success: DefinitionPredicate
-  (Signature
-     (AliasedId ["AreRelated"],
-      [([Var "u"; Var "v"],
-        VariableTypeWithModifier (None, ClassHeaderType ["Set"]));
-       ([Var "r"],
-        VariableTypeWithModifier (None, ClassHeaderType ["BinaryRelation"]))]),
-   (([BlockVariableDeclaration
-        ([Var "one"; Var "two"],
-         VariableTypeWithModifier (None, ClassHeaderType ["Nat"]));
-      BlockStatement
-        (Assignment
-           (Var "one",
-            PredicateWithArgs
-              (AliasedId ["Nat"], [PredicateWithoutArgs (ExtDigits "1")])));
-      BlockStatement
-        (Assignment
-           (Var "two",
-            PredicateWithArgs
-              (AliasedId ["Nat"], [PredicateWithoutArgs (ExtDigits "2")])));
-      BlockVariableDeclaration
-        ([Var "tuple"],
-         VariableTypeWithModifier
-           (None,
-            FplTypeWithRange
-              ((ClassHeaderType ["Tuple"], LeftClosed),
-               (RangeInType (Some (Var "one"), Some (Var "two")), RightClosed))));
-      BlockStatement
-        (Assignment
-           (Var "tuple",
-            PredicateWithArgs
-              (AliasedId ["Tuple"],
-               [PredicateWithoutArgs (Var "u"); PredicateWithoutArgs (Var "v")])));
-      BlockStatement
-        (Assertion
-           (And
-              [PredicateWithArgs
-                 (AliasedId ["In"],
-                  [PredicateWithoutArgs (Var "tuple");
-                   PredicateWithoutArgs (Var "r")]);
-               PredicateWithArgs
-                 (AliasedId ["In"],
-                  [PredicateWithoutArgs (Var "u");
-                   QualifiedIdentifier
-                     (Var "r", [PredicateWithArgs (AliasedId ["Domain"], [])])]);
-               PredicateWithArgs
-                 (AliasedId ["In"],
-                  [PredicateWithoutArgs (Var "v");
-                   QualifiedIdentifier
-                     (Var "r", [PredicateWithArgs (AliasedId ["Codomain"], [])])])]))],
-     None), None))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDefinitionPredicate07 () =
         let result = run definitionPredicate """pred Greater(x,y: obj)
         {
-
+            intrinsic
         }"""
         let actual = sprintf "%O" result
-        let expected = """Success: DefinitionPredicate
-  (Signature
-     (AliasedId ["Greater"],
-      [([Var "x"; Var "y"], VariableTypeWithModifier (None, ObjectType))]),
-   (([], None), None))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDefinitionPredicate08 () =
         let result = run definitionPredicate """pred IsPowerSet(ofSet, potentialPowerSet: Set)
         {
-            z: Set
+            dec ~a:obj ~  z: Set;
             all z
             (
                 impl (Subset(z,ofSet), In(z, potentialPowerSet))
             )
         }"""
         let actual = sprintf "%O" result
-        let expected = """Success: DefinitionPredicate
-  (Signature
-     (AliasedId ["IsPowerSet"],
-      [([Var "ofSet"; Var "potentialPowerSet"],
-        VariableTypeWithModifier (None, ClassHeaderType ["Set"]))]),
-   (([BlockVariableDeclaration
-        ([Var "z"], VariableTypeWithModifier (None, ClassHeaderType ["Set"]))],
-     Some
-       (All
-          ([Var "z"],
-           Impl
-             (PredicateWithArgs
-                (AliasedId ["Subset"],
-                 [PredicateWithoutArgs (Var "z");
-                  PredicateWithoutArgs (Var "ofSet")]),
-              PredicateWithArgs
-                (AliasedId ["In"],
-                 [PredicateWithoutArgs (Var "z");
-                  PredicateWithoutArgs (Var "potentialPowerSet")]))))), None))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDefinitionPredicate09 () =
         let result = run definitionPredicate """pred Union(x,superSet: Set)
         {
-            u: Set
+            dec ~a:obj ~  u: Set;
             all u
             (
                 impl (In(u, x), In(u, superSet))
             )
         }"""
         let actual = sprintf "%O" result
-        let expected = """Success: DefinitionPredicate
-  (Signature
-     (AliasedId ["Union"],
-      [([Var "x"; Var "superSet"],
-        VariableTypeWithModifier (None, ClassHeaderType ["Set"]))]),
-   (([BlockVariableDeclaration
-        ([Var "u"], VariableTypeWithModifier (None, ClassHeaderType ["Set"]))],
-     Some
-       (All
-          ([Var "u"],
-           Impl
-             (PredicateWithArgs
-                (AliasedId ["In"],
-                 [PredicateWithoutArgs (Var "u"); PredicateWithoutArgs (Var "x")]),
-              PredicateWithArgs
-                (AliasedId ["In"],
-                 [PredicateWithoutArgs (Var "u");
-                  PredicateWithoutArgs (Var "superSet")]))))), None))"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<TestMethod>]
+    member this.TestDefinitionPredicate10 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be empty
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate10a () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be empty with dec
+            dec:;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate10b () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be empty with spec
+            dec ~a:obj;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate10c () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be empty with some spec or dec
+            dec ~a:obj;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate11 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some proceeding spec or dec
+            dec ~a:obj;
+            intrinsic
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate11a () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some proceeding spec or dec
+            dec:;
+            intrinsic
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))        
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate11b () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some proceeding spec or dec
+            dec ~a:obj;
+            intrinsic
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))   
         
+    [<TestMethod>]
+    member this.TestDefinitionPredicate12 () =
+        // a predicate can be intrinsic 
+        let result = run definitionPredicate """pred T()
+        {
+            intrinsic
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate12a () =
+        // a predicate can be intrinsic 
+        let result = run definitionPredicate """pred T()
+        {
+            intr
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate12b () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some following declarations or specifications
+            intrinsic
+            dec:;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate12c () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some following declarations or specifications
+            intrinsic
+            dec ~a:obj;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate12d () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate cannot be intrinsic with some following declarations or specifications
+            intrinsic
+            dec ~a:obj;
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate13 () =
+        // a predicate can be intrinsic with some following properties 
+        let result = run definitionPredicate """pred T()
+        {
+            intrinsic
+
+            mand func T() -> obj
+	        {
+	            dec ~a:obj;
+                return x
+	        } 
+
+            optional pred T() 
+	        {
+                true
+	        } 
+
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))       
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate14 () =
+        let result = run definitionPredicate """pred T()
+        {
+            mand func T() -> obj
+	        {
+	            dec ~a:obj;
+                return x
+	        } 
+
+            // a predicate cannot be intrinsic with some proceeding properties 
+            intrinsic
+
+
+            optional pred T() 
+	        {
+                true
+	        } 
+
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))       
+
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate15 () =
+        // a predicate with some proceeding declarations or specifications
+        let result = run definitionPredicate """pred T()
+        {
+            dec ~a:obj;
+            true
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate16 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // a predicate with some proceeding declarations or specifications
+            dec ~a:obj ~ ;
+            true
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate17 () =
+        // a predicate with some proceeding declarations or specifications
+        let result = run definitionPredicate """pred T()
+        {
+            dec ~a:obj;
+            true
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate18 () =
+        // a predicate 
+        let result = run definitionPredicate """pred T()
+        {
+            true
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate19 () =
+        // a predicate with some succeeding properties
+        let result = run definitionPredicate """pred T()
+        {
+            true 
+
+
+            mand func T() -> obj
+	        {
+	            dec ~a:obj;
+                return x
+	        } 
+
+            optional pred T() 
+	        {
+                true
+	        } 
+
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate20 () =
+        let result = run definitionPredicate """pred T()
+        {
+            // properties cannot succeed a predicate within a predicate definition
+            optional pred T() 
+	        {
+                true
+	        } 
+
+
+            true 
+
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+

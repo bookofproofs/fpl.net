@@ -1,82 +1,85 @@
-Fpl.LinAlg
+Fpl.LinAlg 
 {
-    uses {Fpl.Commons, Fpl.Commons.Structures, Fpl.SetTheory.ZermeloFraenkel, Fpl.Algebra.Structures}
-    theory
+    uses Fpl.Commons 
+    uses Fpl.Commons.Structures 
+    uses Fpl.SetTheory.ZermeloFraenkel
+    uses Fpl.Algebra.Structures 
+
+
+    def class FieldPowerN: Sets 
     {
+        dec
+            ~myField: Field  
+            ~addInField: BinOp 
+            ~mulInField: BinOp 
+        ;
 
-        class FieldPowerN: Set
+        ctor FieldPowerN
+        (
+            field : Field, 
+            n: Nat 
+        )
         {
-			myField: Field
-			addInField: BinOp
-			mulInField: BinOp
-			
-
-            FieldPowerN
-            (
-                field : Field,
-                n: Nat
-            )
-            {
-                myField := field
-				addInField := myField.AddOp()
+            dec 
+                myField := field 
+                addInField := myField.AddOp()
                 mulInField := myField.MulOp()
-				assert NotEqual(n, Zero())
-                self:=SetBuilder( myField[1 ~ n], true)
-				
-            }
-
-	        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
-	        {
-	            self[from ~ to]:=addInField(v[from ~ to],w[from ~ to])
-	        }
+                assert NotEqual(n, Zero())
+                self:=SetBuilder( myField[1 , n], true)
+                self!Set()
+            ;
+            self
 
         }
-		
-        lemma VecAddIsCommutative()
+
+        mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from , to])   -> tplFieldElem[from , to]
         {
-            from, to: Nat
-            from := Nat(1)
-            x,y: tplFieldElem[from~to]
-            fieldPowerN: FieldPowerN
+            dec
+                ~result: tplFieldElem[from , to] 
+                result := addInField(v[from , to],w[from , to])
+            ;
+            return result
+        }
+
+    }
+  
+
+    lemma VecAddIsCommutative()
+    {
+        dec
+            ~to: Nat
+            ~x,y: tplFieldElem[1,to]
+            ~fieldPowerN: FieldPowerN
                 (
                 field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
                 n:Nat
                 )
-            vecAdd: VecAdd(v,w: tplFieldElem[from~to])
-            pre:
-                and
-                (
-                    In(x, fieldPowerN),
-                    In(y, fieldPowerN)
-                )
-            con:
-                vecAdd.IsCommutative()
-        }
+            ~vecAdd: VecAdd(v,w: tplFieldElem[from,to])
+        ;
+        pre:
+            and
+            (
+                In(x, fieldPowerN),
+                In(y, fieldPowerN)
+            )
+        con:
+            vecAdd.IsCommutative()
+    }
 
-        class ZeroVectorN: Tuple
+    def class ZeroVectorN: Tuple
+    {
+        ctor ZeroVectorN(n: Nat, field: Field)
         {
-            ZeroVectorN(n: Nat, field: Field)
-            {
-                from: Nat
-                from := Nat(1)
-                i: Nat
-                range i [1~n]
+            dec
+                ~i: Nat 
+                for i in [1,n] 
                 (
-                    self[i]:=field.AdditiveGroup().NeutralElement()
+                    self<i>:=field.AdditiveGroup().NeutralElement()
                 )
-            }
+                self!Tuple()
+            ;
+            self
         }
     }
+     
 }
-
-
-
-
-
-
-
-
-
-
-
-
