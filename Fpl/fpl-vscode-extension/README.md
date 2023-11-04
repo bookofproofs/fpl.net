@@ -8,7 +8,8 @@ This is a Proof of Concept of a private reasearch project to develop such a lang
 
 ## Features
 
-Currently, the extension provides a basic syntax highlighting for `.fpl` files in the dark scheme.
+* The extension provides a basic syntax highlighting for `.fpl` files.
+* Emitting multiple error diagnostics for syntax errors in a single file at once (experimental) 
 
 ## Requirements
 
@@ -23,6 +24,9 @@ None
 * None
 
 ## Release Notes
+
+### 1.3.0
+* Syntax error diagnostics (experimental) 
 
 ### 1.2.10
 * Improved syntax error messages from the FPL parser
