@@ -635,7 +635,7 @@ let fplParser (input:string) =
 
     let intervals = new System.Collections.Generic.List<Interval>()
 
-    let parseResult, pIndex = tryParseFirstError stdParser ad input stdCode stdErrMsg 
+    let parseResult, pIndex = tryParseFirstError stdParser ad preProcessedInput stdCode stdErrMsg 
     intervals.Add(Interval(0, pIndex))
 
     let mutable lastParserIndex = 0
@@ -645,13 +645,13 @@ let fplParser (input:string) =
     if parseResult = Ast.Error then
         let mutable lastSuccess = false
         // skip parsing any matches until the first error index (stored in pIndex)
-        let firstIndex = findFirstIndexInMatches matchList (int pIndex) input.Length
+        let firstIndex = findFirstIndexInMatches matchList (int pIndex) preProcessedInput.Length
         for i in [firstIndex..matchList.Count-1] do
             let index, nextIndex = calculateCurrentContext matchList i
-            let subString = input.Substring(index)
+            let subString = preProcessedInput.Substring(index)
             if (-1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess && lastCode <> stdCode then
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
-                let remainingChunk = input.Substring(int lastParserIndex, (index - int lastParserIndex))
+                let remainingChunk = preProcessedInput.Substring(int lastParserIndex, (index - int lastParserIndex))
                 // emit error messages for for this chunk of input string using the last parser  
                 tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg -1 ""
                 intervals.Add(Interval(lastParserIndex, nextIndex))
@@ -668,16 +668,16 @@ let fplParser (input:string) =
                 lastMsg <- errMsg
                 lastSuccess <- pSuccess
     // emit diagnostics for any error positions that are not overlayed by the intervals
-    tryParseRemainingOnly stdParser ad input stdCode stdErrMsg intervals -1 ""
+    tryParseRemainingOnly stdParser ad preProcessedInput stdCode stdErrMsg intervals -1 ""
     // Return an ast on a best effort basis even if there were some errors 
-    let resultingAst = tryGetAst stdParser input -1
+    let resultingAst = tryGetAst stdParser preProcessedInput -1
 
     let maxBound = maxIntervalBound intervals
-    let remaingString = input.Substring(maxBound).TrimEnd()
-    if not (remaingString.EndsWith("}")) then
+    let remaingString = preProcessedInput.Substring(maxBound).TrimEnd()
+    if not (remaingString.EndsWith("}") && Regex.Matches(preProcessedInput, "\}").Count = Regex.Matches(preProcessedInput, "\{").Count) then
         // prevent emitting "false-positive" errors of characters found after namespase using the heuristic that 
         // the last character of a namespace is "}" and then looks "good"
-        tryParseRemainingChunk stdParser1 ad (input.Substring(maxBound)) maxBound (input.Length) stdCode1 stdErrMsg1 -1 ""
+        tryParseRemainingChunk stdParser1 ad (preProcessedInput.Substring(maxBound)) maxBound (preProcessedInput.Length) stdCode1 stdErrMsg1 -1 ""
     resultingAst
 
 

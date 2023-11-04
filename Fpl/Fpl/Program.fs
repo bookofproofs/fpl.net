@@ -5,35 +5,10 @@ open FParsec
 open System.Text.RegularExpressions
 
 
-let input = """Fpl 
-{
-s     def class FieldPowerN: Sets 
-    {
-        ctor FieldPowerN ()
-        {
-            dec 
-                myField := field 
-                self:=SetBuilder( myField[1 ~ n], true) 
-                self!Set() 
-            ;
-            self 
-
-        }
-    }
-s
-    def class FieldPowerN: Sets 
-    {
-        ctor FieldPowerN ()
-        {
-            dec 
-                myField := field 
-                self:=SetBuilder( myField[1 ~ n], true) 
-                self!Set() 
-            ;
-            self 
-
-        }
-    }
+let input = """TestNamespace {
+    inf 
+        D() { pre: true con: true } }
+        y
 }
 """
 
