@@ -7,13 +7,6 @@ namespace FplLS
 {
     class Program
     {
-        /*
-        static public void Main(string[] args)
-        {
-            var result = FplGrammar.fplParser("foo");
-            Console.WriteLine(result);
-        }
-        */
 
         static async Task Main(string[] args)
         {
@@ -26,6 +19,7 @@ namespace FplLS
                     .WithMinimumLogLevel(LogLevel.Error)
                     .WithServices(ConfigureServices)
                     .WithHandler<TextDocumentSyncHandler>()
+                    .WithHandler<CompletionHandler>()
                     .OnInitialize((s, _) =>
                     {
                         if (s is LanguageServer languageServer)
@@ -53,6 +47,7 @@ namespace FplLS
         {
             services.AddSingleton<BufferManager>();
             services.AddSingleton<DiagnosticsHandler>();
+            services.AddSingleton<FplAutoCompleteService>();
         }
 
     }
