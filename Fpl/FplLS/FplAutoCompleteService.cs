@@ -2,6 +2,7 @@
 using System.Text;
 using System;
 using static FplParser;
+using System.Reflection;
 
 namespace FplLS
 {
@@ -27,8 +28,6 @@ namespace FplLS
            "ctor"
            "dec"
            "declaration"
-           "def"
-           "definition"
            "del"
            "delegate"
            "else"
@@ -94,50 +93,80 @@ namespace FplLS
             var nl = Environment.NewLine;
             foreach (var choice in choices)
             {
-                var ci = new CompletionItem();
                 switch (choice)
                 {
+                    case "<whitespace>":
                     case "<significant whitespace>":
-                        ci.Detail = choice;
-                        ci.Label = " ";
-                        ci.Kind = CompletionItemKind.Text;
+                        modChoices.AddRange(AddWhitespaceChoices(choice, index, line, col, firstIndex));
                         break;
                     case "'ax'":
                     case "'axiom'":
                     case "'post'":
                     case "'postulate'":
-                        ci.Label = choice.Substring(1, choice.Length - 2) + $" SomeFplIdentifier(){nl}" + "{" + $"{nl}\ttrue{nl}" + "}" + nl;
-                        ci.Kind = CompletionItemKind.Keyword;
+                        modChoices.AddRange(AddAxiomChoices(choice, index, line, col, firstIndex));
                         break;
+                    case "'def'":
+                    case "'definition'":
                     default:
-                        ci.Detail = choice;
-                        ci.Label = choice.Substring(1, choice.Length - 2);
-                        ci.Kind = CompletionItemKind.Value;
+                        modChoices.AddRange(AddDefaultChoices(choice, index, line, col, firstIndex));
                         break;
                 }
-                var mumberOfUserCharsFromParserChoices = index - (int)firstIndex;
-                ci.TextEdit = new TextEdit
-                {
-                    NewText = ci.Label,
-                    Range = new OmniSharp.Extensions.LanguageServer.Protocol.Models.Range(
-                    new Position
-                    {
-                        Line = line,
-                        Character = col - mumberOfUserCharsFromParserChoices
-                    }, new Position
-                    {
-                        Line = line,
-                        Character = col - mumberOfUserCharsFromParserChoices + 1
-                    })
-                };
-                modChoices.Add(ci);
-
             }
             return new CompletionList(modChoices);
         }
 
+        private void GetTextEdidit(CompletionItem ci, int index, int line, int col, long firstIndex)
+        {
+            var mumberOfUserCharsFromParserChoices = index - (int)firstIndex;
+            ci.TextEdit = new TextEdit
+            {
+                NewText = ci.Label,
+                Range = new OmniSharp.Extensions.LanguageServer.Protocol.Models.Range(
+                new Position
+                {
+                    Line = line,
+                    Character = col - mumberOfUserCharsFromParserChoices
+                }, new Position
+                {
+                    Line = line,
+                    Character = col - mumberOfUserCharsFromParserChoices + 1
+                })
+            };
+        }
+        private List<CompletionItem> AddAxiomChoices(string choice, int index, int line, int col, long firstIndex)
+        {
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFplIdentifier(){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine;
+            ci.Kind = CompletionItemKind.Keyword;
+            GetTextEdidit(ci, index, line, col, firstIndex);
+            modChoices.Add(ci);
+            return modChoices;
+        }
 
+        private List<CompletionItem> AddDefaultChoices(string choice, int index, int line, int col, long firstIndex)
+        {
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Detail = choice;
+            ci.Label = choice.Substring(1, choice.Length - 2);
+            ci.Kind = CompletionItemKind.Value;
+            GetTextEdidit(ci, index, line, col, firstIndex);
+            modChoices.Add(ci);
+            return modChoices;
+        }
 
+        private List<CompletionItem> AddWhitespaceChoices(string choice, int index, int line, int col, long firstIndex)
+        {
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Detail = choice;
+            ci.Label = " ";
+            ci.Kind = CompletionItemKind.Text;
+            GetTextEdidit(ci, index, line, col, firstIndex);
+            modChoices.Add(ci);
+            return modChoices;
+        }
 
     }
 }
