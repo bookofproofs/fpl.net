@@ -3,6 +3,30 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 
+/*
+MIT License
+
+Copyright (c) 2018 Martin Björkström
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.  
+*/
+
 class CompletionHandler : ICompletionHandler
 {
     private const string PackageReferenceElement = "PackageReference";
@@ -49,9 +73,7 @@ class CompletionHandler : ICompletionHandler
         }
 
 
-        var choices = "aaa,abc,acd,bbb,bac,bca,ccc,cba,cab";
-        _router.Window.LogInfo("Trying :" + choices);
-        var complList = await _fplAutoComplService.GetParserChoices(choices);
+        var complList = await _fplAutoComplService.GetParserChoices(buffer, request);
 
         var ret = new CompletionList(complList.Select(x => new CompletionItem
         {
@@ -73,7 +95,6 @@ class CompletionHandler : ICompletionHandler
             }
         }));
 
-        _router.Window.LogInfo("Receiving :" + ret.Count());
         return ret;
 
     }
