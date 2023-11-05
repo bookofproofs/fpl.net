@@ -71,7 +71,6 @@ namespace FplLS
            "true"
            "undef"
            "undefined"
-           "uses"
            "xor"        */
 
         public async Task<CompletionList> GetParserChoices(StringBuilder builder, int index, int line, int col)
@@ -119,6 +118,9 @@ namespace FplLS
                     case "'conjecture'":
                         modChoices.AddRange(AddTheoremLikeStatementChoices(choice, index, line, col, firstIndex, "Conjecture"));
                         break;
+                    case "'uses'":
+                        modChoices.AddRange(AddUsesChoices(choice, index, line, col, firstIndex));
+                        break;
                     default:
                         modChoices.AddRange(AddDefaultChoices(choice, index, line, col, firstIndex));
                         break;
@@ -145,12 +147,13 @@ namespace FplLS
                 })
             };
         }
+
         private List<CompletionItem> AddAxiomChoices(string choice, int index, int line, int col, long firstIndex)
         {
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFplIdentifier(){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine;
-            ci.Kind = CompletionItemKind.Keyword;
+            ci.Kind = CompletionItemKind.Snippet;
             GetTextEdidit(ci, index, line, col, firstIndex);
             modChoices.Add(ci);
             return modChoices;
@@ -162,19 +165,19 @@ namespace FplLS
             // default class definition
             var ciClass = new CompletionItem();
             ciClass.Label = $"{choice.Substring(1, choice.Length - 2)} class SomeFplClass:obj{Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine;
-            ciClass.Kind = CompletionItemKind.Keyword;
+            ciClass.Kind = CompletionItemKind.Snippet;
             GetTextEdidit(ciClass, index, line, col, firstIndex);
             modChoices.Add(ciClass);
             // default predicate definition
             var ciPredicate = new CompletionItem();
             ciPredicate.Label = $"{choice.Substring(1, choice.Length - 2)} predicate SomeFplPredicate(){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine;
-            ciPredicate.Kind = CompletionItemKind.Keyword;
+            ciPredicate.Kind = CompletionItemKind.Snippet;
             GetTextEdidit(ciPredicate, index, line, col, firstIndex);
             modChoices.Add(ciPredicate);
             // default functionalTerm definition
             var ciFunctionalTerm = new CompletionItem();
             ciFunctionalTerm.Label = $"{choice.Substring(1, choice.Length - 2)} function SomeFplFunctionalTerm() -> obj{Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine;
-            ciFunctionalTerm.Kind = CompletionItemKind.Keyword;
+            ciFunctionalTerm.Kind = CompletionItemKind.Snippet;
             GetTextEdidit(ciFunctionalTerm, index, line, col, firstIndex);
             modChoices.Add(ciFunctionalTerm);
             return modChoices;
@@ -183,12 +186,12 @@ namespace FplLS
         private List<CompletionItem> AddTheoremLikeStatementChoices(string choice, int index, int line, int col, long firstIndex, string example)
         {
             var modChoices = new List<CompletionItem>();
-            // default class definition
-            var ciClass = new CompletionItem();
-            ciClass.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFpl{example}(){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine;
-            ciClass.Kind = CompletionItemKind.Keyword;
-            GetTextEdidit(ciClass, index, line, col, firstIndex);
-            modChoices.Add(ciClass);
+            // default theorem-like statement 
+            var ci = new CompletionItem();
+            ci.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFpl{example}(){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine;
+            ci.Kind = CompletionItemKind.Snippet;
+            GetTextEdidit(ci, index, line, col, firstIndex);
+            modChoices.Add(ci);
             return modChoices;
         }
 
@@ -198,9 +201,25 @@ namespace FplLS
             var ci = new CompletionItem();
             ci.Detail = choice;
             ci.Label = choice.Substring(1, choice.Length - 2);
-            ci.Kind = CompletionItemKind.Value;
+            ci.Kind = CompletionItemKind.Text;
             GetTextEdidit(ci, index, line, col, firstIndex);
             modChoices.Add(ci);
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddUsesChoices(string choice, int index, int line, int col, long firstIndex)
+        {
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFplNamespace{Environment.NewLine}";
+            ci.Kind = CompletionItemKind.Snippet;
+            GetTextEdidit(ci, index, line, col, firstIndex);
+            modChoices.Add(ci);
+            var ci1 = new CompletionItem();
+            ci1.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFplNamespace alias Sfn{Environment.NewLine}";
+            ci1.Kind = CompletionItemKind.Snippet;
+            GetTextEdidit(ci1, index, line, col, firstIndex);
+            modChoices.Add(ci1);
             return modChoices;
         }
 
@@ -215,6 +234,8 @@ namespace FplLS
             modChoices.Add(ci);
             return modChoices;
         }
+
+
 
     }
 }
