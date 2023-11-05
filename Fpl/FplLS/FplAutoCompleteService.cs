@@ -57,8 +57,6 @@ namespace FplLS
            "predicate"
            "pre"
            "premise"
-           "prf"
-           "proof"
            "qed"
            "ret"
            "return"
@@ -119,6 +117,10 @@ namespace FplLS
                     case "'cor'":
                     case "'corollary'":
                         modChoices.AddRange(AddCorollaryChoices(choice, index, line, col, firstIndex));
+                        break;
+                    case "'prf'":
+                    case "'proof'":
+                        modChoices.AddRange(AddProofChoices(choice, index, line, col, firstIndex));
                         break;
                     case "'uses'":
                         modChoices.AddRange(AddUsesChoices(choice, index, line, col, firstIndex));
@@ -202,7 +204,19 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             // default corollary
             var ci = new CompletionItem();
-            ci.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFplCorollary!1 (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine;
+            ci.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFplTheorem!1 (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine;
+            ci.Kind = CompletionItemKind.Snippet;
+            GetTextEdidit(ci, index, line, col, firstIndex);
+            modChoices.Add(ci);
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddProofChoices(string choice, int index, int line, int col, long firstIndex)
+        {
+            var modChoices = new List<CompletionItem>();
+            // default corollary
+            var ci = new CompletionItem();
+            ci.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFplTheorem!1{Environment.NewLine}" + "{" + $"{Environment.NewLine}\t1. |- qed{Environment.NewLine}" + "}" + Environment.NewLine;
             ci.Kind = CompletionItemKind.Snippet;
             GetTextEdidit(ci, index, line, col, firstIndex);
             modChoices.Add(ci);
