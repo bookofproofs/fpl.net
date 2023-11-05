@@ -9,7 +9,7 @@ namespace FplLS
     class FplAutoCompleteService
     {
         /*
-"alias"
+           "alias"
            "all"
            "and"
            "assert"
@@ -18,8 +18,6 @@ namespace FplLS
            "cases"
            "cl"
            "class"
-           "conj"
-           "conjecture"
            "con"
            "conclusion"
            "constructor"
@@ -45,12 +43,8 @@ namespace FplLS
            "index"
            "intr"
            "intrinsic"
-           "inf"
-           "inference"
            "in"
            "is"
-           "lem"
-           "lemma"
            "loc"
            "localization"
            "mand"
@@ -67,16 +61,12 @@ namespace FplLS
            "premise"
            "prf"
            "proof"
-           "prop"
-           "proposition"
            "qed"
            "ret"
            "return"
            "rev"
            "revoke"
            "self"
-           "thm"
-           "theorem"
            "trivial"
            "true"
            "undef"
@@ -107,6 +97,28 @@ namespace FplLS
                         break;
                     case "'def'":
                     case "'definition'":
+                        modChoices.AddRange(AddDefinitionChoices(choice, index, line, col, firstIndex));
+                        break;
+                    case "'thm'":
+                    case "'theorem'":
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, index, line, col, firstIndex, "Theorem"));
+                        break;
+                    case "'lem'":
+                    case "'lemma'":
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, index, line, col, firstIndex, "Lemma"));
+                        break;
+                    case "'prop'":
+                    case "'proposition'":
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, index, line, col, firstIndex, "Proposition"));
+                        break;
+                    case "'inf'":
+                    case "'inference'":
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, index, line, col, firstIndex, "Inference"));
+                        break;
+                    case "'conj'":
+                    case "'conjecture'":
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, index, line, col, firstIndex, "Conjecture"));
+                        break;
                     default:
                         modChoices.AddRange(AddDefaultChoices(choice, index, line, col, firstIndex));
                         break;
@@ -141,6 +153,42 @@ namespace FplLS
             ci.Kind = CompletionItemKind.Keyword;
             GetTextEdidit(ci, index, line, col, firstIndex);
             modChoices.Add(ci);
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddDefinitionChoices(string choice, int index, int line, int col, long firstIndex)
+        {
+            var modChoices = new List<CompletionItem>();
+            // default class definition
+            var ciClass = new CompletionItem();
+            ciClass.Label = $"{choice.Substring(1, choice.Length - 2)} class SomeFplClass:obj{Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine;
+            ciClass.Kind = CompletionItemKind.Keyword;
+            GetTextEdidit(ciClass, index, line, col, firstIndex);
+            modChoices.Add(ciClass);
+            // default predicate definition
+            var ciPredicate = new CompletionItem();
+            ciPredicate.Label = $"{choice.Substring(1, choice.Length - 2)} predicate SomeFplPredicate(){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine;
+            ciPredicate.Kind = CompletionItemKind.Keyword;
+            GetTextEdidit(ciPredicate, index, line, col, firstIndex);
+            modChoices.Add(ciPredicate);
+            // default functionalTerm definition
+            var ciFunctionalTerm = new CompletionItem();
+            ciFunctionalTerm.Label = $"{choice.Substring(1, choice.Length - 2)} function SomeFplFunctionalTerm() -> obj{Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine;
+            ciFunctionalTerm.Kind = CompletionItemKind.Keyword;
+            GetTextEdidit(ciFunctionalTerm, index, line, col, firstIndex);
+            modChoices.Add(ciFunctionalTerm);
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddTheoremLikeStatementChoices(string choice, int index, int line, int col, long firstIndex, string example)
+        {
+            var modChoices = new List<CompletionItem>();
+            // default class definition
+            var ciClass = new CompletionItem();
+            ciClass.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFpl{example}(){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine;
+            ciClass.Kind = CompletionItemKind.Keyword;
+            GetTextEdidit(ciClass, index, line, col, firstIndex);
+            modChoices.Add(ciClass);
             return modChoices;
         }
 
