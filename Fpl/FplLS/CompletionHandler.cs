@@ -74,13 +74,13 @@ class CompletionHandler : ICompletionHandler
         (int)request.Position.Character);
 
         var complList = await _fplAutoComplService.GetParserChoices(buffer, position, (int)request.Position.Line, (int)request.Position.Character);
-        /*var test = new StringBuilder();
+        var test = new StringBuilder();
         foreach (var t in complList)
         {
             test.Append(t.Label + ", ");
         }
-        _languageServer.Window.LogInfo($"######## {position} {test.ToString()}");
-        */
+        _languageServer.Window.LogInfo($"####################################### {position} {test.ToString()}");
+        
         return complList;
 
     }
