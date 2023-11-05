@@ -43,8 +43,6 @@ namespace FplLS
            "intrinsic"
            "in"
            "is"
-           "loc"
-           "localization"
            "mand"
            "mandatory"
            "not"
@@ -121,6 +119,10 @@ namespace FplLS
                     case "'prf'":
                     case "'proof'":
                         modChoices.AddRange(AddProofChoices(choice, index, line, col, firstIndex));
+                        break;
+                    case "'loc'":
+                    case "'localization'":
+                        modChoices.AddRange(AddLocalizationChoices(choice, index, line, col, firstIndex));
                         break;
                     case "'uses'":
                         modChoices.AddRange(AddUsesChoices(choice, index, line, col, firstIndex));
@@ -217,6 +219,18 @@ namespace FplLS
             // default corollary
             var ci = new CompletionItem();
             ci.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFplTheorem!1{Environment.NewLine}" + "{" + $"{Environment.NewLine}\t1. |- qed{Environment.NewLine}" + "}" + Environment.NewLine;
+            ci.Kind = CompletionItemKind.Snippet;
+            GetTextEdidit(ci, index, line, col, firstIndex);
+            modChoices.Add(ci);
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddLocalizationChoices(string choice, int index, int line, int col, long firstIndex)
+        {
+            var modChoices = new List<CompletionItem>();
+            // default corollary
+            var ci = new CompletionItem();
+            ci.Label = $"{choice.Substring(1, choice.Length - 2)} iif(x,y) :={Environment.NewLine}!tex: x \"\\Leftrightarrow\" y{Environment.NewLine}!eng: x \" if and only if \" y{Environment.NewLine}!eng: x \" dann und nur dann \" y{Environment.NewLine}" + ";" + Environment.NewLine;
             ci.Kind = CompletionItemKind.Snippet;
             GetTextEdidit(ci, index, line, col, firstIndex);
             modChoices.Add(ci);
