@@ -2,6 +2,7 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+using System.Text;
 
 /*
 MIT License
@@ -29,11 +30,8 @@ SOFTWARE.
 
 class CompletionHandler : ICompletionHandler
 {
-    private const string PackageReferenceElement = "PackageReference";
-    private const string IncludeAttribute = "Include";
-    private const string VersionAttribute = "Version";
 
-    private readonly ILanguageServer _router;
+    private readonly ILanguageServer _languageServer;
     private readonly BufferManager _bufferManager;
     private readonly FplAutoCompleteService _fplAutoComplService;
 
@@ -46,9 +44,9 @@ class CompletionHandler : ICompletionHandler
 
     private CompletionCapability _capability;
 
-    public CompletionHandler(ILanguageServer router, BufferManager bufferManager, FplAutoCompleteService fplAutoCompletionService)
+    public CompletionHandler(ILanguageServer languageServer, BufferManager bufferManager, FplAutoCompleteService fplAutoCompletionService)
     {
-        _router = router;
+        _languageServer = languageServer;
         _bufferManager = bufferManager;
         _fplAutoComplService = fplAutoCompletionService;
     }
@@ -71,31 +69,18 @@ class CompletionHandler : ICompletionHandler
         {
             return new CompletionList();
         }
+        var position = GetPosition(buffer.ToString().Substring(0, buffer.Length),
+        (int)request.Position.Line,
+        (int)request.Position.Character);
 
-
-        var complList = await _fplAutoComplService.GetParserChoices(buffer, request);
-
-        var ret = new CompletionList(complList.Select(x => new CompletionItem
+        var complList = await _fplAutoComplService.GetParserChoices(buffer, position, (int)request.Position.Line, (int)request.Position.Character);
+        var test = new StringBuilder();
+        foreach (var t in complList)
         {
-            Label = x,
-            Kind = CompletionItemKind.Reference,
-            TextEdit = new TextEdit
-            {
-                NewText = x,
-                Range = new OmniSharp.Extensions.LanguageServer.Protocol.Models.Range(
-            new Position
-            {
-                Line = request.Position.Line,
-                Character = request.Position.Character - 1
-            }, new Position
-            {
-                Line = request.Position.Line,
-                Character = request.Position.Character + 1
-            })
-            }
-        }));
-
-        return ret;
+            test.Append(t.Label + ", ");
+        }
+        _languageServer.Window.LogInfo($"######## {position} {test.ToString()}");
+        return complList;
 
     }
 

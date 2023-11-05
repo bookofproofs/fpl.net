@@ -686,13 +686,13 @@ let fplParser (input:string) =
 
 let parserDiagnostics = ad
 
-/// If the source code is not syntax-error-free, this function will find the first error and emit it.
-let getParserChoicesAtPosition input (index:int)=
+/// Returns the parser choices at position (if any).
+let getParserChoicesAtPosition (input:string) index =
    
-    match run ast input with
+    match run ast (input.Substring(0,index)) with
     | Success(result, restInput, userState) -> 
         // In the success case, we always return the current parser position in the input
-        List.empty
+        List.empty, userState.Index
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
-        choices
+        choices, restInput.Position.Index
