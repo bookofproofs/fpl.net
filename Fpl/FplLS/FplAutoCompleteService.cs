@@ -1,4 +1,5 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+﻿using Microsoft.FSharp.Core;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using System.Text;
 
 
@@ -68,7 +69,6 @@ namespace FplLS
             }
             var choicesTuple = FplParser.getParserChoicesAtPosition(s, index);
             var choices = choicesTuple.Item1;
-            var firstIndex = choicesTuple.Item2;
             var modChoices = new List<CompletionItem>();
             foreach (var choice in choices)
             {
@@ -87,10 +87,12 @@ namespace FplLS
                     case "'undefined'":
                         modChoices.AddRange(AddPredicateChoices(choice, 0));
                         break;
-                    case "'not'":
                     case "'all'":
                     case "'ex'":
                     case "'exn'":
+                        modChoices.AddRange(AddQuantorChoices(choice));
+                        break;
+                    case "'not'":
                         modChoices.AddRange(AddPredicateChoices(choice, 1));
                         break;
                     case "'xor'":
@@ -187,6 +189,83 @@ namespace FplLS
             // keywords
             modChoices.Add(GetCompletionItem(choice));
             return modChoices;
+        }
+
+        public static List<CompletionItem> AddQuantorChoices(string choice)
+        {
+            var modChoices = new List<CompletionItem>();
+            var postfix = "";
+            if (choice == "'exn'")
+            {
+                postfix = "!1";
+            }
+            // snippets
+            var ci = GetCompletionItem(choice, $"<replace>{postfix} x ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
+            ci.Label = "ex (..)"; ReplaceLabel(choice, ci);
+            ci.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci);
+            ci.SortText = "ex00"; ReplaceSortText(choice, ci);
+            modChoices.Add(ci);
+            var ci1 = GetCompletionItem(choice, $"<replace>{postfix} x in someVariadicVar ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
+            ci1.Label = "ex x in variable (..)"; ReplaceLabel(choice, ci1);
+            ci1.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci1);
+            ci1.SortText = "ex01"; ReplaceSortText(choice, ci1);
+            modChoices.Add(ci1);
+            var ci2 = GetCompletionItem(choice, $"<replace>{postfix} x in [a,b] ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
+            ci2.Label = "ex x in range (..)"; ReplaceLabel(choice, ci2);
+            ci2.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci2);
+            ci2.SortText = "ex02"; ReplaceSortText(choice, ci2);
+            modChoices.Add(ci2);
+            var ci3 = GetCompletionItem(choice, $"<replace>{postfix} x in object ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
+            ci3.Label = "ex x in type (..)"; ReplaceLabel(choice, ci3);
+            ci3.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci3);
+            ci3.SortText = "ex03"; ReplaceSortText(choice, ci3);
+            modChoices.Add(ci3);
+
+            if (choice == "'exn'")
+            {
+                // keywords
+                var ci4 = GetCompletionItem("exn!");
+                ci4.SortText = "exn!04";
+                modChoices.Add(ci4);
+            }
+            else
+            {
+                // this combined snippet only available for 'ex' and 'all' but not for exn!
+                var ci5 = GetCompletionItem(choice, $"<replace> x in [a,b], y in c, z ({Environment.NewLine}" + $"\tp(x,y,z){Environment.NewLine})" + Environment.NewLine);
+                ci5.Label = "ex <combined> (..)"; ReplaceLabel(choice, ci5);
+                ci5.Detail = "predicate (exists quantor in <combined>)"; ReplaceDetails(choice, ci5);
+                ci5.SortText = "ex04"; ReplaceSortText(choice, ci5);
+                modChoices.Add(ci5);
+                // keywords
+                var ci6 = GetCompletionItem(choice);
+                ci6.SortText = "ex05"; ReplaceSortText(choice, ci6);
+                modChoices.Add(ci6);
+            }
+            return modChoices;
+        }
+
+        private static void ReplaceLabel(string choice, CompletionItem ci)
+        {
+            if (choice == "'all'")
+                ci.Label = ci.Label.Replace("ex", "all");
+            else if (choice == "'exn'")
+                ci.Label = ci.Label.Replace("ex", "exn!");
+        }
+
+        private static void ReplaceSortText(string choice, CompletionItem ci)
+        {
+            if (choice == "'all'")
+                ci.SortText = ci.SortText.Replace("ex", "all");
+            else if (choice == "'exn'")
+                ci.SortText = ci.SortText.Replace("ex", "exn!");
+        }
+
+        private static void ReplaceDetails(string choice, CompletionItem ci)
+        {
+            if (choice == "'all'")
+                ci.Detail = ci.Detail.Replace("exists", "all"); 
+            else if (choice == "'exn'")
+                ci.Detail = ci.Detail.Replace("exists", "exists n-times");
         }
 
         private List<CompletionItem> AddDefinitionChoices(string choice)
@@ -802,266 +881,321 @@ namespace FplLS
             string ret;
             switch (word)
             {
+                case "alias":
+                    ret = "alias";
+                    sortText = "alias";
+                    break;
                 case "all":
-                    ret = $"predicate (all quantor)";
+                    ret = "predicate (all quantor)";
                     sortText = word;
                     break;
                 case "and":
-                    ret = $"predicate (conjunction)";
-                    sortText = word;
+                    ret = "predicate (conjunction)";
+                    sortText = "and";
                     break;
                 case "ass":
-                    ret = $"assume (short form)";
+                    ret = "argument (assume, short form)";
                     sortText = "assume";
                     break;
+                case "assert":
+                    ret = "statement (assert)";
+                    sortText = "assert";
+                    break;
                 case "assume":
-                    ret = $"assume";
+                    ret = "argument (assume)";
                     sortText = "assume";
                     break;
                 case "ax":
-                    ret = $"axiom (short form)";
+                    ret = "axiom (short form)";
                     sortText = "axiom";
                     break;
                 case "axiom":
-                    ret = $"axiom";
+                    ret = "axiom";
                     sortText = "axiom";
                     break;
-                case "ex":
-                case "exn":
-                    ret = $"predicate (exists quantor)";
-                    sortText = word;
+                case "cases":
+                    ret = "statement (cases)";
+                    sortText = "cases";
                     break;
                 case "cl":
-                    ret = $"class (short form)";
+                    ret = "class (short form)";
                     sortText = "class";
                     break;
                 case "class":
-                    ret = $"class";
+                    ret = "class";
                     sortText = "class";
                     break;
                 case "con":
-                    ret = $"conclusion (short form)";
+                    ret = "conclusion (short form)";
                     sortText = "conclusion";
                     break;
                 case "conclusion":
-                    ret = $"conclusion";
+                    ret = "conclusion";
                     sortText = "conclusion";
                     break;
                 case "cor":
-                    ret = $"corollary (short form)";
+                    ret = "corollary (short form)";
                     sortText = "corollary";
                     break;
                 case "corollary":
-                    ret = $"corollary";
+                    ret = "corollary";
                     sortText = "corollary";
                     break;
                 case "conj":
-                    ret = $"conjecture (short form)";
+                    ret = "conjecture (short form)";
                     sortText = "conjecture";
                     break;
                 case "conjecture":
-                    ret = $"conjecture";
+                    ret = "conjecture";
                     sortText = "conjecture";
                     break;
                 case "ctr":
-                    ret = $"constructor (short form)";
+                    ret = "constructor (short form)";
                     sortText = "constructor";
                     break;
                 case "constructor":
-                    ret = $"constructor";
+                    ret = "constructor";
                     sortText = "constructor";
                     break;
                 case "dec":
-                    ret = $"declaration (short form)";
+                    ret = "declaration (short form)";
                     sortText = "declaration";
                     break;
                 case "declaration":
-                    ret = $"declaration";
+                    ret = "declaration";
                     sortText = "declaration";
                     break;
                 case "del":
-                    ret = $"delegate (short form)";
+                    ret = "delegate (short form)";
                     sortText = "delegate";
                     break;
                 case "delegate":
-                    ret = $"delegate";
+                    ret = "delegate";
                     sortText = "delegate";
                     break;
                 case "def":
-                    ret = $"definition (short form)";
+                    ret = "definition (short form)";
                     sortText = "definition";
                     break;
                 case "definition":
-                    ret = $"definition";
+                    ret = "definition";
                     sortText = "definition";
                     break;
+                case "end":
+                    ret = "extension (end of)";
+                    sortText = "end";
+                    break;
+                case "ex":
+                    ret = "predicate (exists quantor)";
+                    sortText = "ex";
+                    break;
+                case "exn":
+                    ret = "predicate (exists n-times quantor)";
+                    sortText = "exn";
+                    break;
+                case "ext":
+                    ret = "extension (beginning of)";
+                    sortText = "ext";
+                    break;
                 case "false":
-                    ret = $"predicate ({word})";
-                    sortText = word;
+                    ret = "predicate (false)";
+                    sortText = "false";
+                    break;
+                case "for":
+                    ret = "statement (for loop)";
+                    sortText = "for";
                     break;
                 case "func":
-                    ret = $"type (functional term, short form)";
+                    ret = "type (functional term, short form)";
                     sortText = "function";
                     break;
                 case "function":
-                    ret = $"type (functional term)";
+                    ret = "type (functional term)";
                     sortText = "function";
                     break;
                 case "iif":
-                    ret = $"predicate (if and only if, <=>)";
-                    sortText = word;
+                    ret = "predicate (equivalence, <=>)";
+                    sortText = "iif";
                     break;
                 case "impl":
-                    ret = $"predicate (implies, =>)";
-                    sortText = word;
+                    ret = "predicate (implication, =>)";
+                    sortText = "impl";
+                    break;
+                case "in":
+                    ret = "clause (in type or in range)";
+                    sortText = "in";
                     break;
                 case "ind":
-                    ret = $"type (index, short form)";
+                    ret = "type (index, short form)";
                     sortText = "index";
                     break;
                 case "index":
-                    ret = $"type (index)";
+                    ret = "type (index)";
                     sortText = "index";
                     break;
                 case "inf":
-                    ret = $"rule of inference (short form)";
+                    ret = "rule of inference (short form)";
                     sortText = "inference";
                     break;
                 case "inference":
-                    ret = $"rule of inference";
+                    ret = "rule of inference";
                     sortText = "inference";
                     break;
                 case "intr":
-                    ret = $"intrinsic (short form)";
+                    ret = "intrinsic (short form)";
                     sortText = "intrinsic";
                     break;
                 case "intrinsic":
-                    ret = $"intrinsic";
+                    ret = "intrinsic";
                     sortText = "intrinsic";
                     break;
+                case "is":
+                    ret = "predicate (is of type)";
+                    sortText = "is";
+                    break;
                 case "lem":
-                    ret = $"lemma (short form)";
+                    ret = "lemma (short form)";
                     sortText = "lemma";
                     break;
                 case "lemma":
-                    ret = $"lemma";
+                    ret = "lemma";
                     sortText = "lemma";
                     break;
                 case "loc":
-                    ret = $"localization (short form)";
+                    ret = "localization (short form)";
                     sortText = "localization";
                     break;
                 case "localization":
-                    ret = $"localization";
+                    ret = "localization";
                     sortText = "localization";
                     break;
                 case "mand":
-                    ret = $"mandatory (short form)";
+                    ret = "mandatory (short form)";
                     sortText = "mandatory";
                     break;
                 case "mandatory":
-                    ret = $"mandatory";
+                    ret = "mandatory";
                     sortText = "mandatory";
                     break;
+                case "not":
+                    ret = "predicate (negation)";
+                    sortText = "not";
+                    break;
                 case "obj":
-                    ret = $"type (object, short form)";
+                    ret = "type (object, short form)";
                     sortText = "object";
                     break;
                 case "object":
-                    ret = $"type (object)";
+                    ret = "type (object)";
                     sortText = "object";
                     break;
                 case "opt":
-                    ret = $"optional (short form)";
+                    ret = "optional (short form)";
                     sortText = "optional";
                     break;
                 case "optional":
-                    ret = $"optional";
+                    ret = "optional";
                     sortText = "optional";
                     break;
                 case "or":
-                    ret = $"predicate (disjunction)";
-                    sortText = word;
+                    ret = "predicate (disjunction)";
+                    sortText = "or";
                     break;
                 case "post":
-                    ret = $"postulate (short form)";
+                    ret = "postulate (short form)";
                     sortText = "postulate";
                     break;
                 case "postulate":
-                    ret = $"postulate";
+                    ret = "postulate";
                     sortText = "postulate";
                     break;
                 case "pre":
-                    ret = $"premise (short form)";
+                    ret = "premise (short form)";
                     sortText = "premise";
                     break;
                 case "pred":
-                    ret = $"type (predicate, short form)";
+                    ret = "type (predicate, short form)";
                     sortText = "predicate";
                     break;
                 case "predicate":
-                    ret = $"type (predicate)";
+                    ret = "type (predicate)";
                     sortText = "predicate";
                     break;
                 case "premise":
-                    ret = $"premise";
+                    ret = "premise";
                     sortText = "premise";
                     break;
                 case "prop":
-                    ret = $"proposition (short form)";
+                    ret = "proposition (short form)";
                     sortText = "proposition";
                     break;
                 case "proposition":
-                    ret = $"proposition";
+                    ret = "proposition";
                     sortText = "proposition";
                     break;
                 case "prf":
-                    ret = $"proof (short form)";
+                    ret = "proof (short form)";
                     sortText = "proof";
                     break;
                 case "proof":
-                    ret = $"proof";
+                    ret = "proof";
                     sortText = "proof";
                     break;
+                case "qed":
+                    ret = "conclusion (quod erat demonstrandum)";
+                    sortText = "qed";
+                    break;
                 case "ret":
-                    ret = $"return (short form)";
+                    ret = "statement (return, short form)";
                     sortText = "return";
                     break;
                 case "return":
-                    ret = $"return";
+                    ret = "statement (return)";
                     sortText = "return";
                     break;
                 case "rev":
-                    ret = $"revoke (short form)";
+                    ret = "argument (revoke, short form)";
                     sortText = "revoke";
                     break;
                 case "revoke":
-                    ret = $"revoke";
+                    ret = "argument (revoke)";
                     sortText = "revoke";
                     break;
+                case "self":
+                    ret = "reference (to self)";
+                    sortText = "self";
+                    break;
                 case "thm":
-                    ret = $"theorem (short form)";
+                    ret = "theorem (short form)";
                     sortText = "theorem";
                     break;
                 case "theorem":
-                    ret = $"theorem";
+                    ret = "theorem";
                     sortText = "theorem";
                     break;
                 case "true":
-                    ret = $"predicate ({word})";
-                    sortText = word;
+                    ret = "predicate (true)";
+                    sortText = "true";
+                    break;
+                case "trivial":
+                    ret = "argument (trivial)";
+                    sortText = "trivial";
                     break;
                 case "undef":
-                    ret = $"undefined (short form)";
+                    ret = "undefined (short form)";
                     sortText = "undefined";
                     break;
                 case "undefined":
-                    ret = $"undefined";
+                    ret = "undefined";
                     sortText = "undefined";
                     break;
+                case "uses":
+                    ret = "clause (uses)";
+                    sortText = "uses";
+                    break;
                 case "xor":
-                    ret = $"predicate (exclusive or)";
-                    sortText = word;
+                    ret = "predicate (exclusive or)";
+                    sortText = "xor";
                     break;
                 default:
                     ret = "";
@@ -1093,12 +1227,10 @@ namespace FplLS
                 if (ret.Detail.Contains("short"))
                 {
                     ret.SortText = sortText + "03";
-                    ret.Detail += ret.SortText;
                 }
                 else
                 {
                     ret.SortText = sortText + "01";
-                    ret.Detail += ret.SortText;
                 }
             }
             else
@@ -1107,12 +1239,10 @@ namespace FplLS
                 if (ret.Detail.Contains("short"))
                 {
                     ret.SortText = sortText + "04";
-                    ret.Detail += ret.SortText;
                 }
                 else
                 {
                     ret.SortText = sortText + "02";
-                    ret.Detail += ret.SortText;
                 }
             }
             return ret;
