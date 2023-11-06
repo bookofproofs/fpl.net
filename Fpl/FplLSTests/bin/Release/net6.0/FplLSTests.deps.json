@@ -22,7 +22,7 @@
       "coverlet.collector/3.2.0": {},
       "FParsec/1.1.1": {
         "dependencies": {
-          "FSharp.Core": "7.0.400"
+          "FSharp.Core": "7.0.401"
         },
         "runtime": {
           "lib/netstandard2.0/FParsec.dll": {
@@ -35,11 +35,11 @@
           }
         }
       },
-      "FSharp.Core/7.0.400": {
+      "FSharp.Core/7.0.401": {
         "runtime": {
           "lib/netstandard2.1/FSharp.Core.dll": {
             "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.4.23.36405"
+            "fileVersion": "7.4.123.42509"
           }
         },
         "resources": {
@@ -550,7 +550,7 @@
       "Fpl/1.0.0": {
         "dependencies": {
           "FParsec": "1.1.1",
-          "FSharp.Core": "7.0.400",
+          "FSharp.Core": "7.0.401",
           "MSTest.TestAdapter": "3.1.1",
           "MSTest.TestFramework": "3.1.1",
           "Microsoft.NET.Test.Sdk": "17.7.2"
@@ -598,12 +598,12 @@
       "path": "fparsec/1.1.1",
       "hashPath": "fparsec.1.1.1.nupkg.sha512"
     },
-    "FSharp.Core/7.0.400": {
+    "FSharp.Core/7.0.401": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-kJQ7TBQqd1d2VoODSgwFSAaApaBN0Fuu8mZt2XExmd3UzUxLjUsMn5Y5XhpsUWdnxOL8amp7VFg7cwhPllR4Qw==",
-      "path": "fsharp.core/7.0.400",
-      "hashPath": "fsharp.core.7.0.400.nupkg.sha512"
+      "sha512": "sha512-ZL16YHLJnkosMooVXjvJH0vGf7O4RSNtCpA/qw6OAHYxPCYSZRc5pKFTpDeDLdSWpOJDaZlveKcn42F0UDo77A==",
+      "path": "fsharp.core/7.0.401",
+      "hashPath": "fsharp.core.7.0.401.nupkg.sha512"
     },
     "Microsoft.CodeCoverage/17.7.2": {
       "type": "package",

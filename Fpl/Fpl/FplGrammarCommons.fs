@@ -34,7 +34,6 @@ let keyWordSet =
            "definition"
            "del"
            "delegate"
-           "else"
            "end"
            "ext"
            "ex"

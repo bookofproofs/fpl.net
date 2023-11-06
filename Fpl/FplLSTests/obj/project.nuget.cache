@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "9Xx5PreIQhd8vAy3PP7d0jjOpfMxE/Aqgs4E1cG+JACk7z3ZJDVpN5tQLl0P9c5DSyp6tJaaQeUdzXfEwrDPCw==",
+  "dgSpecHash": "Y9IffCZoSHu9BhULmRlzY6aW5hWjEfIBozP+ZybnIczK9GrQmCKJYjP7STvknGUWaLhzYHng4RUcZ5QtjORnmg==",
   "success": true,
   "projectFilePath": "D:\\Forschung\\fpl.net\\Fpl\\FplLSTests\\FplLSTests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\eite\\.nuget\\packages\\coverlet.collector\\3.2.0\\coverlet.collector.3.2.0.nupkg.sha512",
     "C:\\Users\\eite\\.nuget\\packages\\fparsec\\1.1.1\\fparsec.1.1.1.nupkg.sha512",
-    "C:\\Users\\eite\\.nuget\\packages\\fsharp.core\\7.0.400\\fsharp.core.7.0.400.nupkg.sha512",
+    "C:\\Users\\eite\\.nuget\\packages\\fsharp.core\\7.0.401\\fsharp.core.7.0.401.nupkg.sha512",
     "C:\\Users\\eite\\.nuget\\packages\\microsoft.codecoverage\\17.7.2\\microsoft.codecoverage.17.7.2.nupkg.sha512",
     "C:\\Users\\eite\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\2.0.0\\microsoft.extensions.dependencyinjection.2.0.0.nupkg.sha512",
     "C:\\Users\\eite\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\2.0.0\\microsoft.extensions.dependencyinjection.abstractions.2.0.0.nupkg.sha512",

@@ -198,7 +198,7 @@
             "FSharp.Core": {
               "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
               "target": "Package",
-              "version": "[7.0.400, )",
+              "version": "[7.0.401, )",
               "generatePathProperty": true
             },
             "MSTest.TestAdapter": {
