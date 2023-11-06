@@ -75,267 +75,209 @@ namespace FplLS
                 switch (choice)
                 {
                     case "<ISO 639 language code>":
-                        modChoices.AddRange(AddIso639Choices(index, line, col, firstIndex));
+                        modChoices.AddRange(AddIso639Choices());
                         break;
                     case "<whitespace>":
                     case "<significant whitespace>":
-                        modChoices.AddRange(AddWhitespaceChoices(choice, index, line, col, firstIndex));
+                        modChoices.AddRange(AddWhitespaceChoices(choice));
                         break;
                     case "'true'":
                     case "'false'":
                     case "'undef'":
                     case "'undefined'":
-                        modChoices.AddRange(AddPredicateChoices(choice, index, line, col, firstIndex, 0));
+                        modChoices.AddRange(AddPredicateChoices(choice, 0));
                         break;
                     case "'not'":
                     case "'all'":
                     case "'ex'":
                     case "'exn'":
-                        modChoices.AddRange(AddPredicateChoices(choice, index, line, col, firstIndex, 1));
+                        modChoices.AddRange(AddPredicateChoices(choice, 1));
                         break;
                     case "'xor'":
                     case "'iif'":
                     case "'impl'":
-                        modChoices.AddRange(AddPredicateChoices(choice, index, line, col, firstIndex, 2));
+                        modChoices.AddRange(AddPredicateChoices(choice, 2));
                         break;
                     case "'and'":
                     case "'or'":
-                        modChoices.AddRange(AddPredicateChoices(choice, index, line, col, firstIndex, 3));
+                        modChoices.AddRange(AddPredicateChoices(choice, 3));
                         break;
                     case "'ax'":
                     case "'axiom'":
                     case "'post'":
                     case "'postulate'":
-                        modChoices.AddRange(AddAxiomChoices(choice, index, line, col, firstIndex));
+                        modChoices.AddRange(AddAxiomChoices(choice));
                         break;
                     case "'def'":
                     case "'definition'":
-                        modChoices.AddRange(AddDefinitionChoices(choice, index, line, col, firstIndex));
+                        modChoices.AddRange(AddDefinitionChoices(choice));
                         break;
                     case "'thm'":
                     case "'theorem'":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, index, line, col, firstIndex, "Theorem"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Theorem"));
                         break;
                     case "'lem'":
                     case "'lemma'":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, index, line, col, firstIndex, "Lemma"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Lemma"));
                         break;
                     case "'prop'":
                     case "'proposition'":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, index, line, col, firstIndex, "Proposition"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Proposition"));
                         break;
                     case "'inf'":
                     case "'inference'":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, index, line, col, firstIndex, "Inference"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Inference"));
                         break;
                     case "'conj'":
                     case "'conjecture'":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, index, line, col, firstIndex, "Conjecture"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Conjecture"));
                         break;
                     case "'cor'":
                     case "'corollary'":
-                        modChoices.AddRange(AddCorollaryChoices(choice, index, line, col, firstIndex));
+                        modChoices.AddRange(AddCorollaryChoices(choice));
                         break;
                     case "'prf'":
                     case "'proof'":
-                        modChoices.AddRange(AddProofChoices(choice, index, line, col, firstIndex));
+                        modChoices.AddRange(AddProofChoices(choice));
                         break;
                     case "'loc'":
                     case "'localization'":
-                        modChoices.AddRange(AddLocalizationChoices(choice, index, line, col, firstIndex));
+                        modChoices.AddRange(AddLocalizationChoices(choice));
                         break;
                     case "'uses'":
-                        modChoices.AddRange(AddUsesChoices(choice, index, line, col, firstIndex));
+                        modChoices.AddRange(AddUsesChoices(choice));
                         break;
                     default:
-                        modChoices.AddRange(AddDefaultChoices(choice, index, line, col, firstIndex));
+                        modChoices.AddRange(AddDefaultChoices(choice));
                         break;
                 }
             }
             return new CompletionList(modChoices);
         }
 
-        private void GetTextEdit(CompletionItem ci, int index, int line, int col, long firstIndex)
-        {
-            var mumberOfUserCharsFromParserChoices = index - (int)firstIndex;
-            ci.TextEdit = new TextEdit
-            {
-                NewText = ci.Label,
-                Range = new OmniSharp.Extensions.LanguageServer.Protocol.Models.Range (
-                new Position
-                {
-                    Line = line,
-                    Character = col - mumberOfUserCharsFromParserChoices 
-                }, new Position
-                {
-                    Line = line,
-                    Character = col - mumberOfUserCharsFromParserChoices
-                })
-            };
-        }
-
-        private List<CompletionItem> AddAxiomChoices(string choice, int index, int line, int col, long firstIndex)
+        private List<CompletionItem> AddAxiomChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
-            var ci = new CompletionItem();
-            var word = choice.Substring(1, choice.Length - 2);
-            ci.Label = $"{word} SomeFplIdentifier (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine;
-            ci.Kind = CompletionItemKind.Snippet;
-            GetTextEdit(ci, index, line, col, firstIndex);
-            ci.Detail = GetDetail(word, "snippet");
-            modChoices.Add(ci);
-            var ci0 = new CompletionItem();
-            ci0.Label = word;
-            ci0.Kind = CompletionItemKind.Keyword;
-            ci0.Detail = GetDetail(word, "keyword");
-            GetTextEdit(ci0, index, line, col, firstIndex);
-            modChoices.Add(ci0);
+            // snippet
+            modChoices.Add(GetCompletionItem(choice, $"<replace> SomeFplIdentifier (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine));
+            // keyword
+            modChoices.Add(GetCompletionItem(choice));
             return modChoices;
         }
 
-        private List<CompletionItem> AddPredicateChoices(string choice, int index, int line, int col, long firstIndex, int numbOfArgs)
+        private List<CompletionItem> AddPredicateChoices(string choice, int numbOfArgs)
         {
             var modChoices = new List<CompletionItem>();
-            var ci = new CompletionItem();
-            var word = choice.Substring(1, choice.Length - 2);
+            // snippets
             switch (numbOfArgs)
             {
                 case 0:
-                    ci.Label = $"{word}";
+                    // no snippets for null-ary predicates (treat them as keywords only - see below)
                     break;
                 case 1:
-                    ci.Label = $"{word} ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine})" + Environment.NewLine;
+                    modChoices.Add(GetCompletionItem(choice, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine})" + Environment.NewLine));
                     break;
                 case 2:
-                    ci.Label = $"{word} ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine;
+                    modChoices.Add(GetCompletionItem(choice, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine));
                     break;
                 default:
-                    ci.Label = $"{word} ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine;
+                    modChoices.Add(GetCompletionItem(choice, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine));
                     break;
             }
-            ci.Kind = CompletionItemKind.Operator;
-            ci.Detail = "predicate " + GetDetail(word, "snippet");
-            GetTextEdit(ci, index, line, col, firstIndex);
-            modChoices.Add(ci);
+            // keywords
+            modChoices.Add(GetCompletionItem(choice));
             return modChoices;
         }
 
-        private List<CompletionItem> AddDefinitionChoices(string choice, int index, int line, int col, long firstIndex)
+        private List<CompletionItem> AddDefinitionChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
-            // default class definition
-            var ciClass = new CompletionItem();
+            // snippets
+            // class definition
+            modChoices.Add(GetCompletionItem(choice, $"<replace> class SomeFplClass:obj{Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine));
+            // predicate definition
+            modChoices.Add(GetCompletionItem(choice, $"<replace> predicate SomeFplPredicate (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine));
+            // functional term definition
+            modChoices.Add(GetCompletionItem(choice, $"<replace> function SomeFplFunctionalTerm () -> obj{Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine));
+
+            // keywords
             var word = choice.Substring(1, choice.Length - 2);
-            ciClass.Label = $"{word} class SomeFplClass:obj{Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine;
-            ciClass.Kind = CompletionItemKind.Snippet;
-            ciClass.Detail = "definition of " + GetDetail(word, "snippet");
-            GetTextEdit(ciClass, index, line, col, firstIndex);
-            modChoices.Add(ciClass);
-            // default predicate definition
-            var ciPredicate = new CompletionItem();
-            ciPredicate.Label = $"{word} predicate SomeFplPredicate (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine;
-            ciPredicate.Kind = CompletionItemKind.Snippet;
-            ciClass.Detail = "definition of " + GetDetail(word, "snippet");
-            GetTextEdit(ciPredicate, index, line, col, firstIndex);
-            modChoices.Add(ciPredicate);
-            // default functionalTerm definition
-            var ciFunctionalTerm = new CompletionItem();
-            ciFunctionalTerm.Label = $"{choice.Substring(1, choice.Length - 2)} function SomeFplFunctionalTerm () -> obj{Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine;
-            ciFunctionalTerm.Kind = CompletionItemKind.Snippet;
-            ciClass.Detail = "definition of " + GetDetail(word, "snippet");
-            GetTextEdit(ciFunctionalTerm, index, line, col, firstIndex);
-            modChoices.Add(ciFunctionalTerm);
+            // class definition
+            modChoices.Add(GetCompletionItem($"{word} class"));
+            // predicate definition
+            modChoices.Add(GetCompletionItem($"{word} predicate"));
+            // functional term definition
+            modChoices.Add(GetCompletionItem($"{word} function"));
             return modChoices;
         }
 
-        private List<CompletionItem> AddTheoremLikeStatementChoices(string choice, int index, int line, int col, long firstIndex, string example)
+        private List<CompletionItem> AddTheoremLikeStatementChoices(string choice, string example)
         {
             var modChoices = new List<CompletionItem>();
-            // default theorem-like statement 
-            var ci = new CompletionItem();
-            var word = choice.Substring(1, choice.Length - 2);
-            ci.Label = $"{word} SomeFpl{example} (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine;
-            ci.Kind = CompletionItemKind.Snippet;
-            ci.Detail = GetDetail(word, "snippet");
-            GetTextEdit(ci, index, line, col, firstIndex);
-            modChoices.Add(ci);
+            // snippets
+            modChoices.Add(GetCompletionItem(choice, $"<replace> SomeFpl{example} (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine));
+            // keywords
+            modChoices.Add(GetCompletionItem(choice));
             return modChoices;
         }
 
 
-        private List<CompletionItem> AddCorollaryChoices(string choice, int index, int line, int col, long firstIndex)
+        private List<CompletionItem> AddCorollaryChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
-            // default corollary
-            var ci = new CompletionItem();
-            var word = choice.Substring(1, choice.Length - 2);
-            ci.Label = $"{word} SomeFplTheorem!1 (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine;
-            ci.Kind = CompletionItemKind.Snippet;
-            GetTextEdit(ci, index, line, col, firstIndex);
-            ci.Detail = GetDetail(word, "snippet");
-            modChoices.Add(ci);
+            // snippets
+            modChoices.Add(GetCompletionItem(choice, $"<replace> SomeFplTheorem!1 (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine));
+            // keywords
+            modChoices.Add(GetCompletionItem(choice));
             return modChoices;
         }
 
-        private List<CompletionItem> AddProofChoices(string choice, int index, int line, int col, long firstIndex)
+        private List<CompletionItem> AddProofChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
-            // default corollary
-            var ci = new CompletionItem();
-            var word = choice.Substring(1, choice.Length - 2);
-            ci.Label = $"{word} SomeFplTheorem!1{Environment.NewLine}" + "{" + $"{Environment.NewLine}\t1. |- qed{Environment.NewLine}" + "}" + Environment.NewLine;
-            ci.Kind = CompletionItemKind.Snippet;
-            ci.Detail = GetDetail(word, "snippet");
-            GetTextEdit(ci, index, line, col, firstIndex);
-            modChoices.Add(ci);
+            // snippets
+            modChoices.Add(GetCompletionItem(choice, $"<replace> SomeFplTheorem!1{Environment.NewLine}" + "{" + $"{Environment.NewLine}\t1. |- qed{Environment.NewLine}" + "}" + Environment.NewLine));
+            // keywords
+            modChoices.Add(GetCompletionItem(choice));
             return modChoices;
         }
 
-        private List<CompletionItem> AddLocalizationChoices(string choice, int index, int line, int col, long firstIndex)
+        private List<CompletionItem> AddLocalizationChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
-            // default corollary
-            var ci = new CompletionItem();
-            var word = choice.Substring(1, choice.Length - 2);
-            ci.Label = $"{word} iif(x,y) :={Environment.NewLine}!tex: x \"\\Leftrightarrow\" y{Environment.NewLine}!eng: x \" if and only if \" y{Environment.NewLine}!eng: x \" dann und nur dann \" y{Environment.NewLine}" + ";" + Environment.NewLine;
-            ci.Kind = CompletionItemKind.Snippet;
-            ci.Detail = GetDetail(word, "snippet");
-            GetTextEdit(ci, index, line, col, firstIndex);
-            modChoices.Add(ci);
+            // snippets
+            modChoices.Add(GetCompletionItem(choice, $"<replace> iif(x,y) :={Environment.NewLine}!tex: x \"\\Leftrightarrow\" y{Environment.NewLine}!eng: x \" if and only if \" y{Environment.NewLine}!eng: x \" dann und nur dann \" y{Environment.NewLine}" + ";" + Environment.NewLine));
+            // keywords
+            modChoices.Add(GetCompletionItem(choice));
             return modChoices;
         }
 
-        private List<CompletionItem> AddDefaultChoices(string choice, int index, int line, int col, long firstIndex)
+        private List<CompletionItem> AddUsesChoices(string choice)
+        {
+            var modChoices = new List<CompletionItem>();
+            // snippets
+            var ci = GetCompletionItem(choice, $"<replace> SomeFplNamespace{Environment.NewLine}");
+            ci.Detail = "uses namespace";
+            var ci1 = GetCompletionItem(choice, $"<replace> SomeFplNamespace alias Sfn{Environment.NewLine}");
+            ci1.Detail = "uses namespace with alias";
+            // keywords
+            modChoices.Add(GetCompletionItem(choice));
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddDefaultChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = choice;
             ci.Label = choice.Substring(1, choice.Length - 2);
             ci.Kind = CompletionItemKind.Text;
-            GetTextEdit(ci, index, line, col, firstIndex);
             modChoices.Add(ci);
             return modChoices;
         }
 
-        private List<CompletionItem> AddUsesChoices(string choice, int index, int line, int col, long firstIndex)
-        {
-            var modChoices = new List<CompletionItem>();
-            var ci = new CompletionItem();
-            ci.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFplNamespace{Environment.NewLine}";
-            ci.Kind = CompletionItemKind.Snippet;
-            ci.Detail = "uses namespace (snippet)";
-            GetTextEdit(ci, index, line, col, firstIndex);
-            modChoices.Add(ci);
-            var ci1 = new CompletionItem();
-            ci1.Label = $"{choice.Substring(1, choice.Length - 2)} SomeFplNamespace alias Sfn{Environment.NewLine}";
-            ci1.Kind = CompletionItemKind.Snippet;
-            ci.Detail = "uses namespace with alias (snippet)";
-            GetTextEdit(ci1, index, line, col, firstIndex);
-            modChoices.Add(ci1);
-            return modChoices;
-        }
 
-        private List<CompletionItem> AddWhitespaceChoices(string choice, int index, int line, int col, long firstIndex)
+        private List<CompletionItem> AddWhitespaceChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
@@ -343,12 +285,11 @@ namespace FplLS
             ci.Label = " ";
             ci.Kind = CompletionItemKind.Text;
             ci.Detail = "(whitespace)";
-            GetTextEdit(ci, index, line, col, firstIndex);
             modChoices.Add(ci);
             return modChoices;
         }
 
-        private List<CompletionItem> AddIso639Choices(int index, int line, int col, long firstIndex)
+        private List<CompletionItem> AddIso639Choices()
         {
             var modChoices = new List<CompletionItem>();
             var iso632_2 = new Dictionary<string, string>()
@@ -845,107 +786,224 @@ namespace FplLS
                 ,{ "zza","Zaza; Dimili; Dimli; Kirdki; Kirmanjki; Zazaki" }
             };
             foreach (var kvp in iso632_2)
-            
+
             {
                 var ci = new CompletionItem();
                 ci.Label = kvp.Key + ":";
                 ci.Detail = kvp.Value;
                 ci.Kind = CompletionItemKind.Value;
-                GetTextEdit(ci, index, line, col, firstIndex);
                 modChoices.Add(ci);
             }
             return modChoices;
         }
 
-        private string GetDetail(string word, string postfix)
+        private string GetDetail(string word, out string sortText)
         {
             string ret;
             switch (word)
             {
+                case "undef":
+                    ret = $"undefined (short form)";
+                    sortText = "undefined";
+                    break;
+                case "undefined":
+                    ret = $"undefined";
+                    sortText = "undefined";
+                    break;
+                case "true":
+                case "false":
+                    ret = $"predicate ({word})";
+                    sortText = word;
+                    break;
+                case "all":
+                    ret = $"predicate (all quantor)";
+                    sortText = word;
+                    break;
+                case "iif":
+                    ret = $"predicate (if and only if, <=>)";
+                    sortText = word;
+                    break;
+                case "impl":
+                    ret = $"predicate (implies, =>)";
+                    sortText = word;
+                    break;
+                case "xor":
+                    ret = $"predicate (exclusive or)";
+                    sortText = word;
+                    break;
+                case "and":
+                    ret = $"predicate (conjunction)";
+                    sortText = word;
+                    break;
+                case "or":
+                    ret = $"predicate (disjunction)";
+                    sortText = word;
+                    break;
+                case "ex":
+                case "exn":
+                    ret = $"predicate (exists quantor)";
+                    sortText = word;
+                    break;
                 case "pred":
-                    ret = $"predicate (short form, {postfix})";
+                    ret = $"type (predicate, short form)";
+                    sortText = "predicate";
                     break;
                 case "predicate":
-                    ret = $"predicate ({postfix})";
+                    ret = $"type (predicate)";
+                    sortText = "predicate";
                     break;
                 case "func":
-                    ret = $"functional term (short form, {postfix})";
+                    ret = $"type (functional term, short form)";
+                    sortText = "function";
                     break;
                 case "function":
-                    ret = $"functional term ({postfix})";
+                    ret = $"type (functional term)";
+                    sortText = "function";
                     break;
                 case "cl":
-                    ret = $"class (short form, {postfix})";
+                    ret = $"type (class, short form)";
+                    sortText = "class";
                     break;
                 case "class":
-                    ret = $"class ({postfix})";
+                    ret = $"type (class)";
+                    sortText = "class";
                     break;
                 case "thm":
-                    ret = $"theorem (short form, {postfix})";
+                    ret = $"theorem (short form)";
+                    sortText = "theorem";
                     break;
                 case "theorem":
-                    ret = $"theorem ({postfix})";
+                    ret = $"theorem";
+                    sortText = "theorem";
                     break;
                 case "lem":
-                    ret = $"lemma (short form, {postfix})";
+                    ret = $"lemma (short form)";
+                    sortText = "lemma";
                     break;
                 case "lemma":
-                    ret = $"lemma ({postfix})";
+                    ret = $"lemma";
+                    sortText = "lemma";
                     break;
                 case "prop":
-                    ret = $"proposition (short form, {postfix})";
+                    ret = $"proposition (short form)";
+                    sortText = "proposition";
                     break;
                 case "proposition":
-                    ret = $"proposition ({postfix})";
+                    ret = $"proposition";
+                    sortText = "proposition";
                     break;
                 case "conj":
-                    ret = $"conjecture (short form, {postfix})";
+                    ret = $"conjecture (short form)";
+                    sortText = "conjecture";
                     break;
                 case "conjecture":
-                    ret = $"conjecture ({postfix})";
+                    ret = $"conjecture";
+                    sortText = "conjecture";
                     break;
                 case "cor":
-                    ret = $"corollary (short form, {postfix})";
+                    ret = $"corollary (short form)";
+                    sortText = "corollary";
                     break;
                 case "corollary":
-                    ret = $"corollary ({postfix})";
+                    ret = $"corollary";
+                    sortText = "corollary";
                     break;
                 case "prf":
-                    ret = $"proof (short form, {postfix})";
+                    ret = $"proof (short form)";
+                    sortText = "proof";
                     break;
                 case "proof":
-                    ret = $"proof ({postfix})";
+                    ret = $"proof";
+                    sortText = "proof";
                     break;
                 case "ax":
-                    ret = $"axiom (short form, {postfix})";
+                    ret = $"axiom (short form)";
+                    sortText = "axiom";
                     break;
                 case "axiom":
-                    ret = $"axiom ({postfix})";
+                    ret = $"axiom";
+                    sortText = "axiom";
                     break;
                 case "post":
-                    ret = $"postulate (short form, {postfix})";
+                    ret = $"postulate (short form)";
+                    sortText = "postulate";
                     break;
                 case "postulate":
-                    ret = $"postulate ({postfix})";
+                    ret = $"postulate";
+                    sortText = "postulate";
                     break;
                 case "loc":
-                    ret = $"localization (short form, {postfix})";
+                    ret = $"localization (short form";
+                    sortText = "localization";
                     break;
                 case "localization":
-                    ret = $"localization ({postfix})";
+                    ret = $"localization";
+                    sortText = "localization";
                     break;
                 case "inf":
-                    ret = $"rule of inference (short form, {postfix})";
+                    ret = $"rule of inference (short form)";
+                    sortText = "inference";
                     break;
                 case "inference":
-                    ret = $"rule of inference ({postfix})";
+                    ret = $"rule of inference";
+                    sortText = "inference";
                     break;
                 default:
                     ret = "";
+                    sortText = "";
                     break;
             }
             return ret;
         }
 
+        private CompletionItem GetCompletionItem(string replacement, string insertText = "")
+        {
+            var ret = new CompletionItem();
+            string word;
+            if (replacement.StartsWith("'") && replacement.EndsWith("'") || replacement.StartsWith("<") && replacement.EndsWith(">"))
+            {
+                // strip quotes or brackets from label
+                word = replacement.Substring(1, replacement.Length - 2);
+            }
+            else
+            {
+                word = replacement;
+            }
+            ret.Label = word;
+            ret.Detail = GetDetail(word, out string sortText);
+            if (insertText != "")
+            {
+                ret.InsertText = insertText.Replace("<replace>", word);
+                ret.Kind = CompletionItemKind.Snippet;
+                if (ret.Detail.Contains("short"))
+                {
+                    ret.SortText = sortText + "03";
+                    ret.Detail += ret.SortText;
+                }
+                else
+                {
+                    ret.SortText = sortText + "01";
+                    ret.Detail += ret.SortText;
+                }
+            }
+            else
+            {
+                ret.Kind = CompletionItemKind.Keyword;
+                if (ret.Detail.Contains("short"))
+                {
+                    ret.SortText = sortText + "04";
+                    ret.Detail += ret.SortText;
+                }
+                else
+                {
+                    ret.SortText = sortText + "02";
+                    ret.Detail += ret.SortText;
+                }
+            }
+            return ret;
+        }
+
     }
+
+
 }
