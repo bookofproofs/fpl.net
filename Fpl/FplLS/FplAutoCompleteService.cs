@@ -797,7 +797,7 @@ namespace FplLS
             return modChoices;
         }
 
-        private string GetDetail(string word, out string sortText)
+        public static string GetDetail(string word, out string sortText)
         {
             string ret;
             switch (word)
@@ -956,7 +956,7 @@ namespace FplLS
             return ret;
         }
 
-        private CompletionItem GetCompletionItem(string replacement, string insertText = "")
+        public static CompletionItem GetCompletionItem(string replacement, string insertText = "")
         {
             var ret = new CompletionItem();
             string word;
@@ -970,7 +970,7 @@ namespace FplLS
                 word = replacement;
             }
             ret.Label = word;
-            ret.Detail = GetDetail(word, out string sortText);
+            ret.Detail = FplAutoCompleteService.GetDetail(word, out string sortText);
             if (insertText != "")
             {
                 ret.InsertText = insertText.Replace("<replace>", word);
