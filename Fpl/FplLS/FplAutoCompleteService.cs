@@ -269,7 +269,7 @@ namespace FplLS
                 ci.Detail = ci.Detail.Replace("exists", "exists n-times");
         }
 
-        private List<CompletionItem> AddDefinitionChoices(string choice)
+        public static List<CompletionItem> AddDefinitionChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
@@ -994,6 +994,10 @@ namespace FplLS
                     ret = "predicate (exists n-times quantor)";
                     sortText = "exn";
                     break;
+                case "exn!":
+                    ret = "predicate (exists n-times quantor)";
+                    sortText = "exn!";
+                    break;
                 case "ext":
                     ret = "extension (beginning of)";
                     sortText = "ext";
@@ -1245,10 +1249,6 @@ namespace FplLS
                 {
                     ret.SortText = sortText + "02";
                 }
-            }
-            if (ret.Kind != CompletionItemKind.Snippet) 
-            {
-                ret.Detail = "";
             }
 
             return ret;
