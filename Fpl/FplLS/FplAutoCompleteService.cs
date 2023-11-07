@@ -195,7 +195,8 @@ namespace FplLS
         {
             var modChoices = new List<CompletionItem>();
             var postfix = "";
-            if (choice == "'exn'")
+            var isExn = choice.Contains("exn");
+            if (isExn)
             {
                 postfix = "!1";
             }
@@ -221,7 +222,7 @@ namespace FplLS
             ci3.SortText = "ex03"; ReplaceSortText(choice, ci3);
             modChoices.Add(ci3);
 
-            if (choice == "'exn'")
+            if (isExn)
             {
                 // keywords
                 var ci4 = GetCompletionItem("exn!");
@@ -246,25 +247,25 @@ namespace FplLS
 
         private static void ReplaceLabel(string choice, CompletionItem ci)
         {
-            if (choice == "'all'")
+            if (choice.Contains("all"))
                 ci.Label = ci.Label.Replace("ex", "all");
-            else if (choice == "'exn'")
+            else if (choice.Contains("exn"))
                 ci.Label = ci.Label.Replace("ex", "exn!");
         }
 
         private static void ReplaceSortText(string choice, CompletionItem ci)
         {
-            if (choice == "'all'")
+            if (choice.Contains("all"))
                 ci.SortText = ci.SortText.Replace("ex", "all");
-            else if (choice == "'exn'")
+            else if (choice.Contains("exn"))
                 ci.SortText = ci.SortText.Replace("ex", "exn!");
         }
 
         private static void ReplaceDetails(string choice, CompletionItem ci)
         {
-            if (choice == "'all'")
-                ci.Detail = ci.Detail.Replace("exists", "all"); 
-            else if (choice == "'exn'")
+            if (choice.Contains("all"))
+                ci.Detail = ci.Detail.Replace("exists", "all");
+            else if (choice.Contains("exn")) 
                 ci.Detail = ci.Detail.Replace("exists", "exists n-times");
         }
 
@@ -1245,6 +1246,11 @@ namespace FplLS
                     ret.SortText = sortText + "02";
                 }
             }
+            if (ret.Kind != CompletionItemKind.Snippet) 
+            {
+                ret.Detail = "";
+            }
+
             return ret;
         }
 

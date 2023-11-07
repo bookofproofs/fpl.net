@@ -1,4 +1,5 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLSTests
 {
@@ -452,6 +453,36 @@ namespace FplLSTests
             Assert.AreEqual(number, actual.Count);
         }
 
+        [DataRow("all", 5)]
+        [DataRow("ex", 5)]
+        [DataRow("exn", 4)]
+        [TestMethod]
+        public void TestAddQuantorSnippetCounts(string choice, int number)
+        {
+            var actual = FplAutoCompleteService.AddQuantorChoices(choice);
+            var count = 0;
+            foreach(var item in actual)
+            {
+                if (item.Kind == CompletionItemKind.Snippet) count++;
+            }
+            Assert.AreEqual(number, count);
+        }
+
+        [DataRow("all", 1)]
+        [DataRow("ex", 1)]
+        [DataRow("exn", 1)]
+        [TestMethod]
+        public void TestAddQuantorKeywordCounts(string choice, int number)
+        {
+            var actual = FplAutoCompleteService.AddQuantorChoices(choice);
+            var count = 0;
+            foreach (var item in actual)
+            {
+                if (item.Kind == CompletionItemKind.Keyword) count++;
+            }
+            Assert.AreEqual(number, count);
+        }
+
         [DataRow("all")]
         [DataRow("ex")]
         [DataRow("exn")]
@@ -490,7 +521,14 @@ namespace FplLSTests
             var actual = FplAutoCompleteService.AddQuantorChoices(choice);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Label.Contains(s));
+                if (item.Kind == CompletionItemKind.Snippet)
+                {
+                    Assert.IsTrue(item.Detail.Contains(s));
+                }
+                else
+                {
+                    Assert.IsTrue(item.Detail=="");
+                }
             }
         }
 
