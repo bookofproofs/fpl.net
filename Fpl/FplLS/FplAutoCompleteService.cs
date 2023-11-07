@@ -1,5 +1,6 @@
 ﻿using Microsoft.FSharp.Core;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using System.ComponentModel.Design;
 using System.Text;
 
 
@@ -112,7 +113,7 @@ namespace FplLS
                         break;
                     case "'def'":
                     case "'definition'":
-                        modChoices.AddRange(AddDefinitionChoices(choice));
+                        modChoices.AddRange(AddDefinitionChoices());
                         break;
                     case "'thm'":
                     case "'theorem'":
@@ -269,12 +270,24 @@ namespace FplLS
                 ci.Detail = ci.Detail.Replace("exists", "exists n-times");
         }
 
-        public static List<CompletionItem> AddDefinitionChoices(string choice)
+        public static List<CompletionItem> AddDefinitionChoices()
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            // class definition
-            modChoices.Add(GetCompletionItem(choice, $"<replace> class SomeFplClass:obj{Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine));
+            var ci = GetCompletionItem("definition", GetClassDefinitionSnippet(false));
+            ci.SortText = "defclass00";
+            ci.Label = "definition class ...(i)";
+            ci.Detail = "class definition (intrinsic)";
+            modChoices.Add(ci);
+
+            // keyword class definition           
+            var ci1 = GetCompletionItem("definition");
+            ci1.SortText = "defclass02";
+            ci1.Label = "definition class";
+            modChoices.Add(ci1);
+
+
+            /*
             // predicate definition
             modChoices.Add(GetCompletionItem(choice, $"<replace> predicate SomeFplPredicate (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine));
             // functional term definition
@@ -288,7 +301,142 @@ namespace FplLS
             modChoices.Add(GetCompletionItem($"{word} predicate"));
             // functional term definition
             modChoices.Add(GetCompletionItem($"{word} function"));
+
+            */
             return modChoices;
+        }
+
+        private static string GetClassDefinitionSnippet(bool isShort)
+        {
+            var leftBrace = "{";
+            var rightBrace = "}";
+
+            if (isShort)
+            {
+                return
+                    $"{Environment.NewLine}def cl SomeClass:obj" +
+                    $"{Environment.NewLine}{leftBrace}" +
+                    $"{Environment.NewLine}\tintr" +
+                    $"{Environment.NewLine}{rightBrace}" +
+                    $"{Environment.NewLine}";
+            }
+            else
+            {
+                return
+                    $"{Environment.NewLine}definition class SomeClass:obj" +
+                    $"{Environment.NewLine}{leftBrace}" +
+                    $"{Environment.NewLine}\tintrinsic" +
+                    $"{Environment.NewLine}{rightBrace}" +
+                    $"{Environment.NewLine}";
+            }
+        }
+
+        private static string GetConstructorSnippet(bool isShort)
+        {
+            var leftBrace = "{";
+            var rightBrace = "}";
+
+            if (isShort)
+            {
+                return
+                    $"{Environment.NewLine}\tctr SomeFplClass()" +
+                    $"{Environment.NewLine}\t{leftBrace}" +
+                    $"{Environment.NewLine}\t\tdec" +
+                    $"{Environment.NewLine}\t\t\tself!obj()" +
+                    $"{Environment.NewLine}\t\t;" +
+                    $"{Environment.NewLine}\t\tself" +
+                    $"{Environment.NewLine}\t{rightBrace}" +
+                    $"{Environment.NewLine}{rightBrace}" +
+                    $"{Environment.NewLine}";
+            }
+            else
+            {
+                return
+                    $"{Environment.NewLine}\tconstructor SomeFplClass()" +
+                    $"{Environment.NewLine}\t{leftBrace}" +
+                    $"{Environment.NewLine}\t\tdeclaration" +
+                    $"{Environment.NewLine}\t\t\tself!object()" +
+                    $"{Environment.NewLine}\t\t;" +
+                    $"{Environment.NewLine}\t\tself" +
+                    $"{Environment.NewLine}\t{rightBrace}" +
+                    $"{Environment.NewLine}{rightBrace}" +
+                    $"{Environment.NewLine}";
+            }
+        }
+
+        private static string GetClassInstanceSnippet(bool isShort)
+        {
+            var leftBrace = "{";
+            var rightBrace = "}";
+
+            if (isShort)
+            {
+                return
+                    $"{Environment.NewLine}\tmand obj SomeObjectProperty()" +
+                    $"{Environment.NewLine}\t{leftBrace}" +
+                    $"{Environment.NewLine}\t\tintr" +
+                    $"{Environment.NewLine}\t{rightBrace}" +
+                    $"{Environment.NewLine}";
+            }
+            else
+            {
+                return
+                    $"{Environment.NewLine}\tmandatory object SomeObjectProperty()" +
+                    $"{Environment.NewLine}\t{leftBrace}" +
+                    $"{Environment.NewLine}\t\tintrinsic" +
+                    $"{Environment.NewLine}\t{rightBrace}" +
+                    $"{Environment.NewLine}";
+            }
+        }
+
+        private static string GetFunctionalTermInstanceSnippet(bool isShort)
+        {
+            var leftBrace = "{";
+            var rightBrace = "}";
+
+            if (isShort)
+            {
+                return
+                    $"{Environment.NewLine}\tmand func SomeFunctionalProperty() -> obj" +
+                    $"{Environment.NewLine}\t{leftBrace}" +
+                    $"{Environment.NewLine}\t\tintr" +
+                    $"{Environment.NewLine}\t{rightBrace}" +
+                    $"{Environment.NewLine}";
+            }
+            else
+            {
+                return
+                    $"{Environment.NewLine}\tmandatory function SomeFunctionalProperty() -> object" +
+                    $"{Environment.NewLine}\t{leftBrace}" +
+                    $"{Environment.NewLine}\t\tintrinsic" +
+                    $"{Environment.NewLine}\t{rightBrace}" +
+                    $"{Environment.NewLine}";
+            }
+        }
+
+        private static string GetPredicateInstanceSnippet(bool isShort)
+        {
+            var leftBrace = "{";
+            var rightBrace = "}";
+
+            if (isShort)
+            {
+                return
+                    $"{Environment.NewLine}\tmand pred SomePredicateProperty()" +
+                    $"{Environment.NewLine}\t{leftBrace}" +
+                    $"{Environment.NewLine}\t\tintr" +
+                    $"{Environment.NewLine}\t{rightBrace}" +
+                    $"{Environment.NewLine}";
+            }
+            else
+            {
+                return
+                    $"{Environment.NewLine}\tmandatory predicate SomePredicateProperty()" +
+                    $"{Environment.NewLine}\t{leftBrace}" +
+                    $"{Environment.NewLine}\t\tintrinsic" +
+                    $"{Environment.NewLine}\t{rightBrace}" +
+                    $"{Environment.NewLine}";
+            }
         }
 
         private List<CompletionItem> AddTheoremLikeStatementChoices(string choice, string example)

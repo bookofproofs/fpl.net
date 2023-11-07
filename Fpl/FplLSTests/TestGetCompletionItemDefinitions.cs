@@ -6,100 +6,78 @@ namespace FplLSTests
     public class TestGetCompletionItemDefinitions
     {
 
-        [DataRow("all", 6)]
-        [DataRow("ex", 6)]
-        [DataRow("exn", 5)]
         [TestMethod]
-        public void TestAddDefinitionChoicesNumber(string choice, int number)
+        public void TestAddDefinitionChoicesNumber()
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
-            Assert.AreEqual(number, actual.Count);
+            var actual = FplAutoCompleteService.AddDefinitionChoices();
+            Assert.AreEqual(0, actual.Count);
         }
 
-        [DataRow("all", 5)]
-        [DataRow("ex", 5)]
-        [DataRow("exn", 4)]
         [TestMethod]
-        public void TestAddDefinitionSnippetCounts(string choice, int number)
+        public void TestAddDefinitionSnippetCounts()
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var actual = FplAutoCompleteService.AddDefinitionChoices();
             var count = 0;
             foreach(var item in actual)
             {
                 if (item.Kind == CompletionItemKind.Snippet) count++;
             }
-            Assert.AreEqual(number, count);
+            Assert.AreEqual(0, count);
         }
 
-        [DataRow("all", 1)]
-        [DataRow("ex", 1)]
-        [DataRow("exn", 1)]
         [TestMethod]
-        public void TestAddDefinitionKeywordCounts(string choice, int number)
+        public void TestAddDefinitionKeywordCounts()
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var actual = FplAutoCompleteService.AddDefinitionChoices();
             var count = 0;
             foreach (var item in actual)
             {
                 if (item.Kind == CompletionItemKind.Keyword) count++;
             }
-            Assert.AreEqual(number, count);
+            Assert.AreEqual(0, count);
         }
 
-        [DataRow("all")]
-        [DataRow("ex")]
-        [DataRow("exn")]
         [TestMethod]
-        public void TestAddDefinitionChoicesSortText(string choice)
+        public void TestAddDefinitionChoicesSortText()
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var actual = FplAutoCompleteService.AddDefinitionChoices();
             var lastSortText = "";
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains(choice));
+                Assert.IsTrue(item.SortText.Contains("xxx"));
                 Assert.IsTrue(string.Compare(lastSortText,item.SortText)<0);
                 lastSortText = item.SortText;
             }
         }
 
-        [DataRow("all")]
-        [DataRow("ex")]
-        [DataRow("exn")]
         [TestMethod]
-        public void TestAddDefinitionChoicesLabel(string choice)
+        public void TestAddDefinitionChoicesLabel()
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var actual = FplAutoCompleteService.AddDefinitionChoices();
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Label.Contains(choice));
+                Assert.IsTrue(item.Label.Contains("xxx"));
+            }
+        }
+        [TestMethod]
+        public void TestAddDefinitionChoicesDetail()
+        {
+            var actual = FplAutoCompleteService.AddDefinitionChoices();
+            foreach (var item in actual)
+            {
+                Assert.IsTrue(item.Detail.Contains("xxx"));
             }
         }
 
-        [DataRow("all", "all")]
-        [DataRow("ex", "exists")]
-        [DataRow("exn", "n-times")]
         [TestMethod]
-        public void TestAddDefinitionChoicesDetail(string choice, string s)
+        public void TestAddDefinitionChoicesInsertText()
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
-            foreach (var item in actual)
-            {
-                Assert.IsTrue(item.Detail.Contains(s));
-            }
-        }
-
-        [DataRow("all")]
-        [DataRow("ex")]
-        [DataRow("exn")]
-        [TestMethod]
-        public void TestAddDefinitionChoicesInsertText(string choice)
-        {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var actual = FplAutoCompleteService.AddDefinitionChoices();
             foreach (var item in actual)
             {
                 if (item.Kind == CompletionItemKind.Snippet)
                 {
-                    Assert.IsTrue(item.InsertText.Contains(choice));
+                    Assert.IsTrue(item.InsertText.Contains("xxx"));
                 }
                 else
                 {
