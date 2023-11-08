@@ -19,8 +19,6 @@ namespace FplLS
            "class"
            "con"
            "conclusion"
-           "constructor"
-           "ctor"
            "dec"
            "declaration"
            "del"
@@ -106,6 +104,10 @@ namespace FplLS
                     case "'or'":
                         modChoices.AddRange(AddPredicateChoices(choice, 3));
                         break;
+                    case "'ctor'":
+                    case "'constructor'":
+                        modChoices.AddRange(AddConstructorChoices(choice));
+                        break;
                     case "'ax'":
                     case "'axiom'":
                     case "'post'":
@@ -159,7 +161,7 @@ namespace FplLS
             return new CompletionList(modChoices);
         }
 
-        private List<CompletionItem> AddAxiomChoices(string choice)
+        public static List<CompletionItem> AddAxiomChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
             // snippet
@@ -169,7 +171,7 @@ namespace FplLS
             return modChoices;
         }
 
-        private List<CompletionItem> AddPredicateChoices(string choice, int numbOfArgs)
+        public static List<CompletionItem> AddPredicateChoices(string choice, int numbOfArgs)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
@@ -271,28 +273,38 @@ namespace FplLS
                 ci.Detail = ci.Detail.Replace("exists", "exists n-times");
         }
 
+        public static List<CompletionItem> AddConstructorChoices(string choice)
+        {
+            var modChoices = new List<CompletionItem>();
+            // snippet
+            var ci = GetCompletionItem(choice, GetConstructorSnippet(choice));
+            modChoices.Add(ci);
+            // keyword
+            modChoices.Add(GetCompletionItem(choice));
+            return modChoices;
+        }
+
         public static List<CompletionItem> AddDefinitionChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
             // class definition
             var ciClass = GetCompletionItem(choice, GetDefinitionSnippet(choice, "class"));
-            SetIntrinsicDefinitionProperty(ciClass, "class");
+            SetIntrinsicDefinitionProperty(choice, "class", ciClass);
             modChoices.Add(ciClass);
             // predicate definition
             var ciPred = GetCompletionItem(choice, GetDefinitionSnippet(choice, "predicate"));
-            SetIntrinsicDefinitionProperty(ciPred, "predicate");
+            SetIntrinsicDefinitionProperty(choice, "predicate", ciPred);
             modChoices.Add(ciPred);
             // functional term definition
-            var ciFunc = GetCompletionItem(choice, GetDefinitionSnippet(choice, "functional term"));
-            SetIntrinsicDefinitionProperty(ciFunc, "functional term");
+            var ciFunc = GetCompletionItem(choice, GetDefinitionSnippet(choice, "function"));
+            SetIntrinsicDefinitionProperty(choice, "function", ciFunc);
             modChoices.Add(ciFunc);
 
             // keyword
             // class definition           
             var ciClassKw = GetCompletionItem(choice);
             ciClassKw.SortText += "class";
-            ciClassKw.Label += $" cl ...(i)";
             SetDefinitionLabel(choice, "class", ciClassKw);
             modChoices.Add(ciClassKw);
             // predicate definition           
@@ -302,7 +314,7 @@ namespace FplLS
             modChoices.Add(ciPredKw);
             // functional term definition           
             var ciFuncKw = GetCompletionItem(choice);
-            ciFuncKw.SortText += "functional term";
+            ciFuncKw.SortText += "function";
             SetDefinitionLabel(choice, "function", ciFuncKw);
             modChoices.Add(ciFuncKw);
 
@@ -310,48 +322,54 @@ namespace FplLS
         }
         private static void SetDefinitionLabel(string choice, string subType, CompletionItem ci)
         {
-            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(choice, subType, out bool isShort, out string intrinsic);
-            ci.Label += $" {subType} ...(i)";
+            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(choice, subType, out bool isShort, out string intrinsic, out string objtype);
+            ci.Label += $" {newSubType}";
         }
 
-        private static void SetIntrinsicDefinitionProperty(CompletionItem ci, string subType)
+        private static void SetIntrinsicDefinitionProperty(string choice, string subType, CompletionItem ci)
         {
+            
             ci.SortText += subType;
-            ci.Label += $" {subType} ...(i)";
-            if (ci.Detail.Contains("(short form)"))
+            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(choice, subType, out bool isShort, out string intrinsic, out string objtype);
+            ci.Label += $" {newSubType}";
+            if (isShort)
             {
-                ci.Detail = ci.Detail.Replace("(", $"{subType} (intrinsic, ");
+                ci.Detail = ci.Detail.Replace("(", $"{subType} (");
             }
             else
             {
-                ci.Detail += $"{subType} (intrinsic)";
+                ci.Detail += $" {subType}";
             }
 
         }
 
-        private static string GetDefinitionSubtypeDependingOnLengthChoice(string choice, string subType, out bool isShort, out string intrinsic)
+        private static string GetDefinitionSubtypeDependingOnLengthChoice(string choice, string subType, out bool isShort, out string intrinsic, out string objtype)
         {
             isShort = !choice.Contains("definition");
             if (isShort)
             {
                 if (subType == "class")
                 {
+                    objtype = "obj";
                     intrinsic = "intr";
                     return "cl";
                 }
-                else if (subType == "predicate" || subType == "functional term")
+                else if (subType == "predicate" || subType == "function")
                 {
+                    objtype = "obj";
                     intrinsic = "intr";
                     return subType.Substring(0, 4);
                 }
                 else
                 {
+                    objtype = "object";
                     intrinsic = "intrinsic";
                     return subType;
                 }
             }
             else
             {
+                objtype = "object";
                 intrinsic = "intrinsic";
                 return subType;
             }
@@ -362,44 +380,63 @@ namespace FplLS
             var leftBrace = "{";
             var rightBrace = "}";
 
-            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(choice, subType, out bool isShort, out string intrinsic);
+            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(choice, subType, out bool isShort, out string intrinsic, out string objtype);
             var word = StripQuotesOrBrackets(choice);
-            return
-                $"{Environment.NewLine}{word} {newSubType} SomeClass:obj" +
-                $"{Environment.NewLine}{leftBrace}" +
-                $"{Environment.NewLine}\t{intrinsic}" +
-                $"{Environment.NewLine}{rightBrace}" +
-                $"{Environment.NewLine}";
+            switch (subType)
+            {
+                case "class":
+                    return
+                        $"{Environment.NewLine}{word} {newSubType} SomeFplClass: {objtype}" +
+                        $"{Environment.NewLine}{leftBrace}" +
+                        $"{Environment.NewLine}\t{intrinsic}" +
+                        $"{Environment.NewLine}{rightBrace}" +
+                        $"{Environment.NewLine}";
+                case "function":
+                    return
+                        $"{Environment.NewLine}{word} {newSubType} SomeFplFunction() -> {objtype}" +
+                        $"{Environment.NewLine}{leftBrace}" +
+                        $"{Environment.NewLine}\t{intrinsic}" +
+                        $"{Environment.NewLine}{rightBrace}" +
+                        $"{Environment.NewLine}";
+                case "predicate":
+                    return
+                        $"{Environment.NewLine}{word} {newSubType} SomeFplPredicate()" +
+                        $"{Environment.NewLine}{leftBrace}" +
+                        $"{Environment.NewLine}\t{intrinsic}" +
+                        $"{Environment.NewLine}{rightBrace}" +
+                        $"{Environment.NewLine}";
+            }
+            return "";
         }
 
-        private static string GetConstructorSnippet(bool isShort)
+        private static string GetConstructorSnippet(string choice)
         {
             var leftBrace = "{";
             var rightBrace = "}";
 
+            var word = StripQuotesOrBrackets(choice);
+            var isShort = (word == "ctor");
             if (isShort)
             {
                 return
-                    $"{Environment.NewLine}\tctr SomeFplClass()" +
-                    $"{Environment.NewLine}\t{leftBrace}" +
-                    $"{Environment.NewLine}\t\tdec" +
-                    $"{Environment.NewLine}\t\t\tself!obj()" +
-                    $"{Environment.NewLine}\t\t;" +
-                    $"{Environment.NewLine}\t\tself" +
-                    $"{Environment.NewLine}\t{rightBrace}" +
+                    $"{Environment.NewLine}ctor SomeFplClass()" +
+                    $"{Environment.NewLine}{leftBrace}" +
+                    $"{Environment.NewLine}\tdec" +
+                    $"{Environment.NewLine}\t\tself!obj()" +
+                    $"{Environment.NewLine}\t;" +
+                    $"{Environment.NewLine}\tself" +
                     $"{Environment.NewLine}{rightBrace}" +
                     $"{Environment.NewLine}";
             }
             else
             {
                 return
-                    $"{Environment.NewLine}\tconstructor SomeFplClass()" +
-                    $"{Environment.NewLine}\t{leftBrace}" +
-                    $"{Environment.NewLine}\t\tdeclaration" +
-                    $"{Environment.NewLine}\t\t\tself!object()" +
-                    $"{Environment.NewLine}\t\t;" +
-                    $"{Environment.NewLine}\t\tself" +
-                    $"{Environment.NewLine}\t{rightBrace}" +
+                    $"{Environment.NewLine}constructor SomeFplClass()" +
+                    $"{Environment.NewLine}{leftBrace}" +
+                    $"{Environment.NewLine}\tdeclaration" +
+                    $"{Environment.NewLine}\t\tself!object()" +
+                    $"{Environment.NewLine}\t;" +
+                    $"{Environment.NewLine}\tself" +
                     $"{Environment.NewLine}{rightBrace}" +
                     $"{Environment.NewLine}";
             }

@@ -24,7 +24,7 @@ namespace FplLSTests
         {
             var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
             var count = 0;
-            foreach(var item in actual)
+            foreach (var item in actual)
             {
                 if (item.Kind == CompletionItemKind.Snippet) count++;
             }
@@ -49,8 +49,8 @@ namespace FplLSTests
         [DataRow("definition", "class")]
         [DataRow("def", "predicate")]
         [DataRow("definition", "predicate")]
-        [DataRow("def", "functional term")]
-        [DataRow("definition", "functional term")]
+        [DataRow("def", "function")]
+        [DataRow("definition", "function")]
         [TestMethod]
         public void TestAddDefinitionChoicesSortText(string choice, string subType)
         {
@@ -64,9 +64,9 @@ namespace FplLSTests
             Assert.AreEqual(2, countSubType);
         }
 
-        [DataRow("def", "class")]
+        [DataRow("def", "cl")]
         [DataRow("definition", "class")]
-        [DataRow("def", "predicate")]
+        [DataRow("def", "pred")]
         [DataRow("definition", "predicate")]
         [DataRow("def", "func")]
         [DataRow("definition", "function")]
@@ -85,16 +85,12 @@ namespace FplLSTests
                         counterRelated++;
                     }
                 }
-                else if (item.Kind == CompletionItemKind.Keyword)
+                else if (item.Kind == CompletionItemKind.Keyword && item.Label.Contains(subType))
                 {
-                    if (item.Label.Contains(subType))
-                    {
-                        counterRelated++;
-                    }
+                    Assert.AreEqual(choice + " " + subType, item.Label);
                 }
             }
-            Assert.AreEqual(2, counterRelated);
-
+            Assert.AreEqual(1, counterRelated);
         }
 
         [DataRow("def")]
