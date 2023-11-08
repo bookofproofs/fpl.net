@@ -428,7 +428,7 @@ let constructor = positions (keywordConstructor >>. signature .>>. constructorBl
 
 (* FPL building blocks - Properties *)
 let keywordOptional = positions (skipString "optional" <|> skipString "opt") .>> SW >>% Ast.Optional
-let keywordMandatory = positions (skipString "mandatory" <|> skipString "mand") .>> SW >>% Ast.Optional
+let keywordProperty = positions (skipString "property" <|> skipString "prty") .>> SW >>% Ast.Property
 
 let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
 let predicateInstance = positions (keywordPredicate >>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
@@ -448,8 +448,8 @@ let definitionProperty = choice [
     functionalTermInstance
     classInstance
 ]
-let propertyHeader = IW >>. (keywordOptional <|> keywordMandatory)
-let property = positions (propertyHeader .>>. definitionProperty) |>> Ast.Property
+let propertyHeader = IW >>. keywordProperty .>>. opt keywordOptional 
+let property = positions (propertyHeader .>>. definitionProperty) |>> Ast.PropertyBlock
 let propertyList = opt (many1 (property .>> IW)) 
 
 (* FPL building blocks - Proofs 

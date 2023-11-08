@@ -88,7 +88,7 @@ type TestClassInstanceProperties () =
     [<TestMethod>]
     member this.TestClassInstance2a () =
         // a class instance with a self at the end
-        let result = run property """optional T X() 
+        let result = run property """property optional T X() 
 	        {
                 dec ~a:obj;
                 self
@@ -100,7 +100,7 @@ type TestClassInstanceProperties () =
     [<TestMethod>]
     member this.TestClassInstance2b () =
         // a class instance with a self at the end
-        let result = run property """mand T X() 
+        let result = run property """property T X() 
 	        {
                 dec ~a:obj;
                 self
@@ -112,7 +112,7 @@ type TestClassInstanceProperties () =
     [<TestMethod>]
     member this.TestClassInstance2c () =
         // a class instance with a self at the end 
-        let result = run property """optional T X() 
+        let result = run property """property optional T X() 
 	        {
                 dec ~a:obj;
                 self
@@ -124,7 +124,7 @@ type TestClassInstanceProperties () =
     [<TestMethod>]
     member this.TestClassInstance2d () =
         // a class instance with a self at the end 
-        let result = run property """mand T X() 
+        let result = run property """property T X() 
 	        {
                 dec ~a:obj;
                 self
@@ -136,7 +136,7 @@ type TestClassInstanceProperties () =
     [<TestMethod>]
     member this.TestClassInstance2e () =
         // a class instance with a self at the end
-        let result = run property """optional T X() 
+        let result = run property """property opt T X() 
 	        {
                 dec ~a:obj;
                 self
@@ -148,7 +148,7 @@ type TestClassInstanceProperties () =
     [<TestMethod>]
     member this.TestClassInstance2f () =
         // a class instance with a self at the end 
-        let result = run property """mand T X() 
+        let result = run property """property T X() 
 	        {
                 dec ~a:obj;
                 self
@@ -161,7 +161,7 @@ type TestClassInstanceProperties () =
     member this.TestClassInstance3 () =
             // a class instance with a a self at the end and 
             // some other content following it is not allowed
-        let result = run property """mand T X() 
+        let result = run property """property T X() 
 	        {
                 self
                 dec ~a:obj;
@@ -174,7 +174,7 @@ type TestClassInstanceProperties () =
     member this.TestClassInstance3a () =
         // a class instance with a self at the end and 
         // some other content following it is not allowed
-        let result = run property """mand T X() 
+        let result = run property """property T X() 
 	        {
                 self
                 dec ~a:obj ;

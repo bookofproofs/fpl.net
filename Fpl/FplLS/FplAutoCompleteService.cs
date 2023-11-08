@@ -450,7 +450,7 @@ namespace FplLS
             if (isShort)
             {
                 return
-                    $"{Environment.NewLine}\tmand obj SomeObjectProperty()" +
+                    $"{Environment.NewLine}\tprty obj SomeObjectProperty()" +
                     $"{Environment.NewLine}\t{leftBrace}" +
                     $"{Environment.NewLine}\t\tintr" +
                     $"{Environment.NewLine}\t{rightBrace}" +
@@ -459,7 +459,7 @@ namespace FplLS
             else
             {
                 return
-                    $"{Environment.NewLine}\tmandatory object SomeObjectProperty()" +
+                    $"{Environment.NewLine}\tproperty object SomeObjectProperty()" +
                     $"{Environment.NewLine}\t{leftBrace}" +
                     $"{Environment.NewLine}\t\tintrinsic" +
                     $"{Environment.NewLine}\t{rightBrace}" +
@@ -475,7 +475,7 @@ namespace FplLS
             if (isShort)
             {
                 return
-                    $"{Environment.NewLine}\tmand func SomeFunctionalProperty() -> obj" +
+                    $"{Environment.NewLine}\tprty func SomeFunctionalProperty() -> obj" +
                     $"{Environment.NewLine}\t{leftBrace}" +
                     $"{Environment.NewLine}\t\tintr" +
                     $"{Environment.NewLine}\t{rightBrace}" +
@@ -484,7 +484,7 @@ namespace FplLS
             else
             {
                 return
-                    $"{Environment.NewLine}\tmandatory function SomeFunctionalProperty() -> object" +
+                    $"{Environment.NewLine}\tproperty function SomeFunctionalProperty() -> object" +
                     $"{Environment.NewLine}\t{leftBrace}" +
                     $"{Environment.NewLine}\t\tintrinsic" +
                     $"{Environment.NewLine}\t{rightBrace}" +
@@ -500,7 +500,7 @@ namespace FplLS
             if (isShort)
             {
                 return
-                    $"{Environment.NewLine}\tmand pred SomePredicateProperty()" +
+                    $"{Environment.NewLine}\tprty pred SomePredicateProperty()" +
                     $"{Environment.NewLine}\t{leftBrace}" +
                     $"{Environment.NewLine}\t\tintr" +
                     $"{Environment.NewLine}\t{rightBrace}" +
@@ -509,7 +509,7 @@ namespace FplLS
             else
             {
                 return
-                    $"{Environment.NewLine}\tmandatory predicate SomePredicateProperty()" +
+                    $"{Environment.NewLine}\tproperty predicate SomePredicateProperty()" +
                     $"{Environment.NewLine}\t{leftBrace}" +
                     $"{Environment.NewLine}\t\tintrinsic" +
                     $"{Environment.NewLine}\t{rightBrace}" +
@@ -1300,14 +1300,6 @@ namespace FplLS
                     ret = "localization";
                     sortText = "localization";
                     break;
-                case "mand":
-                    ret = "mandatory (short form)";
-                    sortText = "mandatory";
-                    break;
-                case "mandatory":
-                    ret = "mandatory";
-                    sortText = "mandatory";
-                    break;
                 case "not":
                     ret = "predicate (negation)";
                     sortText = "not";
@@ -1363,6 +1355,14 @@ namespace FplLS
                 case "proposition":
                     ret = "proposition";
                     sortText = "proposition";
+                    break;
+                case "prty":
+                    ret = "property (short form)";
+                    sortText = "property";
+                    break;
+                case "property":
+                    ret = "property";
+                    sortText = "property";
                     break;
                 case "prf":
                     ret = "proof (short form)";

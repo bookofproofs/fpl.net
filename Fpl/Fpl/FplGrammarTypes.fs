@@ -106,12 +106,12 @@ type Ast =
     | Axiom of Positions * (Ast * (Ast list option * Ast))
     | ParentConstructorCall of Positions * (Ast * Ast)
     | Constructor of Positions * (Ast * (Ast list option * Ast)) 
-    | Mandatory
+    | Property
     | Optional 
     | PredicateInstance of Positions * (Ast * Ast) 
     | ClassInstance of Positions * ((Ast * Ast) * Ast)
     | FunctionalTermInstance of Positions * ((Ast * Ast) * Ast)
-    | Property of Positions * (Ast * Ast)
+    | PropertyBlock of Positions * ((Ast * Ast option) * Ast)
     | DefPredicateContent of Ast list option * Ast
     | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | DefFunctionContent of Ast list option * Ast

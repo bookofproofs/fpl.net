@@ -45,7 +45,7 @@
 		"inbuiltTypes": {
 			"patterns": [{
 				"name": "inbuiltType.fpl punctuation",
-				"match": "\\b(alias|axiom|ax|class|cl|conjecture|conj|constructor|corollary|cor|ctor|definition|def|function|func|index|ind|inference|inf|lemma|lem|localization|loc|mandatory|mand|object|obj|optional|opt|postulate|post|predicate|pred|proof|prf|proposition|prop|theorem|thm|uses|undefined|undef)\\b"
+				"match": "\\b(alias|axiom|ax|class|cl|conjecture|conj|constructor|corollary|cor|ctor|definition|def|function|func|index|ind|inference|inf|lemma|lem|localization|loc|object|obj|optional|opt|postulate|post|predicate|pred|proof|prf|proposition|property|prop|prty|theorem|thm|uses|undefined|undef)\\b"
 			}]
 		},
 		"templates": {

@@ -543,6 +543,36 @@ The recognition and error reporting of misplaced keywords (for instance, conflic
 * The separator between translations was changed from `~` to `!` to prevent false positives when 
   emitting error recovery diagnostics for variable declarations (see 2).
 
+#### 19) changes in the properties
+
+The property marker keyword `mandatory` (short form `mand`) were abandoned and there is a marker keyword `property` (short form `prty`). A property becomes mandatory per default unless the modifier `optional` (short form `opt`) is used. 
+
+*Before*
+```
+    mandatory predicate SomePredicate() 
+    {
+        ...
+    }
+
+    optional predicate SomeOtherPredicate() 
+    {
+        ...
+    }
+```
+*Now*
+```        
+    property predicate SomePredicate() 
+    {
+        ...
+    }
+
+    property optional predicate SomePredicate() 
+    {
+        ...
+    }
+```
+
+
 #### 20) Self-Containment 
 This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:
 
