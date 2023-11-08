@@ -1,4 +1,6 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using System.Diagnostics.Metrics;
+using System.Reflection;
 
 namespace FplLSTests
 {
@@ -6,84 +8,132 @@ namespace FplLSTests
     public class TestGetCompletionItemDefinitions
     {
 
+        [DataRow("def")]
+        [DataRow("definition")]
         [TestMethod]
-        public void TestAddDefinitionChoicesNumber()
+        public void TestAddDefinitionChoicesNumber(string choice)
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices();
-            Assert.AreEqual(0, actual.Count);
+            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            Assert.AreEqual(6, actual.Count);
         }
 
+        [DataRow("def")]
+        [DataRow("definition")]
         [TestMethod]
-        public void TestAddDefinitionSnippetCounts()
+        public void TestAddDefinitionSnippetCounts(string choice)
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices();
+            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
             var count = 0;
             foreach(var item in actual)
             {
                 if (item.Kind == CompletionItemKind.Snippet) count++;
             }
-            Assert.AreEqual(0, count);
+            Assert.AreEqual(3, count);
         }
 
+        [DataRow("def")]
+        [DataRow("definition")]
         [TestMethod]
-        public void TestAddDefinitionKeywordCounts()
+        public void TestAddDefinitionKeywordCounts(string choice)
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices();
+            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
             var count = 0;
             foreach (var item in actual)
             {
                 if (item.Kind == CompletionItemKind.Keyword) count++;
             }
-            Assert.AreEqual(0, count);
+            Assert.AreEqual(3, count);
         }
 
+        [DataRow("def", "class")]
+        [DataRow("definition", "class")]
+        [DataRow("def", "predicate")]
+        [DataRow("definition", "predicate")]
+        [DataRow("def", "functional term")]
+        [DataRow("definition", "functional term")]
         [TestMethod]
-        public void TestAddDefinitionChoicesSortText()
+        public void TestAddDefinitionChoicesSortText(string choice, string subType)
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices();
-            var lastSortText = "";
+            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var countSubType = 0;
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("xxx"));
-                Assert.IsTrue(string.Compare(lastSortText,item.SortText)<0);
-                lastSortText = item.SortText;
+                if (item.SortText.Contains(subType)) countSubType++;
+                Assert.IsTrue(item.SortText.Contains(choice));
+            }
+            Assert.AreEqual(2, countSubType);
+        }
+
+        [DataRow("def", "class")]
+        [DataRow("definition", "class")]
+        [DataRow("def", "predicate")]
+        [DataRow("definition", "predicate")]
+        [DataRow("def", "func")]
+        [DataRow("definition", "function")]
+        [TestMethod]
+        public void TestAddDefinitionChoicesLabel(string choice, string subType)
+        {
+            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var counterRelated = 0;
+            foreach (var item in actual)
+            {
+                Assert.IsTrue(item.Label.Contains(choice));
+                if (item.Kind == CompletionItemKind.Snippet)
+                {
+                    if (item.Label.Contains(subType))
+                    {
+                        counterRelated++;
+                    }
+                }
+                else if (item.Kind == CompletionItemKind.Keyword)
+                {
+                    if (item.Label.Contains(subType))
+                    {
+                        counterRelated++;
+                    }
+                }
+            }
+            Assert.AreEqual(2, counterRelated);
+
+        }
+
+        [DataRow("def")]
+        [DataRow("definition")]
+        [TestMethod]
+        public void TestAddDefinitionChoicesDetail(string choice)
+        {
+            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            foreach (var item in actual)
+            {
+                Assert.IsTrue(item.Detail.Contains("definition"));
             }
         }
 
+        [DataRow("def", "cl")]
+        [DataRow("definition", "class")]
+        [DataRow("def", "pred")]
+        [DataRow("definition", "predicate")]
+        [DataRow("def", "func")]
+        [DataRow("definition", "function")]
         [TestMethod]
-        public void TestAddDefinitionChoicesLabel()
+        public void TestAddDefinitionChoicesInsertText(string choice, string subType)
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices();
-            foreach (var item in actual)
-            {
-                Assert.IsTrue(item.Label.Contains("xxx"));
-            }
-        }
-        [TestMethod]
-        public void TestAddDefinitionChoicesDetail()
-        {
-            var actual = FplAutoCompleteService.AddDefinitionChoices();
-            foreach (var item in actual)
-            {
-                Assert.IsTrue(item.Detail.Contains("xxx"));
-            }
-        }
-
-        [TestMethod]
-        public void TestAddDefinitionChoicesInsertText()
-        {
-            var actual = FplAutoCompleteService.AddDefinitionChoices();
+            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var counterSnippets = 0;
+            var counterKeywords = 0;
             foreach (var item in actual)
             {
                 if (item.Kind == CompletionItemKind.Snippet)
                 {
-                    Assert.IsTrue(item.InsertText.Contains("xxx"));
+                    if (item.InsertText.Contains(choice) && item.InsertText.Contains(subType)) { counterSnippets++; }
                 }
                 else
                 {
-                    Assert.IsTrue(item.InsertText == null);
+                    if (item.InsertText == null) { counterKeywords++; }
                 }
             }
+            Assert.AreEqual(3, counterKeywords);
+            Assert.AreEqual(1, counterSnippets);
         }
 
     }

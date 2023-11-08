@@ -1,6 +1,7 @@
 ﻿using Microsoft.FSharp.Core;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using System.ComponentModel.Design;
+using System.Data;
 using System.Text;
 
 
@@ -113,7 +114,7 @@ namespace FplLS
                         break;
                     case "'def'":
                     case "'definition'":
-                        modChoices.AddRange(AddDefinitionChoices());
+                        modChoices.AddRange(AddDefinitionChoices(choice));
                         break;
                     case "'thm'":
                     case "'theorem'":
@@ -270,65 +271,105 @@ namespace FplLS
                 ci.Detail = ci.Detail.Replace("exists", "exists n-times");
         }
 
-        public static List<CompletionItem> AddDefinitionChoices()
+        public static List<CompletionItem> AddDefinitionChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            var ci = GetCompletionItem("definition", GetClassDefinitionSnippet(false));
-            ci.SortText = "defclass00";
-            ci.Label = "definition class ...(i)";
-            ci.Detail = "class definition (intrinsic)";
-            modChoices.Add(ci);
-
-            // keyword class definition           
-            var ci1 = GetCompletionItem("definition");
-            ci1.SortText = "defclass02";
-            ci1.Label = "definition class";
-            modChoices.Add(ci1);
-
-
-            /*
-            // predicate definition
-            modChoices.Add(GetCompletionItem(choice, $"<replace> predicate SomeFplPredicate (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine));
-            // functional term definition
-            modChoices.Add(GetCompletionItem(choice, $"<replace> function SomeFplFunctionalTerm () -> obj{Environment.NewLine}" + "{" + $"{Environment.NewLine}\tintrinsic{Environment.NewLine}" + "}" + Environment.NewLine));
-
-            // keywords
-            var word = choice.Substring(1, choice.Length - 2);
             // class definition
-            modChoices.Add(GetCompletionItem($"{word} class"));
+            var ciClass = GetCompletionItem(choice, GetDefinitionSnippet(choice, "class"));
+            SetIntrinsicDefinitionProperty(ciClass, "class");
+            modChoices.Add(ciClass);
             // predicate definition
-            modChoices.Add(GetCompletionItem($"{word} predicate"));
+            var ciPred = GetCompletionItem(choice, GetDefinitionSnippet(choice, "predicate"));
+            SetIntrinsicDefinitionProperty(ciPred, "predicate");
+            modChoices.Add(ciPred);
             // functional term definition
-            modChoices.Add(GetCompletionItem($"{word} function"));
+            var ciFunc = GetCompletionItem(choice, GetDefinitionSnippet(choice, "functional term"));
+            SetIntrinsicDefinitionProperty(ciFunc, "functional term");
+            modChoices.Add(ciFunc);
 
-            */
+            // keyword
+            // class definition           
+            var ciClassKw = GetCompletionItem(choice);
+            ciClassKw.SortText += "class";
+            ciClassKw.Label += $" cl ...(i)";
+            SetDefinitionLabel(choice, "class", ciClassKw);
+            modChoices.Add(ciClassKw);
+            // predicate definition           
+            var ciPredKw = GetCompletionItem(choice);
+            ciPredKw.SortText += "predicate";
+            SetDefinitionLabel(choice, "predicate", ciPredKw);
+            modChoices.Add(ciPredKw);
+            // functional term definition           
+            var ciFuncKw = GetCompletionItem(choice);
+            ciFuncKw.SortText += "functional term";
+            SetDefinitionLabel(choice, "function", ciFuncKw);
+            modChoices.Add(ciFuncKw);
+
             return modChoices;
         }
+        private static void SetDefinitionLabel(string choice, string subType, CompletionItem ci)
+        {
+            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(choice, subType, out bool isShort, out string intrinsic);
+            ci.Label += $" {subType} ...(i)";
+        }
 
-        private static string GetClassDefinitionSnippet(bool isShort)
+        private static void SetIntrinsicDefinitionProperty(CompletionItem ci, string subType)
+        {
+            ci.SortText += subType;
+            ci.Label += $" {subType} ...(i)";
+            if (ci.Detail.Contains("(short form)"))
+            {
+                ci.Detail = ci.Detail.Replace("(", $"{subType} (intrinsic, ");
+            }
+            else
+            {
+                ci.Detail += $"{subType} (intrinsic)";
+            }
+
+        }
+
+        private static string GetDefinitionSubtypeDependingOnLengthChoice(string choice, string subType, out bool isShort, out string intrinsic)
+        {
+            isShort = !choice.Contains("definition");
+            if (isShort)
+            {
+                if (subType == "class")
+                {
+                    intrinsic = "intr";
+                    return "cl";
+                }
+                else if (subType == "predicate" || subType == "functional term")
+                {
+                    intrinsic = "intr";
+                    return subType.Substring(0, 4);
+                }
+                else
+                {
+                    intrinsic = "intrinsic";
+                    return subType;
+                }
+            }
+            else
+            {
+                intrinsic = "intrinsic";
+                return subType;
+            }
+        }
+
+        private static string GetDefinitionSnippet(string choice, string subType)
         {
             var leftBrace = "{";
             var rightBrace = "}";
 
-            if (isShort)
-            {
-                return
-                    $"{Environment.NewLine}def cl SomeClass:obj" +
-                    $"{Environment.NewLine}{leftBrace}" +
-                    $"{Environment.NewLine}\tintr" +
-                    $"{Environment.NewLine}{rightBrace}" +
-                    $"{Environment.NewLine}";
-            }
-            else
-            {
-                return
-                    $"{Environment.NewLine}definition class SomeClass:obj" +
-                    $"{Environment.NewLine}{leftBrace}" +
-                    $"{Environment.NewLine}\tintrinsic" +
-                    $"{Environment.NewLine}{rightBrace}" +
-                    $"{Environment.NewLine}";
-            }
+            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(choice, subType, out bool isShort, out string intrinsic);
+            var word = StripQuotesOrBrackets(choice);
+            return
+                $"{Environment.NewLine}{word} {newSubType} SomeClass:obj" +
+                $"{Environment.NewLine}{leftBrace}" +
+                $"{Environment.NewLine}\t{intrinsic}" +
+                $"{Environment.NewLine}{rightBrace}" +
+                $"{Environment.NewLine}";
         }
 
         private static string GetConstructorSnippet(bool isShort)
@@ -1358,19 +1399,23 @@ namespace FplLS
             return ret;
         }
 
-        public static CompletionItem GetCompletionItem(string replacement, string insertText = "")
+        private static string StripQuotesOrBrackets(string str)
         {
-            var ret = new CompletionItem();
-            string word;
-            if (replacement.StartsWith("'") && replacement.EndsWith("'") || replacement.StartsWith("<") && replacement.EndsWith(">"))
+            if (str.StartsWith("'") && str.EndsWith("'") || str.StartsWith("<") && str.EndsWith(">"))
             {
                 // strip quotes or brackets from label
-                word = replacement.Substring(1, replacement.Length - 2);
+                return str.Substring(1, str.Length - 2);
             }
             else
             {
-                word = replacement;
+                return str;
             }
+        }
+
+        public static CompletionItem GetCompletionItem(string replacement, string insertText = "")
+        {
+            var ret = new CompletionItem();
+            string word = StripQuotesOrBrackets(replacement);
             ret.Label = word;
             ret.Detail = FplAutoCompleteService.GetDetail(word, out string sortText);
             if (insertText != "")
