@@ -292,25 +292,55 @@ namespace FplLS
         {
             var modChoices = new List<CompletionItem>();
             // snippet
-            var ciMandCl = GetCompletionItem(choice, GetClassInstanceSnippet(choice, false));
+            var ciMandCl = GetCompletionItem(choice, GetClassInstanceSnippet(choice, false, out string optMand, out string objMand));
+            ciMandCl.Label += $" {objMand}";
+            ciMandCl.Detail = $"mandatory object property";
             modChoices.Add(ciMandCl);
             var ciMandPr = GetCompletionItem(choice, GetPredicateInstanceSnippet(choice, false));
+            ciMandPr.Label += $" {objMand}";
+            ciMandPr.Detail = $"mandatory predicative property";
             modChoices.Add(ciMandPr);
             var ciMandFu = GetCompletionItem(choice, GetFunctionalTermInstanceSnippet(choice, false));
+            ciMandFu.Label += $" {objMand}";
+            ciMandFu.Detail = $"mandatory functional property";
             modChoices.Add(ciMandFu);
-            var ciOptCl = GetCompletionItem(choice, GetClassInstanceSnippet(choice, true));
+            var ciOptCl = GetCompletionItem(choice, GetClassInstanceSnippet(choice, true, out string optOpt, out string objOpt));
+            ciOptCl.Label += $" {optOpt} {objOpt}";
+            ciOptCl.Detail = $"optional object property";
             modChoices.Add(ciOptCl);
             var ciOptPr = GetCompletionItem(choice, GetPredicateInstanceSnippet(choice, true));
+            ciOptPr.Label += $" {optOpt} {objOpt}";
+            ciOptPr.Detail = $"optional predicative property";
             modChoices.Add(ciOptPr);
             var ciOptFu = GetCompletionItem(choice, GetFunctionalTermInstanceSnippet(choice, true));
+            ciOptFu.Label += $" {optOpt} {objOpt}";
+            ciOptFu.Detail = $"optional functional property";
             modChoices.Add(ciOptFu);
             // keyword
             var ciMandClKw = GetCompletionItem(choice);
+            ciMandClKw.Label = ciMandCl.Label;
+            ciMandClKw.Detail = ciMandCl.Detail;
             modChoices.Add(ciMandClKw);
             var ciMandPrKw = GetCompletionItem(choice);
+            ciMandPrKw.Label = ciMandPr.Label;
+            ciMandPrKw.Detail = ciMandPr.Detail;
             modChoices.Add(ciMandPrKw);
             var ciMandFuKw = GetCompletionItem(choice);
+            ciMandFuKw.Label = ciMandFu.Label;
+            ciMandFuKw.Detail = ciMandFu.Detail;
             modChoices.Add(ciMandFuKw);
+            var ciOptClKw = GetCompletionItem(choice);
+            ciOptClKw.Label = ciOptCl.Label;
+            ciOptClKw.Detail = ciOptCl.Detail;
+            modChoices.Add(ciOptClKw);
+            var ciOptPrKw = GetCompletionItem(choice);
+            ciOptPrKw.Label = ciOptPr.Label;
+            ciOptPrKw.Detail = ciOptPr.Detail;
+            modChoices.Add(ciOptPrKw);
+            var ciOptFuKw = GetCompletionItem(choice);
+            ciOptFuKw.Label = ciOptFu.Label;
+            ciOptFuKw.Detail = ciOptFu.Detail;
+            modChoices.Add(ciOptFuKw);
             return modChoices;
         }
 
@@ -532,13 +562,16 @@ namespace FplLS
             }
         }
 
-        private static string GetClassInstanceSnippet(string choice, bool optional)
+        private static string GetClassInstanceSnippet(string choice, bool optional, out string optionalStr, out string objTypeStr)
         {
             var leftBrace = "{";
             var rightBrace = "}";
 
             var word = StripQuotesOrBrackets(choice);
             GetPropertySubtypeDependingOnLengthChoice(choice, "class", out bool isShort, out string optStr, out string objType, out string intrinsic);
+
+            optionalStr = optStr;
+            objTypeStr = objType;
 
             string firstLine;
             if (optional)
