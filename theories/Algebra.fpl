@@ -203,7 +203,7 @@ Fpl.Algebra.Structures
         dec 
             ~result:tplSetElem 
             assert In(y,x)
-                cases
+            cases
             (
                 | <n = 0>: result := m.NeutralElem()
                 ? result :=

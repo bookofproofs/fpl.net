@@ -14,7 +14,6 @@ namespace FplLS
            "assert"
            "ass"
            "assume"
-           "cases"
            "cl"
            "class"
            "con"
@@ -33,8 +32,6 @@ namespace FplLS
            "intrinsic"
            "in"
            "is"
-           "mand"
-           "mandatory"
            "not"
            "obj"
            "object"
@@ -109,6 +106,9 @@ namespace FplLS
                     case "'dec'":
                     case "'declaration'":
                         modChoices.AddRange(AddDeclarationChoices(choice));
+                        break;
+                    case "'cases'":
+                        modChoices.AddRange(AddCasesChoices(choice));
                         break;
                     case "'prty'":
                     case "'property'":
@@ -359,6 +359,20 @@ namespace FplLS
             return modChoices;
         }
 
+
+        public static List<CompletionItem> AddCasesChoices(string choice)
+        {
+            var modChoices = new List<CompletionItem>();
+
+            // snippet
+            var ci = GetCompletionItem(choice, GetCasesStatement());
+            modChoices.Add(ci);
+            // keyword
+            var ci1 = GetCompletionItem(choice);
+            modChoices.Add(ci1);
+            return modChoices;
+        }
+
         public static List<CompletionItem> AddDefinitionChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
@@ -588,6 +602,18 @@ namespace FplLS
                     $"{Environment.NewLine}{rightBrace}" +
                     $"{Environment.NewLine}";
             }
+        }
+
+        private static string GetCasesStatement()
+        {
+            return
+                $"{Environment.NewLine}cases" +
+                $"{Environment.NewLine}(" +
+                $"{Environment.NewLine}\t| p(x) : y := a" +
+                $"{Environment.NewLine}\t| q(x) : y := b" +
+                $"{Environment.NewLine}\t? y := c" +
+                $"{Environment.NewLine})" +
+                $"{Environment.NewLine}";
         }
 
         private static string GetDeclarationSnippet(string choice)
