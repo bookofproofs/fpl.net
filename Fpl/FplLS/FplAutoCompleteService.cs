@@ -108,6 +108,10 @@ namespace FplLS
                     case "'constructor'":
                         modChoices.AddRange(AddConstructorChoices(choice));
                         break;
+                    case "'prty'":
+                    case "'property'":
+                        modChoices.AddRange(AddPropertyChoices(choice));
+                        break;
                     case "'ax'":
                     case "'axiom'":
                     case "'post'":
@@ -284,6 +288,32 @@ namespace FplLS
             return modChoices;
         }
 
+        public static List<CompletionItem> AddPropertyChoices(string choice)
+        {
+            var modChoices = new List<CompletionItem>();
+            // snippet
+            var ciMandCl = GetCompletionItem(choice, GetClassInstanceSnippet(choice, false));
+            modChoices.Add(ciMandCl);
+            var ciMandPr = GetCompletionItem(choice, GetPredicateInstanceSnippet(choice, false));
+            modChoices.Add(ciMandPr);
+            var ciMandFu = GetCompletionItem(choice, GetFunctionalTermInstanceSnippet(choice, false));
+            modChoices.Add(ciMandFu);
+            var ciOptCl = GetCompletionItem(choice, GetClassInstanceSnippet(choice, true));
+            modChoices.Add(ciOptCl);
+            var ciOptPr = GetCompletionItem(choice, GetPredicateInstanceSnippet(choice, true));
+            modChoices.Add(ciOptPr);
+            var ciOptFu = GetCompletionItem(choice, GetFunctionalTermInstanceSnippet(choice, true));
+            modChoices.Add(ciOptFu);
+            // keyword
+            var ciMandClKw = GetCompletionItem(choice);
+            modChoices.Add(ciMandClKw);
+            var ciMandPrKw = GetCompletionItem(choice);
+            modChoices.Add(ciMandPrKw);
+            var ciMandFuKw = GetCompletionItem(choice);
+            modChoices.Add(ciMandFuKw);
+            return modChoices;
+        }
+
         public static List<CompletionItem> AddDefinitionChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
@@ -375,6 +405,66 @@ namespace FplLS
             }
         }
 
+        private static void GetPropertySubtypeDependingOnLengthChoice(string choice, string subType, out bool isShort, out string optStr, out string objType, out string intrisic)
+        {
+            isShort = !choice.Contains("property");
+            if (isShort)
+            {
+
+                if (subType == "class")
+                {
+                    objType = "object";
+                    optStr = "opt";
+                    intrisic = "intr";
+                }
+                else if (subType == "predicate")
+                {
+                    objType = "pred";
+                    optStr = "opt";
+                    intrisic = "intr";
+                }
+                else if (subType == "function")
+                {
+                    objType = "func";
+                    optStr = "opt";
+                    intrisic = "intr";
+                }
+                else
+                {
+                    objType = "obj";
+                    optStr = "opt";
+                    intrisic = "intr";
+                }
+            }
+            else
+            {
+                if (subType == "class")
+                {
+                    objType = "object";
+                    optStr = "optional";
+                    intrisic = "intrinsic";
+                }
+                else if (subType == "predicate")
+                {
+                    objType = subType;
+                    optStr = "optional";
+                    intrisic = "intrinsic";
+                }
+                else if (subType == "function")
+                {
+                    objType = subType;
+                    optStr = "optional";
+                    intrisic = "intrinsic";
+                }
+                else
+                {
+                    objType = "object";
+                    optStr = "optional";
+                    intrisic = "intrinsic";
+                }
+            }
+        }
+
         private static string GetDefinitionSnippet(string choice, string subType)
         {
             var leftBrace = "{";
@@ -442,79 +532,89 @@ namespace FplLS
             }
         }
 
-        private static string GetClassInstanceSnippet(bool isShort)
+        private static string GetClassInstanceSnippet(string choice, bool optional)
         {
             var leftBrace = "{";
             var rightBrace = "}";
 
-            if (isShort)
+            var word = StripQuotesOrBrackets(choice);
+            GetPropertySubtypeDependingOnLengthChoice(choice, "class", out bool isShort, out string optStr, out string objType, out string intrinsic);
+
+            string firstLine;
+            if (optional)
             {
-                return
-                    $"{Environment.NewLine}\tprty obj SomeObjectProperty()" +
-                    $"{Environment.NewLine}\t{leftBrace}" +
-                    $"{Environment.NewLine}\t\tintr" +
-                    $"{Environment.NewLine}\t{rightBrace}" +
-                    $"{Environment.NewLine}";
+                firstLine = $"{Environment.NewLine}{word} {optStr} {objType} SomeObjectProperty()";
             }
             else
             {
-                return
-                    $"{Environment.NewLine}\tproperty object SomeObjectProperty()" +
-                    $"{Environment.NewLine}\t{leftBrace}" +
-                    $"{Environment.NewLine}\t\tintrinsic" +
-                    $"{Environment.NewLine}\t{rightBrace}" +
-                    $"{Environment.NewLine}";
+                firstLine = $"{Environment.NewLine}{word} {objType} SomeObjectProperty()";
             }
+
+            return
+                firstLine +
+                $"{Environment.NewLine}{leftBrace}" +
+                $"{Environment.NewLine}\t{intrinsic}" +
+                $"{Environment.NewLine}{rightBrace}" +
+                $"{Environment.NewLine}";
         }
 
-        private static string GetFunctionalTermInstanceSnippet(bool isShort)
+        private static string GetFunctionalTermInstanceSnippet(string choice, bool optional)
         {
             var leftBrace = "{";
             var rightBrace = "}";
+            var word = StripQuotesOrBrackets(choice);
+            GetPropertySubtypeDependingOnLengthChoice(choice, "function", out bool isShort, out string optStr, out string objType, out string intrinsic);
 
+            string objStr;
             if (isShort)
             {
-                return
-                    $"{Environment.NewLine}\tprty func SomeFunctionalProperty() -> obj" +
-                    $"{Environment.NewLine}\t{leftBrace}" +
-                    $"{Environment.NewLine}\t\tintr" +
-                    $"{Environment.NewLine}\t{rightBrace}" +
-                    $"{Environment.NewLine}";
+                objStr = "obj";
             }
             else
             {
-                return
-                    $"{Environment.NewLine}\tproperty function SomeFunctionalProperty() -> object" +
-                    $"{Environment.NewLine}\t{leftBrace}" +
-                    $"{Environment.NewLine}\t\tintrinsic" +
-                    $"{Environment.NewLine}\t{rightBrace}" +
-                    $"{Environment.NewLine}";
+                objStr = "object";
             }
+            string firstLine;
+            if (optional)
+            {
+                firstLine = $"{Environment.NewLine}{word} {optStr} {objType} SomeFunctionProperty() -> {objStr}";
+            }
+            else
+            {
+                firstLine = $"{Environment.NewLine}{word} {objType} SomeFunctionProperty() -> {objStr}";
+            }
+
+            return
+                firstLine +
+                $"{Environment.NewLine}{leftBrace}" +
+                $"{Environment.NewLine}\t{intrinsic}" +
+                $"{Environment.NewLine}{rightBrace}" +
+                $"{Environment.NewLine}";
         }
 
-        private static string GetPredicateInstanceSnippet(bool isShort)
+        private static string GetPredicateInstanceSnippet(string choice, bool optional)
         {
             var leftBrace = "{";
             var rightBrace = "}";
+            var word = StripQuotesOrBrackets(choice);
+            GetPropertySubtypeDependingOnLengthChoice(choice, "predicate", out bool isShort, out string optStr, out string objType, out string intrinsic);
 
-            if (isShort)
+            string firstLine;
+            if (optional)
             {
-                return
-                    $"{Environment.NewLine}\tprty pred SomePredicateProperty()" +
-                    $"{Environment.NewLine}\t{leftBrace}" +
-                    $"{Environment.NewLine}\t\tintr" +
-                    $"{Environment.NewLine}\t{rightBrace}" +
-                    $"{Environment.NewLine}";
+                firstLine = $"{Environment.NewLine}{word} {optStr} {objType} SomePredicateProperty()";
             }
             else
             {
-                return
-                    $"{Environment.NewLine}\tproperty predicate SomePredicateProperty()" +
-                    $"{Environment.NewLine}\t{leftBrace}" +
-                    $"{Environment.NewLine}\t\tintrinsic" +
-                    $"{Environment.NewLine}\t{rightBrace}" +
-                    $"{Environment.NewLine}";
+                firstLine = $"{Environment.NewLine}{word} {objType} SomePredicateProperty()";
             }
+
+            return
+                firstLine +
+                $"{Environment.NewLine}{leftBrace}" +
+                $"{Environment.NewLine}\t{intrinsic}" +
+                $"{Environment.NewLine}{rightBrace}" +
+                $"{Environment.NewLine}";
         }
 
         private List<CompletionItem> AddTheoremLikeStatementChoices(string choice, string example)
