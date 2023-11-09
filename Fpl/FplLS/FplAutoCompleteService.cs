@@ -19,8 +19,6 @@ namespace FplLS
            "class"
            "con"
            "conclusion"
-           "dec"
-           "declaration"
            "del"
            "delegate"
            "else"
@@ -107,6 +105,10 @@ namespace FplLS
                     case "'ctor'":
                     case "'constructor'":
                         modChoices.AddRange(AddConstructorChoices(choice));
+                        break;
+                    case "'dec'":
+                    case "'declaration'":
+                        modChoices.AddRange(AddDeclarationChoices(choice));
                         break;
                     case "'prty'":
                     case "'property'":
@@ -344,6 +346,19 @@ namespace FplLS
             return modChoices;
         }
 
+        public static List<CompletionItem> AddDeclarationChoices(string choice)
+        {
+            var modChoices = new List<CompletionItem>();
+
+            // snippet
+            var ci = GetCompletionItem(choice, GetDeclarationSnippet(choice));
+            modChoices.Add(ci);
+            // keyword
+            var ci1 = GetCompletionItem(choice);
+            modChoices.Add(ci1);
+            return modChoices;
+        }
+
         public static List<CompletionItem> AddDefinitionChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
@@ -432,6 +447,19 @@ namespace FplLS
                 objtype = "object";
                 intrinsic = "intrinsic";
                 return subType;
+            }
+        }
+
+        private static string GetObjectTypeDependingOnLengthChoice(string choice)
+        {
+            var isShort = !choice.Contains("declaration");
+            if (isShort)
+            {
+                return "obj";
+            }
+            else
+            {
+                return "object";
             }
         }
 
@@ -560,6 +588,22 @@ namespace FplLS
                     $"{Environment.NewLine}{rightBrace}" +
                     $"{Environment.NewLine}";
             }
+        }
+
+        private static string GetDeclarationSnippet(string choice)
+        {
+
+            var word = StripQuotesOrBrackets(choice);
+            var objStr = GetObjectTypeDependingOnLengthChoice(choice); 
+
+            return
+                $"{Environment.NewLine}{word}" +
+                $"{Environment.NewLine}\t~x: {objStr}" +
+                $"{Environment.NewLine}\t~y: {objStr}" +
+                $"{Environment.NewLine}\tx := 0" +
+                $"{Environment.NewLine}\ty := 1" +
+                $"{Environment.NewLine};" +
+                $"{Environment.NewLine}";
         }
 
         private static string GetClassInstanceSnippet(string choice, bool optional, out string optionalStr, out string objTypeStr)
