@@ -7,14 +7,14 @@ namespace FplLSTests
     public class TestFplAutoCompleteService
     {
         [TestMethod]
-        [DataRow("<some token>", "some token")]
-        [DataRow("'token'", "token")]
-        [DataRow("some token", "some token")]
-        [DataRow("token", "token")]
-        [DataRow("'token", "'token")]
-        [DataRow("token'", "token'")]
-        [DataRow("<token", "<token")]
-        [DataRow("token>", "token>")]
+        [DataRow("<some token>", "_ some token")]
+        [DataRow("'token'", "_ token")]
+        [DataRow("some token", "_ some token")]
+        [DataRow("token", "_ token")]
+        [DataRow("'token", "_ 'token")]
+        [DataRow("token'", "_ token'")]
+        [DataRow("<token", "_ <token")]
+        [DataRow("token>", "_ token>")]
         public void TestGetCompletionItemStrippingBracketsAndQuotes(string input, string expected)
         {
             var actual = FplAutoCompleteService.GetCompletionItem(input);

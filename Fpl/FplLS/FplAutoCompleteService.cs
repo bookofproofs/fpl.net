@@ -1,4 +1,5 @@
-﻿using Microsoft.FSharp.Core;
+﻿using FParsec;
+using Microsoft.FSharp.Core;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using System.ComponentModel.Design;
 using System.Data;
@@ -9,6 +10,7 @@ namespace FplLS
 {
     public class FplAutoCompleteService
     {
+        const string prefix = "_ ";
         /*
            "is"
            "del"
@@ -243,22 +245,22 @@ namespace FplLS
             }
             // snippets
             var ci = GetCompletionItem(choice, $"<replace>{postfix} x ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
-            ci.Label = "ex (..)"; ReplaceLabel(choice, ci);
+            ci.Label = $"{prefix}ex (..)"; ReplaceLabel(choice, ci);
             ci.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci);
             ci.SortText = "ex00"; ReplaceSortText(choice, ci);
             modChoices.Add(ci);
             var ci1 = GetCompletionItem(choice, $"<replace>{postfix} x in someVariadicVar ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
-            ci1.Label = "ex x in variable (..)"; ReplaceLabel(choice, ci1);
+            ci1.Label = $"{prefix}ex x in variable (..)"; ReplaceLabel(choice, ci1);
             ci1.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci1);
             ci1.SortText = "ex01"; ReplaceSortText(choice, ci1);
             modChoices.Add(ci1);
             var ci2 = GetCompletionItem(choice, $"<replace>{postfix} x in [a,b] ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
-            ci2.Label = "ex x in range (..)"; ReplaceLabel(choice, ci2);
+            ci2.Label = $"{prefix}ex x in range (..)"; ReplaceLabel(choice, ci2);
             ci2.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci2);
             ci2.SortText = "ex02"; ReplaceSortText(choice, ci2);
             modChoices.Add(ci2);
             var ci3 = GetCompletionItem(choice, $"<replace>{postfix} x in object ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
-            ci3.Label = "ex x in type (..)"; ReplaceLabel(choice, ci3);
+            ci3.Label = $"{prefix}ex x in type (..)"; ReplaceLabel(choice, ci3);
             ci3.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci3);
             ci3.SortText = "ex03"; ReplaceSortText(choice, ci3);
             modChoices.Add(ci3);
@@ -274,7 +276,7 @@ namespace FplLS
             {
                 // this combined snippet only available for 'ex' and 'all' but not for exn!
                 var ci5 = GetCompletionItem(choice, $"<replace> x in [a,b], y in c, z ({Environment.NewLine}" + $"\tp(x,y,z){Environment.NewLine})" + Environment.NewLine);
-                ci5.Label = "ex <combined> (..)"; ReplaceLabel(choice, ci5);
+                ci5.Label = $"{prefix}ex <combined> (..)"; ReplaceLabel(choice, ci5);
                 ci5.Detail = "predicate (exists quantor in <combined>)"; ReplaceDetails(choice, ci5);
                 ci5.SortText = "ex04"; ReplaceSortText(choice, ci5);
                 modChoices.Add(ci5);
@@ -326,27 +328,27 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             // snippet
             var ciMandCl = GetCompletionItem(choice, GetClassInstanceSnippet(choice, false, out string optMand, out string objMand));
-            ciMandCl.Label += $" {objMand}";
+            ciMandCl.Label += $"{prefix}{objMand}";
             ciMandCl.Detail = $"mandatory object property";
             modChoices.Add(ciMandCl);
             var ciMandPr = GetCompletionItem(choice, GetPredicateInstanceSnippet(choice, false));
-            ciMandPr.Label += $" {objMand}";
+            ciMandPr.Label += $"{prefix}{objMand}";
             ciMandPr.Detail = $"mandatory predicative property";
             modChoices.Add(ciMandPr);
             var ciMandFu = GetCompletionItem(choice, GetFunctionalTermInstanceSnippet(choice, false));
-            ciMandFu.Label += $" {objMand}";
+            ciMandFu.Label += $"{prefix}{objMand}";
             ciMandFu.Detail = $"mandatory functional property";
             modChoices.Add(ciMandFu);
             var ciOptCl = GetCompletionItem(choice, GetClassInstanceSnippet(choice, true, out string optOpt, out string objOpt));
-            ciOptCl.Label += $" {optOpt} {objOpt}";
+            ciOptCl.Label += $"{prefix}{optOpt} {objOpt}";
             ciOptCl.Detail = $"optional object property";
             modChoices.Add(ciOptCl);
             var ciOptPr = GetCompletionItem(choice, GetPredicateInstanceSnippet(choice, true));
-            ciOptPr.Label += $" {optOpt} {objOpt}";
+            ciOptPr.Label += $"{prefix}{optOpt} {objOpt}";
             ciOptPr.Detail = $"optional predicative property";
             modChoices.Add(ciOptPr);
             var ciOptFu = GetCompletionItem(choice, GetFunctionalTermInstanceSnippet(choice, true));
-            ciOptFu.Label += $" {optOpt} {objOpt}";
+            ciOptFu.Label += $"{prefix}{optOpt} {objOpt}";
             ciOptFu.Detail = $"optional functional property";
             modChoices.Add(ciOptFu);
             // keyword
@@ -410,11 +412,11 @@ namespace FplLS
 
             // snippet
             var ci = GetCompletionItem(choice, GetForStatement(true));
-            ci.Label = "for .. []";
+            ci.Label = $"{prefix}for .. []";
             ci.Detail = "for statement (range)";
             modChoices.Add(ci);
             var ci1 = GetCompletionItem(choice, GetForStatement(false));
-            ci1.Label = "for .. list";
+            ci1.Label = $"{prefix}for .. list";
             ci1.Detail = "for statement (list)";
             modChoices.Add(ci1);
             // keyword
@@ -853,8 +855,39 @@ namespace FplLS
         {
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
-            ci.Detail = choice;
-            ci.Label = choice.Substring(1, choice.Length - 2);
+            var word = StripQuotesOrBrackets(choice);
+            ci.InsertText = word;
+            ci.Label = prefix + ci.InsertText;
+            switch (word)
+            {
+                case "{":
+                    ci.Detail = "opening '{'";
+                    break;
+                case "}":
+                    ci.Detail = "closing '{'";
+                    break;
+                case "(":
+                    ci.Detail = "opening '('";
+                    break;
+                case ")":
+                    ci.Detail = "closing '('";
+                    break;
+                case "<":
+                    ci.Detail = "coordinates";
+                    ci.InsertText = "<1,2>";
+                    ci.Label += "1,2>";
+                    break;
+                case ":ext":
+                    ci.Detail = "extension header";
+                    break;
+                case ":end":
+                    ci.Detail = "extension tail";
+                    break;
+                default:
+                    ci.Detail = "unknown";
+                    break;
+            }
+
             ci.Kind = CompletionItemKind.Text;
             modChoices.Add(ci);
             return modChoices;
@@ -871,20 +904,21 @@ namespace FplLS
             ci.Detail = word;
             if (isClosed && isLeftBound)
             {
-                ci.Label = "[";
-            } 
+                ci.InsertText = "[";
+            }
             else if (!isClosed && isLeftBound)
             {
-                ci.Label = "[(";
+                ci.InsertText = "[(";
             }
             else if (isClosed && !isLeftBound)
             {
-                ci.Label = "]";
+                ci.InsertText = "]";
             }
             else
             {
-                ci.Label = ")]";
+                ci.InsertText = ")]";
             }
+            ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Text;
             modChoices.Add(ci);
             return modChoices;
@@ -896,7 +930,8 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = word;
-            ci.Label = "123";
+            ci.InsertText = "123";
+            ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Value;
             modChoices.Add(ci);
             return modChoices;
@@ -908,7 +943,8 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = word;
-            ci.Label = "10.";
+            ci.InsertText = "10.";
+            ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Unit;
             modChoices.Add(ci);
             return modChoices;
@@ -919,7 +955,8 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = word;
-            ci.Label = "\"...\"";
+            ci.InsertText = "\"...\"";
+            ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Value;
             modChoices.Add(ci);
             return modChoices;
@@ -930,7 +967,8 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = word;
-            ci.Label = "/+\\d/ ";
+            ci.InsertText = "/+\\d/ ";
+            ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Text;
             modChoices.Add(ci);
             return modChoices;
@@ -942,7 +980,8 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = "word pattern [a-z0-9_]+";
-            ci.Label = "_someIdentifier";
+            ci.InsertText = "someIdentifier";
+            ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Value;
             modChoices.Add(ci);
             return modChoices;
@@ -954,7 +993,8 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = word;
-            ci.Label = "someVar";
+            ci.InsertText = "someVar";
+            ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Variable;
             modChoices.Add(ci);
             return modChoices;
@@ -966,7 +1006,8 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = "user-defined identifier";
-            ci.Label = "SomeFplIdentifier";
+            ci.InsertText = "SomeFplIdentifier";
+            ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Reference;
              modChoices.Add(ci);
             return modChoices;
@@ -978,8 +1019,9 @@ namespace FplLS
             var word = StripQuotesOrBrackets(choice);
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
-            ci.Detail = "keyword";
-            ci.Label = word;
+            ci.InsertText = word;
+            ci.Label = prefix + ci.InsertText;
+            ci.Detail = $"keyword '{word}'";
             ci.Kind = CompletionItemKind.Keyword;
             modChoices.Add(ci);
             return modChoices;
@@ -989,8 +1031,8 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = choice;
-            ci.Label = "' '";
             ci.InsertText = " ";
+            ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Text;
             ci.Detail = "(whitespace)";
             modChoices.Add(ci);
@@ -1497,7 +1539,8 @@ namespace FplLS
 
             {
                 var ci = new CompletionItem();
-                ci.Label = kvp.Key + ":";
+                ci.InsertText = kvp.Key + ":";
+                ci.Label = prefix + ci.InsertText;
                 ci.Detail = kvp.Value;
                 ci.Kind = CompletionItemKind.Value;
                 modChoices.Add(ci);
@@ -1855,11 +1898,11 @@ namespace FplLS
         {
             var ret = new CompletionItem();
             string word = StripQuotesOrBrackets(replacement);
-            ret.Label = word;
             ret.Detail = FplAutoCompleteService.GetDetail(word, out string sortText);
             if (insertText != "")
             {
                 ret.InsertText = insertText.Replace("<replace>", word);
+                ret.Label = prefix + word;
                 ret.Kind = CompletionItemKind.Snippet;
                 if (ret.Detail.Contains("short"))
                 {
@@ -1873,6 +1916,9 @@ namespace FplLS
             else
             {
                 ret.Kind = CompletionItemKind.Keyword;
+                ret.InsertText = word;
+                ret.Label = prefix + ret.InsertText;
+                ret.Detail = $"keyword '{word}'";
                 if (ret.Detail.Contains("short"))
                 {
                     ret.SortText = sortText + "04";
@@ -1882,7 +1928,6 @@ namespace FplLS
                     ret.SortText = sortText + "02";
                 }
             }
-            ret.FilterText = "x";
             return ret;
         }
 
