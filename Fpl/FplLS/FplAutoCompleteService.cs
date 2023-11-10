@@ -10,44 +10,9 @@ namespace FplLS
     public class FplAutoCompleteService
     {
         /*
-           "alias"
-           "assert"
-           "ass"
-           "assume"
-           "cl"
-           "class"
-           "con"
-           "conclusion"
+           "is"
            "del"
            "delegate"
-           "else"
-           "end"
-           "ext"
-           "for"
-           "func"
-           "function"
-           "ind"
-           "index"
-           "intr"
-           "intrinsic"
-           "in"
-           "is"
-           "not"
-           "obj"
-           "object"
-           "opt"
-           "optional"
-           "pred"
-           "predicate"
-           "pre"
-           "premise"
-           "qed"
-           "ret"
-           "return"
-           "rev"
-           "revoke"
-           "self"
-           "trivial"
            */
 
         public async Task<CompletionList> GetParserChoices(StringBuilder builder, int index, int line, int col)
@@ -75,6 +40,69 @@ namespace FplLS
                     case "<whitespace>":
                     case "<significant whitespace>":
                         modChoices.AddRange(AddWhitespaceChoices(choice));
+                        break;
+                    case "<(closed) left bound>":
+                    case "<(open) left bound>":
+                    case "<(open) right bound>":
+                    case "<(closed) right bound>":
+                        modChoices.AddRange(AddBoundChoices(choice));
+                        break;
+                    case "<digits>":
+                        modChoices.AddRange(AddDigitsChoices(choice));
+                        break;
+                    case "<argument identifier>":
+                        modChoices.AddRange(AddArgumentIdentifierChoices(choice));
+                        break;
+                    case "<language-specific string>":
+                        modChoices.AddRange(AddLanguageSpecificStringChoices(choice));
+                        break;
+                    case "<extension regex>":
+                        modChoices.AddRange(AddExtensionRegexChoices(choice));
+                        break;
+                    case "<word>":
+                        modChoices.AddRange(AddWordChoices(choice));
+                        break;
+                    case "<variable>":
+                    case "<variable (got keyword)>":
+                    case "<variable (got template)>":
+                        modChoices.AddRange(AddVariableChoices(choice));
+                        break;
+                    case "<PascalCaseId>":
+                        modChoices.AddRange(AddPascalCaseIdChoices(choice));
+                        break;
+                    case "'alias'":
+                    case "'assert'":
+                    case "'ass'":
+                    case "'assume'":
+                    case "'cl'":
+                    case "'class'":
+                    case "'con'":
+                    case "'conclusion'":
+                    case "'end'":
+                    case "'ext'":
+                    case "'func'":
+                    case "'function'":
+                    case "'ind'":
+                    case "'index'":
+                    case "'intr'":
+                    case "'intrinsic'":
+                    case "'in'":
+                    case "'obj'":
+                    case "'object'":
+                    case "'opt'":
+                    case "'optional'":
+                    case "'pred'":
+                    case "'predicate'":
+                    case "'pre'":
+                    case "'premise'":
+                    case "'qed'":
+                    case "'ret'":
+                    case "'return'":
+                    case "'rev'":
+                    case "'revoke'":
+                    case "'self'":
+                    case "'trivial'":
+                        modChoices.AddRange(AddKeywordChoices(choice));
                         break;
                     case "'true'":
                     case "'false'":
@@ -109,6 +137,9 @@ namespace FplLS
                         break;
                     case "'cases'":
                         modChoices.AddRange(AddCasesChoices(choice));
+                        break;
+                    case "'for'":
+                        modChoices.AddRange(AddForChoices(choice));
                         break;
                     case "'prty'":
                     case "'property'":
@@ -373,6 +404,26 @@ namespace FplLS
             return modChoices;
         }
 
+        public static List<CompletionItem> AddForChoices(string choice)
+        {
+            var modChoices = new List<CompletionItem>();
+
+            // snippet
+            var ci = GetCompletionItem(choice, GetForStatement(true));
+            ci.Label = "for .. []";
+            ci.Detail = "for statement (range)";
+            modChoices.Add(ci);
+            var ci1 = GetCompletionItem(choice, GetForStatement(false));
+            ci1.Label = "for .. list";
+            ci1.Detail = "for statement (list)";
+            modChoices.Add(ci1);
+            // keyword
+            var ci2 = GetCompletionItem(choice);
+            modChoices.Add(ci2);
+            return modChoices;
+        }
+        
+
         public static List<CompletionItem> AddDefinitionChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
@@ -616,6 +667,30 @@ namespace FplLS
                 $"{Environment.NewLine}";
         }
 
+        private static string GetForStatement(bool withRange)
+        {
+            if (withRange)
+            {
+                return
+                    $"{Environment.NewLine}for i in [a,b]" +
+                    $"{Environment.NewLine}(" +
+                    $"{Environment.NewLine}\tx<i> := 1" +
+                    $"{Environment.NewLine}\ty<i> := 0" +
+                    $"{Environment.NewLine})" +
+                    $"{Environment.NewLine}";
+            }
+            else
+            {
+                return
+                    $"{Environment.NewLine}for i in someList" +
+                    $"{Environment.NewLine}(" +
+                    $"{Environment.NewLine}\tx<i> := 1" +
+                    $"{Environment.NewLine}\ty<i> := 0" +
+                    $"{Environment.NewLine})" +
+                    $"{Environment.NewLine}";
+            }
+        }
+
         private static string GetDeclarationSnippet(string choice)
         {
 
@@ -786,12 +861,136 @@ namespace FplLS
         }
 
 
+        private List<CompletionItem> AddBoundChoices(string choice)
+        {
+            var isLeftBound = choice.Contains("left bound");
+            var isClosed = choice.Contains("closed");
+            var word = StripQuotesOrBrackets(choice);
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Detail = word;
+            if (isClosed && isLeftBound)
+            {
+                ci.Label = "[";
+            } 
+            else if (!isClosed && isLeftBound)
+            {
+                ci.Label = "[(";
+            }
+            else if (isClosed && !isLeftBound)
+            {
+                ci.Label = "]";
+            }
+            else
+            {
+                ci.Label = ")]";
+            }
+            ci.Kind = CompletionItemKind.Text;
+            modChoices.Add(ci);
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddDigitsChoices(string choice)
+        {
+            var word = StripQuotesOrBrackets(choice);
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Detail = word;
+            ci.Label = "123";
+            ci.Kind = CompletionItemKind.Value;
+            modChoices.Add(ci);
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddArgumentIdentifierChoices(string choice)
+        {
+            var word = StripQuotesOrBrackets(choice);
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Detail = word;
+            ci.Label = "10.";
+            ci.Kind = CompletionItemKind.Unit;
+            modChoices.Add(ci);
+            return modChoices;
+        }
+        private List<CompletionItem> AddLanguageSpecificStringChoices(string choice)
+        {
+            var word = StripQuotesOrBrackets(choice);
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Detail = word;
+            ci.Label = "\"...\"";
+            ci.Kind = CompletionItemKind.Value;
+            modChoices.Add(ci);
+            return modChoices;
+        }
+        private List<CompletionItem> AddExtensionRegexChoices(string choice)
+        {
+            var word = StripQuotesOrBrackets(choice);
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Detail = word;
+            ci.Label = "/+\\d/ ";
+            ci.Kind = CompletionItemKind.Text;
+            modChoices.Add(ci);
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddWordChoices(string choice)
+        {
+            var word = StripQuotesOrBrackets(choice);
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Detail = "word pattern [a-z0-9_]+";
+            ci.Label = "_someIdentifier";
+            ci.Kind = CompletionItemKind.Value;
+            modChoices.Add(ci);
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddVariableChoices(string choice)
+        {
+            var word = StripQuotesOrBrackets(choice);
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Detail = word;
+            ci.Label = "someVar";
+            ci.Kind = CompletionItemKind.Variable;
+            modChoices.Add(ci);
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddPascalCaseIdChoices(string choice)
+        {
+            var word = StripQuotesOrBrackets(choice);
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Detail = "user-defined identifier";
+            ci.Label = "SomeFplIdentifier";
+            ci.Kind = CompletionItemKind.Reference;
+             modChoices.Add(ci);
+            return modChoices;
+        }
+
+
+        private List<CompletionItem> AddKeywordChoices(string choice)
+        {
+            var word = StripQuotesOrBrackets(choice);
+            var modChoices = new List<CompletionItem>();
+            var ci = new CompletionItem();
+            ci.Detail = "keyword";
+            ci.Label = word;
+            ci.Kind = CompletionItemKind.Keyword;
+            modChoices.Add(ci);
+            return modChoices;
+        }
         private List<CompletionItem> AddWhitespaceChoices(string choice)
         {
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = choice;
-            ci.Label = " ";
+            ci.Label = "' '";
+            ci.InsertText = " ";
             ci.Kind = CompletionItemKind.Text;
             ci.Detail = "(whitespace)";
             modChoices.Add(ci);
@@ -1683,7 +1882,7 @@ namespace FplLS
                     ret.SortText = sortText + "02";
                 }
             }
-
+            ret.FilterText = "x";
             return ret;
         }
 

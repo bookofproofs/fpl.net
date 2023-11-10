@@ -47,10 +47,10 @@ let case = skipChar '|' >>. spaces
 let elseCase = skipChar '?' >>. spaces
 let leftBracket = skipChar '<' >>. spaces 
 let rightBracket = skipChar '>' >>. spaces  
-let leftClosedBracket = skipChar '[' >>. spaces <?> "<(closed) left bound '['>"
-let leftOpenBracket = skipString "[(" >>. spaces <?> "<(open) left bound '[('>"
-let rightOpenBracket = skipString ")]" >>. spaces <?> "<(open) right bound ')]'>" 
-let rightClosedBracket = skipChar ']' >>. spaces <?> "<(closed) right bound ']'>" 
+let leftClosedBracket = skipChar '[' >>. spaces <?> "<(closed) left bound>"
+let leftOpenBracket = skipString "[(" >>. spaces <?> "<(open) left bound>"
+let rightOpenBracket = skipString ")]" >>. spaces <?> "<(open) right bound>" 
+let rightClosedBracket = skipChar ']' >>. spaces <?> "<(closed) right bound>" 
 let tilde = skipChar '~' .>> spaces
 let semiColon = skipChar ';' >>. spaces
 let exclamationMark = skipChar '!'
@@ -523,7 +523,7 @@ let definition = keywordDefinition >>. choice [
 // Localizations provide a possibility to automatically translate FPL expressions into natural languages
 let keywordLocalization = (skipString "localization" <|> skipString "loc") >>. SW
 let localizationLanguageCode: Parser<string,unit> = regex @"[a-z]{3}" <?> "<ISO 639 language code>"
-let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<\"language-specific string\">" |>> Ast.LocalizationString
+let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<language-specific string>" |>> Ast.LocalizationString
 
 let ebnfTransl, ebnfTranslRef = createParserForwardedToRef()
 let ebnfTranslTuple = (leftParen >>. IW >>. ebnfTransl) .>> (IW .>> rightParen) 
