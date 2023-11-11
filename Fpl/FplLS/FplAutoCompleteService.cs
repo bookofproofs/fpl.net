@@ -368,62 +368,83 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             // snippet
             var ciMandCl = GetCompletionItem(word, GetClassInstanceSnippet(word, false, out string optMand, out string objMand));
-            ciMandCl.Label = ciMandCl.InsertText.Split(" ")[0] + " " + ciMandCl.InsertText.Split(" ")[1];
+            ciMandCl.Label = $"_ property object";
             ciMandCl.Detail = $"mandatory object property";
+            ciMandCl.SortText = "property01";
+            if (word == "prty") { ciMandCl.SortText += "z"; ciMandCl.Detail += " (short)"; ciMandCl.Label = ciMandCl.Label.Replace("property", "prty").Replace("object", "obj"); }
             ciMandCl.Kind = CompletionItemKind.Field;
             modChoices.Add(ciMandCl);
             var ciMandPr = GetCompletionItem(word, GetPredicateInstanceSnippet(word, false));
-            ciMandPr.Label = ciMandPr.InsertText.Split(" ")[0] + " " + ciMandPr.InsertText.Split(" ")[1];
+            ciMandPr.Label = $"_ property predicate";
             ciMandPr.Detail = $"mandatory predicative property";
+            ciMandPr.SortText = "property02";
+            if (word == "prty") { ciMandPr.SortText += "z"; ciMandPr.Detail += " (short)"; ciMandPr.Label = ciMandPr.Label.Replace("property", "prty").Replace("predicate", "pred"); }
             ciMandPr.Kind = CompletionItemKind.Field;
             modChoices.Add(ciMandPr);
             var ciMandFu = GetCompletionItem(word, GetFunctionalTermInstanceSnippet(word, false));
-            ciMandFu.Label = ciMandFu.InsertText.Split(" ")[0] + " " + ciMandFu.InsertText.Split(" ")[1];
+            ciMandFu.Label = $"_ property function";
             ciMandFu.Detail = $"mandatory functional property";
+            ciMandFu.SortText = "property03";
+            if (word == "prty") { ciMandFu.SortText += "z"; ciMandFu.Detail += " (short)"; ciMandFu.Label = ciMandFu.Label.Replace("property", "prty").Replace("function", "func"); }
             ciMandFu.Kind = CompletionItemKind.Field;
             modChoices.Add(ciMandFu);
             var ciOptCl = GetCompletionItem(word, GetClassInstanceSnippet(word, true, out string optOpt, out string objOpt));
-            ciOptCl.Label = ciOptCl.InsertText.Split(" ")[0] + $" {optOpt} " + ciOptCl.InsertText.Split(" ")[1];
-            ciOptCl.Label += $" {optOpt} {objOpt}";
+            ciOptCl.Label = $"_ property optional object";
             ciOptCl.Detail = $"optional object property";
+            ciOptCl.SortText = "property04";
+            if (word == "prty") { ciOptCl.SortText += "z"; ciOptCl.Detail += " (short)"; ciOptCl.Label = ciOptCl.Label.Replace("property", "prty").Replace("object", "obj").Replace("optional", "opt"); }
             ciOptCl.Kind = CompletionItemKind.Field;
             modChoices.Add(ciOptCl);
             var ciOptPr = GetCompletionItem(word, GetPredicateInstanceSnippet(word, true));
-            ciOptPr.Label = ciOptPr.InsertText.Split(" ")[0] + $" {optOpt} " + ciOptPr.InsertText.Split(" ")[1];
-            ciOptPr.Label += $" {optOpt} {objOpt}";
+            ciOptPr.Label = $"_ property optional predicate";
             ciOptPr.Detail = $"optional predicative property";
+            ciOptPr.SortText = "property05";
+            if (word == "prty") { ciOptPr.SortText += "z"; ciOptPr.Detail += " (short)"; ciOptPr.Label = ciOptPr.Label.Replace("property", "prty").Replace("predicate", "pred").Replace("optional", "opt"); }
             ciOptCl.Kind = CompletionItemKind.Field;
             modChoices.Add(ciOptPr);
             var ciOptFu = GetCompletionItem(word, GetFunctionalTermInstanceSnippet(word, true));
-            ciOptFu.Label = ciOptFu.InsertText.Split(" ")[0] + $" {optOpt} " + ciOptFu.InsertText.Split(" ")[1];
-            ciOptFu.Label += $" {optOpt} {objOpt}";
+            ciOptFu.Label = $"_ property optional function";
             ciOptFu.Detail = $"optional functional property";
+            ciOptFu.SortText = "property06";
+            if (word == "prty") { ciOptFu.SortText += "z"; ciOptFu.Detail += " (short)"; ciOptFu.Label = ciOptFu.Label.Replace("property", "prty").Replace("function", "func").Replace("optional", "opt"); }
             ciOptFu.Kind = CompletionItemKind.Field;
             modChoices.Add(ciOptFu);
             // keyword
             var ciMandClKw = GetCompletionItem(word);
             ciMandClKw.Label = ciMandCl.Label;
+            ciMandClKw.InsertText = prefix + ciMandClKw.InsertText;
             ciMandClKw.Detail = ciMandCl.Detail;
+            ciMandClKw.SortText = "zzz" + ciMandCl.SortText;
             modChoices.Add(ciMandClKw);
             var ciMandPrKw = GetCompletionItem(word);
             ciMandPrKw.Label = ciMandPr.Label;
+            ciMandPrKw.InsertText = prefix + ciMandPrKw.InsertText;
             ciMandPrKw.Detail = ciMandPr.Detail;
+            ciMandPrKw.SortText = "zzz" + ciMandPr.SortText;
             modChoices.Add(ciMandPrKw);
             var ciMandFuKw = GetCompletionItem(word);
             ciMandFuKw.Label = ciMandFu.Label;
+            ciMandFuKw.InsertText = prefix + ciMandFuKw.InsertText;
             ciMandFuKw.Detail = ciMandFu.Detail;
+            ciMandFuKw.SortText = "zzz" + ciMandFu.SortText;
             modChoices.Add(ciMandFuKw);
             var ciOptClKw = GetCompletionItem(word);
             ciOptClKw.Label = ciOptCl.Label;
+            ciOptClKw.InsertText = prefix + ciOptClKw.InsertText;
             ciOptClKw.Detail = ciOptCl.Detail;
+            ciOptClKw.SortText = "zzz" + ciOptCl.SortText;
             modChoices.Add(ciOptClKw);
             var ciOptPrKw = GetCompletionItem(word);
             ciOptPrKw.Label = ciOptPr.Label;
+            ciOptPrKw.InsertText = prefix + ciOptPrKw.InsertText;
             ciOptPrKw.Detail = ciOptPr.Detail;
+            ciOptPrKw.SortText = "zzz" + ciOptPr.SortText;
             modChoices.Add(ciOptPrKw);
             var ciOptFuKw = GetCompletionItem(word);
             ciOptFuKw.Label = ciOptFu.Label;
+            ciOptFuKw.InsertText = prefix + ciOptFuKw.InsertText;
             ciOptFuKw.Detail = ciOptFu.Detail;
+            ciOptFuKw.SortText = "zzz" + ciOptFu.SortText;
             modChoices.Add(ciOptFuKw);
             return modChoices;
         }
@@ -591,7 +612,7 @@ namespace FplLS
 
                 if (subType == "class")
                 {
-                    objType = "object";
+                    objType = "obj";
                     optStr = "opt";
                     intrisic = "intr";
                 }
@@ -772,11 +793,11 @@ namespace FplLS
             string firstLine;
             if (optional)
             {
-                firstLine = $"{Environment.NewLine}{word} {optStr} {objType} SomeObjectProperty()";
+                firstLine = $"{word} {optStr} {objType} SomeObjectProperty()";
             }
             else
             {
-                firstLine = $"{Environment.NewLine}{word} {objType} SomeObjectProperty()";
+                firstLine = $"{word} {objType} SomeObjectProperty()";
             }
 
             return
@@ -805,11 +826,11 @@ namespace FplLS
             string firstLine;
             if (optional)
             {
-                firstLine = $"{Environment.NewLine}{word} {optStr} {objType} SomeFunctionProperty() -> {objStr}";
+                firstLine = $"{word} {optStr} {objType} SomeFunctionProperty() -> {objStr}";
             }
             else
             {
-                firstLine = $"{Environment.NewLine}{word} {objType} SomeFunctionProperty() -> {objStr}";
+                firstLine = $"{word} {objType} SomeFunctionProperty() -> {objStr}";
             }
 
             return
@@ -829,11 +850,11 @@ namespace FplLS
             string firstLine;
             if (optional)
             {
-                firstLine = $"{Environment.NewLine}{word} {optStr} {objType} SomePredicateProperty()";
+                firstLine = $"{word} {optStr} {objType} SomePredicateProperty()";
             }
             else
             {
-                firstLine = $"{Environment.NewLine}{word} {objType} SomePredicateProperty()";
+                firstLine = $"{word} {objType} SomePredicateProperty()";
             }
 
             return
