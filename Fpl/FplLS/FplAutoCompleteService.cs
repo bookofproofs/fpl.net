@@ -219,7 +219,7 @@ namespace FplLS
         {
             var modChoices = new List<CompletionItem>();
             // snippet
-            defaultCi.InsertText = $"<replace> SomeFplIdentifier (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine;
+            defaultCi.InsertText = $"{word} SomeFplIdentifier (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine;
             modChoices.Add(defaultCi);
             // keyword
             modChoices.Add(GetCompletionItem(word));
