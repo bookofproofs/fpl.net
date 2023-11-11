@@ -75,6 +75,9 @@ namespace FplLS
                     case "delegate":
                         modChoices.AddRange(AddDelegateChoices(choice));
                         break;
+                    case "is":
+                        modChoices.AddRange(AddIsOperatorChoices(choice));
+                        break;
                     case "alias":
                     case "assert":
                     case "ass":
@@ -1054,7 +1057,28 @@ namespace FplLS
             modChoices.Add(ci);
             return modChoices;
         }
+
+        private List<CompletionItem> AddIsOperatorChoices(string choice)
+        {
+            var modChoices = new List<CompletionItem>();
+            var word = StripQuotesOrBrackets(choice);
+            var ci = new CompletionItem();
+            ci.Detail = "is operator";
+            ci.InsertText = word + "(x, SomeFplType)";
+            ci.Label = prefix + ci.InsertText;
+            ci.Kind = CompletionItemKind.Snippet;
+            modChoices.Add(ci);
+
+            var ci1 = new CompletionItem();
+            ci1.Detail = "keyword 'is'";
+            ci1.InsertText = word;
+            ci1.Label = prefix + ci1.InsertText;
+            ci1.Kind = CompletionItemKind.Keyword;
+            modChoices.Add(ci1);
+            return modChoices;
+        }
         
+
         private List<CompletionItem> AddIso639Choices()
         {
             var modChoices = new List<CompletionItem>();
