@@ -8,12 +8,16 @@ using System.Text;
 
 namespace FplLS
 {
+    public enum KeywordKind 
+    {
+        Short,
+        Long,
+        EitherNor
+    }
+
     public class FplAutoCompleteService
     {
         const string prefix = "_ ";
-        /*
-           "is"
-           */
 
         public async Task<CompletionList> GetParserChoices(StringBuilder builder, int index, int line, int col)
         {
@@ -40,43 +44,43 @@ namespace FplLS
                         break;
                     case "whitespace":
                     case "significant whitespace":
-                        modChoices.AddRange(AddWhitespaceChoices(choice));
+                        modChoices.AddRange(AddWhitespaceChoices());
                         break;
                     case "(closed) left bound":
                     case "(open) left bound":
                     case "(open) right bound":
                     case "(closed) right bound":
-                        modChoices.AddRange(AddBoundChoices(choice));
+                        modChoices.AddRange(AddBoundChoices(word));
                         break;
                     case "digits":
-                        modChoices.AddRange(AddDigitsChoices(choice));
+                        modChoices.AddRange(AddDigitsChoices(word));
                         break;
                     case "argument identifier":
-                        modChoices.AddRange(AddArgumentIdentifierChoices(choice));
+                        modChoices.AddRange(AddArgumentIdentifierChoices(word));
                         break;
                     case "language-specific string":
-                        modChoices.AddRange(AddLanguageSpecificStringChoices(choice));
+                        modChoices.AddRange(AddLanguageSpecificStringChoices(word));
                         break;
                     case "extension regex":
-                        modChoices.AddRange(AddExtensionRegexChoices(choice));
+                        modChoices.AddRange(AddExtensionRegexChoices(word));
                         break;
                     case "word":
-                        modChoices.AddRange(AddWordChoices(choice));
+                        modChoices.AddRange(AddWordChoices(word));
                         break;
                     case "<variable>":
                     case "<variable (got keyword)>":
                     case "<variable (got template)>":
-                        modChoices.AddRange(AddVariableChoices(choice));
+                        modChoices.AddRange(AddVariableChoices(word));
                         break;
                     case "<PascalCaseId>":
-                        modChoices.AddRange(AddPascalCaseIdChoices(choice));
+                        modChoices.AddRange(AddPascalCaseIdChoices(word));
                         break;
                     case "del":
                     case "delegate":
-                        modChoices.AddRange(AddDelegateChoices(choice));
+                        modChoices.AddRange(AddDelegateChoices(word));
                         break;
                     case "is":
-                        modChoices.AddRange(AddIsOperatorChoices(choice));
+                        modChoices.AddRange(AddIsOperatorChoices(word));
                         break;
                     case "alias":
                     case "assert":
@@ -110,113 +114,113 @@ namespace FplLS
                     case "revoke":
                     case "self":
                     case "trivial":
-                        modChoices.AddRange(AddKeywordChoices(choice));
+                        modChoices.AddRange(AddKeywordChoices(word));
                         break;
                     case "true":
                     case "false":
                     case "undef":
                     case "undefined":
-                        modChoices.AddRange(AddPredicateChoices(choice, 0));
+                        modChoices.AddRange(AddPredicateChoices(word, 0));
                         break;
                     case "all":
                     case "ex":
                     case "exn":
-                        modChoices.AddRange(AddQuantorChoices(choice));
+                        modChoices.AddRange(AddQuantorChoices(word));
                         break;
                     case "not":
-                        modChoices.AddRange(AddPredicateChoices(choice, 1));
+                        modChoices.AddRange(AddPredicateChoices(word, 1));
                         break;
                     case "xor":
                     case "iif":
                     case "impl":
-                        modChoices.AddRange(AddPredicateChoices(choice, 2));
+                        modChoices.AddRange(AddPredicateChoices(word, 2));
                         break;
                     case "and":
                     case "or":
-                        modChoices.AddRange(AddPredicateChoices(choice, 3));
+                        modChoices.AddRange(AddPredicateChoices(word, 3));
                         break;
                     case "ctor":
                     case "constructor":
-                        modChoices.AddRange(AddConstructorChoices(choice));
+                        modChoices.AddRange(AddConstructorChoices(word));
                         break;
                     case "dec":
                     case "declaration":
-                        modChoices.AddRange(AddDeclarationChoices(choice));
+                        modChoices.AddRange(AddDeclarationChoices(word));
                         break;
                     case "cases":
-                        modChoices.AddRange(AddCasesChoices(choice));
+                        modChoices.AddRange(AddCasesChoices(word));
                         break;
                     case "for":
-                        modChoices.AddRange(AddForChoices(choice));
+                        modChoices.AddRange(AddForChoices(word));
                         break;
                     case "prty":
                     case "property":
-                        modChoices.AddRange(AddPropertyChoices(choice));
+                        modChoices.AddRange(AddPropertyChoices(word));
                         break;
                     case "ax":
                     case "axiom":
                     case "post":
                     case "postulate":
-                        modChoices.AddRange(AddAxiomChoices(choice));
+                        modChoices.AddRange(AddAxiomChoices(word));
                         break;
                     case "def":
                     case "definition":
-                        modChoices.AddRange(AddDefinitionChoices(choice));
+                        modChoices.AddRange(AddDefinitionChoices(word));
                         break;
                     case "thm":
                     case "theorem":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Theorem"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Theorem"));
                         break;
                     case "lem":
                     case "lemma":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Lemma"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Lemma"));
                         break;
                     case "prop":
                     case "proposition":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Proposition"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Proposition"));
                         break;
                     case "inf":
                     case "inference":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Inference"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Inference"));
                         break;
                     case "conj":
                     case "conjecture":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Conjecture"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Conjecture"));
                         break;
                     case "cor":
                     case "corollary":
-                        modChoices.AddRange(AddCorollaryChoices(choice));
+                        modChoices.AddRange(AddCorollaryChoices(word));
                         break;
                     case "prf":
                     case "proof":
-                        modChoices.AddRange(AddProofChoices(choice));
+                        modChoices.AddRange(AddProofChoices(word));
                         break;
                     case "loc":
                     case "localization":
-                        modChoices.AddRange(AddLocalizationChoices(choice));
+                        modChoices.AddRange(AddLocalizationChoices(word));
                         break;
                     case "uses":
-                        modChoices.AddRange(AddUsesChoices(choice));
+                        modChoices.AddRange(AddUsesChoices(word));
                         break;
                     default:
-                        modChoices.AddRange(AddDefaultChoices(choice));
+                        modChoices.AddRange(AddDefaultChoices(word));
                         break;
                 }
             }
             return new CompletionList(modChoices);
         }
 
-        public static List<CompletionItem> AddAxiomChoices(string choice)
+        public static List<CompletionItem> AddAxiomChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
             // snippet
-            modChoices.Add(GetCompletionItem(choice, $"<replace> SomeFplIdentifier (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine));
+            modChoices.Add(GetCompletionItem(word, $"<replace> SomeFplIdentifier (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine));
             // keyword
-            modChoices.Add(GetCompletionItem(choice));
+            modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
-        public static List<CompletionItem> AddPredicateChoices(string choice, int numbOfArgs)
+        public static List<CompletionItem> AddPredicateChoices(string word, int numbOfArgs)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
@@ -226,49 +230,49 @@ namespace FplLS
                     // no snippets for null-ary predicates (treat them as keywords only - see below)
                     break;
                 case 1:
-                    modChoices.Add(GetCompletionItem(choice, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine})" + Environment.NewLine));
+                    modChoices.Add(GetCompletionItem(word, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine})" + Environment.NewLine));
                     break;
                 case 2:
-                    modChoices.Add(GetCompletionItem(choice, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine));
+                    modChoices.Add(GetCompletionItem(word, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine));
                     break;
                 default:
-                    modChoices.Add(GetCompletionItem(choice, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine));
+                    modChoices.Add(GetCompletionItem(word, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine));
                     break;
             }
             // keywords
-            modChoices.Add(GetCompletionItem(choice));
+            modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
-        public static List<CompletionItem> AddQuantorChoices(string choice)
+        public static List<CompletionItem> AddQuantorChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
             var postfix = "";
-            var isExn = choice.Contains("exn");
+            var isExn = word.Contains("exn");
             if (isExn)
             {
                 postfix = "!1";
             }
             // snippets
-            var ci = GetCompletionItem(choice, $"<replace>{postfix} x ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
-            ci.Label = $"{prefix}ex (..)"; ReplaceLabel(choice, ci);
-            ci.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci);
-            ci.SortText = "ex00"; ReplaceSortText(choice, ci);
+            var ci = GetCompletionItem(word, $"<replace>{postfix} x ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
+            ci.Label = $"{prefix}ex (..)"; ReplaceLabel(word, ci);
+            ci.Detail = "predicate (exists quantor)"; ReplaceDetails(word, ci);
+            ci.SortText = "ex00"; ReplaceSortText(word, ci);
             modChoices.Add(ci);
-            var ci1 = GetCompletionItem(choice, $"<replace>{postfix} x in someVariadicVar ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
-            ci1.Label = $"{prefix}ex x in variable (..)"; ReplaceLabel(choice, ci1);
-            ci1.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci1);
-            ci1.SortText = "ex01"; ReplaceSortText(choice, ci1);
+            var ci1 = GetCompletionItem(word, $"<replace>{postfix} x in someVariadicVar ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
+            ci1.Label = $"{prefix}ex x in variable (..)"; ReplaceLabel(word, ci1);
+            ci1.Detail = "predicate (exists quantor)"; ReplaceDetails(word, ci1);
+            ci1.SortText = "ex01"; ReplaceSortText(word, ci1);
             modChoices.Add(ci1);
-            var ci2 = GetCompletionItem(choice, $"<replace>{postfix} x in [a,b] ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
-            ci2.Label = $"{prefix}ex x in range (..)"; ReplaceLabel(choice, ci2);
-            ci2.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci2);
-            ci2.SortText = "ex02"; ReplaceSortText(choice, ci2);
+            var ci2 = GetCompletionItem(word, $"<replace>{postfix} x in [a,b] ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
+            ci2.Label = $"{prefix}ex x in range (..)"; ReplaceLabel(word, ci2);
+            ci2.Detail = "predicate (exists quantor)"; ReplaceDetails(word, ci2);
+            ci2.SortText = "ex02"; ReplaceSortText(word, ci2);
             modChoices.Add(ci2);
-            var ci3 = GetCompletionItem(choice, $"<replace>{postfix} x in object ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
-            ci3.Label = $"{prefix}ex x in type (..)"; ReplaceLabel(choice, ci3);
-            ci3.Detail = "predicate (exists quantor)"; ReplaceDetails(choice, ci3);
-            ci3.SortText = "ex03"; ReplaceSortText(choice, ci3);
+            var ci3 = GetCompletionItem(word, $"<replace>{postfix} x in object ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
+            ci3.Label = $"{prefix}ex x in type (..)"; ReplaceLabel(word, ci3);
+            ci3.Detail = "predicate (exists quantor)"; ReplaceDetails(word, ci3);
+            ci3.SortText = "ex03"; ReplaceSortText(word, ci3);
             modChoices.Add(ci3);
 
             if (isExn)
@@ -281,204 +285,204 @@ namespace FplLS
             else
             {
                 // this combined snippet only available for 'ex' and 'all' but not for exn!
-                var ci5 = GetCompletionItem(choice, $"<replace> x in [a,b], y in c, z ({Environment.NewLine}" + $"\tp(x,y,z){Environment.NewLine})" + Environment.NewLine);
-                ci5.Label = $"{prefix}ex <combined> (..)"; ReplaceLabel(choice, ci5);
-                ci5.Detail = "predicate (exists quantor in <combined>)"; ReplaceDetails(choice, ci5);
-                ci5.SortText = "ex04"; ReplaceSortText(choice, ci5);
+                var ci5 = GetCompletionItem(word, $"<replace> x in [a,b], y in c, z ({Environment.NewLine}" + $"\tp(x,y,z){Environment.NewLine})" + Environment.NewLine);
+                ci5.Label = $"{prefix}ex <combined> (..)"; ReplaceLabel(word, ci5);
+                ci5.Detail = "predicate (exists quantor in <combined>)"; ReplaceDetails(word, ci5);
+                ci5.SortText = "ex04"; ReplaceSortText(word, ci5);
                 modChoices.Add(ci5);
                 // keywords
-                var ci6 = GetCompletionItem(choice);
-                ci6.SortText = "ex05"; ReplaceSortText(choice, ci6);
+                var ci6 = GetCompletionItem(word);
+                ci6.SortText = "ex05"; ReplaceSortText(word, ci6);
                 modChoices.Add(ci6);
             }
             return modChoices;
         }
 
-        private static void ReplaceLabel(string choice, CompletionItem ci)
+        private static void ReplaceLabel(string word, CompletionItem ci)
         {
-            if (choice.Contains("all"))
+            if (word.Contains("all"))
                 ci.Label = ci.Label.Replace("ex", "all");
-            else if (choice.Contains("exn"))
+            else if (word.Contains("exn"))
                 ci.Label = ci.Label.Replace("ex", "exn!");
         }
 
-        private static void ReplaceSortText(string choice, CompletionItem ci)
+        private static void ReplaceSortText(string word, CompletionItem ci)
         {
-            if (choice.Contains("all"))
+            if (word.Contains("all"))
                 ci.SortText = ci.SortText.Replace("ex", "all");
-            else if (choice.Contains("exn"))
+            else if (word.Contains("exn"))
                 ci.SortText = ci.SortText.Replace("ex", "exn!");
         }
 
-        private static void ReplaceDetails(string choice, CompletionItem ci)
+        private static void ReplaceDetails(string word, CompletionItem ci)
         {
-            if (choice.Contains("all"))
+            if (word.Contains("all"))
                 ci.Detail = ci.Detail.Replace("exists", "all");
-            else if (choice.Contains("exn")) 
+            else if (word.Contains("exn")) 
                 ci.Detail = ci.Detail.Replace("exists", "exists n-times");
         }
 
-        public static List<CompletionItem> AddConstructorChoices(string choice)
+        public static List<CompletionItem> AddConstructorChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
             // snippet
-            var ci = GetCompletionItem(choice, GetConstructorSnippet(choice));
+            var ci = GetCompletionItem(word, GetConstructorSnippet(word));
             modChoices.Add(ci);
             // keyword
-            modChoices.Add(GetCompletionItem(choice));
+            modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
-        public static List<CompletionItem> AddPropertyChoices(string choice)
+        public static List<CompletionItem> AddPropertyChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
             // snippet
-            var ciMandCl = GetCompletionItem(choice, GetClassInstanceSnippet(choice, false, out string optMand, out string objMand));
+            var ciMandCl = GetCompletionItem(word, GetClassInstanceSnippet(word, false, out string optMand, out string objMand));
             ciMandCl.Label += $"{prefix}{objMand}";
             ciMandCl.Detail = $"mandatory object property";
             modChoices.Add(ciMandCl);
-            var ciMandPr = GetCompletionItem(choice, GetPredicateInstanceSnippet(choice, false));
+            var ciMandPr = GetCompletionItem(word, GetPredicateInstanceSnippet(word, false));
             ciMandPr.Label += $"{prefix}{objMand}";
             ciMandPr.Detail = $"mandatory predicative property";
             modChoices.Add(ciMandPr);
-            var ciMandFu = GetCompletionItem(choice, GetFunctionalTermInstanceSnippet(choice, false));
+            var ciMandFu = GetCompletionItem(word, GetFunctionalTermInstanceSnippet(word, false));
             ciMandFu.Label += $"{prefix}{objMand}";
             ciMandFu.Detail = $"mandatory functional property";
             modChoices.Add(ciMandFu);
-            var ciOptCl = GetCompletionItem(choice, GetClassInstanceSnippet(choice, true, out string optOpt, out string objOpt));
+            var ciOptCl = GetCompletionItem(word, GetClassInstanceSnippet(word, true, out string optOpt, out string objOpt));
             ciOptCl.Label += $"{prefix}{optOpt} {objOpt}";
             ciOptCl.Detail = $"optional object property";
             modChoices.Add(ciOptCl);
-            var ciOptPr = GetCompletionItem(choice, GetPredicateInstanceSnippet(choice, true));
+            var ciOptPr = GetCompletionItem(word, GetPredicateInstanceSnippet(word, true));
             ciOptPr.Label += $"{prefix}{optOpt} {objOpt}";
             ciOptPr.Detail = $"optional predicative property";
             modChoices.Add(ciOptPr);
-            var ciOptFu = GetCompletionItem(choice, GetFunctionalTermInstanceSnippet(choice, true));
+            var ciOptFu = GetCompletionItem(word, GetFunctionalTermInstanceSnippet(word, true));
             ciOptFu.Label += $"{prefix}{optOpt} {objOpt}";
             ciOptFu.Detail = $"optional functional property";
             modChoices.Add(ciOptFu);
             // keyword
-            var ciMandClKw = GetCompletionItem(choice);
+            var ciMandClKw = GetCompletionItem(word);
             ciMandClKw.Label = ciMandCl.Label;
             ciMandClKw.Detail = ciMandCl.Detail;
             modChoices.Add(ciMandClKw);
-            var ciMandPrKw = GetCompletionItem(choice);
+            var ciMandPrKw = GetCompletionItem(word);
             ciMandPrKw.Label = ciMandPr.Label;
             ciMandPrKw.Detail = ciMandPr.Detail;
             modChoices.Add(ciMandPrKw);
-            var ciMandFuKw = GetCompletionItem(choice);
+            var ciMandFuKw = GetCompletionItem(word);
             ciMandFuKw.Label = ciMandFu.Label;
             ciMandFuKw.Detail = ciMandFu.Detail;
             modChoices.Add(ciMandFuKw);
-            var ciOptClKw = GetCompletionItem(choice);
+            var ciOptClKw = GetCompletionItem(word);
             ciOptClKw.Label = ciOptCl.Label;
             ciOptClKw.Detail = ciOptCl.Detail;
             modChoices.Add(ciOptClKw);
-            var ciOptPrKw = GetCompletionItem(choice);
+            var ciOptPrKw = GetCompletionItem(word);
             ciOptPrKw.Label = ciOptPr.Label;
             ciOptPrKw.Detail = ciOptPr.Detail;
             modChoices.Add(ciOptPrKw);
-            var ciOptFuKw = GetCompletionItem(choice);
+            var ciOptFuKw = GetCompletionItem(word);
             ciOptFuKw.Label = ciOptFu.Label;
             ciOptFuKw.Detail = ciOptFu.Detail;
             modChoices.Add(ciOptFuKw);
             return modChoices;
         }
 
-        public static List<CompletionItem> AddDeclarationChoices(string choice)
+        public static List<CompletionItem> AddDeclarationChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
 
             // snippet
-            var ci = GetCompletionItem(choice, GetDeclarationSnippet(choice));
+            var ci = GetCompletionItem(word, GetDeclarationSnippet(word));
             modChoices.Add(ci);
             // keyword
-            var ci1 = GetCompletionItem(choice);
+            var ci1 = GetCompletionItem(word);
             modChoices.Add(ci1);
             return modChoices;
         }
 
 
-        public static List<CompletionItem> AddCasesChoices(string choice)
+        public static List<CompletionItem> AddCasesChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
 
             // snippet
-            var ci = GetCompletionItem(choice, GetCasesStatement());
+            var ci = GetCompletionItem(word, GetCasesStatement());
             modChoices.Add(ci);
             // keyword
-            var ci1 = GetCompletionItem(choice);
+            var ci1 = GetCompletionItem(word);
             modChoices.Add(ci1);
             return modChoices;
         }
 
-        public static List<CompletionItem> AddForChoices(string choice)
+        public static List<CompletionItem> AddForChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
 
             // snippet
-            var ci = GetCompletionItem(choice, GetForStatement(true));
+            var ci = GetCompletionItem(word, GetForStatement(true));
             ci.Label = $"{prefix}for .. []";
             ci.Detail = "for statement (range)";
             modChoices.Add(ci);
-            var ci1 = GetCompletionItem(choice, GetForStatement(false));
+            var ci1 = GetCompletionItem(word, GetForStatement(false));
             ci1.Label = $"{prefix}for .. list";
             ci1.Detail = "for statement (list)";
             modChoices.Add(ci1);
             // keyword
-            var ci2 = GetCompletionItem(choice);
+            var ci2 = GetCompletionItem(word);
             modChoices.Add(ci2);
             return modChoices;
         }
         
 
-        public static List<CompletionItem> AddDefinitionChoices(string choice)
+        public static List<CompletionItem> AddDefinitionChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
             // class definition
-            var ciClass = GetCompletionItem(choice, GetDefinitionSnippet(choice, "class"));
-            SetIntrinsicDefinitionProperty(choice, "class", ciClass);
+            var ciClass = GetCompletionItem(word, GetDefinitionSnippet(word, "class"));
+            SetIntrinsicDefinitionProperty(word, "class", ciClass);
             modChoices.Add(ciClass);
             // predicate definition
-            var ciPred = GetCompletionItem(choice, GetDefinitionSnippet(choice, "predicate"));
-            SetIntrinsicDefinitionProperty(choice, "predicate", ciPred);
+            var ciPred = GetCompletionItem(word, GetDefinitionSnippet(word, "predicate"));
+            SetIntrinsicDefinitionProperty(word, "predicate", ciPred);
             modChoices.Add(ciPred);
             // functional term definition
-            var ciFunc = GetCompletionItem(choice, GetDefinitionSnippet(choice, "function"));
-            SetIntrinsicDefinitionProperty(choice, "function", ciFunc);
+            var ciFunc = GetCompletionItem(word, GetDefinitionSnippet(word, "function"));
+            SetIntrinsicDefinitionProperty(word, "function", ciFunc);
             modChoices.Add(ciFunc);
 
             // keyword
             // class definition           
-            var ciClassKw = GetCompletionItem(choice);
+            var ciClassKw = GetCompletionItem(word);
             ciClassKw.SortText += "class";
-            SetDefinitionLabel(choice, "class", ciClassKw);
+            SetDefinitionLabel(word, "class", ciClassKw);
             modChoices.Add(ciClassKw);
             // predicate definition           
-            var ciPredKw = GetCompletionItem(choice);
+            var ciPredKw = GetCompletionItem(word);
             ciPredKw.SortText += "predicate";
-            SetDefinitionLabel(choice, "predicate", ciPredKw);
+            SetDefinitionLabel(word, "predicate", ciPredKw);
             modChoices.Add(ciPredKw);
             // functional term definition           
-            var ciFuncKw = GetCompletionItem(choice);
+            var ciFuncKw = GetCompletionItem(word);
             ciFuncKw.SortText += "function";
-            SetDefinitionLabel(choice, "function", ciFuncKw);
+            SetDefinitionLabel(word, "function", ciFuncKw);
             modChoices.Add(ciFuncKw);
 
             return modChoices;
         }
-        private static void SetDefinitionLabel(string choice, string subType, CompletionItem ci)
+        private static void SetDefinitionLabel(string word, string subType, CompletionItem ci)
         {
-            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(choice, subType, out bool isShort, out string intrinsic, out string objtype);
+            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(word, subType, out bool isShort, out string intrinsic, out string objtype);
             ci.Label += $" {newSubType}";
         }
 
-        private static void SetIntrinsicDefinitionProperty(string choice, string subType, CompletionItem ci)
+        private static void SetIntrinsicDefinitionProperty(string word, string subType, CompletionItem ci)
         {
             
             ci.SortText += subType;
-            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(choice, subType, out bool isShort, out string intrinsic, out string objtype);
+            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(word, subType, out bool isShort, out string intrinsic, out string objtype);
             ci.Label += $" {newSubType}";
             if (isShort)
             {
@@ -491,9 +495,9 @@ namespace FplLS
 
         }
 
-        private static string GetDefinitionSubtypeDependingOnLengthChoice(string choice, string subType, out bool isShort, out string intrinsic, out string objtype)
+        private static string GetDefinitionSubtypeDependingOnLengthChoice(string word, string subType, out bool isShort, out string intrinsic, out string objtype)
         {
-            isShort = !choice.Contains("definition");
+            isShort = !word.Contains("definition");
             if (isShort)
             {
                 if (subType == "class")
@@ -523,9 +527,9 @@ namespace FplLS
             }
         }
 
-        private static string GetObjectTypeDependingOnLengthChoice(string choice)
+        private static string GetObjectTypeDependingOnLengthChoice(string word)
         {
-            var isShort = !choice.Contains("declaration");
+            var isShort = !word.Contains("declaration");
             if (isShort)
             {
                 return "obj";
@@ -536,9 +540,9 @@ namespace FplLS
             }
         }
 
-        private static void GetPropertySubtypeDependingOnLengthChoice(string choice, string subType, out bool isShort, out string optStr, out string objType, out string intrisic)
+        private static void GetPropertySubtypeDependingOnLengthChoice(string word, string subType, out bool isShort, out string optStr, out string objType, out string intrisic)
         {
-            isShort = !choice.Contains("property");
+            isShort = !word.Contains("property");
             if (isShort)
             {
 
@@ -596,13 +600,12 @@ namespace FplLS
             }
         }
 
-        private static string GetDefinitionSnippet(string choice, string subType)
+        private static string GetDefinitionSnippet(string word, string subType)
         {
             var leftBrace = "{";
             var rightBrace = "}";
 
-            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(choice, subType, out bool isShort, out string intrinsic, out string objtype);
-            var word = StripQuotesOrBrackets(choice);
+            var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(word, subType, out bool isShort, out string intrinsic, out string objtype);
             switch (subType)
             {
                 case "class":
@@ -630,12 +633,11 @@ namespace FplLS
             return "";
         }
 
-        private static string GetConstructorSnippet(string choice)
+        private static string GetConstructorSnippet(string word)
         {
             var leftBrace = "{";
             var rightBrace = "}";
 
-            var word = StripQuotesOrBrackets(choice);
             var isShort = (word == "ctor");
             if (isShort)
             {
@@ -699,11 +701,10 @@ namespace FplLS
             }
         }
 
-        private static string GetDeclarationSnippet(string choice)
+        private static string GetDeclarationSnippet(string word)
         {
 
-            var word = StripQuotesOrBrackets(choice);
-            var objStr = GetObjectTypeDependingOnLengthChoice(choice); 
+            var objStr = GetObjectTypeDependingOnLengthChoice(word); 
 
             return
                 $"{Environment.NewLine}{word}" +
@@ -715,13 +716,12 @@ namespace FplLS
                 $"{Environment.NewLine}";
         }
 
-        private static string GetClassInstanceSnippet(string choice, bool optional, out string optionalStr, out string objTypeStr)
+        private static string GetClassInstanceSnippet(string word, bool optional, out string optionalStr, out string objTypeStr)
         {
             var leftBrace = "{";
             var rightBrace = "}";
 
-            var word = StripQuotesOrBrackets(choice);
-            GetPropertySubtypeDependingOnLengthChoice(choice, "class", out bool isShort, out string optStr, out string objType, out string intrinsic);
+            GetPropertySubtypeDependingOnLengthChoice(word, "class", out bool isShort, out string optStr, out string objType, out string intrinsic);
 
             optionalStr = optStr;
             objTypeStr = objType;
@@ -744,12 +744,11 @@ namespace FplLS
                 $"{Environment.NewLine}";
         }
 
-        private static string GetFunctionalTermInstanceSnippet(string choice, bool optional)
+        private static string GetFunctionalTermInstanceSnippet(string word, bool optional)
         {
             var leftBrace = "{";
             var rightBrace = "}";
-            var word = StripQuotesOrBrackets(choice);
-            GetPropertySubtypeDependingOnLengthChoice(choice, "function", out bool isShort, out string optStr, out string objType, out string intrinsic);
+            GetPropertySubtypeDependingOnLengthChoice(word, "function", out bool isShort, out string optStr, out string objType, out string intrinsic);
 
             string objStr;
             if (isShort)
@@ -778,12 +777,11 @@ namespace FplLS
                 $"{Environment.NewLine}";
         }
 
-        private static string GetPredicateInstanceSnippet(string choice, bool optional)
+        private static string GetPredicateInstanceSnippet(string word, bool optional)
         {
             var leftBrace = "{";
             var rightBrace = "}";
-            var word = StripQuotesOrBrackets(choice);
-            GetPropertySubtypeDependingOnLengthChoice(choice, "predicate", out bool isShort, out string optStr, out string objType, out string intrinsic);
+            GetPropertySubtypeDependingOnLengthChoice(word, "predicate", out bool isShort, out string optStr, out string objType, out string intrinsic);
 
             string firstLine;
             if (optional)
@@ -803,65 +801,64 @@ namespace FplLS
                 $"{Environment.NewLine}";
         }
 
-        private List<CompletionItem> AddTheoremLikeStatementChoices(string choice, string example)
+        private List<CompletionItem> AddTheoremLikeStatementChoices(string word, string example)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            modChoices.Add(GetCompletionItem(choice, $"<replace> SomeFpl{example} (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine));
+            modChoices.Add(GetCompletionItem(word, $"<replace> SomeFpl{example} (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine));
             // keywords
-            modChoices.Add(GetCompletionItem(choice));
+            modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
 
-        private List<CompletionItem> AddCorollaryChoices(string choice)
+        private List<CompletionItem> AddCorollaryChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            modChoices.Add(GetCompletionItem(choice, $"<replace> SomeFplTheorem!1 (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine));
+            modChoices.Add(GetCompletionItem(word, $"<replace> SomeFplTheorem!1 (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine));
             // keywords
-            modChoices.Add(GetCompletionItem(choice));
+            modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
-        private List<CompletionItem> AddProofChoices(string choice)
+        private List<CompletionItem> AddProofChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            modChoices.Add(GetCompletionItem(choice, $"<replace> SomeFplTheorem!1{Environment.NewLine}" + "{" + $"{Environment.NewLine}\t1. |- qed{Environment.NewLine}" + "}" + Environment.NewLine));
+            modChoices.Add(GetCompletionItem(word, $"<replace> SomeFplTheorem!1{Environment.NewLine}" + "{" + $"{Environment.NewLine}\t1. |- qed{Environment.NewLine}" + "}" + Environment.NewLine));
             // keywords
-            modChoices.Add(GetCompletionItem(choice));
+            modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
-        private List<CompletionItem> AddLocalizationChoices(string choice)
+        private List<CompletionItem> AddLocalizationChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            modChoices.Add(GetCompletionItem(choice, $"<replace> iif(x,y) :={Environment.NewLine}!tex: x \"\\Leftrightarrow\" y{Environment.NewLine}!eng: x \" if and only if \" y{Environment.NewLine}!eng: x \" dann und nur dann \" y{Environment.NewLine}" + ";" + Environment.NewLine));
+            modChoices.Add(GetCompletionItem(word, $"<replace> iif(x,y) :={Environment.NewLine}!tex: x \"\\Leftrightarrow\" y{Environment.NewLine}!eng: x \" if and only if \" y{Environment.NewLine}!eng: x \" dann und nur dann \" y{Environment.NewLine}" + ";" + Environment.NewLine));
             // keywords
-            modChoices.Add(GetCompletionItem(choice));
+            modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
-        private List<CompletionItem> AddUsesChoices(string choice)
+        private List<CompletionItem> AddUsesChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            var ci = GetCompletionItem(choice, $"<replace> SomeFplNamespace{Environment.NewLine}");
+            var ci = GetCompletionItem(word, $"<replace> SomeFplNamespace{Environment.NewLine}");
             ci.Detail = "uses namespace";
-            var ci1 = GetCompletionItem(choice, $"<replace> SomeFplNamespace alias Sfn{Environment.NewLine}");
+            var ci1 = GetCompletionItem(word, $"<replace> SomeFplNamespace alias Sfn{Environment.NewLine}");
             ci1.Detail = "uses namespace with alias";
             // keywords
-            modChoices.Add(GetCompletionItem(choice));
+            modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
-        private List<CompletionItem> AddDefaultChoices(string choice)
+        private List<CompletionItem> AddDefaultChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
-            var word = StripQuotesOrBrackets(choice);
             ci.InsertText = word;
             ci.Label = prefix + ci.InsertText;
             switch (word)
@@ -900,11 +897,11 @@ namespace FplLS
         }
 
 
-        private List<CompletionItem> AddBoundChoices(string choice)
+        private List<CompletionItem> AddBoundChoices(string word)
         {
-            var isLeftBound = choice.Contains("left bound");
-            var isClosed = choice.Contains("closed");
-            var word = StripQuotesOrBrackets(choice);
+            var isLeftBound = word.Contains("left bound");
+            var isClosed = word.Contains("closed");
+
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = word;
@@ -930,9 +927,8 @@ namespace FplLS
             return modChoices;
         }
 
-        private List<CompletionItem> AddDigitsChoices(string choice)
+        private List<CompletionItem> AddDigitsChoices(string word)
         {
-            var word = StripQuotesOrBrackets(choice);
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = word;
@@ -943,9 +939,8 @@ namespace FplLS
             return modChoices;
         }
 
-        private List<CompletionItem> AddArgumentIdentifierChoices(string choice)
+        private List<CompletionItem> AddArgumentIdentifierChoices(string word)
         {
-            var word = StripQuotesOrBrackets(choice);
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = word;
@@ -955,9 +950,8 @@ namespace FplLS
             modChoices.Add(ci);
             return modChoices;
         }
-        private List<CompletionItem> AddLanguageSpecificStringChoices(string choice)
+        private List<CompletionItem> AddLanguageSpecificStringChoices(string word)
         {
-            var word = StripQuotesOrBrackets(choice);
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = word;
@@ -967,9 +961,8 @@ namespace FplLS
             modChoices.Add(ci);
             return modChoices;
         }
-        private List<CompletionItem> AddExtensionRegexChoices(string choice)
+        private List<CompletionItem> AddExtensionRegexChoices(string word)
         {
-            var word = StripQuotesOrBrackets(choice);
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = word;
@@ -980,9 +973,8 @@ namespace FplLS
             return modChoices;
         }
 
-        private List<CompletionItem> AddWordChoices(string choice)
+        private List<CompletionItem> AddWordChoices(string word)
         {
-            var word = StripQuotesOrBrackets(choice);
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = "word pattern [a-z0-9_]+";
@@ -993,9 +985,8 @@ namespace FplLS
             return modChoices;
         }
 
-        private List<CompletionItem> AddVariableChoices(string choice)
+        private List<CompletionItem> AddVariableChoices(string word)
         {
-            var word = StripQuotesOrBrackets(choice);
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = word;
@@ -1006,9 +997,8 @@ namespace FplLS
             return modChoices;
         }
 
-        private List<CompletionItem> AddPascalCaseIdChoices(string choice)
+        private List<CompletionItem> AddPascalCaseIdChoices(string word)
         {
-            var word = StripQuotesOrBrackets(choice);
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.Detail = "user-defined identifier";
@@ -1020,9 +1010,8 @@ namespace FplLS
         }
 
 
-        private List<CompletionItem> AddKeywordChoices(string choice)
+        private List<CompletionItem> AddKeywordChoices(string word)
         {
-            var word = StripQuotesOrBrackets(choice);
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
             ci.InsertText = word;
@@ -1032,7 +1021,7 @@ namespace FplLS
             modChoices.Add(ci);
             return modChoices;
         }
-        private List<CompletionItem> AddWhitespaceChoices(string choice)
+        private List<CompletionItem> AddWhitespaceChoices()
         {
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
@@ -1045,10 +1034,9 @@ namespace FplLS
             return modChoices;
         }
 
-        private List<CompletionItem> AddDelegateChoices(string choice)
+        private List<CompletionItem> AddDelegateChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
-            var word = StripQuotesOrBrackets(choice);
             var ci = new CompletionItem();
             ci.Detail = "delegate";
             ci.InsertText = word + ".SomeExternalMethod(x,1)";
@@ -1058,10 +1046,9 @@ namespace FplLS
             return modChoices;
         }
 
-        private List<CompletionItem> AddIsOperatorChoices(string choice)
+        private List<CompletionItem> AddIsOperatorChoices(string word)
         {
             var modChoices = new List<CompletionItem>();
-            var word = StripQuotesOrBrackets(choice);
             var ci = new CompletionItem();
             ci.Detail = "is operator";
             ci.InsertText = word + "(x, SomeFplType)";
@@ -1588,7 +1575,7 @@ namespace FplLS
             return modChoices;
         }
 
-        public static string GetDetail(string word, out string sortText)
+        public static string GetDetail(string word, out string sortText, out KeywordKind keywordKind)
         {
             string ret;
             switch (word)
@@ -1596,326 +1583,407 @@ namespace FplLS
                 case "alias":
                     ret = "alias";
                     sortText = "alias";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "all":
                     ret = "predicate (all quantor)";
-                    sortText = word;
+                    sortText = "all";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "and":
                     ret = "predicate (conjunction)";
                     sortText = "and";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "ass":
                     ret = "argument (assume, short form)";
-                    sortText = "assume";
+                    sortText = "assume02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "assert":
                     ret = "statement (assert)";
                     sortText = "assert";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "assume":
                     ret = "argument (assume)";
-                    sortText = "assume";
+                    sortText = "assume01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "ax":
                     ret = "axiom (short form)";
-                    sortText = "axiom";
+                    sortText = "axiom02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "axiom":
                     ret = "axiom";
-                    sortText = "axiom";
+                    sortText = "axiom01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "cases":
                     ret = "statement (cases)";
                     sortText = "cases";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "cl":
                     ret = "class (short form)";
-                    sortText = "class";
+                    sortText = "class02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "class":
                     ret = "class";
-                    sortText = "class";
+                    sortText = "class01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "con":
                     ret = "conclusion (short form)";
-                    sortText = "conclusion";
+                    sortText = "conclusion02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "conclusion":
                     ret = "conclusion";
-                    sortText = "conclusion";
+                    sortText = "conclusion01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "cor":
                     ret = "corollary (short form)";
-                    sortText = "corollary";
+                    sortText = "corollary02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "corollary":
                     ret = "corollary";
-                    sortText = "corollary";
+                    sortText = "corollary01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "conj":
                     ret = "conjecture (short form)";
-                    sortText = "conjecture";
+                    sortText = "conjecture02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "conjecture":
                     ret = "conjecture";
-                    sortText = "conjecture";
+                    sortText = "conjecture01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "ctr":
                     ret = "constructor (short form)";
-                    sortText = "constructor";
+                    sortText = "constructor02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "constructor":
                     ret = "constructor";
-                    sortText = "constructor";
+                    sortText = "constructor01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "dec":
                     ret = "declaration (short form)";
-                    sortText = "declaration";
+                    sortText = "declaration02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "declaration":
                     ret = "declaration";
-                    sortText = "declaration";
+                    sortText = "declaration01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "del":
                     ret = "delegate (short form)";
-                    sortText = "delegate";
+                    sortText = "delegate02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "delegate":
                     ret = "delegate";
-                    sortText = "delegate";
+                    sortText = "delegate01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "def":
                     ret = "definition (short form)";
-                    sortText = "definition";
+                    sortText = "definition02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "definition":
                     ret = "definition";
-                    sortText = "definition";
+                    sortText = "definition01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "end":
                     ret = "extension (end of)";
                     sortText = "end";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "ex":
                     ret = "predicate (exists quantor)";
                     sortText = "ex";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "exn":
                     ret = "predicate (exists n-times quantor)";
                     sortText = "exn";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "exn!":
                     ret = "predicate (exists n-times quantor)";
                     sortText = "exn!";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "ext":
                     ret = "extension (beginning of)";
                     sortText = "ext";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "false":
                     ret = "predicate (false)";
                     sortText = "false";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "for":
                     ret = "statement (for loop)";
                     sortText = "for";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "func":
                     ret = "type (functional term, short form)";
-                    sortText = "function";
+                    sortText = "function02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "function":
                     ret = "type (functional term)";
-                    sortText = "function";
+                    sortText = "function01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "iif":
                     ret = "predicate (equivalence, <=>)";
                     sortText = "iif";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "impl":
                     ret = "predicate (implication, =>)";
                     sortText = "impl";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "in":
                     ret = "clause (in type or in range)";
                     sortText = "in";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "ind":
                     ret = "type (index, short form)";
-                    sortText = "index";
+                    sortText = "index02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "index":
                     ret = "type (index)";
-                    sortText = "index";
+                    sortText = "index01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "inf":
                     ret = "rule of inference (short form)";
-                    sortText = "inference";
+                    sortText = "inference02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "inference":
                     ret = "rule of inference";
-                    sortText = "inference";
+                    sortText = "inference01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "intr":
                     ret = "intrinsic (short form)";
-                    sortText = "intrinsic";
+                    sortText = "intrinsic02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "intrinsic":
                     ret = "intrinsic";
-                    sortText = "intrinsic";
+                    sortText = "intrinsic01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "is":
                     ret = "predicate (is of type)";
                     sortText = "is";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "lem":
                     ret = "lemma (short form)";
-                    sortText = "lemma";
+                    sortText = "lemma02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "lemma":
                     ret = "lemma";
-                    sortText = "lemma";
+                    sortText = "lemma01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "loc":
                     ret = "localization (short form)";
-                    sortText = "localization";
+                    sortText = "localization02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "localization":
                     ret = "localization";
-                    sortText = "localization";
+                    sortText = "localization01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "not":
                     ret = "predicate (negation)";
                     sortText = "not";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "obj":
                     ret = "type (object, short form)";
-                    sortText = "object";
+                    sortText = "object02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "object":
                     ret = "type (object)";
-                    sortText = "object";
+                    sortText = "object01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "opt":
                     ret = "optional (short form)";
-                    sortText = "optional";
+                    sortText = "optional02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "optional":
                     ret = "optional";
-                    sortText = "optional";
+                    sortText = "optional01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "or":
                     ret = "predicate (disjunction)";
                     sortText = "or";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "post":
                     ret = "postulate (short form)";
-                    sortText = "postulate";
+                    sortText = "postulate02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "postulate":
                     ret = "postulate";
-                    sortText = "postulate";
+                    sortText = "postulate01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "pre":
                     ret = "premise (short form)";
-                    sortText = "premise";
+                    sortText = "premise02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "pred":
                     ret = "type (predicate, short form)";
-                    sortText = "predicate";
+                    sortText = "predicate02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "predicate":
                     ret = "type (predicate)";
-                    sortText = "predicate";
+                    sortText = "predicate01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "premise":
                     ret = "premise";
-                    sortText = "premise";
+                    sortText = "premise01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "prop":
                     ret = "proposition (short form)";
-                    sortText = "proposition";
+                    sortText = "proposition02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "proposition":
                     ret = "proposition";
-                    sortText = "proposition";
+                    sortText = "proposition01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "prty":
                     ret = "property (short form)";
-                    sortText = "property";
+                    sortText = "property02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "property":
                     ret = "property";
-                    sortText = "property";
+                    sortText = "property01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "prf":
                     ret = "proof (short form)";
-                    sortText = "proof";
+                    sortText = "proof02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "proof":
                     ret = "proof";
-                    sortText = "proof";
+                    sortText = "proof01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "qed":
                     ret = "conclusion (quod erat demonstrandum)";
                     sortText = "qed";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "ret":
                     ret = "statement (return, short form)";
-                    sortText = "return";
+                    sortText = "return02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "return":
                     ret = "statement (return)";
-                    sortText = "return";
+                    sortText = "return01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "rev":
                     ret = "argument (revoke, short form)";
-                    sortText = "revoke";
+                    sortText = "revoke02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "revoke":
                     ret = "argument (revoke)";
                     sortText = "revoke";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "self":
                     ret = "reference (to self)";
                     sortText = "self";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "thm":
                     ret = "theorem (short form)";
-                    sortText = "theorem";
+                    sortText = "theorem02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "theorem":
                     ret = "theorem";
-                    sortText = "theorem";
+                    sortText = "theorem01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "true":
                     ret = "predicate (true)";
                     sortText = "true";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "trivial":
                     ret = "argument (trivial)";
                     sortText = "trivial";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "undef":
                     ret = "undefined (short form)";
-                    sortText = "undefined";
+                    sortText = "undefined02";
+                    keywordKind = KeywordKind.Short;
                     break;
                 case "undefined":
                     ret = "undefined";
-                    sortText = "undefined";
+                    sortText = "undefined01";
+                    keywordKind = KeywordKind.Long;
                     break;
                 case "uses":
                     ret = "clause (uses)";
                     sortText = "uses";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 case "xor":
                     ret = "predicate (exclusive or)";
                     sortText = "xor";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
                 default:
                     ret = "";
                     sortText = "";
+                    keywordKind = KeywordKind.EitherNor;
                     break;
             }
             return ret;
@@ -1934,11 +2002,10 @@ namespace FplLS
             }
         }
 
-        public static CompletionItem GetCompletionItem(string replacement, string insertText = "")
+        public static CompletionItem GetCompletionItem(string word, string insertText = "")
         {
             var ret = new CompletionItem();
-            string word = StripQuotesOrBrackets(replacement);
-            ret.Detail = FplAutoCompleteService.GetDetail(word, out string sortText);
+            ret.Detail = FplAutoCompleteService.GetDetail(word, out string sortText, out KeywordKind keywordKind);
             if (insertText != "")
             {
                 ret.InsertText = insertText.Replace("<replace>", word);

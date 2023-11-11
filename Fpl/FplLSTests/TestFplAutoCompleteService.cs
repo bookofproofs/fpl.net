@@ -1,5 +1,6 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using FplLS;
 
 namespace FplLSTests
 {
@@ -115,7 +116,7 @@ namespace FplLSTests
         [DataRow("undef", "undefined (short form)")]
         public void TestGetDetailShortForms(string input, string expected)
         {
-            var actual = FplAutoCompleteService.GetDetail(input, out string sortText);
+            var actual = FplAutoCompleteService.GetDetail(input, out string sortText, out KeywordKind keywordKind);
             Assert.AreEqual(expected, actual);
         }
 
@@ -174,7 +175,7 @@ namespace FplLSTests
         [DataRow("xor", "predicate (exclusive or)")]
         public void TestGetDetailLongForms(string input, string expected)
         {
-            var actual = FplAutoCompleteService.GetDetail(input, out string sortText);
+            var actual = FplAutoCompleteService.GetDetail(input, out string sortText, out FplLS.KeywordKind keywordKind);
             Assert.AreEqual(expected, actual);
         }
 
@@ -262,7 +263,7 @@ namespace FplLSTests
         [DataRow("xor", "xor")]
         public void TestGetDetailSortTexts(string input, string expected)
         {
-            var actual = FplAutoCompleteService.GetDetail(input, out string sortText);
+            var actual = FplAutoCompleteService.GetDetail(input, out string sortText, out KeywordKind keywordKind);
             Assert.AreEqual(expected, sortText);
         }
 
