@@ -3,26 +3,26 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 namespace FplLSTests
 {
     [TestClass]
-    public class TestGetCompletionItemTheorems
+    public class TestGetCompletionItemLemmas
     {
 
-        [DataRow("thm")]
-        [DataRow("theorem")]
+        [DataRow("lem")]
+        [DataRow("lemma")]
         [TestMethod]
-        public void TestAddTheoremChoicesNumber(string choice)
+        public void TestAddInferenceChoicesNumber(string choice)
         {
             var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Theorem", detailCi);
+            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Lemma", detailCi);
             Assert.AreEqual(2, actual.Count);
         }
 
-        [DataRow("thm")]
-        [DataRow("theorem")]
+        [DataRow("lem")]
+        [DataRow("lemma")]
         [TestMethod]
-        public void TestAddTheoremKeywordCounts(string choice)
+        public void TestAddInferenceKeywordCounts(string choice)
         {
             var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Theorem", detailCi);
+            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Lemma", detailCi);
             var count = 0;
             foreach (var item in actual)
             {
@@ -31,39 +31,39 @@ namespace FplLSTests
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("thm")]
-        [DataRow("theorem")]
+        [DataRow("lem")]
+        [DataRow("lemma")]
         [TestMethod]
-        public void TestAddTheoremChoicesSortText(string choice)
+        public void TestAddInferenceChoicesSortText(string choice)
         {
             var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Theorem", detailCi);
+            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Lemma", detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("theorem"));
+                Assert.IsTrue(item.SortText.Contains("lemma"));
             }
         }
 
-        [DataRow("thm")]
-        [DataRow("theorem")]
+        [DataRow("lem")]
+        [DataRow("lemma")]
         [TestMethod]
-        public void TestAddTheoremChoicesLabel(string choice)
+        public void TestAddInferenceChoicesLabel(string choice)
         {
             var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Theorem", detailCi);
+            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Lemma", detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
             }
         }
 
-        [DataRow("thm")]
-        [DataRow("theorem")]
+        [DataRow("lem")]
+        [DataRow("lemma")]
         [TestMethod]
-        public void TestAddTheoremChoicesDetail(string choice)
+        public void TestAddInferenceChoicesDetail(string choice)
         {
             var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Theorem", detailCi);
+            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Lemma", detailCi);
             foreach (var item in actual)
             {
                 if (item.Kind == CompletionItemKind.Keyword)
@@ -72,18 +72,18 @@ namespace FplLSTests
                 }
                 else
                 {
-                    Assert.IsTrue(item.Detail.Contains("theorem"));
+                    Assert.IsTrue(item.Detail.Contains("lemma"));
                 }
             }
         }
 
-        [DataRow("thm")]
-        [DataRow("theorem")]
+        [DataRow("lem")]
+        [DataRow("lemma")]
         [TestMethod]
-        public void TestAddTheoremChoicesInsertText(string choice)
+        public void TestAddInferenceChoicesInsertText(string choice)
         {
             var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Theorem", detailCi);
+            var actual = FplAutoCompleteService.AddTheoremLikeStatementChoices(choice, "Lemma", detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)
             {
