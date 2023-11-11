@@ -11,22 +11,9 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorChoicesNumber(string choice)
         {
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice);
-            Assert.AreEqual(6, actual.Count);
-        }
-
-        [DataRow("ctor")]
-        [DataRow("constructor")]
-        [TestMethod]
-        public void TestAddConstructorSnippetCounts(string choice)
-        {
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice);
-            var count = 0;
-            foreach (var item in actual)
-            {
-                if (item.Kind == CompletionItemKind.Snippet) count++;
-            }
-            Assert.AreEqual(3, count);
+            var detailCi = FplAutoCompleteService.GetDetail(choice);
+            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
+            Assert.AreEqual(2, actual.Count);
         }
 
         [DataRow("ctor")]
@@ -34,13 +21,14 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorKeywordCounts(string choice)
         {
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice);
+            var detailCi = FplAutoCompleteService.GetDetail(choice);
+            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
             var count = 0;
             foreach (var item in actual)
             {
                 if (item.Kind == CompletionItemKind.Keyword) count++;
             }
-            Assert.AreEqual(3, count);
+            Assert.AreEqual(1, count);
         }
 
         [DataRow("ctor")]
@@ -48,13 +36,12 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorChoicesSortText(string choice)
         {
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice);
-            var countSubType = 0;
+            var detailCi = FplAutoCompleteService.GetDetail(choice);
+            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains(choice));
+                Assert.IsTrue(item.SortText.Contains("constructor"));
             }
-            Assert.AreEqual(2, countSubType);
         }
 
         [DataRow("ctor")]
@@ -62,13 +49,12 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorChoicesLabel(string choice)
         {
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice);
-            var counterRelated = 0;
+            var detailCi = FplAutoCompleteService.GetDetail(choice);
+            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Label.Contains(choice));
+                Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
             }
-            Assert.AreEqual(1, counterRelated);
         }
 
         [DataRow("ctor")]
@@ -76,10 +62,11 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorChoicesDetail(string choice)
         {
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice);
+            var detailCi = FplAutoCompleteService.GetDetail(choice);
+            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains("constructor"));
+                Assert.IsTrue(item.Detail.Contains(choice));
             }
         }
 
@@ -88,22 +75,14 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorChoicesInsertText(string choice)
         {
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice);
+            var detailCi = FplAutoCompleteService.GetDetail(choice);
+            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
             var counterSnippets = 0;
-            var counterKeywords = 0;
             foreach (var item in actual)
             {
-                if (item.Kind == CompletionItemKind.Snippet)
-                {
-                    if (item.InsertText.Contains(choice)) { counterSnippets++; }
-                }
-                else
-                {
-                    if (item.InsertText == null) { counterKeywords++; }
-                }
+                if (item.InsertText.Contains(choice)) { counterSnippets++; }
             }
-            Assert.AreEqual(3, counterKeywords);
-            Assert.AreEqual(1, counterSnippets);
+            Assert.AreEqual(actual.Count, counterSnippets);
         }
     }
 }

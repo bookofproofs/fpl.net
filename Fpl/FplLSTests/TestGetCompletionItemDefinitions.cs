@@ -20,20 +20,6 @@ namespace FplLSTests
         [DataRow("def")]
         [DataRow("definition")]
         [TestMethod]
-        public void TestAddDefinitionSnippetCounts(string choice)
-        {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
-            var count = 0;
-            foreach (var item in actual)
-            {
-                if (item.Kind == CompletionItemKind.Snippet) count++;
-            }
-            Assert.AreEqual(3, count);
-        }
-
-        [DataRow("def")]
-        [DataRow("definition")]
-        [TestMethod]
         public void TestAddDefinitionKeywordCounts(string choice)
         {
             var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
@@ -77,20 +63,13 @@ namespace FplLSTests
             var counterRelated = 0;
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Label.Contains(choice));
-                if (item.Kind == CompletionItemKind.Snippet)
+                if (item.Label.Contains(subType))
                 {
-                    if (item.Label.Contains(subType))
-                    {
-                        counterRelated++;
-                    }
-                }
-                else if (item.Kind == CompletionItemKind.Keyword && item.Label.Contains(subType))
-                {
-                    Assert.AreEqual(choice + " " + subType, item.Label);
+                    Assert.AreEqual("_ " + choice + " " + subType, item.Label);
+                    counterRelated++;
                 }
             }
-            Assert.AreEqual(1, counterRelated);
+            Assert.AreEqual(2, counterRelated);
         }
 
         [DataRow("def")]
@@ -101,7 +80,7 @@ namespace FplLSTests
             var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains("definition"));
+                Assert.IsTrue(item.Detail.Contains(choice));
             }
         }
 
@@ -116,20 +95,11 @@ namespace FplLSTests
         {
             var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
             var counterSnippets = 0;
-            var counterKeywords = 0;
             foreach (var item in actual)
             {
-                if (item.Kind == CompletionItemKind.Snippet)
-                {
-                    if (item.InsertText.Contains(choice) && item.InsertText.Contains(subType)) { counterSnippets++; }
-                }
-                else
-                {
-                    if (item.InsertText == null) { counterKeywords++; }
-                }
+                if (item.InsertText.Contains(choice) && item.InsertText.Contains(subType)) { counterSnippets++; }
             }
-            Assert.AreEqual(3, counterKeywords);
-            Assert.AreEqual(1, counterSnippets);
+            Assert.AreEqual(2, counterSnippets);
         }
 
     }

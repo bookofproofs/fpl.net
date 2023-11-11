@@ -20,7 +20,7 @@ namespace FplLS
     {
         const string prefix = "_ ";
 
-        public async Task<CompletionList> GetParserChoices(StringBuilder builder, int index, int line, int col)
+        public async Task<CompletionList> GetParserChoices(StringBuilder builder, int index)
         {
             // make sure we get the parser choices from the position before the typed character, not after it
             string s;
@@ -125,38 +125,38 @@ namespace FplLS
                     case "false":
                     case "undef":
                     case "undefined":
-                        modChoices.AddRange(AddPredicateChoices(word, 0));
+                        modChoices.AddRange(AddPredicateChoices(word, 0, defaultCi));
                         break;
                     case "all":
                     case "ex":
                     case "exn":
-                        modChoices.AddRange(AddQuantorChoices(word));
+                        modChoices.AddRange(AddQuantorChoices(word, defaultCi));
                         break;
                     case "not":
-                        modChoices.AddRange(AddPredicateChoices(word, 1));
+                        modChoices.AddRange(AddPredicateChoices(word, 1, defaultCi));
                         break;
                     case "xor":
                     case "iif":
                     case "impl":
-                        modChoices.AddRange(AddPredicateChoices(word, 2));
+                        modChoices.AddRange(AddPredicateChoices(word, 2, defaultCi));
                         break;
                     case "and":
                     case "or":
-                        modChoices.AddRange(AddPredicateChoices(word, 3));
+                        modChoices.AddRange(AddPredicateChoices(word, 3, defaultCi));
                         break;
                     case "ctor":
                     case "constructor":
-                        modChoices.AddRange(AddConstructorChoices(word));
+                        modChoices.AddRange(AddConstructorChoices(word, defaultCi));
                         break;
                     case "dec":
                     case "declaration":
-                        modChoices.AddRange(AddDeclarationChoices(word));
+                        modChoices.AddRange(AddDeclarationChoices(word, defaultCi));
                         break;
                     case "cases":
-                        modChoices.AddRange(AddCasesChoices(word));
+                        modChoices.AddRange(AddCasesChoices(word, defaultCi));
                         break;
                     case "for":
-                        modChoices.AddRange(AddForChoices(word));
+                        modChoices.AddRange(AddForChoices(word, defaultCi));
                         break;
                     case "prty":
                     case "property":
@@ -166,7 +166,7 @@ namespace FplLS
                     case "axiom":
                     case "post":
                     case "postulate":
-                        modChoices.AddRange(AddAxiomChoices(word));
+                        modChoices.AddRange(AddAxiomChoices(word, defaultCi));
                         break;
                     case "def":
                     case "definition":
@@ -174,38 +174,38 @@ namespace FplLS
                         break;
                     case "thm":
                     case "theorem":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Theorem"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Theorem", defaultCi));
                         break;
                     case "lem":
                     case "lemma":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Lemma"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Lemma", defaultCi));
                         break;
                     case "prop":
                     case "proposition":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Proposition"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Proposition", defaultCi));
                         break;
                     case "inf":
                     case "inference":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Inference"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Inference", defaultCi));
                         break;
                     case "conj":
                     case "conjecture":
-                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Conjecture"));
+                        modChoices.AddRange(AddTheoremLikeStatementChoices(word, "Conjecture", defaultCi));
                         break;
                     case "cor":
                     case "corollary":
-                        modChoices.AddRange(AddCorollaryChoices(word));
+                        modChoices.AddRange(AddCorollaryChoices(word, defaultCi));
                         break;
                     case "prf":
                     case "proof":
-                        modChoices.AddRange(AddProofChoices(word));
+                        modChoices.AddRange(AddProofChoices(word, defaultCi));
                         break;
                     case "loc":
                     case "localization":
-                        modChoices.AddRange(AddLocalizationChoices(word));
+                        modChoices.AddRange(AddLocalizationChoices(word, defaultCi));
                         break;
                     case "uses":
-                        modChoices.AddRange(AddUsesChoices(word));
+                        modChoices.AddRange(AddUsesChoices(word, defaultCi));
                         break;
                     default:
                         modChoices.AddRange(AddDefaultChoices(word));
@@ -215,17 +215,18 @@ namespace FplLS
             return new CompletionList(modChoices);
         }
 
-        public static List<CompletionItem> AddAxiomChoices(string word)
+        public static List<CompletionItem> AddAxiomChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
             // snippet
-            modChoices.Add(GetCompletionItem(word, $"<replace> SomeFplIdentifier (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine));
+            defaultCi.InsertText = $"<replace> SomeFplIdentifier (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine;
+            modChoices.Add(defaultCi);
             // keyword
             modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
-        public static List<CompletionItem> AddPredicateChoices(string word, int numbOfArgs)
+        public static List<CompletionItem> AddPredicateChoices(string word, int numbOfArgs, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
@@ -235,21 +236,36 @@ namespace FplLS
                     // no snippets for null-ary predicates (treat them as keywords only - see below)
                     break;
                 case 1:
-                    modChoices.Add(GetCompletionItem(word, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine})" + Environment.NewLine));
+                    var ci = GetCompletionItem(word, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine})" + Environment.NewLine);
+                    ci.Detail = defaultCi.Detail;
+                    ci.SortText = defaultCi.SortText;
+                    ci.Label = defaultCi.Label;
+                    ci.Kind = defaultCi.Kind;
+                    modChoices.Add(ci);
                     break;
                 case 2:
-                    modChoices.Add(GetCompletionItem(word, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine));
+                    var ci1 = GetCompletionItem(word, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine);
+                    ci1.Detail = defaultCi.Detail;
+                    ci1.SortText = defaultCi.SortText;
+                    ci1.Label = defaultCi.Label;
+                    ci1.Kind = defaultCi.Kind;
+                    modChoices.Add(ci1);
                     break;
                 default:
-                    modChoices.Add(GetCompletionItem(word, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine));
+                    var ci2 = GetCompletionItem(word, $"<replace> ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine);
+                    ci2.Detail = defaultCi.Detail;
+                    ci2.SortText = defaultCi.SortText;
+                    ci2.Label = defaultCi.Label;
+                    ci2.Kind = defaultCi.Kind;
+                    modChoices.Add(ci2);
                     break;
             }
             // keywords
-            modChoices.Add(GetCompletionItem(word));
+            modChoices.Add(defaultCi);
             return modChoices;
         }
 
-        public static List<CompletionItem> AddQuantorChoices(string word)
+        public static List<CompletionItem> AddQuantorChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
             var postfix = "";
@@ -263,21 +279,26 @@ namespace FplLS
             ci.Label = $"{prefix}ex (..)"; ReplaceLabel(word, ci);
             ci.Detail = "predicate (exists quantor)"; ReplaceDetails(word, ci);
             ci.SortText = "ex00"; ReplaceSortText(word, ci);
+            ci.Kind = defaultCi.Kind;
             modChoices.Add(ci);
             var ci1 = GetCompletionItem(word, $"<replace>{postfix} x in someVariadicVar ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
             ci1.Label = $"{prefix}ex x in variable (..)"; ReplaceLabel(word, ci1);
             ci1.Detail = "predicate (exists quantor)"; ReplaceDetails(word, ci1);
             ci1.SortText = "ex01"; ReplaceSortText(word, ci1);
+            ci1.Kind = defaultCi.Kind;
             modChoices.Add(ci1);
             var ci2 = GetCompletionItem(word, $"<replace>{postfix} x in [a,b] ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
             ci2.Label = $"{prefix}ex x in range (..)"; ReplaceLabel(word, ci2);
             ci2.Detail = "predicate (exists quantor)"; ReplaceDetails(word, ci2);
             ci2.SortText = "ex02"; ReplaceSortText(word, ci2);
+            ci2.Kind = defaultCi.Kind;
+
             modChoices.Add(ci2);
             var ci3 = GetCompletionItem(word, $"<replace>{postfix} x in object ({Environment.NewLine}" + $"\tp(x){Environment.NewLine})" + Environment.NewLine);
             ci3.Label = $"{prefix}ex x in type (..)"; ReplaceLabel(word, ci3);
             ci3.Detail = "predicate (exists quantor)"; ReplaceDetails(word, ci3);
             ci3.SortText = "ex03"; ReplaceSortText(word, ci3);
+            ci3.Kind = defaultCi.Kind;
             modChoices.Add(ci3);
 
             if (isExn)
@@ -285,6 +306,7 @@ namespace FplLS
                 // keywords
                 var ci4 = GetCompletionItem("exn!");
                 ci4.SortText = "exn!04";
+                ci4.Kind = CompletionItemKind.Keyword;
                 modChoices.Add(ci4);
             }
             else
@@ -294,10 +316,12 @@ namespace FplLS
                 ci5.Label = $"{prefix}ex <combined> (..)"; ReplaceLabel(word, ci5);
                 ci5.Detail = "predicate (exists quantor in <combined>)"; ReplaceDetails(word, ci5);
                 ci5.SortText = "ex04"; ReplaceSortText(word, ci5);
+                ci5.Kind = defaultCi.Kind;
                 modChoices.Add(ci5);
                 // keywords
                 var ci6 = GetCompletionItem(word);
                 ci6.SortText = "ex05"; ReplaceSortText(word, ci6);
+                ci6.Kind = CompletionItemKind.Keyword;
                 modChoices.Add(ci6);
             }
             return modChoices;
@@ -327,12 +351,13 @@ namespace FplLS
                 ci.Detail = ci.Detail.Replace("exists", "exists n-times");
         }
 
-        public static List<CompletionItem> AddConstructorChoices(string word)
+        public static List<CompletionItem> AddConstructorChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
             // snippet
-            var ci = GetCompletionItem(word, GetConstructorSnippet(word));
-            modChoices.Add(ci);
+            defaultCi.InsertText = GetConstructorSnippet(word);
+
+            modChoices.Add(defaultCi);
             // keyword
             modChoices.Add(GetCompletionItem(word));
             return modChoices;
@@ -345,29 +370,35 @@ namespace FplLS
             var ciMandCl = GetCompletionItem(word, GetClassInstanceSnippet(word, false, out string optMand, out string objMand));
             ciMandCl.Label = ciMandCl.InsertText.Split(" ")[0] + " " + ciMandCl.InsertText.Split(" ")[1];
             ciMandCl.Detail = $"mandatory object property";
+            ciMandCl.Kind = CompletionItemKind.Field;
             modChoices.Add(ciMandCl);
             var ciMandPr = GetCompletionItem(word, GetPredicateInstanceSnippet(word, false));
             ciMandPr.Label = ciMandPr.InsertText.Split(" ")[0] + " " + ciMandPr.InsertText.Split(" ")[1];
             ciMandPr.Detail = $"mandatory predicative property";
+            ciMandPr.Kind = CompletionItemKind.Field;
             modChoices.Add(ciMandPr);
             var ciMandFu = GetCompletionItem(word, GetFunctionalTermInstanceSnippet(word, false));
             ciMandFu.Label = ciMandFu.InsertText.Split(" ")[0] + " " + ciMandFu.InsertText.Split(" ")[1];
             ciMandFu.Detail = $"mandatory functional property";
+            ciMandFu.Kind = CompletionItemKind.Field;
             modChoices.Add(ciMandFu);
             var ciOptCl = GetCompletionItem(word, GetClassInstanceSnippet(word, true, out string optOpt, out string objOpt));
             ciOptCl.Label = ciOptCl.InsertText.Split(" ")[0] + $" {optOpt} " + ciOptCl.InsertText.Split(" ")[1];
             ciOptCl.Label += $" {optOpt} {objOpt}";
             ciOptCl.Detail = $"optional object property";
+            ciOptCl.Kind = CompletionItemKind.Field;
             modChoices.Add(ciOptCl);
             var ciOptPr = GetCompletionItem(word, GetPredicateInstanceSnippet(word, true));
             ciOptPr.Label = ciOptPr.InsertText.Split(" ")[0] + $" {optOpt} " + ciOptPr.InsertText.Split(" ")[1];
             ciOptPr.Label += $" {optOpt} {objOpt}";
             ciOptPr.Detail = $"optional predicative property";
+            ciOptCl.Kind = CompletionItemKind.Field;
             modChoices.Add(ciOptPr);
             var ciOptFu = GetCompletionItem(word, GetFunctionalTermInstanceSnippet(word, true));
             ciOptFu.Label = ciOptFu.InsertText.Split(" ")[0] + $" {optOpt} " + ciOptFu.InsertText.Split(" ")[1];
             ciOptFu.Label += $" {optOpt} {objOpt}";
             ciOptFu.Detail = $"optional functional property";
+            ciOptFu.Kind = CompletionItemKind.Field;
             modChoices.Add(ciOptFu);
             // keyword
             var ciMandClKw = GetCompletionItem(word);
@@ -397,13 +428,13 @@ namespace FplLS
             return modChoices;
         }
 
-        public static List<CompletionItem> AddDeclarationChoices(string word)
+        public static List<CompletionItem> AddDeclarationChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
 
             // snippet
-            var ci = GetCompletionItem(word, GetDeclarationSnippet(word));
-            modChoices.Add(ci);
+            defaultCi.InsertText = GetDeclarationSnippet(word);
+            modChoices.Add(defaultCi);
             // keyword
             var ci1 = GetCompletionItem(word);
             modChoices.Add(ci1);
@@ -411,20 +442,20 @@ namespace FplLS
         }
 
 
-        public static List<CompletionItem> AddCasesChoices(string word)
+        public static List<CompletionItem> AddCasesChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
 
             // snippet
-            var ci = GetCompletionItem(word, GetCasesStatement());
-            modChoices.Add(ci);
+            defaultCi.InsertText = GetCasesStatement();
+            modChoices.Add(defaultCi);
             // keyword
             var ci1 = GetCompletionItem(word);
             modChoices.Add(ci1);
             return modChoices;
         }
 
-        public static List<CompletionItem> AddForChoices(string word)
+        public static List<CompletionItem> AddForChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
 
@@ -432,10 +463,12 @@ namespace FplLS
             var ci = GetCompletionItem(word, GetForStatement(true));
             ci.Label = $"{prefix}for .. []";
             ci.Detail = "for statement (range)";
+            ci.Kind = defaultCi.Kind;
             modChoices.Add(ci);
             var ci1 = GetCompletionItem(word, GetForStatement(false));
             ci1.Label = $"{prefix}for .. list";
             ci1.Detail = "for statement (list)";
+            ci1.Kind = defaultCi.Kind;
             modChoices.Add(ci1);
             // keyword
             var ci2 = GetCompletionItem(word);
@@ -484,6 +517,7 @@ namespace FplLS
         {
             var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(word, subType, out bool isShort, out string intrinsic, out string objtype);
             ci.Label += $" {newSubType}";
+            ci.InsertText = $"{word} {newSubType}";
         }
 
         private static void SetIntrinsicDefinitionProperty(string word, string subType, CompletionItem ci)
@@ -500,6 +534,7 @@ namespace FplLS
             {
                 ci.Detail += $" {subType}";
             }
+            ci.Kind = CompletionItemKind.Class;
 
         }
 
@@ -809,55 +844,65 @@ namespace FplLS
                 $"{Environment.NewLine}";
         }
 
-        private List<CompletionItem> AddTheoremLikeStatementChoices(string word, string example)
+        private List<CompletionItem> AddTheoremLikeStatementChoices(string word, string example, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            modChoices.Add(GetCompletionItem(word, $"<replace> SomeFpl{example} (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine));
+            defaultCi.InsertText = $"<replace> SomeFpl{example} (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine;
+            modChoices.Add(defaultCi);
             // keywords
             modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
 
-        private List<CompletionItem> AddCorollaryChoices(string word)
+        private List<CompletionItem> AddCorollaryChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            modChoices.Add(GetCompletionItem(word, $"<replace> SomeFplTheorem!1 (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine));
+            defaultCi.InsertText = $"<replace> SomeFplTheorem!1 (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine;
+            modChoices.Add(defaultCi);
             // keywords
             modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
-        private List<CompletionItem> AddProofChoices(string word)
+        private List<CompletionItem> AddProofChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            modChoices.Add(GetCompletionItem(word, $"<replace> SomeFplTheorem!1{Environment.NewLine}" + "{" + $"{Environment.NewLine}\t1. |- qed{Environment.NewLine}" + "}" + Environment.NewLine));
+            defaultCi.InsertText = $"<replace> SomeFplTheorem!1{Environment.NewLine}" + "{" + $"{Environment.NewLine}\t1. |- qed{Environment.NewLine}" + "}" + Environment.NewLine;
+            modChoices.Add(defaultCi);
             // keywords
             modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
-        private List<CompletionItem> AddLocalizationChoices(string word)
+        private List<CompletionItem> AddLocalizationChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            modChoices.Add(GetCompletionItem(word, $"<replace> iif(x,y) :={Environment.NewLine}!tex: x \"\\Leftrightarrow\" y{Environment.NewLine}!eng: x \" if and only if \" y{Environment.NewLine}!eng: x \" dann und nur dann \" y{Environment.NewLine}" + ";" + Environment.NewLine));
+            defaultCi.InsertText = $"<replace> iif(x,y) :={Environment.NewLine}!tex: x \"\\Leftrightarrow\" y{Environment.NewLine}!eng: x \" if and only if \" y{Environment.NewLine}!eng: x \" dann und nur dann \" y{Environment.NewLine}" + ";" + Environment.NewLine;
+            modChoices.Add(defaultCi);
             // keywords
             modChoices.Add(GetCompletionItem(word));
             return modChoices;
         }
 
-        private List<CompletionItem> AddUsesChoices(string word)
+        private List<CompletionItem> AddUsesChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
             var ci = GetCompletionItem(word, $"<replace> SomeFplNamespace{Environment.NewLine}");
             ci.Detail = "uses namespace";
+            ci.SortText = defaultCi.SortText;
+            ci.Label = defaultCi.Label;
+            ci.Kind = defaultCi.Kind;
             var ci1 = GetCompletionItem(word, $"<replace> SomeFplNamespace alias Sfn{Environment.NewLine}");
             ci1.Detail = "uses namespace with alias";
+            ci1.SortText = defaultCi.SortText;
+            ci1.Label = defaultCi.Label + " .. alias";
+            ci1.Kind = defaultCi.Kind;
             // keywords
             modChoices.Add(GetCompletionItem(word));
             return modChoices;
@@ -1609,6 +1654,8 @@ namespace FplLS
         public static CompletionItem GetDetail(string word)
         {
             CompletionItem ret = new CompletionItem();
+            ret.Label = prefix + word;
+            ret.InsertText = word;
             switch (word)
             {
                 case "alias":
@@ -1696,7 +1743,7 @@ namespace FplLS
                     ret.SortText = "conjecture01";
                     ret.Kind = CompletionItemKind.Class;
                     break;
-                case "ctr":
+                case "ctor":
                     ret.Detail = "constructor (short form)";
                     ret.SortText = "constructor02";
                     ret.Kind = CompletionItemKind.Constructor;
@@ -2038,14 +2085,10 @@ namespace FplLS
             if (insertText != "")
             {
                 ret.InsertText = insertText.Replace("<replace>", word);
-                ret.Label = prefix + word;
-                ret.Kind = CompletionItemKind.Snippet;
             }
             else
             {
                 ret.Kind = CompletionItemKind.Keyword;
-                ret.InsertText = word;
-                ret.Label = prefix + ret.InsertText;
                 ret.Detail = $"keyword '{word}'";
                 ret.SortText = "zzz" + ret.SortText; // display keywords later as non-keywords
             }

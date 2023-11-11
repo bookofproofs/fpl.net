@@ -73,7 +73,7 @@ class CompletionHandler : ICompletionHandler
         (int)request.Position.Line,
         (int)request.Position.Character);
 
-        var complList = await _fplAutoComplService.GetParserChoices(buffer, position, (int)request.Position.Line, (int)request.Position.Character);
+        var complList = await _fplAutoComplService.GetParserChoices(buffer, position);
         var test = new StringBuilder();
         foreach (var t in complList)
         {

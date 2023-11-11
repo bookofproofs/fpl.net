@@ -43,7 +43,7 @@ namespace FplLSTests
         [DataRow("conjecture")]
         [DataRow("con")]
         [DataRow("conclusion")]
-        [DataRow("ctr")]
+        [DataRow("ctor")]
         [DataRow("constructor")]
         [DataRow("dec")]
         [DataRow("declaration")]
@@ -82,7 +82,7 @@ namespace FplLSTests
         public void TestGetCompletionItemLabels(string input)
         {
             var actual = FplAutoCompleteService.GetCompletionItem(input);
-            Assert.AreEqual(input, actual.Label.Replace("_ ",""));
+            Assert.AreEqual("_ " + input, actual.Label);
         }
 
         [TestMethod]
@@ -96,7 +96,7 @@ namespace FplLSTests
         [DataRow("cl", "class (short form)")]
         [DataRow("conj", "conjecture (short form)")]
         [DataRow("con", "conclusion (short form)")]
-        [DataRow("ctr", "constructor (short form)")]
+        [DataRow("ctor", "constructor (short form)")]
         [DataRow("dec", "declaration (short form)")]
         [DataRow("def", "definition (short form)")]
         [DataRow("del", "delegate (short form)")]
@@ -201,7 +201,7 @@ namespace FplLSTests
         [DataRow("conjecture", CompletionItemKind.Class)]
         [DataRow("con", CompletionItemKind.Struct)]
         [DataRow("conclusion", CompletionItemKind.Struct)]
-        [DataRow("ctr", CompletionItemKind.Constructor)]
+        [DataRow("ctor", CompletionItemKind.Constructor)]
         [DataRow("constructor", CompletionItemKind.Constructor)]
         [DataRow("dec", CompletionItemKind.Property)]
         [DataRow("declaration", CompletionItemKind.Property)]
@@ -288,7 +288,7 @@ namespace FplLSTests
         [DataRow("conjecture", "conjecture01")]
         [DataRow("con", "conclusion02")]
         [DataRow("conclusion", "conclusion01")]
-        [DataRow("ctr", "constructor02")]
+        [DataRow("ctor", "constructor02")]
         [DataRow("constructor", "constructor01")]
         [DataRow("dec", "declaration02")]
         [DataRow("declaration", "declaration01")]
@@ -352,7 +352,7 @@ namespace FplLSTests
         {
             var actual = FplAutoCompleteService.GetCompletionItem(input);
             Console.WriteLine(input);
-            Assert.AreEqual(expected, actual.SortText.Replace("zzz",""));
+            Assert.AreEqual(expected, actual.SortText.Replace("zzz", ""));
         }
 
         [TestMethod]
@@ -376,7 +376,7 @@ namespace FplLSTests
         [DataRow("conjecture", "conjecture01")]
         [DataRow("con", "conclusion02")]
         [DataRow("conclusion", "conclusion01")]
-        [DataRow("ctr", "constructor02")]
+        [DataRow("ctor", "constructor02")]
         [DataRow("constructor", "constructor01")]
         [DataRow("dec", "declaration02")]
         [DataRow("declaration", "declaration01")]
