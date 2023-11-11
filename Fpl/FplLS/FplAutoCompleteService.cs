@@ -13,8 +13,6 @@ namespace FplLS
         const string prefix = "_ ";
         /*
            "is"
-           "del"
-           "delegate"
            */
 
         public async Task<CompletionList> GetParserChoices(StringBuilder builder, int index, int line, int col)
@@ -34,34 +32,35 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             foreach (var choice in choices)
             {
-                switch (choice)
+                var word = StripQuotesOrBrackets(choice);
+                switch (word)
                 {
-                    case "<ISO 639 language code>":
+                    case "ISO 639 language code":
                         modChoices.AddRange(AddIso639Choices());
                         break;
-                    case "<whitespace>":
-                    case "<significant whitespace>":
+                    case "whitespace":
+                    case "significant whitespace":
                         modChoices.AddRange(AddWhitespaceChoices(choice));
                         break;
-                    case "<(closed) left bound>":
-                    case "<(open) left bound>":
-                    case "<(open) right bound>":
-                    case "<(closed) right bound>":
+                    case "(closed) left bound":
+                    case "(open) left bound":
+                    case "(open) right bound":
+                    case "(closed) right bound":
                         modChoices.AddRange(AddBoundChoices(choice));
                         break;
-                    case "<digits>":
+                    case "digits":
                         modChoices.AddRange(AddDigitsChoices(choice));
                         break;
-                    case "<argument identifier>":
+                    case "argument identifier":
                         modChoices.AddRange(AddArgumentIdentifierChoices(choice));
                         break;
-                    case "<language-specific string>":
+                    case "language-specific string":
                         modChoices.AddRange(AddLanguageSpecificStringChoices(choice));
                         break;
-                    case "<extension regex>":
+                    case "extension regex":
                         modChoices.AddRange(AddExtensionRegexChoices(choice));
                         break;
-                    case "<word>":
+                    case "word":
                         modChoices.AddRange(AddWordChoices(choice));
                         break;
                     case "<variable>":
@@ -72,124 +71,128 @@ namespace FplLS
                     case "<PascalCaseId>":
                         modChoices.AddRange(AddPascalCaseIdChoices(choice));
                         break;
-                    case "'alias'":
-                    case "'assert'":
-                    case "'ass'":
-                    case "'assume'":
-                    case "'cl'":
-                    case "'class'":
-                    case "'con'":
-                    case "'conclusion'":
-                    case "'end'":
-                    case "'ext'":
-                    case "'func'":
-                    case "'function'":
-                    case "'ind'":
-                    case "'index'":
-                    case "'intr'":
-                    case "'intrinsic'":
-                    case "'in'":
-                    case "'obj'":
-                    case "'object'":
-                    case "'opt'":
-                    case "'optional'":
-                    case "'pred'":
-                    case "'predicate'":
-                    case "'pre'":
-                    case "'premise'":
-                    case "'qed'":
-                    case "'ret'":
-                    case "'return'":
-                    case "'rev'":
-                    case "'revoke'":
-                    case "'self'":
-                    case "'trivial'":
+                    case "del":
+                    case "delegate":
+                        modChoices.AddRange(AddDelegateChoices(choice));
+                        break;
+                    case "alias":
+                    case "assert":
+                    case "ass":
+                    case "assume":
+                    case "cl":
+                    case "class":
+                    case "con":
+                    case "conclusion":
+                    case "end":
+                    case "ext":
+                    case "func":
+                    case "function":
+                    case "ind":
+                    case "index":
+                    case "intr":
+                    case "intrinsic":
+                    case "in":
+                    case "obj":
+                    case "object":
+                    case "opt":
+                    case "optional":
+                    case "pred":
+                    case "predicate":
+                    case "pre":
+                    case "premise":
+                    case "qed":
+                    case "ret":
+                    case "return":
+                    case "rev":
+                    case "revoke":
+                    case "self":
+                    case "trivial":
                         modChoices.AddRange(AddKeywordChoices(choice));
                         break;
-                    case "'true'":
-                    case "'false'":
-                    case "'undef'":
-                    case "'undefined'":
+                    case "true":
+                    case "false":
+                    case "undef":
+                    case "undefined":
                         modChoices.AddRange(AddPredicateChoices(choice, 0));
                         break;
-                    case "'all'":
-                    case "'ex'":
-                    case "'exn'":
+                    case "all":
+                    case "ex":
+                    case "exn":
                         modChoices.AddRange(AddQuantorChoices(choice));
                         break;
-                    case "'not'":
+                    case "not":
                         modChoices.AddRange(AddPredicateChoices(choice, 1));
                         break;
-                    case "'xor'":
-                    case "'iif'":
-                    case "'impl'":
+                    case "xor":
+                    case "iif":
+                    case "impl":
                         modChoices.AddRange(AddPredicateChoices(choice, 2));
                         break;
-                    case "'and'":
-                    case "'or'":
+                    case "and":
+                    case "or":
                         modChoices.AddRange(AddPredicateChoices(choice, 3));
                         break;
-                    case "'ctor'":
-                    case "'constructor'":
+                    case "ctor":
+                    case "constructor":
                         modChoices.AddRange(AddConstructorChoices(choice));
                         break;
-                    case "'dec'":
-                    case "'declaration'":
+                    case "dec":
+                    case "declaration":
                         modChoices.AddRange(AddDeclarationChoices(choice));
                         break;
-                    case "'cases'":
+                    case "cases":
                         modChoices.AddRange(AddCasesChoices(choice));
                         break;
-                    case "'for'":
+                    case "for":
                         modChoices.AddRange(AddForChoices(choice));
                         break;
-                    case "'prty'":
-                    case "'property'":
+                    case "prty":
+                    case "property":
                         modChoices.AddRange(AddPropertyChoices(choice));
                         break;
-                    case "'ax'":
-                    case "'axiom'":
-                    case "'post'":
-                    case "'postulate'":
+                    case "ax":
+                    case "axiom":
+                    case "post":
+                    case "postulate":
                         modChoices.AddRange(AddAxiomChoices(choice));
                         break;
-                    case "'def'":
-                    case "'definition'":
+                    case "def":
+                    case "definition":
                         modChoices.AddRange(AddDefinitionChoices(choice));
                         break;
-                    case "'thm'":
-                    case "'theorem'":
+                    case "thm":
+                    case "theorem":
                         modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Theorem"));
                         break;
-                    case "'lem'":
-                    case "'lemma'":
+                    case "lem":
+                    case "lemma":
                         modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Lemma"));
                         break;
-                    case "'prop'":
-                    case "'proposition'":
+                    case "prop":
+                    case "proposition":
                         modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Proposition"));
                         break;
-                    case "'inf'":
-                    case "'inference'":
+                    case "inf":
+                    case "inference":
                         modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Inference"));
                         break;
-                    case "'conj'":
-                    case "'conjecture'":
+                    case "conj":
+                    case "conjecture":
                         modChoices.AddRange(AddTheoremLikeStatementChoices(choice, "Conjecture"));
                         break;
-                    case "'cor'":
-                    case "'corollary'":
+                    case "cor":
+                    case "corollary":
                         modChoices.AddRange(AddCorollaryChoices(choice));
                         break;
-                    case "'prf'":
-                    case "'proof'":
+                    case "prf":
+                    case "proof":
                         modChoices.AddRange(AddProofChoices(choice));
                         break;
-                    case "'loc'":
-                    case "'localization'":
+                    case "loc":
+                    case "localization":
                         modChoices.AddRange(AddLocalizationChoices(choice));
                         break;
-                    case "'uses'":
+                    case "uses":
                         modChoices.AddRange(AddUsesChoices(choice));
                         break;
                     default:
@@ -1030,15 +1033,28 @@ namespace FplLS
         {
             var modChoices = new List<CompletionItem>();
             var ci = new CompletionItem();
-            ci.Detail = choice;
             ci.InsertText = " ";
             ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Text;
             ci.Detail = "(whitespace)";
+            ci.SortText = "zzzzzzzzz"; // make sure whitespaces appears at the end of any list.
             modChoices.Add(ci);
             return modChoices;
         }
 
+        private List<CompletionItem> AddDelegateChoices(string choice)
+        {
+            var modChoices = new List<CompletionItem>();
+            var word = StripQuotesOrBrackets(choice);
+            var ci = new CompletionItem();
+            ci.Detail = "delegate";
+            ci.InsertText = word + ".SomeExternalMethod(x,1)";
+            ci.Label = prefix + ci.InsertText;
+            ci.Kind = CompletionItemKind.Snippet;
+            modChoices.Add(ci);
+            return modChoices;
+        }
+        
         private List<CompletionItem> AddIso639Choices()
         {
             var modChoices = new List<CompletionItem>();
