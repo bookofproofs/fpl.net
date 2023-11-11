@@ -83,7 +83,7 @@ namespace FplLSTests
             Assert.AreEqual(2, counterRelatedOpt);
         }
 
-        [DataRow("prty", "property")]
+        [DataRow("prty", "pr")]
         [DataRow("property", "property")]
         [TestMethod]
         public void TestAddPropertyChoicesDetail(string choice, string l)
@@ -98,12 +98,12 @@ namespace FplLSTests
             {
                 Assert.IsTrue(item.Detail.Contains(l));
                 if (item.Detail.Contains("mandatory")) countMandatory++;
-                if (item.Detail.Contains("optional")) countOptional++;
-                if (item.Detail.Contains("object")) countObject++;
-                if (item.Detail.Contains("predicative")) countPredicative++;
-                if (item.Detail.Contains("functional")) countFunctional++;
+                if (item.Detail.Contains("opt")) countOptional++;
+                if (item.Detail.Contains("obj")) countObject++;
+                if (item.Detail.Contains("pred")) countPredicative++;
+                if (item.Detail.Contains("func")) countFunctional++;
             }
-            Assert.AreEqual(6, countMandatory);
+            Assert.AreEqual(3, countMandatory);
             Assert.AreEqual(6, countOptional);
             Assert.AreEqual(4, countObject);
             Assert.AreEqual(4, countPredicative);

@@ -92,21 +92,21 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestPremiseOrOtherPredicate01 () =
-        let result = run premiseOrOtherPredicate """pre"""
+        let result = run predicate """pre"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPremiseOrOtherPredicate02 () =
-        let result = run premiseOrOtherPredicate """premise """
+        let result = run predicate """premise """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPremiseOrOtherPredicate03 () =
-        let result = run premiseOrOtherPredicate """and(a,b)"""
+        let result = run predicate """and(a,b)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

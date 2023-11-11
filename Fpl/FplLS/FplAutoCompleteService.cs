@@ -371,79 +371,73 @@ namespace FplLS
             ciMandCl.Label = $"_ property object";
             ciMandCl.Detail = $"mandatory object property";
             ciMandCl.SortText = "property01";
-            if (word == "prty") { ciMandCl.SortText += "z"; ciMandCl.Detail += " (short)"; ciMandCl.Label = ciMandCl.Label.Replace("property", "prty").Replace("object", "obj"); }
-            ciMandCl.Kind = CompletionItemKind.Field;
+            if (word == "prty") { ciMandCl.SortText = "z" + ciMandCl.SortText; ciMandCl.Detail += " (short)"; ciMandCl.Label = ciMandCl.Label.Replace("property", "prty").Replace("object", "obj"); }
             modChoices.Add(ciMandCl);
             var ciMandPr = GetCompletionItem(word, GetPredicateInstanceSnippet(word, false));
             ciMandPr.Label = $"_ property predicate";
             ciMandPr.Detail = $"mandatory predicative property";
             ciMandPr.SortText = "property02";
-            if (word == "prty") { ciMandPr.SortText += "z"; ciMandPr.Detail += " (short)"; ciMandPr.Label = ciMandPr.Label.Replace("property", "prty").Replace("predicate", "pred"); }
-            ciMandPr.Kind = CompletionItemKind.Field;
+            if (word == "prty") { ciMandPr.SortText = "z" + ciMandPr.SortText; ciMandPr.Detail += " (short)"; ciMandPr.Label = ciMandPr.Label.Replace("property", "prty").Replace("predicate", "pred"); }
             modChoices.Add(ciMandPr);
             var ciMandFu = GetCompletionItem(word, GetFunctionalTermInstanceSnippet(word, false));
             ciMandFu.Label = $"_ property function";
             ciMandFu.Detail = $"mandatory functional property";
             ciMandFu.SortText = "property03";
-            if (word == "prty") { ciMandFu.SortText += "z"; ciMandFu.Detail += " (short)"; ciMandFu.Label = ciMandFu.Label.Replace("property", "prty").Replace("function", "func"); }
-            ciMandFu.Kind = CompletionItemKind.Field;
+            if (word == "prty") { ciMandFu.SortText = "z" + ciMandFu.SortText; ciMandFu.Detail += " (short)"; ciMandFu.Label = ciMandFu.Label.Replace("property", "prty").Replace("function", "func"); }
             modChoices.Add(ciMandFu);
             var ciOptCl = GetCompletionItem(word, GetClassInstanceSnippet(word, true, out string optOpt, out string objOpt));
             ciOptCl.Label = $"_ property optional object";
             ciOptCl.Detail = $"optional object property";
             ciOptCl.SortText = "property04";
-            if (word == "prty") { ciOptCl.SortText += "z"; ciOptCl.Detail += " (short)"; ciOptCl.Label = ciOptCl.Label.Replace("property", "prty").Replace("object", "obj").Replace("optional", "opt"); }
-            ciOptCl.Kind = CompletionItemKind.Field;
+            if (word == "prty") { ciOptCl.SortText = "z" + ciOptCl.SortText; ciOptCl.Detail += " (short)"; ciOptCl.Label = ciOptCl.Label.Replace("property", "prty").Replace("object", "obj").Replace("optional", "opt"); }
             modChoices.Add(ciOptCl);
             var ciOptPr = GetCompletionItem(word, GetPredicateInstanceSnippet(word, true));
             ciOptPr.Label = $"_ property optional predicate";
             ciOptPr.Detail = $"optional predicative property";
             ciOptPr.SortText = "property05";
-            if (word == "prty") { ciOptPr.SortText += "z"; ciOptPr.Detail += " (short)"; ciOptPr.Label = ciOptPr.Label.Replace("property", "prty").Replace("predicate", "pred").Replace("optional", "opt"); }
-            ciOptCl.Kind = CompletionItemKind.Field;
+            if (word == "prty") { ciOptPr.SortText = "z" + ciOptPr.SortText; ciOptPr.Detail += " (short)"; ciOptPr.Label = ciOptPr.Label.Replace("property", "prty").Replace("predicate", "pred").Replace("optional", "opt"); }
             modChoices.Add(ciOptPr);
             var ciOptFu = GetCompletionItem(word, GetFunctionalTermInstanceSnippet(word, true));
             ciOptFu.Label = $"_ property optional function";
             ciOptFu.Detail = $"optional functional property";
             ciOptFu.SortText = "property06";
-            if (word == "prty") { ciOptFu.SortText += "z"; ciOptFu.Detail += " (short)"; ciOptFu.Label = ciOptFu.Label.Replace("property", "prty").Replace("function", "func").Replace("optional", "opt"); }
-            ciOptFu.Kind = CompletionItemKind.Field;
+            if (word == "prty") { ciOptFu.SortText = "z" + ciOptFu.SortText; ciOptFu.Detail += " (short)"; ciOptFu.Label = ciOptFu.Label.Replace("property", "prty").Replace("function", "func").Replace("optional", "opt"); }
             modChoices.Add(ciOptFu);
             // keyword
             var ciMandClKw = GetCompletionItem(word);
-            ciMandClKw.Label = ciMandCl.Label;
-            ciMandClKw.InsertText = prefix + ciMandClKw.InsertText;
-            ciMandClKw.Detail = ciMandCl.Detail;
+            ciMandClKw.InsertText = ciMandCl.Label.Substring(2);
+            ciMandClKw.Label = prefix + ciMandClKw.InsertText;
+            ciMandClKw.Detail = $"keywords '{ciMandClKw.InsertText}'";
             ciMandClKw.SortText = "zzz" + ciMandCl.SortText;
             modChoices.Add(ciMandClKw);
             var ciMandPrKw = GetCompletionItem(word);
-            ciMandPrKw.Label = ciMandPr.Label;
-            ciMandPrKw.InsertText = prefix + ciMandPrKw.InsertText;
-            ciMandPrKw.Detail = ciMandPr.Detail;
+            ciMandPrKw.InsertText = ciMandPr.Label.Substring(2);
+            ciMandPrKw.Label = prefix + ciMandPrKw.InsertText;
+            ciMandPrKw.Detail = $"keywords '{ciMandPrKw.InsertText}'";
             ciMandPrKw.SortText = "zzz" + ciMandPr.SortText;
             modChoices.Add(ciMandPrKw);
             var ciMandFuKw = GetCompletionItem(word);
-            ciMandFuKw.Label = ciMandFu.Label;
-            ciMandFuKw.InsertText = prefix + ciMandFuKw.InsertText;
-            ciMandFuKw.Detail = ciMandFu.Detail;
+            ciMandFuKw.InsertText = ciMandFu.Label.Substring(2);
+            ciMandFuKw.Label = prefix + ciMandFuKw.InsertText;
+            ciMandFuKw.Detail = $"keywords '{ciMandFuKw.InsertText}'";
             ciMandFuKw.SortText = "zzz" + ciMandFu.SortText;
             modChoices.Add(ciMandFuKw);
             var ciOptClKw = GetCompletionItem(word);
-            ciOptClKw.Label = ciOptCl.Label;
-            ciOptClKw.InsertText = prefix + ciOptClKw.InsertText;
-            ciOptClKw.Detail = ciOptCl.Detail;
+            ciOptClKw.InsertText = ciOptCl.Label.Substring(2);
+            ciOptClKw.Label = prefix + ciOptClKw.InsertText;
+            ciOptClKw.Detail = $"keywords '{ciOptClKw.InsertText}'";
             ciOptClKw.SortText = "zzz" + ciOptCl.SortText;
             modChoices.Add(ciOptClKw);
             var ciOptPrKw = GetCompletionItem(word);
-            ciOptPrKw.Label = ciOptPr.Label;
-            ciOptPrKw.InsertText = prefix + ciOptPrKw.InsertText;
-            ciOptPrKw.Detail = ciOptPr.Detail;
+            ciOptPrKw.InsertText = ciOptPr.Label.Substring(2);
+            ciOptPrKw.Label = prefix + ciOptPrKw.InsertText;
+            ciOptPrKw.Detail = $"keywords '{ciOptPrKw.InsertText}'";
             ciOptPrKw.SortText = "zzz" + ciOptPr.SortText;
             modChoices.Add(ciOptPrKw);
             var ciOptFuKw = GetCompletionItem(word);
-            ciOptFuKw.Label = ciOptFu.Label;
-            ciOptFuKw.InsertText = prefix + ciOptFuKw.InsertText;
-            ciOptFuKw.Detail = ciOptFu.Detail;
+            ciOptFuKw.InsertText = ciOptFu.Label.Substring(2);
+            ciOptFuKw.Label = prefix + ciOptFuKw.InsertText;
+            ciOptFuKw.Detail = $"keywords '{ciOptFuKw.InsertText}'";
             ciOptFuKw.SortText = "zzz" + ciOptFu.SortText;
             modChoices.Add(ciOptFuKw);
             return modChoices;
@@ -1008,7 +1002,7 @@ namespace FplLS
             ci.Detail = word;
             ci.InsertText = "123";
             ci.Label = prefix + ci.InsertText;
-            ci.Kind = CompletionItemKind.Value;
+            ci.Kind = CompletionItemKind.Text;
             modChoices.Add(ci);
             return modChoices;
         }
@@ -1992,12 +1986,12 @@ namespace FplLS
                 case "prty":
                     ret.Detail = "property (short form)";
                     ret.SortText = "property02";
-                    ret.Kind = CompletionItemKind.Field;
+                    ret.Kind = CompletionItemKind.Value;
                     break;
                 case "property":
                     ret.Detail = "property";
                     ret.SortText = "property01";
-                    ret.Kind = CompletionItemKind.Field;
+                    ret.Kind = CompletionItemKind.Value;
                     break;
                 case "prf":
                     ret.Detail = "proof (short form)";

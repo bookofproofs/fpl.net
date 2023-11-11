@@ -321,6 +321,8 @@ let dotted = dot >>. predicateWithQualification
 let qualification = choice [boundedRange ; bracketedCoords ; argumentTuple] 
 predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) .>>. opt dotted |>> Ast.PredicateWithQualification 
 
+let premiseOfToBeProvedTheorem = positions keywordPremise |>> Ast.PremiseReference 
+let conclusionOfToBeProvedTheorem = positions keywordConclusion |>> Ast.ConclusionReference 
 primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
@@ -328,6 +330,8 @@ primePredicateRef.Value <- choice [
     attempt argumentIdentifier
     fplDelegate 
     predicateWithQualification
+    premiseOfToBeProvedTheorem
+    conclusionOfToBeProvedTheorem
 ]
 
 let conjunction = positions ((keywordAnd >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.And
@@ -463,19 +467,15 @@ let propertyList = opt (many1 (property .>> IW))
 // justifying proof arguments can be the identifiers of Rules of References, conjectures, theorem-like statements, or axioms
 let keywordRevoke = (skipString "revoke" <|> skipString "rev") .>> SW 
 let revokeArgument = positions (keywordRevoke >>. argumentIdentifier) |>> Ast.RevokeArgument 
-let premiseOfToBeProvedTheorem = positions keywordPremise |>> Ast.PremiseReference 
-let conclusionOfToBeProvedTheorem = positions keywordConclusion |>> Ast.ConclusionReference 
-let premiseOrOtherPredicate = premiseOfToBeProvedTheorem <|> predicate
     
 let keywordAssume = skipString "assume" <|> skipString "ass" .>> SW 
-let assumeArgument = positions (keywordAssume >>. premiseOrOtherPredicate) |>> Ast.AssumeArgument
+let assumeArgument = positions (keywordAssume >>. predicate) |>> Ast.AssumeArgument
 let keywordTrivial  = positions (skipString "trivial") .>> IW |>> Ast.Trivial
 let keywordQed  = positions (skipString "qed") .>> IW |>> Ast.Qed
 let derivedPredicate = predicate |>> Ast.DerivedPredicate
 let derivedArgument = choice [
     keywordQed 
     keywordTrivial 
-    conclusionOfToBeProvedTheorem 
     derivedPredicate
 ]
 
@@ -688,8 +688,8 @@ let parserDiagnostics = ad
 
 /// Returns the parser choices at position (if any).
 let getParserChoicesAtPosition (input:string) index =
-   
-    match run ast (input.Substring(0,index)) with
+    let newInput = preParsePreProcess input
+    match run ast (newInput.Substring(0, index)) with
     | Success(result, restInput, userState) -> 
         // In the success case, we always return the current parser position in the input
         List.empty, userState.Index
