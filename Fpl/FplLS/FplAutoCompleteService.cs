@@ -3,12 +3,13 @@ using Microsoft.FSharp.Core;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using System.ComponentModel.Design;
 using System.Data;
+using System.Diagnostics.Tracing;
 using System.Text;
 
 
 namespace FplLS
 {
-    public enum KeywordKind 
+    public enum KeywordKind
     {
         Short,
         Long,
@@ -37,6 +38,7 @@ namespace FplLS
             foreach (var choice in choices)
             {
                 var word = StripQuotesOrBrackets(choice);
+                CompletionItem defaultCi = GetDetail(word);
                 switch (word)
                 {
                     case "ISO 639 language code":
@@ -67,20 +69,20 @@ namespace FplLS
                     case "word":
                         modChoices.AddRange(AddWordChoices(word));
                         break;
-                    case "<variable>":
-                    case "<variable (got keyword)>":
-                    case "<variable (got template)>":
+                    case "variable":
+                    case "variable (got keyword)":
+                    case "variable (got template)":
                         modChoices.AddRange(AddVariableChoices(word));
                         break;
-                    case "<PascalCaseId>":
+                    case "PascalCaseId":
                         modChoices.AddRange(AddPascalCaseIdChoices(word));
                         break;
                     case "del":
                     case "delegate":
-                        modChoices.AddRange(AddDelegateChoices(word));
+                        modChoices.AddRange(AddDelegateChoices(word, defaultCi));
                         break;
                     case "is":
-                        modChoices.AddRange(AddIsOperatorChoices(word));
+                        modChoices.AddRange(AddIsOperatorChoices(word, defaultCi));
                         break;
                     case "alias":
                     case "assert":
@@ -112,9 +114,12 @@ namespace FplLS
                     case "return":
                     case "rev":
                     case "revoke":
-                    case "self":
                     case "trivial":
-                        modChoices.AddRange(AddKeywordChoices(word));
+                        modChoices.AddRange(AddKeywordChoices(word, defaultCi));
+                        break;
+                    case "self":
+                    case "@":
+                        modChoices.AddRange(AddSelfChoices(word));
                         break;
                     case "true":
                     case "false":
@@ -318,7 +323,7 @@ namespace FplLS
         {
             if (word.Contains("all"))
                 ci.Detail = ci.Detail.Replace("exists", "all");
-            else if (word.Contains("exn")) 
+            else if (word.Contains("exn"))
                 ci.Detail = ci.Detail.Replace("exists", "exists n-times");
         }
 
@@ -338,27 +343,30 @@ namespace FplLS
             var modChoices = new List<CompletionItem>();
             // snippet
             var ciMandCl = GetCompletionItem(word, GetClassInstanceSnippet(word, false, out string optMand, out string objMand));
-            ciMandCl.Label += $"{prefix}{objMand}";
+            ciMandCl.Label = ciMandCl.InsertText.Split(" ")[0] + " " + ciMandCl.InsertText.Split(" ")[1];
             ciMandCl.Detail = $"mandatory object property";
             modChoices.Add(ciMandCl);
             var ciMandPr = GetCompletionItem(word, GetPredicateInstanceSnippet(word, false));
-            ciMandPr.Label += $"{prefix}{objMand}";
+            ciMandPr.Label = ciMandPr.InsertText.Split(" ")[0] + " " + ciMandPr.InsertText.Split(" ")[1];
             ciMandPr.Detail = $"mandatory predicative property";
             modChoices.Add(ciMandPr);
             var ciMandFu = GetCompletionItem(word, GetFunctionalTermInstanceSnippet(word, false));
-            ciMandFu.Label += $"{prefix}{objMand}";
+            ciMandFu.Label = ciMandFu.InsertText.Split(" ")[0] + " " + ciMandFu.InsertText.Split(" ")[1];
             ciMandFu.Detail = $"mandatory functional property";
             modChoices.Add(ciMandFu);
             var ciOptCl = GetCompletionItem(word, GetClassInstanceSnippet(word, true, out string optOpt, out string objOpt));
-            ciOptCl.Label += $"{prefix}{optOpt} {objOpt}";
+            ciOptCl.Label = ciOptCl.InsertText.Split(" ")[0] + $" {optOpt} " + ciOptCl.InsertText.Split(" ")[1];
+            ciOptCl.Label += $" {optOpt} {objOpt}";
             ciOptCl.Detail = $"optional object property";
             modChoices.Add(ciOptCl);
             var ciOptPr = GetCompletionItem(word, GetPredicateInstanceSnippet(word, true));
-            ciOptPr.Label += $"{prefix}{optOpt} {objOpt}";
+            ciOptPr.Label = ciOptPr.InsertText.Split(" ")[0] + $" {optOpt} " + ciOptPr.InsertText.Split(" ")[1];
+            ciOptPr.Label += $" {optOpt} {objOpt}";
             ciOptPr.Detail = $"optional predicative property";
             modChoices.Add(ciOptPr);
             var ciOptFu = GetCompletionItem(word, GetFunctionalTermInstanceSnippet(word, true));
-            ciOptFu.Label += $"{prefix}{optOpt} {objOpt}";
+            ciOptFu.Label = ciOptFu.InsertText.Split(" ")[0] + $" {optOpt} " + ciOptFu.InsertText.Split(" ")[1];
+            ciOptFu.Label += $" {optOpt} {objOpt}";
             ciOptFu.Detail = $"optional functional property";
             modChoices.Add(ciOptFu);
             // keyword
@@ -434,7 +442,7 @@ namespace FplLS
             modChoices.Add(ci2);
             return modChoices;
         }
-        
+
 
         public static List<CompletionItem> AddDefinitionChoices(string word)
         {
@@ -480,7 +488,7 @@ namespace FplLS
 
         private static void SetIntrinsicDefinitionProperty(string word, string subType, CompletionItem ci)
         {
-            
+
             ci.SortText += subType;
             var newSubType = GetDefinitionSubtypeDependingOnLengthChoice(word, subType, out bool isShort, out string intrinsic, out string objtype);
             ci.Label += $" {newSubType}";
@@ -704,7 +712,7 @@ namespace FplLS
         private static string GetDeclarationSnippet(string word)
         {
 
-            var objStr = GetObjectTypeDependingOnLengthChoice(word); 
+            var objStr = GetObjectTypeDependingOnLengthChoice(word);
 
             return
                 $"{Environment.NewLine}{word}" +
@@ -1005,22 +1013,47 @@ namespace FplLS
             ci.InsertText = "SomeFplIdentifier";
             ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Reference;
-             modChoices.Add(ci);
-            return modChoices;
-        }
-
-
-        private List<CompletionItem> AddKeywordChoices(string word)
-        {
-            var modChoices = new List<CompletionItem>();
-            var ci = new CompletionItem();
-            ci.InsertText = word;
-            ci.Label = prefix + ci.InsertText;
-            ci.Detail = $"keyword '{word}'";
-            ci.Kind = CompletionItemKind.Keyword;
             modChoices.Add(ci);
             return modChoices;
         }
+
+
+        private List<CompletionItem> AddKeywordChoices(string word, CompletionItem defaultCi)
+        {
+            var modChoices = new List<CompletionItem>();
+            defaultCi.InsertText = word;
+            defaultCi.Label = prefix + defaultCi.InsertText;
+            defaultCi.Kind = CompletionItemKind.Keyword;
+            modChoices.Add(defaultCi);
+            return modChoices;
+        }
+
+        private List<CompletionItem> AddSelfChoices(string word)
+        {
+            var modChoices = new List<CompletionItem>();
+            if (word == "self")
+            {
+                var ci = new CompletionItem();
+                ci.Detail = "self reference";
+                ci.InsertText = "self";
+                ci.Label = prefix + ci.InsertText;
+                ci.Kind = CompletionItemKind.Reference;
+                ci.SortText = "self01";
+                modChoices.Add(ci);
+            }
+            if (word == "@")
+            {
+                var ci = new CompletionItem();
+                ci.Detail = "parent self reference";
+                ci.InsertText = "@self";
+                ci.Label = prefix + ci.InsertText;
+                ci.Kind = CompletionItemKind.Reference;
+                ci.SortText = "self02";
+                modChoices.Add(ci);
+            }
+            return modChoices;
+        }
+
         private List<CompletionItem> AddWhitespaceChoices()
         {
             var modChoices = new List<CompletionItem>();
@@ -1029,42 +1062,40 @@ namespace FplLS
             ci.Label = prefix + ci.InsertText;
             ci.Kind = CompletionItemKind.Text;
             ci.Detail = "(whitespace)";
-            ci.SortText = "zzzzzzzzz"; // make sure whitespaces appears at the end of any list.
+            ci.SortText = "zzzz"; // make sure whitespaces appear at the end of any list.
             modChoices.Add(ci);
             return modChoices;
         }
 
-        private List<CompletionItem> AddDelegateChoices(string word)
+        private List<CompletionItem> AddDelegateChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
-            var ci = new CompletionItem();
-            ci.Detail = "delegate";
-            ci.InsertText = word + ".SomeExternalMethod(x,1)";
-            ci.Label = prefix + ci.InsertText;
-            ci.Kind = CompletionItemKind.Snippet;
-            modChoices.Add(ci);
+            defaultCi.InsertText = word + ".SomeExternalMethod(x,1)";
+            defaultCi.Label = prefix + defaultCi.InsertText;
+            defaultCi.Kind = CompletionItemKind.Reference;
+            modChoices.Add(defaultCi);
             return modChoices;
         }
 
-        private List<CompletionItem> AddIsOperatorChoices(string word)
+        private List<CompletionItem> AddIsOperatorChoices(string word, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
-            var ci = new CompletionItem();
-            ci.Detail = "is operator";
-            ci.InsertText = word + "(x, SomeFplType)";
-            ci.Label = prefix + ci.InsertText;
-            ci.Kind = CompletionItemKind.Snippet;
-            modChoices.Add(ci);
+            defaultCi.Detail = "is operator";
+            defaultCi.InsertText = word + "(x, SomeFplType)";
+            defaultCi.Label = prefix + defaultCi.InsertText;
+            defaultCi.Kind = CompletionItemKind.Interface;
+            modChoices.Add(defaultCi);
 
             var ci1 = new CompletionItem();
             ci1.Detail = "keyword 'is'";
             ci1.InsertText = word;
             ci1.Label = prefix + ci1.InsertText;
             ci1.Kind = CompletionItemKind.Keyword;
+            ci1.SortText = "zzz" + defaultCi.SortText;
             modChoices.Add(ci1);
             return modChoices;
         }
-        
+
 
         private List<CompletionItem> AddIso639Choices()
         {
@@ -1575,421 +1606,420 @@ namespace FplLS
             return modChoices;
         }
 
-        public static string GetDetail(string word, out string sortText, out KeywordKind keywordKind)
+        public static CompletionItem GetDetail(string word)
         {
-            string ret;
+            CompletionItem ret = new CompletionItem();
             switch (word)
             {
                 case "alias":
-                    ret = "alias";
-                    sortText = "alias";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "alias";
+                    ret.SortText = "alias";
+                    ret.Kind = CompletionItemKind.Struct;
                     break;
                 case "all":
-                    ret = "predicate (all quantor)";
-                    sortText = "all";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (all quantor)";
+                    ret.SortText = "all";
+                    ret.Kind = CompletionItemKind.Operator;
                     break;
                 case "and":
-                    ret = "predicate (conjunction)";
-                    sortText = "and";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (conjunction)";
+                    ret.SortText = "and";
+                    ret.Kind = CompletionItemKind.Operator;
                     break;
                 case "ass":
-                    ret = "argument (assume, short form)";
-                    sortText = "assume02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "argument (assume, short form)";
+                    ret.SortText = "assume02";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "assert":
-                    ret = "statement (assert)";
-                    sortText = "assert";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "statement (assert)";
+                    ret.SortText = "assert";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "assume":
-                    ret = "argument (assume)";
-                    sortText = "assume01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "argument (assume)";
+                    ret.SortText = "assume01";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "ax":
-                    ret = "axiom (short form)";
-                    sortText = "axiom02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "axiom (short form)";
+                    ret.SortText = "axiom02";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "axiom":
-                    ret = "axiom";
-                    sortText = "axiom01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "axiom";
+                    ret.SortText = "axiom01";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "cases":
-                    ret = "statement (cases)";
-                    sortText = "cases";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "statement (cases)";
+                    ret.SortText = "cases";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "cl":
-                    ret = "class (short form)";
-                    sortText = "class02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "class (short form)";
+                    ret.SortText = "class02";
+                    ret.Kind = CompletionItemKind.TypeParameter;
                     break;
                 case "class":
-                    ret = "class";
-                    sortText = "class01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "class";
+                    ret.SortText = "class01";
+                    ret.Kind = CompletionItemKind.TypeParameter;
                     break;
                 case "con":
-                    ret = "conclusion (short form)";
-                    sortText = "conclusion02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "conclusion (short form)";
+                    ret.SortText = "conclusion02";
+                    ret.Kind = CompletionItemKind.Struct;
                     break;
                 case "conclusion":
-                    ret = "conclusion";
-                    sortText = "conclusion01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "conclusion";
+                    ret.SortText = "conclusion01";
+                    ret.Kind = CompletionItemKind.Struct;
                     break;
                 case "cor":
-                    ret = "corollary (short form)";
-                    sortText = "corollary02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "corollary (short form)";
+                    ret.SortText = "corollary02";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "corollary":
-                    ret = "corollary";
-                    sortText = "corollary01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "corollary";
+                    ret.SortText = "corollary01";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "conj":
-                    ret = "conjecture (short form)";
-                    sortText = "conjecture02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "conjecture (short form)";
+                    ret.SortText = "conjecture02";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "conjecture":
-                    ret = "conjecture";
-                    sortText = "conjecture01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "conjecture";
+                    ret.SortText = "conjecture01";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "ctr":
-                    ret = "constructor (short form)";
-                    sortText = "constructor02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "constructor (short form)";
+                    ret.SortText = "constructor02";
+                    ret.Kind = CompletionItemKind.Constructor;
                     break;
                 case "constructor":
-                    ret = "constructor";
-                    sortText = "constructor01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "constructor";
+                    ret.SortText = "constructor01";
+                    ret.Kind = CompletionItemKind.Constructor;
                     break;
                 case "dec":
-                    ret = "declaration (short form)";
-                    sortText = "declaration02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "declaration (short form)";
+                    ret.SortText = "declaration02";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "declaration":
-                    ret = "declaration";
-                    sortText = "declaration01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "declaration";
+                    ret.SortText = "declaration01";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "del":
-                    ret = "delegate (short form)";
-                    sortText = "delegate02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "delegate (short form)";
+                    ret.SortText = "delegate02";
+                    ret.Kind = CompletionItemKind.Event;
                     break;
                 case "delegate":
-                    ret = "delegate";
-                    sortText = "delegate01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "delegate";
+                    ret.SortText = "delegate01";
+                    ret.Kind = CompletionItemKind.Event;
                     break;
                 case "def":
-                    ret = "definition (short form)";
-                    sortText = "definition02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "definition (short form)";
+                    ret.SortText = "definition02";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "definition":
-                    ret = "definition";
-                    sortText = "definition01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "definition";
+                    ret.SortText = "definition01";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "end":
-                    ret = "extension (end of)";
-                    sortText = "end";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "extension (end of)";
+                    ret.SortText = "end";
+                    ret.Kind = CompletionItemKind.Struct;
                     break;
                 case "ex":
-                    ret = "predicate (exists quantor)";
-                    sortText = "ex";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (exists quantor)";
+                    ret.SortText = "ex";
+                    ret.Kind = CompletionItemKind.Operator;
                     break;
                 case "exn":
-                    ret = "predicate (exists n-times quantor)";
-                    sortText = "exn";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (exists n-times quantor)";
+                    ret.SortText = "exn";
+                    ret.Kind = CompletionItemKind.Operator;
                     break;
                 case "exn!":
-                    ret = "predicate (exists n-times quantor)";
-                    sortText = "exn!";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (exists n-times quantor)";
+                    ret.SortText = "exn!";
+                    ret.Kind = CompletionItemKind.Operator;
                     break;
                 case "ext":
-                    ret = "extension (beginning of)";
-                    sortText = "ext";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "extension (beginning of)";
+                    ret.SortText = "ext";
+                    ret.Kind = CompletionItemKind.Struct;
                     break;
                 case "false":
-                    ret = "predicate (false)";
-                    sortText = "false";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (false)";
+                    ret.SortText = "false";
+                    ret.Kind = CompletionItemKind.Constant;
                     break;
                 case "for":
-                    ret = "statement (for loop)";
-                    sortText = "for";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "statement (for loop)";
+                    ret.SortText = "for";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "func":
-                    ret = "type (functional term, short form)";
-                    sortText = "function02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "type (functional term, short form)";
+                    ret.SortText = "function02";
+                    ret.Kind = CompletionItemKind.TypeParameter;
                     break;
                 case "function":
-                    ret = "type (functional term)";
-                    sortText = "function01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "type (functional term)";
+                    ret.SortText = "function01";
+                    ret.Kind = CompletionItemKind.TypeParameter;
                     break;
                 case "iif":
-                    ret = "predicate (equivalence, <=>)";
-                    sortText = "iif";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (equivalence, <=>)";
+                    ret.SortText = "iif";
+                    ret.Kind = CompletionItemKind.Operator;
                     break;
                 case "impl":
-                    ret = "predicate (implication, =>)";
-                    sortText = "impl";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (implication, =>)";
+                    ret.SortText = "impl";
+                    ret.Kind = CompletionItemKind.Operator;
                     break;
                 case "in":
-                    ret = "clause (in type or in range)";
-                    sortText = "in";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "clause (in type or in range)";
+                    ret.SortText = "in";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "ind":
-                    ret = "type (index, short form)";
-                    sortText = "index02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "type (index, short form)";
+                    ret.SortText = "index02";
+                    ret.Kind = CompletionItemKind.TypeParameter;
                     break;
                 case "index":
-                    ret = "type (index)";
-                    sortText = "index01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "type (index)";
+                    ret.SortText = "index01";
+                    ret.Kind = CompletionItemKind.TypeParameter;
                     break;
                 case "inf":
-                    ret = "rule of inference (short form)";
-                    sortText = "inference02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "rule of inference (short form)";
+                    ret.SortText = "inference02";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "inference":
-                    ret = "rule of inference";
-                    sortText = "inference01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "rule of inference";
+                    ret.SortText = "inference01";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "intr":
-                    ret = "intrinsic (short form)";
-                    sortText = "intrinsic02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "intrinsic (short form)";
+                    ret.SortText = "intrinsic02";
+                    ret.Kind = CompletionItemKind.Struct;
                     break;
                 case "intrinsic":
-                    ret = "intrinsic";
-                    sortText = "intrinsic01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "intrinsic";
+                    ret.SortText = "intrinsic01";
+                    ret.Kind = CompletionItemKind.Struct;
                     break;
                 case "is":
-                    ret = "predicate (is of type)";
-                    sortText = "is";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (is of type)";
+                    ret.SortText = "is";
+                    ret.Kind = CompletionItemKind.Interface;
                     break;
                 case "lem":
-                    ret = "lemma (short form)";
-                    sortText = "lemma02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "lemma (short form)";
+                    ret.SortText = "lemma02";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "lemma":
-                    ret = "lemma";
-                    sortText = "lemma01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "lemma";
+                    ret.SortText = "lemma01";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "loc":
-                    ret = "localization (short form)";
-                    sortText = "localization02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "localization (short form)";
+                    ret.SortText = "localization02";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "localization":
-                    ret = "localization";
-                    sortText = "localization01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "localization";
+                    ret.SortText = "localization01";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "not":
-                    ret = "predicate (negation)";
-                    sortText = "not";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (negation)";
+                    ret.SortText = "not";
+                    ret.Kind = CompletionItemKind.Operator;
                     break;
                 case "obj":
-                    ret = "type (object, short form)";
-                    sortText = "object02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "type (object, short form)";
+                    ret.SortText = "object02";
+                    ret.Kind = CompletionItemKind.TypeParameter;
                     break;
                 case "object":
-                    ret = "type (object)";
-                    sortText = "object01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "type (object)";
+                    ret.SortText = "object01";
+                    ret.Kind = CompletionItemKind.TypeParameter;
                     break;
                 case "opt":
-                    ret = "optional (short form)";
-                    sortText = "optional02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "optional (short form)";
+                    ret.SortText = "optional02";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "optional":
-                    ret = "optional";
-                    sortText = "optional01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "optional";
+                    ret.SortText = "optional01";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "or":
-                    ret = "predicate (disjunction)";
-                    sortText = "or";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (disjunction)";
+                    ret.SortText = "or";
+                    ret.Kind = CompletionItemKind.Operator;
                     break;
                 case "post":
-                    ret = "postulate (short form)";
-                    sortText = "postulate02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "postulate (short form)";
+                    ret.SortText = "postulate02";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "postulate":
-                    ret = "postulate";
-                    sortText = "postulate01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "postulate";
+                    ret.SortText = "postulate01";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "pre":
-                    ret = "premise (short form)";
-                    sortText = "premise02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "premise (short form)";
+                    ret.SortText = "premise02";
+                    ret.Kind = CompletionItemKind.Struct;
                     break;
                 case "pred":
-                    ret = "type (predicate, short form)";
-                    sortText = "predicate02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "type (predicate, short form)";
+                    ret.SortText = "predicate02";
+                    ret.Kind = CompletionItemKind.TypeParameter;
                     break;
                 case "predicate":
-                    ret = "type (predicate)";
-                    sortText = "predicate01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "type (predicate)";
+                    ret.SortText = "predicate01";
+                    ret.Kind = CompletionItemKind.TypeParameter;
                     break;
                 case "premise":
-                    ret = "premise";
-                    sortText = "premise01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "premise";
+                    ret.SortText = "premise01";
+                    ret.Kind = CompletionItemKind.Struct;
                     break;
                 case "prop":
-                    ret = "proposition (short form)";
-                    sortText = "proposition02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "proposition (short form)";
+                    ret.SortText = "proposition02";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "proposition":
-                    ret = "proposition";
-                    sortText = "proposition01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "proposition";
+                    ret.SortText = "proposition01";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "prty":
-                    ret = "property (short form)";
-                    sortText = "property02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "property (short form)";
+                    ret.SortText = "property02";
+                    ret.Kind = CompletionItemKind.Field;
                     break;
                 case "property":
-                    ret = "property";
-                    sortText = "property01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "property";
+                    ret.SortText = "property01";
+                    ret.Kind = CompletionItemKind.Field;
                     break;
                 case "prf":
-                    ret = "proof (short form)";
-                    sortText = "proof02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "proof (short form)";
+                    ret.SortText = "proof02";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "proof":
-                    ret = "proof";
-                    sortText = "proof01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "proof";
+                    ret.SortText = "proof01";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "qed":
-                    ret = "conclusion (quod erat demonstrandum)";
-                    sortText = "qed";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "(quod erat demonstrandum)";
+                    ret.SortText = "qed";
+                    ret.Kind = CompletionItemKind.Text;
                     break;
                 case "ret":
-                    ret = "statement (return, short form)";
-                    sortText = "return02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "statement (return, short form)";
+                    ret.SortText = "return02";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "return":
-                    ret = "statement (return)";
-                    sortText = "return01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "statement (return)";
+                    ret.SortText = "return01";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "rev":
-                    ret = "argument (revoke, short form)";
-                    sortText = "revoke02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "argument (revoke, short form)";
+                    ret.SortText = "revoke02";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "revoke":
-                    ret = "argument (revoke)";
-                    sortText = "revoke";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "argument (revoke)";
+                    ret.SortText = "revoke01";
+                    ret.Kind = CompletionItemKind.Property;
                     break;
                 case "self":
-                    ret = "reference (to self)";
-                    sortText = "self";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "reference (to self)";
+                    ret.SortText = "self";
+                    ret.Kind = CompletionItemKind.Reference;
                     break;
                 case "thm":
-                    ret = "theorem (short form)";
-                    sortText = "theorem02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "theorem (short form)";
+                    ret.SortText = "theorem02";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "theorem":
-                    ret = "theorem";
-                    sortText = "theorem01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "theorem";
+                    ret.SortText = "theorem01";
+                    ret.Kind = CompletionItemKind.Class;
                     break;
                 case "true":
-                    ret = "predicate (true)";
-                    sortText = "true";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (true)";
+                    ret.SortText = "true";
+                    ret.Kind = CompletionItemKind.Constant;
                     break;
                 case "trivial":
-                    ret = "argument (trivial)";
-                    sortText = "trivial";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "argument (trivial)";
+                    ret.SortText = "trivial";
+                    ret.Kind = CompletionItemKind.Text;
                     break;
                 case "undef":
-                    ret = "undefined (short form)";
-                    sortText = "undefined02";
-                    keywordKind = KeywordKind.Short;
+                    ret.Detail = "undefined (short form)";
+                    ret.SortText = "undefined02";
+                    ret.Kind = CompletionItemKind.Constant;
                     break;
                 case "undefined":
-                    ret = "undefined";
-                    sortText = "undefined01";
-                    keywordKind = KeywordKind.Long;
+                    ret.Detail = "undefined";
+                    ret.SortText = "undefined01";
+                    ret.Kind = CompletionItemKind.Constant;
                     break;
                 case "uses":
-                    ret = "clause (uses)";
-                    sortText = "uses";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "clause (uses)";
+                    ret.SortText = "uses";
+                    ret.Kind = CompletionItemKind.Module;
                     break;
                 case "xor":
-                    ret = "predicate (exclusive or)";
-                    sortText = "xor";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "predicate (exclusive or)";
+                    ret.SortText = "xor";
+                    ret.Kind = CompletionItemKind.Operator;
                     break;
                 default:
-                    ret = "";
-                    sortText = "";
-                    keywordKind = KeywordKind.EitherNor;
+                    ret.Detail = "";
+                    ret.SortText = "";
                     break;
             }
             return ret;
         }
 
-        private static string StripQuotesOrBrackets(string str)
+        public static string StripQuotesOrBrackets(string str)
         {
             if (str.StartsWith("'") && str.EndsWith("'") || str.StartsWith("<") && str.EndsWith(">"))
             {
@@ -2004,21 +2034,12 @@ namespace FplLS
 
         public static CompletionItem GetCompletionItem(string word, string insertText = "")
         {
-            var ret = new CompletionItem();
-            ret.Detail = FplAutoCompleteService.GetDetail(word, out string sortText, out KeywordKind keywordKind);
+            var ret = FplAutoCompleteService.GetDetail(word);
             if (insertText != "")
             {
                 ret.InsertText = insertText.Replace("<replace>", word);
                 ret.Label = prefix + word;
                 ret.Kind = CompletionItemKind.Snippet;
-                if (ret.Detail.Contains("short"))
-                {
-                    ret.SortText = sortText + "03";
-                }
-                else
-                {
-                    ret.SortText = sortText + "01";
-                }
             }
             else
             {
@@ -2026,14 +2047,7 @@ namespace FplLS
                 ret.InsertText = word;
                 ret.Label = prefix + ret.InsertText;
                 ret.Detail = $"keyword '{word}'";
-                if (ret.Detail.Contains("short"))
-                {
-                    ret.SortText = sortText + "04";
-                }
-                else
-                {
-                    ret.SortText = sortText + "02";
-                }
+                ret.SortText = "zzz" + ret.SortText; // display keywords later as non-keywords
             }
             return ret;
         }
