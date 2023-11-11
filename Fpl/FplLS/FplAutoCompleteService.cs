@@ -844,11 +844,11 @@ namespace FplLS
                 $"{Environment.NewLine}";
         }
 
-        private List<CompletionItem> AddTheoremLikeStatementChoices(string word, string example, CompletionItem defaultCi)
+        public static List<CompletionItem> AddTheoremLikeStatementChoices(string word, string example, CompletionItem defaultCi)
         {
             var modChoices = new List<CompletionItem>();
             // snippets
-            defaultCi.InsertText = $"<replace> SomeFpl{example} (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine;
+            defaultCi.InsertText = $"{word} SomeFpl{example} (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\tpre: true{Environment.NewLine}\tcon: true{Environment.NewLine}" + "}" + Environment.NewLine;
             modChoices.Add(defaultCi);
             // keywords
             modChoices.Add(GetCompletionItem(word));
