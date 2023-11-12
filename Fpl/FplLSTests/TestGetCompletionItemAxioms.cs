@@ -13,8 +13,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddAxiomChoicesNumber(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddAxiomChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             Assert.AreEqual(2, actual.Count);
         }
 
@@ -25,8 +25,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddAxiomKeywordCounts(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddAxiomChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
@@ -40,8 +40,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddAxiomChoicesSortText(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddAxiomChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.SortText.Contains("axiom"));
@@ -53,8 +53,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddPostulateChoicesSortText(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddAxiomChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.SortText.Contains("postulate"));
@@ -68,8 +68,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddAxiomChoicesLabel(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddAxiomChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
@@ -83,8 +83,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddAxiomChoicesDetail(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddAxiomChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.Detail.Contains(choice));
@@ -98,8 +98,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddAxiomChoicesInsertText(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddAxiomChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)
             {

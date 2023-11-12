@@ -18,7 +18,7 @@ namespace FplLSTests
         [DataRow("token>", "token>")]
         public void TestGetCompletionItemStrippingBracketsAndQuotes(string input, string expected)
         {
-            var actual = FplAutoCompleteService.StripQuotesOrBrackets(input);
+            var actual = FplCompletionItem.StripQuotesOrBrackets(input);
             Assert.AreEqual(expected, actual);
         }
 
@@ -350,7 +350,7 @@ namespace FplLSTests
         [DataRow("xor", "xor")]
         public void TestGetCompletionItemSortTextsForKeywords(string input, string expected)
         {
-            var actual = FplAutoCompleteService.GetCompletionItem(input);
+            var actual = new FplCompletionItem(input);
             Console.WriteLine(input);
             Assert.AreEqual(expected, actual.SortText.Replace("zzz", ""));
         }
@@ -438,7 +438,7 @@ namespace FplLSTests
         [DataRow("xor", "xor")]
         public void TestGetCompletionItemSortTextsForSnippets(string input, string expected)
         {
-            var actual = FplAutoCompleteService.GetCompletionItem(input, "xxx");
+            var actual = new FplCompletionItem(input, "xxx");
             Console.WriteLine(input);
             Assert.AreEqual(expected, actual.SortText);
         }

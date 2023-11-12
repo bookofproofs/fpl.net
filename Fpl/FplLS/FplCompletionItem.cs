@@ -37,48 +37,36 @@ namespace FplLS
             switch (Word)
             {
                 case "ISO 639 language code":
-                    modChoices.AddRange(AddIso639Choices());
-                    break;
+                    return new FplCompletionItemChoicesIso639().GetChoices(this);
                 case "whitespace":
                 case "significant whitespace":
-                    modChoices.AddRange(AddWhitespaceChoices());
-                    break;
+                    return new FplCompletionItemChoicesWhitespace().GetChoices(this);
                 case "(closed) left bound":
                 case "(open) left bound":
                 case "(open) right bound":
                 case "(closed) right bound":
-                    modChoices.AddRange(AddBoundChoices(word));
-                    break;
+                    return new FplCompletionItemChoicesBound().GetChoices(this);
                 case "digits":
-                    modChoices.AddRange(AddDigitsChoices(word));
-                    break;
+                    return new FplCompletionItemChoicesDigits().GetChoices(this);
                 case "argument identifier":
-                    modChoices.AddRange(AddArgumentIdentifierChoices(word));
-                    break;
+                    return new FplCompletionItemChoicesArgumentIdentifier().GetChoices(this);
                 case "language-specific string":
-                    modChoices.AddRange(AddLanguageSpecificStringChoices(word));
-                    break;
+                    return new FplCompletionItemChoicesString().GetChoices(this);
                 case "extension regex":
-                    modChoices.AddRange(AddExtensionRegexChoices(word));
-                    break;
+                    return new FplCompletionItemChoicesRegex().GetChoices(this);
                 case "word":
-                    modChoices.AddRange(AddWordChoices(word));
-                    break;
+                    return new FplCompletionItemChoicesWord().GetChoices(this);
                 case "variable":
                 case "variable (got keyword)":
                 case "variable (got template)":
-                    modChoices.AddRange(AddVariableChoices(word));
-                    break;
+                    return new FplCompletionItemChoicesVariable().GetChoices(this);
                 case "PascalCaseId":
-                    modChoices.AddRange(AddPascalCaseIdChoices(word));
-                    break;
+                    return new FplCompletionItemChoicesPascalCaseId().GetChoices(this);
                 case "del":
                 case "delegate":
-                    modChoices.AddRange(AddDelegateChoices(word, defaultCi));
-                    break;
+                    return new FplCompletionItemChoicesDelegate().GetChoices(this);
                 case "is":
-                    modChoices.AddRange(AddIsOperatorChoices(word, defaultCi));
-                    break;
+                    return new FplCompletionItemChoicesIsOperator().GetChoices(this);
                 case "alias":
                 case "assert":
                 case "ass":
@@ -110,35 +98,25 @@ namespace FplLS
                 case "rev":
                 case "revoke":
                 case "trivial":
-                    modChoices.AddRange(AddKeywordChoices(word, defaultCi));
-                    break;
+                    return new FplCompletionItemChoicesKeyword().GetChoices(this);
                 case "self":
                 case "@":
-                    modChoices.AddRange(AddSelfChoices(word));
-                    break;
+                    return new FplCompletionItemChoicesSelf().GetChoices(this);
+                case "all":
+                case "ex":
+                case "exn":
+                    return new FplCompletionItemChoicesQuantor().GetChoices(this);
                 case "true":
                 case "false":
                 case "undef":
                 case "undefined":
-                    modChoices.AddRange(AddPredicateChoices(word, 0, defaultCi));
-                    break;
-                case "all":
-                case "ex":
-                case "exn":
-                    modChoices.AddRange(AddQuantorChoices(word, defaultCi));
-                    break;
                 case "not":
-                    modChoices.AddRange(AddPredicateChoices(word, 1, defaultCi));
-                    break;
                 case "xor":
                 case "iif":
                 case "impl":
-                    modChoices.AddRange(AddPredicateChoices(word, 2, defaultCi));
-                    break;
                 case "and":
                 case "or":
-                    modChoices.AddRange(AddPredicateChoices(word, 3, defaultCi));
-                    break;
+                    return new FplCompletionItemChoicesPredicate().GetChoices(this);
                 case "ctor":
                 case "constructor":
                     return new FplCompletionItemChoicesConstructor().GetChoices(this);

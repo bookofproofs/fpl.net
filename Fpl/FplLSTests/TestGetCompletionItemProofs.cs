@@ -11,8 +11,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddProofChoicesNumber(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddProofChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             Assert.AreEqual(2, actual.Count);
         }
 
@@ -21,8 +21,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddProofKeywordCounts(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddProofChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
@@ -36,8 +36,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddProofChoicesSortText(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddProofChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.SortText.Contains("proof"));
@@ -49,8 +49,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddProofChoicesLabel(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddProofChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
@@ -62,8 +62,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddProofChoicesDetail(string choice, string l)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddProofChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
@@ -75,8 +75,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddProofChoicesInsertText(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddProofChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)
             {

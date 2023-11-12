@@ -11,8 +11,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorChoicesNumber(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesConstructor().GetChoices(detailCi);
             Assert.AreEqual(2, actual.Count);
         }
 
@@ -21,8 +21,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorKeywordCounts(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesConstructor().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
@@ -36,8 +36,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorChoicesSortText(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesConstructor().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.SortText.Contains("constructor"));
@@ -49,8 +49,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorChoicesLabel(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesConstructor().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
@@ -62,8 +62,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorChoicesDetail(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesConstructor().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.Detail.Contains(choice));
@@ -75,8 +75,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddConstructorChoicesInsertText(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddConstructorChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesConstructor().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)
             {

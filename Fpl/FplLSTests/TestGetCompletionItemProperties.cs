@@ -13,7 +13,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddPropertyChoicesNumber(string choice)
         {
-            var actual = FplAutoCompleteService.AddPropertyChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             Assert.AreEqual(12, actual.Count);
         }
 
@@ -22,7 +23,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddPropertyKeywordCounts(string choice)
         {
-            var actual = FplAutoCompleteService.AddPropertyChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
@@ -40,7 +42,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddPropertyChoicesSortText(string choice, string subType)
         {
-            var actual = FplAutoCompleteService.AddPropertyChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.SortText.Contains("property"));
@@ -56,7 +59,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddPropertyChoicesLabel(string choice, string subType)
         {
-            var actual = FplAutoCompleteService.AddPropertyChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             var counterRelated = 0;
             var counterRelatedOpt = 0;
             foreach (var item in actual)
@@ -88,7 +92,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddPropertyChoicesDetail(string choice, string l)
         {
-            var actual = FplAutoCompleteService.AddPropertyChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             var countMandatory = 0;
             var countOptional = 0;
             var countObject = 0;
@@ -120,7 +125,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddPropertyChoicesInsertText(string choice, string subType)
         {
-            var actual = FplAutoCompleteService.AddPropertyChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)
             {

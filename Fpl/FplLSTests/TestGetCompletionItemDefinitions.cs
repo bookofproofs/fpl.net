@@ -13,7 +13,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddDefinitionChoicesNumber(string choice)
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesDefinition().GetChoices(detailCi);
             Assert.AreEqual(6, actual.Count);
         }
 
@@ -22,7 +23,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddDefinitionKeywordCounts(string choice)
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesDefinition().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
@@ -40,7 +42,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddDefinitionChoicesSortText(string choice, string subType)
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesDefinition().GetChoices(detailCi);
             var countSubType = 0;
             foreach (var item in actual)
             {
@@ -59,7 +62,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddDefinitionChoicesLabel(string choice, string subType)
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesDefinition().GetChoices(detailCi);
             var counterRelated = 0;
             foreach (var item in actual)
             {
@@ -77,7 +81,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddDefinitionChoicesDetail(string choice)
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesDefinition().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.Detail.Contains(choice));
@@ -93,7 +98,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddDefinitionChoicesInsertText(string choice, string subType)
         {
-            var actual = FplAutoCompleteService.AddDefinitionChoices(choice);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesDefinition().GetChoices(detailCi);
             var counterSnippets = 0;
             foreach (var item in actual)
             {

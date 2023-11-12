@@ -12,9 +12,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddQuantorChoicesNumber(string choice, int number)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddQuantorChoices(choice, detailCi);
-
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
             Assert.AreEqual(number, actual.Count);
         }
 
@@ -24,8 +23,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddQuantorKeywordCounts(string choice, int number)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddQuantorChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
 
             var count = 0;
             foreach (var item in actual)
@@ -41,8 +40,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddQuantorChoicesSortText(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddQuantorChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
 
             var lastSortText = "";
             foreach (var item in actual)
@@ -59,8 +58,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddQuantorChoicesLabel(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddQuantorChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
 
             foreach (var item in actual)
             {
@@ -74,8 +73,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddQuantorChoicesDetail(string choice, string s)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddQuantorChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
             foreach (var item in actual)
             {
                 if (item.Kind != CompletionItemKind.Keyword)
@@ -91,8 +90,8 @@ namespace FplLSTests
         [TestMethod]
         public void TestAddQuantorChoicesInsertText(string choice)
         {
-            var detailCi = FplAutoCompleteService.GetDetail(choice);
-            var actual = FplAutoCompleteService.AddQuantorChoices(choice, detailCi);
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
 
             foreach (var item in actual)
             {
