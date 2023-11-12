@@ -1,42 +1,5 @@
 Fpl 
 {
     
-    definition class SomeFplClass: object
-    {
-        intrinsic
-        property object SomeObjectProperty()
-        {
-            intrinsic
-        }
-        prty object SomeObjectProperty() 
-        {
-            intr
-        }
-        property predicate SomePredicateProperty() // dd
-        {
-            intrinsic
-        }
-        prty pred SomePredicateProperty()
-        {
-            intr
-        }
-        property function SomeFunctionProperty() -> object
-        {
-            intrinsic
-        }
-        prty func SomeFunctionProperty() -> obj
-        {
-            intr
-        }
-        property optional object SomeObjectProperty()
-        {
-            intrinsic
-        }
-        prty opt object SomeObjectProperty()
-        {
-            intr
-        }
-        p
-        
-    }
+    
     

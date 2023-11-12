@@ -5,7 +5,7 @@ using FplLS;
 namespace FplLSTests
 {
     [TestClass]
-    public class TestFplAutoCompleteService
+    public class TestFplCompletionItem
     {
         [TestMethod]
         [DataRow("<some token>", "some token")]
@@ -81,7 +81,7 @@ namespace FplLSTests
         [DataRow("undefined")]
         public void TestGetCompletionItemLabels(string input)
         {
-            var actual = FplAutoCompleteService.GetCompletionItem(input);
+            var actual = new FplCompletionItem(input);
             Assert.AreEqual("_ " + input, actual.Label);
         }
 
@@ -116,7 +116,7 @@ namespace FplLSTests
         [DataRow("undef", "undefined (short form)")]
         public void TestGetDetailShortForms(string input, string expected)
         {
-            var actual = FplAutoCompleteService.GetDetail(input);
+            var actual = new FplCompletionItem(input);
             Assert.AreEqual(expected, actual.Detail);
         }
 
@@ -175,7 +175,7 @@ namespace FplLSTests
         [DataRow("xor", "predicate (exclusive or)")]
         public void TestGetDetailLongForms(string input, string expected)
         {
-            var actual = FplAutoCompleteService.GetDetail(input);
+            var actual = new FplCompletionItem(input);
             Assert.AreEqual(expected, actual.Detail);
         }
 
@@ -263,7 +263,7 @@ namespace FplLSTests
         [DataRow("xor", CompletionItemKind.Operator)]
         public void TestGetDetailCompletionKind(string input, CompletionItemKind expected)
         {
-            var actual = FplAutoCompleteService.GetDetail(input);
+            var actual = new FplCompletionItem(input);
             Assert.AreEqual(expected, actual.Kind);
         }
 
