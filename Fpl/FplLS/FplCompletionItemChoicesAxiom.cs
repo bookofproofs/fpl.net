@@ -1,4 +1,5 @@
-﻿namespace FplLS
+﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+namespace FplLS
 {
     public class FplCompletionItemChoicesAxiom: FplCompletionItemChoices
     {
@@ -17,6 +18,7 @@
             }
             ret.Add(ci);
             // keywords
+            defaultCi.Kind = CompletionItemKind.Keyword;
             ret.Add(defaultCi);
             return ret;
 

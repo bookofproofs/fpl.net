@@ -1,4 +1,6 @@
-﻿namespace FplLS
+﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+
+namespace FplLS
 {
 
     public class FplCompletionItemChoicesDefinition : FplCompletionItemChoices
@@ -13,6 +15,7 @@
             var ci2 = defaultCi.Clone(); SetBody(ci2, "Function", false); ret.Add(ci2);
 
             // keyword
+            defaultCi.Kind = CompletionItemKind.Keyword;
             var ciK = defaultCi.Clone(); SetBody(ciK, "Class", false); ret.Add(ciK);
             var ciK1 = defaultCi.Clone(); SetBody(ciK1, "Predicate", false); ret.Add(ciK1);
             var ciK2 = defaultCi.Clone(); SetBody(ciK2, "Function", false); ret.Add(ciK2);

@@ -1,4 +1,6 @@
-﻿namespace FplLS
+﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+
+namespace FplLS
 {
 
     public class FplCompletionItemChoicesProperty : FplCompletionItemChoices
@@ -40,6 +42,7 @@
                     ci.Detail = $"keywords '{ci.Label}'";
                     ci.SortText = "zzz" + ci.SortText;
                     ci.InsertText = ci.Label;
+                    ci.Kind = CompletionItemKind.Keyword;
                 }
                 else
                 {
@@ -57,6 +60,7 @@
                     ci.Detail = $"keywords '{ci.Label}'";
                     ci.SortText = "zzz" + ci.SortText;
                     ci.InsertText = ci.Label;
+                    ci.Kind = CompletionItemKind.Keyword;
                 }
                 else
                 {

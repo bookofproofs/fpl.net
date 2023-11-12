@@ -1,11 +1,4 @@
-﻿using FParsec;
-using Microsoft.FSharp.Core;
-using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using System.ComponentModel.Design;
-using System.Data;
-using System.Diagnostics.Tracing;
-using System.Text;
-
+﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
@@ -20,6 +13,7 @@ namespace FplLS
             var ci1 = defaultCi.Clone(); SetEquivalenceProof(ci1); ret.Add(ci1);
 
             // keywords
+            defaultCi.Kind = CompletionItemKind.Keyword;
             ret.Add(defaultCi);
             return ret;
         }

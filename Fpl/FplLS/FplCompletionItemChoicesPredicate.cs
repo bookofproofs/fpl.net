@@ -17,13 +17,13 @@ namespace FplLS
                 case "undef":
                 case "undefined":
                     // keyword
-                    var ciK = defaultCi.Clone(); ret.Add(ciK);
+                    var ciK = defaultCi.Clone(); ciK.Kind = CompletionItemKind.Keyword; ret.Add(ciK);
                     break;
                 case "not":
                     // snippet
                     var ci = defaultCi.Clone(); SetBody(ci, 0); ret.Add(ci);
                     // keyword
-                    var ci1 = defaultCi.Clone(); ret.Add(ci1);
+                    var ci1 = defaultCi.Clone(); ci1.Kind = CompletionItemKind.Keyword; ret.Add(ci1);
                     break;
                 case "xor":
                 case "iif":
@@ -31,12 +31,12 @@ namespace FplLS
                     // snippet
                     var ci2 = defaultCi.Clone(); SetBody(ci2, 2); ret.Add(ci2);
                     // keyword
-                    var ci2K = defaultCi.Clone(); ret.Add(ci2K);
+                    var ci2K = defaultCi.Clone(); ci2K.Kind = CompletionItemKind.Keyword; ret.Add(ci2K);
                     break;
                 case "and":
                 case "or":
                     var ci3 = defaultCi.Clone(); SetBody(ci3, 2); ret.Add(ci3);
-                    var ci3K = defaultCi.Clone(); ret.Add(ci3K);
+                    var ci3K = defaultCi.Clone(); ci3K.Kind = CompletionItemKind.Keyword; ret.Add(ci3K);
                     break;
             }
             return ret;

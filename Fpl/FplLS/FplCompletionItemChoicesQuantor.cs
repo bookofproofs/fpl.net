@@ -1,5 +1,4 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using System.Runtime.CompilerServices;
 
 namespace FplLS
 {
@@ -25,6 +24,7 @@ namespace FplLS
                 var ci4 = defaultCi.Clone(); SetBody(ci4, "inRange", postfix); ret.Add(ci4);
             }
             // keyword
+            defaultCi.Kind = CompletionItemKind.Keyword;
             ret.Add(defaultCi);
             return ret;
         }

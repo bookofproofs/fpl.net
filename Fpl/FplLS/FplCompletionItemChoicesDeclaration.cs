@@ -12,6 +12,7 @@ namespace FplLS
             ci.InsertText = GetDeclarationSnippet(ci); ;
             ret.Add(ci);
             // keywords
+            defaultCi.Kind = CompletionItemKind.Keyword;
             ret.Add(defaultCi);
             return ret;
 

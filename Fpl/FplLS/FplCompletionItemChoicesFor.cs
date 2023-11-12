@@ -12,6 +12,7 @@ namespace FplLS
             var ci1 = defaultCi.Clone(); SetForStatement(ci1, false); ret.Add(ci1);
             // keywords
             defaultCi.SortText = "for03";
+            defaultCi.Kind = CompletionItemKind.Keyword;
             ret.Add(defaultCi);
             return ret;
 
