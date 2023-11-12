@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using System.Net.Http.Headers;
 
 namespace FplLS
 {
@@ -16,9 +17,9 @@ namespace FplLS
 
             // keyword
             defaultCi.Kind = CompletionItemKind.Keyword;
-            var ciK = defaultCi.Clone(); SetBody(ciK, "Class", false); ret.Add(ciK);
-            var ciK1 = defaultCi.Clone(); SetBody(ciK1, "Predicate", false); ret.Add(ciK1);
-            var ciK2 = defaultCi.Clone(); SetBody(ciK2, "Function", false); ret.Add(ciK2);
+            var ciK = defaultCi.Clone(); SetBody(ciK, "Class", true); ret.Add(ciK);
+            var ciK1 = defaultCi.Clone(); SetBody(ciK1, "Predicate", true); ret.Add(ciK1);
+            var ciK2 = defaultCi.Clone(); SetBody(ciK2, "Function", true); ret.Add(ciK2);
             return ret;
         }
 
@@ -30,12 +31,10 @@ namespace FplLS
                 TokenObject = "obj";
                 TokenFunction = "func";
                 TokenPredicate = "pred";
+                TokenClass = "cl";
                 if (forKeyword)
                 {
                     ci.Label = GetLabelKeyword(ci, definitionType);
-                    ci.Detail = $"keywords '{ci.Label}'";
-                    ci.SortText = "zzz" + ci.SortText;
-                    ci.InsertText = ci.Label;
                 }
                 else
                 {
@@ -50,15 +49,11 @@ namespace FplLS
                 if (forKeyword)
                 {
                     ci.Label = GetLabelKeyword(ci, definitionType);
-                    ci.Detail = $"keywords '{ci.Label}'";
-                    ci.SortText = "zzz" + ci.SortText;
-                    ci.InsertText = ci.Label;
                 }
                 else
                 {
                     ci.Label = GetLabelKeyword(ci, definitionType) + " ...";
                     ci.Detail = $"{definitionType.ToLower()} definition";
-                    ci.SortText = "z" + ci.SortText;
                     ci.InsertText = GetBody(ci, definitionType);
                 }
             }
@@ -66,19 +61,27 @@ namespace FplLS
 
         public string GetLabelKeyword(FplCompletionItem ci, string definitionType)
         {
+            string ret;
             switch (definitionType)
             {
                 case "Class":
                     ci.SortText = "definition01";
-                    return $"{TokenPrefix}{ci.Word} {TokenClass}'";
+                    ret = $"{TokenPrefix}{ci.Word} {TokenClass}";
+                    break;
                 case "Function":
                     ci.SortText = "definition03";
-                    return $"{TokenPrefix}{ci.Word} {TokenFunction}'";
+                    ret = $"{TokenPrefix}{ci.Word} {TokenFunction}";
+                    break;
                 case "Predicate":
                 default:
                     ci.SortText = "definition02";
-                    return $"{TokenPrefix}{ci.Word} {TokenPredicate}'";
+                    ret = $"{TokenPrefix}{ci.Word} {TokenPredicate}";
+                    break;
             }
+            ci.Label = ret;
+            ci.AdjustSortText();
+            return ret;
+
         }
 
         public string GetBody(FplCompletionItem ci, string definitionType)
@@ -87,21 +90,23 @@ namespace FplLS
             switch (definitionType)
             {
                 case "Class":
-                    ret = $"{GetLabelKeyword(ci, definitionType)} SomeFpl{definitionType}: {TokenObject}{Environment.NewLine}"; 
+                    ret = $"{GetLabelKeyword(ci, definitionType).Substring(TokenPrefix.Length)} SomeFpl{definitionType}: {TokenObject}"; 
                     break;
                 case "Function":
-                    ret = $"{GetLabelKeyword(ci, definitionType)} SomeFpl{definitionType} -> {TokenObject}";
+                    ret = $"{GetLabelKeyword(ci, definitionType).Substring(TokenPrefix.Length)} SomeFpl{definitionType}() -> {TokenObject}";
                     break;
                 case "Predicate":
                 default:
-                    ret = $"{ GetLabelKeyword(ci, definitionType)} SomeFpl{definitionType}()";
+                    ret = $"{ GetLabelKeyword(ci, definitionType).Substring(TokenPrefix.Length)} SomeFpl{definitionType}()";
                     break;
 
             }
             return ret +
+                $"{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t{TokenIntrinsic}{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}" +
+                $"{Environment.NewLine}";
         }
 
     }

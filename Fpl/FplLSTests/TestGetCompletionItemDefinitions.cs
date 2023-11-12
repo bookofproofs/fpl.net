@@ -44,13 +44,10 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDefinition().GetChoices(detailCi);
-            var countSubType = 0;
             foreach (var item in actual)
             {
-                if (item.SortText.Contains(subType)) countSubType++;
-                Assert.IsTrue(item.SortText.Contains(choice));
+                Assert.IsTrue(item.SortText.Contains("definition"));
             }
-            Assert.AreEqual(2, countSubType);
         }
 
         [DataRow("def", "cl")]

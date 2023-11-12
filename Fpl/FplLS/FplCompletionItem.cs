@@ -31,6 +31,27 @@ namespace FplLS
             }
         }
 
+        public void AdjustSortText()
+        {
+            if (IsShort)
+            {
+                this.SortText = "z" + this.SortText;
+            }
+            if (Kind == CompletionItemKind.Keyword)
+            {
+                this.SortText = "zzz" + this.SortText;
+                this.InsertText = this.Label.Substring(2);
+                if (this.InsertText.Split(' ').Length > 1)
+                {
+                    this.Detail = $"keywords '{this.InsertText}'";
+                }
+                else
+                {
+                    this.Detail = $"keyword '{this.InsertText}'";
+                }
+            }
+        }
+
         public List<FplCompletionItem> GetChoices()
         {
 

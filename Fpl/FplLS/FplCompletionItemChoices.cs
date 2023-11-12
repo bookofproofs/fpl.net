@@ -1,4 +1,6 @@
-﻿namespace FplLS
+﻿using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
+
+namespace FplLS
 {
     public abstract class FplCompletionItemChoices
     {
@@ -30,5 +32,8 @@
         }
 
         public abstract List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi);
+
+
+
     }
 }
