@@ -25,6 +25,7 @@ namespace FplLS
             }
             // keyword
             defaultCi.Kind = CompletionItemKind.Keyword;
+            defaultCi.AdjustToKeyword();
             ret.Add(defaultCi);
             return ret;
         }

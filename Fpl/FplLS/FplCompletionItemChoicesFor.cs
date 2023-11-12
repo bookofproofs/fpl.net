@@ -13,6 +13,7 @@ namespace FplLS
             // keywords
             defaultCi.SortText = "for03";
             defaultCi.Kind = CompletionItemKind.Keyword;
+            defaultCi.AdjustToKeyword();
             ret.Add(defaultCi);
             return ret;
 

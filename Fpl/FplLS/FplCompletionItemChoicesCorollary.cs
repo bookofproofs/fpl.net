@@ -13,6 +13,7 @@ namespace FplLS
 
             // keywords
             defaultCi.Kind = CompletionItemKind.Keyword;
+            defaultCi.AdjustToKeyword();
             ret.Add(defaultCi);
             return ret;
         }

@@ -9,6 +9,7 @@ namespace FplLS
             var ret = new List<FplCompletionItem>();
             // keywords
             defaultCi.Kind = CompletionItemKind.Keyword;
+            defaultCi.AdjustToKeyword();
             ret.Add(defaultCi);
             return ret;
 

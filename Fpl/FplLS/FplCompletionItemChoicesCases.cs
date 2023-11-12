@@ -11,6 +11,7 @@ namespace FplLS
             var ci = defaultCi.Clone(); SetCasesStatement(ci, true); ret.Add(ci);
             // keywords
             defaultCi.Kind = CompletionItemKind.Keyword;
+            defaultCi.AdjustToKeyword();
             ret.Add(defaultCi);
             return ret;
 

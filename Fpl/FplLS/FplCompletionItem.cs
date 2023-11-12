@@ -31,7 +31,7 @@ namespace FplLS
             }
         }
 
-        public void AdjustSortText()
+        public void AdjustToKeyword()
         {
             if (IsShort)
             {

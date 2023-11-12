@@ -79,7 +79,7 @@ namespace FplLS
                     break;
             }
             ci.Label = ret;
-            ci.AdjustSortText();
+            ci.AdjustToKeyword();
             return ret;
 
         }
