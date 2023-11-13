@@ -504,8 +504,9 @@ namespace FplLS
 
             {
                 var ci = new FplCompletionItem(kvp.Key);
-                ci.InsertText = kvp.Key + ":";
-                ci.Label = TokenPrefix + ci.InsertText + " ...";
+                ci.InsertText = kvp.Key + ": ";
+                ci.Label = TokenPrefix + kvp.Value + " ...";
+                ci.SortText = null;
                 ci.Detail = kvp.Value;
                 ci.Kind = CompletionItemKind.Value;
                 ret.Add(ci);
