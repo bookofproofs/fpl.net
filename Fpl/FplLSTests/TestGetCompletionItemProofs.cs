@@ -31,16 +31,37 @@ namespace FplLSTests
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("prf")]
-        [DataRow("proof")]
+        [DataRow("proof", CompletionItemKind.Property, "proof01")]
+        [DataRow("prf", CompletionItemKind.Property, "proof02")]
+        [DataRow("proof", CompletionItemKind.Keyword, "zzzproof01")]
+        [DataRow("prf", CompletionItemKind.Keyword, "zzzproof02")]
         [TestMethod]
-        public void TestAddChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("proof"));
+                if (item.Label.Contains(choice) && item.Kind == kind)
+                {
+                    Assert.AreEqual(expected, item.SortText);
+                }
+            }
+        }
+
+        [DataRow("proof")]
+        [DataRow("prf")]
+        [TestMethod]
+        public void TestInsertTextEndsWithTwoNewLines(string choice)
+        {
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
+            foreach (var item in actual)
+            {
+                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                {
+                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine + Environment.NewLine));
+                }
             }
         }
 
