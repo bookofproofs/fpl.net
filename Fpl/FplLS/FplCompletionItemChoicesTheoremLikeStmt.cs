@@ -32,8 +32,8 @@ namespace FplLS
                 TokenPremise = "pre";
                 TokenConclusion = "con";
                 ci.Detail = $"{_statementType.ToLower()} (short)";
-                ci.SortText = "z" + ci.SortText;
             }
+            ci.Label += " ...";
             ci.InsertText =
                 $"{ci.Word} SomeFpl{_statementType}(){Environment.NewLine}" +
                 GetBody(TokenLeftBrace, TokenPremise, TokenConclusion, TokenRightBrace);
