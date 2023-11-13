@@ -59,6 +59,7 @@ namespace FplLSTests
                 }
             }
         }
+
         [DataRow("is")]
         [TestMethod]
         public void TestAddIsOperatorChoicesLabel(string choice)

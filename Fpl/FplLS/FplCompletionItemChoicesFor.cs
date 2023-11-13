@@ -26,22 +26,21 @@ namespace FplLS
             {
                 firstLine = $"for i in [a,b]{Environment.NewLine}";
                 ci.SortText = "for01";
-                ci.Detail = $"{TokenPrefix}for statement (range)";
-                ci.Label = $"{TokenPrefix}for .. []";
+                ci.Detail = $"for statement (range)";
+                ci.Label = $"{TokenPrefix}for ... []";
             }
             else
             {
                 firstLine = $"for i in someList{Environment.NewLine}";
                 ci.SortText = "for02";
                 ci.Detail = $"for statement (list)";
-                ci.Label = $"{TokenPrefix}for .. list";
+                ci.Label = $"{TokenPrefix}for ... list";
             }
-            ci.Label += " ...";
             ci.InsertText = firstLine +
                 $"({Environment.NewLine}" +
                 $"\tx<i> := 1{Environment.NewLine}" +
                 $"\ty<i> := 0{Environment.NewLine}" +
-                $"){Environment.NewLine}";
+                $"){Environment.NewLine}{Environment.NewLine}";
         }
     }
 }
