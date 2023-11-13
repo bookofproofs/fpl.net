@@ -6,18 +6,17 @@ namespace FplLSTests
     public class TestGetCompletionItemUses
     {
 
-        [DataRow("ctor")]
-        [DataRow("Uses")]
+        [DataRow("uses")]
+
         [TestMethod]
         public void TestAddUsesChoicesNumber(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesUses().GetChoices(detailCi);
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual(3, actual.Count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Uses")]
+        [DataRow("uses")]
         [TestMethod]
         public void TestAddUsesKeywordCounts(string choice)
         {
@@ -31,21 +30,39 @@ namespace FplLSTests
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Uses")]
+        [DataRow("uses", "...", CompletionItemKind.Property, "uses01")]
+        [DataRow("uses", "... alias", CompletionItemKind.Property, "uses02")]
+        [DataRow("uses", "", CompletionItemKind.Keyword, "uses03")]
         [TestMethod]
-        public void TestAddUsesChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice, string l, CompletionItemKind kind, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesUses().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("Uses"));
+                if (item.Label.Contains(l) && item.Kind == kind)
+                {
+                    Assert.AreEqual(expected, item.SortText);
+                }
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Uses")]
+        [DataRow("uses")]
+        [TestMethod]
+        public void TestInsertTextEndsWithTwoNewLines(string choice)
+        {
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesUses().GetChoices(detailCi);
+            foreach (var item in actual)
+            {
+                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                {
+                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine + Environment.NewLine));
+                }
+            }
+        }
+
+        [DataRow("uses")]
         [TestMethod]
         public void TestAddUsesChoicesLabel(string choice)
         {
@@ -57,8 +74,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Uses")]
+        [DataRow("uses")]
+
         [TestMethod]
         public void TestAddUsesChoicesDetail(string choice)
         {
@@ -70,8 +87,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Uses")]
+        [DataRow("uses")]
+
         [TestMethod]
         public void TestAddUsesChoicesInsertText(string choice)
         {
