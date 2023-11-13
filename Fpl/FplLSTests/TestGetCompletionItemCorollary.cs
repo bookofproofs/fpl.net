@@ -6,8 +6,8 @@ namespace FplLSTests
     public class TestGetCompletionItemCorollary
     {
 
-        [DataRow("ctor")]
-        [DataRow("Corollary")]
+        [DataRow("corollary")]
+        [DataRow("cor")]
         [TestMethod]
         public void TestAddCorollaryChoicesNumber(string choice)
         {
@@ -16,8 +16,8 @@ namespace FplLSTests
             Assert.AreEqual(2, actual.Count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Corollary")]
+        [DataRow("corollary")]
+        [DataRow("cor")]
         [TestMethod]
         public void TestAddCorollaryKeywordCounts(string choice)
         {
@@ -31,21 +31,42 @@ namespace FplLSTests
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Corollary")]
+        [DataRow("corollary", CompletionItemKind.Property, "corollary01")]
+        [DataRow("cor", CompletionItemKind.Property, "corollary02")]
+        [DataRow("corollary", CompletionItemKind.Keyword, "zzzcorollary01")]
+        [DataRow("cor", CompletionItemKind.Keyword, "zzzzcorollary02")]
         [TestMethod]
-        public void TestAddCorollaryChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("Corollary"));
+                if (item.Label.Contains(choice) && item.Kind == kind)
+                {
+                    Assert.AreEqual(expected, item.SortText);
+                }
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Corollary")]
+        [DataRow("corollary")]
+        [DataRow("cor")]
+        [TestMethod]
+        public void TestInsertTextEndsWithTwoNewLines(string choice)
+        {
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesCorollary().GetChoices(detailCi);
+            foreach (var item in actual)
+            {
+                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                {
+                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine + Environment.NewLine));
+                }
+            }
+        }
+
+        [DataRow("corollary")]
+        [DataRow("cor")]
         [TestMethod]
         public void TestAddCorollaryChoicesLabel(string choice)
         {
@@ -57,8 +78,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Corollary")]
+        [DataRow("corollary")]
+        [DataRow("cor")]
         [TestMethod]
         public void TestAddCorollaryChoicesDetail(string choice)
         {
@@ -70,8 +91,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Corollary")]
+        [DataRow("corollary")]
+        [DataRow("cor")]
         [TestMethod]
         public void TestAddCorollaryChoicesInsertText(string choice)
         {

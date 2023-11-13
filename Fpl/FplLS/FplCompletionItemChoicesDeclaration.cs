@@ -26,7 +26,8 @@ namespace FplLS
                 $"\t~y: {TokenObject}{Environment.NewLine}" +
                 $"\tx := 0{Environment.NewLine}" +
                 $"\ty := 1{Environment.NewLine}" +
-                $";{Environment.NewLine}";
+                $";{Environment.NewLine}" +
+                $"{Environment.NewLine}";
         }
 
     }

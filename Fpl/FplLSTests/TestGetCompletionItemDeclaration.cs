@@ -1,4 +1,5 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using System.Data;
 
 namespace FplLSTests
 {
@@ -6,8 +7,8 @@ namespace FplLSTests
     public class TestGetCompletionItemDeclaration
     {
 
-        [DataRow("ctor")]
-        [DataRow("Declaration")]
+        [DataRow("dec")]
+        [DataRow("declaration")]
         [TestMethod]
         public void TestAddDeclarationChoicesNumber(string choice)
         {
@@ -16,8 +17,8 @@ namespace FplLSTests
             Assert.AreEqual(2, actual.Count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Declaration")]
+        [DataRow("dec")]
+        [DataRow("declaration")]
         [TestMethod]
         public void TestAddDeclarationKeywordCounts(string choice)
         {
@@ -31,21 +32,42 @@ namespace FplLSTests
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Declaration")]
+        [DataRow("declaration", CompletionItemKind.Property, "declaration01")]
+        [DataRow("dec", CompletionItemKind.Property, "declaration02")]
+        [DataRow("declaration", CompletionItemKind.Keyword, "zzzdeclaration01")]
+        [DataRow("dec", CompletionItemKind.Keyword, "zzzzdeclaration02")]
         [TestMethod]
-        public void TestAddDeclarationChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("Declaration"));
+                if (item.Label.Contains(choice) && item.Kind == kind)
+                {
+                    Assert.AreEqual(expected, item.SortText);
+                }
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Declaration")]
+        [DataRow("declaration")]
+        [DataRow("dec")]
+        [TestMethod]
+        public void TestInsertTextEndsWithTwoNewLines(string choice)
+        {
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesDeclaration().GetChoices(detailCi);
+            foreach (var item in actual)
+            {
+                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                {
+                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine + Environment.NewLine));
+                }
+            }
+        }
+
+        [DataRow("dec")]
+        [DataRow("declaration")]
         [TestMethod]
         public void TestAddDeclarationChoicesLabel(string choice)
         {
@@ -57,8 +79,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Declaration")]
+        [DataRow("dec")]
+        [DataRow("declaration")]
         [TestMethod]
         public void TestAddDeclarationChoicesDetail(string choice)
         {
@@ -70,8 +92,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Declaration")]
+        [DataRow("dec")]
+        [DataRow("declaration")]
         [TestMethod]
         public void TestAddDeclarationChoicesInsertText(string choice)
         {

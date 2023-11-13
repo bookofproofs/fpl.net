@@ -31,16 +31,37 @@ namespace FplLSTests
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("constructor")]
+        [DataRow("constructor", CompletionItemKind.Property, "constructor01")]
+        [DataRow("ctor", CompletionItemKind.Property, "constructor02")]
+        [DataRow("constructor", CompletionItemKind.Keyword, "zzzconstructor01")]
+        [DataRow("ctor", CompletionItemKind.Keyword, "zzzzconstructor02")]
         [TestMethod]
-        public void TestAddConstructorChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesConstructor().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("constructor"));
+                if (item.Label.Contains(choice) && item.Kind == kind)
+                {
+                    Assert.AreEqual(expected, item.SortText);
+                }
+            }
+        }
+
+        [DataRow("constructor")]
+        [DataRow("ctor")]
+        [TestMethod]
+        public void TestInsertTextEndsWithTwoNewLines(string choice)
+        {
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesConstructor().GetChoices(detailCi);
+            foreach (var item in actual)
+            {
+                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                {
+                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine + Environment.NewLine));
+                }
             }
         }
 
