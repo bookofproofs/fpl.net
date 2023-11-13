@@ -31,7 +31,7 @@ namespace FplLSTests
 
         [DataRow("cases")]
         [TestMethod]
-        public void TestAddCasesChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesCases().GetChoices(detailCi);

@@ -40,7 +40,7 @@ namespace FplLSTests
         [DataRow("(open) right bound")]
         [DataRow("(closed) right bound")]
         [TestMethod]
-        public void TestAddBoundChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesBound().GetChoices(detailCi);

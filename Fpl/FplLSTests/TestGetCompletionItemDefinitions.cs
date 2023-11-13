@@ -46,7 +46,7 @@ namespace FplLSTests
         [DataRow("def", "pred", CompletionItemKind.Keyword, "zzzzdefinition02")]
         [DataRow("def", "func", CompletionItemKind.Keyword, "zzzzdefinition03")]
         [TestMethod]
-        public void TestAddPropertyChoicesSortText(string choice, string subType, CompletionItemKind isKeyword, string expected)
+        public void TestAddChoicesSortText(string choice, string subType, CompletionItemKind isKeyword, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDefinition().GetChoices(detailCi);

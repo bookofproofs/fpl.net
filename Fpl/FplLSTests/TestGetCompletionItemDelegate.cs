@@ -34,7 +34,7 @@ namespace FplLSTests
         [DataRow("ctor")]
         [DataRow("Delegate")]
         [TestMethod]
-        public void TestAddDelegateChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDelegate().GetChoices(detailCi);

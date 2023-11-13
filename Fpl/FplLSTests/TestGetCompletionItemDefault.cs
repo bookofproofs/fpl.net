@@ -34,7 +34,7 @@ namespace FplLSTests
         [DataRow("ctor")]
         [DataRow("Default")]
         [TestMethod]
-        public void TestAddDefaultChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDefault().GetChoices(detailCi);

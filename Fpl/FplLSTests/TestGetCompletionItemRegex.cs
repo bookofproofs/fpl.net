@@ -34,7 +34,7 @@ namespace FplLSTests
         [DataRow("ctor")]
         [DataRow("Regex")]
         [TestMethod]
-        public void TestAddRegexChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesRegex().GetChoices(detailCi);

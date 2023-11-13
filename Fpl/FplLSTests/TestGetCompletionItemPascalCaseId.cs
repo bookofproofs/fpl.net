@@ -34,7 +34,7 @@ namespace FplLSTests
         [DataRow("ctor")]
         [DataRow("PascalCaseId")]
         [TestMethod]
-        public void TestAddPascalCaseIdChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesPascalCaseId().GetChoices(detailCi);

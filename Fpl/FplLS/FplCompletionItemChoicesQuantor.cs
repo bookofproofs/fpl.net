@@ -17,11 +17,11 @@ namespace FplLS
             // snippets
             var ci = defaultCi.Clone(); SetBody(ci, "none", postfix); ret.Add(ci);
             var ci1 = defaultCi.Clone(); SetBody(ci1, "inType", postfix); ret.Add(ci1);
-            var ci2 = defaultCi.Clone(); SetBody(ci1, "inList", postfix); ret.Add(ci2);
-            var ci3 = defaultCi.Clone(); SetBody(ci1, "inRange", postfix); ret.Add(ci3);
+            var ci2 = defaultCi.Clone(); SetBody(ci2, "inList", postfix); ret.Add(ci2);
+            var ci3 = defaultCi.Clone(); SetBody(ci3, "inRange", postfix); ret.Add(ci3);
             if (postfix == "")
             {
-                var ci4 = defaultCi.Clone(); SetBody(ci4, "inRange", postfix); ret.Add(ci4);
+                var ci4 = defaultCi.Clone(); SetBody(ci4, "combined", postfix); ret.Add(ci4);
             }
             // keyword
             defaultCi.Kind = CompletionItemKind.Keyword;
@@ -54,7 +54,7 @@ namespace FplLS
                     break;
                 case "inType":
                     ci.SortText = $"{ci.Word}02";
-                    ci.Label = $"{TokenPrefix}{ci.Word}{postfix} in FplType ...";
+                    ci.Label = $"{TokenPrefix}{ci.Word}{postfix} in type ...";
                     ci.InsertText = $"{ci.Word} x in FplType" + GetBody();
                     switch (ci.Word)
                     {
@@ -71,7 +71,7 @@ namespace FplLS
                     break;
                 case "inList":
                     ci.SortText = $"{ci.Word}03";
-                    ci.Label = $"{TokenPrefix}{ci.Word}{postfix} in listVar ...";
+                    ci.Label = $"{TokenPrefix}{ci.Word}{postfix} in list ...";
                     ci.InsertText = $"{ci.Word} x in listVar" + GetBody();
                     switch (ci.Word)
                     {
@@ -88,7 +88,7 @@ namespace FplLS
                     break;
                 case "inRange":
                     ci.SortText = $"{ci.Word}04";
-                    ci.Label = $"{TokenPrefix}{ci.Word}{postfix} in [a,b] ...";
+                    ci.Label = $"{TokenPrefix}{ci.Word}{postfix} in range ...";
                     ci.InsertText = $"{ci.Word} x in [a,b]" + GetBody();
                     switch (ci.Word)
                     {
@@ -106,7 +106,7 @@ namespace FplLS
                 case "combined":
                 default:
                     ci.SortText = $"{ci.Word}05";
-                    ci.Label = $"{TokenPrefix}{ci.Word}{postfix} <combined> ...";
+                    ci.Label = $"{TokenPrefix}{ci.Word}{postfix} combined ...";
                     ci.InsertText = $"{ci.Word} x in [a,b], y in listVar, z in FplType" + GetLongBody();
                     switch (ci.Word)
                     {

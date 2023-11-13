@@ -225,7 +225,7 @@ namespace FplLS
         private void SetDetails()
         {
             Word = StripQuotesOrBrackets(Word);
-            this.InsertText = Word;
+            this.InsertText = Word + " ";
             this.Label = _prefix + Word;
             switch (Word)
             {

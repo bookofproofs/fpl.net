@@ -34,7 +34,7 @@ namespace FplLSTests
         [DataRow("prf")]
         [DataRow("proof")]
         [TestMethod]
-        public void TestAddProofChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);

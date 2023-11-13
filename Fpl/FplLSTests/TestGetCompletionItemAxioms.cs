@@ -38,7 +38,7 @@ namespace FplLSTests
         [DataRow("ax")]
         [DataRow("axiom")]
         [TestMethod]
-        public void TestAddAxiomChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
