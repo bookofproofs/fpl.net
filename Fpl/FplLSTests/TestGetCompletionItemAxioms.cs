@@ -107,5 +107,23 @@ namespace FplLSTests
             }
             Assert.AreEqual(actual.Count, counterSnippets);
         }
+
+        [DataRow("ax")]
+        [DataRow("axiom")]
+        [DataRow("post")]
+        [DataRow("postulate")]
+        [TestMethod]
+        public void TestInsertTextEndsWithTwoNewLines(string choice)
+        {
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
+            foreach (var item in actual)
+            {
+                if (item.Kind!=CompletionItemKind.Keyword && item.InsertText.Contains(choice)) 
+                { 
+                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine + Environment.NewLine));
+                }
+            }
+        }
     }
 }

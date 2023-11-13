@@ -31,6 +31,7 @@ namespace FplLS
             ci.InsertText =
                 $"{ci.Word} SomeFplTheorem!1(){Environment.NewLine}" +
                 FplCompletionItemChoicesTheoremLikeStmt.GetBody(TokenLeftBrace, TokenPremise, TokenConclusion, TokenRightBrace);
+            ci.Label += " ...";
         }
 
     }

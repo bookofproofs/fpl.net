@@ -8,9 +8,7 @@ namespace FplLS
         {
             var ret = new List<FplCompletionItem>();
             // snippets
-            var ci = defaultCi.Clone();
-            ci.InsertText = GetDeclarationSnippet(ci); ;
-            ret.Add(ci);
+            var ci = defaultCi.Clone(); SetDeclarationSnippet(ci); ret.Add(ci);
             // keywords
             defaultCi.Kind = CompletionItemKind.Keyword;
             defaultCi.AdjustToKeyword();
@@ -19,10 +17,10 @@ namespace FplLS
 
         }
 
-        private string GetDeclarationSnippet(FplCompletionItem ci)
+        private void SetDeclarationSnippet(FplCompletionItem ci)
         {
-
-            return
+            ci.Label += " ...";
+            ci.InsertText =
                 $"{ci.Word}{Environment.NewLine}" +
                 $"\t~x: {TokenObject}{Environment.NewLine}" +
                 $"\t~y: {TokenObject}{Environment.NewLine}" +

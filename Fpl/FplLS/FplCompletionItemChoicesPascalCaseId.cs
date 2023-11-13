@@ -9,7 +9,7 @@ namespace FplLS
             var ret = new List<FplCompletionItem>();
             defaultCi.Detail = "user-defined identifier";
             defaultCi.InsertText = "SomeFplIdentifier";
-            defaultCi.Label = TokenPrefix + defaultCi.InsertText;
+            defaultCi.Label = TokenPrefix + defaultCi.InsertText + " ...";
             defaultCi.Kind = CompletionItemKind.Reference;
             ret.Add(defaultCi);
             return ret;

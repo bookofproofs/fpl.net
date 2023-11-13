@@ -11,10 +11,12 @@ namespace FplLS
             if (ci.Word.StartsWith("ax"))
             {
                 ci.InsertText = $"{ci.Word} SomeFplAxiom (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine + Environment.NewLine;
+                ci.Label += " ...";
             }
             else
             {
                 ci.InsertText = $"{ci.Word} SomeFplPostulate (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine + Environment.NewLine;
+                ci.Label += " ...";
             }
             ret.Add(ci);
             // keywords

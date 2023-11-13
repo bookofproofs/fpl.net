@@ -40,7 +40,9 @@ namespace FplLS
                 $"\t300. |- {TokenConclusion}{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t400. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}" +
+                $"{Environment.NewLine}";
+            ci.Label += " ...";
         }
 
         private void SetEquivalenceProof(FplCompletionItem ci)
@@ -68,7 +70,9 @@ namespace FplLS
                 $"\t800. |- trivial // \"<=\" follows{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t900. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}" +
+                $"{Environment.NewLine}";
+            ci.Label += " ...";
         }
 
     }

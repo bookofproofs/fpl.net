@@ -8,9 +8,7 @@ namespace FplLS
         {
             var ret = new List<FplCompletionItem>();
             // snippets
-            var ci = defaultCi.Clone();
-            ci.InsertText = GetConstructorSnippet(ci); ;
-            ret.Add(ci);
+            var ci = defaultCi.Clone(); SetConstructorSnippet(ci); ret.Add(ci);
             // keywords
             defaultCi.Kind = CompletionItemKind.Keyword;
             defaultCi.AdjustToKeyword();
@@ -19,23 +17,23 @@ namespace FplLS
 
         }
 
-        private string GetConstructorSnippet(FplCompletionItem ci)
+        private void SetConstructorSnippet(FplCompletionItem ci)
         {
 
-            ci.Detail = $"variable specification";
             if (ci.IsShort)
             {
                 TokenDeclaration = "dec";
-                ci.Detail = $"variable specification (short)";
             }
-            return
+            ci.Label += " ...";
+            ci.InsertText = 
                 $"{ci.Word} SomeFplClass(){Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t{TokenDeclaration}{Environment.NewLine}" +
                 $"\t\tself!obj(){Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +
                 $"\tself{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}" +
+                $"{Environment.NewLine}";
         }
 
     }

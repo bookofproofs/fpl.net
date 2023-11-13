@@ -36,6 +36,7 @@ namespace FplLS
                 ci.Detail = $"for statement (list)";
                 ci.Label = $"{TokenPrefix}for .. list";
             }
+            ci.Label += " ...";
             ci.InsertText = firstLine +
                 $"({Environment.NewLine}" +
                 $"\tx<i> := 1{Environment.NewLine}" +

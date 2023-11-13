@@ -19,6 +19,7 @@ namespace FplLS
 
         private void SetCasesStatement(FplCompletionItem ci, bool withRange)
         {
+            ci.Label += " ...";
             ci.InsertText =
                 $"cases{Environment.NewLine}" +
                 $"({Environment.NewLine}" +

@@ -29,6 +29,7 @@ namespace FplLS
 
         private void SetBody(FplCompletionItem ci, string propertyType, bool isKeyword, bool isOptional)
         {
+            SetSortText(ci,propertyType,isOptional);
             if (ci.IsShort)
             {
                 TokenIntrinsic = "intr";
@@ -39,17 +40,16 @@ namespace FplLS
                 if (isKeyword)
                 {
                     ci.Label = GetLabelKeyword(ci, propertyType, isOptional);
-                    ci.Detail = $"keywords '{ci.Label}'";
+                    ci.Detail = $"keywords '{ci.Label.Substring(TokenPrefix.Length)}'";
                     ci.SortText = "zzz" + ci.SortText;
-                    ci.InsertText = ci.Label;
+                    ci.InsertText = ci.Label.Substring(TokenPrefix.Length);
                     ci.Kind = CompletionItemKind.Keyword;
                 }
                 else
                 {
                     ci.Label = GetLabelKeyword(ci, propertyType, isOptional) + " ...";
-                    ci.Detail = $"{propertyType.ToLower()} definition (short)";
-                    ci.SortText = "z" + ci.SortText;
-                    ci.InsertText = GetBody(ci, propertyType, isOptional);
+                    ci.Detail = $"{propertyType.ToLower()} property (short)";
+                    ci.InsertText = GetInsertText(ci, propertyType, isOptional);
                 }
             }
             else
@@ -57,37 +57,41 @@ namespace FplLS
                 if (isKeyword)
                 {
                     ci.Label = GetLabelKeyword(ci, propertyType, isOptional);
-                    ci.Detail = $"keywords '{ci.Label}'";
+                    ci.Detail = $"keywords '{ci.Label.Substring(TokenPrefix.Length)}'";
                     ci.SortText = "zzz" + ci.SortText;
-                    ci.InsertText = ci.Label;
+                    ci.InsertText = ci.Label.Substring(TokenPrefix.Length);
                     ci.Kind = CompletionItemKind.Keyword;
                 }
                 else
                 {
                     ci.Label = GetLabelKeyword(ci, propertyType, isOptional) + " ...";
-                    ci.Detail = $"{propertyType.ToLower()} definition";
-                    ci.SortText = "z" + ci.SortText;
-                    ci.InsertText = GetBody(ci, propertyType, isOptional);
+                    ci.Detail = $"{propertyType.ToLower()} property";
+                    ci.InsertText = GetInsertText(ci, propertyType, isOptional);
                 }
+            }
+            if (isOptional && ci.Kind != CompletionItemKind.Keyword)
+            {
+                ci.Detail = "optional " + ci.Detail;
             }
         }
 
         public string GetLabelKeyword(FplCompletionItem ci, string propertyType, bool isOptional)
         {
+            string ret;
             if (isOptional)
             {
                 switch (propertyType)
                 {
                     case "Class":
-                        ci.SortText = "property04";
-                        return $"{ci.Word} {TokenOptional} {TokenClass}'";
+                        ret = $"{TokenPrefix}{ci.Word} {TokenOptional} {TokenObject}";
+                        break;
                     case "Function":
-                        ci.SortText = "property06";
-                        return $"{ci.Word} {TokenFunction}'";
+                        ret = $"{TokenPrefix}{ci.Word} {TokenOptional} {TokenFunction}";
+                        break;
                     case "Predicate":
                     default:
-                        ci.SortText = "property05";
-                        return $"{ci.Word} {TokenPredicate}'";
+                        ret = $"{TokenPrefix}{ci.Word} {TokenOptional} {TokenPredicate}";
+                        break;
                 }
             }
             else
@@ -95,40 +99,84 @@ namespace FplLS
                 switch (propertyType)
                 {
                     case "Class":
-                        ci.SortText = "property01";
-                        return $"{ci.Word} {TokenClass}'";
+                        ret = $"{TokenPrefix}{ci.Word} {TokenObject}";
+                        break;
                     case "Function":
-                        ci.SortText = "property03";
-                        return $"{ci.Word} {TokenFunction}'";
+                        ret = $"{TokenPrefix}{ci.Word} {TokenFunction}";
+                        break;
                     case "Predicate":
                     default:
-                        ci.SortText = "property02";
-                        return $"{ci.Word} {TokenPredicate}'";
+                        ret = $"{TokenPrefix}{ci.Word} {TokenPredicate}";
+                        break;
                 }
             }
+            return ret;
         }
 
-        public string GetBody(FplCompletionItem ci, string definitionType, bool isOptional)
+        public string GetInsertText(FplCompletionItem ci, string propertyType, bool isOptional)
         {
             string ret;
-            switch (definitionType)
+            switch (propertyType)
             {
                 case "Class":
-                    ret = $"{GetLabelKeyword(ci, definitionType, isOptional)} SomeFpl{definitionType}Property: {TokenObject}{Environment.NewLine}"; 
+                    ret = $"{GetLabelKeyword(ci, propertyType, isOptional).Substring(TokenPrefix.Length)} SomeFpl{propertyType}Property(){Environment.NewLine}";
                     break;
                 case "Function":
-                    ret = $"{GetLabelKeyword(ci, definitionType, isOptional)} SomeFpl{definitionType}Property -> {TokenObject}";
+                    ret = $"{GetLabelKeyword(ci, propertyType, isOptional).Substring(TokenPrefix.Length)} SomeFpl{propertyType}Property() -> {TokenObject}{Environment.NewLine}";
                     break;
                 case "Predicate":
                 default:
-                    ret = $"{ GetLabelKeyword(ci, definitionType, isOptional)} SomeFpl{definitionType}Property()";
+                    ret = $"{GetLabelKeyword(ci, propertyType, isOptional).Substring(TokenPrefix.Length)} SomeFpl{propertyType}Property(){Environment.NewLine}";
                     break;
 
             }
             return ret +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t{TokenIntrinsic}{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}" +
+                $"{Environment.NewLine}";
+        }
+
+        private void SetSortText(FplCompletionItem ci, string propertyType, bool isOptional)
+        {
+            if (!isOptional)
+            {
+                switch (propertyType)
+                {
+                    case "Class":
+                        ci.SortText = "property01";
+                        break;
+                    case "Function":
+                        ci.SortText = "property03";
+                        break;
+                    case "Predicate":
+                    default:
+                        ci.SortText = "property02";
+                        break;
+
+                }
+            }
+            else
+            {
+                switch (propertyType)
+                {
+                    case "Class":
+                        ci.SortText = "property04";
+                        break;
+                    case "Function":
+                        ci.SortText = "property06";
+                        break;
+                    case "Predicate":
+                    default:
+                        ci.SortText = "property05";
+                        break;
+                }
+            }
+            if (ci.IsShort)
+            {
+                ci.SortText = "z" + ci.SortText;
+            }
+
         }
 
     }

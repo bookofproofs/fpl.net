@@ -59,6 +59,7 @@ namespace FplLS
                     ci.InsertText = $"{ci.Word} ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine})" + Environment.NewLine;
                     break;
             }
+            ci.Label += " ...";
 
         }
 

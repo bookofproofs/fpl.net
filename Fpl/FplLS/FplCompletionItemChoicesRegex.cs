@@ -10,7 +10,7 @@ namespace FplLS
 
             defaultCi.Detail = defaultCi.Word;
             defaultCi.InsertText = "/+\\d/ ";
-            defaultCi.Label = TokenPrefix + defaultCi.InsertText;
+            defaultCi.Label = TokenPrefix + defaultCi.InsertText + " ...";
             defaultCi.Kind = CompletionItemKind.Text;
             ret.Add(defaultCi);
 

@@ -11,9 +11,9 @@ namespace FplLS
         {
             var ret = new List<FplCompletionItem>();
             // snippets
-            var ci = defaultCi.Clone(); SetBody(ci, "Class", false); ret.Add(ci);
-            var ci1 = defaultCi.Clone(); SetBody(ci1, "Predicate", false); ret.Add(ci1);
-            var ci2 = defaultCi.Clone(); SetBody(ci2, "Function", false); ret.Add(ci2);
+            var ci = defaultCi.Clone(); SetBody(ci, "Class", false); ret.Add(ci); ci.Label += " ...";
+            var ci1 = defaultCi.Clone(); SetBody(ci1, "Predicate", false); ret.Add(ci1); ci1.Label += " ...";
+            var ci2 = defaultCi.Clone(); SetBody(ci2, "Function", false); ret.Add(ci2); ci2.Label += " ...";
 
             // keyword
             defaultCi.Kind = CompletionItemKind.Keyword;
