@@ -5,34 +5,99 @@ namespace FplLSTests
     [TestClass]
     public class TestGetCompletionItemDefault
     {
-
-        [DataRow("ctor")]
-        [DataRow("Default")]
+        [DataRow("?")]
+        [DataRow("|")]
+        [DataRow("@")]
+        [DataRow("=")]
+        [DataRow(":=")]
+        [DataRow(":+")]
+        [DataRow(":*")]
+        [DataRow(":")]
+        [DataRow(".")]
+        [DataRow(",")]
+        [DataRow("~")]
+        [DataRow("|-")]
+        [DataRow("->")]
+        [DataRow(";")]
+        [DataRow("!")]
+        [DataRow("{")]
+        [DataRow("}")]
+        [DataRow("(")]
+        [DataRow(")")]
+        [DataRow("<")]
+        [DataRow(">")]
+        [DataRow(":ext")]
+        [DataRow(":end")]
+        [DataRow("blabla")]
         [TestMethod]
         public void TestAddDefaultChoicesNumber(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDefault().GetChoices(detailCi);
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual(1, actual.Count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Default")]
+        [DataRow("?")]
+        [DataRow("|")]
+        [DataRow("@")]
+        [DataRow("=")]
+        [DataRow(":=")]
+        [DataRow(":+")]
+        [DataRow(":*")]
+        [DataRow(":")]
+        [DataRow(".")]
+        [DataRow(",")]
+        [DataRow("~")]
+        [DataRow("|-")]
+        [DataRow("->")]
+        [DataRow(";")]
+        [DataRow("!")]
+        [DataRow("{")]
+        [DataRow("}")]
+        [DataRow("(")]
+        [DataRow(")")]
+        [DataRow("<")]
+        [DataRow(">")]
+        [DataRow(":ext")]
+        [DataRow(":end")]
+        [DataRow("blabla")]
         [TestMethod]
-        public void TestAddDefaultKeywordCounts(string choice)
+        public void TestAddDefaultTextCounts(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDefault().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
-                if (item.Kind == CompletionItemKind.Keyword) count++;
+                if (item.Kind == CompletionItemKind.Text) count++;
             }
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Default")]
+        [DataRow("?")]
+        [DataRow("|")]
+        [DataRow("@")]
+        [DataRow("=")]
+        [DataRow(":=")]
+        [DataRow(":+")]
+        [DataRow(":*")]
+        [DataRow(":")]
+        [DataRow(".")]
+        [DataRow(",")]
+        [DataRow("~")]
+        [DataRow("|-")]
+        [DataRow("->")]
+        [DataRow(";")]
+        [DataRow("!")]
+        [DataRow("{")]
+        [DataRow("}")]
+        [DataRow("(")]
+        [DataRow(")")]
+        [DataRow("<")]
+        [DataRow(">")]
+        [DataRow(":ext")]
+        [DataRow(":end")]
+        [DataRow("blabla")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice)
         {
@@ -40,12 +105,34 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesDefault().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("Default"));
+                Assert.IsTrue(item.SortText.Contains(choice));
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Default")]
+        [DataRow("?")]
+        [DataRow("|")]
+        [DataRow("@")]
+        [DataRow("=")]
+        [DataRow(":=")]
+        [DataRow(":+")]
+        [DataRow(":*")]
+        [DataRow(":")]
+        [DataRow(".")]
+        [DataRow(",")]
+        [DataRow("~")]
+        [DataRow("|-")]
+        [DataRow("->")]
+        [DataRow(";")]
+        [DataRow("!")]
+        [DataRow("{")]
+        [DataRow("}")]
+        [DataRow("(")]
+        [DataRow(")")]
+        [DataRow("<")]
+        [DataRow(">")]
+        [DataRow(":ext")]
+        [DataRow(":end")]
+        [DataRow("blabla")]
         [TestMethod]
         public void TestAddDefaultChoicesLabel(string choice)
         {
@@ -57,21 +144,65 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Default")]
+        [DataRow("?", "else case '?'")]
+        [DataRow("|", "new case '|'")]
+        [DataRow("@", "parent self reference '@'")]
+        [DataRow("=", "equal sign '='")]
+        [DataRow(":=", "assignment sign ':='")]
+        [DataRow(":+", "one or more '*'")]
+        [DataRow(":*", "zero or more '*'")]
+        [DataRow(":", "colon ':'")]
+        [DataRow(".", "dot ','")]
+        [DataRow(",", "enumeration ','")]
+        [DataRow("~", "type declaration '~'")]
+        [DataRow("|-", "follows logically '|-'")]
+        [DataRow("->", "map '->'")]
+        [DataRow(";", "closing ';'")]
+        [DataRow("!", "index '!'")]
+        [DataRow("{", "opening '{'")]
+        [DataRow("}", "closing '}'")]
+        [DataRow("(", "opening '('")]
+        [DataRow(")", "closing '('")]
+        [DataRow("<", "opening '<'")]
+        [DataRow(">", "closing '>'")]
+        [DataRow(":ext", "extension header")]
+        [DataRow(":end", "extension tail")]
+        [DataRow("blabla", "unknown")]
         [TestMethod]
-        public void TestAddDefaultChoicesDetail(string choice)
+        public void TestAddDefaultChoicesDetail(string choice, string l)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDefault().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.AreEqual(l, item.Detail);
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Default")]
+        [DataRow("?")]
+        [DataRow("|")]
+        [DataRow("@")]
+        [DataRow("=")]
+        [DataRow(":=")]
+        [DataRow(":+")]
+        [DataRow(":*")]
+        [DataRow(":")]
+        [DataRow(".")]
+        [DataRow(",")]
+        [DataRow("~")]
+        [DataRow("|-")]
+        [DataRow("->")]
+        [DataRow(";")]
+        [DataRow("!")]
+        [DataRow("{")]
+        [DataRow("}")]
+        [DataRow("(")]
+        [DataRow(")")]
+        [DataRow("<")]
+        [DataRow(">")]
+        [DataRow(":ext")]
+        [DataRow(":end")]
+        [DataRow("blabla")]
         [TestMethod]
         public void TestAddDefaultChoicesInsertText(string choice)
         {
