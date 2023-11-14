@@ -710,6 +710,8 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
+                case "variable":
+                    break;
                 default:
                     if (Regex.IsMatch(Word, @"[A-Z]\\w*"))
                     {

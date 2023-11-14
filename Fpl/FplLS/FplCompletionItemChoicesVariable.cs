@@ -8,7 +8,7 @@ namespace FplLS
         {
             var ret = new List<FplCompletionItem>();
             defaultCi.Detail = "variable";
-            defaultCi.InsertText = "someVar";
+            defaultCi.InsertText = "someVar ";
             defaultCi.Label = TokenPrefix + defaultCi.InsertText;
             defaultCi.Kind = CompletionItemKind.Variable;
             ret.Add(defaultCi);
