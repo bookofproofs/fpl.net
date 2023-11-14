@@ -9,10 +9,10 @@ namespace FplLS
             var ret = new List<FplCompletionItem>();
             var ci = new FplCompletionItem(" ");
             ci.InsertText = " ";
-            ci.Label = TokenPrefix + ci.InsertText;
+            ci.Label = TokenPrefix + "' '";
             ci.Kind = CompletionItemKind.Text;
             ci.Detail = "(whitespace)";
-            ci.SortText = "zzzz"; // make sure whitespaces appear at the end of any list.
+            ci.SortText = "zzzzz"; // make sure whitespaces appear at the end of any list.
             ret.Add(ci); 
             return ret;
 

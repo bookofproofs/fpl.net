@@ -6,46 +6,49 @@ namespace FplLSTests
     public class TestGetCompletionItemWhitespace
     {
 
-        [DataRow("ctor")]
-        [DataRow("Whitespace")]
+        [DataRow("whitespace")]
+        [DataRow("significant whitespace")]
         [TestMethod]
         public void TestAddWhitespaceChoicesNumber(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual(1, actual.Count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Whitespace")]
+        [DataRow("whitespace")]
+        [DataRow("significant whitespace")]
         [TestMethod]
-        public void TestAddWhitespaceKeywordCounts(string choice)
+        public void TestAddWhitespaceTextCounts(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
-                if (item.Kind == CompletionItemKind.Keyword) count++;
+                if (item.Kind == CompletionItemKind.Text) count++;
             }
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Whitespace")]
+        [DataRow("whitespace", CompletionItemKind.Text, "zzzzz")]
+        [DataRow("significant whitespace", CompletionItemKind.Text, "zzzzz")]
         [TestMethod]
-        public void TestAddChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("Whitespace"));
+                if (item.Kind == kind)
+                {
+                    Assert.AreEqual(expected, item.SortText);
+                }
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Whitespace")]
+        [DataRow("whitespace")]
+        [DataRow("significant whitespace")]
         [TestMethod]
         public void TestAddWhitespaceChoicesLabel(string choice)
         {
@@ -53,36 +56,34 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
+                Assert.IsTrue(item.Label.Contains("' '") && item.Label.StartsWith("_ "));
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Whitespace")]
+        [DataRow("whitespace", "(whitespace)")]
+        [DataRow("significant whitespace", "(whitespace)")]
         [TestMethod]
-        public void TestAddWhitespaceChoicesDetail(string choice)
+        public void TestAddWhitespaceChoicesDetail(string choice, string l)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.AreEqual(l, item.Detail);
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Whitespace")]
+        [DataRow("whitespace")]
+        [DataRow("significant whitespace")]
         [TestMethod]
         public void TestAddWhitespaceChoicesInsertText(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
-            var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                Assert.AreEqual(" ", item.InsertText);
             }
-            Assert.AreEqual(actual.Count, counterSnippets);
         }
     }
 }
