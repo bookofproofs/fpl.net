@@ -12,44 +12,44 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesString().GetChoices(detailCi);
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual(1, actual.Count);
         }
 
         [DataRow("language-specific string")]
         [TestMethod]
-        public void TestAddStringKeywordCounts(string choice)
+        public void TestAddStringValueCounts(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesString().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
-                if (item.Kind == CompletionItemKind.Keyword) count++;
+                if (item.Kind == CompletionItemKind.Value) count++;
             }
-            Assert.AreEqual(1, count);
+            Assert.AreEqual(actual.Count, count);
         }
 
-        [DataRow("language-specific string")]
+        [DataRow("language-specific string", "\"\"")]
         [TestMethod]
-        public void TestAddStringChoicesSortText(string choice)
+        public void TestAddStringChoicesSortText(string choice, string l)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesString().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("String"));
+                Assert.AreEqual(l, item.SortText);
             }
         }
 
-        [DataRow("language-specific string")]
+        [DataRow("language-specific string", "\"...\"")]
         [TestMethod]
-        public void TestAddStringChoicesLabel(string choice)
+        public void TestAddStringChoicesLabel(string choice, string l)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesString().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
+                Assert.IsTrue(item.Label.Contains(l) && item.Label.StartsWith("_ "));
             }
         }
 
@@ -65,18 +65,16 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("language-specific string")]
+        [DataRow("language-specific string", "\"...\" ")]
         [TestMethod]
-        public void TestAddStringChoicesInsertText(string choice)
+        public void TestAddStringChoicesInsertText(string choice, string l)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesString().GetChoices(detailCi);
-            var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                Assert.AreEqual(l, item.InsertText);
             }
-            Assert.AreEqual(actual.Count, counterSnippets);
         }
     }
 }

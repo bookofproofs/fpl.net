@@ -9,8 +9,9 @@ namespace FplLS
             var ret = new List<FplCompletionItem>();
 
             defaultCi.Detail = defaultCi.Word;
-            defaultCi.InsertText = "\"...\"";
-            defaultCi.Label = TokenPrefix + defaultCi.InsertText;
+            defaultCi.SortText = "\"\"";
+            defaultCi.InsertText = "\"...\" ";
+            defaultCi.Label = TokenPrefix + "\"...\"";
             defaultCi.Kind = CompletionItemKind.Value;
             ret.Add(defaultCi);
 
