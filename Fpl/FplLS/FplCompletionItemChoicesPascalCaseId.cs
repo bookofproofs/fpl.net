@@ -7,8 +7,8 @@ namespace FplLS
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
         {
             var ret = new List<FplCompletionItem>();
-            defaultCi.Detail = "user-defined identifier";
-            defaultCi.InsertText = "SomeFplIdentifier";
+            defaultCi.Detail = "user-defined id";
+            defaultCi.InsertText = $"{defaultCi.Word}() ";
             defaultCi.Label = TokenPrefix + defaultCi.InsertText + " ...";
             defaultCi.Kind = CompletionItemKind.Reference;
             ret.Add(defaultCi);

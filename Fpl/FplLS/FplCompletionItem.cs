@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using System.Text.RegularExpressions;
 
 namespace FplLS
 {
@@ -710,10 +711,21 @@ namespace FplLS
                     this.IsShort = false;
                     break;
                 default:
-                    this.Detail = Word;
-                    this.SortText = Word;
-                    this.Kind = CompletionItemKind.Text;
-                    this.IsShort = false;
+                    if (Regex.IsMatch(Word, @"[A-Z]\\w*"))
+                    {
+                        // PascalCaseID
+                        this.Detail = Word;
+                        this.SortText = Word;
+                        this.Kind = CompletionItemKind.Reference;
+                        this.IsShort = false;
+                    }
+                    else
+                    {
+                        this.Detail = Word;
+                        this.SortText = Word;
+                        this.Kind = CompletionItemKind.Text;
+                        this.IsShort = false;
+                    }
                     break;
             }
 
