@@ -6,8 +6,7 @@ namespace FplLSTests
     public class TestGetCompletionItemString
     {
 
-        [DataRow("ctor")]
-        [DataRow("String")]
+        [DataRow("language-specific string")]
         [TestMethod]
         public void TestAddStringChoicesNumber(string choice)
         {
@@ -16,8 +15,7 @@ namespace FplLSTests
             Assert.AreEqual(2, actual.Count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("String")]
+        [DataRow("language-specific string")]
         [TestMethod]
         public void TestAddStringKeywordCounts(string choice)
         {
@@ -31,8 +29,7 @@ namespace FplLSTests
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("String")]
+        [DataRow("language-specific string")]
         [TestMethod]
         public void TestAddStringChoicesSortText(string choice)
         {
@@ -44,8 +41,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("String")]
+        [DataRow("language-specific string")]
         [TestMethod]
         public void TestAddStringChoicesLabel(string choice)
         {
@@ -57,8 +53,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("String")]
+        [DataRow("language-specific string")]
         [TestMethod]
         public void TestAddStringChoicesDetail(string choice)
         {
@@ -70,8 +65,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("String")]
+        [DataRow("language-specific string")]
         [TestMethod]
         public void TestAddStringChoicesInsertText(string choice)
         {

@@ -6,59 +6,72 @@ namespace FplLSTests
     public class TestGetCompletionItemRegex
     {
 
-        [DataRow("ctor")]
-        [DataRow("Regex")]
+        [DataRow("extension regex")]
         [TestMethod]
         public void TestAddRegexChoicesNumber(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesRegex().GetChoices(detailCi);
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual(1, actual.Count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Regex")]
+        [DataRow("extension regex")]
         [TestMethod]
-        public void TestAddRegexKeywordCounts(string choice)
+        public void TestAddRegexTextCounts(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesRegex().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
-                if (item.Kind == CompletionItemKind.Keyword) count++;
+                if (item.Kind == CompletionItemKind.Text) count++;
             }
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Regex")]
+        [DataRow("extension regex", CompletionItemKind.Value, "word")]
         [TestMethod]
-        public void TestAddChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesRegex().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("Regex"));
+                if (item.Kind == kind)
+                {
+                    Assert.AreEqual(expected, item.SortText);
+                }
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Regex")]
+        [DataRow("extension regex")]
         [TestMethod]
-        public void TestAddRegexChoicesLabel(string choice)
+        public void TestInsertTextEndsWithSpace(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesRegex().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
+                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && !choice.EndsWith("!"))
+                {
+                    Assert.IsTrue(item.InsertText.EndsWith(" "));
+                }
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Regex")]
+        [DataRow("extension regex", "some regex")]
+        [TestMethod]
+        public void TestAddRegexChoicesLabel(string choice, string l)
+        {
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesRegex().GetChoices(detailCi);
+            foreach (var item in actual)
+            {
+                Assert.IsTrue(item.Label.Contains(l) && item.Label.StartsWith("_ "));
+            }
+        }
+
+        [DataRow("extension regex")]
         [TestMethod]
         public void TestAddRegexChoicesDetail(string choice)
         {
@@ -70,19 +83,16 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Regex")]
+        [DataRow("extension regex", "/+\\d/ ")]
         [TestMethod]
-        public void TestAddRegexChoicesInsertText(string choice)
+        public void TestAddRegexChoicesInsertText(string choice, string l)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesRegex().GetChoices(detailCi);
-            var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                Assert.AreEqual(l, item.InsertText);
             }
-            Assert.AreEqual(actual.Count, counterSnippets);
         }
     }
 }
