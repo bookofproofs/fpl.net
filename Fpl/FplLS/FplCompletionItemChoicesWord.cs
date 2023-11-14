@@ -7,8 +7,8 @@ namespace FplLS
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
         {
             var ret = new List<FplCompletionItem>();
-            defaultCi.Detail = "word pattern [a-z0-9_]+";
-            defaultCi.InsertText = "someIdentifier";
+            defaultCi.Detail = "regex \\w+";
+            defaultCi.InsertText = "someIdentifier ";
             defaultCi.Label = TokenPrefix + defaultCi.InsertText;
             defaultCi.Kind = CompletionItemKind.Value;
             ret.Add(defaultCi);

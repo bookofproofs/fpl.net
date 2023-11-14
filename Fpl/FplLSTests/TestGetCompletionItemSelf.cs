@@ -7,6 +7,7 @@ namespace FplLSTests
     {
 
         [DataRow("self")]
+        [DataRow("self!")]
         [DataRow("@")]
         [TestMethod]
         public void TestAddSelfChoicesNumber(string choice)
@@ -17,6 +18,7 @@ namespace FplLSTests
         }
 
         [DataRow("self")]
+        [DataRow("self!")]
         [DataRow("@")]
         [TestMethod]
         public void TestAddSelfReferenceCounts(string choice)
@@ -33,6 +35,7 @@ namespace FplLSTests
 
         [DataRow("self", CompletionItemKind.Reference, "self01")]
         [DataRow("@", CompletionItemKind.Reference, "self02")]
+        [DataRow("self!", CompletionItemKind.Reference, "self03")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -48,6 +51,7 @@ namespace FplLSTests
         }
 
         [DataRow("self")]
+        [DataRow("self!")]
         [DataRow("@")]
         [TestMethod]
         public void TestInsertTextEndsWithSpace(string choice)
@@ -56,7 +60,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesSelf().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && !choice.EndsWith("!"))
                 {
                     Assert.IsTrue(item.InsertText.EndsWith(" "));
                 }
@@ -64,6 +68,7 @@ namespace FplLSTests
         }
 
         [DataRow("self")]
+        [DataRow("self!")]
         [DataRow("@")]
         [TestMethod]
         public void TestAddSelfChoicesLabel(string choice)
@@ -77,6 +82,7 @@ namespace FplLSTests
         }
 
         [DataRow("self", "self reference")]
+        [DataRow("self!", "ctor call (parent class)")]
         [DataRow("@", "parent self reference")]
         [TestMethod]
         public void TestAddSelfChoicesDetail(string choice, string l)
@@ -90,6 +96,7 @@ namespace FplLSTests
         }
 
         [DataRow("self")]
+        [DataRow("self!")]
         [DataRow("@")]
         [TestMethod]
         public void TestAddSelfChoicesInsertText(string choice)

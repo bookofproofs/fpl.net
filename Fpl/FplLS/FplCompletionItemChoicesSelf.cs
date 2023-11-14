@@ -27,6 +27,16 @@ namespace FplLS
                 ci.SortText = "self02";
                 ret.Add(ci);
             }
+            if (defaultCi.Word == "self!")
+            {
+                var ci = defaultCi.Clone();
+                ci.Detail = "ctor call (parent class)";
+                ci.InsertText = "self!";
+                ci.Label = TokenPrefix + ci.InsertText;
+                ci.Kind = CompletionItemKind.Reference;
+                ci.SortText = "self03";
+                ret.Add(ci);
+            }
             return ret;
         }
     }

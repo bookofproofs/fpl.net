@@ -6,83 +6,94 @@ namespace FplLSTests
     public class TestGetCompletionItemWord
     {
 
-        [DataRow("ctor")]
-        [DataRow("Word")]
+        [DataRow("word")]
         [TestMethod]
         public void TestAddWordChoicesNumber(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual(1, actual.Count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Word")]
+        [DataRow("word")]
         [TestMethod]
-        public void TestAddWordKeywordCounts(string choice)
+        public void TestAddWordValueCounts(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
-                if (item.Kind == CompletionItemKind.Keyword) count++;
+                if (item.Kind == CompletionItemKind.Value) count++;
             }
-            Assert.AreEqual(1, count);
+            Assert.AreEqual(actual.Count, count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Word")]
+        [DataRow("word", CompletionItemKind.Value, "word")]
         [TestMethod]
-        public void TestAddChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("Word"));
+                if (item.Kind == kind)
+                {
+                    Assert.AreEqual(expected, item.SortText);
+                }
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Word")]
+        [DataRow("word")]
         [TestMethod]
-        public void TestAddWordChoicesLabel(string choice)
+        public void TestInsertTextEndsWithSpace(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
+                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice) && !choice.EndsWith("!"))
+                {
+                    Assert.IsTrue(item.InsertText.EndsWith(" "));
+                }
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Word")]
+
+        [DataRow("word", "someIdentifier")]
         [TestMethod]
-        public void TestAddWordChoicesDetail(string choice)
+        public void TestAddWordChoicesLabel(string choice, string l)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.IsTrue(item.Label.Contains(l) && item.Label.StartsWith("_ "));
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Word")]
+        [DataRow("word", "regex \\w+")]
         [TestMethod]
-        public void TestAddWordChoicesInsertText(string choice)
+        public void TestAddWordChoicesDetail(string choice, string l)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
-            var counterSnippets = 0;
             foreach (var item in actual)
             {
-                if (item.InsertText.Contains(choice)) { counterSnippets++; }
+                Assert.AreEqual(l, item.Detail);
             }
-            Assert.AreEqual(actual.Count, counterSnippets);
+        }
+
+        [DataRow("word", "someIdentifier ")]
+        [TestMethod]
+        public void TestAddWordChoicesInsertText(string choice, string l)
+        {
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesWord().GetChoices(detailCi);
+            foreach (var item in actual)
+            {
+                Assert.AreEqual(l, item.InsertText);
+            }
         }
     }
 }
