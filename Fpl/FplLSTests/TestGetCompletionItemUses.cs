@@ -40,7 +40,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesUses().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Label.Contains(l) && item.Kind == kind)
+                if (item.Kind == kind)
                 {
                     Assert.AreEqual(expected, item.SortText);
                 }

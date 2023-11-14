@@ -11,7 +11,7 @@ namespace FplLS
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "self reference";
-                ci.InsertText = "self";
+                ci.InsertText = "self ";
                 ci.Label = TokenPrefix + ci.InsertText;
                 ci.Kind = CompletionItemKind.Reference;
                 ci.SortText = "self01";
@@ -21,7 +21,7 @@ namespace FplLS
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "parent self reference";
-                ci.InsertText = "@self";
+                ci.InsertText = "@self ";
                 ci.Label = TokenPrefix + ci.InsertText;
                 ci.Kind = CompletionItemKind.Reference;
                 ci.SortText = "self02";

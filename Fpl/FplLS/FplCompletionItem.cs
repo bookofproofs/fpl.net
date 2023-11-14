@@ -1,16 +1,15 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using System.Text.RegularExpressions;
 
 namespace FplLS
 {
-    public class FplCompletionItem: CompletionItem
+    public class FplCompletionItem : CompletionItem
     {
         private readonly string _prefix = "_ ";
 
         public bool IsShort { get; set; }
         public string Word { get; set; }
-        
-        public FplCompletionItem(string word) 
+
+        public FplCompletionItem(string word)
         {
             Word = word;
             SetDetails();
@@ -198,14 +197,14 @@ namespace FplLS
             ret.AdditionalTextEdits = this.AdditionalTextEdits;
             ret.Command = this.Command;
             ret.CommitCharacters = this.CommitCharacters;
-            ret.Detail = this.Detail; 
+            ret.Detail = this.Detail;
             ret.Documentation = this.Documentation;
             ret.FilterText = this.FilterText;
-            ret.InsertText = this.InsertText;   
+            ret.InsertText = this.InsertText;
             ret.Kind = this.Kind;
-            ret.Label = this.Label; 
+            ret.Label = this.Label;
             ret.Preselect = this.Preselect;
-            ret.SortText = this.SortText;   
+            ret.SortText = this.SortText;
             ret.TextEdit = this.TextEdit;
             return ret;
         }
@@ -710,24 +709,11 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case "variable":
-                    break;
                 default:
-                    if (Regex.IsMatch(Word, @"[A-Z]\\w*"))
-                    {
-                        // PascalCaseID
-                        this.Detail = Word;
-                        this.SortText = Word;
-                        this.Kind = CompletionItemKind.Reference;
-                        this.IsShort = false;
-                    }
-                    else
-                    {
-                        this.Detail = Word;
-                        this.SortText = Word;
-                        this.Kind = CompletionItemKind.Text;
-                        this.IsShort = false;
-                    }
+                    this.Detail = Word;
+                    this.SortText = Word;
+                    this.Kind = CompletionItemKind.Text;
+                    this.IsShort = false;
                     break;
             }
 

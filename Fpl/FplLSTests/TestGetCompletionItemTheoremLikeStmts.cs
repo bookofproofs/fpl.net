@@ -75,7 +75,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesTheoremLikeStmt(l).GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Label.Contains(choice) && item.Kind == kind)
+                if (item.Kind == kind)
                 {
                     Assert.AreEqual(expected, item.SortText);
                 }

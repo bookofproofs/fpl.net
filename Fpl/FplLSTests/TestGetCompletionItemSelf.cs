@@ -6,46 +6,65 @@ namespace FplLSTests
     public class TestGetCompletionItemSelf
     {
 
-        [DataRow("ctor")]
-        [DataRow("Self")]
+        [DataRow("self")]
+        [DataRow("@")]
         [TestMethod]
         public void TestAddSelfChoicesNumber(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesSelf().GetChoices(detailCi);
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual(1, actual.Count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Self")]
+        [DataRow("self")]
+        [DataRow("@")]
         [TestMethod]
-        public void TestAddSelfKeywordCounts(string choice)
+        public void TestAddSelfReferenceCounts(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesSelf().GetChoices(detailCi);
             var count = 0;
             foreach (var item in actual)
             {
-                if (item.Kind == CompletionItemKind.Keyword) count++;
+                if (item.Kind == CompletionItemKind.Reference) count++;
             }
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("Self")]
+        [DataRow("self", CompletionItemKind.Reference, "self01")]
+        [DataRow("@", CompletionItemKind.Reference, "self02")]
         [TestMethod]
-        public void TestAddChoicesSortText(string choice)
+        public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesSelf().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("Self"));
+                if (item.Kind == kind)
+                {
+                    Assert.AreEqual(expected, item.SortText);
+                }
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Self")]
+        [DataRow("self")]
+        [DataRow("@")]
+        [TestMethod]
+        public void TestInsertTextEndsWithSpace(string choice)
+        {
+            var detailCi = new FplCompletionItem(choice);
+            var actual = new FplCompletionItemChoicesSelf().GetChoices(detailCi);
+            foreach (var item in actual)
+            {
+                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
+                {
+                    Assert.IsTrue(item.InsertText.EndsWith(" "));
+                }
+            }
+        }
+
+        [DataRow("self")]
+        [DataRow("@")]
         [TestMethod]
         public void TestAddSelfChoicesLabel(string choice)
         {
@@ -57,21 +76,21 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Self")]
+        [DataRow("self", "self reference")]
+        [DataRow("@", "parent self reference")]
         [TestMethod]
-        public void TestAddSelfChoicesDetail(string choice)
+        public void TestAddSelfChoicesDetail(string choice, string l)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesSelf().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains(choice));
+                Assert.AreEqual(l, item.Detail);
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("Self")]
+        [DataRow("self")]
+        [DataRow("@")]
         [TestMethod]
         public void TestAddSelfChoicesInsertText(string choice)
         {

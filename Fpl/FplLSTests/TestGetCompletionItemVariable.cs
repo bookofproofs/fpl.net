@@ -32,7 +32,9 @@ namespace FplLSTests
             Assert.AreEqual(1, count);
         }
 
-        [DataRow("PascalCaseId", CompletionItemKind.Reference, "PascalCaseId")]
+        [DataRow("variable", CompletionItemKind.Reference, "variable")]
+        [DataRow("variable (got keyword)", CompletionItemKind.Reference, "variable")]
+        [DataRow("variable (got template)", CompletionItemKind.Reference, "variable")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -40,10 +42,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesVariable().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Label.Contains(choice) && item.Kind == kind)
-                {
-                    Assert.AreEqual(expected, item.SortText);
-                }
+                Assert.AreEqual(expected, item.SortText);
             }
         }
 
