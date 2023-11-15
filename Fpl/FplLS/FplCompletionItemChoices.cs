@@ -33,6 +33,21 @@ namespace FplLS
             TokenRevoke = "revoke";
         }
 
+        public void AdjustToShort()
+        {
+            TokenAssume = "ass";
+            TokenClass = "cl";
+            TokenConclusion = "con";
+            TokenDeclaration = "dec";
+            TokenFunction = "func";
+            TokenIntrinsic = "intr";
+            TokenObject = "obj";
+            TokenOptional = "opt";
+            TokenPredicate = "pred";
+            TokenPremise = "pre";
+            TokenRevoke = "rev";
+        }
+
         public abstract List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi);
 
 
