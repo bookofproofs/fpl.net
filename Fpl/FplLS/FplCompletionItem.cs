@@ -31,12 +31,17 @@ namespace FplLS
             }
         }
 
-        public void AdjustToKeyword()
+        public void AdjustToShort()
         {
             if (IsShort)
             {
                 this.SortText = "z" + this.SortText;
             }
+        }
+
+        public void AdjustToKeyword()
+        {
+            AdjustToShort();
             if (Kind == CompletionItemKind.Keyword)
             {
                 this.SortText = "zzz" + this.SortText;

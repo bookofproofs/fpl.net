@@ -17,6 +17,7 @@ namespace FplLS
         public string TokenOptional { get; set; }
         public string TokenPredicate { get; set; }
         public string TokenPremise { get; set; }
+        public string TokenRevoke { get; set; }
         public FplCompletionItemChoices()
         {
             TokenAssume = "assume";
@@ -29,6 +30,7 @@ namespace FplLS
             TokenOptional = "optional";
             TokenPredicate = "predicate";
             TokenPremise = "premise";
+            TokenRevoke = "revoke";
         }
 
         public abstract List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi);
