@@ -184,7 +184,7 @@ Fpl.Arithmetics.Peano
 
     proof AddIsUnique!1
     {
-        1. assume pre
+        1. |- assume pre
         2. |- trivial
         3. |- and
                 (

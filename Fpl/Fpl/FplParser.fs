@@ -78,7 +78,7 @@ let extDigits: Parser<_, unit> = positions (digits) |>> Ast.ExtDigits
 let IdStartsWithSmallCase = regex @"[a-z]\w*" 
 let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
 let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
-let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
+let argumentIdentifier = positions (regex @"\d+\w*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 
 let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
 let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.PredicateIdentifier 
@@ -479,10 +479,9 @@ let derivedArgument = choice [
     derivedPredicate
 ]
 
-let argumentInference = vDash >>. IW >>. (revokeArgument <|> derivedArgument)
+let argumentInference = vDash >>. IW >>. (assumeArgument<|> revokeArgument <|> derivedArgument)
 let justification = positions (predicateList .>> IW) |>> Ast.Justification
-let justifiedArgument = positions (justification .>>. argumentInference) |>> Ast.JustifiedArgument
-let argument = assumeArgument <|> justifiedArgument
+let argument = positions (justification .>>. argumentInference) |>> Ast.JustifiedArgument
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. argument) .>> IW |>> Ast.Argument
 let proofArgumentList = many1 (IW >>. proofArgument)
 let keywordProof = (skipString "proof" <|> skipString "prf") .>> SW 

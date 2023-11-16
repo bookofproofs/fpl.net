@@ -13,7 +13,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual(15, actual.Count);
         }
 
         [DataRow("prf")]

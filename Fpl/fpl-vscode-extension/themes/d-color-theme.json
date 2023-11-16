@@ -72,6 +72,16 @@
 				"fontStyle": "italic",
 				"foreground": "#7a9711"
 			}
+		},
+		{
+			"name": "ArgumentId",
+			"scope": [
+				"arguments.fpl"
+			],
+			"settings": {
+				"fontStyle": "italic",
+				"foreground": "#a8c3c5"
+			}
 		}
 	]
 }
