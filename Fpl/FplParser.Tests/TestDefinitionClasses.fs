@@ -221,13 +221,13 @@ type TestClasses () =
                 self
             }
 
-            mand func T() -> obj
+            property func T() -> obj
 	        {
 	            dec ~a:obj;
                 return x
 	        } 
 
-            optional pred T() 
+            property optional pred T() 
 	        {
                 true
 	        } 
@@ -288,7 +288,7 @@ type TestClasses () =
                 self
             }
 
-            optional pred T() 
+            property optional pred T() 
 	        {
                 true
 	        } 
@@ -352,13 +352,13 @@ type TestClasses () =
         {
             intrinsic
 
-            mand func T() -> obj
+            property func T() -> obj
 	        {
 	            dec ~a:obj;
                 return x
 	        } 
 
-            optional pred T() 
+            property optional pred T() 
 	        {
                 true
 	        } 

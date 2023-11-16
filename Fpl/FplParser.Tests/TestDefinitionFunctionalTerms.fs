@@ -289,13 +289,13 @@ type TestDefinitionFunctionalTerms01 () =
         {
             intrinsic
 
-            mand func T() -> obj
+            property func T() -> obj
 	        {
 	            dec ~a:obj;
                 return x
 	        } 
 
-            optional pred T() 
+            property optional pred T() 
 	        {
                 true
 	        } 
@@ -386,13 +386,13 @@ type TestDefinitionFunctionalTerms01 () =
             return x 
 
 
-            mand func T() -> obj
+            property func T() -> obj
 	        {
 	            dec ~a:obj ;
                 return x
 	        } 
 
-            optional pred T() 
+            property optional pred T() 
 	        {
                 true
 	        } 

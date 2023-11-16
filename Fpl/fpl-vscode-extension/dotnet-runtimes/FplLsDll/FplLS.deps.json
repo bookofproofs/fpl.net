@@ -9,7 +9,6 @@
       "FplLS/1.0.0": {
         "dependencies": {
           "Fpl": "1.0.0",
-          "GuiLabs.Language.Xml": "1.2.60",
           "OmniSharp.Extensions.LanguageServer": "0.13.1"
         },
         "runtime": {
@@ -18,7 +17,7 @@
       },
       "FParsec/1.1.1": {
         "dependencies": {
-          "FSharp.Core": "7.0.400"
+          "FSharp.Core": "7.0.401"
         },
         "runtime": {
           "lib/netstandard2.0/FParsec.dll": {
@@ -31,22 +30,11 @@
           }
         }
       },
-      "FSharp.Core/7.0.400": {
+      "FSharp.Core/7.0.401": {
         "runtime": {
           "lib/netstandard2.1/FSharp.Core.dll": {
             "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.4.23.36405"
-          }
-        }
-      },
-      "GuiLabs.Language.Xml/1.2.60": {
-        "dependencies": {
-          "System.Collections.Immutable": "1.5.0"
-        },
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.Language.Xml.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.2.60.36188"
+            "fileVersion": "7.4.123.42509"
           }
         }
       },
@@ -241,7 +229,6 @@
           }
         }
       },
-      "System.Collections.Immutable/1.5.0": {},
       "System.Reactive/4.1.2": {
         "dependencies": {
           "System.Runtime.InteropServices.WindowsRuntime": "4.3.0",
@@ -277,7 +264,7 @@
       "Fpl/1.0.0": {
         "dependencies": {
           "FParsec": "1.1.1",
-          "FSharp.Core": "7.0.400",
+          "FSharp.Core": "7.0.401",
           "MSTest.TestAdapter": "3.1.1",
           "MSTest.TestFramework": "3.1.1",
           "Microsoft.NET.Test.Sdk": "17.7.2"
@@ -301,19 +288,12 @@
       "path": "fparsec/1.1.1",
       "hashPath": "fparsec.1.1.1.nupkg.sha512"
     },
-    "FSharp.Core/7.0.400": {
+    "FSharp.Core/7.0.401": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-kJQ7TBQqd1d2VoODSgwFSAaApaBN0Fuu8mZt2XExmd3UzUxLjUsMn5Y5XhpsUWdnxOL8amp7VFg7cwhPllR4Qw==",
-      "path": "fsharp.core/7.0.400",
-      "hashPath": "fsharp.core.7.0.400.nupkg.sha512"
-    },
-    "GuiLabs.Language.Xml/1.2.60": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-DYb0kl3WQXVuMXvelBf26mev48LV40kA0labPe5NtEZAfFSstfXYO2SBvpDC+rRGddzKPlDfbc4Tw9Q7Yj3CNA==",
-      "path": "guilabs.language.xml/1.2.60",
-      "hashPath": "guilabs.language.xml.1.2.60.nupkg.sha512"
+      "sha512": "sha512-ZL16YHLJnkosMooVXjvJH0vGf7O4RSNtCpA/qw6OAHYxPCYSZRc5pKFTpDeDLdSWpOJDaZlveKcn42F0UDo77A==",
+      "path": "fsharp.core/7.0.401",
+      "hashPath": "fsharp.core.7.0.401.nupkg.sha512"
     },
     "Microsoft.CodeCoverage/17.7.2": {
       "type": "package",
@@ -447,13 +427,6 @@
       "sha512": "sha512-fAN7SnoiN0kJTkvuFajzV//LX19LjXVTiwAZ4pBVkwxbCkDgPLi7F0NpI1pihYoH3/vWZSyom9CW5ZYOhbslYA==",
       "path": "omnisharp.extensions.languageserver/0.13.1",
       "hashPath": "omnisharp.extensions.languageserver.0.13.1.nupkg.sha512"
-    },
-    "System.Collections.Immutable/1.5.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-EXKiDFsChZW0RjrZ4FYHu9aW6+P4MCgEDCklsVseRfhoO0F+dXeMSsMRAlVXIo06kGJ/zv+2w1a2uc2+kxxSaQ==",
-      "path": "system.collections.immutable/1.5.0",
-      "hashPath": "system.collections.immutable.1.5.0.nupkg.sha512"
     },
     "System.Reactive/4.1.2": {
       "type": "package",

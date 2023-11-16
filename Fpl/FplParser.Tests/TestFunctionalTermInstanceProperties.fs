@@ -89,7 +89,7 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2a () =
         // a function term instance with a return statement 
-        let result = run property """optional func X() -> Y
+        let result = run property """property optional func X() -> Y
 	        {
                 dec ~a:obj;
                 return x
@@ -101,7 +101,7 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2b () =
         // a function term instance with a return statement 
-        let result = run property """mand func X() -> Y
+        let result = run property """property func X() -> Y
 	        {
                 dec ~a:obj;
                 return x
@@ -113,7 +113,7 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2c () =
         // a function term instance with a return statement 
-        let result = run property """optional func X() -> Y
+        let result = run property """property optional func X() -> Y
 	        {
                 dec ~a:obj;
                 return x
@@ -125,7 +125,7 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2d () =
         // a function term instance with a return statement 
-        let result = run property """mand func X() -> Y
+        let result = run property """property func X() -> Y
 	        {
                 dec ~a:obj;
                 return x
@@ -137,7 +137,7 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2e () =
         // a function term instance with a return statement 
-        let result = run property """optional func X() -> Y
+        let result = run property """property optional func X() -> Y
 	        {
                 dec ~a:obj;
                 return x
@@ -149,7 +149,7 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2f () =
         // a function term instance with a return statement 
-        let result = run property """mand func X() -> Y
+        let result = run property """property func X() -> Y
 	        {
                 dec ~a:obj;
                 return x
@@ -162,7 +162,7 @@ type TestFunctionalTermProperties () =
     member this.TestFunctionalTermInstance3 () =
         // a function term instance with a return statement and 
         // some other content following it is not allowed
-        let result = run property """mand func X() -> Y
+        let result = run property """property func X() -> Y
 	        {
                 return x
                 dec ~a:obj;

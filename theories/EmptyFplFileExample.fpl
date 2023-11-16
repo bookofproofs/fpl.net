@@ -1,52 +1,5 @@
 Fpl 
 {
-    def class FieldPowerN: Sets 
-    {
-        ctor FieldPowerN ()
-        {
-            dec 
-                ~a:obj 
-                ~a:obj 
-                ~a:obj 
-                ~a:obj 
-                myField := field 
-                self:=SetBuilder( myField[1 , n], true) 
-                self!Set() 
-            ;
-            self 
-
-        }
-    }
-
-    def class FieldPowerN: Sets 
-    {
-        ctor FieldPowerN ()
-        {
-            dec 
-                myField := field 
-                self:=SetBuilder( myField[1 , n], true) 
-                self!Set() 
-            ;
-            self 
-
-        }
-    }
-
-
-    def class FieldPowerN: Sets 
-    {
-        ctor FieldPowerN ()
-        {
-            dec 
-                myField := field 
-                self:=SetBuilder( myField[1 , n], true) 
-                self!Set() 
-            ;
-            self 
-
-        }
-    }
+    
+    
 }
-
-
-

@@ -92,21 +92,21 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestPremiseOrOtherPredicate01 () =
-        let result = run premiseOrOtherPredicate """pre"""
+        let result = run predicate """pre"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPremiseOrOtherPredicate02 () =
-        let result = run premiseOrOtherPredicate """premise """
+        let result = run predicate """premise """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPremiseOrOtherPredicate03 () =
-        let result = run premiseOrOtherPredicate """and(a,b)"""
+        let result = run predicate """and(a,b)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -190,28 +190,28 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestJustifiedArgument01 () =
-        let result = run justifiedArgument """|-and(a,b)"""
+        let result = run argument """|-and(a,b)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustifiedArgument02 () =
-        let result = run justifiedArgument """|- revoke 2."""
+        let result = run argument """|- revoke 2."""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustifiedArgument03 () =
-        let result = run justifiedArgument """and(a,b) |- revoke 2."""
+        let result = run argument """and(a,b) |- revoke 2."""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgument01 () =
-        let result = run argument """assume and(a,b)"""
+        let result = run argument """|- assume and(a,b)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -266,7 +266,7 @@ type TestProofs () =
     member this.TestProof02 () =
         let result = run proof """prf AddIsUnique!1
         {
-            1. assume pre
+            1. |- assume pre
             2. |- trivial
         }"""
         let actual = replaceWhiteSpace (sprintf "%O" result)

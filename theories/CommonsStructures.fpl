@@ -38,7 +38,7 @@ Fpl.Commons.Structures
             self
         }
 
-        mandatory Nat Length()
+        property Nat Length()
         {
             dec
                 self:= myLength
@@ -64,7 +64,7 @@ Fpl.Commons.Structures
             self
         }
 
-        mandatory tpl Coord(i: Nat)
+        property tpl Coord(i: Nat)
         {
             dec
                 self:=x<i>
@@ -109,7 +109,7 @@ Fpl.Commons.Structures
             self
         }
 
-        mandatory Nat Length()
+        property Nat Length()
         {
             dec
                 self:= myLength 
@@ -117,7 +117,7 @@ Fpl.Commons.Structures
             self
         }
 
-        mandatory pred AllTuplesIn()
+        property pred AllTuplesIn()
         {
             dec 
                 ~tupleElem: Set
@@ -163,7 +163,7 @@ Fpl.Commons.Structures
             self
         }
 
-        mandatory Nat Arity()
+        property Nat Arity()
         {
             dec self:= myArity;
             self
@@ -187,7 +187,7 @@ Fpl.Commons.Structures
             self
         }
 
-        mandatory Set Domain()
+        property Set Domain()
         {
             dec
                 self:=myDomain
@@ -195,7 +195,7 @@ Fpl.Commons.Structures
             self
         }
 
-        mandatory Set CoDomain()
+        property Set CoDomain()
         {
             dec
                 self:=myCodomain
@@ -203,7 +203,7 @@ Fpl.Commons.Structures
             self
         }
 
-        optional pred RightUnique()
+        property optional pred RightUnique()
         {
             all v,w1,w2 in Set
             (
@@ -222,7 +222,7 @@ Fpl.Commons.Structures
             )
         }
 
-        optional pred LeftUnique()
+        property optional pred LeftUnique()
         {
             all v1,v2,w in Set
             (
@@ -241,17 +241,17 @@ Fpl.Commons.Structures
             )
         }
 
-        optional pred Injective()
+        property optional pred Injective()
         {
             LeftUnique()
         }
 
-        optional pred Unique()
+        property optional pred Unique()
         {
             and (LeftUnique(), RightUnique())
         }
 
-        optional pred RightTotal()
+        property optional pred RightTotal()
         {
             all w in Set
             (
@@ -267,12 +267,12 @@ Fpl.Commons.Structures
             )
         }
 
-        optional pred Surjective()
+        property optional pred Surjective()
         {
             RightTotal()
         }
 
-        optional pred LeftTotal()
+        property optional pred LeftTotal()
         {
             all v in Set
             (
@@ -288,7 +288,7 @@ Fpl.Commons.Structures
             )
         }
 
-        optional pred Total()
+        property optional pred Total()
         {
             and (LeftTotal(), RightTotal())
         }

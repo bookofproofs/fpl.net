@@ -47,10 +47,10 @@ let case = skipChar '|' >>. spaces
 let elseCase = skipChar '?' >>. spaces
 let leftBracket = skipChar '<' >>. spaces 
 let rightBracket = skipChar '>' >>. spaces  
-let leftClosedBracket = skipChar '[' >>. spaces <?> "<(closed) left bound '['>"
-let leftOpenBracket = skipString "[(" >>. spaces <?> "<(open) left bound '[('>"
-let rightOpenBracket = skipString ")]" >>. spaces <?> "<(open) right bound ')]'>" 
-let rightClosedBracket = skipChar ']' >>. spaces <?> "<(closed) right bound ']'>" 
+let leftClosedBracket = skipChar '[' >>. spaces <?> "<(closed) left bound>"
+let leftOpenBracket = skipString "[(" >>. spaces <?> "<(open) left bound>"
+let rightOpenBracket = skipString ")]" >>. spaces <?> "<(open) right bound>" 
+let rightClosedBracket = skipChar ']' >>. spaces <?> "<(closed) right bound>" 
 let tilde = skipChar '~' .>> spaces
 let semiColon = skipChar ';' >>. spaces
 let exclamationMark = skipChar '!'
@@ -78,7 +78,7 @@ let extDigits: Parser<_, unit> = positions (digits) |>> Ast.ExtDigits
 let IdStartsWithSmallCase = regex @"[a-z]\w*" 
 let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
 let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
-let argumentIdentifier = positions (regex @"\d+([a-z]\w)*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
+let argumentIdentifier = positions (regex @"\d+\w*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 
 let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
 let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.PredicateIdentifier 
@@ -321,6 +321,8 @@ let dotted = dot >>. predicateWithQualification
 let qualification = choice [boundedRange ; bracketedCoords ; argumentTuple] 
 predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) .>>. opt dotted |>> Ast.PredicateWithQualification 
 
+let premiseOfToBeProvedTheorem = positions keywordPremise |>> Ast.PremiseReference 
+let conclusionOfToBeProvedTheorem = positions keywordConclusion |>> Ast.ConclusionReference 
 primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
@@ -328,6 +330,8 @@ primePredicateRef.Value <- choice [
     attempt argumentIdentifier
     fplDelegate 
     predicateWithQualification
+    premiseOfToBeProvedTheorem
+    conclusionOfToBeProvedTheorem
 ]
 
 let conjunction = positions ((keywordAnd >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.And
@@ -428,7 +432,7 @@ let constructor = positions (keywordConstructor >>. signature .>>. constructorBl
 
 (* FPL building blocks - Properties *)
 let keywordOptional = positions (skipString "optional" <|> skipString "opt") .>> SW >>% Ast.Optional
-let keywordMandatory = positions (skipString "mandatory" <|> skipString "mand") .>> SW >>% Ast.Optional
+let keywordProperty = positions (skipString "property" <|> skipString "prty") .>> SW >>% Ast.Property
 
 let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
 let predicateInstance = positions (keywordPredicate >>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
@@ -448,8 +452,8 @@ let definitionProperty = choice [
     functionalTermInstance
     classInstance
 ]
-let propertyHeader = IW >>. (keywordOptional <|> keywordMandatory)
-let property = positions (propertyHeader .>>. definitionProperty) |>> Ast.Property
+let propertyHeader = IW >>. keywordProperty .>>. opt keywordOptional 
+let property = positions (propertyHeader .>>. definitionProperty) |>> Ast.PropertyBlock
 let propertyList = opt (many1 (property .>> IW)) 
 
 (* FPL building blocks - Proofs 
@@ -463,26 +467,21 @@ let propertyList = opt (many1 (property .>> IW))
 // justifying proof arguments can be the identifiers of Rules of References, conjectures, theorem-like statements, or axioms
 let keywordRevoke = (skipString "revoke" <|> skipString "rev") .>> SW 
 let revokeArgument = positions (keywordRevoke >>. argumentIdentifier) |>> Ast.RevokeArgument 
-let premiseOfToBeProvedTheorem = positions keywordPremise |>> Ast.PremiseReference 
-let conclusionOfToBeProvedTheorem = positions keywordConclusion |>> Ast.ConclusionReference 
-let premiseOrOtherPredicate = premiseOfToBeProvedTheorem <|> predicate
     
 let keywordAssume = skipString "assume" <|> skipString "ass" .>> SW 
-let assumeArgument = positions (keywordAssume >>. premiseOrOtherPredicate) |>> Ast.AssumeArgument
+let assumeArgument = positions (keywordAssume >>. predicate) |>> Ast.AssumeArgument
 let keywordTrivial  = positions (skipString "trivial") .>> IW |>> Ast.Trivial
 let keywordQed  = positions (skipString "qed") .>> IW |>> Ast.Qed
 let derivedPredicate = predicate |>> Ast.DerivedPredicate
 let derivedArgument = choice [
     keywordQed 
     keywordTrivial 
-    conclusionOfToBeProvedTheorem 
     derivedPredicate
 ]
 
-let argumentInference = vDash >>. IW >>. (revokeArgument <|> derivedArgument)
+let argumentInference = vDash >>. IW >>. (assumeArgument<|> revokeArgument <|> derivedArgument)
 let justification = positions (predicateList .>> IW) |>> Ast.Justification
-let justifiedArgument = positions (justification .>>. argumentInference) |>> Ast.JustifiedArgument
-let argument = assumeArgument <|> justifiedArgument
+let argument = positions (justification .>>. argumentInference) |>> Ast.JustifiedArgument
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. argument) .>> IW |>> Ast.Argument
 let proofArgumentList = many1 (IW >>. proofArgument)
 let keywordProof = (skipString "proof" <|> skipString "prf") .>> SW 
@@ -523,7 +522,7 @@ let definition = keywordDefinition >>. choice [
 // Localizations provide a possibility to automatically translate FPL expressions into natural languages
 let keywordLocalization = (skipString "localization" <|> skipString "loc") >>. SW
 let localizationLanguageCode: Parser<string,unit> = regex @"[a-z]{3}" <?> "<ISO 639 language code>"
-let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<\"language-specific string\">" |>> Ast.LocalizationString
+let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<language-specific string>" |>> Ast.LocalizationString
 
 let ebnfTransl, ebnfTranslRef = createParserForwardedToRef()
 let ebnfTranslTuple = (leftParen >>. IW >>. ebnfTransl) .>> (IW .>> rightParen) 
@@ -686,3 +685,13 @@ let fplParser (input:string) =
 
 let parserDiagnostics = ad
 
+/// Returns the parser choices at position (if any).
+let getParserChoicesAtPosition (input:string) index =
+    let newInput = preParsePreProcess input
+    match run ast (newInput.Substring(0, index)) with
+    | Success(result, restInput, userState) -> 
+        // In the success case, we always return the current parser position in the input
+        List.empty, userState.Index
+    | Failure(errorMsg, restInput, userState) ->
+        let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
+        choices, restInput.Position.Index
