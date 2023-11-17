@@ -28,10 +28,12 @@ Fpl.Arithmetics
     {
         all x in N
         (
-            exn x
+            exn!1 y in N
             (
-                p(x)
+                _
             )
+            
+            
             
             
         )

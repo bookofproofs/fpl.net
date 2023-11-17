@@ -33,6 +33,10 @@ namespace FplLS
                     // keyword
                     var ci2K = defaultCi.Clone(); ci2K.Kind = CompletionItemKind.Keyword; ci2K.AdjustToKeyword(); ret.Add(ci2K);
                     break;
+                case "<":
+                    // snippet for equality
+                    var ciEquals = defaultCi.Clone(); SetBodyEquality(ciEquals); ret.Add(ciEquals);
+                    break;
                 case "and":
                 case "or":
                     var ci3 = defaultCi.Clone(); SetBody(ci3, 2); ret.Add(ci3);
@@ -42,7 +46,7 @@ namespace FplLS
             return ret;
         }
 
-         public void SetBody(FplCompletionItem ci, int numbOfArgs)
+        public void SetBody(FplCompletionItem ci, int numbOfArgs)
         {
             switch (numbOfArgs)
             {
@@ -63,6 +67,14 @@ namespace FplLS
 
         }
 
+        public void SetBodyEquality(FplCompletionItem ci)
+        {
+            ci.InsertText = $"< x = y > ";
+            ci.Label = TokenPrefix + ci.InsertText + "...";
+            ci.Detail = "equality";
+            ci.SortText = "<";
+            ci.Kind = CompletionItemKind.Operator;
+        }
 
     }
 }

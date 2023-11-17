@@ -143,6 +143,7 @@ namespace FplLS
                 case "impl":
                 case "and":
                 case "or":
+                case "<":
                     return new FplCompletionItemChoicesPredicate().GetChoices(this);
                 case "ctor":
                 case "constructor":
