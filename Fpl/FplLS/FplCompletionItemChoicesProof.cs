@@ -170,13 +170,13 @@ namespace FplLS
                 $"\t100. |- {TokenAssume} {TokenPremise}{Environment.NewLine}" +
                 $"\t150. |- or (p, q){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t\t// \"impl(p, con)\" {Environment.NewLine}" +
+                $"\t\t// \"impl(p, {TokenConclusion})\" {Environment.NewLine}" +
                 $"\t\t200. |- {TokenAssume} p{Environment.NewLine}" +
                 $"\t\t210. |- trivial{Environment.NewLine}" +
                 $"\t\t220. |- {TokenConclusion}{Environment.NewLine}" +
                 $"\t\t290. |- impl(p, {TokenConclusion}){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t\t// \"impl(q, con)\" {Environment.NewLine}" +
+                $"\t\t// \"impl(q, {TokenConclusion})\" {Environment.NewLine}" +
                 $"\t\t300. |- {TokenAssume} q{Environment.NewLine}" +
                 $"\t\t310. |- trivial{Environment.NewLine}" +
                 $"\t\t320. |- {TokenConclusion}{Environment.NewLine}" +
@@ -207,7 +207,7 @@ namespace FplLS
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- or (not(p), not(q)){Environment.NewLine}" +
                 $"\t500. |- not({TokenPremise}){Environment.NewLine}" +
-                $"\t600. |- impl(not({TokenConclusion}), not({TokenPremise})){Environment.NewLine}" +
+                $"\t600. ProceedingResults(100., 500.) |- impl(not({TokenConclusion}), not({TokenPremise})){Environment.NewLine}" +
                 $"\t700. |- impl({TokenPremise}, {TokenConclusion}){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
@@ -279,17 +279,18 @@ namespace FplLS
                 $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Counterexample of \"not(all x ( p(x) ))\"){Environment.NewLine}" +
-                $"\t// Strategy: Assume for all x ( p(x) ), then produce an example of x for which p(x) is false.{Environment.NewLine}" +
+                $"\t// Strategy: Assume \"all x ( p(x) )\", then produce an example of x for which p(x) is false.{Environment.NewLine}" +
                 $"\t// Revoking the assumption proves the argument.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
                 $"\t\t ~c:obj{Environment.NewLine}" +
                 $"\t\t // construct a counterexample c := ... {Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} not(all x ( p(x) )){Environment.NewLine}" +
-                $"\t200. |- ex x ( not (p(x)) ){Environment.NewLine}" +
-                $"\t300. ExistsByExample (c) |- false{Environment.NewLine}" +
-                $"\t400. |- {TokenRevoke} 100.{Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} not({TokenPremise}){Environment.NewLine}" +
+                $"\t200. |- not(all x ( p(x) )){Environment.NewLine}" +
+                $"\t300. |- ex x ( not (p(x)) ){Environment.NewLine}" +
+                $"\t400. ExistsByExample (c), 300. |- false{Environment.NewLine}" +
+                $"\t500. |- {TokenRevoke} 100.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t600. |- qed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}" +
@@ -306,15 +307,16 @@ namespace FplLS
                 $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Counterexample of \"not(ex x ( p(x) ))\"){Environment.NewLine}" +
-                $"\t// Strategy: Prove that for all x ( p(x) ) is true.{Environment.NewLine}" +
+                $"\t// Strategy: Prove that for \"all x ( not (p(x)) )\" is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} all x ( p(x) ){Environment.NewLine}" +
-                $"\t200. |- trivial{Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} all x ( not (p(x)) ){Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
-                $"\t400. |- true{Environment.NewLine}" +
-                $"\t500. |- not(ex x ( p(x) )){Environment.NewLine}" +
+                $"\t400. |- trivial{Environment.NewLine}" +
+                $"\t500. |- true{Environment.NewLine}" +
+                $"\t600. |- not(ex x ( p(x) )){Environment.NewLine}" +
+                $"\t700. |- {TokenConclusion}{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t600. |- qed{Environment.NewLine}" +
+                $"\t800. |- qed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}" +
                 $"{Environment.NewLine}";
             ci.Label += " (by counterex. ex) ...";
@@ -361,7 +363,7 @@ namespace FplLS
                 $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Strong Induction (to prove: \"all n in N ( p(n) )\"){Environment.NewLine}" +
-                $"\t// Strategy: Prove the \"base cases\": p(1), ..., p(m){Environment.NewLine}" +
+                $"\t// Strategy: Prove the \"base cases\": p(1),..., p(m){Environment.NewLine}" +
                 $"\t// Then do the \"inductive step\": Prove that if p(n) is for all n = 1,...,n, then also p(n+1) is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
@@ -412,14 +414,14 @@ namespace FplLS
                 $"\t{Environment.NewLine}" +
                 $"\t// \"inductive step\" {Environment.NewLine}" +
                 $"\t300. |- {TokenAssume} pFailsFor_k{Environment.NewLine}" +
-                $"\t// we make use of the Smallest predicate defined in the namespace Fpl.Arithmetics namespace{Environment.NewLine}" +
+                $"\t// we make use of the \"Smallest\" predicate defined in the namespace Fpl.Arithmetics{Environment.NewLine}" +
                 $"\t350. WellOrderingPrinciple() |- {TokenAssume} Smallest(k, pFailsFor_k){Environment.NewLine}" +
                 $"\t400. |- p(SubNat(k,1)){Environment.NewLine}" +
                 $"\t450. |- trivial{Environment.NewLine}" +
                 $"\t500. |- trivial{Environment.NewLine}" +
                 $"\t550. |- p(k){Environment.NewLine}" +
                 $"\t600. |- false{Environment.NewLine}" +
-                $"\t650. |- revoke 350.{Environment.NewLine}" +
+                $"\t650. |- {TokenRevoke} 350.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t700. |- all n in N ( p(n) ){Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +

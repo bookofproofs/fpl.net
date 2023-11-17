@@ -88,6 +88,10 @@ namespace FplLSTests
             foreach (var item in actual)
             {
                 Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
+                if (item.IsShort)
+                {
+                    Assert.IsTrue(item.Label.Contains("(short)"));
+                }
             }
         }
 
