@@ -1,11 +1,4 @@
-﻿open FplGrammarCommons
-open ErrDiagnostics
-open FplParser
-open FParsec
-open System.Text.RegularExpressions
-
-
-let input = """Fpl.Arithmetics 
+Fpl.Arithmetics 
 {
     /* This is a formulation of Edmund Landau's "Foundations of Analysis" (1930 Leipzig) in FPL (the Formal Proving Language).
     The namespace serves as a "proof of concept" for the language. */
@@ -48,12 +41,3 @@ let input = """Fpl.Arithmetics
     
     
 }
-"""
-
-let result = fplParser input
-
-printf "%O" result
-ad.PrintDiagnostics
-
-printf "\n--------------------------------\n"
-
