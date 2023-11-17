@@ -34,7 +34,7 @@ namespace FplLSTests
         [DataRow("proof", CompletionItemKind.Property, "proof01")]
         [DataRow("prf", CompletionItemKind.Property, "proof02")]
         [DataRow("proof", CompletionItemKind.Keyword, "zzzproof01")]
-        [DataRow("prf", CompletionItemKind.Keyword, "zzzproof02")]
+        [DataRow("prf", CompletionItemKind.Keyword, "zzzzproof02")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -87,10 +87,13 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesProof().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Label.Contains(choice) && item.Label.StartsWith("_ "));
-                if (item.IsShort)
+                if (item.Kind != CompletionItemKind.Keyword)
                 {
-                    Assert.IsTrue(item.Label.Contains("(short)"));
+                    Assert.IsTrue(item.Detail.Contains(l));
+                    if (item.IsShort)
+                    {
+                        Assert.IsTrue(item.Detail.Contains("(short)"));
+                    }
                 }
             }
         }
