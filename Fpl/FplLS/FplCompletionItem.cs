@@ -623,7 +623,7 @@ namespace FplLS
                     this.Detail = "proof (short form)";
                     this.SortText = "proof02";
                     this.Kind = CompletionItemKind.Class;
-                    this.IsShort = false;
+                    this.IsShort = true;
                     break;
                 case "proof":
                     this.Detail = "proof";

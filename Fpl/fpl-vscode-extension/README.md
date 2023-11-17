@@ -10,10 +10,11 @@ This is a Proof of Concept of a private reasearch project to develop such a lang
 
 * The extension provides a basic syntax highlighting for `.fpl` files.
 * Emitting multiple error diagnostics for syntax errors in a single file at once (experimental) 
+* (Syntax-driven) Auto-Codecompletion services with various code snippets 
 
 ## Requirements
 
-VSCode version ">1.81.0"
+VSCode version ">1.84.2"
 
 ## Extension Settings
 
@@ -24,6 +25,9 @@ None
 * None
 
 ## Release Notes
+
+### 1.3.0
+* Syntax-driven auto-completion service 
 
 ### 1.3.0
 * Syntax error diagnostics (experimental) 

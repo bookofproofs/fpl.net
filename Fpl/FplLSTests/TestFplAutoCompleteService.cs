@@ -1,6 +1,8 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using FplLS;
+using static FplGrammarTypes.Ast;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace FplLSTests
 {
@@ -444,6 +446,91 @@ namespace FplLSTests
         }
 
 
-
+        [TestMethod]
+        [DataRow("ax", true)]
+        [DataRow("axiom", false)]
+        [DataRow("post", true)]
+        [DataRow("postulate", false)]
+        [DataRow("thm", true)]
+        [DataRow("theorem", false)]
+        [DataRow("lem", true)]
+        [DataRow("lemma", false)]
+        [DataRow("prop", true)]
+        [DataRow("proposition", false)]
+        [DataRow("cor", true)]
+        [DataRow("corollary", false)]
+        [DataRow("ass", true)]
+        [DataRow("assume", false)]
+        [DataRow("cl", true)]
+        [DataRow("class", false)]
+        [DataRow("conj", true)]
+        [DataRow("conjecture", false)]
+        [DataRow("con", true)]
+        [DataRow("conclusion", false)]
+        [DataRow("ctor", true)]
+        [DataRow("constructor", false)]
+        [DataRow("dec", true)]
+        [DataRow("declaration", false)]
+        [DataRow("def", true)]
+        [DataRow("definition", false)]
+        [DataRow("del", true)]
+        [DataRow("delegate", false)]
+        [DataRow("func", true)]
+        [DataRow("function", false)]
+        [DataRow("ind", true)]
+        [DataRow("index", false)]
+        [DataRow("intr", true)]
+        [DataRow("intrinsic", false)]
+        [DataRow("inf", true)]
+        [DataRow("inference", false)]
+        [DataRow("loc", true)]
+        [DataRow("localization", false)]
+        [DataRow("prty", true)]
+        [DataRow("property", false)]
+        [DataRow("obj", true)]
+        [DataRow("object", false)]
+        [DataRow("opt", true)]
+        [DataRow("optional", false)]
+        [DataRow("pred", true)]
+        [DataRow("predicate", false)]
+        [DataRow("pre", true)]
+        [DataRow("premise", false)]
+        [DataRow("prf", true)]
+        [DataRow("proof", false)]
+        [DataRow("ret", true)]
+        [DataRow("return", false)]
+        [DataRow("rev", true)]
+        [DataRow("revoke", false)]
+        [DataRow("undef", true)]
+        [DataRow("undefined", false)]
+        // keywords without a short form
+        [DataRow("alias", false)]
+        [DataRow("all", false)]
+        [DataRow("and", false)]
+        [DataRow("assert", false)]
+        [DataRow("cases", false)]
+        [DataRow("end", false)]
+        [DataRow("ext", false)]
+        [DataRow("ex", false)]
+        [DataRow("exn", false)]
+        [DataRow("false", false)]
+        [DataRow("for", false)]
+        [DataRow("iif", false)]
+        [DataRow("impl", false)]
+        [DataRow("in", false)]
+        [DataRow("is", false)]
+        [DataRow("not", false)]
+        [DataRow("or", false)]
+        [DataRow("qed", false)]
+        [DataRow("self", false)]
+        [DataRow("trivial", false)]
+        [DataRow("true", false)]
+        [DataRow("uses", false)]
+        [DataRow("xor", false)]
+        public void TestGetDetailIsShort(string input, bool expected)
+        {
+            var actual = new FplCompletionItem(input);
+            Assert.AreEqual(expected, actual.IsShort);
+        }
     }
 }

@@ -82,6 +82,16 @@
 				"fontStyle": "italic",
 				"foreground": "#a8c3c5"
 			}
+		},
+		{
+			"name": "CodeExamples",
+			"scope": [
+				"code.fpl"
+			],
+			"settings": {
+				"fontStyle": "bold",
+				"foreground": "#a8c3c5"
+			}
 		}
 	]
 }

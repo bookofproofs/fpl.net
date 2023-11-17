@@ -28,6 +28,9 @@
 		},
 		{
 			"include": "#argumentIdentifiers"
+		},
+		{
+			"include": "#codeExamples"
 		}
 
 	],
@@ -91,6 +94,17 @@
 				"name": "arguments.fpl string",
 				"match": "\\d+\\w*\\."
 			}]
+		},
+		"codeExamples": {
+			"name": "code.fpl",
+			"begin": "`",
+			"end": "`",
+			"patterns": [
+				{
+					"name": "code.fpl string",
+					"match": "."
+				}
+			]
 		}
 	},
 	"scopeName": "source.fpl"
