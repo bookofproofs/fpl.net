@@ -138,13 +138,13 @@ namespace FplLS
                 $"\t// Proof of Equivalence{Environment.NewLine}" +
                 $"\t// Strategy: Show both directions separately.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t// \"impl (q, p)\"{Environment.NewLine}" +
+                $"\t// `impl (q, p)`{Environment.NewLine}" +
                 $"\t100. |- {TokenAssume} p{Environment.NewLine}" +
                 $"\t200. |- trivial{Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- q{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t// \"impl (q, p)\"{Environment.NewLine}" +
+                $"\t// `impl (q, p)`{Environment.NewLine}" +
                 $"\t500. |- {TokenAssume} q{Environment.NewLine}" +
                 $"\t600. |- trivial{Environment.NewLine}" +
                 $"\t700. |- trivial{Environment.NewLine}" +
@@ -170,13 +170,13 @@ namespace FplLS
                 $"\t100. |- {TokenAssume} {TokenPremise}{Environment.NewLine}" +
                 $"\t150. |- or (p, q){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t\t// \"impl(p, {TokenConclusion})\" {Environment.NewLine}" +
+                $"\t\t// `impl(p, {TokenConclusion})` {Environment.NewLine}" +
                 $"\t\t200. |- {TokenAssume} p{Environment.NewLine}" +
                 $"\t\t210. |- trivial{Environment.NewLine}" +
                 $"\t\t220. |- {TokenConclusion}{Environment.NewLine}" +
                 $"\t\t290. |- impl(p, {TokenConclusion}){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t\t// \"impl(q, {TokenConclusion})\" {Environment.NewLine}" +
+                $"\t\t// `impl(q, {TokenConclusion})` {Environment.NewLine}" +
                 $"\t\t300. |- {TokenAssume} q{Environment.NewLine}" +
                 $"\t\t310. |- trivial{Environment.NewLine}" +
                 $"\t\t320. |- {TokenConclusion}{Environment.NewLine}" +
@@ -251,13 +251,13 @@ namespace FplLS
                 $"\t// Proof (Conclusion is a Conjunction: and(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Proof both implications separately.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t// \"impl ({TokenPremise}, p)\"{Environment.NewLine}" +
+                $"\t// `impl ({TokenPremise}, p)`{Environment.NewLine}" +
                 $"\t100. |- {TokenAssume} {TokenPremise}{Environment.NewLine}" +
                 $"\t200. |- trivial{Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- p{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t// \"impl ({TokenPremise}, q)\"{Environment.NewLine}" +
+                $"\t// `impl ({TokenPremise}, q)`{Environment.NewLine}" +
                 $"\t500. |- {TokenAssume} {TokenPremise}{Environment.NewLine}" +
                 $"\t600. |- trivial{Environment.NewLine}" +
                 $"\t700. |- trivial{Environment.NewLine}" +
@@ -278,8 +278,8 @@ namespace FplLS
             ci.InsertText =
                 $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
-                $"\t// Proof by Counterexample of \"not(all x ( p(x) ))\"){Environment.NewLine}" +
-                $"\t// Strategy: Assume \"all x ( p(x) )\", then produce an example of x for which p(x) is false.{Environment.NewLine}" +
+                $"\t// Proof by Counterexample of `not(all x ( p(x) ))`){Environment.NewLine}" +
+                $"\t// Strategy: Assume `all x ( p(x) )`, then produce an example of x for which p(x) is false.{Environment.NewLine}" +
                 $"\t// Revoking the assumption proves the argument.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
@@ -306,8 +306,8 @@ namespace FplLS
             ci.InsertText =
                 $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
-                $"\t// Proof by Counterexample of \"not(ex x ( p(x) ))\"){Environment.NewLine}" +
-                $"\t// Strategy: Prove that for \"all x ( not (p(x)) )\" is true.{Environment.NewLine}" +
+                $"\t// Proof by Counterexample of `not(ex x ( p(x) ))`){Environment.NewLine}" +
+                $"\t// Strategy: Prove that for `all x ( not (p(x)) )` is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t100. |- {TokenAssume} all x ( not (p(x)) ){Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
@@ -330,9 +330,9 @@ namespace FplLS
             ci.InsertText =
                 $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
-                $"\t// Proof by Induction (to prove: \"all n in N ( p(n) )\"){Environment.NewLine}" +
+                $"\t// Proof by Induction (to prove: `all n in N ( p(n) )`){Environment.NewLine}" +
                 $"\t// Strategy: Prove the \"base case\": p(1){Environment.NewLine}" +
-                $"\t// Then do the \"inductive step\": Prove that if p(n) is true, then also p(n+1) is true.{Environment.NewLine}" +
+                $"\t// Then do the \"inductive step\": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
                 $"\t\t ~n : N{Environment.NewLine}" +
@@ -362,9 +362,9 @@ namespace FplLS
             ci.InsertText =
                 $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
-                $"\t// Proof by Strong Induction (to prove: \"all n in N ( p(n) )\"){Environment.NewLine}" +
-                $"\t// Strategy: Prove the \"base cases\": p(1),..., p(m){Environment.NewLine}" +
-                $"\t// Then do the \"inductive step\": Prove that if p(n) is for all n = 1,...,n, then also p(n+1) is true.{Environment.NewLine}" +
+                $"\t// Proof by Strong Induction (to prove: `all n in N ( p(n) )`){Environment.NewLine}" +
+                $"\t// Strategy: Prove the \"base cases\": `p(1)`,..., `p(m)`{Environment.NewLine}" +
+                $"\t// Then do the \"inductive step\": Prove that if `p(n)` is for all `n in [1,n]`, then also `p( AddNat(n,1) )` is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
                 $"\t\t ~n, m : N{Environment.NewLine}" +
@@ -396,11 +396,11 @@ namespace FplLS
             ci.InsertText =
                 $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
-                $"\t// Proof by Induction With Smallest CounterExample (to prove: \"all n in N ( p(n) )\"){Environment.NewLine}" +
-                $"\t// Strategy: Prove the \"base case\": p(1){Environment.NewLine}" +
-                $"\t// Then assume that it is not true that for all n in N ( p(n) ).{Environment.NewLine}" +
-                $"\t// Then assume that k is the smallest such k for which p(k) fails, in particular, p(k-1) is then true.{Environment.NewLine}" +
-                $"\t// Then seek the contradiction for the expression \"and ( p(SubNat(k,1)) , not (p(k)) )\".{Environment.NewLine}" +
+                $"\t// Proof by Induction With Smallest CounterExample (to prove: `all n in N ( p(n) )`){Environment.NewLine}" +
+                $"\t// Strategy: Prove the \"base case\": `p(1)`{Environment.NewLine}" +
+                $"\t// Then assume that it is not true that for `all n in N ( p(n) )`.{Environment.NewLine}" +
+                $"\t// Then assume that k is the smallest such k for which `p(k)` fails, in particular, `p( SubNat(k,1) )` is then true.{Environment.NewLine}" +
+                $"\t// Then seek the contradiction for the expression `and ( p(SubNat(k,1)) , not (p(k)) )`.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
                 $"\t\t ~n, k : N{Environment.NewLine}" +
@@ -414,7 +414,7 @@ namespace FplLS
                 $"\t{Environment.NewLine}" +
                 $"\t// \"inductive step\" {Environment.NewLine}" +
                 $"\t300. |- {TokenAssume} pFailsFor_k{Environment.NewLine}" +
-                $"\t// we make use of the \"Smallest\" predicate defined in the namespace Fpl.Arithmetics{Environment.NewLine}" +
+                $"\t// we make use of the `Smallest` predicate defined in the namespace Fpl.Arithmetics{Environment.NewLine}" +
                 $"\t350. WellOrderingPrinciple() |- {TokenAssume} Smallest(k, pFailsFor_k){Environment.NewLine}" +
                 $"\t400. |- p(SubNat(k,1)){Environment.NewLine}" +
                 $"\t450. |- trivial{Environment.NewLine}" +
