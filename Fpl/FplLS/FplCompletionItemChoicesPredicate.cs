@@ -39,7 +39,7 @@ namespace FplLS
                     break;
                 case "and":
                 case "or":
-                    var ci3 = defaultCi.Clone(); SetBody(ci3, 2); ret.Add(ci3);
+                    var ci3 = defaultCi.Clone(); SetBody(ci3, 3); ret.Add(ci3);
                     var ci3K = defaultCi.Clone(); ci3K.Kind = CompletionItemKind.Keyword; ci3K.AdjustToKeyword(); ret.Add(ci3K);
                     break;
             }
@@ -54,13 +54,13 @@ namespace FplLS
                     // no snippets for null-ary predicates (treat them as keywords only - see below)
                     break;
                 case 1:
-                    ci.InsertText = $"{ci.Word} ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}){Environment.NewLine}{Environment.NewLine}";
+                    ci.InsertText = $"{ci.Word}{Environment.NewLine}({Environment.NewLine}" + $"\ttrue{Environment.NewLine}){Environment.NewLine}";
                     break;
                 case 2:
-                    ci.InsertText = $"{ci.Word} ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine}){Environment.NewLine}{Environment.NewLine}";
+                    ci.InsertText = $"{ci.Word}{Environment.NewLine}({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine}){Environment.NewLine}";
                     break;
                 default:
-                    ci.InsertText = $"{ci.Word} ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine}){Environment.NewLine}{Environment.NewLine}";
+                    ci.InsertText = $"{ci.Word}{Environment.NewLine}({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine}){Environment.NewLine}";
                     break;
             }
             ci.Label += " ...";

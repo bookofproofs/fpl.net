@@ -56,7 +56,7 @@ namespace FplLSTests
             {
                 if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine + Environment.NewLine));
+                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
                 }
             }
         }

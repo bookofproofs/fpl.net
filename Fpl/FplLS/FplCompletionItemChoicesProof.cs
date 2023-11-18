@@ -48,9 +48,7 @@ namespace FplLS
                 $"\t400. |- {TokenConclusion}{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t500. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
-            ci.Label += " (direct) ...";
+                $"{TokenRightBrace}{Environment.NewLine}";
         }
 
         private void SetContrapositiveProof(FplCompletionItem ci)
@@ -73,8 +71,7 @@ namespace FplLS
                 $"\t600. |- impl({TokenPremise}, {TokenConclusion}){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t700. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (contrapositive) ...";
         }
 
@@ -96,8 +93,7 @@ namespace FplLS
                 $"\t500. |- {TokenRevoke} 100.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t600. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (by contradict. 1) ...";
         }
 
@@ -122,8 +118,7 @@ namespace FplLS
                 $"\t700. |- impl ({TokenPremise}, {TokenConclusion}){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (by contradict. 2) ...";
         }
 
@@ -152,8 +147,7 @@ namespace FplLS
                 $"\t{Environment.NewLine}" +
                 $"\t900. |- iif (p,q){Environment.NewLine}" +
                 $"\t950. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (equivalence) ...";
         }
 
@@ -186,8 +180,7 @@ namespace FplLS
                 $"\t500. |- impl ( {TokenPremise}, {TokenConclusion} ){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t600. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " ('or' premise) ...";
         }
 
@@ -211,8 +204,7 @@ namespace FplLS
                 $"\t700. |- impl({TokenPremise}, {TokenConclusion}){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " ('and' premise) ...";
         }
 
@@ -235,8 +227,7 @@ namespace FplLS
                 $"\t{Environment.NewLine}" +
                 $"\t500. |- impl({TokenPremise}, or (p,q)){Environment.NewLine}" +
                 $"\t600. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " ('or' conclusion) ...";
         }
 
@@ -265,8 +256,7 @@ namespace FplLS
                 $"\t{Environment.NewLine}" +
                 $"\t900. |- impl ({TokenPremise}, and(p,q)){Environment.NewLine}" +
                 $"\t950. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " ('and' conclusion) ...";
         }
 
@@ -293,8 +283,7 @@ namespace FplLS
                 $"\t500. |- {TokenRevoke} 100.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t600. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (by counterex. all) ...";
         }
 
@@ -317,8 +306,7 @@ namespace FplLS
                 $"\t700. |- {TokenConclusion}{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (by counterex. ex) ...";
         }
 
@@ -349,8 +337,7 @@ namespace FplLS
                 $"\t{Environment.NewLine}" +
                 $"\t700. |- all n in N ( p(n) ){Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (by induction) ...";
         }
 
@@ -383,8 +370,7 @@ namespace FplLS
                 $"\t{Environment.NewLine}" +
                 $"\t700. |- all n in N ( p(n) ){Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (by strong induction) ...";
         }
 
@@ -425,8 +411,7 @@ namespace FplLS
                 $"\t{Environment.NewLine}" +
                 $"\t700. |- all n in N ( p(n) ){Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " (smallest counterex.) ...";
         }
 

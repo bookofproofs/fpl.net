@@ -40,7 +40,7 @@ namespace FplLS
                 $"({Environment.NewLine}" +
                 $"\tx<i> := 1{Environment.NewLine}" +
                 $"\ty<i> := 0{Environment.NewLine}" +
-                $"){Environment.NewLine}{Environment.NewLine}";
+                $"){Environment.NewLine}";
         }
     }
 }

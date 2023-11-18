@@ -47,8 +47,7 @@ namespace FplLS
                 $"\t\ttrue{Environment.NewLine}" +
                 $"\t{con}:{Environment.NewLine}" +
                 $"\t\ttrue{Environment.NewLine}" +
-                $"{rb}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{rb}{Environment.NewLine}";
         }
 
     }

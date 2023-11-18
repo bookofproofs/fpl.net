@@ -111,7 +111,7 @@ namespace FplLSTests
                     }
                     else
                     {
-                        Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine + Environment.NewLine));
+                        Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
                     }
                 }
             }

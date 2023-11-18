@@ -133,8 +133,7 @@ namespace FplLS
             return ret +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t{TokenIntrinsic}{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
         }
 
         private void SetSortText(FplCompletionItem ci, string propertyType, bool isOptional)

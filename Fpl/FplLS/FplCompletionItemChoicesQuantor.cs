@@ -132,8 +132,7 @@ namespace FplLS
                   $"{Environment.NewLine}" +
                   $"({Environment.NewLine}" +
                   $"\tp(x){Environment.NewLine}" +
-                  $"){Environment.NewLine}" +
-                  $"{Environment.NewLine}";
+                  $"){Environment.NewLine}";
 
         }
 
@@ -143,8 +142,7 @@ namespace FplLS
                   $"{Environment.NewLine}" +
                   $"({Environment.NewLine}" +
                   $"\tand( p(x), q(y), u(z) ){Environment.NewLine}" +
-                  $"){Environment.NewLine}" +
-                  $"{Environment.NewLine}";
+                  $"){Environment.NewLine}";
         }
     }
 }
