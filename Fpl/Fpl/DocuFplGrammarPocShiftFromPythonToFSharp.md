@@ -572,8 +572,48 @@ The property marker keyword `mandatory` (short form `mand`) were abandoned and t
     }
 ```
 
+#### 20) Simplification of the syntax of theorem-like statements, conjectures, and corollaries
 
-#### 20) Self-Containment 
+In previous versions of FPL, the syntax of theorem-like statements, conjectures and corollaries was similar to that of inference rules, i.e., their blocks consisted of a separate premise and a separate conclusion specification. 
+ This choice had the unnecessary consequence that if a theorem-like statement, conjecture, or corollary had no premise (which is sometimes the case in proof-based mathematics), 
+ it had still be declared with `premise: undefined`.
+
+ In the new version of FPL, the syntax of blocks inside theorem-like statements, conjectures and corollaries are exactly the same as in axioms and consist only of a predicate expression.
+
+*Before*
+```
+    theorem SomeTheorem() 
+    {
+        premise: undefined
+        conclusion: 
+            all x,y in N
+            (
+                impl
+                (
+                    not ( < x = y > )
+                    ,
+                    not ( < Successor(x) = Successor(y) > )
+                )
+            )
+    }
+```
+*Now*
+```        
+    theorem SomeTheorem() 
+    {
+        all x,y in N
+        (
+            impl
+            (
+                not ( < x = y > )
+                ,
+                not ( < Successor(x) = Successor(y) > )
+            )
+        )
+    }
+```
+
+#### 21) Self-Containment 
 This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:
 
 * The order of declarations will now matter. 

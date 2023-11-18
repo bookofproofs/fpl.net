@@ -95,11 +95,11 @@ type Ast =
     | SignatureWithPreConBlock of Ast * ((Ast list option * Ast) * Ast)
     | RuleOfInference of Positions * Ast
     | Localization of Positions * (Ast * Ast list)
-    | Theorem of Positions * Ast
-    | Lemma of Positions * Ast
-    | Proposition of Positions * Ast
-    | Corollary of Positions * (((Ast * Ast list) * Ast) * ((Ast list option * Ast) * Ast))
-    | Conjecture of Positions * Ast
+    | Theorem of Positions * (Ast *(Ast list option * Ast))
+    | Lemma of Positions * (Ast *(Ast list option * Ast))
+    | Proposition of Positions * (Ast *(Ast list option * Ast))
+    | Corollary of Positions * (((Ast * Ast list) * Ast) * (Ast list option * Ast))
+    | Conjecture of Positions * (Ast *(Ast list option * Ast))
     | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
     | ParamTuple of Positions * Ast list
     | Signature of Positions * (Ast * Ast)

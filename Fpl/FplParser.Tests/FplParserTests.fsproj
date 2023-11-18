@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+      <Compile Include="TestTheoremLikeStatements.fs" />
       <Compile Include="TestDefinitionFunctionalTerms.fs" />
       <Compile Include="TestClassInstanceProperties.fs" />
       <Compile Include="TestPredicateInstanceProperties.fs" />

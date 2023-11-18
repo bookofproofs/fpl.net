@@ -100,9 +100,7 @@ T
         dec
             ~x,y,z: obj
         ;
-        pre: undefined
-        con:
-            ex x ( and (Greater(x,y), Greater(x,z)) )
+        ex x ( and (Greater(x,y), Greater(x,z)) )
     }
 
     proof Example4!1

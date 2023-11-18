@@ -56,14 +56,12 @@ Fpl.LinAlg
                 )
             ~vecAdd: VecAdd(v,w: tplFieldElem[from,to])
         ;
-        pre:
-            and
-            (
-                In(x, fieldPowerN),
-                In(y, fieldPowerN)
-            )
-        con:
+        impl
+        (
+            and ( In(x, fieldPowerN), In(y, fieldPowerN) )
+            ,
             vecAdd.IsCommutative()
+        )
     }
 
     def class ZeroVectorN: Tuple

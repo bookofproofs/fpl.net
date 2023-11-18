@@ -67,17 +67,20 @@ Fpl.Arithmetics
         )
     }
     
-    // Axiom of Induction: 
+    // Axiom of Induction:
+    // Note: Landau's original axiom declaration is based on set-theory that we do no want to imply here.
+    // Therefore, our axiom definition is a little different and relays only on the syntax of FPL, not the semantics of set theory   
     axiom Axiom5 () 
     {
-        all p in pred // For all predicates p it holds that:
+        all p in predicate // For all predicates p it holds that:
         (
             impl
             (
                 // if 
                 and 
                 ( 
-                    p(One),  // a predicate p is true for One 
+                    p(One) // a predicate p is true for One 
+                    , // and 
                     all x in object  // and for all objects x (kind of which is whatsoever) 
                     ( 
                         impl 
@@ -86,8 +89,9 @@ Fpl.Arithmetics
                             p(Successor(x)) // the truth of p also for x's successor
                         ) 
                     )
-                ),
-                all n in N // then, p is actually true for all natural numbers
+                )
+                , // then, p is actually true for all natural numbers
+                all n in N 
                 ( 
                     p(n) 
                 )
@@ -99,21 +103,18 @@ Fpl.Arithmetics
 
     /* 2. ADDITION */
     
-    theorem Theorem1()
+    theorem Theorem_001()
     {
-        premise: premise
-        conclusion:
-            all x,y in N
+        all x,y in N
+        (
+            impl
             (
-                impl
-                (
-                    not ( < x = y > ),
-                    not ( < Successor(x) = Successor(y) > )
-                )
+                // if
+                not ( < x = y > )
+                , // then
+                not ( < Successor(x) = Successor(y) > )
             )
+        )
     }
-    
-    
-    
-    
+
 }

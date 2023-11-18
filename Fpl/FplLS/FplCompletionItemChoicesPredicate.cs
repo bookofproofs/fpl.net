@@ -57,7 +57,7 @@ namespace FplLS
                     ci.InsertText = $"{ci.Word}{Environment.NewLine}({Environment.NewLine}" + $"\ttrue{Environment.NewLine}){Environment.NewLine}";
                     break;
                 case 2:
-                    ci.InsertText = $"{ci.Word}{Environment.NewLine}({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine}){Environment.NewLine}";
+                    ci.InsertText = $"{ci.Word}{Environment.NewLine}({Environment.NewLine}" + $"\tfalse{Environment.NewLine}\t,{Environment.NewLine}" + $"\ttrue{Environment.NewLine}){Environment.NewLine}";
                     break;
                 default:
                     ci.InsertText = $"{ci.Word}{Environment.NewLine}({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine}){Environment.NewLine}";

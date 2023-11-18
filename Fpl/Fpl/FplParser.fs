@@ -402,22 +402,24 @@ let keywordProposition = (skipString "proposition" <|> skipString "prop") .>> SW
 let keywordCorollary = (skipString "corollary" <|> skipString "cor") .>> SW
 let keywordConjecture = (skipString "conjecture" <|> skipString "conj") .>> SW
 
-let theorem = positions (keywordTheorem >>. signatureWithPremiseConclusionBlock) |>> Ast.Theorem
-let lemma = positions (keywordLemma >>. signatureWithPremiseConclusionBlock) |>> Ast.Lemma
-let proposition = positions (keywordProposition >>. signatureWithPremiseConclusionBlock) |>> Ast.Proposition
-let conjecture = positions (keywordConjecture >>. signatureWithPremiseConclusionBlock) |>> Ast.Conjecture
+let theoremLikeBlock = leftBrace >>. varDeclOrSpecList .>>. spacesPredicate .>> spacesRightBrace
+let signatureWithTheoremLikeBlock = signature .>>. theoremLikeBlock
+
+let theorem = positions (keywordTheorem >>. signatureWithTheoremLikeBlock) |>> Ast.Theorem
+let lemma = positions (keywordLemma >>. signatureWithTheoremLikeBlock) |>> Ast.Lemma
+let proposition = positions (keywordProposition >>. signatureWithTheoremLikeBlock) |>> Ast.Proposition
+let conjecture = positions (keywordConjecture >>. signatureWithTheoremLikeBlock) |>> Ast.Conjecture
 
 let exclamationDigitList = many1 exclamationDigits
 let referencingIdentifier = predicateIdentifier .>>. exclamationDigitList .>> IW
 let corollarySignature = referencingIdentifier .>>. paramTuple .>> IW
-let corollary = positions (keywordCorollary >>. corollarySignature .>>. premiseConclusionBlock) |>> Ast.Corollary
+let corollary = positions (keywordCorollary >>. corollarySignature .>>. theoremLikeBlock) |>> Ast.Corollary
 
 (* FPL building blocks - Axioms *)
 
 let keywordAxiom = (skipString "axiom" <|> skipString "ax" <|> skipString "postulate" <|> skipString "post") >>. SW
-let axiomBlock = leftBrace >>. varDeclOrSpecList .>>. spacesPredicate .>> spacesRightBrace
 
-let axiom = positions (keywordAxiom >>. signature .>> IW .>>. axiomBlock) |>> Ast.Axiom
+let axiom = positions (keywordAxiom >>. signatureWithTheoremLikeBlock) |>> Ast.Axiom
 
 (* FPL building blocks - Constructors *)
 

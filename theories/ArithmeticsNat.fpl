@@ -164,7 +164,8 @@ Fpl.Arithmetics.Peano
             ~n,m: Nat
             ~anotherAdd: Add
         ;
-        pre:
+        impl
+        (
             and
                 (
                     < op(n,0) = n >,
@@ -172,7 +173,7 @@ Fpl.Arithmetics.Peano
                     < op(n,Succ(m)) = Succ(op(n,m)) >,
                     < anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) >
                 )
-        con:
+            ,
             all n
             (
                 all m
@@ -180,6 +181,8 @@ Fpl.Arithmetics.Peano
                     < op(n,m) = anotherAdd(n,m) >
                 )
             )
+        )
+        
     }
 
     proof AddIsUnique!1
@@ -273,17 +276,18 @@ Fpl.Arithmetics.Peano
             ~n, limit: Nat
             ~f: Addend
         ;
-        premise:
+        impl
+        (
             all n in [1,limit]
             (
                 <f(n) = n>
             )
-        conclusion:
+            ,
             all n
             (
                 <Sum(1,n,f) = Div(Mul(n,Succ(n)),2)>
             )
-
+        )
     }
 
     def func RealValuedFunction(x:Real) -> Real
