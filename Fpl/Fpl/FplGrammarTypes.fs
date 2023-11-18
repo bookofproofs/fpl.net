@@ -76,7 +76,6 @@ type Ast =
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Positions * (Ast * Ast)
     | ArgumentIdentifier of Positions * string
-    | PremiseReference of Positions * unit
     | Justification of Positions * Ast list
     | ArgumentTuple of Positions * Ast list
     | EqualityComparison of Ast list
@@ -123,7 +122,6 @@ type Ast =
     // Proofs
     | Trivial of Positions * unit
     | Qed of Positions * unit
-    | ConclusionReference of Positions * unit
     | DerivedPredicate of Ast
     | AssumeArgument of Positions * Ast
     | RevokeArgument of Positions * Ast

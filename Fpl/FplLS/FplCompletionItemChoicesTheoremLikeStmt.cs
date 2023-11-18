@@ -28,26 +28,10 @@ namespace FplLS
         {
             if (ci.IsShort)
             {
-                TokenAssume = "ass";
-                TokenPremise = "pre";
-                TokenConclusion = "con";
                 ci.Detail = $"{_statementType.ToLower()} (short)";
             }
             ci.Label += " ...";
-            ci.InsertText =
-                $"{ci.Word} SomeFpl{_statementType}(){Environment.NewLine}" +
-                GetBody(TokenLeftBrace, TokenPremise, TokenConclusion, TokenRightBrace);
-        }
-
-        public static string GetBody(string lb, string pre, string con, string rb)
-        {
-            return 
-                $"{lb}{Environment.NewLine}" +
-                $"\t{pre}:{Environment.NewLine}" +
-                $"\t\ttrue{Environment.NewLine}" +
-                $"\t{con}:{Environment.NewLine}" +
-                $"\t\ttrue{Environment.NewLine}" +
-                $"{rb}{Environment.NewLine}";
+            ci.InsertText = FplCompletionItemChoicesAxiom.GetBody(ci.Word, _statementType);
         }
 
     }

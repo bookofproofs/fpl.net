@@ -167,12 +167,12 @@ Fpl.Arithmetics.Peano
         impl
         (
             and
-                (
-                    < op(n,0) = n >,
-                    < anotherAdd(n,0) = n >,
-                    < op(n,Succ(m)) = Succ(op(n,m)) >,
-                    < anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) >
-                )
+            (
+                < op(n,0) = n >,
+                < anotherAdd(n,0) = n >,
+                < op(n,Succ(m)) = Succ(op(n,m)) >,
+                < anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) >
+            )
             ,
             all n
             (
@@ -187,14 +187,21 @@ Fpl.Arithmetics.Peano
 
     proof AddIsUnique!1
     {
-        1. |- assume pre
+        1. |- assume 
+            and
+            (
+                < op(n,0) = n >,
+                < anotherAdd(n,0) = n >,
+                < op(n,Succ(m)) = Succ(op(n,m)) >,
+                < anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) >
+            )
         2. |- trivial
-        3. |- and
+        3. |- all n
                 (
-                    < Add(n,0) = n >,
-                    < anotherAdd(n,0) = n >,
-                    < Add(n,Succ(m)) = Succ(Add(n,m)) >,
-                    < anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) >
+                    all m
+                    (
+                        < op(n,m) = anotherAdd(n,m) >
+                    )
                 )
     }
 

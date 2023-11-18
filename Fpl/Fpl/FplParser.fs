@@ -321,8 +321,6 @@ let dotted = dot >>. predicateWithQualification
 let qualification = choice [boundedRange ; bracketedCoords ; argumentTuple] 
 predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) .>>. opt dotted |>> Ast.PredicateWithQualification 
 
-let premiseOfToBeProvedTheorem = positions keywordPremise |>> Ast.PremiseReference 
-let conclusionOfToBeProvedTheorem = positions keywordConclusion |>> Ast.ConclusionReference 
 primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
@@ -330,8 +328,6 @@ primePredicateRef.Value <- choice [
     attempt argumentIdentifier
     fplDelegate 
     predicateWithQualification
-    premiseOfToBeProvedTheorem
-    conclusionOfToBeProvedTheorem
 ]
 
 let conjunction = positions ((keywordAnd >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.And

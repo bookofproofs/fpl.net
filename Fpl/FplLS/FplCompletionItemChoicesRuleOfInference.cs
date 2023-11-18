@@ -3,7 +3,7 @@
 namespace FplLS
 {
 
-    public class FplCompletionItemChoicesCorollary : FplCompletionItemChoices
+    public class FplCompletionItemChoicesRuleOfInference : FplCompletionItemChoices
     {
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi)
         {
@@ -22,13 +22,21 @@ namespace FplLS
         {
             if (ci.IsShort)
             {
-                TokenAssume = "ass";
-                ci.Detail = "corollary (short)";
-                ci.SortText = "z" + ci.SortText;
+                TokenPremise = "pre";
+                TokenConclusion = "con";
+                ci.Detail = $"inference (short)";
             }
-            ci.InsertText = FplCompletionItemChoicesAxiom.GetBody(ci.Word, "CorollaryOfXxx");
             ci.Label += " ...";
+            ci.InsertText =
+                $"{ci.Word} SomeFplRuleOfInference(){Environment.NewLine}" +
+                $"{TokenLeftBrace}{Environment.NewLine}" +
+                $"\t{TokenPremise}:{Environment.NewLine}" +
+                $"\t\ttrue{Environment.NewLine}" +
+                $"\t{TokenConclusion}:{Environment.NewLine}" +
+                $"\t\ttrue{Environment.NewLine}" +
+                $"{TokenRightBrace}{Environment.NewLine}";
         }
+
 
     }
 }

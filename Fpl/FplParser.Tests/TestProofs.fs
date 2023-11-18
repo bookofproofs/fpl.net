@@ -95,14 +95,14 @@ type TestProofs () =
         let result = run predicate """pre"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestPremiseOrOtherPredicate02 () =
         let result = run predicate """premise """
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestPremiseOrOtherPredicate03 () =
@@ -130,14 +130,14 @@ type TestProofs () =
         let result = run derivedArgument """con"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestDerivedArgument04 () =
         let result = run derivedArgument """conclusion"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestDerivedArgument05 () =
@@ -165,14 +165,14 @@ type TestProofs () =
         let result = run argumentInference """|- con"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestArgumentInference04 () =
         let result = run argumentInference """|- conclusion"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestArgumentInference05 () =
@@ -267,6 +267,17 @@ type TestProofs () =
         let result = run proof """prf AddIsUnique!1
         {
             1. |- assume pre
+            2. |- trivial
+        }"""
+        let actual = replaceWhiteSpace (sprintf "%O" result)
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestProof03 () =
+        let result = run proof """prf AddIsUnique!1
+        {
+            1. |- assume true
             2. |- trivial
         }"""
         let actual = replaceWhiteSpace (sprintf "%O" result)

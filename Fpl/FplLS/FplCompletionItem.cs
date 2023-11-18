@@ -175,12 +175,12 @@ namespace FplLS
                 case "prop":
                 case "proposition":
                     return new FplCompletionItemChoicesTheoremLikeStmt("Proposition").GetChoices(this);
-                case "inf":
-                case "inference":
-                    return new FplCompletionItemChoicesTheoremLikeStmt("Inference").GetChoices(this);
                 case "conj":
                 case "conjecture":
                     return new FplCompletionItemChoicesTheoremLikeStmt("Conjecture").GetChoices(this);
+                case "inf":
+                case "inference":
+                    return new FplCompletionItemChoicesRuleOfInference().GetChoices(this);
                 case "cor":
                 case "corollary":
                     return new FplCompletionItemChoicesCorollary().GetChoices(this);

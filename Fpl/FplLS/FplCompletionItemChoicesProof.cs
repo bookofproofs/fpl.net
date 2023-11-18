@@ -42,10 +42,10 @@ namespace FplLS
                 $"\t// Direct Proof{Environment.NewLine}" +
                 $"\t// Strategy: Assume that the premise is true, then prove that the conclusion also must be true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} {TokenPremise}{Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} somePremise{Environment.NewLine}" +
                 $"\t200. |- trivial{Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
-                $"\t400. |- {TokenConclusion}{Environment.NewLine}" +
+                $"\t400. |- someConclusion{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t500. |- qed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
@@ -63,12 +63,12 @@ namespace FplLS
                 $"\t// Strategy: Assume that the conclusion is false, then prove that the premise also must be false.{Environment.NewLine}" +
                 $"\t// By an contrapositive argument, the conclusion then follows from the premise.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} not({TokenConclusion}){Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} not(someConclusion){Environment.NewLine}" +
                 $"\t200. |- trivial{Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- not({TokenPremise}){Environment.NewLine}" +
-                $"\t500. |- impl(not({TokenConclusion}), not({TokenPremise})){Environment.NewLine}" +
-                $"\t600. |- impl({TokenPremise}, {TokenConclusion}){Environment.NewLine}" +
+                $"\t500. |- impl(not(someConclusion), not({TokenPremise})){Environment.NewLine}" +
+                $"\t600. |- impl(somePremise, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t700. |- qed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
@@ -86,7 +86,7 @@ namespace FplLS
                 $"\t// Proof by Contradiction (Type 1){Environment.NewLine}" +
                 $"\t// Strategy: Assume that the premise is false, then derive a contradiction.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} not({TokenPremise}){Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} not(somePremise){Environment.NewLine}" +
                 $"\t200. |- trivial{Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- false{Environment.NewLine}" +
@@ -109,13 +109,13 @@ namespace FplLS
                 $"\t// Strategy: Assume that the premise is true and the conclusion is false.{Environment.NewLine}" +
                 $"\t// Then derive a contradiction.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} and({TokenPremise}, not({TokenConclusion})){Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} and(somePremise, not(someConclusion)){Environment.NewLine}" +
                 $"\t200. |- trivial{Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- false{Environment.NewLine}" +
                 $"\t500. |- {TokenRevoke} 100.{Environment.NewLine}" +
-                $"\t600. |- or (not ({TokenPremise}), {TokenConclusion}){Environment.NewLine}" +
-                $"\t700. |- impl ({TokenPremise}, {TokenConclusion}){Environment.NewLine}" +
+                $"\t600. |- or (not (somePremise), someConclusion){Environment.NewLine}" +
+                $"\t700. |- impl (somePremise, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
@@ -161,23 +161,23 @@ namespace FplLS
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof (Premise is a Disjunction: or(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Given the premise or(p,q), show first impl(p, conclusion), then show impl(q, conclusion).{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} {TokenPremise}{Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} somePremise{Environment.NewLine}" +
                 $"\t150. |- or (p, q){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t\t// `impl(p, {TokenConclusion})` {Environment.NewLine}" +
+                $"\t\t// `impl(p, someConclusion)` {Environment.NewLine}" +
                 $"\t\t200. |- {TokenAssume} p{Environment.NewLine}" +
                 $"\t\t210. |- trivial{Environment.NewLine}" +
-                $"\t\t220. |- {TokenConclusion}{Environment.NewLine}" +
-                $"\t\t290. |- impl(p, {TokenConclusion}){Environment.NewLine}" +
+                $"\t\t220. |- someConclusion{Environment.NewLine}" +
+                $"\t\t290. |- impl(p, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t\t// `impl(q, {TokenConclusion})` {Environment.NewLine}" +
+                $"\t\t// `impl(q, someConclusion)` {Environment.NewLine}" +
                 $"\t\t300. |- {TokenAssume} q{Environment.NewLine}" +
                 $"\t\t310. |- trivial{Environment.NewLine}" +
-                $"\t\t320. |- {TokenConclusion}{Environment.NewLine}" +
-                $"\t\t290. |- impl(q, {TokenConclusion}){Environment.NewLine}" +
+                $"\t\t320. |- someConclusion{Environment.NewLine}" +
+                $"\t\t290. |- impl(q, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t400. |- impl ( or(p,q), {TokenConclusion} ){Environment.NewLine}" +
-                $"\t500. |- impl ( {TokenPremise}, {TokenConclusion} ){Environment.NewLine}" +
+                $"\t400. |- impl ( or(p,q), someConclusion ){Environment.NewLine}" +
+                $"\t500. |- impl ( somePremise, someConclusion ){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t600. |- qed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
@@ -195,13 +195,13 @@ namespace FplLS
                 $"\t// Proof (Premise is a Conjunction: and(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Try a direct proof, or consider a contrapositive.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} not({TokenConclusion}){Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} not(someConclusion){Environment.NewLine}" +
                 $"\t200. |- trivial{Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- or (not(p), not(q)){Environment.NewLine}" +
-                $"\t500. |- not({TokenPremise}){Environment.NewLine}" +
-                $"\t600. ProceedingResults(100., 500.) |- impl(not({TokenConclusion}), not({TokenPremise})){Environment.NewLine}" +
-                $"\t700. |- impl({TokenPremise}, {TokenConclusion}){Environment.NewLine}" +
+                $"\t500. |- not(somePremise){Environment.NewLine}" +
+                $"\t600. ProceedingResults(100., 500.) |- impl(not(someConclusion), not(somePremise)){Environment.NewLine}" +
+                $"\t700. |- impl(somePremise, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
@@ -220,12 +220,12 @@ namespace FplLS
                 $"\t// Strategy: Assume the truth of both, the premise and the negation of one of p or q.{Environment.NewLine}" +
                 $"\t// Then try to prove that the other one is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} and({TokenPremise}, not(p)){Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} and(somePremise, not(p)){Environment.NewLine}" +
                 $"\t200. |- trivial {Environment.NewLine}" +
                 $"\t300. |- trivial {Environment.NewLine}" +
                 $"\t400. |- q{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t500. |- impl({TokenPremise}, or (p,q)){Environment.NewLine}" +
+                $"\t500. |- impl(somePremise, or (p,q)){Environment.NewLine}" +
                 $"\t600. |- qed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " ('or' conclusion) ...";
@@ -242,19 +242,19 @@ namespace FplLS
                 $"\t// Proof (Conclusion is a Conjunction: and(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Proof both implications separately.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t// `impl ({TokenPremise}, p)`{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} {TokenPremise}{Environment.NewLine}" +
+                $"\t// `impl (somePremise, p)`{Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} somePremise{Environment.NewLine}" +
                 $"\t200. |- trivial{Environment.NewLine}" +
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- p{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t// `impl ({TokenPremise}, q)`{Environment.NewLine}" +
-                $"\t500. |- {TokenAssume} {TokenPremise}{Environment.NewLine}" +
+                $"\t// `impl (somePremise, q)`{Environment.NewLine}" +
+                $"\t500. |- {TokenAssume} somePremise{Environment.NewLine}" +
                 $"\t600. |- trivial{Environment.NewLine}" +
                 $"\t700. |- trivial{Environment.NewLine}" +
                 $"\t800. |- q{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
-                $"\t900. |- impl ({TokenPremise}, and(p,q)){Environment.NewLine}" +
+                $"\t900. |- impl (somePremise, and(p,q)){Environment.NewLine}" +
                 $"\t950. |- qed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
             ci.Label += " ('and' conclusion) ...";
@@ -276,7 +276,7 @@ namespace FplLS
                 $"\t\t ~c:obj{Environment.NewLine}" +
                 $"\t\t // construct a counterexample c := ... {Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +
-                $"\t100. |- {TokenAssume} not({TokenPremise}){Environment.NewLine}" +
+                $"\t100. |- {TokenAssume} not(somePremise){Environment.NewLine}" +
                 $"\t200. |- not(all x ( p(x) )){Environment.NewLine}" +
                 $"\t300. |- ex x ( not (p(x)) ){Environment.NewLine}" +
                 $"\t400. ExistsByExample (c), 300. |- false{Environment.NewLine}" +
@@ -303,7 +303,7 @@ namespace FplLS
                 $"\t400. |- trivial{Environment.NewLine}" +
                 $"\t500. |- true{Environment.NewLine}" +
                 $"\t600. |- not(ex x ( p(x) )){Environment.NewLine}" +
-                $"\t700. |- {TokenConclusion}{Environment.NewLine}" +
+                $"\t700. |- someConclusion{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}";
