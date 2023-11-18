@@ -321,12 +321,17 @@ let dotted = dot >>. predicateWithQualification
 let qualification = choice [boundedRange ; bracketedCoords ; argumentTuple] 
 predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) .>>. opt dotted |>> Ast.PredicateWithQualification 
 
+let exclamationDigitList = many1 exclamationDigits
+let referencingIdentifier = predicateIdentifier .>>. exclamationDigitList .>> IW
+let corollarySignatureAsPredicate = positions (referencingIdentifier .>>. paramTuple) .>> IW |>> Ast.ReferenceToCorollary
+
 primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
     keywordUndefined
     attempt argumentIdentifier
     fplDelegate 
+    attempt corollarySignatureAsPredicate
     predicateWithQualification
 ]
 
@@ -406,8 +411,6 @@ let lemma = positions (keywordLemma >>. signatureWithTheoremLikeBlock) |>> Ast.L
 let proposition = positions (keywordProposition >>. signatureWithTheoremLikeBlock) |>> Ast.Proposition
 let conjecture = positions (keywordConjecture >>. signatureWithTheoremLikeBlock) |>> Ast.Conjecture
 
-let exclamationDigitList = many1 exclamationDigits
-let referencingIdentifier = predicateIdentifier .>>. exclamationDigitList .>> IW
 let corollarySignature = referencingIdentifier .>>. paramTuple .>> IW
 let corollary = positions (keywordCorollary >>. corollarySignature .>>. theoremLikeBlock) |>> Ast.Corollary
 

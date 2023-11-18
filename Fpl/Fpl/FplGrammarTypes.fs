@@ -76,6 +76,7 @@ type Ast =
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Positions * (Ast * Ast)
     | ArgumentIdentifier of Positions * string
+    | ReferenceToCorollary of Positions * ((Ast * Ast list) * Ast) 
     | Justification of Positions * Ast list
     | ArgumentTuple of Positions * Ast list
     | EqualityComparison of Ast list

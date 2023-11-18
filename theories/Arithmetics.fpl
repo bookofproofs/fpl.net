@@ -6,22 +6,34 @@ Fpl.Arithmetics
 
     /* 1. AXIOMS */
 
-    definition class N: object
-    {
-        intrinsic
-    }
-    
-    
     definition class One: object
     {
         intrinsic
     }
     
+    // introduction of new symbols 1,2,3,.... and identyfying then with natural numbers of 
+    def class N: obj
+    {
+        // explicit representation of a specific natural number
+        ctor N(x: @Digits)
+        {
+            dec
+                cases
+                (
+                    | <x = 1> : self := One() 
+                    | <x = 2> : self := Succ(One()) 
+                    | <x = 3> : self := Succ(Succ(One())) 
+                    ? self := Succ(delegate.decrement(x))  
+                )
+            ;
+            self
+        }
+    }
     
     // 1 is a natural number
     axiom Axiom1 ()
     {
-        is (One, N) 
+        is (1, N) 
     }
     
     definition function Successor(x: N) -> N
@@ -45,39 +57,33 @@ Fpl.Arithmetics
     // It follows immediately ...
     corollary Axiom2!1 ()
     {
-        all x,y in N
+        dec ~x,y:N ;
+        impl
         (
-            impl
-            (
-                < x = y > 
-                ,
-                < Successor(x) = Successor(y) > 
-            )
+            < x = y > 
+            ,
+            < Successor(x) = Successor(y) > 
         )
     }
     
     // There is no number whose successor is 1.
     axiom Axiom3 ()
     {
-        all x in N
+        dec ~x:N ;
+        not 
         (
-            not 
-            (
-                < Successor(x) = One > 
-            )
+            < Successor(x) = 1 > 
         )
     }
     
     // Successor is injective
     axiom Axiom4 ()
     {
-        all x,y in N
+        dec ~x,y:N ;
+        impl
         (
-            impl
-            (
-                < Successor(x) = Successor(y) >, 
-                < x = y >
-            )
+            < Successor(x) = Successor(y) >, 
+            < x = y >
         )
     }
     
@@ -117,32 +123,88 @@ Fpl.Arithmetics
 
     /* 2. ADDITION */
     
+    // If x <> y then succesor of x <> successor of y.
     theorem Theorem_001()
     {
-        all x,y in N
+        dec ~x,y: N;
+        impl
         (
-            impl
-            (
-                // if
-                not ( < x = y > )
-                , // then
-                not ( < Successor(x) = Successor(y) > )
-            )
+            // if
+            not ( < x = y > )
+            , // then
+            not ( < Successor(x) = Successor(y) > )
         )
     }
 
-    proof SomeFplTheorem!1
+
+    proof Theorem_001!1
     {
-        // Proof by Contradiction (Type 1)
-        // Strategy: Assume that the premise is false, then derive a contradiction.
-        
-        100. |- assume < x = y >
-        200. Axiom2!1 () |- trivial
-        300. |- trivial
-        400. |- false
-        500. |- revoke 100.
-        
-        600. |- qed
+        // Proof by Contradiction (Type 2)
+        // Strategy: Assume that the premise is true and the conclusion is false.
+        // Then derive a contradiction.
+
+        100. |- assume 
+                and
+                (
+                    not ( < x = y > )
+                    , 
+                    < Successor(x) = Successor(y) >
+                )
+        200. Axiom4() |- < x = y >
+        300. |- revoke 100.
+        400. |- qed
     }
     
+    // The successor (x) never equals x 
+    theorem Theorem_002 ()
+    {
+        dec ~x: N;
+        not
+        (
+            < Succesor(x) = x > 
+        )
+    }
+
+    proof Theorem_002!1
+    {
+        // Proof by Induction (to prove: `all n in N ( p(n) )`)
+        // Strategy: Prove the "base case": p(1)
+        // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.
+        
+        // "base case" 
+        100. and (Axiom1(), Axiom3()) |- not ( < Succesor(1) = 1 > )
+        
+        // "inductive step" 
+        200. |- assume ex n in N ( not ( < Succesor(n) = n > ) )
+        300. Theorem_001() |- not ( < Successor(Succesor(n)) = Successor(n) > )
+        
+        400. and(100., 400.) 
+            |- all x in N 
+            (
+                not ( < Succesor(x) = x > ) 
+            )
+        500. |- qed
+    }
+        
+    // If x <> 1, then there exists one (hence by Axiom 4, exactly one) i such that x = successor (u)
+    theorem Theorem_003 ()
+    {
+        dec ~x,y: N;
+
+        impl
+        (
+            not (< x = 1 >)
+            ,
+            exn!1 u in N
+            (
+                < x = Succesor(u) >
+            )
+        )
+    }
+    
+    
+
+
+ 
+   
 }

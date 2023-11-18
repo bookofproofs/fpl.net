@@ -283,4 +283,15 @@ type TestProofs () =
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestProof04 () =
+        let result = run proof """proof Example4!1
+        {
+            1. SomeCorollary!1() |- Greater(a,b)
+            2. |- qed
+        }"""
+        let actual = replaceWhiteSpace (sprintf "%O" result)
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
         
