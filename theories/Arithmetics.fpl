@@ -41,6 +41,20 @@ Fpl.Arithmetics
             )
         )
     }
+
+    // It follows immediately ...
+    corollary Axiom2!1 ()
+    {
+        all x,y in N
+        (
+            impl
+            (
+                < x = y > 
+                ,
+                < Successor(x) = Successor(y) > 
+            )
+        )
+    }
     
     // There is no number whose successor is 1.
     axiom Axiom3 ()
@@ -117,4 +131,18 @@ Fpl.Arithmetics
         )
     }
 
+    proof SomeFplTheorem!1
+    {
+        // Proof by Contradiction (Type 1)
+        // Strategy: Assume that the premise is false, then derive a contradiction.
+        
+        100. |- assume < x = y >
+        200. Axiom2!1 () |- trivial
+        300. |- trivial
+        400. |- false
+        500. |- revoke 100.
+        
+        600. |- qed
+    }
+    
 }

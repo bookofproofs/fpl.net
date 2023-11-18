@@ -26,7 +26,7 @@ namespace FplLS
                 ci.Detail = "corollary (short)";
                 ci.SortText = "z" + ci.SortText;
             }
-            ci.InsertText = FplCompletionItemChoicesAxiom.GetBody(ci.Word, "CorollaryOfXxx");
+            ci.InsertText = FplCompletionItemChoicesAxiom.GetBody(ci.Word, "CorollaryOfXxx!1");
             ci.Label += " ...";
         }
 
