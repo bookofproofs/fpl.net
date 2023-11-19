@@ -19,11 +19,11 @@ type TestErrDiagnostics() =
         let result = fplParser """
         x
         y 
-"""
+;"""
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.AreEqual(2, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -32,11 +32,11 @@ type TestErrDiagnostics() =
         let result = fplParser """
     :
         y
-"""
+;"""
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.AreEqual(2, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -45,7 +45,7 @@ type TestErrDiagnostics() =
         let result = fplParser """
     :ext
         y
-"""
+;"""
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -58,7 +58,7 @@ type TestErrDiagnostics() =
         let result = fplParser """
     :ext T
         y
-"""
+;"""
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -71,7 +71,7 @@ type TestErrDiagnostics() =
         let result = fplParser """
     :ext T:
         y
-"""
+;"""
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -84,7 +84,7 @@ type TestErrDiagnostics() =
         let result = fplParser """
     :ext T: /d/
         y
-"""
+;"""
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -97,11 +97,11 @@ type TestErrDiagnostics() =
         let result = fplParser """
     :ext T: /d/ :end
         y
-"""
+;"""
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(1, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
         
     [<TestMethod>]
@@ -110,7 +110,7 @@ type TestErrDiagnostics() =
         let input = """
     uses
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -124,13 +124,13 @@ type TestErrDiagnostics() =
         let input = """
     uses T  
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN001"))
+        Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
     member this.TestTryParseUses003Diag () =
@@ -138,13 +138,13 @@ type TestErrDiagnostics() =
         let input = """
     uses   R a
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN001"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
     member this.TestTryParseUses004Diag () =
@@ -152,7 +152,7 @@ type TestErrDiagnostics() =
         let input = """
     uses   R alias
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -166,7 +166,7 @@ type TestErrDiagnostics() =
         let input = """
     uses   R alias %
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -180,7 +180,7 @@ type TestErrDiagnostics() =
         let input = """
     uses   R alias s
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -194,12 +194,12 @@ type TestErrDiagnostics() =
         let input = """
     uses   R alias I
         y
-"""
+;"""
         let result = fplParser input
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN001"))
+        Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
     member this.TestTryParseUses009Diag () =
@@ -207,7 +207,7 @@ type TestErrDiagnostics() =
         let input = """
     uses   a alias I 
         y
-"""
+;"""
         let result = fplParser input
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -220,12 +220,12 @@ type TestErrDiagnostics() =
         let input = """
     i
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.AreEqual(2, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -234,7 +234,7 @@ type TestErrDiagnostics() =
         let input = """
     inf
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -248,7 +248,7 @@ type TestErrDiagnostics() =
         let input = """
     inf T
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -264,7 +264,7 @@ type TestErrDiagnostics() =
         x
         y
     }
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -280,7 +280,7 @@ type TestErrDiagnostics() =
         D
         y
     }
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -296,7 +296,7 @@ type TestErrDiagnostics() =
         D(
         y
     }
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -313,7 +313,7 @@ type TestErrDiagnostics() =
     {   
         y
     }
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -330,7 +330,7 @@ type TestErrDiagnostics() =
     {   
         y
     }
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -346,7 +346,7 @@ type TestErrDiagnostics() =
         }
         y
     }
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -361,13 +361,13 @@ type TestErrDiagnostics() =
     inf 
         D() { pre: true con: true }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN001"))
+        Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
     member this.TestTryParseInference010Diag () =
@@ -376,25 +376,25 @@ type TestErrDiagnostics() =
     inf 
         D() { pre: true con: true } }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN001"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
     member this.TestTryParseNamespace000Diag () =
         ad.Clear()
         let input = """
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(1, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -402,12 +402,12 @@ type TestErrDiagnostics() =
         ad.Clear()
         let input = """
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(1, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -415,12 +415,12 @@ type TestErrDiagnostics() =
         ad.Clear()
         let input = """
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(1, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -428,12 +428,12 @@ type TestErrDiagnostics() =
         ad.Clear()
         let input = """    
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(1, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -441,12 +441,12 @@ type TestErrDiagnostics() =
         ad.Clear()
         let input = """
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(1, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -454,12 +454,12 @@ type TestErrDiagnostics() =
         ad.Clear()
         let input = """
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(1, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -467,12 +467,12 @@ type TestErrDiagnostics() =
         ad.Clear()
         let input = """
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(1, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -482,12 +482,12 @@ type TestErrDiagnostics() =
        
         a
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.AreEqual(2, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -496,7 +496,7 @@ type TestErrDiagnostics() =
         let input = """
         ax
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -511,7 +511,7 @@ type TestErrDiagnostics() =
   
         ax T
         y    
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -525,7 +525,7 @@ type TestErrDiagnostics() =
         let input = """
         ax T (
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -540,7 +540,7 @@ type TestErrDiagnostics() =
  
         ax T ()
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -557,7 +557,7 @@ type TestErrDiagnostics() =
         {
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -574,13 +574,13 @@ type TestErrDiagnostics() =
             true
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN001"))
+        Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
     member this.TestTryParseAxiom007Diag () =
@@ -591,7 +591,7 @@ type TestErrDiagnostics() =
             intrinsic
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -605,7 +605,7 @@ type TestErrDiagnostics() =
         let input = """
         def func
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -619,7 +619,7 @@ type TestErrDiagnostics() =
         let input = """
         def func A
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -633,7 +633,7 @@ type TestErrDiagnostics() =
         let input = """
         def func A (
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -647,7 +647,7 @@ type TestErrDiagnostics() =
         let input = """
         def func A ()
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -661,7 +661,7 @@ type TestErrDiagnostics() =
         let input = """
         def func A () ->
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -675,7 +675,7 @@ type TestErrDiagnostics() =
         let input = """
         def func A () -> T
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -690,7 +690,7 @@ type TestErrDiagnostics() =
         def func A () -> T 
         {
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -706,7 +706,7 @@ type TestErrDiagnostics() =
         {
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -722,7 +722,7 @@ type TestErrDiagnostics() =
         {
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -738,7 +738,7 @@ type TestErrDiagnostics() =
         {
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -754,7 +754,7 @@ type TestErrDiagnostics() =
         {
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -772,7 +772,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -791,7 +791,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -810,7 +810,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -828,7 +828,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -846,7 +846,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -864,7 +864,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -882,7 +882,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -900,12 +900,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -918,12 +918,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -936,12 +936,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -954,12 +954,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -972,12 +972,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -990,12 +990,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1008,12 +1008,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1026,7 +1026,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1044,7 +1044,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1062,7 +1062,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1082,7 +1082,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1101,11 +1101,11 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1119,12 +1119,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1138,12 +1138,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1157,12 +1157,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1176,12 +1176,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1195,12 +1195,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1214,12 +1214,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1233,12 +1233,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1252,12 +1252,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1271,12 +1271,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1290,12 +1290,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1309,12 +1309,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1328,12 +1328,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1347,7 +1347,7 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1368,12 +1368,12 @@ type TestErrDiagnostics() =
         }
         y
     }
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(4, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1388,12 +1388,12 @@ type TestErrDiagnostics() =
             con:true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(3, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1406,7 +1406,7 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1424,7 +1424,7 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1443,7 +1443,7 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1461,7 +1461,7 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1479,7 +1479,7 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1499,12 +1499,12 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
+        Assert.AreEqual(2, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1517,12 +1517,12 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
+        Assert.AreEqual(2, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1535,12 +1535,12 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
+        Assert.AreEqual(2, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1553,7 +1553,7 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1571,12 +1571,12 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
+        Assert.AreEqual(2, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1589,12 +1589,12 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
+        Assert.AreEqual(2, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1607,12 +1607,12 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
+        Assert.AreEqual(2, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1625,7 +1625,7 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1643,12 +1643,12 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.AreEqual(1, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -1661,7 +1661,7 @@ type TestErrDiagnostics() =
             true
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1678,7 +1678,7 @@ type TestErrDiagnostics() =
             x, 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1695,7 +1695,7 @@ type TestErrDiagnostics() =
             x: 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1712,7 +1712,7 @@ type TestErrDiagnostics() =
             x:* 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1729,7 +1729,7 @@ type TestErrDiagnostics() =
             x::
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1746,7 +1746,7 @@ type TestErrDiagnostics() =
             x:+ 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1763,7 +1763,7 @@ type TestErrDiagnostics() =
             x:@ 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1780,7 +1780,7 @@ type TestErrDiagnostics() =
             x:func: 
         }
     }
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1797,7 +1797,7 @@ type TestErrDiagnostics() =
             x:ind: 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1814,7 +1814,7 @@ type TestErrDiagnostics() =
             x:obj: 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1831,7 +1831,7 @@ type TestErrDiagnostics() =
             x:pred: 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1848,7 +1848,7 @@ type TestErrDiagnostics() =
             x:tpl: 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1865,7 +1865,7 @@ type TestErrDiagnostics() =
             x:T: 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1882,7 +1882,7 @@ type TestErrDiagnostics() =
             x:tpl. 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1899,7 +1899,7 @@ type TestErrDiagnostics() =
             x:tpl[ 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1916,7 +1916,7 @@ type TestErrDiagnostics() =
             x:tpl[! 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1933,7 +1933,7 @@ type TestErrDiagnostics() =
             x:tpl< 
         }
         y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1947,7 +1947,7 @@ type TestErrDiagnostics() =
         let input = """
         def cl
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1961,7 +1961,7 @@ type TestErrDiagnostics() =
         let input = """
         def cl x
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1975,7 +1975,7 @@ type TestErrDiagnostics() =
         let input = """
         def cl .
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -1989,7 +1989,7 @@ type TestErrDiagnostics() =
         let input = """
         def cl ,
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2003,7 +2003,7 @@ type TestErrDiagnostics() =
         let input = """
         def cl A
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2017,7 +2017,7 @@ type TestErrDiagnostics() =
         let input = """
         def cl A #
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2031,7 +2031,7 @@ type TestErrDiagnostics() =
         let input = """
         def cl A -
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2045,7 +2045,7 @@ type TestErrDiagnostics() =
         let input = """
         def cl A:
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2059,7 +2059,7 @@ type TestErrDiagnostics() =
         let input = """
         def cl A:@
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2073,7 +2073,7 @@ type TestErrDiagnostics() =
         let input = """
         def cl A:obj
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2088,7 +2088,7 @@ type TestErrDiagnostics() =
         def cl A:obj 
         {
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2105,7 +2105,7 @@ type TestErrDiagnostics() =
             dec ~a:obj ;
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2122,7 +2122,7 @@ type TestErrDiagnostics() =
             #
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2137,7 +2137,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2152,7 +2152,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred x
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2167,7 +2167,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred .
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2182,7 +2182,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred ,
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2197,7 +2197,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2212,7 +2212,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A #
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2227,7 +2227,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A -
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2242,7 +2242,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A:
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2257,7 +2257,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A(
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2272,7 +2272,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A(#
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2287,7 +2287,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A()
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2303,7 +2303,7 @@ type TestErrDiagnostics() =
         def pred A() 
         {
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2320,7 +2320,7 @@ type TestErrDiagnostics() =
         {
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2338,7 +2338,7 @@ type TestErrDiagnostics() =
             dec ~a:obj;
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2356,7 +2356,7 @@ type TestErrDiagnostics() =
             #
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2374,7 +2374,7 @@ type TestErrDiagnostics() =
             dec ~a:obj;
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2392,7 +2392,7 @@ type TestErrDiagnostics() =
             dec ~a:obj;
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2411,13 +2411,13 @@ type TestErrDiagnostics() =
             true
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN001"))
+        Assert.IsTrue(actualDiag.Contains("SYN000"))
 
 
     [<TestMethod>]
@@ -2429,13 +2429,13 @@ type TestErrDiagnostics() =
             true
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN001"))
+        Assert.IsTrue(actualDiag.Contains("SYN000"))
 
 
     [<TestMethod>]
@@ -2450,7 +2450,7 @@ type TestErrDiagnostics() =
             true
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2471,13 +2471,13 @@ type TestErrDiagnostics() =
             true
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN001"))
+        Assert.IsTrue(actualDiag.Contains("SYN000"))
 
 
     [<TestMethod>]
@@ -2492,7 +2492,7 @@ type TestErrDiagnostics() =
             true
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
@@ -2513,7 +2513,7 @@ type TestErrDiagnostics() =
             true
         }
     y
-"""
+;"""
         let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString

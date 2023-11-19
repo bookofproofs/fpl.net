@@ -36,16 +36,6 @@ namespace FplLS
             return new CompletionList(modChoices);
         }
 
-        private List<CompletionItem> AddWordChoices(string word)
-        {
-            var modChoices = new List<CompletionItem>();
-            var ci = new CompletionItem();
-
-            modChoices.Add(ci);
-            return modChoices;
-        }
-
-
 
 
     }

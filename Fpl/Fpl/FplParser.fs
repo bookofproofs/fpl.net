@@ -554,10 +554,10 @@ let buildingBlock = choice [
     usesClause
 ]
 
-let buildingBlockList = many1 (buildingBlock .>> IW)
+let buildingBlockList = many (buildingBlock .>> IW)
 
 (* Namespaces *)
-let fplNamespace = ((opt extensionBlock .>> IW) .>>. buildingBlockList) .>> IW |>> Ast.Namespace
+let fplNamespace = ((opt extensionBlock .>> IW) .>>. buildingBlockList) .>> IW .>> semiColon |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
@@ -678,7 +678,7 @@ let fplParser (input:string) =
     let maxBound = maxIntervalBound intervals
     let remaingString = preProcessedInput.Substring(maxBound).TrimEnd()
     if not (remaingString.EndsWith("}") && Regex.Matches(preProcessedInput, "\}").Count = Regex.Matches(preProcessedInput, "\{").Count) then
-        // prevent emitting "false-positive" errors of characters found after namespase using the heuristic that 
+        // prevent emitting "false-positive" errors of characters found after namespace using the heuristic that 
         // the last character of a namespace is "}" and then looks "good"
         tryParseRemainingChunk stdParser1 ad (preProcessedInput.Substring(maxBound)) maxBound (preProcessedInput.Length) stdCode1 stdErrMsg1 -1 ""
     resultingAst

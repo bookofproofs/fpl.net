@@ -26,7 +26,7 @@ None
 
 ## Release Notes
 
-### 1.3.0
+### >=1.4
 * Syntax-driven auto-completion service 
 
 ### 1.3.0

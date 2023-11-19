@@ -1,10 +1,4 @@
 
-/* This is a formulation of Edmund Landau's "Foundations of Analysis" (1930 Leipzig) in FPL (the Formal Proving Language).
-The namespace serves as a "proof of concept" for the language. */
-
-
-/* 1. AXIOMS */
-
 definition class One: object
 {
     intrinsic
@@ -117,86 +111,4 @@ axiom Axiom5 ()
         )
     )
     // This means that our (whatsoever objects) are actually the natural numbers themselves.
-}
-
-
-/* 2. ADDITION */
-
-// If x <> y then succesor of x <> successor of y.
-theorem Theorem_001()
-{
-    dec ~x,y: N;
-    impl
-    (
-        // if
-        not ( < x = y > )
-        , // then
-        not ( < Successor(x) = Successor(y) > )
-    )
-}
-
-
-proof Theorem_001!1
-{
-    // Proof by Contradiction (Type 2)
-    // Strategy: Assume that the premise is true and the conclusion is false.
-    // Then derive a contradiction.
-
-    100. |- assume 
-            and
-            (
-                not ( < x = y > )
-                , 
-                < Successor(x) = Successor(y) >
-            )
-    200. Axiom4() |- < x = y >
-    300. |- revoke 100.
-    400. |- qed
-}
-
-// The successor (x) never equals x 
-theorem Theorem_002 ()
-{
-    dec ~x: N;
-    not
-    (
-        < Succesor(x) = x > 
-    )
-}
-
-proof Theorem_002!1
-{
-    // Proof by Induction (to prove: `all n in N ( p(n) )`)
-    // Strategy: Prove the "base case": p(1)
-    // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.
-    
-    // "base case" 
-    100. and (Axiom1(), Axiom3()) |- not ( < Succesor(1) = 1 > )
-    
-    // "inductive step" 
-    200. |- assume ex n in N ( not ( < Succesor(n) = n > ) )
-    300. Theorem_001() |- not ( < Successor(Succesor(n)) = Successor(n) > )
-    
-    400. and(100., 400.) 
-        |- all x in N 
-        (
-            not ( < Succesor(x) = x > ) 
-        )
-    500. |- qed
-}
-    
-// If x <> 1, then there exists one (hence by Axiom 4, exactly one) i such that x = successor (u)
-theorem Theorem_003 ()
-{
-    dec ~x,y: N;
-
-    impl
-    (
-        not (< x = 1 >)
-        ,
-        exn!1 u in N
-        (
-            < x = Succesor(u) >
-        )
-    )
 }

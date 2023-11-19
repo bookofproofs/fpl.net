@@ -4,6 +4,12 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.4.2
+* minor bugfixes
+
+## 1.4.1
+* minor bugfixes
+
 ## 1.4.0
 * Syntactical autocompletion service added
 * Syntax-Highlighting for argument identifiers and code markdown added
