@@ -97,6 +97,7 @@ namespace FplLS
                 case "assert":
                 case "ass":
                 case "assume":
+                case "bydef":
                 case "cl":
                 case "class":
                 case "con":

@@ -131,6 +131,7 @@ let keywordAssert = skipString "assert" .>> SW
 let keywordUndefined = positions (skipString "undefined" <|> skipString "undef") .>> IW |>> Ast.Undefined
 let keywordTrue = positions (skipString "true") .>> IW  |>> Ast.True  
 let keywordFalse = positions (skipString "false") .>> IW |>>  Ast.False  
+let keywordBydef = positions (skipString "bydef") .>> IW  
 let keywordAnd = skipString "and" .>> IW 
 let keywordOr = skipString "or" .>> IW 
 let keywordImpl = skipString "impl" .>> IW 
@@ -199,7 +200,7 @@ let atList = many at
 
 let self = positions (atList .>> keywordSelf) |>> Ast.SelfAts
 
-let entity = choice [ self ; exclamationVarOrDigits; indexVariable ]
+let entity = choice [ self ; indexVariable ]
 
 let leftOpen = positions leftOpenBracket >>% Ast.LeftOpen
 let leftClosed = positions leftClosedBracket >>% Ast.LeftClosed
@@ -326,10 +327,13 @@ let exclamationDigitList = many1 exclamationDigits
 let referencingIdentifier = predicateIdentifier .>>. exclamationDigitList .>> IW
 let corollarySignatureAsPredicate = positions (referencingIdentifier .>>. paramTuple) .>> IW |>> Ast.ReferenceToCorollary
 
+let byDefinition = positions (keywordBydef >>. indexVariable) |>> Ast.ByDef 
+
 primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
     keywordUndefined
+    byDefinition
     attempt argumentIdentifier
     fplDelegate 
     attempt corollarySignatureAsPredicate
@@ -352,7 +356,7 @@ let existsTimesN = positions (((keywordExN >>. exclamationDigits .>> SW) .>>. va
 let isOperator = positions ((keywordIs >>. leftParen >>. coordInType) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // equality operator
-let equalityComparison = (leftBracket >>. sepBy1 predicate equals .>> rightBracket) |>> Ast.EqualityComparison
+let equalityComparison = positions (leftBracket >>. sepBy1 predicate equals .>> rightBracket) |>> Ast.EqualityComparison
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [

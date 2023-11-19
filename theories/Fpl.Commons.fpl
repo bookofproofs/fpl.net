@@ -37,17 +37,6 @@ inf DisjunctiveSyllogism()
         q
 }
 
-inf ProceedingResults(p:+ pred)
-{
-    premise:
-        all proceedingResult in p
-        (
-            proceedingResult
-        )
-    conclusion:
-        and (p)
-}
-
 inf ExistsByExample(p: pred(c: obj))
 {
     dec ~x: obj;

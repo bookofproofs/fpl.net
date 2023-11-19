@@ -1,3 +1,5 @@
+uses Fpl.SetTheory
+
 
 definition class One: object
 {
@@ -5,10 +7,10 @@ definition class One: object
 }
 
 // introduction of new symbols 1,2,3,.... and identyfying then with natural numbers of 
-def class N: obj
+def class Nat: obj
 {
     // explicit representation of a specific natural number
-    ctor N(x: @Digits)
+    ctor Nat(x: @Digits)
     {
         dec
             cases
@@ -26,7 +28,7 @@ def class N: obj
 // 1 is a natural number
 axiom Axiom1 ()
 {
-    is (1, N) 
+    is (1, Nat) 
 }
 
 definition function Successor(x: N) -> N
@@ -38,9 +40,9 @@ definition function Successor(x: N) -> N
 // For each x there exists exactly one natural number, called the successor of x, the will be denoted x
 axiom Axiom2 ()
 {
-    all x in N
+    all x in Nat
     (
-        exn!1 y in N
+        exn!1 y in Nat
         (
             < y = Successor(x) > 
         )
@@ -50,7 +52,7 @@ axiom Axiom2 ()
 // It follows immediately ...
 corollary Axiom2!1 ()
 {
-    dec ~x,y:N ;
+    dec ~x,y:Nat ;
     impl
     (
         < x = y > 
@@ -62,7 +64,7 @@ corollary Axiom2!1 ()
 // There is no number whose successor is 1.
 axiom Axiom3 ()
 {
-    dec ~x:N ;
+    dec ~x:Nat ;
     not 
     (
         < Successor(x) = 1 > 
@@ -80,12 +82,62 @@ axiom Axiom4 ()
     )
 }
 
+
+// besides the class "Nat", we can formulate definition of the set of all natural numbers
+def class N: Set
+{
+    ctor N()
+    {
+        dec 
+            ~n: Nat
+            self!Set() // call the constructor of set
+
+            // Now, assert that elements of class "Nat" can be collected to a bigger object of class "N"
+            // This requires that we can apply the "In" predicate defined in Fpl.SetTheory to objects of the class "Nat". 
+            // This becomes possible when we assert that every variable of the class "Nat" is a also Set.
+            // This is the case, since we have derived it from the Set class.
+            assert
+                all n
+                (
+                    In(n, self)
+                )
+        ;
+        self
+    }
+}
+
 // Axiom of Induction:
-// Note: Landau's original axiom declaration is based on set-theory that we do no want to imply here.
-// Therefore, our axiom definition is a little different and relays only on the syntax of FPL, not the semantics of set theory   
+// Note: Landau's original axiom declaration is based on set theory.
+// It is possible to formulate this axiom without making use of set theory, but we want to stick to the original in the PoC.
 axiom Axiom5 () 
 {
-    all p in predicate // For all predicates p it holds that:
+    
+    dec 
+       ~m: Set 
+    ; 
+    impl
+    (
+        // if in a set m
+        and
+        (
+            In (1,m) // 1 is its element
+            ,
+            impl
+            (
+                In (x,m) // and with every element x of m
+                ,
+                In (Successor(x),m) // also its successor is the element of m
+            )
+        )
+        ,
+        < m = N > // then m is actually the set of natural numbers
+    )
+}
+
+// PoC note: This axiom does not belong to Landau's work. However, we provide it as an example how we could reformulate the same axiom without relying on set theory.
+axiom AxiomExample ()
+{
+        all p in predicate // For all predicates p it holds that:
     (
         impl
         (
@@ -111,6 +163,7 @@ axiom Axiom5 ()
         )
     )
     // This means that our (whatsoever objects) are actually the natural numbers themselves.
+
 }
 
 ;

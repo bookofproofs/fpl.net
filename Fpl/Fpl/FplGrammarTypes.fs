@@ -80,7 +80,8 @@ type Ast =
     | ReferenceToCorollary of Positions * ((Ast * Ast list) * Ast) 
     | Justification of Positions * Ast list
     | ArgumentTuple of Positions * Ast list
-    | EqualityComparison of Ast list
+    | EqualityComparison of Positions * Ast list
+    | ByDef of Positions * Ast
     // Statements
     | Assertion of Positions * Ast
     | ConditionFollowedByResult of Positions * (Ast * Ast list)

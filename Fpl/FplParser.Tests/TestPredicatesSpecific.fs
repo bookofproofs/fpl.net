@@ -408,4 +408,18 @@ type TestPredicatesSpecific () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+
+    [<TestMethod>]
+    member this.TestByDef01 () =
+        let result = run byDefinition """bydef x"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestByDef02 () =
+        let result = run byDefinition """bydef x!y"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
  

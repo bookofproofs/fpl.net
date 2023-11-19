@@ -114,3 +114,5 @@ proof Example4!1
     7. 6., ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) ) 
     8. |- qed
 }
+
+;

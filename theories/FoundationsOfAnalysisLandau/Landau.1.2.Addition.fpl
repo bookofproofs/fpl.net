@@ -1,9 +1,10 @@
+uses Fpl.SetTheory
 uses Landau *
 
 // If x <> y then succesor of x <> successor of y.
 theorem Theorem_001()
 {
-    dec ~x,y: N;
+    dec ~x,y: Nat; // PoC's note: FPL makes the distinction between the set N and the class Nat of a natural number explicit!
     impl
     (
         // if
@@ -35,7 +36,7 @@ proof Theorem_001!1
 // The successor (x) never equals x 
 theorem Theorem_002 ()
 {
-    dec ~x: N;
+    dec ~x: Nat;
     not
     (
         < Succesor(x) = x > 
@@ -63,10 +64,10 @@ proof Theorem_002!1
     500. |- qed
 }
     
-// If x <> 1, then there exists one (hence by Axiom 4, exactly one) i such that x = successor (u)
+// If x <> 1, then there exists one (hence by Axiom 4, exactly one) predecessor u of x, i.e. successor (u) = x.
 theorem Theorem_003 ()
 {
-    dec ~x,y: N;
+    dec ~x,u: Nat;
 
     impl
     (
@@ -74,9 +75,57 @@ theorem Theorem_003 ()
         ,
         exn!1 u in N
         (
-            < x = Succesor(u) >
+            < Succesor(u) = x >
         )
     )
 }
+
+proof Theorem_003!1
+{
+    // Proof by Induction (to prove: `all n in N ( p(n) )`)
+    // Strategy: Prove the "base case": p(1)
+    // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.
+    
+    dec 
+         ~x : object
+         ~m : Set // let m be a set 
+         assert In (1, m) // such that 1 belongs to m
+         assert 
+            // and of all those x for which there exists such u.
+            // PoC note: We formalize the notion "for which there exists such u" by the following implication
+            impl
+            (
+                // if for some x the premise holds
+                impl
+                (
+                    not (< x = 1 >) 
+                    ,
+                    exn!1 u in N
+                    (
+                        < Succesor(u) = x >
+                    )
+                )
+                ,
+                // then it belongs to the set m
+                In (x, m)
+            )
+    ;
+
+    // "base case" 
+    100. |- In(1, m)
+    200. |- trivial
+    
+    // "inductive step" 
+    300. 200. |- assume In (x, m)
+    400. |- exn!1 u in N
+                    (
+                        < Succesor(u) = x >
+                    )
+    500. Axiom3(), Axiom2() |- < Successor(Successor(u)) = Sucessor(x) >
+    600. bydef m |- In(Successor(x), m)
+    700. |- < m = N >
+    800. |- qed
+}
+
 
 ;

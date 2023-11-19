@@ -200,7 +200,7 @@ namespace FplLS
                 $"\t300. |- trivial{Environment.NewLine}" +
                 $"\t400. |- or (not(p), not(q)){Environment.NewLine}" +
                 $"\t500. |- not(somePremise){Environment.NewLine}" +
-                $"\t600. ProceedingResults(100., 500.) |- impl(not(someConclusion), not(somePremise)){Environment.NewLine}" +
+                $"\t600. and (100., 500.) |- impl(not(someConclusion), not(somePremise)){Environment.NewLine}" +
                 $"\t700. |- impl(somePremise, someConclusion){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
@@ -330,7 +330,7 @@ namespace FplLS
                 $"\t200. |- p(1){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t// \"inductive step\" {Environment.NewLine}" +
-                $"\t300. ProceedingResults (200.) |- {TokenAssume} ex n in N ( p(n) ){Environment.NewLine}" +
+                $"\t300. 200. |- {TokenAssume} ex n in N ( p(n) ){Environment.NewLine}" +
                 $"\t400. |- trivial{Environment.NewLine}" +
                 $"\t500. |- trivial{Environment.NewLine}" +
                 $"\t600. |- p( AddNat(n,1) ){Environment.NewLine}" +
@@ -363,7 +363,7 @@ namespace FplLS
                 $"\t250. |- p(2){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t// \"inductive step\" {Environment.NewLine}" +
-                $"\t300. ProceedingResults (150., 250.) |- {TokenAssume} ex n (all m in [1,n] ( p(m) ) ){Environment.NewLine}" +
+                $"\t300. and (150., 250.) |- {TokenAssume} ex n (all m in [1,n] ( p(m) ) ){Environment.NewLine}" +
                 $"\t400. |- trivial{Environment.NewLine}" +
                 $"\t500. |- trivial{Environment.NewLine}" +
                 $"\t600. |- p( AddNat(n,1) ){Environment.NewLine}" +

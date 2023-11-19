@@ -1,4 +1,4 @@
-uses Fpl.Examples.Commons
+uses Fpl.Commons
 
 def class Set: obj
 {
