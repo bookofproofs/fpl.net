@@ -1,0 +1,334 @@
+uses Fpl.Examples.Commons 
+uses Fpl.Examples.SetTheory.ZermeloFraenkel 
+uses Fpl.Examples.PeanoAxioms 
+
+// defines a fixed length tuple template using a generic type tplIndex for an index in a range
+definition class Tuple : obj
+{
+    dec 
+        ~myLength: Nat
+    ;
+    ctor Tuple(listOfTpl:+ tpl)
+    {
+        dec 
+            ~elem: tpl
+            ~i: Nat 
+            i:= Zero() 
+            for elem in listOfTpl
+            (
+                i:=Succ(i)
+                self<i>:=elem
+            )
+            myLength:=i
+            self!obj()
+        ;
+        self
+    }
+
+    ctor Tuple(from, length:Nat, arr: tpl[from , length])
+    {
+        
+        dec 
+            self:=arr
+            myLength:=length
+            self!obj()
+        ;
+        self
+    }
+
+    property Nat Length()
+    {
+        dec
+            self:= myLength
+        ;
+        self
+    }
+
+}
+
+// defines a tuple template starting from a specific index with an arbitrary length
+definition class UnlimitedTupleFrom: obj
+{
+    dec 
+        ~myX: tpl[from,]
+    ;
+
+    constructor UnlimitedTupleFrom(from:index, x: tpl[from,])
+    {
+        dec
+            self!obj()
+            myX:=x
+        ;
+        self
+    }
+
+    property tpl Coord(i: Nat)
+    {
+        dec
+            self:=x<i>
+        ;
+        self
+    }
+}
+
+def class CartesianProduct: Set
+{
+
+    dec
+        ~myLength: Nat
+        ~myFrom: Nat
+    ;
+
+    constructor CartesianProduct(setList:+ Set)
+    {
+        dec
+            ~setItem: Set
+            ~i: Nat
+            self!Set()
+            i:= Zero()
+            for setItem in setList
+            (
+                i:=Succ(i)
+                self<i>:=setItem
+            )
+            myFrom := Nat(1)
+            myLength:=i
+        ;
+        self
+    }
+
+    ctor CartesianProduct(from, to: Nat, setArray: Set[from , to])
+    {
+        dec
+            self:=setArray
+            myLength:=to
+            self!Set()
+        ;
+        self
+    }
+
+    property Nat Length()
+    {
+        dec
+            self:= myLength 
+        ;
+        self
+    }
+
+    property pred AllTuplesIn()
+    {
+        dec 
+            ~tupleElem: Set
+            ~i: Nat
+        ;
+        and 
+        (
+            is(@self,Set),
+            all tupleElem
+            (
+                impl 
+                (
+                    In(tupleElem,@self),
+                    and (
+                        is(tupleElem,Tuple[myFrom,myLength]),
+                        all i in [1,myLength] 
+                        (
+                            In(tupleElem<i>,@self<i>) 
+                        )
+                    )
+                )
+            )
+        )
+    }
+
+}
+
+def class Relation: Set
+{
+    dec 
+        ~myArity: Nat
+    ;
+
+    ctor Relation(setList:+ Set)
+    {
+        dec
+            ~cartProd : CartesianProduct
+            self!Set()
+            cartProd := CartesianProduct(setList)
+            myArity := cartProd.Length()
+            self := Subset(cartProd)
+        ;
+        self
+    }
+
+    property Nat Arity()
+    {
+        dec self:= myArity;
+        self
+    }
+}
+
+def class BinaryRelation: Relation
+{
+    dec 
+        ~myDomain, myCodomain: Set
+    ;
+
+
+    ctor BinaryRelation(x,y: Set)
+    {
+        dec
+            self!Relation(2,x,y)
+            myDomain:=x
+            myCodomain:=y
+        ;
+        self
+    }
+
+    property Set Domain()
+    {
+        dec
+            self:=myDomain
+        ;
+        self
+    }
+
+    property Set CoDomain()
+    {
+        dec
+            self:=myCodomain
+        ;
+        self
+    }
+
+    property optional pred RightUnique()
+    {
+        all v,w1,w2 in Set
+        (
+            impl
+            (
+                and
+                (
+                    In(v,Domain()),
+                    In(w1,CoDomain()),
+                    In(w2,CoDomain()),
+                    AreRelated(v,w1,@self),
+                    AreRelated(v,w2,@self)
+                ),
+                < w1 = w2 >
+            )
+        )
+    }
+
+    property optional pred LeftUnique()
+    {
+        all v1,v2,w in Set
+        (
+            impl
+            (
+                and
+                (
+                    In(v1,Domain()),
+                    In(v2,Domain()),
+                    In(w,CoDomain()),
+                    AreRelated(v1,w,@self),
+                    AreRelated(v2,w,@self)
+                ),
+                < v1 = v2 >
+            )
+        )
+    }
+
+    property optional pred Injective()
+    {
+        LeftUnique()
+    }
+
+    property optional pred Unique()
+    {
+        and (LeftUnique(), RightUnique())
+    }
+
+    property optional pred RightTotal()
+    {
+        all w in Set
+        (
+            ex v in Set
+            (
+                and
+                (
+                    In(v,Domain()),
+                    In(w,CoDomain()),
+                    AreRelated(v,w,@self)
+                )
+            )
+        )
+    }
+
+    property optional pred Surjective()
+    {
+        RightTotal()
+    }
+
+    property optional pred LeftTotal()
+    {
+        all v in Set
+        (
+            ex w in Set
+            (
+                and
+                (
+                    In(v,Domain()),
+                    In(w,CoDomain()),
+                    AreRelated(v,w,@self)
+                )
+            )
+        )
+    }
+
+    property optional pred Total()
+    {
+        and (LeftTotal(), RightTotal())
+    }
+}
+
+def pred AreRelated(u,v: Set, r: BinaryRelation)
+{
+    dec
+        ~tuple: Tuple[1,2]
+        tuple:=Tuple(u,v)
+    ;
+    and
+    (
+        In(tuple,r),
+        In(u,r.Domain()),
+        In(v,r.Codomain())
+    )
+}
+
+definition class Function: BinaryRelation
+{
+    ctor Function(x,y: Set)
+    {
+        dec
+            self!BinaryRelation(x,y)
+            assert self.LeftTotal()
+            assert self.RightUnique()
+        ;
+        self
+    }
+}
+
+definition class EquivalenceRelation: BinaryRelation
+{
+    ctor EquivalenceRelation(x,y: Set)
+    {
+        dec
+            self:=BinaryRelation(x,y)
+            assert self.Reflexive()
+            assert self.Symmetric()
+            assert self.Transitive()
+        ;
+        self
+    }
+}

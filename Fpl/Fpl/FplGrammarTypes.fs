@@ -19,6 +19,7 @@ type Ast =
     | PredicateIdentifier of Positions * Ast list
     | DelegateId of Positions * string 
     | Alias of Positions * string
+    | Star 
     | SelfAts of Positions * char list 
     | Self of Positions * unit
     | LocalizationString of Positions * string
@@ -129,7 +130,7 @@ type Ast =
     | JustifiedArgument of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
     | Proof of Positions * ((Ast * Ast list) * (Ast list option * Ast list))
-    | Namespace of Positions * (Ast * (Ast option * Ast list))
+    | Namespace of Ast option * Ast list
     | AST of Positions * Ast
     | Escape // used to replace AST subnodes when we recover from an error
     | SomeString of string // used to replace AST for strings subnodes when we recover from an error

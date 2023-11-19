@@ -34,14 +34,7 @@ In the current version, the extra sub-blocks  `inference`, `localization`, and `
 * Every class definition starts the keyword `definition` (short-form `def`), followed as previously by the keyword `class` (short-form `cl`), 
 * Every predicate definition starts the keyword `definition` (short-form `def`), followed as previously by the keyword `function` (short-form `func`), 
 * Every functional term definition starts the keyword `definition` (short-form `def`), followed as previously by the keyword `predicate` (short-form `pred`), 
-* All other building blocks keywords remained unchanged, i.e.:
-    * axioms are started by the keyword `axiom` (short-form `ax`) or `postulate` (short-form `post`),
-    * theorems are started by the keyword `theorem` (short-form `thm`),
-    * propositions are started by the keyword `proposition` (short-form `prop`),
-    * lemmas are started by the keyword `lemma` (short-form `lem`), 
-    * corollaries are started by the keyword `corollary` (short-form `cor`),
-    * conjectures are started by the keyword `conjecture` (short-form `conj`), and 
-    * proofs are started by the keyword `proof` (short-form `prf`). 
+* All other building blocks keywords remain unchanged, e.g. axioms are started by the keyword `axiom` (short-form `ax`) or `postulate` (short-form `post`), theorems are started by the keyword `theorem` (short-form `thm`), etc.
     
 #### 2) In-block Variable Type Declarations and Statements
 In FPL, you can declare variable types of building blocks both in their signatures or in their body. Moreover, in the body also statements using variables are possible.
@@ -613,12 +606,18 @@ In previous versions of FPL, the syntax of theorem-like statements, conjectures 
     }
 ```
 
-#### 21) Self-Containment 
+#### 21) Simplified syntax of namespaces and *.fpl file names
+In the original FPL parser, every FPL file contained a namespaces with a block inside curly brackets. The name of the file could deviate from the name of the namespace.
+
+The current FPL parser simply uses filename as the name of the namespce (without the extension `.fpl` ). The basename of the FPL file itself has to follow the rules of namespaces (i.e. be a concatenated dotted sequence of pascal-case ids). The need of writing curly brackets inside the FPL file and keeping track of which namespaces are inside which file names becomes so obsolete.
+
+
+#### 22) Self-Containment 
 This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:
 
 * The order of declarations will now matter. 
 * This is unlike the previous, python-based FPL interpreter (which can be found in the repository [https://github.com/bookofproofs/fpl](https://github.com/bookofproofs/fpl)).
-* In the new FPL interpreter, checking if an FPL identifier was already declared can be done - in principle - during the parsing process. This could significantly simplify the implementation and performance of the new FPL interpreter.
+* In the new FPL interpreter, checking if an FPL identifier was already declared, can be done - in principle - during the parsing process. This could significantly simplify the implementation and performance of the new FPL interpreter.
 * Nevertheless, we stick to the 'must' requirements (see [INTRO.md](https://github.com/bookofproofs/fpl.net/blob/main/INTRO.md)) 28 (support of overrides), 38 (support recursive linguistic constructs), and 40 (support of self-reference in definitions) that could still potentially negatively impact how complicated it is to implement the new FPL interpreter.
 
 

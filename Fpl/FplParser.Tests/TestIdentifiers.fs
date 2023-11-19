@@ -49,6 +49,13 @@ type TestIdentifiers () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
+    member this.TestUsesClause03 () =
+        let result = run buildingBlockList "uses Fpl.Commons *"
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
     member this.TestPredicateIdentifier1 () =
         let result = run predicateIdentifier "ThisIsMyIdentifier"
         let actual = sprintf "%O" result

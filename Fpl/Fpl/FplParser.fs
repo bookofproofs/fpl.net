@@ -84,8 +84,9 @@ let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.Nam
 let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.PredicateIdentifier 
 
 let alias = positions (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
+let star = positions (skipChar '*') >>% Ast.Star
 
-let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) |>> Ast.AliasedNamespaceIdentifier
+let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt (alias <|> star)) |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z]\w*)|\d*)$", RegexOptions.Compiled)
 
 
@@ -553,11 +554,10 @@ let buildingBlock = choice [
     usesClause
 ]
 
-let buildingBlockList = many (IW >>. buildingBlock .>> IW)
+let buildingBlockList = many1 (buildingBlock .>> IW)
 
 (* Namespaces *)
-let namespaceBlock = (leftBrace >>. opt extensionBlock) .>>. (IW >>. buildingBlockList) .>> spacesRightBrace
-let fplNamespace = positions (namespaceIdentifier .>>. (IW >>. namespaceBlock)) .>> IW |>> Ast.Namespace
+let fplNamespace = ((opt extensionBlock .>> IW) .>>. buildingBlockList) .>> IW |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
