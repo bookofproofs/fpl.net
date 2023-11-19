@@ -525,3 +525,5 @@ def class VectorSpaceOverField : obj
         )
     }
 }
+
+;

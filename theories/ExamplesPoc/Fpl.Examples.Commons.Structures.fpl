@@ -332,3 +332,5 @@ definition class EquivalenceRelation: BinaryRelation
         self
     }
 }
+
+;

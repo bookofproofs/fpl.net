@@ -78,3 +78,4 @@ def class ZeroVectorN: Tuple
     }
 }
     
+;

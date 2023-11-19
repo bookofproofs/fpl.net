@@ -611,6 +611,7 @@ In the original FPL parser, every FPL file contained a namespaces with a block i
 
 The current FPL parser simply uses filename as the name of the namespce (without the extension `.fpl` ). The basename of the FPL file itself has to follow the rules of namespaces (i.e. be a concatenated dotted sequence of pascal-case ids). The need of writing curly brackets inside the FPL file and keeping track of which namespaces are inside which file names becomes so obsolete.
 
+As a result, a syntax sugar from this simplification is that every FPL file has to end with a semicolon `;` to flag the parser that it does not has to look for any other building blocks in the file. 
 
 #### 22) Self-Containment 
 This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:

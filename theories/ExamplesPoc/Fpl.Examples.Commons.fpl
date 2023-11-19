@@ -98,3 +98,5 @@ loc NotEqual(x,y) :=
     !ger: x "ist ungleich" y 
     !pol: x ( "nie równa się" , "nie równe" ) y 
     ;
+
+;

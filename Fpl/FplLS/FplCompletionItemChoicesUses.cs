@@ -25,7 +25,7 @@ namespace FplLS
             ci2.Detail = "uses namespace (all subspaces)";
             ci2.SortText = "uses02";
             ci2.Label = defaultCi.Label + " (all) ... ";
-            ret.Add(ci1);
+            ret.Add(ci2);
             // keywords
             defaultCi.Kind = CompletionItemKind.Keyword;
             defaultCi.AdjustToKeyword();

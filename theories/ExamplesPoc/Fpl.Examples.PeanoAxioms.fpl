@@ -361,3 +361,4 @@ def function ContinuedFraction(k:Nat, arr: Int[k,]) -> Real
 // Example of defining a constant for the natural number 100 using the
 def class N100:Set{ctor N100(){dec ~n:Nat  self!Set() self:=SetBuilder(SetNat(),IsGreater(n,100)); self }}
 
+;
