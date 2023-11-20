@@ -45,6 +45,16 @@ type TestStatements () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
+    member this.TestFor04 () =
+        let result = run forStatement """for n in SomeType
+            (
+                x!n := 1
+            )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+        
+    [<TestMethod>]
     member this.TestAssignment01 () =
         let result = run assignmentStatement """a:= 1"""
         let actual = sprintf "%O" result

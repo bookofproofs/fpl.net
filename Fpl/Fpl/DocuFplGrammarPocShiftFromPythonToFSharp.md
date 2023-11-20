@@ -196,6 +196,12 @@ In the original version of FPL grammar, loops could be constructed using the `lo
     )
 ``` 
 
+The for statement comes with three flavors:
+* iterating through all i in some type: `for i in SomeType (...)`, 
+* iterating through all i in some range: `for i in [1~n] (...)`,
+* iterating through all i in some variadic variable: `for i in y (...)`.
+
+
 #### 8) New `exn` keyword  
 
 The existence quantor accepting a number of allowed occurrences gets an own keyword `exn`, disambiguating it from the general quantor `ex`.

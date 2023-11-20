@@ -292,8 +292,7 @@ let variableListInOptDomain = ( variableList .>>. opt inDomain) .>> IW
 let variableListInOptDomainList = (sepBy1 variableListInOptDomain comma) .>> IW
 
 let entityInDomain = ( entity .>>. inDomain ) .>> IW
-let entityInVariableRange = ( entity .>>. (keywordIn >>. variableRange)) .>> IW
-let forInBody = (entityInVariableRange .>> IW) .>>. (leftParen >>. IW >>. statementList) .>> (IW >>. rightParen)
+let forInBody = (entityInDomain .>> IW) .>>. (leftParen >>. IW >>. statementList) .>> (IW >>. rightParen)
 let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 
 //// Difference of assertion to an axiom: axiom's is followed by a signature of a predicate (i.e. with possible parameters),

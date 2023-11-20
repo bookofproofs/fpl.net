@@ -127,5 +127,73 @@ proof Theorem_003!1
     800. |- qed
 }
 
+// PoC note: In Landau's original, Theorem 4 is formulated as "at the same time Definition 1". In FPL, we deal with theorems and definitions separately,
+// making it more transparent, what is part of a constructive definition and what is the predicative expression about it in the theorem.  
+
+// Theorem 3, and at the same time definition 1: To every pair of number x,y, we can assign in exactly one way a natural number, called x + y such that 
+// (1) x + 1 = successor of x for every x
+// (2) x + y = successor of (x + y)
+// x + y is called the sum of x and y, or the number obtained by addition of y to x.
+
+definition function Sum(x,y: Nat) -> Nat
+{
+    declaration
+        ~res: Nat
+        cases
+        (
+            | < y = 1 > : res := Successor(x) 
+            ? res := Successor( Sum(x,y) )
+        )
+    ;
+    return res
+}
+
+// PoC note: After defining what Sum is, we now simply state its uniqueness predicatively
+theorem Theorem_004 ()
+{
+    declaration
+        ~sum, otherSum: Sum
+    ;
+    
+    all x,y in Nat
+    (
+        < sum(x,y) = otherSum(x,y) >
+    )
+}
+
+proof SomeFplTheorem!1
+{
+    // Proof by Induction (to prove: `all n in N ( p(n) )`)
+    // Strategy: Prove the "base case": p(1)
+    // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.
+    
+    dec 
+         ~a,b : N            
+         ~x,y : N
+
+        for y in N 
+        (
+            a!1 := Successor(x)
+            b!1 := Successor(x)
+            a!Successor(y) := Successor(a!y)
+            b!Successor(y) := Successor(b!y)
+        )
+    ;
+
+    // "base case" 
+    100. |- trivial
+    200. |- p(1)
+    
+    // "inductive step" 
+    300. 200. |- assume ex n in N ( p(n) )
+    400. |- trivial
+    500. |- trivial
+    600. |- p( AddNat(n,1) )
+    
+    700. |- all n in N ( p(n) )
+    800. |- qed
+}
+
+
 
 ;

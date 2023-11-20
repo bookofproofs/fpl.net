@@ -4,6 +4,9 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.4.3
+* additional keyword bydef
+
 ## 1.4.2
 * minor bugfixes
 
