@@ -190,16 +190,13 @@ let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. ex
 
 let xId = positions (at >>. extensionName) |>> Ast.ExtensionType 
 
-let exclamationDigits = positions (exclamationMark >>. digits) |>> Ast.ExclamationDigits
-let exclamationVarOrDigits = positions (exclamationMark >>. (variable <|> digits)) |>> Ast.ExclamationVarOrDigits
-
-let exclamationDigits = positions (dollarDigits) |>> Ast.ExclamationDigits
+let dollarDigits = positions (regex "\$\d+" <?> "<dollarDigits>") |>> Ast.DollarDigits
 
 let atList = many at
 
 let self = positions (atList .>> keywordSelf) |>> Ast.SelfAts
 
-let entity = choice [ self ; indexVariable ]
+let entity = choice [ self ; variable ; dollarDigits ] .>> IW
 
 let leftOpen = positions leftOpenBracket >>% Ast.LeftOpen
 let leftClosed = positions leftClosedBracket >>% Ast.LeftClosed
@@ -232,7 +229,7 @@ let fplRange = (opt coord.>> comma >>. opt coord) .>> IW
 
 let boundedRange = positions (leftBound .>>. fplRange .>>. rightBound) |>> Ast.ClosedOrOpenRange
 
-let coordInType = choice [ fplIdentifier; indexVariable ] .>> IW 
+let coordInType = choice [ fplIdentifier; variable; dollarDigits ] .>> IW 
 
 let coordInTypeList = (sepBy1 coordInType comma) .>> IW 
 
@@ -317,15 +314,16 @@ statementListRef.Value <- many (IW >>. statement .>> IW)
 
 (* Predicates *)
 
-let dotted = dot >>. predicateWithQualification 
-let qualification = choice [boundedRange ; bracketedCoords ; argumentTuple] 
-predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) .>>. opt dotted |>> Ast.PredicateWithQualification 
+let dotted = positions (dot >>. predicateWithQualification) |>> Ast.Dotted 
+let indexPredicate = positions (exclamationMark >>. predicateWithQualification) |>> Ast.PredicateAsIndex
+let qualification = choice [indexPredicate; dotted; boundedRange ; bracketedCoords ; argumentTuple ] 
+predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) |>> Ast.PredicateWithQualification 
 
-let exclamationDigitList = many1 exclamationDigits
-let referencingIdentifier = predicateIdentifier .>>. exclamationDigitList .>> IW
+let dollarDigitList = many1 dollarDigits
+let referencingIdentifier = predicateIdentifier .>>. dollarDigitList .>> IW
 let corollarySignatureAsPredicate = positions (referencingIdentifier .>>. paramTuple) .>> IW |>> Ast.ReferenceToCorollary
 
-let byDefinition = positions (keywordBydef >>. indexVariable) |>> Ast.ByDef 
+let byDefinition = positions (keywordBydef >>. variable) |>> Ast.ByDef 
 
 primePredicateRef.Value <- choice [
     keywordTrue
@@ -350,7 +348,7 @@ let negation = positions (keywordNot >>. onePredicateInParens) |>> Ast.Not
 let all = positions ((keywordAll >>. variableListInOptDomainList) .>>. onePredicateInParens) |>> Ast.All
 let exists = positions ((keywordEx >>. variableListInOptDomainList) .>>. onePredicateInParens) |>> Ast.Exists
 
-let existsTimesN = positions (((keywordExN >>. exclamationDigits .>> SW) .>>. variableInOptDomain) .>>. onePredicateInParens) |>> Ast.ExistsN
+let existsTimesN = positions (((keywordExN >>. dollarDigits .>> SW) .>>. variableInOptDomain) .>>. onePredicateInParens) |>> Ast.ExistsN
 let isOperator = positions ((keywordIs >>. leftParen >>. coordInType) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // equality operator

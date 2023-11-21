@@ -42,7 +42,7 @@ axiom Axiom2 ()
 {
     all x in Nat
     (
-        exn!1 y in Nat
+        exn$1 y in Nat
         (
             < y = Successor(x) > 
         )
@@ -50,7 +50,7 @@ axiom Axiom2 ()
 }
 
 // It follows immediately ...
-corollary Axiom2!1 ()
+corollary Axiom2$1 ()
 {
     dec ~x,y:Nat ;
     impl

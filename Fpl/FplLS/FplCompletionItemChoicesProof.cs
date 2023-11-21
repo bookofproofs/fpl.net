@@ -37,7 +37,7 @@ namespace FplLS
             ci.Detail = "direct proof";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Direct Proof{Environment.NewLine}" +
                 $"\t// Strategy: Assume that the premise is true, then prove that the conclusion also must be true.{Environment.NewLine}" +
@@ -57,7 +57,7 @@ namespace FplLS
             ci.Detail = "contrapositive proof";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Contrapositive Proof{Environment.NewLine}" +
                 $"\t// Strategy: Assume that the conclusion is false, then prove that the premise also must be false.{Environment.NewLine}" +
@@ -81,7 +81,7 @@ namespace FplLS
             ci.Detail = "proof by contradiction (1)";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Contradiction (Type 1){Environment.NewLine}" +
                 $"\t// Strategy: Assume that the premise is false, then derive a contradiction.{Environment.NewLine}" +
@@ -103,7 +103,7 @@ namespace FplLS
             ci.Detail = "proof by contradiction (2)";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Contradiction (Type 2){Environment.NewLine}" +
                 $"\t// Strategy: Assume that the premise is true and the conclusion is false.{Environment.NewLine}" +
@@ -128,7 +128,7 @@ namespace FplLS
             ci.Detail = "equivalence proof";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof of Equivalence{Environment.NewLine}" +
                 $"\t// Strategy: Show both directions separately.{Environment.NewLine}" +
@@ -157,7 +157,7 @@ namespace FplLS
             ci.Detail = "disjunctive premise proof";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof (Premise is a Disjunction: or(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Given the premise or(p,q), show first impl(p, conclusion), then show impl(q, conclusion).{Environment.NewLine}" +
@@ -190,7 +190,7 @@ namespace FplLS
             ci.Detail = "conjunctive premise proof";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof (Premise is a Conjunction: and(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Try a direct proof, or consider a contrapositive.{Environment.NewLine}" +
@@ -214,7 +214,7 @@ namespace FplLS
             ci.Detail = "disjunctive conclusion proof";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof (Conclusion is a Disjunction: or(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Assume the truth of both, the premise and the negation of one of p or q.{Environment.NewLine}" +
@@ -237,7 +237,7 @@ namespace FplLS
             ci.Detail = "conjunctive conclusion proof";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof (Conclusion is a Conjunction: and(p,q) ){Environment.NewLine}" +
                 $"\t// Strategy: Proof both implications separately.{Environment.NewLine}" +
@@ -266,7 +266,7 @@ namespace FplLS
             ci.Detail = "proof by counterexample (all quantor)";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Counterexample of `not(all x ( p(x) ))`){Environment.NewLine}" +
                 $"\t// Strategy: Assume `all x ( p(x) )`, then produce an example of x for which p(x) is false.{Environment.NewLine}" +
@@ -293,7 +293,7 @@ namespace FplLS
             ci.Detail = "proof by counterexample (exists quantor)";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Counterexample of `not(ex x ( p(x) ))`){Environment.NewLine}" +
                 $"\t// Strategy: Prove that for `all x ( not (p(x)) )` is true.{Environment.NewLine}" +
@@ -316,11 +316,11 @@ namespace FplLS
             ci.Detail = "proof by induction";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Induction (to prove: `all n in N ( p(n) )`){Environment.NewLine}" +
                 $"\t// Strategy: Prove the \"base case\": p(1){Environment.NewLine}" +
-                $"\t// Then do the \"inductive step\": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.{Environment.NewLine}" +
+                $"\t// Then do the \"inductive step\": Prove that if `p(n)` is true, then also `p( Sum(n,1) )` is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
                 $"\t\t ~n : N{Environment.NewLine}" +
@@ -333,7 +333,7 @@ namespace FplLS
                 $"\t300. 200. |- {TokenAssume} ex n in N ( p(n) ){Environment.NewLine}" +
                 $"\t400. |- trivial{Environment.NewLine}" +
                 $"\t500. |- trivial{Environment.NewLine}" +
-                $"\t600. |- p( AddNat(n,1) ){Environment.NewLine}" +
+                $"\t600. |- p( Sum(n,1) ){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t700. |- all n in N ( p(n) ){Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
@@ -347,11 +347,11 @@ namespace FplLS
             ci.Detail = "proof by strong induction";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Strong Induction (to prove: `all n in N ( p(n) )`){Environment.NewLine}" +
                 $"\t// Strategy: Prove the \"base cases\": `p(1)`,..., `p(m)`{Environment.NewLine}" +
-                $"\t// Then do the \"inductive step\": Prove that if `p(n)` is for all `n in [1,n]`, then also `p( AddNat(n,1) )` is true.{Environment.NewLine}" +
+                $"\t// Then do the \"inductive step\": Prove that if `p(n)` is for all `n in [1,n]`, then also `p( Sum(n,1) )` is true.{Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\tdec {Environment.NewLine}" +
                 $"\t\t ~n, m : N{Environment.NewLine}" +
@@ -366,7 +366,7 @@ namespace FplLS
                 $"\t300. and (150., 250.) |- {TokenAssume} ex n (all m in [1,n] ( p(m) ) ){Environment.NewLine}" +
                 $"\t400. |- trivial{Environment.NewLine}" +
                 $"\t500. |- trivial{Environment.NewLine}" +
-                $"\t600. |- p( AddNat(n,1) ){Environment.NewLine}" +
+                $"\t600. |- p( Sum(n,1) ){Environment.NewLine}" +
                 $"\t{Environment.NewLine}" +
                 $"\t700. |- all n in N ( p(n) ){Environment.NewLine}" +
                 $"\t800. |- qed{Environment.NewLine}" +
@@ -380,7 +380,7 @@ namespace FplLS
             ci.Detail = "proof by smallest counterexample";
             AdjShort(ci);
             ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1{Environment.NewLine}" +
+                $"{ci.Word} SomeFplTheorem$1{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t// Proof by Induction With Smallest CounterExample (to prove: `all n in N ( p(n) )`){Environment.NewLine}" +
                 $"\t// Strategy: Prove the \"base case\": `p(1)`{Environment.NewLine}" +

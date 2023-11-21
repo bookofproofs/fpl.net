@@ -253,7 +253,7 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestProof01 () =
-        let result = run proof """proof Example4!1
+        let result = run proof """proof Example4$1
         {
             1. GreaterAB() |- Greater(a,b)
             2. |- qed
@@ -264,7 +264,7 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestProof02 () =
-        let result = run proof """prf AddIsUnique!1
+        let result = run proof """prf AddIsUnique$1
         {
             1. |- assume pre
             2. |- trivial
@@ -275,7 +275,7 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestProof03 () =
-        let result = run proof """prf AddIsUnique!1
+        let result = run proof """prf AddIsUnique$1
         {
             1. |- assume true
             2. |- trivial
@@ -286,7 +286,7 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestProof04 () =
-        let result = run proof """proof Example4!1
+        let result = run proof """proof Example4$1
         {
             1. SomeCorollary!1() |- Greater(a,b)
             2. |- qed

@@ -247,6 +247,62 @@ type TestPredicatesSpecific () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
+    member this.TestPredicateWithArgs1a () =
+        let result = run predicateWithQualification """x!Zero()"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicateWithArgs2a () =
+        let result = run predicateWithQualification """x!self(i)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicateWithArgs3a () =
+        let result = run predicateWithQualification """x!ProceedingResults(1.,2.)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicateWithArgs4a () =
+        let result = run predicateWithQualification """x!Add(result,list!i)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicateWithArgs5a () =
+        let result = run predicateWithQualification """x!Add(result,arr<i>)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicateWithArgs6a () =
+        let result = run predicateWithQualification """x!A1()!A2()!A3() """
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicateWithArgs7 () =
+        let result = run predicateWithQualification """x!$3!$2"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicateWithArgs7a () =
+        let result = run predicateWithQualification """x!$3!y!$0"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
     member this.TestQualifiedIdentifier1 () =
         let result = run predicateWithQualification """myOp.NeutralElement()"""
         let actual = sprintf "%O" result
@@ -382,28 +438,28 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestExN1 () =
-        let result = run existsTimesN """exn!0 x (true)"""
+        let result = run existsTimesN """exn$0 x (true)"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExN2 () =
-        let result = run existsTimesN """exn!1 x in Nat (not (iif ( true, not(false))))"""
+        let result = run existsTimesN """exn$1 x in Nat (not (iif ( true, not(false))))"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExN3 () =
-        let result = run existsTimesN """exn!2 x,y,z (not (iif ( iif( true, false), true)))"""
+        let result = run existsTimesN """exn$2 x,y,z (not (iif ( iif( true, false), true)))"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestExN4 () =
-        let result = run existsTimesN """exn!3 x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let result = run existsTimesN """exn$3 x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

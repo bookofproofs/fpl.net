@@ -213,7 +213,7 @@ The existence quantor accepting a number of allowed occurrences gets an own keyw
 ``` 
 *Now*
 ``` 
-    exn!1 x ( p (x) ) // there exists exactly one x ...
+    exn$1 x ( p (x) ) // there exists exactly one x ...
 ``` 
 
 This disambiguation helps to formulate the FPL grammar without `attempt` parsers which would otherwise distort error positions shown during error recovery that occur inside the predicate.
@@ -380,7 +380,7 @@ To disambiguate the two usages, the following changes in the FPL syntax have bee
     n!1
     n!m!k
 ``` 
-* The symbols `!1`, `!2`, ... and `!<variable>" have always the predefined type `index` and never the type of the extension.
+* The symbols `!1`, `!2`, ... have always the predefined type `index` and never the type of the extension.
 * In proof-based mathematics, there are use cases where extensions symbols `1,2,3,...` (for instance those identified with natural numbers) have to be used as index variables. In those cases, FPL allows the coordinate notation.
 
 ``` 
@@ -445,7 +445,7 @@ The following changes have been made:
 ```
 *Now*
 ```        
-    proof Example4!1
+    proof Example4$1
     {
         dec: 
             a:A

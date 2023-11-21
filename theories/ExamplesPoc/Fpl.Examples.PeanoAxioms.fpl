@@ -25,7 +25,7 @@ axiom SuccessorExistsAndIsUnique()
 {
     all n in Nat
     (
-        exn!1 successor in Nat
+        exn$1 successor in Nat
         (
             and
             (
@@ -183,7 +183,7 @@ prop AddIsUnique(op: Add)
     
 }
 
-proof AddIsUnique!1
+proof AddIsUnique$1
 {
     1. |- assume 
         and

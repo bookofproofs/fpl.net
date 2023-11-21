@@ -15,7 +15,7 @@ theorem Theorem_001()
 }
 
 
-proof Theorem_001!1
+proof Theorem_001$1
 {
     // Proof by Contradiction (Type 2)
     // Strategy: Assume that the premise is true and the conclusion is false.
@@ -43,7 +43,7 @@ theorem Theorem_002 ()
     )
 }
 
-proof Theorem_002!1
+proof Theorem_002$1
 {
     // Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -73,14 +73,14 @@ theorem Theorem_003 ()
     (
         not (< x = 1 >)
         ,
-        exn!1 u in N
+        exn$1 u in N
         (
             < Succesor(u) = x >
         )
     )
 }
 
-proof Theorem_003!1
+proof Theorem_003$1
 {
     // Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -100,7 +100,7 @@ proof Theorem_003!1
                 (
                     not (< x = 1 >) 
                     ,
-                    exn!1 u in N
+                    exn$1 u in N
                     (
                         < Succesor(u) = x >
                     )
@@ -117,7 +117,7 @@ proof Theorem_003!1
     
     // "inductive step" 
     300. 200. |- assume In (x, m)
-    400. |- exn!1 u in N
+    400. |- exn$1 u in N
                     (
                         < Succesor(u) = x >
                     )
@@ -161,16 +161,16 @@ theorem Theorem_004 ()
     )
 }
 
-proof SomeFplTheorem!1
+proof SomeFplTheorem$1
 {
     // Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
     // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.
     
     dec 
-         ~a,b : N            
-         ~x,y : N
+         ~x : N // for a fixed x
 
+        // and for all y we define
         for y in N 
         (
             a!1 := Successor(x)

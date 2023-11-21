@@ -9,9 +9,10 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor00 () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        // empty constructors not allowed
+        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
-                // empty constructors not allowed
+                
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -19,9 +20,10 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor00a () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        // constructors are not allowed to be empty and only contain declarations
+        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
-                // constructors are not allowed to be empty and only contain declarations
+                
                 dec: x: obj ;
             }"""
         let actual = sprintf "%O" result
@@ -30,9 +32,10 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor00b () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        // constructors are not allowed to be empty and only contain specifications
+        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
-                // constructors are not allowed to be empty and only contain specifications
+                
                 dec x:= 1 ;
             }"""
         let actual = sprintf "%O" result
@@ -41,9 +44,10 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor01 () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        // constructors are not allowed to be intrinsic
+        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
-                // constructors are not allowed to be intrinsic
+                
                 intr
             }"""
         let actual = sprintf "%O" result
@@ -52,9 +56,10 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor01a () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        // constructors are not allowed to be intrinsic
+        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
-                // constructors are not allowed to be intrinsic
+                
                 dec:;
                 intr
             }"""
@@ -64,9 +69,10 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor01b () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        // constructors are not allowed to be intrinsic
+        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
-                // constructors are not allowed to be intrinsic
+                
                 dec ~a:obj ;
                 intr
             }"""
@@ -76,9 +82,10 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor01c () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        // constructors are not allowed to be intrinsic
+        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
-                // constructors are not allowed to be intrinsic
+                
                 dec ~a:obj ;
                 intr
             }"""
@@ -129,10 +136,11 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor03b () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        // incomplete (syntax error)
+        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj 
-                    self! // incomplete (syntax error)
+                    self! 
                 ;
             }"""
         let actual = sprintf "%O" result
@@ -141,12 +149,13 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor04 () =
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        // incomplete ( self missing)
+        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj
                 self!obj()
                 ;
-                // incomplete ( self missing)
+                
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -154,16 +163,18 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor05 () =
+        // calls to multiple parental constructors possible (multi-inheritance)
+        // incomplete ( self missing)
         let result = run constructor """Magma(x: tplSet, op: BinOp)
             {
-                // calls to multiple parental constructors possible (multi-inheritance)
+                
                 dec 
                     ~a:obj
                     self!obj() 
                     self!T1(x) 
                     self!T2(op) 
                 ;
-                // incomplete ( self missing)
+                
             }"""
         let actual = sprintf "%O" result
         printf "%O" actual

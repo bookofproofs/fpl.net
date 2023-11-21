@@ -12,7 +12,7 @@ namespace FplLS
             var postfix = "";
             if (defaultCi.Word.Contains("exn"))
             {
-                postfix = "!1";
+                postfix = "$1";
             }
             // snippets
             var ci = defaultCi.Clone(); SetBody(ci, "none", postfix); ret.Add(ci);

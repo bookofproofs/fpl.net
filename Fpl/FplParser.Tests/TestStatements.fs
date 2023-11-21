@@ -36,7 +36,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestFor03 () =
-        let result = run forStatement """for n in [!1,!4]
+        let result = run forStatement """for n in [$1,$4]
             (
             assert Equal(f(n),n)
             )"""

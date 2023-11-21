@@ -11,8 +11,7 @@ type Ast =
     // Identifiers
     | Digits of string
     | ExtDigits of Positions * Ast
-    | ExclamationDigits of Positions * Ast
-    | ExclamationVarOrDigits of Positions * Ast
+    | DollarDigits of Positions * string
     | PascalCaseId of string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
@@ -57,13 +56,12 @@ type Ast =
     | ClassTypeWithModifier of Positions * (Ast * Ast)
     // Variables
     | Var of Positions * string
-    | IndexVariable of Positions * (Ast * Ast list option)
 
     // Predicates
     | True of Positions * unit
     | False of Positions * unit 
     | Undefined of Positions * unit
-    | PredicateWithQualification of (Positions * (Ast * Ast option)) * Ast option
+    | PredicateWithQualification of (Positions * (Ast * Ast option))
     | And of Positions * Ast list
     | Or of Positions * Ast list
     | Impl of Positions * (Ast * Ast)
@@ -82,6 +80,8 @@ type Ast =
     | ArgumentTuple of Positions * Ast list
     | EqualityComparison of Positions * Ast list
     | ByDef of Positions * Ast
+    | PredicateAsIndex of Positions * Ast
+    | Dotted of Positions * Ast
     // Statements
     | Assertion of Positions * Ast
     | ConditionFollowedByResult of Positions * (Ast * Ast list)

@@ -31,7 +31,7 @@ type TestAxioms () =
             ;
             all n
             (
-                exn!1 successor
+                exn$1 successor
                 (
                     and
                     (
