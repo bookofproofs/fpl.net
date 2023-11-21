@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+      <Compile Include="TestQualifierExtensionDigits.fs" />
+      <Compile Include="TestQualifierDollarDigits.fs" />
+      <Compile Include="TestQualifierPredicateIdentifier.fs" />
+      <Compile Include="TestQualifierSelf.fs" />
+      <Compile Include="TestQualifiersVars.fs" />
       <Compile Include="TestTheoremLikeStatements.fs" />
       <Compile Include="TestDefinitionFunctionalTerms.fs" />
       <Compile Include="TestClassInstanceProperties.fs" />

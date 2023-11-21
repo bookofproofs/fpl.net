@@ -623,7 +623,21 @@ As a result, a syntax sugar from this simplification is that every FPL file has 
 #### 22) Additional inbuilt-predicate `bydef`
 The additional predicate `bydef <variable>` is an abbreviation to of what had to be formulated in a more complicated way in second-order logic on a case-by-case basis. In principle, the predicate means to check if the asserted predicates used to define a variable justify an argument in an FPL proof.
 
-#### 23) Self-Containment 
+#### 23) A more stringent usage of qualifiers, coordinates, and ranges
+
+The FPL language supports the following qualifiers: dotted notation `x.something`, with arguments `x(something)`, with coordinates `x<something>`, with range `x[something,something]`, with subscript `x!something`. All of them can be chained, for instance, a dotted notation can be chained with a subscripted one like this: `x.something!somethingelse`
+
+There is a connection between qualifiers and identifiers, that are variables, the self keyword, pascal-cased FPL identifiers < PascalCasId >, index-typed digits< $digits >, and extension digits < extensionDigits >. This connection whether identifiers can be used "with" qualifiers, "as" qualifiers, or both- The following table shows which identifiers can be used how with these qualifiers:
+
+| Qualifier   | Variables |  self keyword | < PascalCasId > | < $digits > | < extensionDigits >
+| :----:    | :----: | :----: |:----: |:----: |:----: |
+| Dotted      |   both  | (both)    |   both  | -      |   -      |
+| Arguments   |   both  | both    |   both  | as     |   as     |
+| Coordinates |   both  | both    |   as    | as     |   as     |
+| Ranges      |   both  | both    |   as    | as     |   as     |
+| Subscripts  |   both  | both    |   as    | as     |   as     |
+
+#### 24) Self-Containment 
 This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:
 
 * The order of declarations will now matter. 
