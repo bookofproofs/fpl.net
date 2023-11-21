@@ -193,8 +193,7 @@ let xId = positions (at >>. extensionName) |>> Ast.ExtensionType
 let exclamationDigits = positions (exclamationMark >>. digits) |>> Ast.ExclamationDigits
 let exclamationVarOrDigits = positions (exclamationMark >>. (variable <|> digits)) |>> Ast.ExclamationVarOrDigits
 
-let indexed = opt (many1 (exclamationVarOrDigits))
-let indexVariable = positions (variable .>>. indexed) .>> IW |>> Ast.IndexVariable
+let exclamationDigits = positions (dollarDigits) |>> Ast.ExclamationDigits
 
 let atList = many at
 
@@ -221,7 +220,7 @@ let predicateWithQualification, predicateWithQualificationRef = createParserForw
 let paramTuple, paramTupleRef = createParserForwardedToRef()
 
 
-let coord = choice [ entity; extDigits; exclamationVarOrDigits ] .>> IW 
+let coord = choice [ entity; extDigits ] .>> IW 
 
 let fplIdentifier = choice [ entity; extDigits; predicateIdentifier ]
 
