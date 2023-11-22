@@ -17,8 +17,22 @@ type TestQualifiersPredicateIdentifier () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
+    member this.TestDottedBoth1 () =
+        let result = run predicate """PascalId().PascalId()"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
     member this.TestDottedBothA () =
         let result = run predicate """PascalId .PascalId"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDottedBothAa () =
+        let result = run predicate """Xx .Yy .Zz"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

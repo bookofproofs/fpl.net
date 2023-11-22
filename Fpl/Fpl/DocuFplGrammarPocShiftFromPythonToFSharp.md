@@ -635,7 +635,7 @@ There is a connection between qualifiers and identifiers, that are variables, th
 | Arguments   |   both  | both    |   both  | as     |   as     |
 | Coordinates |   both  | both    |   as    | as     |   as     |
 | Ranges      |   both  | both    |   as    | as     |   as     |
-| Subscripts  |   both  | both    |   as    | as     |   as     |
+| Subscripts  |   both  | both    |   both  | as     |   as     |
 
 #### 24) Self-Containment 
 This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:

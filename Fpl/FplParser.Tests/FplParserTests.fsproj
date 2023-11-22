@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+      <Compile Include="TestCoordInTypePossibilities.fs" />
+      <Compile Include="TestCoordPossibilities.fs" />
       <Compile Include="TestQualifierExtensionDigits.fs" />
       <Compile Include="TestQualifierDollarDigits.fs" />
       <Compile Include="TestQualifierPredicateIdentifier.fs" />

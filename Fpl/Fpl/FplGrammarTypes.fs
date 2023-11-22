@@ -8,6 +8,14 @@ type Positions = Position * Position
 
 
 type Ast = 
+    // Literals
+    | Star 
+    | Dot
+    | Index
+    | LeftClosed
+    | LeftOpen 
+    | RightClosed
+    | RightOpen 
     // Identifiers
     | Digits of string
     | ExtDigits of Positions * Ast
@@ -15,10 +23,9 @@ type Ast =
     | PascalCaseId of string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
-    | PredicateIdentifier of Positions * Ast list
+    | PredicateIdentifier of Positions * Ast 
     | DelegateId of Positions * string 
     | Alias of Positions * string
-    | Star 
     | SelfAts of Positions * char list 
     | Self of Positions * unit
     | LocalizationString of Positions * string
@@ -30,11 +37,6 @@ type Ast =
     | ExtensionType of Positions * Ast 
     | ExtensionBlock of Positions * (Ast * Ast)
     | UsesClause of Positions * Ast
-    | LeftClosed
-    | LeftOpen 
-    | RightClosed
-    | RightOpen 
-    | Id of string
     | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | BrackedCoordList of Positions * Ast list
     | RangeInType of Positions * (Ast option * Ast option) 
@@ -61,7 +63,7 @@ type Ast =
     | True of Positions * unit
     | False of Positions * unit 
     | Undefined of Positions * unit
-    | PredicateWithQualification of (Positions * (Ast * Ast option))
+    | PredicateWithQualification of Positions * (Ast * Ast option) list
     | And of Positions * Ast list
     | Or of Positions * Ast list
     | Impl of Positions * (Ast * Ast)
@@ -80,8 +82,6 @@ type Ast =
     | ArgumentTuple of Positions * Ast list
     | EqualityComparison of Positions * Ast list
     | ByDef of Positions * Ast
-    | PredicateAsIndex of Positions * Ast
-    | Dotted of Positions * Ast
     // Statements
     | Assertion of Positions * Ast
     | ConditionFollowedByResult of Positions * (Ast * Ast list)
@@ -133,9 +133,5 @@ type Ast =
     | Proof of Positions * ((Ast * Ast list) * (Ast list option * Ast list))
     | Namespace of Ast option * Ast list
     | AST of Positions * Ast
-    | Escape // used to replace AST subnodes when we recover from an error
-    | SomeString of string // used to replace AST for strings subnodes when we recover from an error
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from
-    | Empty // used to mark empty inner inputs between enclosing ones 
-    | Sequence of Positions * Ast list
 

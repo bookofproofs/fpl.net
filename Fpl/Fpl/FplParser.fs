@@ -34,9 +34,9 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 let leftBrace = skipChar '{' >>. spaces 
 let rightBrace = skipChar '}' >>. spaces
 let leftParen = skipChar '(' >>. spaces 
-let rightParen = skipChar ')' 
+let rightParen = skipChar ')' <!> "rightParen"
 let comma = skipChar ',' >>. spaces 
-let dot = skipChar '.'
+let dot = skipChar '.' <!> "dot" >>% Ast.Dot
 let colon = skipChar ':' >>. spaces >>% Ast.One
 let colonStar = skipString ":*" >>. spaces >>% Ast.Many
 let colonPlus = skipString ":+" >>. spaces >>% Ast.Many1
@@ -53,7 +53,7 @@ let rightOpenBracket = skipString ")]" >>. spaces <?> "<(open) right bound>"
 let rightClosedBracket = skipChar ']' >>. spaces <?> "<(closed) right bound>" 
 let tilde = skipChar '~' .>> spaces
 let semiColon = skipChar ';' >>. spaces
-let exclamationMark = skipChar '!'
+let exclamationMark = skipChar '!' >>% Ast.Index
 let toArrow = skipString "->"
 let vDash = skipString "|-"
 
@@ -81,7 +81,7 @@ let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
 let argumentIdentifier = positions (regex @"\d+\w*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 
 let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
-let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.PredicateIdentifier 
+let predicateIdentifier = positions (pascalCaseId) .>> IW |>> Ast.PredicateIdentifier 
 
 let alias = positions (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
 let star = positions (skipChar '*') >>% Ast.Star
@@ -196,7 +196,7 @@ let atList = many at
 
 let self = positions (atList .>> keywordSelf) |>> Ast.SelfAts
 
-let entity = choice [ self ; variable ; dollarDigits ] .>> IW
+let entity = choice [ self ; variable ] .>> IW
 
 let leftOpen = positions leftOpenBracket >>% Ast.LeftOpen
 let leftClosed = positions leftClosedBracket >>% Ast.LeftClosed
@@ -217,9 +217,9 @@ let predicateWithQualification, predicateWithQualificationRef = createParserForw
 let paramTuple, paramTupleRef = createParserForwardedToRef()
 
 
-let coord = choice [ entity; extDigits ] .>> IW 
+let coord = choice [ predicateWithQualification ] .>> IW 
 
-let fplIdentifier = choice [ entity; extDigits; predicateIdentifier ]
+let fplIdentifier = choice [ entity; extDigits; predicateIdentifier ] <!> "fplIdentifier"
 
 let coordList = (sepBy1 coord comma) .>> IW
 
@@ -262,7 +262,7 @@ paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclaration
 let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) .>> IW |>> Ast.Signature
 
 (* Statements *)
-let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen))  |>> Ast.ArgumentTuple 
+let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen)) <!> "argumentTuple" |>> Ast.ArgumentTuple 
 
 let word = regex @"\w+" <?> "<word>" .>> IW
 let fplDelegateIdentifier = positions (keywordDel >>. dot >>. word) .>> IW |>> Ast.DelegateId
@@ -314,10 +314,10 @@ statementListRef.Value <- many (IW >>. statement .>> IW)
 
 (* Predicates *)
 
-let dotted = positions (dot >>. predicateWithQualification) |>> Ast.Dotted 
-let indexPredicate = positions (exclamationMark >>. predicateWithQualification) |>> Ast.PredicateAsIndex
-let qualification = choice [indexPredicate; dotted; boundedRange ; bracketedCoords ; argumentTuple ] 
-predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) |>> Ast.PredicateWithQualification 
+let optionalSpecification = opt (choice [boundedRange ; bracketedCoords; argumentTuple])
+let predicateWithOptSpecification = fplIdentifier .>>. optionalSpecification
+let qualificationSeparator = choice [dot; exclamationMark]
+predicateWithQualificationRef.Value <- positions (sepBy1 predicateWithOptSpecification qualificationSeparator) <!> "predicateWithQualification" |>> Ast.PredicateWithQualification 
 
 let dollarDigitList = many1 dollarDigits
 let referencingIdentifier = predicateIdentifier .>>. dollarDigitList .>> IW
