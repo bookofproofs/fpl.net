@@ -23,7 +23,7 @@ type Ast =
     | PascalCaseId of string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
-    | PredicateIdentifier of Positions * Ast 
+    | PredicateIdentifier of Positions * Ast list 
     | DelegateId of Positions * string 
     | Alias of Positions * string
     | SelfAts of Positions * char list 

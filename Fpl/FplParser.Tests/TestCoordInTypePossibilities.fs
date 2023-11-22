@@ -7,6 +7,11 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
 type TestCoordInTypePossibilities () =
+    let replaceWhiteSpace (input: string) =
+        let whiteSpaceChars = [|' '; '\t'; '\n'; '\r'|]
+        input.Split(whiteSpaceChars)
+            |> String.concat ""
+    
     (* Tests the specification in DocuFplGrammarPocShiftFromPythonToFSharp.md #### 23 *)
 
     [<TestMethod>]
@@ -28,14 +33,7 @@ type TestCoordInTypePossibilities () =
         let result = run coordInType """xyz"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
-
-    [<TestMethod>]
-    member this.TestVariable2 () =
-        let result = run coordInType """x.y().z()"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSelf () =
@@ -60,30 +58,10 @@ type TestCoordInTypePossibilities () =
 
     [<TestMethod>]
     member this.TestPascalCaseId1 () =
-        let result = run coordInType """PascalCaseId()"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
-
-    [<TestMethod>]
-    member this.TestPascalCaseId2 () =
-        let result = run coordInType """PascalCaseId.PascalCaseId()"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
-
-    [<TestMethod>]
-    member this.TestPascalCaseId3 () =
-        let result = run coordInType """PascalCaseId.PascalCaseId().PascalCaseId()"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
-
-    [<TestMethod>]
-    member this.TestPascalCaseId4 () =
-        let result = run coordInType """PascalCaseId.PascalCaseId.PascalCaseId"""
+        let result = run coordInType """PascalCaseId.PascalCaseId"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
 
 

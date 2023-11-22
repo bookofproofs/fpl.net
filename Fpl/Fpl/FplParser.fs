@@ -34,9 +34,9 @@ let positions (p: Parser<_,_>): Parser<Positions * _,_> =
 let leftBrace = skipChar '{' >>. spaces 
 let rightBrace = skipChar '}' >>. spaces
 let leftParen = skipChar '(' >>. spaces 
-let rightParen = skipChar ')' <!> "rightParen"
+let rightParen = skipChar ')' 
 let comma = skipChar ',' >>. spaces 
-let dot = skipChar '.' <!> "dot" >>% Ast.Dot
+let dot = skipChar '.' >>% Ast.Dot
 let colon = skipChar ':' >>. spaces >>% Ast.One
 let colonStar = skipString ":*" >>. spaces >>% Ast.Many
 let colonPlus = skipString ":+" >>. spaces >>% Ast.Many1
@@ -81,7 +81,7 @@ let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
 let argumentIdentifier = positions (regex @"\d+\w*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 
 let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
-let predicateIdentifier = positions (pascalCaseId) .>> IW |>> Ast.PredicateIdentifier 
+let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.PredicateIdentifier 
 
 let alias = positions (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
 let star = positions (skipChar '*') >>% Ast.Star
@@ -215,11 +215,11 @@ let predicateList, predicateListRef = createParserForwardedToRef()
 let predicateList1, predicateList1Ref = createParserForwardedToRef()
 let predicateWithQualification, predicateWithQualificationRef = createParserForwardedToRef()
 let paramTuple, paramTupleRef = createParserForwardedToRef()
-
+let classType, classTypeRef = createParserForwardedToRef()
 
 let coord = choice [ predicateWithQualification ] .>> IW 
 
-let fplIdentifier = choice [ entity; extDigits; predicateIdentifier ] <!> "fplIdentifier"
+let fplIdentifier = choice [ entity; extDigits; predicateIdentifier ] 
 
 let coordList = (sepBy1 coord comma) .>> IW
 
@@ -229,7 +229,7 @@ let fplRange = (opt coord.>> comma >>. opt coord) .>> IW
 
 let boundedRange = positions (leftBound .>>. fplRange .>>. rightBound) |>> Ast.ClosedOrOpenRange
 
-let coordInType = choice [ fplIdentifier; variable; dollarDigits ] .>> IW 
+let coordInType = choice [ classType; variable ] .>> IW 
 
 let coordInTypeList = (sepBy1 coordInType comma) .>> IW 
 
@@ -249,7 +249,7 @@ let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) 
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
 let bracketModifier = boundedRangeInType <|> bracketedCoordsInType 
-let classType = positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
+classTypeRef.Value <- positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
 let simpleVariableType = positions (choice [ keywordIndex; keywordFunction; keywordPredicate; classType ] .>> IW) |>> Ast.SimpleVariableType
 
@@ -262,7 +262,7 @@ paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclaration
 let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) .>> IW |>> Ast.Signature
 
 (* Statements *)
-let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen)) <!> "argumentTuple" |>> Ast.ArgumentTuple 
+let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
 
 let word = regex @"\w+" <?> "<word>" .>> IW
 let fplDelegateIdentifier = positions (keywordDel >>. dot >>. word) .>> IW |>> Ast.DelegateId
@@ -317,7 +317,7 @@ statementListRef.Value <- many (IW >>. statement .>> IW)
 let optionalSpecification = opt (choice [boundedRange ; bracketedCoords; argumentTuple])
 let predicateWithOptSpecification = fplIdentifier .>>. optionalSpecification
 let qualificationSeparator = choice [dot; exclamationMark]
-predicateWithQualificationRef.Value <- positions (sepBy1 predicateWithOptSpecification qualificationSeparator) <!> "predicateWithQualification" |>> Ast.PredicateWithQualification 
+predicateWithQualificationRef.Value <- positions (sepBy1 predicateWithOptSpecification qualificationSeparator) |>> Ast.PredicateWithQualification 
 
 let dollarDigitList = many1 dollarDigits
 let referencingIdentifier = predicateIdentifier .>>. dollarDigitList .>> IW
@@ -349,7 +349,8 @@ let all = positions ((keywordAll >>. variableListInOptDomainList) .>>. onePredic
 let exists = positions ((keywordEx >>. variableListInOptDomainList) .>>. onePredicateInParens) |>> Ast.Exists
 
 let existsTimesN = positions (((keywordExN >>. dollarDigits .>> SW) .>>. variableInOptDomain) .>>. onePredicateInParens) |>> Ast.ExistsN
-let isOperator = positions ((keywordIs >>. leftParen >>. coordInType) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
+let isOpArg = choice [ predicateIdentifier; variable; self; extDigits ] .>> IW
+let isOperator = positions ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // equality operator
 let equalityComparison = positions (leftBracket >>. sepBy1 predicate equals .>> rightBracket) |>> Ast.EqualityComparison

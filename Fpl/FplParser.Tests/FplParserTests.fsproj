@@ -11,6 +11,7 @@
   <ItemGroup>
       <Compile Include="TestCoordInTypePossibilities.fs" />
       <Compile Include="TestCoordPossibilities.fs" />
+      <Compile Include="TestPascalCaseIdDotted.fs" />
       <Compile Include="TestQualifierExtensionDigits.fs" />
       <Compile Include="TestQualifierDollarDigits.fs" />
       <Compile Include="TestQualifierPredicateIdentifier.fs" />
@@ -27,6 +28,7 @@
       <Compile Include="TestLocalizations.fs" />
       <Compile Include="TestAxioms.fs" />
       <Compile Include="TestFplBlockComponents.fs" />
+      <Compile Include="TestPascalCaseIdIndexed.fs" />
       <Compile Include="TestVariableTypes.fs" />
       <Compile Include="TestDefinitionPredicates.fs" />
       <Compile Include="TestClassInheritanceTypes.fs" />
