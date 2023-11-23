@@ -63,7 +63,6 @@ type Ast =
     | True of Positions * unit
     | False of Positions * unit 
     | Undefined of Positions * unit
-    | PredicateWithQualification of Positions * (Ast * Ast option) list
     | And of Positions * Ast list
     | Or of Positions * Ast list
     | Impl of Positions * (Ast * Ast)
@@ -82,6 +81,11 @@ type Ast =
     | ArgumentTuple of Positions * Ast list
     | EqualityComparison of Positions * Ast list
     | ByDef of Positions * Ast
+    | PredicateWithOptSpecification of Positions * (Ast * Ast option)
+    | DottedPredicate of Positions * Ast 
+    | IndexedPredicate of Positions * Ast
+    | QualificationList of Positions * Ast list
+    | PredicateWithQualification of Ast * Ast
     // Statements
     | Assertion of Positions * Ast
     | ConditionFollowedByResult of Positions * (Ast * Ast list)

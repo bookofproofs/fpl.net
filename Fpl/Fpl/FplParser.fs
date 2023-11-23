@@ -315,9 +315,12 @@ statementListRef.Value <- many (IW >>. statement .>> IW)
 (* Predicates *)
 
 let optionalSpecification = opt (choice [boundedRange ; bracketedCoords; argumentTuple])
-let predicateWithOptSpecification = fplIdentifier .>>. optionalSpecification
-let qualificationSeparator = choice [dot; exclamationMark]
-predicateWithQualificationRef.Value <- positions (sepBy1 predicateWithOptSpecification qualificationSeparator) |>> Ast.PredicateWithQualification 
+let predicateWithOptSpecification = positions (fplIdentifier .>>. optionalSpecification) |>> Ast.PredicateWithOptSpecification
+let dottedPredicate = positions (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate
+let indexedPredicate = positions (exclamationMark >>. predicateWithOptSpecification) |>> Ast.IndexedPredicate
+let qualifiedPredicate = choice [dottedPredicate; indexedPredicate]
+let qualificationList = positions (many qualifiedPredicate) |>> Ast.QualificationList
+predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification 
 
 let dollarDigitList = many1 dollarDigits
 let referencingIdentifier = predicateIdentifier .>>. dollarDigitList .>> IW
