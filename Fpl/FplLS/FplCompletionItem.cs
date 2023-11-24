@@ -73,6 +73,7 @@ namespace FplLS
                 case "(closed) right bound":
                     return new FplCompletionItemChoicesBound().GetChoices(this);
                 case "digits":
+                case "dollarDigits":
                     return new FplCompletionItemChoicesDigits().GetChoices(this);
                 case "argument identifier":
                     return new FplCompletionItemChoicesArgumentIdentifier().GetChoices(this);

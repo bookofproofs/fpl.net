@@ -296,22 +296,38 @@ type TestPredicatesSpecific () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
+    member this.TestPredicateWithArgs71 () =
+        let result = run (predicateWithQualification .>> eof) """x!$3()!$2"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+        
+    [<TestMethod>]
     member this.TestPredicateWithArgs7a () =
-        let result = run predicateWithQualification """x!$3!y!$0"""
+        let result = run (predicateWithQualification .>> eof) """x!3!2"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
+    member this.TestPredicateWithArgs71a () =
+        let result = run (predicateWithQualification .>> eof) """x!3()!2"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+
+
+    [<TestMethod>]
     member this.TestQualifiedIdentifier1 () =
-        let result = run predicateWithQualification """myOp.NeutralElement()"""
+        let result = run (predicateWithQualification .>> eof) """myOp.NeutralElement()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestQualifiedIdentifier2 () =
-        let result = run predicateWithQualification """myOp.NeutralElement().SomeProperty()"""
+        let result = run (predicateWithQualification .>> eof) """myOp.NeutralElement().SomeProperty()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

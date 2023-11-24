@@ -217,7 +217,7 @@ let predicateWithQualification, predicateWithQualificationRef = createParserForw
 let paramTuple, paramTupleRef = createParserForwardedToRef()
 let classType, classTypeRef = createParserForwardedToRef()
 
-let coord = choice [ predicateWithQualification ] .>> IW 
+let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
 let fplIdentifier = choice [ entity; extDigits; predicateIdentifier ] 
 
@@ -229,7 +229,7 @@ let fplRange = (opt coord.>> comma >>. opt coord) .>> IW
 
 let boundedRange = positions (leftBound .>>. fplRange .>>. rightBound) |>> Ast.ClosedOrOpenRange
 
-let coordInType = choice [ classType; variable ] .>> IW 
+let coordInType = choice [ classType; variable; dollarDigits ] .>> IW 
 
 let coordInTypeList = (sepBy1 coordInType comma) .>> IW 
 
@@ -317,8 +317,8 @@ statementListRef.Value <- many (IW >>. statement .>> IW)
 let optionalSpecification = opt (choice [boundedRange ; bracketedCoords; argumentTuple])
 let predicateWithOptSpecification = positions (fplIdentifier .>>. optionalSpecification) |>> Ast.PredicateWithOptSpecification
 let dottedPredicate = positions (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate
-let indexedPredicate = positions (exclamationMark >>. predicateWithOptSpecification) |>> Ast.IndexedPredicate
-let qualifiedPredicate = choice [dottedPredicate; indexedPredicate]
+let indexedPredicate = positions (exclamationMark >>. choice [ predicateWithOptSpecification; dollarDigits; extDigits ] ) |>> Ast.IndexedPredicate
+let qualifiedPredicate = choice [dottedPredicate; indexedPredicate ]
 let qualificationList = positions (many qualifiedPredicate) |>> Ast.QualificationList
 predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification 
 

@@ -34,9 +34,6 @@ type TestPascalCaseIdMixed () =
         printf "%O" actual
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
 
-
-
-
     [<TestMethod>]
     member this.TestPascalCaseId2A () =
         let expected = """Success: PredicateWithQualification

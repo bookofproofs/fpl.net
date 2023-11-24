@@ -26,7 +26,7 @@ type TestCoordInTypePossibilities () =
         let result = run coordInType """$1"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariable () =

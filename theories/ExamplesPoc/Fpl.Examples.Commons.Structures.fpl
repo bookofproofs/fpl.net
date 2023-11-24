@@ -295,7 +295,7 @@ def class BinaryRelation: Relation
 def pred AreRelated(u,v: Set, r: BinaryRelation)
 {
     dec
-        ~tuple: Tuple[1,2]
+        ~tuple: Tuple[$1,$2]
         tuple:=Tuple(u,v)
     ;
     and

@@ -46,7 +46,7 @@ lemma VecAddIsCommutative()
 {
     dec
         ~to: Nat
-        ~x,y: tplFieldElem[1,to]
+        ~x,y: tplFieldElem[$1,to]
         ~fieldPowerN: FieldPowerN
             (
             field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
