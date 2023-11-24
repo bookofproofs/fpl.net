@@ -16,49 +16,49 @@ type TestCoordInTypePossibilities () =
 
     [<TestMethod>]
     member this.TestExtensionDigit () =
-        let result = run coordInType """1"""
+        let result = run (coordInType .>> eof) """1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestDollarDigit () =
-        let result = run coordInType """$1"""
+        let result = run (coordInType .>> eof) """$1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariable () =
-        let result = run coordInType """xyz"""
+        let result = run (coordInType .>> eof) """xyz"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSelf () =
-        let result = run coordInType """self"""
+        let result = run (coordInType .>> eof) """self"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSelf1 () =
-        let result = run coordInType """@self"""
+        let result = run (coordInType .>> eof) """@self"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestPascalCaseId () =
-        let result = run coordInType """PascalCaseId"""
+        let result = run (coordInType .>> eof) """PascalCaseId"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPascalCaseId1 () =
-        let result = run coordInType """PascalCaseId.PascalCaseId"""
+        let result = run (coordInType .>> eof) """PascalCaseId.PascalCaseId"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

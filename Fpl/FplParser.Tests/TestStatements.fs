@@ -14,7 +14,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestFor01 () =
-        let result = run forStatement """for proceedingResult in    p
+        let result = run (forStatement .>> eof) """for proceedingResult in    p
                 (
                     assert proceedingResult
                     a:=1
@@ -26,7 +26,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestFor02 () =
-        let result = run forStatement """for    n in [1,4]
+        let result = run (forStatement .>> eof) """for    n in [1,4]
             (
             assert Equal(f(n),n)
             )"""
@@ -36,7 +36,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestFor03 () =
-        let result = run forStatement """for n in [$1,$4]
+        let result = run (forStatement .>> eof) """for n in [$1,$4]
             (
             assert Equal(f(n),n)
             )"""
@@ -46,7 +46,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestFor04 () =
-        let result = run forStatement """for n in SomeType
+        let result = run (forStatement .>> eof) """for n in SomeType
             (
                 x!n := 1
             )"""
@@ -56,28 +56,28 @@ type TestStatements () =
         
     [<TestMethod>]
     member this.TestAssignment01 () =
-        let result = run assignmentStatement """a:= 1"""
+        let result = run (assignmentStatement .>> eof) """a:= 1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestAssignment02 () =
-        let result = run assignmentStatement """self := Zero()"""
+        let result = run (assignmentStatement .>> eof) """self := Zero()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDelegate01 () =
-        let result = run fplDelegate """del.test(1,2)"""
+        let result = run (fplDelegate .>> eof) """del.test(1,2)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDelegate02 () =
-        let result = run fplDelegate """del.decrement(x)"""
+        let result = run (fplDelegate .>> eof) """del.decrement(x)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -85,7 +85,7 @@ type TestStatements () =
    
     [<TestMethod>]
     member this.TestAssertion01 () =
-        let result = run assertionStatement """assert
+        let result = run (assertionStatement .>> eof) """assert
                     all n
                     (
                         and
@@ -101,7 +101,7 @@ type TestStatements () =
     [<TestMethod>]
     member this.TestCases01 () =
         // else case addressed using a python delegate
-        let result = run casesStatement """cases
+        let result = run (casesStatement .>> eof) """cases
                 (
                     | Equal(x,0) :
                         self := Zero()
@@ -117,7 +117,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestCases02 () =
-        let result = run casesStatement """cases
+        let result = run (casesStatement .>> eof) """cases
                 (
                     | Equal(n,0): result := m.NeutralElem()
                     ? result :=
@@ -132,7 +132,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestCases03 () =
-        let result = run casesStatement """cases
+        let result = run (casesStatement .>> eof) """cases
                     (
                         | <x = 0> : self := Zero() 
                         | <x = 1> : self := Succ(Zero())
@@ -145,7 +145,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestCases04 () =
-        let result = run casesStatement """cases
+        let result = run (casesStatement .>> eof) """cases
                     (
                         | IsGreaterOrEqual(x.RightMember(), x.LeftMember()): self:=x.RightMember()
                         ? self:=undefined
@@ -156,7 +156,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestCases05 () =
-        let result = run casesStatement """cases
+        let result = run (casesStatement .>> eof) """cases
             (
                 | <m = 0>: result:= n
                 | <Succ(m) = k>: result:= Succ(Add(n,k))

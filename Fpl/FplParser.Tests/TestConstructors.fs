@@ -10,7 +10,7 @@ type TestConstructors () =
     [<TestMethod>]
     member this.TestConstructor00 () =
         // empty constructors not allowed
-        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 
             }"""
@@ -21,7 +21,7 @@ type TestConstructors () =
     [<TestMethod>]
     member this.TestConstructor00a () =
         // constructors are not allowed to be empty and only contain declarations
-        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 
                 dec: x: obj ;
@@ -33,7 +33,7 @@ type TestConstructors () =
     [<TestMethod>]
     member this.TestConstructor00b () =
         // constructors are not allowed to be empty and only contain specifications
-        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 
                 dec x:= 1 ;
@@ -45,7 +45,7 @@ type TestConstructors () =
     [<TestMethod>]
     member this.TestConstructor01 () =
         // constructors are not allowed to be intrinsic
-        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 
                 intr
@@ -57,7 +57,7 @@ type TestConstructors () =
     [<TestMethod>]
     member this.TestConstructor01a () =
         // constructors are not allowed to be intrinsic
-        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 
                 dec:;
@@ -70,7 +70,7 @@ type TestConstructors () =
     [<TestMethod>]
     member this.TestConstructor01b () =
         // constructors are not allowed to be intrinsic
-        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 
                 dec ~a:obj ;
@@ -83,7 +83,7 @@ type TestConstructors () =
     [<TestMethod>]
     member this.TestConstructor01c () =
         // constructors are not allowed to be intrinsic
-        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 
                 dec ~a:obj ;
@@ -98,7 +98,7 @@ type TestConstructors () =
         // constructors must contain the call(s) of the parent constructors
         // of all parent classes of the class; the call's syntax starts
         // with self followed by an exclamation mark and name of the classes constructor
-        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj  self!AlgebraicStructure(x,op);
                 self
@@ -112,7 +112,7 @@ type TestConstructors () =
         // constructors must contain the call(s) of the parent constructors
         // of all parent classes of the class; the call's syntax starts
         // with self followed by an exclamation mark and name of the classes constructor
-        let result = run constructor """constructor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """constructor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj
                     self!AlgebraicStructure(x,op)
@@ -125,7 +125,7 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor03a () =
-        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj;
                 self 
@@ -137,7 +137,7 @@ type TestConstructors () =
     [<TestMethod>]
     member this.TestConstructor03b () =
         // incomplete (syntax error)
-        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj 
                     self! 
@@ -150,7 +150,7 @@ type TestConstructors () =
     [<TestMethod>]
     member this.TestConstructor04 () =
         // incomplete ( self missing)
-        let result = run constructor """ctor Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj
                 self!obj()
@@ -165,7 +165,7 @@ type TestConstructors () =
     member this.TestConstructor05 () =
         // calls to multiple parental constructors possible (multi-inheritance)
         // incomplete ( self missing)
-        let result = run constructor """Magma(x: tplSet, op: BinOp)
+        let result = run (constructor .>> eof) """Magma(x: tplSet, op: BinOp)
             {
                 
                 dec 
@@ -182,7 +182,7 @@ type TestConstructors () =
 
     [<TestMethod>]
     member this.TestConstructor06 () =
-        let result = run constructor """ctor FieldPowerN
+        let result = run (constructor .>> eof) """ctor FieldPowerN
             (
                 field : Field,
                 n: Nat

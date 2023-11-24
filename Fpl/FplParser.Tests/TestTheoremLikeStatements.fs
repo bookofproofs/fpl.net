@@ -14,7 +14,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestProposition01 () =
-        let result = run proposition """proposition SuccessorExistsAndIsUnique()
+        let result = run (proposition .>> eof) """proposition SuccessorExistsAndIsUnique()
         {
             dec
                 ~ n, successor: Nat
@@ -37,7 +37,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestTheorem01 () =
-        let result = run theorem """thm CompleteInduction()
+        let result = run (theorem .>> eof) """thm CompleteInduction()
         {
             dec 
                 ~n: Nat
@@ -59,7 +59,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestTheorem02 () =
-        let result = run theorem """theorem ZeroIsNat()
+        let result = run (theorem .>> eof) """theorem ZeroIsNat()
         {
             is(Zero,Nat)
         }"""
@@ -69,7 +69,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestLemma01 () =
-        let result = run lemma """lem EmptySetExists()
+        let result = run (lemma .>> eof) """lem EmptySetExists()
         {
             dec ~x: Set;
             ex x
@@ -84,7 +84,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestLemma02 () =
-        let result = run lemma """lemma ZeroIsNotSuccessor()
+        let result = run (lemma .>> eof) """lemma ZeroIsNotSuccessor()
         {
             dec ~n: Nat;
             all n
@@ -98,7 +98,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestConjecture01 () =
-        let result = run conjecture """conjecture SuccessorIsInjective()
+        let result = run (conjecture .>> eof) """conjecture SuccessorIsInjective()
         {
             dec ~n,m: Nat;
             all n,m
@@ -116,7 +116,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestConjecture02 () =
-        let result = run conjecture """conj Extensionality()
+        let result = run (conjecture .>> eof) """conj Extensionality()
         {
             dec ~x,y: Set ;
             all x,y
@@ -138,7 +138,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestCorollary01 () =
-        let result = run corollary """corollary SuccessorIsInjective$1()
+        let result = run (corollary .>> eof) """corollary SuccessorIsInjective$1()
         {
             dec ~n,m: Nat;
             all n,m
@@ -156,7 +156,7 @@ type TestTheoremLikeStatements () =
 
     [<TestMethod>]
     member this.TestCorollary02 () =
-        let result = run corollary """cor Extensionality$1()
+        let result = run (corollary .>> eof) """cor Extensionality$1()
         {
             dec ~x,y: Set ;
             all x,y

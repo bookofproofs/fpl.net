@@ -29,7 +29,7 @@ type TestPascalCaseIdMixed () =
              (PredicateIdentifier
                 (((Ln: 1, Col: 4), (Ln: 1, Col: 9)),
                  [PascalCaseId "Xx"; PascalCaseId "Xx"]), None)))]))"""
-        let result = run predicateWithQualification """Xx!Xx.Xx"""
+        let result = run (predicateWithQualification .>> eof) """Xx!Xx.Xx"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
@@ -51,7 +51,7 @@ type TestPascalCaseIdMixed () =
                 (((Ln: 1, Col: 4), (Ln: 1, Col: 9)),
                  [PascalCaseId "Xx"; PascalCaseId "Xx"]),
               Some (ArgumentTuple (((Ln: 1, Col: 9), (Ln: 1, Col: 11)), [])))))]))"""
-        let result = run predicateWithQualification """Xx!Xx.Xx()"""
+        let result = run (predicateWithQualification .>> eof) """Xx!Xx.Xx()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
@@ -78,7 +78,7 @@ type TestPascalCaseIdMixed () =
                 (((Ln: 1, Col: 9), (Ln: 1, Col: 11)),
                  (PredicateIdentifier
                     (((Ln: 1, Col: 9), (Ln: 1, Col: 11)), [PascalCaseId "Yy"]), None)))]))"""
-        let result = run predicateWithQualification """Xx!Xx().Yy"""
+        let result = run (predicateWithQualification .>> eof) """Xx!Xx().Yy"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
@@ -101,7 +101,7 @@ type TestPascalCaseIdMixed () =
             (((Ln: 1, Col: 9), (Ln: 1, Col: 11)),
              (PredicateIdentifier
                 (((Ln: 1, Col: 9), (Ln: 1, Col: 11)), [PascalCaseId "Yy"]), None)))]))"""
-        let result = run predicateWithQualification """Xx.Xx()!Yy"""
+        let result = run (predicateWithQualification .>> eof) """Xx.Xx()!Yy"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
@@ -135,7 +135,7 @@ type TestPascalCaseIdMixed () =
              (PredicateIdentifier
                 (((Ln: 1, Col: 12), (Ln: 1, Col: 14)), [PascalCaseId "Yy"]),
               None)))]))"""
-        let result = run predicateWithQualification """Xx!Xx!Xx().Yy"""
+        let result = run (predicateWithQualification .>> eof) """Xx!Xx!Xx().Yy"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
@@ -157,7 +157,7 @@ type TestPascalCaseIdMixed () =
                  (PredicateIdentifier
                     (((Ln: 1, Col: 6), (Ln: 1, Col: 11)),
                      [PascalCaseId "Yy"; PascalCaseId "Zz"]), None)))]))"""
-        let result = run predicateWithQualification """Xx()!Yy.Zz"""
+        let result = run (predicateWithQualification .>> eof) """Xx()!Yy.Zz"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
@@ -185,7 +185,7 @@ type TestPascalCaseIdMixed () =
              (PredicateIdentifier
                 (((Ln: 1, Col: 9), (Ln: 1, Col: 14)),
                  [PascalCaseId "Yy"; PascalCaseId "Zz"]), None)))]))"""
-        let result = run predicateWithQualification """Xx!Xx()!Yy.Zz"""
+        let result = run (predicateWithQualification .>> eof) """Xx!Xx()!Yy.Zz"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
@@ -226,7 +226,7 @@ type TestPascalCaseIdMixed () =
                  (PredicateIdentifier
                     (((Ln: 1, Col: 15), (Ln: 1, Col: 17)), [PascalCaseId "Zz"]),
                   None)))]))"""
-        let result = run predicateWithQualification """Xx!Xx!Xx()!Yy!Zz"""
+        let result = run (predicateWithQualification .>> eof) """Xx!Xx!Xx()!Yy!Zz"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
@@ -255,7 +255,7 @@ type TestPascalCaseIdMixed () =
                  (PredicateIdentifier
                     (((Ln: 1, Col: 11), (Ln: 1, Col: 13)), [PascalCaseId "Zz"]),
                   Some (ArgumentTuple (((Ln: 1, Col: 13), (Ln: 1, Col: 15)), [])))))]))"""
-        let result = run predicateWithQualification """Xx()!Yy().Zz()"""
+        let result = run (predicateWithQualification .>> eof) """Xx()!Yy().Zz()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)

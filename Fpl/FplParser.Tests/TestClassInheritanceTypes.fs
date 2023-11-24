@@ -13,42 +13,42 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestSpecificType3 () =
-        let result = run specificClassType """object"""
+        let result = run (specificClassType .>> eof) """object"""
         let actual = sprintf "%O" result
         let expected = """Success: ObjectType"""
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSpecificType4 () =
-        let result = run specificClassType """tpl"""
+        let result = run (specificClassType .>> eof) """tpl"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpecificType5 () =
-        let result = run specificClassType """tplSetElem"""
+        let result = run (specificClassType .>> eof) """tplSetElem"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
 
     member this.TestSpecificType7 () =
-        let result = run specificClassType """@extNat"""
+        let result = run (specificClassType .>> eof) """@extNat"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpecificType8 () =
-        let result = run specificClassType """SomeClass"""
+        let result = run (specificClassType .>> eof) """SomeClass"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpecificType9 () =
-        let result = run specificClassType """bla"""
+        let result = run (specificClassType .>> eof) """bla"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -69,7 +69,7 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType4 () =
-        let result = run classType """tpl[from,]"""
+        let result = run (classType .>> eof) """tpl[from,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -13,7 +13,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate01 () =
-        let result = run definitionPredicate """pred IsGreaterOrEqual(n,m: Nat)
+        let result = run (definitionPredicate .>> eof) """pred IsGreaterOrEqual(n,m: Nat)
         {
             dec ~a:obj ~  k: Nat;
             ex k ( Equal(n,Add(m,k)) )
@@ -24,7 +24,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate02 () =
-        let result = run definitionPredicate """pred IsBounded(x: Real)
+        let result = run (definitionPredicate .>> eof) """pred IsBounded(x: Real)
         {
             dec ~a:obj ~  upperBound, lowerBound: Real;
             ex upperBound, lowerBound
@@ -38,7 +38,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate03 () =
-        let result = run definitionPredicate """pred IsBounded(f: RealValuedFunction)
+        let result = run (definitionPredicate .>> eof) """pred IsBounded(f: RealValuedFunction)
         {
             dec ~a:obj ~  x: Real;
             all x
@@ -53,7 +53,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate04 () =
-        let result = run definitionPredicate """pred Equal(a,b: tpl)
+        let result = run (definitionPredicate .>> eof) """pred Equal(a,b: tpl)
         {
             dec ~a:obj ~  p: pred;
 
@@ -73,7 +73,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate05 () =
-        let result = run definitionPredicate """pred NotEqual(x,y: tpl)
+        let result = run (definitionPredicate .>> eof) """pred NotEqual(x,y: tpl)
         {
             not
             (
@@ -86,7 +86,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate06 () =
-        let result = run definitionPredicate """pred AreRelated(u,v: Set, r: BinaryRelation)
+        let result = run (definitionPredicate .>> eof) """pred AreRelated(u,v: Set, r: BinaryRelation)
         {
             dec ~a:obj ~  
                 one, two:Nat
@@ -109,7 +109,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate07 () =
-        let result = run definitionPredicate """pred Greater(x,y: obj)
+        let result = run (definitionPredicate .>> eof) """pred Greater(x,y: obj)
         {
             intrinsic
         }"""
@@ -119,7 +119,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate08 () =
-        let result = run definitionPredicate """pred IsPowerSet(ofSet, potentialPowerSet: Set)
+        let result = run (definitionPredicate .>> eof) """pred IsPowerSet(ofSet, potentialPowerSet: Set)
         {
             dec ~a:obj ~  z: Set;
             all z
@@ -133,7 +133,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate09 () =
-        let result = run definitionPredicate """pred Union(x,superSet: Set)
+        let result = run (definitionPredicate .>> eof) """pred Union(x,superSet: Set)
         {
             dec ~a:obj ~  u: Set;
             all u
@@ -147,7 +147,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate10 () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be empty
         }"""
@@ -157,7 +157,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate10a () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be empty with dec
             dec:;
@@ -168,7 +168,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate10b () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be empty with spec
             dec ~a:obj;
@@ -179,7 +179,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate10c () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be empty with some spec or dec
             dec ~a:obj;
@@ -190,7 +190,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate11 () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be intrinsic with some proceeding spec or dec
             dec ~a:obj;
@@ -202,7 +202,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate11a () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be intrinsic with some proceeding spec or dec
             dec:;
@@ -214,7 +214,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate11b () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be intrinsic with some proceeding spec or dec
             dec ~a:obj;
@@ -227,7 +227,7 @@ type TestDefinitionPredicates () =
     [<TestMethod>]
     member this.TestDefinitionPredicate12 () =
         // a predicate can be intrinsic 
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             intrinsic
         }"""
@@ -238,7 +238,7 @@ type TestDefinitionPredicates () =
     [<TestMethod>]
     member this.TestDefinitionPredicate12a () =
         // a predicate can be intrinsic 
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             intr
         }"""
@@ -248,7 +248,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate12b () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be intrinsic with some following declarations or specifications
             intrinsic
@@ -260,7 +260,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate12c () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be intrinsic with some following declarations or specifications
             intrinsic
@@ -272,7 +272,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate12d () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be intrinsic with some following declarations or specifications
             intrinsic
@@ -285,7 +285,7 @@ type TestDefinitionPredicates () =
     [<TestMethod>]
     member this.TestDefinitionPredicate13 () =
         // a predicate can be intrinsic with some following properties 
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             intrinsic
 
@@ -307,7 +307,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate14 () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             mand func T() -> obj
 	        {
@@ -333,7 +333,7 @@ type TestDefinitionPredicates () =
     [<TestMethod>]
     member this.TestDefinitionPredicate15 () =
         // a predicate with some proceeding declarations or specifications
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             dec ~a:obj;
             true
@@ -344,7 +344,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate16 () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate with some proceeding declarations or specifications
             dec ~a:obj ~ ;
@@ -357,7 +357,7 @@ type TestDefinitionPredicates () =
     [<TestMethod>]
     member this.TestDefinitionPredicate17 () =
         // a predicate with some proceeding declarations or specifications
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             dec ~a:obj;
             true
@@ -369,7 +369,7 @@ type TestDefinitionPredicates () =
     [<TestMethod>]
     member this.TestDefinitionPredicate18 () =
         // a predicate 
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             true
         }"""
@@ -381,7 +381,7 @@ type TestDefinitionPredicates () =
     [<TestMethod>]
     member this.TestDefinitionPredicate19 () =
         // a predicate with some succeeding properties
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             true 
 
@@ -404,7 +404,7 @@ type TestDefinitionPredicates () =
 
     [<TestMethod>]
     member this.TestDefinitionPredicate20 () =
-        let result = run definitionPredicate """pred T()
+        let result = run (definitionPredicate .>> eof) """pred T()
         {
             // properties cannot succeed a predicate within a predicate definition
             optional pred T() 
