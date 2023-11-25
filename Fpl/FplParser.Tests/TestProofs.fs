@@ -15,77 +15,77 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestJustification01 () =
-        let result = run (justification .>> eof) """GreaterAB|-"""
+        let result = run (justification .>> eof) """GreaterAB"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustification02 () =
-        let result = run (justification .>> eof) """GreaterAB |-"""
+        let result = run (justification .>> eof) """GreaterAB"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustification03 () =
-        let result = run (justification .>> eof) """ProceedingResults(1.,2.) |-"""
+        let result = run (justification .>> eof) """ProceedingResults(1.,2.)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustification04 () =
-        let result = run (justification .>> eof) """3., GreaterTransitive |-"""
+        let result = run (justification .>> eof) """3., GreaterTransitive """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustification05 () =
-        let result = run (justification .>> eof) """4., ModusPonens|-"""
+        let result = run (justification .>> eof) """4., ModusPonens """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustification06 () =
-        let result = run (justification .>> eof) """4., ModusPonens, 1. |-"""
+        let result = run (justification .>> eof) """4., ModusPonens, 1.  """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"));
 
     [<TestMethod>]
     member this.TestJustification07 () =
-        let result = run (justification .>> eof) """6., ExistsByExample(and(Greater(a,c), Greater(a,b))) |-"""
+        let result = run (justification .>> eof) """6., ExistsByExample(and(Greater(a,c), Greater(a,b)))  """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustification08 () =
-        let result = run (justification .>> eof) """|-"""
+        let result = run (justification .>> eof) """ """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustification09 () =
-        let result = run (justification .>> eof) """and(a,b) |-"""
+        let result = run (justification .>> eof) """and(a,b)  """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustification10 () =
-        let result = run (justification .>> eof) """and(a,b), 2. |-"""
+        let result = run (justification .>> eof) """and(a,b), 2.  """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustification12 () =
-        let result = run (justification .>> eof) """or(1.,2.), 2. |-"""
+        let result = run (justification .>> eof) """or(1.,2.), 2.  """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -288,10 +288,10 @@ type TestProofs () =
     member this.TestProof04 () =
         let result = run (proof .>> eof) """proof Example4$1
         {
-            1. SomeCorollary!1() |- Greater(a,b)
+            1. SomeCorollary$1() |- Greater(a,b)
             2. |- qed
         }"""
-        let actual = replaceWhiteSpace (sprintf "%O" result)
+        let actual = (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
         

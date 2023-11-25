@@ -217,9 +217,9 @@ let predicateWithQualification, predicateWithQualificationRef = createParserForw
 let paramTuple, paramTupleRef = createParserForwardedToRef()
 let classType, classTypeRef = createParserForwardedToRef()
 
-let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
+let coord = choice [ predicateWithQualification; dollarDigits; extDigits ] .>> IW 
 
-let fplIdentifier = choice [ entity; extDigits; predicateIdentifier ] 
+let fplIdentifier = choice [ entity; predicateIdentifier ] 
 
 let coordList = (sepBy1 coord comma) .>> IW
 
@@ -248,12 +248,12 @@ let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) 
 // to restrict it to pure objects.
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
-let bracketModifier = boundedRangeInType <|> bracketedCoordsInType 
+let bracketModifier = choice [boundedRangeInType ; bracketedCoordsInType ; paramTuple ]
 classTypeRef.Value <- positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
 let simpleVariableType = positions (choice [ keywordIndex; keywordFunction; keywordPredicate; classType ] .>> IW) |>> Ast.SimpleVariableType
-
-let variableType = positions (simpleVariableType .>>. opt paramTuple .>> IW) |>> Ast.VariableType
+let optionalTypeSpecification = opt (choice [boundedRange ; bracketedCoords; paramTuple])
+let variableType = positions (simpleVariableType .>>. opt bracketModifier .>> IW) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
@@ -282,7 +282,8 @@ let conditionFollowedByResultList = many1 (IW >>. conditionFollowedByResult)
 let elseStatement = elseCase >>. IW >>. defaultResult .>> IW
 let casesStatement = positions (((keywordCases >>. IW >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
 
-let inDomain = positions (keywordIn >>. (simpleVariableType <|> variableRange) .>> IW) |>> Ast.Domain
+let allowedInDomainType = choice [keywordIndex; keywordFunction; keywordPredicate; specificClassType]
+let inDomain = positions (keywordIn >>. (allowedInDomainType <|> variableRange) .>> IW) |>> Ast.Domain
 let variableInOptDomain = ( (variable .>> IW) .>>. opt inDomain) .>> IW
 let variableListInOptDomain = ( variableList .>>. opt inDomain) .>> IW
 let variableListInOptDomainList = (sepBy1 variableListInOptDomain comma) .>> IW
@@ -317,7 +318,8 @@ statementListRef.Value <- many (IW >>. statement .>> IW)
 let optionalSpecification = opt (choice [boundedRange ; bracketedCoords; argumentTuple])
 let predicateWithOptSpecification = positions (fplIdentifier .>>. optionalSpecification) |>> Ast.PredicateWithOptSpecification
 let dottedPredicate = positions (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate
-let indexedPredicate = positions (exclamationMark >>. choice [ predicateWithOptSpecification; dollarDigits; extDigits ] ) |>> Ast.IndexedPredicate
+let indexedPredicate = positions (exclamationMark >>. IW >>. choice [ predicateWithOptSpecification; dollarDigits; extDigits ] ) |>> Ast.IndexedPredicate
+
 let qualifiedPredicate = choice [dottedPredicate; indexedPredicate ]
 let qualificationList = positions (many qualifiedPredicate) |>> Ast.QualificationList
 predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification 
@@ -326,7 +328,7 @@ let dollarDigitList = many1 dollarDigits
 let referencingIdentifier = predicateIdentifier .>>. dollarDigitList .>> IW
 let corollarySignatureAsPredicate = positions (referencingIdentifier .>>. paramTuple) .>> IW |>> Ast.ReferenceToCorollary
 
-let byDefinition = positions (keywordBydef >>. variable) |>> Ast.ByDef 
+let byDefinition = positions (keywordBydef >>. predicateWithQualification ) |>> Ast.ByDef 
 
 primePredicateRef.Value <- choice [
     keywordTrue
@@ -335,6 +337,8 @@ primePredicateRef.Value <- choice [
     byDefinition
     attempt argumentIdentifier
     fplDelegate 
+    extDigits
+    dollarDigits
     attempt corollarySignatureAsPredicate
     predicateWithQualification
 ]
@@ -538,7 +542,7 @@ let ebnfFactor = choice [
     ebnfTranslTuple
 ] 
 let ebnfTerm = positions (sepEndBy1 ebnfFactor SW) |>> Ast.LocalizationTerm
-ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. comma >>. IW)) |>> Ast.LocalizationTermList
+ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.LocalizationTermList
 let translation = (exclamationMark >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl |>> Ast.Translation
 let translationList = many1 (IW >>. translation .>> IW)
 let localization = positions (keywordLocalization >>. (predicate .>> IW .>> colonEqual) .>>. (translationList .>> IW .>> semiColon)) .>> IW |>> Ast.Localization

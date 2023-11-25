@@ -71,14 +71,14 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestIndexVariable1 () =
-        let result = run (variable .>> eof) "x<123>"
+        let result = run (predicateWithQualification .>> eof) "x<123>"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestIndexVariable2 () =
-        let result = run (variable .>> eof) "x<y>"
+        let result = run (predicateWithQualification .>> eof) "x<y>"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -178,17 +178,17 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestBoundLeftOpen () =
-        let result = run (leftBound .>> eof) """[!"""
+        let result = run (leftBound .>> eof) """[("""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestBoundLeftOpen1 () =
-        let result = run (leftBound .>> eof) """[ !"""
+        let result = run (leftBound .>> eof) """[ ("""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestBoundRightOpen () =

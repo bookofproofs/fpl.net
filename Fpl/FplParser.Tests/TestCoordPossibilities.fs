@@ -56,7 +56,7 @@ type TestCoordPossibilities () =
         let result = run (coord .>> eof) """PascalCaseId"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPascalCaseId1 () =

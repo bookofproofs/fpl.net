@@ -39,7 +39,7 @@ type TestQualifiersExtensionDigits () =
 
     [<TestMethod>]
     member this.TestArgumentsBoth () =
-        let result = run (predicate .>> eof) """1(1)"""
+        let result = run (predicate .>> eof) """4(2)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -152,140 +152,140 @@ type TestQualifiersExtensionDigits () =
     (* extension digits can only be used "as" in some cases *) 
 
     [<TestMethod>]
-    member this.TestDottedBoth1 () =
+    member this.TestDottedAs1 () =
         let result = run (predicate .>> eof) """x.1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestDottedBothA1 () =
+    member this.TestDottedAsA1 () =
         let result = run (predicate .>> eof) """x .1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestDottedBothB1 () =
+    member this.TestDottedAsB1 () =
         let result = run (predicate .>> eof) """x. 1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestDottedBothC1 () =
+    member this.TestDottedAsC1 () =
         let result = run (predicate .>> eof) """x . 1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestArgumentsBoth1 () =
+    member this.TestArgumentsAs1 () =
         let result = run (predicate .>> eof) """x(1)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestArgumentsBothA1 () =
+    member this.TestArgumentsAsA1 () =
         let result = run (predicate .>> eof) """x (1)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestArgumentsBothB1 () =
+    member this.TestArgumentsAsB1 () =
         let result = run (predicate .>> eof) """x( 1 )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestArgumentsBothC1 () =
+    member this.TestArgumentsAsC1 () =
         let result = run (predicate .>> eof) """s ( 1 )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordinatesBoth1 () =
+    member this.TestCoordinatesAs1 () =
         let result = run (predicate .>> eof) """x<1>"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordinatesBothA1 () =
+    member this.TestCoordinatesAsA1 () =
         let result = run (predicate .>> eof) """x <1>"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordinatesBothB1 () =
+    member this.TestCoordinatesAsB1 () =
         let result = run (predicate .>> eof) """x< 1 >"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordinatesBothC1 () =
+    member this.TestCoordinatesAsC1 () =
         let result = run (predicate .>> eof) """x < 1 >"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBoth1 () =
-        let result = run (predicate .>> eof) """x[1,]>"""
+    member this.TestRangesAs1 () =
+        let result = run (predicate .>> eof) """x[1,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBothA1 () =
+    member this.TestRangesAsA1 () =
         let result = run (predicate .>> eof) """x [1,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBothB1 () =
+    member this.TestRangesAsB1 () =
         let result = run (predicate .>> eof) """x[ 1 ,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBothC1 () =
+    member this.TestRangesAsC1 () =
         let result = run (predicate .>> eof) """x [ 1 ,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestSubscriptsBoth1 () =
+    member this.TestSubscriptsAs1 () =
         let result = run (predicate .>> eof) """x!1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestSubscriptsBothA1 () =
+    member this.TestSubscriptsAsA1 () =
         let result = run (predicate .>> eof) """x !1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestSubscriptsBothB1 () =
+    member this.TestSubscriptsAsB1 () =
         let result = run (predicate .>> eof) """x! 1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestSubscriptsBothC1 () =
+    member this.TestSubscriptsAsC1 () =
         let result = run (predicate .>> eof) """x ! 1"""
         let actual = sprintf "%O" result
         printf "%O" actual

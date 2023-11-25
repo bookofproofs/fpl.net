@@ -45,7 +45,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPrimePredicate5 () =
-        let result = run (primePredicate .>> eof) """list$i"""
+        let result = run (primePredicate .>> eof) """list!i"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -283,7 +283,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs6a () =
-        let result = run (predicateWithQualification .>> eof) """x!A1()!A2()!A3() """
+        let result = run (predicateWithQualification .>> eof) """x!A1()!A2()!A3()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -311,7 +311,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs71a () =
-        let result = run (predicateWithQualification .>> eof) """x!3()!2"""
+        let result = run (predicateWithQualification .>> eof) """x!3()"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))

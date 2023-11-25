@@ -95,7 +95,7 @@ type TestQualifiersSelf () =
 
     [<TestMethod>]
     member this.TestRangesBoth () =
-        let result = run (predicate .>> eof) """@self[@self,]>"""
+        let result = run (predicate .>> eof) """@self[@self,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -140,11 +140,11 @@ type TestQualifiersSelf () =
         let result = run (predicate .>> eof) """@self! @self"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSubscriptsBothC () =
         let result = run (predicate .>> eof) """@self ! @self"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))

@@ -109,7 +109,7 @@ type TestQualifiersPredicateIdentifier () =
 
     [<TestMethod>]
     member this.TestRangesBoth () =
-        let result = run (predicate .>> eof) """PascalId[PascalId,]>"""
+        let result = run (predicate .>> eof) """PascalId[PascalId,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -137,6 +137,8 @@ type TestQualifiersPredicateIdentifier () =
 
     [<TestMethod>]
     member this.TestSubscriptsBoth () =
+        // the FPL interpreter should treat PascalId as PascalId(), i.e. no arguments and 
+        // warn if the user writes PascalId() instead of PascalId to simplify the notation
         let result = run (predicate .>> eof) """PascalId!PascalId"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -154,11 +156,11 @@ type TestQualifiersPredicateIdentifier () =
         let result = run (predicate .>> eof) """PascalId! PascalId"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSubscriptsBothC () =
         let result = run (predicate .>> eof) """PascalId ! PascalId"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))

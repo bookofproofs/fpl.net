@@ -95,14 +95,14 @@ type TestQualifiersVars () =
 
     [<TestMethod>]
     member this.TestRangesBoth () =
-        let result = run (predicate .>> eof) """x[y,]>"""
+        let result = run (predicate .>> eof) """z<x[y,]>"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestRangesBothA () =
-        let result = run (predicate .>> eof) """x [y,]"""
+        let result = run (predicate .>> eof) """z[(x, y<i>]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -140,11 +140,11 @@ type TestQualifiersVars () =
         let result = run (predicate .>> eof) """x! y"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSubscriptsBothC () =
         let result = run (predicate .>> eof) """x ! y"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
