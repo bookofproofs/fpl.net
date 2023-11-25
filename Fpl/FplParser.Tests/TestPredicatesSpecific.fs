@@ -530,3 +530,18 @@ type TestPredicatesSpecific () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
  
+
+    [<TestMethod>]
+    member this.TestEquality01 () =
+        let result = run (equalityComparison .>> eof) """< x = 1 >"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestEquality02 () =
+        let result = run (equalityComparison .>> eof) """< x = y = z >"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+ 

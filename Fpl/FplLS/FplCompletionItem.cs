@@ -128,7 +128,7 @@ namespace FplLS
                 case "trivial":
                     return new FplCompletionItemChoicesKeyword().GetChoices(this);
                 case "self":
-                case "self!":
+                case "base":
                 case "@":
                     return new FplCompletionItemChoicesSelf().GetChoices(this);
                 case "all":

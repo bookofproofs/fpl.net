@@ -111,7 +111,7 @@ let variable = positions variableX |>> Ast.Var
 let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
 let keywordSelf = positions (skipString "self") .>> IW |>> Ast.Self
-let keywordSelfExclamation = skipString "self!" .>> IW
+let keywordBaseClassReference = skipString "base" .>> IW
 let keywordIndex = (skipString "index" <|> skipString "ind") .>> IW  >>% Ast.IndexType
 
 
@@ -299,7 +299,7 @@ let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = positions (keywordAssert >>. predicate) |>> Ast.Assertion
 
-let callConstructorParentClass = positions (keywordSelfExclamation >>. specificClassType .>>. argumentTuple .>> IW) |>> Ast.ParentConstructorCall
+let callConstructorParentClass = positions (keywordBaseClassReference >>. dot >>. specificClassType .>>. argumentTuple .>> IW) |>> Ast.ParentConstructorCall
 
 let statement = 
     (choice [
@@ -600,7 +600,7 @@ let errInformation = [
     ("LOC000", "Syntax error in rule of localization", ["loc"], localization)
     ("USE000", "Syntax error in uses clause", ["uses"], usesClause)
     ("PRE000", "Syntax error in predicate", ["and"; "or"; "impl"; "iif"; "xor"; "not"; "all"; "ex"; "is"], compoundPredicate)
-    ("SMT000", "Syntax error in statement", ["assert"; "cases"; "self!"; "for"; "del"], statement)
+    ("SMT000", "Syntax error in statement", ["assert"; "cases"; "base"; "for"; "del"], statement)
     ("AGI000", "Syntax error in proof argument", ["|-"], argumentInference)
     ("CAS000", "Syntax error in case block", ["|"], conditionFollowedByResult)
     ("DCS000", "Syntax error in default case block", ["?"], elseStatement)

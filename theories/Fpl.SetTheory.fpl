@@ -34,7 +34,7 @@ def class EmptySet: Set
     ctor EmptySet()
     {
         dec 
-            self!obj()
+            base.obj()
             assert IsEmpty(self) 
         ;
         self
@@ -56,7 +56,7 @@ def class Subset: Set
     ctor Subset(superSet: Set)
     {
         dec
-            self!Set()
+            base.Set()
             assert IsSubset(self, superSet)
         ;
         self
@@ -88,7 +88,7 @@ def class SetRoster: Set
     {
         dec 
             ~elem: Set
-            self!Set()
+            base.Set()
             for elem in listOfSets
             (
                 assert In(elem, self)

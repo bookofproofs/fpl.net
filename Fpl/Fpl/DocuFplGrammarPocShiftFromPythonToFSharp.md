@@ -104,7 +104,7 @@ class A :B, :C
 
 #### 4) Syntax of class constructors
 
-The syntax of constructors allows calls of parental constructors in the `specification`, their syntax starts with `self!" followed by the parent class identifier and related parameters like in `self!ParentClass(first, second)` . Moreover, the keyword `self` has as the last expression in the constructor. These two additional components disambiguate the representation of the class object after the constructor has been executed. 
+The syntax of constructors allows calls of parental constructors in the `specification`, their syntax starts with `base." followed by the parent class identifier and related parameters like in `base.ParentClass(first, second)` . Moreover, the keyword `self` has as the last expression in the constructor. These two additional components disambiguate the representation of the class object after the constructor has been executed. 
 
 *Before*
 ``` 
@@ -134,7 +134,7 @@ class SomeClass: ParentClass
     {
     	dec
             myField := field
-            self!ParentClass()
+            base.ParentClass()
         ;
         self
     }
@@ -254,6 +254,8 @@ In the new FPL syntax version, we introduce an inbuilt equality sign and allow i
 ``` 
 
 Of course, the equality predicate can be placed everywhere any predicate can be used in FPL, for instance, it can be nested within other predicates. 
+
+The equality comparison supports multiple equalities at once, for instance `< x = y = z >` is a shorter form for  `and (<x = y>, <y = z>)`
 
 #### 10) Domains are now allowed in the quantors `all`, `ex`, and `exn`.
 
@@ -505,7 +507,7 @@ In order to simplify the error recovery process, we introduce an additional keyw
         {
             dec
                 ~i: Nat 
-                self!Tuple()
+                base.Tuple()
                 for i in [1~n] 
                 (
                     self<i>:=field.AdditiveGroup().NeutralElement()
@@ -523,7 +525,7 @@ In order to simplify the error recovery process, we introduce an additional keyw
         {
             dec
                 ~i: Nat 
-                self!Tuple()
+                base.Tuple()
                 for i in [1~n] 
                 (
                     self<i>:=field.AdditiveGroup().NeutralElement()

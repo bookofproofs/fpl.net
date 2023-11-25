@@ -17,7 +17,7 @@ theorem Theorem_001()
 
 proof Theorem_001$1
 {
-    // Proof by Contradiction (Type 2)
+    // PoC note: Proof by Contradiction (Type 2)
     // Strategy: Assume that the premise is true and the conclusion is false.
     // Then derive a contradiction.
 
@@ -45,7 +45,7 @@ theorem Theorem_002 ()
 
 proof Theorem_002$1
 {
-    // Proof by Induction (to prove: `all n in N ( p(n) )`)
+    // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
     // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.
     
@@ -82,7 +82,7 @@ theorem Theorem_003 ()
 
 proof Theorem_003$1
 {
-    // Proof by Induction (to prove: `all n in N ( p(n) )`)
+    // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
     // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.
     
@@ -131,8 +131,8 @@ proof Theorem_003$1
 // making it more transparent, what is part of a constructive definition and what is the predicative expression about it in the theorem.  
 
 // Theorem 3, and at the same time definition 1: To every pair of number x,y, we can assign in exactly one way a natural number, called x + y such that 
-// (1) x + 1 = successor of x for every x
-// (2) x + y = successor of (x + y)
+// (1) x + 1 = x' for every x
+// (2) x + y = (x + y)'
 // x + y is called the sum of x and y, or the number obtained by addition of y to x.
 
 definition function Sum(x,y: Nat) -> Nat
@@ -142,57 +142,152 @@ definition function Sum(x,y: Nat) -> Nat
         cases
         (
             | < y = 1 > : res := Successor(x) 
-            ? res := Successor( Sum(x,y) )
+            ? Sum (x, Successor(y)) := Successor( Sum(x,y) )
         )
     ;
     return res
 }
 
-// PoC note: After defining what Sum is, we now simply state its uniqueness predicatively
-theorem Theorem_004 ()
+// PoC note: Landau 'proves' the definition in one proof splitting it into the parts A and B. In fact, he proves that the way he defines Sum is 'well-defined'
+// i.e. it exists and is unique
+// In FPL, we formulate for these parts lemmas and them prove them. Finally, we prove the Theorem_004 using the lemmas
+// This makes the prove longer on one hand but more clear on the other hand.
+// (PoC note: In modern terms, Landau shows the uniqueness Sum is actually a function, i.e. that it produces at most one result, is unique)
+lemma Theorem_004_A ()
 {
-    declaration
-        ~sum, otherSum: Sum
+    // (A) We first show that for fixed x there is at most one possibility of defining x + y for all y such that x + 1 = successor(x) and x + successor(y) = successor (x, y)
+    declaration 
+         ~x : N // for a fixed x
     ;
-    
-    all x,y in Nat
-    (
-        < sum(x,y) = otherSum(x,y) >
+
+    and (
+        < Sum(x, 1) = Successor(x) > 
+        , 
+        all y in N 
+        ( 
+            < Sum(x,Successor(y)) = Successor(x,y) > 
+        ) 
     )
 }
 
-proof SomeFplTheorem$1
+proof Theorem_004_A$1
 {
-    // Proof by Induction (to prove: `all n in N ( p(n) )`)
+    // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
-    // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.
+    // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( Sum(n,1) )` is true.
     
-    dec 
+    declaration 
          ~x : N // for a fixed x
-
-        // and for all y we define
+        // and for all y we define 
         for y in N 
         (
-            a!1 := Successor(x)
+            // such that
+            a!1 := Successor(x) 
             b!1 := Successor(x)
             a!Successor(y) := Successor(a!y)
             b!Successor(y) := Successor(b!y)
         )
     ;
-
+    declaration
+         ~m : Set // let m be a set 
+         assert 
+            // Let m be the set of all y 
+            // for which a!y = b!y and a!1 = successor(x) = b!1
+            iif
+            (
+                < a!y = b!y >
+                ,
+                // PoC note: We formulate it predicatively using the implication that if the conjugated premise is fulfilled for some x than x is element of m
+                In (y, m)
+            )
+    ;
+    
     // "base case" 
-    100. |- trivial
-    200. |- p(1)
+    100. bydef a!1, bydef b!1 |- < a!1 = Successor(x) = b!1 >
+    100. |- < a!1 = b!1 >
+    200. bydef m |- In (1, m)
     
     // "inductive step" 
-    300. 200. |- assume ex n in N ( p(n) )
-    400. |- trivial
-    500. |- trivial
-    600. |- p( AddNat(n,1) )
+    300. 200. |- assume ex y ( In(y,m) ) // if y belongs to m
+    400. bydef m |- < a!y = b!y > 
+    500. Axiom2 |- 
+        < Successor(a!y) = Successor(b!y) > 
+    600. bydef a!Successor(y), bydef b!Successor(b) |- 
+        < a!Successor(y) = Successor(a!y) = Successor(b!y) = b!Successor(y) >
+    650. |- In(Successor(y), m)
     
-    700. |- all n in N ( p(n) )
+    700. |- all y in N ( < a!y = b!y > )
     800. |- qed
 }
+
+// PoC note: In modern terms, Landau shows the existence of the function Sum
+lemma Theorem_004_B ()
+{
+    // (B) Now we will prove that for each x it is actually possible to define x + y for all y in such a way that 
+    // x + 1 = successor(x) and x + successor(y) = successor (x + y) for every y.
+    // PoC note: We reformulate it predicatively
+    all x,y in N
+    (
+        and 
+        (
+            < Sum(x, 1) = Successor (x) >
+            ,
+            < Sum(x, Successor(y)) = Successor (x, y) > 
+        )
+    )
+}
+
+
+
+proof Theorem_004_B$1
+{
+    // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
+    // Strategy: Prove the "base case": p(1)
+    // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.
+    
+    // Let m be the set all x for which this is possible.
+
+    declaration
+         ~m : Set 
+         assert 
+            impl
+            (
+                all x,y in N
+                (
+                    and 
+                    (
+                        < Sum(x, 1) = Successor (x) >
+                        ,
+                        < Sum(x, Successor(y)) = Successor (x, y) > 
+                    )
+                )
+                ,
+                In (x, m)
+            )
+    ;
+
+    // "base case" 
+    // For x = 1 the number x + y = successor(y) is as required
+    100. |- assume <x = 1> 
+    110. 100., bydef Sum |- 
+        < Sum(x, 1) = Successor (x) > // since x + 1 = successor(1) = successor (x) and 
+    150. 100., bydef Sum |- 
+        // (x+y') = (y')' = (x+y)'
+        < Sum (x, Successor(y)) = Successor(Successor(y)) = Successor (x,y) >
+    200. |- In (1,m) // hence 1 belongs to m
+    
+    // "inductive step" 
+    300. 200. |- assume ex x ( In (x, m) ) // let x belong to m, so that there exists an x + y for all y. Then the number x'+ y = (x + y)' is the required number for x'  
+    400. bydef Sum |- 
+        < Sum(Successor (x), 1) = Successor(Sum(x,1)) = Successor(Successor(x)) > // since x' + 1 = (x+1)' = (x')'
+
+    500. bydef Sum |- 
+        // and x' + y' = (x+y')' = ((x+y)')' = (x'+y)' 
+        < Sum(Successor(x), Successor(y)) = Successor(Sum(x, Successor(y))) = Successor(Successor(x,y)) = Successor(Sum (Successor(x), y)) > 
+    600. |- In (Successor(x), m) // hence, x' belongs to m
+    800. |- qed
+}
+
 
 
 

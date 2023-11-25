@@ -100,7 +100,7 @@ type TestConstructors () =
         // with self followed by an exclamation mark and name of the classes constructor
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
-                dec ~a:obj  self!AlgebraicStructure(x,op);
+                dec ~a:obj  base.AlgebraicStructure(x,op);
                 self
             }"""
         let actual = sprintf "%O" result
@@ -115,7 +115,7 @@ type TestConstructors () =
         let result = run (constructor .>> eof) """constructor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj
-                    self!AlgebraicStructure(x,op)
+                    base.AlgebraicStructure(x,op)
                 ;
                 self
             }"""
@@ -140,7 +140,7 @@ type TestConstructors () =
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj 
-                    self! 
+                    base. 
                 ;
             }"""
         let actual = sprintf "%O" result
@@ -153,7 +153,7 @@ type TestConstructors () =
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
                 dec ~a:obj
-                self!obj()
+                base.obj()
                 ;
                 
             }"""
@@ -170,9 +170,9 @@ type TestConstructors () =
                 
                 dec 
                     ~a:obj
-                    self!obj() 
-                    self!T1(x) 
-                    self!T2(op) 
+                    base.obj() 
+                    base.T1(x) 
+                    base.T2(op) 
                 ;
                 
             }"""
@@ -193,8 +193,8 @@ type TestConstructors () =
                     addInField := myField.AddOp()
                     mulInField := myField.MulOp()
                     assert NotEqual(n, Zero())
+    				base.obj()
                     self:=SetBuilder( myField[1 , n], true)
-    				self!obj()
                 ;
                 self
             }"""

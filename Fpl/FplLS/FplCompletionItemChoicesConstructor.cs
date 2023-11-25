@@ -29,7 +29,7 @@ namespace FplLS
                 $"{ci.Word} SomeFplClass(){Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t{TokenDeclaration}{Environment.NewLine}" +
-                $"\t\tself!obj(){Environment.NewLine}" +
+                $"\t\tbase.obj(){Environment.NewLine}" +
                 $"\t;{Environment.NewLine}" +
                 $"\tself{Environment.NewLine}" +
                 $"{TokenRightBrace}{Environment.NewLine}" +

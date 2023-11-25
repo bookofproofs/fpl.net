@@ -37,7 +37,7 @@ definition function Successor(x: N) -> N
 }
 
 
-// For each x there exists exactly one natural number, called the successor of x, the will be denoted x
+// For each x there exists exactly one natural number, called the successor of x, the will be denoted x'
 axiom Axiom2 ()
 {
     all x in Nat
@@ -83,7 +83,7 @@ axiom Axiom4 ()
 }
 
 
-// besides the class "Nat", we can formulate definition of the set of all natural numbers
+// PoC Note: besides the class "Nat", we can formulate definition of the set of all natural numbers
 def class N: Set
 {
     ctor N()

@@ -85,7 +85,7 @@ type TestClasses () =
         {
             ctor FieldPowerN()
             {
-                dec self!obj() ;
+                dec base.obj() ;
                 self
             }
         }"""
@@ -101,7 +101,7 @@ type TestClasses () =
             dec ~x: obj;
             constructor FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj() ;
                 self
             }
         }"""
@@ -117,7 +117,7 @@ type TestClasses () =
             dec:;
             FieldPowerN() 
             {
-                self!obj()
+                base.obj()
             }
         }"""
         let actual = sprintf "%O" result
@@ -132,7 +132,7 @@ type TestClasses () =
             dec ~a:obj;
             ctor FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj() ;
                 self
             }
         }"""
@@ -148,7 +148,7 @@ type TestClasses () =
             dec ~a:obj;
             FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj() ;
             }
         }"""
         let actual = sprintf "%O" result
@@ -162,7 +162,7 @@ type TestClasses () =
         {
             ctor FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj() ;
                 self
             }
         }"""
@@ -177,7 +177,7 @@ type TestClasses () =
             // A class with a constructor but without self
             FieldPowerN() 
             {
-                self!obj()
+                base.obj()
             }
         }"""
         let actual = sprintf "%O" result
@@ -191,12 +191,12 @@ type TestClasses () =
         {
             ctor FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj() ;
                 self
             }
             constructor FieldPowerN() 
             {
-                dec self!T1() ;
+                dec base.T1() ;
                 self
             }
         }"""
@@ -211,13 +211,13 @@ type TestClasses () =
         {
             ctor FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj() ;
                 self
             }
 
             ctor FieldPowerN() 
             {
-                dec self!T1() ;
+                dec base.T1() ;
                 self
             }
 
@@ -246,7 +246,7 @@ type TestClasses () =
             {
                 dec 
                     ~a:obj
-                    self.obj()
+                    base.obj()
                     ;
                 self
             }
@@ -259,7 +259,7 @@ type TestClasses () =
             FieldPowerN() 
             {
                 dec
-                    self.T1()
+                    base.T1()
                 ;
                 self
             }
@@ -284,7 +284,7 @@ type TestClasses () =
 
             ctor FieldPowerN() 
             {
-                dec self!T1() ;
+                dec base.T1() ;
                 self
             }
 

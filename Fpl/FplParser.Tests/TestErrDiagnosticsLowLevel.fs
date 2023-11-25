@@ -157,7 +157,7 @@ The parser backtracked after:
                     // to object of the class "Nat". This becomes possible when we assert that every variable of the class
                     // "Nat" is a also Set.
                     // This is comparable to implementing an interface (or comparable to multiple inheritance).
-                    self!Set()
+                    base.Set()
                 ;
                 self
             }
@@ -179,7 +179,7 @@ The parser backtracked after:
         function T() -> Real { intr }
 
         // Example of defining a constant for the natural number 100 using the
-        class N100:Set{N100(){dec ~n:Nat  self!Set() self:=SetBuilder(SetNat(),IsGreater(n,100)); self }}""", 1605, 46)>]
+        class N100:Set{N100(){dec ~n:Nat  base.Set() self:=SetBuilder(SetNat(),IsGreater(n,100)); self }}""", 1605, 46)>]
     [<DataRow("",0,1)>]
     member this.TestReplaceFplComments
         (
