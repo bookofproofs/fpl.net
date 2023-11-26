@@ -50,7 +50,7 @@ axiom Axiom2 ()
 }
 
 // It follows immediately ...
-corollary Axiom2$1 ()
+corollary Axiom2!$1 ()
 {
     dec ~x,y:Nat ;
     impl
@@ -90,7 +90,7 @@ def class N: Set
     {
         dec 
             ~n: Nat
-            self!Set() // call the constructor of set
+            base.Set() // call the constructor of set
 
             // Now, assert that elements of class "Nat" can be collected to a bigger object of class "N"
             // This requires that we can apply the "In" predicate defined in Fpl.SetTheory to objects of the class "Nat". 

@@ -325,7 +325,7 @@ let qualificationList = positions (many qualifiedPredicate) |>> Ast.Qualificatio
 predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification 
 
 let dollarDigitList = many1 dollarDigits
-let referencingIdentifier = predicateIdentifier .>>. dollarDigitList .>> IW
+let referencingIdentifier = predicateIdentifier .>>. (exclamationMark >>. IW >>. dollarDigitList) .>> IW
 let corollarySignatureAsPredicate = positions (referencingIdentifier .>>. paramTuple) .>> IW |>> Ast.ReferenceToCorollary
 
 let byDefinition = positions (keywordBydef >>. predicateWithQualification ) |>> Ast.ByDef 

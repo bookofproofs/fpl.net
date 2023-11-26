@@ -15,7 +15,7 @@ theorem Theorem_001()
 }
 
 
-proof Theorem_001$1
+proof Theorem_001!$1
 {
     // PoC note: Proof by Contradiction (Type 2)
     // Strategy: Assume that the premise is true and the conclusion is false.
@@ -43,7 +43,7 @@ theorem Theorem_002 ()
     )
 }
 
-proof Theorem_002$1
+proof Theorem_002!$1
 {
     // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -80,7 +80,7 @@ theorem Theorem_003 ()
     )
 }
 
-proof Theorem_003$1
+proof Theorem_003!$1
 {
     // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -170,7 +170,7 @@ lemma Theorem_004_A ()
     )
 }
 
-proof Theorem_004_A$1
+proof Theorem_004_A!$1
 {
     // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -239,7 +239,7 @@ lemma Theorem_004_B ()
 
 
 
-proof Theorem_004_B$1
+proof Theorem_004_B!$1
 {
     // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -288,7 +288,93 @@ proof Theorem_004_B$1
     800. |- qed
 }
 
+// (Associative Law of Addition)
+theorem Theorem_005_SumIsAssoziative ()
+{
+    < Sum(Sum(x,y),z) = Sum(x,Sum(y,z)) > 
+}
 
+proof Theorem_005_SumIsAssoziative!$1
+{
+    // Proof by Induction (to prove: `all n in N ( p(n) )`)
+    // Strategy: Prove the "base case": p(1)
+    // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( Sum(n,1) )` is true.
+    
+    dec 
+         ~x,y,z : N // Fix x and y.
+         ~m : Set 
+         // Denote by m the set of all z for which the assertion of the theorem holds
+         assert 
+            impl
+            (
+                < Sum(Sum(x,y),z) = Sum(x,Sum(y,z)) > 
+                ,
+                In (z, m)
+            )
+    ;
+
+    // "base case" 
+    // (x + y) + 1 = (x + y)' = x + y' = x + (y + 1)
+    100. bydef Sum |- < Sum(Sum(x,y),1) = Successor(Sum(x,y)) = Sum(x, Successor(y)) = Sum(x, Sum(y,1)) > 
+    200. |- In (1, m)
+    
+    // "inductive step" 
+    300. 200. |- assume ex x ( < Sum(Sum(x,y),z) = Sum(x,Sum(y,z)) > )
+    400. |- < 
+              Sum( Sum(x,y), Successor (z) )    //   (x+y) + z' 
+            = Successor( Sum(Sum(x,y), z) )     // = ((x+y) + z)'
+            = Successor( Sum(x, Sum(y,z)) )     // = (x + (y + z))'
+            = Sum( x, Successor(Sum(y,z)) )     // = x + (y+z)'
+            = Sum( x, Sum(y, Successor (y)))    // = x + (y + z')
+            >
+    600. |- In (Successor(z), m)
+    800. |- qed
+}
+
+// (Commutative Law of Addition)
+theorem Theorem_005_SumIsCommutatitve ()
+{
+    < Sum(x,y) = Sum(y,x) > 
+}
+
+proof Theorem_005_SumIsCommutatitve!$1
+{
+    // Proof by Induction (to prove: `all n in N ( p(n) )`)
+    // Strategy: Prove the "base case": p(1)
+    // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( Sum(n,1) )` is true.
+    
+    dec 
+         ~x, y : N // Fix x.
+         ~m : Set 
+         // Let m be the set of all y for which the assertion of the theorem holds
+         assert 
+            impl
+            (
+                < Sum(x,y) = Sum(y,x) >
+                ,
+                In (z, m)
+            )
+    ;
+
+    // "base case" 
+    100. bydef Sum |- < Sum(y,1) = Successor(Sum(y)) > // We have y + 1 = y', 
+    110. Theorem_004_B!$1 |- <Sum(1,y) = Successor(Sum(y)) >  // by the construction in the proof of Theorem 4, 1 + y = y'
+    150. 100., 110. |- < Sum(y,1) = Sum(1,y) > // so that 1 + y = y + 1
+    200. |- In (1, m) // and 1 belongs to m.
+    
+    // "inductive step" 
+    300. 200. |- assume ex x ( In (x, m) ) // If x belongs to m,
+    400. |- < Sum(x,y) = Sum(y,x) >
+    450. |- <    //   then x + y = y + x
+            Successor( Sum(x,y) )     // therefore (x + y)' = (y+x)' = y + x'
+            = Successor( Sum(y,x) )  
+            = Sum( x, Successor(y) )     
+            >
+    470. Theorem_004_B!$1 |- <Sum(Successor(x),y) = Successor(Sum(x,y)) >  // by the construction in the proof of theorem 4, we have x' + y = (x + y)'.
+    500. |- <Sum(Successor(x),y) = Sum(y, Successor(x))> // hense x' + y = y + x'
+    600. |- In (Successor(x), m) // so that x' belongs to m
+    800. |- qed
+}
 
 
 ;

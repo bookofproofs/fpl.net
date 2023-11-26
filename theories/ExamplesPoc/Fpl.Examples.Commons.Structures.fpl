@@ -20,7 +20,7 @@ definition class Tuple : obj
                 self<i>:=elem
             )
             myLength:=i
-            self!obj()
+            base.obj()
         ;
         self
     }
@@ -31,7 +31,7 @@ definition class Tuple : obj
         dec 
             self:=arr
             myLength:=length
-            self!obj()
+            base.obj()
         ;
         self
     }
@@ -56,7 +56,7 @@ definition class UnlimitedTupleFrom: obj
     constructor UnlimitedTupleFrom(from:index, x: tpl[from,])
     {
         dec
-            self!obj()
+            base.obj()
             myX:=x
         ;
         self
@@ -84,7 +84,7 @@ def class CartesianProduct: Set
         dec
             ~setItem: Set
             ~i: Nat
-            self!Set()
+            base.Set()
             i:= Zero()
             for setItem in setList
             (
@@ -102,7 +102,7 @@ def class CartesianProduct: Set
         dec
             self:=setArray
             myLength:=to
-            self!Set()
+            base.Set()
         ;
         self
     }
@@ -153,7 +153,7 @@ def class Relation: Set
     {
         dec
             ~cartProd : CartesianProduct
-            self!Set()
+            base.Set()
             cartProd := CartesianProduct(setList)
             myArity := cartProd.Length()
             self := Subset(cartProd)
@@ -178,7 +178,7 @@ def class BinaryRelation: Relation
     ctor BinaryRelation(x,y: Set)
     {
         dec
-            self!Relation(2,x,y)
+            base.Relation(2,x,y)
             myDomain:=x
             myCodomain:=y
         ;
@@ -311,7 +311,7 @@ definition class Function: BinaryRelation
     ctor Function(x,y: Set)
     {
         dec
-            self!BinaryRelation(x,y)
+            base.BinaryRelation(x,y)
             assert self.LeftTotal()
             assert self.RightUnique()
         ;

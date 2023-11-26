@@ -24,7 +24,7 @@ def class FieldPowerN: Sets
             mulInField := myField.MulOp()
             assert NotEqual(n, Zero())
             self:=SetBuilder( myField[1 , n], true)
-            self!Set()
+            base.Set()
         ;
         self
 
@@ -72,7 +72,7 @@ def class ZeroVectorN: Tuple
             (
                 self<i>:=field.AdditiveGroup().NeutralElement()
             )
-            self!Tuple()
+            base.Tuple()
         ;
         self
     }

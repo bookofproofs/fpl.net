@@ -97,7 +97,7 @@ lemma Example4()
     ex x ( and (Greater(x,y), Greater(x,z)) )
 }
 
-proof Example4$1
+proof Example4!$1
 {
     dec
         ~a:A

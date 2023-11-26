@@ -1,4 +1,7 @@
-﻿## 2.4.3
+﻿## 3.0.0
+* Updated Documentation [DocuFplGrammarPocShiftFromPythonToFSharp.md](https://github.com/bookofproofs/fpl.net/blob/main/Fpl/Fpl/DocuFplGrammarPocShiftFromPythonToFSharp.md) updated
+
+## 2.4.3
 * Hook up error diagnostics stemming from what later will become error recovery in F# to the language server in C#.
 
 ## 2.4.2
