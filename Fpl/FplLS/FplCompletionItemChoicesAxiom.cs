@@ -30,7 +30,7 @@ namespace FplLS
         public static string GetBody(string word, string label)
         {
             return 
-                $"{word} SomeFpl{label} (){Environment.NewLine}" + 
+                $"{word} SomeFpl{label}(){Environment.NewLine}" + 
                 "{" + Environment.NewLine +
                 $"\ttrue{Environment.NewLine}" + 
                 "}" + Environment.NewLine;

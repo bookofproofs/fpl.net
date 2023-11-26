@@ -332,12 +332,12 @@ proof Theorem_005_SumIsAssoziative!$1
 }
 
 // (Commutative Law of Addition)
-theorem Theorem_005_SumIsCommutatitve ()
+theorem Theorem_006_SumIsCommutatitve ()
 {
     < Sum(x,y) = Sum(y,x) > 
 }
 
-proof Theorem_005_SumIsCommutatitve!$1
+proof Theorem_006_SumIsCommutatitve!$1
 {
     // Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -373,6 +373,37 @@ proof Theorem_005_SumIsCommutatitve!$1
     470. Theorem_004_B!$1 |- <Sum(Successor(x),y) = Successor(Sum(x,y)) >  // by the construction in the proof of theorem 4, we have x' + y = (x + y)'.
     500. |- <Sum(Successor(x),y) = Sum(y, Successor(x))> // hense x' + y = y + x'
     600. |- In (Successor(x), m) // so that x' belongs to m
+    800. |- qed
+}
+
+theorem Theorem_007 ()
+{
+    not
+    (
+        < y = Sum(x,y) > 
+    )
+}
+
+proof SomeFplTheorem!$1
+{
+    // Proof by Induction (to prove: `all n in N ( p(n) )`)
+    // Strategy: Prove the "base case": p(1)
+    // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( Sum(n,1) )` is true.
+    
+    dec 
+         ~n : N
+    ;
+    // "base case" 
+    100. |- trivial
+    200. |- p(1)
+    
+    // "inductive step" 
+    300. 200. |- assume ex n in N ( p(n) )
+    400. |- trivial
+    500. |- trivial
+    600. |- p( Sum(n,1) )
+    
+    700. |- all n in N ( p(n) )
     800. |- qed
 }
 

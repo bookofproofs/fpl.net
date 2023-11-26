@@ -1,6 +1,12 @@
 ﻿## 3.0.0
 * Updated Documentation [DocuFplGrammarPocShiftFromPythonToFSharp.md](https://github.com/bookofproofs/fpl.net/blob/main/Fpl/Fpl/DocuFplGrammarPocShiftFromPythonToFSharp.md) updated
 
+## 2.6.0
+* Hook up auto-completion service
+
+## 2.5.0
+* Error diagnostics (experimental)
+
 ## 2.4.3
 * Hook up error diagnostics stemming from what later will become error recovery in F# to the language server in C#.
 
