@@ -345,12 +345,12 @@ primePredicateRef.Value <- choice [
 
 let conjunction = positions ((keywordAnd >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.And
 let disjunction = positions ((keywordOr >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.Or
+let exclusiveOr = positions ((keywordXor >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.Xor
 
 let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParen 
 let onePredicateInParens = (leftParen >>. predicate) .>> rightParen
 let implication = positions (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
 let equivalence = positions (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
-let exclusiveOr = positions (keywordXor >>. twoPredicatesInParens) |>> Ast.Xor
 let negation = positions (keywordNot >>. onePredicateInParens) |>> Ast.Not
 let all = positions ((keywordAll >>. variableListInOptDomainList) .>>. onePredicateInParens) |>> Ast.All
 let exists = positions ((keywordEx >>. variableListInOptDomainList) .>>. onePredicateInParens) |>> Ast.Exists
@@ -493,9 +493,9 @@ let argumentInference = vDash >>. IW >>. (assumeArgument<|> revokeArgument <|> d
 let justification = positions (predicateList .>> IW) |>> Ast.Justification
 let argument = positions (justification .>>. argumentInference) |>> Ast.JustifiedArgument
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. argument) .>> IW |>> Ast.Argument
-let proofArgumentList = many1 (IW >>. proofArgument)
+let proofArgumentList = many1 (IW >>. (proofArgument <|> varDeclBlock))
 let keywordProof = (skipString "proof" <|> skipString "prf") .>> SW 
-let proofBlock = (leftBrace >>. varDeclOrSpecList) .>>. (proofArgumentList .>> spacesRightBrace)
+let proofBlock = leftBrace >>. proofArgumentList .>> spacesRightBrace
 let proof = positions ((keywordProof >>. referencingIdentifier) .>>. (IW >>. proofBlock)) |>> Ast.Proof
 
 (* FPL building blocks - Definitions *)

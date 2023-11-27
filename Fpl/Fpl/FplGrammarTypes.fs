@@ -65,9 +65,9 @@ type Ast =
     | Undefined of Positions * unit
     | And of Positions * Ast list
     | Or of Positions * Ast list
+    | Xor of Positions * Ast list
     | Impl of Positions * (Ast * Ast)
     | Iif of Positions * (Ast * Ast)
-    | Xor of Positions * (Ast * Ast)
     | Not of Positions * Ast
     | Domain of Positions * Ast
     | All of Positions * ((Ast list * Ast option) list * Ast)
@@ -134,7 +134,7 @@ type Ast =
     | RevokeArgument of Positions * Ast
     | JustifiedArgument of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
-    | Proof of Positions * ((Ast * Ast list) * (Ast list option * Ast list))
+    | Proof of Positions * ((Ast * Ast list) * Ast list)
     | Namespace of Ast option * Ast list
     | AST of Positions * Ast
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from

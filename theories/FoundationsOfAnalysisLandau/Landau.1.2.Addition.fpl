@@ -464,16 +464,82 @@ theorem Theorem_009()
     ;
     // PoC note: a predicative expression that becomes true "if and only if exactly one of the cases is true" 
     // PoC note: FPL allows abbreviation of complex predicates while using them as boolean variables in boolean expressions (reducing PL1 to PL0)
-    or
+    and
     (
-         and (    case1 , not(case2), not(case3))
-        ,and (not(case1),     case2 , not(case3))
-        ,and (not(case1), not(case2),     case3 )
+        // PoC note: the cases are mutually exclusive
+         not (and (case1, case2) ) 
+        ,not (and (case1, case3) ) 
+        ,not (and (case2, case3) ) 
+        // and at least one of them is true
+        ,or (case1, case2, case3)
     ) 
     
 }
 
 // PoC note: Landau now splits his proof into two parts A and B. In part A, he shows that the three cases are mutually exclusive. 
 // In part B, he shows that at least one of the cases takes place.   
+
+proof SomeFplTheorem!$1
+{
+
+    // Part A
+    100. |- assume and (case1 , case2) 
+    110. Theorem_007 |- false // By theorem 7, cases (1) and (2) are incompatible
+    120. |- revoke 100.
+    130. |- assume and (case1 , case3) 
+    140. Theorem_007 |- false // Similarly, cases (1) and (3) are incompatible
+    150. |- revoke 130.
+    160. |- assume and (case2, case3)
+    170. Theorem_007 |- <x = Sum(y,u)     // The incompatibility of (2) and (3) also fallows from Theorem 7; for otherwise, we would have x = y + u
+            = Sum(Sum(x,v),u) // = (x+v) + u
+            = Sum(x,Sum(v,u)) // = x + (v+u)
+            = Sum(Sum(v,u),x) // = (v+u) + x
+    >
+    180. |- revoke 170. 
+    200. 120., 150., 180. |- and (not (and (case1 , case2)), not (and (case1 , case3)), not (and (case2 , case3))) // Therefore, we can have at most one of the cases (1), (2), (3).
+    
+    // Part B (by induction)
+    declaration
+        ~x,y: N // let x be fixed
+        ~m: Set // and let m b the set of all y 
+        assert
+            impl
+            (
+                or(case1, case2, case3) // for which one (hence by (A), exactly one) of the cases (1), (2), and (3) obtains.
+                ,
+                In (y,m)
+            )
+    ;
+    300. Theorem_003 |- xor (<x = 1>, <x = Successor(u) = Sum(1,u)>) // For y = 1, we have by theorem 3 that either x = 1 = y or x = u' = 1 + u = y + u.
+    400. |- In(1,m) // Hence, 1 belongs to m.
+    
+    500a. 400. |- assume ex y (In (y,m))
+    510a. |- assume case1 // either (case (1) for y)
+    520a. |- <Successor(y) = Sum(y,1) = Sum(x,1) > // hence y' = y + 1 = x + 1
+    530a. |- In (Successor(y), m)
+
+    510b. |- assume case2 // or (case (2) for y)
+    520b. |- impl ( <u=1>, <x = Sum(y,1) = Succesor(y)>) // hence if u = 1 then x = y + 1 = y'
+    530b. Theorem_003 |- 
+        impl 
+        ( 
+            not (<u=1>), // but if u != 1 then, by theorem 3, 
+            and
+            (
+                <u = Successor(w) = Sum(1,w)> // u = w' = 1 + w
+                ,
+                <x = Sum(y,Sum(1,w)) = Sum(Sum(y,1),w) = Sum(Successor(y), w)> // x = y + (1+w) = (y+1) + w = y' + w
+            )
+        ) 
+    540c. 520b., 530b. |- In (Successor(y), m)
+
+    510c. |- assume case3 // or (case (3) for y)
+    520c. |- <Successor(y) = Successor(Sum(x,v)) = Sum(x,Successor(v)) > // y' = (x+v)' = x+v' (case 3 for y')
+    530c. |- In (Successor(y), m)
+    
+    600. 530a., 540b., 530c. |- or (case1, case2, case3) // In any case, y' belongs to m. Therefore, we always have one of the cases (1), (2), and (3).
+    
+}
+
 
 ;

@@ -1,4 +1,9 @@
-﻿## 3.0.0
+﻿## 3.1.0
+* Bugfixes: 
+	* xor accepts more than two predicates
+	* proofs accept alternating variable declarations and argument proofs
+
+## 3.0.0
 * Updated Documentation [DocuFplGrammarPocShiftFromPythonToFSharp.md](https://github.com/bookofproofs/fpl.net/blob/main/Fpl/Fpl/DocuFplGrammarPocShiftFromPythonToFSharp.md) updated
 
 ## 2.6.0
