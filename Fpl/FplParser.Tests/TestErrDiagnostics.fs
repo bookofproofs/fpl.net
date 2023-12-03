@@ -1056,7 +1056,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseVarDecl003i003Diag () =
         ad.Clear()
         let input = """
-    inf D(x:tpl< )
+    inf D(x:tpl[ )
         {
             pre:true
             con:true
@@ -1657,7 +1657,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred T()
         {
-            dec ~x:tpl< ;
+            dec ~x:tpl[ ;
             true
         }
         y

@@ -62,28 +62,28 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType3a () =
-        let result = run (classType .>> eof) """object<SomeObject1, SomeObject2,SomeObject3>"""
+        let result = run (classType .>> eof) """object[SomeObject1, SomeObject2,SomeObject3]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType4 () =
-        let result = run (classType .>> eof) """tpl[from,]"""
+        let result = run (classType .>> eof) """tpl[[from,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType4a () =
-        let result = run (classType .>> eof) """tpl[, to]"""
+        let result = run (classType .>> eof) """tpl[[, to]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType4b () =
-        let result = run (classType .>> eof) """tpl[,]"""
+        let result = run (classType .>> eof) """tpl[[,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -97,14 +97,14 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType5a () =
-        let result = run (classType .>> eof) """Set[(from , to]"""
+        let result = run (classType .>> eof) """Set[(from , to]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType5b () =
-        let result = run (classType .>> eof) """Set[from , to)]"""
+        let result = run (classType .>> eof) """Set[[from , to)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

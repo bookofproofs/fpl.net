@@ -1,4 +1,7 @@
-﻿## 3.1.0
+﻿## 3.2.0
+* Extending predicates by parenthesized expressions
+
+## 3.1.0
 * Bugfixes: 
 	* xor accepts more than two predicates
 	* proofs accept alternating variable declarations and argument proofs

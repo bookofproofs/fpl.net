@@ -44,12 +44,12 @@ let colonEqual = skipString ":=" >>. spaces
 let at = pchar '@'
 let case = skipChar '|' >>. spaces
 let elseCase = skipChar '?' >>. spaces
-let leftBracket = skipChar '<' >>. spaces 
-let rightBracket = skipChar '>' >>. spaces  
-let leftClosedBracket = skipChar '[' >>. spaces <?> "<(closed) left bound>"
+let leftBracket = skipChar '[' >>. spaces 
+let rightBracket = skipChar ']' >>. spaces  
+let leftClosedBracket = skipString "[[" >>. spaces <?> "<(closed) left bound>"
 let leftOpenBracket = skipString "[(" >>. spaces <?> "<(open) left bound>"
 let rightOpenBracket = skipString ")]" >>. spaces <?> "<(open) right bound>" 
-let rightClosedBracket = skipChar ']' >>. spaces <?> "<(closed) right bound>" 
+let rightClosedBracket = skipString "]]" >>. spaces <?> "<(closed) right bound>" 
 let tilde = skipChar '~' .>> spaces
 let semiColon = skipChar ';' >>. spaces
 let exclamationMark = skipChar '!' >>% Ast.Index
@@ -351,7 +351,7 @@ let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate)
 let onePredicateInParens = (leftParen >>. predicate) .>> rightParen
 let implication = positions (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
 let equivalence = positions (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
-let negation = positions (keywordNot >>. onePredicateInParens) |>> Ast.Not
+let negation = positions (keywordNot >>. predicate) |>> Ast.Not
 let all = positions ((keywordAll >>. variableListInOptDomainList) .>>. onePredicateInParens) |>> Ast.All
 let exists = positions ((keywordEx >>. variableListInOptDomainList) .>>. onePredicateInParens) |>> Ast.Exists
 
@@ -360,13 +360,13 @@ let isOpArg = choice [ predicateIdentifier; variable; self; extDigits ] .>> IW
 let isOperator = positions ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // equality operator 
-let sepOp = positions (regex "[\+\-\*\/\<\>=@\w]+" |>> fun (a:string) -> a.Trim()) .>> IW <?> "<infix operator>" |>> Ast.InfixOperator
+let sepOp = positions (regex "[\+\-\*\/\\\<\>=@\w]+" |>> fun (a:string) -> a.Trim()) .>> IW <?> "<infix operator>" |>> Ast.InfixOperator
 
 let pWithSep p separator =
     let combinedParser = pipe2 p (opt separator) (fun a b -> (a, b))
     combinedParser |> many
 
-let infixOperation = positions (leftParen >>. pWithSep predicate sepOp .>> rightParen) |>> Ast.InfixOperation
+let infixOperation = positions (leftParen >>. pWithSep predicate sepOp .>> rightParen) |>> Ast.Expression
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [

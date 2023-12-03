@@ -86,7 +86,7 @@ type Ast =
     | QualificationList of Positions * Ast list
     | PredicateWithQualification of (Ast * Ast) 
     | InfixOperator of Positions * string
-    | InfixOperation of Positions * (Ast * Ast option) list
+    | Expression of Positions * (Ast * Ast option) list
     // Statements
     | Assertion of Positions * Ast
     | ConditionFollowedByResult of Positions * (Ast * Ast list)

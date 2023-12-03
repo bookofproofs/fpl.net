@@ -209,56 +209,56 @@ type TestQualifiersExtensionDigits () =
 
     [<TestMethod>]
     member this.TestCoordinatesAs1 () =
-        let result = run (predicate .>> eof) """x<1>"""
+        let result = run (predicate .>> eof) """x[1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordinatesAsA1 () =
-        let result = run (predicate .>> eof) """x <1>"""
+        let result = run (predicate .>> eof) """x [1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordinatesAsB1 () =
-        let result = run (predicate .>> eof) """x< 1 >"""
+        let result = run (predicate .>> eof) """x[ 1 ]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordinatesAsC1 () =
-        let result = run (predicate .>> eof) """x < 1 >"""
+        let result = run (predicate .>> eof) """x [ 1 ]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestRangesAs1 () =
-        let result = run (predicate .>> eof) """x[1,]"""
+        let result = run (predicate .>> eof) """x[[1,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestRangesAsA1 () =
-        let result = run (predicate .>> eof) """x [1,]"""
+        let result = run (predicate .>> eof) """x [[1,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestRangesAsB1 () =
-        let result = run (predicate .>> eof) """x[ 1 ,]"""
+        let result = run (predicate .>> eof) """x[[1 ,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestRangesAsC1 () =
-        let result = run (predicate .>> eof) """x [ 1 ,]"""
+        let result = run (predicate .>> eof) """x [[ 1 ,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

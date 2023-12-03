@@ -398,7 +398,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate53 () =
-        let result = run (predicate .>> eof) """all x in [a,b], y in c, z (and (a,b,c))"""
+        let result = run (predicate .>> eof) """all x in [[a,b]], y in c, z (and (a,b,c))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -412,7 +412,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate55 () =
-        let result = run (predicate .>> eof) """ex x in [a,b], y in c, z (and (a,b,c))"""
+        let result = run (predicate .>> eof) """ex x in [[a,b]], y in c, z (and (a,b,c))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

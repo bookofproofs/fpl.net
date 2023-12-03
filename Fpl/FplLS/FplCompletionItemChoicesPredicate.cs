@@ -32,7 +32,7 @@ namespace FplLS
                     // keyword
                     var ci2K = defaultCi.Clone(); ci2K.Kind = CompletionItemKind.Keyword; ci2K.AdjustToKeyword(); ret.Add(ci2K);
                     break;
-                case "<":
+                case "(":
                     // snippet for equality
                     var ciEquals = defaultCi.Clone(); SetBodyEquality(ciEquals); ret.Add(ciEquals);
                     break;
@@ -69,10 +69,10 @@ namespace FplLS
 
         public void SetBodyEquality(FplCompletionItem ci)
         {
-            ci.InsertText = $"< x = y > ";
+            ci.InsertText = $"( x = y ) ";
             ci.Label = TokenPrefix + ci.InsertText + "...";
             ci.Detail = "equality";
-            ci.SortText = "<";
+            ci.SortText = "(";
             ci.Kind = CompletionItemKind.Operator;
         }
 

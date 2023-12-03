@@ -17,7 +17,7 @@ definition class Tuple : obj
             for elem in listOfTpl
             (
                 i:=Succ(i)
-                self<i>:=elem
+                self[i]:=elem
             )
             myLength:=i
             base.obj()
@@ -50,10 +50,10 @@ definition class Tuple : obj
 definition class UnlimitedTupleFrom: obj
 {
     dec 
-        ~myX: tpl[from,]
+        ~myX: tpl[[from,]]
     ;
 
-    constructor UnlimitedTupleFrom(from:index, x: tpl[from,])
+    constructor UnlimitedTupleFrom(from:index, x: tpl[[from,]])
     {
         dec
             base.obj()
@@ -65,7 +65,7 @@ definition class UnlimitedTupleFrom: obj
     property tpl Coord(i: Nat)
     {
         dec
-            self:=x<i>
+            self:=x[i]
         ;
         self
     }
@@ -89,7 +89,7 @@ def class CartesianProduct: Set
             for setItem in setList
             (
                 i:=Succ(i)
-                self<i>:=setItem
+                self[i]:=setItem
             )
             myFrom := Nat(1)
             myLength:=i
@@ -131,9 +131,9 @@ def class CartesianProduct: Set
                     In(tupleElem,@self),
                     and (
                         is(tupleElem,Tuple[myFrom,myLength]),
-                        all i in [1,myLength] 
+                        all i in [[1,myLength]]
                         (
-                            In(tupleElem<i>,@self<i>) 
+                            In(tupleElem[i],@self[i]) 
                         )
                     )
                 )

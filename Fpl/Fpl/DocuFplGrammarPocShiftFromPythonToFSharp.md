@@ -241,7 +241,7 @@ The original FPL language had not inbuilt equality predicate, relying on the sec
 However, this approach seems not feasible from the implementation point of view because such a predicate would be hard if not impossible to interpret. Moreover, the equality sign `=` in the infix notation is so common in proof-based mathematics that it is preferable to FPL expressions using the user-defined `Equal` predicate.
 
 In the new FPL syntax version, we introduce an inbuilt equality sign and allow infix notation for equality. Nevertheless, infix notation together with the error recovery mechanism in the new FPL parser
-  requires disambiguation in the form that equality comparison have to be enclosed by some other characters that cannot be mixed up with other literals or predicates in FPL. We chose the enclosing characters `<` and `>` for this purpose:
+  requires disambiguation in the form that equality comparison have to be enclosed by some other characters that cannot be mixed up with other literals or predicates in FPL. We chose the enclosing characters `(` and `)` for this purpose:
 
 *Before*
 ``` 
@@ -250,12 +250,12 @@ In the new FPL syntax version, we introduce an inbuilt equality sign and allow i
 ``` 
 *Now*
 ``` 
-    <x = y>
+    (x = y)
 ``` 
 
 Of course, the equality predicate can be placed everywhere any predicate can be used in FPL, for instance, it can be nested within other predicates. 
 
-The equality comparison supports multiple equalities at once, for instance `< x = y = z >` is a shorter form for  `and (<x = y>, <y = z>)`
+The equality comparison supports multiple equalities at once, for instance `( x = y = z )` is a shorter form for  `and ((x = y), (y = z))`
 
 #### 10) Domains are now allowed in the quantors `all`, `ex`, and `exn`.
 
@@ -293,7 +293,7 @@ Also, expressions in second-order logic predicates are allowed:
         (
             ex y in Set
             (
-                <y = SetBuilder(x,p)>
+                (y = SetBuilder(x,p))
             )
         )
     }
@@ -301,7 +301,10 @@ Also, expressions in second-order logic predicates are allowed:
 
 #### 11) Disambiguation of coordinate lists and ranges
 
-In previous versions, the square brackets `[`, `]` were used for both, coordinate lists and ranges. In the new version, coordinates have to be placed in angle brackets `<` and `>`. This disambiguates the grammar for to improve the inbuilt error recovery mechanism.
+In previous versions, the square brackets `[`, `]` were used for both, coordinate lists and ranges. 
+In the new version, coordinates have to be placed in square brackets `[` and `]`, while ranges have left and right bounds 
+that can be either open like in `[(`, `)]` or closed like in `[[`, `]]`
+This disambiguates the grammar for to improve the inbuilt error recovery mechanism.
 
 *Before*
 ``` 
@@ -313,9 +316,9 @@ In previous versions, the square brackets `[`, `]` were used for both, coordinat
 ``` 
 *Now*
 ``` 
-    for i in [1~n]  // <- range
+    for i in [[1~n]]  // <- range
     (
-        a<i,j>:= b // <- coordinates
+        a[i,j]:= b // <- coordinates
     )
 ``` 
 
@@ -386,8 +389,8 @@ To disambiguate the two usages, the following changes in the FPL syntax have bee
 * In proof-based mathematics, there are use cases where extensions symbols `1,2,3,...` (for instance those identified with natural numbers) have to be used as index variables. In those cases, FPL allows the coordinate notation.
 
 ``` 
-    n<1>
-    n<m,k>
+    n[1]
+    n[m,k]
 ``` 
 * Left- and Right-open ranges contain both indexes and extensions
 *Before*
@@ -404,16 +407,16 @@ To disambiguate the two usages, the following changes in the FPL syntax have bee
 ``` 
     // boundaries can be disambiguated 
     // extension type 
-    [1~5] // (closed range with boundaries 1 and 5 )
-    [(1~5] // (left-open range with boundaries 1 and 5)
-    [1~5)] // (right-open range with boundaries 1 and 5)
+    [[1~5]] // (closed range with boundaries 1 and 5 )
+    [(1~5]] // (left-open range with boundaries 1 and 5)
+    [[1~5)] // (right-open range with boundaries 1 and 5)
     [(1~5)] // (left- and right-open range with boundaries 1 and 5)
 
     // boundaries can be disambiguated 
     // index type 
-    [!1~!5] // (closed range with boundaries 1 and 5 )
-    [(!1~!5] // (left-open range with boundaries 1 and 5)
-    [!1~!5)] // (right-open range with boundaries 1 and 5)
+    [[!1~!5]] // (closed range with boundaries 1 and 5 )
+    [(!1~!5]] // (left-open range with boundaries 1 and 5)
+    [[!1~!5)] // (right-open range with boundaries 1 and 5)
     [(!1~!5)] // (left- and right-open range with boundaries 1 and 5)
 
 ``` 
@@ -490,9 +493,9 @@ The following changes have been made:
 ```        
     cases
     (
-        | <x = 0> : self := Zero()
-        | <x = 1> : self := Succ(Zero())
-        | <x = 2> : self := Succ(Succ(Zero()))
+        | (x = 0) : self := Zero()
+        | (x = 1) : self := Succ(Zero())
+        | (x = 2) : self := Succ(Succ(Zero()))
         ? self := Succ(delegate.decrement(x))
     )
 ```
@@ -511,7 +514,7 @@ In order to simplify the error recovery process, we introduce an additional keyw
                 base.Tuple()
                 for i in [1~n] 
                 (
-                    self<i>:=field.AdditiveGroup().NeutralElement()
+                    self[i]:=field.AdditiveGroup().NeutralElement()
                 )
             ;
             self
@@ -527,9 +530,9 @@ In order to simplify the error recovery process, we introduce an additional keyw
             dec
                 ~i: Nat 
                 base.Tuple()
-                for i in [1~n] 
+                for i in [[1,n]] 
                 (
-                    self<i>:=field.AdditiveGroup().NeutralElement()
+                    self[i]:=field.AdditiveGroup().NeutralElement()
                 )
             ;
             self
@@ -592,9 +595,9 @@ In previous versions of FPL, the syntax of theorem-like statements, conjectures 
             (
                 impl
                 (
-                    not ( < x = y > )
+                    not ( x = y )
                     ,
-                    not ( < Successor(x) = Successor(y) > )
+                    not ( Successor(x) = Successor(y) )
                 )
             )
     }
@@ -607,9 +610,9 @@ In previous versions of FPL, the syntax of theorem-like statements, conjectures 
         (
             impl
             (
-                not ( < x = y > )
+                not ( x = y )
                 ,
-                not ( < Successor(x) = Successor(y) > )
+                not ( Successor(x) = Successor(y) )
             )
         )
     }
@@ -628,7 +631,7 @@ The additional predicate `bydef <variable>` is an abbreviation to of what had to
 
 #### 23) A more stringent usage of qualifiers, coordinates, and ranges
 
-FPL supports the following qualifiers: dotted notation `x.something`, with arguments `x(something)`, with coordinates `x<something>`, with range `x[something,something]`, with subscript `x!something`. In general, all of them can be chained, for instance, a dotted notation can be chained with a subscripted one like this: `x.something!somethingelse`
+FPL supports the following qualifiers: dotted notation `x.something`, with arguments `x(something)`, with coordinates `x[something]`, with range `x[[something,something]]`, with subscript `x!something`. In general, all of them can be chained, for instance, a dotted notation can be chained with a subscripted one like this: `x.something!somethingelse`
 
 There is a connection between qualifiers and identifiers, that are variables, the self keyword, pascal-cased FPL identifiers < PascalCasId >, index-typed digits< $digits >, and extension digits < extensionDigits >. This connection depends on whether identifiers can be used "with" qualifiers, "as" qualifiers, or both- The following table shows which identifiers can be used how with these qualifiers:
 

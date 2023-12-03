@@ -16,7 +16,7 @@ namespace FplLSTests
         [DataRow("impl", 2)]
         [DataRow("and", 2)]
         [DataRow("or", 2)]
-        [DataRow("<", 1)]
+        [DataRow("(", 1)]
         [TestMethod]
         public void TestAddPredicateChoicesNumber(string choice, int expected)
         {
@@ -35,7 +35,7 @@ namespace FplLSTests
         [DataRow("impl")]
         [DataRow("and")]
         [DataRow("or")]
-        [DataRow("<")]
+        [DataRow("(")]
         [TestMethod]
         public void TestAddPredicateKeywordCounts(string choice)
         {
@@ -45,7 +45,7 @@ namespace FplLSTests
             int expected = 1;
             foreach (var item in actual)
             {
-                if (choice == "<")
+                if (choice == "(")
                 {
                     expected = 0;
                 }
@@ -70,7 +70,7 @@ namespace FplLSTests
         [DataRow("and", CompletionItemKind.Keyword, "zzzand")]
         [DataRow("or", CompletionItemKind.Operator, "or")]
         [DataRow("or", CompletionItemKind.Keyword, "zzzor")]
-        [DataRow("<", CompletionItemKind.Operator, "<")]
+        [DataRow("(", CompletionItemKind.Operator, "(")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind isKeyword, string expected)
         {
@@ -95,7 +95,7 @@ namespace FplLSTests
         [DataRow("impl")]
         [DataRow("and")]
         [DataRow("or")]
-        [DataRow("<")]
+        [DataRow("(")]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -105,7 +105,7 @@ namespace FplLSTests
             {
                 if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
-                    if (choice == "<")
+                    if (choice == "(")
                     {
                         Assert.IsTrue(item.InsertText.EndsWith(" "));
                     }
@@ -127,7 +127,7 @@ namespace FplLSTests
         [DataRow("impl")]
         [DataRow("and")]
         [DataRow("or")]
-        [DataRow("<")]
+        [DataRow("(")]
         [TestMethod]
         public void TestAddPredicateChoicesLabel(string choice)
         {
@@ -149,7 +149,7 @@ namespace FplLSTests
         [DataRow("impl", "predicate (implication, =>)")]
         [DataRow("and", "predicate (conjunction)")]
         [DataRow("or", "predicate (disjunction)")]
-        [DataRow("<", "equality")]
+        [DataRow("(", "equality")]
         [TestMethod]
         public void TestAddPredicateChoicesDetail(string choice, string l)
         {
@@ -174,7 +174,7 @@ namespace FplLSTests
         [DataRow("impl")]
         [DataRow("and")]
         [DataRow("or")]
-        [DataRow("<")]
+        [DataRow("(")]
         [TestMethod]
         public void TestAddPredicateChoicesInsertText(string choice)
         {

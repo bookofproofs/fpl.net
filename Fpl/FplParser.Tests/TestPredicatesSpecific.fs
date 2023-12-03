@@ -52,7 +52,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPrimePredicate6 () =
-        let result = run (primePredicate .>> eof) """arr<i>"""
+        let result = run (primePredicate .>> eof) """arr[i]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -248,7 +248,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs5 () =
-        let result = run (predicateWithQualification .>> eof) """Add(result,arr<i>)"""
+        let result = run (predicateWithQualification .>> eof) """Add(result,arr[i])"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -283,7 +283,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs5a () =
-        let result = run (predicateWithQualification .>> eof) """x!Add(result,arr<i>)"""
+        let result = run (predicateWithQualification .>> eof) """x!Add(result,arr[i])"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -369,6 +369,13 @@ type TestPredicatesSpecific () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
+    member this.TestNot5 () =
+        let result = run (negation .>> eof) """not all x,y in N ( (x >< y) )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
     member this.TestIsOperator1 () =
         let result = run (isOperator .>> eof) """is(x, Nat)"""
         let actual = sprintf "%O" result
@@ -440,7 +447,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestAll5 () =
-        let result = run (all .>> eof) """all x in [a,b], y in c, z (and (a,b,c))"""
+        let result = run (all .>> eof) """all x in [[a,b]], y in c, z (and (a,b,c))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -482,7 +489,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestEx5 () =
-        let result = run (exists .>> eof) """ex x in [a,b], y in c, z (and (a,b,c))"""
+        let result = run (exists .>> eof) """ex x in [[a,b]], y in c, z (and (a,b,c))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -540,35 +547,35 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestOperator01 () =
-        let result = run (equalityComparison .>> eof) """( x = 1 )"""
+        let result = run (infixOperation .>> eof) """( x = 1 )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestOperator02 () =
-        let result = run (equalityComparison .>> eof) """( x = y = z )"""
+        let result = run (infixOperation .>> eof) """( x = y = z )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestOperator03 () =
-        let result = run (equalityComparison .>> eof) """( x b y c z )"""
+        let result = run (infixOperation .>> eof) """( x b y c z )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestOperator04 () =
-        let result = run (equalityComparison .>> eof) """( x + y / z = abc )"""
+        let result = run (infixOperation .>> eof) """( x + y / z = abc )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestOperator05 () =
-        let result = run (equalityComparison .>> eof) """( x' + y / z = abc )"""
+        let result = run (infixOperation .>> eof) """( ((x) + y) / z = abc )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

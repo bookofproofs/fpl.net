@@ -26,7 +26,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestFor02 () =
-        let result = run (forStatement .>> eof) """for    n in [1,4]
+        let result = run (forStatement .>> eof) """for    n in [[1,4]]
             (
             assert Equal(f(n),n)
             )"""
@@ -36,7 +36,7 @@ type TestStatements () =
 
     [<TestMethod>]
     member this.TestFor03 () =
-        let result = run (forStatement .>> eof) """for n in [$1,$4]
+        let result = run (forStatement .>> eof) """for n in [[$1,$4]]
             (
             assert Equal(f(n),n)
             )"""
@@ -134,9 +134,9 @@ type TestStatements () =
     member this.TestCases03 () =
         let result = run (casesStatement .>> eof) """cases
                     (
-                        | <x = 0> : self := Zero() 
-                        | <x = 1> : self := Succ(Zero())
-                        | <x = 2> : self := Succ(Succ(Zero()))
+                        | (x = 0) : self := Zero() 
+                        | (x = 1) : self := Succ(Zero())
+                        | (x = 2) : self := Succ(Succ(Zero()))
                         ? self := Succ(delegate.decrement(x))  
                     )"""
         let actual = sprintf "%O" result
@@ -158,8 +158,8 @@ type TestStatements () =
     member this.TestCases05 () =
         let result = run (casesStatement .>> eof) """cases
             (
-                | <m = 0>: result:= n
-                | <Succ(m) = k>: result:= Succ(Add(n,k))
+                | (m = 0): result:= n
+                | (Succ(m) = k): result:= Succ(Add(n,k))
                 ? result:= undef
             )"""
         let actual = sprintf "%O" result

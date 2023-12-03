@@ -68,9 +68,9 @@ def class ZeroVectorN: Tuple
     {
         dec
             ~i: Nat 
-            for i in [1,n] 
+            for i in [[1,n]] 
             (
-                self<i>:=field.AdditiveGroup().NeutralElement()
+                self[i]:=field.AdditiveGroup().NeutralElement()
             )
             base.Tuple()
         ;

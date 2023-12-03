@@ -67,56 +67,56 @@ type TestQualifiersSelf () =
 
     [<TestMethod>]
     member this.TestCoordinatesBoth () =
-        let result = run (predicate .>> eof) """@self<@self>"""
+        let result = run (predicate .>> eof) """@self[@self]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordinatesBothA () =
-        let result = run (predicate .>> eof) """@self <@self>"""
+        let result = run (predicate .>> eof) """@self [@self]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordinatesBothB () =
-        let result = run (predicate .>> eof) """x< y >"""
+        let result = run (predicate .>> eof) """x[ y ]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordinatesBothC () =
-        let result = run (predicate .>> eof) """@self < @self >"""
+        let result = run (predicate .>> eof) """@self [ @self ]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestRangesBoth () =
-        let result = run (predicate .>> eof) """@self[@self,]"""
+        let result = run (predicate .>> eof) """@self[[@self,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestRangesBothA () =
-        let result = run (predicate .>> eof) """@self [@self,]"""
+        let result = run (predicate .>> eof) """@self [[@self,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestRangesBothB () =
-        let result = run (predicate .>> eof) """@self[ @self ,]"""
+        let result = run (predicate .>> eof) """@self[[ @self ,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestRangesBothC () =
-        let result = run (predicate .>> eof) """@self [ @self ,]"""
+        let result = run (predicate .>> eof) """@self [[ @self ,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
