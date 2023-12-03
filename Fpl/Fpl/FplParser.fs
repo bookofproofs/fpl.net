@@ -41,7 +41,6 @@ let colon = skipChar ':' >>. spaces >>% Ast.One
 let colonStar = skipString ":*" >>. spaces >>% Ast.Many
 let colonPlus = skipString ":+" >>. spaces >>% Ast.Many1
 let colonEqual = skipString ":=" >>. spaces 
-let equals = skipString "=" >>. spaces
 let at = pchar '@'
 let case = skipChar '|' >>. spaces
 let elseCase = skipChar '?' >>. spaces
@@ -322,6 +321,7 @@ let indexedPredicate = positions (exclamationMark >>. IW >>. choice [ predicateW
 
 let qualifiedPredicate = choice [dottedPredicate; indexedPredicate ]
 let qualificationList = positions (many qualifiedPredicate) |>> Ast.QualificationList
+
 predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification 
 
 let dollarDigitList = many1 dollarDigits
@@ -359,12 +359,18 @@ let existsTimesN = positions (((keywordExN >>. dollarDigits .>> SW) .>>. variabl
 let isOpArg = choice [ predicateIdentifier; variable; self; extDigits ] .>> IW
 let isOperator = positions ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
-// equality operator
-let equalityComparison = positions (leftBracket >>. sepBy1 predicate equals .>> rightBracket) |>> Ast.EqualityComparison
+// equality operator 
+let sepOp = positions (regex "[\+\-\*\/\<\>=@\w]+" |>> fun (a:string) -> a.Trim()) .>> IW <?> "<infix operator>" |>> Ast.InfixOperator
+
+let pWithSep p separator =
+    let combinedParser = pipe2 p (opt separator) (fun a b -> (a, b))
+    combinedParser |> many
+
+let infixOperation = positions (leftParen >>. pWithSep predicate sepOp .>> rightParen) |>> Ast.InfixOperation
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [
-    equalityComparison
+    infixOperation
     conjunction
     disjunction
     implication

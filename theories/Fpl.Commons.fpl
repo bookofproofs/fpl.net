@@ -49,11 +49,8 @@ inf ExistsByExample(p: pred(c: obj))
 
 def pred NotEqual(x,y: tpl)
 {
-    not ( <x = y> )
+    not ( (x = y) )
 }
-
-
-
 
 localization iif(x,y) :=
     !tex: x "\Leftrightarrow" y

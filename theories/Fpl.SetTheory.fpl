@@ -75,7 +75,7 @@ axiom Extensionality()
                 IsSubset(x,y),
                 IsSubset(y,x)
             ),
-            < x = y >
+            ( x = y )
         )
     )
 }
@@ -110,7 +110,7 @@ axiom SchemaSeparation()
     (
         ex y
         (
-            < y = SetBuilder(x,p) >
+            ( y = SetBuilder(x,p) )
         )
     )
 }
@@ -152,8 +152,8 @@ axiom Pairing()
                     In(w,z),
                     or
                     (
-                        < w = x >,
-                        < w = y >
+                        ( w = x ),
+                        ( w = y )
                     )
                 )
             )

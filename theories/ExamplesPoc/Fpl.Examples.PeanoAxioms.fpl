@@ -30,7 +30,7 @@ axiom SuccessorExistsAndIsUnique()
             and
             (
                 NotEqual(successor,n),
-                <successor = Succ(n)>
+                (successor = Succ(n))
             )
         )
     )
@@ -50,8 +50,8 @@ axiom SuccessorIsInjective()
     (
         impl
         (
-            < Succ(n) = Succ(m) >, 
-            < n = m >
+            ( Succ(n) = Succ(m) ),
+            ( n = m )
         )
     )
 }
@@ -80,9 +80,9 @@ def class Nat: obj
         dec
             cases
             (
-                | <x = 0> : self := Zero() 
-                | <x = 1> : self := Succ(Zero()) 
-                | <x = 2> : self := Succ(Succ(Zero())) 
+                | (x = 0) : self := Zero() 
+                | (x = 1) : self := Succ(Zero()) 
+                | (x = 2) : self := Succ(Succ(Zero())) 
                 ? self := Succ(delegate.decrement(x))  
             )
         ;
@@ -105,7 +105,7 @@ def class Nat: obj
 
 def pred IsGreaterOrEqual(n,m: Nat)
 {
-    ex k in Nat ( <n = Add(m,k)> )
+    ex k in Nat ( (n = Add(m,k)) )
 }
 
 // besides the class "Nat", we can formulate definition of the set of all natural numbers
@@ -142,8 +142,8 @@ def func Add(n,m: Nat)->Nat
         ~result, k: Nat
         cases
         (
-            | <m = 0>: result:= n
-            | <Succ(m) = k>: result:= Succ(Add(n,k))
+            | (m = 0): result:= n
+            | (Succ(m) = k): result:= Succ(Add(n,k))
             ? result:= undef
         )
     ;
@@ -166,17 +166,17 @@ prop AddIsUnique(op: Add)
     (
         and
         (
-            < op(n,0) = n >,
-            < anotherAdd(n,0) = n >,
-            < op(n,Succ(m)) = Succ(op(n,m)) >,
-            < anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) >
+            ( op(n,0) = n ),
+            ( anotherAdd(n,0) = n ),
+            ( op(n,Succ(m)) = Succ(op(n,m)) ),
+            ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
         )
         ,
         all n
         (
             all m
             (
-                < op(n,m) = anotherAdd(n,m) >
+                ( op(n,m) = anotherAdd(n,m) )
             )
         )
     )
@@ -188,17 +188,17 @@ proof AddIsUnique!$1
     1. |- assume 
         and
         (
-            < op(n,0) = n >,
-            < anotherAdd(n,0) = n >,
-            < op(n,Succ(m)) = Succ(op(n,m)) >,
-            < anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) >
+            ( op(n,0) = n ),
+            ( anotherAdd(n,0) = n ),
+            ( op(n,Succ(m)) = Succ(op(n,m)) ),
+            ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
         )
     2. |- trivial
     3. |- all n
             (
                 all m
                 (
-                    < op(n,m) = anotherAdd(n,m) >
+                    ( op(n,m) = anotherAdd(n,m) )
                 )
             )
 }
@@ -285,12 +285,12 @@ proposition SumOfConsecutiveNumbers()
     (
         all n in [1,limit]
         (
-            <f(n) = n>
+            (f(n) = n)
         )
         ,
         all n
         (
-            <Sum(1,n,f) = Div(Mul(n,Succ(n)),2)>
+            (Sum(1,n,f) = Div(Mul(n,Succ(n)),2))
         )
     )
 }

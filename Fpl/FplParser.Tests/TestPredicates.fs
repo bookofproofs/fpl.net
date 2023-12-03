@@ -374,23 +374,24 @@ type TestPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+
     [<TestMethod>]
     member this.TestPredicate50 () =
-        let result = run (predicate .>> eof) """<z = y>"""
+        let result = run (predicate .>> eof) """(z = y)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate51 () =
-        let result = run (predicate .>> eof) """<z = true>"""
+        let result = run (predicate .>> eof) """(z @= true)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate52 () =
-        let result = run (predicate .>> eof) """<z = true = and(x,y)>"""
+        let result = run (predicate .>> eof) """(z @= true @= and(x,y))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

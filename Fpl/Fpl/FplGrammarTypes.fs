@@ -79,13 +79,14 @@ type Ast =
     | ReferenceToCorollary of Positions * ((Ast * Ast list) * Ast) 
     | Justification of Positions * Ast list
     | ArgumentTuple of Positions * Ast list
-    | EqualityComparison of Positions * Ast list
     | ByDef of Positions * Ast
     | PredicateWithOptSpecification of Positions * (Ast * Ast option)
     | DottedPredicate of Positions * Ast 
     | IndexedPredicate of Positions * Ast
     | QualificationList of Positions * Ast list
-    | PredicateWithQualification of Ast * Ast
+    | PredicateWithQualification of (Ast * Ast) 
+    | InfixOperator of Positions * string
+    | InfixOperation of Positions * (Ast * Ast option) list
     // Statements
     | Assertion of Positions * Ast
     | ConditionFollowedByResult of Positions * (Ast * Ast list)

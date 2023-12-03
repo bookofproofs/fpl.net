@@ -215,7 +215,7 @@ def class BinaryRelation: Relation
                     AreRelated(v,w1,@self),
                     AreRelated(v,w2,@self)
                 ),
-                < w1 = w2 >
+                ( w1 = w2 )
             )
         )
     }
@@ -234,7 +234,7 @@ def class BinaryRelation: Relation
                     AreRelated(v1,w,@self),
                     AreRelated(v2,w,@self)
                 ),
-                < v1 = v2 >
+                ( v1 = v2 )
             )
         )
     }

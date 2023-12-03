@@ -539,15 +539,36 @@ type TestPredicatesSpecific () =
  
 
     [<TestMethod>]
-    member this.TestEquality01 () =
-        let result = run (equalityComparison .>> eof) """< x = 1 >"""
+    member this.TestOperator01 () =
+        let result = run (equalityComparison .>> eof) """( x = 1 )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestEquality02 () =
-        let result = run (equalityComparison .>> eof) """< x = y = z >"""
+    member this.TestOperator02 () =
+        let result = run (equalityComparison .>> eof) """( x = y = z )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestOperator03 () =
+        let result = run (equalityComparison .>> eof) """( x b y c z )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestOperator04 () =
+        let result = run (equalityComparison .>> eof) """( x + y / z = abc )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestOperator05 () =
+        let result = run (equalityComparison .>> eof) """( x' + y / z = abc )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

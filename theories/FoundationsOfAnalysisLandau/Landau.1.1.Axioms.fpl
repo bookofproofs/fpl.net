@@ -15,9 +15,9 @@ def class Nat: obj
         dec
             cases
             (
-                | <x = 1> : self := One() 
-                | <x = 2> : self := Succ(One()) 
-                | <x = 3> : self := Succ(Succ(One())) 
+                | (x = 1) : self := One() 
+                | (x = 2) : self := Succ(One()) 
+                | (x = 3) : self := Succ(Succ(One())) 
                 ? self := Succ(delegate.decrement(x))  
             )
         ;
@@ -44,7 +44,7 @@ axiom Axiom2 ()
     (
         exn$1 y in Nat
         (
-            < y = Successor(x) > 
+            ( y = Successor(x) )
         )
     )
 }
@@ -55,9 +55,9 @@ corollary Axiom2!$1 ()
     dec ~x,y:Nat ;
     impl
     (
-        < x = y > 
+        ( x = y )
         ,
-        < Successor(x) = Successor(y) > 
+        ( Successor(x) = Successor(y) )
     )
 }
 
@@ -67,7 +67,7 @@ axiom Axiom3 ()
     dec ~x:Nat ;
     not 
     (
-        < Successor(x) = 1 > 
+        ( Successor(x) = 1 )
     )
 }
 
@@ -77,8 +77,8 @@ axiom Axiom4 ()
     dec ~x,y:N ;
     impl
     (
-        < Successor(x) = Successor(y) >, 
-        < x = y >
+        ( Successor(x) = Successor(y) ),
+        ( x = y )
     )
 }
 
@@ -130,7 +130,7 @@ axiom Axiom5 ()
             )
         )
         ,
-        < m = N > // then m is actually the set of natural numbers
+        ( m = N ) // then m is actually the set of natural numbers
     )
 }
 

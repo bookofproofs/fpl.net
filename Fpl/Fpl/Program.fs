@@ -5,7 +5,11 @@ open FParsec
 open System.Text.RegularExpressions
 
 
-let input = """PascalId().PascalId()"""
+
+
+
+
+let input = """PascalId() @<> PascalId()"""
 //let input = """PascalId()()"""
 
 

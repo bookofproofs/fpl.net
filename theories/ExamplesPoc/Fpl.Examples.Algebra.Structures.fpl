@@ -11,22 +11,22 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
     intr
     property optional pred IsAssociative()
     {
-        all a,b,c in tplSetElem (  <@self(a,@self(b,c)) = @self(@self(a,b),c)>  )
+        all a,b,c in tplSetElem (  (@self(a,@self(b,c)) = @self(@self(a,b),c))  )
     }
 
     property optional pred IsCommutative()
     {
-        all a,b in tplSetElem ( <@self(a,b) = @self(b,a)> )
+        all a,b in tplSetElem ( (@self(a,b) = @self(b,a)) )
     }
 
     property optional pred IsLeftNeutralElement(e: tplSetElem)
     {
-        all x in tplSetElem ( <@self(e,x) = x> )
+        all x in tplSetElem ( (@self(e,x) = x) )
     }
 
     property optional pred IsRightNeutralElement(e: tplSetElem)
     {
-        all x in tplSetElem ( <@self(x,e) = x> )
+        all x in tplSetElem ( (@self(x,e) = x) )
     }
 
     property optional pred IsNeutralElement(e: tplSetElem)
@@ -201,7 +201,7 @@ def func Exp
         assert In(y,x)
         cases
         (
-            | <n = 0>: result := m.NeutralElem()
+            | (n = 0): result := m.NeutralElem()
             ? result :=
                     op(
                         y,
@@ -247,8 +247,8 @@ def class Group: Monoid
             assert
                 and
                 (
-                    <myOp(x,val) = self.NeutralElem()>,
-                    <myOp(val,x) = self.NeutralElem()>
+                    (myOp(x,val) = self.NeutralElem()),
+                    (myOp(val,x) = self.NeutralElem())
                 )
         ;
         ret val
@@ -326,7 +326,7 @@ def class Ring: AlgebraicStructure
     {
         all a,b,c in tplElem
         (
-            < myMul(myAdd(a,b),c) = myAdd(myMul(a,c),myMul(b,c)) >
+            ( myMul(myAdd(a,b),c) = myAdd(myMul(a,c),myMul(b,c)) )
         )
     }
 
@@ -334,7 +334,7 @@ def class Ring: AlgebraicStructure
     {
         all a,b,c in tplElem
         (
-            < myMul(a,myAdd(b,c)) = myAdd(myMul(a,b),myMul(a,c)) >
+            ( myMul(a,myAdd(b,c)) = myAdd(myMul(a,b),myMul(a,c)) )
         )
     }
 
@@ -493,7 +493,7 @@ def class VectorSpaceOverField : obj
     {
         all u,w in tplVector, a in tplFieldElement
         (
-            < myScalarMul(myVecAdd(u,w),a) = myVecAdd(myScalarMul(u,a),myScalarMul(w,a)) >
+            ( myScalarMul(myVecAdd(u,w),a) = myVecAdd(myScalarMul(u,a),myScalarMul(w,a)) )
         )
     }
 
@@ -501,7 +501,7 @@ def class VectorSpaceOverField : obj
     {
         all u,w in tplVector, a in tplFieldElement
         (
-            < myScalarMul(a,myVecAdd(u,w)) = myVecAdd(myScalarMul(a,u),myScalarMul(a,w)) >
+            ( myScalarMul(a,myVecAdd(u,w)) = myVecAdd(myScalarMul(a,u),myScalarMul(a,w)) )
         )
     }
 
@@ -509,7 +509,7 @@ def class VectorSpaceOverField : obj
     {
         all a,b in tplFieldElement, u in tplVector
         (
-            < myScalarMul(myFieldMul(a,b),u) = myScalarMul(a,myScalarMul(b,u)) >
+            ( myScalarMul(myFieldMul(a,b),u) = myScalarMul(a,myScalarMul(b,u)) )
         )
     }
 
@@ -521,7 +521,7 @@ def class VectorSpaceOverField : obj
         ;
         all u in tplVector
         (
-            < myScalarMul(one,u) =  u >
+            ( myScalarMul(one,u) =  u )
         )
     }
 }
