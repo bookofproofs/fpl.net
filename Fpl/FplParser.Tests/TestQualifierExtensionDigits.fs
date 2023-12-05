@@ -263,32 +263,7 @@ type TestQualifiersExtensionDigits () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestSubscriptsAs1 () =
-        let result = run (predicate .>> eof) """x!1"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestSubscriptsAsA1 () =
-        let result = run (predicate .>> eof) """x !1"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestSubscriptsAsB1 () =
-        let result = run (predicate .>> eof) """x! 1"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestSubscriptsAsC1 () =
-        let result = run (predicate .>> eof) """x ! 1"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
 
 

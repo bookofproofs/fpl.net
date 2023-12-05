@@ -264,29 +264,29 @@ type TestQualifiersDollarDigits () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestSubscriptsAs1 () =
-        let result = run (predicate .>> eof) """x!$1"""
+    member this.TestCoordsAs1 () =
+        let result = run (predicate .>> eof) """x[$1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestSubscriptsAsA1 () =
-        let result = run (predicate .>> eof) """x !$1"""
+    member this.TestSCoordsAsA1 () =
+        let result = run (predicate .>> eof) """x [$1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestSubscriptsAsB1 () =
-        let result = run (predicate .>> eof) """x! $1"""
+    member this.TestCoordsAsB1 () =
+        let result = run (predicate .>> eof) """x[ $1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestSubscriptsAsC1 () =
-        let result = run (predicate .>> eof) """x ! $1"""
+    member this.TestCoordsAsC1 () =
+        let result = run (predicate .>> eof) """x [ $1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

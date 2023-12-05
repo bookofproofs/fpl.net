@@ -45,7 +45,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPrimePredicate5 () =
-        let result = run (primePredicate .>> eof) """list!i"""
+        let result = run (primePredicate .>> eof) """list[i]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -241,7 +241,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs4 () =
-        let result = run (predicateWithQualification .>> eof) """Add(result,list!i)"""
+        let result = run (predicateWithQualification .>> eof) """Add(result,list[i])"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -255,70 +255,70 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs1a () =
-        let result = run (predicateWithQualification .>> eof) """x!Zero()"""
+        let result = run (predicateWithQualification .>> eof) """x[Zero()]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicateWithArgs2a () =
-        let result = run (predicateWithQualification .>> eof) """x!self(i)"""
+        let result = run (predicateWithQualification .>> eof) """x[self(i)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicateWithArgs3a () =
-        let result = run (predicateWithQualification .>> eof) """x!ProceedingResults(1.,2.)"""
+        let result = run (predicateWithQualification .>> eof) """x[ProceedingResults(1.,2.)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicateWithArgs4a () =
-        let result = run (predicateWithQualification .>> eof) """x!Add(result,list!i)"""
+        let result = run (predicateWithQualification .>> eof) """x[Add(result,list[i])]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicateWithArgs5a () =
-        let result = run (predicateWithQualification .>> eof) """x!Add(result,arr[i])"""
+        let result = run (predicateWithQualification .>> eof) """x[Add(result,arr[i])]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicateWithArgs6a () =
-        let result = run (predicateWithQualification .>> eof) """x!A1()!A2()!A3()"""
+        let result = run (predicateWithQualification .>> eof) """x[A1[A2().A3()]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicateWithArgs7 () =
-        let result = run (predicateWithQualification .>> eof) """x!$3!$2"""
+        let result = run (predicateWithQualification .>> eof) """x[$3,$2]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicateWithArgs71 () =
-        let result = run (predicateWithQualification .>> eof) """x!$3()!$2"""
+        let result = run (predicateWithQualification .>> eof) """x[$3(),$2]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
         
     [<TestMethod>]
     member this.TestPredicateWithArgs7a () =
-        let result = run (predicateWithQualification .>> eof) """x!3!2"""
+        let result = run (predicateWithQualification .>> eof) """x[3,2]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicateWithArgs71a () =
-        let result = run (predicateWithQualification .>> eof) """x!3()"""
+        let result = run (predicateWithQualification .>> eof) """x[3()]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -539,7 +539,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestByDef02 () =
-        let result = run (byDefinition .>> eof) """bydef x!y"""
+        let result = run (byDefinition .>> eof) """bydef x[y]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

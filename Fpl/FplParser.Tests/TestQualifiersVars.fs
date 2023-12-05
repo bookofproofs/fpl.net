@@ -121,30 +121,3 @@ type TestQualifiersVars () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<TestMethod>]
-    member this.TestSubscriptsBoth () =
-        let result = run (predicate .>> eof) """x!y"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestSubscriptsBothA () =
-        let result = run (predicate .>> eof) """x !y"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestSubscriptsBothB () =
-        let result = run (predicate .>> eof) """x! y"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestSubscriptsBothC () =
-        let result = run (predicate .>> eof) """x ! y"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
