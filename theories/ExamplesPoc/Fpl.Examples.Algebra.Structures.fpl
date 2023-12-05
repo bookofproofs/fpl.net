@@ -118,7 +118,7 @@ def class AlgebraicStructure: obj
 
     property  func NthOp(n: index) -> Composition
     {
-        return myOps!n
+        return myOps[n]
     }
 
     // Every algebraic structure will have a mandatory property called CarrierSet of type Set.

@@ -48,7 +48,7 @@ type TestStatements () =
     member this.TestFor04 () =
         let result = run (forStatement .>> eof) """for n in SomeType
             (
-                x!n := 1
+                x[n] := 1
             )"""
         let actual = sprintf "%O" result
         printf "%O" actual

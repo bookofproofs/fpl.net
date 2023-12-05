@@ -15,7 +15,7 @@ theorem Theorem_001()
 }
 
 
-proof Theorem_001!$1
+proof Theorem_001$1
 {
     // PoC note: Proof by Contradiction (Type 2)
     // Strategy: Assume that the premise is true and the conclusion is false.
@@ -43,7 +43,7 @@ theorem Theorem_002 ()
     )
 }
 
-proof Theorem_002!$1
+proof Theorem_002$1
 {
     // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -80,7 +80,7 @@ theorem Theorem_003 ()
     )
 }
 
-proof Theorem_003!$1
+proof Theorem_003$1
 {
     // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -170,7 +170,7 @@ lemma Theorem_004_A ()
     )
 }
 
-proof Theorem_004_A!$1
+proof Theorem_004_A$1
 {
     // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -182,10 +182,10 @@ proof Theorem_004_A!$1
         for y in N 
         (
             // such that
-            a!1 := Successor(x) 
-            b!1 := Successor(x)
-            a!Successor(y) := Successor(a!y)
-            b!Successor(y) := Successor(b!y)
+            a[1] := Successor(x) 
+            b[1] := Successor(x)
+            a[Successor(y)] := Successor(a[y])
+            b[Successor(y)] := Successor(b[y])
         )
     ;
     declaration
@@ -195,7 +195,7 @@ proof Theorem_004_A!$1
             // for which a!y = b!y and a!1 = successor(x) = b!1
             iif
             (
-                ( a!y = b!y )
+                ( a[y] = b[y] )
                 ,
                 // PoC note: We formulate it predicatively using the implication that if the conjugated premise is fulfilled for some x than x is element of m
                 In (y, m)
@@ -203,20 +203,20 @@ proof Theorem_004_A!$1
     ;
     
     // "base case" 
-    100. bydef a!1, bydef b!1 |- ( a!1 = Successor(x) = b!1 )
-    100. |- ( a!1 = b!1 )
+    100. bydef a[1], bydef b[1] |- ( a[1] = Successor(x) = b[1] )
+    100. |- ( a[1] = b[1] )
     200. bydef m |- In (1, m)
     
     // "inductive step" 
     300. 200. |- assume ex y ( In(y,m) ) // if y belongs to m
-    400. bydef m |- ( a!y = b!y )
+    400. bydef m |- ( a[y] = b[y] )
     500. Axiom2 |- 
-        ( Successor(a!y) = Successor(b!y) )
-    600. bydef a!Successor(y), bydef b!Successor(b) |- 
-        ( a!Successor(y) = Successor(a!y) = Successor(b!y) = b!Successor(y) )
+        ( Successor(a[y]) = Successor(b[y]) )
+    600. bydef a[Successor(y)], bydef b[Successor(b)] |- 
+        ( a[Successor(y)] = Successor(a[y]) = Successor(b[y]) = b[Successor(y)] )
     650. |- In(Successor(y), m)
     
-    700. |- all y in N ( ( a!y = b!y ) )
+    700. |- all y in N ( ( a[y] = b[y] ) )
     800. |- qed
 }
 
@@ -239,7 +239,7 @@ lemma Theorem_004_B ()
 
 
 
-proof Theorem_004_B!$1
+proof Theorem_004_B$1
 {
     // PoC note: Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -294,7 +294,7 @@ theorem Theorem_005_SumIsAssoziative ()
     ( Sum(Sum(x,y),z) = Sum(x,Sum(y,z)) )
 }
 
-proof Theorem_005_SumIsAssoziative!$1
+proof Theorem_005_SumIsAssoziative$1
 {
     // Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -337,7 +337,7 @@ theorem Theorem_006_SumIsCommutatitve ()
     ( Sum(x,y) = Sum(y,x) )
 }
 
-proof Theorem_006_SumIsCommutatitve!$1
+proof Theorem_006_SumIsCommutatitve$1
 {
     // Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -358,7 +358,7 @@ proof Theorem_006_SumIsCommutatitve!$1
 
     // "base case" 
     100. bydef Sum |- ( Sum(y,1) = Successor(Sum(y)) ) // We have y + 1 = y', 
-    110. Theorem_004_B!$1 |- (Sum(1,y) = Successor(Sum(y)) )  // by the construction in the proof of Theorem 4, 1 + y = y'
+    110. Theorem_004_B$1 |- (Sum(1,y) = Successor(Sum(y)) )  // by the construction in the proof of Theorem 4, 1 + y = y'
     150. 100., 110. |- ( Sum(y,1) = Sum(1,y) ) // so that 1 + y = y + 1
     200. |- In (1, m) // and 1 belongs to m.
     
@@ -370,7 +370,7 @@ proof Theorem_006_SumIsCommutatitve!$1
             = Successor( Sum(y,x) )  
             = Sum( x, Successor(y) )     
             )
-    470. Theorem_004_B!$1 |- (Sum(Successor(x),y) = Successor(Sum(x,y)) )  // by the construction in the proof of theorem 4, we have x' + y = (x + y)'.
+    470. Theorem_004_B$1 |- (Sum(Successor(x),y) = Successor(Sum(x,y)) )  // by the construction in the proof of theorem 4, we have x' + y = (x + y)'.
     500. |- ( Sum(Successor(x),y) = Sum(y, Successor(x)) ) // hense x' + y = y + x'
     600. |- In (Successor(x), m) // so that x' belongs to m
     800. |- qed
@@ -382,7 +382,7 @@ theorem Theorem_007 ()
     not ( ( y = Sum(x,y) ) )
 }
 
-proof Theorem_007!$1
+proof Theorem_007$1
 {
     // Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -423,7 +423,7 @@ theorem Theorem_008()
     impl ( not( (y = z )) , not ( (Sum(x,y) = Sum(x,z)) )  )
 }
 
-prf Theorem_008!$1
+prf Theorem_008$1
 {
     // Proof by Induction (to prove: `all n in N ( p(n) )`)
     // Strategy: Prove the "base case": p(1)
@@ -479,7 +479,7 @@ theorem Theorem_009()
 // PoC note: Landau now splits his proof into two parts A and B. In part A, he shows that the three cases are mutually exclusive. 
 // In part B, he shows that at least one of the cases takes place.   
 
-proof SomeFplTheorem!$1
+proof SomeFplTheorem$1
 {
 
     // Part A

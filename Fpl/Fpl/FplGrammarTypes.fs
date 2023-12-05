@@ -11,7 +11,6 @@ type Ast =
     // Literals
     | Star 
     | Dot
-    | Index
     | LeftClosed
     | LeftOpen 
     | RightClosed
@@ -40,6 +39,7 @@ type Ast =
     | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | BrackedCoordList of Positions * Ast list
     | RangeInType of Positions * (Ast option * Ast option) 
+    | ReferencingIdentifier of Positions * (Ast * Ast list)
     // Types
     | One 
     | Many 
@@ -76,13 +76,12 @@ type Ast =
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Positions * (Ast * Ast)
     | ArgumentIdentifier of Positions * string
-    | ReferenceToCorollary of Positions * ((Ast * Ast list) * Ast) 
+    | ReferenceToProofOrCorollary of Positions * (Ast * Ast option) 
     | Justification of Positions * Ast list
     | ArgumentTuple of Positions * Ast list
     | ByDef of Positions * Ast
     | PredicateWithOptSpecification of Positions * (Ast * Ast option)
     | DottedPredicate of Positions * Ast 
-    | IndexedPredicate of Positions * Ast
     | QualificationList of Positions * Ast list
     | PredicateWithQualification of (Ast * Ast) 
     | InfixOperator of Positions * string
@@ -105,7 +104,7 @@ type Ast =
     | Theorem of Positions * (Ast *(Ast list option * Ast))
     | Lemma of Positions * (Ast *(Ast list option * Ast))
     | Proposition of Positions * (Ast *(Ast list option * Ast))
-    | Corollary of Positions * (((Ast * Ast list) * Ast) * (Ast list option * Ast))
+    | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
     | Conjecture of Positions * (Ast *(Ast list option * Ast))
     | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
     | ParamTuple of Positions * Ast list
@@ -135,7 +134,7 @@ type Ast =
     | RevokeArgument of Positions * Ast
     | JustifiedArgument of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
-    | Proof of Positions * ((Ast * Ast list) * Ast list)
+    | Proof of Positions * (Ast * Ast list)
     | Namespace of Ast option * Ast list
     | AST of Positions * Ast
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from

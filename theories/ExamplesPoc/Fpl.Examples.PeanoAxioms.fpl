@@ -183,7 +183,7 @@ prop AddIsUnique(op: Add)
     
 }
 
-proof AddIsUnique!$1
+proof AddIsUnique$1
 {
     1. |- assume 
         and

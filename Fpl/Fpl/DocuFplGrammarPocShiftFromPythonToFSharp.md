@@ -631,7 +631,11 @@ The additional predicate `bydef <variable>` is an abbreviation to of what had to
 
 #### 23) A more stringent usage of qualifiers, coordinates, and ranges
 
-FPL supports the following qualifiers: dotted notation `x.something`, with arguments `x(something)`, with coordinates `x[something]`, with range `x[[something,something]]`, with subscript `x!something`. In general, all of them can be chained, for instance, a dotted notation can be chained with a subscripted one like this: `x.something!somethingelse`
+FPL supports the following qualifiers: dotted notation `x.something`, with arguments `x(something)`, with coordinates `x[something]`, and with a range `x[[something,something]]`. 
+
+Note: The subscripted notation `x$something` available in the original version of FPL was removed because it was equivalent to coordinate notation. However, it is still available in the signatures of corollaries and proofs. 
+
+In general, all of the abovementioned qualifiers can be chained, for instance, a dotted notation can be chained with a coordinate one like this: `x.something[somethingelse]`.
 
 There is a connection between qualifiers and identifiers, that are variables, the self keyword, pascal-cased FPL identifiers < PascalCasId >, index-typed digits< $digits >, and extension digits < extensionDigits >. This connection depends on whether identifiers can be used "with" qualifiers, "as" qualifiers, or both- The following table shows which identifiers can be used how with these qualifiers:
 
@@ -641,7 +645,7 @@ There is a connection between qualifiers and identifiers, that are variables, th
 | Arguments   |   both  | both    |   both  | as     |   as     |
 | Coordinates |   both  | both    |   both  | as     |   as     |
 | Ranges      |   both  | both    |   both  | as     |   as     |
-| Subscripts  |   both  | both    |   both  | as     |   as     |
+
 
 #### 24) Self-Containment 
 This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:

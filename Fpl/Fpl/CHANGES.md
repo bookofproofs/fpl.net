@@ -1,4 +1,7 @@
-﻿## 3.2.0
+﻿## 3.2.1
+* Removing indexed predicates as alternative notation to coordinate notation
+
+## 3.2.0
 * Extending predicates by parenthesized expressions
 
 ## 3.1.0

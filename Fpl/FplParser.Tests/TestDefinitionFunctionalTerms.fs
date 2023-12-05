@@ -72,7 +72,7 @@ type TestDefinitionFunctionalTerms01 () =
                 result:=Zero()
                 for i in list
                 (
-                    result:=Add(result,list!i)
+                    result:=Add(result,list[i])
                 )
             ;
             return result

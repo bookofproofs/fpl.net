@@ -52,7 +52,7 @@ let rightOpenBracket = skipString ")]" >>. spaces <?> "<(open) right bound>"
 let rightClosedBracket = skipString "]]" >>. spaces <?> "<(closed) right bound>" 
 let tilde = skipChar '~' .>> spaces
 let semiColon = skipChar ';' >>. spaces
-let exclamationMark = skipChar '!' >>% Ast.Index
+let exclamationMark = skipChar '!' 
 let toArrow = skipString "->"
 let vDash = skipString "|-"
 
@@ -317,16 +317,15 @@ statementListRef.Value <- many (IW >>. statement .>> IW)
 let optionalSpecification = opt (choice [boundedRange ; bracketedCoords; argumentTuple])
 let predicateWithOptSpecification = positions (fplIdentifier .>>. optionalSpecification) |>> Ast.PredicateWithOptSpecification
 let dottedPredicate = positions (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate
-let indexedPredicate = positions (exclamationMark >>. IW >>. choice [ predicateWithOptSpecification; dollarDigits; extDigits ] ) |>> Ast.IndexedPredicate
 
-let qualifiedPredicate = choice [dottedPredicate; indexedPredicate ]
+let qualifiedPredicate = choice [dottedPredicate]
 let qualificationList = positions (many qualifiedPredicate) |>> Ast.QualificationList
 
 predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification 
 
 let dollarDigitList = many1 dollarDigits
-let referencingIdentifier = predicateIdentifier .>>. (exclamationMark >>. IW >>. dollarDigitList) .>> IW
-let corollarySignatureAsPredicate = positions (referencingIdentifier .>>. paramTuple) .>> IW |>> Ast.ReferenceToCorollary
+let referencingIdentifier = positions (predicateIdentifier .>>. dollarDigitList) .>> IW |>> Ast.ReferencingIdentifier
+let referenceToProofOrCorollary = positions (referencingIdentifier .>>. opt paramTuple) .>> IW |>> Ast.ReferenceToProofOrCorollary
 
 let byDefinition = positions (keywordBydef >>. predicateWithQualification ) |>> Ast.ByDef 
 
@@ -339,7 +338,7 @@ primePredicateRef.Value <- choice [
     fplDelegate 
     extDigits
     dollarDigits
-    attempt corollarySignatureAsPredicate
+    attempt referenceToProofOrCorollary
     predicateWithQualification
 ]
 
