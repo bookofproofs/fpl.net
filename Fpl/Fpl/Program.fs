@@ -9,7 +9,7 @@ open System.Text.RegularExpressions
 
 
 
-let input = """PascalId() @<> PascalId()"""
+let input = """-(x + -y)'"""
 //let input = """PascalId()()"""
 
 
@@ -21,7 +21,7 @@ ad.PrintDiagnostics
 *)
 
 
-let result = run predicateWithQualification input
+let result = run (predicate .>> eof) input
 printf "%O" result
 
 printf "\n--------------------------------\n"

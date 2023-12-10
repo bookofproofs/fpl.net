@@ -60,6 +60,9 @@ type Ast =
     | Var of Positions * string
 
     // Predicates
+    | Prefix of Positions * Ast
+    | Infix of Positions * Ast 
+    | Postfix of Positions * Ast
     | True of Positions * unit
     | False of Positions * unit 
     | Undefined of Positions * unit
@@ -85,7 +88,10 @@ type Ast =
     | QualificationList of Positions * Ast list
     | PredicateWithQualification of (Ast * Ast) 
     | InfixOperator of Positions * string
-    | Expression of Positions * (Ast * Ast option) list
+    | PostfixOperator of Positions * string
+    | PrefixOperator of Positions * string
+    | InfixOperation of Positions * (Ast * Ast option) list
+    | Expression of (Ast option * Ast) * Ast option
     // Statements
     | Assertion of Positions * Ast
     | ConditionFollowedByResult of Positions * (Ast * Ast list)
@@ -109,6 +115,7 @@ type Ast =
     | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
     | ParamTuple of Positions * Ast list
     | Signature of Positions * (Ast * Ast)
+    | SignatureWithUserDefinedString of Positions * ((Ast * Ast option) * Ast)
     | Axiom of Positions * (Ast * (Ast list option * Ast))
     | ParentConstructorCall of Positions * (Ast * Ast)
     | Constructor of Positions * (Ast * (Ast list option * Ast)) 
@@ -134,7 +141,7 @@ type Ast =
     | RevokeArgument of Positions * Ast
     | JustifiedArgument of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
-    | Proof of Positions * (Ast * Ast list)
+    | Proof of Positions * (Ast * (Ast list * Ast option))
     | Namespace of Ast option * Ast list
     | AST of Positions * Ast
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from

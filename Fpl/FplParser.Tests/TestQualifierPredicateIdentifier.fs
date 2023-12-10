@@ -25,14 +25,14 @@ type TestQualifiersPredicateIdentifier () =
 
     [<TestMethod>]
     member this.TestDottedBothA () =
-        let result = run (predicate .>> eof) """PascalId .PascalId"""
+        let result = run (predicate .>> eof) """PascalId'.PascalId"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestDottedBothAa () =
-        let result = run (predicate .>> eof) """Xx .Yy .Zz"""
+        let result = run (predicate .>> eof) """Xx'.Yy'.Zz"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -60,7 +60,7 @@ type TestQualifiersPredicateIdentifier () =
 
     [<TestMethod>]
     member this.TestArgumentsBothA () =
-        let result = run (predicate .>> eof) """PascalId (PascalId)"""
+        let result = run (predicate .>> eof) """PascalId'(PascalId)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -74,7 +74,7 @@ type TestQualifiersPredicateIdentifier () =
 
     [<TestMethod>]
     member this.TestArgumentsBothC () =
-        let result = run (predicate .>> eof) """PascalId ( PascalId )"""
+        let result = run (predicate .>> eof) """PascalId'( PascalId )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -88,7 +88,7 @@ type TestQualifiersPredicateIdentifier () =
 
     [<TestMethod>]
     member this.TestCoordinatesBothA () =
-        let result = run (predicate .>> eof) """PascalId [PascalId]"""
+        let result = run (predicate .>> eof) """PascalId'[PascalId]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -102,7 +102,7 @@ type TestQualifiersPredicateIdentifier () =
 
     [<TestMethod>]
     member this.TestCoordinatesBothC () =
-        let result = run (predicate .>> eof) """PascalId [ PascalId ]"""
+        let result = run (predicate .>> eof) """PascalId'[ PascalId ]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -116,7 +116,7 @@ type TestQualifiersPredicateIdentifier () =
 
     [<TestMethod>]
     member this.TestRangesBothA () =
-        let result = run (predicate .>> eof) """PascalId [[PascalId,]]"""
+        let result = run (predicate .>> eof) """PascalId'[[PascalId,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -130,7 +130,7 @@ type TestQualifiersPredicateIdentifier () =
 
     [<TestMethod>]
     member this.TestRangesBothC () =
-        let result = run (predicate .>> eof) """PascalId [[ PascalId ,]]"""
+        let result = run (predicate .>> eof) """PascalId'[[ PascalId ,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

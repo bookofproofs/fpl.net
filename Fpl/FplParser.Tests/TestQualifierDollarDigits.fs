@@ -188,7 +188,7 @@ type TestQualifiersDollarDigits () =
 
     [<TestMethod>]
     member this.TestArgumentsAsA1 () =
-        let result = run (predicate .>> eof) """x ($1)"""
+        let result = run (predicate .>> eof) """x($1)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -205,7 +205,7 @@ type TestQualifiersDollarDigits () =
         let result = run (predicate .>> eof) """s ( $1 )"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestCoordinatesAs1 () =
@@ -219,7 +219,7 @@ type TestQualifiersDollarDigits () =
         let result = run (predicate .>> eof) """x [$1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestCoordinatesAsB1 () =
@@ -233,7 +233,7 @@ type TestQualifiersDollarDigits () =
         let result = run (predicate .>> eof) """x [ $1 ]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestRangesAs1 () =
@@ -247,7 +247,7 @@ type TestQualifiersDollarDigits () =
         let result = run (predicate .>> eof) """x [[$1,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestRangesAsB1 () =
@@ -261,7 +261,7 @@ type TestQualifiersDollarDigits () =
         let result = run (predicate .>> eof) """x [[ $1 ,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestCoordsAs1 () =
@@ -272,10 +272,10 @@ type TestQualifiersDollarDigits () =
 
     [<TestMethod>]
     member this.TestSCoordsAsA1 () =
-        let result = run (predicate .>> eof) """x [$1]"""
+        let result = run (predicate .>> eof) """x'[$1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestCoordsAsB1 () =
@@ -289,6 +289,6 @@ type TestQualifiersDollarDigits () =
         let result = run (predicate .>> eof) """x [ $1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
 

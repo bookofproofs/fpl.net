@@ -321,7 +321,7 @@ type TestPredicatesSpecific () =
         let result = run (predicateWithQualification .>> eof) """x[3()]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
 
 

@@ -116,7 +116,7 @@ type TestProofs () =
         let result = run (derivedArgument .>> eof) """qed"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestDerivedArgument02 () =
@@ -151,7 +151,7 @@ type TestProofs () =
         let result = run (argumentInference .>> eof) """|- qed"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestArgumentInference02 () =
@@ -235,7 +235,7 @@ type TestProofs () =
         let result = run (argument .>> eof) """|- qed"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestArgument05 () =
@@ -256,7 +256,7 @@ type TestProofs () =
         let result = run (proof .>> eof) """proof Example4$1
         {
             1. GreaterAB() |- Greater(a,b)
-            2. |- qed
+            qed
         }"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
@@ -275,10 +275,11 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestProof03 () =
-        let result = run (proof .>> eof) """prf AddIsUnique $1
+        let result = run (proof .>> eof) """prf AddIsUnique$1
         {
             1. |- assume true
             2. |- trivial
+            qed
         }"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
@@ -286,10 +287,10 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestProof04 () =
-        let result = run (proof .>> eof) """proof Example4  $1
+        let result = run (proof .>> eof) """proof Example4$1
         {
-            1. SomeCorollary $1() |- Greater(a,b)
-            2. |- qed
+            1. SomeCorollary$1() |- (a > b)
+            qed
         }"""
         let actual = (sprintf "%O" result)
         printf "%O" actual

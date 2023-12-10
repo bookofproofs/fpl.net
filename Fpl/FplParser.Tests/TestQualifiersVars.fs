@@ -18,7 +18,7 @@ type TestQualifiersVars () =
 
     [<TestMethod>]
     member this.TestDottedBothA () =
-        let result = run (predicate .>> eof) """x .y"""
+        let result = run (predicate .>> eof) """x'.y"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -32,10 +32,10 @@ type TestQualifiersVars () =
 
     [<TestMethod>]
     member this.TestDottedBothC () =
-        let result = run (predicate .>> eof) """x . y"""
+        let result = run (predicate .>> eof) """x'.y"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgumentsBoth () =
@@ -46,7 +46,7 @@ type TestQualifiersVars () =
 
     [<TestMethod>]
     member this.TestArgumentsBothA () =
-        let result = run (predicate .>> eof) """x (y)"""
+        let result = run (predicate .>> eof) """x'(y)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -60,7 +60,7 @@ type TestQualifiersVars () =
 
     [<TestMethod>]
     member this.TestArgumentsBothC () =
-        let result = run (predicate .>> eof) """x ( y )"""
+        let result = run (predicate .>> eof) """x'( y )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -74,7 +74,7 @@ type TestQualifiersVars () =
 
     [<TestMethod>]
     member this.TestCoordinatesBothA () =
-        let result = run (predicate .>> eof) """x [y]"""
+        let result = run (predicate .>> eof) """x'[y]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -88,7 +88,7 @@ type TestQualifiersVars () =
 
     [<TestMethod>]
     member this.TestCoordinatesBothC () =
-        let result = run (predicate .>> eof) """x [ y ]"""
+        let result = run (predicate .>> eof) """x'[ y ]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -119,5 +119,5 @@ type TestQualifiersVars () =
         let result = run (predicate .>> eof) """x [[ y ,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 

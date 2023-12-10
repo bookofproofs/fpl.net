@@ -50,7 +50,7 @@ def class C: obj
     intr
 }
 
-def pred Greater(x,y: obj)
+def pred Greater postfix ">" (x,y: obj)
 {
     intr
 }
@@ -61,7 +61,7 @@ axiom GreaterAB()
         ~a: A
         ~b: B
     ;
-    Greater(a,b)
+    (a > b)
 }
 
 axiom GreaterBC()
@@ -70,7 +70,7 @@ axiom GreaterBC()
         ~b: B
         ~c: C
     ;
-    Greater(b,c)
+    (b > c)
 }
 
 axiom GreaterTransitive()
@@ -82,10 +82,9 @@ axiom GreaterTransitive()
     (
         and
         (
-            Greater(x,y),
-            Greater(y,z)
+            (x > y), (y > z)
         ),
-        Greater(x,z)
+        (x > z)
     )
 }
 
@@ -94,7 +93,8 @@ lemma Example4()
     dec
         ~x,y,z: obj
     ;
-    ex x ( and (Greater(x,y), Greater(x,z)) )
+    ex x  
+        and ((x > y), (x > z)) 
 }
 
 proof Example4$1
@@ -105,13 +105,15 @@ proof Example4$1
         ~c:C
         ~x,y,z: obj
     ;
-    1. GreaterAB |- Greater(a,b) 
-    2. GreaterBC |- Greater(b,c) 
-    3. ProceedingResults(1.,2.) |- and (Greater(a,b), Greater(b,c)) 
-    4. 3., GreaterTransitive |- impl ( and (Greater(a,b), Greater(b,c)), Greater(a,c) ) 
-    5. 4., ModusPonens |- Greater(a,c)
-    6. ProceedingResults(5.,1.) |- and (Greater(a,c), Greater(a,b)) 
-    7. 6., ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) ) 
+    1. GreaterAB |- (a > b) 
+    2. GreaterBC |- (b > c) 
+    3. 1., 2. |- and ((a > b), (b > c)) 
+    4. 3., GreaterTransitive |- impl ( and ((a > b), (b > c)), (a > c) ) 
+    5. 4., ModusPonens |- (a > c)
+    6. 5., 1. |- and ((a > c), (a > b)) 
+    7. 6., ExistsByExample(and((a > c), (a > b))) |- 
+        ex x  
+            and ((x > y), (x > z)) 
     8. |- qed
 }
 

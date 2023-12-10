@@ -1,4 +1,8 @@
-﻿## 3.2.1
+﻿## 3.3.0
+* Removing the necessity to put negation and quantor predicates into parentheses
+* Making user-defined infix and postfix notations possible
+
+## 3.2.1
 * Removing indexed predicates as alternative notation to coordinate notation
 
 ## 3.2.0

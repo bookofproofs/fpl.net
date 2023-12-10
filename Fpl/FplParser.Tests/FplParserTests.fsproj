@@ -25,7 +25,7 @@
     <Compile Include="TestIdentifiers.fs" />
     <Compile Include="TestLocalizations.fs" />
     <Compile Include="TestPascalCaseIdDotted.fs" />
-    <Compile Include="TestPascalCaseIdIndexed.fs" />
+    <Compile Include="TestInFixPostFixPrefix.fs" />
     <Compile Include="TestPascalCaseIdMixed.fs" />
     <Compile Include="TestPredicateInstanceProperties.fs" />
     <Compile Include="TestPredicates.fs" />

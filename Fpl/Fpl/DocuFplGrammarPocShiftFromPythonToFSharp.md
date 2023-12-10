@@ -635,19 +635,59 @@ FPL supports the following qualifiers: dotted notation `x.something`, with argum
 
 Note: The subscripted notation `x$something` available in the original version of FPL was removed because it was equivalent to coordinate notation. However, it is still available in the signatures of corollaries and proofs. 
 
-In general, all of the abovementioned qualifiers can be chained, for instance, a dotted notation can be chained with a coordinate one like this: `x.something[somethingelse]`.
+In general, all of the above-mentioned qualifiers can be chained, for instance, a dotted notation can be chained with a coordinate one like this: `x.something[somethingelse]`.
 
 There is a connection between qualifiers and identifiers, that are variables, the self keyword, pascal-cased FPL identifiers < PascalCasId >, index-typed digits< $digits >, and extension digits < extensionDigits >. This connection depends on whether identifiers can be used "with" qualifiers, "as" qualifiers, or both- The following table shows which identifiers can be used how with these qualifiers:
 
 | Qualifier   | Variables |  self keyword | < PascalCasId > | < $digits > | < extensionDigits >
 | :----:    | :----: | :----: |:----: |:----: |:----: |
-| Dotted      |   both  | both    |   both  | -      |   -      |
-| Arguments   |   both  | both    |   both  | as     |   as     |
-| Coordinates |   both  | both    |   both  | as     |   as     |
-| Ranges      |   both  | both    |   both  | as     |   as     |
+| Dotted      |   both  | both    |   both  | -      |   both     |
+| Arguments   |   both  | both    |   both  | as     |   both     |
+| Coordinates |   both  | both    |   both  | as     |   both     |
+| Ranges      |   both  | both    |   both  | as     |   both     |
 
 
-#### 24) Self-Containment 
+#### 24) User-Defined Prefix, Infix, and Postfix Operators for predicates and functional terms
+FPL's standard syntax for calling user-defined functional terms or predicates requires their pascal-case identifier, followed by a comma-separated list of parameters in parentheses, like in 
+`SomeIdentifier(x,y)`. FPL allows now the introduction of user-defined prefix, infix, and postfix symbols to be identified by the FPL interpreter with the pascal-case identifier.
+For instance, instead of writing `Add(x,y)`, we can no tell the FPL to interpret the input `(x + y)` to mean `Add(x,y)`.
+
+To accomplish this behavior, we have to do two things: 
+1. Define the prefix, postfix, or infix notation together with the functional term or predicate in question.
+1. Use the new notation
+
+##### Example of Prefix-Notation definition
+
+```
+    // definition of a prefix notation
+    def func Minus prefix "-" (x: Int) -> Int
+    {
+        return x.AdditiveInverse()
+    }
+
+    // example usages
+    -a
+    -b
+    -(x + y)
+
+```
+*Now*
+```        
+    theorem SomeTheorem() 
+    {
+        all x,y in N
+        (
+            impl
+            (
+                not ( x = y )
+                ,
+                not ( Successor(x) = Successor(y) )
+            )
+        )
+    }
+```
+
+#### 25) Self-Containment 
 This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:
 
 * The order of declarations will now matter. 

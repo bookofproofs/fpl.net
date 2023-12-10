@@ -1,5 +1,5 @@
 uses Fpl.SetTheory
-
+uses Fpl.Commons
 
 definition class One: object
 {
@@ -31,20 +31,19 @@ axiom Axiom1 ()
     is (1, Nat) 
 }
 
-definition function Successor(x: N) -> N
+// For each x there exists exactly one natural number, called the successor of x, the will be denoted x'
+definition function Successor infix "'" (x: N) -> N
 {
     intrinsic
 }
 
-
-// For each x there exists exactly one natural number, called the successor of x, the will be denoted x'
 axiom Axiom2 ()
 {
     all x in Nat
     (
         exn$1 y in Nat
         (
-            ( y = Successor(x) )
+            ( y = x' )
         )
     )
 }
@@ -57,7 +56,7 @@ corollary Axiom2$1 ()
     (
         ( x = y )
         ,
-        ( Successor(x) = Successor(y) )
+        ( x' = y' )
     )
 }
 
@@ -67,7 +66,7 @@ axiom Axiom3 ()
     dec ~x:Nat ;
     not 
     (
-        ( Successor(x) = 1 )
+        ( x' = 1 )
     )
 }
 
@@ -75,11 +74,7 @@ axiom Axiom3 ()
 axiom Axiom4 ()
 {
     dec ~x,y:N ;
-    impl
-    (
-        ( Successor(x) = Successor(y) ),
-        ( x = y )
-    )
+    (( x' = y' ) => ( x = y ))
 }
 
 
@@ -99,7 +94,7 @@ def class N: Set
             assert
                 all n
                 (
-                    In(n, self)
+                    (n -in self)
                 )
         ;
         self

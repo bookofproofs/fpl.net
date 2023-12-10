@@ -5,13 +5,8 @@ uses Landau *
 theorem Theorem_001()
 {
     dec ~x,y: Nat; // PoC's note: FPL makes the distinction between the set N and the class Nat of a natural number explicit!
-    impl
-    (
-        // if
-        not ( ( x = y ) )
-        , // then
-        not ( ( Successor(x) = Successor(y) ) )
-    )
+    // if x != y then x' != y'
+    (( x <> y ) => ( x' <> y' ))
 }
 
 
@@ -21,13 +16,8 @@ proof Theorem_001$1
     // Strategy: Assume that the premise is true and the conclusion is false.
     // Then derive a contradiction.
 
-    100. |- assume 
-            and
-            (
-                not ( ( x = y ) )
-                , 
-                ( Successor(x) = Successor(y) )
-            )
+    // Otherwise, we would have x' = y' and hence, by axiom 4, x = y
+    100. |- assume ((x <> y) ~and (x' = y'))
     200. Axiom4() |- ( x = y )
     300. |- revoke 100.
     400. |- qed
@@ -37,10 +27,7 @@ proof Theorem_001$1
 theorem Theorem_002 ()
 {
     dec ~x: Nat;
-    not
-    (
-        ( Succesor(x) = x )
-    )
+    ( x' <>  x )
 }
 
 proof Theorem_002$1
@@ -50,17 +37,14 @@ proof Theorem_002$1
     // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.
     
     // "base case" 
-    100. and (Axiom1(), Axiom3()) |- not ( ( Succesor(1) = 1 ) )
+    100. and (Axiom1(), Axiom3()) |- ( 1' <> 1 )
     
     // "inductive step" 
-    200. |- assume ex n in N ( not ( ( Succesor(n) = n ) ) )
-    300. Theorem_001() |- not ( ( Successor(Succesor(n)) = Successor(n) ) )
+    200. |- assume ex n in N ( n' <> n )
+    300. Theorem_001() |- ( n''<> n' ) 
     
     400. and(100., 400.) 
-        |- all x in N 
-        (
-            not ( ( Succesor(x) = x ) ) 
-        )
+        |- all x in N ( x' <> x )
     500. |- qed
 }
     
@@ -68,15 +52,8 @@ proof Theorem_002$1
 theorem Theorem_003 ()
 {
     dec ~x,u: Nat;
-
-    impl
     (
-        not (( x = 1 ))
-        ,
-        exn$1 u in N
-        (
-            ( Succesor(u) = x )
-        )
+        ( x <> 1 ) => exn$1 u in N ( u' = x )
     )
 }
 
@@ -89,42 +66,33 @@ proof Theorem_003$1
     dec 
          ~x : object
          ~m : Set // let m be a set 
-         assert In (1, m) // such that 1 belongs to m
+         assert (1 ~in m) // such that 1 belongs to m
          assert 
             // and of all those x for which there exists such u.
             // PoC note: We formalize the notion "for which there exists such u" by the following implication
             impl
             (
                 // if for some x the premise holds
-                impl
                 (
-                    not (( x = 1 )) 
-                    ,
-                    exn$1 u in N
-                    (
-                        ( Succesor(u) = x )
-                    )
-                )
-                ,
+                    ( x <> 1 ) => exn$1 u in N ( u' = x )
+                ),
                 // then it belongs to the set m
-                In (x, m)
+                (x ~in m)
             )
     ;
 
     // "base case" 
-    100. |- In(1, m)
+    100. |- (1 ~in m)
     200. |- trivial
     
     // "inductive step" 
-    300. 200. |- assume In (x, m)
-    400. |- exn$1 u in N
-                    (
-                        ( Succesor(u) = x )
-                    )
-    500. Axiom3(), Axiom2() |- ( Successor(Successor(u)) = Sucessor(x) )
-    600. bydef m |- In(Successor(x), m)
+    300. 200. |- assume (x ~in m)
+    400. |- exn$1 u in N ( u' = x )
+    500. Axiom3(), Axiom2() |- ( u'' = x' )
+    600. bydef m |- (x' ~in m)
     700. |- ( m = N )
-    800. |- qed
+    
+    qed
 }
 
 // PoC note: In Landau's original, Theorem 4 is formulated as "at the same time Definition 1". In FPL, we deal with theorems and definitions separately,

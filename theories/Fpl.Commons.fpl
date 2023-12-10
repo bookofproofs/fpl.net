@@ -47,9 +47,44 @@ inf ExistsByExample(p: pred(c: obj))
 }
 
 
-def pred NotEqual(x,y: tpl)
+def pred NotEqual infix "<>" (x,y: tpl)
 {
-    not ( (x = y) )
+    not (x = y) 
+}
+
+def pred Implies infix "=>" (x,y: pred)
+{
+    impl
+    (
+        x
+        ,
+        y
+    )
+}
+
+def pred IfAndOnlyIf infix "<=>" (x,y: pred)
+{
+    iif
+    (
+        x
+        ,
+        y
+    )
+}
+
+def pred And infix "~and" (x:+ pred)
+{
+    and (x)
+}
+
+def pred Or infix "~or" (x:+ pred)
+{
+    or (x)
+}
+
+def pred Xor infix "~xor" (x:+ pred)
+{
+    xor (x)
 }
 
 localization iif(x,y) :=
