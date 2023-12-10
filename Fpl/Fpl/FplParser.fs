@@ -318,9 +318,6 @@ let statement =
 statementListRef.Value <- many (IW >>. statement .>> IW)
 
 (* Predicates *)
-let fixCharacters = regex "['%@!&~\+\-\*\/]+" |>> fun (a:string) -> a.Trim()
-let postfixOp = positions ( fixCharacters ) .>> IW <?> "<postfix operator>" <!> "postfixOp" |>> Ast.PostfixOperator
-let prefixOp = positions ( fixCharacters ) .>> IW <?> "<prefix operator>" <!> "prefixOp" |>> Ast.PrefixOperator
 let optionalSpecification = opt (choice [boundedRange ; bracketedCoords; argumentTuple])
 let predicateWithOptSpecification = positions (fplIdentifier .>>. optionalSpecification) <!> "predicateWithOptSpecification" |>> Ast.PredicateWithOptSpecification
 let dottedPredicate = positions (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate
@@ -385,7 +382,10 @@ let compoundPredicate = choice [
     isOperator
 ]
 
-let expression = opt prefixOp .>>. choice [compoundPredicate; primePredicate] .>>. opt postfixOp .>> IW <!> "expression" |>> Ast.Expression
+let fixCharacters = regex "['%@!&~\+\-\*\/]+" |>> fun (a:string) -> a.Trim()
+let postfixOp = positions ( fixCharacters ) .>> IW <?> "<postfix operator>" <!> "postfixOp" |>> Ast.PostfixOperator
+let prefixOp = positions ( fixCharacters ) .>> IW <?> "<prefix operator>" <!> "prefixOp" |>> Ast.PrefixOperator
+let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePredicate] .>>. opt postfixOp .>>. optionalSpecification) .>> IW <!> "expression" |>> Ast.Expression
 
 predicateRef.Value <- expression
 

@@ -91,7 +91,7 @@ type Ast =
     | PostfixOperator of Positions * string
     | PrefixOperator of Positions * string
     | InfixOperation of Positions * (Ast * Ast option) list
-    | Expression of (Ast option * Ast) * Ast option
+    | Expression of Positions * (((Ast option * Ast) * Ast option) * Ast option)
     // Statements
     | Assertion of Positions * Ast
     | ConditionFollowedByResult of Positions * (Ast * Ast list)

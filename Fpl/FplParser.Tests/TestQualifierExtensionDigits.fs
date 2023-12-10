@@ -134,7 +134,7 @@ type TestQualifiersExtensionDigits () =
 
     [<TestMethod>]
     member this.TestDottedAsA1 () =
-        let result = run (predicate .>> eof) """x .1"""
+        let result = run (predicate .>> eof) """x'.1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
