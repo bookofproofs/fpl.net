@@ -211,12 +211,11 @@ let statementList, statementListRef = createParserForwardedToRef()
 let primePredicate, primePredicateRef = createParserForwardedToRef()
 let predicate, predicateRef = createParserForwardedToRef()
 let predicateList, predicateListRef = createParserForwardedToRef()
-let predicateList1, predicateList1Ref = createParserForwardedToRef()
 let predicateWithQualification, predicateWithQualificationRef = createParserForwardedToRef()
 let paramTuple, paramTupleRef = createParserForwardedToRef()
 let classType, classTypeRef = createParserForwardedToRef()
 
-let coord = choice [ predicateWithQualification; dollarDigits; extDigits ] .>> IW 
+let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
 let fplIdentifier = choice [ entity; predicateIdentifier; extDigits ] <!> "fplIdentifier"
 
@@ -343,9 +342,9 @@ primePredicateRef.Value <- choice [
     predicateWithQualification
 ]
 
-let conjunction = positions ((keywordAnd >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.And
-let disjunction = positions ((keywordOr >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.Or
-let exclusiveOr = positions ((keywordXor >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.Xor
+let conjunction = positions ((keywordAnd >>. leftParen >>. predicateList) .>> rightParen) |>> Ast.And
+let disjunction = positions ((keywordOr >>. leftParen >>. predicateList) .>> rightParen) |>> Ast.Or
+let exclusiveOr = positions ((keywordXor >>. leftParen >>. predicateList) .>> rightParen) |>> Ast.Xor
 
 let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParen 
 let implication = positions (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
@@ -390,7 +389,6 @@ let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePr
 predicateRef.Value <- expression
 
 predicateListRef.Value <- sepBy predicate comma
-predicateList1Ref.Value <- sepBy1 predicate comma
 
 (* FPL building blocks *)
 let keywordDeclaration = (skipString "declaration" <|> skipString "dec") .>> SW 
