@@ -1,4 +1,7 @@
-﻿## 3.3.0
+﻿## 3.3.1
+* Making user-defined prefix notations possible
+
+## 3.3.0
 * Removing the necessity to put negation and quantor predicates into parentheses
 * Making user-defined infix and postfix notations possible
 

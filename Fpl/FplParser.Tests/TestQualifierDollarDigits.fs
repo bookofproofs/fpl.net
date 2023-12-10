@@ -126,18 +126,25 @@ type TestQualifiersDollarDigits () =
         let result = run (predicate .>> eof) """$1!.$1"""
         let actual = sprintf "%O" result
         printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestSubscriptsBothD () =
+        let result = run (predicate .>> eof) """$1!.Test(1)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSubscriptsBothA () =
-        let result = run (predicate .>> eof) """$1'!.$1"""
+        let result = run (predicate .>> eof) """$1'!.Test(1)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSubscriptsBothB () =
-        let result = run (predicate .>> eof) """$1!.$1"""
+        let result = run (predicate .>> eof) """$1!'.Test(1)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

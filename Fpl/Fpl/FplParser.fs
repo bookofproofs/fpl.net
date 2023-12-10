@@ -217,7 +217,7 @@ let classType, classTypeRef = createParserForwardedToRef()
 
 let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
-let fplIdentifier = choice [ entity; predicateIdentifier; extDigits ] <!> "fplIdentifier"
+let fplIdentifier = choice [ entity; predicateIdentifier; extDigits ] 
 
 let coordList = (sepBy1 coord comma) .>> IW
 
@@ -318,11 +318,11 @@ statementListRef.Value <- many (IW >>. statement .>> IW)
 
 (* Predicates *)
 let optionalSpecification = opt (choice [boundedRange ; bracketedCoords; argumentTuple])
-let predicateWithOptSpecification = positions (fplIdentifier .>>. optionalSpecification) <!> "predicateWithOptSpecification" |>> Ast.PredicateWithOptSpecification
+let predicateWithOptSpecification = positions (fplIdentifier .>>. optionalSpecification) |>> Ast.PredicateWithOptSpecification
 let dottedPredicate = positions (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate
 let qualificationList = positions (many dottedPredicate) |>> Ast.QualificationList
 
-predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList <!> "predicateWithQualification" |>> Ast.PredicateWithQualification 
+predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification 
 
 let dollarDigitList = many1 dollarDigits
 let referencingIdentifier = positions (predicateIdentifier .>>. dollarDigitList) .>> IW |>> Ast.ReferencingIdentifier
@@ -358,7 +358,7 @@ let isOpArg = choice [ predicateIdentifier; variable; self; extDigits ] .>> IW
 let isOperator = positions ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // infix operators like the equality operator 
-let infixOp = positions (regex "[~\+\-\*\/\\\<\>=@\w]+" |>> fun (a:string) -> a.Trim()) .>> SW <?> "<infix operator>" <!> "infixOp" |>> Ast.InfixOperator
+let infixOp = positions (regex "[~\+\-\*\/\\\<\>=@\w]+" |>> fun (a:string) -> a.Trim()) .>> SW <?> "<infix operator>" |>> Ast.InfixOperator
 
 let pWithSep p separator =
     let combinedParser = pipe2 p (opt separator) (fun a b -> (a, b))
@@ -382,9 +382,9 @@ let compoundPredicate = choice [
 ]
 
 let fixCharacters = regex "['%@!&~\+\-\*\/]+" |>> fun (a:string) -> a.Trim()
-let postfixOp = positions ( fixCharacters ) .>> IW <?> "<postfix operator>" <!> "postfixOp" |>> Ast.PostfixOperator
-let prefixOp = positions ( fixCharacters ) .>> IW <?> "<prefix operator>" <!> "prefixOp" |>> Ast.PrefixOperator
-let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePredicate] .>>. opt postfixOp .>>. optionalSpecification) .>> IW <!> "expression" |>> Ast.Expression
+let postfixOp = positions ( fixCharacters ) .>> IW <?> "<postfix operator>" |>> Ast.PostfixOperator
+let prefixOp = positions ( fixCharacters ) .>> IW <?> "<prefix operator>" |>> Ast.PrefixOperator
+let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePredicate] .>>. opt postfixOp .>>. optionalSpecification .>>. qualificationList) .>> IW |>> Ast.Expression
 
 predicateRef.Value <- expression
 

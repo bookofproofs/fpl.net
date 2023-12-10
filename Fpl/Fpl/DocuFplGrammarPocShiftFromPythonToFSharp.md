@@ -671,20 +671,67 @@ To accomplish this behavior, we have to do two things:
     -(x + y)
 
 ```
-*Now*
-```        
-    theorem SomeTheorem() 
+Whitespace characters are insignificant in the infix notation: 
+```
+    (x + -y) // correct
+    (x + - y) // still correct, the "+" will be parsed as infix operation, the "-" as a prefix operation
+
+```
+
+##### Example of Infix-Notation definition
+
+```
+    // definition of a infix notation
+    def func Add infix "-" (x,y: Int) -> Int
     {
-        all x,y in N
-        (
-            impl
-            (
-                not ( x = y )
-                ,
-                not ( Successor(x) = Successor(y) )
-            )
-        )
+        return Add(x,y)
     }
+
+    // example usages
+    -(x + y)
+    (x + y + z) // equivalent to ((x + y) + z)
+    (x + (y + z))
+
+```
+The infix notation is, by default, left-associative. If you want another 
+
+##### Example of Postfix-Notation definition
+
+```
+    // definition of a infix notation
+    def func Successor postfix "'" (x: Nat) -> Nat
+    {
+        intrinsic
+    }
+
+    // example usage
+    x'
+    x!
+    x!!
+
+```
+Whitespace characters are significant in postfix notation:
+```
+    x' // correct
+    x ' // wrong, (syntax error)
+```
+
+Postfix notation can be composed by applying parentheses:
+```
+    (x')' // correct
+    x'' // wrong, since '' is a different operator as '.
+```
+In cases you want to use the shorter notation `x''` instead of `(x')'`, you will have to define it separately: 
+```
+    // definition of a infix notation
+    def func SuccessorOfSuccessor postfix "''" (x: Nat) -> Nat
+    {
+        return Successor(Successor(x))
+    }
+
+    // example usage
+    x'' // now, this is equivalent to (x')'
+
 ```
 
 #### 25) Self-Containment 

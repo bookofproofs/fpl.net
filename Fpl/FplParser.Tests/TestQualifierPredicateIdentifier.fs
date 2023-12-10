@@ -35,6 +35,13 @@ type TestQualifiersPredicateIdentifier () =
         let result = run (predicate .>> eof) """Xx'.Yy'.Zz"""
         let actual = sprintf "%O" result
         printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestDottedBothAb () =
+        let result = run (predicate .>> eof) """Xx'.Yy().Zz"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
