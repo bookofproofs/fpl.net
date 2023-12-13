@@ -10,12 +10,12 @@ namespace FplLS
             var ci = defaultCi.Clone();
             if (ci.Word.StartsWith("ax"))
             {
-                ci.InsertText = $"{ci.Word} SomeFplAxiom (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine + Environment.NewLine;
+                ci.InsertText = GetBody(ci.Word, "Axiom");
                 ci.Label += " ...";
             }
             else
             {
-                ci.InsertText = $"{ci.Word} SomeFplPostulate (){Environment.NewLine}" + "{" + $"{Environment.NewLine}\ttrue{Environment.NewLine}" + "}" + Environment.NewLine + Environment.NewLine;
+                ci.InsertText = GetBody(ci.Word, "Postulate");
                 ci.Label += " ...";
             }
             ret.Add(ci);
@@ -27,5 +27,14 @@ namespace FplLS
 
         }
 
+        public static string GetBody(string word, string label)
+        {
+            return 
+                $"{word} SomeFpl{label}(){Environment.NewLine}" + 
+                "{" + Environment.NewLine +
+                $"\ttrue{Environment.NewLine}" + 
+                "}" + Environment.NewLine;
+
+        }
     }
 }

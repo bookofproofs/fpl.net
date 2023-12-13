@@ -105,8 +105,7 @@ namespace FplLS
                 $"{Environment.NewLine}" +
                 $"{TokenLeftBrace}{Environment.NewLine}" +
                 $"\t{TokenIntrinsic}{Environment.NewLine}" +
-                $"{TokenRightBrace}{Environment.NewLine}" +
-                $"{Environment.NewLine}";
+                $"{TokenRightBrace}{Environment.NewLine}";
         }
 
     }

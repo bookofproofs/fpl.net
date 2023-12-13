@@ -73,6 +73,7 @@ namespace FplLS
                 case "(closed) right bound":
                     return new FplCompletionItemChoicesBound().GetChoices(this);
                 case "digits":
+                case "dollarDigits":
                     return new FplCompletionItemChoicesDigits().GetChoices(this);
                 case "argument identifier":
                     return new FplCompletionItemChoicesArgumentIdentifier().GetChoices(this);
@@ -97,6 +98,7 @@ namespace FplLS
                 case "assert":
                 case "ass":
                 case "assume":
+                case "bydef":
                 case "cl":
                 case "class":
                 case "con":
@@ -126,7 +128,7 @@ namespace FplLS
                 case "trivial":
                     return new FplCompletionItemChoicesKeyword().GetChoices(this);
                 case "self":
-                case "self!":
+                case "base":
                 case "@":
                     return new FplCompletionItemChoicesSelf().GetChoices(this);
                 case "all":
@@ -143,6 +145,7 @@ namespace FplLS
                 case "impl":
                 case "and":
                 case "or":
+                case "(":
                     return new FplCompletionItemChoicesPredicate().GetChoices(this);
                 case "ctor":
                 case "constructor":
@@ -174,12 +177,12 @@ namespace FplLS
                 case "prop":
                 case "proposition":
                     return new FplCompletionItemChoicesTheoremLikeStmt("Proposition").GetChoices(this);
-                case "inf":
-                case "inference":
-                    return new FplCompletionItemChoicesTheoremLikeStmt("Inference").GetChoices(this);
                 case "conj":
                 case "conjecture":
                     return new FplCompletionItemChoicesTheoremLikeStmt("Conjecture").GetChoices(this);
+                case "inf":
+                case "inference":
+                    return new FplCompletionItemChoicesRuleOfInference().GetChoices(this);
                 case "cor":
                 case "corollary":
                     return new FplCompletionItemChoicesCorollary().GetChoices(this);

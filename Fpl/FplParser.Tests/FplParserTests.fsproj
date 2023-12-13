@@ -9,40 +9,52 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <Compile Include="TestDefinitionFunctionalTerms.fs" />
-      <Compile Include="TestClassInstanceProperties.fs" />
-      <Compile Include="TestPredicateInstanceProperties.fs" />
-      <Compile Include="TestDefinitionClasses.fs" />
-      <Compile Include="TestConstructors.fs" />
-      <Compile Include="TestErrDiagnosticsLowLevel.fs" />
-      <Compile Include="TestErrDiagnostics.fs" />
-      <Compile Include="TestLocalizations.fs" />
-      <Compile Include="TestAxioms.fs" />
-      <Compile Include="TestFplBlockComponents.fs" />
-      <Compile Include="TestVariableTypes.fs" />
-      <Compile Include="TestDefinitionPredicates.fs" />
-      <Compile Include="TestClassInheritanceTypes.fs" />
-      <Compile Include="TestStatements.fs" />
-      <Compile Include="TestIdentifiers.fs" />
-      <Compile Include="TestFunctionalTermInstanceProperties.fs" />
-      <Compile Include="TestProofs.fs" />
-      <Compile Include="TestPredicatesSpecific.fs" />
-      <Compile Include="TestPredicates.fs" />
-      <Compile Include="TestReferenceRules.fs" />
-    </ItemGroup>
+    <Compile Include="TestAxioms.fs" />
+    <Compile Include="TestClassInheritanceTypes.fs" />
+    <Compile Include="TestClassInstanceProperties.fs" />
+    <Compile Include="TestConstructors.fs" />
+    <Compile Include="TestCoordInTypePossibilities.fs" />
+    <Compile Include="TestCoordPossibilities.fs" />
+    <Compile Include="TestDefinitionClasses.fs" />
+    <Compile Include="TestDefinitionFunctionalTerms.fs" />
+    <Compile Include="TestDefinitionPredicates.fs" />
+    <Compile Include="TestErrDiagnostics.fs" />
+    <Compile Include="TestErrDiagnosticsLowLevel.fs" />
+    <Compile Include="TestFplBlockComponents.fs" />
+    <Compile Include="TestFunctionalTermInstanceProperties.fs" />
+    <Compile Include="TestIdentifiers.fs" />
+    <Compile Include="TestLocalizations.fs" />
+    <Compile Include="TestPascalCaseIdDotted.fs" />
+    <Compile Include="TestInFixPostFixPrefix.fs" />
+    <Compile Include="TestPascalCaseIdMixed.fs" />
+    <Compile Include="TestPredicateInstanceProperties.fs" />
+    <Compile Include="TestPredicates.fs" />
+    <Compile Include="TestPredicatesSpecific.fs" />
+    <Compile Include="TestProofs.fs" />
+    <Compile Include="TestQualifierDollarDigits.fs" />
+    <Compile Include="TestQualifierExtensionDigits.fs" />
+    <Compile Include="TestQualifierPredicateIdentifier.fs" />
+    <Compile Include="TestQualifierSelf.fs" />
+    <Compile Include="TestQualifiersVars.fs" />
+    <Compile Include="TestReferenceRules.fs" />
+    <Compile Include="TestKeywordSpaces.fs" />
+    <Compile Include="TestStatements.fs" />
+    <Compile Include="TestTheoremLikeStatements.fs" />
+    <Compile Include="TestVariableTypes.fs" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-      <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
-      <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\Fpl\Fpl.fsproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fpl\Fpl.fsproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Update="FSharp.Core" Version="8.0.100" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="8.0.100" />
+  </ItemGroup>
 
 </Project>

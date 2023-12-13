@@ -13,7 +13,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesUses().GetChoices(detailCi);
-            Assert.AreEqual(3, actual.Count);
+            Assert.AreEqual(4, actual.Count);
         }
 
         [DataRow("uses")]
@@ -57,7 +57,7 @@ namespace FplLSTests
             {
                 if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine + Environment.NewLine));
+                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
                 }
             }
         }

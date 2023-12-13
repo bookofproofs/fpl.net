@@ -13,98 +13,98 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestSpecificType3 () =
-        let result = run specificClassType """object"""
+        let result = run (specificClassType .>> eof) """object """
         let actual = sprintf "%O" result
         let expected = """Success: ObjectType"""
         Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
 
     [<TestMethod>]
     member this.TestSpecificType4 () =
-        let result = run specificClassType """tpl"""
+        let result = run (specificClassType .>> eof) """tpl"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpecificType5 () =
-        let result = run specificClassType """tplSetElem"""
+        let result = run (specificClassType .>> eof) """tplSetElem"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
 
     member this.TestSpecificType7 () =
-        let result = run specificClassType """@extNat"""
+        let result = run (specificClassType .>> eof) """@extNat"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpecificType8 () =
-        let result = run specificClassType """SomeClass"""
+        let result = run (specificClassType .>> eof) """SomeClass"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpecificType9 () =
-        let result = run specificClassType """bla"""
+        let result = run (specificClassType .>> eof) """bla"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType3 () =
-        let result = run classType """object[self,]"""
+        let result = run (classType .>> eof) """object[self,]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestClassType3a () =
-        let result = run classType """object<SomeObject1, SomeObject2,SomeObject3>"""
+        let result = run (classType .>> eof) """object [SomeObject1, SomeObject2,SomeObject3]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType4 () =
-        let result = run classType """tpl[from,]"""
+        let result = run (classType .>> eof) """tpl[[from,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType4a () =
-        let result = run classType """tpl[, to]"""
+        let result = run (classType .>> eof) """tpl[[, to]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType4b () =
-        let result = run classType """tpl[,]"""
+        let result = run (classType .>> eof) """tpl[[,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType5 () =
-        let result = run classType """Set[from , to]"""
+        let result = run (classType .>> eof) """Set[from , to]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType5a () =
-        let result = run classType """Set[(from , to]"""
+        let result = run (classType .>> eof) """Set[(from , to]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType5b () =
-        let result = run classType """Set[from , to)]"""
+        let result = run (classType .>> eof) """Set[[from , to)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -112,21 +112,28 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType7 () =
-        let result = run classType """@Nat"""
+        let result = run (classType .>> eof) """@Nat"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType8 () =
-        let result = run classType """SomeClass"""
+        let result = run (classType .>> eof) """SomeClass"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType9 () =
-        let result = run classType """bla"""
+        let result = run (classType .>> eof) """bla"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestClassType10 () =
+        let result = run (classType .>> eof) """object [$1,$2]"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

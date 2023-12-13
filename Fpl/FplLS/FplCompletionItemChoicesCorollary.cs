@@ -23,14 +23,10 @@ namespace FplLS
             if (ci.IsShort)
             {
                 TokenAssume = "ass";
-                TokenPremise = "pre";
-                TokenConclusion = "con";
                 ci.Detail = "corollary (short)";
                 ci.SortText = "z" + ci.SortText;
             }
-            ci.InsertText =
-                $"{ci.Word} SomeFplTheorem!1(){Environment.NewLine}" +
-                FplCompletionItemChoicesTheoremLikeStmt.GetBody(TokenLeftBrace, TokenPremise, TokenConclusion, TokenRightBrace);
+            ci.InsertText = FplCompletionItemChoicesAxiom.GetBody(ci.Word, "CorollaryOfXxx$1");
             ci.Label += " ...";
         }
 

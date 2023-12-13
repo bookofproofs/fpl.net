@@ -7,11 +7,23 @@ namespace FplLS
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
         {
             var ret = new List<FplCompletionItem>();
-            defaultCi.Detail = "digits";
-            defaultCi.InsertText = "123";
-            defaultCi.SortText = "123";
-            defaultCi.Label = TokenPrefix + defaultCi.InsertText;
-            defaultCi.Kind = CompletionItemKind.Text;
+
+            if (defaultCi.Word.Contains("dollar"))
+            {
+                defaultCi.Detail = "$digits";
+                defaultCi.InsertText = "$123";
+                defaultCi.SortText = "$123";
+                defaultCi.Label = TokenPrefix + defaultCi.InsertText;
+                defaultCi.Kind = CompletionItemKind.Text;
+            }
+            else
+            {
+                defaultCi.Detail = "digits";
+                defaultCi.InsertText = "123";
+                defaultCi.SortText = "123";
+                defaultCi.Label = TokenPrefix + defaultCi.InsertText;
+                defaultCi.Kind = CompletionItemKind.Text;
+            }
             ret.Add(defaultCi);
             return ret;
 

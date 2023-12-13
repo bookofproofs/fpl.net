@@ -215,7 +215,8 @@ let getLineOffset (input: string) (line:int)=
     let lengthLineSep = Environment.NewLine.Length
     let mutable offset = 0
     for i in 0..(line - 2) do
-        offset <- offset + lines.[i].Length + lengthLineSep
+        if i<lines.Length then
+            offset <- offset + lines.[i].Length + lengthLineSep
     offset
 
 let getLineAndColumn (input: string) =

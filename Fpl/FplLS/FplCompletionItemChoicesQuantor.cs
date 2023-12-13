@@ -12,7 +12,7 @@ namespace FplLS
             var postfix = "";
             if (defaultCi.Word.Contains("exn"))
             {
-                postfix = "!1";
+                postfix = "$1";
             }
             // snippets
             var ci = defaultCi.Clone(); SetBody(ci, "none", postfix); ret.Add(ci);
@@ -38,7 +38,7 @@ namespace FplLS
                 case "none":
                     ci.SortText = $"{ci.Word}01";
                     ci.Label = $"{TokenPrefix}{ci.Word}{postfix} ...";
-                    ci.InsertText = $"{ci.Word} x" + GetBody();
+                    ci.InsertText = $"{ci.Word}{postfix} x" + GetBody();
                     switch (ci.Word)
                     {
                         case "all":
@@ -55,7 +55,7 @@ namespace FplLS
                 case "inType":
                     ci.SortText = $"{ci.Word}02";
                     ci.Label = $"{TokenPrefix}{ci.Word}{postfix} in type ...";
-                    ci.InsertText = $"{ci.Word} x in FplType" + GetBody();
+                    ci.InsertText = $"{ci.Word}{postfix} x in FplType" + GetBody();
                     switch (ci.Word)
                     {
                         case "all":
@@ -72,7 +72,7 @@ namespace FplLS
                 case "inList":
                     ci.SortText = $"{ci.Word}03";
                     ci.Label = $"{TokenPrefix}{ci.Word}{postfix} in list ...";
-                    ci.InsertText = $"{ci.Word} x in listVar" + GetBody();
+                    ci.InsertText = $"{ci.Word}{postfix} x in listVar" + GetBody();
                     switch (ci.Word)
                     {
                         case "all":
@@ -89,7 +89,7 @@ namespace FplLS
                 case "inRange":
                     ci.SortText = $"{ci.Word}04";
                     ci.Label = $"{TokenPrefix}{ci.Word}{postfix} in range ...";
-                    ci.InsertText = $"{ci.Word} x in [a,b]" + GetBody();
+                    ci.InsertText = $"{ci.Word}{postfix} x in [a,b]" + GetBody();
                     switch (ci.Word)
                     {
                         case "all":
@@ -107,7 +107,7 @@ namespace FplLS
                 default:
                     ci.SortText = $"{ci.Word}05";
                     ci.Label = $"{TokenPrefix}{ci.Word}{postfix} combined ...";
-                    ci.InsertText = $"{ci.Word} x in [a,b], y in listVar, z in FplType" + GetLongBody();
+                    ci.InsertText = $"{ci.Word}{postfix} x in [a,b], y in listVar, z in FplType" + GetLongBody();
                     switch (ci.Word)
                     {
                         case "all":
@@ -128,23 +128,12 @@ namespace FplLS
         }
         private string GetBody()
         {
-            return
-                  $"{Environment.NewLine}" +
-                  $"({Environment.NewLine}" +
-                  $"\tp(x){Environment.NewLine}" +
-                  $"){Environment.NewLine}" +
-                  $"{Environment.NewLine}";
-
+            return $" p(x) ";
         }
 
         private string GetLongBody()
         {
-            return
-                  $"{Environment.NewLine}" +
-                  $"({Environment.NewLine}" +
-                  $"\tand( p(x), q(y), u(z) ){Environment.NewLine}" +
-                  $"){Environment.NewLine}" +
-                  $"{Environment.NewLine}";
+            return $" and( p(x), q(y), u(z) ) ";
         }
     }
 }

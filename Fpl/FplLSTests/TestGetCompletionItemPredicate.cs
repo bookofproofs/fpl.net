@@ -1,4 +1,5 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FParsec.ErrorMessage;
 
 namespace FplLSTests
 {
@@ -15,6 +16,7 @@ namespace FplLSTests
         [DataRow("impl", 2)]
         [DataRow("and", 2)]
         [DataRow("or", 2)]
+        [DataRow("(", 1)]
         [TestMethod]
         public void TestAddPredicateChoicesNumber(string choice, int expected)
         {
@@ -33,17 +35,23 @@ namespace FplLSTests
         [DataRow("impl")]
         [DataRow("and")]
         [DataRow("or")]
+        [DataRow("(")]
         [TestMethod]
         public void TestAddPredicateKeywordCounts(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesPredicate().GetChoices(detailCi);
             var count = 0;
+            int expected = 1;
             foreach (var item in actual)
             {
+                if (choice == "(")
+                {
+                    expected = 0;
+                }
                 if (item.Kind == CompletionItemKind.Keyword) count++;
             }
-            Assert.AreEqual(1, count);
+            Assert.AreEqual(expected, count);
         }
 
         [DataRow("true", CompletionItemKind.Keyword, "zzztrue")]
@@ -62,6 +70,7 @@ namespace FplLSTests
         [DataRow("and", CompletionItemKind.Keyword, "zzzand")]
         [DataRow("or", CompletionItemKind.Operator, "or")]
         [DataRow("or", CompletionItemKind.Keyword, "zzzor")]
+        [DataRow("(", CompletionItemKind.Operator, "(")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind isKeyword, string expected)
         {
@@ -86,6 +95,7 @@ namespace FplLSTests
         [DataRow("impl")]
         [DataRow("and")]
         [DataRow("or")]
+        [DataRow("(")]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -95,7 +105,7 @@ namespace FplLSTests
             {
                 if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine + Environment.NewLine));
+                    Assert.IsTrue(item.InsertText.EndsWith(" "));
                 }
             }
         }
@@ -110,6 +120,7 @@ namespace FplLSTests
         [DataRow("impl")]
         [DataRow("and")]
         [DataRow("or")]
+        [DataRow("(")]
         [TestMethod]
         public void TestAddPredicateChoicesLabel(string choice)
         {
@@ -131,6 +142,7 @@ namespace FplLSTests
         [DataRow("impl", "predicate (implication, =>)")]
         [DataRow("and", "predicate (conjunction)")]
         [DataRow("or", "predicate (disjunction)")]
+        [DataRow("(", "equality")]
         [TestMethod]
         public void TestAddPredicateChoicesDetail(string choice, string l)
         {
@@ -155,6 +167,7 @@ namespace FplLSTests
         [DataRow("impl")]
         [DataRow("and")]
         [DataRow("or")]
+        [DataRow("(")]
         [TestMethod]
         public void TestAddPredicateChoicesInsertText(string choice)
         {

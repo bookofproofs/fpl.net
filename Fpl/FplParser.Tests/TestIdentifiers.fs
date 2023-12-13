@@ -15,140 +15,147 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestTheoryNamespace () =
-        let result = run theoryNamespace "Fpl.Test alias MyAlias"
+        let result = run (theoryNamespace .>> eof) "Fpl.Test alias MyAlias"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestTheoryNamespace2 () =
-        let result = run theoryNamespace "Fpl.Test"
+        let result = run (theoryNamespace .>> eof) "Fpl.Test"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestUsesClause () =
-        let result = run buildingBlockList "uses  Fpl.Test alias MyAlias uses Fpl.Test uses Fpl.Test.Test1 "
+        let result = run (buildingBlockList .>> eof) "uses  Fpl.Test alias MyAlias uses Fpl.Test uses Fpl.Test.Test1 "
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestUsesClause01 () =
-        let result = run buildingBlockList "uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel"
+        let result = run (buildingBlockList .>> eof) "uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestUsesClause02 () =
-        let result = run buildingBlockList "uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel alias ZF uses  Fpl.Arithmetics.Peano alias A"
+        let result = run (buildingBlockList .>> eof) "uses Fpl.Commons uses Fpl.SetTheory.ZermeloFraenkel alias ZF uses  Fpl.Arithmetics.Peano alias A"
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestUsesClause03 () =
+        let result = run (buildingBlockList .>> eof) "uses Fpl.Commons *"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicateIdentifier1 () =
-        let result = run predicateIdentifier "ThisIsMyIdentifier"
+        let result = run (predicateIdentifier .>> eof) "ThisIsMyIdentifier"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicateIdentifier2 () =
-        let result = run predicateIdentifier "This.Is.My.Identifier"
+        let result = run (predicateIdentifier .>> eof) "This.Is.My.Identifier"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestIndexVariable1 () =
-        let result = run variable "x<123>"
+        let result = run (predicateWithQualification .>> eof) "x[123]"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestIndexVariable2 () =
-        let result = run variable "x<y>"
+        let result = run (predicateWithQualification .>> eof) "x[y]"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestAtList0 () =
-        let result = run atList ""
+        let result = run (atList .>> eof) ""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestAtList1 () =
-        let result = run atList "@"
+        let result = run (atList .>> eof) "@"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestAtList2 () =
-        let result = run atList "@@"
+        let result = run (atList .>> eof) "@@"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSelf0 () =
-        let result = run self "self"
+        let result = run (self .>> eof) "self"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSelf1 () =
-        let result = run self "@self"
+        let result = run (self .>> eof) "@self"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSelf2 () =
-        let result = run self "@@self"
+        let result = run (self .>> eof) "@@self"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntitySelf () =
-        let result = run entity "self"
+        let result = run (entity .>> eof) "self"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntityAtSelf () =
-        let result = run entity "@self"
+        let result = run (entity .>> eof) "@self"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntityVariable () =
-        let result = run entity "xyz"
+        let result = run (entity .>> eof) "xyz"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExtensionName () =
-        let result = run extensionName "Digits"
+        let result = run (extensionName .>> eof) "Digits"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExtensionBlock1 () =
-        let result = run extensionBlock """:ext
+        let result = run (extensionBlock .>> eof) """:ext
         Digits : /\d+/
     :end """
         let actual = sprintf "%O" result
@@ -157,91 +164,91 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestBoundLeftClosed () =
-        let result = run leftBound """["""
+        let result = run (leftBound .>> eof) """[["""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestBoundLeftClosed1 () =
-        let result = run leftBound """[ """
+        let result = run (leftBound .>> eof) """[[ """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestBoundLeftOpen () =
-        let result = run leftBound """[!"""
+        let result = run (leftBound .>> eof) """[("""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestBoundLeftOpen1 () =
-        let result = run leftBound """[ !"""
+        let result = run (leftBound .>> eof) """[ ("""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestBoundRightOpen () =
-        let result = run rightBound """)]"""
+        let result = run (rightBound .>> eof) """)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestBoundRightOpen1 () =
-        let result = run rightBound """)] """
+        let result = run (rightBound .>> eof) """)] """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestBoundRightClosed () =
-        let result = run rightBound """]"""
+        let result = run (rightBound .>> eof) """]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestBoundRightClosed1 () =
-        let result = run rightBound """] """
+        let result = run (rightBound .>> eof) """]] """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntityWithCoord1 () =
-        let result = run predicateWithQualification """myField[1 , n]"""
+        let result = run (predicateWithQualification .>> eof) """myField[1 , n]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntityWithCoord2 () =
-        let result = run predicateWithQualification """theorem[from , to]"""
+        let result = run (predicateWithQualification .>> eof) """theorem[from , to]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestEntityWithCoord3 () =
-        let result = run predicateWithQualification """self[from , to]"""
+        let result = run (predicateWithQualification .>> eof) """self[from , to]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntityWithCoord4 () =
-        let result = run predicateWithQualification """tplSetElem[from , to]"""
+        let result = run (predicateWithQualification .>> eof) """tplSetElem[from , to]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestEntityWithCoord5 () =
-        let result = run predicateWithQualification """tpls[from , to]"""
+        let result = run (predicateWithQualification .>> eof) """tpls[from , to]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

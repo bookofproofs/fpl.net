@@ -8,15 +8,21 @@ type Positions = Position * Position
 
 
 type Ast = 
+    // Literals
+    | Star 
+    | Dot
+    | LeftClosed
+    | LeftOpen 
+    | RightClosed
+    | RightOpen 
     // Identifiers
     | Digits of string
     | ExtDigits of Positions * Ast
-    | ExclamationDigits of Positions * Ast
-    | ExclamationVarOrDigits of Positions * Ast
+    | DollarDigits of Positions * string
     | PascalCaseId of string
     | NamespaceIdentifier of Positions * Ast list
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
-    | PredicateIdentifier of Positions * Ast list
+    | PredicateIdentifier of Positions * Ast list 
     | DelegateId of Positions * string 
     | Alias of Positions * string
     | SelfAts of Positions * char list 
@@ -30,14 +36,10 @@ type Ast =
     | ExtensionType of Positions * Ast 
     | ExtensionBlock of Positions * (Ast * Ast)
     | UsesClause of Positions * Ast
-    | LeftClosed
-    | LeftOpen 
-    | RightClosed
-    | RightOpen 
-    | Id of string
     | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | BrackedCoordList of Positions * Ast list
     | RangeInType of Positions * (Ast option * Ast option) 
+    | ReferencingIdentifier of Positions * (Ast * Ast list)
     // Types
     | One 
     | Many 
@@ -56,18 +58,19 @@ type Ast =
     | ClassTypeWithModifier of Positions * (Ast * Ast)
     // Variables
     | Var of Positions * string
-    | IndexVariable of Positions * (Ast * Ast list option)
 
     // Predicates
+    | Prefix of Positions * Ast
+    | Infix of Positions * Ast 
+    | Postfix of Positions * Ast
     | True of Positions * unit
     | False of Positions * unit 
     | Undefined of Positions * unit
-    | PredicateWithQualification of (Positions * (Ast * Ast option)) * Ast option
     | And of Positions * Ast list
     | Or of Positions * Ast list
+    | Xor of Positions * Ast list
     | Impl of Positions * (Ast * Ast)
     | Iif of Positions * (Ast * Ast)
-    | Xor of Positions * (Ast * Ast)
     | Not of Positions * Ast
     | Domain of Positions * Ast
     | All of Positions * ((Ast list * Ast option) list * Ast)
@@ -76,10 +79,19 @@ type Ast =
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Positions * (Ast * Ast)
     | ArgumentIdentifier of Positions * string
-    | PremiseReference of Positions * unit
+    | ReferenceToProofOrCorollary of Positions * (Ast * Ast option) 
     | Justification of Positions * Ast list
     | ArgumentTuple of Positions * Ast list
-    | EqualityComparison of Ast list
+    | ByDef of Positions * Ast
+    | PredicateWithOptSpecification of Positions * (Ast * Ast option)
+    | DottedPredicate of Positions * Ast 
+    | QualificationList of Positions * Ast list
+    | PredicateWithQualification of (Ast * Ast) 
+    | InfixOperator of Positions * string
+    | PostfixOperator of Positions * string
+    | PrefixOperator of Positions * string
+    | InfixOperation of Positions * (Ast * Ast option) list
+    | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     // Statements
     | Assertion of Positions * Ast
     | ConditionFollowedByResult of Positions * (Ast * Ast list)
@@ -95,14 +107,15 @@ type Ast =
     | SignatureWithPreConBlock of Ast * ((Ast list option * Ast) * Ast)
     | RuleOfInference of Positions * Ast
     | Localization of Positions * (Ast * Ast list)
-    | Theorem of Positions * Ast
-    | Lemma of Positions * Ast
-    | Proposition of Positions * Ast
-    | Corollary of Positions * (((Ast * Ast list) * Ast) * ((Ast list option * Ast) * Ast))
-    | Conjecture of Positions * Ast
+    | Theorem of Positions * (Ast *(Ast list option * Ast))
+    | Lemma of Positions * (Ast *(Ast list option * Ast))
+    | Proposition of Positions * (Ast *(Ast list option * Ast))
+    | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
+    | Conjecture of Positions * (Ast *(Ast list option * Ast))
     | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
     | ParamTuple of Positions * Ast list
     | Signature of Positions * (Ast * Ast)
+    | SignatureWithUserDefinedString of Positions * ((Ast * Ast option) * Ast)
     | Axiom of Positions * (Ast * (Ast list option * Ast))
     | ParentConstructorCall of Positions * (Ast * Ast)
     | Constructor of Positions * (Ast * (Ast list option * Ast)) 
@@ -123,18 +136,13 @@ type Ast =
     // Proofs
     | Trivial of Positions * unit
     | Qed of Positions * unit
-    | ConclusionReference of Positions * unit
     | DerivedPredicate of Ast
     | AssumeArgument of Positions * Ast
     | RevokeArgument of Positions * Ast
     | JustifiedArgument of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
-    | Proof of Positions * ((Ast * Ast list) * (Ast list option * Ast list))
-    | Namespace of Positions * (Ast * (Ast option * Ast list))
+    | Proof of Positions * (Ast * (Ast list * Ast option))
+    | Namespace of Ast option * Ast list
     | AST of Positions * Ast
-    | Escape // used to replace AST subnodes when we recover from an error
-    | SomeString of string // used to replace AST for strings subnodes when we recover from an error
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from
-    | Empty // used to mark empty inner inputs between enclosing ones 
-    | Sequence of Positions * Ast list
 

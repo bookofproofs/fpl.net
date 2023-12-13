@@ -1,4 +1,32 @@
-﻿## 2.4.3
+﻿## 3.3.1
+* Making user-defined prefix notations possible
+* Bugfixes of significant spaces in the syntax
+
+## 3.3.0
+* Removing the necessity to put negation and quantor predicates into parentheses
+* Making user-defined infix and postfix notations possible
+
+## 3.2.1
+* Removing indexed predicates as alternative notation to coordinate notation
+
+## 3.2.0
+* Extending predicates by parenthesized expressions
+
+## 3.1.0
+* Bugfixes: 
+	* xor accepts more than two predicates
+	* proofs accept alternating variable declarations and argument proofs
+
+## 3.0.0
+* Updated Documentation [DocuFplGrammarPocShiftFromPythonToFSharp.md](https://github.com/bookofproofs/fpl.net/blob/main/Fpl/Fpl/DocuFplGrammarPocShiftFromPythonToFSharp.md) updated
+
+## 2.6.0
+* Hook up auto-completion service
+
+## 2.5.0
+* Error diagnostics (experimental)
+
+## 2.4.3
 * Hook up error diagnostics stemming from what later will become error recovery in F# to the language server in C#.
 
 ## 2.4.2

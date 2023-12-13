@@ -9,7 +9,7 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass00 () =
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
         
         }"""
@@ -20,7 +20,7 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass01 () =
         // if empty then intrinsic
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             intr
         }"""
@@ -31,7 +31,7 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass01a () =
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // intrinsic classes with declarations or specifications not allowed
             dec:;
@@ -43,10 +43,10 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass01b () =
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // intrinsic classes with declarations or specifications not allowed
-            dec ~a:obj;
+            dec ~a:obj ;
             intr
         }"""
         let actual = sprintf "%O" result
@@ -55,7 +55,7 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass01c () =
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // intrinsic classes with declarations or specifications not allowed
             dec ~d:Nat 
@@ -69,7 +69,7 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass01d () =
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // intrinsic classes with declarations or specifications not allowed
             decs := x
@@ -81,11 +81,11 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass02 () =
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             ctor FieldPowerN()
             {
-                dec self!obj() ;
+                dec base.obj () ;
                 self
             }
         }"""
@@ -96,12 +96,12 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass02a () =
         // A class with a constructor and a self reference
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
-            dec ~x: obj;
+            dec ~x: obj ;
             constructor FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj () ;
                 self
             }
         }"""
@@ -111,13 +111,13 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass02a0 () =
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // A class with a constructor and a self reference but without self
             dec:;
             FieldPowerN() 
             {
-                self!obj()
+                base.obj ()
             }
         }"""
         let actual = sprintf "%O" result
@@ -127,12 +127,12 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass02b () =
         // A class with a constructor
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
-            dec ~a:obj;
+            dec ~a:obj ;
             ctor FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj () ;
                 self
             }
         }"""
@@ -142,13 +142,13 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass02b0 () =
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // A class with a constructor but without self
-            dec ~a:obj;
+            dec ~a:obj ;
             FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj () ;
             }
         }"""
         let actual = sprintf "%O" result
@@ -158,11 +158,11 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass02c () =
         // A class with a constructor 
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             ctor FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj () ;
                 self
             }
         }"""
@@ -172,12 +172,12 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass02c0 () =
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // A class with a constructor but without self
             FieldPowerN() 
             {
-                self!obj()
+                base.obj ()
             }
         }"""
         let actual = sprintf "%O" result
@@ -187,16 +187,16 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass03 () =
         // A class with more than one constructor
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             ctor FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj () ;
                 self
             }
             constructor FieldPowerN() 
             {
-                dec self!T1() ;
+                dec base.T1() ;
                 self
             }
         }"""
@@ -207,23 +207,23 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass03a () =
         // A class with more than one constructor and some properties
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             ctor FieldPowerN() 
             {
-                dec self!obj() ;
+                dec base.obj () ;
                 self
             }
 
             ctor FieldPowerN() 
             {
-                dec self!T1() ;
+                dec base.T1() ;
                 self
             }
 
             property func T() -> obj
 	        {
-	            dec ~a:obj;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -239,14 +239,14 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass03b () =
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // A class with more than one constructor and some properties
             FieldPowerN() 
             {
                 dec 
                     ~a:obj
-                    self.obj()
+                    base.obj ()
                     ;
                 self
             }
@@ -259,14 +259,14 @@ type TestClasses () =
             FieldPowerN() 
             {
                 dec
-                    self.T1()
+                    base.T1()
                 ;
                 self
             }
 
             mand func T() -> obj
 	        {
-	            dec ~a:obj;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -279,12 +279,12 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass04a () =
         // A class with a constructor and a property 
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
 
             ctor FieldPowerN() 
             {
-                dec self!T1() ;
+                dec base.T1() ;
                 self
             }
 
@@ -300,7 +300,7 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass04b () =
-        let result = run definitionClass """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // A class with a constructor and a property but constructors have to proceed properties
 
@@ -325,7 +325,7 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass05 () =
         // A class with multiple inheritance
-        let result = run definitionClass """class FieldPowerN: Typ1, :* Typ2, :+ Typ3 
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Typ1, :* Typ2, :+ Typ3 
         {
             intrinsic
 
@@ -337,7 +337,7 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass06 () =
         // An intrinsic class 
-        let result = run definitionClass """class FieldPowerN: Typ1
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Typ1
         {
             intrinsic
         }"""
@@ -348,13 +348,13 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass07 () =
         // An intrinsic class some following properties
-        let result = run definitionClass """class FieldPowerN: Typ1
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Typ1
         {
             intrinsic
 
             property func T() -> obj
 	        {
-	            dec ~a:obj;
+	            dec ~a:obj ;
                 return x
 	        } 
 

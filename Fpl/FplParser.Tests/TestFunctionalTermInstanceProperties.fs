@@ -9,7 +9,7 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance01 () =
-        let result = run property """mand func X() -> Y
+        let result = run (property .>> eof) """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
 	        }"""
@@ -19,7 +19,7 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance01a () =
-        let result = run property """mand func X() -> Y
+        let result = run (property .>> eof) """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
                 dec:;
@@ -30,10 +30,10 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance01b () =
-        let result = run property """mand func X() -> Y
+        let result = run (property .>> eof) """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
-                dec ~a:obj;
+                dec ~a:obj ;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -41,7 +41,7 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance01c () =
-        let result = run property """mand func X() -> Y
+        let result = run (property .>> eof) """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
                 dec:;
@@ -53,10 +53,10 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance01d () =
-        let result = run property """mand func X() -> Y
+        let result = run (property .>> eof) """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
-                dec ~a:obj;
+                dec ~a:obj ;
                 x
 	        }"""
         let actual = sprintf "%O" result
@@ -65,7 +65,7 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance01e () =
-        let result = run property """mand func X() -> Y
+        let result = run (property .>> eof) """mand func X() -> Y
 	        {
                 // a function term instance without a return statement is not allowed
                 dec:;
@@ -78,7 +78,7 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance01f () =
         // a function term instance without a return statement is not allowed
-        let result = run property """mand func X() -> Y
+        let result = run (property .>> eof) """mand func X() -> Y
 	        {
                 x
 	        }"""
@@ -89,9 +89,9 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2a () =
         // a function term instance with a return statement 
-        let result = run property """property optional func X() -> Y
+        let result = run (property .>> eof) """property optional func X() -> Y
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 return x
 	        }"""
         let actual = sprintf "%O" result
@@ -101,9 +101,9 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2b () =
         // a function term instance with a return statement 
-        let result = run property """property func X() -> Y
+        let result = run (property .>> eof) """property func X() -> Y
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 return x
 	        }"""
         let actual = sprintf "%O" result
@@ -113,9 +113,9 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2c () =
         // a function term instance with a return statement 
-        let result = run property """property optional func X() -> Y
+        let result = run (property .>> eof) """property optional func X() -> Y
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 return x
 	        }"""
         let actual = sprintf "%O" result
@@ -125,9 +125,9 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2d () =
         // a function term instance with a return statement 
-        let result = run property """property func X() -> Y
+        let result = run (property .>> eof) """property func X() -> Y
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 return x
 	        }"""
         let actual = sprintf "%O" result
@@ -137,9 +137,9 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2e () =
         // a function term instance with a return statement 
-        let result = run property """property optional func X() -> Y
+        let result = run (property .>> eof) """property optional func X() -> Y
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 return x
 	        }"""
         let actual = sprintf "%O" result
@@ -149,9 +149,9 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2f () =
         // a function term instance with a return statement 
-        let result = run property """property func X() -> Y
+        let result = run (property .>> eof) """property func X() -> Y
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 return x
 	        }"""
         let actual = sprintf "%O" result
@@ -162,10 +162,10 @@ type TestFunctionalTermProperties () =
     member this.TestFunctionalTermInstance3 () =
         // a function term instance with a return statement and 
         // some other content following it is not allowed
-        let result = run property """property func X() -> Y
+        let result = run (property .>> eof) """property func X() -> Y
 	        {
                 return x
-                dec ~a:obj;
+                dec ~a:obj ;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -175,10 +175,10 @@ type TestFunctionalTermProperties () =
     member this.TestFunctionalTermInstance3a () =
         // a function term instance with a return statement and 
         // some other content following it is not allowed
-        let result = run property """func X() -> Y
+        let result = run (property .>> eof) """func X() -> Y
 	        {
                 return x
-                dec ~a:obj;
+                dec ~a:obj ;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -188,7 +188,7 @@ type TestFunctionalTermProperties () =
     member this.TestFunctionalTermInstance3b () =
         // a function term instance with a return statement and 
         // some other content following it is not allowed
-        let result = run property """func X() -> Y
+        let result = run (property .>> eof) """func X() -> Y
 	        {
                 return x
                 dec a:ind;
@@ -199,7 +199,7 @@ type TestFunctionalTermProperties () =
 
     [<TestMethod>]
     member this.TestFunctionalTermInstance4 () =
-        let result = run property """mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
+        let result = run (property .>> eof) """mand func VecAdd(from,to: Nat, v,w: tplFieldElem[from ~ to]) -> tplFieldElem[from ~ to]
 	        {
 			    dec ~a:obj
     	            self[from ~ to]:=addInField(v[from ~ to],w[from ~ to])

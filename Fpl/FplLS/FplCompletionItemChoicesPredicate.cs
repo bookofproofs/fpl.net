@@ -25,7 +25,6 @@ namespace FplLS
                     // keyword
                     var ci1 = defaultCi.Clone(); ci1.Kind = CompletionItemKind.Keyword; ci1.AdjustToKeyword(); ret.Add(ci1);
                     break;
-                case "xor":
                 case "iif":
                 case "impl":
                     // snippet
@@ -33,16 +32,21 @@ namespace FplLS
                     // keyword
                     var ci2K = defaultCi.Clone(); ci2K.Kind = CompletionItemKind.Keyword; ci2K.AdjustToKeyword(); ret.Add(ci2K);
                     break;
+                case "(":
+                    // snippet for equality
+                    var ciEquals = defaultCi.Clone(); SetBodyEquality(ciEquals); ret.Add(ciEquals);
+                    break;
                 case "and":
                 case "or":
-                    var ci3 = defaultCi.Clone(); SetBody(ci3, 2); ret.Add(ci3);
+                case "xor":
+                    var ci3 = defaultCi.Clone(); SetBody(ci3, 3); ret.Add(ci3);
                     var ci3K = defaultCi.Clone(); ci3K.Kind = CompletionItemKind.Keyword; ci3K.AdjustToKeyword(); ret.Add(ci3K);
                     break;
             }
             return ret;
         }
 
-         public void SetBody(FplCompletionItem ci, int numbOfArgs)
+        public void SetBody(FplCompletionItem ci, int numbOfArgs)
         {
             switch (numbOfArgs)
             {
@@ -50,19 +54,27 @@ namespace FplLS
                     // no snippets for null-ary predicates (treat them as keywords only - see below)
                     break;
                 case 1:
-                    ci.InsertText = $"{ci.Word} ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}){Environment.NewLine}{Environment.NewLine}";
+                    ci.InsertText = $"{ci.Word} true ";
                     break;
                 case 2:
-                    ci.InsertText = $"{ci.Word} ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine}){Environment.NewLine}{Environment.NewLine}";
+                    ci.InsertText = $"{ci.Word} ( false, true ) ";
                     break;
                 default:
-                    ci.InsertText = $"{ci.Word} ({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine}){Environment.NewLine}{Environment.NewLine}";
+                    ci.InsertText = $"{ci.Word} ( true, true, false ) ";
                     break;
             }
             ci.Label += " ...";
 
         }
 
+        public void SetBodyEquality(FplCompletionItem ci)
+        {
+            ci.InsertText = $"( x = y ) ";
+            ci.Label = TokenPrefix + ci.InsertText + "...";
+            ci.Detail = "equality";
+            ci.SortText = "(";
+            ci.Kind = CompletionItemKind.Operator;
+        }
 
     }
 }

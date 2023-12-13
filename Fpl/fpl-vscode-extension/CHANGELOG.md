@@ -4,6 +4,28 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.4.7
+* CHANGELOG and README for FPL extension updated
+
+## 1.4.6
+* FPL support for user-defined prefix, postfix, and infix notation for mathematical operators in expressions.
+
+## 1.4.5
+* Bugfixes in the syntax of referencing identifiers in proofs and corollaries
+
+## 1.4.4
+* Bugfixes in the syntax of indexed and dotted predicates
+* Disambiguation of parent-class calls and indexed predicates by introducing the new keyword base.
+
+## 1.4.3
+* Additional keyword bydef
+
+## 1.4.2
+* Minor bugfixes
+
+## 1.4.1
+* Minor bugfixes
+
 ## 1.4.0
 * Syntactical autocompletion service added
 * Syntax-Highlighting for argument identifiers and code markdown added

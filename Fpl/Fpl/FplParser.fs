@@ -36,24 +36,23 @@ let rightBrace = skipChar '}' >>. spaces
 let leftParen = skipChar '(' >>. spaces 
 let rightParen = skipChar ')' 
 let comma = skipChar ',' >>. spaces 
-let dot = skipChar '.'
+let dot = skipChar '.' >>% Ast.Dot
 let colon = skipChar ':' >>. spaces >>% Ast.One
 let colonStar = skipString ":*" >>. spaces >>% Ast.Many
 let colonPlus = skipString ":+" >>. spaces >>% Ast.Many1
 let colonEqual = skipString ":=" >>. spaces 
-let equals = skipString "=" >>. spaces
 let at = pchar '@'
 let case = skipChar '|' >>. spaces
 let elseCase = skipChar '?' >>. spaces
-let leftBracket = skipChar '<' >>. spaces 
-let rightBracket = skipChar '>' >>. spaces  
-let leftClosedBracket = skipChar '[' >>. spaces <?> "<(closed) left bound>"
+let leftBracket = skipChar '[' >>. spaces 
+let rightBracket = skipChar ']' >>. spaces  
+let leftClosedBracket = skipString "[[" >>. spaces <?> "<(closed) left bound>"
 let leftOpenBracket = skipString "[(" >>. spaces <?> "<(open) left bound>"
 let rightOpenBracket = skipString ")]" >>. spaces <?> "<(open) right bound>" 
-let rightClosedBracket = skipChar ']' >>. spaces <?> "<(closed) right bound>" 
+let rightClosedBracket = skipString "]]" >>. spaces <?> "<(closed) right bound>" 
 let tilde = skipChar '~' .>> spaces
 let semiColon = skipChar ';' >>. spaces
-let exclamationMark = skipChar '!'
+let exclamationMark = skipChar '!' 
 let toArrow = skipString "->"
 let vDash = skipString "|-"
 
@@ -62,6 +61,8 @@ let vDash = skipString "|-"
 let IW = spaces <?> "<whitespace>"
 
 let SW = spaces1 <?> "<significant whitespace>"
+
+let attemptSW = SW <|> (IW .>> lookAhead (choice [skipChar '('; skipChar ')'; skipChar '{'; skipChar ','; skipChar ';'; skipChar '[' ]))
 
 // -----------------------------------------------------
 // Extensions of the FPL language (have to be dynamic)! Lacking a pre-processor, we put the rules
@@ -81,11 +82,12 @@ let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
 let argumentIdentifier = positions (regex @"\d+\w*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 
 let namespaceIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
-let predicateIdentifier = positions (sepBy1 pascalCaseId dot) .>> IW |>> Ast.PredicateIdentifier 
+let predicateIdentifier = positions (sepBy1 pascalCaseId dot) |>> Ast.PredicateIdentifier 
 
 let alias = positions (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
+let star = positions (skipChar '*') >>% Ast.Star
 
-let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt alias) |>> Ast.AliasedNamespaceIdentifier
+let aliasedNamespaceIdentifier = positions (namespaceIdentifier .>>. opt (alias <|> star)) |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z]\w*)|\d*)$", RegexOptions.Compiled)
 
 
@@ -110,8 +112,8 @@ let variable = positions variableX |>> Ast.Var
 let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
 let keywordSelf = positions (skipString "self") .>> IW |>> Ast.Self
-let keywordSelfExclamation = skipString "self!" .>> IW
-let keywordIndex = (skipString "index" <|> skipString "ind") .>> IW  >>% Ast.IndexType
+let keywordBaseClassReference = skipString "base" .>> IW
+let keywordIndex = (skipString "index" <|> skipString "ind") .>> attemptSW >>% Ast.IndexType
 
 
 (* FplBlock-related Keywords *)
@@ -123,21 +125,22 @@ let keywordConclusion = (skipString "conclusion" <|> skipString "con") >>. IW
 let keywordDel = skipString "delegate" <|> skipString "del" 
 let keywordFor = skipString "for" .>> SW 
 let keywordIn = skipString "in" .>> SW 
-let keywordCases = skipString "cases" .>> SW 
+let keywordCases = skipString "cases" .>> IW 
 let keywordAssert = skipString "assert" .>> SW
 
 (* Predicate-related Keywords *)
 let keywordUndefined = positions (skipString "undefined" <|> skipString "undef") .>> IW |>> Ast.Undefined
 let keywordTrue = positions (skipString "true") .>> IW  |>> Ast.True  
 let keywordFalse = positions (skipString "false") .>> IW |>>  Ast.False  
+let keywordBydef = positions (skipString "bydef") .>> SW  
 let keywordAnd = skipString "and" .>> IW 
 let keywordOr = skipString "or" .>> IW 
 let keywordImpl = skipString "impl" .>> IW 
 let keywordIif = skipString "iif" .>> IW 
 let keywordXor = skipString "xor" .>> IW 
-let keywordNot = skipString "not" .>> IW 
-let keywordAll = skipString "all" .>> IW 
-let keywordEx = skipString "ex" .>> IW
+let keywordNot = skipString "not" .>> attemptSW 
+let keywordAll = skipString "all" .>> SW 
+let keywordEx = skipString "ex" .>> SW
 let keywordExN = skipString "exn" .>> IW
 let keywordIs = skipString "is" .>> IW 
 
@@ -152,15 +155,15 @@ let templateTail = choice [ idStartsWithCap; (regex @"\d+") ]
 
 let templateWithTail = positions (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) .>> IW |>>  Ast.TemplateType
 
-let keywordObject = (skipString "object" <|> skipString "obj") .>> IW >>% Ast.ObjectType 
+let keywordObject = (skipString "object" <|> skipString "obj") .>> attemptSW >>% Ast.ObjectType 
 
 let objectHeader = choice [
     keywordObject
     (attempt templateWithTail) <|> keywordTemplate
 ] 
 
-let keywordPredicate = (skipString "predicate" <|> skipString "pred") .>> IW >>% Ast.PredicateType
-let keywordFunction = (skipString "function" <|> skipString "func") .>> IW >>% Ast.FunctionalTermType
+let keywordPredicate = (skipString "predicate" <|> skipString "pred") .>> attemptSW >>% Ast.PredicateType
+let keywordFunction = (skipString "function" <|> skipString "func") .>> attemptSW >>% Ast.FunctionalTermType
 
 
 let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
@@ -170,7 +173,7 @@ let usesClause = positions (keywordUses >>. theoryNamespace) |>> Ast.UsesClause
 
 let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
-let extensionHeader: Parser<unit,unit> = skipString ":ext" 
+let extensionHeader: Parser<unit,unit> = skipString ":ext" >>. SW
 
 let extensionName = positions (idStartsWithCap .>> IW) |>> Ast.Extensionname
 
@@ -188,17 +191,13 @@ let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. ex
 
 let xId = positions (at >>. extensionName) |>> Ast.ExtensionType 
 
-let exclamationDigits = positions (exclamationMark >>. digits) |>> Ast.ExclamationDigits
-let exclamationVarOrDigits = positions (exclamationMark >>. (variable <|> digits)) |>> Ast.ExclamationVarOrDigits
-
-let indexed = opt (many1 (exclamationVarOrDigits))
-let indexVariable = positions (variable .>>. indexed) .>> IW |>> Ast.IndexVariable
+let dollarDigits = positions (regex "\$\d+" <?> "<dollarDigits>") |>> Ast.DollarDigits
 
 let atList = many at
 
 let self = positions (atList .>> keywordSelf) |>> Ast.SelfAts
 
-let entity = choice [ self ; exclamationVarOrDigits; indexVariable ]
+let entity = choice [ self ; variable ] 
 
 let leftOpen = positions leftOpenBracket >>% Ast.LeftOpen
 let leftClosed = positions leftClosedBracket >>% Ast.LeftClosed
@@ -214,14 +213,13 @@ let statementList, statementListRef = createParserForwardedToRef()
 let primePredicate, primePredicateRef = createParserForwardedToRef()
 let predicate, predicateRef = createParserForwardedToRef()
 let predicateList, predicateListRef = createParserForwardedToRef()
-let predicateList1, predicateList1Ref = createParserForwardedToRef()
 let predicateWithQualification, predicateWithQualificationRef = createParserForwardedToRef()
 let paramTuple, paramTupleRef = createParserForwardedToRef()
+let classType, classTypeRef = createParserForwardedToRef()
 
+let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
-let coord = choice [ entity; extDigits; exclamationVarOrDigits ] .>> IW 
-
-let fplIdentifier = choice [ entity; extDigits; predicateIdentifier ]
+let fplIdentifier = choice [ entity; predicateIdentifier; extDigits ] 
 
 let coordList = (sepBy1 coord comma) .>> IW
 
@@ -231,7 +229,7 @@ let fplRange = (opt coord.>> comma >>. opt coord) .>> IW
 
 let boundedRange = positions (leftBound .>>. fplRange .>>. rightBound) |>> Ast.ClosedOrOpenRange
 
-let coordInType = choice [ fplIdentifier; indexVariable ] .>> IW 
+let coordInType = choice [ classType; variable; dollarDigits ] .>> IW 
 
 let coordInTypeList = (sepBy1 coordInType comma) .>> IW 
 
@@ -250,21 +248,26 @@ let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) 
 // to restrict it to pure objects.
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
-let bracketModifier = boundedRangeInType <|> bracketedCoordsInType 
-let classType = positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
+let bracketModifier = choice [boundedRangeInType ; bracketedCoordsInType ; paramTuple ]
+classTypeRef.Value <- positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
 let simpleVariableType = positions (choice [ keywordIndex; keywordFunction; keywordPredicate; classType ] .>> IW) |>> Ast.SimpleVariableType
-
-let variableType = positions (simpleVariableType .>>. opt paramTuple .>> IW) |>> Ast.VariableType
+let optionalTypeSpecification = opt (choice [boundedRange ; bracketedCoords; paramTuple])
+let variableType = positions (simpleVariableType .>>. opt bracketModifier .>> IW) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
 
 paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) |>> Ast.ParamTuple
 let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) .>> IW |>> Ast.Signature
-
+let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<language-specific string>" |>> Ast.LocalizationString
+let userDefinedInfix = positions (pstring "infix" >>. IW >>. localizationString) .>> IW |>> Ast.Infix
+let userDefinedPostfix = positions (pstring "postfix" .>> IW >>. localizationString) .>> IW |>> Ast.Postfix
+let userDefinedPrefix = positions (pstring "prefix" .>> IW >>. localizationString) .>> IW |>> Ast.Prefix
+let userDefinedFix = opt choice[ userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]
+let signatureWithUserDefinedString = positions (predicateIdentifier .>> IW .>>. userDefinedFix .>>. paramTuple) .>> IW |>> Ast.SignatureWithUserDefinedString
 (* Statements *)
-let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen))  |>> Ast.ArgumentTuple 
+let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
 
 let word = regex @"\w+" <?> "<word>" .>> IW
 let fplDelegateIdentifier = positions (keywordDel >>. dot >>. word) .>> IW |>> Ast.DelegateId
@@ -275,23 +278,23 @@ let variableRange = choice [ entity ; boundedRange]
 
 let spacesRightBrace = (IW .>> rightBrace) 
 
-let keywordReturn = IW >>. (skipString "return" <|> skipString "ret") .>> IW 
+let keywordReturn = IW >>. (skipString "return" <|> skipString "ret") .>> SW 
 
 let defaultResult = positions (IW >>. statementList) |>> Ast.DefaultResult
 let conditionFollowedByResult = positions ((case >>. predicate .>> colon) .>>. (IW >>. statementList)) |>> Ast.ConditionFollowedByResult
 let conditionFollowedByResultList = many1 (IW >>. conditionFollowedByResult)
 
 let elseStatement = elseCase >>. IW >>. defaultResult .>> IW
-let casesStatement = positions (((keywordCases >>. IW >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
+let casesStatement = positions (((keywordCases >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
 
-let inDomain = positions (keywordIn >>. (simpleVariableType <|> variableRange) .>> IW) |>> Ast.Domain
+let allowedInDomainType = choice [keywordIndex; keywordFunction; keywordPredicate; specificClassType]
+let inDomain = positions (keywordIn >>. (allowedInDomainType <|> variableRange) .>> IW) |>> Ast.Domain
 let variableInOptDomain = ( (variable .>> IW) .>>. opt inDomain) .>> IW
 let variableListInOptDomain = ( variableList .>>. opt inDomain) .>> IW
 let variableListInOptDomainList = (sepBy1 variableListInOptDomain comma) .>> IW
 
-let entityInDomain = ( entity .>>. inDomain ) .>> IW
-let entityInVariableRange = ( entity .>>. (keywordIn >>. variableRange)) .>> IW
-let forInBody = (entityInVariableRange .>> IW) .>>. (leftParen >>. IW >>. statementList) .>> (IW >>. rightParen)
+let entityInDomain = ( entity .>> IW .>>. inDomain ) .>> IW
+let forInBody = (entityInDomain .>> IW) .>>. (leftParen >>. IW >>. statementList) .>> (IW >>. rightParen)
 let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 
 //// Difference of assertion to an axiom: axiom's is followed by a signature of a predicate (i.e. with possible parameters),
@@ -301,7 +304,7 @@ let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = positions (keywordAssert >>. predicate) |>> Ast.Assertion
 
-let callConstructorParentClass = positions (keywordSelfExclamation >>. specificClassType .>>. argumentTuple .>> IW) |>> Ast.ParentConstructorCall
+let callConstructorParentClass = positions (keywordBaseClassReference >>. dot >>. specificClassType .>>. argumentTuple .>> IW) |>> Ast.ParentConstructorCall
 
 let statement = 
     (choice [
@@ -316,45 +319,58 @@ let statement =
 statementListRef.Value <- many (IW >>. statement .>> IW)
 
 (* Predicates *)
+let optionalSpecification = opt (choice [boundedRange ; bracketedCoords; argumentTuple])
+let predicateWithOptSpecification = positions (fplIdentifier .>>. optionalSpecification) |>> Ast.PredicateWithOptSpecification
+let dottedPredicate = positions (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate
+let qualificationList = positions (many dottedPredicate) |>> Ast.QualificationList
 
-let dotted = dot >>. predicateWithQualification 
-let qualification = choice [boundedRange ; bracketedCoords ; argumentTuple] 
-predicateWithQualificationRef.Value <- positions (fplIdentifier .>>. opt qualification) .>>. opt dotted |>> Ast.PredicateWithQualification 
+predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification 
 
-let premiseOfToBeProvedTheorem = positions keywordPremise |>> Ast.PremiseReference 
-let conclusionOfToBeProvedTheorem = positions keywordConclusion |>> Ast.ConclusionReference 
+let dollarDigitList = many1 dollarDigits
+let referencingIdentifier = positions (predicateIdentifier .>>. dollarDigitList) .>> IW |>> Ast.ReferencingIdentifier
+let referenceToProofOrCorollary = positions (referencingIdentifier .>>. opt paramTuple) .>> IW |>> Ast.ReferenceToProofOrCorollary
+
+let byDefinition = positions (keywordBydef >>. predicateWithQualification ) |>> Ast.ByDef 
+
 primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
     keywordUndefined
+    byDefinition
     attempt argumentIdentifier
     fplDelegate 
+    dollarDigits
+    attempt referenceToProofOrCorollary
     predicateWithQualification
-    premiseOfToBeProvedTheorem
-    conclusionOfToBeProvedTheorem
 ]
 
-let conjunction = positions ((keywordAnd >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.And
-let disjunction = positions ((keywordOr >>. leftParen >>. predicateList1) .>> rightParen) |>> Ast.Or
+let conjunction = positions ((keywordAnd >>. leftParen >>. predicateList) .>> rightParen) |>> Ast.And
+let disjunction = positions ((keywordOr >>. leftParen >>. predicateList) .>> rightParen) |>> Ast.Or
+let exclusiveOr = positions ((keywordXor >>. leftParen >>. predicateList) .>> rightParen) |>> Ast.Xor
 
 let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParen 
-let onePredicateInParens = (leftParen >>. predicate) .>> rightParen
 let implication = positions (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
 let equivalence = positions (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
-let exclusiveOr = positions (keywordXor >>. twoPredicatesInParens) |>> Ast.Xor
-let negation = positions (keywordNot >>. onePredicateInParens) |>> Ast.Not
-let all = positions ((keywordAll >>. variableListInOptDomainList) .>>. onePredicateInParens) |>> Ast.All
-let exists = positions ((keywordEx >>. variableListInOptDomainList) .>>. onePredicateInParens) |>> Ast.Exists
+let negation = positions (keywordNot >>. predicate) |>> Ast.Not
+let all = positions ((keywordAll >>. variableListInOptDomainList) .>>. predicate) |>> Ast.All
+let exists = positions ((keywordEx >>. variableListInOptDomainList) .>>. predicate) |>> Ast.Exists
 
-let existsTimesN = positions (((keywordExN >>. exclamationDigits .>> SW) .>>. variableInOptDomain) .>>. onePredicateInParens) |>> Ast.ExistsN
-let isOperator = positions ((keywordIs >>. leftParen >>. coordInType) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
+let existsTimesN = positions (((keywordExN >>. dollarDigits .>> SW) .>>. variableInOptDomain) .>>. predicate) |>> Ast.ExistsN
+let isOpArg = choice [ predicateIdentifier; variable; self; extDigits ] .>> IW
+let isOperator = positions ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
-// equality operator
-let equalityComparison = (leftBracket >>. sepBy1 predicate equals .>> rightBracket) |>> Ast.EqualityComparison
+// infix operators like the equality operator 
+let infixOp = positions (regex "[~\+\-\*\/\\\<\>=@\w]+" |>> fun (a:string) -> a.Trim()) .>> SW <?> "<infix operator>" |>> Ast.InfixOperator
+
+let pWithSep p separator =
+    let combinedParser = pipe2 p (opt separator) (fun a b -> (a, b))
+    combinedParser |> many
+
+let infixOperation = positions (leftParen >>. pWithSep predicate infixOp .>> rightParen) |>> Ast.InfixOperation
 
 // A compound Predicate has its own boolean expressions to avoid mixing up with Pl0Propositions
 let compoundPredicate = choice [
-    equalityComparison
+    infixOperation
     conjunction
     disjunction
     implication
@@ -367,12 +383,14 @@ let compoundPredicate = choice [
     isOperator
 ]
 
+let fixCharacters = regex "['%@!&~\+\-\*\/]+" |>> fun (a:string) -> a.Trim()
+let postfixOp = positions ( fixCharacters ) .>> IW <?> "<postfix operator>" |>> Ast.PostfixOperator
+let prefixOp = positions ( fixCharacters ) .>> IW <?> "<prefix operator>" |>> Ast.PrefixOperator
+let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePredicate] .>>. opt postfixOp .>>. optionalSpecification .>>. qualificationList) .>> IW |>> Ast.Expression
 
-
-predicateRef.Value <- choice [compoundPredicate; primePredicate] .>> IW 
+predicateRef.Value <- expression
 
 predicateListRef.Value <- sepBy predicate comma
-predicateList1Ref.Value <- sepBy1 predicate comma
 
 (* FPL building blocks *)
 let keywordDeclaration = (skipString "declaration" <|> skipString "dec") .>> SW 
@@ -402,22 +420,22 @@ let keywordProposition = (skipString "proposition" <|> skipString "prop") .>> SW
 let keywordCorollary = (skipString "corollary" <|> skipString "cor") .>> SW
 let keywordConjecture = (skipString "conjecture" <|> skipString "conj") .>> SW
 
-let theorem = positions (keywordTheorem >>. signatureWithPremiseConclusionBlock) |>> Ast.Theorem
-let lemma = positions (keywordLemma >>. signatureWithPremiseConclusionBlock) |>> Ast.Lemma
-let proposition = positions (keywordProposition >>. signatureWithPremiseConclusionBlock) |>> Ast.Proposition
-let conjecture = positions (keywordConjecture >>. signatureWithPremiseConclusionBlock) |>> Ast.Conjecture
+let theoremLikeBlock = leftBrace >>. varDeclOrSpecList .>>. spacesPredicate .>> spacesRightBrace
+let signatureWithTheoremLikeBlock = signature .>>. theoremLikeBlock
 
-let exclamationDigitList = many1 exclamationDigits
-let referencingIdentifier = predicateIdentifier .>>. exclamationDigitList .>> IW
+let theorem = positions (keywordTheorem >>. signatureWithTheoremLikeBlock) |>> Ast.Theorem
+let lemma = positions (keywordLemma >>. signatureWithTheoremLikeBlock) |>> Ast.Lemma
+let proposition = positions (keywordProposition >>. signatureWithTheoremLikeBlock) |>> Ast.Proposition
+let conjecture = positions (keywordConjecture >>. signatureWithTheoremLikeBlock) |>> Ast.Conjecture
+
 let corollarySignature = referencingIdentifier .>>. paramTuple .>> IW
-let corollary = positions (keywordCorollary >>. corollarySignature .>>. premiseConclusionBlock) |>> Ast.Corollary
+let corollary = positions (keywordCorollary >>. corollarySignature .>>. theoremLikeBlock) |>> Ast.Corollary
 
 (* FPL building blocks - Axioms *)
 
 let keywordAxiom = (skipString "axiom" <|> skipString "ax" <|> skipString "postulate" <|> skipString "post") >>. SW
-let axiomBlock = leftBrace >>. varDeclOrSpecList .>>. spacesPredicate .>> spacesRightBrace
 
-let axiom = positions (keywordAxiom >>. signature .>> IW .>>. axiomBlock) |>> Ast.Axiom
+let axiom = positions (keywordAxiom >>. signatureWithTheoremLikeBlock) |>> Ast.Axiom
 
 (* FPL building blocks - Constructors *)
 
@@ -440,7 +458,7 @@ let predicateInstance = positions (keywordPredicate >>. signature .>>. (IW >>. p
 let classInstanceBlock = leftBrace >>. (keywordIntrinsic <|> classContent) .>> spacesRightBrace
 let classInstance = positions (variableType .>>. signature .>>. classInstanceBlock) |>> Ast.ClassInstance
 let mapping = toArrow >>. IW >>. variableType
-let functionalTermSignature = (keywordFunction >>. signature) .>>. (IW >>. mapping) .>> IW 
+let functionalTermSignature = (keywordFunction >>. signatureWithUserDefinedString) .>>. (IW >>. mapping) .>> IW 
 
 let returnStatement = positions (keywordReturn >>. (fplDelegate <|> predicateWithQualification)) .>> IW |>> Ast.Return
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
@@ -474,7 +492,6 @@ let keywordTrivial  = positions (skipString "trivial") .>> IW |>> Ast.Trivial
 let keywordQed  = positions (skipString "qed") .>> IW |>> Ast.Qed
 let derivedPredicate = predicate |>> Ast.DerivedPredicate
 let derivedArgument = choice [
-    keywordQed 
     keywordTrivial 
     derivedPredicate
 ]
@@ -483,16 +500,16 @@ let argumentInference = vDash >>. IW >>. (assumeArgument<|> revokeArgument <|> d
 let justification = positions (predicateList .>> IW) |>> Ast.Justification
 let argument = positions (justification .>>. argumentInference) |>> Ast.JustifiedArgument
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. argument) .>> IW |>> Ast.Argument
-let proofArgumentList = many1 (IW >>. proofArgument)
+let proofArgumentList = many1 (IW >>. (proofArgument <|> varDeclBlock))
 let keywordProof = (skipString "proof" <|> skipString "prf") .>> SW 
-let proofBlock = (leftBrace >>. varDeclOrSpecList) .>>. (proofArgumentList .>> spacesRightBrace)
+let proofBlock = leftBrace >>. proofArgumentList .>>. opt keywordQed .>> spacesRightBrace
 let proof = positions ((keywordProof >>. referencingIdentifier) .>>. (IW >>. proofBlock)) |>> Ast.Proof
 
 (* FPL building blocks - Definitions *)
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let predicateDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace 
-let definitionPredicate = positions (keywordPredicate >>. (signature .>> IW) .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
+let definitionPredicate = positions (keywordPredicate >>. (signatureWithUserDefinedString .>> IW) .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let functionalTermDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace
@@ -522,7 +539,6 @@ let definition = keywordDefinition >>. choice [
 // Localizations provide a possibility to automatically translate FPL expressions into natural languages
 let keywordLocalization = (skipString "localization" <|> skipString "loc") >>. SW
 let localizationLanguageCode: Parser<string,unit> = regex @"[a-z]{3}" <?> "<ISO 639 language code>"
-let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<language-specific string>" |>> Ast.LocalizationString
 
 let ebnfTransl, ebnfTranslRef = createParserForwardedToRef()
 let ebnfTranslTuple = (leftParen >>. IW >>. ebnfTransl) .>> (IW .>> rightParen) 
@@ -532,7 +548,7 @@ let ebnfFactor = choice [
     ebnfTranslTuple
 ] 
 let ebnfTerm = positions (sepEndBy1 ebnfFactor SW) |>> Ast.LocalizationTerm
-ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. comma >>. IW)) |>> Ast.LocalizationTermList
+ebnfTranslRef.Value <-  positions (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.LocalizationTermList
 let translation = (exclamationMark >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl |>> Ast.Translation
 let translationList = many1 (IW >>. translation .>> IW)
 let localization = positions (keywordLocalization >>. (predicate .>> IW .>> colonEqual) .>>. (translationList .>> IW .>> semiColon)) .>> IW |>> Ast.Localization
@@ -552,11 +568,10 @@ let buildingBlock = choice [
     usesClause
 ]
 
-let buildingBlockList = many (IW >>. buildingBlock .>> IW)
+let buildingBlockList = many (buildingBlock .>> IW)
 
 (* Namespaces *)
-let namespaceBlock = (leftBrace >>. opt extensionBlock) .>>. (IW >>. buildingBlockList) .>> spacesRightBrace
-let fplNamespace = positions (namespaceIdentifier .>>. (IW >>. namespaceBlock)) .>> IW |>> Ast.Namespace
+let fplNamespace = ((opt extensionBlock .>> IW) .>>. buildingBlockList) .>> IW .>> semiColon |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 
@@ -591,7 +606,7 @@ let errInformation = [
     ("LOC000", "Syntax error in rule of localization", ["loc"], localization)
     ("USE000", "Syntax error in uses clause", ["uses"], usesClause)
     ("PRE000", "Syntax error in predicate", ["and"; "or"; "impl"; "iif"; "xor"; "not"; "all"; "ex"; "is"], compoundPredicate)
-    ("SMT000", "Syntax error in statement", ["assert"; "cases"; "self!"; "for"; "del"], statement)
+    ("SMT000", "Syntax error in statement", ["assert"; "cases"; "base"; "for"; "del"], statement)
     ("AGI000", "Syntax error in proof argument", ["|-"], argumentInference)
     ("CAS000", "Syntax error in case block", ["|"], conditionFollowedByResult)
     ("DCS000", "Syntax error in default case block", ["?"], elseStatement)
@@ -677,7 +692,7 @@ let fplParser (input:string) =
     let maxBound = maxIntervalBound intervals
     let remaingString = preProcessedInput.Substring(maxBound).TrimEnd()
     if not (remaingString.EndsWith("}") && Regex.Matches(preProcessedInput, "\}").Count = Regex.Matches(preProcessedInput, "\{").Count) then
-        // prevent emitting "false-positive" errors of characters found after namespase using the heuristic that 
+        // prevent emitting "false-positive" errors of characters found after namespace using the heuristic that 
         // the last character of a namespace is "}" and then looks "good"
         tryParseRemainingChunk stdParser1 ad (preProcessedInput.Substring(maxBound)) maxBound (preProcessedInput.Length) stdCode1 stdErrMsg1 -1 ""
     resultingAst

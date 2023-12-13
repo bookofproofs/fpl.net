@@ -34,14 +34,7 @@ In the current version, the extra sub-blocks  `inference`, `localization`, and `
 * Every class definition starts the keyword `definition` (short-form `def`), followed as previously by the keyword `class` (short-form `cl`), 
 * Every predicate definition starts the keyword `definition` (short-form `def`), followed as previously by the keyword `function` (short-form `func`), 
 * Every functional term definition starts the keyword `definition` (short-form `def`), followed as previously by the keyword `predicate` (short-form `pred`), 
-* All other building blocks keywords remained unchanged, i.e.:
-    * axioms are started by the keyword `axiom` (short-form `ax`) or `postulate` (short-form `post`),
-    * theorems are started by the keyword `theorem` (short-form `thm`),
-    * propositions are started by the keyword `proposition` (short-form `prop`),
-    * lemmas are started by the keyword `lemma` (short-form `lem`), 
-    * corollaries are started by the keyword `corollary` (short-form `cor`),
-    * conjectures are started by the keyword `conjecture` (short-form `conj`), and 
-    * proofs are started by the keyword `proof` (short-form `prf`). 
+* All other building blocks keywords remain unchanged, e.g. axioms are started by the keyword `axiom` (short-form `ax`) or `postulate` (short-form `post`), theorems are started by the keyword `theorem` (short-form `thm`), etc.
     
 #### 2) In-block Variable Type Declarations and Statements
 In FPL, you can declare variable types of building blocks both in their signatures or in their body. Moreover, in the body also statements using variables are possible.
@@ -111,7 +104,7 @@ class A :B, :C
 
 #### 4) Syntax of class constructors
 
-The syntax of constructors allows calls of parental constructors in the `specification`, their syntax starts with `self!" followed by the parent class identifier and related parameters like in `self!ParentClass(first, second)` . Moreover, the keyword `self` has as the last expression in the constructor. These two additional components disambiguate the representation of the class object after the constructor has been executed. 
+The syntax of constructors allows calls of parental constructors in the `specification`, their syntax starts with `base." followed by the parent class identifier and related parameters like in `base.ParentClass(first, second)` . Moreover, the keyword `self` has as the last expression in the constructor. These two additional components disambiguate the representation of the class object after the constructor has been executed. 
 
 *Before*
 ``` 
@@ -141,7 +134,7 @@ class SomeClass: ParentClass
     {
     	dec
             myField := field
-            self!ParentClass()
+            base.ParentClass()
         ;
         self
     }
@@ -203,6 +196,12 @@ In the original version of FPL grammar, loops could be constructed using the `lo
     )
 ``` 
 
+The for statement comes with three flavors:
+* iterating through all i in some type: `for i in SomeType (...)`, 
+* iterating through all i in some range: `for i in [1~n] (...)`,
+* iterating through all i in some variadic variable: `for i in y (...)`.
+
+
 #### 8) New `exn` keyword  
 
 The existence quantor accepting a number of allowed occurrences gets an own keyword `exn`, disambiguating it from the general quantor `ex`.
@@ -214,7 +213,7 @@ The existence quantor accepting a number of allowed occurrences gets an own keyw
 ``` 
 *Now*
 ``` 
-    exn!1 x ( p (x) ) // there exists exactly one x ...
+    exn$1 x ( p (x) ) // there exists exactly one x ...
 ``` 
 
 This disambiguation helps to formulate the FPL grammar without `attempt` parsers which would otherwise distort error positions shown during error recovery that occur inside the predicate.
@@ -242,7 +241,7 @@ The original FPL language had not inbuilt equality predicate, relying on the sec
 However, this approach seems not feasible from the implementation point of view because such a predicate would be hard if not impossible to interpret. Moreover, the equality sign `=` in the infix notation is so common in proof-based mathematics that it is preferable to FPL expressions using the user-defined `Equal` predicate.
 
 In the new FPL syntax version, we introduce an inbuilt equality sign and allow infix notation for equality. Nevertheless, infix notation together with the error recovery mechanism in the new FPL parser
-  requires disambiguation in the form that equality comparison have to be enclosed by some other characters that cannot be mixed up with other literals or predicates in FPL. We chose the enclosing characters `<` and `>` for this purpose:
+  requires disambiguation in the form that equality comparison have to be enclosed by some other characters that cannot be mixed up with other literals or predicates in FPL. We chose the enclosing characters `(` and `)` for this purpose:
 
 *Before*
 ``` 
@@ -251,10 +250,12 @@ In the new FPL syntax version, we introduce an inbuilt equality sign and allow i
 ``` 
 *Now*
 ``` 
-    <x = y>
+    (x = y)
 ``` 
 
 Of course, the equality predicate can be placed everywhere any predicate can be used in FPL, for instance, it can be nested within other predicates. 
+
+The equality comparison supports multiple equalities at once, for instance `( x = y = z )` is a shorter form for  `and ((x = y), (y = z))`
 
 #### 10) Domains are now allowed in the quantors `all`, `ex`, and `exn`.
 
@@ -292,7 +293,7 @@ Also, expressions in second-order logic predicates are allowed:
         (
             ex y in Set
             (
-                <y = SetBuilder(x,p)>
+                (y = SetBuilder(x,p))
             )
         )
     }
@@ -300,7 +301,10 @@ Also, expressions in second-order logic predicates are allowed:
 
 #### 11) Disambiguation of coordinate lists and ranges
 
-In previous versions, the square brackets `[`, `]` were used for both, coordinate lists and ranges. In the new version, coordinates have to be placed in angle brackets `<` and `>`. This disambiguates the grammar for to improve the inbuilt error recovery mechanism.
+In previous versions, the square brackets `[`, `]` were used for both, coordinate lists and ranges. 
+In the new version, coordinates have to be placed in square brackets `[` and `]`, while ranges have left and right bounds 
+that can be either open like in `[(`, `)]` or closed like in `[[`, `]]`
+This disambiguates the grammar for to improve the inbuilt error recovery mechanism.
 
 *Before*
 ``` 
@@ -312,9 +316,9 @@ In previous versions, the square brackets `[`, `]` were used for both, coordinat
 ``` 
 *Now*
 ``` 
-    for i in [1~n]  // <- range
+    for i in [[1~n]]  // <- range
     (
-        a<i,j>:= b // <- coordinates
+        a[i,j]:= b // <- coordinates
     )
 ``` 
 
@@ -381,12 +385,12 @@ To disambiguate the two usages, the following changes in the FPL syntax have bee
     n!1
     n!m!k
 ``` 
-* The symbols `!1`, `!2`, ... and `!<variable>" have always the predefined type `index` and never the type of the extension.
+* The symbols `!1`, `!2`, ... have always the predefined type `index` and never the type of the extension.
 * In proof-based mathematics, there are use cases where extensions symbols `1,2,3,...` (for instance those identified with natural numbers) have to be used as index variables. In those cases, FPL allows the coordinate notation.
 
 ``` 
-    n<1>
-    n<m,k>
+    n[1]
+    n[m,k]
 ``` 
 * Left- and Right-open ranges contain both indexes and extensions
 *Before*
@@ -403,16 +407,16 @@ To disambiguate the two usages, the following changes in the FPL syntax have bee
 ``` 
     // boundaries can be disambiguated 
     // extension type 
-    [1~5] // (closed range with boundaries 1 and 5 )
-    [(1~5] // (left-open range with boundaries 1 and 5)
-    [1~5)] // (right-open range with boundaries 1 and 5)
+    [[1~5]] // (closed range with boundaries 1 and 5 )
+    [(1~5]] // (left-open range with boundaries 1 and 5)
+    [[1~5)] // (right-open range with boundaries 1 and 5)
     [(1~5)] // (left- and right-open range with boundaries 1 and 5)
 
     // boundaries can be disambiguated 
     // index type 
-    [!1~!5] // (closed range with boundaries 1 and 5 )
-    [(!1~!5] // (left-open range with boundaries 1 and 5)
-    [!1~!5)] // (right-open range with boundaries 1 and 5)
+    [[!1~!5]] // (closed range with boundaries 1 and 5 )
+    [(!1~!5]] // (left-open range with boundaries 1 and 5)
+    [[!1~!5)] // (right-open range with boundaries 1 and 5)
     [(!1~!5)] // (left- and right-open range with boundaries 1 and 5)
 
 ``` 
@@ -423,11 +427,13 @@ The following changes have been made:
 * Derived arguments can now also reference the conclusion of the to-be-proven theorem
 * A simplified syntax of referencing argumentIdentifiers (referencing via slash `/` is no longer necessary). Now, restating the same identifier is enough.
 * Bugfix preventing syntax allowing assumptions followed by a justification (pure math standard: without justification)
+* The referencing identifier using dollar digits (e.g. `$1` at the end of `SomeTheorem$1`) was extended to look like the indexed predicate (`SomeTheorem$1`) so there is no difference between the two any more.
+* `qed` is optional and not a derived argument. 
 * Improved readability, for instance, instead of 
 
 *Before*
 ```
-    proof Example4$1
+    proof SomeTheorem$1
     {
         a:A
         b:B
@@ -446,22 +452,24 @@ The following changes have been made:
 ```
 *Now*
 ```        
-    proof Example4!1
+    proof SomeTheorem$1
     {
-        dec: 
-            a:A
-            b:B
-            c:C
-            x,y,z: obj
+        dec
+            ~a:A
+            ~b:B
+            ~c:C
+            ~x,y,z: obj
         ;
-        1. GreaterAB |- Greater(a,b)
-        2. GreaterBC |- Greater(b,c)
-        3. ProceedingResults(1.,2.) |- and (Greater(a,b), Greater(b,c))
-        4. 3., GreaterTransitive |- impl ( and (Greater(a,b), Greater(b,c)), Greater(a,c) )
-        5. 4., ModusPonens |- Greater(a,c)
-        6. ProceedingResults(5.,1.) |- and (Greater(a,c), Greater(a,b))
-        7. 6., ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) )
-        8. |- qed
+        1. GreaterAB |- (a > b) 
+        2. GreaterBC |- (b > c) 
+        3. 1., 2. |- and ((a > b), (b > c)) 
+        4. 3., GreaterTransitive |- ( and ((a > b), (b > c)) => (a > c) ) 
+        5. 4., ModusPonens |- (a > c)
+        6. 5., 1. |- and ((a > c), (a > b)) 
+        7. 6., ExistsByExample(and((a > c), (a > b))) |- 
+            ex x  
+                and ((x > y), (x > z)) 
+        qed
     }
 ```
 
@@ -488,9 +496,9 @@ The following changes have been made:
 ```        
     cases
     (
-        | <x = 0> : self := Zero()
-        | <x = 1> : self := Succ(Zero())
-        | <x = 2> : self := Succ(Succ(Zero()))
+        | (x = 0) : self := Zero()
+        | (x = 1) : self := Succ(Zero())
+        | (x = 2) : self := Succ(Succ(Zero()))
         ? self := Succ(delegate.decrement(x))
     )
 ```
@@ -506,10 +514,10 @@ In order to simplify the error recovery process, we introduce an additional keyw
         {
             dec
                 ~i: Nat 
-                self!Tuple()
+                base.Tuple()
                 for i in [1~n] 
                 (
-                    self<i>:=field.AdditiveGroup().NeutralElement()
+                    self[i]:=field.AdditiveGroup().NeutralElement()
                 )
             ;
             self
@@ -524,10 +532,10 @@ In order to simplify the error recovery process, we introduce an additional keyw
         {
             dec
                 ~i: Nat 
-                self!Tuple()
-                for i in [1~n] 
+                base.Tuple()
+                for i in [[1,n]] 
                 (
-                    self<i>:=field.AdditiveGroup().NeutralElement()
+                    self[i]:=field.AdditiveGroup().NeutralElement()
                 )
             ;
             self
@@ -572,13 +580,169 @@ The property marker keyword `mandatory` (short form `mand`) were abandoned and t
     }
 ```
 
+#### 20) Simplification of the syntax of theorem-like statements, conjectures, and corollaries
 
-#### 20) Self-Containment 
+In previous versions of FPL, the syntax of theorem-like statements, conjectures and corollaries was similar to that of inference rules, i.e., their blocks consisted of a separate premise and a separate conclusion specification. 
+ This choice had the unnecessary consequence that if a theorem-like statement, conjecture, or corollary had no premise (which is sometimes the case in proof-based mathematics), 
+ it had still be declared with `premise: undefined`.
+
+ In the new version of FPL, the syntax of blocks inside theorem-like statements, conjectures and corollaries are exactly the same as in axioms and consist only of a predicate expression.
+
+*Before*
+```
+    theorem SomeTheorem() 
+    {
+        premise: undefined
+        conclusion: 
+            all x,y in N
+            (
+                impl
+                (
+                    not ( x = y )
+                    ,
+                    not ( Successor(x) = Successor(y) )
+                )
+            )
+    }
+```
+*Now*
+```        
+    theorem SomeTheorem() 
+    {
+        all x,y in N
+        (
+            impl
+            (
+                not ( x = y )
+                ,
+                not ( Successor(x) = Successor(y) )
+            )
+        )
+    }
+```
+
+#### 21) Simplified syntax of namespaces and *.fpl file names
+In the original FPL parser, every FPL file contained a namespaces with a block inside curly brackets. The name of the file could deviate from the name of the namespace.
+
+The current FPL parser simply uses filename as the name of the namespce (without the extension `.fpl` ). The basename of the FPL file itself has to follow the rules of namespaces (i.e. be a concatenated dotted sequence of pascal-case ids). The need of writing curly brackets inside the FPL file and keeping track of which namespaces are inside which file names becomes so obsolete.
+
+As a result, a syntax sugar from this simplification is that every FPL file has to end with a semicolon `;` to flag the parser that it does not has to look for any other building blocks in the file. 
+
+
+#### 22) Additional inbuilt-predicate `bydef`
+The additional predicate `bydef <variable>` is an abbreviation to of what had to be formulated in a more complicated way in second-order logic on a case-by-case basis. In principle, the predicate means to check if the asserted predicates used to define a variable justify an argument in an FPL proof.
+
+#### 23) A more stringent usage of qualifiers, coordinates, and ranges
+
+FPL supports the following qualifiers: dotted notation `x.something`, with arguments `x(something)`, with coordinates `x[something]`, and with a range `x[[something,something]]`. 
+
+Note: The subscripted notation `x$something` available in the original version of FPL was removed because it was equivalent to coordinate notation. However, it is still available in the signatures of corollaries and proofs. 
+
+In general, all of the above-mentioned qualifiers can be chained, for instance, a dotted notation can be chained with a coordinate one like this: `x.something[somethingelse]`.
+
+There is a connection between qualifiers and identifiers, that are variables, the self keyword, pascal-cased FPL identifiers < PascalCasId >, index-typed digits< $digits >, and extension digits < extensionDigits >. This connection depends on whether identifiers can be used "with" qualifiers, "as" qualifiers, or both- The following table shows which identifiers can be used how with these qualifiers:
+
+| Qualifier   | Variables |  self keyword | < PascalCasId > | < $digits > | < extensionDigits >
+| :----:    | :----: | :----: |:----: |:----: |:----: |
+| Dotted      |   both  | both    |   both  | -      |   both     |
+| Arguments   |   both  | both    |   both  | as     |   both     |
+| Coordinates |   both  | both    |   both  | as     |   both     |
+| Ranges      |   both  | both    |   both  | as     |   both     |
+
+
+#### 24) User-Defined Prefix, Infix, and Postfix Operators for predicates and functional terms
+FPL's standard syntax for calling user-defined functional terms or predicates requires their pascal-case identifier, followed by a comma-separated list of parameters in parentheses, like in 
+`SomeIdentifier(x,y)`. FPL allows now the introduction of user-defined prefix, infix, and postfix symbols to be identified by the FPL interpreter with the pascal-case identifier.
+For instance, instead of writing `Add(x,y)`, we can no tell the FPL to interpret the input `(x + y)` to mean `Add(x,y)`.
+
+To accomplish this behavior, we have to do two things: 
+1. Define the prefix, postfix, or infix notation together with the functional term or predicate in question.
+1. Use the new notation
+
+##### Example of Prefix-Notation definition
+
+```
+    // definition of a prefix notation
+    def func Minus prefix "-" (x: Int) -> Int
+    {
+        return x.AdditiveInverse()
+    }
+
+    // example usages
+    -a
+    -b
+    -(x + y)
+
+```
+Whitespace characters are insignificant in the infix notation: 
+```
+    (x + -y) // correct
+    (x + - y) // still correct, the "+" will be parsed as infix operation, the "-" as a prefix operation
+
+```
+
+##### Example of Infix-Notation definition
+
+```
+    // definition of a infix notation
+    def func Add infix "-" (x,y: Int) -> Int
+    {
+        return Add(x,y)
+    }
+
+    // example usages
+    -(x + y)
+    (x + y + z) // equivalent to ((x + y) + z)
+    (x + (y + z))
+
+```
+The infix notation is, by default, left-associative. If you want another 
+
+##### Example of Postfix-Notation definition
+
+```
+    // definition of a infix notation
+    def func Successor postfix "'" (x: Nat) -> Nat
+    {
+        intrinsic
+    }
+
+    // example usage
+    x'
+    x!
+    x!!
+
+```
+Whitespace characters are significant in postfix notation:
+```
+    x' // correct
+    x ' // wrong, (syntax error)
+```
+
+Postfix notation can be composed by applying parentheses:
+```
+    (x')' // correct
+    x'' // wrong, since '' is a different operator as '.
+```
+In cases you want to use the shorter notation `x''` instead of `(x')'`, you will have to define it separately: 
+```
+    // definition of a infix notation
+    def func SuccessorOfSuccessor postfix "''" (x: Nat) -> Nat
+    {
+        return Successor(Successor(x))
+    }
+
+    // example usage
+    x'' // now, this is equivalent to (x')'
+
+```
+
+#### 25) Self-Containment 
 This is not an amendment to the FPL parser. However, we want to significantly simplify the later recognition of self-containment in the FPL interpreter by the following convention:
 
 * The order of declarations will now matter. 
 * This is unlike the previous, python-based FPL interpreter (which can be found in the repository [https://github.com/bookofproofs/fpl](https://github.com/bookofproofs/fpl)).
-* In the new FPL interpreter, checking if an FPL identifier was already declared can be done - in principle - during the parsing process. This could significantly simplify the implementation and performance of the new FPL interpreter.
+* In the new FPL interpreter, checking if an FPL identifier was already declared, can be done - in principle - during the parsing process. This could significantly simplify the implementation and performance of the new FPL interpreter.
 * Nevertheless, we stick to the 'must' requirements (see [INTRO.md](https://github.com/bookofproofs/fpl.net/blob/main/INTRO.md)) 28 (support of overrides), 38 (support recursive linguistic constructs), and 40 (support of self-reference in definitions) that could still potentially negatively impact how complicated it is to implement the new FPL interpreter.
 
 

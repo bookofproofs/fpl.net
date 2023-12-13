@@ -27,11 +27,11 @@ namespace FplLS
                 ci.SortText = "self02";
                 ret.Add(ci);
             }
-            if (defaultCi.Word == "self!")
+            if (defaultCi.Word == "base")
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "ctor call (parent class)";
-                ci.InsertText = "self!";
+                ci.InsertText = "base";
                 ci.Label = TokenPrefix + ci.InsertText;
                 ci.Kind = CompletionItemKind.Reference;
                 ci.SortText = "self03";
