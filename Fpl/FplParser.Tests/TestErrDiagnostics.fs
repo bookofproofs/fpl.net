@@ -2335,7 +2335,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a:obj;
+            dec ~a:obj ;
         }
     y
 ;"""
@@ -2371,7 +2371,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a:obj;
+            dec ~a:obj ;
         }
     y
 ;"""
@@ -2389,7 +2389,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a:obj;
+            dec ~a:obj ;
         }
     y
 ;"""
@@ -2407,7 +2407,7 @@ type TestErrDiagnostics() =
         let input = """
         def pred A() 
         {
-            dec ~a: obj;
+            dec ~a: obj ;
             true
         }
     y

@@ -1,5 +1,6 @@
 ﻿## 3.3.1
 * Making user-defined prefix notations possible
+* Bugfixes of significant spaces in the syntax
 
 ## 3.3.0
 * Removing the necessity to put negation and quantor predicates into parentheses

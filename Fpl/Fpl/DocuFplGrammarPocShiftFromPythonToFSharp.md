@@ -427,7 +427,8 @@ The following changes have been made:
 * Derived arguments can now also reference the conclusion of the to-be-proven theorem
 * A simplified syntax of referencing argumentIdentifiers (referencing via slash `/` is no longer necessary). Now, restating the same identifier is enough.
 * Bugfix preventing syntax allowing assumptions followed by a justification (pure math standard: without justification)
-* The referencing identifier using dollar digits (e.g. `$1` at the end of `SomeTheorem$1`) was extended to look like the indexed predicate (`SomeTheorem!$1`) so there is no difference between the two any more.
+* The referencing identifier using dollar digits (e.g. `$1` at the end of `SomeTheorem$1`) was extended to look like the indexed predicate (`SomeTheorem$1`) so there is no difference between the two any more.
+* `qed` is optional and not a derived argument. 
 * Improved readability, for instance, instead of 
 
 *Before*
@@ -451,7 +452,7 @@ The following changes have been made:
 ```
 *Now*
 ```        
-    proof SomeTheorem!$1
+    proof SomeTheorem$1
     {
         dec
             ~a:A
@@ -459,14 +460,16 @@ The following changes have been made:
             ~c:C
             ~x,y,z: obj
         ;
-        1. GreaterAB |- Greater(a,b) 
-        2. GreaterBC |- Greater(b,c) 
-        3. ProceedingResults(1.,2.) |- and (Greater(a,b), Greater(b,c)) 
-        4. 3., GreaterTransitive |- impl ( and (Greater(a,b), Greater(b,c)), Greater(a,c) ) 
-        5. 4., ModusPonens |- Greater(a,c)
-        6. ProceedingResults(5.,1.) |- and (Greater(a,c), Greater(a,b)) 
-        7. 6., ExistsByExample(and(Greater(a,c), Greater(a,b))) |- ex x ( and (Greater(x,y), Greater(x,z)) ) 
-        8. |- qed
+        1. GreaterAB |- (a > b) 
+        2. GreaterBC |- (b > c) 
+        3. 1., 2. |- and ((a > b), (b > c)) 
+        4. 3., GreaterTransitive |- ( and ((a > b), (b > c)) => (a > c) ) 
+        5. 4., ModusPonens |- (a > c)
+        6. 5., 1. |- and ((a > c), (a > b)) 
+        7. 6., ExistsByExample(and((a > c), (a > b))) |- 
+            ex x  
+                and ((x > y), (x > z)) 
+        qed
     }
 ```
 

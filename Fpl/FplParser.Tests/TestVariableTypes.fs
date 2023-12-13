@@ -14,56 +14,56 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType001 () =
-        let result = run (variableType .>> eof) """object"""
+        let result = run (variableType .>> eof) """object """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType002 () =
-        let result = run (variableType .>> eof) """obj"""
+        let result = run (variableType .>> eof) """obj """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType003 () =
-        let result = run (variableType .>> eof) """function"""
+        let result = run (variableType .>> eof) """function """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType004 () =
-        let result = run (variableType .>> eof) """func"""
+        let result = run (variableType .>> eof) """func """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType005 () =
-        let result = run (variableType .>> eof) """predicate"""
+        let result = run (variableType .>> eof) """predicate """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType006 () =
-        let result = run (variableType .>> eof) """pred"""
+        let result = run (variableType .>> eof) """pred """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType007 () =
-        let result = run (variableType .>> eof) """index"""
+        let result = run (variableType .>> eof) """index """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType008 () =
-        let result = run (variableType .>> eof) """ind"""
+        let result = run (variableType .>> eof) """ind """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

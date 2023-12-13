@@ -341,14 +341,14 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestNot1 () =
-        let result = run (negation .>> eof) """not(true)"""
+        let result = run (negation .>> eof) """not (true)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestNot2 () =
-        let result = run (negation .>> eof) """not (iif ( true, not(false)))"""
+        let result = run (negation .>> eof) """not (iif ( true, not (false)))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -363,7 +363,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestNot4 () =
-        let result = run (negation .>> eof) """not(iif ( iif ( true, iif( true, false)), not(true) ))"""
+        let result = run (negation .>> eof) """not (iif ( iif ( true, iif( true, false)), not (true) ))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -426,7 +426,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestAll2 () =
-        let result = run (all .>> eof) """all x,y,z (not (iif ( true, not(false))))"""
+        let result = run (all .>> eof) """all x,y,z (not (iif ( true, not false)))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -440,7 +440,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestAll4 () =
-        let result = run (all .>> eof) """all x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let result = run (all .>> eof) """all x (not (iif ( iif ( true, iif( true, false)), not (true) )))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -468,7 +468,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestEx2 () =
-        let result = run (exists .>> eof) """ex x,y,z (not (iif ( true, not(false))))"""
+        let result = run (exists .>> eof) """ex x,y,z (not (iif ( true, not (false))))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -482,7 +482,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestEx4 () =
-        let result = run (exists .>> eof) """ex x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let result = run (exists .>> eof) """ex x (not (iif ( iif ( true, iif( true, false)), not (true) )))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -510,7 +510,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestExN2 () =
-        let result = run (existsTimesN .>> eof) """exn$1 x in Nat (not (iif ( true, not(false))))"""
+        let result = run (existsTimesN .>> eof) """exn$1 x in Nat (not (iif ( true, not (false))))"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -524,7 +524,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestExN4 () =
-        let result = run (existsTimesN .>> eof) """exn$3 x (not(iif ( iif ( true, iif( true, false)), not(true) )))"""
+        let result = run (existsTimesN .>> eof) """exn$3 x (not (iif ( iif ( true, iif( true, false)), not (true) )))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -128,21 +128,12 @@ namespace FplLS
         }
         private string GetBody()
         {
-            return
-                  $"{Environment.NewLine}" +
-                  $"({Environment.NewLine}" +
-                  $"\tp(x){Environment.NewLine}" +
-                  $"){Environment.NewLine}";
-
+            return $" p(x) ";
         }
 
         private string GetLongBody()
         {
-            return
-                  $"{Environment.NewLine}" +
-                  $"({Environment.NewLine}" +
-                  $"\tand( p(x), q(y), u(z) ){Environment.NewLine}" +
-                  $"){Environment.NewLine}";
+            return $" and( p(x), q(y), u(z) ) ";
         }
     }
 }

@@ -15,7 +15,7 @@ def pred IsEmpty(x: Set)
 {
     all y in Set
     (
-        not ( In(y, x) )
+        not In(y, x) 
     )
 }
 
@@ -173,7 +173,7 @@ axiom Union()
                 impl
                 (
                     and (In(z,w), In(w,x)),
-                    In (z,y)
+                    In(z,y)
                 )
             )
         )

@@ -170,7 +170,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
             // a functional term cannot be empty with spec
-            dec ~a:obj;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -181,7 +181,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
             // a functional term cannot be empty with some spec or dec
-            dec ~a:obj;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -192,7 +192,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
             // a functional term cannot be intrinsic with some proceeding spec or dec
-            dec ~a:obj;
+            dec ~a:obj ;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -216,7 +216,7 @@ type TestDefinitionFunctionalTerms01 () =
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
             // a functional term cannot be intrinsic with some proceeding spec or dec
-            dec ~a:obj;
+            dec ~a:obj ;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -263,7 +263,7 @@ type TestDefinitionFunctionalTerms01 () =
         {
             // a functional term cannot be intrinsic with some following declarations or specifications
             intrinsic
-            dec ~a:obj;
+            dec ~a:obj ;
             spec:;
         }"""
         let actual = sprintf "%O" result
@@ -276,7 +276,7 @@ type TestDefinitionFunctionalTerms01 () =
         {
             // a functional term cannot be intrinsic with some following declarations or specifications
             intrinsic
-            dec ~a:obj;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -291,7 +291,7 @@ type TestDefinitionFunctionalTerms01 () =
 
             property func T() -> obj
 	        {
-	            dec ~a:obj;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -311,7 +311,7 @@ type TestDefinitionFunctionalTerms01 () =
         {
             mand func T() -> obj
 	        {
-	            dec ~a:obj;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -335,7 +335,7 @@ type TestDefinitionFunctionalTerms01 () =
         // a functional term with some proceeding declarations or specifications
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
-            dec ~a:obj;
+            dec ~a:obj ;
             return x
         }"""
         let actual = sprintf "%O" result
@@ -347,7 +347,7 @@ type TestDefinitionFunctionalTerms01 () =
         // a functional term with some proceeding declarations or specifications
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
-            dec ~a:obj;
+            dec ~a:obj ;
             return x
         }"""
         let actual = sprintf "%O" result
@@ -359,7 +359,7 @@ type TestDefinitionFunctionalTerms01 () =
         // a functional term with some proceeding declarations or specifications
         let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj
         {
-            dec ~a:obj;
+            dec ~a:obj ;
             return x
         }"""
         let actual = sprintf "%O" result
@@ -419,3 +419,13 @@ type TestDefinitionFunctionalTerms01 () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm21 () =
+        // properties cannot succeed a return statement within a functional term definition
+        let result = run (definitionFunctionalTerm .>> eof) """function DoubleSuccessor postfix "''" (x: N) -> N
+{
+    returtttt
+}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))

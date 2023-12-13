@@ -114,7 +114,7 @@ proof Example4$1
     7. 6., ExistsByExample(and((a > c), (a > b))) |- 
         ex x  
             and ((x > y), (x > z)) 
-    8. |- qed
+    qed
 }
 
 ;

@@ -9,7 +9,10 @@ open System.Text.RegularExpressions
 
 
 
-let input = """-(x + -y)'"""
+let input = """definition function DoubleSuccessor postfix "''" (x: N) -> N
+{
+    returtttt
+}"""
 //let input = """PascalId()()"""
 
 
@@ -21,7 +24,7 @@ ad.PrintDiagnostics
 *)
 
 
-let result = run (predicate .>> eof) input
+let result = run (definition .>> eof) input
 printf "%O" result
 
 printf "\n--------------------------------\n"

@@ -46,7 +46,7 @@ type TestClasses () =
         let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // intrinsic classes with declarations or specifications not allowed
-            dec ~a:obj;
+            dec ~a:obj ;
             intr
         }"""
         let actual = sprintf "%O" result
@@ -85,7 +85,7 @@ type TestClasses () =
         {
             ctor FieldPowerN()
             {
-                dec base.obj() ;
+                dec base.obj () ;
                 self
             }
         }"""
@@ -98,10 +98,10 @@ type TestClasses () =
         // A class with a constructor and a self reference
         let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
-            dec ~x: obj;
+            dec ~x: obj ;
             constructor FieldPowerN() 
             {
-                dec base.obj() ;
+                dec base.obj () ;
                 self
             }
         }"""
@@ -117,7 +117,7 @@ type TestClasses () =
             dec:;
             FieldPowerN() 
             {
-                base.obj()
+                base.obj ()
             }
         }"""
         let actual = sprintf "%O" result
@@ -129,10 +129,10 @@ type TestClasses () =
         // A class with a constructor
         let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
-            dec ~a:obj;
+            dec ~a:obj ;
             ctor FieldPowerN() 
             {
-                dec base.obj() ;
+                dec base.obj () ;
                 self
             }
         }"""
@@ -145,10 +145,10 @@ type TestClasses () =
         let result = run (definitionClass .>> eof) """class FieldPowerN: Set
         {
             // A class with a constructor but without self
-            dec ~a:obj;
+            dec ~a:obj ;
             FieldPowerN() 
             {
-                dec base.obj() ;
+                dec base.obj () ;
             }
         }"""
         let actual = sprintf "%O" result
@@ -162,7 +162,7 @@ type TestClasses () =
         {
             ctor FieldPowerN() 
             {
-                dec base.obj() ;
+                dec base.obj () ;
                 self
             }
         }"""
@@ -177,7 +177,7 @@ type TestClasses () =
             // A class with a constructor but without self
             FieldPowerN() 
             {
-                base.obj()
+                base.obj ()
             }
         }"""
         let actual = sprintf "%O" result
@@ -191,7 +191,7 @@ type TestClasses () =
         {
             ctor FieldPowerN() 
             {
-                dec base.obj() ;
+                dec base.obj () ;
                 self
             }
             constructor FieldPowerN() 
@@ -211,7 +211,7 @@ type TestClasses () =
         {
             ctor FieldPowerN() 
             {
-                dec base.obj() ;
+                dec base.obj () ;
                 self
             }
 
@@ -223,7 +223,7 @@ type TestClasses () =
 
             property func T() -> obj
 	        {
-	            dec ~a:obj;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -246,7 +246,7 @@ type TestClasses () =
             {
                 dec 
                     ~a:obj
-                    base.obj()
+                    base.obj ()
                     ;
                 self
             }
@@ -266,7 +266,7 @@ type TestClasses () =
 
             mand func T() -> obj
 	        {
-	            dec ~a:obj;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -354,7 +354,7 @@ type TestClasses () =
 
             property func T() -> obj
 	        {
-	            dec ~a:obj;
+	            dec ~a:obj ;
                 return x
 	        } 
 

@@ -70,7 +70,7 @@ type TestLocalizations () =
 
     [<TestMethod>]
     member this.TestLocalization01 () =
-        let result = run (localization .>> eof) """loc not(x) :=
+        let result = run (localization .>> eof) """loc not (x) :=
             !tex: "\neg(" x ")"
             !eng: "not " x
             !ger: "nicht " x

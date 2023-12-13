@@ -127,7 +127,7 @@ type TestConstructors () =
     member this.TestConstructor03a () =
         let result = run (constructor .>> eof) """ctor Magma(x: tplSet, op: BinOp)
             {
-                dec ~a:obj;
+                dec ~a:obj ;
                 self 
             }"""
         let actual = sprintf "%O" result
@@ -170,7 +170,7 @@ type TestConstructors () =
                 
                 dec 
                     ~a:obj
-                    base.obj() 
+                    base.obj () 
                     base.T1(x) 
                     base.T2(op) 
                 ;
@@ -193,7 +193,7 @@ type TestConstructors () =
                     addInField := myField.AddOp()
                     mulInField := myField.MulOp()
                     assert NotEqual(n, Zero())
-    				base.obj()
+    				base.obj ()
                     self:=SetBuilder( myField[1 , n], true)
                 ;
                 self

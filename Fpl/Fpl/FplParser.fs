@@ -62,6 +62,8 @@ let IW = spaces <?> "<whitespace>"
 
 let SW = spaces1 <?> "<significant whitespace>"
 
+let attemptSW = SW <|> (IW .>> lookAhead (choice [skipChar '('; skipChar ')'; skipChar '{'; skipChar ','; skipChar ';'; skipChar '[' ]))
+
 // -----------------------------------------------------
 // Extensions of the FPL language (have to be dynamic)! Lacking a pre-processor, we put the rules
 // from the Proof of Concept of FPL code manually into the EBNF of the core FPL grammar.
@@ -111,7 +113,7 @@ let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
 let keywordSelf = positions (skipString "self") .>> IW |>> Ast.Self
 let keywordBaseClassReference = skipString "base" .>> IW
-let keywordIndex = (skipString "index" <|> skipString "ind") .>> IW  >>% Ast.IndexType
+let keywordIndex = (skipString "index" <|> skipString "ind") .>> attemptSW >>% Ast.IndexType
 
 
 (* FplBlock-related Keywords *)
@@ -123,22 +125,22 @@ let keywordConclusion = (skipString "conclusion" <|> skipString "con") >>. IW
 let keywordDel = skipString "delegate" <|> skipString "del" 
 let keywordFor = skipString "for" .>> SW 
 let keywordIn = skipString "in" .>> SW 
-let keywordCases = skipString "cases" .>> SW 
+let keywordCases = skipString "cases" .>> IW 
 let keywordAssert = skipString "assert" .>> SW
 
 (* Predicate-related Keywords *)
 let keywordUndefined = positions (skipString "undefined" <|> skipString "undef") .>> IW |>> Ast.Undefined
 let keywordTrue = positions (skipString "true") .>> IW  |>> Ast.True  
 let keywordFalse = positions (skipString "false") .>> IW |>>  Ast.False  
-let keywordBydef = positions (skipString "bydef") .>> IW  
+let keywordBydef = positions (skipString "bydef") .>> SW  
 let keywordAnd = skipString "and" .>> IW 
 let keywordOr = skipString "or" .>> IW 
 let keywordImpl = skipString "impl" .>> IW 
 let keywordIif = skipString "iif" .>> IW 
 let keywordXor = skipString "xor" .>> IW 
-let keywordNot = skipString "not" .>> IW 
-let keywordAll = skipString "all" .>> IW 
-let keywordEx = skipString "ex" .>> IW
+let keywordNot = skipString "not" .>> attemptSW 
+let keywordAll = skipString "all" .>> SW 
+let keywordEx = skipString "ex" .>> SW
 let keywordExN = skipString "exn" .>> IW
 let keywordIs = skipString "is" .>> IW 
 
@@ -153,15 +155,15 @@ let templateTail = choice [ idStartsWithCap; (regex @"\d+") ]
 
 let templateWithTail = positions (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) .>> IW |>>  Ast.TemplateType
 
-let keywordObject = (skipString "object" <|> skipString "obj") .>> IW >>% Ast.ObjectType 
+let keywordObject = (skipString "object" <|> skipString "obj") .>> attemptSW >>% Ast.ObjectType 
 
 let objectHeader = choice [
     keywordObject
     (attempt templateWithTail) <|> keywordTemplate
 ] 
 
-let keywordPredicate = (skipString "predicate" <|> skipString "pred") .>> IW >>% Ast.PredicateType
-let keywordFunction = (skipString "function" <|> skipString "func") .>> IW >>% Ast.FunctionalTermType
+let keywordPredicate = (skipString "predicate" <|> skipString "pred") .>> attemptSW >>% Ast.PredicateType
+let keywordFunction = (skipString "function" <|> skipString "func") .>> attemptSW >>% Ast.FunctionalTermType
 
 
 let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
@@ -171,7 +173,7 @@ let usesClause = positions (keywordUses >>. theoryNamespace) |>> Ast.UsesClause
 
 let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
-let extensionHeader: Parser<unit,unit> = skipString ":ext" 
+let extensionHeader: Parser<unit,unit> = skipString ":ext" >>. SW
 
 let extensionName = positions (idStartsWithCap .>> IW) |>> Ast.Extensionname
 
@@ -276,14 +278,14 @@ let variableRange = choice [ entity ; boundedRange]
 
 let spacesRightBrace = (IW .>> rightBrace) 
 
-let keywordReturn = IW >>. (skipString "return" <|> skipString "ret") .>> IW 
+let keywordReturn = IW >>. (skipString "return" <|> skipString "ret") .>> SW 
 
 let defaultResult = positions (IW >>. statementList) |>> Ast.DefaultResult
 let conditionFollowedByResult = positions ((case >>. predicate .>> colon) .>>. (IW >>. statementList)) |>> Ast.ConditionFollowedByResult
 let conditionFollowedByResultList = many1 (IW >>. conditionFollowedByResult)
 
 let elseStatement = elseCase >>. IW >>. defaultResult .>> IW
-let casesStatement = positions (((keywordCases >>. IW >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
+let casesStatement = positions (((keywordCases >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
 
 let allowedInDomainType = choice [keywordIndex; keywordFunction; keywordPredicate; specificClassType]
 let inDomain = positions (keywordIn >>. (allowedInDomainType <|> variableRange) .>> IW) |>> Ast.Domain

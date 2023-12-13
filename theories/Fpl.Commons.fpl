@@ -14,7 +14,7 @@ inf ModusTollens()
     dec ~p,q: pred;
 
     premise:
-        and (not(q), impl(p,q) )
+        and (not q, impl(p,q) )
     conclusion:
         not (p)
 }

@@ -37,6 +37,7 @@
     <Compile Include="TestQualifierSelf.fs" />
     <Compile Include="TestQualifiersVars.fs" />
     <Compile Include="TestReferenceRules.fs" />
+    <Compile Include="TestKeywordSpaces.fs" />
     <Compile Include="TestStatements.fs" />
     <Compile Include="TestTheoremLikeStatements.fs" />
     <Compile Include="TestVariableTypes.fs" />

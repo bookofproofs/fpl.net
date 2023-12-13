@@ -8,9 +8,10 @@ This is a Proof of Concept of a private reasearch project to develop such a lang
 
 ## Features
 
-* The extension provides a basic syntax highlighting for `.fpl` files.
-* Emitting multiple error diagnostics for syntax errors in a single file at once (experimental) 
-* (Syntax-driven) Auto-Codecompletion services with various code snippets 
+* Syntax highlighting for `.fpl` files.
+* (Syntax-driven) Error diagnostics service (experimental) 
+* (Syntax-driven) Code-completion service with various code snippets 
+* FPL support for user-defined prefix, postfix, and infix notation for mathematical operators in expressions.
 
 ## Requirements
 

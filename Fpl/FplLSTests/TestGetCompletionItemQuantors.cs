@@ -69,7 +69,7 @@ namespace FplLSTests
         [DataRow("ex")]
         [DataRow("exn")]
         [TestMethod]
-        public void TestInsertTextEndsWithTwoNewLines(string choice)
+        public void TestInsertTextEndsWithSpace(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
@@ -77,7 +77,7 @@ namespace FplLSTests
             {
                 if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
                 {
-                    Assert.IsTrue(item.InsertText.EndsWith(Environment.NewLine));
+                    Assert.IsTrue(item.InsertText.EndsWith(" "));
                 }
             }
         }

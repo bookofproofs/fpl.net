@@ -54,13 +54,13 @@ namespace FplLS
                     // no snippets for null-ary predicates (treat them as keywords only - see below)
                     break;
                 case 1:
-                    ci.InsertText = $"{ci.Word}{Environment.NewLine}({Environment.NewLine}" + $"\ttrue{Environment.NewLine}){Environment.NewLine}";
+                    ci.InsertText = $"{ci.Word} true ";
                     break;
                 case 2:
-                    ci.InsertText = $"{ci.Word}{Environment.NewLine}({Environment.NewLine}" + $"\tfalse{Environment.NewLine}\t,{Environment.NewLine}" + $"\ttrue{Environment.NewLine}){Environment.NewLine}";
+                    ci.InsertText = $"{ci.Word} ( false, true ) ";
                     break;
                 default:
-                    ci.InsertText = $"{ci.Word}{Environment.NewLine}({Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\ttrue,{Environment.NewLine}" + $"\tfalse{Environment.NewLine}){Environment.NewLine}";
+                    ci.InsertText = $"{ci.Word} ( true, true, false ) ";
                     break;
             }
             ci.Label += " ...";

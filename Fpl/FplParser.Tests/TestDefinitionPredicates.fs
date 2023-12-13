@@ -55,7 +55,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate04 () =
         let result = run (definitionPredicate .>> eof) """pred Equal(a,b: tpl)
         {
-            dec ~a:obj ~  p: pred;
+            dec ~a:obj ~  p: pred ;
 
 			all p
 			(
@@ -171,7 +171,7 @@ type TestDefinitionPredicates () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be empty with spec
-            dec ~a:obj;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -182,7 +182,7 @@ type TestDefinitionPredicates () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be empty with some spec or dec
-            dec ~a:obj;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -193,7 +193,7 @@ type TestDefinitionPredicates () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be intrinsic with some proceeding spec or dec
-            dec ~a:obj;
+            dec ~a:obj ;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -217,7 +217,7 @@ type TestDefinitionPredicates () =
         let result = run (definitionPredicate .>> eof) """pred T()
         {
             // a predicate cannot be intrinsic with some proceeding spec or dec
-            dec ~a:obj;
+            dec ~a:obj ;
             intrinsic
         }"""
         let actual = sprintf "%O" result
@@ -264,7 +264,7 @@ type TestDefinitionPredicates () =
         {
             // a predicate cannot be intrinsic with some following declarations or specifications
             intrinsic
-            dec ~a:obj;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -276,7 +276,7 @@ type TestDefinitionPredicates () =
         {
             // a predicate cannot be intrinsic with some following declarations or specifications
             intrinsic
-            dec ~a:obj;
+            dec ~a:obj ;
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -291,7 +291,7 @@ type TestDefinitionPredicates () =
 
             property func T() -> obj
 	        {
-	            dec ~a:obj;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -311,7 +311,7 @@ type TestDefinitionPredicates () =
         {
             mand func T() -> obj
 	        {
-	            dec ~a:obj;
+	            dec ~a:obj ;
                 return x
 	        } 
 
@@ -335,7 +335,7 @@ type TestDefinitionPredicates () =
         // a predicate with some proceeding declarations or specifications
         let result = run (definitionPredicate .>> eof) """pred T()
         {
-            dec ~a:obj;
+            dec ~a:obj ;
             true
         }"""
         let actual = sprintf "%O" result
@@ -359,7 +359,7 @@ type TestDefinitionPredicates () =
         // a predicate with some proceeding declarations or specifications
         let result = run (definitionPredicate .>> eof) """pred T()
         {
-            dec ~a:obj;
+            dec ~a:obj ;
             true
         }"""
         let actual = sprintf "%O" result
@@ -388,7 +388,7 @@ type TestDefinitionPredicates () =
 
             property func T() -> obj
 	        {
-	            dec ~a:obj;
+	            dec ~a:obj ;
                 return x
 	        } 
 

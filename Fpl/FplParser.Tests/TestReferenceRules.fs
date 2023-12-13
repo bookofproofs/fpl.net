@@ -33,7 +33,7 @@ type TestReferenceRules() =
             dec ~a:obj ~p,q: pred;
 
             premise:
-                and (not(q), impl(p,q) )
+                and (not (q), impl(p,q) )
             conclusion:
                 not (p)
         }"""
@@ -61,7 +61,7 @@ type TestReferenceRules() =
         {
             dec ~a:obj ~p,q: pred;
             premise:
-                and (not(p), or(p,q))
+                and (not (p), or(p,q))
             conclusion:
                 q
         }"""
@@ -103,7 +103,7 @@ type TestReferenceRules() =
     member this.TestReferenceRule06 () =
         let result = run (ruleOfInference .>> eof) """inf ExistsByExample(p: pred(c: obj))
         {
-            dec ~a:obj ~ x: obj;
+            dec ~a:obj ~ x: obj ;
             premise:
                 p(c)
             conclusion:

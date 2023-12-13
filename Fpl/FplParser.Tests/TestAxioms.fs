@@ -93,7 +93,7 @@ type TestAxioms () =
                 impl
                 (
                     and ( p(0), all n ( impl ( p(n), p(Succ(n)) ) ) ),
-                    all n ( p(n) )
+                    all n p(n)
                 )
             )
         }"""

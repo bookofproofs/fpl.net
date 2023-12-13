@@ -90,7 +90,7 @@ type TestClassInstanceProperties () =
         // a class instance with a self at the end
         let result = run (property .>> eof) """property optional T X() 
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 self
 	        }"""
         let actual = sprintf "%O" result
@@ -102,7 +102,7 @@ type TestClassInstanceProperties () =
         // a class instance with a self at the end
         let result = run (property .>> eof) """property T X() 
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 self
 	        }"""
         let actual = sprintf "%O" result
@@ -114,7 +114,7 @@ type TestClassInstanceProperties () =
         // a class instance with a self at the end 
         let result = run (property .>> eof) """property optional T X() 
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 self
 	        }"""
         let actual = sprintf "%O" result
@@ -126,7 +126,7 @@ type TestClassInstanceProperties () =
         // a class instance with a self at the end 
         let result = run (property .>> eof) """property T X() 
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 self
 	        }"""
         let actual = sprintf "%O" result
@@ -138,7 +138,7 @@ type TestClassInstanceProperties () =
         // a class instance with a self at the end
         let result = run (property .>> eof) """property opt T X() 
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 self
 	        }"""
         let actual = sprintf "%O" result
@@ -150,7 +150,7 @@ type TestClassInstanceProperties () =
         // a class instance with a self at the end 
         let result = run (property .>> eof) """property T X() 
 	        {
-                dec ~a:obj;
+                dec ~a:obj ;
                 self
 	        }"""
         let actual = sprintf "%O" result
@@ -164,7 +164,7 @@ type TestClassInstanceProperties () =
         let result = run (property .>> eof) """property T X() 
 	        {
                 self
-                dec ~a:obj;
+                dec ~a:obj ;
 	        }"""
         let actual = sprintf "%O" result
         printf "%O" actual

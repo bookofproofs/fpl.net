@@ -32,9 +32,14 @@ axiom Axiom1 ()
 }
 
 // For each x there exists exactly one natural number, called the successor of x, the will be denoted x'
-definition function Successor infix "'" (x: N) -> N
+definition function Successor postfix "'" (x: N) -> N
 {
     intrinsic
+}
+
+definition function DoubleSuccessor postfix "''" (x: N) -> N
+{
+    ret urtttt
 }
 
 axiom Axiom2 ()
@@ -115,13 +120,13 @@ axiom Axiom5 ()
         // if in a set m
         and
         (
-            In (1,m) // 1 is its element
+            In(1,m) // 1 is its element
             ,
             impl
             (
-                In (x,m) // and with every element x of m
+                In(x,m) // and with every element x of m
                 ,
-                In (Successor(x),m) // also its successor is the element of m
+                In(Successor(x),m) // also its successor is the element of m
             )
         )
         ,
