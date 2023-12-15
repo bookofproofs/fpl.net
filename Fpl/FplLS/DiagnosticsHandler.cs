@@ -2,6 +2,7 @@
 using Microsoft.FSharp.Collections;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+using static ErrDiagnostics;
 using static FplParser;
 
 namespace FplLS
