@@ -1,8 +1,8 @@
 ﻿using System.Text;
+using FParsec;
 using Microsoft.FSharp.Collections;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using static ErrDiagnostics;
 using static FplParser;
 
 namespace FplLS
@@ -23,20 +23,28 @@ namespace FplLS
         {
             if (buffer != null)
             {
-                var sourceCode = buffer.ToString();
-                var parserDiagnostics = FplParser.parserDiagnostics;
-                parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
-                var ast = FplParser.fplParser(sourceCode);
-                var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
-                _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
+                try
                 {
-                    Uri = uri,
-                    Diagnostics = diagnostics
-                });
+                    var sourceCode = buffer.ToString();
+                    var parserDiagnostics = FplParser.parserDiagnostics;
+                    parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
+                    FplParser.fplParser(sourceCode);
+                    var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
+                    _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
+                    {
+                        Uri = uri,
+                        Diagnostics = diagnostics
+                    });
+
+                }
+                catch (Exception ex)
+                {
+                    FplLsTraceLogger.LogException(_languageServer, ex, "PublishDiagnostics");
+                }
             }
             else
             {
-                throw new NullReferenceException("buffer parameter was unexpectedly null");
+                FplLsTraceLogger.LogMsg(_languageServer, "buffer was unexpectedly null", "PublishDiagnostics");
             }
         }
 

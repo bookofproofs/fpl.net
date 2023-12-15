@@ -72,17 +72,17 @@ def pred IfAndOnlyIf infix "<=>" (x,y: pred)
     )
 }
 
-def pred And infix "~and" (x:+ pred)
+def pred And infix "and" (x:+ pred)
 {
     and (x)
 }
 
-def pred Or infix "~or" (x:+ pred)
+def pred Or infix "or" (x:+ pred)
 {
     or (x)
 }
 
-def pred Xor infix "~xor" (x:+ pred)
+def pred Xor infix "xor" (x:+ pred)
 {
     xor (x)
 }

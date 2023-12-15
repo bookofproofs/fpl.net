@@ -2,7 +2,6 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using System.Text;
 
 /*
 MIT License
@@ -62,9 +61,9 @@ class CompletionHandler : ICompletionHandler
 
     public async Task<CompletionList> Handle(CompletionParams request, CancellationToken cancellationToken)
     {
+        FplLsTraceLogger.LogMsg(_languageServer, "Task<CompletionList>", "CompletionHandler.Handle");
         var uri = request.TextDocument.Uri;
         var buffer = _bufferManager.GetBuffer(uri);
-
         if (buffer == null)
         {
             return new CompletionList();
@@ -73,14 +72,8 @@ class CompletionHandler : ICompletionHandler
         (int)request.Position.Line,
         (int)request.Position.Character);
 
-        var complList = await _fplAutoComplService.GetParserChoices(buffer, position);
-        var test = new StringBuilder();
-        foreach (var t in complList)
-        {
-            test.Append(t.Label + ", ");
-        }
-        _languageServer.Window.LogInfo($"####################################### {position} {test.ToString()}");
-        
+        var complList = await _fplAutoComplService.GetParserChoices(buffer, position, _languageServer);
+
         return complList;
 
     }

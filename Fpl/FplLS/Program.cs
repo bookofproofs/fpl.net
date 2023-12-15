@@ -39,7 +39,7 @@ namespace FplLS
                     .WithOutput(Console.OpenStandardOutput())
                     .WithLoggerFactory(new LoggerFactory())
                     .AddDefaultLoggingProvider()
-                    .WithMinimumLogLevel(LogLevel.Error)
+                    .WithMinimumLogLevel(LogLevel.Trace)
                     .WithServices(ConfigureServices)
                     .WithHandler<TextDocumentSyncHandler>()
                     .WithHandler<CompletionHandler>()

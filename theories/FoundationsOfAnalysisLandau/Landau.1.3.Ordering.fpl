@@ -1,0 +1,17 @@
+uses Fpl.SetTheory
+uses Landau *
+
+// If x = y + u then x > y ( > to b read "is greater than")
+definition predicate Greater infix ">" (x,y: Nat)
+{
+    (ex u (x = y + u) => Greater(x,y))
+}
+
+// If y = x + v then x < y ( < to b read "is smaller than")
+definition predicate Smaller infix "<" (x,y: Nat)
+{
+    (ex v (x + v = y) => Smaller(x,y))
+}
+
+
+;

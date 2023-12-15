@@ -372,8 +372,11 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                 let correctedIndex = userState.Index + startIndexOfInput
                 // replace the input by manipulating the input string depending on the parser position
                 let newInput = inputStringManipulator input (int userState.Index)
-                if userState.Index < input.Length then
-                    tryParseRemainingChunk someParser ad newInput startIndexOfInput nextIndex code stdMsg correctedIndex ""
+                if input = newInput then
+                    () // end the recursion, since we have probably an infinite loop
+                else
+                    if userState.Index < input.Length then
+                        tryParseRemainingChunk someParser ad newInput startIndexOfInput nextIndex code stdMsg correctedIndex ""
             | Failure(errorMsg, restInput, userState) ->
                 let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
                 let previousChoices = String.concat ", " choices
@@ -427,7 +430,7 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         let previousChoices = (String.concat ", " choices)
         let stringBetweenRecursiveCalls = 
-            if lastCorrectedIndex >= 0 then
+            if restInput.Position.Index> lastCorrectedIndex && lastCorrectedIndex >= 0  then
                 input.Substring(int lastCorrectedIndex, int restInput.Position.Index - int lastCorrectedIndex)
             else
                 "#"
