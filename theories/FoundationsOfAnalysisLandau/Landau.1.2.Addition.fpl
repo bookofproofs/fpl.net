@@ -350,25 +350,25 @@ proof Theorem_007$1
     ;
 
     // "base case" 
-    100. Axiom3 |- not ( ( 1 = Successor(x) ) ) // 1 != x'
-    200. bydef Sum |- not ( ( 1 = Sum(x,1) ) ) // 1 != x + 1
-    200. |- In (1, m) // 1 belongs to m
+    100. Axiom3 |- ( 1 <> x') // 1 != x'
+    200. bydef Sum |- ( 1 <> x + 1 ) // 1 != x + 1
+    200. |- (1 in  m) // 1 belongs to m
     
     // "inductive step" 
-    300. 200. |- assume ex y in N ( In (y, m) ) // if y belongs to m
-    400. |- not ( ( y = Sum(x,y) ) ) // then y != x + y
-    500. |- not ( ( Successor(y) = Successor(Sum(x,y)) ) ) // hence y' != (x + y)'
-    510. bydef Sum |- not ( ( Successor(y) = Sum(x,Successor(y)) ) ) // y' != x + y'
-    600. |- In (Successor(y), m) // so that x' belongs to m
+    300. 200. |- assume ex y in N (y in m) // if y belongs to m
+    400. |- (y <> x + y) // then y != x + y
+    500. |- (y' = (x + y)') // hence y' != (x + y)'
+    510. bydef Sum |- (y' <> x + y') // y' != x + y'
+    600. |- (y' + m) // so that x' belongs to m
     
-    700. |- all y in N (  not ( ( y = Sum(x,y) ) ) ) // therefore, the assertion holds for all y.
+    700. |- all y in N (y <> x + y) // therefore, the assertion holds for all y.
     qed
 }
 
 // if y != z then x + y != x + z
 theorem Theorem_008()
 {
-    impl ( not( (y = z )) , not ( (Sum(x,y) = Sum(x,z)) )  )
+    (y <> z => x + y <> x + z )
 }
 
 prf Theorem_008$1
@@ -379,25 +379,24 @@ prf Theorem_008$1
     
     dec 
          ~y,z : N // consider a fixed y and a fixed z such that y != z
-         assert not ( ( y = z ) )
+         assert ( y <> z )
          ~m : Set // and let m be the set of all x for which x + y != x + z
          ~x : N
-         assert impl ( not( (y = z) ) , not ( ( Sum(x,y) = Sum(x,z) ) )  )
+         assert ( x + y <> x + z => x in m )
     ;
 
     // "base case" 
-    100. Axiom3 |- not ( ( Successor(y) = Successor(z) ) ) // y' != z'
-    150. |- not ( (Sum(1,y) = Sum(1,z)) ) // 1 + y != 1 + z
-    200. |- In(1,m) // hence, 1 belongs to m
+    100. Axiom3 |- (y' <> z') // y' != z'
+    150. |- (1 + y <> 1 + z) // 1 + y != 1 + z
+    200. |- (1 in m) // hence, 1 belongs to m
     
     // "inductive step" 
-    300. 200. |- ass ex x in N ( In (x,m) ) // if x belongs to m
-    400. |- not ((Sum(x,y) = Sum(x,z))) // then x + y != x + z
-    500. Axiom3 |- not ( (Successor(Sum(x,y)) = Successor(Sum(x,z)) ) ) // hence (x+y)' != (x+z)'
-    550. |- not ((Sum(Successor(x),y) = Sum(Successor(x),z))) // x' + y != x' + z
-    600. |- In (Successor(y), m) // so that x' belongs to m
-    
-    700. |- all x,y,z in N ( impl ( not( (y = z) ) , not ( (Sum(x,y) = Sum(x,z)) )  ) ) // therefore, the assertion holds always.
+    300. 200. |- ass ex x in N (x in m) // if x belongs to m
+    400. |- (x + y <> x <> z) // then x + y != x + z
+    500. Axiom3 |- ((x + y)' <> (x + z)') // hence (x+y)' != (x+z)'
+    550. |- (x' + y <> x' + z) // x' + y != x' + z
+    600. |- (x' in m) // so that x' belongs to m
+    700. |- all x,y,z in N (y <> z => x + y <> x + z) // therefore, the assertion holds always.
     qed
 }
 
@@ -407,8 +406,8 @@ theorem Theorem_009()
         ~x,y: N // for given x and y, exactly one of the following must be the case:
         ~case1,case2,case3:predicate
         case1 := (x = y) // x = y
-        case2 := ex u in N (x = y + u) ) // there exists a u (exactly one, by theorem 8) such that x = y + u
-        case3 := ex v in N (y = x + v) ) // there exists a v (exactly one, by theorem 8) such that y = x + v
+        case2 := ex u in N (x = y + u) // there exists a u (exactly one, by theorem 8) such that x = y + u
+        case3 := ex v in N (y = x + v) // there exists a v (exactly one, by theorem 8) such that y = x + v
     ;
     // PoC note: a predicative expression that becomes true "if and only if exactly one of the cases is true" 
     // PoC note: FPL allows abbreviation of complex predicates while using them as boolean variables in boolean expressions (reducing PL1 to PL0)
@@ -440,10 +439,10 @@ proof Theorem_009$1
     160. |- assume and (case2, case3)
     170. Theorem_007 |- 
             (
-            x = Sum(y,u)     // The incompatibility of (2) and (3) also fallows from Theorem 7; for otherwise, we would have x = y + u
-            = Sum(Sum(x,v),u) // = (x+v) + u
-            = Sum(x,Sum(v,u)) // = x + (v+u)
-            = Sum(Sum(v,u),x) // = (v+u) + x
+            x = y + u     // The incompatibility of (2) and (3) also fallows from Theorem 7; for otherwise, we would have x = y + u
+            = (x + v) + u // = (x+v) + u
+            = x + (v + u) // = x + (v+u)
+            = (v + u) + x // = (v+u) + x
             )
     180. |- revoke 170. 
     200. 120., 150., 180. |- and (not (and (case1 , case2)), not (and (case1 , case3)), not (and (case2 , case3))) // Therefore, we can have at most one of the cases (1), (2), (3).
@@ -453,39 +452,34 @@ proof Theorem_009$1
         ~x,y: N // let x be fixed
         ~m: Set // and let m b the set of all y 
         assert
-            impl
             (
-                or(case1, case2, case3) // for which one (hence by (A), exactly one) of the cases (1), (2), and (3) obtains.
-                ,
-                In (y,m)
+                or(case1, case2, case3) => y in m// for which one (hence by (A), exactly one) of the cases (1), (2), and (3) obtains.
             )
     ;
-    300. Theorem_003 |- xor ( (x = 1), (x = Successor(u) = Sum(1,u)) ) // For y = 1, we have by theorem 3 that either x = 1 = y or x = u' = 1 + u = y + u.
-    400. |- In(1,m) // Hence, 1 belongs to m.
+    300. Theorem_003 |- (x = 1 xor x = u' = 1 + u) // For y = 1, we have by theorem 3 that either x = 1 = y or x = u' = 1 + u = y + u.
+    400. |- (1 in m) // Hence, 1 belongs to m.
     
-    500a. 400. |- assume ex y (In (y,m))
+    500a. 400. |- assume ex y (y in m)
     510a. |- assume case1 // either (case (1) for y)
-    520a. |- (Successor(y) = Sum(y,1) = Sum(x,1) ) // hence y' = y + 1 = x + 1
-    530a. |- In (Successor(y), m)
+    520a. |- (y' = y + 1 = x + 1) // hence y' = y + 1 = x + 1
+    530a. |- (y in m)
 
     510b. |- assume case2 // or (case (2) for y)
-    520b. |- impl ( (u=1), (x = Sum(y,1) = Succesor(y)) ) // hence if u = 1 then x = y + 1 = y'
+    520b. |- (u = 1 => x = y + 1 = y') // hence if u = 1 then x = y + 1 = y'
     530b. Theorem_003 |- 
-        impl 
         ( 
-            not ( (u=1) ), // but if u != 1 then, by theorem 3, 
-            and
+            (u <> 1) => // but if u != 1 then, by theorem 3, 
             (
-                (u = Successor(w) = Sum(1,w)) // u = w' = 1 + w
-                ,
-                (x = Sum(y,Sum(1,w)) = Sum(Sum(y,1),w) = Sum(Successor(y), w)) // x = y + (1+w) = (y+1) + w = y' + w
+                (u = w' = 1 + w) // u = w' = 1 + w
+                and
+                (x = y + (1 + w) = (y + 1) + w = y' + w) // x = y + (1+w) = (y+1) + w = y' + w
             )
         ) 
-    540c. 520b., 530b. |- In (Successor(y), m)
+    540c. 520b., 530b. |- (y in m)
 
     510c. |- assume case3 // or (case (3) for y)
-    520c. |- ( Successor(y) = Successor(Sum(x,v)) = Sum(x,Successor(v)) ) // y' = (x+v)' = x+v' (case 3 for y')
-    530c. |- In (Successor(y), m)
+    520c. |- (y' = (x + v)' = x + y') // y' = (x+v)' = x+v' (case 3 for y')
+    530c. |- (y in m)
     
     600. 530a., 540b., 530c. |- or (case1, case2, case3) // In any case, y' belongs to m. Therefore, we always have one of the cases (1), (2), and (3).
     
