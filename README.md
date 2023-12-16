@@ -7,7 +7,7 @@ local natural languages.
 This repository is a Proof of Concept of FPL (PoC) based on requirements specified below.
 It is a private research project with the goal to show that FPL is capable to formulate and interpret complex mathematics in a standardized format. 
 
-<img src="https://github.com/bookofproofs/fpl.net/blob/main/Fpl/fpl-vscode-extension/images/FplExtension.gif" width="450">
+<img src="https://github.com/bookofproofs/fpl.net/blob/main/Fpl/fpl-vscode-extension/images/FplExtension.gif" width="650">
 
 Contributions are welcome. 
 
