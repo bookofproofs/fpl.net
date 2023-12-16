@@ -1,4 +1,8 @@
-﻿## 3.3.1
+﻿## 3.3.2
+* Bugfixing stability and better logging for FplLS
+* Refactoring newly emitted syntax errors in PoC's Landau.1.2.Addition
+
+## 3.3.1
 * Making user-defined prefix notations possible
 * Bugfixes of significant spaces in the syntax
 

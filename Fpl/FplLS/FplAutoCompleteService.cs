@@ -1,6 +1,7 @@
 ﻿using FParsec;
 using Microsoft.FSharp.Core;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.ComponentModel.Design;
 using System.Data;
 using System.Diagnostics.Tracing;
@@ -13,7 +14,7 @@ namespace FplLS
     {
         const string prefix = "_ ";
 
-        public async Task<CompletionList> GetParserChoices(StringBuilder builder, int index)
+        public async Task<CompletionList> GetParserChoices(StringBuilder builder, int index, ILanguageServer languageServer)
         {
             // make sure we get the parser choices from the position before the typed character, not after it
             string s;
@@ -25,14 +26,22 @@ namespace FplLS
             {
                 s = builder.ToString().Substring(0, index);
             }
-            var choicesTuple = FplParser.getParserChoicesAtPosition(s, index);
-            var choices = choicesTuple.Item1;
             var modChoices = new List<FplCompletionItem>();
-            foreach (var choice in choices)
+            try
             {
-                var defaultCi = new FplCompletionItem(choice);
-                modChoices.AddRange(defaultCi.GetChoices());
+                var choicesTuple = FplParser.getParserChoicesAtPosition(s, index);
+                var choices = choicesTuple.Item1;
+                foreach (var choice in choices)
+                {
+                    var defaultCi = new FplCompletionItem(choice);
+                    modChoices.AddRange(defaultCi.GetChoices());
+                }
             }
+            catch (Exception ex)
+            {
+                FplLsTraceLogger.LogException(languageServer, ex, "GetParserChoices");
+            }
+
             return new CompletionList(modChoices);
         }
 

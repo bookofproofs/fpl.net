@@ -189,6 +189,14 @@ type TestInfixPostfixPrefix () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
+    member this.TestInfixUsage04 () =
+        let expected = """"""
+        let result = run (predicate .>> eof) """(x in z)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+        
+    [<TestMethod>]
     member this.TestCombinedUsage01 () =
         let expected = """"""
         let result = run (predicate .>> eof) """(x' + y'' < z)"""
