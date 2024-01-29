@@ -261,6 +261,7 @@ let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
 paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) |>> Ast.ParamTuple
 let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) .>> IW |>> Ast.Signature
 let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<language-specific string>" |>> Ast.LocalizationString
+
 let userDefinedInfix = positions (pstring "infix" >>. IW >>. localizationString) .>> IW |>> Ast.Infix
 let userDefinedPostfix = positions (pstring "postfix" .>> IW >>. localizationString) .>> IW |>> Ast.Postfix
 let userDefinedPrefix = positions (pstring "prefix" .>> IW >>. localizationString) .>> IW |>> Ast.Prefix
@@ -332,6 +333,9 @@ let referenceToProofOrCorollary = positions (referencingIdentifier .>>. opt para
 
 let byDefinition = positions (keywordBydef >>. predicateWithQualification ) |>> Ast.ByDef 
 
+// infix operators like the equality operator 
+let objectSymbol = positions (regex "[∟∠∞∅0-9]+" |>> fun (a:string) -> a.Trim()) .>> IW <?> "<object symbol>" |>> Ast.ObjectSymbol
+
 primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
@@ -342,6 +346,7 @@ primePredicateRef.Value <- choice [
     dollarDigits
     attempt referenceToProofOrCorollary
     predicateWithQualification
+    objectSymbol
 ]
 
 let conjunction = positions ((keywordAnd >>. leftParen >>. predicateList) .>> rightParen) |>> Ast.And
@@ -356,11 +361,12 @@ let all = positions ((keywordAll >>. variableListInOptDomainList) .>>. predicate
 let exists = positions ((keywordEx >>. variableListInOptDomainList) .>>. predicate) |>> Ast.Exists
 
 let existsTimesN = positions (((keywordExN >>. dollarDigits .>> SW) .>>. variableInOptDomain) .>>. predicate) |>> Ast.ExistsN
-let isOpArg = choice [ predicateIdentifier; variable; self; extDigits ] .>> IW
+let isOpArg = choice [ objectSymbol; predicateIdentifier; variable; self ] .>> IW
 let isOperator = positions ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // infix operators like the equality operator 
-let infixOp = positions (regex "[~\+\-\*\/\\\<\>=@\w]+" |>> fun (a:string) -> a.Trim()) .>> SW <?> "<infix operator>" |>> Ast.InfixOperator
+//let infixOp = positions (regex "[~\+\-\*\/\\\<\>=@∘∈a-z]+" |>> fun (a:string) -> a.Trim()) .>> SW <?> "<infix operator>" |>> Ast.InfixOperator
+let infixOp = positions ( infixMathSymbols ) .>> SW <?> "<infix operator>" |>> Ast.InfixOperator
 
 let pWithSep p separator =
     let combinedParser = pipe2 p (opt separator) (fun a b -> (a, b))
@@ -383,9 +389,9 @@ let compoundPredicate = choice [
     isOperator
 ]
 
-let fixCharacters = regex "['%@!&~\+\-\*\/]+" |>> fun (a:string) -> a.Trim()
-let postfixOp = positions ( fixCharacters ) .>> IW <?> "<postfix operator>" |>> Ast.PostfixOperator
-let prefixOp = positions ( fixCharacters ) .>> IW <?> "<prefix operator>" |>> Ast.PrefixOperator
+//let fixCharacters = regex "['%!&~\+\-\*\/]+" |>> fun (a:string) -> a.Trim()
+let postfixOp = positions ( postfixMathSymbols ) .>> IW <?> "<postfix operator>" |>> Ast.PostfixOperator
+let prefixOp = positions ( prefixMathSymbols ) .>> IW <?> "<prefix operator>" |>> Ast.PrefixOperator
 let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePredicate] .>>. opt postfixOp .>>. optionalSpecification .>>. qualificationList) .>> IW |>> Ast.Expression
 
 predicateRef.Value <- expression
@@ -524,7 +530,8 @@ let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteCo
 let classTypeWithModifier = positions (varDeclModifier .>>. classType .>> IW) |>> Ast.ClassTypeWithModifier
 let classTypeWithModifierList = sepBy1 classTypeWithModifier comma
 
-let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. classTypeWithModifierList
+let userdDefinedSymbol = positions (pstring "symbol" .>> IW >>. localizationString) .>> IW |>> Ast.Symbol
+let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. opt userdDefinedSymbol .>>. classTypeWithModifierList
 let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString "definition" <|> skipString "def") >>. SW
@@ -611,7 +618,7 @@ let errInformation = [
     ("CAS000", "Syntax error in case block", ["|"], conditionFollowedByResult)
     ("DCS000", "Syntax error in default case block", ["?"], elseStatement)
     ("ASS000", "Syntax error in assumption", ["ass"], assumeArgument)
-    ("REV000", "Syntax error in revokation", ["rev"], revokeArgument)
+    ("REV000", "Syntax error in revocation", ["rev"], revokeArgument)
     ("RET000", "Syntax error in return statement", ["ret"], returnStatement)
     ("PRE000", "Syntax error in premise", ["pre"], premise)
     ("CON000", "Syntax error in conclusion", ["con"], conclusion)

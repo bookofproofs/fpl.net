@@ -14,7 +14,7 @@ This is a Proof of Concept of a private research project to develop such a langu
 * FPL support for user-defined prefix, postfix, and infix notation for mathematical operators in expressions.
 
 
-<img src="https://github.com/bookofproofs/fpl.net/blob/main/Fpl/fpl-vscode-extension/images/FplExtension.gif" width="550">
+<img src="https://github.com/bookofproofs/fpl.net/blob/main/Fpl/fpl-vscode-extension/images/FplExtension.gif?raw=true" width="550">
 
 ## Requirements
 

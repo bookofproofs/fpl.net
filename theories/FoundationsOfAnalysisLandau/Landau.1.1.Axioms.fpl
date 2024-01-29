@@ -1,12 +1,12 @@
 uses Fpl.SetTheory
 uses Fpl.Commons
 
-definition class One: object
+definition class One symbol "1" : object
 {
     intrinsic
 }
 
-// introduction of new symbols 1,2,3,.... and identyfying then with natural numbers of 
+// introduction of new symbols 1,2,3,.... and identyfying them with natural numbers 
 def class Nat: obj
 {
     // explicit representation of a specific natural number
@@ -27,8 +27,8 @@ def class Nat: obj
 
 // 1 is a natural number
 axiom Axiom1 ()
-{
-    is (1, Nat) 
+{   
+    is (0, Nat) 
 }
 
 // For each x there exists exactly one natural number, called the successor of x, the will be denoted x'
@@ -39,7 +39,7 @@ definition function Successor postfix "'" (x: N) -> N
 
 definition function DoubleSuccessor postfix "''" (x: N) -> N
 {
-    ret urtttt
+    ret Successr(Successor(x))
 }
 
 axiom Axiom2 ()
@@ -99,7 +99,7 @@ def class N: Set
             assert
                 all n
                 (
-                    (n -in self)
+                    (n ∈ self)
                 )
         ;
         self
