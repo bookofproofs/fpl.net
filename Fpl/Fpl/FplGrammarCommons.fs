@@ -107,22 +107,20 @@ let replaceLinesWithSpaces (input: string) (pattern: string) =
     )
     regex.Replace(input, evaluator)
 
-/// Replaces in the `input` all FPL comments by spaces while preserving the new lines
+/// Replaces in the `input` all FPL comments by spaces while preserving new lines
 let removeFplComments (input:string) = 
     let r1 = replaceLinesWithSpaces input "\/\/[^\n]*" // replace inline comments
     replaceLinesWithSpaces r1 "\/\*((?:.|\n)*?)\*\/" // replace block comments
 
-/// Replaces in the `input` all strings by spaces while preserving the new lines
-let removeStrings (input:string) =
-    let regex = new Regex("\"[^\"" + Environment.NewLine + "]*\"")
-    let replacement = MatchEvaluator(fun m -> "\"" + String.replicate (m.Value.Length - 2) " " + "\"")
-    regex.Replace(input, replacement)
-
-
-
 /// Special math symbols that can be used as infix, postfix, prefix operators, or other mathematical symbols;
 /// based on source: https://www.classe.cornell.edu/~dms79/LectureNotes/formulae/list-of-math-symbols-extended.htm
-
+/// Code 0 = symbol is excluded from FPL unused
+/// Code > 0 = symbol is included in FPL, with significant bits
+/// Code 8 = math object symbol
+/// Code 4 = prefix
+/// Code 2 = infix
+/// Code 1 = postfix
+/// (sums like 8 + 2 + 1 are allowed).
 let mathSymbols = dict [
         ('a', 2) // Latin Letter a, U+0041
         ('b', 2) // Latin Letter b, U+0042

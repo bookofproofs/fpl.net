@@ -57,6 +57,7 @@ namespace FplLSTests
         [DataRow("function")]
         [DataRow("ind")]
         [DataRow("index")]
+        [DataRow("infix")]
         [DataRow("intr")]
         [DataRow("intrinsic")]
         [DataRow("inf")]

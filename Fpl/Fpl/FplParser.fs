@@ -262,11 +262,21 @@ paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclaration
 let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) .>> IW |>> Ast.Signature
 let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<language-specific string>" |>> Ast.LocalizationString
 
-let userDefinedInfix = positions (pstring "infix" >>. IW >>. localizationString) .>> IW |>> Ast.Infix
-let userDefinedPostfix = positions (pstring "postfix" .>> IW >>. localizationString) .>> IW |>> Ast.Postfix
-let userDefinedPrefix = positions (pstring "prefix" .>> IW >>. localizationString) .>> IW |>> Ast.Prefix
-let userDefinedFix = opt choice[ userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]
-let signatureWithUserDefinedString = positions (predicateIdentifier .>> IW .>>. userDefinedFix .>>. paramTuple) .>> IW |>> Ast.SignatureWithUserDefinedString
+let keywordSymbol = pstring "symbol" .>> IW
+let objectSymbolString = pchar '"' >>. objectMathSymbols .>> pchar '"' <?> "<object symbol>"
+let infixString = pchar '"' >>. infixMathSymbols .>> pchar '"' <?> "<infix symbol>"
+let keywordInfix = pstring "infix" >>. IW
+let postfixString = pchar '"' >>. postfixMathSymbols .>> pchar '"' <?> "<postfix symbol>"
+let keywordPostfix = pstring "postfix" >>. IW
+let prefixString = pchar '"' >>. prefixMathSymbols .>> pchar '"' <?> "<prefix operand>"
+let keywordPrefix = pstring "prefix" >>. IW
+let userDefinedObjSym = positions (keywordSymbol >>. objectSymbolString) .>> IW |>> Ast.Symbol
+let userDefinedInfix = positions (keywordInfix >>. infixString) .>> IW |>> Ast.Infix
+let userDefinedPostfix = positions (keywordPostfix >>. postfixString) .>> IW |>> Ast.Postfix
+let userDefinedPrefix = positions (keywordPrefix >>. prefixString) .>> IW |>> Ast.Prefix
+let userDefinedSymbol = opt choice[ userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]
+
+let signatureWithUserDefinedString = positions (predicateIdentifier .>> IW .>>. userDefinedSymbol .>>. paramTuple) .>> IW |>> Ast.SignatureWithUserDefinedString
 (* Statements *)
 let argumentTuple = positions ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
 
@@ -530,8 +540,8 @@ let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteCo
 let classTypeWithModifier = positions (varDeclModifier .>>. classType .>> IW) |>> Ast.ClassTypeWithModifier
 let classTypeWithModifierList = sepBy1 classTypeWithModifier comma
 
-let userdDefinedSymbol = positions (pstring "symbol" .>> IW >>. localizationString) .>> IW |>> Ast.Symbol
-let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. opt userdDefinedSymbol .>>. classTypeWithModifierList
+
+let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. opt userDefinedObjSym .>>. classTypeWithModifierList
 let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString "definition" <|> skipString "def") >>. SW

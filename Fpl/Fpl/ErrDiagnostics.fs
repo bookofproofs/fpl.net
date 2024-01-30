@@ -492,7 +492,6 @@ let resultSatisfies predicate msg (p: Parser<_,_>) : Parser<_,_> =
 let preParsePreProcess (input:string) = 
     input
     |> removeFplComments 
-    |> removeStrings
 
 
 /// Returns a list of tuples with (position,regexMmatch) of string matches based on an error-recovery regex pattern 
