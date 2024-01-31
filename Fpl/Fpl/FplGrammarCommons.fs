@@ -165,7 +165,7 @@ let mathSymbols = dict [
         ('/', 7) // Slash, U+002F
         ('\\', 2) // Backslash, U+005C
         ('@', 2) // At, U+0040
-        ('&', 5) // Ampresand, U+0026
+        ('&', 5) // Ampersand, U+0026
         (''', 5) // Apostrophe, U+0027
         ('!', 1) // Exclamation Mark, U+0021
         ('^', 2) // Circumflex, U+005E
@@ -1127,10 +1127,16 @@ let isObject c =
     | (true, a) -> (a &&& 8) = 8
     | _ -> false
 
-let infixMathSymbols: Parser<string,unit> = many1Satisfy isInfix 
 
-let postfixMathSymbols: Parser<string,unit> = many1Satisfy isPostfix 
+let fixChar predicate expected = 
+    let prefixChar = 
+        satisfy predicate <|> fail ("Expecting: " + expected)
+    many1Chars prefixChar
 
-let prefixMathSymbols: Parser<string,unit> = many1Satisfy isPrefix 
+let infixMathSymbols: Parser<string,unit> = fixChar isInfix "<infix symbol>"
 
-let objectMathSymbols: Parser<string,unit> = many1Satisfy isObject 
+let postfixMathSymbols: Parser<string,unit> = fixChar isPostfix "<postfix symbol>" 
+
+let prefixMathSymbols: Parser<string,unit> = fixChar isPrefix "<prefix symbol>"
+
+let objectMathSymbols: Parser<string,unit> = fixChar isObject "<object symbol>"
