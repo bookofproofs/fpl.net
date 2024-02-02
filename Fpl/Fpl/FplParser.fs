@@ -263,12 +263,12 @@ let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) .>> IW 
 let localizationString = positions (regex "\"[^\"\n]*\"") <?> "<language-specific string>" |>> Ast.LocalizationString
 
 let keywordSymbol = pstring "symbol" .>> IW
-let objectSymbolString = pchar '"' >>. objectMathSymbols .>> pchar '"' <?> "<object symbol>"
-let infixString = pchar '"' >>. infixMathSymbols .>> pchar '"' <?> "<infix symbol>"
+let objectSymbolString = pchar '"' >>. objectMathSymbols .>> pchar '"'
+let infixString = pchar '"' >>. infixMathSymbols .>> pchar '"'
 let keywordInfix = pstring "infix" >>. IW
-let postfixString = pchar '"' >>. postfixMathSymbols .>> pchar '"' <?> "<postfix symbol>"
+let postfixString = pchar '"' >>. postfixMathSymbols .>> pchar '"' 
 let keywordPostfix = pstring "postfix" >>. IW
-let prefixString = pchar '"' >>. prefixMathSymbols .>> pchar '"' <?> "<prefix operand>"
+let prefixString = pchar '"' >>. prefixMathSymbols .>> pchar '"' 
 let keywordPrefix = pstring "prefix" >>. IW
 let userDefinedObjSym = positions (keywordSymbol >>. objectSymbolString) .>> IW |>> Ast.Symbol
 let userDefinedInfix = positions (keywordInfix >>. infixString) .>> IW |>> Ast.Infix
@@ -344,7 +344,8 @@ let referenceToProofOrCorollary = positions (referencingIdentifier .>>. opt para
 let byDefinition = positions (keywordBydef >>. predicateWithQualification ) |>> Ast.ByDef 
 
 // infix operators like the equality operator 
-let objectSymbol = positions (regex "[∟∠∞∅0-9]+" |>> fun (a:string) -> a.Trim()) .>> IW <?> "<object symbol>" |>> Ast.ObjectSymbol
+//let objectSymbol = positions (regex "[∟∠∞∅0-9]+" |>> fun (a:string) -> a.Trim()) .>> IW <?> "<object symbol>" |>> Ast.ObjectSymbol
+let objectSymbol = positions ( objectMathSymbols ) .>> IW |>> Ast.ObjectSymbol
 
 primePredicateRef.Value <- choice [
     keywordTrue
@@ -376,7 +377,7 @@ let isOperator = positions ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>
 
 // infix operators like the equality operator 
 //let infixOp = positions (regex "[~\+\-\*\/\\\<\>=@∘∈a-z]+" |>> fun (a:string) -> a.Trim()) .>> SW <?> "<infix operator>" |>> Ast.InfixOperator
-let infixOp = positions ( infixMathSymbols ) .>> SW <?> "<infix operator>" |>> Ast.InfixOperator
+let infixOp = positions ( infixMathSymbols ) .>> SW |>> Ast.InfixOperator
 
 let pWithSep p separator =
     let combinedParser = pipe2 p (opt separator) (fun a b -> (a, b))
@@ -400,8 +401,8 @@ let compoundPredicate = choice [
 ]
 
 //let fixCharacters = regex "['%!&~\+\-\*\/]+" |>> fun (a:string) -> a.Trim()
-let postfixOp = positions ( postfixMathSymbols ) .>> IW <?> "<postfix operator>" |>> Ast.PostfixOperator
-let prefixOp = positions ( prefixMathSymbols ) .>> IW <?> "<prefix operator>" |>> Ast.PrefixOperator
+let postfixOp = positions ( postfixMathSymbols ) .>> IW |>> Ast.PostfixOperator
+let prefixOp = positions ( prefixMathSymbols ) .>> IW |>> Ast.PrefixOperator
 let expression = positions (opt prefixOp .>>. choice [compoundPredicate; primePredicate] .>>. opt postfixOp .>>. optionalSpecification .>>. qualificationList) .>> IW |>> Ast.Expression
 
 predicateRef.Value <- expression

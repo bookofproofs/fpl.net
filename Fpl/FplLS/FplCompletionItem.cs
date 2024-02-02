@@ -198,7 +198,12 @@ namespace FplLS
                 case "postfix":
                 case "symbol":
                 case "infix":
-                    return new FplCompletionItemChoicesSymbolic().GetChoices(this);
+                    return new FplCompletionItemChoicesSymbol(Word, true).GetChoices(this);
+                case "prefix symbol":
+                case "postfix symbol":
+                case "object symbol":
+                case "infix symbol":
+                    return new FplCompletionItemChoicesSymbol(Word, false).GetChoices(this);
                 default:
                     return new FplCompletionItemChoicesDefault().GetChoices(this);
             }
