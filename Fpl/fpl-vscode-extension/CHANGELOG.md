@@ -4,6 +4,13 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.5.0
+* Contains the newest FPL parser 
+* Allows auto-completion for user-defined mathematical symbols
+
+## 1.4.9
+* Gif image added
+
 ## 1.4.8
 * Minor Bugfixes in Parser and Language Server 
 

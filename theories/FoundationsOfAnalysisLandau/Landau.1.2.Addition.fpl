@@ -66,7 +66,7 @@ proof Theorem_003$1
     dec 
          ~x : object
          ~m : Set // let m be a set 
-         assert (1 in m) // such that 1 belongs to m
+         assert (1 ∈ m) // such that 1 belongs to m
          assert 
             // and of all those x for which there exists such u.
             // PoC note: We formalize the notion "for which there exists such u" by the following implication
@@ -82,14 +82,14 @@ proof Theorem_003$1
     ;
 
     // "base case" 
-    100. |- (1 in m)
+    100. |- (1 ∈ m)
     200. |- trivial
     
     // "inductive step" 
-    300. 200. |- assume (x in m)
+    300. 200. |- assume (x ∈ m)
     400. |- exn$1 u in N ( u' = x )
     500. Axiom3(), Axiom2() |- ( u'' = x' )
-    600. bydef m |- (x' in m)
+    600. bydef m |- (x' ∈ m)
     700. |- ( m = N )
     
     qed
@@ -166,7 +166,7 @@ proof Theorem_004_A$1
                 ( a[y] = b[y] )
                 ,
                 // PoC note: We formulate it predicatively using the implication that if the conjugated premise is fulfilled for some x than x is element of m
-                (y in m)
+                (y ∈ m)
             )
     ;
     
@@ -234,13 +234,13 @@ proof Theorem_004_B$1
     100. |- assume (x = 1) 
     110. 100., bydef Sum |- ((x + 1) = x') // since x + 1 = successor(1) = successor (x) and 
     150. 100., bydef Sum |- ((x + y') = (y')' = (x + y)') // (x+y') = (y')' = (x+y)'
-    200. |- (1 in m) // hence 1 belongs to m
+    200. |- (1 ∈ m) // hence 1 belongs to m
     
     // "inductive step" 
-    300. 200. |- assume ex x (x in m) // let x belong to m, so that there exists an x + y for all y. Then the number x'+ y = (x + y)' is the required number for x'  
+    300. 200. |- assume ex x (x ∈ m) // let x belong to m, so that there exists an x + y for all y. Then the number x'+ y = (x + y)' is the required number for x'  
     400. bydef Sum |- ( (x' + 1) = (x + 1)' = (x')' ) // since x' + 1 = (x+1)' = (x')'
     500. bydef Sum |- ( (x' + y') = (x + y')' = ((x + y)')' = (x' + y)' ) // and x' + y' = (x+y')' = ((x+y)')' = (x'+y)' 
-    600. |- (x' in m) // hence, x' belongs to m
+    600. |- (x' ∈ m) // hence, x' belongs to m
     qed
 }
 
@@ -265,14 +265,14 @@ proof Theorem_005_SumIsAssoziative$1
             (
                 ( (x + y) + z = x + (y + z) )
                 ,
-                (z in m)
+                (z ∈ m)
             )
     ;
 
     // "base case" 
     // (x + y) + 1 = (x + y)' = x + y' = x + (y + 1)
     100. bydef Sum |- ( (x + y) + 1 = (x + y)' = x + y' = x + (y + 1) )
-    200. |- (1 in m)
+    200. |- (1 ∈ m)
     
     // "inductive step" 
     300. 200. |- assume ex z ( (x + y) + z = x + (y + z) )
@@ -283,7 +283,7 @@ proof Theorem_005_SumIsAssoziative$1
             = x + (y + z)'    // = x + (y+z)'
             = x + (y + z')    // = x + (y + z')
             )
-    600. |- (z' in m)
+    600. |- (z' ∈ m)
     qed
 }
 
@@ -304,17 +304,17 @@ proof Theorem_006_SumIsCommutatitve$1
          ~m : Set 
          // Let m be the set of all y for which the assertion of the theorem holds
          assert 
-            (( x + y = y + x ) => (z in m))
+            (( x + y = y + x ) => (z ∈ m))
     ;
 
     // "base case" 
     100. bydef Sum |- ( y + 1 = y' ) // We have y + 1 = y', 
     110. Theorem_004_B$1 |- (1 + y = y' )  // by the construction in the proof of Theorem 4, 1 + y = y'
     150. 100., 110. |- ( y + 1 = 1 + y ) // so that 1 + y = y + 1
-    200. |- (1 in m) // and 1 belongs to m.
+    200. |- (1 ∈ m) // and 1 belongs to m.
     
     // "inductive step" 
-    300. 200. |- assume ex x (x in m) // If x belongs to m,
+    300. 200. |- assume ex x (x ∈ m) // If x belongs to m,
     400. |- ( (x + y) = (y + x) )
     450. |- (    //   then x + y = y + x
               (x + y)'     // therefore (x + y)' = (y+x)' = y + x'
@@ -323,7 +323,7 @@ proof Theorem_006_SumIsCommutatitve$1
             )
     470. Theorem_004_B$1 |- (x' + y = (x + y)' )  // by the construction in the proof of theorem 4, we have x' + y = (x + y)'.
     500. |- ( x' + y = y + x' ) // hence x' + y = y + x'
-    600. |- (x' in m) // so that x' belongs to m
+    600. |- (x' ∈ m) // so that x' belongs to m
     qed
 }
 
@@ -344,7 +344,7 @@ proof Theorem_007$1
          ~m : Set // and let m be the set of all y for which the assertion is true
          assert
             (
-                y = x + y => y in m
+                y = x + y => y ∈ m
             )
             
     ;
@@ -352,10 +352,10 @@ proof Theorem_007$1
     // "base case" 
     100. Axiom3 |- ( 1 <> x') // 1 != x'
     200. bydef Sum |- ( 1 <> x + 1 ) // 1 != x + 1
-    200. |- (1 in  m) // 1 belongs to m
+    200. |- (1 ∈  m) // 1 belongs to m
     
     // "inductive step" 
-    300. 200. |- assume ex y in N (y in m) // if y belongs to m
+    300. 200. |- assume ex y in N (y ∈ m) // if y belongs to m
     400. |- (y <> x + y) // then y != x + y
     500. |- (y' = (x + y)') // hence y' != (x + y)'
     510. bydef Sum |- (y' <> x + y') // y' != x + y'
@@ -382,20 +382,20 @@ prf Theorem_008$1
          assert ( y <> z )
          ~m : Set // and let m be the set of all x for which x + y != x + z
          ~x : N
-         assert ( x + y <> x + z => x in m )
+         assert ( x + y <> x + z => x ∈ m )
     ;
 
     // "base case" 
     100. Axiom3 |- (y' <> z') // y' != z'
     150. |- (1 + y <> 1 + z) // 1 + y != 1 + z
-    200. |- (1 in m) // hence, 1 belongs to m
+    200. |- (1 ∈ m) // hence, 1 belongs to m
     
     // "inductive step" 
-    300. 200. |- ass ex x in N (x in m) // if x belongs to m
+    300. 200. |- ass ex x in N (x ∈ m) // if x belongs to m
     400. |- (x + y <> x <> z) // then x + y != x + z
     500. Axiom3 |- ((x + y)' <> (x + z)') // hence (x+y)' != (x+z)'
     550. |- (x' + y <> x' + z) // x' + y != x' + z
-    600. |- (x' in m) // so that x' belongs to m
+    600. |- (x' ∈ m) // so that x' belongs to m
     700. |- all x,y,z in N (y <> z => x + y <> x + z) // therefore, the assertion holds always.
     qed
 }

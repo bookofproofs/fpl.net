@@ -60,9 +60,6 @@ type Ast =
     | Var of Positions * string
 
     // Predicates
-    | Prefix of Positions * Ast
-    | Infix of Positions * Ast 
-    | Postfix of Positions * Ast
     | True of Positions * unit
     | False of Positions * unit 
     | Undefined of Positions * unit
@@ -87,6 +84,11 @@ type Ast =
     | DottedPredicate of Positions * Ast 
     | QualificationList of Positions * Ast list
     | PredicateWithQualification of (Ast * Ast) 
+    | ObjectSymbol of Positions * string
+    | Prefix of Positions * string
+    | Infix of Positions * string 
+    | Postfix of Positions * string
+    | Symbol of Positions * string
     | InfixOperator of Positions * string
     | PostfixOperator of Positions * string
     | PrefixOperator of Positions * string
@@ -131,7 +133,7 @@ type Ast =
     | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
     | DefClassContent of Ast list option * Ast
     | DefClassCompleteContent of Ast list option * Ast list
-    | DefinitionClass of Positions * ((Ast * Ast list) * (Ast * Ast list option))
+    | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option)) 
 
     // Proofs
     | Trivial of Positions * unit

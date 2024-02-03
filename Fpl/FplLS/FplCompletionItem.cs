@@ -194,6 +194,16 @@ namespace FplLS
                     return new FplCompletionItemChoicesLocalization().GetChoices(this);
                 case "uses":
                     return new FplCompletionItemChoicesUses().GetChoices(this);
+                case "prefix":
+                case "postfix":
+                case "symbol":
+                case "infix":
+                    return new FplCompletionItemChoicesSymbol(Word, true).GetChoices(this);
+                case "prefix symbol":
+                case "postfix symbol":
+                case "object symbol":
+                case "infix symbol":
+                    return new FplCompletionItemChoicesSymbol(Word, false).GetChoices(this);
                 default:
                     return new FplCompletionItemChoicesDefault().GetChoices(this);
             }
@@ -484,6 +494,12 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
+                case "infix":
+                    this.Detail = "infix operator";
+                    this.SortText = "infix";
+                    this.Kind = CompletionItemKind.Operator;
+                    this.IsShort = false;
+                    break;
                 case "intr":
                     this.Detail = "intrinsic (short form)";
                     this.SortText = "intrinsic02";
@@ -592,6 +608,18 @@ namespace FplLS
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
+                case "prefix":
+                    this.Detail = "prefix operator";
+                    this.SortText = "prefix";
+                    this.Kind = CompletionItemKind.Operator;
+                    this.IsShort = false;
+                    break;
+                case "postfix":
+                    this.Detail = "postfix operator";
+                    this.SortText = "postfix";
+                    this.Kind = CompletionItemKind.Operator;
+                    this.IsShort = false;
+                    break;
                 case "premise":
                     this.Detail = "premise";
                     this.SortText = "premise01";
@@ -668,6 +696,12 @@ namespace FplLS
                     this.Detail = "reference (to self)";
                     this.SortText = "self";
                     this.Kind = CompletionItemKind.Reference;
+                    this.IsShort = false;
+                    break;
+                case "symbol":
+                    this.Detail = "object symbol";
+                    this.SortText = "symbol";
+                    this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
                 case "thm":

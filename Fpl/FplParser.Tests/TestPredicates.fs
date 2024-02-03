@@ -391,7 +391,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate52 () =
-        let result = run (predicate .>> eof) """(z @= true @= and(x,y))"""
+        let result = run (predicate .>> eof) """(z @ true @= and(x,y))"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
