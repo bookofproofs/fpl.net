@@ -81,13 +81,13 @@ namespace FplLSTests
         [DataRow("postfix", true)]
         [DataRow("symbol", true)]
         [TestMethod]
-        public void TestInsertTextEndsWithSpace(string choice, bool declarative)
+        public void TestInsertTextDoesNotEndWithSpace(string choice, bool declarative)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesSymbol(choice, declarative).GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.InsertText.EndsWith(" "));
+                Assert.IsTrue(!item.InsertText.EndsWith(" "));
             }
         }
 

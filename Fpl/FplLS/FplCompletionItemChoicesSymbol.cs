@@ -51,12 +51,12 @@ namespace FplLS
                     if (_declarative)
                     {
                         ci.Label = $"{TokenPrefix} {_symbolType} {op} {item.Value.Item2} ({item.Value.Item3})";
-                        ci.InsertText = $"{_symbolType} \"{op}\" ";
+                        ci.InsertText = $"{_symbolType} \"{op}\"";
                     }
                     else
                     {
                         ci.Label = $"{TokenPrefix} {op} {item.Value.Item2} ({item.Value.Item3})";
-                        ci.InsertText = $"{op} ";
+                        ci.InsertText = $"{op}";
                     }
                     ci.Kind = CompletionItemKind.Operator;
                     ci.SortText = $"symbol {ci.InsertText}";

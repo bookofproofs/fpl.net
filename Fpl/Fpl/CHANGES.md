@@ -1,4 +1,8 @@
-﻿## 3.3.2
+﻿## 3.4.0
+* Extension of infix, postfix, prefix, and object symbols in FPL 
+
+
+## 3.3.2
 * Bugfixing stability and better logging for FplLS
 * Refactoring newly emitted syntax errors in PoC's Landau.1.2.Addition
 
