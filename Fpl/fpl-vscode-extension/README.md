@@ -34,7 +34,7 @@ None
 
 ## Release Notes
 
-### 1.5.0
+### 1.5.x
 * Newest FPL parser including many mathematical symbols further simplifying the syntax
 
 ### >=1.4

@@ -26,7 +26,7 @@ There is also an FPL Channel on YouTube devoted to the language.
 # Getting Started
 
 ## Software dependencies
-* Use F# (.NET 6.0)
+* Use F# (.NET 8.0)
 * Install the following Nuget packages:
   * FSharp.Core by Microsoft (latest) 
   * FParsec by Stephan Tolksdorf (latest)

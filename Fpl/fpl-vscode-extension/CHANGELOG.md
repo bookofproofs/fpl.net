@@ -4,6 +4,10 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.5.1
+* Migration to .NET 8.0
+* Bugfix duplicates in auto-completion items 
+
 ## 1.5.0
 * Contains the newest FPL parser 
 * Allows auto-completion for user-defined mathematical symbols
