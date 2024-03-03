@@ -42,6 +42,7 @@ namespace FplLS
  
             foreach (KeyValuePair<char, System.Tuple<int,string,string>> item in FplGrammarCommons.mathSymbols)
             {
+
                 if ((item.Value.Item1 & _bitPattern) == _bitPattern) 
                 {
                     var ci = defaultCi.Clone();
@@ -70,25 +71,25 @@ namespace FplLS
         private void SetDetail(FplCompletionItem ci, int bits)
         {
             List<string> usableAs = new List<string>();
-            if ((bits & 8) == 8 && 8 != _bitPattern)
+            if ((bits & 8) == 8)
             {
                 usableAs.Add("object symbol");
             }
-            if ((bits & 4) == 4 && 4 != _bitPattern)
+            if ((bits & 4) == 4)
             {
                 usableAs.Add("prefix");
             }
-            if ((bits & 2) == 2 && 2 != _bitPattern)
+            if ((bits & 2) == 2)
             {
                 usableAs.Add("infix");
             }
-            if ((bits & 8) == 1 && 1 != _bitPattern)
+            if ((bits & 1) == 1)
             {
                 usableAs.Add("postfix");
             }
             if (usableAs.Count > 0)
             {
-                ci.Detail = $"also usable as {string.Join(",", usableAs)}";
+                ci.Detail = $"also usable as {string.Join(", ", usableAs)}";
             }
             else
             {

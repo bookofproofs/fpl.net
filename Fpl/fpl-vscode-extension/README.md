@@ -16,6 +16,10 @@ This is a Proof of Concept of a private research project to develop such a langu
 
 <img src="https://github.com/bookofproofs/fpl.net/blob/main/Fpl/fpl-vscode-extension/images/FplExtension.gif?raw=true" width="550">
 
+There is also an FPL Channel on YouTube devoted to the language.
+
+[![FPL Channel](https://img.youtube.com/vi/0yiR_3S3OJA/0.jpg)](http://www.youtube.com/watch?v=0yiR_3S3OJA "FPL Channel").
+
 ## Requirements
 
 VSCode version ">1.84.2"
