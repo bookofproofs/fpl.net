@@ -2,6 +2,7 @@
 using Microsoft.FSharp.Core;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Data;
 using System.Diagnostics.Tracing;
@@ -31,10 +32,20 @@ namespace FplLS
             {
                 var choicesTuple = FplParser.getParserChoicesAtPosition(s, index);
                 var choices = choicesTuple.Item1;
+                HashSet<string> uniqueSymbols = new HashSet<string>();
                 foreach (var choice in choices)
                 {
                     var defaultCi = new FplCompletionItem(choice);
-                    modChoices.AddRange(defaultCi.GetChoices());
+                    var completionItemChoices = defaultCi.GetChoices();
+                    // prevent adding duplicate symbols if they can be used as infix postfix or prefix notation
+                    foreach (var ci in completionItemChoices)
+                    {
+                        if (!uniqueSymbols.Contains(ci.Label))
+                        {
+                            modChoices.Add(ci);
+                            uniqueSymbols.Add(ci.Label);    
+                        }
+                    }
                 }
             }
             catch (Exception ex)

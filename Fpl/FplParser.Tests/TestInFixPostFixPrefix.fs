@@ -352,3 +352,23 @@ type TestInfixPostfixPrefix () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<TestMethod>]
+    member this.TestAnd01 () =
+        let result = run (predicate .>> eof) """and (x,y)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestAnd02 () =
+        let result = run (predicate .>> eof) """(x and y)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestAnd03 () =
+        let result = run (predicate .>> eof) """(x and not x)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

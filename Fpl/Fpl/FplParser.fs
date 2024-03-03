@@ -376,7 +376,6 @@ let isOpArg = choice [ objectSymbol; predicateIdentifier; variable; self ] .>> I
 let isOperator = positions ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // infix operators like the equality operator 
-//let infixOp = positions (regex "[~\+\-\*\/\\\<\>=@∘∈a-z]+" |>> fun (a:string) -> a.Trim()) .>> SW <?> "<infix operator>" |>> Ast.InfixOperator
 let infixOp = positions ( infixMathSymbols ) .>> SW |>> Ast.InfixOperator
 
 let pWithSep p separator =
