@@ -19,9 +19,7 @@ There is also an FPL Channel on YouTube devoted to the language.
 * The FPL grammar and parser based on F# / FParsec library 
 
 ## Open tasks (among others)
-* Writing even more unit tests for the new F# parser
-* IDE extension for FPL (e.g. based on Visual Studio)
-* FPL interpreter
+* See [project](https://github.com/users/bookofproofs/projects/1).
 
 # Getting Started
 
