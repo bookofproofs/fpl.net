@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TestUsesClause.fs" />
     <Compile Include="TestAxioms.fs" />
     <Compile Include="TestClassInheritanceTypes.fs" />
     <Compile Include="TestClassInstanceProperties.fs" />
