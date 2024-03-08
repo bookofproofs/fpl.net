@@ -1,20 +1,70 @@
 ﻿module FplInterpreter
 open FplGrammarTypes
+open FParsec
 
-type Namespace =
-    | Namespace of string * Ast
+type ParsedAst =
+    | ParsedAst of string * Ast
 
     member this.Name =
         match this with
-        | Namespace(name, ast) -> name
+        | ParsedAst(name, ast) -> name
 
     member this.Ast =
         match this with
-        | Namespace(code, ast) -> ast
+        | ParsedAst(name, ast) -> ast
 
 
 type SymbolTable =
-    | Namespaces of Namespace list
+    | ParsedAsts of ParsedAst list
+
+// A record type that contains all the necessary fields to store the used namespaces in the parsed FPL code
+type EvalAliasedNamespaceIdentifier = 
+    { StartPos: Position
+      EndPos: Position
+      AliasOrStar: string option
+      PascalCaseIdList: string list }
+    with
+        member this.FileNamePattern = 
+            let pascalCaseIdList = String.concat "." this.PascalCaseIdList
+            match this.AliasOrStar with
+            | Some "*" -> 
+                sprintf "%s*.fpl" pascalCaseIdList
+            | _ -> 
+                sprintf "%s.fpl" pascalCaseIdList
+        member this.Name = 
+            let pascalCaseIdList = String.concat "." this.PascalCaseIdList
+            match this.AliasOrStar with
+            | Some "*" -> 
+                pascalCaseIdList
+            | Some s -> 
+                s
+            | _ -> 
+                pascalCaseIdList
+
+
+let rec eval_uses = function 
+    | Ast.AST ((pos1, pos2), ast) -> 
+        eval_uses ast
+    | Ast.Namespace (optAst, asts) -> 
+        let results = asts |> List.collect eval_uses
+        let optAstResults = optAst |> Option.map eval_uses |> Option.defaultValue []
+        optAstResults @ results
+    | Ast.UsesClause ((pos1, pos2), ast) -> 
+        eval_uses ast
+    | Ast.AliasedNamespaceIdentifier ((pos1, pos2), (ast, optAst)) -> 
+        let aliasOrStar = match optAst with
+                          | Some (Ast.Alias (_, s)) -> Some s
+                          | Some Ast.Star -> Some "*"
+                          | _ -> None
+        let pascalCaseIdList = match ast with
+                               | Ast.NamespaceIdentifier (_, asts) -> 
+                                   asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
+                               | _ -> []
+        [{ EvalAliasedNamespaceIdentifier.StartPos = pos1 
+           EvalAliasedNamespaceIdentifier.EndPos = pos2 
+           EvalAliasedNamespaceIdentifier.AliasOrStar = aliasOrStar
+           EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList }]
+    | _ -> []
 
 let rec eval = function
     // units: | Star

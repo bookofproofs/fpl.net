@@ -10,128 +10,57 @@ open System.Text.RegularExpressions
 
 
 
-let input = """
-inf ModusPonens()
+let input = """uses TestNamespace
+def class Set: obj
 {
-    dec ~p,q: pred;
-
-    premise:
-        and (p, impl (p,q) )
-    conclusion:
-        q
+    intr
 }
+uses uses TestNamespace1.TestNamespace2
 
-inf ModusTollens()
+// "in relation" ("is element of") relation
+def pred In infix "in" (x,y: Set)
 {
-    dec ~p,q: pred;
-
-    premise:
-        and (not q, impl(p,q) )
-    conclusion:
-        not (p)
+    intr
 }
-
-inf HypotheticalSyllogism()
+uses TestNamespace *
+def pred IsEmpty(x: Set)
 {
-    dec ~p,q,r: pred;
-    premise:
-        and (impl(p,q), impl(q,r))
-    conclusion:
-        impl(p,r)
-}
-
-inf DisjunctiveSyllogism()
-{
-    dec ~p,q: pred;
-    premise:
-        and (not(p), or(p,q))
-    conclusion:
-        q
-}
-
-inf ExistsByExample(p: pred(c: obj))
-{
-    dec ~x: obj;
-    premise:  
-        p(c)
-    conclusion: 
-        ex x(p(x))
-}
-
-
-def pred NotEqual infix "<>" (x,y: tpl)
-{
-    not (x = y) 
-}
-
-def pred Implies infix "=>" (x,y: pred)
-{
-    impl
+    all y in Set
     (
-        x
-        ,
-        y
+        not In(y, x) 
     )
 }
-
-def pred IfAndOnlyIf infix "<=>" (x,y: pred)
+uses TestNamespace1.TestNamespace2 *
+// existence of an empty set
+axiom EmptySetExists()
 {
-    iif
+    ex x in Set
     (
-        x
-        ,
-        y
+        IsEmpty(x)
     )
 }
-
-def pred And infix "and" (x:+ pred)
+uses TestNamespace alias T1
+// introduction of a new mathematical object
+def class EmptySet: Set
 {
-    and (x)
+    ctor EmptySet()
+    {
+        dec 
+            base.obj()
+            assert IsEmpty(self) 
+        ;
+        self
+    }
 }
-
-def pred Or infix "or" (x:+ pred)
+uses TestNamespace1.TestNamespace2 alias T2
+// relation between a subset and a superset
+def pred IsSubset(subset,superset: Set)
 {
-    or (x)
+    all u in Set
+    (
+        impl (In(u, subset), In(u, superset))
+    )
 }
-
-def pred Xor infix "xor" (x:+ pred)
-{
-    xor (x)
-}
-
-localization iif(x,y) :=
-    !tex: x "\Leftrightarrow" y
-    !eng: x " if and only if " y
-    !ger: x " dann und nur dann wenn " y
-    ;
-
-loc not(x) :=
-    !tex: "\neg(" x ")"
-    !eng: "not " x
-    !ger: "nicht " x
-    ;
-
-loc and(p,q) :=
-    !tex: p "\wedge" q
-    !eng: p " and " q
-    !ger: p " und " q
-    ;
-
-loc Equal(x,y) :=
-    !tex: x "=" y
-    !eng: x " equals " y
-    !ger: x " ist gleich " y
-    !ita: x " è uguale a " y
-    !pol: x " równa się " y
-    ;
-
-loc NotEqual(x,y) :=
-    !tex: x "\neq" y 
-    !eng: x "is unequal" y 
-    !ger: x "ist ungleich" y 
-    !pol: x ( "nie równa się" | "nie równe" ) y 
-    ;
-
 ;"""
 
 let result = fplParser input
@@ -140,8 +69,8 @@ printf "%O" result
 
 ad.PrintDiagnostics
 
-let interpret = eval result
-printf "%s" interpret
+let interpret = eval_uses result
+printf "%A" interpret
 
 printf "\n--------------------------------\n"
 
