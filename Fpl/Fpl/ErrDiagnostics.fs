@@ -38,19 +38,11 @@ If you decide to reuse this code for your language and other IDEs, please consid
 *)
 
 type DiagnosticCode = 
-    | DiagnosticCode of string * string * string
-
-    member this.Code =
-        match this with
-        | DiagnosticCode(code, msg, stdMsg) -> code
-
-    member this.OrigMsg =
-        match this with
-        | DiagnosticCode(code, msg, stdMsg) -> msg
-
-    member this.StdMsg =
-        match this with
-        | DiagnosticCode(code, msg, stdMsg) -> stdMsg
+    { DiagnosticCode: string * string * string }
+    with
+    member this.Code = let (code, _, _) = this.DiagnosticCode in code
+    member this.OrigMsg = let (_, origMsg, _) = this.DiagnosticCode in origMsg
+    member this.StdMsg = let (_, _, stdMsg) = this.DiagnosticCode in stdMsg
 
     member this.CodeMessage = 
         // improves the error message for a special case in FPL, return this.StdMsg in your case
@@ -84,27 +76,13 @@ type DiagnosticMessage =
         | DiagnosticMessage(value) -> value
 
 type Diagnostic =
-    | Diagnostic of DiagnosticEmitter * DiagnosticSeverity * Position * DiagnosticMessage * DiagnosticCode
-
-    member this.Emitter =
-        match this with
-        | Diagnostic(emitter, _, _, _, _) -> emitter
-
-    member this.Severity =
-        match this with
-        | Diagnostic(_, severity, _, _, _) -> severity
-
-    member this.Position =
-        match this with
-        | Diagnostic(_, _, position, _, _) -> position
-
-    member this.Message =
-        match this with
-        | Diagnostic(_, _, _, message, _) -> message
-
-    member this.Code =
-        match this with
-        | Diagnostic(_, _, _, _, code) -> code
+    { Diagnostic: DiagnosticEmitter * DiagnosticSeverity * Position * DiagnosticMessage * DiagnosticCode }
+    with
+    member this.Emitter = let (emitter, _, _, _, _) = this.Diagnostic in emitter
+    member this.Severity = let (_, severity, _, _, _) = this.Diagnostic in severity
+    member this.Position = let (_, _, position, _, _) = this.Diagnostic in position
+    member this.Message = let (_, _, _, message, _) = this.Diagnostic in message
+    member this.Code = let (_, _, _, _, code) = this.Diagnostic in code
 
 type Diagnostics() =
     let myDictionary = new Dictionary<string, Diagnostic>()
@@ -304,10 +282,10 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
         result, (int userState.Index)
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, _ = mapErrMsgToRecText input errorMsg restInput.Position
-        let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
+        let diagnosticCode = { DiagnosticCode = (code, newErrMsg, stdMsg) }
         let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
         let diagnostic =
-            Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode)
+            { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode) }
         ad.AddDiagnostic diagnostic
 
         Ast.Error, int restInput.Position.Index
@@ -344,10 +322,10 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
                     restInput.Position.Line,
                     restInput.Position.Column 
                 )
-            let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
-            let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
+            let diagnosticCode = { DiagnosticCode = (code, newErrMsg, stdMsg) }
+            let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage)
             let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
+                { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode) }
             ad.AddDiagnostic diagnostic
             
             // replace the input by manipulating the input string depending on the error position
@@ -391,10 +369,10 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                             restInput.Position.Line,
                             restInput.Position.Column 
                         )
-                    let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
+                    let diagnosticCode = { DiagnosticCode = (code, newErrMsg, stdMsg) }
                     let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
                     let diagnostic =
-                        Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode)
+                        { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode) }
 
                     ad.AddDiagnostic diagnostic
             
@@ -437,10 +415,10 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
         let cond = previousChoices<>lastChoices || stringBetweenRecursiveCalls.Contains(Environment.NewLine)
         if isNotInAnyInterval intervals (int restInput.Position.Index) then
             if cond then
-                let diagnosticCode = DiagnosticCode(code, newErrMsg, stdMsg)
-                let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
+                let diagnosticCode = { DiagnosticCode = (code, newErrMsg, stdMsg) }
+                let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage)
                 let diagnostic =
-                    Diagnostic(DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode)
+                    { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode) }
                 ad.AddDiagnostic diagnostic
             
         if restInput.Position.Index < input.Length && restInput.Position.Index <> lastCorrectedIndex && cond then

@@ -12,7 +12,7 @@ type ParsedAst =
     { ParsedAst: string * Ast }
     with
         member this.Name = fst this.ParsedAst  // first element of the tuple 
-        member this.Ast = snd this.ParsedAst  // second element of the uple
+        member this.Ast = snd this.ParsedAst  // second element of the tuple
 
 /// A record type to store all the necessary fields for parsed uses clauses in FPL code
 type EvalAliasedNamespaceIdentifier = 
@@ -94,8 +94,14 @@ let findFilesWithWildcard filePath wildcard =
 let files = findFilesWithWildcard "sitemap.txt" "http://example.com/myfile*.txt"
 files |> List.iter (printfn "%s")
 
-/// Takes an AST, interprets it by extracting the uses clauses and looking for the files 
-/// in the currentPath to be loaded and parsed to create even more ASTs.
+let acquireFiles (e:EvalAliasedNamespaceIdentifier) currentPath currentWebRepo =
+    let fileNames = Directory.EnumerateFiles(currentPath, e.FileNamePattern)
+
+    fileNames |> Seq.toList
+
+
+/// Takes an `ast`, interprets it by extracting the uses clauses and looks for the files 
+/// in the `currentPath` to be loaded and parsed to create even more ASTs.
 /// Returns a list ParseAst objects or adds new diagnostics if the files were not found.
 let tryFindAndParseUsesClauses ast (ad: Diagnostics) currentPath =
     let parseFile (e:EvalAliasedNamespaceIdentifier) =
@@ -103,9 +109,9 @@ let tryFindAndParseUsesClauses ast (ad: Diagnostics) currentPath =
         let fileNamesEmpty = fileNames |> Seq.tryFind (fun _ -> true) |> Option.isNone
         if fileNamesEmpty then
             let msg = DiagnosticMessage($"{e.FileNamePattern} not found")
-            let code = DiagnosticCode("NSP000", "", msg.Value)
+            let code = { DiagnosticCode = ("NSP000", "", msg.Value) }
             let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code)
+                { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
             ad.AddDiagnostic diagnostic
         fileNames
         |> Seq.choose (fun fileName ->
@@ -116,9 +122,9 @@ let tryFindAndParseUsesClauses ast (ad: Diagnostics) currentPath =
             with
             | :? FileNotFoundException -> 
                 let msg = DiagnosticMessage($"{fileName} not found")
-                let code = DiagnosticCode("NSP000", msg.Value, msg.Value)
+                let code = { DiagnosticCode = ("NSP000", msg.Value, msg.Value) }
                 let diagnostic =
-                    Diagnostic(DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code)
+                    { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
                 ad.AddDiagnostic diagnostic
                 None
         ) 

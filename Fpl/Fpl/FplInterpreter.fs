@@ -1,11 +1,17 @@
 ﻿module FplInterpreter
 open FplGrammarTypes
+open FplParser
 open FplInterpreterUsesClause
 open FParsec
 
 type SymbolTable =
     { ParsedAsts: ParsedAst list }
 
+let fplInterpreter ast uripath = 
+    let diagnostics = FplParser.parserDiagnostics
+    let parsedAsts = FplInterpreterUsesClause.tryFindAndParseUsesClauses ast diagnostics uripath
+    let symbolTable = { ParsedAsts = parsedAsts}
+    symbolTable
 
 let rec eval = function
     // units: | Star
