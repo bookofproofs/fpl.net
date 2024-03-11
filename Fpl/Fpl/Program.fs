@@ -15,7 +15,7 @@ def class Set: obj
 {
     intr
 }
-uses uses TestNamespace1.TestNamespace2
+uses Fpl.SetTheory
 
 // "in relation" ("is element of") relation
 def pred In infix "in" (x,y: Set)
@@ -69,8 +69,10 @@ printf "%O" result
 
 ad.PrintDiagnostics
 
-let interpret = eval_uses result
+let interpret = tryFindAndParseUsesClauses result ad "."
 printf "%A" interpret
+
+ad.PrintDiagnostics
 
 printf "\n--------------------------------\n"
 
