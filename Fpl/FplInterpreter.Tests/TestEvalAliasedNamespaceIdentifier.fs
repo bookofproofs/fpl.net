@@ -1,7 +1,7 @@
 namespace FplInterpreter.Tests
 
 open FParsec
-open FplInterpreter
+open FplInterpreterUsesClause
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]

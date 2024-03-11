@@ -1,102 +1,11 @@
 ﻿module FplInterpreter
 open FplGrammarTypes
-open FplParser
-open ErrDiagnostics
+open FplInterpreterUsesClause
 open FParsec
-
-type ParsedAst =
-    { ParsedAst: string * Ast }
-    with
-        member this.Name = fst this.ParsedAst  // first element of the tuple 
-        member this.Ast = snd this.ParsedAst  // second element of the uple
-
 
 type SymbolTable =
     { ParsedAsts: ParsedAst list }
 
-// A record type that contains all the necessary fields to store the used namespaces in the parsed FPL code
-type EvalAliasedNamespaceIdentifier = 
-    { StartPos: Position
-      EndPos: Position
-      AliasOrStar: string option
-      PascalCaseIdList: string list }
-    with
-        member this.FileNamePattern = 
-            let pascalCaseIdList = String.concat "." this.PascalCaseIdList
-            match this.AliasOrStar with
-            | Some "*" -> 
-                sprintf "%s*.fpl" pascalCaseIdList
-            | _ -> 
-                sprintf "%s.fpl" pascalCaseIdList
-        member this.Name = 
-            let pascalCaseIdList = String.concat "." this.PascalCaseIdList
-            match this.AliasOrStar with
-            | Some "*" -> 
-                pascalCaseIdList
-            | Some s -> 
-                s
-            | _ -> 
-                pascalCaseIdList
-
-/// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
-/// for each occurrence of the uses clause in the FPL code.
-let rec eval_uses = function 
-    | Ast.AST ((pos1, pos2), ast) -> 
-        eval_uses ast
-    | Ast.Namespace (optAst, asts) -> 
-        let results = asts |> List.collect eval_uses
-        let optAstResults = optAst |> Option.map eval_uses |> Option.defaultValue []
-        optAstResults @ results
-    | Ast.UsesClause ((pos1, pos2), ast) -> 
-        eval_uses ast
-    | Ast.AliasedNamespaceIdentifier ((pos1, pos2), (ast, optAst)) -> 
-        let aliasOrStar = match optAst with
-                          | Some (Ast.Alias (_, s)) -> Some s
-                          | Some Ast.Star -> Some "*"
-                          | _ -> None
-        let pascalCaseIdList = match ast with
-                               | Ast.NamespaceIdentifier (_, asts) -> 
-                                   asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
-                               | _ -> []
-        [{ EvalAliasedNamespaceIdentifier.StartPos = pos1 
-           EvalAliasedNamespaceIdentifier.EndPos = pos2 
-           EvalAliasedNamespaceIdentifier.AliasOrStar = aliasOrStar
-           EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList }]
-    | _ -> []
-
-/// Takes an AST, interprets it by extracting the uses clauses and looking for the files 
-// in the currentPath to be loaded and parsed to create even more ASTs.
-// Returns a list ParseAst objects or adds new diagnostics if the files were not found.
-let tryFindAndParseUsesClauses ast (ad: Diagnostics) currentPath =
-    let parseFile (e:EvalAliasedNamespaceIdentifier) =
-        let fileNames = System.IO.Directory.EnumerateFiles(currentPath, e.FileNamePattern)
-        let fileNamesEmpty = fileNames |> Seq.tryFind (fun _ -> true) |> Option.isNone
-        if fileNamesEmpty then
-            let msg = DiagnosticMessage($"{e.FileNamePattern} not found")
-            let code = DiagnosticCode("NSP000", "", msg.Value)
-            let diagnostic =
-                Diagnostic(DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code)
-            ad.AddDiagnostic diagnostic
-        fileNames
-        |> Seq.choose (fun fileName ->
-            try
-                let fileContent = System.IO.File.ReadAllText fileName
-                let ast = fplParser fileContent
-                Some { ParsedAst = (fileName, ast) }
-            with
-            | :? System.IO.FileNotFoundException -> 
-                let msg = DiagnosticMessage($"{fileName} not found")
-                let code = DiagnosticCode("NSP000", msg.Value, msg.Value)
-                let diagnostic =
-                    Diagnostic(DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code)
-                ad.AddDiagnostic diagnostic
-                None
-        ) 
-        |> Seq.toList
-
-    eval_uses ast 
-    |> List.map (fun (eval:EvalAliasedNamespaceIdentifier) -> eval)
-    |> List.collect parseFile
 
 let rec eval = function
     // units: | Star

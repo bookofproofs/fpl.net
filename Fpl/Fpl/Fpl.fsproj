@@ -15,6 +15,7 @@
     <None Include="CHANGES.md" />
     <None Include="DocuFplGrammarPocShiftFromPythonToFSharp.md" />
     <Compile Include="FplParser.fs" />
+    <Compile Include="FplInterpreterUsesClause.fs" />
     <Compile Include="FplInterpreter.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
