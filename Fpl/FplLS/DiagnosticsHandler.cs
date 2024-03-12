@@ -103,7 +103,7 @@ namespace FplLS
         /// <exception cref="NotImplementedException"></exception>
         private string CastDiagnosticCodeMessage(ErrDiagnostics.Diagnostic diagnostic)
         {
-            return diagnostic.Code.CodeMessage;
+            return diagnostic.Message;
         }
         /// <summary>
         /// Casts an F# ErrReccovery module severity into the OmniSharp's DiagnosticSeverity
@@ -136,9 +136,9 @@ namespace FplLS
             return castedSeverity;
         }
 
-        private DiagnosticCode CastCode(ErrDiagnostics.DiagnosticCode code)
+        private DiagnosticCode CastCode(string code)
         {
-            return new DiagnosticCode(code.Code.ToString());
+            return new DiagnosticCode(code);
         }
     }
 }

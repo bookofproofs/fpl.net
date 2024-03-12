@@ -103,7 +103,7 @@ let private findFilesWithWildcard filePath wildcard =
 let files = findFilesWithWildcard "sitemap.txt" "http://example.com/myfile*.txt"
 files |> List.iter (printfn "%s")
 
-let private createLibSubfolder (uri: Uri) =
+let createLibSubfolder (uri: Uri) =
     let unescapedPath = Uri.UnescapeDataString(uri.AbsolutePath)
     let directoryPath = Path.GetDirectoryName(unescapedPath)
     let libDirectoryPath = Path.Combine(directoryPath, "lib")
@@ -129,7 +129,7 @@ let tryFindAndParseUsesClauses ast (ad: Diagnostics) (uri: Uri) =
         let fileNamesEmpty = fileNames |> Seq.tryFind (fun _ -> true) |> Option.isNone
         if fileNamesEmpty then
             let msg = DiagnosticMessage(interpreterErrorMsg (NSP000 e.FileNamePattern))
-            let code = { DiagnosticCode = (nameof(NSP000), "", msg.Value) }
+            let code = { DiagnosticCode = nameof(NSP000) }
             let diagnostic =
                 { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
             ad.AddDiagnostic diagnostic
@@ -141,8 +141,8 @@ let tryFindAndParseUsesClauses ast (ad: Diagnostics) (uri: Uri) =
                 Some { ParsedAst = (fileName, ast) }
             with
             | :? FileNotFoundException -> 
-                let msg = DiagnosticMessage($"{fileName} not found")
-                let code = { DiagnosticCode = ("NSP000", msg.Value, msg.Value) }
+                let msg = DiagnosticMessage(interpreterErrorMsg (NSP001 fileName))
+                let code = { DiagnosticCode = nameof(NSP001) }
                 let diagnostic =
                     { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
                 ad.AddDiagnostic diagnostic

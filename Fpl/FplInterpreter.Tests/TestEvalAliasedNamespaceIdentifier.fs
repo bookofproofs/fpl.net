@@ -2,6 +2,7 @@ namespace FplInterpreter.Tests
 
 open FParsec
 open FplInterpreterUsesClause
+open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
@@ -56,3 +57,30 @@ type TestEvalAliasedNamespaceIdentifier() =
                     PascalCaseIdList = [pascelCaseId] 
                 }
         Assert.AreEqual(expected, eval.Name)
+
+    [<TestMethod>]
+    member this.TestCreateLibSubfolder01() = 
+        let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
+        let expected = Directory.GetCurrentDirectory()
+        let (directoryPath, libDirectoryPath) = createLibSubfolder uri
+        Assert.AreEqual(expected, directoryPath)
+        if Directory.Exists(libDirectoryPath) then
+            Directory.Delete(libDirectoryPath, true)
+
+    [<TestMethod>]
+    member this.TestCreateLibSubfolder02() = 
+        let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
+        let expected = Path.Combine(Directory.GetCurrentDirectory(), "lib")
+        let (directoryPath, libDirectoryPath) = createLibSubfolder uri
+        Assert.AreEqual(expected, libDirectoryPath)
+        if Directory.Exists(libDirectoryPath) then
+            Directory.Delete(libDirectoryPath, true)
+
+    [<TestMethod>]
+    member this.TestCreateLibSubfolder03() = 
+        let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
+        let expected = Path.Combine(Directory.GetCurrentDirectory(), "lib")
+        let (directoryPath, libDirectoryPath) = createLibSubfolder uri
+        Assert.IsTrue(Directory.Exists(libDirectoryPath))
+        if Directory.Exists(libDirectoryPath) then
+            Directory.Delete(libDirectoryPath, true)

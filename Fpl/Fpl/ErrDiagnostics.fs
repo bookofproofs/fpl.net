@@ -38,24 +38,9 @@ If you decide to reuse this code for your language and other IDEs, please consid
 *)
 
 type DiagnosticCode = 
-    { DiagnosticCode: string * string * string }
+    { DiagnosticCode: string }
     with
-    member this.Code = let (code, _, _) = this.DiagnosticCode in code
-    member this.OrigMsg = let (_, origMsg, _) = this.DiagnosticCode in origMsg
-    member this.StdMsg = let (_, _, stdMsg) = this.DiagnosticCode in stdMsg
-
-    member this.CodeMessage = 
-        // improves the error message for a special case in FPL, return this.StdMsg in your case
-        let tranlatedCode = 
-            match this.Code with 
-            | "DEF000" -> 
-                if this.OrigMsg.StartsWith("':'") then 
-                    (this.StdMsg + ": " + this.OrigMsg).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
-                else
-                    this.StdMsg 
-            | _ -> this.StdMsg
-        tranlatedCode + ": " + this.OrigMsg 
-
+    member this.Code = let code = this.DiagnosticCode in code
 
 type DiagnosticEmitter =
     // replace your language-specific emitters here
@@ -75,14 +60,27 @@ type DiagnosticMessage =
         match this with
         | DiagnosticMessage(value) -> value
 
+
+/// improves the error message for a special case in FPL, return this.StdMsg in your case
+let private codeMessage code (origMsg:string) (stdMsg:string) = 
+    let tranlatedCode = 
+        match code with 
+        | "DEF000" -> 
+            if origMsg.StartsWith("':'") then 
+                (stdMsg + ": " + origMsg).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
+            else
+                stdMsg 
+        | _ -> stdMsg
+    tranlatedCode + ": " + origMsg 
+
 type Diagnostic =
     { Diagnostic: DiagnosticEmitter * DiagnosticSeverity * Position * DiagnosticMessage * DiagnosticCode }
     with
     member this.Emitter = let (emitter, _, _, _, _) = this.Diagnostic in emitter
     member this.Severity = let (_, severity, _, _, _) = this.Diagnostic in severity
     member this.Position = let (_, _, position, _, _) = this.Diagnostic in position
-    member this.Message = let (_, _, _, message, _) = this.Diagnostic in message
-    member this.Code = let (_, _, _, _, code) = this.Diagnostic in code
+    member this.Message = let (_, _, _, message, _) = this.Diagnostic in message.Value
+    member this.Code = let (_, _, _, _, code) = this.Diagnostic in code.Code
 
 type Diagnostics() =
     let myDictionary = new Dictionary<string, Diagnostic>()
@@ -103,7 +101,7 @@ type Diagnostics() =
 
     member this.PrintDiagnostics =
         for d in this.Collection do
-            printfn "%O" d.Code.CodeMessage
+            printfn "%s" d.Message
 
         printfn "%s" "\n^------------------------^\n"
 
@@ -111,8 +109,8 @@ type Diagnostics() =
         this.Collection 
         |> Seq.map (fun d -> 
             d.Emitter.ToString() + ":" +
-            d.Code.Code + ":" +
-            d.Code.CodeMessage) 
+            d.Code + ":" +
+            d.Message) 
         |> String.concat "\n"
     member this.Clear() = myDictionary.Clear()
 
@@ -282,8 +280,8 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
         result, (int userState.Index)
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, _ = mapErrMsgToRecText input errorMsg restInput.Position
-        let diagnosticCode = { DiagnosticCode = (code, newErrMsg, stdMsg) }
-        let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
+        let diagnosticCode = { DiagnosticCode = code }
+        let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
         let diagnostic =
             { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode) }
         ad.AddDiagnostic diagnostic
@@ -322,8 +320,8 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
                     restInput.Position.Line,
                     restInput.Position.Column 
                 )
-            let diagnosticCode = { DiagnosticCode = (code, newErrMsg, stdMsg) }
-            let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage)
+            let diagnosticCode = { DiagnosticCode = code }
+            let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
             let diagnostic =
                 { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode) }
             ad.AddDiagnostic diagnostic
@@ -369,8 +367,8 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                             restInput.Position.Line,
                             restInput.Position.Column 
                         )
-                    let diagnosticCode = { DiagnosticCode = (code, newErrMsg, stdMsg) }
-                    let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage )
+                    let diagnosticCode = { DiagnosticCode = code }
+                    let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
                     let diagnostic =
                         { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode) }
 
@@ -415,8 +413,8 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
         let cond = previousChoices<>lastChoices || stringBetweenRecursiveCalls.Contains(Environment.NewLine)
         if isNotInAnyInterval intervals (int restInput.Position.Index) then
             if cond then
-                let diagnosticCode = { DiagnosticCode = (code, newErrMsg, stdMsg) }
-                let diagnosticMsg = DiagnosticMessage(diagnosticCode.CodeMessage)
+                let diagnosticCode = { DiagnosticCode = code }
+                let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
                 let diagnostic =
                     { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode) }
                 ad.AddDiagnostic diagnostic
