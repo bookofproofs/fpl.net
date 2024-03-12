@@ -69,9 +69,10 @@ printf "%O" result
 
 ad.PrintDiagnostics
 
-let interpret = FplInterpreterUsesClause.tryFindAndParseUsesClauses result ad "."
+let interpret = FplInterpreter.fplInterpreter result (System.Uri("."))
 printf "%A" interpret
 
+printf "\n--------------------------------\n"
 ad.PrintDiagnostics
 
 printf "\n--------------------------------\n"

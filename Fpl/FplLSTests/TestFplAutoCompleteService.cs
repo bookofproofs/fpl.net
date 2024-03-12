@@ -1,8 +1,6 @@
-using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using FplLS;
 using static FplGrammarTypes.Ast;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace FplLSTests
 {

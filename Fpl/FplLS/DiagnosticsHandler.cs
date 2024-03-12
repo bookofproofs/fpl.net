@@ -30,14 +30,13 @@ namespace FplLS
                     var parserDiagnostics = FplParser.parserDiagnostics;
                     parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
                     var ast = FplParser.fplParser(sourceCode);
-                    FplInterpreter.fplInterpreter(ast, uri.AbsolutePath);
+                    FplInterpreter.fplInterpreter(ast, uri);
                     var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
                     _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
                     {
                         Uri = uri,
                         Diagnostics = diagnostics
                     });
-                    FplLsTraceLogger.LogMsg(_languageServer, parserDiagnostics.DiagnosticsToString, "test");
                 }
                 catch (Exception ex)
                 {

@@ -2,10 +2,21 @@
 open System.Text.RegularExpressions
 open System.Net.Http
 open System.IO
+open System
 open FplGrammarTypes
 open FplParser
 open ErrDiagnostics
 open FParsec
+
+type FplInterpreterErrorCode =
+    | NSP000 of string
+    | NSP001 of string
+    | NSP002 of string
+
+let private interpreterErrorMsg = function  
+    | NSP000 fileNamePattern -> sprintf "%s could not be loaded" fileNamePattern
+    | NSP001 fileName -> sprintf "%s not found" fileName
+
 
 /// A record type to store all the necessary fields for parsed namespaces in FPL code
 type ParsedAst =
@@ -64,26 +75,24 @@ let rec eval_uses_clause = function
            EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList }]
     | _ -> []
 
-// downloadFile "http://example.com/myfile.txt" "localfile.txt"
-let downloadFile url filePath =
+let private downloadFile url (ad: Diagnostics) =
     let client = new HttpClient()
     try
         async {
-            let! data = client.GetStringAsync(System.Uri(url)) |> Async.AwaitTask
-            do! File.WriteAllTextAsync(filePath, data) |> Async.AwaitTask
+            let! data = client.GetStringAsync(Uri(url)) |> Async.AwaitTask
+            return data
         } |> Async.RunSynchronously
-        printfn "File downloaded successfully."
     with
-    | :? HttpRequestException as ex -> printfn "An error occurred while downloading the file: %s" ex.Message
-    | :? IOException as ex -> printfn "An error occurred while writing to the file: %s" ex.Message
-    | ex -> printfn "An unexpected error occurred: %s" ex.Message
+    | :? HttpRequestException as ex -> 
+        printfn "An error occurred while downloading the file: %s" ex.Message; ""
+    | ex -> printfn "An unexpected error occurred: %s" ex.Message; ""
 
 
 
-let wildcardToRegex (wildcard : string) =
+let private wildcardToRegex (wildcard : string) =
     "^" + Regex.Escape(wildcard).Replace("\\*", ".*").Replace("\\?", ".") + "$"
 
-let findFilesWithWildcard filePath wildcard =
+let private findFilesWithWildcard filePath wildcard =
     let regexPattern = wildcardToRegex wildcard
     let regex = Regex(regexPattern, RegexOptions.IgnoreCase)
     File.ReadLines(filePath)
@@ -94,22 +103,33 @@ let findFilesWithWildcard filePath wildcard =
 let files = findFilesWithWildcard "sitemap.txt" "http://example.com/myfile*.txt"
 files |> List.iter (printfn "%s")
 
-let acquireFiles (e:EvalAliasedNamespaceIdentifier) currentPath currentWebRepo =
-    let fileNames = Directory.EnumerateFiles(currentPath, e.FileNamePattern)
+let private createLibSubfolder (uri: Uri) =
+    let unescapedPath = Uri.UnescapeDataString(uri.AbsolutePath)
+    let directoryPath = Path.GetDirectoryName(unescapedPath)
+    let libDirectoryPath = Path.Combine(directoryPath, "lib")
+    if not <| Directory.Exists(libDirectoryPath) then
+        Directory.CreateDirectory(libDirectoryPath) |> ignore
+    (directoryPath, libDirectoryPath)
 
-    fileNames |> Seq.toList
+
+let acquireFiles (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (currentWebRepo: string) (ad: Diagnostics) =
+    let (directoryPath,libDirectoryPath) = createLibSubfolder uri
+    let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, e.FileNamePattern)
+    let fileNamesInLibSubDir = Directory.EnumerateFiles(libDirectoryPath, e.FileNamePattern)
+    fileNamesInCurrDir |> Seq.toList
 
 
 /// Takes an `ast`, interprets it by extracting the uses clauses and looks for the files 
 /// in the `currentPath` to be loaded and parsed to create even more ASTs.
 /// Returns a list ParseAst objects or adds new diagnostics if the files were not found.
-let tryFindAndParseUsesClauses ast (ad: Diagnostics) currentPath =
+let tryFindAndParseUsesClauses ast (ad: Diagnostics) (uri: Uri) =
     let parseFile (e:EvalAliasedNamespaceIdentifier) =
-        let fileNames = Directory.EnumerateFiles(currentPath, e.FileNamePattern)
+        let (directoryPath,libDirectoryPath) = createLibSubfolder uri
+        let fileNames = Directory.EnumerateFiles(directoryPath, e.FileNamePattern)
         let fileNamesEmpty = fileNames |> Seq.tryFind (fun _ -> true) |> Option.isNone
         if fileNamesEmpty then
-            let msg = DiagnosticMessage($"{e.FileNamePattern} not found")
-            let code = { DiagnosticCode = ("NSP000", "", msg.Value) }
+            let msg = DiagnosticMessage(interpreterErrorMsg (NSP000 e.FileNamePattern))
+            let code = { DiagnosticCode = (nameof(NSP000), "", msg.Value) }
             let diagnostic =
                 { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
             ad.AddDiagnostic diagnostic
