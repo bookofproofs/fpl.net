@@ -15,8 +15,12 @@
     <None Include="CHANGES.md" />
     <None Include="DocuFplGrammarPocShiftFromPythonToFSharp.md" />
     <Compile Include="FplParser.fs" />
+    <Compile Include="FplInterpreterUsesClause.fs" />
+    <Compile Include="FplInterpreter.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
+
+  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="FParsec" Version="1.1.1" />
@@ -26,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="8.0.100" />
+    <PackageReference Update="FSharp.Core" Version="8.0.200" />
   </ItemGroup>
 
 </Project>

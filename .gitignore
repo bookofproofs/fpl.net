@@ -28,7 +28,11 @@
 copydlls.bat
 /Fpl/FplLSTests/obj/Debug/net6.0
 /Fpl/FplLSTests/obj/Release/net6.0
+/Fpl/FplLSTests/obj/Debug/net8.0
+/Fpl/FplLSTests/obj/Release/net8.0
 /Fpl/FplLSTests/bin
 /Fpl/FplLSTests/obj
 /Fpl/fpl-vscode-extension/Landau.odt
 /Fpl/fpl-vscode-extension/.~lock.Landau.odt#
+/Fpl/FplInterpreter.Tests/bin
+/Fpl/FplInterpreter.Tests/obj

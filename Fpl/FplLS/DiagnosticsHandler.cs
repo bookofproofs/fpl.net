@@ -4,6 +4,7 @@ using Microsoft.FSharp.Collections;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using static FplParser;
+using static FplInterpreter;
 
 namespace FplLS
 {
@@ -28,14 +29,15 @@ namespace FplLS
                     var sourceCode = buffer.ToString();
                     var parserDiagnostics = FplParser.parserDiagnostics;
                     parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
-                    FplParser.fplParser(sourceCode);
+                    var ast = FplParser.fplParser(sourceCode);
+                    var fplLibUri = "https://github.com/bookofproofs/fpl.net/tree/main/theories/lib";
+                    FplInterpreter.fplInterpreter(ast, uri, fplLibUri);
                     var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
                     _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
                     {
                         Uri = uri,
                         Diagnostics = diagnostics
                     });
-
                 }
                 catch (Exception ex)
                 {
@@ -102,7 +104,7 @@ namespace FplLS
         /// <exception cref="NotImplementedException"></exception>
         private string CastDiagnosticCodeMessage(ErrDiagnostics.Diagnostic diagnostic)
         {
-            return diagnostic.Code.CodeMessage;
+            return diagnostic.Message;
         }
         /// <summary>
         /// Casts an F# ErrReccovery module severity into the OmniSharp's DiagnosticSeverity
@@ -135,9 +137,9 @@ namespace FplLS
             return castedSeverity;
         }
 
-        private DiagnosticCode CastCode(ErrDiagnostics.DiagnosticCode code)
+        private DiagnosticCode CastCode(string code)
         {
-            return new DiagnosticCode(code.Code.ToString());
+            return new DiagnosticCode(code);
         }
     }
 }

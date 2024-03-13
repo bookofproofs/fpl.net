@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TestUsesClause.fs" />
     <Compile Include="TestAxioms.fs" />
     <Compile Include="TestClassInheritanceTypes.fs" />
     <Compile Include="TestClassInstanceProperties.fs" />
@@ -56,7 +57,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="8.0.100" />
+    <PackageReference Update="FSharp.Core" Version="8.0.200" />
   </ItemGroup>
 
 </Project>
