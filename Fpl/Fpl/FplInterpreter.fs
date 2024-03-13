@@ -7,9 +7,9 @@ open FParsec
 type SymbolTable =
     { ParsedAsts: ParsedAst list }
 
-let fplInterpreter ast uri = 
-    let diagnostics = FplParser.parserDiagnostics
-    let parsedAsts = FplInterpreterUsesClause.tryFindAndParseUsesClauses ast diagnostics uri
+let fplInterpreter ast uri fplLibUrl = 
+    let ad = FplParser.parserDiagnostics
+    let parsedAsts = FplInterpreterUsesClause.tryFindAndParseUsesClauses ast ad uri fplLibUrl
     let symbolTable = { ParsedAsts = parsedAsts}
     symbolTable
 

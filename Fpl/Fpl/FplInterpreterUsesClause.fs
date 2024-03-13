@@ -11,11 +11,12 @@ open FParsec
 type FplInterpreterErrorCode =
     | NSP000 of string
     | NSP001 of string
-    | NSP002 of string
+    | NSP002 of string * string
 
-let private interpreterErrorMsg = function  
+let private getErroMsg = function  
     | NSP000 fileNamePattern -> sprintf "%s could not be loaded" fileNamePattern
     | NSP001 fileName -> sprintf "%s not found" fileName
+    | NSP002 (url, innerErrMsg) -> sprintf "%s not downloadable: %s" url innerErrMsg
 
 
 /// A record type to store all the necessary fields for parsed namespaces in FPL code
@@ -75,7 +76,7 @@ let rec eval_uses_clause = function
            EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList }]
     | _ -> []
 
-let private downloadFile url (ad: Diagnostics) =
+let private downloadFile url (ad: Diagnostics) pos =
     let client = new HttpClient()
     try
         async {
@@ -83,25 +84,25 @@ let private downloadFile url (ad: Diagnostics) =
             return data
         } |> Async.RunSynchronously
     with
-    | :? HttpRequestException as ex -> 
-        printfn "An error occurred while downloading the file: %s" ex.Message; ""
-    | ex -> printfn "An unexpected error occurred: %s" ex.Message; ""
+    | ex -> 
+        let msg = DiagnosticMessage(getErroMsg (NSP002 (url, ex.Message)))
+        let code = { DiagnosticCode = nameof(NSP002) }
+        let diagnostic =
+            { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, pos, msg, code) }
+        ad.AddDiagnostic diagnostic 
+        ""
 
 
 
 let private wildcardToRegex (wildcard : string) =
     "^" + Regex.Escape(wildcard).Replace("\\*", ".*").Replace("\\?", ".") + "$"
 
-let private findFilesWithWildcard filePath wildcard =
+let findFilesInLibMapWithWildcard (libmap:string) wildcard =
     let regexPattern = wildcardToRegex wildcard
     let regex = Regex(regexPattern, RegexOptions.IgnoreCase)
-    File.ReadLines(filePath)
+    libmap.Split(Environment.NewLine)
     |> Seq.filter regex.IsMatch
     |> Seq.toList
-
-// Usage
-let files = findFilesWithWildcard "sitemap.txt" "http://example.com/myfile*.txt"
-files |> List.iter (printfn "%s")
 
 let createLibSubfolder (uri: Uri) =
     let unescapedPath = Uri.UnescapeDataString(uri.AbsolutePath)
@@ -112,43 +113,59 @@ let createLibSubfolder (uri: Uri) =
     (directoryPath, libDirectoryPath)
 
 
-let acquireFiles (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (currentWebRepo: string) (ad: Diagnostics) =
+let downloadLibMap (currentWebRepo: string) (ad: Diagnostics) =
+    let libMap = downloadFile (currentWebRepo + "/libmap.txt") ad
+    libMap    
+
+let acquireSources (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (fplLibUrl: string) (ad: Diagnostics) =
     let (directoryPath,libDirectoryPath) = createLibSubfolder uri
-    let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, e.FileNamePattern)
-    let fileNamesInLibSubDir = Directory.EnumerateFiles(libDirectoryPath, e.FileNamePattern)
-    fileNamesInCurrDir |> Seq.toList
+    let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, e.FileNamePattern) |> Seq.toList
+    let fileNamesInLibSubDir = Directory.EnumerateFiles(libDirectoryPath, e.FileNamePattern) |> Seq.toList
+    let filesToDownload = findFilesInLibMapWithWildcard (downloadLibMap fplLibUrl ad e.StartPos) e.FileNamePattern 
+                            |> Seq.toList
+                            |> List.map (fun s -> fplLibUrl + "/" + s)
+    fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload
 
-
+/// Checks if the pattern for a uses clause was found in some sources. If no sources were found
+/// a diagnostic will be emitted and the function returns false, otherwise no diagnostics are emitted and 
+/// and false is returned.
+let private sourcesFound (e:EvalAliasedNamespaceIdentifier) sourcesList = 
+    let listEmpty = sourcesList |> Seq.tryFind (fun _ -> true) |> Option.isNone
+    if listEmpty then
+        let msg = DiagnosticMessage(getErroMsg (NSP000 e.FileNamePattern))
+        let code = { DiagnosticCode = nameof(NSP000) }
+        let diagnostic =
+            { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
+        ad.AddDiagnostic diagnostic
+        false
+    else
+        true
+    
 /// Takes an `ast`, interprets it by extracting the uses clauses and looks for the files 
 /// in the `currentPath` to be loaded and parsed to create even more ASTs.
 /// Returns a list ParseAst objects or adds new diagnostics if the files were not found.
-let tryFindAndParseUsesClauses ast (ad: Diagnostics) (uri: Uri) =
+let tryFindAndParseUsesClauses ast (ad: Diagnostics) (uri: Uri) (fplLibUrl: string)  =
     let parseFile (e:EvalAliasedNamespaceIdentifier) =
-        let (directoryPath,libDirectoryPath) = createLibSubfolder uri
-        let fileNames = Directory.EnumerateFiles(directoryPath, e.FileNamePattern)
-        let fileNamesEmpty = fileNames |> Seq.tryFind (fun _ -> true) |> Option.isNone
-        if fileNamesEmpty then
-            let msg = DiagnosticMessage(interpreterErrorMsg (NSP000 e.FileNamePattern))
-            let code = { DiagnosticCode = nameof(NSP000) }
-            let diagnostic =
-                { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
-            ad.AddDiagnostic diagnostic
-        fileNames
-        |> Seq.choose (fun fileName ->
-            try
-                let fileContent = File.ReadAllText fileName
-                let ast = fplParser fileContent
-                Some { ParsedAst = (fileName, ast) }
-            with
-            | :? FileNotFoundException -> 
-                let msg = DiagnosticMessage(interpreterErrorMsg (NSP001 fileName))
-                let code = { DiagnosticCode = nameof(NSP001) }
-                let diagnostic =
-                    { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
-                ad.AddDiagnostic diagnostic
-                None
-        ) 
-        |> Seq.toList
+        let availableSources = acquireSources e uri fplLibUrl ad
+        if (sourcesFound e availableSources) then
+            availableSources
+            |> Seq.choose (fun fileName ->
+                try
+                    let fileContent = File.ReadAllText fileName
+                    let ast = fplParser fileContent
+                    Some { ParsedAst = (fileName, ast) }
+                with
+                | :? FileNotFoundException -> 
+                    let msg = DiagnosticMessage(getErroMsg (NSP001 fileName))
+                    let code = { DiagnosticCode = nameof(NSP001) }
+                    let diagnostic =
+                        { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
+                    ad.AddDiagnostic diagnostic
+                    None
+            ) 
+            |> Seq.toList
+        else    
+            []
 
     eval_uses_clause ast 
     |> List.map (fun (eval:EvalAliasedNamespaceIdentifier) -> eval)

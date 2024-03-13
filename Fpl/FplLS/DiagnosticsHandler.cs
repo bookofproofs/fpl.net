@@ -30,7 +30,8 @@ namespace FplLS
                     var parserDiagnostics = FplParser.parserDiagnostics;
                     parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
                     var ast = FplParser.fplParser(sourceCode);
-                    FplInterpreter.fplInterpreter(ast, uri);
+                    var fplLibUri = "https://github.com/bookofproofs/fpl.net/tree/main/theories/lib";
+                    FplInterpreter.fplInterpreter(ast, uri, fplLibUri);
                     var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
                     _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
                     {
