@@ -122,6 +122,6 @@ Fpl.Test.Test2
         let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
         let e = { StartPos = pos; EndPos = pos; AliasOrStar = Some "*"; PascalCaseIdList = ["Fpl"] }
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        let fplLibUrl = "https://github.com/bookofproofs/fpl.net/blob/main/theories/registry"
+        let fplLibUrl = "https://github.com/bookofproofs/fpl.net/blob/main/theories/lib"
         let sources = acquireSources e uri fplLibUrl ad
         Assert.IsTrue(sources.Length > 0)
