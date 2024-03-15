@@ -100,7 +100,7 @@ let private wildcardToRegex (wildcard : string) =
 let findFilesInLibMapWithWildcard (libmap:string) wildcard =
     let regexPattern = wildcardToRegex wildcard
     let regex = Regex(regexPattern, RegexOptions.IgnoreCase)
-    libmap.Split(Environment.NewLine)
+    libmap.Split("\n")
     |> Seq.filter regex.IsMatch
     |> Seq.toList
 
@@ -121,8 +121,8 @@ let acquireSources (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (fplLibUrl: str
     let (directoryPath,libDirectoryPath) = createLibSubfolder uri
     let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, e.FileNamePattern) |> Seq.toList
     let fileNamesInLibSubDir = Directory.EnumerateFiles(libDirectoryPath, e.FileNamePattern) |> Seq.toList
-    let filesToDownload = findFilesInLibMapWithWildcard (downloadLibMap fplLibUrl ad e.StartPos) e.FileNamePattern 
-                            |> Seq.toList
+    let libMap = downloadLibMap fplLibUrl ad e.StartPos
+    let filesToDownload = findFilesInLibMapWithWildcard libMap e.FileNamePattern 
                             |> List.map (fun s -> fplLibUrl + "/" + s)
     fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload
 
