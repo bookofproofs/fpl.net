@@ -117,6 +117,24 @@ let downloadLibMap (currentWebRepo: string) (ad: Diagnostics) =
     let libMap = downloadFile (currentWebRepo + "/libmap.txt") ad
     libMap    
 
+/// A type that encapsulates the sources found for a uses clause 
+/// and provides members to filter those from the file system and those from 
+/// the web.
+type FplSources(strings: string list) =
+    member this.Strings = strings
+    member this.IsUrl (s: string) =
+        let pattern = @"^https?://"
+        Regex.IsMatch(s, pattern)
+    member this.IsFilePath (s: string) =
+        try
+            Path.GetFullPath(s) |> ignore
+            true
+        with
+        | :? ArgumentException -> false
+    member this.Urls = List.filter this.IsUrl this.Strings
+    member this.FilePaths = List.filter this.IsFilePath this.Strings
+    member this.Length = this.Strings.Length
+
 let acquireSources (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (fplLibUrl: string) (ad: Diagnostics) =
     let (directoryPath,libDirectoryPath) = createLibSubfolder uri
     let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, e.FileNamePattern) |> Seq.toList
@@ -124,7 +142,7 @@ let acquireSources (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (fplLibUrl: str
     let libMap = downloadLibMap fplLibUrl ad e.StartPos
     let filesToDownload = findFilesInLibMapWithWildcard libMap e.FileNamePattern 
                             |> List.map (fun s -> fplLibUrl + "/" + s)
-    fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload
+    FplSources(fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload)
 
 /// Checks if the pattern for a uses clause was found in some sources. If no sources were found
 /// a diagnostic will be emitted and the function returns false, otherwise no diagnostics are emitted and 
@@ -147,8 +165,8 @@ let private sourcesFound (e:EvalAliasedNamespaceIdentifier) sourcesList =
 let tryFindAndParseUsesClauses ast (ad: Diagnostics) (uri: Uri) (fplLibUrl: string)  =
     let parseFile (e:EvalAliasedNamespaceIdentifier) =
         let availableSources = acquireSources e uri fplLibUrl ad
-        if (sourcesFound e availableSources) then
-            availableSources
+        if (sourcesFound e availableSources.Strings) then
+            availableSources.Strings
             |> Seq.choose (fun fileName ->
                 try
                     let fileContent = File.ReadAllText fileName

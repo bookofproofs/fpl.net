@@ -101,27 +101,85 @@ type TestEvalAliasedNamespaceIdentifier() =
         Assert.AreEqual(ad.CountDiagnostics, 0)
 
 
-    [<DataRow("Fpl.*", 4)>]
-    [<DataRow("Fpl.Test.*", 2)>]
-    [<DataRow("Fpl.Commons", 1)>]
-    [<DataRow("Fpl.SetTheory", 1)>]
-    [<DataRow("FpX.*", 0)>]
+    [<DataRow("Fpl.*.fpl", 4)>]
+    [<DataRow("Fpl.Test.*.fpl", 2)>]
+    [<DataRow("Fpl.Commons.fpl", 1)>]
+    [<DataRow("Fpl.SetTheory.fpl", 1)>]
+    [<DataRow("FpX.*.fpl", 0)>]
     [<TestMethod>]
     member this.TestFindFilesInLibMapWithWildcard(wildcards: string, expected) =
         let sitelib =
-            """Fpl.Commons
-Fpl.SetTheory
-Fpl.Test.Test1
-Fpl.Test.Test2
-"""
+            "Fpl.Commons.fpl\nFpl.SetTheory.fpl\nFpl.Test.Test1.fpl\nFpl.Test.Test2.fpl"
+
         let filteredList = findFilesInLibMapWithWildcard sitelib wildcards
         Assert.AreEqual(expected, filteredList.Length)
 
+    [<DataRow("*", "Fpl", 2)>]
+    [<DataRow("*", "Fpl.Commons", 1)>]
+    [<DataRow("T1", "Fpl", 0)>]
+    [<DataRow("T2", "Fpl.Commons", 1)>]
+    [<DataRow("", "Fpl", 0)>]
+    [<DataRow("", "Fpl.Commons", 1)>]
     [<TestMethod>]
-    member this.TestAcquireSources() =
+    member this.TestAcquireSourcesWebOnly(aliasOrStar: string, pascelCaseId: string, expected: int) =
+        let eval =
+            if aliasOrStar = "" then
+                { StartPos = Position("", 1, 1, 1)
+                  EndPos = Position("", 1, 1, 1)
+                  AliasOrStar = None
+                  PascalCaseIdList = [ pascelCaseId ] }
+            else
+                { StartPos = Position("", 1, 1, 1)
+                  EndPos = Position("", 1, 1, 1)
+                  AliasOrStar = Some aliasOrStar
+                  PascalCaseIdList = [ pascelCaseId ] }
+
         let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
-        let e = { StartPos = pos; EndPos = pos; AliasOrStar = Some "*"; PascalCaseIdList = ["Fpl"] }
-        let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        let sources = acquireSources e uri fplLibUrl ad
-        Assert.IsTrue(sources.Length > 0)
+
+        let uri =
+            System.Uri(Path.Combine(Directory.GetCurrentDirectory(), pascelCaseId + ".fpl"))
+
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+
+        let sources = acquireSources eval uri fplLibUrl ad
+        Assert.AreEqual(expected, sources.Urls.Length)
+
+    [<DataRow("*", "Test1")>]
+    [<DataRow("*", "Test1.Test2")>]
+    [<DataRow("T1", "Test1")>]
+    [<DataRow("T2", "Test1.Test2")>]
+    [<DataRow("", "Test1")>]
+    [<DataRow("", "Test1.Test2")>]
+    [<TestMethod>]
+    member this.TestAcquireSourcesWebAndCurrDir(aliasOrStar: string, pascelCaseId: string) =
+        // prepare test
+        let pathToFile =
+            Path.Combine(Directory.GetCurrentDirectory(), pascelCaseId + ".fpl")
+
+        File.WriteAllText(pathToFile, ";")
+
+        let eval =
+            if aliasOrStar = "" then
+                { StartPos = Position("", 1, 1, 1)
+                  EndPos = Position("", 1, 1, 1)
+                  AliasOrStar = None
+                  PascalCaseIdList = [ pascelCaseId ] }
+            else
+                { StartPos = Position("", 1, 1, 1)
+                  EndPos = Position("", 1, 1, 1)
+                  AliasOrStar = Some aliasOrStar
+                  PascalCaseIdList = [ pascelCaseId ] }
+
+        let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
+        let uri = System.Uri(pathToFile)
+
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+
+        // perform test
+        let sources = acquireSources eval uri fplLibUrl ad
+        Assert.AreEqual(sources.Length, 1)
+
+        // clean up test
+        File.Delete(pathToFile)
