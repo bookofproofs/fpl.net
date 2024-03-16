@@ -20,6 +20,13 @@ type TestUsesClause () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
+    member this.TestUsesClause01a () =
+        let result = run (usesClause .>> eof) """uses Fpl.Commons"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
     member this.TestUsesClause02 () =
         let result = run (usesClause .>> eof) """uses TestNamespace1.TestNamespace2"""
         let actual = sprintf "%O" result
@@ -27,7 +34,7 @@ type TestUsesClause () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestUsesClause01a () =
+    member this.TestUsesClause01c () =
         let result = run (usesClause .>> eof) """uses TestNamespace *"""
         let actual = sprintf "%O" result
         printf "%O" actual

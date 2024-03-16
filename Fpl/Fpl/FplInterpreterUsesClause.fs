@@ -2,6 +2,8 @@
 open System.Text.RegularExpressions
 open System.Net.Http
 open System.IO
+open System.Security.Cryptography
+open System.Text
 open System
 open FplGrammarTypes
 open FplParser
@@ -18,13 +20,6 @@ let private getErroMsg = function
     | NSP001 fileName -> sprintf "%s not found" fileName
     | NSP002 (url, innerErrMsg) -> sprintf "%s not downloadable: %s" url innerErrMsg
 
-
-/// A record type to store all the necessary fields for parsed namespaces in FPL code
-type ParsedAst =
-    { ParsedAst: string * Ast }
-    with
-        member this.Name = fst this.ParsedAst  // first element of the tuple 
-        member this.Ast = snd this.ParsedAst  // second element of the tuple
 
 /// A record type to store all the necessary fields for parsed uses clauses in FPL code
 type EvalAliasedNamespaceIdentifier = 
@@ -76,6 +71,19 @@ let rec eval_uses_clause = function
            EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList }]
     | _ -> []
 
+/// A record type to store all the necessary fields for parsed namespaces in FPL code
+type ParsedAst =
+    { 
+        UriPath: string // source of the ast
+        FplCode: string // source code of the ast
+        Ast: Ast // parsed ast
+        Checksum: string // checksum of the parsed ast
+        Id: int // id of this ast giving the order in which it was parsed with other asts
+        mutable ReferencingAsts: int list // list of asts "referencing" this one with a uses clause
+        mutable ReferencedAsts: int list // list of asts "referenced" by this one in a uses clause
+        EANI: EvalAliasedNamespaceIdentifier // uses clause that as a first caused this ast to be loaded 
+    }
+
 let private downloadFile url (ad: Diagnostics) pos =
     let client = new HttpClient()
     try
@@ -92,7 +100,17 @@ let private downloadFile url (ad: Diagnostics) pos =
         ad.AddDiagnostic diagnostic 
         ""
 
-
+let private loadFile fileName (ad: Diagnostics) pos =
+    try
+        File.ReadAllText fileName
+    with
+    | :? FileNotFoundException -> 
+        let msg = DiagnosticMessage(getErroMsg (NSP001 fileName))
+        let code = { DiagnosticCode = nameof(NSP001) }
+        let diagnostic =
+            { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, pos, msg, code) }
+        ad.AddDiagnostic diagnostic
+        ""
 
 let private wildcardToRegex (wildcard : string) =
     "^" + Regex.Escape(wildcard).Replace("\\*", ".*").Replace("\\?", ".") + "$"
@@ -105,7 +123,13 @@ let findFilesInLibMapWithWildcard (libmap:string) wildcard =
     |> Seq.toList
 
 let createLibSubfolder (uri: Uri) =
-    let unescapedPath = Uri.UnescapeDataString(uri.AbsolutePath)
+    let unescapedPath = 
+        let p = Uri.UnescapeDataString(uri.LocalPath)
+        let pattern = @"^[\/\\][a-zA-Z]:"
+        if Regex.IsMatch(p, pattern) then
+            p.Substring(1)
+        else
+            p
     let directoryPath = Path.GetDirectoryName(unescapedPath)
     let libDirectoryPath = Path.Combine(directoryPath, "lib")
     if not <| Directory.Exists(libDirectoryPath) then
@@ -128,13 +152,18 @@ type FplSources(strings: string list) =
     member this.IsFilePath (s: string) =
         try
             Path.GetFullPath(s) |> ignore
-            true
+            let pattern = @"^https?://"
+            not (Regex.IsMatch(s, pattern))
         with
         | :? ArgumentException -> false
     member this.Urls = List.filter this.IsUrl this.Strings
     member this.FilePaths = List.filter this.IsFilePath this.Strings
     member this.Length = this.Strings.Length
+    member this.NoneFound = this.Strings.Length = 0
 
+/// Acquires FPL sources that can be found with a single uses clause.
+/// They are searched for in the current directory of the file, in the lib subfolder
+/// as well as in the web resource 
 let acquireSources (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (fplLibUrl: string) (ad: Diagnostics) =
     let (directoryPath,libDirectoryPath) = createLibSubfolder uri
     let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, e.FileNamePattern) |> Seq.toList
@@ -144,49 +173,55 @@ let acquireSources (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (fplLibUrl: str
                             |> List.map (fun s -> fplLibUrl + "/" + s)
     FplSources(fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload)
 
-/// Checks if the pattern for a uses clause was found in some sources. If no sources were found
-/// a diagnostic will be emitted and the function returns false, otherwise no diagnostics are emitted and 
-/// and false is returned.
-let private sourcesFound (e:EvalAliasedNamespaceIdentifier) sourcesList = 
-    let listEmpty = sourcesList |> Seq.tryFind (fun _ -> true) |> Option.isNone
-    if listEmpty then
-        let msg = DiagnosticMessage(getErroMsg (NSP000 e.FileNamePattern))
-        let code = { DiagnosticCode = nameof(NSP000) }
-        let diagnostic =
-            { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
-        ad.AddDiagnostic diagnostic
-        false
-    else
-        true
-    
+/// computes an MD5 checksum of a string
+let computeMD5Checksum (input: string) =
+    let md5 = MD5.Create()
+    let inputBytes = Encoding.ASCII.GetBytes(input)
+    let hash = md5.ComputeHash(inputBytes)
+    hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
+
+   
+let private getParsedAstsFromSources identifier (e:EvalAliasedNamespaceIdentifier) (source: seq<string>) (getContent: string -> Diagnostics -> Position -> string) =
+    source
+    |> Seq.choose (fun fileLoc ->
+        let fileContent = getContent fileLoc ad e.StartPos
+        if fileContent <> "" then
+            Some { 
+                UriPath = fileLoc
+                FplCode = fileContent
+                Ast = fplParser fileContent
+                Checksum = computeMD5Checksum fileContent
+                Id = identifier + 1
+                ReferencingAsts = [identifier]
+                ReferencedAsts = []
+                EANI = e 
+            }
+        else
+            None
+    ) 
+    |> Seq.toList
+
+
 /// Takes an `ast`, interprets it by extracting the uses clauses and looks for the files 
 /// in the `currentPath` to be loaded and parsed to create even more ASTs.
 /// Returns a list ParseAst objects or adds new diagnostics if the files were not found.
-let tryFindAndParseUsesClauses ast (ad: Diagnostics) (uri: Uri) (fplLibUrl: string)  =
-    let parseFile (e:EvalAliasedNamespaceIdentifier) =
+let findParsedAstsMatchingAliasedNamespaceIdentifier (ident:int) ast (ad: Diagnostics) (uri: Uri) (fplLibUrl: string)  =
+    let parsedAstsMatchingAliasedNamespaceIdentifier (e:EvalAliasedNamespaceIdentifier) =
         let availableSources = acquireSources e uri fplLibUrl ad
-        if (sourcesFound e availableSources.Strings) then
-            availableSources.Strings
-            |> Seq.choose (fun fileName ->
-                try
-                    let fileContent = File.ReadAllText fileName
-                    let ast = fplParser fileContent
-                    Some { ParsedAst = (fileName, ast) }
-                with
-                | :? FileNotFoundException -> 
-                    let msg = DiagnosticMessage(getErroMsg (NSP001 fileName))
-                    let code = { DiagnosticCode = nameof(NSP001) }
-                    let diagnostic =
-                        { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
-                    ad.AddDiagnostic diagnostic
-                    None
-            ) 
-            |> Seq.toList
-        else    
+        if availableSources.NoneFound then 
+            let msg = DiagnosticMessage(getErroMsg (NSP000 e.FileNamePattern))
+            let code = { DiagnosticCode = nameof(NSP000) }
+            let diagnostic =
+                { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
+            ad.AddDiagnostic diagnostic
             []
+        else
+            let astsFromFilePaths = getParsedAstsFromSources ident e availableSources.FilePaths loadFile
+            let astsFromUrls = getParsedAstsFromSources ident e availableSources.Urls downloadFile
+            astsFromFilePaths @ astsFromUrls
 
     eval_uses_clause ast 
     |> List.map (fun (eval:EvalAliasedNamespaceIdentifier) -> eval)
-    |> List.collect parseFile
+    |> List.collect parsedAstsMatchingAliasedNamespaceIdentifier
 
 

@@ -69,7 +69,7 @@ printf "%O" result
 
 ad.PrintDiagnostics
 
-let interpret = FplInterpreter.fplInterpreter result (System.Uri("."))
+let interpret = FplInterpreter.fplInterpreter result (System.Uri("file:///d%3A/Forschung/fpl.net/theories/Landau/Test.fpl"))
 printf "%A" interpret
 
 printf "\n--------------------------------\n"
@@ -77,3 +77,17 @@ ad.PrintDiagnostics
 
 printf "\n--------------------------------\n"
 
+open System
+open System.IO
+
+let uri = new Uri("file:///d%3A/Forschung/fpl.net/theories/Landau/Test.fpl")
+let localPath = uri.LocalPath
+let p = Uri.UnescapeDataString(uri.LocalPath)
+let pattern = @"^[\/\\][a-zA-Z]:"
+let result1 = 
+    if Regex.IsMatch(p, pattern) then
+            p.Substring(1)
+        else
+            p
+let directoryName = Path.GetDirectoryName(result1)
+printfn "Directory Name: %s" directoryName

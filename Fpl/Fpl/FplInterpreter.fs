@@ -9,8 +9,8 @@ type SymbolTable =
 
 let fplInterpreter ast uri fplLibUrl = 
     let ad = FplParser.parserDiagnostics
-    let parsedAsts = FplInterpreterUsesClause.tryFindAndParseUsesClauses ast ad uri fplLibUrl
-    let symbolTable = { ParsedAsts = parsedAsts}
+    let parsedAsts = FplInterpreterUsesClause.findParsedAstsMatchingAliasedNamespaceIdentifier 0 ast ad uri fplLibUrl
+    let symbolTable = { ParsedAsts = parsedAsts }
     symbolTable
 
 let rec eval = function

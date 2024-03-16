@@ -16,6 +16,7 @@ type TestEvalAliasedNamespaceIdentifier() =
     [<DataRow("T2", "Test1.Test2", "Test1.Test2.fpl")>]
     [<DataRow("", "Test1", "Test1.fpl")>]
     [<DataRow("", "Test1.Test2", "Test1.Test2.fpl")>]
+    [<DataRow("", "Fpl.Commons", "Fpl.Commons.fpl")>]
     [<TestMethod>]
     member this.TestFileNamePattern(aliasOrStar: string, pascelCaseId: string, expected: string) =
         let eval =
@@ -23,12 +24,12 @@ type TestEvalAliasedNamespaceIdentifier() =
                 { StartPos = Position("", 1, 1, 1)
                   EndPos = Position("", 1, 1, 1)
                   AliasOrStar = None
-                  PascalCaseIdList = [ pascelCaseId ] }
+                  PascalCaseIdList = pascelCaseId.Split('.') |> Array.toList }
             else
                 { StartPos = Position("", 1, 1, 1)
                   EndPos = Position("", 1, 1, 1)
                   AliasOrStar = Some aliasOrStar
-                  PascalCaseIdList = [ pascelCaseId ] }
+                  PascalCaseIdList = pascelCaseId.Split('.') |> Array.toList }
 
         Assert.AreEqual(expected, eval.FileNamePattern)
 
@@ -183,3 +184,20 @@ type TestEvalAliasedNamespaceIdentifier() =
 
         // clean up test
         File.Delete(pathToFile)
+
+    [<TestMethod>]
+    member this.TestComputeMD5Checksum() =
+        let input = "Hello world"
+        let actual = computeMD5Checksum input
+        let expected = "3e25960a79dbc69b674cd4ec67a72c62"
+        Assert.AreEqual(expected, actual)
+
+    [<TestMethod>]
+    member this.TestFplSourcesUrls() =
+        let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"])
+        Assert.AreEqual(1, fplSources.Urls.Length)
+
+    [<TestMethod>]
+    member this.TestFplSourcesFiles() =
+        let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"])
+        Assert.AreEqual(2, fplSources.FilePaths.Length)
