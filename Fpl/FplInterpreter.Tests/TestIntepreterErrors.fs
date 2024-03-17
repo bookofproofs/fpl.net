@@ -5,13 +5,12 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 
 open FParsec
 open ErrDiagnostics
-open FplInterpreterErrors
 
 [<TestClass>]
 type TestInterpreterErrors() =
-    let filterByErrorCode (input: Diagnostics) (errCode:string) =
+    let filterByErrorCode (input: Diagnostics) errCode =
         input.Collection
-        |> List.filter (fun d -> d.Code.Code = errCode)
+        |> List.filter (fun d -> d.Code = errCode)
 
     [<TestMethod>]
     member this.TestNSP003() =
@@ -23,6 +22,6 @@ type TestInterpreterErrors() =
         let fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let interpreter = FplInterpreter.fplInterpreter ast uri fplLibUri
-        let result = filterByErrorCode FplParser.parserDiagnostics (nameof(NSP003))
+        let result = filterByErrorCode FplParser.parserDiagnostics (NSP003 "T1")
         Assert.AreEqual(1, result.Length)
 

@@ -80,7 +80,7 @@ namespace FplLS
             castedDiagnostic.Severity = CastSeverity(diagnostic.Severity);
             castedDiagnostic.Message = CastMessage(diagnostic, sb);
             castedDiagnostic.Range = tp.GetRange(diagnostic.StartPos.Index, diagnostic.EndPos.Index);
-            castedDiagnostic.Code = CastCode(diagnostic.Code.Code);
+            castedDiagnostic.Code = CastCode(nameof(diagnostic.Code));
             return castedDiagnostic;
         }
 

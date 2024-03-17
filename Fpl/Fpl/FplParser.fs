@@ -591,11 +591,12 @@ let buildingBlockList = many (buildingBlock .>> IW)
 let fplNamespace = ((opt extensionBlock .>> IW) .>>. buildingBlockList) .>> IW .>> semiColon |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
-
-let stdErrInfo = ("SYN000", "Other syntax error", [], ast)
-let stdCode, stdErrMsg, _, stdParser = stdErrInfo
-let stdErrInfo1 = ("SYN001", "Characters found after namespace", [], ast)
-let stdCode1, stdErrMsg1, _, stdParser1 = stdErrInfo1
+let stdParser = ast
+let stdCode = SYN000
+let stdErrMsg = getDiagnosticErrorMsg SYN000
+let stdCode1 = SYN001
+let stdErrMsg1 = getDiagnosticErrorMsg SYN001
+let stdParser1 = ast
 
 let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i = 
     let index = matchList[i]
@@ -608,40 +609,39 @@ let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i =
 let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:|(~|\!)[a-z]"
 
 let errInformation = [
-    ("DEF000", "Syntax error in definition", ["def"], definition)
-    ("PRP000", "Syntax error in property", ["mand"; "opt"], property)
-    ("AXI000", "Syntax error in axiom", ["ax"; "post"], axiom)
-    ("THM000", "Syntax error in theorem", ["theorem"; "thm"], theorem)
-    ("COR000", "Syntax error in corollary", ["theorem"; "cor"], corollary)
-    ("LEM000", "Syntax error in lemma", ["lem"], lemma)
-    ("PPS000", "Syntax error in proposition", ["prop"], proposition)
-    ("CNJ000", "Syntax error in conjecture", ["conj"], conjecture)
-    ("VAR000", "Syntax error in variable declaration and/or specification", ["dec"], varDeclBlock)
-    ("CTR000", "Syntax error in constructor", ["constructor"; "ctor"], constructor)
-    ("PRF000", "Syntax error in proof", ["proof"; "prf"], proof)
-    ("INF000", "Syntax error in rule of inference", ["inf"], ruleOfInference)
-    ("LOC000", "Syntax error in rule of localization", ["loc"], localization)
-    ("USE000", "Syntax error in uses clause", ["uses"], usesClause)
-    ("PRE000", "Syntax error in predicate", ["and"; "or"; "impl"; "iif"; "xor"; "not"; "all"; "ex"; "is"], compoundPredicate)
-    ("SMT000", "Syntax error in statement", ["assert"; "cases"; "base"; "for"; "del"], statement)
-    ("AGI000", "Syntax error in proof argument", ["|-"], argumentInference)
-    ("CAS000", "Syntax error in case block", ["|"], conditionFollowedByResult)
-    ("DCS000", "Syntax error in default case block", ["?"], elseStatement)
-    ("ASS000", "Syntax error in assumption", ["ass"], assumeArgument)
-    ("REV000", "Syntax error in revocation", ["rev"], revokeArgument)
-    ("RET000", "Syntax error in return statement", ["ret"], returnStatement)
-    ("PRE000", "Syntax error in premise", ["pre"], premise)
-    ("CON000", "Syntax error in conclusion", ["con"], conclusion)
-    ("TRL000", "Syntax error in translation", ["!"], translation)
-    ("TYD000", "Syntax error in type declaration", ["~"], varDecl)
+    (DEF000, getDiagnosticErrorMsg DEF000, ["def"], definition)
+    (PRP000, getDiagnosticErrorMsg PRP000, ["mand"; "opt"], property)
+    (AXI000, getDiagnosticErrorMsg AXI000, ["ax"; "post"], axiom)
+    (THM000, getDiagnosticErrorMsg THM000, ["theorem"; "thm"], theorem)
+    (COR000, getDiagnosticErrorMsg COR000, ["theorem"; "cor"], corollary)
+    (LEM000, getDiagnosticErrorMsg LEM000, ["lem"], lemma)
+    (PPS000, getDiagnosticErrorMsg PPS000, ["prop"], proposition)
+    (CNJ000, getDiagnosticErrorMsg CNJ000, ["conj"], conjecture)
+    (VAR000, getDiagnosticErrorMsg VAR000, ["dec"], varDeclBlock)
+    (CTR000, getDiagnosticErrorMsg CTR000, ["constructor"; "ctor"], constructor)
+    (PRF000, getDiagnosticErrorMsg PRF000, ["proof"; "prf"], proof)
+    (INF000, getDiagnosticErrorMsg INF000, ["inf"], ruleOfInference)
+    (LOC000, getDiagnosticErrorMsg LOC000, ["loc"], localization)
+    (USE000, getDiagnosticErrorMsg USE000, ["uses"], usesClause)
+    (PRD000, getDiagnosticErrorMsg PRD000, ["and"; "or"; "impl"; "iif"; "xor"; "not"; "all"; "ex"; "is"], compoundPredicate)
+    (SMT000, getDiagnosticErrorMsg SMT000, ["assert"; "cases"; "base"; "for"; "del"], statement)
+    (AGI000, getDiagnosticErrorMsg AGI000, ["|-"], argumentInference)
+    (CAS000, getDiagnosticErrorMsg CAS000, ["|"], conditionFollowedByResult)
+    (DCS000, getDiagnosticErrorMsg DCS000, ["?"], elseStatement)
+    (ASS000, getDiagnosticErrorMsg ASS000, ["ass"], assumeArgument)
+    (REV000, getDiagnosticErrorMsg REV000, ["rev"], revokeArgument)
+    (RET000, getDiagnosticErrorMsg RET000, ["ret"], returnStatement)
+    (PRE000, getDiagnosticErrorMsg PRE000, ["pre"], premise)
+    (CON000, getDiagnosticErrorMsg CON000, ["con"], conclusion)
+    (TRL000, getDiagnosticErrorMsg TRL000, ["!"], translation)
+    (TYD000, getDiagnosticErrorMsg TYD000, ["~"], varDecl)
 ]
-
 /// Finds the error information tuple based on a prefix of a string from the errInformation list. 
 /// If no prefix matches than the SYN000 tuple will be returned.
 let findErrInfoTuple (str:string) =
     match List.tryFind (fun (_, _, prefixes, _) -> List.exists (fun prefix -> str.StartsWith(prefix : string)) prefixes) errInformation with
     | Some tuple -> tuple
-    | None -> stdErrInfo
+    | None -> (stdCode, stdErrMsg, [], stdParser)
 
 
 let findFirstIndexInMatches (matchList:System.Collections.Generic.List<int>) pIndex kMax =

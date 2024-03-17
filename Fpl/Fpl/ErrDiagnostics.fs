@@ -38,7 +38,113 @@ If you decide to reuse this code for your language and other IDEs, please consid
 *)
 
 type DiagnosticCode = 
-    { Code: string }
+    // parser error codes
+    | SYN000
+    | SYN001
+    | DEF000
+    | PRP000
+    | AXI000
+    | THM000
+    | COR000
+    | LEM000
+    | PPS000
+    | CNJ000
+    | VAR000
+    | CTR000
+    | PRF000
+    | INF000
+    | LOC000
+    | USE000
+    | PRD000
+    | SMT000
+    | AGI000
+    | CAS000
+    | DCS000
+    | ASS000
+    | REV000
+    | RET000
+    | PRE000
+    | CON000
+    | TRL000
+    | TYD000
+    // interpreter error codes
+    | NSP000 of string
+    | NSP001 of string
+    | NSP002 of string * string
+    | NSP003 of string
+
+let getDiagnosticErrorMsg = function  
+    // parser error messages
+    | SYN000 -> "Other syntax error" 
+    | SYN001 -> "Characters found after namespace"
+    | DEF000 -> "Syntax error in definition"
+    | PRP000 -> "Syntax error in property"
+    | AXI000 -> "Syntax error in axiom"
+    | THM000 -> "Syntax error in theorem"
+    | COR000 -> "Syntax error in corollary"
+    | LEM000 -> "Syntax error in lemma"
+    | PPS000 -> "Syntax error in proposition"
+    | CNJ000 -> "Syntax error in conjecture"
+    | VAR000 -> "Syntax error in variable declaration and/or specification"
+    | CTR000 -> "Syntax error in constructor"
+    | PRF000 -> "Syntax error in proof"
+    | INF000 -> "Syntax error in rule of inference"
+    | LOC000 -> "Syntax error in rule of localization"
+    | USE000 -> "Syntax error in uses clause"
+    | PRD000 -> "Syntax error in predicate"
+    | SMT000 -> "Syntax error in statement"
+    | AGI000 -> "Syntax error in proof argument"
+    | CAS000 -> "Syntax error in case block"
+    | DCS000 -> "Syntax error in default case block"
+    | ASS000 -> "Syntax error in assumption"
+    | REV000 -> "Syntax error in revocation"
+    | RET000 -> "Syntax error in return statement"
+    | PRE000 -> "Syntax error in premise"
+    | CON000 -> "Syntax error in conclusion"
+    | TRL000 -> "Syntax error in translation"
+    | TYD000 -> "Syntax error in type declaration"
+    // interpreter error messages
+    | NSP000 fileNamePattern -> sprintf "%s could not be loaded" fileNamePattern
+    | NSP001 fileName -> sprintf "%s not found" fileName
+    | NSP002 (url, innerErrMsg) -> sprintf "%s not downloadable: %s" url innerErrMsg
+    | NSP003 alias -> sprintf "Alias %s appeared previously in this namespace" alias
+
+let getCode = function  
+    // parser error messages
+    | SYN000 -> "SYN000"
+    | SYN001 -> "SYN001"
+    | DEF000 -> "DEF000"
+    | PRP000 -> "PRP000"
+    | AXI000 -> "AXI000"
+    | THM000 -> "THM000"
+    | COR000 -> "COR000"
+    | LEM000 -> "LEM000"
+    | PPS000 -> "PPS000"
+    | CNJ000 -> "CNJ000"
+    | VAR000 -> "VAR000"
+    | CTR000 -> "CTR000"
+    | PRF000 -> "PRF000"
+    | INF000 -> "INF000"
+    | LOC000 -> "LOC000"
+    | USE000 -> "USE000"
+    | PRD000 -> "PRD000"
+    | SMT000 -> "SMT000"
+    | AGI000 -> "AGI000"
+    | CAS000 -> "CAS000"
+    | DCS000 -> "DCS000"
+    | ASS000 -> "ASS000"
+    | REV000 -> "REV000"
+    | RET000 -> "RET000"
+    | PRE000 -> "PRE000"
+    | CON000 -> "CON000"
+    | TRL000 -> "TRL000"
+    | TYD000 -> "TYD000"
+    // interpreter error messages
+    | NSP000 _ -> "NSP000"
+    | NSP001 _ -> "NSP001"
+    | NSP002 (_, _) -> "NSP002"
+    | NSP003 _-> "NSP003"
+
 
 type DiagnosticEmitter =
     // replace your language-specific emitters here
@@ -103,7 +209,7 @@ type Diagnostics() =
         this.Collection 
         |> Seq.map (fun d -> 
             d.Emitter.ToString() + ":" +
-            d.Code.Code + ":" +
+            getCode d.Code + ":" +
             d.Message.Value) 
         |> String.concat "\n"
     member this.Clear() = myDictionary.Clear()
@@ -266,7 +372,7 @@ let inputStringManipulator (input:string) errorIndex =
         replaceFirstNonWhitespace (input)
 
 /// If the source code is not syntax-error-free, this function will find the first error and emit it.
-let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:string) =
+let tryParseFirstError someParser (ad: Diagnostics) input (code:DiagnosticCode) (stdMsg:string) =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -274,8 +380,8 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
         result, (int userState.Index)
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, _ = mapErrMsgToRecText input errorMsg restInput.Position
-        let diagnosticCode = { DiagnosticCode.Code = code }
-        let diagnosticMsg = { DiagnosticMessage.Value = codeMessage code newErrMsg stdMsg }
+        let diagnosticCode = code 
+        let diagnosticMsg = { DiagnosticMessage.Value = codeMessage (nameof(code)) newErrMsg stdMsg }
         let diagnostic =
             { 
                 Diagnostic.Emitter = DiagnosticEmitter.FplParser 
@@ -293,7 +399,7 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
 /// position with spaces as long as the parser reaches a position where another parser should be 
 /// applied according to the applied synchronizing tokens. The recursive call stop also in rare cases, 
 /// in which this strategy would fail because the error occurs at the same position in consecutive recursive calls of the function.
-let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex code stdMsg lastCorrectedIndex lastChoices =
+let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex (code:DiagnosticCode) stdMsg lastCorrectedIndex lastChoices =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -321,8 +427,8 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
                     restInput.Position.Line,
                     restInput.Position.Column 
                 )
-            let diagnosticCode = { DiagnosticCode.Code = code }
-            let diagnosticMsg = { DiagnosticMessage.Value = codeMessage code newErrMsg stdMsg }
+            let diagnosticCode = code
+            let diagnosticMsg = { DiagnosticMessage.Value = codeMessage (nameof(code)) newErrMsg stdMsg }
             let diagnostic =
                 { 
                     Diagnostic.Emitter = DiagnosticEmitter.FplParser 
@@ -348,7 +454,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
 
 /// This function emits diagnostics for chunks of input between the end of parsing result of someParser and the starting index
 /// where another parser should be applied according to the applied synchronizing tokens.
-let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput nextIndex code stdMsg lastCorrectedIndex lastChoices =
+let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput nextIndex (code:DiagnosticCode) stdMsg lastCorrectedIndex lastChoices =
     
     if input.Trim() <> "" then
          match run someParser input with
@@ -375,8 +481,8 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                             restInput.Position.Line,
                             restInput.Position.Column 
                         )
-                    let diagnosticCode = { DiagnosticCode.Code = code }
-                    let diagnosticMsg = { DiagnosticMessage.Value = codeMessage code newErrMsg stdMsg }
+                    let diagnosticCode = code
+                    let diagnosticMsg = { DiagnosticMessage.Value = codeMessage (nameof(code)) newErrMsg stdMsg }
                     let diagnostic =
                         { 
                             Diagnostic.Emitter = DiagnosticEmitter.FplParser 
@@ -405,7 +511,7 @@ let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) nu
 
 
 /// Emits diagnostics for the error positions (if any) that are not overlapped by the intervals
-let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (stdMsg:string) (intervals:System.Collections.Generic.List<Interval>) lastCorrectedIndex lastChoices =
+let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:DiagnosticCode) (stdMsg:string) (intervals:System.Collections.Generic.List<Interval>) lastCorrectedIndex lastChoices =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -427,8 +533,8 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
         let cond = previousChoices<>lastChoices || stringBetweenRecursiveCalls.Contains(Environment.NewLine)
         if isNotInAnyInterval intervals (int restInput.Position.Index) then
             if cond then
-                let diagnosticCode = { DiagnosticCode.Code = code }
-                let diagnosticMsg = { DiagnosticMessage.Value = codeMessage code newErrMsg stdMsg }
+                let diagnosticCode = code 
+                let diagnosticMsg = { DiagnosticMessage.Value = codeMessage (nameof(code)) newErrMsg stdMsg }
                 let diagnostic =
                     { 
                         Diagnostic.Emitter = DiagnosticEmitter.FplParser 
