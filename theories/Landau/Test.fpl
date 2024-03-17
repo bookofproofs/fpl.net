@@ -1,10 +1,10 @@
-axiom SomeFplAxiom()
+axiom xSomeFplAxiom()
 {
     (x _ y)
 }
 
 uses Fpl.Commons alias T1
 
-uses Fpl.Commons alias T1
+uses FplCommons alias T1
 
 ;

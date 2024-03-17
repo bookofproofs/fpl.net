@@ -106,16 +106,14 @@ let private downloadFile url (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifier
         } |> Async.RunSynchronously
     with
     | ex -> 
-        let msg = { DiagnosticMessage.Value = getDiagnosticErrorMsg (NSP002 (url, ex.Message)) }
-        let code = NSP002
         let diagnostic =
             { 
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = e.StartPos
                 Diagnostic.EndPos = e.EndPos
-                Diagnostic.Message = msg
                 Diagnostic.Code = NSP002 (url, ex.Message)
+                Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic 
         ""
@@ -124,17 +122,15 @@ let private loadFile fileName (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifie
     try
         File.ReadAllText fileName
     with
-    | :? FileNotFoundException -> 
-        let msg = { DiagnosticMessage.Value = getDiagnosticErrorMsg (NSP001 fileName) }
-        let code = NSP001
+    | ex -> 
         let diagnostic =
             { 
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = e.StartPos
                 Diagnostic.EndPos = e.EndPos
-                Diagnostic.Message = msg
-                Diagnostic.Code = NSP001 fileName
+                Diagnostic.Code = NSP001 (fileName, ex.Message)
+                Diagnostic.Alternatives = None
             }
         ad.AddDiagnostic diagnostic
         ""
@@ -243,10 +239,8 @@ let findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list) =
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = alias.StartPos
                     Diagnostic.EndPos = alias.EndPos
-                    Diagnostic.Message = { 
-                        DiagnosticMessage.Value = getDiagnosticErrorMsg (NSP003 alias.AliasOrStar)
-                        }
                     Diagnostic.Code = NSP003 alias.AliasOrStar
+                    Diagnostic.Alternatives = None
                 }
             ad.AddDiagnostic diagnostic        
         else    
@@ -266,16 +260,14 @@ let findParsedAstsMatchingAliasedNamespaceIdentifier (ident:int) ast (ad: Diagno
     let parsedAstsMatchingAliasedNamespaceIdentifier (eani:EvalAliasedNamespaceIdentifier) =
         let availableSources = acquireSources eani uri fplLibUrl ad
         if availableSources.NoneFound then 
-            let msg = { DiagnosticMessage.Value = getDiagnosticErrorMsg (NSP000 eani.FileNamePattern) }
-            let code = NSP000
             let diagnostic =
                 { 
                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = eani.StartPos
                     Diagnostic.EndPos = eani.EndPos
-                    Diagnostic.Message = msg
                     Diagnostic.Code = NSP000 eani.FileNamePattern
+                    Diagnostic.Alternatives = None
                 }
             ad.AddDiagnostic diagnostic
             []

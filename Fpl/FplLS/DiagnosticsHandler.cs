@@ -80,7 +80,7 @@ namespace FplLS
             castedDiagnostic.Severity = CastSeverity(diagnostic.Severity);
             castedDiagnostic.Message = CastMessage(diagnostic, sb);
             castedDiagnostic.Range = tp.GetRange(diagnostic.StartPos.Index, diagnostic.EndPos.Index);
-            castedDiagnostic.Code = CastCode(nameof(diagnostic.Code));
+            castedDiagnostic.Code = CastCode(diagnostic.Code.Code);
             return castedDiagnostic;
         }
 
@@ -104,7 +104,7 @@ namespace FplLS
         /// <exception cref="NotImplementedException"></exception>
         private string CastDiagnosticCodeMessage(ErrDiagnostics.Diagnostic diagnostic)
         {
-            return diagnostic.Message.Value;
+            return diagnostic.Message;
         }
         /// <summary>
         /// Casts an F# ErrReccovery module severity into the OmniSharp's DiagnosticSeverity

@@ -593,9 +593,7 @@ let fplNamespace = ((opt extensionBlock .>> IW) .>>. buildingBlockList) .>> IW .
 let ast =  positions (IW >>. fplNamespace) |>> Ast.AST
 let stdParser = ast
 let stdCode = SYN000
-let stdErrMsg = getDiagnosticErrorMsg SYN000
 let stdCode1 = SYN001
-let stdErrMsg1 = getDiagnosticErrorMsg SYN001
 let stdParser1 = ast
 
 let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i = 
@@ -609,39 +607,39 @@ let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i =
 let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:|(~|\!)[a-z]"
 
 let errInformation = [
-    (DEF000, getDiagnosticErrorMsg DEF000, ["def"], definition)
-    (PRP000, getDiagnosticErrorMsg PRP000, ["mand"; "opt"], property)
-    (AXI000, getDiagnosticErrorMsg AXI000, ["ax"; "post"], axiom)
-    (THM000, getDiagnosticErrorMsg THM000, ["theorem"; "thm"], theorem)
-    (COR000, getDiagnosticErrorMsg COR000, ["theorem"; "cor"], corollary)
-    (LEM000, getDiagnosticErrorMsg LEM000, ["lem"], lemma)
-    (PPS000, getDiagnosticErrorMsg PPS000, ["prop"], proposition)
-    (CNJ000, getDiagnosticErrorMsg CNJ000, ["conj"], conjecture)
-    (VAR000, getDiagnosticErrorMsg VAR000, ["dec"], varDeclBlock)
-    (CTR000, getDiagnosticErrorMsg CTR000, ["constructor"; "ctor"], constructor)
-    (PRF000, getDiagnosticErrorMsg PRF000, ["proof"; "prf"], proof)
-    (INF000, getDiagnosticErrorMsg INF000, ["inf"], ruleOfInference)
-    (LOC000, getDiagnosticErrorMsg LOC000, ["loc"], localization)
-    (USE000, getDiagnosticErrorMsg USE000, ["uses"], usesClause)
-    (PRD000, getDiagnosticErrorMsg PRD000, ["and"; "or"; "impl"; "iif"; "xor"; "not"; "all"; "ex"; "is"], compoundPredicate)
-    (SMT000, getDiagnosticErrorMsg SMT000, ["assert"; "cases"; "base"; "for"; "del"], statement)
-    (AGI000, getDiagnosticErrorMsg AGI000, ["|-"], argumentInference)
-    (CAS000, getDiagnosticErrorMsg CAS000, ["|"], conditionFollowedByResult)
-    (DCS000, getDiagnosticErrorMsg DCS000, ["?"], elseStatement)
-    (ASS000, getDiagnosticErrorMsg ASS000, ["ass"], assumeArgument)
-    (REV000, getDiagnosticErrorMsg REV000, ["rev"], revokeArgument)
-    (RET000, getDiagnosticErrorMsg RET000, ["ret"], returnStatement)
-    (PRE000, getDiagnosticErrorMsg PRE000, ["pre"], premise)
-    (CON000, getDiagnosticErrorMsg CON000, ["con"], conclusion)
-    (TRL000, getDiagnosticErrorMsg TRL000, ["!"], translation)
-    (TYD000, getDiagnosticErrorMsg TYD000, ["~"], varDecl)
+    (DEF000, ["def"], definition)
+    (PRP000, ["mand"; "opt"], property)
+    (AXI000, ["ax"; "post"], axiom)
+    (THM000, ["theorem"; "thm"], theorem)
+    (COR000, ["theorem"; "cor"], corollary)
+    (LEM000, ["lem"], lemma)
+    (PPS000, ["prop"], proposition)
+    (CNJ000, ["conj"], conjecture)
+    (VAR000, ["dec"], varDeclBlock)
+    (CTR000, ["constructor"; "ctor"], constructor)
+    (PRF000, ["proof"; "prf"], proof)
+    (INF000, ["inf"], ruleOfInference)
+    (LOC000, ["loc"], localization)
+    (USE000, ["uses"], usesClause)
+    (PRD000, ["and"; "or"; "impl"; "iif"; "xor"; "not"; "all"; "ex"; "is"], compoundPredicate)
+    (SMT000, ["assert"; "cases"; "base"; "for"; "del"], statement)
+    (AGI000, ["|-"], argumentInference)
+    (CAS000, ["|"], conditionFollowedByResult)
+    (DCS000, ["?"], elseStatement)
+    (ASS000, ["ass"], assumeArgument)
+    (REV000, ["rev"], revokeArgument)
+    (RET000, ["ret"], returnStatement)
+    (PRE000, ["pre"], premise)
+    (CON000, ["con"], conclusion)
+    (TRL000, ["!"], translation)
+    (TYD000, ["~"], varDecl)
 ]
 /// Finds the error information tuple based on a prefix of a string from the errInformation list. 
 /// If no prefix matches than the SYN000 tuple will be returned.
 let findErrInfoTuple (str:string) =
-    match List.tryFind (fun (_, _, prefixes, _) -> List.exists (fun prefix -> str.StartsWith(prefix : string)) prefixes) errInformation with
+    match List.tryFind (fun (_, prefixes, _) -> List.exists (fun prefix -> str.StartsWith(prefix : string)) prefixes) errInformation with
     | Some tuple -> tuple
-    | None -> (stdCode, stdErrMsg, [], stdParser)
+    | None -> (stdCode, [], stdParser)
 
 
 let findFirstIndexInMatches (matchList:System.Collections.Generic.List<int>) pIndex kMax =
@@ -669,13 +667,13 @@ let fplParser (input:string) =
 
     let intervals = new System.Collections.Generic.List<Interval>()
 
-    let parseResult, pIndex = tryParseFirstError stdParser ad preProcessedInput stdCode stdErrMsg 
+    let parseResult, pIndex = tryParseFirstError stdParser ad preProcessedInput stdCode  
     intervals.Add(Interval(0, pIndex))
 
     let mutable lastParserIndex = 0
     let mutable lastParser = stdParser
     let mutable lastCode = stdCode
-    let mutable lastMsg = stdErrMsg
+    let mutable lastMsg = stdCode.Message
     if parseResult = Ast.Error then
         let mutable lastSuccess = false
         // skip parsing any matches until the first error index (stored in pIndex)
@@ -687,22 +685,22 @@ let fplParser (input:string) =
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
                 let remainingChunk = preProcessedInput.Substring(int lastParserIndex, (index - int lastParserIndex))
                 // emit error messages for for this chunk of input string using the last parser  
-                tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode lastMsg -1 ""
+                tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode -1 ""
                 intervals.Add(Interval(lastParserIndex, nextIndex))
                 lastParserIndex <- nextIndex
             else
                 // otherwise, find the next error info tuple based on the current substring
-                let code, errMsg, prefixList, errRecParser = findErrInfoTuple subString
+                let code, prefixList, errRecParser = findErrInfoTuple subString
                 // try to parse substring using the parser from the error info and emitting diagnostics (if any)
-                let pResult, pIndex, pSuccess = tryParse errRecParser ad subString index nextIndex code errMsg -1 ""
+                let pResult, pIndex, pSuccess = tryParse errRecParser ad subString index nextIndex code -1 ""
                 intervals.Add(Interval(index, pIndex))
                 lastParserIndex <- pIndex
                 lastParser <- errRecParser
                 lastCode <- code
-                lastMsg <- errMsg
+                lastMsg <- code.Message
                 lastSuccess <- pSuccess
     // emit diagnostics for any error positions that are not overlayed by the intervals
-    tryParseRemainingOnly stdParser ad preProcessedInput stdCode stdErrMsg intervals -1 ""
+    tryParseRemainingOnly stdParser ad preProcessedInput stdCode intervals -1 ""
     // Return an ast on a best effort basis even if there were some errors 
     let resultingAst = tryGetAst stdParser preProcessedInput -1
 
@@ -711,7 +709,7 @@ let fplParser (input:string) =
     if not (remaingString.EndsWith("}") && Regex.Matches(preProcessedInput, "\}").Count = Regex.Matches(preProcessedInput, "\{").Count) then
         // prevent emitting "false-positive" errors of characters found after namespace using the heuristic that 
         // the last character of a namespace is "}" and then looks "good"
-        tryParseRemainingChunk stdParser1 ad (preProcessedInput.Substring(maxBound)) maxBound (preProcessedInput.Length) stdCode1 stdErrMsg1 -1 ""
+        tryParseRemainingChunk stdParser1 ad (preProcessedInput.Substring(maxBound)) maxBound (preProcessedInput.Length) stdCode1 -1 ""
     resultingAst
 
 
