@@ -90,7 +90,13 @@ type TestEvalAliasedNamespaceIdentifier() =
         let url = "https://github.com/bookofproofs/fpl.net/blob/main/theories/lib"
         ad.Clear()
         let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
-        let libMap = downloadLibMap url ad pos
+        let e = 
+            { 
+                StartPos = pos
+                EndPos = pos 
+                AliasOrStar = None
+                PascalCaseIdList = [] }
+        let libMap = downloadLibMap url ad e
         Assert.IsTrue(libMap.Length > 0)
 
     [<TestMethod>]
@@ -98,7 +104,13 @@ type TestEvalAliasedNamespaceIdentifier() =
         let url = "https://github.com/bookofproofs/fpl.net/blob/main/theories/lib"
         ad.Clear()
         let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
-        let libMap = downloadLibMap url ad pos
+        let e = 
+            { 
+                StartPos = pos
+                EndPos = pos 
+                AliasOrStar = None
+                PascalCaseIdList = [] }
+        let libMap = downloadLibMap url ad e
         Assert.AreEqual(ad.CountDiagnostics, 0)
 
 

@@ -61,14 +61,16 @@ let rec eval_uses_clause = function
                           | Some (Ast.Alias (_, s)) -> Some s
                           | Some Ast.Star -> Some "*"
                           | _ -> None
-        let pascalCaseIdList = match ast with
-                               | Ast.NamespaceIdentifier (_, asts) -> 
-                                   asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
-                               | _ -> []
-        [{ EvalAliasedNamespaceIdentifier.StartPos = pos1 
-           EvalAliasedNamespaceIdentifier.EndPos = pos2 
-           EvalAliasedNamespaceIdentifier.AliasOrStar = aliasOrStar
-           EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList }]
+        match ast with
+        | Ast.NamespaceIdentifier ((p1, p2), asts) -> 
+            let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
+            [{  
+                EvalAliasedNamespaceIdentifier.StartPos = p1 
+                EvalAliasedNamespaceIdentifier.EndPos = p2 
+                EvalAliasedNamespaceIdentifier.AliasOrStar = aliasOrStar
+                EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList 
+            }]
+        | _ -> []
     | _ -> []
 
 /// A record type to store all the necessary fields for parsed namespaces in FPL code
@@ -84,7 +86,7 @@ type ParsedAst =
         EANI: EvalAliasedNamespaceIdentifier // uses clause that as a first caused this ast to be loaded 
     }
 
-let private downloadFile url (ad: Diagnostics) pos =
+let private downloadFile url (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifier) =
     let client = new HttpClient()
     try
         async {
@@ -96,11 +98,18 @@ let private downloadFile url (ad: Diagnostics) pos =
         let msg = DiagnosticMessage(getErroMsg (NSP002 (url, ex.Message)))
         let code = { DiagnosticCode = nameof(NSP002) }
         let diagnostic =
-            { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, pos, msg, code) }
+            { 
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = e.StartPos
+                Diagnostic.EndPos = e.EndPos
+                Diagnostic.Message = msg
+                Diagnostic.Code = code
+            }
         ad.AddDiagnostic diagnostic 
         ""
 
-let private loadFile fileName (ad: Diagnostics) pos =
+let private loadFile fileName (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifier) =
     try
         File.ReadAllText fileName
     with
@@ -108,7 +117,14 @@ let private loadFile fileName (ad: Diagnostics) pos =
         let msg = DiagnosticMessage(getErroMsg (NSP001 fileName))
         let code = { DiagnosticCode = nameof(NSP001) }
         let diagnostic =
-            { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, pos, msg, code) }
+            { 
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = e.StartPos
+                Diagnostic.EndPos = e.EndPos
+                Diagnostic.Message = msg
+                Diagnostic.Code = code
+            }
         ad.AddDiagnostic diagnostic
         ""
 
@@ -137,8 +153,8 @@ let createLibSubfolder (uri: Uri) =
     (directoryPath, libDirectoryPath)
 
 
-let downloadLibMap (currentWebRepo: string) (ad: Diagnostics) =
-    let libMap = downloadFile (currentWebRepo + "/libmap.txt") ad
+let downloadLibMap (currentWebRepo: string) (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifier) =
+    let libMap = downloadFile (currentWebRepo + "/libmap.txt") ad e
     libMap    
 
 /// A type that encapsulates the sources found for a uses clause 
@@ -168,7 +184,7 @@ let acquireSources (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (fplLibUrl: str
     let (directoryPath,libDirectoryPath) = createLibSubfolder uri
     let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, e.FileNamePattern) |> Seq.toList
     let fileNamesInLibSubDir = Directory.EnumerateFiles(libDirectoryPath, e.FileNamePattern) |> Seq.toList
-    let libMap = downloadLibMap fplLibUrl ad e.StartPos
+    let libMap = downloadLibMap fplLibUrl ad e
     let filesToDownload = findFilesInLibMapWithWildcard libMap e.FileNamePattern 
                             |> List.map (fun s -> fplLibUrl + "/" + s)
     FplSources(fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload)
@@ -181,10 +197,10 @@ let computeMD5Checksum (input: string) =
     hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
 
    
-let private getParsedAstsFromSources identifier (e:EvalAliasedNamespaceIdentifier) (source: seq<string>) (getContent: string -> Diagnostics -> Position -> string) =
+let private getParsedAstsFromSources identifier (e:EvalAliasedNamespaceIdentifier) (source: seq<string>) (getContent: string -> Diagnostics -> EvalAliasedNamespaceIdentifier -> string) =
     source
     |> Seq.choose (fun fileLoc ->
-        let fileContent = getContent fileLoc ad e.StartPos
+        let fileContent = getContent fileLoc ad e
         if fileContent <> "" then
             Some { 
                 UriPath = fileLoc
@@ -212,7 +228,14 @@ let findParsedAstsMatchingAliasedNamespaceIdentifier (ident:int) ast (ad: Diagno
             let msg = DiagnosticMessage(getErroMsg (NSP000 e.FileNamePattern))
             let code = { DiagnosticCode = nameof(NSP000) }
             let diagnostic =
-                { Diagnostic = (DiagnosticEmitter.FplInterpreter, DiagnosticSeverity.Error, e.StartPos, msg, code) }
+                { 
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = e.StartPos
+                    Diagnostic.EndPos = e.EndPos
+                    Diagnostic.Message = msg
+                    Diagnostic.Code = code
+                }
             ad.AddDiagnostic diagnostic
             []
         else

@@ -74,13 +74,14 @@ let private codeMessage code (origMsg:string) (stdMsg:string) =
     tranlatedCode + ": " + origMsg 
 
 type Diagnostic =
-    { Diagnostic: DiagnosticEmitter * DiagnosticSeverity * Position * DiagnosticMessage * DiagnosticCode }
-    with
-    member this.Emitter = let (emitter, _, _, _, _) = this.Diagnostic in emitter
-    member this.Severity = let (_, severity, _, _, _) = this.Diagnostic in severity
-    member this.Position = let (_, _, position, _, _) = this.Diagnostic in position
-    member this.Message = let (_, _, _, message, _) = this.Diagnostic in message.Value
-    member this.Code = let (_, _, _, _, code) = this.Diagnostic in code.Code
+    {
+        Emitter: DiagnosticEmitter
+        Severity: DiagnosticSeverity
+        StartPos: Position
+        EndPos: Position
+        Message: DiagnosticMessage
+        Code: DiagnosticCode
+    }
 
 type Diagnostics() =
     let myDictionary = new Dictionary<string, Diagnostic>()
@@ -92,7 +93,7 @@ type Diagnostics() =
         |> Seq.toList
 
     member this.AddDiagnostic (d:Diagnostic) =
-        let keyOfd = (sprintf "%07d" d.Position.Index) + d.Emitter.ToString()
+        let keyOfd = (sprintf "%07d" d.StartPos.Index) + d.Emitter.ToString()
         if not (myDictionary.ContainsKey(keyOfd)) then
             myDictionary.Add(keyOfd, d) |> ignore
 
@@ -101,7 +102,7 @@ type Diagnostics() =
 
     member this.PrintDiagnostics =
         for d in this.Collection do
-            printfn "%s" d.Message
+            printfn "%s" d.Message.Value
 
         printfn "%s" "\n^------------------------^\n"
 
@@ -109,8 +110,8 @@ type Diagnostics() =
         this.Collection 
         |> Seq.map (fun d -> 
             d.Emitter.ToString() + ":" +
-            d.Code + ":" +
-            d.Message) 
+            d.Code.Code + ":" +
+            d.Message.Value) 
         |> String.concat "\n"
     member this.Clear() = myDictionary.Clear()
 
@@ -283,7 +284,14 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
         let diagnosticCode = { DiagnosticCode = code }
         let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
         let diagnostic =
-            { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode) }
+            { 
+                Diagnostic.Emitter = DiagnosticEmitter.FplParser 
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = restInput.Position
+                Diagnostic.EndPos = restInput.Position
+                Diagnostic.Message = diagnosticMsg
+                Diagnostic.Code = diagnosticCode 
+            }
         ad.AddDiagnostic diagnostic
 
         Ast.Error, int restInput.Position.Index
@@ -323,7 +331,14 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
             let diagnosticCode = { DiagnosticCode = code }
             let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
             let diagnostic =
-                { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode) }
+                { 
+                    Diagnostic.Emitter = DiagnosticEmitter.FplParser 
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = correctedPosition
+                    Diagnostic.EndPos = correctedPosition
+                    Diagnostic.Message = diagnosticMsg
+                    Diagnostic.Code = diagnosticCode 
+                }
             ad.AddDiagnostic diagnostic
             
             // replace the input by manipulating the input string depending on the error position
@@ -370,8 +385,14 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                     let diagnosticCode = { DiagnosticCode = code }
                     let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
                     let diagnostic =
-                        { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode) }
-
+                        { 
+                            Diagnostic.Emitter = DiagnosticEmitter.FplParser 
+                            Diagnostic.Severity = DiagnosticSeverity.Error
+                            Diagnostic.StartPos = correctedPosition
+                            Diagnostic.EndPos = correctedPosition
+                            Diagnostic.Message = diagnosticMsg
+                            Diagnostic.Code = diagnosticCode 
+                        }
                     ad.AddDiagnostic diagnostic
             
                     // replace the input by manipulating the input string depending on the error position
@@ -416,7 +437,14 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
                 let diagnosticCode = { DiagnosticCode = code }
                 let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
                 let diagnostic =
-                    { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode) }
+                    { 
+                        Diagnostic.Emitter = DiagnosticEmitter.FplParser 
+                        Diagnostic.Severity = DiagnosticSeverity.Error
+                        Diagnostic.StartPos = restInput.Position
+                        Diagnostic.EndPos = restInput.Position
+                        Diagnostic.Message = diagnosticMsg
+                        Diagnostic.Code = diagnosticCode 
+                    }
                 ad.AddDiagnostic diagnostic
             
         if restInput.Position.Index < input.Length && restInput.Position.Index <> lastCorrectedIndex && cond then
