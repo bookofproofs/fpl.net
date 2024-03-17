@@ -2,4 +2,9 @@ axiom SomeFplAxiom()
 {
     (x _ y)
 }
+
+uses Fpl.Commons alias T1
+
+uses Fpl.Commons alias T1
+
 ;

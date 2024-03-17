@@ -38,9 +38,7 @@ If you decide to reuse this code for your language and other IDEs, please consid
 *)
 
 type DiagnosticCode = 
-    { DiagnosticCode: string }
-    with
-    member this.Code = let code = this.DiagnosticCode in code
+    { Code: string }
 
 type DiagnosticEmitter =
     // replace your language-specific emitters here
@@ -54,12 +52,7 @@ type DiagnosticSeverity =
     | Information
 
 type DiagnosticMessage =
-    | DiagnosticMessage of string
-
-    member this.Value =
-        match this with
-        | DiagnosticMessage(value) -> value
-
+    { Value: string }
 
 /// improves the error message for a special case in FPL, return this.StdMsg in your case
 let private codeMessage code (origMsg:string) (stdMsg:string) = 
@@ -281,8 +274,8 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
         result, (int userState.Index)
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, _ = mapErrMsgToRecText input errorMsg restInput.Position
-        let diagnosticCode = { DiagnosticCode = code }
-        let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
+        let diagnosticCode = { DiagnosticCode.Code = code }
+        let diagnosticMsg = { DiagnosticMessage.Value = codeMessage code newErrMsg stdMsg }
         let diagnostic =
             { 
                 Diagnostic.Emitter = DiagnosticEmitter.FplParser 
@@ -328,8 +321,8 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
                     restInput.Position.Line,
                     restInput.Position.Column 
                 )
-            let diagnosticCode = { DiagnosticCode = code }
-            let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
+            let diagnosticCode = { DiagnosticCode.Code = code }
+            let diagnosticMsg = { DiagnosticMessage.Value = codeMessage code newErrMsg stdMsg }
             let diagnostic =
                 { 
                     Diagnostic.Emitter = DiagnosticEmitter.FplParser 
@@ -382,8 +375,8 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                             restInput.Position.Line,
                             restInput.Position.Column 
                         )
-                    let diagnosticCode = { DiagnosticCode = code }
-                    let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
+                    let diagnosticCode = { DiagnosticCode.Code = code }
+                    let diagnosticMsg = { DiagnosticMessage.Value = codeMessage code newErrMsg stdMsg }
                     let diagnostic =
                         { 
                             Diagnostic.Emitter = DiagnosticEmitter.FplParser 
@@ -434,8 +427,8 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
         let cond = previousChoices<>lastChoices || stringBetweenRecursiveCalls.Contains(Environment.NewLine)
         if isNotInAnyInterval intervals (int restInput.Position.Index) then
             if cond then
-                let diagnosticCode = { DiagnosticCode = code }
-                let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
+                let diagnosticCode = { DiagnosticCode.Code = code }
+                let diagnosticMsg = { DiagnosticMessage.Value = codeMessage code newErrMsg stdMsg }
                 let diagnostic =
                     { 
                         Diagnostic.Emitter = DiagnosticEmitter.FplParser 

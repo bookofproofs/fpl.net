@@ -4,6 +4,7 @@ open System.Net.Http
 open System.IO
 open System.Security.Cryptography
 open System.Text
+open System.Collections.Generic
 open System
 open FplGrammarTypes
 open FplParser
@@ -14,36 +15,41 @@ type FplInterpreterErrorCode =
     | NSP000 of string
     | NSP001 of string
     | NSP002 of string * string
+    | NSP003 of string
 
 let private getErroMsg = function  
     | NSP000 fileNamePattern -> sprintf "%s could not be loaded" fileNamePattern
     | NSP001 fileName -> sprintf "%s not found" fileName
     | NSP002 (url, innerErrMsg) -> sprintf "%s not downloadable: %s" url innerErrMsg
+    | NSP003 alias -> sprintf "Alias %s appeared previously in this namespace" alias
 
+type EvalAlias =  
+    {
+        StartPos: Position
+        EndPos: Position
+        AliasOrStar: string
+    }
 
 /// A record type to store all the necessary fields for parsed uses clauses in FPL code
 type EvalAliasedNamespaceIdentifier = 
     { StartPos: Position
       EndPos: Position
-      AliasOrStar: string option
+      EvalAlias: EvalAlias
       PascalCaseIdList: string list }
     with
         member this.FileNamePattern = 
             let pascalCaseIdList = String.concat "." this.PascalCaseIdList
-            match this.AliasOrStar with
-            | Some "*" -> 
+            match this.EvalAlias.AliasOrStar with
+            | "*" -> 
                 sprintf "%s*.fpl" pascalCaseIdList
             | _ -> 
                 sprintf "%s.fpl" pascalCaseIdList
         member this.Name = 
-            let pascalCaseIdList = String.concat "." this.PascalCaseIdList
-            match this.AliasOrStar with
-            | Some "*" -> 
-                pascalCaseIdList
-            | Some s -> 
-                s
-            | _ -> 
-                pascalCaseIdList
+            let concatenatedPascalCaseIds = String.concat "." this.PascalCaseIdList
+            match this.EvalAlias.AliasOrStar with
+            | "*" -> concatenatedPascalCaseIds
+            | _ when this.EvalAlias.AliasOrStar <> "*" && this.EvalAlias.AliasOrStar <> "" -> this.EvalAlias.AliasOrStar
+            | _ -> concatenatedPascalCaseIds
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -57,17 +63,34 @@ let rec eval_uses_clause = function
     | Ast.UsesClause ((pos1, pos2), ast) -> 
         eval_uses_clause ast
     | Ast.AliasedNamespaceIdentifier ((pos1, pos2), (ast, optAst)) -> 
-        let aliasOrStar = match optAst with
-                          | Some (Ast.Alias (_, s)) -> Some s
-                          | Some Ast.Star -> Some "*"
-                          | _ -> None
+        let evalAlias = match optAst with
+                          | Some (Ast.Alias ((p1, p2), s)) -> 
+                                    { 
+                                        StartPos = p1
+                                        EndPos = p2
+                                        AliasOrStar = s
+                                    }
+                          | Some Ast.Star -> 
+                                    { 
+                                        StartPos = Position("",0,1,1)
+                                        EndPos = Position("",0,1,1)
+                                        AliasOrStar = "*"
+                                    }
+
+                          | _ -> 
+                                    { 
+                                        StartPos = Position("",0,1,1)
+                                        EndPos = Position("",0,1,1)
+                                        AliasOrStar = ""
+                                    }
+
         match ast with
         | Ast.NamespaceIdentifier ((p1, p2), asts) -> 
             let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
             [{  
                 EvalAliasedNamespaceIdentifier.StartPos = p1 
                 EvalAliasedNamespaceIdentifier.EndPos = p2 
-                EvalAliasedNamespaceIdentifier.AliasOrStar = aliasOrStar
+                EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
                 EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList 
             }]
         | _ -> []
@@ -95,8 +118,8 @@ let private downloadFile url (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifier
         } |> Async.RunSynchronously
     with
     | ex -> 
-        let msg = DiagnosticMessage(getErroMsg (NSP002 (url, ex.Message)))
-        let code = { DiagnosticCode = nameof(NSP002) }
+        let msg = { DiagnosticMessage.Value =getErroMsg (NSP002 (url, ex.Message)) }
+        let code = { DiagnosticCode.Code = nameof(NSP002) }
         let diagnostic =
             { 
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
@@ -114,8 +137,8 @@ let private loadFile fileName (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifie
         File.ReadAllText fileName
     with
     | :? FileNotFoundException -> 
-        let msg = DiagnosticMessage(getErroMsg (NSP001 fileName))
-        let code = { DiagnosticCode = nameof(NSP001) }
+        let msg = { DiagnosticMessage.Value = getErroMsg (NSP001 fileName) }
+        let code = { DiagnosticCode.Code = nameof(NSP001) }
         let diagnostic =
             { 
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
@@ -197,10 +220,10 @@ let computeMD5Checksum (input: string) =
     hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
 
    
-let private getParsedAstsFromSources identifier (e:EvalAliasedNamespaceIdentifier) (source: seq<string>) (getContent: string -> Diagnostics -> EvalAliasedNamespaceIdentifier -> string) =
+let private getParsedAstsFromSources identifier (eani:EvalAliasedNamespaceIdentifier) (source: seq<string>) (getContent: string -> Diagnostics -> EvalAliasedNamespaceIdentifier -> string) =
     source
     |> Seq.choose (fun fileLoc ->
-        let fileContent = getContent fileLoc ad e
+        let fileContent = getContent fileLoc ad eani
         if fileContent <> "" then
             Some { 
                 UriPath = fileLoc
@@ -210,7 +233,7 @@ let private getParsedAstsFromSources identifier (e:EvalAliasedNamespaceIdentifie
                 Id = identifier + 1
                 ReferencingAsts = [identifier]
                 ReferencedAsts = []
-                EANI = e 
+                EANI = eani 
             }
         else
             None
@@ -218,32 +241,65 @@ let private getParsedAstsFromSources identifier (e:EvalAliasedNamespaceIdentifie
     |> Seq.toList
 
 
-/// Takes an `ast`, interprets it by extracting the uses clauses and looks for the files 
-/// in the `currentPath` to be loaded and parsed to create even more ASTs.
-/// Returns a list ParseAst objects or adds new diagnostics if the files were not found.
-let findParsedAstsMatchingAliasedNamespaceIdentifier (ident:int) ast (ad: Diagnostics) (uri: Uri) (fplLibUrl: string)  =
-    let parsedAstsMatchingAliasedNamespaceIdentifier (e:EvalAliasedNamespaceIdentifier) =
-        let availableSources = acquireSources e uri fplLibUrl ad
-        if availableSources.NoneFound then 
-            let msg = DiagnosticMessage(getErroMsg (NSP000 e.FileNamePattern))
-            let code = { DiagnosticCode = nameof(NSP000) }
+let findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list) =
+    let uniqueAliases = HashSet<string>()
+    eaniList
+    |> List.map (fun eani -> eani.EvalAlias)
+    // filter out the identifiers with AliasOrStar equal to None or Some "*"
+    |> List.filter (fun alias -> alias.AliasOrStar <> "*" && alias.AliasOrStar <> "")
+    |> List.map (fun alias ->
+        if uniqueAliases.Contains alias.AliasOrStar then
             let diagnostic =
                 { 
                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                     Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = e.StartPos
-                    Diagnostic.EndPos = e.EndPos
+                    Diagnostic.StartPos = alias.StartPos
+                    Diagnostic.EndPos = alias.EndPos
+                    Diagnostic.Message = { 
+                        DiagnosticMessage.Value = getErroMsg (NSP003 alias.AliasOrStar)
+                        }
+                    Diagnostic.Code = { DiagnosticCode.Code = nameof(NSP003) }
+                }
+            ad.AddDiagnostic diagnostic        
+        else    
+            uniqueAliases.Add(alias.AliasOrStar) |> ignore
+    )
+
+    // groups the remaining identifiers by AliasOrStar 
+    |> List.groupBy id  
+    // Select the ones that appear more than once
+    |> List.choose (fun (alias, instances) -> if List.length instances > 1 then Some alias else None)
+
+
+/// Takes an `ast`, interprets it by extracting the uses clauses and looks for the files 
+/// in the `currentPath` to be loaded and parsed to create even more ASTs.
+/// Returns a list ParseAst objects or adds new diagnostics if the files were not found.
+let findParsedAstsMatchingAliasedNamespaceIdentifier (ident:int) ast (ad: Diagnostics) (uri: Uri) (fplLibUrl: string)  =
+    let parsedAstsMatchingAliasedNamespaceIdentifier (eani:EvalAliasedNamespaceIdentifier) =
+        let availableSources = acquireSources eani uri fplLibUrl ad
+        if availableSources.NoneFound then 
+            let msg = { DiagnosticMessage.Value = getErroMsg (NSP000 eani.FileNamePattern) }
+            let code = { DiagnosticCode.Code = nameof(NSP000) }
+            let diagnostic =
+                { 
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = eani.StartPos
+                    Diagnostic.EndPos = eani.EndPos
                     Diagnostic.Message = msg
                     Diagnostic.Code = code
                 }
             ad.AddDiagnostic diagnostic
             []
         else
-            let astsFromFilePaths = getParsedAstsFromSources ident e availableSources.FilePaths loadFile
-            let astsFromUrls = getParsedAstsFromSources ident e availableSources.Urls downloadFile
+            let astsFromFilePaths = getParsedAstsFromSources ident eani availableSources.FilePaths loadFile
+            let astsFromUrls = getParsedAstsFromSources ident eani availableSources.Urls downloadFile
             astsFromFilePaths @ astsFromUrls
 
-    eval_uses_clause ast 
+    let eaniList = eval_uses_clause ast 
+    findDuplicateAliases eaniList |> ignore
+
+    eaniList 
     |> List.map (fun (eval:EvalAliasedNamespaceIdentifier) -> eval)
     |> List.collect parsedAstsMatchingAliasedNamespaceIdentifier
 
