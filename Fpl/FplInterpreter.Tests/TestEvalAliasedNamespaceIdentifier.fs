@@ -21,16 +21,16 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestFileNamePattern(aliasOrStar: string, pascelCaseId: string, expected: string) =
         let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
         let evalAlias = {
-                StartPos = pos
-                EndPos = pos
-                AliasOrStar = aliasOrStar
+                EvalAlias.StartPos = pos
+                EvalAlias.EndPos = pos
+                EvalAlias.AliasOrStar = aliasOrStar
             }
 
         let eval = { 
-                StartPos = pos
-                EndPos = pos
-                EvalAlias = evalAlias
-                PascalCaseIdList = pascelCaseId.Split('.') |> Array.toList 
+                EvalAliasedNamespaceIdentifier.StartPos = pos
+                EvalAliasedNamespaceIdentifier.EndPos = pos
+                EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
+                EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascelCaseId.Split('.') |> Array.toList 
             }
 
         Assert.AreEqual(expected, eval.FileNamePattern)
@@ -45,17 +45,17 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestName(aliasOrStar: string, pascelCaseId: string, expected: string) =
         let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
         let evalAlias = {
-                StartPos = pos
-                EndPos = pos
-                AliasOrStar = aliasOrStar
+                EvalAlias.StartPos = pos
+                EvalAlias.EndPos = pos
+                EvalAlias.AliasOrStar = aliasOrStar
             }
 
         let eval =
             { 
-                StartPos = pos
-                EndPos = pos
-                EvalAlias = evalAlias
-                PascalCaseIdList = [ pascelCaseId ] 
+                EvalAliasedNamespaceIdentifier.StartPos = pos
+                EvalAliasedNamespaceIdentifier.EndPos = pos
+                EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
+                EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascelCaseId ] 
             }
 
         Assert.AreEqual(expected, eval.Name)
@@ -96,16 +96,16 @@ type TestEvalAliasedNamespaceIdentifier() =
         ad.Clear()
         let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
         let evalAlias = {
-                StartPos = pos
-                EndPos = pos
-                AliasOrStar = ""
+                EvalAlias.StartPos = pos
+                EvalAlias.EndPos = pos
+                EvalAlias.AliasOrStar = ""
             }
         let e = 
             { 
-                StartPos = pos
-                EndPos = pos 
-                EvalAlias = evalAlias
-                PascalCaseIdList = [] }
+                EvalAliasedNamespaceIdentifier.StartPos = pos
+                EvalAliasedNamespaceIdentifier.EndPos = pos 
+                EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
+                EvalAliasedNamespaceIdentifier.PascalCaseIdList = [] }
         let libMap = downloadLibMap url ad e
         Assert.IsTrue(libMap.Length > 0)
 
@@ -115,16 +115,16 @@ type TestEvalAliasedNamespaceIdentifier() =
         ad.Clear()
         let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
         let evalAlias = {
-                StartPos = pos
-                EndPos = pos
-                AliasOrStar = ""
+                EvalAlias.StartPos = pos
+                EvalAlias.EndPos = pos
+                EvalAlias.AliasOrStar = ""
             }
         let e = 
             { 
-                StartPos = pos
-                EndPos = pos 
-                EvalAlias = evalAlias
-                PascalCaseIdList = [] }
+                EvalAliasedNamespaceIdentifier.StartPos = pos
+                EvalAliasedNamespaceIdentifier.EndPos = pos 
+                EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
+                EvalAliasedNamespaceIdentifier.PascalCaseIdList = [] }
         let libMap = downloadLibMap url ad e
         Assert.AreEqual(ad.CountDiagnostics, 0)
 
@@ -152,16 +152,16 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestAcquireSourcesWebOnly(aliasOrStar: string, pascelCaseId: string, expected: int) =
         let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
         let evalAlias = {
-                StartPos = pos
-                EndPos = pos
-                AliasOrStar = aliasOrStar
+                EvalAlias.StartPos = pos
+                EvalAlias.EndPos = pos
+                EvalAlias.AliasOrStar = aliasOrStar
             }
 
         let eval =
-                { StartPos = Position("", 1, 1, 1)
-                  EndPos = Position("", 1, 1, 1)
-                  EvalAlias = evalAlias
-                  PascalCaseIdList = [ pascelCaseId ] }
+                { EvalAliasedNamespaceIdentifier.StartPos = Position("", 1, 1, 1)
+                  EvalAliasedNamespaceIdentifier.EndPos = Position("", 1, 1, 1)
+                  EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
+                  EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascelCaseId ] }
 
         let uri =
             System.Uri(Path.Combine(Directory.GetCurrentDirectory(), pascelCaseId + ".fpl"))
@@ -188,16 +188,16 @@ type TestEvalAliasedNamespaceIdentifier() =
 
         let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
         let evalAlias = {
-                StartPos = pos
-                EndPos = pos
-                AliasOrStar = aliasOrStar
+                EvalAlias.StartPos = pos
+                EvalAlias.EndPos = pos
+                EvalAlias.AliasOrStar = aliasOrStar
             }
 
         let eval =
-                { StartPos = Position("", 1, 1, 1)
-                  EndPos = Position("", 1, 1, 1)
-                  EvalAlias = evalAlias
-                  PascalCaseIdList = [ pascelCaseId ] }
+                { EvalAliasedNamespaceIdentifier.StartPos = Position("", 1, 1, 1)
+                  EvalAliasedNamespaceIdentifier.EndPos = Position("", 1, 1, 1)
+                  EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
+                  EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascelCaseId ] }
 
         let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
         let uri = System.Uri(pathToFile)
@@ -228,3 +228,17 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestFplSourcesFiles() =
         let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"])
         Assert.AreEqual(2, fplSources.FilePaths.Length)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses() =
+        let input = """
+            uses Fpl.Commons
+            ;"""
+        let pathToFile =
+            Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl")
+        let uri = System.Uri(pathToFile)
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+
+        let result = loadAllUsesClauses input uri fplLibUrl 0
+        Assert.AreEqual(2, result.ParsedAsts.Count)

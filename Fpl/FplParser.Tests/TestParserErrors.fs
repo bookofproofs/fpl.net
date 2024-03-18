@@ -62,22 +62,28 @@ type TestParserErrors() =
         let code = AXI000
         printf "Trying %s" code.Message
         let input = """
+        axiom x() { true }
+        axiom x() { true }
+        axiom x() { true }
         ;
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual(1, result.Length)
+        Assert.AreEqual(2, result.Length)
 
     [<TestMethod>]
     member this.TestTHM000() =
         let code = THM000
         printf "Trying %s" code.Message
         let input = """
+        thm x() { true }
+        thm x() { true }
+        thm x() { true }
         ;
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual(1, result.Length)
+        Assert.AreEqual(2, result.Length)
 
     [<TestMethod>]
     member this.TestCOR000() =
@@ -95,11 +101,14 @@ type TestParserErrors() =
         let code = LEM000
         printf "Trying %s" code.Message
         let input = """
+        lem x() { true }
+        lem x() { true }
+        lem x() { true } 
         ;
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual(1, result.Length)
+        Assert.AreEqual(2, result.Length)
 
     [<TestMethod>]
     member this.TestPPS000() =
@@ -117,11 +126,14 @@ type TestParserErrors() =
         let code = CNJ000
         printf "Trying %s" code.Message
         let input = """
+        conj x() { true }
+        conj x() { true }
+        conj x() { true } 
         ;
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual(1, result.Length)
+        Assert.AreEqual(2, result.Length)
 
     [<TestMethod>]
     member this.TestVAR000() =
