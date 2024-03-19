@@ -342,7 +342,9 @@ let private getInitiateParsedAst input (uri:Uri) =
         ParsedAst.Status = ParsedAstStatus.Loaded
     }
     
-
+/// Parses the input at Uri and loads all referenced namespaces until
+/// each of them was loaded. If a referenced namespace contains even more uses clauses,
+/// their namespaces will also be loaded. The result list a list of ParsedAst objects.
 let loadAllUsesClauses input uri fplLibUrl = 
     let symbolTable = { ParsedAsts = List<ParsedAst>() }
     let evenMoreParsedAsts = List<ParsedAst>()
