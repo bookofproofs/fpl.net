@@ -29,9 +29,8 @@ namespace FplLS
                     var sourceCode = buffer.ToString();
                     var parserDiagnostics = FplParser.parserDiagnostics;
                     parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
-                    var ast = FplParser.fplParser(sourceCode);
                     var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
-                    FplInterpreter.fplInterpreter(ast, uri, fplLibUri);
+                    FplInterpreter.fplInterpreter(sourceCode, uri, fplLibUri);
                     var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
                     _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
                     {

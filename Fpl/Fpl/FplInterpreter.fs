@@ -4,13 +4,9 @@ open FplParser
 open FplInterpreterUsesClause
 open FParsec
 
-type SymbolTable =
-    { ParsedAsts: ParsedAst list }
-
-let fplInterpreter ast uri fplLibUrl = 
+let fplInterpreter input uri fplLibUrl = 
     let ad = FplParser.parserDiagnostics
-    let parsedAsts = FplInterpreterUsesClause.findParsedAstsMatchingAliasedNamespaceIdentifier "" ast uri fplLibUrl
-    let symbolTable = { ParsedAsts = parsedAsts }
+    let symbolTable = FplInterpreterUsesClause.loadAllUsesClauses input uri fplLibUrl
     symbolTable
 
 let rec eval = function

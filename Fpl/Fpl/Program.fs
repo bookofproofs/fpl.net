@@ -69,7 +69,8 @@ printf "%O" result
 
 ad.PrintDiagnostics
 
-let interpret = FplInterpreter.fplInterpreter result (System.Uri("file:///d%3A/Forschung/fpl.net/theories/Landau/Test.fpl"))
+let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+let interpret = FplInterpreter.fplInterpreter input (System.Uri("file:///d%3A/Forschung/fpl.net/theories/Landau/Test.fpl")) fplLibUrl
 printf "%A" interpret
 
 printf "\n--------------------------------\n"
