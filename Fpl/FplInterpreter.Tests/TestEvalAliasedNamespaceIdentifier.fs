@@ -229,8 +229,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"])
         Assert.AreEqual(2, fplSources.FilePaths.Length)
 
-    [<TestMethod>]
-    member this.TestLoadAllUsesClauses() =
+    member this.PrepareTestLoadAllUsesClauses01() =
         let input = """
             uses Fpl.Commons
             ;"""
@@ -239,6 +238,45 @@ type TestEvalAliasedNamespaceIdentifier() =
         let uri = System.Uri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        loadAllUsesClauses input uri fplLibUrl "Test"
 
-        let result = loadAllUsesClauses input uri fplLibUrl 0
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses01Number() =
+        let result = this.PrepareTestLoadAllUsesClauses01()
         Assert.AreEqual(2, result.ParsedAsts.Count)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses01Id1() =
+        let result = this.PrepareTestLoadAllUsesClauses01()
+        Assert.AreEqual("Test", result.ParsedAsts.Find(fun pa -> pa.EANI.Name = "Test").Id)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses01Id2() =
+        let result = this.PrepareTestLoadAllUsesClauses01()
+        Assert.AreEqual("Fpl.Commons", result.ParsedAsts.Find(fun pa -> pa.EANI.Name = "Fpl.Commons").Id)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses01Id1ReferencedAsts() =
+        let result = this.PrepareTestLoadAllUsesClauses01()
+        // "Test" knows that it references to "Fpl.Commons"
+        Assert.AreEqual(["Fpl.Commons"], result.ParsedAsts.Find(fun pa -> pa.EANI.Name = "Test").ReferencedAsts)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses01Id1ReferencingAsts() =
+        let result = this.PrepareTestLoadAllUsesClauses01()
+        // "Test" knows that nothing is referencing to it
+        Assert.AreEqual([], result.ParsedAsts.Find(fun pa -> pa.EANI.Name = "Test").ReferencingAsts)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses01Id2ReferencedAsts() =
+        let result = this.PrepareTestLoadAllUsesClauses01()
+        // "Fpl.Commons" knows that it doesn't reference to anything
+        Assert.AreEqual([], result.ParsedAsts.Find(fun pa -> pa.EANI.Name = "Fpl.Commons").ReferencedAsts)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses01Id2ReferencingAsts() =
+        let result = this.PrepareTestLoadAllUsesClauses01()
+        // "Fpl.Commons" knows that "Test" is referencing to it
+        Assert.AreEqual(["Test"], result.ParsedAsts.Find(fun pa -> pa.EANI.Name = "Fpl.Commons").ReferencingAsts)
+

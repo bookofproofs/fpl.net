@@ -95,9 +95,9 @@ type ParsedAst =
         FplCode: string // source code of the ast
         Ast: Ast // parsed ast
         Checksum: string // checksum of the parsed ast
-        Id: int // id of this ast giving the order in which it was parsed with other asts
-        mutable ReferencingAsts: int list // list of asts "referencing" this one with a uses clause
-        mutable ReferencedAsts: int list // list of asts "referenced" by this one in a uses clause
+        Id: string // id of this ast giving the order in which it was parsed with other asts
+        mutable ReferencingAsts: string list // list of asts "referencing" this one with a uses clause
+        mutable ReferencedAsts: string list // list of asts "referenced" by this one in a uses clause
         EANI: EvalAliasedNamespaceIdentifier // uses clause that as a first caused this ast to be loaded 
         mutable Status: ParsedAstStatus
     }
@@ -209,7 +209,7 @@ let computeMD5Checksum (input: string) =
     hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
 
    
-let private getParsedAstsFromSources identifier (eani:EvalAliasedNamespaceIdentifier) (source: seq<string>) (getContent: string -> Diagnostics -> EvalAliasedNamespaceIdentifier -> string) =
+let private getParsedAstsFromSources (eani:EvalAliasedNamespaceIdentifier) (source: seq<string>) (getContent: string -> Diagnostics -> EvalAliasedNamespaceIdentifier -> string) =
     source
     |> Seq.choose (fun fileLoc ->
         let fileContent = getContent fileLoc ad eani
@@ -219,8 +219,8 @@ let private getParsedAstsFromSources identifier (eani:EvalAliasedNamespaceIdenti
                 ParsedAst.FplCode = fileContent
                 ParsedAst.Ast = fplParser fileContent
                 ParsedAst.Checksum = computeMD5Checksum fileContent
-                ParsedAst.Id = identifier 
-                ParsedAst.ReferencingAsts = [identifier]
+                ParsedAst.Id = eani.Name 
+                ParsedAst.ReferencingAsts = []
                 ParsedAst.ReferencedAsts = []
                 ParsedAst.EANI = eani 
                 ParsedAst.Status = ParsedAstStatus.Loaded
@@ -262,7 +262,7 @@ let findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list) =
 /// Takes an `ast`, interprets it by extracting the uses clauses and looks for the files 
 /// in the `currentPath` to be loaded and parsed to create even more ASTs.
 /// Returns a list ParseAst objects or adds new diagnostics if the files were not found.
-let findParsedAstsMatchingAliasedNamespaceIdentifier (ident:int) ast (uri: Uri) (fplLibUrl: string)  =
+let findParsedAstsMatchingAliasedNamespaceIdentifier (ident:string) ast (uri: Uri) (fplLibUrl: string)  =
     let ad = FplParser.parserDiagnostics
 
     let parsedAstsMatchingAliasedNamespaceIdentifier (eani:EvalAliasedNamespaceIdentifier) =
@@ -280,8 +280,8 @@ let findParsedAstsMatchingAliasedNamespaceIdentifier (ident:int) ast (uri: Uri) 
             ad.AddDiagnostic diagnostic
             []
         else
-            let astsFromFilePaths = getParsedAstsFromSources ident eani availableSources.FilePaths loadFile
-            let astsFromUrls = getParsedAstsFromSources ident eani availableSources.Urls downloadFile
+            let astsFromFilePaths = getParsedAstsFromSources eani availableSources.FilePaths loadFile
+            let astsFromUrls = getParsedAstsFromSources eani availableSources.Urls downloadFile
             astsFromFilePaths @ astsFromUrls
 
     let eaniList = eval_uses_clause ast 
@@ -298,6 +298,7 @@ type SymbolTable =
 /// We will put it in a collection, in which even more ParseAsts will 
 /// be added if this ast contains some 'uses' clauses.
 let private getInitiateParsedAst input (uri:Uri) = 
+    let name = Path.GetFileNameWithoutExtension(uri.LocalPath)
     let initialEvaAlias = {
         EvalAlias.StartPos = Position ("",0,1,1)
         EvalAlias.EndPos = Position ("",0,1,1)
@@ -307,14 +308,14 @@ let private getInitiateParsedAst input (uri:Uri) =
         EvalAliasedNamespaceIdentifier.StartPos = Position ("",0,1,1)
         EvalAliasedNamespaceIdentifier.EndPos = Position ("",0,1,1)
         EvalAliasedNamespaceIdentifier.EvalAlias = initialEvaAlias
-        EvalAliasedNamespaceIdentifier.PascalCaseIdList = []
+        EvalAliasedNamespaceIdentifier.PascalCaseIdList = name.Split('.') |> Array.toList
     }
     {
         ParsedAst.UriPath = uri.AbsolutePath
         ParsedAst.FplCode = input
         ParsedAst.Ast = fplParser input
         ParsedAst.Checksum = computeMD5Checksum input
-        ParsedAst.Id = 0
+        ParsedAst.Id = initialEvalAliasedNamespaceIdentifier.Name
         ParsedAst.ReferencingAsts = []
         ParsedAst.ReferencedAsts = []
         ParsedAst.EANI = initialEvalAliasedNamespaceIdentifier 
@@ -323,22 +324,23 @@ let private getInitiateParsedAst input (uri:Uri) =
     
 
 let loadAllUsesClauses input uri fplLibUrl parsedAstId = 
-    let mutable continueLooping = true
     let symbolTable = { ParsedAsts = List<ParsedAst>() }
-    symbolTable.ParsedAsts.Add(getInitiateParsedAst input uri)
-    while continueLooping do
-        continueLooping <- false
-        let evenMoreParsedAsts = List<ParsedAst>()
-        symbolTable.ParsedAsts 
+    let evenMoreParsedAsts = List<ParsedAst>()
+    evenMoreParsedAsts.Add(getInitiateParsedAst input uri)
+    while evenMoreParsedAsts.Count > 0 do
+        symbolTable.ParsedAsts.AddRange(evenMoreParsedAsts)
+        evenMoreParsedAsts.Clear()
+        symbolTable.ParsedAsts
         |> Seq.iter (fun pa -> 
             if pa.Status = ParsedAstStatus.Loaded then
-                continueLooping <- true
-                let newPa = findParsedAstsMatchingAliasedNamespaceIdentifier (parsedAstId + 1) pa.Ast uri fplLibUrl
-                pa.ReferencedAsts <- pa.ReferencedAsts @ [parsedAstId + 1]
-                newPa |> Seq.iter (fun subPa -> subPa.ReferencingAsts <- pa.ReferencingAsts @ [parsedAstId])
+                let newPa = findParsedAstsMatchingAliasedNamespaceIdentifier pa.EANI.Name pa.Ast uri fplLibUrl
+                newPa |> Seq.iter 
+                    (fun subPa -> 
+                        subPa.ReferencingAsts <- subPa.ReferencingAsts @ [pa.EANI.Name]
+                        pa.ReferencedAsts <- pa.ReferencedAsts @ [subPa.EANI.Name]
+                    )
                 pa.Status <- ParsedAstStatus.UsesClausesEvaluated
                 evenMoreParsedAsts.AddRange(newPa)
         )
         |> ignore
-        symbolTable.ParsedAsts.AddRange(evenMoreParsedAsts)
     symbolTable
