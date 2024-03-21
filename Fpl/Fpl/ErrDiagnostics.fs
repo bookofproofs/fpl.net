@@ -72,6 +72,7 @@ type DiagnosticCode =
     | NSP001 of string * string
     | NSP002 of string * string
     | NSP003 of string
+    | NSP004 of string
     member this.Code = 
         match this with
             // parser error messages
@@ -107,7 +108,8 @@ type DiagnosticCode =
             | NSP000 _ -> "NSP000"
             | NSP001 _ -> "NSP001"
             | NSP002 (_, _) -> "NSP002"
-            | NSP003 _-> "NSP003"
+            | NSP003 _ -> "NSP003"
+            | NSP004 _ -> "NSP004"
     member this.Message = 
         match this with
             // parser error messages
@@ -144,6 +146,7 @@ type DiagnosticCode =
             | NSP001 (fileName, innerErrMsg) -> sprintf "%s found but could not be loaded: %s" fileName innerErrMsg
             | NSP002 (url, innerErrMsg) -> sprintf "%s found but could not be downloaded: %s" url innerErrMsg
             | NSP003 alias -> sprintf "Alias %s appeared previously in this namespace" alias
+            | NSP004 name -> sprintf "Circular import in %s detected" name
 
 type DiagnosticEmitter =
     // replace your language-specific emitters here

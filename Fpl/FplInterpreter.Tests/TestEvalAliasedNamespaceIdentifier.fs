@@ -106,7 +106,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAliasedNamespaceIdentifier.EndPos = pos 
                 EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
                 EvalAliasedNamespaceIdentifier.PascalCaseIdList = [] }
-        let libMap = downloadLibMap url ad e
+        let libMap = downloadLibMap url e
         Assert.IsTrue(libMap.Length > 0)
 
     [<TestMethod>]
@@ -125,7 +125,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAliasedNamespaceIdentifier.EndPos = pos 
                 EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
                 EvalAliasedNamespaceIdentifier.PascalCaseIdList = [] }
-        let libMap = downloadLibMap url ad e
+        let libMap = downloadLibMap url e
         Assert.AreEqual(ad.CountDiagnostics, 0)
 
 
@@ -169,7 +169,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
-        let sources = acquireSources eval uri fplLibUrl ad
+        let sources = acquireSources eval uri fplLibUrl 
         Assert.AreEqual(expected, sources.Urls.Length)
 
     [<DataRow("*", "Test1")>]
@@ -206,7 +206,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
         // perform test
-        let sources = acquireSources eval uri fplLibUrl ad
+        let sources = acquireSources eval uri fplLibUrl 
         Assert.AreEqual(sources.Length, 1)
 
         // clean up test

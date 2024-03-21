@@ -96,13 +96,14 @@ type ParsedAst =
         Ast: Ast // parsed ast
         Checksum: string // checksum of the parsed ast
         Id: string // id of this ast giving the order in which it was parsed with other asts
+        mutable TopologicalSorting: int // an order in which the ParsedAsts have to be interpreted to avoid undeclared identifiers (undefined if a circle was caused by uses clauses)
         mutable ReferencingAsts: string list // list of asts "referencing" this one with a uses clause
         mutable ReferencedAsts: string list // list of asts "referenced" by this one in a uses clause
         EANI: EvalAliasedNamespaceIdentifier // uses clause that as a first caused this ast to be loaded 
         mutable Status: ParsedAstStatus
     }
 
-let private downloadFile url (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifier) =
+let private downloadFile url (e:EvalAliasedNamespaceIdentifier) =
     let client = new HttpClient()
     try
         async {
@@ -120,10 +121,10 @@ let private downloadFile url (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifier
                 Diagnostic.Code = NSP002 (url, ex.Message)
                 Diagnostic.Alternatives = None 
             }
-        ad.AddDiagnostic diagnostic 
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic 
         ""
 
-let private loadFile fileName (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifier) =
+let private loadFile fileName (e:EvalAliasedNamespaceIdentifier) =
     try
         File.ReadAllText fileName
     with
@@ -137,7 +138,7 @@ let private loadFile fileName (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifie
                 Diagnostic.Code = NSP001 (fileName, ex.Message)
                 Diagnostic.Alternatives = None
             }
-        ad.AddDiagnostic diagnostic
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
         ""
 
 let private wildcardToRegex (wildcard : string) =
@@ -165,8 +166,8 @@ let createLibSubfolder (uri: Uri) =
     (directoryPath, libDirectoryPath)
 
 
-let downloadLibMap (currentWebRepo: string) (ad: Diagnostics) (e:EvalAliasedNamespaceIdentifier) =
-    let libMap = downloadFile (currentWebRepo + "/libmap.txt") ad e
+let downloadLibMap (currentWebRepo: string) (e:EvalAliasedNamespaceIdentifier) =
+    let libMap = downloadFile (currentWebRepo + "/libmap.txt") e
     libMap    
 
 /// A type that encapsulates the sources found for a uses clause 
@@ -192,11 +193,11 @@ type FplSources(strings: string list) =
 /// Acquires FPL sources that can be found with a single uses clause.
 /// They are searched for in the current directory of the file, in the lib subfolder
 /// as well as in the web resource 
-let acquireSources (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (fplLibUrl: string) (ad: Diagnostics) =
+let acquireSources (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (fplLibUrl: string) =
     let (directoryPath,libDirectoryPath) = createLibSubfolder uri
     let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, e.FileNamePattern) |> Seq.toList
     let fileNamesInLibSubDir = Directory.EnumerateFiles(libDirectoryPath, e.FileNamePattern) |> Seq.toList
-    let libMap = downloadLibMap fplLibUrl ad e
+    let libMap = downloadLibMap fplLibUrl e
     let filesToDownload = findFilesInLibMapWithWildcard libMap e.FileNamePattern 
                             |> List.map (fun s -> fplLibUrl + "/" + s)
     FplSources(fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload)
@@ -214,7 +215,7 @@ type SymbolTable =
 let private getParsedAstsFromSources 
     (eani:EvalAliasedNamespaceIdentifier) 
     (sources: seq<string>) (
-    getContent: string -> Diagnostics -> EvalAliasedNamespaceIdentifier -> string) 
+    getContent: string -> EvalAliasedNamespaceIdentifier -> string) 
     (alreadyLoaded:List<ParsedAst>)
     parsedAst =
     let alreadyLoadedIds = alreadyLoaded |> Seq.map (fun pa -> pa.Id) |> Seq.toList
@@ -235,7 +236,7 @@ let private getParsedAstsFromSources
 
     filteredSources
     |> Seq.choose (fun fileLoc ->
-        let fileContent = getContent fileLoc ad eani
+        let fileContent = getContent fileLoc eani
         if fileContent <> "" then
             Some { 
                 ParsedAst.UriPath = fileLoc
@@ -245,6 +246,7 @@ let private getParsedAstsFromSources
                 ParsedAst.Id = eani.Name 
                 ParsedAst.ReferencingAsts = [parsedAst.Id]
                 ParsedAst.ReferencedAsts = []
+                ParsedAst.TopologicalSorting = 0
                 ParsedAst.EANI = eani 
                 ParsedAst.Status = ParsedAstStatus.Loaded
             }
@@ -289,7 +291,7 @@ let findParsedAstsMatchingAliasedNamespaceIdentifier parsedAst (uri: Uri) (fplLi
     let ad = FplParser.parserDiagnostics
 
     let parsedAstsMatchingAliasedNamespaceIdentifier (eani:EvalAliasedNamespaceIdentifier) =
-        let availableSources = acquireSources eani uri fplLibUrl ad
+        let availableSources = acquireSources eani uri fplLibUrl 
         if availableSources.NoneFound then 
             let diagnostic =
                 { 
@@ -338,10 +340,33 @@ let private getInitiateParsedAst input (uri:Uri) =
         ParsedAst.Id = initialEvalAliasedNamespaceIdentifier.Name
         ParsedAst.ReferencingAsts = []
         ParsedAst.ReferencedAsts = []
+        ParsedAst.TopologicalSorting = 0
         ParsedAst.EANI = initialEvalAliasedNamespaceIdentifier 
         ParsedAst.Status = ParsedAstStatus.Loaded
     }
     
+let private isCircular (parsedAsts:List<ParsedAst>) = 
+    let l0 = Stack<ParsedAst>()
+    let igrad = Dictionary<string,int>()
+    parsedAsts |> Seq.map (fun pa -> 
+        igrad.Add(pa.Id, pa.ReferencingAsts.Length)
+        if pa.ReferencingAsts.Length = 0 then l0.Push(pa)
+    ) |> ignore
+    let mutable i = -1
+    let mutable isCircular = false
+    while not isCircular && i < parsedAsts.Count do
+        i <- i + 1 
+        isCircular <- l0.Count = 0 
+        if not isCircular then
+            let v = l0.Pop()
+            v.TopologicalSorting <- i
+            v.ReferencedAsts |> List.iter (fun name -> 
+                igrad[name] <- igrad[name] - 1
+                if igrad[name] = 0 then
+                    l0.Push(parsedAsts.Find(fun pa -> pa.Id = name))
+            )
+    isCircular
+
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
@@ -355,10 +380,23 @@ let loadAllUsesClauses input uri fplLibUrl =
         symbolTable.ParsedAsts
         |> Seq.iter (fun pa -> 
             if pa.Status = ParsedAstStatus.Loaded then
-                let alreadyLoaded = symbolTable.ParsedAsts |> Seq.map (fun pa1 -> pa1.Id) |> Seq.toList
                 let newPa = findParsedAstsMatchingAliasedNamespaceIdentifier pa uri fplLibUrl symbolTable.ParsedAsts
                 pa.Status <- ParsedAstStatus.UsesClausesEvaluated
                 evenMoreParsedAsts.AddRange(newPa)
         )
         |> ignore
+    if isCircular symbolTable.ParsedAsts then
+        let circleStart = symbolTable.ParsedAsts.Find(fun pa -> pa.ReferencingAsts.Length = 0)
+        let diagnostic =
+                { 
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = circleStart.EANI.StartPos
+                    Diagnostic.EndPos = circleStart.EANI.EndPos
+                    Diagnostic.Code = NSP004 circleStart.Id
+                    Diagnostic.Alternatives = None
+                }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
     symbolTable
+

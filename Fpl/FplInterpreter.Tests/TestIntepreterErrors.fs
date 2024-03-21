@@ -19,9 +19,9 @@ type TestInterpreterErrors() =
         let input = """
         uses Bla 
         ;"""
-        let fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        let interpreter = FplInterpreter.fplInterpreter input uri fplLibUri
+        FplInterpreter.fplInterpreter input uri fplLibUrl |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -33,9 +33,27 @@ type TestInterpreterErrors() =
         uses Fpl1 alias T1
         uses Fpl2 alias T1
         ;"""
-        let fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        let interpreter = FplInterpreter.fplInterpreter input uri fplLibUri
+        FplInterpreter.fplInterpreter input uri fplLibUrl |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
+    member this.PrepareTestNSP004Circular() =
+        let input = """
+            uses Test
+            ;"""
+        let pathToFile =
+            Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl")
+        let uri = System.Uri(pathToFile)
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        FplInterpreter.fplInterpreter input uri fplLibUrl
+
+    [<TestMethod>]
+    member this.TestNSP004Cicrular() =
+        let code = NSP004 "Test"
+        printf "Trying %s" code.Message
+        this.PrepareTestNSP004Circular() |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(1, result.Length)
