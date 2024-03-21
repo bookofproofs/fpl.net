@@ -4,6 +4,9 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.5.2-4
+* Bugfix spawn UNKNOWN
+
 ## 1.5.1
 * Migration to .NET 8.0
 * Bugfix duplicates in auto-completion items 

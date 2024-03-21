@@ -34,7 +34,7 @@ function removeDirectorySync(path) {
             if (directoryOrFileExists(path)) 
             {
                 const fs = require('fs');
-                fs.rmdirSync(path, { recursive: true });
+                fs.rmSync(path, { recursive: true });
             }
             resolve("directory removed");
         }
@@ -113,16 +113,12 @@ function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
                             resolve('runtime ' + runtimeName + ' installed successfully');
                         }
                         else if (path.extname(pathToDownloadedFile)=='.zip') {
-                            const unzipper = require('unzipper');
-                            // Extract the downloaded runtime zip file into the same directory and delete it after extraction
-                            fs.createReadStream(pathToDownloadedFile)
-                                .pipe(unzipper.Extract({ path: downloadPath }))
-                                .on('close', () => {
-                                    // remove the zip file
-                                    deleteFile(pathToDownloadedFile);
-                                    log2Console('runtime ' + runtimeName + ' installed successfully', false);
-                                    resolve('runtime ' + runtimeName + ' installed successfully');
-                                });
+                            const AdmZip = require('adm-zip');
+                            var zip = new AdmZip(pathToDownloadedFile);
+                            zip.extractAllTo(downloadPath, true)
+                            deleteFile(pathToDownloadedFile);
+                            log2Console('runtime ' + runtimeName + ' installed successfully', false);
+                            resolve('runtime ' + runtimeName + ' installed successfully');
                         }
                         else
                         {
@@ -146,13 +142,13 @@ function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
  */
 function dispatchRuntime(runtimeName) {
     if (runtimeName == 'win32-x64') {
-        return ['https://download.visualstudio.microsoft.com/download/pr/8abf4502-4a22-4a2e-bea0-9fe73379d62e/88146c1d41e53e08f9dbc92a217143de', 'dotnet-runtime-8.0.2-win-x64.zip'];
+        return ['https://download.visualstudio.microsoft.com/download/pr/420ca01f-4528-43c0-893b-321ed0f9087a/c340930ab3e48da2abe868244415c846', 'dotnet-runtime-8.0.3-win-x64.zip'];
     }
     else if (runtimeName == "linux-x64") {
-        return ['https://download.visualstudio.microsoft.com/download/pr/307e4bf7-53c1-4b03-a2e5-379151ab3a04/140e7502609d45dfd83e4750b4bb5178', 'dotnet-runtime-8.0.2-linux-x64.tar.gz'];
+        return ['https://download.visualstudio.microsoft.com/download/pr/ed0c9129-950a-48db-80be-e770daf2db41/53879e5802bc6e76bac55c1b8154ed06', 'dotnet-runtime-8.0.3-linux-x64.tar.gz'];
     }
     else if (runtimeName == "darwin-x64") {
-        return ['https://download.visualstudio.microsoft.com/download/pr/414af43f-fdc6-4e8e-bbff-8b544a6627a8/0719a2eafa1d0d5f73ee0a7aae4ce670', 'dotnet-runtime-8.0.2-osx-x64.tar.gz'];
+        return ['https://download.visualstudio.microsoft.com/download/pr/564a929b-4f15-490b-895e-5260338cbae1/1db7fd97d0907d3911ac3e4dda32fbb2', 'dotnet-runtime-8.0.3-osx-x64.tar.gz'];
     }
     else {
         let errorMsg = "Unfortunately, no runtime found for your system " + runtimeName;
