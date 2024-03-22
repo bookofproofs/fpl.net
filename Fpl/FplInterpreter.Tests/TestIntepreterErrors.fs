@@ -39,21 +39,51 @@ type TestInterpreterErrors() =
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
-    member this.PrepareTestNSP004Circular() =
-        let input = """
-            uses Test
-            ;"""
+    member this.PrepareTestNSP004CircularAA(delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let A = """uses Test1_A;"""
         let pathToFile =
-            Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl")
+            Path.Combine(Directory.GetCurrentDirectory(), "Test1_A.fpl")
+        File.WriteAllText(pathToFile, A)
         let uri = System.Uri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        FplInterpreter.fplInterpreter input uri fplLibUrl
+        if delete then File.Delete(pathToFile)
+        FplInterpreter.fplInterpreter A uri fplLibUrl
+
 
     [<TestMethod>]
-    member this.TestNSP004Cicrular() =
-        let code = NSP004 "Test"
+    member this.TestNSP004CircularAA() =
+        let code = NSP004 "Test1_A -> Test1_A"
         printf "Trying %s" code.Message
-        this.PrepareTestNSP004Circular() |> ignore
+        this.PrepareTestNSP004CircularAA(false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
+        this.PrepareTestNSP004CircularAA(true) |> ignore
+
+    member this.PrepareTestNSP004CircularABCA(delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let A = """uses Test2_B;"""
+        let B = """uses Test2_C;"""
+        let C = """uses Test2_A;"""
+        let currDir = Directory.GetCurrentDirectory()
+        File.WriteAllText(Path.Combine(currDir, "Test2_A.fpl"), A)
+        File.WriteAllText(Path.Combine(currDir, "Test2_B.fpl"), B)
+        File.WriteAllText(Path.Combine(currDir, "Test2_C.fpl"), C)
+        let uri = System.Uri(Path.Combine(currDir, "Test2_A.fpl"))
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            File.Delete(Path.Combine(currDir, "Test2_A.fpl"))
+            File.Delete(Path.Combine(currDir, "Test2_B.fpl"))
+            File.Delete(Path.Combine(currDir, "Test2_C.fpl"))
+        FplInterpreter.fplInterpreter A uri fplLibUrl
+
+    [<TestMethod>]
+    member this.TestNSP004CircularABCA() =
+        let code = NSP004 "Test2_A -> Test2_B -> Test2_C -> Test2_A"
+        printf "Trying %s" code.Message
+        this.PrepareTestNSP004CircularABCA(false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(1, result.Length)
+        this.PrepareTestNSP004CircularABCA(true) |> ignore

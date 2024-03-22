@@ -367,13 +367,29 @@ let private isCircular (parsedAsts:List<ParsedAst>) =
             )
     isCircular
 
+let private findCycle (parsedAsts:List<ParsedAst>) =  
+    let rec dfs visited path node =
+        if List.contains node.Id path then
+            Some (node.Id :: path)
+        elif Set.contains node.Id visited then
+            None
+        else
+            let visited = Set.add node.Id visited
+            let path = node.Id :: path
+            parsedAsts
+            |> Seq.toList
+            |> List.choose (fun x -> if List.contains x.Id node.ReferencingAsts then Some x else None)
+            |> List.tryPick (dfs visited path)
+    parsedAsts |> Seq.toList |> List.tryPick (dfs Set.empty [])
+
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
 let loadAllUsesClauses input uri fplLibUrl = 
     let symbolTable = { ParsedAsts = List<ParsedAst>() }
     let evenMoreParsedAsts = List<ParsedAst>()
-    evenMoreParsedAsts.Add(getInitiateParsedAst input uri)
+    let initParsedAst = getInitiateParsedAst input uri
+    evenMoreParsedAsts.Add(initParsedAst)
     while evenMoreParsedAsts.Count > 0 do
         symbolTable.ParsedAsts.AddRange(evenMoreParsedAsts)
         evenMoreParsedAsts.Clear()
@@ -386,17 +402,23 @@ let loadAllUsesClauses input uri fplLibUrl =
         )
         |> ignore
     if isCircular symbolTable.ParsedAsts then
-        let circleStart = symbolTable.ParsedAsts.Find(fun pa -> pa.ReferencingAsts.Length = 0)
-        let diagnostic =
-                { 
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = circleStart.EANI.StartPos
-                    Diagnostic.EndPos = circleStart.EANI.EndPos
-                    Diagnostic.Code = NSP004 circleStart.Id
-                    Diagnostic.Alternatives = None
-                }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+        let cycle = findCycle symbolTable.ParsedAsts
+        match cycle with
+        | Some lst -> 
+            let path = String.concat " -> " lst
+            let pa = symbolTable.ParsedAsts |> Seq.filter (fun pa -> pa.Id = lst.Head) |> Seq.head
+            let diagnostic =
+                    { 
+                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+                        Diagnostic.Severity = DiagnosticSeverity.Error
+                        Diagnostic.StartPos = pa.EANI.StartPos
+                        Diagnostic.EndPos = pa.EANI.EndPos
+                        Diagnostic.Code = NSP004 path
+                        Diagnostic.Alternatives = None
+                    }
+            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+        | None -> ()
 
     symbolTable
 
