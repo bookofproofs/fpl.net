@@ -9,7 +9,7 @@
       "FplLS/1.0.0": {
         "dependencies": {
           "Fpl": "1.0.0",
-          "Microsoft.NET.ILLink.Tasks": "8.0.1",
+          "Microsoft.NET.ILLink.Tasks": "8.0.0",
           "OmniSharp.Extensions.LanguageServer": "0.13.1"
         },
         "runtime": {
@@ -110,7 +110,7 @@
           }
         }
       },
-      "Microsoft.NET.ILLink.Tasks/8.0.1": {},
+      "Microsoft.NET.ILLink.Tasks/8.0.0": {},
       "Microsoft.NET.Test.Sdk/17.8.0": {
         "dependencies": {
           "Microsoft.CodeCoverage": "17.8.0",
@@ -346,12 +346,12 @@
       "path": "microsoft.extensions.primitives/2.0.0",
       "hashPath": "microsoft.extensions.primitives.2.0.0.nupkg.sha512"
     },
-    "Microsoft.NET.ILLink.Tasks/8.0.1": {
+    "Microsoft.NET.ILLink.Tasks/8.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ADdJXuKNjwZDfBmybMnpvwd5CK3gp92WkWqqeQhW4W+q4MO3Qaa9QyW2DcFLAvCDMcCWxT5hRXqGdv13oon7nA==",
-      "path": "microsoft.net.illink.tasks/8.0.1",
-      "hashPath": "microsoft.net.illink.tasks.8.0.1.nupkg.sha512"
+      "sha512": "sha512-B3etT5XQ2nlWkZGO2m/ytDYrOmSsQG1XNBaM6ZYlX5Ch/tDrMFadr0/mK6gjZwaQc55g+5+WZMw4Cz3m8VEF7g==",
+      "path": "microsoft.net.illink.tasks/8.0.0",
+      "hashPath": "microsoft.net.illink.tasks.8.0.0.nupkg.sha512"
     },
     "Microsoft.NET.Test.Sdk/17.8.0": {
       "type": "package",

@@ -99,7 +99,7 @@ type ParsedAst =
         mutable TopologicalSorting: int // an order in which the ParsedAsts have to be interpreted to avoid undeclared identifiers (undefined if a circle was caused by uses clauses)
         mutable ReferencingAsts: string list // list of asts "referencing" this one with a uses clause
         mutable ReferencedAsts: string list // list of asts "referenced" by this one in a uses clause
-        EANI: EvalAliasedNamespaceIdentifier // uses clause that as a first caused this ast to be loaded 
+        mutable EANIList: EvalAliasedNamespaceIdentifier list // evaluated uses clauses found in the Ast 
         mutable Status: ParsedAstStatus
     }
 
@@ -214,6 +214,7 @@ type SymbolTable =
     
 let private getParsedAstsFromSources 
     (eani:EvalAliasedNamespaceIdentifier) 
+    (eaniList:EvalAliasedNamespaceIdentifier list) 
     (sources: seq<string>) (
     getContent: string -> EvalAliasedNamespaceIdentifier -> string) 
     (alreadyLoaded:List<ParsedAst>)
@@ -247,7 +248,7 @@ let private getParsedAstsFromSources
                 ParsedAst.ReferencingAsts = [parsedAst.Id]
                 ParsedAst.ReferencedAsts = []
                 ParsedAst.TopologicalSorting = 0
-                ParsedAst.EANI = eani 
+                ParsedAst.EANIList = eaniList 
                 ParsedAst.Status = ParsedAstStatus.Loaded
             }
         else
@@ -290,7 +291,7 @@ let findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list) =
 let findParsedAstsMatchingAliasedNamespaceIdentifier parsedAst (uri: Uri) (fplLibUrl: string) (alreadyLoaded:List<ParsedAst>) =
     let ad = FplParser.parserDiagnostics
 
-    let parsedAstsMatchingAliasedNamespaceIdentifier (eani:EvalAliasedNamespaceIdentifier) =
+    let parsedAstsMatchingAliasedNamespaceIdentifier eaniList (eani:EvalAliasedNamespaceIdentifier) =
         let availableSources = acquireSources eani uri fplLibUrl 
         if availableSources.NoneFound then 
             let diagnostic =
@@ -305,8 +306,8 @@ let findParsedAstsMatchingAliasedNamespaceIdentifier parsedAst (uri: Uri) (fplLi
             ad.AddDiagnostic diagnostic
             []
         else
-            let astsFromFilePaths = getParsedAstsFromSources eani availableSources.FilePaths loadFile alreadyLoaded parsedAst
-            let astsFromUrls = getParsedAstsFromSources eani availableSources.Urls downloadFile alreadyLoaded parsedAst
+            let astsFromFilePaths = getParsedAstsFromSources eani eaniList availableSources.FilePaths loadFile alreadyLoaded parsedAst
+            let astsFromUrls = getParsedAstsFromSources eani eaniList availableSources.Urls downloadFile alreadyLoaded parsedAst
             astsFromFilePaths @ astsFromUrls
 
     let eaniList = eval_uses_clause parsedAst.Ast 
@@ -314,13 +315,16 @@ let findParsedAstsMatchingAliasedNamespaceIdentifier parsedAst (uri: Uri) (fplLi
 
     eaniList 
     |> List.map (fun (eval:EvalAliasedNamespaceIdentifier) -> eval)
-    |> List.collect parsedAstsMatchingAliasedNamespaceIdentifier
+    |> List.collect (parsedAstsMatchingAliasedNamespaceIdentifier eaniList)
 
 /// Creates an initial ParsedAst for the symbol table. 
 /// We will put it in a collection, in which even more ParseAsts will 
 /// be added if this ast contains some 'uses' clauses.
 let private getInitiateParsedAst input (uri:Uri) = 
     let name = Path.GetFileNameWithoutExtension(uri.LocalPath)
+    let ast = fplParser input
+    let eaniList = eval_uses_clause ast 
+
     let initialEvaAlias = {
         EvalAlias.StartPos = Position ("",0,1,1)
         EvalAlias.EndPos = Position ("",0,1,1)
@@ -335,13 +339,13 @@ let private getInitiateParsedAst input (uri:Uri) =
     {
         ParsedAst.UriPath = uri.AbsolutePath
         ParsedAst.FplCode = input
-        ParsedAst.Ast = fplParser input
+        ParsedAst.Ast = ast
         ParsedAst.Checksum = computeMD5Checksum input
         ParsedAst.Id = initialEvalAliasedNamespaceIdentifier.Name
         ParsedAst.ReferencingAsts = []
         ParsedAst.ReferencedAsts = []
         ParsedAst.TopologicalSorting = 0
-        ParsedAst.EANI = initialEvalAliasedNamespaceIdentifier 
+        ParsedAst.EANIList = eaniList 
         ParsedAst.Status = ParsedAstStatus.Loaded
     }
     
@@ -406,13 +410,15 @@ let loadAllUsesClauses input uri fplLibUrl =
         match cycle with
         | Some lst -> 
             let path = String.concat " -> " lst
-            let pa = symbolTable.ParsedAsts |> Seq.filter (fun pa -> pa.Id = lst.Head) |> Seq.head
+            let parsedAstThatStartsTheCycle = symbolTable.ParsedAsts |> Seq.filter (fun pa -> pa.Id = lst.Head) |> Seq.head
+            let circularReferencedName = List.item 1 lst
+            let circularEaniReference = parsedAstThatStartsTheCycle.EANIList |> List.filter (fun eani -> eani.Name = circularReferencedName) |> List.head
             let diagnostic =
                     { 
                         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                         Diagnostic.Severity = DiagnosticSeverity.Error
-                        Diagnostic.StartPos = pa.EANI.StartPos
-                        Diagnostic.EndPos = pa.EANI.EndPos
+                        Diagnostic.StartPos = circularEaniReference.StartPos
+                        Diagnostic.EndPos = circularEaniReference.EndPos
                         Diagnostic.Code = NSP004 path
                         Diagnostic.Alternatives = None
                     }

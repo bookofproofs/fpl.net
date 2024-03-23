@@ -25,7 +25,6 @@
 # un-ignore only the FplLS subdirectory and its subdirectories
 !/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLS/
 !/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLS/**
-copydlls.bat
 /Fpl/FplLSTests/obj/Debug/net6.0
 /Fpl/FplLSTests/obj/Release/net6.0
 /Fpl/FplLSTests/obj/Debug/net8.0
