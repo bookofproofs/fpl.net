@@ -91,10 +91,10 @@ type ParsedAstStatus =
 /// A record type to store all the necessary fields for parsed namespaces in FPL code
 type ParsedAst =
     { 
-        UriPath: string // source of the ast
-        FplCode: string // source code of the ast
-        Ast: Ast // parsed ast
-        Checksum: string // checksum of the parsed ast
+        mutable UriPath: string // source of the ast
+        mutable FplSourceCode: string // source code of the ast
+        mutable Ast: Ast // parsed ast
+        mutable Checksum: string // checksum of the parsed ast
         Id: string // id of this ast giving the order in which it was parsed with other asts
         mutable TopologicalSorting: int // an order in which the ParsedAsts have to be interpreted to avoid undeclared identifiers (undefined if a circle was caused by uses clauses)
         mutable ReferencingAsts: string list // list of asts "referencing" this one with a uses clause
@@ -212,49 +212,69 @@ let computeMD5Checksum (input: string) =
 type SymbolTable =
     { ParsedAsts: List<ParsedAst> }
     
+let tryFindParsedAstByName identifier (parsedAsts:List<ParsedAst>) =
+    if parsedAsts.Exists(fun pa -> pa.Id = identifier) then
+        Some(parsedAsts.Find(fun pa -> pa.Id = identifier))
+    else
+        None
+
+let tryFindParsedAstLoaded (parsedAsts:List<ParsedAst>) =
+    if parsedAsts.Exists(fun pa -> pa.Status = ParsedAstStatus.Loaded) then
+        Some(parsedAsts.Find(fun pa -> pa.Status = ParsedAstStatus.Loaded))
+    else
+        None
+
+
+/// For a given EvalAliasedNamespaceIdentifier, a sequence of FplSources was found (these can be either absolute file paths or URLs).
+/// 
+/// EvalAliasedNamespaceIdentifier  given EvalAliasedNamespaceIdentifier and a 
+/// Generates a list of ParsedAsts in a collection, in which even more ParseAsts will 
+/// be added if this ast contains some 'uses' clauses.
 let private getParsedAstsFromSources 
     (eani:EvalAliasedNamespaceIdentifier) 
-    (eaniList:EvalAliasedNamespaceIdentifier list) 
-    (sources: seq<string>) (
+    (fplSources: seq<string>) (
     getContent: string -> EvalAliasedNamespaceIdentifier -> string) 
-    (alreadyLoaded:List<ParsedAst>)
-    parsedAst =
-    let alreadyLoadedIds = alreadyLoaded |> Seq.map (fun pa -> pa.Id) |> Seq.toList
-    let filteredSources =
-        Seq.filter (fun (s:string) -> 
-            let name = Path.GetFileNameWithoutExtension(s)
-            not (List.contains name alreadyLoadedIds)
-        ) sources
+    (alreadyLoaded:List<ParsedAst>) =
 
-    // complement referenced asts 
-    if not (List.contains eani.Name parsedAst.ReferencedAsts) then 
-        parsedAst.ReferencedAsts <- parsedAst.ReferencedAsts @ [eani.Name]
-    // complement referencing asts in the specific parsedAst even if it was already loaded
-    if (List.contains eani.Name alreadyLoadedIds) then
-        let referencedPa = alreadyLoaded.Find(fun pa -> pa.Id = eani.Name)
-        if not (List.contains parsedAst.Id referencedPa.ReferencingAsts) then 
-            referencedPa.ReferencingAsts <- referencedPa.ReferencingAsts @ [parsedAst.Id]
-
-    filteredSources
-    |> Seq.choose (fun fileLoc ->
+    fplSources
+    |> Seq.iter (fun fileLoc ->
+        // load the content of every source
         let fileContent = getContent fileLoc eani
-        if fileContent <> "" then
-            Some { 
+        let idAlreadyFound = tryFindParsedAstByName eani.Name alreadyLoaded
+        let checkSum = computeMD5Checksum fileContent
+        match idAlreadyFound with
+        | Some pa -> 
+            if pa.Checksum <> checkSum then
+                // if there ist a Parsed Ast with the same Name as the eani.Name 
+                // and its checksum differs from the previous checksum 
+                // then replace the ast, checksum, location, sourcecode, the 
+                pa.Ast <- fplParser fileContent
+                pa.UriPath <- fileLoc
+                pa.FplSourceCode <- fileContent
+                pa.Checksum <- checkSum
+                pa.EANIList <- []
+                pa.Status <- ParsedAstStatus.Loaded
+
+            else
+                // if the checksum is the same, do not replace anything
+                ()
+        | None -> 
+            // add a new ParsedAst
+            let pa = { 
                 ParsedAst.UriPath = fileLoc
-                ParsedAst.FplCode = fileContent
+                ParsedAst.FplSourceCode = fileContent
                 ParsedAst.Ast = fplParser fileContent
-                ParsedAst.Checksum = computeMD5Checksum fileContent
+                ParsedAst.Checksum = checkSum
                 ParsedAst.Id = eani.Name 
-                ParsedAst.ReferencingAsts = [parsedAst.Id]
+                ParsedAst.ReferencingAsts = []
                 ParsedAst.ReferencedAsts = []
                 ParsedAst.TopologicalSorting = 0
-                ParsedAst.EANIList = eaniList 
+                ParsedAst.EANIList = [] 
                 ParsedAst.Status = ParsedAstStatus.Loaded
             }
-        else
-            None
-    ) 
-    |> Seq.toList
+            alreadyLoaded.Add(pa)
+        ()
+    ) |> ignore
 
 
 let findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list) =
@@ -285,41 +305,26 @@ let findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list) =
     |> List.choose (fun (alias, instances) -> if List.length instances > 1 then Some alias else None)
 
 
-/// Takes an `ast`, interprets it by extracting the uses clauses and looks for the files 
-/// in the `currentPath` to be loaded and parsed to create even more ASTs.
-/// Returns a list ParseAst objects or adds new diagnostics if the files were not found.
-let findParsedAstsMatchingAliasedNamespaceIdentifier parsedAst (uri: Uri) (fplLibUrl: string) (alreadyLoaded:List<ParsedAst>) =
-    let ad = FplParser.parserDiagnostics
+let getParsedAstsMatchingAliasedNamespaceIdentifier (uri: Uri) (fplLibUrl: string) (alreadyLoaded:List<ParsedAst>) (eani:EvalAliasedNamespaceIdentifier) =
+    let availableSources = acquireSources eani uri fplLibUrl 
+    if availableSources.NoneFound then 
+        let diagnostic =
+            { 
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = eani.StartPos
+                Diagnostic.EndPos = eani.EndPos
+                Diagnostic.Code = NSP000 eani.FileNamePattern
+                Diagnostic.Alternatives = None
+            }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+        ()
+    else
+        getParsedAstsFromSources eani availableSources.FilePaths loadFile alreadyLoaded 
+        getParsedAstsFromSources eani availableSources.Urls downloadFile alreadyLoaded 
 
-    let parsedAstsMatchingAliasedNamespaceIdentifier eaniList (eani:EvalAliasedNamespaceIdentifier) =
-        let availableSources = acquireSources eani uri fplLibUrl 
-        if availableSources.NoneFound then 
-            let diagnostic =
-                { 
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = eani.StartPos
-                    Diagnostic.EndPos = eani.EndPos
-                    Diagnostic.Code = NSP000 eani.FileNamePattern
-                    Diagnostic.Alternatives = None
-                }
-            ad.AddDiagnostic diagnostic
-            []
-        else
-            let astsFromFilePaths = getParsedAstsFromSources eani eaniList availableSources.FilePaths loadFile alreadyLoaded parsedAst
-            let astsFromUrls = getParsedAstsFromSources eani eaniList availableSources.Urls downloadFile alreadyLoaded parsedAst
-            astsFromFilePaths @ astsFromUrls
-
-    let eaniList = eval_uses_clause parsedAst.Ast 
-    findDuplicateAliases eaniList |> ignore
-
-    eaniList 
-    |> List.map (fun (eval:EvalAliasedNamespaceIdentifier) -> eval)
-    |> List.collect (parsedAstsMatchingAliasedNamespaceIdentifier eaniList)
 
 /// Creates an initial ParsedAst for the symbol table. 
-/// We will put it in a collection, in which even more ParseAsts will 
-/// be added if this ast contains some 'uses' clauses.
 let private getInitiateParsedAst input (uri:Uri) = 
     let name = Path.GetFileNameWithoutExtension(uri.LocalPath)
     let ast = fplParser input
@@ -338,7 +343,7 @@ let private getInitiateParsedAst input (uri:Uri) =
     }
     {
         ParsedAst.UriPath = uri.AbsolutePath
-        ParsedAst.FplCode = input
+        ParsedAst.FplSourceCode = input
         ParsedAst.Ast = ast
         ParsedAst.Checksum = computeMD5Checksum input
         ParsedAst.Id = initialEvalAliasedNamespaceIdentifier.Name
@@ -386,25 +391,43 @@ let private findCycle (parsedAsts:List<ParsedAst>) =
             |> List.tryPick (dfs visited path)
     parsedAsts |> Seq.toList |> List.tryPick (dfs Set.empty [])
 
+
+let private chainParsedAsts (alreadyLoaded:List<ParsedAst>) parsedAst (eani:EvalAliasedNamespaceIdentifier) = 
+    // complement referenced asts 
+    if not (List.contains eani.Name parsedAst.ReferencedAsts) then 
+        parsedAst.ReferencedAsts <- parsedAst.ReferencedAsts @ [eani.Name]
+    // complement referencing asts in the specific parsedAst even if it was already loaded
+    let referencedPa = tryFindParsedAstByName eani.Name alreadyLoaded
+    match referencedPa with
+    | Some pa -> 
+        if not (List.contains parsedAst.Id pa.ReferencingAsts) then 
+            pa.ReferencingAsts <- pa.ReferencingAsts @ [parsedAst.Id]
+    | None -> ()
+
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
 let loadAllUsesClauses input uri fplLibUrl = 
     let symbolTable = { ParsedAsts = List<ParsedAst>() }
-    let evenMoreParsedAsts = List<ParsedAst>()
     let initParsedAst = getInitiateParsedAst input uri
-    evenMoreParsedAsts.Add(initParsedAst)
-    while evenMoreParsedAsts.Count > 0 do
-        symbolTable.ParsedAsts.AddRange(evenMoreParsedAsts)
-        evenMoreParsedAsts.Clear()
-        symbolTable.ParsedAsts
-        |> Seq.iter (fun pa -> 
-            if pa.Status = ParsedAstStatus.Loaded then
-                let newPa = findParsedAstsMatchingAliasedNamespaceIdentifier pa uri fplLibUrl symbolTable.ParsedAsts
-                pa.Status <- ParsedAstStatus.UsesClausesEvaluated
-                evenMoreParsedAsts.AddRange(newPa)
-        )
-        |> ignore
+    symbolTable.ParsedAsts.Add(initParsedAst)
+    let mutable found = true
+
+    while found do
+        let loadedParsedAst = tryFindParsedAstLoaded symbolTable.ParsedAsts
+        match loadedParsedAst with
+        | Some pa -> 
+            // evaluate the EvalAliasedNamespaceIdentifier list of the ast
+            pa.EANIList <- eval_uses_clause pa.Ast 
+            pa.Status <- ParsedAstStatus.UsesClausesEvaluated
+            findDuplicateAliases pa.EANIList |> ignore
+            pa.EANIList
+            |> List.map (fun (eani:EvalAliasedNamespaceIdentifier) -> 
+                getParsedAstsMatchingAliasedNamespaceIdentifier uri fplLibUrl symbolTable.ParsedAsts eani
+                chainParsedAsts symbolTable.ParsedAsts pa eani
+            ) |> ignore
+        | None -> 
+            found <- false
     if isCircular symbolTable.ParsedAsts then
         let cycle = findCycle symbolTable.ParsedAsts
         match cycle with
