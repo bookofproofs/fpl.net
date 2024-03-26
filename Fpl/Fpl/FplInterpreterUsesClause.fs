@@ -212,7 +212,7 @@ let private addOrUpdateParsedAst fileContent (fileLoc:string) (parsedAsts:List<P
             ParsedAst.Status = ParsedAstStatus.Loaded
         }
         parsedAsts.Add(pa)
-    ()
+    name
 
 /// For a given EvalAliasedNamespaceIdentifier, a sequence of FplSources was found (these can be either absolute file paths or URLs).
 /// 
@@ -229,8 +229,8 @@ let private getParsedAstsFromSources
     |> Seq.iter (fun fileLoc ->
         // load the content of every source
         let fileContent = getContent fileLoc eani
-        addOrUpdateParsedAst fileContent fileLoc parsedAsts
-    ) |> ignore
+        addOrUpdateParsedAst fileContent fileLoc parsedAsts |> ignore
+    ) 
 
 
 let findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list) =
@@ -304,7 +304,7 @@ let private isCircular (parsedAsts:List<ParsedAst>) =
 let private findCycle (parsedAsts:List<ParsedAst>) =  
     let rec dfs visited path node =
         if List.contains node.Id path then
-            Some (node.Id :: path)
+            Some (path)
         elif Set.contains node.Id visited then
             None
         else
@@ -329,11 +329,18 @@ let private chainParsedAsts (alreadyLoaded:List<ParsedAst>) parsedAst (eani:Eval
             pa.ReferencingAsts <- pa.ReferencingAsts @ [parsedAst.Id]
     | None -> ()
 
+
+let rearrangeList element list =
+    let afterElement = list |> List.skipWhile ((<>) element)
+    let beforeElement = list |> List.takeWhile ((<>) element)
+    afterElement @ beforeElement
+
+
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
 let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:List<ParsedAst>) = 
-    addOrUpdateParsedAst input uri.LocalPath parsedAsts
+    let currentName = addOrUpdateParsedAst input uri.LocalPath parsedAsts
     let mutable found = true
 
     while found do
@@ -355,9 +362,10 @@ let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:List<ParsedAst>) =
         let cycle = findCycle parsedAsts
         match cycle with
         | Some lst -> 
-            let path = String.concat " -> " lst
-            let parsedAstThatStartsTheCycle = parsedAsts |> Seq.filter (fun pa -> pa.Id = lst.Head) |> Seq.head
-            let circularReferencedName = List.item 1 lst
+            let lstWithCurrentAsHead = rearrangeList currentName lst @ [currentName]
+            let path = String.concat " -> " lstWithCurrentAsHead
+            let parsedAstThatStartsTheCycle = parsedAsts |> Seq.filter (fun pa -> pa.Id = lstWithCurrentAsHead.Head) |> Seq.head
+            let circularReferencedName = List.item 1 lstWithCurrentAsHead
             let circularEaniReference = parsedAstThatStartsTheCycle.EANIList |> List.filter (fun eani -> eani.Name = circularReferencedName) |> List.head
             let diagnostic =
                     { 

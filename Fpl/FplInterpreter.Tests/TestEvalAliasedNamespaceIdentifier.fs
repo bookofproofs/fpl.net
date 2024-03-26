@@ -10,6 +10,13 @@ open FplInterpreterUsesClause
 [<TestClass>]
 type TestEvalAliasedNamespaceIdentifier() =
 
+    let deleteFilesWithExtension dir extension =
+        if Directory.Exists(dir) then
+            Directory.GetFiles(dir, "*." + extension)
+            |> Array.iter File.Delete
+        else
+            printfn "Directory %s does not exist." dir
+
     [<DataRow("*", "Test1", "Test1*.fpl")>]
     [<DataRow("*", "Test1.Test2", "Test1.Test2*.fpl")>]
     [<DataRow("T1", "Test1", "Test1.fpl")>]
@@ -183,6 +190,9 @@ type TestEvalAliasedNamespaceIdentifier() =
         // prepare test
         let pathToFile =
             Path.Combine(Directory.GetCurrentDirectory(), pascelCaseId + ".fpl")
+
+        deleteFilesWithExtension (Directory.GetCurrentDirectory()) "fpl"
+        deleteFilesWithExtension (Path.Combine(Directory.GetCurrentDirectory(), "lib")) "fpl"
 
         File.WriteAllText(pathToFile, ";")
 
