@@ -35,3 +35,5 @@
 /Fpl/fpl-vscode-extension/.~lock.Landau.odt#
 /Fpl/FplInterpreter.Tests/bin
 /Fpl/FplInterpreter.Tests/obj
+/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLsDll/FplLS.exe
+/Fpl/fpl-vscode-extension/dotnet-runtimes/FplLsDll/FplLS.pdb
