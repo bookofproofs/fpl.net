@@ -1,13 +1,12 @@
 ﻿module FplInterpreter
 open FplGrammarTypes
+open FplInterpreterTypes
 open FplParser
 open FplInterpreterUsesClause
 open FParsec
 
-let fplInterpreter input uri fplLibUrl = 
-    let ad = FplParser.parserDiagnostics
-    let symbolTable = FplInterpreterUsesClause.loadAllUsesClauses input uri fplLibUrl
-    symbolTable
+let fplInterpreter input uri fplLibUrl (parsedAsts:System.Collections.Generic.List<ParsedAst>) = 
+    FplInterpreterUsesClause.loadAllUsesClauses input uri fplLibUrl parsedAsts
 
 let rec eval = function
     // units: | Star

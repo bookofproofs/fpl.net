@@ -2,9 +2,9 @@ namespace FplInterpreter.Tests
 
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
-
 open FParsec
 open ErrDiagnostics
+open FplInterpreterTypes
 
 [<TestClass>]
 type TestInterpreterErrors() =
@@ -21,7 +21,8 @@ type TestInterpreterErrors() =
         ;"""
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        FplInterpreter.fplInterpreter input uri fplLibUrl |> ignore
+        let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts 
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -35,7 +36,8 @@ type TestInterpreterErrors() =
         ;"""
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        FplInterpreter.fplInterpreter input uri fplLibUrl |> ignore
+        let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts 
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -49,8 +51,8 @@ type TestInterpreterErrors() =
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then File.Delete(pathToFile)
-        FplInterpreter.fplInterpreter A uri fplLibUrl
-
+        let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+        FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts
 
     [<TestMethod>]
     member this.TestNSP004CircularAA() =
@@ -67,6 +69,7 @@ type TestInterpreterErrors() =
         let B = """uses Test2_C;"""
         let C = """uses Test2_A;"""
         let currDir = Directory.GetCurrentDirectory()
+
         File.WriteAllText(Path.Combine(currDir, "Test2_A.fpl"), A)
         File.WriteAllText(Path.Combine(currDir, "Test2_B.fpl"), B)
         File.WriteAllText(Path.Combine(currDir, "Test2_C.fpl"), C)
@@ -77,7 +80,8 @@ type TestInterpreterErrors() =
             File.Delete(Path.Combine(currDir, "Test2_A.fpl"))
             File.Delete(Path.Combine(currDir, "Test2_B.fpl"))
             File.Delete(Path.Combine(currDir, "Test2_C.fpl"))
-        FplInterpreter.fplInterpreter A uri fplLibUrl
+        let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+        FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts
 
     [<TestMethod>]
     member this.TestNSP004CircularABCA() =

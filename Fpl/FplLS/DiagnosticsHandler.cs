@@ -1,10 +1,13 @@
 ﻿using System.Text;
 using FParsec;
 using Microsoft.FSharp.Collections;
+using System.Collections.Generic;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using static FplParser;
+using static FplInterpreterTypes;
 using static FplInterpreter;
+using static FplInterpreterUsesClause;
 
 namespace FplLS
 {
@@ -12,11 +15,13 @@ namespace FplLS
     {
         private readonly ILanguageServer _languageServer;
         private readonly BufferManager _bufferManager;
+        private readonly List<ParsedAst> _parsedAstsList;
 
         public DiagnosticsHandler(ILanguageServer languageServer, BufferManager bufferManager)
         {
             _languageServer = languageServer;
             _bufferManager = bufferManager;
+            _parsedAstsList = new List<ParsedAst>();
         }
 
 
@@ -30,7 +35,7 @@ namespace FplLS
                     var parserDiagnostics = FplParser.parserDiagnostics;
                     parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
                     var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
-                    FplInterpreter.fplInterpreter(sourceCode, uri, fplLibUri);
+                    FplInterpreter.fplInterpreter(sourceCode, uri, fplLibUri, _parsedAstsList);
                     var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
                     _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
                     {
