@@ -126,26 +126,6 @@ let downloadLibMap (currentWebRepo: string) (e:EvalAliasedNamespaceIdentifier) =
     let libMap = downloadFile (currentWebRepo + "/libmap.txt") e
     libMap    
 
-/// A type that encapsulates the sources found for a uses clause 
-/// and provides members to filter those from the file system and those from 
-/// the web.
-type FplSources(strings: string list) =
-    member this.Strings = strings
-    member this.IsUrl (s: string) =
-        let pattern = @"^https?://"
-        Regex.IsMatch(s, pattern)
-    member this.IsFilePath (s: string) =
-        try
-            Path.GetFullPath(s) |> ignore
-            let pattern = @"^https?://"
-            not (Regex.IsMatch(s, pattern))
-        with
-        | :? ArgumentException -> false
-    member this.Urls = List.filter this.IsUrl this.Strings
-    member this.FilePaths = List.filter this.IsFilePath this.Strings
-    member this.Length = this.Strings.Length
-    member this.NoneFound = this.Strings.Length = 0
-
 /// Acquires FPL sources that can be found with a single uses clause.
 /// They are searched for in the current directory of the file, in the lib subfolder
 /// as well as in the web resource 
@@ -233,7 +213,7 @@ let private getParsedAstsFromSources
     ) 
 
 
-let findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list) =
+let private findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list) =
     let uniqueAliases = HashSet<string>()
     eaniList
     |> List.map (fun eani -> eani.EvalAlias)
@@ -259,6 +239,60 @@ let findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list) =
     |> List.groupBy id  
     // Select the ones that appear more than once
     |> List.choose (fun (alias, instances) -> if List.length instances > 1 then Some alias else None)
+
+/// Emits diagnostics if the same FPL theory can be found in multiple sources.
+let private findDuplicateFiles (uri: Uri) (fplLibUrl: string) =
+    let pos = Position("", 0, 0, 1)
+    let name = Path.GetFileNameWithoutExtension(uri.LocalPath)
+    let evalAlias = { 
+        EvalAlias.StartPos = pos 
+        EvalAlias.EndPos = pos 
+        EvalAlias.AliasOrStar = ""
+        }
+    let eani =  { 
+        EvalAliasedNamespaceIdentifier.StartPos = pos
+        EvalAliasedNamespaceIdentifier.EndPos = pos
+        EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
+        EvalAliasedNamespaceIdentifier.PascalCaseIdList = [name]
+        }
+
+    let availableSources = acquireSources eani uri fplLibUrl 
+    let fplTheories = 
+        availableSources.Paths
+        |> List.map (fun fp -> (Path.GetFileNameWithoutExtension fp, fp))
+    let groupedFplTheories = 
+        fplTheories
+        |> List.groupBy fst
+    let duplicates = 
+        groupedFplTheories
+        |> List.filter (fun (_, paths) -> List.length paths > 1)
+        |> List.map (fun (fileName, paths) -> 
+            let pathTypes =
+                List.map snd paths
+                |> List.map (fun path -> 
+                    if availableSources.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                        "./lib"
+                    elif  availableSources.IsFilePath(path) then 
+                        "./"
+                    else
+                        "https"
+                )
+            (fileName, pathTypes)
+            )
+    duplicates
+    |> List.map (fun (duplicate,pathTypes) ->
+            let diagnostic =
+                { 
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = Position("",0,0,1)
+                    Diagnostic.EndPos = Position("",0,0,1)
+                    Diagnostic.Code = NSP005 (duplicate, pathTypes)
+                    Diagnostic.Alternatives = None
+                }
+            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+    )
+    |> ignore
 
 
 let getParsedAstsMatchingAliasedNamespaceIdentifier (uri: Uri) (fplLibUrl: string) (parsedAsts:List<ParsedAst>) (eani:EvalAliasedNamespaceIdentifier) =
@@ -340,6 +374,7 @@ let rearrangeList element list =
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
 let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:List<ParsedAst>) = 
+    findDuplicateFiles uri fplLibUrl
     let currentName = addOrUpdateParsedAst input uri.LocalPath parsedAsts
     let mutable found = true
 

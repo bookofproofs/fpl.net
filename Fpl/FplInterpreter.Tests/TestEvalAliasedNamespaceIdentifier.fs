@@ -368,3 +368,4 @@ type TestEvalAliasedNamespaceIdentifier() =
         // "Fpl.Commons" knows that "Test" is referencing to it
         let actual = result.Find(fun pa -> pa.Id = "Fpl.Commons").ReferencingAsts
         Assert.AreEqual(["Test"; "Fpl.SetTheory"], actual)
+

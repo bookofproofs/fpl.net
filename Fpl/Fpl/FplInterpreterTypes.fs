@@ -1,4 +1,7 @@
 ﻿module FplInterpreterTypes
+open System
+open System.Text.RegularExpressions
+open System.IO
 open FParsec
 open FplGrammarTypes
 
@@ -48,6 +51,26 @@ type ParsedAst =
         mutable EANIList: EvalAliasedNamespaceIdentifier list // evaluated uses clauses found in the Ast 
         mutable Status: ParsedAstStatus
     }
+
+/// A type that encapsulates the sources found for a uses clause 
+/// and provides members to filter those from the file system and those from 
+/// the web.
+type FplSources(paths: string list) =
+    member this.Paths = paths
+    member this.IsUrl (s: string) =
+        let pattern = @"^https?://"
+        Regex.IsMatch(s, pattern)
+    member this.IsFilePath (s: string) =
+        try
+            Path.GetFullPath(s) |> ignore
+            let pattern = @"^https?://"
+            not (Regex.IsMatch(s, pattern))
+        with
+        | :? ArgumentException -> false
+    member this.Urls = List.filter this.IsUrl this.Paths
+    member this.FilePaths = List.filter this.IsFilePath this.Paths
+    member this.Length = this.Paths.Length
+    member this.NoneFound = this.Paths.Length = 0
 
 type SymbolTable =
     { ParsedAsts: List<ParsedAst> }

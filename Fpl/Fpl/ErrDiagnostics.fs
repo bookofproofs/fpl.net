@@ -73,6 +73,7 @@ type DiagnosticCode =
     | NSP002 of string * string
     | NSP003 of string
     | NSP004 of string 
+    | NSP005 of string * string list
     member this.Code = 
         match this with
             // parser error messages
@@ -110,6 +111,7 @@ type DiagnosticCode =
             | NSP002 (_, _) -> "NSP002"
             | NSP003 _ -> "NSP003"
             | NSP004 _ -> "NSP004"
+            | NSP005 _ -> "NSP005"
     member this.Message = 
         match this with
             // parser error messages
@@ -147,6 +149,7 @@ type DiagnosticCode =
             | NSP002 (url, innerErrMsg) -> sprintf "%s found but could not be downloaded: %s" url innerErrMsg
             | NSP003 alias -> sprintf "Alias %s appeared previously in this namespace" alias
             | NSP004 path -> sprintf "Circular theory reference detected: %s" path
+            | NSP005 (theory, sources) -> sprintf "Multiple sources %A for theory %s detected." sources theory
 
 type DiagnosticEmitter =
     // replace your language-specific emitters here

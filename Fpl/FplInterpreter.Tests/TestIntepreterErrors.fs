@@ -8,6 +8,13 @@ open FplInterpreterTypes
 
 [<TestClass>]
 type TestInterpreterErrors() =
+    let deleteFilesWithExtension dir extension =
+        if Directory.Exists(dir) then
+            Directory.GetFiles(dir, "*." + extension)
+            |> Array.iter File.Delete
+        else
+            printfn "Directory %s does not exist." dir
+
     let filterByErrorCode (input: Diagnostics) errCode =
         input.Collection
         |> List.filter (fun d -> d.Code = errCode)
@@ -22,7 +29,7 @@ type TestInterpreterErrors() =
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts 
+        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -37,7 +44,7 @@ type TestInterpreterErrors() =
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts 
+        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts |> ignore 
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -77,9 +84,8 @@ type TestInterpreterErrors() =
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
-            File.Delete(Path.Combine(currDir, "Test2_A.fpl"))
-            File.Delete(Path.Combine(currDir, "Test2_B.fpl"))
-            File.Delete(Path.Combine(currDir, "Test2_C.fpl"))
+            deleteFilesWithExtension currDir "fpl"
+
         let parsedAsts = System.Collections.Generic.List<ParsedAst>()
         FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts
 
@@ -91,3 +97,53 @@ type TestInterpreterErrors() =
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
         this.PrepareTestNSP004CircularABCA(true) |> ignore
+
+    member this.PrepareTestNSP005 (delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let input = """;"""
+        let currDir = Directory.GetCurrentDirectory()
+
+        File.WriteAllText(Path.Combine(currDir, "Fpl.Commons.fpl"), input)
+        let uri = System.Uri(Path.Combine(currDir, "Fpl.Commons.fpl"))
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            deleteFilesWithExtension currDir "fpl"
+
+        let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts
+
+    [<TestMethod>]
+    member this.TestNSP005() =
+        let code = NSP005 ("Fpl.Commons", ["./"; "https"])
+        printf "Trying %s" code.Message
+        this.PrepareTestNSP005(false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(1, result.Length)
+        this.PrepareTestNSP005(true) |> ignore
+
+    member this.PrepareTestNSP005a (delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let input = """;"""
+        let currDir = Directory.GetCurrentDirectory()
+
+        File.WriteAllText(Path.Combine(currDir, "Fpl.Commons.fpl"), input)
+        File.WriteAllText(Path.Combine(currDir, "lib", "Fpl.Commons.fpl"), input)
+        let uri = System.Uri(Path.Combine(currDir, "Fpl.Commons.fpl"))
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            deleteFilesWithExtension currDir "fpl"
+            deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
+
+        let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts
+
+    [<TestMethod>]
+    member this.TestNSP005a() =
+        let code = NSP005 ("Fpl.Commons", ["./"; "./lib"; "https"])
+        printf "Trying %s" code.Message
+        this.PrepareTestNSP005a(false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(1, result.Length)
+        this.PrepareTestNSP005a(true) |> ignore
