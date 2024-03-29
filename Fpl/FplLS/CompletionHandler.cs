@@ -48,6 +48,7 @@ class CompletionHandler : ICompletionHandler
         _languageServer = languageServer;
         _bufferManager = bufferManager;
         _fplAutoComplService = fplAutoCompletionService;
+        _capability = new CompletionCapability();
     }
 
     public CompletionRegistrationOptions GetRegistrationOptions()

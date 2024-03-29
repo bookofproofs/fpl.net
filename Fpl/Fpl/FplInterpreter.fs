@@ -3,10 +3,12 @@ open FplGrammarTypes
 open FplInterpreterTypes
 open FplParser
 open FplInterpreterUsesClause
-open FParsec
+open FplInterpreterBuildingBlocks
 
 let fplInterpreter input uri fplLibUrl (parsedAsts:System.Collections.Generic.List<ParsedAst>) = 
-    FplInterpreterUsesClause.loadAllUsesClauses input uri fplLibUrl parsedAsts
+    loadAllUsesClauses input uri fplLibUrl parsedAsts 
+    evaluateParsedAsts parsedAsts
+
 
 let rec eval = function
     // units: | Star

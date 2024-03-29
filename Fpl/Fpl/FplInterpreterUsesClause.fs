@@ -2,8 +2,6 @@
 open System.Text.RegularExpressions
 open System.Net.Http
 open System.IO
-open System.Security.Cryptography
-open System.Text
 open System.Collections.Generic
 open System
 open FParsec
@@ -137,13 +135,6 @@ let acquireSources (e:EvalAliasedNamespaceIdentifier) (uri: Uri) (fplLibUrl: str
     let filesToDownload = findFilesInLibMapWithWildcard libMap e.FileNamePattern 
                             |> List.map (fun s -> fplLibUrl + "/" + s)
     FplSources(fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload)
-
-/// computes an MD5 checksum of a string
-let computeMD5Checksum (input: string) =
-    let md5 = MD5.Create()
-    let inputBytes = Encoding.ASCII.GetBytes(input)
-    let hash = md5.ComputeHash(inputBytes)
-    hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
     
 let tryFindParsedAstByName identifier (parsedAsts:List<ParsedAst>) =
     if parsedAsts.Exists(fun pa -> pa.Id = identifier) then
@@ -160,18 +151,13 @@ let tryFindParsedAstLoaded (parsedAsts:List<ParsedAst>) =
 let private addOrUpdateParsedAst fileContent (fileLoc:string) (parsedAsts:List<ParsedAst>) = 
     let name = Path.GetFileNameWithoutExtension(fileLoc)
     let idAlreadyFound = tryFindParsedAstByName name parsedAsts
-    let checkSum = computeMD5Checksum fileContent
     match idAlreadyFound with
     | Some pa -> 
-        if pa.Checksum <> checkSum then
+        if pa.Parsing.Reset fileContent fileLoc then
             // if there ist a Parsed Ast with the same Name as the eani.Name 
             // and its checksum differs from the previous checksum 
             // then replace the ast, checksum, location, sourcecode, the 
-            pa.Ast <- fplParser fileContent
-            pa.UriPath <- fileLoc
-            pa.FplSourceCode <- fileContent
-            pa.Checksum <- checkSum
-            pa.EANIList <- []
+            pa.Sorting.Reset()
             pa.Status <- ParsedAstStatus.Loaded
 
         else
@@ -179,16 +165,26 @@ let private addOrUpdateParsedAst fileContent (fileLoc:string) (parsedAsts:List<P
             ()
     | None -> 
         // add a new ParsedAst
+        let parsing = {
+            ParsingProperties.UriPath = fileLoc
+            ParsingProperties.FplSourceCode = fileContent
+            ParsingProperties.Ast = fplParser fileContent
+            ParsingProperties.Checksum = computeMD5Checksum fileContent
+        }
+        let sorting = {
+            SortingProperties.TopologicalSorting = 0
+            SortingProperties.ReferencingAsts = []
+            SortingProperties.ReferencedAsts = []
+            SortingProperties.EANIList = [] 
+        }
+        let fplBlocks = {
+            FplBlockProperties.FplBlockIds = Dictionary<string, int>()
+        }
         let pa = { 
-            ParsedAst.UriPath = fileLoc
-            ParsedAst.FplSourceCode = fileContent
-            ParsedAst.Ast = fplParser fileContent
-            ParsedAst.Checksum = checkSum
             ParsedAst.Id = name 
-            ParsedAst.ReferencingAsts = []
-            ParsedAst.ReferencedAsts = []
-            ParsedAst.TopologicalSorting = 0
-            ParsedAst.EANIList = [] 
+            ParsedAst.Parsing = parsing
+            ParsedAst.Sorting = sorting
+            ParsedAst.FplBlocks = fplBlocks
             ParsedAst.Status = ParsedAstStatus.Loaded
         }
         parsedAsts.Add(pa)
@@ -313,27 +309,32 @@ let getParsedAstsMatchingAliasedNamespaceIdentifier (uri: Uri) (fplLibUrl: strin
         getParsedAstsFromSources eani availableSources.FilePaths loadFile parsedAsts 
         getParsedAstsFromSources eani availableSources.Urls downloadFile parsedAsts 
 
+/// Calculates the ParsedAst.TopologicalSorting property of the all ParsedAsts 
+/// unless the resulting directed graph is circular. If the function returns false, 
+/// there is a valid topological sorting. If true is returned, there is no 
+/// valid topological sorting and there is a cycle caused by the uses clauses in the
+/// ParsedAsts.
 let private isCircular (parsedAsts:List<ParsedAst>) = 
     let l0 = Stack<ParsedAst>()
     let igrad = Dictionary<string,int>()
     parsedAsts |> Seq.map (fun pa -> 
-        igrad.Add(pa.Id, pa.ReferencingAsts.Length)
-        if pa.ReferencingAsts.Length = 0 then l0.Push(pa)
+        igrad.Add(pa.Id, pa.Sorting.ReferencingAsts.Length)
+        if pa.Sorting.ReferencingAsts.Length = 0 then l0.Push(pa)
     ) |> ignore
     let mutable i = -1
-    let mutable isCircular = false
-    while not isCircular && i < parsedAsts.Count do
+    let mutable hasCycle = false
+    while not hasCycle && i < parsedAsts.Count do
         i <- i + 1 
-        isCircular <- l0.Count = 0 
-        if not isCircular then
+        hasCycle <- l0.Count = 0 
+        if not hasCycle then
             let v = l0.Pop()
-            v.TopologicalSorting <- i
-            v.ReferencedAsts |> List.iter (fun name -> 
+            v.Sorting.TopologicalSorting <- i
+            v.Sorting.ReferencedAsts |> List.iter (fun name -> 
                 igrad[name] <- igrad[name] - 1
                 if igrad[name] = 0 then
                     l0.Push(parsedAsts.Find(fun pa -> pa.Id = name))
             )
-    isCircular
+    hasCycle
 
 let private findCycle (parsedAsts:List<ParsedAst>) =  
     let rec dfs visited path node =
@@ -346,21 +347,21 @@ let private findCycle (parsedAsts:List<ParsedAst>) =
             let path = node.Id :: path
             parsedAsts
             |> Seq.toList
-            |> List.choose (fun x -> if List.contains x.Id node.ReferencingAsts then Some x else None)
+            |> List.choose (fun x -> if List.contains x.Id node.Sorting.ReferencingAsts then Some x else None)
             |> List.tryPick (dfs visited path)
     parsedAsts |> Seq.toList |> List.tryPick (dfs Set.empty [])
 
 
 let private chainParsedAsts (alreadyLoaded:List<ParsedAst>) parsedAst (eani:EvalAliasedNamespaceIdentifier) = 
     // complement referenced asts 
-    if not (List.contains eani.Name parsedAst.ReferencedAsts) then 
-        parsedAst.ReferencedAsts <- parsedAst.ReferencedAsts @ [eani.Name]
+    if not (List.contains eani.Name parsedAst.Sorting.ReferencedAsts) then 
+        parsedAst.Sorting.ReferencedAsts <- parsedAst.Sorting.ReferencedAsts @ [eani.Name]
     // complement referencing asts in the specific parsedAst even if it was already loaded
     let referencedPa = tryFindParsedAstByName eani.Name alreadyLoaded
     match referencedPa with
     | Some pa -> 
-        if not (List.contains parsedAst.Id pa.ReferencingAsts) then 
-            pa.ReferencingAsts <- pa.ReferencingAsts @ [parsedAst.Id]
+        if not (List.contains parsedAst.Id pa.Sorting.ReferencingAsts) then 
+            pa.Sorting.ReferencingAsts <- pa.Sorting.ReferencingAsts @ [parsedAst.Id]
     | None -> ()
 
 
@@ -383,10 +384,10 @@ let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:List<ParsedAst>) =
         match loadedParsedAst with
         | Some pa -> 
             // evaluate the EvalAliasedNamespaceIdentifier list of the ast
-            pa.EANIList <- eval_uses_clause pa.Ast 
+            pa.Sorting.EANIList <- eval_uses_clause pa.Parsing.Ast 
             pa.Status <- ParsedAstStatus.UsesClausesEvaluated
-            findDuplicateAliases pa.EANIList |> ignore
-            pa.EANIList
+            findDuplicateAliases pa.Sorting.EANIList |> ignore
+            pa.Sorting.EANIList
             |> List.map (fun (eani:EvalAliasedNamespaceIdentifier) -> 
                 getParsedAstsMatchingAliasedNamespaceIdentifier uri fplLibUrl parsedAsts eani
                 chainParsedAsts parsedAsts pa eani
@@ -401,7 +402,7 @@ let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:List<ParsedAst>) =
             let path = String.concat " -> " lstWithCurrentAsHead
             let parsedAstThatStartsTheCycle = parsedAsts |> Seq.filter (fun pa -> pa.Id = lstWithCurrentAsHead.Head) |> Seq.head
             let circularReferencedName = List.item 1 lstWithCurrentAsHead
-            let circularEaniReference = parsedAstThatStartsTheCycle.EANIList |> List.filter (fun eani -> eani.Name = circularReferencedName) |> List.head
+            let circularEaniReference = parsedAstThatStartsTheCycle.Sorting.EANIList |> List.filter (fun eani -> eani.Name = circularReferencedName) |> List.head
             let diagnostic =
                     { 
                         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
@@ -414,5 +415,5 @@ let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:List<ParsedAst>) =
             FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
         | None -> ()
-    parsedAsts
+
 
