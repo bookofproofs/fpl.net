@@ -6,8 +6,14 @@ open FplInterpreterUsesClause
 open FplInterpreterBuildingBlocks
 
 let fplInterpreter input uri fplLibUrl (parsedAsts:System.Collections.Generic.List<ParsedAst>) = 
+    let st = { 
+        SymbolTable.ParsedAsts = parsedAsts
+        SymbolTable.EvaluationContext = EvalContext.ContextNone
+        SymbolTable.Current = None
+        }
+    
     loadAllUsesClauses input uri fplLibUrl parsedAsts 
-    evaluateParsedAsts parsedAsts
+    evaluateSymbolTable st
 
 
 let rec eval = function

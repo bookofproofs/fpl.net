@@ -121,5 +121,14 @@ type FplSources(paths: string list) =
     member this.Length = this.Paths.Length
     member this.NoneFound = this.Paths.Length = 0
 
+type EvalContext = 
+    | ContextNone
+    | InSignature of Positions
+
 type SymbolTable =
-    { ParsedAsts: List<ParsedAst> }
+    { 
+        ParsedAsts: List<ParsedAst> 
+        mutable EvaluationContext: EvalContext
+        mutable Current: ParsedAst option
+    }
+

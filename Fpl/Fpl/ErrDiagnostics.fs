@@ -74,6 +74,8 @@ type DiagnosticCode =
     | NSP003 of string
     | NSP004 of string 
     | NSP005 of string * string list
+    // identifier-related error codes
+    | ID001 of string
     member this.Code = 
         match this with
             // parser error messages
@@ -112,6 +114,8 @@ type DiagnosticCode =
             | NSP003 _ -> "NSP003"
             | NSP004 _ -> "NSP004"
             | NSP005 _ -> "NSP005"
+            // identifier-related error codes 
+            | ID001 _ -> "ID001"
     member this.Message = 
         match this with
             // parser error messages
@@ -150,6 +154,8 @@ type DiagnosticCode =
             | NSP003 alias -> sprintf "Alias %s appeared previously in this namespace" alias
             | NSP004 path -> sprintf "Circular theory reference detected: %s" path
             | NSP005 (theory, sources) -> sprintf "Multiple sources %A for theory %s detected." sources theory
+            // identifier-related error codes 
+            | ID001 identifier -> sprintf "Duplicate identifier %s detected." identifier
 
 type DiagnosticEmitter =
     // replace your language-specific emitters here

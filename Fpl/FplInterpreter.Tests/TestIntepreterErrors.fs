@@ -57,9 +57,11 @@ type TestInterpreterErrors() =
         let uri = System.Uri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        if delete then File.Delete(pathToFile)
-        let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-        FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts
+        if delete then 
+            File.Delete(pathToFile)
+        else
+            let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+            FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts
 
     [<TestMethod>]
     member this.TestNSP004CircularAA() =
@@ -85,9 +87,9 @@ type TestInterpreterErrors() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
             deleteFilesWithExtension currDir "fpl"
-
-        let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-        FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts
+        else
+            let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+            FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts
 
     [<TestMethod>]
     member this.TestNSP004CircularABCA() =
@@ -109,9 +111,9 @@ type TestInterpreterErrors() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
             deleteFilesWithExtension currDir "fpl"
-
-        let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts
+        else
+            let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+            FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts
 
     [<TestMethod>]
     member this.TestNSP005() =
@@ -135,9 +137,9 @@ type TestInterpreterErrors() =
         if delete then 
             deleteFilesWithExtension currDir "fpl"
             deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
-
-        let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts
+        else
+            let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+            FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts
 
     [<TestMethod>]
     member this.TestNSP005a() =
@@ -147,3 +149,39 @@ type TestInterpreterErrors() =
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
         this.PrepareTestNSP005a(true) |> ignore
+
+
+    member this.PrepareFplCode(fplCode:string, delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let currDir = Directory.GetCurrentDirectory()
+
+        File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
+        let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            deleteFilesWithExtension currDir "fpl"
+        else
+            let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+            FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts
+
+    [<TestMethod>]
+    member this.TestID001() =
+        let code = ID001 "SomeAxiom"
+        printf "Trying %s" code.Message
+        let fplCode = """axiom SomeAxiom() {true} 
+        axiom SomeAxiom() {true}
+        ;"""
+        this.PrepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(1, result.Length)
+        this.PrepareFplCode("", true) |> ignore
+
+    [<TestMethod>]
+    member this.TestID001CrossCheck() =
+        let code = ID001 "SomeAxiom"
+        printf "Trying %s" code.Message
+        this.PrepareFplCode("axiom SomeAxiom() {true} ;", false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(0, result.Length)
+        this.PrepareFplCode("", true) |> ignore
