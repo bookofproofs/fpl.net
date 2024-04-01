@@ -158,6 +158,7 @@ let private addOrUpdateParsedAst fileContent (fileLoc:string) (parsedAsts:List<P
             // and its checksum differs from the previous checksum 
             // then replace the ast, checksum, location, sourcecode, the 
             pa.Sorting.Reset()
+            pa.FplBlocks.Reset()
             pa.Status <- ParsedAstStatus.Loaded
 
         else

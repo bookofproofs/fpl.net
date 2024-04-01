@@ -89,6 +89,9 @@ type FplBlockProperties =
     {
         FplBlockIds: Dictionary<string,int>
     }
+    with 
+    member this.Reset() = 
+        this.FplBlockIds.Clear()
 
 /// A record type to store all the necessary fields for parsed namespaces in FPL code
 type ParsedAst =
