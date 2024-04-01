@@ -540,8 +540,8 @@ let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteCo
 let classTypeWithModifier = positions (varDeclModifier .>>. classType .>> IW) |>> Ast.ClassTypeWithModifier
 let classTypeWithModifierList = sepBy1 classTypeWithModifier comma
 
-
-let classSignature = (keywordClass >>. predicateIdentifier .>> IW) .>>. opt userDefinedObjSym .>>. classTypeWithModifierList
+let classIdentifier = positions (predicateIdentifier .>> IW) |>> Ast.ClassIdentifier
+let classSignature = (keywordClass >>. classIdentifier) .>>. opt userDefinedObjSym .>>. classTypeWithModifierList
 let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString "definition" <|> skipString "def") >>. SW

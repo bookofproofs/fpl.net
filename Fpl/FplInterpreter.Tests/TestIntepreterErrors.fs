@@ -165,22 +165,99 @@ type TestInterpreterErrors() =
             let parsedAsts = System.Collections.Generic.List<ParsedAst>()
             FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts
 
+    [<DataRow("axiom", "SomeAxiom")>]
+    [<DataRow("postulate", "SomePostulate")>]
+    [<DataRow("theorem", "SomeTheorem")>]
+    [<DataRow("lemma", "SomeLemma")>]
+    [<DataRow("proposition", "SomeProposition")>]
+    [<DataRow("conjecture", "SomeConjecture")>]
     [<TestMethod>]
-    member this.TestID001() =
-        let code = ID001 "SomeAxiom"
+    member this.TestID001Predicative(blockType:string, blockName:string) =
+        let code = ID001 blockName
         printf "Trying %s" code.Message
-        let fplCode = """axiom SomeAxiom() {true} 
-        axiom SomeAxiom() {true}
-        ;"""
+        let fplCode = sprintf """%s %s() {true} %s %s() {true} ;""" blockType blockName blockType blockName
         this.PrepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
         this.PrepareFplCode("", true) |> ignore
 
+    [<DataRow("axiom", "SomeAxiom")>]
+    [<DataRow("postulate", "SomePostulate")>]
+    [<DataRow("theorem", "SomeTheorem")>]
+    [<DataRow("lemma", "SomeLemma")>]
+    [<DataRow("proposition", "SomeProposition")>]
+    [<DataRow("conjecture", "SomeConjecture")>]
     [<TestMethod>]
-    member this.TestID001CrossCheck() =
-        let code = ID001 "SomeAxiom"
+    member this.TestID001PredicativeCrossCheck(blockType:string, blockName:string) =
+        let code = ID001 blockName
         printf "Trying %s" code.Message
+        let fplCode = sprintf """%s %s() {true} ;""" blockType blockName 
+        this.PrepareFplCode("axiom SomeAxiom() {true} ;", false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(0, result.Length)
+        this.PrepareFplCode("", true) |> ignore
+
+    [<DataRow("function", "SomeFunctionalTerm")>]
+    [<TestMethod>]
+    member this.TestID001Function(blockType:string, blockName:string) =
+        let code = ID001 blockName
+        printf "Trying %s" code.Message
+        let fplCode = sprintf """def %s %s() -> obj {intrinsic} def %s %s() -> obj {intrinsic} ;""" blockType blockName blockType blockName
+        this.PrepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(1, result.Length)
+        this.PrepareFplCode("", true) |> ignore
+
+    [<DataRow("function", "SomeFunctionalTerm")>]
+    [<TestMethod>]
+    member this.TestID001FunctionCrossCheck(blockType:string, blockName:string) =
+        let code = ID001 blockName
+        printf "Trying %s" code.Message
+        let fplCode = sprintf """def %s %s() -> obj {intrinsic} ;""" blockType blockName 
+        this.PrepareFplCode("axiom SomeAxiom() {true} ;", false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(0, result.Length)
+        this.PrepareFplCode("", true) |> ignore
+
+    [<DataRow("class", "SomeClass")>]
+    [<TestMethod>]
+    member this.TestID001Class(blockType:string, blockName:string) =
+        let code = ID001 blockName
+        printf "Trying %s" code.Message
+        let fplCode = sprintf """def %s %s: obj {intrinsic} def %s %s: obj {intrinsic} ;""" blockType blockName blockType blockName
+        this.PrepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(1, result.Length)
+        this.PrepareFplCode("", true) |> ignore
+
+    [<DataRow("class", "SomeClass")>]
+    [<TestMethod>]
+    member this.TestID001ClassCrossCheck(blockType:string, blockName:string) =
+        let code = ID001 blockName
+        printf "Trying %s" code.Message
+        let fplCode = sprintf """def %s %s: obj {intrinsic} ;""" blockType blockName 
+        this.PrepareFplCode("axiom SomeAxiom() {true} ;", false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(0, result.Length)
+        this.PrepareFplCode("", true) |> ignore
+
+    [<DataRow("predicate", "SomePredicate")>]
+    [<TestMethod>]
+    member this.TestID001Predicate(blockType:string, blockName:string) =
+        let code = ID001 blockName
+        printf "Trying %s" code.Message
+        let fplCode = sprintf """def %s %s() {intrinsic} def %s %s() {intrinsic} ;""" blockType blockName blockType blockName
+        this.PrepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(1, result.Length)
+        this.PrepareFplCode("", true) |> ignore
+
+    [<DataRow("predicate", "SomePredicate")>]
+    [<TestMethod>]
+    member this.TestID001PredicateCrossCheck(blockType:string, blockName:string) =
+        let code = ID001 blockName
+        printf "Trying %s" code.Message
+        let fplCode = sprintf """def %s %s() {intrinsic} ;""" blockType blockName 
         this.PrepareFplCode("axiom SomeAxiom() {true} ;", false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(0, result.Length)

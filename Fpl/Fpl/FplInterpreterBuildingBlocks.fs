@@ -107,9 +107,12 @@ let rec eval (st:SymbolTable) ast =
     | Ast.UsesClause ((pos1, pos2), ast) -> 
         eval st ast |> ignore
         eval_pos_ast st pos1 pos2
-    | Ast.ClassIdentifier ((pos1, pos2), ast) -> 
-        eval st ast |> ignore
-        eval_pos_ast st pos1 pos2
+    | Ast.ClassIdentifier ((pos1, pos2), predicateIdentifierAst) -> 
+        st.EvaluationContext <- EvalContext.InSignature (pos1, pos2)
+        eval st predicateIdentifierAst |> ignore
+        eval_pos_ast st pos1 pos2 |> ignore
+        st.EvaluationContext <- EvalContext.ContextNone
+        ""
     | Ast.SimpleVariableType ((pos1, pos2), ast) -> 
         eval st ast |> ignore
         eval_pos_ast st pos1 pos2
@@ -236,9 +239,13 @@ let rec eval (st:SymbolTable) ast =
     | Ast.ClosedOrOpenRange ((pos1, pos2), ((ast1, optAst), ast2)) -> 
         let optAstStr = optAst |> Option.map (eval st) |> Option.defaultValue "None"
         sprintf "ClosedOrOpenRange at positions %A and %A: ((%s, %s), %s)" (pos1.ToString()) (pos2.ToString()) (eval st ast1) optAstStr (eval st ast2)
-    | Ast.SignatureWithUserDefinedString ((pos1, pos2), ((ast, optAst), ast2)) -> 
-        let optAstStr = optAst |> Option.map (eval st) |> Option.defaultValue "None"
-        sprintf "SignatureWithUserDefinedString at positions %A and %A: ((%s, %s), %s)" (pos1.ToString()) (pos2.ToString()) (eval st ast) optAstStr (eval st ast2)
+    | Ast.SignatureWithUserDefinedString ((pos1, pos2), ((predicateIdentifierAst, optUserDefinedSymbolAst), paramTupleAst)) -> 
+        st.EvaluationContext <- EvalContext.InSignature (pos1, pos2)
+        eval st predicateIdentifierAst |> ignore
+        optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue "None" |> ignore
+        eval st paramTupleAst |> ignore
+        st.EvaluationContext <- EvalContext.ContextNone
+        ""
     | Ast.PropertyBlock ((pos1, pos2), ((ast, optAst), ast2)) -> 
         let optAstStr = optAst |> Option.map (eval st) |> Option.defaultValue "None"
         sprintf "PropertyBlock at positions %A and %A: ((%s, %s), %s)" (pos1.ToString()) (pos2.ToString()) (eval st ast) optAstStr (eval st ast2)
@@ -418,11 +425,11 @@ let rec eval (st:SymbolTable) ast =
         let optAstsStr = optAsts |> Option.map (List.map (eval st) >> String.concat ", ") |> Option.defaultValue "None"
         sprintf "DefinitionFunctionalTerm at positions %A and %A: ((%s, %s), (%s, %s))" (pos1.ToString()) (pos2.ToString()) (eval st ast1) (eval st ast2) (eval st ast3) optAstsStr
     // | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option)) 
-    | Ast.DefinitionClass ((pos1, pos2), (((ast1, optAst), asts), (ast2, optAsts))) -> 
-        let optAstStr = optAst |> Option.map (eval st) |> Option.defaultValue "None"
-        let astsStr = asts |> List.map (eval st) |> String.concat ", "
-        let optAstsStr = optAsts |> Option.map (List.map (eval st) >> String.concat ", ") |> Option.defaultValue "None"
-        sprintf "DefinitionClass at positions %A and %A: (((%s, %s), [%s]), (%s, %s))" (pos1.ToString()) (pos2.ToString()) (eval st ast1) optAstStr astsStr (eval st ast2) optAstsStr
+    | Ast.DefinitionClass ((pos1, pos2), (((predicateIdentifierAst, optUserDefinedObjSymAst), classTypeWithModifierListAsts), (classContentAst, optPropertyListAsts))) -> 
+        let optAstStr = optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue "None"
+        let astsStr = classTypeWithModifierListAsts |> List.map (eval st) |> String.concat ", "
+        let optAstsStr = optPropertyListAsts |> Option.map (List.map (eval st) >> String.concat ", ") |> Option.defaultValue "None"
+        sprintf "DefinitionClass at positions %A and %A: (((%s, %s), [%s]), (%s, %s))" (pos1.ToString()) (pos2.ToString()) (eval st predicateIdentifierAst) optAstStr astsStr (eval st classContentAst) optAstsStr
     // | DerivedPredicate of Ast
     | Ast.DerivedPredicate ast -> sprintf "DerivedPredicate %s" (eval st ast)
 
