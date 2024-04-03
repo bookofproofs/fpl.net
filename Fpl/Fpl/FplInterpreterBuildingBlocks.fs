@@ -28,7 +28,7 @@ let eval_string (st:SymbolTable) s =
             else
                 pa.FplBlocks.FplBlockIds.Add(s,0)
         | None -> ()
-    | EvalContext.ContextNone -> ()
+    | _ -> ()
     ""
 
 let eval_pos_string (st:SymbolTable) (startpos:Position) (endpos:Position) ast = ""
@@ -38,7 +38,19 @@ let eval_pos_unit (st:SymbolTable) (startpos:Position) (endpos:Position) = ""
 let eval_pos_ast (st:SymbolTable) (startpos:Position) (endpos:Position) = ""
 
 
-let eval_pos_astlist (st:SymbolTable) (startpos:Position) (endpos:Position) = ""
+let eval_pos_astlist_start (st:SymbolTable) (startpos:Position) (endpos:Position) = 
+    let oldEvalContext = st.EvaluationContext
+    match oldEvalContext with
+        | EvalContext.InParamTuple fplType -> fplType.StringRepresentation <- fplType.StringRepresentation + "(" 
+        | _ -> ()
+    oldEvalContext
+
+let eval_pos_astlist_end (st:SymbolTable) (startpos:Position) (endpos:Position) (oldEvalContext:EvalContext)= 
+    match oldEvalContext with
+        | EvalContext.InParamTuple fplType -> fplType.StringRepresentation <- fplType.StringRepresentation + ")" 
+        | _ -> ()
+    st.EvaluationContext <- oldEvalContext
+    ""
 
 let eval_pos_ast_ast_opt (st:SymbolTable) (startpos:Position) (endpos:Position) = ""
 
@@ -148,53 +160,69 @@ let rec eval (st:SymbolTable) ast =
         eval_pos_ast st pos1 pos2
     // | NamespaceIdentifier of Positions * Ast list
     | Ast.NamespaceIdentifier ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.PredicateIdentifier ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.LocalizationTerm ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.LocalizationTermList ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.BrackedCoordList ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.BracketedCoordsInType ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.And ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.Or ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.Xor ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
-    | Ast.ParamTuple ((pos1, pos2), asts) -> 
-        asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
+    | Ast.ParamTuple ((pos1, pos2), namedVariableDeclarationListAsts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
+        namedVariableDeclarationListAsts |> List.map (eval st) |> ignore
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.VarDeclBlock ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.StatementList ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.DefaultResult ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.Justification ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.ArgumentTuple ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     | Ast.QualificationList ((pos1, pos2), asts) -> 
+        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist st pos1 pos2 
+        eval_pos_astlist_end st pos1 pos2 oldEvalContext
     // | Namespace of Ast option * Ast list
     | Ast.Namespace (optAst, asts) -> 
         optAst |> Option.map (eval st) |> ignore

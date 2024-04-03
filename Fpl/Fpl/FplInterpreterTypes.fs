@@ -124,11 +124,16 @@ type FplSources(paths: string list) =
     member this.Length = this.Paths.Length
     member this.NoneFound = this.Paths.Length = 0
 
-
+type FplType =  
+    {
+        mutable StringRepresentation: string
+    }
 
 type EvalContext = 
     | ContextNone
-    | InSignature of Positions
+    | InSignature of Positions 
+    | InParamTuple of FplType  
+
 
 type SymbolTable =
     { 
