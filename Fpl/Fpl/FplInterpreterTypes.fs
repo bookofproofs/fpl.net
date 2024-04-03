@@ -131,8 +131,7 @@ type FplType =
 
 type EvalContext = 
     | ContextNone
-    | InSignature of Positions 
-    | InParamTuple of FplType  
+    | InSignature of Positions * FplType
 
 
 type SymbolTable =

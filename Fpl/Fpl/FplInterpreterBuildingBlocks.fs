@@ -6,27 +6,31 @@ open ErrDiagnostics
 open FplGrammarTypes
 open FplInterpreterTypes
 
-let eval_units (st:SymbolTable) = ()
-
+let eval_units (st:SymbolTable) unitType = 
+    match st.EvaluationContext with 
+    | EvalContext.InSignature ((_, _), fplType) -> 
+        fplType.StringRepresentation <- fplType.StringRepresentation + unitType
+    | _ -> ()
 
 let eval_string (st:SymbolTable) s = 
     match st.EvaluationContext with 
-    | EvalContext.InSignature (startpos, endpos) -> 
+    | EvalContext.InSignature ((startpos, endpos), fplType) -> 
         match st.Current with
         | Some pa -> 
-            if pa.FplBlocks.FplBlockIds.ContainsKey(s) then 
+            let identifier = s + fplType.StringRepresentation
+            if pa.FplBlocks.FplBlockIds.ContainsKey(identifier) then 
                 let diagnostic =
                     { 
                         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                         Diagnostic.Severity = DiagnosticSeverity.Error
                         Diagnostic.StartPos = startpos
                         Diagnostic.EndPos = endpos
-                        Diagnostic.Code = ID001 s
+                        Diagnostic.Code = ID001 identifier
                         Diagnostic.Alternatives = None 
                     }
                 FplParser.parserDiagnostics.AddDiagnostic diagnostic 
             else
-                pa.FplBlocks.FplBlockIds.Add(s,0)
+                pa.FplBlocks.FplBlockIds.Add(identifier,0)
         | None -> ()
     | _ -> ()
 
@@ -36,19 +40,15 @@ let eval_pos_unit (st:SymbolTable) (startpos:Position) (endpos:Position) = ()
 
 let eval_pos_ast (st:SymbolTable) (startpos:Position) (endpos:Position) = ()
 
-
 let eval_pos_astlist_start (st:SymbolTable) (startpos:Position) (endpos:Position) = 
-    let oldEvalContext = st.EvaluationContext
-    match oldEvalContext with
-        | EvalContext.InParamTuple fplType -> fplType.StringRepresentation <- fplType.StringRepresentation + "(" 
+    match st.EvaluationContext with
+        | EvalContext.InSignature ((_,_), fplType) -> fplType.StringRepresentation <- fplType.StringRepresentation + "(" 
         | _ -> ()
-    oldEvalContext
 
-let eval_pos_astlist_end (st:SymbolTable) (startpos:Position) (endpos:Position) (oldEvalContext:EvalContext)= 
-    match oldEvalContext with
-        | EvalContext.InParamTuple fplType -> fplType.StringRepresentation <- fplType.StringRepresentation + ")" 
+let eval_pos_astlist_end (st:SymbolTable) (startpos:Position) (endpos:Position) = 
+    match st.EvaluationContext with
+        | EvalContext.InSignature ((_,_), fplType) -> fplType.StringRepresentation <- fplType.StringRepresentation + ")" 
         | _ -> ()
-    st.EvaluationContext <- oldEvalContext
 
 let eval_pos_ast_ast_opt (st:SymbolTable) (startpos:Position) (endpos:Position) = ()
 
@@ -63,8 +63,15 @@ let eval_pos_string_ast (st:SymbolTable) str =
 let rec eval (st:SymbolTable) ast = 
     match ast with
     // units: | Star
+    | Ast.IndexType ->
+        eval_units st "index"
+    | Ast.ObjectType ->
+        eval_units st "object"
+    | Ast.PredicateType ->
+        eval_units st "predicate"
     | Ast.Star 
     | Ast.Dot 
+    | Ast.Intrinsic
     | Ast.LeftClosed 
     | Ast.LeftOpen 
     | Ast.RightClosed 
@@ -72,16 +79,13 @@ let rec eval (st:SymbolTable) ast =
     | Ast.One 
     | Ast.Many 
     | Ast.Many1 
-    | Ast.ObjectType 
-    | Ast.PredicateType 
     | Ast.FunctionalTermType 
-    | Ast.IndexType 
     | Ast.Property 
     | Ast.Optional 
-    | Ast.Error -> eval_units st
+    | Ast.Error -> eval_units st ""
     // strings: | Digits of string
     | Ast.Digits s  
-    | Ast.PascalCaseId s  
+    | Ast.PascalCaseId s 
     | Ast.ExtensionRegex s -> eval_string st s
     // | DollarDigits of Positions * string
     | Ast.DollarDigits ((pos1, pos2), s) 
@@ -111,7 +115,7 @@ let rec eval (st:SymbolTable) ast =
 
     | Ast.ClassIdentifier ((pos1, pos2), ast) -> 
         let oldEvalContext = st.EvaluationContext
-        st.EvaluationContext <- EvalContext.InSignature (pos1, pos2)
+        st.EvaluationContext <- EvalContext.InSignature ((pos1, pos2), {FplType.StringRepresentation = ""})
         eval st ast 
         eval_pos_ast st pos1 pos2 
         st.EvaluationContext <- oldEvalContext
@@ -132,6 +136,7 @@ let rec eval (st:SymbolTable) ast =
         eval st ast 
         eval_pos_ast st pos1 pos2
     // | NamespaceIdentifier of Positions * Ast list
+    | Ast.ParamTuple ((pos1, pos2), asts) 
     | Ast.NamespaceIdentifier ((pos1, pos2), asts) 
     | Ast.PredicateIdentifier ((pos1, pos2), asts) 
     | Ast.LocalizationTerm ((pos1, pos2), asts) 
@@ -141,16 +146,17 @@ let rec eval (st:SymbolTable) ast =
     | Ast.And ((pos1, pos2), asts) 
     | Ast.Or ((pos1, pos2), asts) 
     | Ast.Xor ((pos1, pos2), asts) 
-    | Ast.ParamTuple ((pos1, pos2), asts) 
     | Ast.VarDeclBlock ((pos1, pos2), asts) 
     | Ast.StatementList ((pos1, pos2), asts) 
     | Ast.DefaultResult ((pos1, pos2), asts) 
     | Ast.Justification ((pos1, pos2), asts) 
     | Ast.ArgumentTuple ((pos1, pos2), asts) 
     | Ast.QualificationList ((pos1, pos2), asts) -> 
-        let oldEvalContext = eval_pos_astlist_start st pos1 pos2
+        let oldEvalContext = st.EvaluationContext
+        eval_pos_astlist_start st pos1 pos2
         asts |> List.map (eval st) |> ignore
-        eval_pos_astlist_end st pos1 pos2 oldEvalContext
+        eval_pos_astlist_end st pos1 pos2 
+        st.EvaluationContext <- oldEvalContext
     // | Namespace of Ast option * Ast list
     | Ast.Namespace (optAst, asts) -> 
         optAst |> Option.map (eval st) |> ignore
@@ -183,7 +189,7 @@ let rec eval (st:SymbolTable) ast =
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | Ast.SignatureWithUserDefinedString ((pos1, pos2), ((predicateIdentifierAst, optUserDefinedSymbolAst), paramTupleAst)) -> 
         let oldEvalContext = st.EvaluationContext
-        st.EvaluationContext <- EvalContext.InSignature (pos1, pos2)
+        st.EvaluationContext <- EvalContext.InSignature ((pos1, pos2), {FplType.StringRepresentation = ""})
         eval st predicateIdentifierAst 
         optUserDefinedSymbolAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
         eval st paramTupleAst 
@@ -255,7 +261,7 @@ let rec eval (st:SymbolTable) ast =
     // | Assignment of Positions * (Ast * Ast)
     | Ast.Signature ((pos1, pos2), (ast1, ast2)) -> 
         let oldEvalContext = st.EvaluationContext
-        st.EvaluationContext <- EvalContext.InSignature (pos1, pos2)
+        st.EvaluationContext <- EvalContext.InSignature ((pos1, pos2), {FplType.StringRepresentation = ""})
         eval st ast1  
         eval st ast2 
         st.EvaluationContext <- oldEvalContext
