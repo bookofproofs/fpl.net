@@ -110,7 +110,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Trivial((pos1, pos2), _)
     | Ast.Qed((pos1, pos2), _) -> eval_pos_unit st pos1 pos2
     // | ExtDigits of Positions * Ast
-
+    | Ast.RuleOfInference((pos1, pos2), signatureWithPremiseConclusionBlockAst) ->
+            evalSimpleSignature signatureWithPremiseConclusionBlockAst FplBlockType.RuleOfInference pos1 pos2
     | Ast.ClassIdentifier((pos1, pos2), ast) 
     | Ast.ExtDigits((pos1, pos2), ast)
     | Ast.ExtensionType((pos1, pos2), ast)
@@ -122,7 +123,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ByDef((pos1, pos2), ast)
     | Ast.DottedPredicate((pos1, pos2), ast)
     | Ast.Return((pos1, pos2), ast)
-    | Ast.RuleOfInference((pos1, pos2), ast)
     | Ast.AssumeArgument((pos1, pos2), ast)
     | Ast.RevokeArgument((pos1, pos2), ast)
     | Ast.AST((pos1, pos2), ast) ->
@@ -287,11 +287,11 @@ let rec eval (st: SymbolTable) ast =
         eval st ast2
         asts |> List.map (eval st) |> ignore
     // | SignatureWithPreConBlock of Ast * ((Ast list option * Ast) * Ast)
-    | Ast.SignatureWithPreConBlock(ast, ((optAsts, ast2), ast3)) ->
-        eval st ast
-        optAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        eval st ast2
-        eval st ast3
+    | Ast.SignatureWithPreConBlock(signatureAst, ((optVarDeclOrSpecList, premiseAst), conclusionAst)) ->
+        eval st signatureAst
+        optVarDeclOrSpecList |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+        eval st premiseAst
+        eval st conclusionAst
     // | Theorem of Positions * (Ast * (Ast list option * Ast))
     | Ast.Theorem((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         evalSimpleSignature signatureAst FplBlockType.Theorem pos1 pos2
