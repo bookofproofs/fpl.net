@@ -47,7 +47,7 @@ let rec eval (st: SymbolTable) ast =
             let currentTheory = st.Theories.Value[theoryId]
             let createAndEval fplBlockType =
                 let fv = FplValue.CreateFplValue((pos1, pos2), fplBlockType, currentTheory)
-                EvalContext.Multiple [ EvalContext.InTheory theoryId; EvalContext.InTheoremLikeStatement fv], fv
+                EvalContext.Multiple [ EvalContext.InTheory theoryId; EvalContext.InSignature fv], fv
             let newContext, fplValue = createAndEval fplBlockType
             let oldContext = st.CurrentContext
             st.CurrentContext <- newContext
@@ -86,7 +86,12 @@ let rec eval (st: SymbolTable) ast =
     | Ast.PascalCaseId s
     | Ast.ExtensionRegex s -> eval_string st s
     // | DollarDigits of Positions * string
-    | Ast.DollarDigits((pos1, pos2), s)
+    | Ast.DollarDigits((pos1, pos2), s) -> 
+        match st.CurrentContext with
+        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InSignature fplBlock] -> 
+            fplBlock.Name <- fplBlock.Name + s
+            fplBlock.NameEndPos <- pos2 // the full name ends where the dollar digits end 
+        | _ -> ()
     | Ast.DelegateId((pos1, pos2), s)
     | Ast.Alias((pos1, pos2), s)
     | Ast.LocalizationString((pos1, pos2), s)
@@ -133,26 +138,43 @@ let rec eval (st: SymbolTable) ast =
         let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
         match st.CurrentContext with
-        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InDefinitionClass fplBlock] -> 
+        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InSignature fplBlock] -> 
                 fplBlock.Name <- identifier
-                fplBlock.TypeSignature <- identifier
                 fplBlock.NameStartPos <- pos1 // the full name begins where the PredicateIdentifier starts 
-        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InTheoremLikeStatement fplBlock]  
-        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InDefinitionPredicate fplBlock]  
-        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InDefinitionFunctionalTerm fplBlock] -> 
-            fplBlock.Name <- identifier
-        | _ -> 
-            ()
+                match fplBlock.BlockType with 
+                | FplBlockType.Class -> 
+                    fplBlock.TypeSignature <- identifier
+                    fplBlock.NameEndPos <- pos2 // the full name stops where the PredicateIdentifier stops 
+                | FplBlockType.Proof
+                | FplBlockType.Predicate
+                | FplBlockType.Theorem
+                | FplBlockType.Lemma
+                | FplBlockType.Proposition
+                | FplBlockType.Conjecture
+                | FplBlockType.Corollary
+                | FplBlockType.RuleOfInference
+                | FplBlockType.Conclusion
+                | FplBlockType.Premise
+                | FplBlockType.RuleOfInference
+                | FplBlockType.Theory
+                | FplBlockType.Axiom -> 
+                    fplBlock.TypeSignature <- "predicate"
+                | FplBlockType.Constructor ->
+                    fplBlock.TypeSignature <- identifier
+                | FplBlockType.SignatureVariable
+                | FplBlockType.MandatoryProperty
+                | FplBlockType.OptionalProperty
+                | FplBlockType.InnerVariable
+                | FplBlockType.FunctionalTerm -> ()
+        | _ -> ()
     | Ast.ParamTuple((pos1, pos2), asts) ->
         match st.CurrentContext with
-        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InTheoremLikeStatement fplBlock]  
-        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InDefinitionPredicate fplBlock]  
-        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InDefinitionFunctionalTerm fplBlock] -> 
+        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InSignature fplBlock] -> 
             fplBlock.Name <- fplBlock.Name + "("
             fplBlock.TypeSignature <- fplBlock.TypeSignature + "("
             asts |> List.map (eval st) |> ignore
             fplBlock.Name <- fplBlock.Name + ")"
-            fplBlock.NameEndPos <- pos2 // the full name ends where the parameters end (if any)
+            fplBlock.NameEndPos <- pos2 // the full name ends where the parameters end 
             fplBlock.TypeSignature <- fplBlock.TypeSignature + ")"
         | _ -> ()
 
@@ -222,8 +244,8 @@ let rec eval (st: SymbolTable) ast =
     | ReferencingIdentifier((pos1, pos2), (ast, asts))
     | Ast.ConditionFollowedByResult((pos1, pos2), (ast, asts))
     | Ast.Localization((pos1, pos2), (ast, asts)) ->
-        asts |> List.map (eval st) |> ignore
         eval st ast
+        asts |> List.map (eval st) |> ignore
     // | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
     | Ast.BoundedRangeInType((pos1, pos2), ((ast1, ast2), ast3))
     | Ast.ClassInstance((pos1, pos2), ((ast1, ast2), ast3))
@@ -365,7 +387,6 @@ let rec eval (st: SymbolTable) ast =
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         classTypeWithModifierListAsts |> List.map (eval st) |> ignore
         eval st classContentAst
-
         optPropertyListAsts
         |> Option.map (List.map (eval st) >> ignore)
         |> Option.defaultValue ()
@@ -373,7 +394,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DerivedPredicate ast -> eval st ast
     // | Proof of Positions * (Ast * (Ast list * Ast option))
     | Ast.Proof((pos1, pos2), (astReferencingIdentifier, (proofArgumentListAst, optQedAst))) ->
-        eval st astReferencingIdentifier
+        evalSimpleSignature astReferencingIdentifier FplBlockType.Proof pos1 pos2
         proofArgumentListAst |> List.map (eval st) |> ignore
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
     | ast ->

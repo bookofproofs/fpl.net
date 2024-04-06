@@ -284,3 +284,29 @@ type TestInterpreterErrors() =
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(0, result.Length)
         this.PrepareFplCode("", true) |> ignore
+
+    [<DataRow("proof", "SomeProof$1")>]
+    [<DataRow("proof", "SomeProof$1$2")>]
+    [<DataRow("proof", "SomeProof$1$1$2")>]
+    [<TestMethod>]
+    member this.TestID001Proof(blockType:string, blockName:string) =
+        let code = ID001 blockName
+        printf "Trying %s" code.Message
+        let fplCode = sprintf """%s %s {1. |- trivial} %s %s {1. |- trivial} ;""" blockType blockName blockType blockName
+        this.PrepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(1, result.Length)
+        this.PrepareFplCode("", true) |> ignore
+
+    [<DataRow("proof", "SomeProof$1")>]
+    [<DataRow("proof", "SomeProof$1$2")>]
+    [<DataRow("proof", "SomeProof$1$1$2")>]
+    [<TestMethod>]
+    member this.TestID001ProofCrossCheck(blockType:string, blockName:string) =
+        let code = ID001 blockName
+        printf "Trying %s" code.Message
+        let fplCode = sprintf """%s %s() {pre: true con: true} ;""" blockType blockName 
+        this.PrepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(0, result.Length)
+        this.PrepareFplCode("", true) |> ignore

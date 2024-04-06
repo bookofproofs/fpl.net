@@ -229,12 +229,7 @@ type FplValue(name:string, blockType:FplBlockType, evalType: FplType, positions:
 type EvalContext = 
     | ContextNone
     | InTheory of string
-    | InSignature of Positions 
-    | InDefinitionClass of FplValue 
-    | InDefinitionFunctionalTerm of FplValue 
-    | InDefinitionPredicate of FplValue
-    | InTheoremLikeStatement of FplValue
-
+    | InSignature of FplValue 
     | Multiple of EvalContext list
 
 type SymbolTable =
