@@ -7,7 +7,12 @@ open ErrDiagnostics
 open FplGrammarTypes
 open FplInterpreterTypes
 
-let eval_units (st: SymbolTable) unitType = ()
+let eval_units (st: SymbolTable) unitType = 
+    match st.CurrentContext with
+    | EvalContext.Multiple [ EvalContext.InTheory theoryId; EvalContext.InSignature fplValue] -> 
+        fplValue.Name <- fplValue.Name + unitType
+        fplValue.TypeSignature <- fplValue.Name + unitType
+    | _ -> ()
 
 let eval_string (st: SymbolTable) s = ()
 
@@ -67,6 +72,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.IndexType -> eval_units st "index"
     | Ast.ObjectType -> eval_units st "object"
     | Ast.PredicateType -> eval_units st "predicate"
+    | Ast.FunctionalTermType -> eval_units st "function"
     | Ast.Star
     | Ast.Dot
     | Ast.Intrinsic
@@ -77,7 +83,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.One
     | Ast.Many
     | Ast.Many1
-    | Ast.FunctionalTermType
     | Ast.Property
     | Ast.Optional
     | Ast.Error -> eval_units st ""
@@ -92,11 +97,23 @@ let rec eval (st: SymbolTable) ast =
             fplBlock.Name <- fplBlock.Name + s
             fplBlock.NameEndPos <- pos2 // the full name ends where the dollar digits end 
         | _ -> ()
+    | Ast.Extensionname((pos1, pos2), s) ->
+        match st.CurrentContext with
+        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InSignature fplBlock] -> 
+            fplBlock.Name <- fplBlock.Name + "@" + s
+            fplBlock.NameEndPos <- pos2 // the full name ends where the dollar digits end 
+            fplBlock.TypeSignature <- fplBlock.TypeSignature + "@" + s
+        | _ -> ()
+    | Ast.TemplateType((pos1, pos2), s) -> 
+        match st.CurrentContext with
+        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InSignature fplBlock] -> 
+            fplBlock.Name <- fplBlock.Name + s 
+            fplBlock.NameEndPos <- pos2 // the full name ends where the dollar digits end 
+            fplBlock.TypeSignature <- fplBlock.TypeSignature + s 
+        | _ -> ()
     | Ast.DelegateId((pos1, pos2), s)
     | Ast.Alias((pos1, pos2), s)
     | Ast.LocalizationString((pos1, pos2), s)
-    | Ast.Extensionname((pos1, pos2), s)
-    | Ast.TemplateType((pos1, pos2), s)
     | Ast.Var((pos1, pos2), s)
     | Ast.ObjectSymbol((pos1, pos2), s)
     | Ast.ArgumentIdentifier((pos1, pos2), s)
@@ -139,11 +156,11 @@ let rec eval (st: SymbolTable) ast =
         let identifier = String.concat "." pascalCaseIdList
         match st.CurrentContext with
         | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InSignature fplBlock] -> 
-                fplBlock.Name <- identifier
+                fplBlock.Name <- fplBlock.Name + identifier
                 fplBlock.NameStartPos <- pos1 // the full name begins where the PredicateIdentifier starts 
                 match fplBlock.BlockType with 
                 | FplBlockType.Class -> 
-                    fplBlock.TypeSignature <- identifier
+                    fplBlock.TypeSignature <- fplBlock.TypeSignature + identifier
                     fplBlock.NameEndPos <- pos2 // the full name stops where the PredicateIdentifier stops 
                 | FplBlockType.Proof
                 | FplBlockType.Predicate
@@ -158,9 +175,9 @@ let rec eval (st: SymbolTable) ast =
                 | FplBlockType.RuleOfInference
                 | FplBlockType.Theory
                 | FplBlockType.Axiom -> 
-                    fplBlock.TypeSignature <- "predicate"
+                    fplBlock.TypeSignature <- fplBlock.TypeSignature + "predicate"
                 | FplBlockType.Constructor ->
-                    fplBlock.TypeSignature <- identifier
+                    fplBlock.TypeSignature <- fplBlock.TypeSignature + identifier
                 | FplBlockType.SignatureVariable
                 | FplBlockType.MandatoryProperty
                 | FplBlockType.OptionalProperty
@@ -198,13 +215,13 @@ let rec eval (st: SymbolTable) ast =
         optAst |> Option.map (eval st) |> ignore
         asts |> List.map (eval st) |> ignore
     // AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
-    | Ast.AliasedNamespaceIdentifier((pos1, pos2), (ast, optAst))
-    | Ast.VariableType((pos1, pos2), (ast, optAst))
-    | Ast.ClassType((pos1, pos2), (ast, optAst))
-    | Ast.ReferenceToProofOrCorollary((pos1, pos2), (ast, optAst))
-    | Ast.PredicateWithOptSpecification((pos1, pos2), (ast, optAst)) ->
+    | Ast.VariableType((pos1, pos2), (ast1, optAst))
+    | Ast.AliasedNamespaceIdentifier((pos1, pos2), (ast1, optAst))
+    | Ast.ClassType((pos1, pos2), (ast1, optAst))
+    | Ast.ReferenceToProofOrCorollary((pos1, pos2), (ast1, optAst))
+    | Ast.PredicateWithOptSpecification((pos1, pos2), (ast1, optAst)) ->
+        eval st ast1
         optAst |> Option.map (eval st) |> ignore
-        eval st ast
         eval_pos_ast_ast_opt st pos1 pos2
     // | SelfAts of Positions * char list
     | Ast.SelfAts((pos1, pos2), chars) -> eval_pos_char_list st pos1 pos2 chars
@@ -248,11 +265,13 @@ let rec eval (st: SymbolTable) ast =
         asts |> List.map (eval st) |> ignore
     // | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
     | Ast.BoundedRangeInType((pos1, pos2), ((ast1, ast2), ast3))
-    | Ast.ClassInstance((pos1, pos2), ((ast1, ast2), ast3))
-    | Ast.FunctionalTermInstance((pos1, pos2), ((ast1, ast2), ast3)) ->
+    | Ast.ClassInstance((pos1, pos2), ((ast1, ast2), ast3)) ->
         eval st ast1
         eval st ast2
         eval st ast3
+    | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermSignatureAst, ast2)) ->
+        eval st functionalTermSignatureAst
+        eval st ast2
     // | All of Positions * ((Ast list * Ast option) list * Ast)
     | Ast.All((pos1, pos2), (astsOpts, ast))
     | Ast.Exists((pos1, pos2), (astsOpts, ast)) ->
@@ -271,7 +290,15 @@ let rec eval (st: SymbolTable) ast =
         eval st ast2
         optAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
         eval st ast3
-    // | PredicateWithQualification of (Ast * Ast)
+    // | FunctionalTermSignature of (Ast * Ast)
+    | Ast.FunctionalTermSignature(signatureWithUserDefinedStringAst, mappingAst) -> 
+        eval st signatureWithUserDefinedStringAst
+        match st.CurrentContext with 
+        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InSignature fplBlock] -> 
+            fplBlock.Name <- fplBlock.Name + "->"
+            fplBlock.TypeSignature <- fplBlock.TypeSignature + "->"
+        | _ -> ()
+        eval st mappingAst
     | Ast.PredicateWithQualification(ast1, ast2) ->
         eval st ast1
         eval st ast2
@@ -371,9 +398,8 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
-    | Ast.DefinitionFunctionalTerm((pos1, pos2), ((signatureWithUserDefinedStringAst, variableTypeAst), (funcContentAst, optPropertyListAsts))) ->
-        evalSimpleSignature signatureWithUserDefinedStringAst FplBlockType.FunctionalTerm pos1 pos2
-        eval st variableTypeAst
+    | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, (funcContentAst, optPropertyListAsts))) ->
+        evalSimpleSignature functionalTermSignatureAst FplBlockType.FunctionalTerm pos1 pos2
         eval st funcContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
     // | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option))

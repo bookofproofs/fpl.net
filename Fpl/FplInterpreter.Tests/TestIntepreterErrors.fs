@@ -165,15 +165,15 @@ type TestInterpreterErrors() =
             let parsedAsts = System.Collections.Generic.List<ParsedAst>()
             FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts
 
-    [<DataRow("axiom", "SomeAxiom()")>]
-    [<DataRow("postulate", "SomePostulate()")>]
-    [<DataRow("theorem", "SomeTheorem()")>]
-    [<DataRow("lemma", "SomeLemma()")>]
-    [<DataRow("proposition", "SomeProposition()")>]
-    [<DataRow("conjecture", "SomeConjecture()")>]
+    [<DataRow("axiom", "SomeAxiom()", "SomeAxiom()")>]
+    [<DataRow("postulate", "SomePostulate()", "SomePostulate()")>]
+    [<DataRow("theorem", "SomeTheorem()", "SomeTheorem()")>]
+    [<DataRow("lemma", "SomeLemma()", "SomeLemma()")>]
+    [<DataRow("proposition", "SomeProposition()", "SomeProposition()")>]
+    [<DataRow("conjecture", "SomeConjecture()", "SomeConjecture()")>]
     [<TestMethod>]
-    member this.TestID001Predicative(blockType:string, blockName:string) =
-        let code = ID001 blockName
+    member this.TestID001Predicative(blockType:string, blockName:string, expected:string) =
+        let code = ID001 expected
         printf "Trying %s" code.Message
         let fplCode = sprintf """%s %s {true} %s %s {true} ;""" blockType blockName blockType blockName
         this.PrepareFplCode(fplCode, false) |> ignore
@@ -196,23 +196,37 @@ type TestInterpreterErrors() =
         Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
         this.PrepareFplCode("", true) |> ignore
 
-    [<DataRow("function", "SomeFunctionalTerm()")>]
+    [<DataRow("SomeFunctionalTerm() -> obj", "SomeFunctionalTerm()->object")>]
+    [<DataRow("SomeFunctionalTerm(x:ind) -> obj", "SomeFunctionalTerm(index)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:pred) -> obj", "SomeFunctionalTerm(predicate)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:func) -> obj", "SomeFunctionalTerm(function)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:obj) -> obj", "SomeFunctionalTerm(object)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:index) -> obj", "SomeFunctionalTerm(index)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:predicate) -> obj", "SomeFunctionalTerm(predicate)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:function) -> obj", "SomeFunctionalTerm(function)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:object) -> obj", "SomeFunctionalTerm(object)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:Nat) -> obj", "SomeFunctionalTerm(Nat)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:@Nat) -> obj", "SomeFunctionalTerm(@Nat)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:tpl) -> obj", "SomeFunctionalTerm(tpl)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:template) -> obj", "SomeFunctionalTerm(template)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:tplTest) -> obj", "SomeFunctionalTerm(tplTest)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:templateTest) -> obj", "SomeFunctionalTerm(templateTest)->object")>]
     [<TestMethod>]
-    member this.TestID001Function(blockType:string, blockName:string) =
-        let code = ID001 blockName
+    member this.TestID001Function(blockName:string, expected:string) =
+        let code = ID001 expected
         printf "Trying %s" code.Message
-        let fplCode = sprintf """def %s %s -> obj {intrinsic} def %s %s -> obj {intrinsic} ;""" blockType blockName blockType blockName
+        let fplCode = sprintf """def function %s {intrinsic} def function %s {intrinsic} ;""" blockName blockName
         this.PrepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
         this.PrepareFplCode("", true) |> ignore
 
-    [<DataRow("function", "SomeFunctionalTerm()")>]
+    [<DataRow("SomeFunctionalTerm() -> obj")>]
     [<TestMethod>]
-    member this.TestID001FunctionCrossCheck(blockType:string, blockName:string) =
+    member this.TestID001FunctionCrossCheck(blockName:string) =
         let code = ID001 blockName
         printf "Trying %s" code.Message
-        let fplCode = sprintf """def %s %s -> obj {intrinsic} ;""" blockType blockName 
+        let fplCode = sprintf """def function %s {intrinsic} ;""" blockName 
         this.PrepareFplCode(fplCode, false) |> ignore
         Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
         this.PrepareFplCode("", true) |> ignore
