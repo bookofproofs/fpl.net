@@ -124,20 +124,99 @@ type FplSources(paths: string list) =
     member this.Length = this.Paths.Length
     member this.NoneFound = this.Paths.Length = 0
 
-type FplType =  
-    {
-        mutable StringRepresentation: string
-    }
+
+
+
+type FplType = 
+    | Object
+    | Predicate
+    | Template
+
+type FplBlockType = 
+    | InnerVariable
+    | SignatureVariable
+    | MandatoryProperty
+    | OptionalProperty
+    | Constructor
+    | Class
+    | Theorem
+    | Lemma
+    | Proposition
+    | Corollary
+    | Proof
+    | Conjecture
+    | Axiom
+    | RuleOfInference
+    | Premise
+    | Conclusion
+    | Predicate
+    | FunctionalTerm
+    | Theory
+
+type FplValue(name:string, blockType:FplBlockType, evalType: FplType, positions:Positions, parent: FplValue option) = 
+    let mutable _name = name
+    let mutable _nameStartPos = Position("", 0, 1, 1)
+    let mutable _nameEndPos = Position("", 0, 1, 1)
+    let mutable _typeSignature = ""
+    let mutable _representation = ""
+    let _scope = System.Collections.Generic.Dictionary<string,FplValue>()
+    /// Identifier of this FplValue that is unique in its scope
+    member this.Name 
+        with get() = _name 
+        and set(value) = _name <- value
+
+    /// Identifier of this FplValue that is unique in its scope
+    member this.NameStartPos 
+        with get() = _nameStartPos 
+        and set(value) = _nameStartPos <- value
+    /// Identifier of this FplValue that is unique in its scope
+    member this.NameEndPos
+        with get() = _nameEndPos 
+        and set(value) = _nameEndPos <- value
+    
+    /// Signature of this FplValue, for instance "predicate(object)"
+    member this.TypeSignature 
+        with get() = _typeSignature 
+        and set(value) = _typeSignature <- value
+    /// Type of the FPL block with this FplValue
+    member this.BlockType = blockType 
+    /// The primary type of the FplValue
+    member this.EvaluationType = evalType
+    /// A representation of the constructed object (if any)
+    member this.FplRepresentation
+        with get() = _representation 
+        and set(value) = _representation <- value
+    /// Starting position of this FplValue
+    member this.StartPos = fst positions
+    /// Ending position of this FplValue
+    member this.EndPos = snd positions
+    /// Parent FplValue of this FplValue
+    member this.Parent = parent
+    /// A list of asserted predicates for this FplValue
+    member this.AssertedPredicates = System.Collections.Generic.List<Ast>()
+    /// A scope inside this FplValue
+    member this.Scope with get() = _scope
+
+    /// A factory method for the evaluation of FPL theories
+    static member CreateTheory(namespaceId:string, positions:Positions) = new FplValue(namespaceId, FplBlockType.Theory, FplType.Predicate, positions, None)
+
+    /// A factory method for the evaluation of Fpl class definitions
+    static member CreateClass(positions:Positions, parentTheory:FplValue) = new FplValue("", FplBlockType.Class, FplType.Object, positions, Some parentTheory)
+
 
 type EvalContext = 
     | ContextNone
-    | InSignature of Positions * FplType
-
+    | InTheory of string
+    | InSignature of Positions 
+    | InDefinitionClass of FplValue 
+    | InDefinitionFunctionalTerm of FplValue 
+    | InDefinitionPredicate of FplValue
+    | Multiple of EvalContext list
 
 type SymbolTable =
     { 
         ParsedAsts: List<ParsedAst> 
-        mutable EvaluationContext: EvalContext
-        mutable Current: ParsedAst option
+        mutable CurrentContext: EvalContext
+        Theories: System.Collections.Generic.Dictionary<string,FplValue> option
     }
 

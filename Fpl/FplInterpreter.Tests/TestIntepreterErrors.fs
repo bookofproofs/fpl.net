@@ -165,12 +165,12 @@ type TestInterpreterErrors() =
             let parsedAsts = System.Collections.Generic.List<ParsedAst>()
             FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts
 
-    [<DataRow("axiom", "SomeAxiom")>]
-    [<DataRow("postulate", "SomePostulate")>]
-    [<DataRow("theorem", "SomeTheorem")>]
-    [<DataRow("lemma", "SomeLemma")>]
-    [<DataRow("proposition", "SomeProposition")>]
-    [<DataRow("conjecture", "SomeConjecture")>]
+    [<DataRow("axiom", "SomeAxiom()")>]
+    [<DataRow("postulate", "SomePostulate()")>]
+    [<DataRow("theorem", "SomeTheorem()")>]
+    [<DataRow("lemma", "SomeLemma()")>]
+    [<DataRow("proposition", "SomeProposition()")>]
+    [<DataRow("conjecture", "SomeConjecture()")>]
     [<TestMethod>]
     member this.TestID001Predicative(blockType:string, blockName:string) =
         let code = ID001 blockName
@@ -181,12 +181,12 @@ type TestInterpreterErrors() =
         Assert.AreEqual(1, result.Length)
         this.PrepareFplCode("", true) |> ignore
 
-    [<DataRow("axiom", "SomeAxiom")>]
-    [<DataRow("postulate", "SomePostulate")>]
-    [<DataRow("theorem", "SomeTheorem")>]
-    [<DataRow("lemma", "SomeLemma")>]
-    [<DataRow("proposition", "SomeProposition")>]
-    [<DataRow("conjecture", "SomeConjecture")>]
+    [<DataRow("axiom", "SomeAxiom()")>]
+    [<DataRow("postulate", "SomePostulate()")>]
+    [<DataRow("theorem", "SomeTheorem()")>]
+    [<DataRow("lemma", "SomeLemma()")>]
+    [<DataRow("proposition", "SomeProposition()")>]
+    [<DataRow("conjecture", "SomeConjecture()")>]
     [<TestMethod>]
     member this.TestID001PredicativeCrossCheck(blockType:string, blockName:string) =
         let code = ID001 blockName
@@ -197,7 +197,7 @@ type TestInterpreterErrors() =
         Assert.AreEqual(0, result.Length)
         this.PrepareFplCode("", true) |> ignore
 
-    [<DataRow("function", "SomeFunctionalTerm")>]
+    [<DataRow("function", "SomeFunctionalTerm()")>]
     [<TestMethod>]
     member this.TestID001Function(blockType:string, blockName:string) =
         let code = ID001 blockName
@@ -208,7 +208,7 @@ type TestInterpreterErrors() =
         Assert.AreEqual(1, result.Length)
         this.PrepareFplCode("", true) |> ignore
 
-    [<DataRow("function", "SomeFunctionalTerm")>]
+    [<DataRow("function", "SomeFunctionalTerm()")>]
     [<TestMethod>]
     member this.TestID001FunctionCrossCheck(blockType:string, blockName:string) =
         let code = ID001 blockName
@@ -241,7 +241,7 @@ type TestInterpreterErrors() =
         Assert.AreEqual(0, result.Length)
         this.PrepareFplCode("", true) |> ignore
 
-    [<DataRow("predicate", "SomePredicate")>]
+    [<DataRow("predicate", "SomePredicate()")>]
     [<TestMethod>]
     member this.TestID001Predicate(blockType:string, blockName:string) =
         let code = ID001 blockName
@@ -252,7 +252,7 @@ type TestInterpreterErrors() =
         Assert.AreEqual(1, result.Length)
         this.PrepareFplCode("", true) |> ignore
 
-    [<DataRow("predicate", "SomePredicate")>]
+    [<DataRow("predicate", "SomePredicate()")>]
     [<TestMethod>]
     member this.TestID001PredicateCrossCheck(blockType:string, blockName:string) =
         let code = ID001 blockName

@@ -1,4 +1,5 @@
 ﻿module FplInterpreter
+open System.Collections.Generic
 open FplGrammarTypes
 open FplInterpreterTypes
 open FplParser
@@ -8,8 +9,8 @@ open FplInterpreterBuildingBlocks
 let fplInterpreter input uri fplLibUrl (parsedAsts:System.Collections.Generic.List<ParsedAst>) = 
     let st = { 
         SymbolTable.ParsedAsts = parsedAsts
-        SymbolTable.EvaluationContext = EvalContext.ContextNone
-        SymbolTable.Current = None
+        SymbolTable.CurrentContext = EvalContext.ContextNone
+        SymbolTable.Theories = Some (Dictionary<string,FplValue>())
         }
     
     loadAllUsesClauses input uri fplLibUrl parsedAsts 
