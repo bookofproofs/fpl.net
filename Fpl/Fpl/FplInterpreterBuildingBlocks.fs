@@ -348,30 +348,12 @@ let rec eval (st: SymbolTable) ast =
         asts |> List.map (eval st) |> ignore
     // | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | Ast.DefinitionPredicate((pos1, pos2), (signatureWithUserDefinedStringAst, (predicateContentAst, optPropertyListAsts))) ->
-        match st.CurrentContext with
-        | EvalContext.InTheory theoryId -> 
-            let currentTheory = st.Theories.Value[theoryId]
-            let predValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Predicate, currentTheory)
-            let oldContext = st.CurrentContext
-            st.CurrentContext <- EvalContext.Multiple [st.CurrentContext; EvalContext.InDefinitionPredicate predValue]
-            eval st signatureWithUserDefinedStringAst
-            st.CurrentContext <- oldContext
-            tryAddBlock predValue
-        | _ -> ()
+        evalSimpleSignature signatureWithUserDefinedStringAst FplBlockType.Predicate pos1 pos2
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
     | Ast.DefinitionFunctionalTerm((pos1, pos2), ((signatureWithUserDefinedStringAst, variableTypeAst), (funcContentAst, optPropertyListAsts))) ->
-        match st.CurrentContext with
-        | EvalContext.InTheory theoryId -> 
-            let currentTheory = st.Theories.Value[theoryId]
-            let funcValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.FunctionalTerm, currentTheory)
-            let oldContext = st.CurrentContext
-            st.CurrentContext <- EvalContext.Multiple [st.CurrentContext; EvalContext.InDefinitionFunctionalTerm funcValue]
-            eval st signatureWithUserDefinedStringAst
-            st.CurrentContext <- oldContext
-            tryAddBlock funcValue
-        | _ -> ()
+        evalSimpleSignature signatureWithUserDefinedStringAst FplBlockType.FunctionalTerm pos1 pos2
         eval st variableTypeAst
         eval st funcContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
@@ -379,17 +361,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DefinitionClass((pos1, pos2),
                           (((predicateIdentifierAst, optUserDefinedObjSymAst), classTypeWithModifierListAsts),
                            (classContentAst, optPropertyListAsts))) ->
-        match st.CurrentContext with
-        | EvalContext.InTheory theoryId -> 
-            let currentTheory = st.Theories.Value[theoryId]
-            let classValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Class, currentTheory)
-            let oldContext = st.CurrentContext
-            st.CurrentContext <- EvalContext.Multiple [st.CurrentContext; EvalContext.InDefinitionClass classValue]
-            eval st predicateIdentifierAst
-            st.CurrentContext <- oldContext
-            tryAddBlock classValue
-        | _ -> ()
-
+        evalSimpleSignature predicateIdentifierAst FplBlockType.Class pos1 pos2
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         classTypeWithModifierListAsts |> List.map (eval st) |> ignore
         eval st classContentAst
@@ -400,10 +372,10 @@ let rec eval (st: SymbolTable) ast =
     // | DerivedPredicate of Ast
     | Ast.DerivedPredicate ast -> eval st ast
     // | Proof of Positions * (Ast * (Ast list * Ast option))
-    | Ast.Proof((pos1, pos2), (ast1, (asts, optAst))) ->
-        eval st ast1
-        asts |> List.map (eval st) |> ignore
-        optAst |> Option.map (eval st) |> Option.defaultValue ()
+    | Ast.Proof((pos1, pos2), (astReferencingIdentifier, (proofArgumentListAst, optQedAst))) ->
+        eval st astReferencingIdentifier
+        proofArgumentListAst |> List.map (eval st) |> ignore
+        optQedAst |> Option.map (eval st) |> Option.defaultValue ()
     | ast ->
         let astType = ast.GetType().Name
 
