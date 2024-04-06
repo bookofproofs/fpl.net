@@ -331,15 +331,12 @@ let rec eval (st: SymbolTable) ast =
         evalSimpleSignature signatureAst FplBlockType.Axiom pos1 pos2
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
     // | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
-    | Ast.Corollary((pos1, pos2), ((ast1, ast2), (Some astList, ast3))) ->
-        eval st ast1
-        eval st ast2
-        astList |> List.map (eval st) |> ignore
-        eval st ast3
-    | Ast.Corollary((pos1, pos2), ((ast1, ast2), (None, ast3))) ->
-        eval st ast1
-        eval st ast2
-        eval st ast3
+    | Ast.CorollarySignature(referencingIdentifierAst, paramTupleAst) ->
+        eval st referencingIdentifierAst
+        eval st paramTupleAst
+    | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
+        evalSimpleSignature corollarySignatureAst FplBlockType.Corollary pos1 pos2
+        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
     | Ast.NamedVarDecl((pos1, pos2), ((asts, ast1), ast2)) ->
         asts |> List.map (eval st) |> ignore
@@ -393,8 +390,8 @@ let rec eval (st: SymbolTable) ast =
     // | DerivedPredicate of Ast
     | Ast.DerivedPredicate ast -> eval st ast
     // | Proof of Positions * (Ast * (Ast list * Ast option))
-    | Ast.Proof((pos1, pos2), (astReferencingIdentifier, (proofArgumentListAst, optQedAst))) ->
-        evalSimpleSignature astReferencingIdentifier FplBlockType.Proof pos1 pos2
+    | Ast.Proof((pos1, pos2), (referencingIdentifierAst, (proofArgumentListAst, optQedAst))) ->
+        evalSimpleSignature referencingIdentifierAst FplBlockType.Proof pos1 pos2
         proofArgumentListAst |> List.map (eval st) |> ignore
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
     | ast ->

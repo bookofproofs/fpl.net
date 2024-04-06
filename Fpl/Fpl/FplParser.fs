@@ -444,7 +444,7 @@ let lemma = positions (keywordLemma >>. signatureWithTheoremLikeBlock) |>> Ast.L
 let proposition = positions (keywordProposition >>. signatureWithTheoremLikeBlock) |>> Ast.Proposition
 let conjecture = positions (keywordConjecture >>. signatureWithTheoremLikeBlock) |>> Ast.Conjecture
 
-let corollarySignature = referencingIdentifier .>>. paramTuple .>> IW
+let corollarySignature = referencingIdentifier .>>. paramTuple .>> IW |>> Ast.CorollarySignature
 let corollary = positions (keywordCorollary >>. corollarySignature .>>. theoremLikeBlock) |>> Ast.Corollary
 
 (* FPL building blocks - Axioms *)

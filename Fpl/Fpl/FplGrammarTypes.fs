@@ -112,7 +112,8 @@ type Ast =
     | Theorem of Positions * (Ast *(Ast list option * Ast))
     | Lemma of Positions * (Ast *(Ast list option * Ast))
     | Proposition of Positions * (Ast *(Ast list option * Ast))
-    | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
+    | Corollary of Positions * (Ast * (Ast list option * Ast))
+    | CorollarySignature of (Ast * Ast)
     | Conjecture of Positions * (Ast *(Ast list option * Ast))
     | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
     | ParamTuple of Positions * Ast list
