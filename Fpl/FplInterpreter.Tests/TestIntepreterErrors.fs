@@ -175,7 +175,7 @@ type TestInterpreterErrors() =
     member this.TestID001Predicative(blockType:string, blockName:string) =
         let code = ID001 blockName
         printf "Trying %s" code.Message
-        let fplCode = sprintf """%s %s() {true} %s %s() {true} ;""" blockType blockName blockType blockName
+        let fplCode = sprintf """%s %s {true} %s %s {true} ;""" blockType blockName blockType blockName
         this.PrepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
@@ -191,8 +191,8 @@ type TestInterpreterErrors() =
     member this.TestID001PredicativeCrossCheck(blockType:string, blockName:string) =
         let code = ID001 blockName
         printf "Trying %s" code.Message
-        let fplCode = sprintf """%s %s() {true} ;""" blockType blockName 
-        this.PrepareFplCode("axiom SomeAxiom() {true} ;", false) |> ignore
+        let fplCode = sprintf """%s %s {true} ;""" blockType blockName 
+        this.PrepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(0, result.Length)
         this.PrepareFplCode("", true) |> ignore
@@ -214,7 +214,7 @@ type TestInterpreterErrors() =
         let code = ID001 blockName
         printf "Trying %s" code.Message
         let fplCode = sprintf """def %s %s() -> obj {intrinsic} ;""" blockType blockName 
-        this.PrepareFplCode("axiom SomeAxiom() {true} ;", false) |> ignore
+        this.PrepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(0, result.Length)
         this.PrepareFplCode("", true) |> ignore
@@ -236,7 +236,7 @@ type TestInterpreterErrors() =
         let code = ID001 blockName
         printf "Trying %s" code.Message
         let fplCode = sprintf """def %s %s: obj {intrinsic} ;""" blockType blockName 
-        this.PrepareFplCode("axiom SomeAxiom() {true} ;", false) |> ignore
+        this.PrepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(0, result.Length)
         this.PrepareFplCode("", true) |> ignore
@@ -258,7 +258,7 @@ type TestInterpreterErrors() =
         let code = ID001 blockName
         printf "Trying %s" code.Message
         let fplCode = sprintf """def %s %s() {intrinsic} ;""" blockType blockName 
-        this.PrepareFplCode("axiom SomeAxiom() {true} ;", false) |> ignore
+        this.PrepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(0, result.Length)
         this.PrepareFplCode("", true) |> ignore

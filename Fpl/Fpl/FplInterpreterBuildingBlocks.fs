@@ -41,6 +41,27 @@ let tryAddBlock (fplValue:FplValue) =
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval (st: SymbolTable) ast =
+    let evalSimpleSignature signatureAst (fplBlockType:FplBlockType) pos1 pos2 = 
+        match st.CurrentContext with
+        | EvalContext.InTheory theoryId -> 
+            let currentTheory = st.Theories.Value[theoryId]
+            let createAndEval fplBlockType =
+                let fv = FplValue.CreateFplValue((pos1, pos2), fplBlockType, currentTheory)
+                EvalContext.Multiple [ EvalContext.InTheory theoryId; EvalContext.InTheoremLikeStatement fv], fv
+            let newContext, fplValue = createAndEval fplBlockType
+            let oldContext = st.CurrentContext
+            st.CurrentContext <- newContext
+            eval st signatureAst
+            st.CurrentContext <- oldContext
+            tryAddBlock fplValue 
+        | _ -> ()
+
+    let evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst =
+        match optVarDeclOrSpecList with
+        | Some astList -> astList |> List.map (eval st) |> ignore
+        | None -> ()
+        eval st predicateAst
+
     match ast with
     // units: | Star
     | Ast.IndexType -> eval_units st "index"
@@ -116,12 +137,15 @@ let rec eval (st: SymbolTable) ast =
                 fplBlock.Name <- identifier
                 fplBlock.TypeSignature <- identifier
                 fplBlock.NameStartPos <- pos1 // the full name begins where the PredicateIdentifier starts 
+        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InTheoremLikeStatement fplBlock]  
         | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InDefinitionPredicate fplBlock]  
         | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InDefinitionFunctionalTerm fplBlock] -> 
             fplBlock.Name <- identifier
-        | _ -> ()
+        | _ -> 
+            ()
     | Ast.ParamTuple((pos1, pos2), asts) ->
         match st.CurrentContext with
+        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InTheoremLikeStatement fplBlock]  
         | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InDefinitionPredicate fplBlock]  
         | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InDefinitionFunctionalTerm fplBlock] -> 
             fplBlock.Name <- fplBlock.Name + "("
@@ -232,7 +256,6 @@ let rec eval (st: SymbolTable) ast =
     // | InfixOperation of Positions * (Ast * Ast option) list
     | Ast.InfixOperation((pos1, pos2), astsOpts) ->
         eval st ast
-
         astsOpts
         |> List.map (fun (ast, optAst) -> optAst |> Option.map (eval st) |> Option.defaultValue ())
         |> ignore
@@ -269,20 +292,22 @@ let rec eval (st: SymbolTable) ast =
         optAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         eval st ast2
         eval st ast3
-    // | Theorem of Positions * (Ast *(Ast list option * Ast))
-    | Ast.Theorem((pos1, pos2), (ast, (Some astList, ast2)))
-    | Ast.Lemma((pos1, pos2), (ast, (Some astList, ast2)))
-    | Ast.Proposition((pos1, pos2), (ast, (Some astList, ast2)))
-    | Ast.Conjecture((pos1, pos2), (ast, (Some astList, ast2))) ->
-        eval st ast
-        astList |> List.map (eval st) |> ignore
-        eval st ast2
-    | Ast.Theorem((pos1, pos2), (ast, (None, ast2)))
-    | Ast.Lemma((pos1, pos2), (ast, (None, ast2)))
-    | Ast.Proposition((pos1, pos2), (ast, (None, ast2)))
-    | Ast.Conjecture((pos1, pos2), (ast, (None, ast2))) ->
-        eval st ast
-        eval st ast2
+    // | Theorem of Positions * (Ast * (Ast list option * Ast))
+    | Ast.Theorem((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
+        evalSimpleSignature signatureAst FplBlockType.Theorem pos1 pos2
+        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
+    | Ast.Lemma((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
+        evalSimpleSignature signatureAst FplBlockType.Lemma pos1 pos2
+        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
+    | Ast.Proposition((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
+        evalSimpleSignature signatureAst FplBlockType.Proposition pos1 pos2
+        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
+    | Ast.Conjecture((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
+        evalSimpleSignature signatureAst FplBlockType.Conjecture pos1 pos2
+        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
+    | Ast.Axiom((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
+        evalSimpleSignature signatureAst FplBlockType.Axiom pos1 pos2
+        evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
     // | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
     | Ast.Corollary((pos1, pos2), ((ast1, ast2), (Some astList, ast3))) ->
         eval st ast1
@@ -298,14 +323,12 @@ let rec eval (st: SymbolTable) ast =
         asts |> List.map (eval st) |> ignore
         eval st ast1
         eval st ast2
-    // | Axiom of Positions * (Ast * (Ast list option * Ast))
-    | Ast.Axiom((pos1, pos2), (ast, (Some astList, ast2)))
+    // | Axiom of Constructor * (Ast * (Ast list option * Ast))
 
     | Ast.Constructor((pos1, pos2), (ast, (Some astList, ast2))) ->
         eval st ast
         astList |> List.map (eval st) |> ignore
         eval st ast2
-    | Ast.Axiom((pos1, pos2), (ast1, (None, ast2)))
     | Ast.Constructor((pos1, pos2), (ast1, (None, ast2))) ->
         eval st ast1
         eval st ast2
@@ -328,7 +351,7 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InTheory theoryId -> 
             let currentTheory = st.Theories.Value[theoryId]
-            let predValue = FplValue.CreateClass((pos1, pos2), currentTheory)
+            let predValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Predicate, currentTheory)
             let oldContext = st.CurrentContext
             st.CurrentContext <- EvalContext.Multiple [st.CurrentContext; EvalContext.InDefinitionPredicate predValue]
             eval st signatureWithUserDefinedStringAst
@@ -342,7 +365,7 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InTheory theoryId -> 
             let currentTheory = st.Theories.Value[theoryId]
-            let funcValue = FplValue.CreateClass((pos1, pos2), currentTheory)
+            let funcValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.FunctionalTerm, currentTheory)
             let oldContext = st.CurrentContext
             st.CurrentContext <- EvalContext.Multiple [st.CurrentContext; EvalContext.InDefinitionFunctionalTerm funcValue]
             eval st signatureWithUserDefinedStringAst
@@ -359,7 +382,7 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InTheory theoryId -> 
             let currentTheory = st.Theories.Value[theoryId]
-            let classValue = FplValue.CreateClass((pos1, pos2), currentTheory)
+            let classValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Class, currentTheory)
             let oldContext = st.CurrentContext
             st.CurrentContext <- EvalContext.Multiple [st.CurrentContext; EvalContext.InDefinitionClass classValue]
             eval st predicateIdentifierAst

@@ -157,6 +157,7 @@ type FplValue(name:string, blockType:FplBlockType, evalType: FplType, positions:
     let mutable _name = name
     let mutable _nameStartPos = Position("", 0, 1, 1)
     let mutable _nameEndPos = Position("", 0, 1, 1)
+    let mutable _evalType = evalType
     let mutable _typeSignature = ""
     let mutable _representation = ""
     let _scope = System.Collections.Generic.Dictionary<string,FplValue>()
@@ -181,7 +182,9 @@ type FplValue(name:string, blockType:FplBlockType, evalType: FplType, positions:
     /// Type of the FPL block with this FplValue
     member this.BlockType = blockType 
     /// The primary type of the FplValue
-    member this.EvaluationType = evalType
+    member this.EvaluationType 
+        with get() = _evalType 
+        and set(value) = _evalType <- value
     /// A representation of the constructed object (if any)
     member this.FplRepresentation
         with get() = _representation 
@@ -201,8 +204,27 @@ type FplValue(name:string, blockType:FplBlockType, evalType: FplType, positions:
     static member CreateTheory(namespaceId:string, positions:Positions) = new FplValue(namespaceId, FplBlockType.Theory, FplType.Predicate, positions, None)
 
     /// A factory method for the evaluation of Fpl class definitions
-    static member CreateClass(positions:Positions, parentTheory:FplValue) = new FplValue("", FplBlockType.Class, FplType.Object, positions, Some parentTheory)
-
+    static member CreateFplValue(positions:Positions, fplBlockType:FplBlockType, parent:FplValue) = 
+        match fplBlockType with 
+        | FplBlockType.Axiom 
+        | FplBlockType.Theorem 
+        | FplBlockType.Lemma 
+        | FplBlockType.Proposition 
+        | FplBlockType.Corollary 
+        | FplBlockType.Conjecture 
+        | FplBlockType.Premise 
+        | FplBlockType.Conclusion 
+        | FplBlockType.Proof 
+        | FplBlockType.RuleOfInference
+        | FplBlockType.Predicate -> new FplValue("", fplBlockType, FplType.Predicate, positions, Some parent)
+        | FplBlockType.Constructor 
+        | FplBlockType.FunctionalTerm 
+        | FplBlockType.InnerVariable 
+        | FplBlockType.SignatureVariable 
+        | FplBlockType.MandatoryProperty 
+        | FplBlockType.OptionalProperty 
+        | FplBlockType.Class -> new FplValue("", fplBlockType, FplType.Object, positions, Some parent)
+        | FplBlockType.Theory -> raise (ArgumentException("Please use CreateTheory for creating theories instead"))
 
 type EvalContext = 
     | ContextNone
@@ -211,6 +233,8 @@ type EvalContext =
     | InDefinitionClass of FplValue 
     | InDefinitionFunctionalTerm of FplValue 
     | InDefinitionPredicate of FplValue
+    | InTheoremLikeStatement of FplValue
+
     | Multiple of EvalContext list
 
 type SymbolTable =
