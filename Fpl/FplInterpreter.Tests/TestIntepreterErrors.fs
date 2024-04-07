@@ -211,6 +211,8 @@ type TestInterpreterErrors() =
     [<DataRow("SomeFunctionalTerm(x:template) -> obj", "SomeFunctionalTerm(template)->object")>]
     [<DataRow("SomeFunctionalTerm(x:tplTest) -> obj", "SomeFunctionalTerm(tplTest)->object")>]
     [<DataRow("SomeFunctionalTerm(x:templateTest) -> obj", "SomeFunctionalTerm(templateTest)->object")>]
+    [<DataRow("SomeFunctionalTerm(x,y,z:obj) -> obj", "SomeFunctionalTerm(object,object,object)->object")>]
+    [<DataRow("SomeFunctionalTerm(x,y:pred(z:obj)) -> obj", "SomeFunctionalTerm(pred(object),pred(object))->object")>]
     [<TestMethod>]
     member this.TestID001Function(blockName:string, expected:string) =
         let code = ID001 expected

@@ -251,7 +251,7 @@ let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) 
 let bracketModifier = choice [boundedRangeInType ; bracketedCoordsInType ; paramTuple ]
 classTypeRef.Value <- positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
-let simpleVariableType = positions (choice [ keywordIndex; keywordFunction; keywordPredicate; classType ] .>> IW) |>> Ast.SimpleVariableType
+let simpleVariableType = positions (choice [ keywordIndex; keywordFunction; keywordPredicate; specificClassType ] .>> IW) |>> Ast.SimpleVariableType
 let optionalTypeSpecification = opt (choice [boundedRange ; bracketedCoords; paramTuple])
 let variableType = positions (simpleVariableType .>>. opt bracketModifier .>> IW) |>> Ast.VariableType
 
