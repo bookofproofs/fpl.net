@@ -42,8 +42,8 @@ type Ast =
     | ReferencingIdentifier of Positions * (Ast * Ast list)
     // Types
     | One 
-    | Many 
-    | Many1 
+    | Many of Positions * unit
+    | Many1 of Positions * unit  
     | TemplateType of Positions * string
     | ObjectType 
     | ClassIdentifier of Positions * Ast
@@ -56,6 +56,7 @@ type Ast =
     | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
     | ClassType of Positions * (Ast * Ast option)
     | ClassTypeWithModifier of Positions * (Ast * Ast)
+
     // Variables
     | Var of Positions * string
 

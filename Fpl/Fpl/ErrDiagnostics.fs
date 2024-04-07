@@ -68,15 +68,17 @@ type DiagnosticCode =
     | TRL000
     | TYD000
     // interpreter error codes
-    | NSP000 of string
-    | NSP001 of string * string
-    | NSP002 of string * string
-    | NSP003 of string
-    | NSP004 of string 
-    | NSP005 of string * string list
+    | NSP00 of string
+    | NSP01 of string * string
+    | NSP02 of string * string
+    | NSP03 of string
+    | NSP04 of string 
+    | NSP05 of string * string list
     // identifier-related error codes
     | ID000 of string
     | ID001 of string
+    // variable-related error codes
+    | VAR00 
     member this.Code = 
         match this with
             // parser error messages
@@ -109,15 +111,17 @@ type DiagnosticCode =
             | TRL000 -> "TRL000"
             | TYD000 -> "TYD000"
             // interpreter error messages
-            | NSP000 _ -> "NSP000"
-            | NSP001 _ -> "NSP001"
-            | NSP002 (_, _) -> "NSP002"
-            | NSP003 _ -> "NSP003"
-            | NSP004 _ -> "NSP004"
-            | NSP005 _ -> "NSP005"
+            | NSP00 _ -> "NSP000"
+            | NSP01 _ -> "NSP001"
+            | NSP02 (_, _) -> "NSP002"
+            | NSP03 _ -> "NSP003"
+            | NSP04 _ -> "NSP004"
+            | NSP05 _ -> "NSP005"
             // identifier-related error codes 
             | ID000 _ -> "ID000"
             | ID001 _ -> "ID001"
+            // variable-related error codes
+            | VAR00 -> "VAR00"
     member this.Message = 
         match this with
             // parser error messages
@@ -150,16 +154,17 @@ type DiagnosticCode =
             | TRL000 -> "Syntax error in translation"
             | TYD000 -> "Syntax error in type declaration"
             // interpreter error messages
-            | NSP000 fileNamePattern -> sprintf "%s not found" fileNamePattern
-            | NSP001 (fileName, innerErrMsg) -> sprintf "%s found but could not be loaded: %s" fileName innerErrMsg
-            | NSP002 (url, innerErrMsg) -> sprintf "%s found but could not be downloaded: %s" url innerErrMsg
-            | NSP003 alias -> sprintf "Alias %s appeared previously in this namespace" alias
-            | NSP004 path -> sprintf "Circular theory reference detected: %s" path
-            | NSP005 (theory, sources) -> sprintf "Multiple sources %A for theory %s detected." sources theory
+            | NSP00 fileNamePattern -> sprintf "%s not found" fileNamePattern
+            | NSP01 (fileName, innerErrMsg) -> sprintf "%s found but could not be loaded: %s" fileName innerErrMsg
+            | NSP02 (url, innerErrMsg) -> sprintf "%s found but could not be downloaded: %s" url innerErrMsg
+            | NSP03 alias -> sprintf "Alias %s appeared previously in this namespace" alias
+            | NSP04 path -> sprintf "Circular theory reference detected: %s" path
+            | NSP05 (theory, sources) -> sprintf "Multiple sources %A for theory %s detected." sources theory
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
             | ID001 identifier -> sprintf "Duplicate identifier %s detected." identifier
-
+            // variable-related error codes
+            | VAR00 ->  sprintf "Declaring multiple variadic variables at once will cause ambiguities."
 type DiagnosticEmitter =
     // replace your language-specific emitters here
     | FplParser

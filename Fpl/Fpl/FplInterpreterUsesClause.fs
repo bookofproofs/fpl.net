@@ -72,7 +72,7 @@ let private downloadFile url (e:EvalAliasedNamespaceIdentifier) =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = e.StartPos
                 Diagnostic.EndPos = e.EndPos
-                Diagnostic.Code = NSP002 (url, ex.Message)
+                Diagnostic.Code = NSP02 (url, ex.Message)
                 Diagnostic.Alternatives = None 
             }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic 
@@ -89,7 +89,7 @@ let private loadFile fileName (e:EvalAliasedNamespaceIdentifier) =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = e.StartPos
                 Diagnostic.EndPos = e.EndPos
-                Diagnostic.Code = NSP001 (fileName, ex.Message)
+                Diagnostic.Code = NSP01 (fileName, ex.Message)
                 Diagnostic.Alternatives = None
             }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
@@ -224,7 +224,7 @@ let private findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list)
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = alias.StartPos
                     Diagnostic.EndPos = alias.EndPos
-                    Diagnostic.Code = NSP003 alias.AliasOrStar
+                    Diagnostic.Code = NSP03 alias.AliasOrStar
                     Diagnostic.Alternatives = None
                 }
             ad.AddDiagnostic diagnostic        
@@ -284,7 +284,7 @@ let private findDuplicateFiles (uri: Uri) (fplLibUrl: string) =
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = Position("",0,0,1)
                     Diagnostic.EndPos = Position("",0,0,1)
-                    Diagnostic.Code = NSP005 (duplicate, pathTypes)
+                    Diagnostic.Code = NSP05 (duplicate, pathTypes)
                     Diagnostic.Alternatives = None
                 }
             FplParser.parserDiagnostics.AddDiagnostic diagnostic
@@ -301,7 +301,7 @@ let getParsedAstsMatchingAliasedNamespaceIdentifier (uri: Uri) (fplLibUrl: strin
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = eani.StartPos
                 Diagnostic.EndPos = eani.EndPos
-                Diagnostic.Code = NSP000 eani.FileNamePattern
+                Diagnostic.Code = NSP00 eani.FileNamePattern
                 Diagnostic.Alternatives = None
             }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
@@ -410,7 +410,7 @@ let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:List<ParsedAst>) =
                         Diagnostic.Severity = DiagnosticSeverity.Error
                         Diagnostic.StartPos = circularEaniReference.StartPos
                         Diagnostic.EndPos = circularEaniReference.EndPos
-                        Diagnostic.Code = NSP004 path
+                        Diagnostic.Code = NSP04 path
                         Diagnostic.Alternatives = None
                     }
             FplParser.parserDiagnostics.AddDiagnostic diagnostic

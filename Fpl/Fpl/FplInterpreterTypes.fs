@@ -160,6 +160,7 @@ type FplValue(name:string, blockType:FplBlockType, evalType: FplType, positions:
     let mutable _evalType = evalType
     let mutable _typeSignature = ""
     let mutable _representation = ""
+    let mutable _auxiliaryInfo = 0
     let _scope = System.Collections.Generic.Dictionary<string,FplValue>()
     /// Identifier of this FplValue that is unique in its scope
     member this.Name 
@@ -170,6 +171,7 @@ type FplValue(name:string, blockType:FplBlockType, evalType: FplType, positions:
     member this.NameStartPos 
         with get() = _nameStartPos 
         and set(value) = _nameStartPos <- value
+
     /// Identifier of this FplValue that is unique in its scope
     member this.NameEndPos
         with get() = _nameEndPos 
@@ -189,6 +191,10 @@ type FplValue(name:string, blockType:FplBlockType, evalType: FplType, positions:
     member this.FplRepresentation
         with get() = _representation 
         and set(value) = _representation <- value
+    /// An auxiliary storage that is used e.g. for remembering how many variables were declared when traversing the Ast recursively.
+    member this.AuxiliaryInfo
+        with get() = _auxiliaryInfo
+        and set(value) = _auxiliaryInfo <- value
     /// Starting position of this FplValue
     member this.StartPos = fst positions
     /// Ending position of this FplValue

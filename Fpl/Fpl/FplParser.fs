@@ -38,8 +38,8 @@ let rightParen = skipChar ')'
 let comma = skipChar ',' >>. spaces 
 let dot = skipChar '.' >>% Ast.Dot
 let colon = skipChar ':' >>. spaces >>% Ast.One
-let colonStar = skipString ":*" >>. spaces >>% Ast.Many
-let colonPlus = skipString ":+" >>. spaces >>% Ast.Many1
+let colonStar = positions (skipString ":*") .>> spaces |>> Ast.Many
+let colonPlus = positions (skipString ":+") .>> spaces |>> Ast.Many1
 let colonEqual = skipString ":=" >>. spaces 
 let at = pchar '@'
 let case = skipChar '|' >>. spaces

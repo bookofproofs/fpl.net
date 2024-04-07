@@ -43,6 +43,18 @@ let tryAddBlock (fplValue:FplValue) =
     else        
         fplValue.Parent.Value.Scope.Add(fplValue.Name, fplValue)
 
+let tryAddVariadicVariables numberOfVariadicVars (startPos:Position) (endPos:Position)=
+    if numberOfVariadicVars > 1 then
+        let diagnostic = { 
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = startPos
+            Diagnostic.EndPos = endPos
+            Diagnostic.Code = VAR00 
+            Diagnostic.Alternatives = None 
+        }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval (st: SymbolTable) ast =
@@ -72,7 +84,14 @@ let rec eval (st: SymbolTable) ast =
     | Ast.IndexType -> eval_units st "index"
     | Ast.ObjectType -> eval_units st "object"
     | Ast.PredicateType -> eval_units st "predicate"
-    | Ast.FunctionalTermType -> eval_units st "function"
+    | Ast.FunctionalTermType -> eval_units st "function"  
+    | Ast.Many((pos1, pos2),())
+    | Ast.Many1((pos1, pos2),()) ->
+        match st.CurrentContext with
+        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InSignature fplBlock] -> 
+            tryAddVariadicVariables fplBlock.AuxiliaryInfo pos1 pos2
+        | _ -> ()
+    | Ast.One
     | Ast.Star
     | Ast.Dot
     | Ast.Intrinsic
@@ -80,9 +99,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.LeftOpen
     | Ast.RightClosed
     | Ast.RightOpen
-    | Ast.One
-    | Ast.Many
-    | Ast.Many1
     | Ast.Property
     | Ast.Optional
     | Ast.Error -> eval_units st ""
@@ -230,8 +246,10 @@ let rec eval (st: SymbolTable) ast =
         eval st ast
         eval_pos_string_ast st s
     // | ExtensionBlock of Positions * (Ast * Ast)
+    | Ast.ClassTypeWithModifier((pos1, pos2), (ast1, ast2)) -> 
+        eval st ast1
+        eval st ast2
     | Ast.ExtensionBlock((pos1, pos2), (ast1, ast2))
-    | Ast.ClassTypeWithModifier((pos1, pos2), (ast1, ast2))
     | Ast.Impl((pos1, pos2), (ast1, ast2))
     | Ast.Iif((pos1, pos2), (ast1, ast2))
     | Ast.IsOperator((pos1, pos2), (ast1, ast2))
@@ -365,10 +383,14 @@ let rec eval (st: SymbolTable) ast =
         evalSimpleSignature corollarySignatureAst FplBlockType.Corollary pos1 pos2
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
-    | Ast.NamedVarDecl((pos1, pos2), ((asts, ast1), ast2)) ->
-        asts |> List.map (eval st) |> ignore
-        eval st ast1
-        eval st ast2
+    | Ast.NamedVarDecl((pos1, pos2), ((variableListAst, varDeclModifierAst), variableTypeAst)) ->
+        match st.CurrentContext with 
+        | EvalContext.Multiple [ EvalContext.InTheory _; EvalContext.InSignature fplBlock] -> 
+            fplBlock.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
+        | _ -> ()
+        variableListAst |> List.map (eval st) |> ignore
+        eval st varDeclModifierAst
+        eval st variableTypeAst
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
 
     | Ast.Constructor((pos1, pos2), (ast, (Some astList, ast2))) ->
