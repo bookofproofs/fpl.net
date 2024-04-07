@@ -197,22 +197,23 @@ type TestInterpreterErrors() =
         this.PrepareFplCode("", true) |> ignore
 
     [<DataRow("SomeFunctionalTerm() -> obj", "SomeFunctionalTerm()->object")>]
-    [<DataRow("SomeFunctionalTerm(x:ind) -> obj", "SomeFunctionalTerm(index)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:pred) -> obj", "SomeFunctionalTerm(predicate)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:func) -> obj", "SomeFunctionalTerm(function)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:obj) -> obj", "SomeFunctionalTerm(object)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:index) -> obj", "SomeFunctionalTerm(index)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:predicate) -> obj", "SomeFunctionalTerm(predicate)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:function) -> obj", "SomeFunctionalTerm(function)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:object) -> obj", "SomeFunctionalTerm(object)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:Nat) -> obj", "SomeFunctionalTerm(Nat)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:@Nat) -> obj", "SomeFunctionalTerm(@Nat)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:tpl) -> obj", "SomeFunctionalTerm(tpl)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:template) -> obj", "SomeFunctionalTerm(template)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:tplTest) -> obj", "SomeFunctionalTerm(tplTest)->object")>]
-    [<DataRow("SomeFunctionalTerm(x:templateTest) -> obj", "SomeFunctionalTerm(templateTest)->object")>]
-    [<DataRow("SomeFunctionalTerm(x,y,z:obj) -> obj", "SomeFunctionalTerm(object,object,object)->object")>]
-    [<DataRow("SomeFunctionalTerm(x,y:pred(z:obj)) -> obj", "SomeFunctionalTerm(pred(object),pred(object))->object")>]
+    [<DataRow("SomeFunctionalTerm(x:ind) -> obj", "SomeFunctionalTerm(1:index)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:pred) -> obj", "SomeFunctionalTerm(1:predicate)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:func) -> obj", "SomeFunctionalTerm(1:function)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:obj) -> obj", "SomeFunctionalTerm(1:object)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:index) -> obj", "SomeFunctionalTerm(1:index)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:predicate) -> obj", "SomeFunctionalTerm(1:predicate)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:function) -> obj", "SomeFunctionalTerm(1:function)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:object) -> obj", "SomeFunctionalTerm(1:object)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:Nat) -> obj", "SomeFunctionalTerm(1:Nat)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:@Nat) -> obj", "SomeFunctionalTerm(1:@Nat)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:tpl) -> obj", "SomeFunctionalTerm(1:tpl)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:template) -> obj", "SomeFunctionalTerm(1:template)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:tplTest) -> obj", "SomeFunctionalTerm(1:tplTest)->object")>]
+    [<DataRow("SomeFunctionalTerm(x:templateTest) -> obj", "SomeFunctionalTerm(1:templateTest)->object")>]
+    [<DataRow("SomeFunctionalTerm(x,y,z:obj) -> obj", "SomeFunctionalTerm(3:object)->object")>]
+    [<DataRow("SomeFunctionalTerm(x,y:pred(z:obj)) -> obj", "SomeFunctionalTerm(2:predicate(1:object))->object")>]
+    [<DataRow("SomeFunctionalTerm(x,y:pred(u,v,w:obj)) -> obj", "SomeFunctionalTerm(2:predicate(3:object))->object")>]
     [<TestMethod>]
     member this.TestID001Function(blockName:string, expected:string) =
         let code = ID001 expected
@@ -356,6 +357,21 @@ type TestInterpreterErrors() =
         let code = VAR00
         printf "Trying %s" code.Message
         let fplCode = sprintf """def predicate %s {true} ;""" signature 
+        this.PrepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(expected, result.Length)
+        this.PrepareFplCode("", true) |> ignore
+
+    [<DataRow("def pred Test(x,x:* pred) {true};", 1)>]
+    [<DataRow("def pred Test(x,x:+ pred) {true};", 1)>]
+    [<DataRow("def pred Test(x,x: pred) {true};", 1)>]
+    [<DataRow("def pred Test(x: pred) {true};", 0)>]
+    [<DataRow("def pred Test(x:+ pred) {dec ~x:obj; true};", 1)>]
+    [<TestMethod>]
+    member this.TestVAR01(fplCode:string, expected) =
+        let code = VAR01 "x"
+        FplParser.parserDiagnostics.Clear()
+        printf "Trying %s" code.Message
         this.PrepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(expected, result.Length)

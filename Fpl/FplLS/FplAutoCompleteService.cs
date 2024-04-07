@@ -43,7 +43,7 @@ namespace FplLS
                         if (!uniqueSymbols.Contains(ci.Label))
                         {
                             modChoices.Add(ci);
-                            uniqueSymbols.Add(ci.Label);    
+                            uniqueSymbols.Add(ci.Label);
                         }
                     }
                 }

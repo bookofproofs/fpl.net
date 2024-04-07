@@ -79,6 +79,7 @@ type DiagnosticCode =
     | ID001 of string
     // variable-related error codes
     | VAR00 
+    | VAR01 of string
     member this.Code = 
         match this with
             // parser error messages
@@ -122,6 +123,7 @@ type DiagnosticCode =
             | ID001 _ -> "ID001"
             // variable-related error codes
             | VAR00 -> "VAR00"
+            | VAR01 _ -> "VAR01"
     member this.Message = 
         match this with
             // parser error messages
@@ -164,7 +166,8 @@ type DiagnosticCode =
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
             | ID001 identifier -> sprintf "Duplicate identifier %s detected." identifier
             // variable-related error codes
-            | VAR00 ->  sprintf "Declaring multiple variadic variables at once will cause ambiguities."
+            | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
+            | VAR01 identifier -> sprintf "Duplicate variable %s declaration detected." identifier
 type DiagnosticEmitter =
     // replace your language-specific emitters here
     | FplParser

@@ -8,7 +8,7 @@ let fplInterpreter input uri fplLibUrl (parsedAsts:System.Collections.Generic.Li
     let st = { 
         SymbolTable.ParsedAsts = parsedAsts
         SymbolTable.CurrentContext = EvalContext.ContextNone
-        SymbolTable.Theories = Some (Dictionary<string,FplValue>())
+        SymbolTable.Root = FplValue.CreateRoot()
         }
     
     loadAllUsesClauses input uri fplLibUrl parsedAsts 
