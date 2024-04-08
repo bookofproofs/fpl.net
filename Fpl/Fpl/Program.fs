@@ -29,3 +29,5 @@ ad.PrintDiagnostics
 printf "\n--------------------------------\n"
 
 
+let mutable test = []
+test <- test @ [""]

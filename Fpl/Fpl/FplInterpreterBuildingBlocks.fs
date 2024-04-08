@@ -7,24 +7,32 @@ open ErrDiagnostics
 open FplGrammarTypes
 open FplInterpreterTypes
 
+let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str = 
+    if str <> "" then
+        if str = "(" || str = ")" || fplValue.Name.EndsWith "(" || fplValue.Name.Length = 0 || fplValue.Name.EndsWith "-> " then 
+            fplValue.Name <- fplValue.Name + str
+        else
+            fplValue.Name <- fplValue.Name + ", " + str
+        fplValue.TypeSignature <- fplValue.TypeSignature @ [str]
+        match st.CurrentContext with
+        | EvalContext.InSignature _ -> 
+            if not fplValue.IsFplBlock then 
+                match fplValue.Parent with
+                | Some parent -> adjustSignature st parent str
+                | None -> ()
+        | EvalContext.InBlock _ -> 
+            match fplValue.Parent with
+            | Some parent -> 
+                if parent.IsVariable then 
+                    adjustSignature st parent str
+            | None -> ()
+        | _ -> ()
+
 let eval_units (st: SymbolTable) unitType = 
-    let adjustSignature (fplValue:FplValue) =
-        fplValue.Name <- fplValue.Name + unitType
-        fplValue.TypeSignature <- fplValue.TypeSignature + unitType
-
     match st.CurrentContext with
+    | EvalContext.InBlock fplValue 
     | EvalContext.InSignature fplValue -> 
-        adjustSignature fplValue
-    | EvalContext.InVarDeclaration (fplValue) -> 
-        fplValue.Scope
-        |> Seq.filter (fun varKeyValue -> varKeyValue.Value.BlockType = FplBlockType.Variable || varKeyValue.Value.BlockType = FplBlockType.VariadicVariable)
-        |> Seq.iter (fun varKeyValue ->
-            // correct the TypeSignature of each declared variable
-            varKeyValue.Value.TypeSignature <- varKeyValue.Value.TypeSignature + unitType
-        )
-        if fplValue.BlockType <> FplBlockType.Variable && fplValue.BlockType <> FplBlockType.VariadicVariable then
-            adjustSignature fplValue
-
+        adjustSignature st fplValue unitType
     | _ -> ()
 
 let eval_string (st: SymbolTable) s = ()
@@ -72,7 +80,6 @@ let tryAddVariadicVariables numberOfVariadicVars (startPos:Position) (endPos:Pos
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval (st: SymbolTable) ast =
@@ -84,32 +91,23 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
 
     let evalMany st str pos1 pos2 = 
-        let adjustSignature (fplBlock:FplValue) = 
-            tryAddVariadicVariables fplBlock.AuxiliaryInfo pos1 pos2
-            fplBlock.Name <- fplBlock.Name + str
-            fplBlock.TypeSignature <- fplBlock.TypeSignature + str
-
         match st.CurrentContext with
-        | EvalContext.InSignature fplBlock -> 
-            adjustSignature fplBlock
-        | EvalContext.InVarDeclaration (fplValue) -> 
+        | EvalContext.InBlock fplValue
+        | EvalContext.InSignature fplValue -> 
             tryAddVariadicVariables fplValue.AuxiliaryInfo pos1 pos2
-            fplValue.Scope 
-            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.BlockType = FplBlockType.Variable || varKeyValue.Value.BlockType = FplBlockType.VariadicVariable)
-            |> Seq.iter (fun varKeyValue ->
-                // correct the blocktype from initial FplBlockType.Variable to FplBlockType.VariadicVariable
-                varKeyValue.Value.BlockType <- FplBlockType.VariadicVariable
-            )
-            if fplValue.BlockType <> FplBlockType.Variable && fplValue.BlockType <> FplBlockType.VariadicVariable then
-                adjustSignature fplValue
+            // adjust type of variables to variadic variables, if their type has not yet been established
+            fplValue.Scope
+            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.IsVariable && varKeyValue.Value.TypeSignature = [])
+            |> Seq.iter (fun varKeyValue -> varKeyValue.Value.BlockType <- FplBlockType.VariadicVariable)
+            adjustSignature st fplValue str
         | _ -> ()
 
     match ast with
     // units: | Star
-    | Ast.IndexType -> eval_units st "index"
-    | Ast.ObjectType -> eval_units st "object"
-    | Ast.PredicateType -> eval_units st "predicate"
-    | Ast.FunctionalTermType -> eval_units st "function"  
+    | Ast.IndexType -> eval_units st "ind"
+    | Ast.ObjectType -> eval_units st "obj"
+    | Ast.PredicateType -> eval_units st "pred"
+    | Ast.FunctionalTermType -> eval_units st "func"  
     | Ast.Many((pos1, pos2),()) ->
         evalMany st "Many:" pos1 pos2
     | Ast.Many1((pos1, pos2),()) ->
@@ -132,49 +130,26 @@ let rec eval (st: SymbolTable) ast =
     // | DollarDigits of Positions * string
     | Ast.DollarDigits((pos1, pos2), s) -> 
         match st.CurrentContext with
-        | EvalContext.InSignature fplBlock ->
-            fplBlock.Name <- fplBlock.Name + s
-            fplBlock.NameEndPos <- pos2 // the full name ends where the dollar digits end 
+        | EvalContext.InSignature fplValue ->
+            fplValue.Name <- fplValue.Name + s
+            fplValue.NameEndPos <- pos2 // the full name ends where the dollar digits end 
         | _ -> ()
     | Ast.Extensionname((pos1, pos2), s) ->
-        let adjustSignature (fplBlock:FplValue) = 
-            fplBlock.Name <- fplBlock.Name + "@" + s
-            fplBlock.NameEndPos <- pos2 // the full name ends where the dollar digits end 
-            fplBlock.TypeSignature <- fplBlock.TypeSignature + "@" + s
         match st.CurrentContext with
-        | EvalContext.InSignature fplBlock -> 
-            adjustSignature fplBlock
-        | EvalContext.InVarDeclaration (fplValue) -> 
-            fplValue.Scope 
-            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.BlockType = FplBlockType.Variable || varKeyValue.Value.BlockType = FplBlockType.VariadicVariable)
-            |> Seq.iter (fun varKeyValue ->
-                // correct the TypeSignature of each declared variable
-                varKeyValue.Value.TypeSignature <- varKeyValue.Value.TypeSignature + "@" + s
-            )
-            if fplValue.BlockType <> FplBlockType.Variable && fplValue.BlockType <> FplBlockType.VariadicVariable then
-                adjustSignature fplValue
+        | EvalContext.InBlock fplValue 
+        | EvalContext.InSignature fplValue -> 
+            adjustSignature st fplValue ("@" + s)
         | _ -> ()
     | Ast.TemplateType((pos1, pos2), s) -> 
-        let adjustSignature (fplBlock:FplValue) = 
-            fplBlock.Name <- fplBlock.Name + s 
-            fplBlock.NameEndPos <- pos2 // the full name ends where the dollar digits end 
-            fplBlock.TypeSignature <- fplBlock.TypeSignature + s 
         match st.CurrentContext with
-        | EvalContext.InSignature fplBlock -> 
-            adjustSignature fplBlock
-        | EvalContext.InVarDeclaration (fplValue) -> 
-            fplValue.Scope 
-            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.BlockType = FplBlockType.Variable || varKeyValue.Value.BlockType = FplBlockType.VariadicVariable)
-            |> Seq.iter (fun varKeyValue ->
-                // correct the TypeSignature of each declared variable
-                varKeyValue.Value.TypeSignature <- varKeyValue.Value.TypeSignature + s
-            )
-            if fplValue.BlockType <> FplBlockType.Variable && fplValue.BlockType <> FplBlockType.VariadicVariable then
-                adjustSignature fplValue
+        | EvalContext.InBlock fplValue 
+        | EvalContext.InSignature fplValue -> 
+            adjustSignature st fplValue s
         | _ -> ()
     | Ast.Var((pos1, pos2), s) ->
         match st.CurrentContext with
-        | EvalContext.InVarDeclaration (fplValue) -> 
+        | EvalContext.InBlock fplValue 
+        | EvalContext.InSignature fplValue -> 
             let varValue = FplValue.CreateFplValue((pos1,pos2), FplBlockType.Variable, fplValue)
             varValue.Name <- s
             tryAddBlock varValue 
@@ -227,74 +202,21 @@ let rec eval (st: SymbolTable) ast =
         eval_pos_ast st pos1 pos2
     // | NamespaceIdentifier of Positions * Ast list
     | Ast.PredicateIdentifier((pos1, pos2), asts) ->
-        let adjustSignature (fplBlock:FplValue) identifier = 
-            fplBlock.Name <- fplBlock.Name + identifier
-            fplBlock.NameStartPos <- pos1 // the full name begins where the PredicateIdentifier starts 
-            match fplBlock.BlockType with 
-            | FplBlockType.Class -> 
-                fplBlock.TypeSignature <- fplBlock.TypeSignature + identifier
-                fplBlock.NameEndPos <- pos2 // the full name stops where the PredicateIdentifier stops 
-            | FplBlockType.Proof
-            | FplBlockType.Predicate
-            | FplBlockType.Theorem
-            | FplBlockType.Lemma
-            | FplBlockType.Proposition
-            | FplBlockType.Conjecture
-            | FplBlockType.Corollary
-            | FplBlockType.RuleOfInference
-            | FplBlockType.Conclusion
-            | FplBlockType.Premise
-            | FplBlockType.RuleOfInference
-            | FplBlockType.Theory
-            | FplBlockType.Axiom -> 
-                fplBlock.TypeSignature <- fplBlock.TypeSignature + "predicate"
-            | FplBlockType.Constructor ->
-                fplBlock.TypeSignature <- fplBlock.TypeSignature + identifier
-            | FplBlockType.Variable
-            | FplBlockType.VariadicVariable
-            | FplBlockType.Expression
-            | FplBlockType.MandatoryProperty
-            | FplBlockType.OptionalProperty
-            | FplBlockType.Root
-            | FplBlockType.FunctionalTerm -> ()
         let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
         match st.CurrentContext with
-        | EvalContext.InSignature fplBlock -> 
-            adjustSignature fplBlock identifier
-        | EvalContext.InVarDeclaration (fplValue) -> 
-            fplValue.Scope 
-            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.BlockType = FplBlockType.Variable || varKeyValue.Value.BlockType = FplBlockType.VariadicVariable)
-            |> Seq.iter (fun varKeyValue ->
-                // correct the TypeSignature of each declared variable
-                varKeyValue.Value.TypeSignature <- varKeyValue.Value.TypeSignature + identifier
-            )
-            if fplValue.BlockType <> FplBlockType.Variable && fplValue.BlockType <> FplBlockType.VariadicVariable then
-                adjustSignature fplValue identifier
+        | EvalContext.InBlock fplValue
+        | EvalContext.InSignature fplValue -> 
+            adjustSignature st fplValue identifier
         | _ -> ()
     | Ast.ParamTuple((pos1, pos2), asts) ->
-        let adjustSignature (fplBlock:FplValue) = 
-            fplBlock.Name <- fplBlock.Name + "("
-            fplBlock.TypeSignature <- fplBlock.TypeSignature + "("
-            asts |> List.map (eval st) |> ignore
-            fplBlock.Name <- fplBlock.Name + ")"
-            fplBlock.NameEndPos <- pos2 // the full name ends where the parameters end 
-            fplBlock.TypeSignature <- fplBlock.TypeSignature + ")"
-
         match st.CurrentContext with
-        | EvalContext.InSignature fplBlock -> 
-            adjustSignature fplBlock
-        | EvalContext.InVarDeclaration (fplValue) -> 
-            fplValue.Scope 
-            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.BlockType = FplBlockType.Variable || varKeyValue.Value.BlockType = FplBlockType.VariadicVariable)
-            |> Seq.iter (fun varKeyValue ->
-                // correct the TypeSignature of each declared variable
-                varKeyValue.Value.TypeSignature <- varKeyValue.Value.TypeSignature + "("
-                asts |> List.map (eval st) |> ignore
-                varKeyValue.Value.TypeSignature <- varKeyValue.Value.TypeSignature + ")"
-            )
-            if fplValue.BlockType <> FplBlockType.Variable && fplValue.BlockType <> FplBlockType.VariadicVariable then
-                adjustSignature fplValue
+        | EvalContext.InBlock fplValue 
+        | EvalContext.InSignature fplValue -> 
+            adjustSignature st fplValue "("
+            asts |> List.map (eval st) |> ignore
+            adjustSignature st fplValue ")"
+            fplValue.NameEndPos <- pos2
         | _ -> ()
     | Ast.NamespaceIdentifier((pos1, pos2), asts)
     | Ast.LocalizationTerm((pos1, pos2), asts)
@@ -398,8 +320,8 @@ let rec eval (st: SymbolTable) ast =
         eval st signatureWithUserDefinedStringAst
         match st.CurrentContext with 
         | EvalContext.InSignature fplBlock -> 
-            fplBlock.Name <- fplBlock.Name + "->"
-            fplBlock.TypeSignature <- fplBlock.TypeSignature + "->"
+            fplBlock.Name <- fplBlock.Name + " -> "
+            fplBlock.TypeSignature <- fplBlock.TypeSignature @ ["->"]
         | _ -> ()
         eval st mappingAst
     | Ast.PredicateWithQualification(ast1, ast2) ->
@@ -523,29 +445,28 @@ let rec eval (st: SymbolTable) ast =
         st.CurrentContext <- oldContext
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
     | Ast.NamedVarDecl((pos1, pos2), ((variableListAst, varDeclModifierAst), variableTypeAst)) ->
-        let adjustSignature (fplValue:FplValue) = 
-            fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
-            fplValue.Name <- fplValue.Name + fplValue.AuxiliaryInfo.ToString() + ":"
-            fplValue.TypeSignature <- fplValue.TypeSignature + fplValue.AuxiliaryInfo.ToString() + ":"
         let oldContext = st.CurrentContext
-        match st.CurrentContext with 
-        | EvalContext.InBlock fplBlock -> 
-            st.CurrentContext <- EvalContext.InVarDeclaration (fplBlock)
-        | EvalContext.InSignature fplBlock -> 
-            adjustSignature fplBlock
-            st.CurrentContext <- EvalContext.InVarDeclaration (fplBlock)
-        | EvalContext.InVarDeclaration (fplValue) -> 
-            fplValue.Scope 
-            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.BlockType = FplBlockType.Variable || varKeyValue.Value.BlockType = FplBlockType.VariadicVariable)
-            |> Seq.iter (fun childKeyValue -> 
-                st.CurrentContext <- EvalContext.InVarDeclaration (childKeyValue.Value)
-            )
-            if fplValue.BlockType <> FplBlockType.Variable && fplValue.BlockType <> FplBlockType.VariadicVariable then
-                adjustSignature fplValue
-        | _ -> ()
         variableListAst |> List.map (eval st) |> ignore
-        eval st varDeclModifierAst
-        eval st variableTypeAst
+        match st.CurrentContext with 
+        | EvalContext.InBlock fplValue ->
+            fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
+            eval st varDeclModifierAst
+            fplValue.Scope 
+            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.IsVariable)
+            |> Seq.iter (fun childKeyValue -> 
+                st.CurrentContext <- EvalContext.InBlock (childKeyValue.Value)
+                eval st variableTypeAst
+            )
+        | EvalContext.InSignature fplValue -> 
+            fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
+            eval st varDeclModifierAst
+            fplValue.Scope 
+            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.IsVariable)
+            |> Seq.iter (fun childKeyValue -> 
+                st.CurrentContext <- EvalContext.InSignature (childKeyValue.Value)
+                eval st variableTypeAst
+            )
+        | _ -> ()
         st.CurrentContext <- oldContext
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
 

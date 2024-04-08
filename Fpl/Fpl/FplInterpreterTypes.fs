@@ -155,7 +155,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     let mutable _nameStartPos = Position("", 0, 1, 1)
     let mutable _nameEndPos = Position("", 0, 1, 1)
     let mutable _evalType = evalType
-    let mutable _typeSignature = ""
+    let mutable _typeSignature = []
     let mutable _representation = ""
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
@@ -179,7 +179,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     /// Signature of this FplValue, for instance "predicate(object)"
     member this.TypeSignature
         with get () = _typeSignature
-        and set (value) = _typeSignature <- value
+        and set (value:string list) = _typeSignature <- value
 
     /// Type of the FPL block with this FplValue
     member this.BlockType
@@ -216,6 +216,25 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     static member CreateRoot() =
         new FplValue("", FplBlockType.Root, FplType.Predicate, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
 
+    /// Indicates if this FplValue is an FPL building block
+    member this.IsFplBlock = 
+        this.BlockType = FplBlockType.Axiom
+        || this.BlockType = FplBlockType.Theorem 
+        || this.BlockType = FplBlockType.Lemma 
+        || this.BlockType = FplBlockType.Proposition 
+        || this.BlockType = FplBlockType.Corollary 
+        || this.BlockType = FplBlockType.Conjecture 
+        || this.BlockType = FplBlockType.Proof 
+        || this.BlockType = FplBlockType.RuleOfInference 
+        || this.BlockType = FplBlockType.Predicate 
+        || this.BlockType = FplBlockType.FunctionalTerm 
+        || this.BlockType = FplBlockType.Class 
+
+    /// Indicates if this FplValue is a variable
+    member this.IsVariable = 
+        this.BlockType = FplBlockType.Variable
+        || this.BlockType = FplBlockType.VariadicVariable
+
     /// A factory method for the evaluation of Fpl class definitions
     static member CreateFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =
         match fplBlockType with
@@ -246,7 +265,6 @@ type EvalContext =
     | InTheory of FplValue
     | InSignature of FplValue
     | InBlock of FplValue
-    | InVarDeclaration of FplValue
 
 type SymbolTable =
     { ParsedAsts: List<ParsedAst>
