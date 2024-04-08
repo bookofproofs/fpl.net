@@ -5,19 +5,10 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
 open FplInterpreterTypes
+open CommonTestHelpers
 
 [<TestClass>]
 type TestInterpreterErrors() =
-    let deleteFilesWithExtension dir extension =
-        if Directory.Exists(dir) then
-            Directory.GetFiles(dir, "*." + extension)
-            |> Array.iter File.Delete
-        else
-            printfn "Directory %s does not exist." dir
-
-    let filterByErrorCode (input: Diagnostics) errCode =
-        input.Collection
-        |> List.filter (fun d -> d.Code = errCode)
 
     [<TestMethod>]
     member this.TestNSP00() =
@@ -59,9 +50,10 @@ type TestInterpreterErrors() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
             File.Delete(pathToFile)
+            None
         else
             let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-            FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts
+            Some (FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts)
 
     [<TestMethod>]
     member this.TestNSP04CircularAA() =
@@ -87,9 +79,10 @@ type TestInterpreterErrors() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
             deleteFilesWithExtension currDir "fpl"
+            None
         else
             let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-            FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts
+            Some(FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts)
 
     [<TestMethod>]
     member this.TestNSP04CircularABCA() =
@@ -111,9 +104,10 @@ type TestInterpreterErrors() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
             deleteFilesWithExtension currDir "fpl"
+            None
         else
             let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-            FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts
+            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts)
 
     [<TestMethod>]
     member this.TestNSP05() =
@@ -137,9 +131,10 @@ type TestInterpreterErrors() =
         if delete then 
             deleteFilesWithExtension currDir "fpl"
             deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
+            None
         else
             let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-            FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts
+            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts)
 
     [<TestMethod>]
     member this.TestNSP05a() =
@@ -150,20 +145,6 @@ type TestInterpreterErrors() =
         Assert.AreEqual(1, result.Length)
         this.PrepareTestNSP05a(true) |> ignore
 
-
-    member this.PrepareFplCode(fplCode:string, delete:bool) =
-        FplParser.parserDiagnostics.Clear()
-        let currDir = Directory.GetCurrentDirectory()
-
-        File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
-        let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
-        let fplLibUrl =
-            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        if delete then 
-            deleteFilesWithExtension currDir "fpl"
-        else
-            let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-            FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts
 
     [<DataRow("axiom", "SomeAxiom()", "SomeAxiom()")>]
     [<DataRow("postulate", "SomePostulate()", "SomePostulate()")>]
@@ -176,10 +157,10 @@ type TestInterpreterErrors() =
         let code = ID001 expected
         printf "Trying %s" code.Message
         let fplCode = sprintf """%s %s {true} %s %s {true} ;""" blockType blockName blockType blockName
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("axiom", "SomeAxiom()")>]
     [<DataRow("postulate", "SomePostulate()")>]
@@ -192,9 +173,9 @@ type TestInterpreterErrors() =
         let code = ID001 blockName
         printf "Trying %s" code.Message
         let fplCode = sprintf """%s %s {true} ;""" blockType blockName 
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomeFunctionalTerm() -> obj", "SomeFunctionalTerm()->object")>]
     [<DataRow("SomeFunctionalTerm(x:ind) -> obj", "SomeFunctionalTerm(1:index)->object")>]
@@ -219,10 +200,10 @@ type TestInterpreterErrors() =
         let code = ID001 expected
         printf "Trying %s" code.Message
         let fplCode = sprintf """def function %s {intrinsic} def function %s {intrinsic} ;""" blockName blockName
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomeFunctionalTerm() -> obj")>]
     [<TestMethod>]
@@ -230,9 +211,9 @@ type TestInterpreterErrors() =
         let code = ID001 blockName
         printf "Trying %s" code.Message
         let fplCode = sprintf """def function %s {intrinsic} ;""" blockName 
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomeClass")>]
     [<TestMethod>]
@@ -240,10 +221,10 @@ type TestInterpreterErrors() =
         let code = ID001 blockName
         printf "Trying %s" code.Message
         let fplCode = sprintf """def class %s: obj {intrinsic} def class %s: obj {intrinsic} ;""" blockName blockName
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomeClass")>]
     [<TestMethod>]
@@ -251,9 +232,9 @@ type TestInterpreterErrors() =
         let code = ID001 blockName
         printf "Trying %s" code.Message
         let fplCode = sprintf """def class %s: obj {intrinsic} ;""" blockName 
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomePredicate()", "SomePredicate()")>]
     [<TestMethod>]
@@ -261,10 +242,10 @@ type TestInterpreterErrors() =
         let code = ID001 expected
         printf "Trying %s" code.Message
         let fplCode = sprintf """def predicate %s {intrinsic} def predicate %s {intrinsic} ;""" blockName blockName
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomePredicate()")>]
     [<TestMethod>]
@@ -272,9 +253,9 @@ type TestInterpreterErrors() =
         let code = ID001 blockName
         printf "Trying %s" code.Message
         let fplCode = sprintf """def predicate %s {intrinsic} ;""" blockName 
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomeRuleOfInference()", "SomeRuleOfInference()")>]
     [<TestMethod>]
@@ -282,10 +263,10 @@ type TestInterpreterErrors() =
         let code = ID001 expected
         printf "Trying %s" code.Message
         let fplCode = sprintf """inference %s {pre: true con: true} inference %s {pre: true con: true} ;""" blockName blockName
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomeRuleOfInference()")>]
     [<TestMethod>]
@@ -293,9 +274,9 @@ type TestInterpreterErrors() =
         let code = ID001 blockName
         printf "Trying %s" code.Message
         let fplCode = sprintf """inference %s {pre: true con: true} ;""" blockName 
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomeProof$1", "SomeProof$1")>]
     [<DataRow("SomeProof$1$2", "SomeProof$1$2")>]
@@ -305,10 +286,10 @@ type TestInterpreterErrors() =
         let code = ID001 expected
         printf "Trying %s" code.Message
         let fplCode = sprintf """proof %s {1. |- trivial} proof %s {1. |- trivial} ;""" blockName blockName
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomeProof$1")>]
     [<DataRow("SomeProof$1$2")>]
@@ -318,9 +299,9 @@ type TestInterpreterErrors() =
         let code = ID001 blockName
         printf "Trying %s" code.Message
         let fplCode = sprintf """proof %s {1. |- trivial} ;""" blockName 
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomeCorollary$1()", "SomeCorollary$1()")>]
     [<DataRow("SomeCorollary$1$2()", "SomeCorollary$1$2()")>]
@@ -330,10 +311,10 @@ type TestInterpreterErrors() =
         let code = ID001 expected
         printf "Trying %s" code.Message
         let fplCode = sprintf """corollary %s {true} corollary %s {true} ;""" blockName blockName
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("SomeCorollary$1()")>]
     [<DataRow("SomeCorollary$1$2()")>]
@@ -343,9 +324,9 @@ type TestInterpreterErrors() =
         let code = ID001 blockName
         printf "Trying %s" code.Message
         let fplCode = sprintf """corollary %s {true} ;""" blockName 
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("Test(x,y:* pred)", 1)>]
     [<DataRow("Test(x,y:+ pred)", 1)>]
@@ -357,10 +338,10 @@ type TestInterpreterErrors() =
         let code = VAR00
         printf "Trying %s" code.Message
         let fplCode = sprintf """def predicate %s {true} ;""" signature 
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(expected, result.Length)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("def pred Test(x,x:* pred) {true};", 1)>]
     [<DataRow("def pred Test(x,x:+ pred) {true};", 1)>]
@@ -372,7 +353,7 @@ type TestInterpreterErrors() =
         let code = VAR01 "x"
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
-        this.PrepareFplCode(fplCode, false) |> ignore
+        prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(expected, result.Length)
-        this.PrepareFplCode("", true) |> ignore
+        prepareFplCode("", true) |> ignore

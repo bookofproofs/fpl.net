@@ -671,6 +671,8 @@ let evaluateSymbolTable (st: SymbolTable) =
         | Some pa ->
             // evaluate the ParsedAst
             let theoryValue = FplValue.CreateFplValue((Position("",0,1,1), Position("",0,1,1)), FplBlockType.Theory, st.Root)
+            if not (st.Root.Scope.ContainsKey(pa.Id)) then
+                st.Root.Scope.Add(pa.Id, theoryValue)
             theoryValue.Name <- pa.Id
             st.CurrentContext <- EvalContext.InTheory theoryValue
             eval st pa.Parsing.Ast

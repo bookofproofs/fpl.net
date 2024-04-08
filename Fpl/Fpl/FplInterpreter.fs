@@ -13,4 +13,4 @@ let fplInterpreter input uri fplLibUrl (parsedAsts:System.Collections.Generic.Li
     
     loadAllUsesClauses input uri fplLibUrl parsedAsts 
     evaluateSymbolTable st
-
+    st

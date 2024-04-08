@@ -214,7 +214,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
-        new FplValue("", FplBlockType.Theory, FplType.Predicate, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+        new FplValue("", FplBlockType.Root, FplType.Predicate, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
 
     /// A factory method for the evaluation of Fpl class definitions
     static member CreateFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =
