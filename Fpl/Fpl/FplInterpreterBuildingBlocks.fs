@@ -9,7 +9,7 @@ open FplInterpreterTypes
 
 let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str = 
     if str <> "" then
-        if str = "(" || str = ")" || fplValue.Name.EndsWith "(" || fplValue.Name.Length = 0 || fplValue.Name.EndsWith "-> " then 
+        if str = "(" || str = ")" || fplValue.Name.EndsWith "(" || fplValue.Name.Length = 0 || fplValue.Name.EndsWith "-> " || str.StartsWith "$" then 
             fplValue.Name <- fplValue.Name + str
         else
             fplValue.Name <- fplValue.Name + ", " + str
@@ -18,7 +18,8 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
         | EvalContext.InSignature _ -> 
             if not fplValue.IsFplBlock then 
                 match fplValue.Parent with
-                | Some parent -> adjustSignature st parent str
+                | Some parent -> 
+                    adjustSignature st parent str
                 | None -> ()
         | EvalContext.InBlock _ -> 
             match fplValue.Parent with
@@ -130,8 +131,9 @@ let rec eval (st: SymbolTable) ast =
     // | DollarDigits of Positions * string
     | Ast.DollarDigits((pos1, pos2), s) -> 
         match st.CurrentContext with
+        | EvalContext.InBlock fplValue 
         | EvalContext.InSignature fplValue ->
-            fplValue.Name <- fplValue.Name + s
+            adjustSignature st fplValue s
             fplValue.NameEndPos <- pos2 // the full name ends where the dollar digits end 
         | _ -> ()
     | Ast.Extensionname((pos1, pos2), s) ->
@@ -205,6 +207,7 @@ let rec eval (st: SymbolTable) ast =
         let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
         match st.CurrentContext with
+        | EvalContext.InTheory fplValue
         | EvalContext.InBlock fplValue
         | EvalContext.InSignature fplValue -> 
             adjustSignature st fplValue identifier

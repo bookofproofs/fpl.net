@@ -367,3 +367,14 @@ type TestClasses () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))       
+
+    [<TestMethod>]
+    member this.TestClass08 () =
+        // An intrinsic class some following properties
+        let result = run (definitionClass .>> eof) """class SomeClass:Nat1, :Nat2, :* Nat3, :+ Nat3 
+        {
+            intrinsic
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))       
