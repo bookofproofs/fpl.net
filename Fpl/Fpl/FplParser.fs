@@ -62,7 +62,7 @@ let IW = spaces <?> "<whitespace>"
 
 let SW = spaces1 <?> "<significant whitespace>"
 
-let attemptSW = SW <|> (IW .>> lookAhead (choice [skipChar '('; skipChar ')'; skipChar '{'; skipChar ','; skipChar ';'; skipChar '[' ]))
+let attemptSW = SW <|> (IW .>> attempt (lookAhead (choice [skipChar '('; skipChar ')'; skipChar '{'; skipChar ','; skipChar ';'; skipChar '[' ])))
 
 // -----------------------------------------------------
 // Extensions of the FPL language (have to be dynamic)! Lacking a pre-processor, we put the rules
@@ -113,7 +113,7 @@ let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
 let keywordSelf = positions (skipString "self") .>> IW |>> Ast.Self
 let keywordBaseClassReference = skipString "base" .>> IW
-let keywordIndex = (skipString "index" <|> skipString "ind") .>> attemptSW >>% Ast.IndexType
+let keywordIndex = (skipString "index" <|> skipString "ind") .>> IW >>% Ast.IndexType
 
 
 (* FplBlock-related Keywords *)
@@ -155,15 +155,15 @@ let templateTail = choice [ idStartsWithCap; (regex @"\d+") ]
 
 let templateWithTail = positions (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) .>> IW |>>  Ast.TemplateType
 
-let keywordObject = (skipString "object" <|> skipString "obj") .>> attemptSW >>% Ast.ObjectType 
+let keywordObject = (skipString "object" <|> skipString "obj") .>> IW >>% Ast.ObjectType 
 
 let objectHeader = choice [
     keywordObject
     (attempt templateWithTail) <|> keywordTemplate
 ] 
 
-let keywordPredicate = (skipString "predicate" <|> skipString "pred") .>> attemptSW >>% Ast.PredicateType
-let keywordFunction = (skipString "function" <|> skipString "func") .>> attemptSW >>% Ast.FunctionalTermType
+let keywordPredicate = (skipString "predicate" <|> skipString "pred") >>% Ast.PredicateType
+let keywordFunction = (skipString "function" <|> skipString "func") >>% Ast.FunctionalTermType
 
 
 let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
@@ -229,7 +229,7 @@ let fplRange = (opt coord.>> comma >>. opt coord) .>> IW
 
 let boundedRange = positions (leftBound .>>. fplRange .>>. rightBound) |>> Ast.ClosedOrOpenRange
 
-let coordInType = choice [ classType; variable; dollarDigits ] .>> IW 
+let coordInType = choice [ classType; keywordIndex ] .>> IW 
 
 let coordInTypeList = (sepBy1 coordInType comma) .>> IW 
 
@@ -469,12 +469,12 @@ let keywordOptional = positions (skipString "optional" <|> skipString "opt") .>>
 let keywordProperty = positions (skipString "property" <|> skipString "prty") .>> SW >>% Ast.Property
 
 let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
-let predicateInstance = positions (keywordPredicate >>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
+let predicateInstance = positions (keywordPredicate >>. SW >>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
 
 let classInstanceBlock = leftBrace >>. (keywordIntrinsic <|> classContent) .>> spacesRightBrace
 let classInstance = positions (variableType .>>. signature .>>. classInstanceBlock) |>> Ast.ClassInstance
 let mapping = toArrow >>. IW >>. variableType
-let functionalTermSignature = (keywordFunction >>. signatureWithUserDefinedString) .>>. (IW >>. mapping) .>> IW |>> Ast.FunctionalTermSignature
+let functionalTermSignature = (keywordFunction >>. SW >>. signatureWithUserDefinedString) .>>. (IW >>. mapping) .>> IW |>> Ast.FunctionalTermSignature
 
 let returnStatement = positions (keywordReturn >>. (fplDelegate <|> predicateWithQualification)) .>> IW |>> Ast.Return
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
@@ -525,14 +525,14 @@ let proof = positions ((keywordProof >>. referencingIdentifier) .>>. (IW >>. pro
 
 // Predicate building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let predicateDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> predContent) .>> IW) .>>. propertyList .>> spacesRightBrace 
-let definitionPredicate = positions (keywordPredicate >>. (signatureWithUserDefinedString .>> IW) .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
+let definitionPredicate = positions (keywordPredicate >>. SW >>. (signatureWithUserDefinedString .>> IW) .>>. predicateDefinitionBlock) |>> Ast.DefinitionPredicate
 
 // Functional term building blocks can be defined similarly to classes, they can have properties but they cannot be derived any parent type 
 let functionalTermDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> funcContent) .>> IW) .>>. propertyList .>> spacesRightBrace
 let definitionFunctionalTerm = positions ((functionalTermSignature .>> IW) .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
-let keywordClass = (skipString "class" <|> skipString "cl") >>. SW
+let keywordClass = (skipString "class" <|> skipString "cl")
 
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
@@ -541,7 +541,7 @@ let classTypeWithModifier = positions (varDeclModifier .>>. classType .>> IW) |>
 let classTypeWithModifierList = sepBy1 classTypeWithModifier comma
 
 let classIdentifier = positions (predicateIdentifier .>> IW) |>> Ast.ClassIdentifier
-let classSignature = (keywordClass >>. classIdentifier) .>>. opt userDefinedObjSym .>>. classTypeWithModifierList
+let classSignature = (keywordClass >>. SW >>. classIdentifier) .>>. opt userDefinedObjSym .>>. classTypeWithModifierList
 let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString "definition" <|> skipString "def") >>. SW

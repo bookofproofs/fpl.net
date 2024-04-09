@@ -9,7 +9,17 @@ open FplInterpreterTypes
 
 let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str = 
     if str <> "" then
-        if str = "(" || str = ")" || fplValue.Name.EndsWith "(" || fplValue.Name.Length = 0 || fplValue.Name.EndsWith "-> " || str.StartsWith "$" then 
+        if str = "(" || str = ")" 
+            || str = "[" || str = "]" 
+            || str = "[(" || str = ")]" 
+            || str = "[[" || str = "]]" 
+            || fplValue.Name.EndsWith "(" 
+            || fplValue.Name.EndsWith "[" 
+            || fplValue.Name.EndsWith "[(" 
+            || fplValue.Name.EndsWith "[[" 
+            || fplValue.Name.Length = 0 
+            || fplValue.Name.EndsWith "-> " 
+            || str.StartsWith "$" then 
             fplValue.Name <- fplValue.Name + str
         else
             fplValue.Name <- fplValue.Name + ", " + str
@@ -109,6 +119,10 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ObjectType -> eval_units st "obj"
     | Ast.PredicateType -> eval_units st "pred"
     | Ast.FunctionalTermType -> eval_units st "func"  
+    | Ast.LeftClosed -> eval_units st "[["
+    | Ast.LeftOpen -> eval_units st "[("
+    | Ast.RightClosed -> eval_units st "]]"
+    | Ast.RightOpen -> eval_units st ")]"
     | Ast.Many((pos1, pos2),()) ->
         evalMany st "Many:" pos1 pos2
     | Ast.Many1((pos1, pos2),()) ->
@@ -117,10 +131,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Star
     | Ast.Dot
     | Ast.Intrinsic
-    | Ast.LeftClosed
-    | Ast.LeftOpen
-    | Ast.RightClosed
-    | Ast.RightOpen
     | Ast.Property
     | Ast.Optional
     | Ast.Error -> eval_units st ""
@@ -221,11 +231,19 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue ")"
             fplValue.NameEndPos <- pos2
         | _ -> ()
+    | Ast.BracketedCoordsInType((pos1, pos2), asts) ->
+        match st.CurrentContext with
+        | EvalContext.InBlock fplValue 
+        | EvalContext.InSignature fplValue -> 
+            adjustSignature st fplValue "["
+            asts |> List.map (eval st) |> ignore
+            adjustSignature st fplValue "]"
+            fplValue.NameEndPos <- pos2
+        | _ -> ()
     | Ast.NamespaceIdentifier((pos1, pos2), asts)
     | Ast.LocalizationTerm((pos1, pos2), asts)
     | Ast.LocalizationTermList((pos1, pos2), asts)
     | Ast.BrackedCoordList((pos1, pos2), asts)
-    | Ast.BracketedCoordsInType((pos1, pos2), asts)
     | Ast.And((pos1, pos2), asts)
     | Ast.Or((pos1, pos2), asts)
     | Ast.Xor((pos1, pos2), asts)

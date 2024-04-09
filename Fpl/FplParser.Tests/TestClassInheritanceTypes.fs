@@ -69,14 +69,14 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType4 () =
-        let result = run (classType .>> eof) """tpl[[from,]]"""
+        let result = run (classType .>> eof) """tpl[[Nat,]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType4a () =
-        let result = run (classType .>> eof) """tpl[[, to]]"""
+        let result = run (classType .>> eof) """tpl[[, index]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -90,21 +90,21 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType5 () =
-        let result = run (classType .>> eof) """Set[from , to]"""
+        let result = run (classType .>> eof) """Set[ind , Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType5a () =
-        let result = run (classType .>> eof) """Set[(from , to]]"""
+        let result = run (classType .>> eof) """Set[(index , index]]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType5b () =
-        let result = run (classType .>> eof) """Set[[from , to)]"""
+        let result = run (classType .>> eof) """Set[[index , index)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -133,7 +133,7 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType10 () =
-        let result = run (classType .>> eof) """object [$1,$2]"""
+        let result = run (classType .>> eof) """object [ind,index]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

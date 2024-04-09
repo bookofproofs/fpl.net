@@ -431,7 +431,7 @@ type TestKeywordSpaces() =
     [<DataRow("class")>]
     [<DataRow("cl")>]
     [<TestMethod>]
-    member this.TestSpacesClassA (word:string) =
+    member this.TestSpacesClassWithSpace (word:string) =
         let result = run (definition .>> eof) ("def " + word + " T:obj{intr}")
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -446,6 +446,15 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
+    [<DataRow("predicate")>]
+    [<DataRow("pred")>]
+    [<TestMethod>]
+    member this.TestSpacesPredicateWithSpace (word:string) =
+        let result = run (definition .>> eof) ("def " + word + " X(){intr}")
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
     [<DataRow("function")>]
     [<DataRow("func")>]
     [<TestMethod>]
@@ -454,6 +463,15 @@ type TestKeywordSpaces() =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
+
+    [<DataRow("function")>]
+    [<DataRow("func")>]
+    [<TestMethod>]
+    member this.TestSpacesFunctionalTermWithSpace (word:string) =
+        let result = run (definition .>> eof) ("def " + word + " X()->obj{intr}")
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow("function")>]
     [<DataRow("func")>]
@@ -468,7 +486,7 @@ type TestKeywordSpaces() =
         let result = run (varDecl .>> eof) ("~a:" + word + "x")
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
+        Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))
 
     [<TestMethod>]
     member this.TestSpacesQed () =
