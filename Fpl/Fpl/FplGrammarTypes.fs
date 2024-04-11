@@ -11,10 +11,6 @@ type Ast =
     // Literals
     | Star 
     | Dot
-    | LeftClosed
-    | LeftOpen 
-    | RightClosed
-    | RightOpen 
     // Identifiers
     | Digits of string
     | ExtDigits of Positions * Ast
@@ -36,9 +32,7 @@ type Ast =
     | ExtensionType of Positions * Ast 
     | ExtensionBlock of Positions * (Ast * Ast)
     | UsesClause of Positions * Ast
-    | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | BrackedCoordList of Positions * Ast list
-    | RangeInType of Positions * (Ast option * Ast option) 
     | ReferencingIdentifier of Positions * (Ast * Ast list)
     // Types
     | One 
@@ -52,7 +46,6 @@ type Ast =
     | IndexType
     | VariableType of Positions * Ast 
     | BracketedCoordsInType of Positions * Ast list 
-    | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
     | ClassTypeWithModifier of Positions * (Ast * Ast)
     | ClassType of Positions * (Ast * Ast option)
     | CompoundPredicateType of Positions * (Ast * Ast option)

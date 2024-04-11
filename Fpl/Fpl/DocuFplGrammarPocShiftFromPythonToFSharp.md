@@ -299,28 +299,10 @@ Also, expressions in second-order logic predicates are allowed:
     }
 ``` 
 
-#### 11) Disambiguation of coordinate lists and ranges
+#### 11) Disambiguation of coordinate lists, ranges removed from FPL syntax
 
 In previous versions, the square brackets `[`, `]` were used for both, coordinate lists and ranges. 
-In the new version, coordinates have to be placed in square brackets `[` and `],` while ranges have left and right bounds 
-that can be either open like in `[(`, `)]` or closed like in `[[`, `]]`
-This disambiguates the grammar to improve the built-in error recovery mechanism.
-
-*Before*
-``` 
-    for i in [1~n]  // <- range
-    (
-        a[i,j]:= b // <- coordinates
-    )
-
-``` 
-*Now*
-``` 
-    for i in [[1~n]]  // <- range
-    (
-        a[i,j]:= b // <- coordinates
-    )
-``` 
+In the new version, ranges have been abandoned from the parser since dealing with them requires the concept of ordered entities that is in mathematics a semantic one. Implementing such structures in FPL, however, still remains possible using (possibly a combination of) definitions of predicates, classes, or functional terms.
 
 #### 12) Delegates 
 

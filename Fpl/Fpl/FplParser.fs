@@ -46,10 +46,6 @@ let case = skipChar '|' >>. spaces
 let elseCase = skipChar '?' >>. spaces
 let leftBracket = skipChar '[' >>. spaces 
 let rightBracket = skipChar ']' >>. spaces  
-let leftClosedBracket = skipString "[[" >>. spaces <?> "<(closed) left bound>"
-let leftOpenBracket = skipString "[(" >>. spaces <?> "<(open) left bound>"
-let rightOpenBracket = skipString ")]" >>. spaces <?> "<(open) right bound>" 
-let rightClosedBracket = skipString "]]" >>. spaces <?> "<(closed) right bound>" 
 let tilde = skipChar '~' .>> spaces
 let semiColon = skipChar ';' >>. spaces
 let exclamationMark = skipChar '!' 
@@ -183,7 +179,7 @@ let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. extReg .>> IW |>>
 let extensionBlock = positions (extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail) |>> Ast.ExtensionBlock
 
 
-(* Signatures, Variable Declarations, and Types, Ranges and Coordinates *)
+(* Signatures, Variable Declarations, and Types, and Coordinates *)
 // convention: All syntax production rules of FPL syntax extensions have to start with "ext", followed by
 // a Pascal Case id.
 // This ensures that they will not be mixed-up with original FPL ebnf productions
@@ -199,15 +195,6 @@ let self = positions (atList .>> keywordSelf) |>> Ast.SelfAts
 
 let entity = choice [ self ; variable ] 
 
-let leftOpen = positions leftOpenBracket >>% Ast.LeftOpen
-let leftClosed = positions leftClosedBracket >>% Ast.LeftClosed
-
-let rightOpen = positions rightOpenBracket >>% Ast.RightOpen
-let rightClosed = positions rightClosedBracket >>% Ast.RightClosed
-
-let leftBound = leftOpen <|> leftClosed
-let rightBound = rightOpen <|> rightClosed 
- 
 ////// resolving recursive parsers
 let statementList, statementListRef = createParserForwardedToRef()
 let primePredicate, primePredicateRef = createParserForwardedToRef()
@@ -225,15 +212,9 @@ let coordList = (sepBy1 coord comma) .>> IW
 
 let bracketedCoords = positions (leftBracket >>. coordList .>> rightBracket) |>> Ast.BrackedCoordList
 
-let fplRange = (opt coord.>> comma >>. opt coord) .>> IW
-
-let boundedRange = positions (leftBound .>>. fplRange .>>. rightBound) |>> Ast.ClosedOrOpenRange
-
 let coordInType = choice [ classType; keywordIndex ] .>> IW 
 
 let coordInTypeList = (sepBy1 coordInType comma) .>> IW 
-
-let rangeInType = positions ((opt coordInType .>> comma) .>>. opt coordInType) |>> Ast.RangeInType
 
 let specificClassType = choice [ objectHeader; xId; predicateIdentifier ] .>> IW
 
@@ -241,14 +222,13 @@ let specificClassType = choice [ objectHeader; xId; predicateIdentifier ] .>> IW
 let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
 
 let bracketedCoordsInType = positions (leftBracket >>. coordInTypeList .>> rightBracket) |>> Ast.BracketedCoordsInType
-let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) |>> Ast.BoundedRangeInType
 
 // The classType is the last type in FPL we can derive FPL classes from.
 // It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
 // to restrict it to pure objects.
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
-let bracketModifier = choice [boundedRangeInType; bracketedCoordsInType; paramTuple ]
+let bracketModifier = choice [bracketedCoordsInType; paramTuple ]
 classTypeRef.Value <- positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
 let mapping, mappingRef = createParserForwardedToRef()
@@ -256,7 +236,7 @@ let predicateType = positions (keywordPredicate .>> IW .>>. opt paramTuple) |>> 
 let functionalTermType = positions (keywordFunction .>> IW .>>. opt (paramTuple .>>. mapping)) |>> Ast.CompoundFunctionalTermType
 
 let compoundVariableType = choice [ keywordIndex; classType; functionalTermType; predicateType ] .>> IW
-let optionalTypeSpecification = opt (choice [boundedRange ; bracketedCoords; paramTuple])
+let optionalTypeSpecification = opt (choice [bracketedCoords; paramTuple])
 let variableType = positions (compoundVariableType) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
@@ -289,8 +269,6 @@ let fplDelegateIdentifier = positions (keywordDel >>. dot >>. word) .>> IW |>> A
 let fplDelegate = positions (fplDelegateIdentifier .>>. argumentTuple) |>> Ast.Delegate
 let assignmentStatement = positions ((predicateWithQualification .>> IW .>> colonEqual) .>>. predicate) |>> Ast.Assignment
 
-let variableRange = choice [ entity ; boundedRange] 
-
 let spacesRightBrace = (IW .>> rightBrace) 
 
 let keywordReturn = IW >>. (skipString "return" <|> skipString "ret") .>> SW 
@@ -303,7 +281,7 @@ let elseStatement = elseCase >>. IW >>. defaultResult .>> IW
 let casesStatement = positions (((keywordCases >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
 
 let allowedInDomainType = choice [keywordIndex; keywordFunction; keywordPredicate; specificClassType]
-let inDomain = positions (keywordIn >>. (allowedInDomainType <|> variableRange) .>> IW) |>> Ast.Domain
+let inDomain = positions (keywordIn >>. (allowedInDomainType <|> entity) .>> IW) |>> Ast.Domain
 let variableInOptDomain = ( (variable .>> IW) .>>. opt inDomain) .>> IW
 let variableListInOptDomain = ( variableList .>>. opt inDomain) .>> IW
 let variableListInOptDomainList = (sepBy1 variableListInOptDomain comma) .>> IW
@@ -334,7 +312,7 @@ let statement =
 statementListRef.Value <- many (IW >>. statement .>> IW)
 
 (* Predicates *)
-let optionalSpecification = opt (choice [boundedRange ; bracketedCoords; argumentTuple])
+let optionalSpecification = opt (choice [bracketedCoords; argumentTuple])
 let predicateWithOptSpecification = positions (fplIdentifier .>>. optionalSpecification) |>> Ast.PredicateWithOptSpecification
 let dottedPredicate = positions (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate
 let qualificationList = positions (many dottedPredicate) |>> Ast.QualificationList

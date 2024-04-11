@@ -163,62 +163,6 @@ type TestIdentifiers () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestBoundLeftClosed () =
-        let result = run (leftBound .>> eof) """[["""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestBoundLeftClosed1 () =
-        let result = run (leftBound .>> eof) """[[ """
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestBoundLeftOpen () =
-        let result = run (leftBound .>> eof) """[("""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestBoundLeftOpen1 () =
-        let result = run (leftBound .>> eof) """[ ("""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
-
-    [<TestMethod>]
-    member this.TestBoundRightOpen () =
-        let result = run (rightBound .>> eof) """)]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestBoundRightOpen1 () =
-        let result = run (rightBound .>> eof) """)] """
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestBoundRightClosed () =
-        let result = run (rightBound .>> eof) """]]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestBoundRightClosed1 () =
-        let result = run (rightBound .>> eof) """]] """
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
     member this.TestEntityWithCoord1 () =
         let result = run (predicateWithQualification .>> eof) """myField[1 , n]"""
         let actual = sprintf "%O" result

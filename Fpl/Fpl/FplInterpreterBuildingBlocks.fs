@@ -11,12 +11,8 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
     if str <> "" then
         if str = "(" || str = ")" 
             || str = "[" || str = "]" 
-            || str = "[(" || str = ")]" 
-            || str = "[[" || str = "]]" 
             || fplValue.Name.EndsWith "(" 
             || fplValue.Name.EndsWith "[" 
-            || fplValue.Name.EndsWith "[(" 
-            || fplValue.Name.EndsWith "[[" 
             || fplValue.Name.Length = 0 
             || fplValue.Name.EndsWith "-> " 
             || str.StartsWith "$" then 
@@ -119,10 +115,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ObjectType -> eval_units st "obj"
     | Ast.PredicateType -> eval_units st "pred"
     | Ast.FunctionalTermType -> eval_units st "func"  
-    | Ast.LeftClosed -> eval_units st "[["
-    | Ast.LeftOpen -> eval_units st "[("
-    | Ast.RightClosed -> eval_units st "]]"
-    | Ast.RightOpen -> eval_units st ")]"
     | Ast.Many((pos1, pos2),()) ->
         evalMany st "Many:" pos1 pos2
     | Ast.Many1((pos1, pos2),()) ->
@@ -302,24 +294,17 @@ let rec eval (st: SymbolTable) ast =
         |> Option.defaultValue ()
         |> ignore
         eval st paramTupleAst
-
-    | Ast.ClosedOrOpenRange((pos1, pos2), ((ast1, optAst), ast2))
     | Ast.PropertyBlock((pos1, pos2), ((ast1, optAst), ast2)) ->
         optAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
         eval st ast1
         eval st ast2
-    // | RangeInType of Positions * (Ast option * Ast option)
-    | Ast.RangeInType((pos1, pos2), (optAst1, optAst2)) ->
-        optAst1 |> Option.map (eval st) |> Option.defaultValue () |> ignore
-        optAst2 |> Option.map (eval st) |> Option.defaultValue () |> ignore
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
     | ReferencingIdentifier((pos1, pos2), (ast1, asts))
     | Ast.ConditionFollowedByResult((pos1, pos2), (ast1, asts))
     | Ast.Localization((pos1, pos2), (ast1, asts)) ->
         eval st ast1
         asts |> List.map (eval st) |> ignore
-    // | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
-    | Ast.BoundedRangeInType((pos1, pos2), ((ast1, ast2), ast3))
+    // | ClassInstance of Positions * ((Ast * Ast) * Ast)
     | Ast.ClassInstance((pos1, pos2), ((ast1, ast2), ast3)) ->
         eval st ast1
         eval st ast2
