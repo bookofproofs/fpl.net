@@ -212,16 +212,14 @@ let coordList = (sepBy1 coord comma) .>> IW
 
 let bracketedCoords = positions (leftBracket >>. coordList .>> rightBracket) |>> Ast.BrackedCoordList
 
-let coordInType = choice [ classType; keywordIndex ] .>> IW 
-
-let coordInTypeList = (sepBy1 coordInType comma) .>> IW 
+let namedVariableDeclarationList, namedVariableDeclarationListRef = createParserForwardedToRef()
 
 let specificClassType = choice [ objectHeader; xId; predicateIdentifier ] .>> IW
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
 let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
 
-let bracketedCoordsInType = positions (leftBracket >>. coordInTypeList .>> rightBracket) |>> Ast.BracketedCoordsInType
+let bracketedCoordsInType = positions (leftBracket >>. namedVariableDeclarationList .>> rightBracket) |>> Ast.BracketedCoordsInType
 
 // The classType is the last type in FPL we can derive FPL classes from.
 // It therefore excludes the in-built FPL-types keywordPredicate, keywordFunction, and keywordIndex
@@ -236,11 +234,10 @@ let predicateType = positions (keywordPredicate .>> IW .>>. opt paramTuple) |>> 
 let functionalTermType = positions (keywordFunction .>> IW .>>. opt (paramTuple .>>. mapping)) |>> Ast.CompoundFunctionalTermType
 
 let compoundVariableType = choice [ keywordIndex; classType; functionalTermType; predicateType ] .>> IW
-let optionalTypeSpecification = opt (choice [bracketedCoords; paramTuple])
 let variableType = positions (compoundVariableType) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
-let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
+namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma
 
 paramTupleRef.Value <- positions ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) |>> Ast.ParamTuple
 let signature = positions ((predicateIdentifier .>> IW) .>>. paramTuple) .>> IW |>> Ast.Signature

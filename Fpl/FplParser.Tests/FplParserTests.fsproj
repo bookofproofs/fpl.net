@@ -15,7 +15,6 @@
     <Compile Include="TestClassInheritanceTypes.fs" />
     <Compile Include="TestClassInstanceProperties.fs" />
     <Compile Include="TestConstructors.fs" />
-    <Compile Include="TestCoordInTypePossibilities.fs" />
     <Compile Include="TestCoordPossibilities.fs" />
     <Compile Include="TestDefinitionClasses.fs" />
     <Compile Include="TestDefinitionFunctionalTerms.fs" />
