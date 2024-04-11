@@ -196,21 +196,21 @@ let rec eval (st: SymbolTable) ast =
             tryAddBlock fplValue 
         | _ -> ()
         st.CurrentContext <- oldContext
-    | Ast.ClassIdentifier((pos1, pos2), ast) 
-    | Ast.ExtDigits((pos1, pos2), ast)
-    | Ast.ExtensionType((pos1, pos2), ast)
-    | Ast.UsesClause((pos1, pos2), ast)
-    | Ast.SimpleVariableType((pos1, pos2), ast)
-    | Ast.Not((pos1, pos2), ast)
-    | Ast.Domain((pos1, pos2), ast)
-    | Ast.Assertion((pos1, pos2), ast)
-    | Ast.ByDef((pos1, pos2), ast)
-    | Ast.DottedPredicate((pos1, pos2), ast)
-    | Ast.Return((pos1, pos2), ast)
-    | Ast.AssumeArgument((pos1, pos2), ast)
-    | Ast.RevokeArgument((pos1, pos2), ast)
-    | Ast.AST((pos1, pos2), ast) ->
-        eval st ast
+    | Ast.ClassIdentifier((pos1, pos2), ast1) 
+    | Ast.ExtDigits((pos1, pos2), ast1)
+    | Ast.ExtensionType((pos1, pos2), ast1)
+    | Ast.UsesClause((pos1, pos2), ast1)
+    | Ast.Not((pos1, pos2), ast1)
+    | Ast.Domain((pos1, pos2), ast1)
+    | Ast.Assertion((pos1, pos2), ast1)
+    | Ast.ByDef((pos1, pos2), ast1)
+    | Ast.DottedPredicate((pos1, pos2), ast1)
+    | Ast.Return((pos1, pos2), ast1)
+    | Ast.AssumeArgument((pos1, pos2), ast1)
+    | Ast.RevokeArgument((pos1, pos2), ast1)
+    | Ast.VariableType((pos1, pos2), ast1)
+    | Ast.AST((pos1, pos2), ast1) ->
+        eval st ast1
         eval_pos_ast st pos1 pos2
     // | NamespaceIdentifier of Positions * Ast list
     | Ast.PredicateIdentifier((pos1, pos2), asts) ->
@@ -258,10 +258,19 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Namespace(optAst, asts) ->
         optAst |> Option.map (eval st) |> ignore
         asts |> List.map (eval st) |> ignore
+    // CompoundFunctionalTermType of Positions * ((Ast * Ast) option)
+    | Ast.CompoundFunctionalTermType((pos1, pos2), (ast1, astTupleOption)) ->
+        eval st ast1
+        match astTupleOption with 
+        | Some (ast2, _) -> eval st ast2 |> ignore
+        | _ -> ()
+        match astTupleOption with 
+        | Some (_, ast3) -> eval st ast3 |> ignore
+        | _ -> ()
     // AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
-    | Ast.VariableType((pos1, pos2), (ast1, optAst))
     | Ast.AliasedNamespaceIdentifier((pos1, pos2), (ast1, optAst))
     | Ast.ClassType((pos1, pos2), (ast1, optAst))
+    | Ast.CompoundPredicateType((pos1, pos2), (ast1, optAst))
     | Ast.ReferenceToProofOrCorollary((pos1, pos2), (ast1, optAst))
     | Ast.PredicateWithOptSpecification((pos1, pos2), (ast1, optAst)) ->
         eval st ast1
@@ -270,8 +279,8 @@ let rec eval (st: SymbolTable) ast =
     // | SelfAts of Positions * char list
     | Ast.SelfAts((pos1, pos2), chars) -> eval_pos_char_list st pos1 pos2 chars
     // | Translation of string * Ast
-    | Ast.Translation(s, ast) ->
-        eval st ast
+    | Ast.Translation(s, ast1) ->
+        eval st ast1
         eval_pos_string_ast st s
     // | ExtensionBlock of Positions * (Ast * Ast)
     | Ast.ClassTypeWithModifier((pos1, pos2), (ast1, ast2)) -> 
@@ -304,10 +313,10 @@ let rec eval (st: SymbolTable) ast =
         optAst1 |> Option.map (eval st) |> Option.defaultValue () |> ignore
         optAst2 |> Option.map (eval st) |> Option.defaultValue () |> ignore
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
-    | ReferencingIdentifier((pos1, pos2), (ast, asts))
-    | Ast.ConditionFollowedByResult((pos1, pos2), (ast, asts))
-    | Ast.Localization((pos1, pos2), (ast, asts)) ->
-        eval st ast
+    | ReferencingIdentifier((pos1, pos2), (ast1, asts))
+    | Ast.ConditionFollowedByResult((pos1, pos2), (ast1, asts))
+    | Ast.Localization((pos1, pos2), (ast1, asts)) ->
+        eval st ast1
         asts |> List.map (eval st) |> ignore
     // | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
     | Ast.BoundedRangeInType((pos1, pos2), ((ast1, ast2), ast3))
@@ -319,9 +328,9 @@ let rec eval (st: SymbolTable) ast =
         eval st functionalTermSignatureAst
         eval st ast2
     // | All of Positions * ((Ast list * Ast option) list * Ast)
-    | Ast.All((pos1, pos2), (astsOpts, ast))
-    | Ast.Exists((pos1, pos2), (astsOpts, ast)) ->
-        eval st ast
+    | Ast.All((pos1, pos2), (astsOpts, ast1))
+    | Ast.Exists((pos1, pos2), (astsOpts, ast1)) ->
+        eval st ast1
 
         astsOpts
         |> List.map (fun (asts, optAst) ->
@@ -350,9 +359,8 @@ let rec eval (st: SymbolTable) ast =
         eval st ast2
     // | InfixOperation of Positions * (Ast * Ast option) list
     | Ast.InfixOperation((pos1, pos2), astsOpts) ->
-        eval st ast
         astsOpts
-        |> List.map (fun (ast, optAst) -> optAst |> Option.map (eval st) |> Option.defaultValue ())
+        |> List.map (fun (ast1, optAst) -> optAst |> Option.map (eval st) |> Option.defaultValue ())
         |> ignore
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((optAst1, ast1), optAst2), optAst3), ast2)) ->
@@ -362,9 +370,9 @@ let rec eval (st: SymbolTable) ast =
         optAst3 |> Option.map (eval st) |> Option.defaultValue ()
         eval st ast2
     // | Cases of Positions * (Ast list * Ast)
-    | Ast.Cases((pos1, pos2), (asts, ast)) ->
+    | Ast.Cases((pos1, pos2), (asts, ast1)) ->
         asts |> List.map (eval st) |> ignore
-        eval st ast
+        eval st ast1
     // | Assignment of Positions * (Ast * Ast)
     | Ast.Signature((pos1, pos2), (predicateIdentifierAst, paramTupleAst)) ->
         eval st predicateIdentifierAst
@@ -491,23 +499,23 @@ let rec eval (st: SymbolTable) ast =
         st.CurrentContext <- oldContext
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
 
-    | Ast.Constructor((pos1, pos2), (ast, (Some astList, ast2))) ->
-        eval st ast
+    | Ast.Constructor((pos1, pos2), (ast1, (Some astList, ast2))) ->
+        eval st ast1
         astList |> List.map (eval st) |> ignore
         eval st ast2
     | Ast.Constructor((pos1, pos2), (ast1, (None, ast2))) ->
         eval st ast1
         eval st ast2
     // | DefPredicateContent of Ast list option * Ast
-    | Ast.DefPredicateContent(optAsts, ast)
-    | Ast.DefFunctionContent(optAsts, ast)
-    | Ast.DefClassContent(optAsts, ast) ->
+    | Ast.DefPredicateContent(optAsts, ast1)
+    | Ast.DefFunctionContent(optAsts, ast1)
+    | Ast.DefClassContent(optAsts, ast1) ->
         optAsts
         |> Option.map (List.map (eval st) >> ignore)
         |> Option.defaultValue ()
         |> ignore
 
-        eval st ast
+        eval st ast1
     // | DefClassCompleteContent of Ast list option * Ast list
     | Ast.DefClassCompleteContent(optAsts, asts) ->
         optAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
@@ -562,7 +570,7 @@ let rec eval (st: SymbolTable) ast =
         st.CurrentContext <- oldContext
 
     // | DerivedPredicate of Ast
-    | Ast.DerivedPredicate ast -> eval st ast
+    | Ast.DerivedPredicate ast1 -> eval st ast1
     // | Proof of Positions * (Ast * (Ast list * Ast option))
     | Ast.Proof((pos1, pos2), (referencingIdentifierAst, (proofArgumentListAst, optQedAst))) ->
         let oldContext = st.CurrentContext
@@ -577,8 +585,8 @@ let rec eval (st: SymbolTable) ast =
             optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         | _ -> ()
         st.CurrentContext <- oldContext
-    | ast ->
-        let astType = ast.GetType().Name
+    | ast1 ->
+        let astType = ast1.GetType().Name
 
         let diagnostic =
             { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter

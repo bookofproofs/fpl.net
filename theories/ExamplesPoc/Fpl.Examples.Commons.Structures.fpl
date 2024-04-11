@@ -201,7 +201,7 @@ def class BinaryRelation: Relation
         self
     }
 
-    property optional pred RightUnique()
+    property pred RightUnique()
     {
         all v,w1,w2 in Set
         (
@@ -220,7 +220,7 @@ def class BinaryRelation: Relation
         )
     }
 
-    property optional pred LeftUnique()
+    property pred LeftUnique()
     {
         all v1,v2,w in Set
         (
@@ -239,17 +239,17 @@ def class BinaryRelation: Relation
         )
     }
 
-    property optional pred Injective()
+    property pred Injective()
     {
         LeftUnique()
     }
 
-    property optional pred Unique()
+    property pred Unique()
     {
         and (LeftUnique(), RightUnique())
     }
 
-    property optional pred RightTotal()
+    property pred RightTotal()
     {
         all w in Set
         (
@@ -265,12 +265,12 @@ def class BinaryRelation: Relation
         )
     }
 
-    property optional pred Surjective()
+    property pred Surjective()
     {
         RightTotal()
     }
 
-    property optional pred LeftTotal()
+    property pred LeftTotal()
     {
         all v in Set
         (
@@ -286,7 +286,7 @@ def class BinaryRelation: Relation
         )
     }
 
-    property optional pred Total()
+    property pred Total()
     {
         and (LeftTotal(), RightTotal())
     }

@@ -248,12 +248,16 @@ let boundedRangeInType = positions (leftBound .>>. rangeInType .>>. rightBound) 
 // to restrict it to pure objects.
 // In contrast to variableType which can also be used for declaring variables 
 // in the scope of FPL building blocks
-let bracketModifier = choice [boundedRangeInType ; bracketedCoordsInType ; paramTuple ]
+let bracketModifier = choice [boundedRangeInType; bracketedCoordsInType; paramTuple ]
 classTypeRef.Value <- positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
-let simpleVariableType = positions (choice [ keywordIndex; keywordFunction; keywordPredicate; specificClassType ] .>> IW) |>> Ast.SimpleVariableType
+let mapping, mappingRef = createParserForwardedToRef()
+let predicateType = positions (keywordPredicate .>> IW .>>. opt paramTuple) |>> Ast.CompoundPredicateType
+let functionalTermType = positions (keywordFunction .>> IW .>>. opt (paramTuple .>>. mapping)) |>> Ast.CompoundFunctionalTermType
+
+let compoundVariableType = choice [ keywordIndex; classType; functionalTermType; predicateType ] .>> IW
 let optionalTypeSpecification = opt (choice [boundedRange ; bracketedCoords; paramTuple])
-let variableType = positions (simpleVariableType .>>. opt bracketModifier .>> IW) |>> Ast.VariableType
+let variableType = positions (compoundVariableType) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
 let namedVariableDeclarationList = sepBy namedVariableDeclaration comma
@@ -473,7 +477,7 @@ let predicateInstance = positions (keywordPredicate >>. SW >>. signature .>>. (I
 
 let classInstanceBlock = leftBrace >>. (keywordIntrinsic <|> classContent) .>> spacesRightBrace
 let classInstance = positions (variableType .>>. signature .>>. classInstanceBlock) |>> Ast.ClassInstance
-let mapping = toArrow >>. IW >>. variableType
+mappingRef.Value <- toArrow >>. IW >>. variableType
 let functionalTermSignature = (keywordFunction >>. SW >>. signatureWithUserDefinedString) .>>. (IW >>. mapping) .>> IW |>> Ast.FunctionalTermSignature
 
 let returnStatement = positions (keywordReturn >>. (fplDelegate <|> predicateWithQualification)) .>> IW |>> Ast.Return

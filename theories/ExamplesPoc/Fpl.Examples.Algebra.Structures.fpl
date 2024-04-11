@@ -1,5 +1,5 @@
 uses Fpl.Commons
-uses Fpl.SetTheory.ZermeloFraenkel
+uses Fpl.SetTheory
 
 /* Binary operation. Note that the generic type "tplSetElem" limits a Binary operation to be closed
     inside a type, however, it still might be not closed inside a particular set of elements of this type.

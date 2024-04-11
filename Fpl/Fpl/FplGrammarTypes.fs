@@ -50,13 +50,13 @@ type Ast =
     | PredicateType 
     | FunctionalTermType 
     | IndexType
-    | VariableType of Positions * (Ast * Ast option)
-    | SimpleVariableType of Positions * Ast 
+    | VariableType of Positions * Ast 
     | BracketedCoordsInType of Positions * Ast list 
     | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
-    | ClassType of Positions * (Ast * Ast option)
     | ClassTypeWithModifier of Positions * (Ast * Ast)
-
+    | ClassType of Positions * (Ast * Ast option)
+    | CompoundPredicateType of Positions * (Ast * Ast option)
+    | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
     // Variables
     | Var of Positions * string
 

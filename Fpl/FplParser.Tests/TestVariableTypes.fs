@@ -252,7 +252,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType031 () =
-        let result = run (variableType .>> eof) """function[[,ind)]"""
+        let result = run (variableType .>> eof) """function()->obj"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
