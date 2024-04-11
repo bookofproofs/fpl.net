@@ -32,7 +32,7 @@
     <Compile Include="TestPredicates.fs" />
     <Compile Include="TestPredicatesSpecific.fs" />
     <Compile Include="TestProofs.fs" />
-    <Compile Include="TestRanges.fs" />
+    <Compile Include="TestInDomain.fs" />
     <Compile Include="TestSubscripts.fs" />
     <Compile Include="TestQualifierDollarDigits.fs" />
     <Compile Include="TestQualifierExtensionDigits.fs" />

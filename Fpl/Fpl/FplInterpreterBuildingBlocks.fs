@@ -275,9 +275,8 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         eval_pos_string_ast st s
     // | ExtensionBlock of Positions * (Ast * Ast)
-    | Ast.ClassTypeWithModifier((pos1, pos2), (ast1, ast2)) -> 
+    | Ast.InheritedClassType((pos1, pos2), ast1) -> 
         eval st ast1
-        eval st ast2
     | Ast.ExtensionBlock((pos1, pos2), (ast1, ast2))
     | Ast.Impl((pos1, pos2), (ast1, ast2))
     | Ast.Iif((pos1, pos2), (ast1, ast2))

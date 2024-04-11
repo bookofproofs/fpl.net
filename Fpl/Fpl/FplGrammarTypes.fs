@@ -46,7 +46,7 @@ type Ast =
     | IndexType
     | VariableType of Positions * Ast 
     | BracketedCoordsInType of Positions * Ast list 
-    | ClassTypeWithModifier of Positions * (Ast * Ast)
+    | InheritedClassType of Positions * Ast
     | ClassType of Positions * (Ast * Ast option)
     | CompoundPredicateType of Positions * (Ast * Ast option)
     | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)

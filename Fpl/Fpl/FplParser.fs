@@ -233,7 +233,7 @@ let mapping, mappingRef = createParserForwardedToRef()
 let predicateType = positions (keywordPredicate .>> IW .>>. opt paramTuple) |>> Ast.CompoundPredicateType
 let functionalTermType = positions (keywordFunction .>> IW .>>. opt (paramTuple .>>. mapping)) |>> Ast.CompoundFunctionalTermType
 
-let compoundVariableType = choice [ keywordIndex; classType; functionalTermType; predicateType ] .>> IW
+let compoundVariableType = choice [ keywordIndex; xId; classType; functionalTermType; predicateType ] .>> IW
 let variableType = positions (compoundVariableType) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
@@ -277,8 +277,7 @@ let conditionFollowedByResultList = many1 (IW >>. conditionFollowedByResult)
 let elseStatement = elseCase >>. IW >>. defaultResult .>> IW
 let casesStatement = positions (((keywordCases >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
 
-let allowedInDomainType = choice [keywordIndex; keywordFunction; keywordPredicate; specificClassType]
-let inDomain = positions (keywordIn >>. (allowedInDomainType <|> entity) .>> IW) |>> Ast.Domain
+let inDomain = positions (keywordIn >>. (predicateWithQualification <|> variableType) .>> IW) |>> Ast.Domain
 let variableInOptDomain = ( (variable .>> IW) .>>. opt inDomain) .>> IW
 let variableListInOptDomain = ( variableList .>>. opt inDomain) .>> IW
 let variableListInOptDomainList = (sepBy1 variableListInOptDomain comma) .>> IW
@@ -516,11 +515,11 @@ let keywordClass = (skipString "class" <|> skipString "cl")
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
 let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace
-let classTypeWithModifier = positions (varDeclModifier .>>. classType .>> IW) |>> Ast.ClassTypeWithModifier
-let classTypeWithModifierList = sepBy1 classTypeWithModifier comma
+let inheritedClassType = positions (specificClassType) .>> IW |>> Ast.InheritedClassType
+let inheritedClassTypeList = sepBy1 inheritedClassType comma
 
 let classIdentifier = positions (predicateIdentifier .>> IW) |>> Ast.ClassIdentifier
-let classSignature = (keywordClass >>. SW >>. classIdentifier) .>>. opt userDefinedObjSym .>>. classTypeWithModifierList
+let classSignature = (keywordClass >>. SW >>. classIdentifier) .>>. opt userDefinedObjSym .>>. (colon >>. inheritedClassTypeList)
 let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString "definition" <|> skipString "def") >>. SW

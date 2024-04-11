@@ -9,7 +9,7 @@ type TestClasses () =
 
     [<TestMethod>]
     member this.TestClass00 () =
-        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: obj
         {
         
         }"""
@@ -20,7 +20,7 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass01 () =
         // if empty then intrinsic
-        let result = run (definitionClass .>> eof) """class FieldPowerN: Set
+        let result = run (definitionClass .>> eof) """class FieldPowerN: tpl
         {
             intr
         }"""
@@ -325,7 +325,7 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass05 () =
         // A class with multiple inheritance
-        let result = run (definitionClass .>> eof) """class FieldPowerN: Typ1, :* Typ2, :+ Typ3 
+        let result = run (definitionClass .>> eof) """class FieldPowerN: Typ1, Typ2, Typ3 
         {
             intrinsic
 
@@ -371,7 +371,18 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass08 () =
         // An intrinsic class some following properties
-        let result = run (definitionClass .>> eof) """class SomeClass:Nat1, :Nat2, :* Nat3, :+ Nat3 
+        let result = run (definitionClass .>> eof) """class SomeClass:Nat1 ,Nat2Nat3,Nat3 
+        {
+            intrinsic
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))       
+
+    [<TestMethod>]
+    member this.TestClass09 () =
+        // An intrinsic class some following properties
+        let result = run (definitionClass .>> eof) """class SomeClass :Nat1,Nat2, Nat3,Nat3 
         {
             intrinsic
         }"""
