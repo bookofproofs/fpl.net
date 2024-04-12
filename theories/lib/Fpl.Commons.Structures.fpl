@@ -1,5 +1,5 @@
-uses Fpl.Examples.Commons 
-uses Fpl.Examples.SetTheory.ZermeloFraenkel 
+uses Fpl.Commons 
+uses Fpl.SetTheory 
 uses Fpl.Examples.PeanoAxioms 
 
 // defines a fixed length tuple template using a generic type tplIndex for an index in a range
@@ -15,17 +15,17 @@ definition class Tuple : obj
             ~i: Nat 
             i:= Zero() 
             for elem in listOfTpl
-            (
+            {
                 i:=Succ(i)
                 self[i]:=elem
-            )
+            }
             myLength:=i
             base.obj()
         ;
         self
     }
 
-    ctor Tuple(from, length:Nat, arr: tpl[from , length])
+    ctor Tuple(arr: tpl[from, length:Nat])
     {
         
         dec 
@@ -50,10 +50,10 @@ definition class Tuple : obj
 definition class UnlimitedTupleFrom: obj
 {
     dec 
-        ~myX: tpl[[from,]]
+        ~myX:+ tpl
     ;
 
-    constructor UnlimitedTupleFrom(from:index, x: tpl[[from,]])
+    constructor UnlimitedTupleFrom(from:index, x:+ tpl)
     {
         dec
             base.obj()
@@ -87,17 +87,17 @@ def class CartesianProduct: Set
             base.Set()
             i:= Zero()
             for setItem in setList
-            (
+            {
                 i:=Succ(i)
                 self[i]:=setItem
-            )
+            }
             myFrom := Nat(1)
             myLength:=i
         ;
         self
     }
 
-    ctor CartesianProduct(from, to: Nat, setArray: Set[from , to])
+    ctor CartesianProduct(setArray: Set[from , to:Nat])
     {
         dec
             self:=setArray
@@ -125,19 +125,19 @@ def class CartesianProduct: Set
         (
             is(@self,Set),
             all tupleElem
-            (
+            {
                 impl 
                 (
                     In(tupleElem,@self),
                     and (
-                        is(tupleElem,Tuple[myFrom,myLength]),
-                        all i in [[1,myLength]]
-                        (
+                        is(tupleElem,Tuple[myFrom,myLength:Nat]),
+                        all i in Rang(1,myLength)
+                        {
                             In(tupleElem[i],@self[i]) 
-                        )
+                        }
                     )
                 )
-            )
+            }
         )
     }
 
@@ -204,7 +204,7 @@ def class BinaryRelation: Relation
     property pred RightUnique()
     {
         all v,w1,w2 in Set
-        (
+        {
             impl
             (
                 and
@@ -217,13 +217,13 @@ def class BinaryRelation: Relation
                 ),
                 ( w1 = w2 )
             )
-        )
+        }
     }
 
     property pred LeftUnique()
     {
         all v1,v2,w in Set
-        (
+        {
             impl
             (
                 and
@@ -236,7 +236,7 @@ def class BinaryRelation: Relation
                 ),
                 ( v1 = v2 )
             )
-        )
+        }
     }
 
     property pred Injective()
@@ -252,17 +252,17 @@ def class BinaryRelation: Relation
     property pred RightTotal()
     {
         all w in Set
-        (
+        {
             ex v in Set
-            (
+            {
                 and
                 (
                     In(v,Domain()),
                     In(w,CoDomain()),
                     AreRelated(v,w,@self)
                 )
-            )
-        )
+            }
+        }
     }
 
     property pred Surjective()
@@ -273,17 +273,17 @@ def class BinaryRelation: Relation
     property pred LeftTotal()
     {
         all v in Set
-        (
+        {
             ex w in Set
-            (
+            {
                 and
                 (
                     In(v,Domain()),
                     In(w,CoDomain()),
                     AreRelated(v,w,@self)
                 )
-            )
-        )
+            }
+        }
     }
 
     property pred Total()
@@ -295,8 +295,8 @@ def class BinaryRelation: Relation
 def pred AreRelated(u,v: Set, r: BinaryRelation)
 {
     dec
-        ~tuple: Tuple[$1,$2]
-        tuple:=Tuple(u,v)
+        ~tuple: Tuple[i,j:ind]
+        tuple:=Tuple($1,$2)
     ;
     and
     (

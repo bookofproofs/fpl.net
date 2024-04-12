@@ -10,35 +10,35 @@ type TestInDomain () =
 
     [<TestMethod>]
     member this.TestInDomain01 () =
-        let result = run (inDomain .>> eof) """in obj"""
+        let result = run (inDomain .>> eof) """is obj"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestInDomain02 () =
-        let result = run (inDomain .>> eof) """in obj[x:TestClass]"""
+        let result = run (inDomain .>> eof) """is obj[x:TestClass]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestInDomain03 () =
-        let result = run (inDomain .>> eof) """in func"""
+        let result = run (inDomain .>> eof) """is func"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestInDomain04 () =
-        let result = run (inDomain .>> eof) """in ind"""
+        let result = run (inDomain .>> eof) """is ind"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestInDomain05 () =
-        let result = run (inDomain .>> eof) """in pred"""
+        let result = run (inDomain .>> eof) """is pred"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -52,21 +52,21 @@ type TestInDomain () =
 
     [<TestMethod>]
     member this.TestInDomain07 () =
-        let result = run (inDomain .>> eof) """in template"""
+        let result = run (inDomain .>> eof) """is template"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestInDomain08 () =
-        let result = run (inDomain .>> eof) """in @Nat"""
+        let result = run (inDomain .>> eof) """is @Nat"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestInDomain09 () =
-        let result = run (inDomain .>> eof) """in func()->obj"""
+        let result = run (inDomain .>> eof) """is func()->obj"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -101,7 +101,7 @@ type TestInDomain () =
 
     [<TestMethod>]
     member this.TestInDomain14 () =
-        let result = run (inDomain .>> eof) """in T[x:func]"""
+        let result = run (inDomain .>> eof) """is T[x:func]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

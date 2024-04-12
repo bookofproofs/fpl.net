@@ -94,29 +94,29 @@ type TestQualifiersSelf () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBoth () =
-        let result = run (predicate .>> eof) """@self[[@self,]]"""
+    member this.TestCoordsBoth () =
+        let result = run (predicate .>> eof) """@self[@self,@@self]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBothA () =
-        let result = run (predicate .>> eof) """@self [[@self,]]"""
+    member this.TestCoordsBothA () =
+        let result = run (predicate .>> eof) """@self [@self,@@self]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBothB () =
-        let result = run (predicate .>> eof) """@self[[ @self ,]]"""
+    member this.TestCoordsBothB () =
+        let result = run (predicate .>> eof) """@self[ @self ,self]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBothC () =
-        let result = run (predicate .>> eof) """@self [[ @self ,]]"""
+    member this.TestCoordsBothC () =
+        let result = run (predicate .>> eof) """@self [ @self ,@@@self]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

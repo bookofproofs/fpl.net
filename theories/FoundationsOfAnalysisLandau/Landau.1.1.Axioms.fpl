@@ -32,10 +32,6 @@ axiom Axiom1 ()
 }
 
 // For each x there exists exactly one natural number, called the successor of x, the will be denoted x'
-definition function Successor postfix "'" (x: N) -> N
-{
-    intrinsic
-}
 
 definition function DoubleSuccessor postfix "''" (x: N) -> N
 {
@@ -45,12 +41,12 @@ definition function DoubleSuccessor postfix "''" (x: N) -> N
 axiom Axiom2 ()
 {
     all x in Nat
-    (
+    {
         exn$1 y in Nat
-        (
+        {
             ( y = x' )
-        )
-    )
+        }
+    }
 }
 
 // It follows immediately ...
@@ -98,9 +94,9 @@ def class N: Set
             // This is the case, since we have derived it from the Set class.
             assert
                 all n
-                (
+                {
                     (n ∈ self)
-                )
+                }
         ;
         self
     }
@@ -137,8 +133,8 @@ axiom Axiom5 ()
 // PoC note: This axiom does not belong to Landau's work. However, we provide it as an example how we could reformulate the same axiom without relying on set theory.
 axiom AxiomExample ()
 {
-        all p in predicate // For all predicates p it holds that:
-    (
+    all p is predicate // For all predicates p it holds that:
+    {
         impl
         (
             // if 
@@ -146,22 +142,22 @@ axiom AxiomExample ()
             ( 
                 p(One) // a predicate p is true for One 
                 , // and 
-                all x in object  // and for all objects x (kind of which is whatsoever) 
-                ( 
+                all x is object  // and for all objects x (kind of which is whatsoever) 
+                { 
                     impl 
                     ( 
                         p(x), // the truth of p for x implies
                         p(Successor(x)) // the truth of p also for x's successor
                     ) 
-                )
+                }
             )
             , // then, p is actually true for all natural numbers
             all n in N 
-            ( 
+            { 
                 p(n) 
-            )
+            }
         )
-    )
+    }
     // This means that our (whatsoever objects) are actually the natural numbers themselves.
 
 }

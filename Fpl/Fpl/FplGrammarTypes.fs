@@ -63,7 +63,8 @@ type Ast =
     | Impl of Positions * (Ast * Ast)
     | Iif of Positions * (Ast * Ast)
     | Not of Positions * Ast
-    | Domain of Positions * Ast
+    | InEntity of Positions * Ast
+    | IsType of Positions * Ast
     | All of Positions * ((Ast list * Ast option) list * Ast)
     | Exists of Positions * ((Ast list * Ast option) list * Ast)
     | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)

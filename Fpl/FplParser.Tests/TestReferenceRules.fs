@@ -76,9 +76,9 @@ type TestReferenceRules() =
             dec ~a:obj ~ proceedingResult: pred
 
                 for proceedingResult in p
-                (
+                {
                     assert proceedingResult
-                )
+                }
             ;
             premise: undefined
             conclusion: and (p)
@@ -92,7 +92,7 @@ type TestReferenceRules() =
         let result = run (ruleOfInference .>> eof) """inference ProceedingResults(p:+ pred)
         {
             dec ~a:obj ~  proceedingResult: pred;
-            premise: all proceedingResult in p ( proceedingResult )
+            premise: all proceedingResult in p { proceedingResult }
             conclusion: and (p)
         }"""
         let actual = sprintf "%O" result
@@ -107,7 +107,7 @@ type TestReferenceRules() =
             premise:
                 p(c)
             conclusion:
-                ex x(p(x))
+                ex x{p(x)}
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual

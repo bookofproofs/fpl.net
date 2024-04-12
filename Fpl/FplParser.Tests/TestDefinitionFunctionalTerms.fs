@@ -15,9 +15,9 @@ type TestDefinitionFunctionalTerms01 () =
 
             assert 
                 ex e
-                (
+                {
                     IsLeftNeutralElement(e)
-                );
+                };
             return e
         }"""
         let actual = sprintf "%O" result
@@ -52,9 +52,9 @@ type TestDefinitionFunctionalTerms01 () =
                 result, addend: Nat
                 result:=Zero()
                 for addend in list
-                (
+                {
                     result:=Add(result,addend)
-                )
+                }
             ;
             return result
         }"""
@@ -71,9 +71,9 @@ type TestDefinitionFunctionalTerms01 () =
                 i: index
                 result:=Zero()
                 for i in list
-                (
+                {
                     result:=Add(result,list[i])
-                )
+                }
             ;
             return result
         }"""
@@ -91,9 +91,9 @@ type TestDefinitionFunctionalTerms01 () =
                 result:=Zero()
 
                 for i in ClosedRange(from,to)
-                (
+                {
                     result:=Add(result,arr[i])
-                )
+                }
             ;
             return result
         }"""
@@ -103,16 +103,73 @@ type TestDefinitionFunctionalTerms01 () =
 
     [<TestMethod>]
     member this.TestDefinitionFunctionalTerm07 () =
-        let result = run (definitionFunctionalTerm .>> eof) """func Sum(arr: Nat[[,]]) -> Nat
+        let result = run (definitionFunctionalTerm .>> eof) """func Sum(arr: Nat) -> Nat
         {
             dec ~a:obj ~ 
                 addend, result: Nat
             
                 result:=Zero()
                 for addend in arr
-                (
+                {
                     result:=Add(result,addend)
-                )
+                }
+            ;
+            return result
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm07a () =
+        let result = run (definitionFunctionalTerm .>> eof) """func Sum() -> Nat
+        {
+            dec ~a:obj ~ 
+                addend, result: Nat
+            
+                result:=Zero()
+                for addend is Nat
+                {
+                    result:=Add(result,addend)
+                }
+            ;
+            return result
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm07b () =
+        let result = run (definitionFunctionalTerm .>> eof) """func Sum() -> Nat
+        {
+            dec ~a:obj ~ 
+                addend, result: Nat
+            
+                result:=Zero()
+                for addend in Nat()
+                {
+                    result:=Add(result,addend)
+                }
+            ;
+            return result
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm07c () =
+        let result = run (definitionFunctionalTerm .>> eof) """func Sum() -> Nat
+        {
+            dec ~a:obj ~ 
+                addend, result: Nat
+            
+                result:=Zero()
+                for addend is Nat()
+                {
+                    result:=Add(result,addend)
+                }
             ;
             return result
         }"""

@@ -138,7 +138,7 @@ let keywordNot = skipString "not" .>> attemptSW
 let keywordAll = skipString "all" .>> SW 
 let keywordEx = skipString "ex" .>> SW
 let keywordExN = skipString "exn" .>> IW
-let keywordIs = skipString "is" .>> IW 
+let keywordIs = skipString "is" .>> attemptSW 
 
 
 // Via templates, FPL supports generic types, which make it possible to define abstract mathematical
@@ -277,13 +277,15 @@ let conditionFollowedByResultList = many1 (IW >>. conditionFollowedByResult)
 let elseStatement = elseCase >>. IW >>. defaultResult .>> IW
 let casesStatement = positions (((keywordCases >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
 
-let inDomain = positions (keywordIn >>. (predicateWithQualification <|> variableType) .>> IW) |>> Ast.Domain
+let ofType = keywordIs >>. positions (variableType) .>> IW |>> Ast.IsType
+let inEntity = keywordIn >>. positions (predicateWithQualification) .>> IW |>> Ast.InEntity
+let inDomain = choice [ofType; inEntity]
 let variableInOptDomain = ( (variable .>> IW) .>>. opt inDomain) .>> IW
 let variableListInOptDomain = ( variableList .>>. opt inDomain) .>> IW
 let variableListInOptDomainList = (sepBy1 variableListInOptDomain comma) .>> IW
 
 let entityInDomain = ( entity .>> IW .>>. inDomain ) .>> IW
-let forInBody = (entityInDomain .>> IW) .>>. (leftParen >>. IW >>. statementList) .>> (IW >>. rightParen)
+let forInBody = (entityInDomain .>> IW) .>>. (leftBrace >>. IW >>. statementList) .>> (IW >>. rightBrace)
 let forStatement = positions (keywordFor >>. forInBody) |>> Ast.ForIn
 
 //// Difference of assertion to an axiom: axiom's is followed by a signature of a predicate (i.e. with possible parameters),
@@ -346,10 +348,10 @@ let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate)
 let implication = positions (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
 let equivalence = positions (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
 let negation = positions (keywordNot >>. predicate) |>> Ast.Not
-let all = positions ((keywordAll >>. variableListInOptDomainList) .>>. predicate) |>> Ast.All
-let exists = positions ((keywordEx >>. variableListInOptDomainList) .>>. predicate) |>> Ast.Exists
+let all = positions ((keywordAll >>. variableListInOptDomainList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.All
+let exists = positions ((keywordEx >>. variableListInOptDomainList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
-let existsTimesN = positions (((keywordExN >>. dollarDigits .>> SW) .>>. variableInOptDomain) .>>. predicate) |>> Ast.ExistsN
+let existsTimesN = positions (((keywordExN >>. dollarDigits .>> SW) .>>. variableInOptDomain) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
 let isOpArg = choice [ objectSymbol; predicateIdentifier; variable; self ] .>> IW
 let isOperator = positions ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
@@ -662,7 +664,7 @@ let fplParser (input:string) =
             if (-1 < lastParserIndex) && (lastParserIndex < index) && not lastSuccess && lastCode <> stdCode then
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
                 let remainingChunk = preProcessedInput.Substring(int lastParserIndex, (index - int lastParserIndex))
-                // emit error messages for for this chunk of input string using the last parser  
+                // emit error messages for this chunk of input string using the last parser  
                 tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode -1 ""
                 intervals.Add(Interval(lastParserIndex, nextIndex))
                 lastParserIndex <- nextIndex

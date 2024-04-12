@@ -40,11 +40,11 @@ proof Theorem_002$1
     100. and (Axiom1(), Axiom3()) |- ( 1' <> 1 )
     
     // "inductive step" 
-    200. |- assume ex n in N ( n' <> n )
+    200. |- assume ex n in N { (n' <> n) }
     300. Theorem_001() |- ( n''<> n' ) 
     
     400. and(100., 400.) 
-        |- all x in N ( x' <> x )
+        |- all x in N { ( x' <> x ) }
     qed
 }
     
@@ -53,7 +53,7 @@ theorem Theorem_003 ()
 {
     dec ~x,u: Nat;
     (
-        ( x <> 1 ) => exn$1 u in N ( u' = x )
+        ( x <> 1 ) => exn$1 u in N { ( u' = x ) }
     )
 }
 
@@ -74,7 +74,7 @@ proof Theorem_003$1
             (
                 // if for some x the premise holds
                 (
-                    ( x <> 1 ) => exn$1 u in N ( u' = x )
+                    ( x <> 1 ) => exn$1 u in N {( u' = x )}
                 ),
                 // then it belongs to the set m
                 (x in m)
@@ -87,7 +87,7 @@ proof Theorem_003$1
     
     // "inductive step" 
     300. 200. |- assume (x ∈ m)
-    400. |- exn$1 u in N ( u' = x )
+    400. |- exn$1 u in N {( u' = x )}
     500. Axiom3(), Axiom2() |- ( u'' = x' )
     600. bydef m |- (x' ∈ m)
     700. |- ( m = N )
@@ -132,9 +132,9 @@ lemma Theorem_004_A ()
         ( Sum(x, 1) = Successor(x) )
         , 
         all y in N 
-        ( 
+        {
             ( Sum(x,Successor(y)) = Successor(x,y) )
-        ) 
+        } 
     )
 }
 
@@ -148,13 +148,13 @@ proof Theorem_004_A$1
          ~x : N // for a fixed x
         // and for all y we define 
         for y in N 
-        (
+        {
             // such that
             a[1] := Successor(x) 
             b[1] := Successor(x)
             a[Successor(y)] := Successor(a[y])
             b[Successor(y)] := Successor(b[y])
-        )
+        }
     ;
     declaration
          ~m : Set // let m be a set 
@@ -176,7 +176,7 @@ proof Theorem_004_A$1
     200. bydef m |- In(1, m)
     
     // "inductive step" 
-    300. 200. |- assume ex y ( In(y,m) ) // if y belongs to m
+    300. 200. |- assume ex y { In(y,m) } // if y belongs to m
     400. bydef m |- ( a[y] = b[y] )
     500. Axiom2 |- 
         ( Successor(a[y]) = Successor(b[y]) )
@@ -184,7 +184,7 @@ proof Theorem_004_A$1
         ( a[Successor(y)] = Successor(a[y]) = Successor(b[y]) = b[Successor(y)] )
     650. |- In(Successor(y), m)
     
-    700. |- all y in N ( ( a[y] = b[y] ) )
+    700. |- all y in N { ( a[y] = b[y] ) }
     qed
 }
 
@@ -195,14 +195,14 @@ lemma Theorem_004_B ()
     // x + 1 = successor(x) and x + successor(y) = successor (x + y) for every y.
     // PoC note: We reformulate it predicatively
     all x,y in N
-    (
+    {
         and 
         (
             ( (x + 1) = x' )
             ,
             ( (x + y') = (x + y)' )
         )
-    )
+    }
 }
 
 
@@ -221,9 +221,13 @@ proof Theorem_004_B$1
             impl
             (
                 all x,y in N
-                (
-                   ( (x + 1) = x' ) and ( (x + y') = (x + y)' )
-                )
+                {
+                    and 
+                    ( 
+                        ( x + 1 = x' )
+                        , ( x + y' = (x + y)' ) 
+                    ) 
+                }
                 ,
                 (x in m)
             )
@@ -237,7 +241,7 @@ proof Theorem_004_B$1
     200. |- (1 ∈ m) // hence 1 belongs to m
     
     // "inductive step" 
-    300. 200. |- assume ex x (x ∈ m) // let x belong to m, so that there exists an x + y for all y. Then the number x'+ y = (x + y)' is the required number for x'  
+    300. 200. |- assume ex x {(x ∈ m)} // let x belong to m, so that there exists an x + y for all y. Then the number x'+ y = (x + y)' is the required number for x'  
     400. bydef Sum |- ( (x' + 1) = (x + 1)' = (x')' ) // since x' + 1 = (x+1)' = (x')'
     500. bydef Sum |- ( (x' + y') = (x + y')' = ((x + y)')' = (x' + y)' ) // and x' + y' = (x+y')' = ((x+y)')' = (x'+y)' 
     600. |- (x' ∈ m) // hence, x' belongs to m
@@ -275,7 +279,7 @@ proof Theorem_005_SumIsAssoziative$1
     200. |- (1 ∈ m)
     
     // "inductive step" 
-    300. 200. |- assume ex z ( (x + y) + z = x + (y + z) )
+    300. 200. |- assume ex z { ((x + y) + z = x + (y + z)) }
     400. |- ( 
               (x + y) + z'    //   (x+y) + z' 
             = ((x + y) + z)'     // = ((x+y) + z)'
@@ -314,7 +318,7 @@ proof Theorem_006_SumIsCommutatitve$1
     200. |- (1 ∈ m) // and 1 belongs to m.
     
     // "inductive step" 
-    300. 200. |- assume ex x (x ∈ m) // If x belongs to m,
+    300. 200. |- assume ex x {(x ∈ m)} // If x belongs to m,
     400. |- ( (x + y) = (y + x) )
     450. |- (    //   then x + y = y + x
               (x + y)'     // therefore (x + y)' = (y+x)' = y + x'
@@ -355,13 +359,13 @@ proof Theorem_007$1
     200. |- (1 ∈  m) // 1 belongs to m
     
     // "inductive step" 
-    300. 200. |- assume ex y in N (y ∈ m) // if y belongs to m
+    300. 200. |- assume ex y in N {(y ∈ m)} // if y belongs to m
     400. |- (y <> x + y) // then y != x + y
     500. |- (y' = (x + y)') // hence y' != (x + y)'
     510. bydef Sum |- (y' <> x + y') // y' != x + y'
     600. |- (y' + m) // so that x' belongs to m
     
-    700. |- all y in N (y <> x + y) // therefore, the assertion holds for all y.
+    700. |- all y in N {(y <> x + y)} // therefore, the assertion holds for all y.
     qed
 }
 
@@ -391,12 +395,12 @@ prf Theorem_008$1
     200. |- (1 ∈ m) // hence, 1 belongs to m
     
     // "inductive step" 
-    300. 200. |- ass ex x in N (x ∈ m) // if x belongs to m
+    300. 200. |- ass ex x in N {(x ∈ m)} // if x belongs to m
     400. |- (x + y <> x <> z) // then x + y != x + z
     500. Axiom3 |- ((x + y)' <> (x + z)') // hence (x+y)' != (x+z)'
     550. |- (x' + y <> x' + z) // x' + y != x' + z
     600. |- (x' ∈ m) // so that x' belongs to m
-    700. |- all x,y,z in N (y <> z => x + y <> x + z) // therefore, the assertion holds always.
+    700. |- all x,y,z in N {(y <> z => x + y <> x + z)} // therefore, the assertion holds always.
     qed
 }
 
@@ -406,8 +410,8 @@ theorem Theorem_009()
         ~x,y: N // for given x and y, exactly one of the following must be the case:
         ~case1,case2,case3:predicate
         case1 := (x = y) // x = y
-        case2 := ex u in N (x = y + u) // there exists a u (exactly one, by theorem 8) such that x = y + u
-        case3 := ex v in N (y = x + v) // there exists a v (exactly one, by theorem 8) such that y = x + v
+        case2 := ex u in N {(x = y + u)} // there exists a u (exactly one, by theorem 8) such that x = y + u
+        case3 := ex v in N {(y = x + v)} // there exists a v (exactly one, by theorem 8) such that y = x + v
     ;
     // PoC note: a predicative expression that becomes true "if and only if exactly one of the cases is true" 
     // PoC note: FPL allows abbreviation of complex predicates while using them as boolean variables in boolean expressions (reducing PL1 to PL0)
@@ -459,7 +463,7 @@ proof Theorem_009$1
     300. Theorem_003 |- (x = 1 xor x = u' = 1 + u) // For y = 1, we have by theorem 3 that either x = 1 = y or x = u' = 1 + u = y + u.
     400. |- (1 in m) // Hence, 1 belongs to m.
     
-    500a. 400. |- assume ex y (y in m)
+    500a. 400. |- assume ex y {(y in m)}
     510a. |- assume case1 // either (case (1) for y)
     520a. |- (y' = y + 1 = x + 1) // hence y' = y + 1 = x + 1
     530a. |- (y in m)

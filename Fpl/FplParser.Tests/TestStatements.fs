@@ -15,31 +15,31 @@ type TestStatements () =
     [<TestMethod>]
     member this.TestFor01 () =
         let result = run (forStatement .>> eof) """for proceedingResult in    p
-                (
+                {
                     assert proceedingResult
                     a:=1
                     b:=1
-                )"""
+                }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestFor02 () =
-        let result = run (forStatement .>> eof) """for    n in [[1,4]]
-            (
-            assert Equal(f(n),n)
-            )"""
+        let result = run (forStatement .>> eof) """for    n in Range(1,4)
+            {
+                assert Equal(f(n),n)
+            }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestFor03 () =
-        let result = run (forStatement .>> eof) """for n in [[$1,$4]]
-            (
-            assert Equal(f(n),n)
-            )"""
+        let result = run (forStatement .>> eof) """for n in Range($1,$4)
+            {
+                assert Equal(f(n),n)
+            }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -47,9 +47,9 @@ type TestStatements () =
     [<TestMethod>]
     member this.TestFor04 () =
         let result = run (forStatement .>> eof) """for n in SomeType
-            (
+            {
                 x[n] := 1
-            )"""
+            }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -87,13 +87,13 @@ type TestStatements () =
     member this.TestAssertion01 () =
         let result = run (assertionStatement .>> eof) """assert
                     all n
-                    (
+                    {
                         and
                         (
                             is(n, Set),
                             In(n, self)
                         )
-                    )"""
+                    }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
