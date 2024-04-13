@@ -266,8 +266,44 @@ type EvalContext =
     | InSignature of FplValue
     | InBlock of FplValue
 
-type SymbolTable =
-    { ParsedAsts: List<ParsedAst>
-      mutable CurrentContext: EvalContext
-      Root: FplValue
-    }
+type SymbolTable(parsedAsts:List<ParsedAst>, debug:bool) =
+    let _parsedAsts = parsedAsts
+    let mutable _currentContext = EvalContext.ContextNone
+    let _evalPath = Stack<string>()
+    let _root = FplValue.CreateRoot()
+    let _debug = debug
+
+    /// Sets and gets the current evaluation context.
+    member this.CurrentContext
+        with get () = _currentContext
+        and set (value) = _currentContext <- value
+
+    /// Returns the evaluation root node of the symbol table.
+    member this.Root = _root
+
+    /// Returns the list of parsed asts
+    member this.ParsedAsts = _parsedAsts
+
+    /// Returns the path of the current recursive evaluation. The path is reversed, i.e. starting with the root ast name.
+    member this.EvalPath() = 
+        _evalPath 
+        |> Seq.toList 
+        |> List.rev 
+        |> String.concat "."
+
+    /// Add the current ast name to the recursive evaluation path.
+    member this.EvalPush(astName:string) = 
+        _evalPath.Push(astName)
+        if debug then
+            System.Console.WriteLine(this.EvalPath())
+
+    /// Remove the current ast name from the recursive evaluation path.
+    member this.EvalPop() = 
+        _evalPath.Pop() |> ignore
+
+
+    /// If there is a valid topological sorting, order the list descending by this ordering.
+    member this.OrderAsts() =
+        _parsedAsts.Sort(
+            Comparer<ParsedAst>.Create(fun b a -> compare a.Sorting.TopologicalSorting b.Sorting.TopologicalSorting)
+        )

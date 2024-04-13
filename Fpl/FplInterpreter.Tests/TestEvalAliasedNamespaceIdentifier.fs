@@ -334,7 +334,7 @@ type TestEvalAliasedNamespaceIdentifier() =
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id2ReferencedAsts() =
         let result = this.PrepareTestLoadAllUsesClauses02()
-        // "Fpl.Commons" knows that it doesn't reference to anything
+        // "Fpl.SetTheory" references to FplCommons
         let actual = result.Find(fun pa -> pa.Id = "Fpl.SetTheory").Sorting.ReferencedAsts
         Assert.AreEqual(["Fpl.Commons"], actual)
 
