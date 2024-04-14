@@ -20,7 +20,7 @@ ad.PrintDiagnostics
 
 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-FplInterpreter.fplInterpreter input (System.Uri("file:///d%3A/Forschung/fpl.net/theories/Landau/Test.fpl")) fplLibUrl parsedAsts
+FplInterpreter.fplInterpreter input (System.Uri("file:///d%3A/Forschung/fpl.net/theories/Landau/Test.fpl")) fplLibUrl parsedAsts true
 printf "%A" parsedAsts
 
 printf "\n--------------------------------\n"

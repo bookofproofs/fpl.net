@@ -413,9 +413,7 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue "["
             asts 
             |> List.map (fun ast1 ->
-                let oldContext = st.CurrentContext        
                 eval st ast1
-                st.CurrentContext <- oldContext
             ) |> ignore
             adjustSignature st fplValue "]"
             fplValue.NameEndPos <- pos2

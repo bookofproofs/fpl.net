@@ -9,8 +9,6 @@ open CommonTestHelpers
 [<TestClass>]
 type TestFplValue() =
 
-
-
     [<TestMethod>]
     member this.TestInitialFactory() =
         FplParser.parserDiagnostics.Clear()
@@ -44,7 +42,6 @@ type TestFplValue() =
         testFactory FplBlockType.MandatoryProperty FplType.Object
         testFactory FplBlockType.OptionalProperty FplType.Object
         testFactory FplBlockType.Class FplType.Object 
-
 
     member this.ScopeVariablesInSignature() =
         FplParser.parserDiagnostics.Clear()
@@ -95,6 +92,60 @@ type TestFplValue() =
     member this.TestScopeVariablesInSignatureIsComplete() =
         try
             this.ScopeVariablesInSignature() |> ignore
+            Assert.IsTrue(true)
+        with
+        | ex -> 
+            Assert.IsTrue(false)
+
+    member this.ScopeVariablesInBlock() =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = """
+        def pred TestPredicate() 
+            {dec ~x,y:pred(u,v,w:func(a,b,c:obj)->obj); true}
+        ;
+        """
+        let stOption = prepareFplCode(fplCode, false) 
+        let result = match stOption with
+                        | Some st -> 
+                            let name = "TestPredicate()"
+                            let r = st.Root
+                            let theory = r.Scope["Test"]
+                            let block = theory.Scope[name]
+                            let x = block.Scope["x"]
+                            let y = block.Scope["y"]
+                            let xw = x.Scope["w"]
+                            let xu = x.Scope["u"]
+                            let xv = x.Scope["v"]
+                            let yw = y.Scope["w"]
+                            let yu = y.Scope["u"]
+                            let yv = y.Scope["v"]
+                            let xwa = xw.Scope["a"]
+                            let xwb = xw.Scope["b"]
+                            let xwc = xw.Scope["c"]
+                            let xua = xu.Scope["a"]
+                            let xub = xu.Scope["b"]
+                            let xuc = xu.Scope["c"]
+                            let xva = xv.Scope["a"]
+                            let xvb = xv.Scope["b"]
+                            let xvc = xv.Scope["c"]
+                            let ywa = yw.Scope["a"]
+                            let ywb = yw.Scope["b"]
+                            let ywc = yw.Scope["c"]
+                            let yua = yu.Scope["a"]
+                            let yub = yu.Scope["b"]
+                            let yuc = yu.Scope["c"]
+                            let yva = yv.Scope["a"]
+                            let yvb = yv.Scope["b"]
+                            let yvc = yv.Scope["c"]
+                            Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
+                        | None -> None
+        prepareFplCode("", true) |> ignore
+        result
+
+    [<TestMethod>]
+    member this.TestScopeVariablesInBlockIsComplete() =
+        try
+            this.ScopeVariablesInBlock() |> ignore
             Assert.IsTrue(true)
         with
         | ex -> 
@@ -171,7 +222,6 @@ type TestFplValue() =
     [<DataRow("inference TestId(x:obj[y:index,z:Nat]) {pre: true con: true};", "TestId(obj[ind, Nat])", "TestId ( obj [ ind Nat ] )")>]
     [<DataRow("inference TestId(x:obj[y:obj,z:@Nat]) {pre: true con: true};", "TestId(obj[obj, @Nat])", "TestId ( obj [ obj @Nat ] )")>]
     [<DataRow("inference TestId(x:obj[y:tpl,z:index]) {pre: true con: true};", "TestId(obj[tpl, ind])", "TestId ( obj [ tpl ind ] )")>]
-
 
     [<DataRow("axiom TestId() {true};", "TestId()", "TestId ( )")>]
     [<DataRow("axiom TestId(x:ind) {true};", "TestId(ind)", "TestId ( ind )")>]

@@ -20,7 +20,7 @@ type TestInterpreterErrors() =
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts |> ignore
+        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -35,7 +35,7 @@ type TestInterpreterErrors() =
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts |> ignore 
+        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true |> ignore 
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -53,7 +53,7 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-            Some (FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts)
+            Some (FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts true)
 
     [<TestMethod>]
     member this.TestNSP04CircularAA() =
@@ -82,7 +82,7 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-            Some(FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts)
+            Some(FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts true)
 
     [<TestMethod>]
     member this.TestNSP04CircularABCA() =
@@ -107,7 +107,7 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts)
+            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true)
 
     [<TestMethod>]
     member this.TestNSP05() =
@@ -134,7 +134,7 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts)
+            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true)
 
     [<TestMethod>]
     member this.TestNSP05a() =
