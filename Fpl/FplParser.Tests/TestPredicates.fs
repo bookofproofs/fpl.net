@@ -268,56 +268,56 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate35 () =
-        let result = run (predicate .>> eof) """all x,y,z(true)"""
+        let result = run (predicate .>> eof) """all x,y,z{true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate36 () =
-        let result = run (predicate .>> eof) """all x,y,z (not (iif ( true, not false)))"""
+        let result = run (predicate .>> eof) """all x,y,z {not (iif ( true, not false))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate37 () =
-        let result = run (predicate .>> eof) """all x,y,z (not (iif ( iif( true, false), true)))"""
+        let result = run (predicate .>> eof) """all x,y,z {not (iif ( iif( true, false), true))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate38 () =
-        let result = run (predicate .>> eof) """all x (not (iif ( iif ( true, iif( true, false)), not true )))"""
+        let result = run (predicate .>> eof) """all x {not (iif ( iif ( true, iif( true, false)), not true ))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate39 () =
-        let result = run (predicate .>> eof) """ex x,y,z(true)"""
+        let result = run (predicate .>> eof) """ex x,y,z {true }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate40 () =
-        let result = run (predicate .>> eof) """ex x,y,z (not (iif ( true, not false)))"""
+        let result = run (predicate .>> eof) """ex x,y,z { not (iif ( true, not false))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate41 () =
-        let result = run (predicate .>> eof) """ex x,y,z (not (iif ( iif( true, false), true)))"""
+        let result = run (predicate .>> eof) """ex x,y,z {not (iif ( iif( true, false), true))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate42 () =
-        let result = run (predicate .>> eof) """ex x (not (iif ( iif ( true, iif( true, false)), not true )))"""
+        let result = run (predicate .>> eof) """ex x {not (iif ( iif ( true, iif( true, false)), not true ))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -331,21 +331,21 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate44 () =
-        let result = run (predicate .>> eof) """exn$1 x in Nat (not (iif ( true, not (false))))"""
+        let result = run (predicate .>> eof) """exn$1 x in Nat {not (iif ( true, not (false)))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate45 () =
-        let result = run (predicate .>> eof) """exn$2 x in Nat,y (not (iif ( iif( true, false), true)))"""
+        let result = run (predicate .>> eof) """exn$2 x in Nat,y {not (iif ( iif( true, false), true))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestPredicate46 () =
-        let result = run (predicate .>> eof) """exn$3 x (not (iif ( iif ( true, iif( true, false)), not true )))"""
+        let result = run (predicate .>> eof) """exn$3 x {not (iif ( iif ( true, iif( true, false)), not true ))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -360,9 +360,9 @@ type TestPredicates () =
     [<TestMethod>]
     member this.TestPredicate48 () =
         let result = run (predicate .>> eof) """all arg in args 
-				(
+				{
 					is(arg,Set)
-				)"""
+				}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -398,28 +398,28 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate53 () =
-        let result = run (predicate .>> eof) """all x in [[a,b]], y in c, z (and (a,b,c))"""
+        let result = run (predicate .>> eof) """all x in Range(a,b), y in c, z {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate54 () =
-        let result = run (predicate .>> eof) """all x in Real, y in pred, z in func (and (a,b,c))"""
+        let result = run (predicate .>> eof) """all x is Real, y is pred, z is func {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate55 () =
-        let result = run (predicate .>> eof) """ex x in [[a,b]], y in c, z (and (a,b,c))"""
+        let result = run (predicate .>> eof) """ex x in Range(a,b), y in c, z {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate56 () =
-        let result = run (predicate .>> eof) """ex x in Real, y in pred, z in func (and (a,b,c))"""
+        let result = run (predicate .>> eof) """ex x is Real, y is pred, z is func {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

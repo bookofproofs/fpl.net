@@ -1,10 +1,13 @@
 ﻿using System.Text;
 using FParsec;
 using Microsoft.FSharp.Collections;
+using System.Collections.Generic;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using static FplParser;
+using static FplInterpreterTypes;
 using static FplInterpreter;
+using static FplInterpreterUsesClause;
 
 namespace FplLS
 {
@@ -12,11 +15,13 @@ namespace FplLS
     {
         private readonly ILanguageServer _languageServer;
         private readonly BufferManager _bufferManager;
+        private readonly List<ParsedAst> _parsedAstsList;
 
         public DiagnosticsHandler(ILanguageServer languageServer, BufferManager bufferManager)
         {
             _languageServer = languageServer;
             _bufferManager = bufferManager;
+            _parsedAstsList = new List<ParsedAst>();
         }
 
 
@@ -29,9 +34,8 @@ namespace FplLS
                     var sourceCode = buffer.ToString();
                     var parserDiagnostics = FplParser.parserDiagnostics;
                     parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
-                    var ast = FplParser.fplParser(sourceCode);
-                    var fplLibUri = "https://github.com/bookofproofs/fpl.net/tree/main/theories/lib";
-                    FplInterpreter.fplInterpreter(ast, uri, fplLibUri);
+                    var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
+                    FplInterpreter.fplInterpreter(sourceCode, uri, fplLibUri, _parsedAstsList, false);
                     var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
                     _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
                     {
@@ -79,8 +83,8 @@ namespace FplLS
             castedDiagnostic.Source = diagnostic.Emitter.ToString();
             castedDiagnostic.Severity = CastSeverity(diagnostic.Severity);
             castedDiagnostic.Message = CastMessage(diagnostic, sb);
-            castedDiagnostic.Range = tp.GetRange(diagnostic.Position.Index, diagnostic.Position.Index);
-            castedDiagnostic.Code = CastCode(diagnostic.Code);
+            castedDiagnostic.Range = tp.GetRange(diagnostic.StartPos.Index, diagnostic.EndPos.Index);
+            castedDiagnostic.Code = CastCode(diagnostic.Code.Code);
             return castedDiagnostic;
         }
 

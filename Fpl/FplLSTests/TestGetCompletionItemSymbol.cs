@@ -16,7 +16,7 @@ namespace FplLSTests
         [DataRow("postfix", true, 1)]
         [DataRow("symbol", true, 8)]
         [TestMethod]
-        public void TestAddSymbolChoicesNumber(string choice, bool declarative, int bitmask)
+        public void TestAddSymbolChoicesNumber(string choice, bool declarative, int bitMask)
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesSymbol(choice, declarative).GetChoices(detailCi);
@@ -24,7 +24,7 @@ namespace FplLSTests
 
             foreach (KeyValuePair<char, System.Tuple<int, string, string>> item in FplGrammarCommons.mathSymbols)
             {
-                if ((item.Value.Item1 & bitmask) == bitmask)
+                if ((item.Value.Item1 & bitMask) == bitMask)
                 {
                     counter++;
                 }

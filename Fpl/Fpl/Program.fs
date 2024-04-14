@@ -2,66 +2,15 @@
 open ErrDiagnostics
 open FplParser
 open FplInterpreter
+open FplInterpreterTypes
 open FParsec
 open System.Text.RegularExpressions
+open System.Collections.Generic
 
 
 
 
-
-
-let input = """uses TestNamespace
-def class Set: obj
-{
-    intr
-}
-uses Fpl.SetTheory
-
-// "in relation" ("is element of") relation
-def pred In infix "in" (x,y: Set)
-{
-    intr
-}
-uses TestNamespace *
-def pred IsEmpty(x: Set)
-{
-    all y in Set
-    (
-        not In(y, x) 
-    )
-}
-uses TestNamespace1.TestNamespace2 *
-// existence of an empty set
-axiom EmptySetExists()
-{
-    ex x in Set
-    (
-        IsEmpty(x)
-    )
-}
-uses TestNamespace alias T1
-// introduction of a new mathematical object
-def class EmptySet: Set
-{
-    ctor EmptySet()
-    {
-        dec 
-            base.obj()
-            assert IsEmpty(self) 
-        ;
-        self
-    }
-}
-uses TestNamespace1.TestNamespace2 alias T2
-// relation between a subset and a superset
-def pred IsSubset(subset,superset: Set)
-{
-    all u in Set
-    (
-        impl (In(u, subset), In(u, superset))
-    )
-}
-;"""
+let input = """axiom TestId(x:obj[y:index,z:Nat]) {true};"""
 
 let result = fplParser input
 
@@ -69,11 +18,16 @@ printf "%O" result
 
 ad.PrintDiagnostics
 
-let interpret = FplInterpreter.fplInterpreter result (System.Uri("."))
-printf "%A" interpret
+let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+FplInterpreter.fplInterpreter input (System.Uri("file:///d%3A/Forschung/fpl.net/theories/Landau/Test.fpl")) fplLibUrl parsedAsts true
+printf "%A" parsedAsts
 
 printf "\n--------------------------------\n"
 ad.PrintDiagnostics
 
 printf "\n--------------------------------\n"
 
+
+let mutable test = []
+test <- test @ [""]

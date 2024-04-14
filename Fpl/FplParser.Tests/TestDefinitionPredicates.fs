@@ -16,7 +16,7 @@ type TestDefinitionPredicates () =
         let result = run (definitionPredicate .>> eof) """pred IsGreaterOrEqual(n,m: Nat)
         {
             dec ~a:obj ~  k: Nat;
-            ex k ( Equal(n,Add(m,k)) )
+            ex k { Equal(n,Add(m,k)) }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -28,9 +28,9 @@ type TestDefinitionPredicates () =
         {
             dec ~a:obj ~  upperBound, lowerBound: Real;
             ex upperBound, lowerBound
-            (
+            {
                 and (LowerEqual(x,upperBound), LowerEqual(lowerBound,x))
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -42,9 +42,9 @@ type TestDefinitionPredicates () =
         {
             dec ~a:obj ~  x: Real;
             all x
-            (
+            {
                 IsBounded(f(x))
-            )
+            }
         }
 """
         let actual = sprintf "%O" result
@@ -58,13 +58,13 @@ type TestDefinitionPredicates () =
             dec ~a:obj ~  p: pred ;
 
 			all p
-			(
+			{
 				iif
 				(
 					p(a),
 					p(b)
 				)
-			)
+			}
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -88,12 +88,9 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate06 () =
         let result = run (definitionPredicate .>> eof) """pred AreRelated(u,v: Set, r: BinaryRelation)
         {
-            dec ~a:obj ~  
-                one, two:Nat
-                one := Nat(1)
-                two := Nat(2)
-                ~tuple: Tuple[one,two]
-                tuple:=Tuple(u,v)
+            dec ~a:obj
+                ~tuple: Tuple[one:Nat,two:Nat]
+                tuple:=Tuple(Nat(1),Nat(2))
                 ;
             
             and
@@ -123,9 +120,9 @@ type TestDefinitionPredicates () =
         {
             dec ~a:obj ~  z: Set;
             all z
-            (
+            {
                 impl (Subset(z,ofSet), In(z, potentialPowerSet))
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -137,9 +134,9 @@ type TestDefinitionPredicates () =
         {
             dec ~a:obj ~  u: Set;
             all u
-            (
+            {
                 impl (In(u, x), In(u, superSet))
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual

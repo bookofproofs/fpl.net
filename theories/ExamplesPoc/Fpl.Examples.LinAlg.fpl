@@ -1,6 +1,6 @@
-uses Fpl.Examples.Commons 
-uses Fpl.Examples.Commons.Structures 
-uses Fpl.Examples.SetTheory.ZermeloFraenkel
+uses Fpl.Commons 
+uses Fpl.Commons.Structures 
+uses Fpl.SetTheory
 uses Fpl.Examples.Algebra.Structures 
 
 
@@ -30,10 +30,10 @@ def class FieldPowerN: Sets
 
     }
 
-    property func VecAdd(from,to: Nat, v,w: tplFieldElem[from , to])   -> tplFieldElem[from , to]
+    property func VecAdd(v,w: tplFieldElem[from , to:Nat])   -> tplFieldElem[from , to:Nat]
     {
         dec
-            ~result: tplFieldElem[from , to] 
+            ~result: tplFieldElem[from , to:Nat] 
             result := addInField(v[from , to],w[from , to])
         ;
         return result
@@ -45,14 +45,13 @@ def class FieldPowerN: Sets
 lemma VecAddIsCommutative()
 {
     dec
-        ~to: Nat
-        ~x,y: tplFieldElem[$1,to]
+        ~x,y: tplFieldElem[from,to:Nat]
         ~fieldPowerN: FieldPowerN
             (
             field: Field(f: tplFieldSet, opAdd, opMul: BinOp(a,b: tplFieldElem)),
             n:Nat
             )
-        ~vecAdd: VecAdd(v,w: tplFieldElem[from,to])
+        ~vecAdd: VecAdd(v,w: tplFieldElem[from,to:Nat])
     ;
     impl
     (
@@ -68,10 +67,10 @@ def class ZeroVectorN: Tuple
     {
         dec
             ~i: Nat 
-            for i in [[1,n]] 
-            (
+            for i in Range(1,n) 
+            {
                 self[i]:=field.AdditiveGroup().NeutralElement()
-            )
+            }
             base.Tuple()
         ;
         self

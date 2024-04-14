@@ -67,11 +67,6 @@ namespace FplLS
                 case "whitespace":
                 case "significant whitespace":
                     return new FplCompletionItemChoicesWhitespace().GetChoices(this);
-                case "(closed) left bound":
-                case "(open) left bound":
-                case "(open) right bound":
-                case "(closed) right bound":
-                    return new FplCompletionItemChoicesBound().GetChoices(this);
                 case "digits":
                 case "dollarDigits":
                     return new FplCompletionItemChoicesDigits().GetChoices(this);

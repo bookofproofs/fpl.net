@@ -62,52 +62,59 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType3a () =
-        let result = run (classType .>> eof) """object [SomeObject1, SomeObject2,SomeObject3]"""
+        let result = run (classType .>> eof) """object [x:SomeObject1, y:SomeObject2, a,b,c:SomeObject3]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType4 () =
-        let result = run (classType .>> eof) """tpl[[from,]]"""
+        let result = run (classType .>> eof) """tpl[a:Nat,b:func]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType4a () =
-        let result = run (classType .>> eof) """tpl[[, to]]"""
+        let result = run (classType .>> eof) """tpl[a:pred , b:index]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType4b () =
-        let result = run (classType .>> eof) """tpl[[,]]"""
+        let result = run (classType .>> eof) """tpl[a:tpl ,b:tplA]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType5 () =
-        let result = run (classType .>> eof) """Set[from , to]"""
+        let result = run (classType .>> eof) """Set[x:ind , a,b:Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType5a () =
-        let result = run (classType .>> eof) """Set[(from , to]]"""
+        let result = run (classType .>> eof) """Set[x:index , y:func]"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestClassType5a1 () =
+        let result = run (classType .>> eof) """Set[x:index , y:func()->obj]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType5b () =
-        let result = run (classType .>> eof) """Set[[from , to)]"""
+        let result = run (classType .>> eof) """Set[a:func()]"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
 
     [<TestMethod>]
@@ -133,7 +140,14 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType10 () =
-        let result = run (classType .>> eof) """object [$1,$2]"""
+        let result = run (classType .>> eof) """object [x:ind,y:index]"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestClassType10a () =
+        let result = run (classType .>> eof) """object [x:obj,y:Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

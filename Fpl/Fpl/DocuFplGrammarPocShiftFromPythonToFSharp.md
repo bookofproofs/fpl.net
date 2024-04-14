@@ -176,12 +176,12 @@ In the original version of FPL grammar, loops could be constructed using the `lo
 
 *Before*
 ``` 
-    range i [1~n]
+    range i x
     (
         // do something
     )
 
-    loop i [1~n]
+    loop i x
     (
         // do something
     )
@@ -189,17 +189,17 @@ In the original version of FPL grammar, loops could be constructed using the `lo
 ``` 
 *Now*
 ``` 
-    for i in [1~n]
+    for i in x
     (
         // do something
     )
 ``` 
 
-The for statement comes in three flavors:
-* iterating through all i in some type: `for i in SomeType (...)`, 
-* iterating through all i in some range: `for i in [1~n] (...)`,
-* iterating through all i in some variadic variable: `for i in y (...)`.
+The for statement comes in two flavors:
+* iterating through all i in some type: `for i is <variableType> (...)`, 
+* iterating through all i in some entity: `for i in <predicateWithQualification> (...)`,
 
+Please note that the keyword `is` indicates that we want to loop over all entities of with a specific variable type, while the keyword `in` indicates that we want to loop over all entities as elements of some other entity. 
 
 #### 8) New `exn` keyword  
 
@@ -271,13 +271,17 @@ In the original version of FPL grammar, free variables used in quantors had to b
 ``` 
 *Now*
 ``` 
-    all x in Nat ( p (x) ) 
+    all x is Nat ( p (x) ) 
 ``` 
 
-The syntax is similar to the `for` statement, i.e., it also allows variadic variables and ranges, but it is more flexible since it not only allows types but also can be enumerated, for instance, this the free variables `x` and `n` do not have to be declared. Their type will be inferred from how they are used in the `all` quantor:
+The syntax is similar to the `for` statement, i.e., it also allows the two flavors 
+* iterating through all i in some type: `for i is <variableType> (...)`, 
+* iterating through all i in some entity: `for i in <predicateWithQualification> (...)`,
+
+Still, the syntax is s more flexible since it not only allows types but also can be enumerated, for instance, this the free variables `x` and `n` do not have to be declared. Their type will be inferred from how they are used in the `all` quantor:
 
 ``` 
-    all x in Nat, n in [1~m] 
+    all x is Nat, n is func(obj)->obj
     ( 
         p (x,n) 
     ) 
@@ -289,7 +293,7 @@ Also, expressions in second-order logic predicates are allowed:
 ``` 
     axiom SchemaSeparation()
     {
-        all p in pred, x,y in Set
+        all p is pred, x,y is Set
         (
             ex y in Set
             (
@@ -299,28 +303,10 @@ Also, expressions in second-order logic predicates are allowed:
     }
 ``` 
 
-#### 11) Disambiguation of coordinate lists and ranges
+#### 11) Disambiguation of coordinate lists, ranges removed from FPL syntax
 
 In previous versions, the square brackets `[`, `]` were used for both, coordinate lists and ranges. 
-In the new version, coordinates have to be placed in square brackets `[` and `],` while ranges have left and right bounds 
-that can be either open like in `[(`, `)]` or closed like in `[[`, `]]`
-This disambiguates the grammar to improve the built-in error recovery mechanism.
-
-*Before*
-``` 
-    for i in [1~n]  // <- range
-    (
-        a[i,j]:= b // <- coordinates
-    )
-
-``` 
-*Now*
-``` 
-    for i in [[1~n]]  // <- range
-    (
-        a[i,j]:= b // <- coordinates
-    )
-``` 
+In the new version, ranges have been abandoned from the parser since dealing with them requires the concept of ordered entities that is in mathematics a semantic one. Implementing such structures in FPL, however, still remains possible using (possibly a combination of) definitions of predicates, classes, or functional terms.
 
 #### 12) Delegates 
 

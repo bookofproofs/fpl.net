@@ -9,12 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TestParserErrors.fs" />
     <Compile Include="TestUsesClause.fs" />
     <Compile Include="TestAxioms.fs" />
     <Compile Include="TestClassInheritanceTypes.fs" />
     <Compile Include="TestClassInstanceProperties.fs" />
     <Compile Include="TestConstructors.fs" />
-    <Compile Include="TestCoordInTypePossibilities.fs" />
     <Compile Include="TestCoordPossibilities.fs" />
     <Compile Include="TestDefinitionClasses.fs" />
     <Compile Include="TestDefinitionFunctionalTerms.fs" />
@@ -32,7 +32,7 @@
     <Compile Include="TestPredicates.fs" />
     <Compile Include="TestPredicatesSpecific.fs" />
     <Compile Include="TestProofs.fs" />
-    <Compile Include="TestRanges.fs" />
+    <Compile Include="TestInDomain.fs" />
     <Compile Include="TestSubscripts.fs" />
     <Compile Include="TestQualifierDollarDigits.fs" />
     <Compile Include="TestQualifierExtensionDigits.fs" />

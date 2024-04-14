@@ -258,7 +258,7 @@ type TestProofs () =
             1. GreaterAB() |- Greater(a,b)
             qed
         }"""
-        let actual = replaceWhiteSpace (sprintf "%O" result)
+        let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
@@ -269,7 +269,7 @@ type TestProofs () =
             1. |- assume pre
             2. |- trivial
         }"""
-        let actual = replaceWhiteSpace (sprintf "%O" result)
+        let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
@@ -281,7 +281,7 @@ type TestProofs () =
             2. |- trivial
             qed
         }"""
-        let actual = replaceWhiteSpace (sprintf "%O" result)
+        let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
@@ -292,7 +292,7 @@ type TestProofs () =
             1. SomeCorollary$1() |- (a > b)
             qed
         }"""
-        let actual = (sprintf "%O" result)
+        let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
         

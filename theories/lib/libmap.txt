@@ -1,2 +1,4 @@
 Fpl.Commons.fpl
+Fpl.Commons.Structures.fpl
 Fpl.SetTheory.fpl
+Fpl.PeanoArithmetics.fpl

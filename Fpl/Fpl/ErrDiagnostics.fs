@@ -38,10 +38,136 @@ If you decide to reuse this code for your language and other IDEs, please consid
 *)
 
 type DiagnosticCode = 
-    { DiagnosticCode: string }
-    with
-    member this.Code = let code = this.DiagnosticCode in code
-
+    // parser error codes
+    | SYN000
+    | SYN001
+    | DEF000
+    | PRP000
+    | AXI000
+    | THM000
+    | COR000
+    | LEM000
+    | PPS000
+    | CNJ000
+    | VAR000
+    | CTR000
+    | PRF000
+    | INF000
+    | LOC000
+    | USE000
+    | PRD000
+    | SMT000
+    | AGI000
+    | CAS000
+    | DCS000
+    | ASS000
+    | REV000
+    | RET000
+    | PRE000
+    | CON000
+    | TRL000
+    | TYD000
+    // interpreter error codes
+    | NSP00 of string
+    | NSP01 of string * string
+    | NSP02 of string * string
+    | NSP03 of string
+    | NSP04 of string 
+    | NSP05 of string * string list
+    // identifier-related error codes
+    | ID000 of string
+    | ID001 of string
+    // variable-related error codes
+    | VAR00 
+    | VAR01 of string
+    member this.Code = 
+        match this with
+            // parser error messages
+            | SYN000 -> "SYN000"
+            | SYN001 -> "SYN001"
+            | DEF000 -> "DEF000"
+            | PRP000 -> "PRP000"
+            | AXI000 -> "AXI000"
+            | THM000 -> "THM000"
+            | COR000 -> "COR000"
+            | LEM000 -> "LEM000"
+            | PPS000 -> "PPS000"
+            | CNJ000 -> "CNJ000"
+            | VAR000 -> "VAR000"
+            | CTR000 -> "CTR000"
+            | PRF000 -> "PRF000"
+            | INF000 -> "INF000"
+            | LOC000 -> "LOC000"
+            | USE000 -> "USE000"
+            | PRD000 -> "PRD000"
+            | SMT000 -> "SMT000"
+            | AGI000 -> "AGI000"
+            | CAS000 -> "CAS000"
+            | DCS000 -> "DCS000"
+            | ASS000 -> "ASS000"
+            | REV000 -> "REV000"
+            | RET000 -> "RET000"
+            | PRE000 -> "PRE000"
+            | CON000 -> "CON000"
+            | TRL000 -> "TRL000"
+            | TYD000 -> "TYD000"
+            // interpreter error messages
+            | NSP00 _ -> "NSP000"
+            | NSP01 _ -> "NSP001"
+            | NSP02 (_, _) -> "NSP002"
+            | NSP03 _ -> "NSP003"
+            | NSP04 _ -> "NSP004"
+            | NSP05 _ -> "NSP005"
+            // identifier-related error codes 
+            | ID000 _ -> "ID000"
+            | ID001 _ -> "ID001"
+            // variable-related error codes
+            | VAR00 -> "VAR00"
+            | VAR01 _ -> "VAR01"
+    member this.Message = 
+        match this with
+            // parser error messages
+            | SYN000 -> "Other syntax error" 
+            | SYN001 -> "Characters found after namespace"
+            | DEF000 -> "Syntax error in definition"
+            | PRP000 -> "Syntax error in property"
+            | AXI000 -> "Syntax error in axiom"
+            | THM000 -> "Syntax error in theorem"
+            | COR000 -> "Syntax error in corollary"
+            | LEM000 -> "Syntax error in lemma"
+            | PPS000 -> "Syntax error in proposition"
+            | CNJ000 -> "Syntax error in conjecture"
+            | VAR000 -> "Syntax error in variable declaration and/or specification"
+            | CTR000 -> "Syntax error in constructor"
+            | PRF000 -> "Syntax error in proof"
+            | INF000 -> "Syntax error in rule of inference"
+            | LOC000 -> "Syntax error in rule of localization"
+            | USE000 -> "Syntax error in uses clause"
+            | PRD000 -> "Syntax error in predicate"
+            | SMT000 -> "Syntax error in statement"
+            | AGI000 -> "Syntax error in proof argument"
+            | CAS000 -> "Syntax error in case block"
+            | DCS000 -> "Syntax error in default case block"
+            | ASS000 -> "Syntax error in assumption"
+            | REV000 -> "Syntax error in revocation"
+            | RET000 -> "Syntax error in return statement"
+            | PRE000 -> "Syntax error in premise"
+            | CON000 -> "Syntax error in conclusion"
+            | TRL000 -> "Syntax error in translation"
+            | TYD000 -> "Syntax error in type declaration"
+            // interpreter error messages
+            | NSP00 fileNamePattern -> sprintf "%s not found" fileNamePattern
+            | NSP01 (fileName, innerErrMsg) -> sprintf "%s found but could not be loaded: %s" fileName innerErrMsg
+            | NSP02 (url, innerErrMsg) -> sprintf "%s found but could not be downloaded: %s" url innerErrMsg
+            | NSP03 alias -> sprintf "Alias %s appeared previously in this namespace" alias
+            | NSP04 path -> sprintf "Circular theory reference detected: %s" path
+            | NSP05 (theory, sources) -> sprintf "Multiple sources %A for theory %s detected." sources theory
+            // identifier-related error codes 
+            | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
+            | ID001 identifier -> sprintf "Duplicate identifier %s detected." identifier
+            // variable-related error codes
+            | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
+            | VAR01 identifier -> sprintf "Duplicate variable %s declaration detected." identifier
 type DiagnosticEmitter =
     // replace your language-specific emitters here
     | FplParser
@@ -53,34 +179,38 @@ type DiagnosticSeverity =
     | Hint
     | Information
 
-type DiagnosticMessage =
-    | DiagnosticMessage of string
-
-    member this.Value =
-        match this with
-        | DiagnosticMessage(value) -> value
-
-
-/// improves the error message for a special case in FPL, return this.StdMsg in your case
-let private codeMessage code (origMsg:string) (stdMsg:string) = 
-    let tranlatedCode = 
-        match code with 
-        | "DEF000" -> 
-            if origMsg.StartsWith("':'") then 
-                (stdMsg + ": " + origMsg).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
-            else
-                stdMsg 
-        | _ -> stdMsg
-    tranlatedCode + ": " + origMsg 
-
 type Diagnostic =
-    { Diagnostic: DiagnosticEmitter * DiagnosticSeverity * Position * DiagnosticMessage * DiagnosticCode }
-    with
-    member this.Emitter = let (emitter, _, _, _, _) = this.Diagnostic in emitter
-    member this.Severity = let (_, severity, _, _, _) = this.Diagnostic in severity
-    member this.Position = let (_, _, position, _, _) = this.Diagnostic in position
-    member this.Message = let (_, _, _, message, _) = this.Diagnostic in message.Value
-    member this.Code = let (_, _, _, _, code) = this.Diagnostic in code.Code
+    {
+        Emitter: DiagnosticEmitter
+        Severity: DiagnosticSeverity
+        StartPos: Position
+        EndPos: Position
+        Code: DiagnosticCode
+        Alternatives: string option
+    }
+    member this.Message = 
+        let alternatives = 
+            match this.Alternatives with
+            | Some s ->
+                s
+            | None -> 
+                ""
+        let tranlatedMsg = 
+            // improves the error message for a special case in FPL, return this.StdMsg in your case
+            match this.Code with 
+            | DEF000 -> 
+                if alternatives.StartsWith("':'") then 
+                    (this.Code.Message + ": " + alternatives).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
+                else
+                    this.Code.Message 
+            | _ -> this.Code.Message
+        if alternatives = "" then   
+            tranlatedMsg
+        else
+            tranlatedMsg + ": " + alternatives 
+
+    member this.DiagnosticID = 
+        (sprintf "%07d" this.StartPos.Index) + this.Emitter.ToString() + this.Code.Code
 
 type Diagnostics() =
     let myDictionary = new Dictionary<string, Diagnostic>()
@@ -92,7 +222,7 @@ type Diagnostics() =
         |> Seq.toList
 
     member this.AddDiagnostic (d:Diagnostic) =
-        let keyOfd = (sprintf "%07d" d.Position.Index) + d.Emitter.ToString()
+        let keyOfd = d.DiagnosticID
         if not (myDictionary.ContainsKey(keyOfd)) then
             myDictionary.Add(keyOfd, d) |> ignore
 
@@ -109,8 +239,8 @@ type Diagnostics() =
         this.Collection 
         |> Seq.map (fun d -> 
             d.Emitter.ToString() + ":" +
-            d.Code + ":" +
-            d.Message) 
+            d.Code.Code + ":" +
+            d.Code.Message) 
         |> String.concat "\n"
     member this.Clear() = myDictionary.Clear()
 
@@ -272,7 +402,7 @@ let inputStringManipulator (input:string) errorIndex =
         replaceFirstNonWhitespace (input)
 
 /// If the source code is not syntax-error-free, this function will find the first error and emit it.
-let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:string) =
+let tryParseFirstError someParser (ad: Diagnostics) input (code:DiagnosticCode) =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -280,10 +410,15 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
         result, (int userState.Index)
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, _ = mapErrMsgToRecText input errorMsg restInput.Position
-        let diagnosticCode = { DiagnosticCode = code }
-        let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
         let diagnostic =
-            { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode) }
+            { 
+                Diagnostic.Emitter = DiagnosticEmitter.FplParser 
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = restInput.Position
+                Diagnostic.EndPos = restInput.Position
+                Diagnostic.Code = code
+                Diagnostic.Alternatives = Some newErrMsg
+            }
         ad.AddDiagnostic diagnostic
 
         Ast.Error, int restInput.Position.Index
@@ -292,7 +427,7 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:string) (stdMsg:
 /// position with spaces as long as the parser reaches a position where another parser should be 
 /// applied according to the applied synchronizing tokens. The recursive call stop also in rare cases, 
 /// in which this strategy would fail because the error occurs at the same position in consecutive recursive calls of the function.
-let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex code stdMsg lastCorrectedIndex lastChoices =
+let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex (code:DiagnosticCode) lastCorrectedIndex lastChoices =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -320,17 +455,22 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
                     restInput.Position.Line,
                     restInput.Position.Column 
                 )
-            let diagnosticCode = { DiagnosticCode = code }
-            let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
             let diagnostic =
-                { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode) }
+                { 
+                    Diagnostic.Emitter = DiagnosticEmitter.FplParser 
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = correctedPosition
+                    Diagnostic.EndPos = correctedPosition
+                    Diagnostic.Code = code                    
+                    Diagnostic.Alternatives = Some newErrMsg
+                }
             ad.AddDiagnostic diagnostic
             
             // replace the input by manipulating the input string depending on the error position
             let newInput = inputStringManipulator input (int restInput.Position.Index)
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
             // and cond1 are still met.
-            tryParse someParser ad newInput startIndexOfInput nextIndex code stdMsg correctedIndex previousChoices
+            tryParse someParser ad newInput startIndexOfInput nextIndex code correctedIndex previousChoices
         else
             // We return -1 if in the first recursive call the error position did not met the conditions cond0 and cond1
             // Otherwise, we return an error position of the previous error in the recursive call that still 
@@ -340,7 +480,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
 
 /// This function emits diagnostics for chunks of input between the end of parsing result of someParser and the starting index
 /// where another parser should be applied according to the applied synchronizing tokens.
-let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput nextIndex code stdMsg lastCorrectedIndex lastChoices =
+let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput nextIndex (code:DiagnosticCode) lastCorrectedIndex lastChoices =
     
     if input.Trim() <> "" then
          match run someParser input with
@@ -352,7 +492,7 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                     () // end the recursion, since we have probably an infinite loop
                 else
                     if userState.Index < input.Length then
-                        tryParseRemainingChunk someParser ad newInput startIndexOfInput nextIndex code stdMsg correctedIndex ""
+                        tryParseRemainingChunk someParser ad newInput startIndexOfInput nextIndex code correctedIndex ""
             | Failure(errorMsg, restInput, userState) ->
                 let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
                 let previousChoices = String.concat ", " choices
@@ -367,11 +507,15 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                             restInput.Position.Line,
                             restInput.Position.Column 
                         )
-                    let diagnosticCode = { DiagnosticCode = code }
-                    let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
                     let diagnostic =
-                        { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, correctedPosition, diagnosticMsg, diagnosticCode) }
-
+                        { 
+                            Diagnostic.Emitter = DiagnosticEmitter.FplParser 
+                            Diagnostic.Severity = DiagnosticSeverity.Error
+                            Diagnostic.StartPos = correctedPosition
+                            Diagnostic.EndPos = correctedPosition
+                            Diagnostic.Code = code 
+                            Diagnostic.Alternatives = Some newErrMsg
+                        }
                     ad.AddDiagnostic diagnostic
             
                     // replace the input by manipulating the input string depending on the error position
@@ -379,7 +523,7 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                     // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
                     // and cond1 are still met.
                     if restInput.Position.Index < input.Length && lastCorrectedIndex <> correctedIndex then
-                        tryParseRemainingChunk someParser ad newInput startIndexOfInput nextIndex code stdMsg correctedIndex previousChoices
+                        tryParseRemainingChunk someParser ad newInput startIndexOfInput nextIndex code correctedIndex previousChoices
         
 
 let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) num = 
@@ -391,7 +535,7 @@ let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) nu
 
 
 /// Emits diagnostics for the error positions (if any) that are not overlapped by the intervals
-let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (stdMsg:string) (intervals:System.Collections.Generic.List<Interval>) lastCorrectedIndex lastChoices =
+let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:DiagnosticCode) (intervals:System.Collections.Generic.List<Interval>) lastCorrectedIndex lastChoices =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -401,7 +545,7 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
             let newInput = inputStringManipulator input (int userState.Index)
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions 
             // are still met.
-            tryParseRemainingOnly someParser ad newInput code stdMsg intervals userState.Index ""
+            tryParseRemainingOnly someParser ad newInput code intervals userState.Index ""
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         let previousChoices = (String.concat ", " choices)
@@ -413,17 +557,22 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:string) (
         let cond = previousChoices<>lastChoices || stringBetweenRecursiveCalls.Contains(Environment.NewLine)
         if isNotInAnyInterval intervals (int restInput.Position.Index) then
             if cond then
-                let diagnosticCode = { DiagnosticCode = code }
-                let diagnosticMsg = DiagnosticMessage( codeMessage code newErrMsg stdMsg )
                 let diagnostic =
-                    { Diagnostic = (DiagnosticEmitter.FplParser, DiagnosticSeverity.Error, restInput.Position, diagnosticMsg, diagnosticCode) }
+                    { 
+                        Diagnostic.Emitter = DiagnosticEmitter.FplParser 
+                        Diagnostic.Severity = DiagnosticSeverity.Error
+                        Diagnostic.StartPos = restInput.Position
+                        Diagnostic.EndPos = restInput.Position
+                        Diagnostic.Code = code 
+                        Diagnostic.Alternatives = Some newErrMsg
+                    }
                 ad.AddDiagnostic diagnostic
             
         if restInput.Position.Index < input.Length && restInput.Position.Index <> lastCorrectedIndex && cond then
             // replace the input by manipulating the input string depending on the error position
             let newInput = inputStringManipulator input (int restInput.Position.Index)
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions are still met.
-            tryParseRemainingOnly someParser ad newInput code stdMsg intervals restInput.Position.Index previousChoices
+            tryParseRemainingOnly someParser ad newInput code intervals restInput.Position.Index previousChoices
 
 /// Generate an ast on a best-effort basis, no matter if there are syntax errors, without emitting any diagnostics
 let rec tryGetAst someParser input lastCorrectedIndex =

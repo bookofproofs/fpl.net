@@ -30,16 +30,16 @@ type TestAxioms () =
                 ~ n, successor: Nat
             ;
             all n
-            (
+            {
                 exn$1 successor
-                (
+                {
                     and
                     (
                         NotEqual(successor,n),
                         Equal(successor,Succ(n))
                     )
-                )
-            )
+                }
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -51,9 +51,9 @@ type TestAxioms () =
         {
             dec ~n: Nat;
             all n
-            (
+            {
                 NotEqual(Zero(), Succ(n))
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -67,13 +67,13 @@ type TestAxioms () =
         {
             dec ~n,m: Nat;
             all n,m
-            (
+            {
                 impl
                 (
                     Equal(Succ(n),Succ(m)),
                     Equal(n,m)
                 )
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -89,13 +89,13 @@ type TestAxioms () =
                 ~p: pred
             ;
             all p
-            (
+            {
                 impl
                 (
-                    and ( p(0), all n ( impl ( p(n), p(Succ(n)) ) ) ),
-                    all n p(n)
+                    and ( p(0), all n { impl ( p(n), p(Succ(n)) ) } ),
+                    all n { p(n) }
                 )
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -108,9 +108,9 @@ type TestAxioms () =
         {
             dec ~x: Set;
             ex x
-            (
+            {
                 IsEmpty(x)
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -123,7 +123,7 @@ type TestAxioms () =
         {
             dec ~x,y: Set ;
             all x,y
-            (
+            {
                 impl
                 (
                     and
@@ -133,7 +133,17 @@ type TestAxioms () =
                     ),
                     Equal(x,y)
                 )
-            )
+            }
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestAxiom08 () =
+        let result = run (axiom .>> eof) """axiom TestAxiom()
+        {
+            true
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual

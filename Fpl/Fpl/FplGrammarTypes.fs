@@ -11,10 +11,6 @@ type Ast =
     // Literals
     | Star 
     | Dot
-    | LeftClosed
-    | LeftOpen 
-    | RightClosed
-    | RightOpen 
     // Identifiers
     | Digits of string
     | ExtDigits of Positions * Ast
@@ -36,26 +32,24 @@ type Ast =
     | ExtensionType of Positions * Ast 
     | ExtensionBlock of Positions * (Ast * Ast)
     | UsesClause of Positions * Ast
-    | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | BrackedCoordList of Positions * Ast list
-    | RangeInType of Positions * (Ast option * Ast option) 
     | ReferencingIdentifier of Positions * (Ast * Ast list)
     // Types
     | One 
-    | Many 
-    | Many1 
+    | Many of Positions * unit
+    | Many1 of Positions * unit  
     | TemplateType of Positions * string
     | ObjectType 
     | ClassIdentifier of Positions * Ast
     | PredicateType 
     | FunctionalTermType 
     | IndexType
-    | VariableType of Positions * (Ast * Ast option)
-    | SimpleVariableType of Positions * Ast 
+    | VariableType of Positions * Ast 
     | BracketedCoordsInType of Positions * Ast list 
-    | BoundedRangeInType of Positions * ((Ast * Ast) * Ast)
+    | InheritedClassType of Positions * Ast
     | ClassType of Positions * (Ast * Ast option)
-    | ClassTypeWithModifier of Positions * (Ast * Ast)
+    | CompoundPredicateType of Positions * (Ast * Ast option)
+    | CompoundFunctionalTermType of Positions * (Ast * (Ast * Ast) option)
     // Variables
     | Var of Positions * string
 
@@ -69,7 +63,8 @@ type Ast =
     | Impl of Positions * (Ast * Ast)
     | Iif of Positions * (Ast * Ast)
     | Not of Positions * Ast
-    | Domain of Positions * Ast
+    | InEntity of Positions * Ast
+    | IsType of Positions * Ast
     | All of Positions * ((Ast list * Ast option) list * Ast)
     | Exists of Positions * ((Ast list * Ast option) list * Ast)
     | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
@@ -112,7 +107,8 @@ type Ast =
     | Theorem of Positions * (Ast *(Ast list option * Ast))
     | Lemma of Positions * (Ast *(Ast list option * Ast))
     | Proposition of Positions * (Ast *(Ast list option * Ast))
-    | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
+    | Corollary of Positions * (Ast * (Ast list option * Ast))
+    | CorollarySignature of (Ast * Ast)
     | Conjecture of Positions * (Ast *(Ast list option * Ast))
     | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
     | ParamTuple of Positions * Ast list
@@ -125,12 +121,13 @@ type Ast =
     | Optional 
     | PredicateInstance of Positions * (Ast * Ast) 
     | ClassInstance of Positions * ((Ast * Ast) * Ast)
-    | FunctionalTermInstance of Positions * ((Ast * Ast) * Ast)
+    | FunctionalTermInstance of Positions * (Ast * Ast)
     | PropertyBlock of Positions * ((Ast * Ast option) * Ast)
     | DefPredicateContent of Ast list option * Ast
     | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | DefFunctionContent of Ast list option * Ast
-    | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
+    | FunctionalTermSignature of Ast * Ast
+    | DefinitionFunctionalTerm of Positions * (Ast * (Ast * Ast list option))
     | DefClassContent of Ast list option * Ast
     | DefClassCompleteContent of Ast list option * Ast list
     | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option)) 

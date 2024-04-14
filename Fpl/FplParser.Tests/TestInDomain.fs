@@ -6,118 +6,102 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
 [<TestClass>]
-type TestQualifiersVars () =
-    (* Tests the specification in DocuFplGrammarPocShiftFromPythonToFSharp.md #### 23 *)
+type TestInDomain () =
 
     [<TestMethod>]
-    member this.TestDottedBoth () =
-        let result = run (predicate .>> eof) """x.y"""
+    member this.TestInDomain01 () =
+        let result = run (inDomain .>> eof) """is obj"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestDottedBothA () =
-        let result = run (predicate .>> eof) """x'.y"""
+    member this.TestInDomain02 () =
+        let result = run (inDomain .>> eof) """is obj[x:TestClass]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestDottedBothB () =
-        let result = run (predicate .>> eof) """x. y"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
-
-    [<TestMethod>]
-    member this.TestDottedBothC () =
-        let result = run (predicate .>> eof) """x'.y"""
+    member this.TestInDomain03 () =
+        let result = run (inDomain .>> eof) """is func"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestArgumentsBoth () =
-        let result = run (predicate .>> eof) """x(y)"""
+    member this.TestInDomain04 () =
+        let result = run (inDomain .>> eof) """is ind"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestArgumentsBothA () =
-        let result = run (predicate .>> eof) """x'(y)"""
+    member this.TestInDomain05 () =
+        let result = run (inDomain .>> eof) """is pred"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestArgumentsBothB () =
-        let result = run (predicate .>> eof) """x( y )"""
+    member this.TestInDomain06 () =
+        let result = run (inDomain .>> eof) """in TestClass"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestArgumentsBothC () =
-        let result = run (predicate .>> eof) """x'( y )"""
+    member this.TestInDomain07 () =
+        let result = run (inDomain .>> eof) """is template"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordinatesBoth () =
-        let result = run (predicate .>> eof) """x[y]"""
+    member this.TestInDomain08 () =
+        let result = run (inDomain .>> eof) """is @Nat"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordinatesBothA () =
-        let result = run (predicate .>> eof) """x'[y]"""
+    member this.TestInDomain09 () =
+        let result = run (inDomain .>> eof) """is func()->obj"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordinatesBothB () =
-        let result = run (predicate .>> eof) """x[ y ]"""
+    member this.TestInDomain10 () =
+        let result = run (inDomain .>> eof) """in someVar"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordinatesBothC () =
-        let result = run (predicate .>> eof) """x'[ y ]"""
+    member this.TestInDomain11 () =
+        let result = run (inDomain .>> eof) """in self"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordsBoth () =
-        let result = run (predicate .>> eof) """z[x[y]]"""
+    member this.TestInDomain12 () =
+        let result = run (inDomain .>> eof) """in ClosedRange(from,to)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordsBothA () =
-        let result = run (predicate .>> eof) """z[x, y[i]]"""
+    member this.TestInDomain13 () =
+        let result = run (inDomain .>> eof) """in T[x]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestCoordsBothB () =
-        let result = run (predicate .>> eof) """x[y]"""
+    member this.TestInDomain14 () =
+        let result = run (inDomain .>> eof) """is T[x:func]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestCoordsBothC () =
-        let result = run (predicate .>> eof) """x [y]"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
-

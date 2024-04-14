@@ -4,13 +4,13 @@ uses Landau *
 // If x = y + u then x > y ( > to b read "is greater than")
 definition predicate Greater infix ">" (x,y: Nat)
 {
-    (ex u in N (x = y + u) => x > y)
+    (ex u in N {(x = y + u)} => x > y)
 }
 
 // If y = x + v then x < y ( < to b read "is smaller than")
 definition predicate Smaller infix "<" (x,y: Nat)
 {
-    (ex v in N (x + v = y) => x < y)
+    (ex v in N {(x + v = y)} => x < y)
 }
 
 // For any given x,y, we have exactly one of the cases x = y, x > y, x < y
@@ -143,7 +143,7 @@ proof Theorem_015$1
     // Strategy: Assume that the premise is true, then prove that the conclusion also must be true.
     
     100. |- assume (x < y and y < z)
-    200. Smaller |- ex u,w in N (x + u = y and y + w = z) 
+    200. Smaller |- ex u,w in N {(x + u = y and y + w = z)} 
     300. |- (z = (x + u) + w = x + (u + w))
     400. |- (x < z)
     
@@ -165,7 +165,7 @@ proof Theorem_015a$1
     // Strategy: Assume that the premise is true, then prove that the conclusion also must be true.
     
     100. |- assume (x > y and y > z)
-    200. Smaller |- ex u,w in N (x = y + u and y = z + w) 
+    200. Smaller |- ex u,w in N {(x = y + u and y = z + w)} 
     300. |- (x = (z + w) + u = z + (w + u))
     400. |- (x > z)
     
@@ -280,7 +280,7 @@ proof Theorem_019a$1
     // Strategy: Assume that the premise is true, then prove that the conclusion also must be true.
     
     100. |- assume (x > y) // if x > y
-    200. bydef Greater |- ex u in N (x = y + u) // then x = y + u 
+    200. bydef Greater |- ex u in N {(x = y + u)} // then x = y + u 
     300. |- (x + z = (y + u) + z = (u + y) + z = u + (y + z) = (y + z) + u) //x + z = (y + u) + z = (u + y) + z = u + (y + z) = (y + z) + u 
     400. |- (x + z > y + z) // x + z > y + z
     qed
@@ -316,9 +316,9 @@ theorem Theorem_020()
     declaration ~x,y,z: Nat;
     and
     (
-        all x,y,z in Nat (x + z > y + z => x > y)
-        ,all x,y,z in Nat (x + z = y + z => x = y)
-        ,all x,y,z in Nat (x + z < y + z => x < y)
+        all x,y,z is Nat {(x + z > y + z => x > y)}
+        ,all x,y,z is Nat {(x + z = y + z => x = y)}
+        ,all x,y,z is Nat {(x + z < y + z => x < y)}
     )
 }
 

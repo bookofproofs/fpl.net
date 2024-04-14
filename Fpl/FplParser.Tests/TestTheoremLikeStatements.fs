@@ -20,16 +20,16 @@ type TestTheoremLikeStatements () =
                 ~ n, successor: Nat
             ;
             all n
-            (
+            {
                 exn$1 successor
-                (
+                {
                     and
                     (
                         NotEqual(successor,n),
                         Equal(successor,Succ(n))
                     )
-                )
-            )
+                }
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -44,13 +44,13 @@ type TestTheoremLikeStatements () =
                 ~p: pred
             ;
             all p
-            (
+            {
                 impl
                 (
-                    and ( p(0), all n ( impl ( p(n), p(Succ(n)) ) ) ),
-                    all n p(n)
+                    and ( p(0), all n { impl ( p(n), p(Succ(n)) ) } ),
+                    all n { p(n) }
                 )
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -73,9 +73,9 @@ type TestTheoremLikeStatements () =
         {
             dec ~x: Set;
             ex x
-            (
+            {
                 IsEmpty(x)
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -88,9 +88,9 @@ type TestTheoremLikeStatements () =
         {
             dec ~n: Nat;
             all n
-            (
+            {
                 NotEqual(Zero(), Succ(n))
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -102,13 +102,13 @@ type TestTheoremLikeStatements () =
         {
             dec ~n,m: Nat;
             all n,m
-            (
+            {
                 impl
                 (
                     Equal(Succ(n),Succ(m)),
                     Equal(n,m)
                 )
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -120,7 +120,7 @@ type TestTheoremLikeStatements () =
         {
             dec ~x,y: Set ;
             all x,y
-            (
+            {
                 impl
                 (
                     and
@@ -130,7 +130,7 @@ type TestTheoremLikeStatements () =
                     ),
                     Equal(x,y)
                 )
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -142,13 +142,13 @@ type TestTheoremLikeStatements () =
         {
             dec ~n,m: Nat;
             all n,m
-            (
+            {
                 impl
                 (
                     Equal(Succ(n),Succ(m)),
                     Equal(n,m)
                 )
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -160,7 +160,7 @@ type TestTheoremLikeStatements () =
         {
             dec ~x,y: Set ;
             all x,y
-            (
+            {
                 impl
                 (
                     and
@@ -170,7 +170,7 @@ type TestTheoremLikeStatements () =
                     ),
                     Equal(x,y)
                 )
-            )
+            }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual

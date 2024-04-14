@@ -115,29 +115,29 @@ type TestQualifiersPredicateIdentifier () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBoth () =
-        let result = run (predicate .>> eof) """PascalId[[PascalId,]]"""
+    member this.TestCoordsBoth () =
+        let result = run (predicate .>> eof) """PascalId[PascalId,Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBothA () =
-        let result = run (predicate .>> eof) """PascalId'[[PascalId,]]"""
+    member this.TestCoordsBothA () =
+        let result = run (predicate .>> eof) """PascalId'[PascalId,Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBothB () =
-        let result = run (predicate .>> eof) """PascalId[[ PascalId ,]]"""
+    member this.TestCoordsBothB () =
+        let result = run (predicate .>> eof) """PascalId[PascalId,Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestRangesBothC () =
-        let result = run (predicate .>> eof) """PascalId'[[ PascalId ,]]"""
+    member this.TestCoordsBothC () =
+        let result = run (predicate .>> eof) """PascalId'[PascalId,Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -1,14 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="CommonTestHelpers.fs" />
+    <Compile Include="TestFplValue.fs" />
+    <Compile Include="TestIntepreterErrors.fs" />
     <Compile Include="TestEvalAliasedNamespaceIdentifier.fs" />
   </ItemGroup>
 
