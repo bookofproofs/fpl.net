@@ -29,5 +29,5 @@ let prepareFplCode(fplCode:string, delete:bool) =
         None
     else
         let parsedAsts = System.Collections.Generic.List<ParsedAst>()
-        Some (FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts)
+        Some (FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts true)
 

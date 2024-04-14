@@ -209,6 +209,8 @@ type Diagnostic =
         else
             tranlatedMsg + ": " + alternatives 
 
+    member this.DiagnosticID = 
+        (sprintf "%07d" this.StartPos.Index) + this.Emitter.ToString() + this.Code.Code
 
 type Diagnostics() =
     let myDictionary = new Dictionary<string, Diagnostic>()
@@ -220,7 +222,7 @@ type Diagnostics() =
         |> Seq.toList
 
     member this.AddDiagnostic (d:Diagnostic) =
-        let keyOfd = (sprintf "%07d" d.StartPos.Index) + d.Emitter.ToString()
+        let keyOfd = d.DiagnosticID
         if not (myDictionary.ContainsKey(keyOfd)) then
             myDictionary.Add(keyOfd, d) |> ignore
 

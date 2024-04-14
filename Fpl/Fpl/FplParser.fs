@@ -492,7 +492,7 @@ let derivedArgument = choice [
     derivedPredicate
 ]
 
-let argumentInference = vDash >>. IW >>. (assumeArgument<|> revokeArgument <|> derivedArgument)
+let argumentInference = vDash >>. IW >>. (assumeArgument <|> revokeArgument <|> derivedArgument)
 let justification = positions (predicateList .>> IW) |>> Ast.Justification
 let argument = positions (justification .>>. argumentInference) |>> Ast.JustifiedArgument
 let proofArgument = positions ((argumentIdentifier .>> IW) .>>. argument) .>> IW |>> Ast.Argument
@@ -578,7 +578,7 @@ let stdParser1 = ast
 
 let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i = 
     let index = matchList[i]
-    if i + 1 < matchList.Count - 1 then
+    if i + 1 < matchList.Count then
         let nextIndex = matchList[i+1]
         index, nextIndex
     else
@@ -618,27 +618,31 @@ let errInformation = [
 /// If no prefix matches than the SYN000 tuple will be returned.
 let findErrInfoTuple (str:string) =
     match List.tryFind (fun (_, prefixes, _) -> List.exists (fun prefix -> str.StartsWith(prefix : string)) prefixes) errInformation with
-    | Some tuple -> tuple
-    | None -> (stdCode, [], stdParser)
+    | Some tuple -> 
+        tuple
+    | None -> 
+        (stdCode, [], stdParser)
 
 
 let findFirstIndexInMatches (matchList:System.Collections.Generic.List<int>) pIndex kMax =
-    let rec loop i =
+    let rec loop i last =
         if i >= matchList.Count then 
             kMax
         else 
             let index = matchList[i]
             if index > pIndex then 
-                i
+                last
             else 
-                loop (i + 1)
-    loop 0
+                loop (i + 1) i
+    loop 0 0
 
 let maxIntervalBound (intervals:System.Collections.Generic.List<Interval>) =
     let mutable maxBound = -1
     for interval in intervals do
         if interval.End > maxBound then
             maxBound <- interval.End
+        if interval.End = -1 && interval.Start > maxBound then
+            maxBound <- interval.Start
     maxBound
 
 let fplParser (input:string) = 
@@ -679,6 +683,7 @@ let fplParser (input:string) =
                 lastCode <- code
                 lastMsg <- code.Message
                 lastSuccess <- pSuccess
+
     // emit diagnostics for any error positions that are not overlayed by the intervals
     tryParseRemainingOnly stdParser ad preProcessedInput stdCode intervals -1 ""
     // Return an ast on a best effort basis even if there were some errors 

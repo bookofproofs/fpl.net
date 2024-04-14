@@ -39,8 +39,9 @@ type TestParserErrors() =
     member this.TestDEF000() =
         let code = DEF000
         printf "Trying %s" code.Message
-        let input = """
-        ;
+        let input = """def cl A
+    y
+;
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
@@ -172,9 +173,7 @@ type TestParserErrors() =
     member this.TestINF000() =
         let code = INF000
         printf "Trying %s" code.Message
-        let input = """
-        ;
-        """
+        let input = """inf D(x) {pre:true con:true};"""
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
@@ -225,11 +224,10 @@ type TestParserErrors() =
 
     [<TestMethod>]
     member this.TestAGI000() =
+        ad.Clear()
         let code = AGI000
         printf "Trying %s" code.Message
-        let input = """
-        ;
-        """
+        let input = """def pred T() { 1. |- :: };"""
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
@@ -238,9 +236,19 @@ type TestParserErrors() =
     member this.TestCAS000() =
         let code = CAS000
         printf "Trying %s" code.Message
-        let input = """
-        ;
-        """
+        let input = """def pred T() 
+            { 
+                dec
+                    cases
+                    (
+                        | dddd
+                            self := Ze
+                        ? self := Succ(del.decrement(x))
+                    )
+                ;
+                true
+             };
+            """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
@@ -258,11 +266,10 @@ type TestParserErrors() =
 
     [<TestMethod>]
     member this.TestASS000() =
+        ad.Clear()
         let code = ASS000
         printf "Trying %s" code.Message
-        let input = """
-        ;
-        """
+        let input = """proof T$1 { 1. |- assume :: };"""
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
