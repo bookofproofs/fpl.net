@@ -159,6 +159,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     let mutable _representation = ""
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
+    let _auxiliaryUniqueChilds = HashSet<string>()
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
 
     /// Identifier of this FplValue that is unique in its scope
@@ -201,6 +202,9 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         with get () = _auxiliaryInfo
         and set (value) = _auxiliaryInfo <- value
 
+    /// Am aixiliary storage that is used e.g. for remembering the names of already processed variables when traversing the Ast recursively.
+    member this.AuxiliaryUniqueChilds = _auxiliaryUniqueChilds
+
     /// Starting position of this FplValue
     member this.StartPos = fst positions
     /// Ending position of this FplValue
@@ -211,6 +215,8 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     member this.AssertedPredicates = System.Collections.Generic.List<Ast>()
     /// A scope inside this FplValue
     member this.Scope = _scope
+
+
 
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =

@@ -8,7 +8,9 @@ open FplGrammarTypes
 open FplInterpreterTypes
 
 let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str = 
-    if str <> "" then
+    if str <> "" && not fplValue.IsVariable then
+        // note: the Name attribute of variables are set in Ast.Var directly
+        // and we do not want to append the type to the names of variables.
         if str = "(" || str = ")" 
             || str = "[" || str = "]" 
             || str = "->"
@@ -23,7 +25,9 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
                 fplValue.Name <- fplValue.Name + str
         else
             fplValue.Name <- fplValue.Name + ", " + str
-
+    
+    if str <> "" then
+        // note: the manipulation of the TypeSignature is necessary for all kinds of fplValue
         fplValue.TypeSignature <- fplValue.TypeSignature @ [str]
         match st.CurrentContext with
         | EvalContext.InSignature _ -> 
@@ -95,7 +99,6 @@ let tryAddVariadicVariables numberOfVariadicVars (startPos:Position) (endPos:Pos
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval (st: SymbolTable) ast =
-
     let evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst =
         match optVarDeclOrSpecList with
         | Some astList -> astList |> List.map (eval st) |> ignore
@@ -403,12 +406,17 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.BracketedCoordsInType((pos1, pos2), asts) ->
         st.EvalPush("BracketedCoordsInType")
+        
         match st.CurrentContext with
         | EvalContext.InBlock fplValue 
         | EvalContext.InSignature fplValue -> 
             adjustSignature st fplValue "["
             asts 
-            |> List.map (eval st) |> ignore
+            |> List.map (fun ast1 ->
+                let oldContext = st.CurrentContext        
+                eval st ast1
+                st.CurrentContext <- oldContext
+            ) |> ignore
             adjustSignature st fplValue "]"
             fplValue.NameEndPos <- pos2
         | _ -> ()
@@ -813,26 +821,31 @@ let rec eval (st: SymbolTable) ast =
     | Ast.NamedVarDecl((pos1, pos2), ((variableListAst, varDeclModifierAst), variableTypeAst)) ->
         st.EvalPush("NamedVarDecl")
         let oldContext = st.CurrentContext
-        variableListAst |> List.map (eval st) |> ignore
+
+        let evalNamedVarDecl (fplValue:FplValue) (context:string) = 
+            fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
+            eval st varDeclModifierAst
+            fplValue.Scope 
+            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.IsVariable)
+            |> Seq.iter (fun childKeyValue -> 
+                if not (childKeyValue.Value.Parent.Value.AuxiliaryUniqueChilds.Contains(childKeyValue.Value.Name)) then 
+                    if context = "InBlock" then 
+                        st.CurrentContext <- EvalContext.InBlock (childKeyValue.Value)
+                    elif context = "InSignature" then
+                        st.CurrentContext <- EvalContext.InSignature (childKeyValue.Value)
+                    eval st variableTypeAst
+                    st.CurrentContext <- oldContext
+                    childKeyValue.Value.Parent.Value.AuxiliaryUniqueChilds.Add(childKeyValue.Value.Name) |> ignore
+            )
+
+        // create all variables of the named variable declaration in the current scope
+        variableListAst |> List.map (eval st) |> ignore 
+
         match st.CurrentContext with 
         | EvalContext.InBlock fplValue ->
-            fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
-            eval st varDeclModifierAst
-            fplValue.Scope 
-            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.IsVariable)
-            |> Seq.iter (fun childKeyValue -> 
-                st.CurrentContext <- EvalContext.InBlock (childKeyValue.Value)
-                eval st variableTypeAst
-            )
+            evalNamedVarDecl fplValue "InBlock"
         | EvalContext.InSignature fplValue -> 
-            fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
-            eval st varDeclModifierAst
-            fplValue.Scope 
-            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.IsVariable)
-            |> Seq.iter (fun childKeyValue -> 
-                st.CurrentContext <- EvalContext.InSignature (childKeyValue.Value)
-                eval st variableTypeAst
-            )
+            evalNamedVarDecl fplValue "InSignature"
         | _ -> ()
         st.CurrentContext <- oldContext
         st.EvalPop()
