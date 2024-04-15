@@ -143,8 +143,8 @@ type TestEvalAliasedNamespaceIdentifier() =
         let filteredList = findFilesInLibMapWithWildcard sitelib wildcards
         Assert.AreEqual(expected, filteredList.Length)
 
-    [<DataRow("*", "Fpl", 2)>]
-    [<DataRow("*", "Fpl.Commons", 1)>]
+    [<DataRow("*", "Fpl", 4)>]
+    [<DataRow("*", "Fpl.Commons", 2)>]
     [<DataRow("T1", "Fpl", 0)>]
     [<DataRow("T2", "Fpl.Commons", 1)>]
     [<DataRow("", "Fpl", 0)>]
@@ -364,4 +364,17 @@ type TestEvalAliasedNamespaceIdentifier() =
         // "Fpl.Commons" knows that "Test" is referencing to it
         let actual = result.Find(fun pa -> pa.Id = "Fpl.Commons").Sorting.ReferencingAsts
         Assert.AreEqual(["Test"; "Fpl.SetTheory"], actual)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClausesTopologicalSorting() =
+        let result = this.PrepareTestLoadAllUsesClauses02()
+        // "Fpl.Commons" knows that "Test" is referencing to it
+        let a = result.Find(fun pa -> pa.Id = "Fpl.Commons").Sorting.TopologicalSorting
+        let b = result.Find(fun pa -> pa.Id = "Fpl.SetTheory").Sorting.TopologicalSorting
+        let c = result.Find(fun pa -> pa.Id = "Test").Sorting.TopologicalSorting
+        Assert.AreEqual(1, a)
+        Assert.AreEqual(2, b)
+        Assert.AreEqual(3, c)
+
+    
 

@@ -101,8 +101,8 @@ type Ast =
     | Intrinsic
     | VarDeclBlock of Positions * Ast list 
     | StatementList of Positions * Ast list
-    | SignatureWithPreConBlock of Ast * ((Ast list option * Ast) * Ast)
-    | RuleOfInference of Positions * Ast
+    | PremiseConclusionBlock of Positions * ((Ast list option * Ast) * Ast)
+    | RuleOfInference of Positions * (Ast * Ast)
     | Localization of Positions * (Ast * Ast list)
     | Theorem of Positions * (Ast *(Ast list option * Ast))
     | Lemma of Positions * (Ast *(Ast list option * Ast))

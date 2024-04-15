@@ -93,6 +93,33 @@ type TestInterpreterErrors() =
         Assert.AreEqual(1, result.Length)
         this.PrepareTestNSP04CircularABCA(true) |> ignore
 
+
+    member this.PrepareTestNSP04NonCircular(delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let input = """
+            uses Fpl.Commons
+            uses Fpl.SetTheory
+            ;"""
+        let pathToFile =
+            Path.Combine(Directory.GetCurrentDirectory(), "Test1_A.fpl")
+        File.WriteAllText(pathToFile, input)
+        let uri = System.Uri(pathToFile)
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            File.Delete(pathToFile)
+            None
+        else
+            let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+            Some (FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts false)
+
+    [<TestMethod>]
+    member this.TestNSP04NonCircular() =
+        this.PrepareTestNSP04NonCircular(false) |> ignore
+        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
+        this.PrepareTestNSP04NonCircular(true) |> ignore
+
+
     member this.PrepareTestNSP05 (delete:bool) =
         FplParser.parserDiagnostics.Clear()
         let input = """;"""
@@ -356,4 +383,16 @@ type TestInterpreterErrors() =
         prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(expected, result.Length)
+        prepareFplCode("", true) |> ignore
+
+
+    [<DataRow("inf ModusPonens() {dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q};")>]
+    [<TestMethod>]
+    member this.TestVAR01CrossCheck(fplCode:string) =
+        let code = VAR01 "p"
+        FplParser.parserDiagnostics.Clear()
+        printf "Trying %s" code.Message
+        prepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(0, result.Length)
         prepareFplCode("", true) |> ignore

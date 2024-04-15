@@ -271,6 +271,7 @@ type EvalContext =
     | InTheory of FplValue
     | InSignature of FplValue
     | InBlock of FplValue
+    | NamedVarDeclarationInBlock of FplValue
 
 type SymbolTable(parsedAsts:List<ParsedAst>, debug:bool) =
     let _parsedAsts = parsedAsts
