@@ -3,7 +3,7 @@
 :end
 
 uses Fpl.Commons
-uses Fpl.SetTheory.ZermeloFraenkel
+uses Fpl.SetTheory
 
 def class Zero: obj
 {
@@ -24,36 +24,36 @@ axiom ZeroIsNat()
 axiom SuccessorExistsAndIsUnique()
 {
     all n in Nat
-    (
+    {
         exn$1 successor in Nat
-        (
+        {
             and
             (
                 NotEqual(successor,n),
                 (successor = Succ(n))
             )
-        )
-    )
+        }
+    }
 }
 
 axiom ZeroIsNotSuccessor()
 {
     all n in Nat
-    (
+    {
         NotEqual(Zero(), Succ(n))
-    )
+    }
 }
 
 axiom SuccessorIsInjective()
 {
     all n,m in Nat
-    (
+    {
         impl
         (
             ( Succ(n) = Succ(m) ),
             ( n = m )
         )
-    )
+    }
 }
 
 axiom CompleteInduction()
@@ -61,14 +61,14 @@ axiom CompleteInduction()
     dec 
         ~n: Nat
     ;
-    all p in pred
-    (
+    all p is pred
+    {
         impl
         (
-            and ( p(0), all n ( impl ( p(n), p(Succ(n)) ) ) ),
-            all n ( p(n) )
+            and ( p(0), all n { impl ( p(n), p(Succ(n)) ) } ),
+            all n { p(n) }
         )
-    )
+    }
 }
 
 
@@ -105,7 +105,7 @@ def class Nat: obj
 
 def pred IsGreaterOrEqual(n,m: Nat)
 {
-    ex k in Nat ( (n = Add(m,k)) )
+    ex k in Nat { (n = Add(m,k)) }
 }
 
 // besides the class "Nat", we can formulate definition of the set of all natural numbers
@@ -122,13 +122,13 @@ def class SetNat: Set
             // This is comparable to implementing an interface (or comparable to multiple inheritance).
             assert
                 all n
-                (
+                {
                     and
                     (
                         is(n, Set),
                         In(n, self)
                     )
-                )
+                }
             base.Set()
         ;
         self
@@ -172,13 +172,10 @@ prop AddIsUnique(op: Add)
             ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
         )
         ,
-        all n
-        (
-            all m
-            (
-                ( op(n,m) = anotherAdd(n,m) )
-            )
-        )
+        all n, m
+        {
+            ( op(n,m) = anotherAdd(n,m) )
+        }
     )
     
 }
@@ -194,13 +191,10 @@ proof AddIsUnique$1
             ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
         )
     2. |- trivial
-    3. |- all n
-            (
-                all m
-                (
-                    ( op(n,m) = anotherAdd(n,m) )
-                )
-            )
+    3. |- all n, m
+            {
+                ( op(n,m) = anotherAdd(n,m) )
+            }
 }
 
 
@@ -210,9 +204,9 @@ def func Sum(list:* Nat)->Nat
         ~result, addend: Nat
         result:=Zero()
         for addend in list
-        (
+        {
             result:=Add(result,addend)
-        )
+        }
     ;
     return result
 }
@@ -223,36 +217,36 @@ def func Sum(list:* Nat)->Nat
         ~i: index
         result:=Zero()
         for i in list
-        (
+        {
             result:=Add(result,list[i])
-        )
+        }
     ; 
     return result
 }
 
-def func Sum(from,to:Nat, arr: Nat[[from,to]]) -> Nat
+def func Sum(arr: Nat[from,to:Nat]) -> Nat
 {
     dec
         ~i, result: Nat
         result:=Zero()
 
-        for i in [[from,to]]
-        (
+        for i in Range(from,to)
+        {
             result:=Add(result,arr[i])
-        )
+        }
     ;
     return result
 }
 
-def func Sum(arr: Nat[[,]]) -> Nat
+def func Sum(arr: Nat) -> Nat
 {
     dec
         ~addend, result: Nat
         result:=Zero()
         for addend in arr
-        (
+        {
             result:=Add(result,addend)
-        )
+        }
     ;
     return result
 }
@@ -267,10 +261,10 @@ def func Sum(from,to:Nat, addend: Addend) -> Nat
     dec
         ~i, result: Nat
         result:=Zero()
-        for i in [[from,to]]
-        (
+        for i in Range(from,to)
+        {
             result:=Add(result,addend(i))
-        )
+        }
     ;
     return result
 }
@@ -283,15 +277,15 @@ proposition SumOfConsecutiveNumbers()
     ;
     impl
     (
-        all n in [[1,limit]]
-        (
+        all n in Range(1,limit)
+        {
             (f(n) = n)
-        )
+        }
         ,
         all n
-        (
+        {
             (Sum(1,n,f) = Div(Mul(n,Succ(n)),2))
-        )
+        }
     )
 }
 
@@ -305,18 +299,18 @@ def func RealValuedFunction(x:Real) -> Real
 
 def pred IsBounded(x: Real)
 {
-    ex upperBound, lowerBound in Real
-    (
+    ex upperBound, lowerBound is Real
+    {
         and (LowerEqual(x,upperBound), LowerEqual(lowerBound,x))
-    )
+    }
 }
 
 def pred IsBounded(f: RealValuedFunction)
 {
     all x in Real
-    (
+    {
         IsBounded(f(x))
-    )
+    }
 }
 
 def func RiemannIntegral(from,to:Real, f: RealValuedFunction ) -> Real
@@ -325,29 +319,29 @@ def func RiemannIntegral(from,to:Real, f: RealValuedFunction ) -> Real
         ~x, result: Real
         assert IsBounded(f)
         result:=ZeroReal()
-        for x in [[from,to]]
-        (
+        for x in Range(from,to)
+        {
             result:=Add(result, Mult(f(x), D(x)))
-        )
+        }
     ;
     return result
 }
 
-def func PowerSeries(k:Nat, arr: Real[[k,]] ) -> Real
+def func PowerSeries(arr: RightOpenRange[k:Nat]) -> Real
 {
     dec
         ~result: Real
         ~i: Nat
         result:=ZeroReal()
-        for i in [[k,]]
-        (
+        for i in RightOpenRange(k)
+        {
             result:=Add(result, Exp(arr[i],i))
-        )
+        }
     ;
     return result
 }
 
-def function ContinuedFraction(k:Nat, arr: Int[[k,]]) -> Real
+def function ContinuedFraction(arr: RightOpenRangeInt[k:Nat]) -> Real
 {
     dec
         ~i: Nat
@@ -355,7 +349,7 @@ def function ContinuedFraction(k:Nat, arr: Int[[k,]]) -> Real
         cf:=Real(arr[k])
         i:=Succ(k)
     ;
-    return Add( cf, Div(1 , ContinuedFraction(i, arr[[i,]])))
+    return Add( cf, Div(1 , ContinuedFraction(i, RightOpenRange[arr[i]])))
 }
 
 // Example of defining a constant for the natural number 100 using the

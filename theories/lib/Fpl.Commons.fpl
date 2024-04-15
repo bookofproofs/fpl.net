@@ -43,7 +43,7 @@ inf ExistsByExample(p: pred(c: obj))
     premise:  
         p(c)
     conclusion: 
-        ex x(p(x))
+        ex x {p(x)}
 }
 
 
