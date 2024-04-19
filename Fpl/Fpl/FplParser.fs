@@ -402,12 +402,11 @@ However, there is a syntactical simplification of the signature*)
 let spacesPredicate = IW >>. predicate
 let premise = IW >>. (keywordPremise >>. colon >>. predicate) 
 let conclusion = IW >>. (keywordConclusion >>. colon >>. predicate) 
-let premiseConclusionBlock = leftBrace >>. varDeclOrSpecList .>>. premise .>>. conclusion .>> spacesRightBrace
+let premiseConclusionBlock = positions (leftBrace >>. varDeclOrSpecList .>>. premise .>>. conclusion .>> spacesRightBrace) |>> Ast.PremiseConclusionBlock
 
 (* FPL building blocks - rules of reference *)
 let keywordInference = (skipString "inference" <|> skipString "inf") .>> SW 
-let signatureWithPremiseConclusionBlock = signature .>>. premiseConclusionBlock |>> Ast.SignatureWithPreConBlock
-let ruleOfInference = positions (keywordInference >>. signatureWithPremiseConclusionBlock) |>> Ast.RuleOfInference
+let ruleOfInference = positions (keywordInference >>. signature .>>. premiseConclusionBlock) |>> Ast.RuleOfInference
 
 (* FPL building blocks - Theorem-like statements and conjectures *)
 let keywordTheorem = (skipString "theorem" <|> skipString "thm") .>> SW

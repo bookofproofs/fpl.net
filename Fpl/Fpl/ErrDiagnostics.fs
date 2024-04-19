@@ -73,7 +73,7 @@ type DiagnosticCode =
     | NSP02 of string * string
     | NSP03 of string
     | NSP04 of string 
-    | NSP05 of string * string list
+    | NSP05 of string list * string * string
     // identifier-related error codes
     | ID000 of string
     | ID001 of string
@@ -161,7 +161,7 @@ type DiagnosticCode =
             | NSP02 (url, innerErrMsg) -> sprintf "%s found but could not be downloaded: %s" url innerErrMsg
             | NSP03 alias -> sprintf "Alias %s appeared previously in this namespace" alias
             | NSP04 path -> sprintf "Circular theory reference detected: %s" path
-            | NSP05 (theory, sources) -> sprintf "Multiple sources %A for theory %s detected." sources theory
+            | NSP05 (sources, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." sources theory chosenSource
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
             | ID001 identifier -> sprintf "Duplicate identifier %s detected." identifier

@@ -36,7 +36,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
                 | Some parent -> 
                     adjustSignature st parent str
                 | None -> ()
-        | EvalContext.InBlock _ -> 
+        | EvalContext.NamedVarDeclarationInBlock _ -> 
             match fplValue.Parent with
             | Some parent -> 
                 if parent.IsVariable then 
@@ -46,7 +46,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
 
 let eval_units (st: SymbolTable) unitType = 
     match st.CurrentContext with
-    | EvalContext.InBlock fplValue 
+    | EvalContext.NamedVarDeclarationInBlock fplValue 
     | EvalContext.InSignature fplValue -> 
         adjustSignature st fplValue unitType
     | _ -> ()
@@ -107,7 +107,7 @@ let rec eval (st: SymbolTable) ast =
 
     let evalMany (st:SymbolTable) str pos1 pos2 = 
         match st.CurrentContext with
-        | EvalContext.InBlock fplValue
+        | EvalContext.NamedVarDeclarationInBlock fplValue
         | EvalContext.InSignature fplValue -> 
             tryAddVariadicVariables fplValue.AuxiliaryInfo pos1 pos2
             // adjust type of variables to variadic variables, if their type has not yet been established
@@ -188,7 +188,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DollarDigits((pos1, pos2), s) -> 
         st.EvalPush("DollarDigits")
         match st.CurrentContext with
-        | EvalContext.InBlock fplValue 
+        | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InSignature fplValue ->
             adjustSignature st fplValue s
             fplValue.NameEndPos <- pos2 // the full name ends where the dollar digits end 
@@ -197,7 +197,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Extensionname((pos1, pos2), s) ->
         st.EvalPush("Extensionname")
         match st.CurrentContext with
-        | EvalContext.InBlock fplValue 
+        | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InSignature fplValue -> 
             adjustSignature st fplValue ("@" + s)
         | _ -> ()
@@ -205,7 +205,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
         match st.CurrentContext with
-        | EvalContext.InBlock fplValue 
+        | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InSignature fplValue -> 
             adjustSignature st fplValue s
         | _ -> ()
@@ -213,7 +213,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Var((pos1, pos2), s) ->
         st.EvalPush("Var")
         match st.CurrentContext with
-        | EvalContext.InBlock fplValue 
+        | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InSignature fplValue -> 
             let varValue = FplValue.CreateFplValue((pos1,pos2), FplBlockType.Variable, fplValue)
             varValue.Name <- s
@@ -294,14 +294,16 @@ let rec eval (st: SymbolTable) ast =
         eval_pos_unit st pos1 pos2
         st.EvalPop() 
     // | ExtDigits of Positions * Ast
-    | Ast.RuleOfInference((pos1, pos2), signatureWithPremiseConclusionBlockAst) ->
+    | Ast.RuleOfInference((pos1, pos2), (signatureAst, premiseConclusionBlockAst)) ->
         st.EvalPush("RuleOfInference")
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.RuleOfInference, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval st signatureWithPremiseConclusionBlockAst
+            eval st signatureAst
+            st.CurrentContext <- EvalContext.InBlock fplValue
+            eval st premiseConclusionBlockAst
             tryAddBlock fplValue 
         | _ -> ()
         st.CurrentContext <- oldContext
@@ -388,7 +390,7 @@ let rec eval (st: SymbolTable) ast =
         let identifier = String.concat "." pascalCaseIdList
         match st.CurrentContext with
         | EvalContext.InTheory fplValue
-        | EvalContext.InBlock fplValue
+        | EvalContext.NamedVarDeclarationInBlock fplValue
         | EvalContext.InSignature fplValue -> 
             adjustSignature st fplValue identifier
         | _ -> ()
@@ -396,7 +398,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ParamTuple((pos1, pos2), asts) ->
         st.EvalPush("ParamTuple")
         match st.CurrentContext with
-        | EvalContext.InBlock fplValue 
+        | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InSignature fplValue -> 
             adjustSignature st fplValue "("
             asts |> List.map (eval st) |> ignore
@@ -408,7 +410,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("BracketedCoordsInType")
         
         match st.CurrentContext with
-        | EvalContext.InBlock fplValue 
+        | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InSignature fplValue -> 
             adjustSignature st fplValue "["
             asts 
@@ -487,7 +489,7 @@ let rec eval (st: SymbolTable) ast =
         match astTupleOption with 
         | Some (_, ast3) -> 
             match st.CurrentContext with 
-            | EvalContext.InBlock fplBlock 
+            | EvalContext.NamedVarDeclarationInBlock fplBlock 
             | EvalContext.InSignature fplBlock ->
                 adjustSignature st fplBlock "->"
             | _ -> ()
@@ -645,7 +647,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("FunctionalTermSignature")
         eval st signatureWithUserDefinedStringAst
         match st.CurrentContext with 
-        | EvalContext.InBlock fplBlock 
         | EvalContext.InSignature fplBlock -> 
             adjustSignature st fplBlock "->"
         | _ -> ()
@@ -717,9 +718,8 @@ let rec eval (st: SymbolTable) ast =
         asts |> List.map (eval st) |> ignore
         st.EvalPop()
     // | SignatureWithPreConBlock of Ast * ((Ast list option * Ast) * Ast)
-    | Ast.SignatureWithPreConBlock(signatureAst, ((optVarDeclOrSpecList, premiseAst), conclusionAst)) ->
-        st.EvalPush("SignatureWithPreConBlock")
-        eval st signatureAst
+    | Ast.PremiseConclusionBlock((pos1, pos2), ((optVarDeclOrSpecList, premiseAst), conclusionAst)) ->
+        st.EvalPush("PremiseConclusionBlock")
         optVarDeclOrSpecList |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         eval st premiseAst
         eval st conclusionAst
@@ -827,21 +827,28 @@ let rec eval (st: SymbolTable) ast =
             |> Seq.filter (fun varKeyValue -> varKeyValue.Value.IsVariable)
             |> Seq.iter (fun childKeyValue -> 
                 if not (childKeyValue.Value.Parent.Value.AuxiliaryUniqueChilds.Contains(childKeyValue.Value.Name)) then 
-                    if context = "InBlock" then 
-                        st.CurrentContext <- EvalContext.InBlock (childKeyValue.Value)
+                    if context = "NamedVarDeclarationInBlock" then 
+                        st.CurrentContext <- EvalContext.NamedVarDeclarationInBlock (childKeyValue.Value)
                     elif context = "InSignature" then
                         st.CurrentContext <- EvalContext.InSignature (childKeyValue.Value)
+                    else
+                        raise (ArgumentException(sprintf "Unknown context %s" context))
                     eval st variableTypeAst
                     st.CurrentContext <- oldContext
                     childKeyValue.Value.Parent.Value.AuxiliaryUniqueChilds.Add(childKeyValue.Value.Name) |> ignore
             )
 
         // create all variables of the named variable declaration in the current scope
+        match st.CurrentContext with
+        | EvalContext.InBlock fplValue ->
+            st.CurrentContext <- EvalContext.NamedVarDeclarationInBlock (fplValue)
+        | _ -> ()
         variableListAst |> List.map (eval st) |> ignore 
 
         match st.CurrentContext with 
-        | EvalContext.InBlock fplValue ->
-            evalNamedVarDecl fplValue "InBlock"
+        | EvalContext.InBlock fplValue
+        | EvalContext.NamedVarDeclarationInBlock fplValue ->
+            evalNamedVarDecl fplValue "NamedVarDeclarationInBlock"
         | EvalContext.InSignature fplValue -> 
             evalNamedVarDecl fplValue "InSignature"
         | _ -> ()
@@ -921,7 +928,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     // | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option))
     | Ast.DefinitionClass((pos1, pos2),
-                          (((predicateIdentifierAst, optUserDefinedObjSymAst), classTypeWithModifierListAsts),
+                          (((predicateIdentifierAst, optUserDefinedObjSymAst), classTypeListAsts),
                            (classContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionClass")
         let oldContext = st.CurrentContext
@@ -931,9 +938,9 @@ let rec eval (st: SymbolTable) ast =
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st predicateIdentifierAst
             tryAddBlock fplValue 
-            st.CurrentContext <- EvalContext.InBlock fplValue
             optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
-            classTypeWithModifierListAsts |> List.map (eval st) |> ignore
+            classTypeListAsts |> List.map (eval st) |> ignore
+            st.CurrentContext <- EvalContext.InBlock fplValue
             eval st classContentAst
             optPropertyListAsts
             |> Option.map (List.map (eval st) >> ignore)

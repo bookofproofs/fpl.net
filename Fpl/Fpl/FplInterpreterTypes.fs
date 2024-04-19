@@ -22,6 +22,24 @@ type EvalAliasedNamespaceIdentifier =
       EvalAlias: EvalAlias
       PascalCaseIdList: string list }
 
+    static member CreateEani (pascalCaseId:string, aliasOrStar: string, startPos, endPos) =
+        let evalAlias = {
+                EvalAlias.StartPos = startPos
+                EvalAlias.EndPos = endPos
+                EvalAlias.AliasOrStar = aliasOrStar
+            }
+
+        { EvalAliasedNamespaceIdentifier.StartPos = startPos
+          EvalAliasedNamespaceIdentifier.EndPos = endPos
+          EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
+          EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascalCaseId ] }
+
+    static member CreateEani (pascalCaseIdList:string list, evalAlias:EvalAlias, startPos, endPos) = 
+        { EvalAliasedNamespaceIdentifier.StartPos = startPos
+          EvalAliasedNamespaceIdentifier.EndPos = endPos
+          EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
+          EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList }
+
     member this.FileNamePattern =
         let pascalCaseIdList = String.concat "." this.PascalCaseIdList
 
@@ -95,13 +113,43 @@ type ParsedAst =
       FplBlocks: FplBlockProperties
       mutable Status: ParsedAstStatus }
 
+/// A reference type to store a list of ParsedAsts
+type ParsedAstList() = 
+    inherit System.Collections.Generic.List<ParsedAst>()
+    let this = List<ParsedAst>()
+    /// Finds some ParsedAst by identifier. Returns None if none was found.
+    member this.TryFindAstById(identifier:string) = 
+        if this.Exists(fun pa -> pa.Id = identifier) then
+            Some(this.Find(fun pa -> pa.Id = identifier))
+        else
+            None    
+
+    /// Finds some loaded ParsedAst. Returns None if none was found.
+    member this.TryFindLoadedAst() = 
+        if this.Exists(fun pa -> pa.Status = ParsedAstStatus.Loaded) then
+            Some(this.Find(fun pa -> pa.Status = ParsedAstStatus.Loaded))
+        else
+            None
+
+
 
 /// A type that encapsulates the sources found for a uses clause
 /// and provides members to filter those from the file system and those from
 /// the web.
+
 type FplSources(paths: string list) =
+    /// All found paths for a uses clause, including those from the web.
     member this.Paths = paths
 
+    /// Returns all loaded FPL theories loaded by a uses clause grouped by name with lists of potential locations
+    member this.Grouped 
+        with get () = 
+            let fplTheories = 
+                this.Paths
+                |> List.map (fun fp -> (Path.GetFileName fp, fp))
+            fplTheories
+            |> List.groupBy fst
+    
     member this.IsUrl(s: string) =
         let pattern = @"^https?://"
         Regex.IsMatch(s, pattern)
@@ -114,13 +162,65 @@ type FplSources(paths: string list) =
         with :? ArgumentException ->
             false
 
+
     member this.Urls = List.filter this.IsUrl this.Paths
     member this.FilePaths = List.filter this.IsFilePath this.Paths
     member this.Length = this.Paths.Length
-    member this.NoneFound = this.Paths.Length = 0
 
+    member this.GroupedWithPreferedSource 
+        with get () = 
+            let result = 
+                let grouped = this.Grouped
+                grouped
+                |> List.collect (fun (fileName, paths) -> 
+                    let pathType =
+                        paths
+                        |> List.map snd
+                        |> List.tryFind (fun path -> 
+                            if this.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                                true // the first source is the current directory
+                            elif this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
+                                true // the second is the lib subdirectory 
+                            else
+                                true // the third is the internet source
+                        )
 
+                    let pathTypes =
+                        List.map snd paths
+                        |> List.map (fun path -> 
+                            if this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                                "./lib"
+                            elif  this.IsFilePath(path) then 
+                                "./"
+                            else
+                                "https"
+                        )                    
+                    let fileNameWithoutExtension = 
+                        Path.GetFileNameWithoutExtension(fileName)
+                    match pathType with
+                    | Some path -> 
+                        let chosenPathType = 
+                            if this.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                                "./"
+                            elif this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
+                                "./lib"
+                            else
+                                "https"
+                        [(fileName, path, chosenPathType, pathTypes, fileNameWithoutExtension)]
+                    | None -> []
+                )
+            result
 
+    member this.FindWithPattern(pattern:string) = 
+        let wildcardToRegex (wildcard : string) =
+            "^" + Regex.Escape(wildcard).Replace("\\*", ".*").Replace("\\?", ".") + "$"
+        let regexPattern = wildcardToRegex pattern
+        let regex = Regex(regexPattern, RegexOptions.IgnoreCase)
+        this.GroupedWithPreferedSource
+        |> List.filter (fun (fileName, _, _, _, _) ->
+            regex.IsMatch(fileName)
+        )
+        
 
 type FplType =
     | Object
@@ -271,8 +371,9 @@ type EvalContext =
     | InTheory of FplValue
     | InSignature of FplValue
     | InBlock of FplValue
+    | NamedVarDeclarationInBlock of FplValue
 
-type SymbolTable(parsedAsts:List<ParsedAst>, debug:bool) =
+type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     let _parsedAsts = parsedAsts
     let mutable _currentContext = EvalContext.ContextNone
     let _evalPath = Stack<string>()
@@ -313,3 +414,4 @@ type SymbolTable(parsedAsts:List<ParsedAst>, debug:bool) =
         _parsedAsts.Sort(
             Comparer<ParsedAst>.Create(fun b a -> compare a.Sorting.TopologicalSorting b.Sorting.TopologicalSorting)
         )
+

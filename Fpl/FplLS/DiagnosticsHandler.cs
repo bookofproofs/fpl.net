@@ -15,13 +15,13 @@ namespace FplLS
     {
         private readonly ILanguageServer _languageServer;
         private readonly BufferManager _bufferManager;
-        private readonly List<ParsedAst> _parsedAstsList;
+        private readonly ParsedAstList _parsedAstsList;
 
         public DiagnosticsHandler(ILanguageServer languageServer, BufferManager bufferManager)
         {
             _languageServer = languageServer;
             _bufferManager = bufferManager;
-            _parsedAstsList = new List<ParsedAst>();
+            _parsedAstsList = new ParsedAstList();
         }
 
 
