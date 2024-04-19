@@ -60,3 +60,24 @@ type TestUsesClause () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestUsesClause03 () =
+        let result = run (usesClause .>> eof) """uses Fpl.Test.fpl"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestUsesClause04 () =
+        let result = run (usesClause .>> eof) """uses Fpl.Test*.fpl"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestUsesClause05 () =
+        let result = run (usesClause .>> eof) """uses Fpl.Test."""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))

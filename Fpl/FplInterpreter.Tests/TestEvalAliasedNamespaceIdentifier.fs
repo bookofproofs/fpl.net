@@ -101,13 +101,8 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAlias.EndPos = pos
                 EvalAlias.AliasOrStar = ""
             }
-        let e = 
-            { 
-                EvalAliasedNamespaceIdentifier.StartPos = pos
-                EvalAliasedNamespaceIdentifier.EndPos = pos 
-                EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
-                EvalAliasedNamespaceIdentifier.PascalCaseIdList = [] }
-        let libMap = downloadLibMap url e
+        let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos)
+        let libMap = downloadLibMap url
         Assert.IsTrue(libMap.Length > 0)
 
     [<TestMethod>]
@@ -120,67 +115,53 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAlias.EndPos = pos
                 EvalAlias.AliasOrStar = ""
             }
-        let e = 
-            { 
-                EvalAliasedNamespaceIdentifier.StartPos = pos
-                EvalAliasedNamespaceIdentifier.EndPos = pos 
-                EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
-                EvalAliasedNamespaceIdentifier.PascalCaseIdList = [] }
-        let libMap = downloadLibMap url e
-        Assert.AreEqual(ad.CountDiagnostics, 0)
+        let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos)
+        let libMap = downloadLibMap url
+        Assert.AreEqual(0, ad.CountDiagnostics)
 
-
-    [<DataRow("Fpl.*.fpl", 4)>]
-    [<DataRow("Fpl.Test.*.fpl", 2)>]
-    [<DataRow("Fpl.Commons.fpl", 1)>]
-    [<DataRow("Fpl.SetTheory.fpl", 1)>]
-    [<DataRow("FpX.*.fpl", 0)>]
+    [<DataRow("Fpl *", 4)>]
+    [<DataRow("Fpl.Test *", 0)>]
+    [<DataRow("Fpl.Commons *", 2)>]
+    [<DataRow("Fpl.Commons", 1)>]
+    [<DataRow("Fpl.SetTheory", 1)>]
+    [<DataRow("FpX *", 0)>]
     [<TestMethod>]
-    member this.TestFindFilesInLibMapWithWildcard(wildcards: string, expected) =
-        let sitelib =
-            "Fpl.Commons.fpl\nFpl.SetTheory.fpl\nFpl.Test.Test1.fpl\nFpl.Test.Test2.fpl"
-
-        let filteredList = findFilesInLibMapWithWildcard sitelib wildcards
-        Assert.AreEqual(expected, filteredList.Length)
-
-    [<DataRow("*", "Fpl", 4)>]
-    [<DataRow("*", "Fpl.Commons", 2)>]
-    [<DataRow("T1", "Fpl", 0)>]
-    [<DataRow("T2", "Fpl.Commons", 1)>]
-    [<DataRow("", "Fpl", 0)>]
-    [<DataRow("", "Fpl.Commons", 1)>]
-    [<TestMethod>]
-    member this.TestAcquireSourcesWebOnly(aliasOrStar: string, pascelCaseId: string, expected: int) =
-        let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
-        let evalAlias = {
-                EvalAlias.StartPos = pos
-                EvalAlias.EndPos = pos
-                EvalAlias.AliasOrStar = aliasOrStar
-            }
-
-        let eval =
-                { EvalAliasedNamespaceIdentifier.StartPos = Position("", 1, 1, 1)
-                  EvalAliasedNamespaceIdentifier.EndPos = Position("", 1, 1, 1)
-                  EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
-                  EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascelCaseId ] }
-
-        let uri =
-            System.Uri(Path.Combine(Directory.GetCurrentDirectory(), pascelCaseId + ".fpl"))
-
+    member this.TestFindFilesInLibMapWithWildcard(usesClause: string, expected) =
+        let st = prepareFplCode (sprintf "uses %s;" usesClause, false) 
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        
+        let uri =
+            System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
+        let sources = acquireSources uri fplLibUrl
+        let eaniList = eval_uses_clause st.Value.ParsedAsts[0].Parsing.Ast
 
-        let sources = acquireSources eval uri fplLibUrl 
-        Assert.AreEqual(expected, sources.Urls.Length)
+        let filtered = sources.FindWithPattern eaniList.Head.FileNamePattern
+        Assert.AreEqual(expected, filtered.Length)
+        prepareFplCode ("", true) |> ignore
 
-    [<DataRow("*", "Test1")>]
-    [<DataRow("*", "Test1.Test2")>]
-    [<DataRow("T1", "Test1")>]
-    [<DataRow("T2", "Test1.Test2")>]
-    [<DataRow("", "Test1")>]
-    [<DataRow("", "Test1.Test2")>]
+
+    [<DataRow("Fpl *", 5)>]
+    [<DataRow("Fpl.Commons *", 5)>]
+    [<DataRow("Fpl alias T1", 1)>]
+    [<DataRow("Fpl.Commons alias T2", 2)>]
+    [<DataRow("Fpl", 1)>]
+    [<DataRow("Fpl.Commons", 2)>]
     [<TestMethod>]
-    member this.TestAcquireSourcesWebAndCurrDir(aliasOrStar: string, pascelCaseId: string) =
+    member this.TestParsedAstsCount(usesClause: string, expected: int) =
+        let st = prepareFplCode (sprintf "uses %s;" usesClause, false) 
+        let result = st.Value.ParsedAsts
+        Assert.AreEqual(expected, result.Count)
+        prepareFplCode ("", true) |> ignore
+
+    [<DataRow("Test1")>]
+    [<DataRow("Test1.Test2")>]
+    [<DataRow("Test1")>]
+    [<DataRow("Test1.Test2")>]
+    [<DataRow("Test1")>]
+    [<DataRow("Test1.Test2")>]
+    [<TestMethod>]
+    member this.TestAcquireSourcesWebAndCurrDir(pascelCaseId: string) =
         // prepare test
         let pathToFile =
             Path.Combine(Directory.GetCurrentDirectory(), pascelCaseId + ".fpl")
@@ -190,27 +171,14 @@ type TestEvalAliasedNamespaceIdentifier() =
 
         File.WriteAllText(pathToFile, ";")
 
-        let pos = Position("", (int64) 0, (int64) 1, (int64) 1)
-        let evalAlias = {
-                EvalAlias.StartPos = pos
-                EvalAlias.EndPos = pos
-                EvalAlias.AliasOrStar = aliasOrStar
-            }
-
-        let eval =
-                { EvalAliasedNamespaceIdentifier.StartPos = Position("", 1, 1, 1)
-                  EvalAliasedNamespaceIdentifier.EndPos = Position("", 1, 1, 1)
-                  EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
-                  EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascelCaseId ] }
-
         let uri = System.Uri(pathToFile)
 
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
         // perform test
-        let sources = acquireSources eval uri fplLibUrl 
-        Assert.AreEqual(1, sources.Length)
+        let sources = acquireSources uri fplLibUrl 
+        Assert.AreEqual(5, sources.Length)
 
         // clean up test
         File.Delete(pathToFile)
@@ -366,15 +334,23 @@ type TestEvalAliasedNamespaceIdentifier() =
         Assert.AreEqual(["Test"; "Fpl.SetTheory"], actual)
 
     [<TestMethod>]
-    member this.TestLoadAllUsesClausesTopologicalSorting() =
+    member this.TestLoadAllUsesClausesTopologicalSorting02() =
         let result = this.PrepareTestLoadAllUsesClauses02()
         // "Fpl.Commons" knows that "Test" is referencing to it
         let a = result.Find(fun pa -> pa.Id = "Fpl.Commons").Sorting.TopologicalSorting
         let b = result.Find(fun pa -> pa.Id = "Fpl.SetTheory").Sorting.TopologicalSorting
         let c = result.Find(fun pa -> pa.Id = "Test").Sorting.TopologicalSorting
-        Assert.AreEqual(1, a)
-        Assert.AreEqual(2, b)
-        Assert.AreEqual(3, c)
+        Assert.AreEqual(2, a)
+        Assert.AreEqual(1, b)
+        Assert.AreEqual(0, c)
 
+    [<TestMethod>]
+    member this.TestLoadAllUsesClausesTopologicalSorting01() =
+        let result = this.PrepareTestLoadAllUsesClauses01()
+        // "Fpl.Commons" knows that "Test" is referencing to it
+        let a = result.Find(fun pa -> pa.Id = "Fpl.Commons").Sorting.TopologicalSorting
+        let c = result.Find(fun pa -> pa.Id = "Test").Sorting.TopologicalSorting
+        Assert.AreEqual(1, a)
+        Assert.AreEqual(0, c)
     
 
