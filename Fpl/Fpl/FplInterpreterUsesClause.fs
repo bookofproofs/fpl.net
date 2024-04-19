@@ -124,21 +124,9 @@ let acquireSources (uri: Uri) (fplLibUrl: string) =
                            |> Seq.toList
     FplSources(fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload)
     
-let tryFindParsedAstByName identifier (parsedAsts:List<ParsedAst>) =
-    if parsedAsts.Exists(fun pa -> pa.Id = identifier) then
-        Some(parsedAsts.Find(fun pa -> pa.Id = identifier))
-    else
-        None
-
-let tryFindParsedAstLoaded (parsedAsts:List<ParsedAst>) =
-    if parsedAsts.Exists(fun pa -> pa.Status = ParsedAstStatus.Loaded) then
-        Some(parsedAsts.Find(fun pa -> pa.Status = ParsedAstStatus.Loaded))
-    else
-        None
-
-let private addOrUpdateParsedAst fileContent (fileLoc:string) (parsedAsts:List<ParsedAst>) = 
+let private addOrUpdateParsedAst fileContent (fileLoc:string) (parsedAsts:ParsedAstList) = 
     let name = Path.GetFileNameWithoutExtension(fileLoc)
-    let idAlreadyFound = tryFindParsedAstByName name parsedAsts
+    let idAlreadyFound = parsedAsts.TryFindAstById(name)
     match idAlreadyFound with
     | Some pa -> 
         if pa.Parsing.Reset fileContent fileLoc then
@@ -188,7 +176,7 @@ let private getParsedAstsFromSources
     (eani:EvalAliasedNamespaceIdentifier) 
     (fplSources: seq<string>) (
     getContent: string -> EvalAliasedNamespaceIdentifier -> string) 
-    (parsedAsts:List<ParsedAst>) =
+    (parsedAsts:ParsedAstList) =
 
     fplSources
     |> Seq.iter (fun fileLoc ->
@@ -222,15 +210,16 @@ let private findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list)
 
 /// Emits diagnostics if the same FPL theory can be found in multiple sources.
 let private emitDiagnosticsForDuplicateFiles (availableSources:FplSources) =
-    availableSources.Duplicates()
-    |> List.map (fun (theory,sources) ->
+    availableSources.GroupedWithPreferedSource
+    |> List.map (fun (_, _, chosenPathType, sources, theoryName) ->
+        if sources.Length > 1 then        
             let diagnostic =
                 { 
                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = Position("",0,0,1)
                     Diagnostic.EndPos = Position("",0,0,1)
-                    Diagnostic.Code = NSP05 (theory, sources)
+                    Diagnostic.Code = NSP05 (sources, theoryName, chosenPathType)
                     Diagnostic.Alternatives = None
                 }
             FplParser.parserDiagnostics.AddDiagnostic diagnostic
@@ -238,7 +227,7 @@ let private emitDiagnosticsForDuplicateFiles (availableSources:FplSources) =
     |> ignore
 
 
-let getParsedAstsMatchingAliasedNamespaceIdentifier (sources:FplSources) (parsedAsts:List<ParsedAst>) (eani:EvalAliasedNamespaceIdentifier) =
+let getParsedAstsMatchingAliasedNamespaceIdentifier (sources:FplSources) (parsedAsts:ParsedAstList) (eani:EvalAliasedNamespaceIdentifier) =
     let filtered = sources.FindWithPattern eani.FileNamePattern
     if filtered.IsEmpty then
         // Emits diagnostics if there are no files for the pattern 
@@ -254,7 +243,7 @@ let getParsedAstsMatchingAliasedNamespaceIdentifier (sources:FplSources) (parsed
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
     else
         filtered
-        |> Seq.iter (fun (fileName, path) ->
+        |> Seq.iter (fun (_, path, _, _, _) ->
             let p = path
             if sources.IsFilePath(path) then
                 getParsedAstsFromSources eani [path] loadFile parsedAsts 
@@ -268,7 +257,7 @@ let getParsedAstsMatchingAliasedNamespaceIdentifier (sources:FplSources) (parsed
 /// there is a valid topological sorting. If true is returned, there is no 
 /// valid topological sorting and there is a cycle caused by the uses clauses in the
 /// ParsedAsts.
-let private isCircular (parsedAsts:List<ParsedAst>) = 
+let private isCircular (parsedAsts:ParsedAstList) = 
     let l0 = Stack<ParsedAst>()
     let igrad = Dictionary<string,int>()
     parsedAsts |> Seq.iter (fun pa -> 
@@ -287,7 +276,11 @@ let private isCircular (parsedAsts:List<ParsedAst>) =
                 if igrad.ContainsKey(name) then 
                     igrad[name] <- igrad[name] - 1
                     if igrad[name] = 0 then
-                        l0.Push(parsedAsts.Find(fun pa -> pa.Id = name))
+                        let paNew = parsedAsts.TryFindAstById(name)
+                        match paNew with 
+                        | Some pa -> 
+                            l0.Push(pa)
+                        | None -> ()
             )
     hasCycle
 
@@ -307,12 +300,12 @@ let private findCycle (parsedAsts:List<ParsedAst>) =
     parsedAsts |> Seq.toList |> List.tryPick (dfs Set.empty [])
 
 
-let private chainParsedAsts (alreadyLoaded:List<ParsedAst>) parsedAst (eani:EvalAliasedNamespaceIdentifier) = 
+let private chainParsedAsts (alreadyLoaded:ParsedAstList) parsedAst (eani:EvalAliasedNamespaceIdentifier) = 
     // complement referenced asts 
     if not (List.contains eani.Name parsedAst.Sorting.ReferencedAsts) then 
         parsedAst.Sorting.ReferencedAsts <- parsedAst.Sorting.ReferencedAsts @ [eani.Name]
     // complement referencing asts in the specific parsedAst even if it was already loaded
-    let referencedPa = tryFindParsedAstByName eani.Name alreadyLoaded
+    let referencedPa = alreadyLoaded.TryFindAstById(eani.Name)
     match referencedPa with
     | Some pa -> 
         if not (List.contains parsedAst.Id pa.Sorting.ReferencingAsts) then 
@@ -329,7 +322,7 @@ let rearrangeList element list =
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
-let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:List<ParsedAst>) = 
+let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:ParsedAstList) = 
     let sources = acquireSources uri fplLibUrl
     emitDiagnosticsForDuplicateFiles sources
 
@@ -337,7 +330,7 @@ let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:List<ParsedAst>) =
     let mutable found = true
 
     while found do
-        let loadedParsedAst = tryFindParsedAstLoaded parsedAsts
+        let loadedParsedAst = parsedAsts.TryFindLoadedAst()
         match loadedParsedAst with
         | Some pa -> 
             // evaluate the EvalAliasedNamespaceIdentifier list of the ast
@@ -357,20 +350,22 @@ let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:List<ParsedAst>) =
         | Some lst -> 
             let lstWithCurrentAsHead = rearrangeList currentName lst @ [currentName]
             let path = String.concat " -> " lstWithCurrentAsHead
-            let parsedAstThatStartsTheCycle = parsedAsts |> Seq.filter (fun pa -> pa.Id = lstWithCurrentAsHead.Head) |> Seq.head
+            let parsedAstThatStartsTheCycle = parsedAsts.TryFindAstById(lstWithCurrentAsHead.Head)
             let circularReferencedName = List.item 1 lstWithCurrentAsHead
-            let circularEaniReference = parsedAstThatStartsTheCycle.Sorting.EANIList |> List.filter (fun eani -> eani.Name = circularReferencedName) |> List.head
-            let diagnostic =
-                    { 
-                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                        Diagnostic.Severity = DiagnosticSeverity.Error
-                        Diagnostic.StartPos = circularEaniReference.StartPos
-                        Diagnostic.EndPos = circularEaniReference.EndPos
-                        Diagnostic.Code = NSP04 path
-                        Diagnostic.Alternatives = None
-                    }
-            FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
+            match parsedAstThatStartsTheCycle with 
+            | Some pa -> 
+                let circularEaniReference = pa.Sorting.EANIList |> List.filter (fun eani -> eani.Name = circularReferencedName) |> List.head
+                let diagnostic =
+                        { 
+                            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+                            Diagnostic.Severity = DiagnosticSeverity.Error
+                            Diagnostic.StartPos = circularEaniReference.StartPos
+                            Diagnostic.EndPos = circularEaniReference.EndPos
+                            Diagnostic.Code = NSP04 path
+                            Diagnostic.Alternatives = None
+                        }
+                FplParser.parserDiagnostics.AddDiagnostic diagnostic
+            | None -> ()
         | None -> ()
 
 

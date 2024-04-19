@@ -113,6 +113,26 @@ type ParsedAst =
       FplBlocks: FplBlockProperties
       mutable Status: ParsedAstStatus }
 
+/// A reference type to store a list of ParsedAsts
+type ParsedAstList() = 
+    inherit System.Collections.Generic.List<ParsedAst>()
+    let this = List<ParsedAst>()
+    /// Finds some ParsedAst by identifier. Returns None if none was found.
+    member this.TryFindAstById(identifier:string) = 
+        if this.Exists(fun pa -> pa.Id = identifier) then
+            Some(this.Find(fun pa -> pa.Id = identifier))
+        else
+            None    
+
+    /// Finds some loaded ParsedAst. Returns None if none was found.
+    member this.TryFindLoadedAst() = 
+        if this.Exists(fun pa -> pa.Status = ParsedAstStatus.Loaded) then
+            Some(this.Find(fun pa -> pa.Status = ParsedAstStatus.Loaded))
+        else
+            None
+
+
+
 /// A type that encapsulates the sources found for a uses clause
 /// and provides members to filter those from the file system and those from
 /// the web.
@@ -147,26 +167,6 @@ type FplSources(paths: string list) =
     member this.FilePaths = List.filter this.IsFilePath this.Paths
     member this.Length = this.Paths.Length
 
-    member this.Duplicates() = 
-        let duplicates = 
-            let grouped = this.Grouped
-            grouped
-            |> List.filter (fun (_, paths) -> List.length paths > 1)
-            |> List.map (fun (fileName, paths) -> 
-                let pathTypes =
-                    List.map snd paths
-                    |> List.map (fun path -> 
-                        if this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then
-                            "./lib"
-                        elif  this.IsFilePath(path) then 
-                            "./"
-                        else
-                            "https"
-                    )
-                (fileName, pathTypes)
-                )
-        duplicates
-
     member this.GroupedWithPreferedSource 
         with get () = 
             let result = 
@@ -184,8 +184,29 @@ type FplSources(paths: string list) =
                             else
                                 true // the third is the internet source
                         )
+
+                    let pathTypes =
+                        List.map snd paths
+                        |> List.map (fun path -> 
+                            if this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                                "./lib"
+                            elif  this.IsFilePath(path) then 
+                                "./"
+                            else
+                                "https"
+                        )                    
+                    let fileNameWithoutExtension = 
+                        Path.GetFileNameWithoutExtension(fileName)
                     match pathType with
-                    | Some path -> [(fileName, path)]
+                    | Some path -> 
+                        let chosenPathType = 
+                            if this.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                                "./"
+                            elif this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
+                                "./lib"
+                            else
+                                "https"
+                        [(fileName, path, chosenPathType, pathTypes, fileNameWithoutExtension)]
                     | None -> []
                 )
             result
@@ -196,7 +217,7 @@ type FplSources(paths: string list) =
         let regexPattern = wildcardToRegex pattern
         let regex = Regex(regexPattern, RegexOptions.IgnoreCase)
         this.GroupedWithPreferedSource
-        |> List.filter (fun (fileName, _) ->
+        |> List.filter (fun (fileName, _, _, _, _) ->
             regex.IsMatch(fileName)
         )
         
@@ -352,7 +373,7 @@ type EvalContext =
     | InBlock of FplValue
     | NamedVarDeclarationInBlock of FplValue
 
-type SymbolTable(parsedAsts:List<ParsedAst>, debug:bool) =
+type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     let _parsedAsts = parsedAsts
     let mutable _currentContext = EvalContext.ContextNone
     let _evalPath = Stack<string>()

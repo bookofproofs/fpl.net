@@ -28,6 +28,6 @@ let prepareFplCode(fplCode:string, delete:bool) =
         deleteFilesWithExtension currDir "fpl"
         None
     else
-        let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+        let parsedAsts = ParsedAstList()
         Some (FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts true)
 

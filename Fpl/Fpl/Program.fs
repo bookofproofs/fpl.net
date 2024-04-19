@@ -265,7 +265,7 @@ ad.PrintDiagnostics
 *)
 
 let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-let parsedAsts = System.Collections.Generic.List<ParsedAst>()
+let parsedAsts = ParsedAstList()
 FplInterpreter.fplInterpreter input (System.Uri("file:///d%3A/Forschung/fpl.net/theories/lib/FplSetTheory.fpl")) fplLibUrl parsedAsts false |> ignore
 
 printf "\n--------------------------------\n"
