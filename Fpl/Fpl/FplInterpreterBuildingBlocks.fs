@@ -72,7 +72,7 @@ let tryAddBlock (fplValue:FplValue) =
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.EndPos = fplValue.EndPos
             Diagnostic.Code = 
                 if fplValue.BlockType = FplBlockType.Variable || fplValue.BlockType = FplBlockType.VariadicVariable then 
                     VAR01 fplValue.Name
