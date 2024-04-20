@@ -112,12 +112,12 @@ type DiagnosticCode =
             | TRL000 -> "TRL000"
             | TYD000 -> "TYD000"
             // interpreter error messages
-            | NSP00 _ -> "NSP000"
-            | NSP01 _ -> "NSP001"
-            | NSP02 (_, _) -> "NSP002"
-            | NSP03 _ -> "NSP003"
-            | NSP04 _ -> "NSP004"
-            | NSP05 _ -> "NSP005"
+            | NSP00 _ -> "NSP00"
+            | NSP01 _ -> "NSP01"
+            | NSP02 (_, _) -> "NSP02"
+            | NSP03 _ -> "NSP03"
+            | NSP04 _ -> "NSP04"
+            | NSP05 _ -> "NSP05"
             // identifier-related error codes 
             | ID000 _ -> "ID000"
             | ID001 _ -> "ID001"
@@ -161,7 +161,7 @@ type DiagnosticCode =
             | NSP02 (url, innerErrMsg) -> sprintf "%s found but could not be downloaded: %s" url innerErrMsg
             | NSP03 alias -> sprintf "Alias %s appeared previously in this namespace" alias
             | NSP04 path -> sprintf "Circular theory reference detected: %s" path
-            | NSP05 (sources, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." sources theory chosenSource
+            | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
             | ID001 identifier -> sprintf "Duplicate identifier %s detected." identifier
@@ -181,6 +181,7 @@ type DiagnosticSeverity =
 
 type Diagnostic =
     {
+        Uri: System.Uri
         Emitter: DiagnosticEmitter
         Severity: DiagnosticSeverity
         StartPos: Position
@@ -402,7 +403,7 @@ let inputStringManipulator (input:string) errorIndex =
         replaceFirstNonWhitespace (input)
 
 /// If the source code is not syntax-error-free, this function will find the first error and emit it.
-let tryParseFirstError someParser (ad: Diagnostics) input (code:DiagnosticCode) =
+let tryParseFirstError someParser (uri: System.Uri) input (code:DiagnosticCode) =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -412,6 +413,7 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:DiagnosticCode) 
         let newErrMsg, _ = mapErrMsgToRecText input errorMsg restInput.Position
         let diagnostic =
             { 
+                Diagnostic.Uri = uri
                 Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = restInput.Position
@@ -427,7 +429,7 @@ let tryParseFirstError someParser (ad: Diagnostics) input (code:DiagnosticCode) 
 /// position with spaces as long as the parser reaches a position where another parser should be 
 /// applied according to the applied synchronizing tokens. The recursive call stop also in rare cases, 
 /// in which this strategy would fail because the error occurs at the same position in consecutive recursive calls of the function.
-let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex (code:DiagnosticCode) lastCorrectedIndex lastChoices =
+let rec tryParse someParser (uri: System.Uri) input startIndexOfInput nextIndex (code:DiagnosticCode) lastCorrectedIndex lastChoices =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -457,6 +459,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
                 )
             let diagnostic =
                 { 
+                    Diagnostic.Uri = uri
                     Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = correctedPosition
@@ -470,7 +473,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
             let newInput = inputStringManipulator input (int restInput.Position.Index)
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
             // and cond1 are still met.
-            tryParse someParser ad newInput startIndexOfInput nextIndex code correctedIndex previousChoices
+            tryParse someParser uri newInput startIndexOfInput nextIndex code correctedIndex previousChoices
         else
             // We return -1 if in the first recursive call the error position did not met the conditions cond0 and cond1
             // Otherwise, we return an error position of the previous error in the recursive call that still 
@@ -480,7 +483,7 @@ let rec tryParse someParser (ad: Diagnostics) input startIndexOfInput nextIndex 
 
 /// This function emits diagnostics for chunks of input between the end of parsing result of someParser and the starting index
 /// where another parser should be applied according to the applied synchronizing tokens.
-let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) startIndexOfInput nextIndex (code:DiagnosticCode) lastCorrectedIndex lastChoices =
+let rec tryParseRemainingChunk someParser (uri: System.Uri) (input:string) startIndexOfInput nextIndex (code:DiagnosticCode) lastCorrectedIndex lastChoices =
     
     if input.Trim() <> "" then
          match run someParser input with
@@ -492,7 +495,7 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                     () // end the recursion, since we have probably an infinite loop
                 else
                     if userState.Index < input.Length then
-                        tryParseRemainingChunk someParser ad newInput startIndexOfInput nextIndex code correctedIndex ""
+                        tryParseRemainingChunk someParser uri newInput startIndexOfInput nextIndex code correctedIndex ""
             | Failure(errorMsg, restInput, userState) ->
                 let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
                 let previousChoices = String.concat ", " choices
@@ -509,6 +512,7 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                         )
                     let diagnostic =
                         { 
+                            Diagnostic.Uri = uri
                             Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                             Diagnostic.Severity = DiagnosticSeverity.Error
                             Diagnostic.StartPos = correctedPosition
@@ -523,7 +527,7 @@ let rec tryParseRemainingChunk someParser (ad: Diagnostics) (input:string) start
                     // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
                     // and cond1 are still met.
                     if restInput.Position.Index < input.Length && lastCorrectedIndex <> correctedIndex then
-                        tryParseRemainingChunk someParser ad newInput startIndexOfInput nextIndex code correctedIndex previousChoices
+                        tryParseRemainingChunk someParser uri newInput startIndexOfInput nextIndex code correctedIndex previousChoices
         
 
 let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) num = 
@@ -535,7 +539,7 @@ let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) nu
 
 
 /// Emits diagnostics for the error positions (if any) that are not overlapped by the intervals
-let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:DiagnosticCode) (intervals:System.Collections.Generic.List<Interval>) lastCorrectedIndex lastChoices =
+let rec tryParseRemainingOnly someParser (uri: System.Uri) input (code:DiagnosticCode) (intervals:System.Collections.Generic.List<Interval>) lastCorrectedIndex lastChoices =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -545,7 +549,7 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:Diagnosti
             let newInput = inputStringManipulator input (int userState.Index)
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions 
             // are still met.
-            tryParseRemainingOnly someParser ad newInput code intervals userState.Index ""
+            tryParseRemainingOnly someParser uri newInput code intervals userState.Index ""
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         let previousChoices = (String.concat ", " choices)
@@ -559,6 +563,7 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:Diagnosti
             if cond then
                 let diagnostic =
                     { 
+                        Diagnostic.Uri = uri
                         Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                         Diagnostic.Severity = DiagnosticSeverity.Error
                         Diagnostic.StartPos = restInput.Position
@@ -572,7 +577,7 @@ let rec tryParseRemainingOnly someParser (ad: Diagnostics) input (code:Diagnosti
             // replace the input by manipulating the input string depending on the error position
             let newInput = inputStringManipulator input (int restInput.Position.Index)
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions are still met.
-            tryParseRemainingOnly someParser ad newInput code intervals restInput.Position.Index previousChoices
+            tryParseRemainingOnly someParser uri newInput code intervals restInput.Position.Index previousChoices
 
 /// Generate an ast on a best-effort basis, no matter if there are syntax errors, without emitting any diagnostics
 let rec tryGetAst someParser input lastCorrectedIndex =

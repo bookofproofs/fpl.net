@@ -22,6 +22,7 @@ type EvalAliasedNamespaceIdentifier =
       EvalAlias: EvalAlias
       PascalCaseIdList: string list }
 
+    /// Creates an EvalAliasedNamespaceIdentifier with a string, alias or star, and positions.
     static member CreateEani (pascalCaseId:string, aliasOrStar: string, startPos, endPos) =
         let evalAlias = {
                 EvalAlias.StartPos = startPos
@@ -34,11 +35,18 @@ type EvalAliasedNamespaceIdentifier =
           EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
           EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascalCaseId ] }
 
+    /// Creates an EvalAliasedNamespaceIdentifier with a string list and a given EvalAlias and positions.
     static member CreateEani (pascalCaseIdList:string list, evalAlias:EvalAlias, startPos, endPos) = 
         { EvalAliasedNamespaceIdentifier.StartPos = startPos
           EvalAliasedNamespaceIdentifier.EndPos = endPos
           EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
           EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList }
+
+    /// Creates an EvalAliasedNamespaceIdentifier with a given Uri.
+    static member CreateEani(uri:System.Uri) = 
+        let pascalCaseId = Path.GetFileNameWithoutExtension(uri.LocalPath)
+        let pos = Position(uri.LocalPath, 0, 1, 1)
+        EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseId, "*", pos, pos)
 
     member this.FileNamePattern =
         let pascalCaseIdList = String.concat "." this.PascalCaseIdList
@@ -73,11 +81,122 @@ type SortingProperties =
         this.ReferencedAsts <- []
         this.EANIList <- []
 
+    static member Create() = 
+        {
+            SortingProperties.TopologicalSorting = 0
+            SortingProperties.ReferencingAsts = []
+            SortingProperties.ReferencedAsts = []
+            SortingProperties.EANIList = [] 
+        }
+
 let computeMD5Checksum (input: string) =
     let md5 = MD5.Create()
     let inputBytes = Encoding.ASCII.GetBytes(input)
     let hash = md5.ComputeHash(inputBytes)
     hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
+
+
+/// A type that encapsulates the sources found for a uses clause
+/// and provides members to filter those from the file system and those from
+/// the web.
+type FplSources(paths: string list) =
+    /// All found paths for a uses clause, including those from the web.
+    member this.Paths = paths
+
+    /// Returns all loaded FPL theories loaded by a uses clause grouped by name with lists of potential locations
+    member this.Grouped 
+        with get () = 
+            let fplTheories = 
+                this.Paths
+                |> List.map (fun fp -> (Path.GetFileName fp, fp))
+            fplTheories
+            |> List.groupBy fst
+    
+    static member IsUrl(s: string) =
+        let pattern = @"^https?://"
+        Regex.IsMatch(s, pattern)
+
+    static member IsFilePath(s: string) =
+        try
+            Path.GetFullPath(s) |> ignore
+            let pattern = @"^https?://"
+            not (Regex.IsMatch(s, pattern))
+        with :? ArgumentException ->
+            false
+
+    /// Uri of this ParsingProperties
+    static member EscapedUri(path:string) = 
+        let pathNew = Uri.UnescapeDataString(path.Replace("\\","/"))
+        if FplSources.IsFilePath(pathNew) then  
+            Uri($"{pathNew}")
+        else
+            Uri($"fplregistry://{pathNew}")
+
+    member this.Urls = List.filter FplSources.IsUrl this.Paths
+    member this.FilePaths = List.filter FplSources.IsFilePath this.Paths
+    member this.Length = this.Paths.Length
+
+
+
+    member this.GroupedWithPreferedSource 
+        with get () = 
+            let result = 
+                let grouped = this.Grouped
+                grouped
+                |> List.collect (fun (fileName, paths) -> 
+                    let pathType =
+                        paths
+                        |> List.map snd
+                        |> List.tryFind (fun path -> 
+                            if FplSources.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                                true // the first source is the current directory
+                            elif FplSources.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
+                                true // the second is the lib subdirectory 
+                            else
+                                true // the third is the internet source
+                        )
+
+                    let pathTypes =
+                        List.map snd paths
+                        |> List.map (fun path -> 
+                            if FplSources.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                                "./lib"
+                            elif  FplSources.IsFilePath(path) then 
+                                "./"
+                            else
+                                "https"
+                        )                    
+                    let theoryName = 
+                        Path.GetFileNameWithoutExtension(fileName)
+                    match pathType with
+                    | Some path -> 
+                        let chosenPathType = 
+                            if FplSources.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                                "./"
+                            elif FplSources.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
+                                "./lib"
+                            else
+                                "https"
+                        [(fileName, path, chosenPathType, pathTypes, theoryName)]
+                    | None -> []          
+                )
+            result
+
+    /// Checks if a filename has a pattern.
+    static member HasPattern(fileName:string, pattern) = 
+        let wildcardToRegex (wildcard : string) =
+            "^" + Regex.Escape(wildcard).Replace("\\*", ".*").Replace("\\?", ".") + "$"
+        let regexPattern = wildcardToRegex pattern
+        let regex = Regex(regexPattern, RegexOptions.IgnoreCase)
+        regex.IsMatch(fileName)
+    
+    /// Finds all filenames in sources with a given pattern.
+    member this.FindWithPattern(pattern:string) = 
+        this.GroupedWithPreferedSource
+        |> List.filter (fun (fileName, _, _, _, _) ->
+            FplSources.HasPattern(fileName, pattern)
+        )
+
 
 type ParsingProperties =
     { mutable UriPath: string // source of the ast
@@ -85,6 +204,7 @@ type ParsingProperties =
       mutable Ast: Ast // parsed ast
       mutable Checksum: string } // checksum of the parsed ast
 
+    /// Reset this ParsingProperties to its new location
     member this.Reset (fplCode: string) (codeLoc: string) =
         let checksum = computeMD5Checksum fplCode
 
@@ -92,13 +212,21 @@ type ParsingProperties =
             // if there ist a Parsed Ast with the same Name as the eani.Name
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, sourcecode, the
-            this.Ast <- fplParser fplCode
             this.UriPath <- codeLoc
+            this.Ast <- fplParser (FplSources.EscapedUri(codeLoc)) fplCode
             this.FplSourceCode <- fplCode
             this.Checksum <- checksum
             true
         else
             false
+
+    static member Create(fileLoc, fileContent) = 
+        {
+            ParsingProperties.UriPath = fileLoc
+            ParsingProperties.FplSourceCode = fileContent
+            ParsingProperties.Ast = FplParser.fplParser (FplSources.EscapedUri(fileLoc)) fileContent
+            ParsingProperties.Checksum = computeMD5Checksum fileContent
+        }
 
 type FplBlockProperties =
     { FplBlockIds: Dictionary<string, int> }
@@ -133,93 +261,6 @@ type ParsedAstList() =
 
 
 
-/// A type that encapsulates the sources found for a uses clause
-/// and provides members to filter those from the file system and those from
-/// the web.
-
-type FplSources(paths: string list) =
-    /// All found paths for a uses clause, including those from the web.
-    member this.Paths = paths
-
-    /// Returns all loaded FPL theories loaded by a uses clause grouped by name with lists of potential locations
-    member this.Grouped 
-        with get () = 
-            let fplTheories = 
-                this.Paths
-                |> List.map (fun fp -> (Path.GetFileName fp, fp))
-            fplTheories
-            |> List.groupBy fst
-    
-    member this.IsUrl(s: string) =
-        let pattern = @"^https?://"
-        Regex.IsMatch(s, pattern)
-
-    member this.IsFilePath(s: string) =
-        try
-            Path.GetFullPath(s) |> ignore
-            let pattern = @"^https?://"
-            not (Regex.IsMatch(s, pattern))
-        with :? ArgumentException ->
-            false
-
-
-    member this.Urls = List.filter this.IsUrl this.Paths
-    member this.FilePaths = List.filter this.IsFilePath this.Paths
-    member this.Length = this.Paths.Length
-
-    member this.GroupedWithPreferedSource 
-        with get () = 
-            let result = 
-                let grouped = this.Grouped
-                grouped
-                |> List.collect (fun (fileName, paths) -> 
-                    let pathType =
-                        paths
-                        |> List.map snd
-                        |> List.tryFind (fun path -> 
-                            if this.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
-                                true // the first source is the current directory
-                            elif this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
-                                true // the second is the lib subdirectory 
-                            else
-                                true // the third is the internet source
-                        )
-
-                    let pathTypes =
-                        List.map snd paths
-                        |> List.map (fun path -> 
-                            if this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then
-                                "./lib"
-                            elif  this.IsFilePath(path) then 
-                                "./"
-                            else
-                                "https"
-                        )                    
-                    let fileNameWithoutExtension = 
-                        Path.GetFileNameWithoutExtension(fileName)
-                    match pathType with
-                    | Some path -> 
-                        let chosenPathType = 
-                            if this.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
-                                "./"
-                            elif this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
-                                "./lib"
-                            else
-                                "https"
-                        [(fileName, path, chosenPathType, pathTypes, fileNameWithoutExtension)]
-                    | None -> []
-                )
-            result
-
-    member this.FindWithPattern(pattern:string) = 
-        let wildcardToRegex (wildcard : string) =
-            "^" + Regex.Escape(wildcard).Replace("\\*", ".*").Replace("\\?", ".") + "$"
-        let regexPattern = wildcardToRegex pattern
-        let regex = Regex(regexPattern, RegexOptions.IgnoreCase)
-        this.GroupedWithPreferedSource
-        |> List.filter (fun (fileName, _, _, _, _) ->
-            regex.IsMatch(fileName)
-        )
         
 
 type FplType =
@@ -252,7 +293,6 @@ type FplBlockType =
 
 type FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions: Positions, parent: FplValue option) =
     let mutable _name = name
-    let mutable _nameStartPos = Position("", 0, 1, 1)
     let mutable _nameEndPos = Position("", 0, 1, 1)
     let mutable _evalType = evalType
     let mutable _typeSignature = []
@@ -267,12 +307,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         with get () = _name
         and set (value) = _name <- value
 
-    /// Identifier of this FplValue that is unique in its scope
-    member this.NameStartPos
-        with get () = _nameStartPos
-        and set (value) = _nameStartPos <- value
-
-    /// Identifier of this FplValue that is unique in its scope
+    /// This FplValue's name's end position that can be different from its endig position
     member this.NameEndPos
         with get () = _nameEndPos
         and set (value) = _nameEndPos <- value

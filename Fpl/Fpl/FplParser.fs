@@ -644,13 +644,13 @@ let maxIntervalBound (intervals:System.Collections.Generic.List<Interval>) =
             maxBound <- interval.Start
     maxBound
 
-let fplParser (input:string) = 
+let fplParser (uri:System.Uri) (input:string) = 
     let preProcessedInput = preParsePreProcess input
     let matchList = stringMatches preProcessedInput errRecPattern
 
     let intervals = new System.Collections.Generic.List<Interval>()
 
-    let parseResult, pIndex = tryParseFirstError stdParser ad preProcessedInput stdCode  
+    let parseResult, pIndex = tryParseFirstError stdParser uri preProcessedInput stdCode  
     intervals.Add(Interval(0, pIndex))
 
     let mutable lastParserIndex = 0
@@ -668,14 +668,14 @@ let fplParser (input:string) =
                 // the last parsing process hasn't consumed all the input between lastParserIndex and index
                 let remainingChunk = preProcessedInput.Substring(int lastParserIndex, (index - int lastParserIndex))
                 // emit error messages for this chunk of input string using the last parser  
-                tryParseRemainingChunk lastParser ad remainingChunk lastParserIndex index lastCode -1 ""
+                tryParseRemainingChunk lastParser uri remainingChunk lastParserIndex index lastCode -1 ""
                 intervals.Add(Interval(lastParserIndex, nextIndex))
                 lastParserIndex <- nextIndex
             else
                 // otherwise, find the next error info tuple based on the current substring
                 let code, prefixList, errRecParser = findErrInfoTuple subString
                 // try to parse substring using the parser from the error info and emitting diagnostics (if any)
-                let pResult, pIndex, pSuccess = tryParse errRecParser ad subString index nextIndex code -1 ""
+                let pResult, pIndex, pSuccess = tryParse errRecParser uri subString index nextIndex code -1 ""
                 intervals.Add(Interval(index, pIndex))
                 lastParserIndex <- pIndex
                 lastParser <- errRecParser
@@ -684,7 +684,7 @@ let fplParser (input:string) =
                 lastSuccess <- pSuccess
 
     // emit diagnostics for any error positions that are not overlayed by the intervals
-    tryParseRemainingOnly stdParser ad preProcessedInput stdCode intervals -1 ""
+    tryParseRemainingOnly stdParser uri preProcessedInput stdCode intervals -1 ""
     // Return an ast on a best effort basis even if there were some errors 
     let resultingAst = tryGetAst stdParser preProcessedInput -1
 
@@ -693,7 +693,7 @@ let fplParser (input:string) =
     if not (remaingString.EndsWith("}") && Regex.Matches(preProcessedInput, "\}").Count = Regex.Matches(preProcessedInput, "\{").Count) then
         // prevent emitting "false-positive" errors of characters found after namespace using the heuristic that 
         // the last character of a namespace is "}" and then looks "good"
-        tryParseRemainingChunk stdParser1 ad (preProcessedInput.Substring(maxBound)) maxBound (preProcessedInput.Length) stdCode1 -1 ""
+        tryParseRemainingChunk stdParser1 uri (preProcessedInput.Substring(maxBound)) maxBound (preProcessedInput.Length) stdCode1 -1 ""
     resultingAst
 
 

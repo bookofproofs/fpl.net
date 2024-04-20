@@ -102,7 +102,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAlias.AliasOrStar = ""
             }
         let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos)
-        let libMap = downloadLibMap url
+        let libMap = downloadLibMap (System.Uri(url)) url
         Assert.IsTrue(libMap.Length > 0)
 
     [<TestMethod>]
@@ -116,7 +116,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAlias.AliasOrStar = ""
             }
         let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos)
-        let libMap = downloadLibMap url
+        let libMap = downloadLibMap (System.Uri(url)) url
         Assert.AreEqual(0, ad.CountDiagnostics)
 
     [<DataRow("Fpl *", 4)>]

@@ -3,256 +3,164 @@ open ErrDiagnostics
 open FplParser
 open FplInterpreter
 open FplInterpreterTypes
+open System.IO
 open FParsec
 open System.Text.RegularExpressions
 open System.Collections.Generic
 
+let deleteFilesWithExtension dir extension =
+    if Directory.Exists(dir) then
+        Directory.GetFiles(dir, "*." + extension)
+        |> Array.iter File.Delete
+    else
+        printfn "Directory %s does not exist." dir
 
 
+let prepareFplCode(fplCode:string, delete:bool) =
+    FplParser.parserDiagnostics.Clear()
+    let currDir = Directory.GetCurrentDirectory()
 
-let input = """uses Fpl.Commons
+    File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
+    let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+    let fplLibUrl =
+        "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+    if delete then 
+        deleteFilesWithExtension currDir "fpl"
+        None
+    else
+        let parsedAsts = ParsedAstList()
+        Some (FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts true)
 
-def class Set: obj
-{
-    intr
-}
+let loadFplFile(path:string) = 
+    let uri = System.Uri(path)
+    let fplLibUrl =
+        "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+    let parsedAsts = ParsedAstList()
+    let fplCode = File.ReadAllText(path)
+    Some (FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts false)
 
-// "in relation" ("is element of") relation
-def pred In infix "in" (x,y: Set)
-{
-    intr
-}
 
-def pred IsEmpty(x: Set)
-{
-    all y in Set
-    {
-        not In(y, x) 
-    }
-}
-
-// existence of an empty set
-axiom EmptySetExists()
-{
-    ex x in Set
-    {
-        IsEmpty(x)
-    }
-}
-
-// introduction of a new mathematical object
-def class EmptySet: Set
-{
-    ctor EmptySet()
-    {
-        dec 
-            base.obj()
-            assert IsEmpty(self) 
-        ;
-        self
-    }
-}
-
-// relation between a subset and a superset
-def pred IsSubset(subset,superset: Set)
-{
-    all u in Set
-    {
-        impl (In(u, subset), In(u, superset))
-    }
-}
-
-// introduction of a new mathematical object that is a subset of a superset
-def class Subset: Set
-{
-    ctor Subset(superSet: Set)
-    {
-        dec
-            base.Set()
-            assert IsSubset(self, superSet)
-        ;
-        self
-    }
-}
-
-// extensionality
-axiom Extensionality()
-{
-    all x,y in Set
-    {
-        impl
-        (
-            and
-            (
-                IsSubset(x,y),
-                IsSubset(y,x)
-            ),
-            ( x = y )
-        )
-    }
-}
-
-// adds Roster notation capability to this theory
-def class SetRoster: Set
-{
-    // to support enumerating set elements, e.g. SetRoster(1,2,3)
-    ctor SetRoster(listOfSets:* Set)
-    {
-        dec 
-            ~elem: Set
-            base.Set()
-            for elem in listOfSets
-            {
-                assert In(elem, self)
-            }
-        ;
-        self
-    }
-
-}
-
-// Schema of separation axioms
-axiom SchemaSeparation()
+let input = """inference ModusPonens()
 {
     dec
-        ~p: pred
-        ~x,y: Set
+        ~p,q: pred
     ;
-    all p, x
-    {
-        ex y
-        {
-            ( y = SetBuilder(x,p) )
-        }
-    }
+    premise:
+        and (p, impl (p,q) )
+    conclusion:
+        q
 }
 
-// adds set-builder notation capability to this theory
-// pred p indicates that p is a predicate, in which the variable u is bound and the type of u is Set
-// moreover, p can accept even more bound variables of any type.
-def class SetBuilder: Set
+inference ProceedingResults(p:+ pred)
 {
-    // to support set builder notation, ex. all "even" natural numbers like SetBuilder(n: Nat, Even(n))
-    ctor SetBuilder(x: Set, p: pred(u: Set, o:* obj))
-    {
-        dec
-        assert
-            all u
-            {
-                iif
-                (
-                    In(u,self),
-                    and ( In(u,x), p(u,o) )
-                )
-            }
-        ;
-        self
-    }
-}
-
-// For any two sets $x,y$ there exists a set $z$ containing them as elements.
-axiom Pairing()
-{
-    all x,y in Set
-    {
-        ex z in Set
-        {
-            all w in Set
-            {
-                iif
-                (
-                    In(w,z),
-                    or
-                    (
-                        ( w = x ),
-                        ( w = y )
-                    )
-                )
-            }
-        }
-    }
-}
-
-// for every set x there is a set containing all elements of the elements of x
-axiom Union()
-{
-    all x in Set
-    {
-        ex y in Set
-        {
-            all z,w in Set
-            {
-                impl
-                (
-                    and (In(z,w), In(w,x)),
-                    In(z,y)
-                )
-            }
-        }
-    }
-}
-
-def pred IsPowerSet(ofSet, potentialPowerSet: Set)
-{
-    all z in Set
-    {
-        impl (Subset(z,ofSet), In(z, potentialPowerSet))
-    }
-}
-
-// including the PowerSet function
-def func PowerSet(x: Set) -> Set
-{
-    dec 
-        ~y: Set
-        assert IsPowerSet(x,y)
+    dec
+        ~proceedingResult: pred
     ;
-    return y
-}
-
-// for every set x there is a set y containing all subsets of x as its elements
-axiom PowerSetExistsForAllSets()
-{
-    all x in Set
-    {
-        ex y in Set
+    premise: 
+        all proceedingResult in p
         {
-            IsPowerSet(x, y)
+            proceedingResult
         }
-    }
+
+    conclusion:
+        and (p)
 }
 
-// introducing a set union function
-def func SetUnion(x,y: Set) -> Set
+inference ExistsByExample(p: pred(c: obj, other:* obj))
 {
-    dec 
-        ~union: Set
-        assert
-            all z in Set
-            {
-                iif
-                (
-                    or (In(z,x), In(z,y)),
-                    In(z,union)
-                )
-            }
+    dec
+        ~x: obj
     ;
-    return union
+    premise:
+        p(c, other)
+    conclusion:
+        ex x {p(x, other)}
 }
 
-// introducing a singleton function
-def func Singleton(x: Set) -> Set
+def class A: obj
 {
-    return SetRoster(x)
+    intr
 }
 
-// alternative 2: adds SetUnion notation capability to this theory (as predicate)
-def pred Union(x,superSet: Set)
+def class B: obj
 {
-    all u in Set
-    {
-        impl (In(u, x), In(u, superSet))
+    intr
+}
+
+def class C: obj
+{
+    intr
+}
+
+def pred Greater infix ">" (x,y: obj)
+{
+    intr
+}
+
+axiom GreaterAB()
+{
+    dec
+        ~a: A
+        ~b: B
+    ;
+    (a > b)
+}
+
+axiom GreaterBC()
+{
+    dec
+        ~b: B
+        ~c: C
+    ;
+    (b > c)
+}
+
+axiom GreaterTransitive()
+{
+    dec
+        ~x,y,z: obj
+    ;
+    impl
+    (
+        and
+        (
+            (x > y), (y > z)
+        ),
+        (x > z)
+    )
+}
+
+lemma Example4()
+{
+    dec
+        ~x,y,z: obj
+    ;
+    ex x 
+    { 
+        and ((x > y), (x > z)) 
     }
+}
+
+proof Example4$1
+{
+    dec
+        ~a:A
+        ~b:B
+        ~c:C
+        ~x,y,z: obj
+    ;
+    1. GreaterAB |- (a > b) 
+    2. GreaterBC |- (b > c) 
+    3. 1., 2. |- and ((a > b), (b > c)) 
+    4. 3., GreaterTransitive |- impl ( and ((a > b), (b > c)), (a > c) ) 
+    5. 4., ModusPonens |- (a > c)
+    6. 5., 1. |- and ((a > c), (a > b)) 
+    7. 6., ExistsByExample(and((a > c), (a > b))) |- 
+        ex x 
+        { 
+            and ((x > y), (x > z)) 
+        }
+    qed
 }
 
 ;"""
@@ -264,9 +172,11 @@ printf "%O" result
 ad.PrintDiagnostics
 *)
 
-let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-let parsedAsts = ParsedAstList()
-FplInterpreter.fplInterpreter input (System.Uri("file:///d%3A/Forschung/fpl.net/theories/lib/FplSetTheory.fpl")) fplLibUrl parsedAsts false |> ignore
+let st = loadFplFile(@"D:\Forschung\fpl.net\theories\lib\Fpl.Commons.Structures.fpl")
+(*
+prepareFplCode("",true) |> ignore
+let st = prepareFplCode(input,true) 
+*)
 
 printf "\n--------------------------------\n"
 ad.PrintDiagnostics
@@ -274,6 +184,4 @@ ad.PrintDiagnostics
 printf "\n--------------------------------\n"
 
 
-let mutable test = []
-test <- test @ [""]
 

@@ -1,12 +1,13 @@
 ﻿module FplInterpreter
-open System.Collections.Generic
+open System
 open FplInterpreterTypes
 open FplInterpreterUsesClause
 open FplInterpreterBuildingBlocks
 
-let fplInterpreter input uri fplLibUrl (parsedAsts:ParsedAstList) debug = 
+let fplInterpreter input (uri:Uri) fplLibUrl (parsedAsts:ParsedAstList) debug = 
+    let escapedUri = Uri(Uri.UnescapeDataString(uri.AbsoluteUri))
     let st = SymbolTable(parsedAsts, debug)
     
-    loadAllUsesClauses input uri fplLibUrl parsedAsts 
-    evaluateSymbolTable st
+    loadAllUsesClauses input escapedUri fplLibUrl parsedAsts 
+    evaluateSymbolTable uri st
     st

@@ -173,6 +173,31 @@ type TestInterpreterErrors() =
         this.PrepareTestNSP05a(true) |> ignore
 
 
+    member this.PrepareTestNSP05CrossCheck (delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let input = """;"""
+        let currDir = Directory.GetCurrentDirectory()
+
+        File.WriteAllText(Path.Combine(currDir, "Test.fpl"), input)
+        let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            deleteFilesWithExtension currDir "fpl"
+            deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
+            None
+        else
+            let parsedAsts = ParsedAstList()
+            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true)
+
+    [<TestMethod>]
+    member this.TestNSP05CrossCheck() =
+        let code = NSP05 (["./"], "Test", "./")
+        printf "Trying %s" code.Message
+        this.PrepareTestNSP05CrossCheck(false) |> ignore
+        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
+        this.PrepareTestNSP05CrossCheck(true) |> ignore
+
     [<DataRow("axiom", "SomeAxiom()", "SomeAxiom()")>]
     [<DataRow("postulate", "SomePostulate()", "SomePostulate()")>]
     [<DataRow("theorem", "SomeTheorem()", "SomeTheorem()")>]

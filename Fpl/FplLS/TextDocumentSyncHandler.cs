@@ -6,6 +6,8 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using OmniSharp.Extensions.LanguageServer.Protocol;
 using OmniSharp.Extensions.Embedded.MediatR;
 using System;
+using static FplInterpreterTypes;
+
 
 namespace FplLS
 {
@@ -66,8 +68,9 @@ namespace FplLS
 
         public TextDocumentAttributes GetTextDocumentAttributes(Uri uri)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, $"{uri}", "TextDocumentSyncHandler.GetTextDocumentAttributes");
-            return new TextDocumentAttributes(uri, "fpl");
+            var escapedUri = FplSources.EscapedUri(uri.AbsoluteUri);
+            FplLsTraceLogger.LogMsg(_languageServer, $"{escapedUri}", "TextDocumentSyncHandler.GetTextDocumentAttributes");
+            return new TextDocumentAttributes(escapedUri, "fpl");
         }
 
         public Task<Unit> Handle(DidChangeTextDocumentParams request, CancellationToken cancellationToken)
@@ -76,10 +79,10 @@ namespace FplLS
             FplLsTraceLogger.LogMsg(_languageServer, $"{cancellationToken}", "TextDocumentSyncHandler.Handle");
             try
             {
-                var uri = request.TextDocument.Uri;
+                var uri = FplSources.EscapedUri(request.TextDocument.Uri.AbsoluteUri);
                 var text = request.ContentChanges.FirstOrDefault()?.Text;
 
-                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer", "TextDocumentSyncHandler.Handle");
+                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer", $"TextDocumentSyncHandler.Handle {uri}");
                 _bufferManager.UpdateBuffer(uri, new StringBuilder(text));
                 FplLsTraceLogger.LogMsg(_languageServer, $"buffer updated", "TextDocumentSyncHandler.Handle");
             }
@@ -97,8 +100,9 @@ namespace FplLS
             FplLsTraceLogger.LogMsg(_languageServer, "(DidOpenTextDocumentParams)", "TextDocumentSyncHandler.Handle");
             try
             {
-                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer (DidOpenTextDocumentParams)", "TextDocumentSyncHandler.Handle");
-                _bufferManager.UpdateBuffer(request.TextDocument.Uri, new StringBuilder(request.TextDocument.Text));
+                var uri = FplSources.EscapedUri(request.TextDocument.Uri.AbsoluteUri);
+                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer (DidOpenTextDocumentParams)", $"TextDocumentSyncHandler.Handle {uri}");
+                _bufferManager.UpdateBuffer(uri, new StringBuilder(request.TextDocument.Text));
                 FplLsTraceLogger.LogMsg(_languageServer, $"buffer updated (DidOpenTextDocumentParams)", "TextDocumentSyncHandler.Handle");
             }
             catch (Exception ex)
