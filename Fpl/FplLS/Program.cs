@@ -52,7 +52,7 @@ namespace FplLS
                             var diagnosticsHandler = serviceProvider.GetService<DiagnosticsHandler>();
 
                             // Hook up diagnostics
-                            bufferManager.BufferUpdated += (__, x) => diagnosticsHandler.PublishDiagnostics(x.Uri, bufferManager.GetBuffer(x.Uri));
+                            bufferManager.BufferUpdated += (__, x) => diagnosticsHandler.PublishDiagnostics(UriDiagnostics.EscapedUri(x.Uri), bufferManager.GetBuffer(x.Uri));
 
                             return Task.CompletedTask;
                         }

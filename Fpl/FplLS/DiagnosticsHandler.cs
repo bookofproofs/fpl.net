@@ -12,6 +12,40 @@ using static ErrDiagnostics;
 
 namespace FplLS
 {
+    public class UriDiagnostics
+    {
+        private readonly Dictionary<Uri, List<Model.Diagnostic>> _diagnostics;
+
+        public UriDiagnostics()
+        {
+            _diagnostics = new Dictionary<Uri, List<Model.Diagnostic>>();
+        }
+
+
+        public static Uri EscapedUri(Uri oldUri)
+        {
+            string decodedUriString = Uri.UnescapeDataString(oldUri.AbsoluteUri);
+            return new Uri(decodedUriString);
+        }
+        
+        public void AddDiagnostics(Uri uri, Model.Diagnostic diagnostic)
+        {
+            var key = EscapedUri(uri);
+            if (!_diagnostics.ContainsKey(key))
+            {
+                _diagnostics.Add(key, new List<Model.Diagnostic>());
+            }
+            _diagnostics[key].Add(diagnostic);
+        }
+
+        public Dictionary<Uri, List<Model.Diagnostic>> Enumerator()
+        {
+            return _diagnostics;
+        }
+
+    }
+
+
     public class DiagnosticsHandler
     {
         private readonly ILanguageServer _languageServer;
@@ -37,29 +71,15 @@ namespace FplLS
                     parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
                     var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
                     FplInterpreter.fplInterpreter(sourceCode, uri, fplLibUri, _parsedAstsList, false);
-                    var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
-                    _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
+                    var diagnostics = CastDiagnostics(uri, parserDiagnostics.Collection, new TextPositions(sourceCode));
+                    foreach (var diagnostic in diagnostics.Enumerator())
                     {
-                        Uri = uri,
-                        Diagnostics = diagnostics
-                    });
-
-                    var testDiagnostics = new List<Model.Diagnostic>();
-                    var testDiagnostic = new Model.Diagnostic();
-                    testDiagnostic.Severity = Model.DiagnosticSeverity.Error;
-                    testDiagnostic.Message = "Test Diagnostic";
-                    var tp = new TextPositions("");
-                    testDiagnostic.Range = tp.GetRange(0, 0);
-                    testDiagnostics.Add(testDiagnostic);
-                    var encodedFilePath = fplLibUri + "/Fpl.Commons.fpl";
-                    var newUripath = encodedFilePath.Replace("https:", "fplregistry:");
-                    newUripath = newUripath.Replace("http:", "fplregistry:");
-                    _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
-                    {
-                        Uri = new System.Uri(newUripath),
-                        Diagnostics = testDiagnostics
-                    });
-
+                        _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
+                        {
+                            Uri = diagnostic.Key,
+                            Diagnostics = diagnostic.Value
+                        });
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -78,13 +98,13 @@ namespace FplLS
         /// <param name="diagnostics">Input list</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted list</returns>
-        public List<Model.Diagnostic> CastDiagnostics(FSharpList<ErrDiagnostics.Diagnostic> listDiagnostics, TextPositions tp)
+        public UriDiagnostics CastDiagnostics(Uri uri, FSharpList<ErrDiagnostics.Diagnostic> listDiagnostics, TextPositions tp)
         {
             var sb = new StringBuilder();
-            var castedListDiagnostics = new List<Model.Diagnostic>();
+            var castedListDiagnostics = new UriDiagnostics();
             foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics)
             {
-                castedListDiagnostics.Add(CastDiagnostic(diagnostic, tp, sb));
+                castedListDiagnostics.AddDiagnostics(diagnostic.Uri, CastDiagnostic(diagnostic, tp, sb));
             }
             return castedListDiagnostics;
         }
