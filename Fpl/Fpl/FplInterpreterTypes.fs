@@ -22,6 +22,7 @@ type EvalAliasedNamespaceIdentifier =
       EvalAlias: EvalAlias
       PascalCaseIdList: string list }
 
+    /// Creates an EvalAliasedNamespaceIdentifier with a string, alias or star, and positions.
     static member CreateEani (pascalCaseId:string, aliasOrStar: string, startPos, endPos) =
         let evalAlias = {
                 EvalAlias.StartPos = startPos
@@ -34,11 +35,18 @@ type EvalAliasedNamespaceIdentifier =
           EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
           EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascalCaseId ] }
 
+    /// Creates an EvalAliasedNamespaceIdentifier with a string list and a given EvalAlias and positions.
     static member CreateEani (pascalCaseIdList:string list, evalAlias:EvalAlias, startPos, endPos) = 
         { EvalAliasedNamespaceIdentifier.StartPos = startPos
           EvalAliasedNamespaceIdentifier.EndPos = endPos
           EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
           EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList }
+
+    /// Creates an EvalAliasedNamespaceIdentifier with a given Uri.
+    static member CreateEani(uri:System.Uri) = 
+        let pascalCaseId = Path.GetFileNameWithoutExtension(uri.LocalPath)
+        let pos = Position(uri.LocalPath, 0, 1, 1)
+        EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseId, "*", pos, pos)
 
     member this.FileNamePattern =
         let pascalCaseIdList = String.concat "." this.PascalCaseIdList
@@ -195,7 +203,7 @@ type FplSources(paths: string list) =
                             else
                                 "https"
                         )                    
-                    let fileNameWithoutExtension = 
+                    let theoryName = 
                         Path.GetFileNameWithoutExtension(fileName)
                     match pathType with
                     | Some path -> 
@@ -206,19 +214,24 @@ type FplSources(paths: string list) =
                                 "./lib"
                             else
                                 "https"
-                        [(fileName, path, chosenPathType, pathTypes, fileNameWithoutExtension)]
-                    | None -> []
+                        [(fileName, path, chosenPathType, pathTypes, theoryName)]
+                    | None -> []          
                 )
             result
 
-    member this.FindWithPattern(pattern:string) = 
+    /// Checks if a filename has a pattern.
+    static member HasPattern(fileName:string, pattern) = 
         let wildcardToRegex (wildcard : string) =
             "^" + Regex.Escape(wildcard).Replace("\\*", ".*").Replace("\\?", ".") + "$"
         let regexPattern = wildcardToRegex pattern
         let regex = Regex(regexPattern, RegexOptions.IgnoreCase)
+        regex.IsMatch(fileName)
+    
+    /// Finds all filenames in sources with a given pattern.
+    member this.FindWithPattern(pattern:string) = 
         this.GroupedWithPreferedSource
         |> List.filter (fun (fileName, _, _, _, _) ->
-            regex.IsMatch(fileName)
+            FplSources.HasPattern(fileName, pattern)
         )
         
 

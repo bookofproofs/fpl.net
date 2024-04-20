@@ -112,12 +112,12 @@ type DiagnosticCode =
             | TRL000 -> "TRL000"
             | TYD000 -> "TYD000"
             // interpreter error messages
-            | NSP00 _ -> "NSP000"
-            | NSP01 _ -> "NSP001"
-            | NSP02 (_, _) -> "NSP002"
-            | NSP03 _ -> "NSP003"
-            | NSP04 _ -> "NSP004"
-            | NSP05 _ -> "NSP005"
+            | NSP00 _ -> "NSP00"
+            | NSP01 _ -> "NSP01"
+            | NSP02 (_, _) -> "NSP02"
+            | NSP03 _ -> "NSP03"
+            | NSP04 _ -> "NSP04"
+            | NSP05 _ -> "NSP05"
             // identifier-related error codes 
             | ID000 _ -> "ID000"
             | ID001 _ -> "ID001"
@@ -161,7 +161,7 @@ type DiagnosticCode =
             | NSP02 (url, innerErrMsg) -> sprintf "%s found but could not be downloaded: %s" url innerErrMsg
             | NSP03 alias -> sprintf "Alias %s appeared previously in this namespace" alias
             | NSP04 path -> sprintf "Circular theory reference detected: %s" path
-            | NSP05 (sources, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." sources theory chosenSource
+            | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
             | ID001 identifier -> sprintf "Duplicate identifier %s detected." identifier
