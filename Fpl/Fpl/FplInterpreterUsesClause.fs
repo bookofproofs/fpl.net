@@ -241,7 +241,7 @@ let getParsedAstsMatchingAliasedNamespaceIdentifier (uri:System.Uri) (sources:Fp
         filtered
         |> Seq.iter (fun (_, path, _, _, _) ->
             let p = path
-            if sources.IsFilePath(path) then
+            if FplSources.IsFilePath(path) then
                 getParsedAstsFromSources uri eani [path] loadFile parsedAsts 
             else
                 getParsedAstsFromSources uri eani [path] downloadFile parsedAsts 
@@ -333,11 +333,11 @@ let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:ParsedAstList) =
             // evaluate the EvalAliasedNamespaceIdentifier list of the ast
             pa.Sorting.EANIList <- eval_uses_clause pa.Parsing.Ast 
             pa.Status <- ParsedAstStatus.UsesClausesEvaluated
-            findDuplicateAliases (pa.Parsing.Uri()) pa.Sorting.EANIList |> ignore
+            findDuplicateAliases (FplSources.EscapedUri(pa.Parsing.UriPath)) pa.Sorting.EANIList |> ignore
             pa.Sorting.EANIList
             |> List.iter (fun (eani:EvalAliasedNamespaceIdentifier) -> 
                 getParsedAstsMatchingAliasedNamespaceIdentifier uri sources parsedAsts eani
-                emitDiagnosticsForDuplicateFiles (pa.Parsing.Uri()) sources eani
+                emitDiagnosticsForDuplicateFiles (FplSources.EscapedUri(pa.Parsing.UriPath)) sources eani
                 chainParsedAsts parsedAsts pa eani
             ) |> ignore
         | None -> 
@@ -355,7 +355,7 @@ let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:ParsedAstList) =
                 let circularEaniReference = pa.Sorting.EANIList |> List.filter (fun eani -> eani.Name = circularReferencedName) |> List.head
                 let diagnostic =
                         { 
-                            Diagnostic.Uri = (pa.Parsing.Uri())
+                            Diagnostic.Uri = (FplSources.EscapedUri(pa.Parsing.UriPath))
                             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                             Diagnostic.Severity = DiagnosticSeverity.Error
                             Diagnostic.StartPos = circularEaniReference.StartPos

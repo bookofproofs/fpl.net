@@ -95,14 +95,114 @@ let computeMD5Checksum (input: string) =
     let hash = md5.ComputeHash(inputBytes)
     hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
 
+
+/// A type that encapsulates the sources found for a uses clause
+/// and provides members to filter those from the file system and those from
+/// the web.
+type FplSources(paths: string list) =
+    /// All found paths for a uses clause, including those from the web.
+    member this.Paths = paths
+
+    /// Returns all loaded FPL theories loaded by a uses clause grouped by name with lists of potential locations
+    member this.Grouped 
+        with get () = 
+            let fplTheories = 
+                this.Paths
+                |> List.map (fun fp -> (Path.GetFileName fp, fp))
+            fplTheories
+            |> List.groupBy fst
+    
+    static member IsUrl(s: string) =
+        let pattern = @"^https?://"
+        Regex.IsMatch(s, pattern)
+
+    static member IsFilePath(s: string) =
+        try
+            Path.GetFullPath(s) |> ignore
+            let pattern = @"^https?://"
+            not (Regex.IsMatch(s, pattern))
+        with :? ArgumentException ->
+            false
+
+    /// Uri of this ParsingProperties
+    static member EscapedUri(path:string) = 
+        let pathNew = Uri.UnescapeDataString(path.Replace("\\","/"))
+        if FplSources.IsFilePath(pathNew) then  
+            Uri($"{pathNew}")
+        else
+            Uri($"fplregistry://{pathNew}")
+
+    member this.Urls = List.filter FplSources.IsUrl this.Paths
+    member this.FilePaths = List.filter FplSources.IsFilePath this.Paths
+    member this.Length = this.Paths.Length
+
+
+
+    member this.GroupedWithPreferedSource 
+        with get () = 
+            let result = 
+                let grouped = this.Grouped
+                grouped
+                |> List.collect (fun (fileName, paths) -> 
+                    let pathType =
+                        paths
+                        |> List.map snd
+                        |> List.tryFind (fun path -> 
+                            if FplSources.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                                true // the first source is the current directory
+                            elif FplSources.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
+                                true // the second is the lib subdirectory 
+                            else
+                                true // the third is the internet source
+                        )
+
+                    let pathTypes =
+                        List.map snd paths
+                        |> List.map (fun path -> 
+                            if FplSources.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                                "./lib"
+                            elif  FplSources.IsFilePath(path) then 
+                                "./"
+                            else
+                                "https"
+                        )                    
+                    let theoryName = 
+                        Path.GetFileNameWithoutExtension(fileName)
+                    match pathType with
+                    | Some path -> 
+                        let chosenPathType = 
+                            if FplSources.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                                "./"
+                            elif FplSources.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
+                                "./lib"
+                            else
+                                "https"
+                        [(fileName, path, chosenPathType, pathTypes, theoryName)]
+                    | None -> []          
+                )
+            result
+
+    /// Checks if a filename has a pattern.
+    static member HasPattern(fileName:string, pattern) = 
+        let wildcardToRegex (wildcard : string) =
+            "^" + Regex.Escape(wildcard).Replace("\\*", ".*").Replace("\\?", ".") + "$"
+        let regexPattern = wildcardToRegex pattern
+        let regex = Regex(regexPattern, RegexOptions.IgnoreCase)
+        regex.IsMatch(fileName)
+    
+    /// Finds all filenames in sources with a given pattern.
+    member this.FindWithPattern(pattern:string) = 
+        this.GroupedWithPreferedSource
+        |> List.filter (fun (fileName, _, _, _, _) ->
+            FplSources.HasPattern(fileName, pattern)
+        )
+
+
 type ParsingProperties =
     { mutable UriPath: string // source of the ast
       mutable FplSourceCode: string // source code of the ast
       mutable Ast: Ast // parsed ast
       mutable Checksum: string } // checksum of the parsed ast
-
-    /// Uri of this ParsingProperties
-    member this.Uri() = System.Uri(this.UriPath) 
 
     /// Reset this ParsingProperties to its new location
     member this.Reset (fplCode: string) (codeLoc: string) =
@@ -113,7 +213,7 @@ type ParsingProperties =
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, sourcecode, the
             this.UriPath <- codeLoc
-            this.Ast <- fplParser (this.Uri()) fplCode
+            this.Ast <- fplParser (FplSources.EscapedUri(codeLoc)) fplCode
             this.FplSourceCode <- fplCode
             this.Checksum <- checksum
             true
@@ -124,7 +224,7 @@ type ParsingProperties =
         {
             ParsingProperties.UriPath = fileLoc
             ParsingProperties.FplSourceCode = fileContent
-            ParsingProperties.Ast = FplParser.fplParser (System.Uri(fileLoc)) fileContent
+            ParsingProperties.Ast = FplParser.fplParser (FplSources.EscapedUri(fileLoc)) fileContent
             ParsingProperties.Checksum = computeMD5Checksum fileContent
         }
 
@@ -161,98 +261,6 @@ type ParsedAstList() =
 
 
 
-/// A type that encapsulates the sources found for a uses clause
-/// and provides members to filter those from the file system and those from
-/// the web.
-
-type FplSources(paths: string list) =
-    /// All found paths for a uses clause, including those from the web.
-    member this.Paths = paths
-
-    /// Returns all loaded FPL theories loaded by a uses clause grouped by name with lists of potential locations
-    member this.Grouped 
-        with get () = 
-            let fplTheories = 
-                this.Paths
-                |> List.map (fun fp -> (Path.GetFileName fp, fp))
-            fplTheories
-            |> List.groupBy fst
-    
-    member this.IsUrl(s: string) =
-        let pattern = @"^https?://"
-        Regex.IsMatch(s, pattern)
-
-    member this.IsFilePath(s: string) =
-        try
-            Path.GetFullPath(s) |> ignore
-            let pattern = @"^https?://"
-            not (Regex.IsMatch(s, pattern))
-        with :? ArgumentException ->
-            false
-
-
-    member this.Urls = List.filter this.IsUrl this.Paths
-    member this.FilePaths = List.filter this.IsFilePath this.Paths
-    member this.Length = this.Paths.Length
-
-    member this.GroupedWithPreferedSource 
-        with get () = 
-            let result = 
-                let grouped = this.Grouped
-                grouped
-                |> List.collect (fun (fileName, paths) -> 
-                    let pathType =
-                        paths
-                        |> List.map snd
-                        |> List.tryFind (fun path -> 
-                            if this.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
-                                true // the first source is the current directory
-                            elif this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
-                                true // the second is the lib subdirectory 
-                            else
-                                true // the third is the internet source
-                        )
-
-                    let pathTypes =
-                        List.map snd paths
-                        |> List.map (fun path -> 
-                            if this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then
-                                "./lib"
-                            elif  this.IsFilePath(path) then 
-                                "./"
-                            else
-                                "https"
-                        )                    
-                    let theoryName = 
-                        Path.GetFileNameWithoutExtension(fileName)
-                    match pathType with
-                    | Some path -> 
-                        let chosenPathType = 
-                            if this.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
-                                "./"
-                            elif this.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
-                                "./lib"
-                            else
-                                "https"
-                        [(fileName, path, chosenPathType, pathTypes, theoryName)]
-                    | None -> []          
-                )
-            result
-
-    /// Checks if a filename has a pattern.
-    static member HasPattern(fileName:string, pattern) = 
-        let wildcardToRegex (wildcard : string) =
-            "^" + Regex.Escape(wildcard).Replace("\\*", ".*").Replace("\\?", ".") + "$"
-        let regexPattern = wildcardToRegex pattern
-        let regex = Regex(regexPattern, RegexOptions.IgnoreCase)
-        regex.IsMatch(fileName)
-    
-    /// Finds all filenames in sources with a given pattern.
-    member this.FindWithPattern(pattern:string) = 
-        this.GroupedWithPreferedSource
-        |> List.filter (fun (fileName, _, _, _, _) ->
-            FplSources.HasPattern(fileName, pattern)
-        )
         
 
 type FplType =

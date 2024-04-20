@@ -1,45 +1,9 @@
-uses Fpl.Commons
 
-definition class Tuple : obj
-{
-    dec 
-        ~myLength: Nat
-    ;
-    ctor Tuple(listOfTpl:+ tpl)
-    {
-        dec 
-            ~elem: tpl
-            ~i: Nat 
-            i:= Zero() 
-            for elem in listOfTpl
-            {
-                i:=Succ(i)
-                self[i]:=elem
-            }
-            myLength:=i
-            base.obj()
-        ;
-        self
-    }
 
-    ctor Tuple(arr: tpl[from, length:Nat])
-    {
-        
-        dec 
-            self:=arr
-            myLength:=length
-            base.obj()
-        ;
-        self
-    }
 
-    property Nat Length()
-    {
-        dec
-            self:= myLength
-        ;
-        self
-    }
 
-}
+
+
+
+
 ;

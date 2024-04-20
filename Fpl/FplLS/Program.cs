@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OmniSharp.Extensions.LanguageServer.Server;
+using static FplInterpreterTypes;
 
 namespace FplLS
 {
@@ -52,7 +53,7 @@ namespace FplLS
                             var diagnosticsHandler = serviceProvider.GetService<DiagnosticsHandler>();
 
                             // Hook up diagnostics
-                            bufferManager.BufferUpdated += (__, x) => diagnosticsHandler.PublishDiagnostics(UriDiagnostics.EscapedUri(x.Uri), bufferManager.GetBuffer(x.Uri));
+                            bufferManager.BufferUpdated += (__, x) => diagnosticsHandler.PublishDiagnostics(FplSources.EscapedUri(x.Uri.AbsoluteUri), bufferManager.GetBuffer(x.Uri));
 
                             return Task.CompletedTask;
                         }

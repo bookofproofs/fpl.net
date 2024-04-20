@@ -22,15 +22,9 @@ namespace FplLS
         }
 
 
-        public static Uri EscapedUri(Uri oldUri)
-        {
-            string decodedUriString = Uri.UnescapeDataString(oldUri.AbsoluteUri);
-            return new Uri(decodedUriString);
-        }
-        
         public void AddDiagnostics(Uri uri, Model.Diagnostic diagnostic)
         {
-            var key = EscapedUri(uri);
+            var key = FplSources.EscapedUri(uri.AbsoluteUri);
             if (!_diagnostics.ContainsKey(key))
             {
                 _diagnostics.Add(key, new List<Model.Diagnostic>());
@@ -71,7 +65,7 @@ namespace FplLS
                     parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
                     var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
                     FplInterpreter.fplInterpreter(sourceCode, uri, fplLibUri, _parsedAstsList, false);
-                    var diagnostics = CastDiagnostics(uri, parserDiagnostics.Collection, new TextPositions(sourceCode));
+                    var diagnostics = CastDiagnostics(uri, parserDiagnostics, new TextPositions(sourceCode));
                     foreach (var diagnostic in diagnostics.Enumerator())
                     {
                         _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
@@ -80,6 +74,7 @@ namespace FplLS
                             Diagnostics = diagnostic.Value
                         });
                     }
+
                 }
                 catch (Exception ex)
                 {
@@ -98,13 +93,14 @@ namespace FplLS
         /// <param name="diagnostics">Input list</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted list</returns>
-        public UriDiagnostics CastDiagnostics(Uri uri, FSharpList<ErrDiagnostics.Diagnostic> listDiagnostics, TextPositions tp)
+        public UriDiagnostics CastDiagnostics(Uri uri, ErrDiagnostics.Diagnostics listDiagnostics, TextPositions tp)
         {
             var sb = new StringBuilder();
             var castedListDiagnostics = new UriDiagnostics();
-            foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics)
+            FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.DiagnosticsToString, "~~~~~Diagnostics");
+            foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
             {
-                castedListDiagnostics.AddDiagnostics(diagnostic.Uri, CastDiagnostic(diagnostic, tp, sb));
+                castedListDiagnostics.AddDiagnostics(FplSources.EscapedUri(diagnostic.Uri.AbsoluteUri), CastDiagnostic(diagnostic, tp, sb));
             }
             return castedListDiagnostics;
         }
