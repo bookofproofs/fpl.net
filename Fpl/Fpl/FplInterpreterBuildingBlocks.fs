@@ -71,8 +71,8 @@ let tryAddBlock (fplValue:FplValue) =
         let diagnostic = { 
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.NameStartPos
-            Diagnostic.EndPos = fplValue.EndPos
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = 
                 if fplValue.BlockType = FplBlockType.Variable || fplValue.BlockType = FplBlockType.VariadicVariable then 
                     VAR01 fplValue.Name
@@ -217,6 +217,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InSignature fplValue -> 
             let varValue = FplValue.CreateFplValue((pos1,pos2), FplBlockType.Variable, fplValue)
             varValue.Name <- s
+            varValue.NameEndPos <- pos2
             tryAddBlock varValue 
         | _ -> ()
         st.EvalPop() 

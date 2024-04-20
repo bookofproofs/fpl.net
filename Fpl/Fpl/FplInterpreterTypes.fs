@@ -265,7 +265,6 @@ type FplBlockType =
 
 type FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions: Positions, parent: FplValue option) =
     let mutable _name = name
-    let mutable _nameStartPos = Position("", 0, 1, 1)
     let mutable _nameEndPos = Position("", 0, 1, 1)
     let mutable _evalType = evalType
     let mutable _typeSignature = []
@@ -280,12 +279,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         with get () = _name
         and set (value) = _name <- value
 
-    /// Identifier of this FplValue that is unique in its scope
-    member this.NameStartPos
-        with get () = _nameStartPos
-        and set (value) = _nameStartPos <- value
-
-    /// Identifier of this FplValue that is unique in its scope
+    /// This FplValue's name's end position that can be different from its endig position
     member this.NameEndPos
         with get () = _nameEndPos
         and set (value) = _nameEndPos <- value

@@ -172,7 +172,7 @@ printf "%O" result
 ad.PrintDiagnostics
 *)
 
-let st = loadFplFile(@"D:\Forschung\fpl.net\theories\lib\Fpl.SetTheory.fpl")
+let st = loadFplFile(@"D:\Forschung\fpl.net\theories\lib\Fpl.Commons.Structures.fpl")
 (*
 prepareFplCode("",true) |> ignore
 let st = prepareFplCode(input,true) 
