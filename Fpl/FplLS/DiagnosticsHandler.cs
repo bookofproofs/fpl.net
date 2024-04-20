@@ -9,6 +9,7 @@ using static FplInterpreterTypes;
 using static FplInterpreter;
 using static FplInterpreterUsesClause;
 using static ErrDiagnostics;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
@@ -72,6 +73,14 @@ namespace FplLS
                         {
                             Uri = diagnostic.Key,
                             Diagnostics = diagnostic.Value
+                        });
+                    }
+                    if (diagnostics.Enumerator().Count == 0) 
+                    {
+                        _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
+                        {
+                            Uri = uri,
+                            Diagnostics = new List<Model.Diagnostic>()
                         });
                     }
 
