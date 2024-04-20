@@ -2,12 +2,13 @@
 using FParsec;
 using Microsoft.FSharp.Collections;
 using System.Collections.Generic;
-using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using static FplParser;
 using static FplInterpreterTypes;
 using static FplInterpreter;
 using static FplInterpreterUsesClause;
+using static ErrDiagnostics;
 
 namespace FplLS
 {
@@ -37,11 +38,28 @@ namespace FplLS
                     var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
                     FplInterpreter.fplInterpreter(sourceCode, uri, fplLibUri, _parsedAstsList, false);
                     var diagnostics = CastDiagnostics(parserDiagnostics.Collection, new TextPositions(sourceCode));
-                    _languageServer.Document.PublishDiagnostics(new PublishDiagnosticsParams
+                    _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
                     {
                         Uri = uri,
                         Diagnostics = diagnostics
                     });
+
+                    var testDiagnostics = new List<Model.Diagnostic>();
+                    var testDiagnostic = new Model.Diagnostic();
+                    testDiagnostic.Severity = Model.DiagnosticSeverity.Error;
+                    testDiagnostic.Message = "Test Diagnostic";
+                    var tp = new TextPositions("");
+                    testDiagnostic.Range = tp.GetRange(0, 0);
+                    testDiagnostics.Add(testDiagnostic);
+                    var encodedFilePath = fplLibUri + "/Fpl.Commons.fpl";
+                    var newUripath = encodedFilePath.Replace("https:", "fplregistry:");
+                    newUripath = newUripath.Replace("http:", "fplregistry:");
+                    _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
+                    {
+                        Uri = new System.Uri(newUripath),
+                        Diagnostics = testDiagnostics
+                    });
+
                 }
                 catch (Exception ex)
                 {
@@ -60,10 +78,10 @@ namespace FplLS
         /// <param name="diagnostics">Input list</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted list</returns>
-        public List<Diagnostic> CastDiagnostics(FSharpList<ErrDiagnostics.Diagnostic> listDiagnostics, TextPositions tp)
+        public List<Model.Diagnostic> CastDiagnostics(FSharpList<ErrDiagnostics.Diagnostic> listDiagnostics, TextPositions tp)
         {
             var sb = new StringBuilder();
-            var castedListDiagnostics = new List<Diagnostic>();
+            var castedListDiagnostics = new List<Model.Diagnostic>();
             foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics)
             {
                 castedListDiagnostics.Add(CastDiagnostic(diagnostic, tp, sb));
@@ -77,9 +95,9 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted diagnostic</returns>
-        public Diagnostic CastDiagnostic(ErrDiagnostics.Diagnostic diagnostic, TextPositions tp, StringBuilder sb)
+        public Model.Diagnostic CastDiagnostic(ErrDiagnostics.Diagnostic diagnostic, TextPositions tp, StringBuilder sb)
         {
-            var castedDiagnostic = new Diagnostic();
+            var castedDiagnostic = new Model.Diagnostic();
             castedDiagnostic.Source = diagnostic.Emitter.ToString();
             castedDiagnostic.Severity = CastSeverity(diagnostic.Severity);
             castedDiagnostic.Message = CastMessage(diagnostic, sb);
@@ -115,24 +133,24 @@ namespace FplLS
         /// </summary>
         /// <param name="severity">Input severity</param>
         /// <returns>Casted severity</returns>
-        private DiagnosticSeverity CastSeverity(ErrDiagnostics.DiagnosticSeverity severity)
+        private Model.DiagnosticSeverity CastSeverity(ErrDiagnostics.DiagnosticSeverity severity)
         {
-            DiagnosticSeverity castedSeverity = new DiagnosticSeverity();
+            var castedSeverity = new Model.DiagnosticSeverity();
             if (severity.IsError)
             {
-                castedSeverity = DiagnosticSeverity.Error;
+                castedSeverity = Model.DiagnosticSeverity.Error;
             }
             else if (severity.IsWarning)
             {
-                castedSeverity = DiagnosticSeverity.Warning;
+                castedSeverity = Model.DiagnosticSeverity.Warning;
             }
             else if (severity.IsHint)
             {
-                castedSeverity = DiagnosticSeverity.Hint;
+                castedSeverity = Model.DiagnosticSeverity.Hint;
             }
             else if (severity.IsInformation)
             {
-                castedSeverity = DiagnosticSeverity.Information;
+                castedSeverity = Model.DiagnosticSeverity.Information;
             }
             else
             {
@@ -141,9 +159,9 @@ namespace FplLS
             return castedSeverity;
         }
 
-        private DiagnosticCode CastCode(string code)
+        private Model.DiagnosticCode CastCode(string code)
         {
-            return new DiagnosticCode(code);
+            return new Model.DiagnosticCode(code);
         }
     }
 }

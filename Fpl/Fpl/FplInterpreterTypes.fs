@@ -81,6 +81,14 @@ type SortingProperties =
         this.ReferencedAsts <- []
         this.EANIList <- []
 
+    static member Create() = 
+        {
+            SortingProperties.TopologicalSorting = 0
+            SortingProperties.ReferencingAsts = []
+            SortingProperties.ReferencedAsts = []
+            SortingProperties.EANIList = [] 
+        }
+
 let computeMD5Checksum (input: string) =
     let md5 = MD5.Create()
     let inputBytes = Encoding.ASCII.GetBytes(input)
@@ -93,6 +101,10 @@ type ParsingProperties =
       mutable Ast: Ast // parsed ast
       mutable Checksum: string } // checksum of the parsed ast
 
+    /// Uri of this ParsingProperties
+    member this.Uri() = System.Uri(this.UriPath) 
+
+    /// Reset this ParsingProperties to its new location
     member this.Reset (fplCode: string) (codeLoc: string) =
         let checksum = computeMD5Checksum fplCode
 
@@ -100,13 +112,21 @@ type ParsingProperties =
             // if there ist a Parsed Ast with the same Name as the eani.Name
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, sourcecode, the
-            this.Ast <- fplParser fplCode
             this.UriPath <- codeLoc
+            this.Ast <- fplParser (this.Uri()) fplCode
             this.FplSourceCode <- fplCode
             this.Checksum <- checksum
             true
         else
             false
+
+    static member Create(fileLoc, fileContent) = 
+        {
+            ParsingProperties.UriPath = fileLoc
+            ParsingProperties.FplSourceCode = fileContent
+            ParsingProperties.Ast = FplParser.fplParser (System.Uri(fileLoc)) fileContent
+            ParsingProperties.Checksum = computeMD5Checksum fileContent
+        }
 
 type FplBlockProperties =
     { FplBlockIds: Dictionary<string, int> }

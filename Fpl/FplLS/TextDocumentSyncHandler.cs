@@ -79,7 +79,7 @@ namespace FplLS
                 var uri = request.TextDocument.Uri;
                 var text = request.ContentChanges.FirstOrDefault()?.Text;
 
-                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer", "TextDocumentSyncHandler.Handle");
+                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer", $"TextDocumentSyncHandler.Handle {uri}");
                 _bufferManager.UpdateBuffer(uri, new StringBuilder(text));
                 FplLsTraceLogger.LogMsg(_languageServer, $"buffer updated", "TextDocumentSyncHandler.Handle");
             }
@@ -97,8 +97,9 @@ namespace FplLS
             FplLsTraceLogger.LogMsg(_languageServer, "(DidOpenTextDocumentParams)", "TextDocumentSyncHandler.Handle");
             try
             {
-                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer (DidOpenTextDocumentParams)", "TextDocumentSyncHandler.Handle");
-                _bufferManager.UpdateBuffer(request.TextDocument.Uri, new StringBuilder(request.TextDocument.Text));
+                var uri = request.TextDocument.Uri;
+                FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer (DidOpenTextDocumentParams)", $"TextDocumentSyncHandler.Handle {uri}");
+                _bufferManager.UpdateBuffer(uri, new StringBuilder(request.TextDocument.Text));
                 FplLsTraceLogger.LogMsg(_languageServer, $"buffer updated (DidOpenTextDocumentParams)", "TextDocumentSyncHandler.Handle");
             }
             catch (Exception ex)
