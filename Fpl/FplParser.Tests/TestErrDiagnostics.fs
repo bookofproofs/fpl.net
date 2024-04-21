@@ -2157,8 +2157,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(3, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
 
     [<TestMethod>]
@@ -2172,8 +2172,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(3, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
 
     [<TestMethod>]
@@ -2187,8 +2187,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(3, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
 
     [<TestMethod>]
@@ -2217,8 +2217,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(3, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
 
     [<TestMethod>]
@@ -2232,8 +2232,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(3, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
 
     [<TestMethod>]
@@ -2262,8 +2262,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
 
     [<TestMethod>]
@@ -2277,8 +2277,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
 
     [<TestMethod>]
@@ -2308,8 +2308,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
 
     [<TestMethod>]
@@ -2325,8 +2325,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
 
     [<TestMethod>]
@@ -2361,8 +2361,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(3, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
 
     [<TestMethod>]
