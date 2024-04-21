@@ -145,7 +145,7 @@ type TestEvalAliasedNamespaceIdentifier() =
 
 
     [<DataRow("Fpl *", 5)>]
-    [<DataRow("Fpl.Commons *", 3)>]
+    [<DataRow("Fpl.Commons *", 5)>]
     [<DataRow("Fpl alias T1", 1)>]
     [<DataRow("Fpl.Commons alias T2", 2)>]
     [<DataRow("Fpl", 1)>]

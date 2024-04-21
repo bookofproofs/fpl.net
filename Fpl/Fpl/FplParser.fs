@@ -109,7 +109,7 @@ let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
 let keywordSelf = positions (skipString "self") .>> IW |>> Ast.Self
 let keywordBaseClassReference = skipString "base" .>> IW
-let keywordIndex = (skipString "index" <|> skipString "ind") .>> IW >>% Ast.IndexType
+let keywordIndex = (skipString "index" <|> skipString "ind") >>% Ast.IndexType
 
 
 (* FplBlock-related Keywords *)
@@ -230,8 +230,8 @@ let bracketModifier = choice [bracketedCoordsInType; paramTuple ]
 classTypeRef.Value <- positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
 let mapping, mappingRef = createParserForwardedToRef()
-let predicateType = positions (keywordPredicate .>> IW .>>. opt paramTuple) |>> Ast.CompoundPredicateType
-let functionalTermType = positions (keywordFunction .>> IW .>>. opt (paramTuple .>>. mapping)) |>> Ast.CompoundFunctionalTermType
+let predicateType = positions (keywordPredicate .>>. opt paramTuple) |>> Ast.CompoundPredicateType
+let functionalTermType = positions (keywordFunction .>>. opt (paramTuple .>>. mapping)) |>> Ast.CompoundFunctionalTermType
 
 let compoundVariableType = choice [ keywordIndex; xId; classType; functionalTermType; predicateType ] 
 let variableType = positions (compoundVariableType) |>> Ast.VariableType

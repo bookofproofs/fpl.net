@@ -526,6 +526,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             | EvalContext.NamedVarDeclarationInBlock fplBlock 
             | EvalContext.InSignature fplBlock ->
                 adjustSignature st fplBlock "->"
+                fplBlock.NameEndPos <- pos2
             | _ -> ()
             eval uri st ast3 |> ignore
         | _ -> ()
