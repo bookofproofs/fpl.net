@@ -1,9 +1,5 @@
+def func TestId() -> func(x:obj[y:@Nat])->obj {intrinsic}
 
-
-
-
-
-
-
+def func TestId() -> func(x:obj[y:@Nat])->obj {intrinsic};
 
 ;

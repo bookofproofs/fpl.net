@@ -49,22 +49,28 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
         ex e is tplSetElem { IsNeutralElement(e) }
     }
 
-    property optional tplSetElem LeftNeutralElement()
+    property optional func LeftNeutralElement() -> tplSetElem
     {
-        dec assert IsLeftNeutralElement(self);
-        self
+        dec 
+            ~result:tplSetElem 
+            assert IsLeftNeutralElement(result);
+        return result
     }
 
-    property optional tplSetElem RightNeutralElement()
+    property optional func RightNeutralElement() -> tplSetElem
     {
-        dec assert IsRightNeutralElement(self);
-        self
+        dec 
+            ~result:tplSetElem 
+            assert IsRightNeutralElement(result);
+        return result
     }
 
-    property optional tplSetElem NeutralElement()
+    property optional func NeutralElement() -> tplSetElem
     {
-        dec assert IsNeutralElement(self);
-        self
+        dec 
+            ~result:tplSetElem 
+            assert IsNeutralElement(result);
+        return result
     }
 
 }
@@ -122,14 +128,10 @@ def class AlgebraicStructure: obj
     }
 
     // Every algebraic structure will have a mandatory property called CarrierSet of type Set.
-    property  Set CarrierSet()
+    property func CarrierSet() -> Set
     {
-        dec 
-            self:=myCarrierSet
-        ;
-        self
+        return myCarrierSet
     }
-
 
 }
 
@@ -178,12 +180,9 @@ def class Monoid: Semigroup
         self
     }
 
-    property tplSetElem NeutralElem()
+    property func NeutralElem() -> tplSetElem
     {
-        dec
-            self:=myOp.NeutralElement()
-        ;
-        self
+        return myOp.NeutralElement()
     }
 }
 
@@ -222,7 +221,7 @@ def class Group: Monoid
     {
         dec
             myOp:=op
-            base.Monoid (x,op)
+            base.Monoid(x,op)
         ;
         self
     }
@@ -306,20 +305,14 @@ def class Ring: AlgebraicStructure
         return myMul(a,b)
     }
 
-    property CommutativeGroup AdditiveGroup()
+    property func AdditiveGroup() -> CommutativeGroup
     {
-        dec
-            self:= CommutativeGroup(myX, myAdd)
-        ;
-        self
+        return CommutativeGroup(myX, myAdd)
     }
 
-    property Semigroup MultiplicativeSemiGroup()
+    property func MultiplicativeSemiGroup() -> Semigroup
     {
-        dec
-            self:= CommutativeGroup(myX, myMul)
-        ;
-        self
+        return CommutativeGroup(myX, myMul)
     }
 
     property pred RightDistributive()
@@ -359,12 +352,9 @@ def class UnitRing: Ring
         self
     }
 
-    property Monoid MultiplicativeMonoid()
+    property func MultiplicativeMonoid() -> Monoid 
     {
-        dec
-            self:= Monoid(self.CarrierSet(), self.Mul())
-        ;
-        self
+        return Monoid(self.CarrierSet(), self.Mul())
     }
 }
 
@@ -391,12 +381,9 @@ def class Field: CommutativeUnitRing
         self
     }
 
-    property CommutativeGroup MultiplicativeGroup()
+    property func MultiplicativeGroup() -> CommutativeGroup
     {
-        dec
-            self:= CommutativeGroup(self.CarrierSet(), self.Mul())
-        ;
-        self
+        return CommutativeGroup(self.CarrierSet(), self.Mul())
     }
 
     property pred OneUnequalZero()
@@ -447,14 +434,13 @@ def class VectorSpaceOverField : obj
     ctor VectorSpaceOverField
         (
             space: NonemptySet,
-                field: Field
-                (
+                field: Field(
                     fieldSet: tplFieldSet,
                     fieldAdd: BinOp,
                     fieldMul: BinOp
                 ),
-            vecAdd: AddVec (v,w: tplVector),
-            scalarMul: ScalarMul (a: tplFieldElement,v1: tplVector)
+            vecAdd: AddVec(v,w: tplVector),
+            scalarMul: ScalarMul(a: tplFieldElement,v1: tplVector)
         )
     {
         dec
@@ -473,20 +459,14 @@ def class VectorSpaceOverField : obj
 
     // vs together with oppAdd is a commutative group,
     // let's call it with the identifier "Space"
-    property CommutativeGroup Space()
+    property func Space() -> CommutativeGroup
     {
-        dec
-            self:=CommutativeGroup(mySpace, myFieldAdd)
-        ;
-        self
+        return CommutativeGroup(mySpace, myFieldAdd)
     }
 
-    property Field MyField()
+    property func MyField() -> Field
     {
-        dec
-            self:=myField
-        ;
-        self
+        return myField
     }
 
     property pred ScalarMulIsRightDistributive()

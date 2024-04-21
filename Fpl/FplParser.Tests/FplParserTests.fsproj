@@ -13,7 +13,6 @@
     <Compile Include="TestUsesClause.fs" />
     <Compile Include="TestAxioms.fs" />
     <Compile Include="TestClassInheritanceTypes.fs" />
-    <Compile Include="TestClassInstanceProperties.fs" />
     <Compile Include="TestConstructors.fs" />
     <Compile Include="TestCoordPossibilities.fs" />
     <Compile Include="TestDefinitionClasses.fs" />

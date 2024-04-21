@@ -109,7 +109,7 @@ let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
 let keywordSelf = positions (skipString "self") .>> IW |>> Ast.Self
 let keywordBaseClassReference = skipString "base" .>> IW
-let keywordIndex = (skipString "index" <|> skipString "ind") .>> IW >>% Ast.IndexType
+let keywordIndex = (skipString "index" <|> skipString "ind") >>% Ast.IndexType
 
 
 (* FplBlock-related Keywords *)
@@ -145,13 +145,13 @@ let keywordIs = skipString "is" .>> attemptSW
 // objects and their properties that defer the concrete
 // specification of one or more types until the definition or method is declared and instantiated by
 // client code
-let keywordTemplate = positions (pstring "template" <|> pstring "tpl") .>> IW |>> Ast.TemplateType
+let keywordTemplate = positions (pstring "template" <|> pstring "tpl") |>> Ast.TemplateType
 
 let templateTail = choice [ idStartsWithCap; (regex @"\d+") ]
 
-let templateWithTail = positions (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) .>> IW |>>  Ast.TemplateType
+let templateWithTail = positions (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) |>>  Ast.TemplateType
 
-let keywordObject = (skipString "object" <|> skipString "obj") .>> IW >>% Ast.ObjectType 
+let keywordObject = (skipString "object" <|> skipString "obj") >>% Ast.ObjectType 
 
 let objectHeader = choice [
     keywordObject
@@ -171,7 +171,7 @@ let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
 
 let extensionHeader: Parser<unit,unit> = skipString ":ext" >>. SW
 
-let extensionName = positions (idStartsWithCap .>> IW) |>> Ast.Extensionname
+let extensionName = positions (idStartsWithCap) |>> Ast.Extensionname
 
 let extReg = regex "\/.*\/\s" <?> "<extension regex>"
 let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. extReg .>> IW |>> Ast.ExtensionRegex
@@ -214,7 +214,7 @@ let bracketedCoords = positions (leftBracket >>. coordList .>> rightBracket) |>>
 
 let namedVariableDeclarationList, namedVariableDeclarationListRef = createParserForwardedToRef()
 
-let specificClassType = choice [ objectHeader; xId; predicateIdentifier ] .>> IW
+let specificClassType = choice [ objectHeader; xId; predicateIdentifier ] 
 
 //// later semantics: Star: 0 or more occurrences, Plus: 1 or more occurrences
 let varDeclModifier = choice [ colonStar; colonPlus; colon ] .>> IW
@@ -230,10 +230,10 @@ let bracketModifier = choice [bracketedCoordsInType; paramTuple ]
 classTypeRef.Value <- positions (specificClassType .>>. opt bracketModifier) |>> Ast.ClassType
 
 let mapping, mappingRef = createParserForwardedToRef()
-let predicateType = positions (keywordPredicate .>> IW .>>. opt paramTuple) |>> Ast.CompoundPredicateType
-let functionalTermType = positions (keywordFunction .>> IW .>>. opt (paramTuple .>>. mapping)) |>> Ast.CompoundFunctionalTermType
+let predicateType = positions (keywordPredicate .>>. opt paramTuple) |>> Ast.CompoundPredicateType
+let functionalTermType = positions (keywordFunction .>>. opt (paramTuple .>>. mapping)) |>> Ast.CompoundFunctionalTermType
 
-let compoundVariableType = choice [ keywordIndex; xId; classType; functionalTermType; predicateType ] .>> IW
+let compoundVariableType = choice [ keywordIndex; xId; classType; functionalTermType; predicateType ] 
 let variableType = positions (compoundVariableType) |>> Ast.VariableType
 
 let namedVariableDeclaration = positions (variableList .>>. varDeclModifier .>>. variableType .>> IW) |>> Ast.NamedVarDecl
@@ -438,7 +438,6 @@ let keywordIntrinsic = (skipString "intrinsic" <|> skipString "intr") .>> IW >>%
 
 let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateContent
 
-let classContent = varDeclOrSpecList .>>. keywordSelf |>> Ast.DefClassContent
 let keywordConstructor = (skipString "constructor" <|> skipString "ctor") .>> SW
 let constructorBlock = leftBrace >>. varDeclOrSpecList .>>. keywordSelf .>> spacesRightBrace 
 let constructor = positions (keywordConstructor >>. signature .>>. constructorBlock) |>> Ast.Constructor
@@ -450,10 +449,8 @@ let keywordProperty = positions (skipString "property" <|> skipString "prty") .>
 let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
 let predicateInstance = positions (keywordPredicate >>. SW >>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
 
-let classInstanceBlock = leftBrace >>. (keywordIntrinsic <|> classContent) .>> spacesRightBrace
-let classInstance = positions (variableType .>>. signature .>>. classInstanceBlock) |>> Ast.ClassInstance
 mappingRef.Value <- toArrow >>. IW >>. variableType
-let functionalTermSignature = (keywordFunction >>. SW >>. signatureWithUserDefinedString) .>>. (IW >>. mapping) .>> IW |>> Ast.FunctionalTermSignature
+let functionalTermSignature = positions ((keywordFunction >>. SW >>. signatureWithUserDefinedString) .>>. (IW >>. mapping)) .>> IW |>> Ast.FunctionalTermSignature
 
 let returnStatement = positions (keywordReturn >>. (fplDelegate <|> predicateWithQualification)) .>> IW |>> Ast.Return
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
@@ -463,7 +460,6 @@ let functionalTermInstance = positions (functionalTermSignature .>>. functionalT
 let definitionProperty = choice [
     predicateInstance
     functionalTermInstance
-    classInstance
 ]
 let propertyHeader = IW >>. keywordProperty .>>. opt keywordOptional 
 let property = positions (propertyHeader .>>. definitionProperty) |>> Ast.PropertyBlock
@@ -520,8 +516,8 @@ let inheritedClassType = positions (specificClassType) .>> IW |>> Ast.InheritedC
 let inheritedClassTypeList = sepBy1 inheritedClassType comma
 
 let classIdentifier = positions (predicateIdentifier .>> IW) |>> Ast.ClassIdentifier
-let classSignature = (keywordClass >>. SW >>. classIdentifier) .>>. opt userDefinedObjSym .>>. (colon >>. inheritedClassTypeList)
-let definitionClass = positions ((classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
+let classSignature = classIdentifier .>>. opt userDefinedObjSym .>>. (colon >>. inheritedClassTypeList)
+let definitionClass = positions ((keywordClass >>. SW >>. classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
 let keywordDefinition = (skipString "definition" <|> skipString "def") >>. SW
 let definition = keywordDefinition >>. choice [

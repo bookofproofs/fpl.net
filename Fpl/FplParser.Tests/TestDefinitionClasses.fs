@@ -85,7 +85,7 @@ type TestClasses () =
         {
             ctor FieldPowerN()
             {
-                dec base.obj () ;
+                dec base.obj() ;
                 self
             }
         }"""
@@ -101,7 +101,7 @@ type TestClasses () =
             dec ~x: obj ;
             constructor FieldPowerN() 
             {
-                dec base.obj () ;
+                dec base.obj() ;
                 self
             }
         }"""
@@ -117,7 +117,7 @@ type TestClasses () =
             dec:;
             FieldPowerN() 
             {
-                base.obj ()
+                base.obj()
             }
         }"""
         let actual = sprintf "%O" result
@@ -132,7 +132,7 @@ type TestClasses () =
             dec ~a:obj ;
             ctor FieldPowerN() 
             {
-                dec base.obj () ;
+                dec base.obj() ;
                 self
             }
         }"""
@@ -148,7 +148,7 @@ type TestClasses () =
             dec ~a:obj ;
             FieldPowerN() 
             {
-                dec base.obj () ;
+                dec base.obj() ;
             }
         }"""
         let actual = sprintf "%O" result
@@ -162,7 +162,7 @@ type TestClasses () =
         {
             ctor FieldPowerN() 
             {
-                dec base.obj () ;
+                dec base.obj() ;
                 self
             }
         }"""
@@ -177,7 +177,7 @@ type TestClasses () =
             // A class with a constructor but without self
             FieldPowerN() 
             {
-                base.obj ()
+                base.obj()
             }
         }"""
         let actual = sprintf "%O" result
@@ -191,7 +191,7 @@ type TestClasses () =
         {
             ctor FieldPowerN() 
             {
-                dec base.obj () ;
+                dec base.obj() ;
                 self
             }
             constructor FieldPowerN() 
@@ -211,7 +211,7 @@ type TestClasses () =
         {
             ctor FieldPowerN() 
             {
-                dec base.obj () ;
+                dec base.obj() ;
                 self
             }
 
@@ -246,7 +246,7 @@ type TestClasses () =
             {
                 dec 
                     ~a:obj
-                    base.obj ()
+                    base.obj()
                     ;
                 self
             }
