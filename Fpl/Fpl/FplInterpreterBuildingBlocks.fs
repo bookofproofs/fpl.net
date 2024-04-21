@@ -659,13 +659,6 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         eval uri st ast1
         asts |> List.map (eval uri st) |> ignore
         st.EvalPop()
-    // | ClassInstance of Positions * ((Ast * Ast) * Ast)
-    | Ast.ClassInstance((pos1, pos2), ((ast1, ast2), ast3)) ->
-        st.EvalPush("ClassInstance")
-        eval uri st ast1
-        eval uri st ast2
-        eval uri st ast3
-        st.EvalPop()
     | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermSignatureAst, functionalTermInstanceBlockAst)) ->
         st.EvalPush("FunctionalTermInstance")
         eval uri st functionalTermSignatureAst
@@ -938,14 +931,6 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.DefFunctionContent(optAsts, ast1) ->
         st.EvalPush("DefFunctionContent")
-        optAsts
-        |> Option.map (List.map (eval uri st) >> ignore)
-        |> Option.defaultValue ()
-        |> ignore
-        eval uri st ast1
-        st.EvalPop()
-    | Ast.DefClassContent(optAsts, ast1) ->
-        st.EvalPush("DefClassContent")
         optAsts
         |> Option.map (List.map (eval uri st) >> ignore)
         |> Option.defaultValue ()

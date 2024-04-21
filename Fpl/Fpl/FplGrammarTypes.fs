@@ -120,7 +120,6 @@ type Ast =
     | Property
     | Optional 
     | PredicateInstance of Positions * (Ast * Ast) 
-    | ClassInstance of Positions * ((Ast * Ast) * Ast)
     | FunctionalTermInstance of Positions * (Ast * Ast)
     | PropertyBlock of Positions * ((Ast * Ast option) * Ast)
     | DefPredicateContent of Ast list option * Ast
@@ -128,7 +127,6 @@ type Ast =
     | DefFunctionContent of Ast list option * Ast
     | FunctionalTermSignature of Positions * (Ast * Ast)
     | DefinitionFunctionalTerm of Positions * (Ast * (Ast * Ast list option))
-    | DefClassContent of Ast list option * Ast
     | DefClassCompleteContent of Ast list option * Ast list
     | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option)) 
 

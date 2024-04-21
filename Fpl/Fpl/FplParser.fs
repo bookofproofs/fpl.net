@@ -438,7 +438,6 @@ let keywordIntrinsic = (skipString "intrinsic" <|> skipString "intr") .>> IW >>%
 
 let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateContent
 
-let classContent = varDeclOrSpecList .>>. keywordSelf |>> Ast.DefClassContent
 let keywordConstructor = (skipString "constructor" <|> skipString "ctor") .>> SW
 let constructorBlock = leftBrace >>. varDeclOrSpecList .>>. keywordSelf .>> spacesRightBrace 
 let constructor = positions (keywordConstructor >>. signature .>>. constructorBlock) |>> Ast.Constructor
@@ -450,8 +449,6 @@ let keywordProperty = positions (skipString "property" <|> skipString "prty") .>
 let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
 let predicateInstance = positions (keywordPredicate >>. SW >>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
 
-let classInstanceBlock = leftBrace >>. (keywordIntrinsic <|> classContent) .>> spacesRightBrace
-let classInstance = positions (variableType .>> SW .>>. signature .>>. classInstanceBlock) |>> Ast.ClassInstance
 mappingRef.Value <- toArrow >>. IW >>. variableType
 let functionalTermSignature = positions ((keywordFunction >>. SW >>. signatureWithUserDefinedString) .>>. (IW >>. mapping)) .>> IW |>> Ast.FunctionalTermSignature
 
@@ -463,7 +460,6 @@ let functionalTermInstance = positions (functionalTermSignature .>>. functionalT
 let definitionProperty = choice [
     predicateInstance
     functionalTermInstance
-    classInstance
 ]
 let propertyHeader = IW >>. keywordProperty .>>. opt keywordOptional 
 let property = positions (propertyHeader .>>. definitionProperty) |>> Ast.PropertyBlock

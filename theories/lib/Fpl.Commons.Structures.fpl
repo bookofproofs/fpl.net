@@ -36,12 +36,9 @@ definition class Tuple : obj
         self
     }
 
-    property Nat Length()
+    property func Length() -> Nat
     {
-        dec
-            self:= myLength
-        ;
-        self
+        return myLength
     }
 
 }
@@ -62,12 +59,9 @@ definition class UnlimitedTupleFrom: obj
         self
     }
 
-    property tpl Coord(i: Nat)
+    property func Coord(i: Nat) -> tpl
     {
-        dec
-            self:=x[i]
-        ;
-        self
+        return x[i]
     }
 }
 
@@ -107,12 +101,9 @@ def class CartesianProduct: Set
         self
     }
 
-    property Nat Length()
+    property func Length() -> Nat
     {
-        dec
-            self:= myLength 
-        ;
-        self
+        return myLength 
     }
 
     property pred AllTuplesIn()
@@ -161,10 +152,9 @@ def class Relation: Set
         self
     }
 
-    property Nat Arity()
+    property func Arity() -> Nat
     {
-        dec self:= myArity;
-        self
+        return myArity
     }
 }
 
@@ -185,20 +175,14 @@ def class BinaryRelation: Relation
         self
     }
 
-    property Set Domain()
+    property func Domain() -> Set 
     {
-        dec
-            self:=myDomain
-        ;
-        self
+        return myDomain
     }
 
-    property Set CoDomain()
+    property func CoDomain() -> Set
     {
-        dec
-            self:=myCodomain
-        ;
-        self
+        ret myCodomain
     }
 
     property pred RightUnique()

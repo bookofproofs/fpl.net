@@ -1053,8 +1053,6 @@ type TestFplValue() =
             prty opt pred T2() {intr}
             prty func T3()->obj {intr}
             prty func opt func T4()->obj {intr}
-            prty X T5() {intr}
-            prty Y T6() {intr}
         }
         ;
         """
@@ -1069,9 +1067,7 @@ type TestFplValue() =
                             let t2 = block.Scope["T2()"]
                             let t3 = block.Scope["T3() -> obj"]
                             let t4 = block.Scope["T4() -> obj"]
-                            let t5 = block.Scope["X, T5()"]
-                            let t6 = block.Scope["Y, T6()"]
-                            Some (r,theory,block,t1,t2,t3,t4,t5,t6)
+                            Some (r,theory,block,t1,t2,t3,t4)
                         | None -> None
         prepareFplCode("", true) |> ignore
         result
@@ -1090,8 +1086,6 @@ type TestFplValue() =
     [<DataRow("def pred TestId() { intr prty opt pred T() {intr} };", "T()", false)>]
     [<DataRow("def pred TestId() { intr prty func T()->obj {intr} };", "T() -> obj", true)>]
     [<DataRow("def pred TestId() { intr prty opt func T()->obj {intr} };", "T() -> obj", false)>]
-    [<DataRow("def pred TestId() { intr prty X T() {intr} };", "X, T()", true)>]
-    [<DataRow("def pred TestId() { intr prty opt Y T() {intr} };", "Y, T()", false)>]
     [<TestMethod>]
     member this.TestMandatoryAndOptionalProperties(fplCode:string, expectedPropertyName:string, isMandatory) =
         let result = prepareFplCode(fplCode, false) 

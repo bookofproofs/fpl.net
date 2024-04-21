@@ -564,6 +564,43 @@ The property marker keyword `mandatory` (short form `mand`) were abandoned and t
     }
 ```
 
+Moreover, in previous versions, properties could have one of three types: they could be predicate instances, functional terms instances and class instances. The latter are abandoned because they can be expressed using functional term instances with the arity zero.
+
+*Before*
+```
+    property optional tplSetElem NeutralElement()
+    {
+        dec assert IsNeutralElement(self);
+        self
+    }
+
+    property CommutativeGroup AdditiveGroup()
+    {
+        dec
+            self:= CommutativeGroup(myX, myAdd)
+        ;
+        self
+    }
+```
+*Now*
+```        
+    property optional func NeutralElement() -> tplSetElem
+    {
+        dec 
+            ~result:tplSetElem 
+            assert IsNeutralElement(result)
+        ;
+        return result
+    }
+
+    property func AdditiveGroup() -> CommutativeGroup
+    {
+        return CommutativeGroup(myX, myAdd)
+    }
+```
+
+This approach also significantly simplifies the recognition of duplicate signatures of properties in the same scope.
+
 #### 20) Simplification of the syntax of theorem-like statements, conjectures, and corollaries
 
 In previous versions of FPL, the syntax of theorem-like statements, conjectures, and corollaries was similar to that of inference rules; their blocks consisted of a separate premise and a separate conclusion specification. 
