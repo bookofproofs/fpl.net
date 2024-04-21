@@ -336,6 +336,10 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
     | Ast.ClassIdentifier((pos1, pos2), ast1) ->
         st.EvalPush("ClassIdentifier")
         eval uri st ast1
+        match st.CurrentContext with 
+        | EvalContext.InSignature fplBlock -> 
+            fplBlock.NameEndPos <- pos2
+        | _ -> ()
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.ExtDigits((pos1, pos2), ast1) ->
@@ -638,10 +642,10 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         eval uri st ast2
         eval uri st ast3
         st.EvalPop()
-    | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermSignatureAst, ast2)) ->
+    | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermSignatureAst, functionalTermInstanceBlockAst)) ->
         st.EvalPush("FunctionalTermInstance")
         eval uri st functionalTermSignatureAst
-        eval uri st ast2
+        eval uri st functionalTermInstanceBlockAst
         st.EvalPop()
     // | All of Positions * ((Ast list * Ast option) list * Ast)
     | Ast.All((pos1, pos2), (astsOpts, ast1)) ->
@@ -672,13 +676,14 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         optAst |> Option.map (eval uri st) |> Option.defaultValue () |> ignore
         eval uri st ast3
         st.EvalPop()
-    // | FunctionalTermSignature of (Ast * Ast)
-    | Ast.FunctionalTermSignature(signatureWithUserDefinedStringAst, mappingAst) -> 
+    // | FunctionalTermSignature of Positions * (Ast * Ast)
+    | Ast.FunctionalTermSignature((pos1, pos2), (signatureWithUserDefinedStringAst, mappingAst)) -> 
         st.EvalPush("FunctionalTermSignature")
         eval uri st signatureWithUserDefinedStringAst
         match st.CurrentContext with 
         | EvalContext.InSignature fplBlock -> 
             adjustSignature st fplBlock "->"
+            fplBlock.NameEndPos <- pos2
         | _ -> ()
         eval uri st mappingAst
         st.EvalPop()

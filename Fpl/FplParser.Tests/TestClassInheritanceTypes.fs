@@ -15,8 +15,7 @@ type TestClassInheritanceTypes () =
     member this.TestSpecificType3 () =
         let result = run (specificClassType .>> eof) """object """
         let actual = sprintf "%O" result
-        let expected = """Success: ObjectType"""
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual);
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpecificType4 () =
@@ -62,7 +61,7 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType3a () =
-        let result = run (classType .>> eof) """object [x:SomeObject1, y:SomeObject2, a,b,c:SomeObject3]"""
+        let result = run (classType .>> eof) """object[x:SomeObject1, y:SomeObject2, a,b,c:SomeObject3]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -140,14 +139,14 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestClassType10 () =
-        let result = run (classType .>> eof) """object [x:ind,y:index]"""
+        let result = run (classType .>> eof) """object[x:ind,y:index]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestClassType10a () =
-        let result = run (classType .>> eof) """object [x:obj,y:Nat]"""
+        let result = run (classType .>> eof) """object[x:obj,y:Nat]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

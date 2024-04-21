@@ -126,7 +126,7 @@ type Ast =
     | DefPredicateContent of Ast list option * Ast
     | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | DefFunctionContent of Ast list option * Ast
-    | FunctionalTermSignature of Ast * Ast
+    | FunctionalTermSignature of Positions * (Ast * Ast)
     | DefinitionFunctionalTerm of Positions * (Ast * (Ast * Ast list option))
     | DefClassContent of Ast list option * Ast
     | DefClassCompleteContent of Ast list option * Ast list

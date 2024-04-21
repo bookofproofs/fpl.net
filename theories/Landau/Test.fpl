@@ -1,9 +1,5 @@
+def func TestId() -> obj {intrinsic}
 
-
-
-
-
-
-
+def func TestId() -> obj {intrinsic}
 
 ;

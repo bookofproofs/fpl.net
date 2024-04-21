@@ -164,7 +164,7 @@ type DiagnosticCode =
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
-            | ID001 identifier -> sprintf "Duplicate identifier %s detected." identifier
+            | ID001 signature -> sprintf "Duplicate signature %s detected." signature
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 identifier -> sprintf "Duplicate variable %s declaration detected." identifier

@@ -156,7 +156,7 @@ type TestIdentifiers () =
     [<TestMethod>]
     member this.TestExtensionBlock1 () =
         let result = run (extensionBlock .>> eof) """:ext
-        Digits : /\d+/
+        Digits: /\d+/
     :end """
         let actual = sprintf "%O" result
         printf "%O" actual

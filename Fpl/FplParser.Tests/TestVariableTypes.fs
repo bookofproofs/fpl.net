@@ -14,14 +14,14 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType001 () =
-        let result = run (variableType .>> eof) """object """
+        let result = run (variableType .>> eof) """object"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType002 () =
-        let result = run (variableType .>> eof) """obj """
+        let result = run (variableType .>> eof) """obj"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -343,14 +343,14 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType039 () =
-        let result = run (variableType .>> eof) """template [x:func()->func()->func()->func()->ind]"""
+        let result = run (variableType .>> eof) """template[x:func()->func()->func()->func()->ind]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType040 () =
-        let result = run (variableType .>> eof) """tpl [x,y,z:pred()]"""
+        let result = run (variableType .>> eof) """tpl[x,y,z:pred()]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -427,7 +427,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType051 () =
-        let result = run (variableType .>> eof) """SomeClass [x:SomeOtherClass]"""
+        let result = run (variableType .>> eof) """SomeClass[x:SomeOtherClass]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"));

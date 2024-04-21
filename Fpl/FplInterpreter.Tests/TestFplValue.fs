@@ -959,6 +959,21 @@ type TestFplValue() =
     member this.TestTypeSignatureOfFplBlocks(fplCode:string, expectedName:string, expectedTypeSignatureStr:string) =
         let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
         let result = prepareFplCode(fplCode, false) 
-        let actual = result.Value.Root.Scope["Test"].Scope[expectedName].TypeSignature
-        Assert.AreEqual(expectedTypeSignature, actual)
+        let fplValue = result.Value.Root.Scope["Test"].Scope[expectedName]
+        let actualTypeSignature = fplValue.TypeSignature
+        let actualSignatureStart = fplValue.StartPos.Index
+        let actualSignatureEnd = fplValue.NameEndPos.Index
+        Assert.AreEqual(expectedTypeSignature, actualTypeSignature)
+        let expectedStart =
+            if fplCode.StartsWith("def ") then 
+                (int64)4
+            else
+                (int64)0
+        Assert.AreEqual(expectedStart, actualSignatureStart)
+        let expectedEnd =
+            if fplCode.StartsWith("def class") then 
+                (int64)(fplCode.IndexOf(":", System.StringComparison.OrdinalIgnoreCase))
+            else
+                (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
+        Assert.AreEqual(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore
