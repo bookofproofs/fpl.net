@@ -1082,6 +1082,43 @@ type TestFplValue() =
             Assert.IsTrue(false)
 
 
+    member this.ScopeConstructors() =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = """
+        def cl TestId:obj 
+        {
+            ctor TestId() {self} 
+            ctor TestId(x:obj) {self} 
+            ctor TestId(x:pred) {self} 
+            ctor TestId(x:ind) {self} 
+        }
+        ;
+        """
+        let stOption = prepareFplCode(fplCode, false) 
+        let result = match stOption with
+                        | Some st -> 
+                            let name = "TestId"
+                            let r = st.Root
+                            let theory = r.Scope["Test"]
+                            let block = theory.Scope[name]
+                            let t1 = block.Scope["TestId()"]
+                            let t2 = block.Scope["TestId(obj)"]
+                            let t3 = block.Scope["TestId(pred)"]
+                            let t4 = block.Scope["TestId(ind)"]
+                            Some (r,theory,block,t1,t2,t3,t4)
+                        | None -> None
+        prepareFplCode("", true) |> ignore
+        result
+
+    [<TestMethod>]
+    member this.TestScopeConstructorsIsComplete() =
+        try
+            this.ScopeConstructors() |> ignore
+            Assert.IsTrue(true)
+        with
+        | ex -> 
+            Assert.IsTrue(false)
+
     [<DataRow("def pred TestId() { intr prty pred T() {intr} };", "T()", true)>]
     [<DataRow("def pred TestId() { intr prty opt pred T() {intr} };", "T()", false)>]
     [<DataRow("def pred TestId() { intr prty func T()->obj {intr} };", "T() -> obj", true)>]
@@ -1097,3 +1134,309 @@ type TestFplValue() =
             Assert.AreEqual(FplBlockType.OptionalProperty, propertyValue.BlockType)
         prepareFplCode("", true) |> ignore
 
+    [<DataRow("def cl TestId:obj {ctor TestId() {self} };", "TestId()")>]
+    [<DataRow("def cl TestId:obj {ctor TestId(x:obj) {self} };", "TestId(obj)")>]
+    [<DataRow("def cl TestId:obj {ctor TestId(x:ind) {self} };", "TestId(ind)")>]
+    [<DataRow("def cl TestId:obj {ctor TestId(x:pred) {self} };", "TestId(pred)")>]
+    [<TestMethod>]
+    member this.TestConstructor(fplCode:string, expectedConstructorName:string) =
+        let result = prepareFplCode(fplCode, false) 
+        let fplBlock = result.Value.Root.Scope["Test"].Scope["TestId"]
+        let constructorName = fplBlock.Scope[expectedConstructorName]
+        Assert.AreEqual(FplBlockType.Constructor, constructorName.BlockType)
+        prepareFplCode("", true) |> ignore
+
+    [<DataRow("def cl T:obj {intr prty pred TestId() {intrinsic}};", "TestId()", "TestId ( )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:ind) {intrinsic}};", "TestId(ind)", "TestId ( ind )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:pred) {intrinsic}};", "TestId(pred)", "TestId ( pred )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:func) {intrinsic}};", "TestId(func)", "TestId ( func )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj) {intrinsic}};", "TestId(obj)", "TestId ( obj )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:index) {intrinsic}};", "TestId(ind)", "TestId ( ind )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:predicate) {intrinsic}};", "TestId(pred)", "TestId ( pred )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:function) {intrinsic}};", "TestId(func)", "TestId ( func )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:object) {intrinsic}};", "TestId(obj)", "TestId ( obj )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:Nat) {intrinsic}};", "TestId(Nat)", "TestId ( Nat )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:@Nat) {intrinsic}};", "TestId(@Nat)", "TestId ( @Nat )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:tpl) {intrinsic}};", "TestId(tpl)", "TestId ( tpl )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:template) {intrinsic}};", "TestId(template)", "TestId ( template )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:tplTest) {intrinsic}};", "TestId(tplTest)", "TestId ( tplTest )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:templateTest) {intrinsic}};", "TestId(templateTest)", "TestId ( templateTest )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x,y,z:obj) {intrinsic}};", "TestId(obj, obj, obj)", "TestId ( obj obj obj )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x,y:pred(z:obj)) {intrinsic}};", "TestId(pred(obj), pred(obj))", "TestId ( pred ( obj ) pred ( obj ) )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x,y:pred(u,v,w:obj)) {intrinsic}};", "TestId(pred(obj, obj, obj), pred(obj, obj, obj))", "TestId ( pred ( obj obj obj ) pred ( obj obj obj ) )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:func(u:obj)->Nat) {intrinsic}};", "TestId(func(obj) -> Nat)", "TestId ( func ( obj ) -> Nat )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:@Nat]) {intrinsic}};", "TestId(obj[@Nat])", "TestId ( obj [ @Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:Nat]) {intrinsic}};", "TestId(obj[Nat])", "TestId ( obj [ Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:Test.Nat]) {intrinsic}};", "TestId(obj[Test.Nat])", "TestId ( obj [ Test.Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:index]) {intrinsic}};", "TestId(obj[ind])", "TestId ( obj [ ind ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:ind]) {intrinsic}};", "TestId(obj[ind])", "TestId ( obj [ ind ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:tpl]) {intrinsic}};", "TestId(obj[tpl])", "TestId ( obj [ tpl ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:template]) {intrinsic}};", "TestId(obj[template])", "TestId ( obj [ template ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:tplTest]) {intrinsic}};", "TestId(obj[tplTest])", "TestId ( obj [ tplTest ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:templateTest]) {intrinsic}};", "TestId(obj[templateTest])", "TestId ( obj [ templateTest ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:Nat,z:templateTest]) {intrinsic}};", "TestId(obj[Nat, templateTest])", "TestId ( obj [ Nat templateTest ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:index,z:Nat]) {intrinsic}};", "TestId(obj[ind, Nat])", "TestId ( obj [ ind Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:obj,z:@Nat]) {intrinsic}};", "TestId(obj[obj, @Nat])", "TestId ( obj [ obj @Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:tpl,z:index]) {intrinsic}};", "TestId(obj[tpl, ind])", "TestId ( obj [ tpl ind ] )")>]
+
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*ind) {intrinsic}};", "TestId(*ind)", "TestId ( * ind )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+pred) {intrinsic}};", "TestId(+pred)", "TestId ( + pred )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*func) {intrinsic}};", "TestId(*func)", "TestId ( * func )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+obj) {intrinsic}};", "TestId(+obj)", "TestId ( + obj )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+index) {intrinsic}};", "TestId(+ind)", "TestId ( + ind )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*predicate) {intrinsic}};", "TestId(*pred)", "TestId ( * pred )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+function) {intrinsic}};", "TestId(+func)", "TestId ( + func )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*object) {intrinsic}};", "TestId(*obj)", "TestId ( * obj )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+Nat) {intrinsic}};", "TestId(+Nat)", "TestId ( + Nat )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*@Nat) {intrinsic}};", "TestId(*@Nat)", "TestId ( * @Nat )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*tpl) {intrinsic}};", "TestId(*tpl)", "TestId ( * tpl )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+template) {intrinsic}};", "TestId(+template)", "TestId ( + template )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*tplTest) {intrinsic}};", "TestId(*tplTest)", "TestId ( * tplTest )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+templateTest) {intrinsic}};", "TestId(+templateTest)", "TestId ( + templateTest )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x,y,z:+obj) {intrinsic}};", "TestId(+obj, +obj, +obj)", "TestId ( + obj + obj + obj )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x,y:+pred(z:obj)) {intrinsic}};", "TestId(+pred(obj), +pred(obj))", "TestId ( + pred ( obj ) + pred ( obj ) )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x,y:pred(u,v,w:*obj)) {intrinsic}};", "TestId(pred(*obj, *obj, *obj), pred(*obj, *obj, *obj))", "TestId ( pred ( * obj * obj * obj ) pred ( * obj * obj * obj ) )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:func(u:+obj)->Nat) {intrinsic}};", "TestId(func(+obj) -> Nat)", "TestId ( func ( + obj ) -> Nat )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:*@Nat]) {intrinsic}};", "TestId(obj[*@Nat])", "TestId ( obj [ * @Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:obj[y:+Nat]) {intrinsic}};", "TestId(obj[+Nat])", "TestId ( obj [ + Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+obj[y:+Test.Nat]) {intrinsic}};", "TestId(+obj[+Test.Nat])", "TestId ( + obj [ + Test.Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+obj[y:*index]) {intrinsic}};", "TestId(+obj[*ind])", "TestId ( + obj [ * ind ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*obj[y:+ind]) {intrinsic}};", "TestId(*obj[+ind])", "TestId ( * obj [ + ind ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+obj[y:*tpl]) {intrinsic}};", "TestId(+obj[*tpl])", "TestId ( + obj [ * tpl ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+obj[y:*template]) {intrinsic}};", "TestId(+obj[*template])", "TestId ( + obj [ * template ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*obj[y:+tplTest]) {intrinsic}};", "TestId(*obj[+tplTest])", "TestId ( * obj [ + tplTest ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*obj[y:*templateTest]) {intrinsic}};", "TestId(*obj[*templateTest])", "TestId ( * obj [ * templateTest ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+obj[y:Nat,z:+templateTest]) {intrinsic}};", "TestId(+obj[Nat, +templateTest])", "TestId ( + obj [ Nat + templateTest ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:+obj[y:index,z:*Nat]) {intrinsic}};", "TestId(+obj[ind, *Nat])", "TestId ( + obj [ ind * Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*obj[y:*obj,z:+@Nat]) {intrinsic}};", "TestId(*obj[*obj, +@Nat])", "TestId ( * obj [ * obj + @Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty pred TestId(x:*obj[y:+tpl,z:index]) {intrinsic}};", "TestId(*obj[+tpl, ind])", "TestId ( * obj [ + tpl ind ] )")>]
+
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj {intrinsic}};", "TestId() -> obj", "TestId ( ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:ind) -> obj {intrinsic}};", "TestId(ind) -> obj", "TestId ( ind ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:pred) -> obj {intrinsic}};", "TestId(pred) -> obj", "TestId ( pred ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:func) -> obj {intrinsic}};", "TestId(func) -> obj", "TestId ( func ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj) -> obj {intrinsic}};", "TestId(obj) -> obj", "TestId ( obj ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:index) -> obj {intrinsic}};", "TestId(ind) -> obj", "TestId ( ind ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:predicate) -> obj {intrinsic}};", "TestId(pred) -> obj", "TestId ( pred ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:function) -> obj {intrinsic}};", "TestId(func) -> obj", "TestId ( func ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:object) -> obj {intrinsic}};", "TestId(obj) -> obj", "TestId ( obj ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:Nat) -> obj {intrinsic}};", "TestId(Nat) -> obj", "TestId ( Nat ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:@Nat) -> obj {intrinsic}};", "TestId(@Nat) -> obj", "TestId ( @Nat ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:tpl) -> obj {intrinsic}};", "TestId(tpl) -> obj", "TestId ( tpl ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:template) -> obj {intrinsic}};", "TestId(template) -> obj", "TestId ( template ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:tplTest) -> obj {intrinsic}};", "TestId(tplTest) -> obj", "TestId ( tplTest ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:templateTest) -> obj {intrinsic}};", "TestId(templateTest) -> obj", "TestId ( templateTest ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x,y,z:obj) -> obj {intrinsic}};", "TestId(obj, obj, obj) -> obj", "TestId ( obj obj obj ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x,y:pred(z:obj)) -> obj {intrinsic}};", "TestId(pred(obj), pred(obj)) -> obj", "TestId ( pred ( obj ) pred ( obj ) ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x,y:pred(u,v,w:obj)) -> obj {intrinsic}};", "TestId(pred(obj, obj, obj), pred(obj, obj, obj)) -> obj", "TestId ( pred ( obj obj obj ) pred ( obj obj obj ) ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:func(u:obj)->Nat) -> obj {intrinsic}};", "TestId(func(obj) -> Nat) -> obj", "TestId ( func ( obj ) -> Nat ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:@Nat]) -> obj {intrinsic}};", "TestId(obj[@Nat]) -> obj", "TestId ( obj [ @Nat ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:Nat]) -> obj {intrinsic}};", "TestId(obj[Nat]) -> obj", "TestId ( obj [ Nat ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:Test.Nat]) -> obj {intrinsic}};", "TestId(obj[Test.Nat]) -> obj", "TestId ( obj [ Test.Nat ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:index]) -> obj {intrinsic}};", "TestId(obj[ind]) -> obj", "TestId ( obj [ ind ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:ind]) -> obj {intrinsic}};", "TestId(obj[ind]) -> obj", "TestId ( obj [ ind ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:tpl]) -> obj {intrinsic}};", "TestId(obj[tpl]) -> obj", "TestId ( obj [ tpl ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:template]) -> obj {intrinsic}};", "TestId(obj[template]) -> obj", "TestId ( obj [ template ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:tplTest]) -> obj {intrinsic}};", "TestId(obj[tplTest]) -> obj", "TestId ( obj [ tplTest ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:templateTest]) -> obj {intrinsic}};", "TestId(obj[templateTest]) -> obj", "TestId ( obj [ templateTest ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:Nat,z:templateTest]) -> obj {intrinsic}};", "TestId(obj[Nat, templateTest]) -> obj", "TestId ( obj [ Nat templateTest ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:index,z:Nat]) -> obj {intrinsic}};", "TestId(obj[ind, Nat]) -> obj", "TestId ( obj [ ind Nat ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:obj,z:@Nat]) -> obj {intrinsic}};", "TestId(obj[obj, @Nat]) -> obj", "TestId ( obj [ obj @Nat ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:tpl,z:index]) -> obj {intrinsic}};", "TestId(obj[tpl, ind]) -> obj", "TestId ( obj [ tpl ind ] ) -> obj")>]
+
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*ind) -> obj {intrinsic}};", "TestId(*ind) -> obj", "TestId ( * ind ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+pred) -> obj {intrinsic}};", "TestId(+pred) -> obj", "TestId ( + pred ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*func) -> obj {intrinsic}};", "TestId(*func) -> obj", "TestId ( * func ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+obj) -> obj {intrinsic}};", "TestId(+obj) -> obj", "TestId ( + obj ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+index) -> obj {intrinsic}};", "TestId(+ind) -> obj", "TestId ( + ind ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*predicate) -> obj {intrinsic}};", "TestId(*pred) -> obj", "TestId ( * pred ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+function) -> obj {intrinsic}};", "TestId(+func) -> obj", "TestId ( + func ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*object) -> obj {intrinsic}};", "TestId(*obj) -> obj", "TestId ( * obj ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+Nat) -> obj {intrinsic}};", "TestId(+Nat) -> obj", "TestId ( + Nat ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*@Nat) -> obj {intrinsic}};", "TestId(*@Nat) -> obj", "TestId ( * @Nat ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*tpl) -> obj {intrinsic}};", "TestId(*tpl) -> obj", "TestId ( * tpl ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+template) -> obj {intrinsic}};", "TestId(+template) -> obj", "TestId ( + template ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*tplTest) -> obj {intrinsic}};", "TestId(*tplTest) -> obj", "TestId ( * tplTest ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+templateTest) -> obj {intrinsic}};", "TestId(+templateTest) -> obj", "TestId ( + templateTest ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x,y,z:+obj) -> obj {intrinsic}};", "TestId(+obj, +obj, +obj) -> obj", "TestId ( + obj + obj + obj ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x,y:+pred(z:obj)) -> obj {intrinsic}};", "TestId(+pred(obj), +pred(obj)) -> obj", "TestId ( + pred ( obj ) + pred ( obj ) ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x,y:pred(u,v,w:*obj)) -> obj {intrinsic}};", "TestId(pred(*obj, *obj, *obj), pred(*obj, *obj, *obj)) -> obj", "TestId ( pred ( * obj * obj * obj ) pred ( * obj * obj * obj ) ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:func(u:+obj)->Nat) -> obj {intrinsic}};", "TestId(func(+obj) -> Nat) -> obj", "TestId ( func ( + obj ) -> Nat ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:*@Nat]) -> obj {intrinsic}};", "TestId(obj[*@Nat]) -> obj", "TestId ( obj [ * @Nat ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:obj[y:+Nat]) -> obj {intrinsic}};", "TestId(obj[+Nat]) -> obj", "TestId ( obj [ + Nat ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+obj[y:+Test.Nat]) -> obj {intrinsic}};", "TestId(+obj[+Test.Nat]) -> obj", "TestId ( + obj [ + Test.Nat ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+obj[y:*index]) -> obj {intrinsic}};", "TestId(+obj[*ind]) -> obj", "TestId ( + obj [ * ind ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*obj[y:+ind]) -> obj {intrinsic}};", "TestId(*obj[+ind]) -> obj", "TestId ( * obj [ + ind ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+obj[y:*tpl]) -> obj {intrinsic}};", "TestId(+obj[*tpl]) -> obj", "TestId ( + obj [ * tpl ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+obj[y:*template]) -> obj {intrinsic}};", "TestId(+obj[*template]) -> obj", "TestId ( + obj [ * template ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*obj[y:+tplTest]) -> obj {intrinsic}};", "TestId(*obj[+tplTest]) -> obj", "TestId ( * obj [ + tplTest ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*obj[y:*templateTest]) -> obj {intrinsic}};", "TestId(*obj[*templateTest]) -> obj", "TestId ( * obj [ * templateTest ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+obj[y:Nat,z:+templateTest]) -> obj {intrinsic}};", "TestId(+obj[Nat, +templateTest]) -> obj", "TestId ( + obj [ Nat + templateTest ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:+obj[y:index,z:*Nat]) -> obj {intrinsic}};", "TestId(+obj[ind, *Nat]) -> obj", "TestId ( + obj [ ind * Nat ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*obj[y:*obj,z:+@Nat]) -> obj {intrinsic}};", "TestId(*obj[*obj, +@Nat]) -> obj", "TestId ( * obj [ * obj + @Nat ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId(x:*obj[y:+tpl,z:index]) -> obj {intrinsic}};", "TestId(*obj[+tpl, ind]) -> obj", "TestId ( * obj [ + tpl ind ] ) -> obj")>]
+
+    [<DataRow("def cl T:obj {intr prty func TestId() -> ind {intrinsic}};", "TestId() -> ind", "TestId ( ) -> ind")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> pred {intrinsic}};", "TestId() -> pred", "TestId ( ) -> pred")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> func {intrinsic}};", "TestId() -> func", "TestId ( ) -> func")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj {intrinsic}};", "TestId() -> obj", "TestId ( ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> index {intrinsic}};", "TestId() -> ind", "TestId ( ) -> ind")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> predicate {intrinsic}};", "TestId() -> pred", "TestId ( ) -> pred")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> function {intrinsic}};", "TestId() -> func", "TestId ( ) -> func")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> object {intrinsic}};", "TestId() -> obj", "TestId ( ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> Nat {intrinsic}};", "TestId() -> Nat", "TestId ( ) -> Nat")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> @Nat {intrinsic}};", "TestId() -> @Nat", "TestId ( ) -> @Nat")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> tpl {intrinsic}};", "TestId() -> tpl", "TestId ( ) -> tpl")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> template {intrinsic}};", "TestId() -> template", "TestId ( ) -> template")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> tplTest {intrinsic}};", "TestId() -> tplTest", "TestId ( ) -> tplTest")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> templateTest {intrinsic}};", "TestId() -> templateTest", "TestId ( ) -> templateTest")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> Nat(x,y,z:obj) {intrinsic}};", "TestId() -> Nat(obj, obj, obj)", "TestId ( ) -> Nat ( obj obj obj )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> template(x,y:pred(z:obj)) {intrinsic}};", "TestId() -> template(pred(obj), pred(obj))", "TestId ( ) -> template ( pred ( obj ) pred ( obj ) )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x,y:pred(u,v,w:obj)) {intrinsic}};", "TestId() -> obj(pred(obj, obj, obj), pred(obj, obj, obj))", "TestId ( ) -> obj ( pred ( obj obj obj ) pred ( obj obj obj ) )")>]
+
+    [<DataRow("def cl T:obj {intr prty func TestId() -> pred(x:func(u:obj)->Nat) {intrinsic}};", "TestId() -> pred(func(obj) -> Nat)", "TestId ( ) -> pred ( func ( obj ) -> Nat )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> func(x:obj[y:@Nat])->obj {intrinsic}};", "TestId() -> func(obj[@Nat]) -> obj", "TestId ( ) -> func ( obj [ @Nat ] ) -> obj")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:obj[y:Test.Nat]) {intrinsic}};", "TestId() -> obj(obj[Test.Nat])", "TestId ( ) -> obj ( obj [ Test.Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:obj[y:index]) {intrinsic}};", "TestId() -> obj(obj[ind])", "TestId ( ) -> obj ( obj [ ind ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> templateTest(x:obj[y:ind]) {intrinsic}};", "TestId() -> templateTest(obj[ind])", "TestId ( ) -> templateTest ( obj [ ind ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:obj[y:tpl]) {intrinsic}};", "TestId() -> obj(obj[tpl])", "TestId ( ) -> obj ( obj [ tpl ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:obj[y:template]) {intrinsic}};", "TestId() -> obj(obj[template])", "TestId ( ) -> obj ( obj [ template ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> templateTest(x:obj[y:tplTest]) {intrinsic}};", "TestId() -> templateTest(obj[tplTest])", "TestId ( ) -> templateTest ( obj [ tplTest ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:obj[y:templateTest]) {intrinsic}};", "TestId() -> obj(obj[templateTest])", "TestId ( ) -> obj ( obj [ templateTest ] )")>]
+
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:obj[y:Nat,z:templateTest]) {intrinsic}};", "TestId() -> obj(obj[Nat, templateTest])", "TestId ( ) -> obj ( obj [ Nat templateTest ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:obj[y:index,z:Nat]) {intrinsic}};", "TestId() -> obj(obj[ind, Nat])", "TestId ( ) -> obj ( obj [ ind Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:obj[y:obj,z:@Nat]) {intrinsic}};", "TestId() -> obj(obj[obj, @Nat])", "TestId ( ) -> obj ( obj [ obj @Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:obj[y:tpl,z:index]) {intrinsic}};", "TestId() -> obj(obj[tpl, ind])", "TestId ( ) -> obj ( obj [ tpl ind ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*ind) {intrinsic}};", "TestId() -> obj(*ind)", "TestId ( ) -> obj ( * ind )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+pred) {intrinsic}};", "TestId() -> obj(+pred)", "TestId ( ) -> obj ( + pred )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*func) {intrinsic}};", "TestId() -> obj(*func)", "TestId ( ) -> obj ( * func )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+obj) {intrinsic}};", "TestId() -> obj(+obj)", "TestId ( ) -> obj ( + obj )")>]
+
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+index) {intrinsic}};", "TestId() -> obj(+ind)", "TestId ( ) -> obj ( + ind )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*predicate) {intrinsic}};", "TestId() -> obj(*pred)", "TestId ( ) -> obj ( * pred )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+function) {intrinsic}};", "TestId() -> obj(+func)", "TestId ( ) -> obj ( + func )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*object) {intrinsic}};", "TestId() -> obj(*obj)", "TestId ( ) -> obj ( * obj )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+Nat) {intrinsic}};", "TestId() -> obj(+Nat)", "TestId ( ) -> obj ( + Nat )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*@Nat) {intrinsic}};", "TestId() -> obj(*@Nat)", "TestId ( ) -> obj ( * @Nat )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*tpl) {intrinsic}};", "TestId() -> obj(*tpl)", "TestId ( ) -> obj ( * tpl )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+template) {intrinsic}};", "TestId() -> obj(+template)", "TestId ( ) -> obj ( + template )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*tplTest) {intrinsic}};", "TestId() -> obj(*tplTest)", "TestId ( ) -> obj ( * tplTest )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+templateTest) {intrinsic}};", "TestId() -> obj(+templateTest)", "TestId ( ) -> obj ( + templateTest )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x,y,z:+obj) {intrinsic}};", "TestId() -> obj(+obj, +obj, +obj)", "TestId ( ) -> obj ( + obj + obj + obj )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x,y:+pred(z:obj)) {intrinsic}};", "TestId() -> obj(+pred(obj), +pred(obj))", "TestId ( ) -> obj ( + pred ( obj ) + pred ( obj ) )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x,y:pred(u,v,w:*obj)) {intrinsic}};", "TestId() -> obj(pred(*obj, *obj, *obj), pred(*obj, *obj, *obj))", "TestId ( ) -> obj ( pred ( * obj * obj * obj ) pred ( * obj * obj * obj ) )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:func(u:+obj)->Nat) {intrinsic}};", "TestId() -> obj(func(+obj) -> Nat)", "TestId ( ) -> obj ( func ( + obj ) -> Nat )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:obj[y:*@Nat]) {intrinsic}};", "TestId() -> obj(obj[*@Nat])", "TestId ( ) -> obj ( obj [ * @Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:obj[y:+Nat]) {intrinsic}};", "TestId() -> obj(obj[+Nat])", "TestId ( ) -> obj ( obj [ + Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+obj[y:+Test.Nat]) {intrinsic}};", "TestId() -> obj(+obj[+Test.Nat])", "TestId ( ) -> obj ( + obj [ + Test.Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+obj[y:*index]) {intrinsic}};", "TestId() -> obj(+obj[*ind])", "TestId ( ) -> obj ( + obj [ * ind ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*obj[y:+ind]) {intrinsic}};", "TestId() -> obj(*obj[+ind])", "TestId ( ) -> obj ( * obj [ + ind ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+obj[y:*tpl]) {intrinsic}};", "TestId() -> obj(+obj[*tpl])", "TestId ( ) -> obj ( + obj [ * tpl ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> template(x:+obj[y:*template]) {intrinsic}};", "TestId() -> template(+obj[*template])", "TestId ( ) -> template ( + obj [ * template ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*obj[y:+tplTest]) {intrinsic}};", "TestId() -> obj(*obj[+tplTest])", "TestId ( ) -> obj ( * obj [ + tplTest ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*obj[y:*templateTest]) {intrinsic}};", "TestId() -> obj(*obj[*templateTest])", "TestId ( ) -> obj ( * obj [ * templateTest ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+obj[y:Nat,z:+templateTest]) {intrinsic}};", "TestId() -> obj(+obj[Nat, +templateTest])", "TestId ( ) -> obj ( + obj [ Nat + templateTest ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:+obj[y:index,z:*Nat]) {intrinsic}};", "TestId() -> obj(+obj[ind, *Nat])", "TestId ( ) -> obj ( + obj [ ind * Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*obj[y:*obj,z:+@Nat]) {intrinsic}};", "TestId() -> obj(*obj[*obj, +@Nat])", "TestId ( ) -> obj ( * obj [ * obj + @Nat ] )")>]
+    [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*obj[y:+tpl,z:index]) {intrinsic}};", "TestId() -> obj(*obj[+tpl, ind])", "TestId ( ) -> obj ( * obj [ + tpl ind ] )")>]
+
+    [<TestMethod>]
+    member this.TestTypeSignatureOfFplProperties(fplCode:string, expectedName:string, expectedTypeSignatureStr:string) =
+        let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
+        let result = prepareFplCode(fplCode, false) 
+        let fplValue = result.Value.Root.Scope["Test"].Scope["T"].Scope[expectedName]
+        let actualTypeSignature = fplValue.TypeSignature
+        let actualSignatureStart = fplValue.StartPos.Index
+        let actualSignatureEnd = fplValue.NameEndPos.Index
+        Assert.AreEqual(expectedTypeSignature, actualTypeSignature)
+        let expectedStart =
+                (int64)19
+        Assert.AreEqual(expectedStart, actualSignatureStart)
+        let expectedEnd =
+                (int64)(fplCode.IndexOf(" {intrinsic", System.StringComparison.OrdinalIgnoreCase))
+        Assert.AreEqual(expectedEnd, actualSignatureEnd)
+        prepareFplCode("", true) |> ignore
+
+
+    [<DataRow("def cl T:obj {ctor T() {self}};", "T()", "T ( )")>]
+    [<DataRow("def cl T:obj {ctor T(x:ind) {self}};", "T(ind)", "T ( ind )")>]
+    [<DataRow("def cl T:obj {ctor T(x:pred) {self}};", "T(pred)", "T ( pred )")>]
+    [<DataRow("def cl T:obj {ctor T(x:func) {self}};", "T(func)", "T ( func )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj) {self}};", "T(obj)", "T ( obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x:index) {self}};", "T(ind)", "T ( ind )")>]
+    [<DataRow("def cl T:obj {ctor T(x:predicate) {self}};", "T(pred)", "T ( pred )")>]
+    [<DataRow("def cl T:obj {ctor T(x:function) {self}};", "T(func)", "T ( func )")>]
+    [<DataRow("def cl T:obj {ctor T(x:object) {self}};", "T(obj)", "T ( obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x:Nat) {self}};", "T(Nat)", "T ( Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:@Nat) {self}};", "T(@Nat)", "T ( @Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:tpl) {self}};", "T(tpl)", "T ( tpl )")>]
+    [<DataRow("def cl T:obj {ctor T(x:template) {self}};", "T(template)", "T ( template )")>]
+    [<DataRow("def cl T:obj {ctor T(x:tplTest) {self}};", "T(tplTest)", "T ( tplTest )")>]
+    [<DataRow("def cl T:obj {ctor T(x:templateTest) {self}};", "T(templateTest)", "T ( templateTest )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y,z:obj) {self}};", "T(obj, obj, obj)", "T ( obj obj obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y:pred(z:obj)) {self}};", "T(pred(obj), pred(obj))", "T ( pred ( obj ) pred ( obj ) )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y:pred(u,v,w:obj)) {self}};", "T(pred(obj, obj, obj), pred(obj, obj, obj))", "T ( pred ( obj obj obj ) pred ( obj obj obj ) )")>]
+    [<DataRow("def cl T:obj {ctor T(x:func(u:obj)->Nat) {self}};", "T(func(obj) -> Nat)", "T ( func ( obj ) -> Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:@Nat]) {self}};", "T(obj[@Nat])", "T ( obj [ @Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:Nat]) {self}};", "T(obj[Nat])", "T ( obj [ Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:Test.Nat]) {self}};", "T(obj[Test.Nat])", "T ( obj [ Test.Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:index]) {self}};", "T(obj[ind])", "T ( obj [ ind ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:ind]) {self}};", "T(obj[ind])", "T ( obj [ ind ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:tpl]) {self}};", "T(obj[tpl])", "T ( obj [ tpl ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:template]) {self}};", "T(obj[template])", "T ( obj [ template ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:tplTest]) {self}};", "T(obj[tplTest])", "T ( obj [ tplTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:templateTest]) {self}};", "T(obj[templateTest])", "T ( obj [ templateTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:Nat,z:templateTest]) {self}};", "T(obj[Nat, templateTest])", "T ( obj [ Nat templateTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:index,z:Nat]) {self}};", "T(obj[ind, Nat])", "T ( obj [ ind Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:obj,z:@Nat]) {self}};", "T(obj[obj, @Nat])", "T ( obj [ obj @Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:tpl,z:index]) {self}};", "T(obj[tpl, ind])", "T ( obj [ tpl ind ] )")>]
+
+    [<DataRow("def cl T:obj {ctor T(x:*ind) {self}};", "T(*ind)", "T ( * ind )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+pred) {self}};", "T(+pred)", "T ( + pred )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*func) {self}};", "T(*func)", "T ( * func )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj) {self}};", "T(+obj)", "T ( + obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+index) {self}};", "T(+ind)", "T ( + ind )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*predicate) {self}};", "T(*pred)", "T ( * pred )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+function) {self}};", "T(+func)", "T ( + func )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*object) {self}};", "T(*obj)", "T ( * obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+Nat) {self}};", "T(+Nat)", "T ( + Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*@Nat) {self}};", "T(*@Nat)", "T ( * @Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*tpl) {self}};", "T(*tpl)", "T ( * tpl )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+template) {self}};", "T(+template)", "T ( + template )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*tplTest) {self}};", "T(*tplTest)", "T ( * tplTest )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+templateTest) {self}};", "T(+templateTest)", "T ( + templateTest )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y,z:+obj) {self}};", "T(+obj, +obj, +obj)", "T ( + obj + obj + obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y:+pred(z:obj)) {self}};", "T(+pred(obj), +pred(obj))", "T ( + pred ( obj ) + pred ( obj ) )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y:pred(u,v,w:*obj)) {self}};", "T(pred(*obj, *obj, *obj), pred(*obj, *obj, *obj))", "T ( pred ( * obj * obj * obj ) pred ( * obj * obj * obj ) )")>]
+    [<DataRow("def cl T:obj {ctor T(x:func(u:+obj)->Nat) {self}};", "T(func(+obj) -> Nat)", "T ( func ( + obj ) -> Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:*@Nat]) {self}};", "T(obj[*@Nat])", "T ( obj [ * @Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:+Nat]) {self}};", "T(obj[+Nat])", "T ( obj [ + Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:+Test.Nat]) {self}};", "T(+obj[+Test.Nat])", "T ( + obj [ + Test.Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:*index]) {self}};", "T(+obj[*ind])", "T ( + obj [ * ind ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*obj[y:+ind]) {self}};", "T(*obj[+ind])", "T ( * obj [ + ind ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:*tpl]) {self}};", "T(+obj[*tpl])", "T ( + obj [ * tpl ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:*template]) {self}};", "T(+obj[*template])", "T ( + obj [ * template ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*obj[y:+tplTest]) {self}};", "T(*obj[+tplTest])", "T ( * obj [ + tplTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*obj[y:*templateTest]) {self}};", "T(*obj[*templateTest])", "T ( * obj [ * templateTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:Nat,z:+templateTest]) {self}};", "T(+obj[Nat, +templateTest])", "T ( + obj [ Nat + templateTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:index,z:*Nat]) {self}};", "T(+obj[ind, *Nat])", "T ( + obj [ ind * Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*obj[y:*obj,z:+@Nat]) {self}};", "T(*obj[*obj, +@Nat])", "T ( * obj [ * obj + @Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*obj[y:+tpl,z:index]) {self}};", "T(*obj[+tpl, ind])", "T ( * obj [ + tpl ind ] )")>]
+
+    [<TestMethod>]
+    member this.TestTypeSignatureOfConstructors(fplCode:string, expectedName:string, expectedTypeSignatureStr:string) =
+        let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
+        let result = prepareFplCode(fplCode, false) 
+        let fplValue = result.Value.Root.Scope["Test"].Scope["T"].Scope[expectedName]
+        let actualTypeSignature = fplValue.TypeSignature
+        let actualSignatureStart = fplValue.StartPos.Index
+        let actualSignatureEnd = fplValue.NameEndPos.Index
+        Assert.AreEqual(expectedTypeSignature, actualTypeSignature)
+        let expectedStart =
+                (int64)14
+        Assert.AreEqual(expectedStart, actualSignatureStart)
+        let expectedEnd =
+                (int64)(fplCode.IndexOf(" {self", System.StringComparison.OrdinalIgnoreCase))
+        Assert.AreEqual(expectedEnd, actualSignatureEnd)
+        prepareFplCode("", true) |> ignore
