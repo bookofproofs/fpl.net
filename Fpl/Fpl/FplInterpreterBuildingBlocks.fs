@@ -662,7 +662,13 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
     | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermSignatureAst, functionalTermInstanceBlockAst)) ->
         st.EvalPush("FunctionalTermInstance")
         eval uri st functionalTermSignatureAst
+        let oldContext = st.CurrentContext 
+        match st.CurrentContext with
+        | EvalContext.InPropertySignature fplValue ->
+            st.CurrentContext <- EvalContext.InPropertyBlock fplValue
+        | _ -> ()
         eval uri st functionalTermInstanceBlockAst
+        st.CurrentContext <- oldContext
         st.EvalPop()
     // | All of Positions * ((Ast list * Ast option) list * Ast)
     | Ast.All((pos1, pos2), (astsOpts, ast1)) ->
@@ -743,10 +749,16 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         eval uri st ast1
         eval uri st ast2
         st.EvalPop()
-    | Ast.PredicateInstance((pos1, pos2), (ast1, ast2)) ->
+    | Ast.PredicateInstance((pos1, pos2), (signatureAst, predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")
-        eval uri st ast1
-        eval uri st ast2
+        eval uri st signatureAst
+        let oldContext = st.CurrentContext 
+        match st.CurrentContext with
+        | EvalContext.InPropertySignature fplValue ->
+            st.CurrentContext <- EvalContext.InPropertyBlock fplValue
+        | _ -> ()
+        eval uri st predInstanceBlockAst
+        st.CurrentContext <- oldContext
         st.EvalPop()
     | Ast.ParentConstructorCall((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("ParentConstructorCall")
@@ -895,13 +907,15 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
 
         // create all variables of the named variable declaration in the current scope
         match st.CurrentContext with
-        | EvalContext.InBlock fplValue ->
+        | EvalContext.InBlock fplValue 
+        | EvalContext.InPropertyBlock fplValue ->
             st.CurrentContext <- EvalContext.NamedVarDeclarationInBlock (fplValue)
         | _ -> ()
         variableListAst |> List.map (eval uri st) |> ignore 
 
         match st.CurrentContext with 
         | EvalContext.InBlock fplValue
+        | EvalContext.InPropertyBlock fplValue
         | EvalContext.NamedVarDeclarationInBlock fplValue ->
             evalNamedVarDecl fplValue "NamedVarDeclarationInBlock"
         | EvalContext.InPropertySignature fplValue -> 

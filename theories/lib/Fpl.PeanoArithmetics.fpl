@@ -1,5 +1,5 @@
 :ext
-    Digits : /\d+/
+    Digits: /\d+/
 :end
 
 uses Fpl.Commons

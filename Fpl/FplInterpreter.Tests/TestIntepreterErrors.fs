@@ -400,6 +400,16 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test(x,x: pred) {true};", 1)>]
     [<DataRow("def pred Test(x: pred) {true};", 0)>]
     [<DataRow("def pred Test(x:+ pred) {dec ~x:obj; true};", 1)>]
+    [<DataRow("def pred Test() {true prty pred X(x,x:* pred) {true} };", 1)>]
+    [<DataRow("def pred Test() {true prty pred X(x,x:+ pred) {true} };", 1)>]
+    [<DataRow("def pred Test() {true prty pred X(x,x: pred) {true} };", 1)>]
+    [<DataRow("def pred Test() {true prty pred X(x: pred) {true} };", 0)>]
+    [<DataRow("def pred Test() {true prty pred X(x:+ pred) {dec ~x:obj; true} };", 1)>]
+    [<DataRow("def pred Test() {true prty func X(x,x:* pred)->obj {intr} };", 1)>]
+    [<DataRow("def pred Test() {true prty func X(x,x:+ pred)->obj {intr} };", 1)>]
+    [<DataRow("def pred Test() {true prty func X(x,x: pred)->obj {intr} };", 1)>]
+    [<DataRow("def pred Test() {true prty func X(x: pred)->obj {intr} };", 0)>]
+    [<DataRow("def pred Test() {true prty func X(x:+ pred)->obj {dec ~x:obj; return x} };", 1)>]
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
         let code = VAR01 "x"
@@ -411,10 +421,12 @@ type TestInterpreterErrors() =
         prepareFplCode("", true) |> ignore
 
 
-    [<DataRow("inf ModusPonens() {dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q};")>]
+    [<DataRow("inf ModusPonens() {dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q};", "p")>]
+    [<DataRow("def pred Test() {true prty pred X(y:+ pred) {dec ~x:obj; ex x {true}} };", "x")>]
+    [<DataRow("def pred Test() {true prty func X(y:+ pred)->obj {dec ~x:obj; ex x {true}} };", "x")>]
     [<TestMethod>]
-    member this.TestVAR01CrossCheck(fplCode:string) =
-        let code = VAR01 "p"
+    member this.TestVAR01CrossCheck(fplCode:string, duplicateCandidate:string) =
+        let code = VAR01 duplicateCandidate
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
