@@ -1042,3 +1042,64 @@ type TestFplValue() =
                 (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
         Assert.AreEqual(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore
+
+    member this.ScopeProperties() =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = """
+        def pred TestId() 
+        {
+            intr 
+            prty pred T1() {intr}
+            prty opt pred T2() {intr}
+            prty func T3()->obj {intr}
+            prty func opt func T4()->obj {intr}
+            prty X T5() {intr}
+            prty Y T6() {intr}
+        }
+        ;
+        """
+        let stOption = prepareFplCode(fplCode, false) 
+        let result = match stOption with
+                        | Some st -> 
+                            let name = "TestId()"
+                            let r = st.Root
+                            let theory = r.Scope["Test"]
+                            let block = theory.Scope[name]
+                            let t1 = block.Scope["T1()"]
+                            let t2 = block.Scope["T2()"]
+                            let t3 = block.Scope["T3() -> obj"]
+                            let t4 = block.Scope["T4() -> obj"]
+                            let t5 = block.Scope["X, T5()"]
+                            let t6 = block.Scope["Y, T6()"]
+                            Some (r,theory,block,t1,t2,t3,t4,t5,t6)
+                        | None -> None
+        prepareFplCode("", true) |> ignore
+        result
+
+    [<TestMethod>]
+    member this.TestScopePropertiesIsComplete() =
+        try
+            this.ScopeProperties() |> ignore
+            Assert.IsTrue(true)
+        with
+        | ex -> 
+            Assert.IsTrue(false)
+
+
+    [<DataRow("def pred TestId() { intr prty pred T() {intr} };", "T()", true)>]
+    [<DataRow("def pred TestId() { intr prty opt pred T() {intr} };", "T()", false)>]
+    [<DataRow("def pred TestId() { intr prty func T()->obj {intr} };", "T() -> obj", true)>]
+    [<DataRow("def pred TestId() { intr prty opt func T()->obj {intr} };", "T() -> obj", false)>]
+    [<DataRow("def pred TestId() { intr prty X T() {intr} };", "X, T()", true)>]
+    [<DataRow("def pred TestId() { intr prty opt Y T() {intr} };", "Y, T()", false)>]
+    [<TestMethod>]
+    member this.TestMandatoryAndOptionalProperties(fplCode:string, expectedPropertyName:string, isMandatory) =
+        let result = prepareFplCode(fplCode, false) 
+        let fplBlock = result.Value.Root.Scope["Test"].Scope["TestId()"]
+        let propertyValue = fplBlock.Scope[expectedPropertyName]
+        if isMandatory then
+            Assert.AreEqual(FplBlockType.MandatoryProperty, propertyValue.BlockType)
+        else
+            Assert.AreEqual(FplBlockType.OptionalProperty, propertyValue.BlockType)
+        prepareFplCode("", true) |> ignore
+

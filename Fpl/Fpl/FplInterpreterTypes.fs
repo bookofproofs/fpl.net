@@ -417,6 +417,8 @@ type EvalContext =
     | InTheory of FplValue
     | InSignature of FplValue
     | InBlock of FplValue
+    | InPropertySignature of FplValue
+    | InPropertyBlock of FplValue
     | NamedVarDeclarationInBlock of FplValue
 
 type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =

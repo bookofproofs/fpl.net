@@ -183,4 +183,16 @@ type TestClassInstanceProperties () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
-    
+    [<TestMethod>]
+    member this.TestClassInstance4a () =
+        let result = run (property .>> eof) """prty X T() {intr}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestClassInstance4n () =
+        let result = run (property .>> eof) """prty opt X T() {intr}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

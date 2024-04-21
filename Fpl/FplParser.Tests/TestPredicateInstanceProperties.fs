@@ -194,3 +194,10 @@ type TestPredicateInstanceProperties () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicateInstance5 () =
+        let result = run (property .>> eof) """prty opt pred T() {true}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
