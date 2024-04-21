@@ -389,3 +389,18 @@ type TestClasses () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))       
+
+    [<TestMethod>]
+    member this.TestClass10 () =
+        let result = run (definitionClass .>> eof) """cl TestId:obj 
+        {
+            ctor TestId() {self} 
+            ctor TestId(x:obj) {self} 
+            ctor TestId(x:pred) {self} 
+            ctor TestId(x:ind) {self} 
+        }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))       
+
+        

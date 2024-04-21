@@ -1082,6 +1082,43 @@ type TestFplValue() =
             Assert.IsTrue(false)
 
 
+    member this.ScopeConstructors() =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = """
+        def cl TestId:obj 
+        {
+            ctor TestId() {self} 
+            ctor TestId(x:obj) {self} 
+            ctor TestId(x:pred) {self} 
+            ctor TestId(x:ind) {self} 
+        }
+        ;
+        """
+        let stOption = prepareFplCode(fplCode, false) 
+        let result = match stOption with
+                        | Some st -> 
+                            let name = "TestId"
+                            let r = st.Root
+                            let theory = r.Scope["Test"]
+                            let block = theory.Scope[name]
+                            let t1 = block.Scope["TestId()"]
+                            let t2 = block.Scope["TestId(obj)"]
+                            let t3 = block.Scope["TestId(pred)"]
+                            let t4 = block.Scope["TestId(ind)"]
+                            Some (r,theory,block,t1,t2,t3,t4)
+                        | None -> None
+        prepareFplCode("", true) |> ignore
+        result
+
+    [<TestMethod>]
+    member this.TestScopeConstructorsIsComplete() =
+        try
+            this.ScopeConstructors() |> ignore
+            Assert.IsTrue(true)
+        with
+        | ex -> 
+            Assert.IsTrue(false)
+
     [<DataRow("def pred TestId() { intr prty pred T() {intr} };", "T()", true)>]
     [<DataRow("def pred TestId() { intr prty opt pred T() {intr} };", "T()", false)>]
     [<DataRow("def pred TestId() { intr prty func T()->obj {intr} };", "T() -> obj", true)>]
@@ -1095,6 +1132,18 @@ type TestFplValue() =
             Assert.AreEqual(FplBlockType.MandatoryProperty, propertyValue.BlockType)
         else
             Assert.AreEqual(FplBlockType.OptionalProperty, propertyValue.BlockType)
+        prepareFplCode("", true) |> ignore
+
+    [<DataRow("def cl TestId:obj {ctor TestId() {self} };", "TestId()")>]
+    [<DataRow("def cl TestId:obj {ctor TestId(x:obj) {self} };", "TestId(obj)")>]
+    [<DataRow("def cl TestId:obj {ctor TestId(x:ind) {self} };", "TestId(ind)")>]
+    [<DataRow("def cl TestId:obj {ctor TestId(x:pred) {self} };", "TestId(pred)")>]
+    [<TestMethod>]
+    member this.TestConstructor(fplCode:string, expectedConstructorName:string) =
+        let result = prepareFplCode(fplCode, false) 
+        let fplBlock = result.Value.Root.Scope["Test"].Scope["TestId"]
+        let constructorName = fplBlock.Scope[expectedConstructorName]
+        Assert.AreEqual(FplBlockType.Constructor, constructorName.BlockType)
         prepareFplCode("", true) |> ignore
 
     [<DataRow("def cl T:obj {intr prty pred TestId() {intrinsic}};", "TestId()", "TestId ( )")>]
@@ -1306,5 +1355,88 @@ type TestFplValue() =
         Assert.AreEqual(expectedStart, actualSignatureStart)
         let expectedEnd =
                 (int64)(fplCode.IndexOf(" {intrinsic", System.StringComparison.OrdinalIgnoreCase))
+        Assert.AreEqual(expectedEnd, actualSignatureEnd)
+        prepareFplCode("", true) |> ignore
+
+
+    [<DataRow("def cl T:obj {ctor T() {self}};", "T()", "T ( )")>]
+    [<DataRow("def cl T:obj {ctor T(x:ind) {self}};", "T(ind)", "T ( ind )")>]
+    [<DataRow("def cl T:obj {ctor T(x:pred) {self}};", "T(pred)", "T ( pred )")>]
+    [<DataRow("def cl T:obj {ctor T(x:func) {self}};", "T(func)", "T ( func )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj) {self}};", "T(obj)", "T ( obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x:index) {self}};", "T(ind)", "T ( ind )")>]
+    [<DataRow("def cl T:obj {ctor T(x:predicate) {self}};", "T(pred)", "T ( pred )")>]
+    [<DataRow("def cl T:obj {ctor T(x:function) {self}};", "T(func)", "T ( func )")>]
+    [<DataRow("def cl T:obj {ctor T(x:object) {self}};", "T(obj)", "T ( obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x:Nat) {self}};", "T(Nat)", "T ( Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:@Nat) {self}};", "T(@Nat)", "T ( @Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:tpl) {self}};", "T(tpl)", "T ( tpl )")>]
+    [<DataRow("def cl T:obj {ctor T(x:template) {self}};", "T(template)", "T ( template )")>]
+    [<DataRow("def cl T:obj {ctor T(x:tplTest) {self}};", "T(tplTest)", "T ( tplTest )")>]
+    [<DataRow("def cl T:obj {ctor T(x:templateTest) {self}};", "T(templateTest)", "T ( templateTest )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y,z:obj) {self}};", "T(obj, obj, obj)", "T ( obj obj obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y:pred(z:obj)) {self}};", "T(pred(obj), pred(obj))", "T ( pred ( obj ) pred ( obj ) )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y:pred(u,v,w:obj)) {self}};", "T(pred(obj, obj, obj), pred(obj, obj, obj))", "T ( pred ( obj obj obj ) pred ( obj obj obj ) )")>]
+    [<DataRow("def cl T:obj {ctor T(x:func(u:obj)->Nat) {self}};", "T(func(obj) -> Nat)", "T ( func ( obj ) -> Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:@Nat]) {self}};", "T(obj[@Nat])", "T ( obj [ @Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:Nat]) {self}};", "T(obj[Nat])", "T ( obj [ Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:Test.Nat]) {self}};", "T(obj[Test.Nat])", "T ( obj [ Test.Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:index]) {self}};", "T(obj[ind])", "T ( obj [ ind ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:ind]) {self}};", "T(obj[ind])", "T ( obj [ ind ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:tpl]) {self}};", "T(obj[tpl])", "T ( obj [ tpl ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:template]) {self}};", "T(obj[template])", "T ( obj [ template ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:tplTest]) {self}};", "T(obj[tplTest])", "T ( obj [ tplTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:templateTest]) {self}};", "T(obj[templateTest])", "T ( obj [ templateTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:Nat,z:templateTest]) {self}};", "T(obj[Nat, templateTest])", "T ( obj [ Nat templateTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:index,z:Nat]) {self}};", "T(obj[ind, Nat])", "T ( obj [ ind Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:obj,z:@Nat]) {self}};", "T(obj[obj, @Nat])", "T ( obj [ obj @Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:tpl,z:index]) {self}};", "T(obj[tpl, ind])", "T ( obj [ tpl ind ] )")>]
+
+    [<DataRow("def cl T:obj {ctor T(x:*ind) {self}};", "T(*ind)", "T ( * ind )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+pred) {self}};", "T(+pred)", "T ( + pred )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*func) {self}};", "T(*func)", "T ( * func )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj) {self}};", "T(+obj)", "T ( + obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+index) {self}};", "T(+ind)", "T ( + ind )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*predicate) {self}};", "T(*pred)", "T ( * pred )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+function) {self}};", "T(+func)", "T ( + func )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*object) {self}};", "T(*obj)", "T ( * obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+Nat) {self}};", "T(+Nat)", "T ( + Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*@Nat) {self}};", "T(*@Nat)", "T ( * @Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*tpl) {self}};", "T(*tpl)", "T ( * tpl )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+template) {self}};", "T(+template)", "T ( + template )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*tplTest) {self}};", "T(*tplTest)", "T ( * tplTest )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+templateTest) {self}};", "T(+templateTest)", "T ( + templateTest )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y,z:+obj) {self}};", "T(+obj, +obj, +obj)", "T ( + obj + obj + obj )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y:+pred(z:obj)) {self}};", "T(+pred(obj), +pred(obj))", "T ( + pred ( obj ) + pred ( obj ) )")>]
+    [<DataRow("def cl T:obj {ctor T(x,y:pred(u,v,w:*obj)) {self}};", "T(pred(*obj, *obj, *obj), pred(*obj, *obj, *obj))", "T ( pred ( * obj * obj * obj ) pred ( * obj * obj * obj ) )")>]
+    [<DataRow("def cl T:obj {ctor T(x:func(u:+obj)->Nat) {self}};", "T(func(+obj) -> Nat)", "T ( func ( + obj ) -> Nat )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:*@Nat]) {self}};", "T(obj[*@Nat])", "T ( obj [ * @Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:obj[y:+Nat]) {self}};", "T(obj[+Nat])", "T ( obj [ + Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:+Test.Nat]) {self}};", "T(+obj[+Test.Nat])", "T ( + obj [ + Test.Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:*index]) {self}};", "T(+obj[*ind])", "T ( + obj [ * ind ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*obj[y:+ind]) {self}};", "T(*obj[+ind])", "T ( * obj [ + ind ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:*tpl]) {self}};", "T(+obj[*tpl])", "T ( + obj [ * tpl ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:*template]) {self}};", "T(+obj[*template])", "T ( + obj [ * template ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*obj[y:+tplTest]) {self}};", "T(*obj[+tplTest])", "T ( * obj [ + tplTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*obj[y:*templateTest]) {self}};", "T(*obj[*templateTest])", "T ( * obj [ * templateTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:Nat,z:+templateTest]) {self}};", "T(+obj[Nat, +templateTest])", "T ( + obj [ Nat + templateTest ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:+obj[y:index,z:*Nat]) {self}};", "T(+obj[ind, *Nat])", "T ( + obj [ ind * Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*obj[y:*obj,z:+@Nat]) {self}};", "T(*obj[*obj, +@Nat])", "T ( * obj [ * obj + @Nat ] )")>]
+    [<DataRow("def cl T:obj {ctor T(x:*obj[y:+tpl,z:index]) {self}};", "T(*obj[+tpl, ind])", "T ( * obj [ + tpl ind ] )")>]
+
+    [<TestMethod>]
+    member this.TestTypeSignatureOfConstructors(fplCode:string, expectedName:string, expectedTypeSignatureStr:string) =
+        let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
+        let result = prepareFplCode(fplCode, false) 
+        let fplValue = result.Value.Root.Scope["Test"].Scope["T"].Scope[expectedName]
+        let actualTypeSignature = fplValue.TypeSignature
+        let actualSignatureStart = fplValue.StartPos.Index
+        let actualSignatureEnd = fplValue.NameEndPos.Index
+        Assert.AreEqual(expectedTypeSignature, actualTypeSignature)
+        let expectedStart =
+                (int64)14
+        Assert.AreEqual(expectedStart, actualSignatureStart)
+        let expectedEnd =
+                (int64)(fplCode.IndexOf(" {self", System.StringComparison.OrdinalIgnoreCase))
         Assert.AreEqual(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore

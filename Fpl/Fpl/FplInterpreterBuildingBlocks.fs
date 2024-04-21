@@ -36,6 +36,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
             fplValue.TypeSignature <- fplValue.TypeSignature @ [str]
         match st.CurrentContext with
         | EvalContext.InPropertySignature _
+        | EvalContext.InConstructorSignature _
         | EvalContext.InSignature _ -> 
             if not fplValue.IsFplBlock then 
                 match fplValue.Parent with
@@ -54,6 +55,7 @@ let eval_units (st: SymbolTable) unitType =
     match st.CurrentContext with
     | EvalContext.NamedVarDeclarationInBlock fplValue 
     | EvalContext.InPropertySignature fplValue 
+    | EvalContext.InConstructorSignature fplValue
     | EvalContext.InSignature fplValue -> 
         if unitType <> "" then 
             if fplValue.IsVariadicVariableMany then 
@@ -124,6 +126,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue
         | EvalContext.InPropertySignature fplValue
+        | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
             tryAddVariadicVariables uri fplValue.AuxiliaryInfo pos1 pos2
             // adjust type of variables to variadic variables, if their type has not yet been established
@@ -210,6 +213,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InPropertySignature fplValue 
+        | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue ->
             adjustSignature st fplValue s
             fplValue.NameEndPos <- pos2 // the full name ends where the dollar digits end 
@@ -220,6 +224,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InPropertySignature fplValue 
+        | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
             if fplValue.IsVariadicVariableMany then 
                 adjustSignature st fplValue ("*@" + s)
@@ -234,6 +239,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InPropertySignature fplValue 
+        | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
             if fplValue.IsVariadicVariableMany then 
                 adjustSignature st fplValue ("*" + s)
@@ -248,6 +254,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InPropertySignature fplValue 
+        | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
             let varValue = FplValue.CreateFplValue((pos1,pos2), FplBlockType.Variable, fplValue)
             varValue.Name <- s
@@ -347,9 +354,10 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPush("ClassIdentifier")
         eval uri st ast1
         match st.CurrentContext with 
-        | EvalContext.InPropertySignature fplBlock 
-        | EvalContext.InSignature fplBlock -> 
-            fplBlock.NameEndPos <- pos2
+        | EvalContext.InPropertySignature fplValue 
+        | EvalContext.InConstructorSignature fplValue
+        | EvalContext.InSignature fplValue -> 
+            fplValue.NameEndPos <- pos2
         | _ -> ()
         eval_pos_ast st pos1 pos2
         st.EvalPop()
@@ -432,6 +440,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory fplValue
         | EvalContext.NamedVarDeclarationInBlock fplValue
         | EvalContext.InPropertySignature fplValue 
+        | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
             if fplValue.IsVariadicVariableMany then 
                 adjustSignature st fplValue ("*" + identifier)
@@ -446,6 +455,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InPropertySignature fplValue 
+        | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
             adjustSignature st fplValue "("
             asts |> List.map (eval uri st) |> ignore
@@ -459,6 +469,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InPropertySignature fplValue 
+        | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
             adjustSignature st fplValue "["
             asts 
@@ -539,6 +550,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             match st.CurrentContext with 
             | EvalContext.NamedVarDeclarationInBlock fplValue 
             | EvalContext.InPropertySignature fplValue 
+            | EvalContext.InConstructorSignature fplValue
             | EvalContext.InSignature fplValue ->
                 adjustSignature st fplValue "->"
                 fplValue.NameEndPos <- pos2
@@ -896,6 +908,8 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                         st.CurrentContext <- EvalContext.NamedVarDeclarationInBlock (childKeyValue.Value)
                     elif context = "InPropertySignature" then
                         st.CurrentContext <- EvalContext.InPropertySignature (childKeyValue.Value)
+                    elif context = "InConstructorSignature" then
+                        st.CurrentContext <- EvalContext.InConstructorSignature (childKeyValue.Value)
                     elif context = "InSignature" then
                         st.CurrentContext <- EvalContext.InSignature (childKeyValue.Value)
                     else
@@ -908,6 +922,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         // create all variables of the named variable declaration in the current scope
         match st.CurrentContext with
         | EvalContext.InBlock fplValue 
+        | EvalContext.InConstructorBlock fplValue
         | EvalContext.InPropertyBlock fplValue ->
             st.CurrentContext <- EvalContext.NamedVarDeclarationInBlock (fplValue)
         | _ -> ()
@@ -915,24 +930,36 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
 
         match st.CurrentContext with 
         | EvalContext.InBlock fplValue
+        | EvalContext.InConstructorBlock fplValue
         | EvalContext.InPropertyBlock fplValue
         | EvalContext.NamedVarDeclarationInBlock fplValue ->
             evalNamedVarDecl fplValue "NamedVarDeclarationInBlock"
         | EvalContext.InPropertySignature fplValue -> 
             evalNamedVarDecl fplValue "InPropertySignature"
+        | EvalContext.InConstructorSignature fplValue -> 
+            evalNamedVarDecl fplValue "InConstructorSignature"
         | EvalContext.InSignature fplValue -> 
             evalNamedVarDecl fplValue "InSignature"
         | _ -> ()
         st.CurrentContext <- oldContext
         st.EvalPop()
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
-    | Ast.Constructor((pos1, pos2), (ast1, (optAstList, ast2))) ->
+    | Ast.Constructor((pos1, pos2), (signatureAst, (optVarDeclOrSpecListAst, keywordSelfAst))) ->
         st.EvalPush("Constructor")
-        eval uri st ast1
-        match optAstList with
-        | Some astList -> astList |> List.map (eval uri st) |> ignore
-        | None -> ()
-        eval uri st ast2
+        let oldContext = st.CurrentContext
+        match st.CurrentContext with
+        | EvalContext.InBlock classBlock -> 
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Constructor, classBlock)
+            st.CurrentContext <- EvalContext.InConstructorSignature fplValue
+            eval uri st signatureAst
+            tryAddBlock uri fplValue 
+            st.CurrentContext <- EvalContext.InConstructorBlock fplValue
+            match optVarDeclOrSpecListAst with
+            | Some astList -> astList |> List.map (eval uri st) |> ignore
+            | None -> ()
+            eval uri st keywordSelfAst
+        | _ -> ()
+        st.CurrentContext <- oldContext
         st.EvalPop()
     // | DefPredicateContent of Ast list option * Ast
     | Ast.DefPredicateContent(optAsts, ast1) ->
