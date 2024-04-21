@@ -270,7 +270,8 @@ type FplType =
 
 type FplBlockType =
     | Variable
-    | VariadicVariable
+    | VariadicVariableMany
+    | VariadicVariableMany1
     | Expression
     | MandatoryProperty
     | OptionalProperty
@@ -357,7 +358,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     static member CreateRoot() =
         new FplValue("", FplBlockType.Root, FplType.Predicate, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
 
-    /// Indicates if this FplValue is an FPL building block
+    /// Indicates if this FplValue is an FPL building block.
     member this.IsFplBlock = 
         this.BlockType = FplBlockType.Axiom
         || this.BlockType = FplBlockType.Theorem 
@@ -371,10 +372,19 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         || this.BlockType = FplBlockType.FunctionalTerm 
         || this.BlockType = FplBlockType.Class 
 
-    /// Indicates if this FplValue is a variable
+    /// Indicates if this FplValue is a variable.
     member this.IsVariable = 
         this.BlockType = FplBlockType.Variable
-        || this.BlockType = FplBlockType.VariadicVariable
+        || this.BlockType = FplBlockType.VariadicVariableMany
+        || this.BlockType = FplBlockType.VariadicVariableMany1
+
+    /// Indicates if this FplValue is a variadic * variable.
+    member this.IsVariadicVariableMany = 
+        this.BlockType = FplBlockType.VariadicVariableMany
+
+    /// Indicates if this FplValue is a variadic + variable.
+    member this.IsVariadicVariableMany1 = 
+        this.BlockType = FplBlockType.VariadicVariableMany1
 
     /// A factory method for the evaluation of Fpl class definitions
     static member CreateFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =
@@ -395,7 +405,8 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         | FplBlockType.Constructor
         | FplBlockType.FunctionalTerm
         | FplBlockType.Variable
-        | FplBlockType.VariadicVariable
+        | FplBlockType.VariadicVariableMany
+        | FplBlockType.VariadicVariableMany1
         | FplBlockType.MandatoryProperty
         | FplBlockType.OptionalProperty
         | FplBlockType.Class -> new FplValue("", fplBlockType, FplType.Object, positions, Some parent)

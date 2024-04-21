@@ -25,16 +25,21 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
                 fplValue.Name <- fplValue.Name + str
         else
             fplValue.Name <- fplValue.Name + ", " + str
-    
+
     if str <> "" then
         // note: the manipulation of the TypeSignature is necessary for all kinds of fplValue
-        fplValue.TypeSignature <- fplValue.TypeSignature @ [str]
+        if str.StartsWith("*") then
+            fplValue.TypeSignature <- fplValue.TypeSignature @ ["*"; str.Substring(1)]
+        elif str.StartsWith("+") then
+            fplValue.TypeSignature <- fplValue.TypeSignature @ ["+"; str.Substring(1)]
+        else
+            fplValue.TypeSignature <- fplValue.TypeSignature @ [str]
         match st.CurrentContext with
         | EvalContext.InSignature _ -> 
             if not fplValue.IsFplBlock then 
                 match fplValue.Parent with
                 | Some parent -> 
-                    adjustSignature st parent str
+                        adjustSignature st parent str
                 | None -> ()
         | EvalContext.NamedVarDeclarationInBlock _ -> 
             match fplValue.Parent with
@@ -48,7 +53,13 @@ let eval_units (st: SymbolTable) unitType =
     match st.CurrentContext with
     | EvalContext.NamedVarDeclarationInBlock fplValue 
     | EvalContext.InSignature fplValue -> 
-        adjustSignature st fplValue unitType
+        if unitType <> "" then 
+            if fplValue.IsVariadicVariableMany then 
+                adjustSignature st fplValue $"*{unitType}"
+            elif fplValue.IsVariadicVariableMany1 then 
+                adjustSignature st fplValue $"+{unitType}"
+            else
+                adjustSignature st fplValue unitType
     | _ -> ()
 
 let eval_string (st: SymbolTable) s = ()
@@ -75,7 +86,7 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
             Diagnostic.StartPos = fplValue.StartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = 
-                if fplValue.BlockType = FplBlockType.Variable || fplValue.BlockType = FplBlockType.VariadicVariable then 
+                if fplValue.IsVariable then 
                     VAR01 fplValue.Name
                 else
                     ID001 fplValue.Name
@@ -107,7 +118,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | None -> ()
         eval uri st predicateAst
 
-    let evalMany (st:SymbolTable) str pos1 pos2 = 
+    let evalMany (st:SymbolTable) blockType pos1 pos2 = 
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue
         | EvalContext.InSignature fplValue -> 
@@ -115,8 +126,9 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             // adjust type of variables to variadic variables, if their type has not yet been established
             fplValue.Scope
             |> Seq.filter (fun varKeyValue -> varKeyValue.Value.IsVariable && varKeyValue.Value.TypeSignature = [])
-            |> Seq.iter (fun varKeyValue -> varKeyValue.Value.BlockType <- FplBlockType.VariadicVariable)
-            adjustSignature st fplValue str
+            |> Seq.iter (fun varKeyValue -> 
+                varKeyValue.Value.BlockType <- blockType
+            )
         | _ -> ()
 
     match ast with
@@ -139,11 +151,11 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
-        evalMany st "Many:" pos1 pos2
+        evalMany st FplBlockType.VariadicVariableMany pos1 pos2
         st.EvalPop()
     | Ast.Many1((pos1, pos2),()) ->
         st.EvalPush("Many1")
-        evalMany st "Many1:" pos1 pos2
+        evalMany st FplBlockType.VariadicVariableMany1 pos1 pos2
         st.EvalPop()
     | Ast.One -> 
         st.EvalPush("One")
@@ -201,7 +213,12 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InSignature fplValue -> 
-            adjustSignature st fplValue ("@" + s)
+            if fplValue.IsVariadicVariableMany then 
+                adjustSignature st fplValue ("*@" + s)
+            elif fplValue.IsVariadicVariableMany1 then 
+                adjustSignature st fplValue ("+@" + s)
+            else
+                adjustSignature st fplValue ("@" + s)
         | _ -> ()
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
@@ -209,7 +226,12 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InSignature fplValue -> 
-            adjustSignature st fplValue s
+            if fplValue.IsVariadicVariableMany then 
+                adjustSignature st fplValue ("*" + s)
+            elif fplValue.IsVariadicVariableMany1 then 
+                adjustSignature st fplValue ("+" + s)
+            else
+                adjustSignature st fplValue s
         | _ -> ()
         st.EvalPop() 
     | Ast.Var((pos1, pos2), s) ->
@@ -395,7 +417,12 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory fplValue
         | EvalContext.NamedVarDeclarationInBlock fplValue
         | EvalContext.InSignature fplValue -> 
-            adjustSignature st fplValue identifier
+            if fplValue.IsVariadicVariableMany then 
+                adjustSignature st fplValue ("*" + identifier)
+            elif fplValue.IsVariadicVariableMany1 then 
+                adjustSignature st fplValue ("+" + identifier)
+            else
+                adjustSignature st fplValue identifier
         | _ -> ()
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), asts) ->
