@@ -449,6 +449,12 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test(x: ind) {true prty func X()->obj {dec ~x: obj; return x} };", 1)>]
     [<DataRow("def pred Test(x: ind) {true prty func X()->obj {dec ~x:* obj; return x} };", 1)>]
     [<DataRow("def pred Test(x: ind) {true prty func X()->obj {dec ~x:+ obj; return x} };", 1)>]
+    [<DataRow("def cl Test:obj {dec ~x:ind; ctor Test(x: pred) {self} };", 1)>]
+    [<DataRow("def cl Test:obj {dec ~x:ind; ctor Test(x:* pred) {self} };", 1)>]
+    [<DataRow("def cl Test:obj {dec ~x:ind; ctor Test(x:+ pred) {self} };", 1)>]
+    [<DataRow("def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x: obj; self} };", 1)>]
+    [<DataRow("def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x:* obj; self} };", 1)>]
+    [<DataRow("def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x:+ obj; self} };", 1)>]
     [<TestMethod>]
     member this.TestVAR02(fplCode:string, expected) =
         let code = VAR02 "x"
