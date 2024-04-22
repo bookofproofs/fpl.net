@@ -354,50 +354,77 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
 
 
+    /// Indicates if this FplValue is an FPL building block.
+    static member IsFplBlock(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Axiom
+        || fplValue.BlockType = FplBlockType.Theorem 
+        || fplValue.BlockType = FplBlockType.Lemma 
+        || fplValue.BlockType = FplBlockType.Proposition 
+        || fplValue.BlockType = FplBlockType.Corollary 
+        || fplValue.BlockType = FplBlockType.Conjecture 
+        || fplValue.BlockType = FplBlockType.Proof 
+        || fplValue.BlockType = FplBlockType.RuleOfInference 
+        || fplValue.BlockType = FplBlockType.Predicate 
+        || fplValue.BlockType = FplBlockType.FunctionalTerm 
+        || fplValue.BlockType = FplBlockType.Class 
+
+    /// Indicates if this FplValue is a constructor.
+    static member IsConstructor(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Constructor
+
+    /// Indicates if this FplValue is a property.
+    static member IsProperty(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.MandatoryProperty
+        || fplValue.BlockType = FplBlockType.OptionalProperty
+
+    /// Indicates if this FplValue is a constructor or a property
+    static member IsConstructorOrProperty(fplValue:FplValue)  = 
+        FplValue.IsConstructor(fplValue) || FplValue.IsProperty(fplValue)
+
+    /// Indicates if this FplValue is a variable.
+    static member IsVariable(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Variable
+        || fplValue.BlockType = FplBlockType.VariadicVariableMany
+        || fplValue.BlockType = FplBlockType.VariadicVariableMany1
+
+    /// Indicates if this FplValue is a variadic * variable.
+    static member IsVariadicVariableMany(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.VariadicVariableMany
+
+    /// Indicates if this FplValue is a variadic + variable.
+    static member IsVariadicVariableMany1(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.VariadicVariableMany1
+
+    /// Checks if a block is in the scope of its parent 
+    static member InScopeOfParent(fplValue:FplValue) = 
+        match fplValue.Parent with
+        | Some parent ->
+            if parent.Scope.ContainsKey(fplValue.Name) then
+                true
+            else    
+                false
+        | None -> false
+
+    /// Checks if a variable defined in the scope of a constructor or a property
+    /// was already defined in the scope of its parent definition. 
+    static member ConstructorOrPropertyVariableInOuterScope(fplValue:FplValue) =
+        if (FplValue.IsVariable(fplValue)) then 
+            match fplValue.Parent with
+            | Some parent ->
+                if (FplValue.IsConstructorOrProperty(parent)) then 
+                    if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
+                        true
+                    else
+                        false
+                else
+                    false
+            | None -> false
+        else
+            false
+
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
         new FplValue("", FplBlockType.Root, FplType.Predicate, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
-
-    /// Indicates if this FplValue is an FPL building block.
-    member this.IsFplBlock = 
-        this.BlockType = FplBlockType.Axiom
-        || this.BlockType = FplBlockType.Theorem 
-        || this.BlockType = FplBlockType.Lemma 
-        || this.BlockType = FplBlockType.Proposition 
-        || this.BlockType = FplBlockType.Corollary 
-        || this.BlockType = FplBlockType.Conjecture 
-        || this.BlockType = FplBlockType.Proof 
-        || this.BlockType = FplBlockType.RuleOfInference 
-        || this.BlockType = FplBlockType.Predicate 
-        || this.BlockType = FplBlockType.FunctionalTerm 
-        || this.BlockType = FplBlockType.Class 
-
-    /// Indicates if this FplValue is a constructor.
-    member this.IsConstructor = 
-        this.BlockType = FplBlockType.Constructor
-
-    /// Indicates if this FplValue is a property.
-    member this.IsProperty = 
-        this.BlockType = FplBlockType.MandatoryProperty
-        || this.BlockType = FplBlockType.OptionalProperty
-
-    /// Indicates if this FplValue is a constructor or a property
-    member this.IsConstructorOrProperty = 
-        this.IsConstructor || this.IsProperty
-
-    /// Indicates if this FplValue is a variable.
-    member this.IsVariable = 
-        this.BlockType = FplBlockType.Variable
-        || this.BlockType = FplBlockType.VariadicVariableMany
-        || this.BlockType = FplBlockType.VariadicVariableMany1
-
-    /// Indicates if this FplValue is a variadic * variable.
-    member this.IsVariadicVariableMany = 
-        this.BlockType = FplBlockType.VariadicVariableMany
-
-    /// Indicates if this FplValue is a variadic + variable.
-    member this.IsVariadicVariableMany1 = 
-        this.BlockType = FplBlockType.VariadicVariableMany1
 
     /// A factory method for the evaluation of Fpl class definitions
     static member CreateFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =

@@ -8,7 +8,7 @@ open FplGrammarTypes
 open FplInterpreterTypes
 
 let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str = 
-    if str <> "" && not fplValue.IsVariable then
+    if str <> "" && not (FplValue.IsVariable(fplValue)) then
         // note: the Name attribute of variables are set in Ast.Var directly
         // and we do not want to append the type to the names of variables.
         if str = "(" || str = ")" 
@@ -38,7 +38,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
         | EvalContext.InPropertySignature _
         | EvalContext.InConstructorSignature _
         | EvalContext.InSignature _ -> 
-            if not fplValue.IsFplBlock then 
+            if not (FplValue.IsFplBlock(fplValue)) then 
                 match fplValue.Parent with
                 | Some parent -> 
                         adjustSignature st parent str
@@ -46,7 +46,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
         | EvalContext.NamedVarDeclarationInBlock _ -> 
             match fplValue.Parent with
             | Some parent -> 
-                if parent.IsVariable then 
+                if (FplValue.IsVariable(parent)) then 
                     adjustSignature st parent str
             | None -> ()
         | _ -> ()
@@ -58,9 +58,9 @@ let eval_units (st: SymbolTable) unitType =
     | EvalContext.InConstructorSignature fplValue
     | EvalContext.InSignature fplValue -> 
         if unitType <> "" then 
-            if fplValue.IsVariadicVariableMany then 
+            if (FplValue.IsVariadicVariableMany(fplValue)) then 
                 adjustSignature st fplValue $"*{unitType}"
-            elif fplValue.IsVariadicVariableMany1 then 
+            elif (FplValue.IsVariadicVariableMany1(fplValue)) then 
                 adjustSignature st fplValue $"+{unitType}"
             else
                 adjustSignature st fplValue unitType
@@ -82,7 +82,7 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
 let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
-    let emitVAR01diagnostics (fplValue:FplValue) = 
+    let emitVAR01orID001diagnostics (fplValue:FplValue) = 
         let diagnostic = { 
             Diagnostic.Uri = uri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
@@ -90,7 +90,7 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
             Diagnostic.StartPos = fplValue.StartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = 
-                if fplValue.IsVariable then 
+                if (FplValue.IsVariable(fplValue)) then 
                     VAR01 fplValue.Name
                 else
                     ID001 fplValue.Name
@@ -110,36 +110,10 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-    let inScopeOfParent (fplValue:FplValue) = 
-        if fplValue.Parent.Value.Scope.ContainsKey(fplValue.Name) then
-            emitVAR01diagnostics fplValue
-            true
-        else    
-            false
-
-    /// Checks if a variable defined in the scope of a constructor or a property
-    /// was already defined in the scope of its parent definition. 
-    /// If so, emits VAR02 diagnostics.
-    let constructorOrPropertyVariableInOuterScope (fplValue:FplValue) =
-        if fplValue.IsVariable then 
-            match fplValue.Parent with
-            | Some parent ->
-                if parent.IsConstructorOrProperty then 
-                    if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
-                        emitVAR02diagnostics fplValue
-                        true
-                    else
-                        false
-                else
-                    false
-            | _ -> false
-        else
-            false
-
-    if inScopeOfParent fplValue then 
-        ()
-    elif constructorOrPropertyVariableInOuterScope fplValue then 
-        ()
+    if FplValue.InScopeOfParent(fplValue) then 
+        emitVAR01orID001diagnostics fplValue
+    elif FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) then 
+        emitVAR02diagnostics fplValue
     else        
         fplValue.Parent.Value.Scope.Add (fplValue.Name,fplValue)
 
@@ -174,7 +148,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             tryAddVariadicVariables uri fplValue.AuxiliaryInfo pos1 pos2
             // adjust type of variables to variadic variables, if their type has not yet been established
             fplValue.Scope
-            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.IsVariable && varKeyValue.Value.TypeSignature = [])
+            |> Seq.filter (fun varKeyValue -> FplValue.IsVariable(varKeyValue.Value) && varKeyValue.Value.TypeSignature = [])
             |> Seq.iter (fun varKeyValue -> 
                 varKeyValue.Value.BlockType <- blockType
             )
@@ -269,9 +243,9 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
-            if fplValue.IsVariadicVariableMany then 
+            if (FplValue.IsVariadicVariableMany(fplValue)) then 
                 adjustSignature st fplValue ("*@" + s)
-            elif fplValue.IsVariadicVariableMany1 then 
+            elif (FplValue.IsVariadicVariableMany1(fplValue)) then 
                 adjustSignature st fplValue ("+@" + s)
             else
                 adjustSignature st fplValue ("@" + s)
@@ -284,9 +258,9 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
-            if fplValue.IsVariadicVariableMany then 
+            if (FplValue.IsVariadicVariableMany(fplValue)) then 
                 adjustSignature st fplValue ("*" + s)
-            elif fplValue.IsVariadicVariableMany1 then 
+            elif (FplValue.IsVariadicVariableMany1(fplValue)) then 
                 adjustSignature st fplValue ("+" + s)
             else
                 adjustSignature st fplValue s
@@ -485,9 +459,9 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
-            if fplValue.IsVariadicVariableMany then 
+            if (FplValue.IsVariadicVariableMany(fplValue)) then 
                 adjustSignature st fplValue ("*" + identifier)
-            elif fplValue.IsVariadicVariableMany1 then 
+            elif (FplValue.IsVariadicVariableMany1(fplValue)) then 
                 adjustSignature st fplValue ("+" + identifier)
             else
                 adjustSignature st fplValue identifier
@@ -944,7 +918,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
             eval uri st varDeclModifierAst
             fplValue.Scope 
-            |> Seq.filter (fun varKeyValue -> varKeyValue.Value.IsVariable)
+            |> Seq.filter (fun varKeyValue -> FplValue.IsVariable(varKeyValue.Value))
             |> Seq.iter (fun childKeyValue -> 
                 if not (childKeyValue.Value.Parent.Value.AuxiliaryUniqueChilds.Contains(childKeyValue.Value.Name)) then 
                     if context = "NamedVarDeclarationInBlock" then 
