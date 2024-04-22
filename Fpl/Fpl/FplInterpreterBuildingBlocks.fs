@@ -81,8 +81,8 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
-let tryAddBlock (uri:System.Uri) (fplValue:FplValue) = 
-    if fplValue.Parent.Value.Scope.ContainsKey(fplValue.Name) then
+let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
+    let emitVAR01diagnostics (fplValue:FplValue) = 
         let diagnostic = { 
             Diagnostic.Uri = uri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
@@ -97,8 +97,51 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
             Diagnostic.Alternatives = None 
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+    let emitVAR02diagnostics (fplValue:FplValue) = 
+        let diagnostic = { 
+            Diagnostic.Uri = uri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = VAR02 fplValue.Name
+            Diagnostic.Alternatives = None 
+        }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+    let inScopeOfParent (fplValue:FplValue) = 
+        if fplValue.Parent.Value.Scope.ContainsKey(fplValue.Name) then
+            emitVAR01diagnostics fplValue
+            true
+        else    
+            false
+
+    /// Checks if a variable defined in the scope of a constructor or a property
+    /// was already defined in the scope of its parent definition. 
+    /// If so, emits VAR02 diagnostics.
+    let constructorOrPropertyVariableInOuterScope (fplValue:FplValue) =
+        if fplValue.IsVariable then 
+            match fplValue.Parent with
+            | Some parent ->
+                if parent.IsConstructorOrProperty then 
+                    if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
+                        emitVAR02diagnostics fplValue
+                        true
+                    else
+                        false
+                else
+                    false
+            | _ -> false
+        else
+            false
+
+    if inScopeOfParent fplValue then 
+        ()
+    elif constructorOrPropertyVariableInOuterScope fplValue then 
+        ()
     else        
-        fplValue.Parent.Value.Scope.Add(fplValue.Name, fplValue)
+        fplValue.Parent.Value.Scope.Add (fplValue.Name,fplValue)
 
 let tryAddVariadicVariables (uri:System.Uri) numberOfVariadicVars (startPos:Position) (endPos:Position) =
     if numberOfVariadicVars > 1 then

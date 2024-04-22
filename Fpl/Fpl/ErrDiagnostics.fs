@@ -80,6 +80,7 @@ type DiagnosticCode =
     // variable-related error codes
     | VAR00 
     | VAR01 of string
+    | VAR02 of string
     member this.Code = 
         match this with
             // parser error messages
@@ -124,6 +125,7 @@ type DiagnosticCode =
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _ -> "VAR01"
+            | VAR02 _ -> "VAR02"
     member this.Message = 
         match this with
             // parser error messages
@@ -168,6 +170,7 @@ type DiagnosticCode =
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 identifier -> sprintf "Duplicate variable %s declaration detected." identifier
+            | VAR02 identifier -> sprintf "Variable %s was already declared in the outer scope of definition." identifier
 type DiagnosticEmitter =
     // replace your language-specific emitters here
     | FplParser

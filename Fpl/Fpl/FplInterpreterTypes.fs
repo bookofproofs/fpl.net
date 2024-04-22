@@ -372,6 +372,19 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         || this.BlockType = FplBlockType.FunctionalTerm 
         || this.BlockType = FplBlockType.Class 
 
+    /// Indicates if this FplValue is a constructor.
+    member this.IsConstructor = 
+        this.BlockType = FplBlockType.Constructor
+
+    /// Indicates if this FplValue is a property.
+    member this.IsProperty = 
+        this.BlockType = FplBlockType.MandatoryProperty
+        || this.BlockType = FplBlockType.OptionalProperty
+
+    /// Indicates if this FplValue is a constructor or a property
+    member this.IsConstructorOrProperty = 
+        this.IsConstructor || this.IsProperty
+
     /// Indicates if this FplValue is a variable.
     member this.IsVariable = 
         this.BlockType = FplBlockType.Variable

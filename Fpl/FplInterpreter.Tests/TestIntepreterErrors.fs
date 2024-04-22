@@ -400,6 +400,7 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test(x,x: pred) {true};", 1)>]
     [<DataRow("def pred Test(x: pred) {true};", 0)>]
     [<DataRow("def pred Test(x:+ pred) {dec ~x:obj; true};", 1)>]
+
     [<DataRow("def pred Test() {true prty pred X(x,x:* pred) {true} };", 1)>]
     [<DataRow("def pred Test() {true prty pred X(x,x:+ pred) {true} };", 1)>]
     [<DataRow("def pred Test() {true prty pred X(x,x: pred) {true} };", 1)>]
@@ -410,6 +411,7 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test() {true prty func X(x,x: pred)->obj {intr} };", 1)>]
     [<DataRow("def pred Test() {true prty func X(x: pred)->obj {intr} };", 0)>]
     [<DataRow("def pred Test() {true prty func X(x:+ pred)->obj {dec ~x:obj; return x} };", 1)>]
+
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
         let code = VAR01 "x"
@@ -432,4 +434,27 @@ type TestInterpreterErrors() =
         prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(0, result.Length)
+        prepareFplCode("", true) |> ignore
+
+
+    [<DataRow("def pred Test(x: ind) {true prty pred X(x: pred) {true} };", 1)>]
+    [<DataRow("def pred Test(x: ind) {true prty pred X(x:* pred) {true} };", 1)>]
+    [<DataRow("def pred Test(x: ind) {true prty pred X(x:+ pred) {true} };", 1)>]
+    [<DataRow("def pred Test(x: ind) {true prty pred X() {dec ~x: obj; true} };", 1)>]
+    [<DataRow("def pred Test(x: ind) {true prty pred X() {dec ~x:* obj; true} };", 1)>]
+    [<DataRow("def pred Test(x: ind) {true prty pred X() {dec ~x:+ obj; true} };", 1)>]
+    [<DataRow("def pred Test(x: ind) {true prty func X(x: pred)->obj {intr} };", 1)>]
+    [<DataRow("def pred Test(x: ind) {true prty func X(x:* pred)->obj {intr} };", 1)>]
+    [<DataRow("def pred Test(x: ind) {true prty func X(x:+ pred)->obj {intr} };", 1)>]
+    [<DataRow("def pred Test(x: ind) {true prty func X()->obj {dec ~x: obj; return x} };", 1)>]
+    [<DataRow("def pred Test(x: ind) {true prty func X()->obj {dec ~x:* obj; return x} };", 1)>]
+    [<DataRow("def pred Test(x: ind) {true prty func X()->obj {dec ~x:+ obj; return x} };", 1)>]
+    [<TestMethod>]
+    member this.TestVAR02(fplCode:string, expected) =
+        let code = VAR02 "x"
+        FplParser.parserDiagnostics.Clear()
+        printf "Trying %s" code.Message
+        prepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore
