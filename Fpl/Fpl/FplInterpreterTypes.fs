@@ -291,7 +291,7 @@ type FplBlockType =
     | FunctionalTerm
     | Theory
     | Root
-    member this.Name = 
+    member private this.UnqualifiedName = 
         match this with
             // parser error messages
             | Variable -> "var"
@@ -316,11 +316,21 @@ type FplBlockType =
             | FunctionalTerm -> "functional term definition"
             | Theory -> "theory"
             | Root -> "root"
+    member private this.Article = 
+        match this with
+        | OptionalProperty 
+        | Expression 
+        | Axiom -> "an"
+        | _ -> "a"
 
-type Provable = 
+    member this.Name = this.Article + " " + this.UnqualifiedName
+
+
+type ScopeSearchResult = 
     | FoundCorrect of string 
     | FoundMultiple of string
-    | FoundIncorrect of FplBlockType
+    | FoundIncorrect of string
+    | FoundConflict of string
     | NotFound
     | NotApplicable
 
@@ -340,6 +350,10 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     member this.Name
         with get () = _name
         and set (value) = _name <- value
+
+    /// Qualified name of this FplValue 
+    member this.QualifiedName
+        with get () = _blockType.Name + " " + _name
 
     /// This FplValue's name's end position that can be different from its endig position
     member this.NameEndPos
@@ -437,10 +451,12 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         match fplValue.Parent with
         | Some parent ->
             if parent.Scope.ContainsKey(fplValue.Name) then
-                true
+                let foundConflict = parent.Scope[fplValue.Name]
+                let foundConflictBlockType = foundConflict.BlockType
+                ScopeSearchResult.FoundConflict foundConflictBlockType.Name 
             else    
-                false
-        | None -> false
+                ScopeSearchResult.NotFound
+        | None -> ScopeSearchResult.NotApplicable
 
     /// Checks if a variable defined in the scope of a constructor or a property
     /// was already defined in the scope of its parent definition. 
@@ -502,18 +518,19 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                         not (FplValue.IsProvable(keyValuePair.Value))
                     )
                 if theoremLikeList.Length > 1 then
-                    Provable.FoundMultiple (theoremLikeList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
+                    ScopeSearchResult.FoundMultiple (theoremLikeList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
                 elif theoremLikeList.Length > 0 then 
                     let potentialTheorem = theoremLikeList.Head
-                    Provable.FoundCorrect potentialTheorem.Value.Name
+                    ScopeSearchResult.FoundCorrect  potentialTheorem.Value.Name
                 elif notTheoremLikeList.Length > 0 then 
                     let potentialOther = notTheoremLikeList.Head
-                    Provable.FoundIncorrect potentialOther.Value.BlockType
+                    let fplBlockType = potentialOther.Value.BlockType
+                    ScopeSearchResult.FoundIncorrect potentialOther.Value.QualifiedName
                 else
-                    Provable.NotFound
-            | None -> Provable.NotApplicable
+                    ScopeSearchResult.NotFound
+            | None -> ScopeSearchResult.NotApplicable
         else
-            Provable.NotApplicable
+            ScopeSearchResult.NotApplicable
 
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =

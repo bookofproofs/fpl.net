@@ -24,7 +24,10 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
             else
                 fplValue.Name <- fplValue.Name + str
         else
-            fplValue.Name <- fplValue.Name + ", " + str
+            if fplValue.BlockType = FplBlockType.Class && fplValue.Name <> "" then 
+                () // for classes, the name is ready if it is not empty for the first time
+            else
+                fplValue.Name <- fplValue.Name + ", " + str
 
     if str <> "" then
         // note: the manipulation of the TypeSignature is necessary for all kinds of fplValue
@@ -82,7 +85,7 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
 let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
-    let emitVAR01orID001diagnostics (fplValue:FplValue) = 
+    let emitVAR01orID001diagnostics (fplValue:FplValue) qualifiedName = 
         let diagnostic = { 
             Diagnostic.Uri = uri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
@@ -93,7 +96,7 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
                 if (FplValue.IsVariable(fplValue)) then 
                     VAR01 fplValue.Name
                 else
-                    ID001 fplValue.Name
+                    ID001 (fplValue.Name, qualifiedName)
             Diagnostic.Alternatives = None 
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
@@ -147,23 +150,25 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
     match FplValue.TryFindProvable(fplValue) with
-    | Provable.FoundCorrect parentsName -> 
+    | ScopeSearchResult.FoundCorrect parentsName -> 
         // everything is ok, change the parent of the provable from theory to the found parent 
         fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
-    | Provable.NotApplicable -> () 
-    | Provable.FoundIncorrect blockType ->
-        emitID002diagnostics fplValue blockType.Name
-    | Provable.NotFound ->
+    | ScopeSearchResult.FoundIncorrect block ->
+        emitID002diagnostics fplValue block
+    | ScopeSearchResult.NotFound ->
         emitID003diagnostics fplValue 
-    | Provable.FoundMultiple listOfKandidates ->
+    | ScopeSearchResult.FoundMultiple listOfKandidates ->
         emitID004diagnostics fplValue listOfKandidates
+    | _ -> ()
 
-    if FplValue.InScopeOfParent(fplValue) then 
-        emitVAR01orID001diagnostics fplValue
-    elif FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) then 
-        emitVAR02diagnostics fplValue
-    else        
-        fplValue.Parent.Value.Scope.Add (fplValue.Name,fplValue)
+    match FplValue.InScopeOfParent(fplValue) with
+    | ScopeSearchResult.FoundConflict qualifiedName -> 
+        emitVAR01orID001diagnostics fplValue qualifiedName
+    | _ -> 
+        if FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) then 
+            emitVAR02diagnostics fplValue
+        else        
+            fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
 
 let tryAddVariadicVariables (uri:System.Uri) numberOfVariadicVars (startPos:Position) (endPos:Position) =
     if numberOfVariadicVars > 1 then

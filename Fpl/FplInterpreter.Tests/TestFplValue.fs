@@ -825,6 +825,8 @@ type TestFplValue() =
     [<DataRow("proof TestId$1$2 {1. |- trivial} ;", "TestId$1$2", "TestId $1 $2")>]
     [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", "TestId$1$2$3", "TestId $1 $2 $3")>]
 
+    
+    [<DataRow("def class Test:obj {intr} proof Test$1 {1. |- trivial};", "Test", "Test obj")>]
     [<DataRow("def class TestId:obj {intrinsic} ;", "TestId", "TestId obj")>]
     [<DataRow("def class TestId:Nat1, Nat2, Nat3, Nat4 {intrinsic} ;", "TestId", "TestId Nat1 Nat2 Nat3 Nat4")>]
     [<DataRow("def class TestId:obj, Nat3 {intrinsic} ;", "TestId", "TestId obj Nat3")>]
@@ -1029,6 +1031,7 @@ type TestFplValue() =
         let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
         let result = prepareFplCode(fplCode, false) 
         let fplValue = result.Value.Root.Scope["Test"].Scope[expectedName]
+        Assert.AreEqual(expectedName, fplValue.Name)
         let actualTypeSignature = fplValue.TypeSignature
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index

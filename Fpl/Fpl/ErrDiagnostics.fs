@@ -76,7 +76,7 @@ type DiagnosticCode =
     | NSP05 of string list * string * string
     // identifier-related error codes
     | ID000 of string
-    | ID001 of string
+    | ID001 of string * string
     | ID002 of string * string
     | ID003 of string
     | ID004 of string * string
@@ -124,7 +124,7 @@ type DiagnosticCode =
             | NSP05 _ -> "NSP05"
             // identifier-related error codes 
             | ID000 _ -> "ID000"
-            | ID001 _ -> "ID001"
+            | ID001 (_, _) -> "ID001"
             | ID002 (_, _) -> "ID002"
             | ID003 _ -> "ID003"
             | ID004 (_, _) -> "ID004"
@@ -172,10 +172,10 @@ type DiagnosticCode =
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
-            | ID001 signature -> sprintf "Duplicate signature %s detected." signature
-            | ID002 (signature, incorrectBlockType) -> sprintf "The proof %s is missing a provable block; cannot prove %s." signature incorrectBlockType
-            | ID003 signature -> sprintf "The proof %s is missing a provable block." signature 
-            | ID004 (signature, candidates)  -> sprintf "Cannot associate proof %s; found more than one candidate: %s." signature candidates
+            | ID001 (signature, duplicate) -> sprintf "Duplicate signature %s detected; %s with the same signature was already declared." signature duplicate
+            | ID002 (signature, incorrectBlockType) -> sprintf "Cannot associate proof %s with a theorem-like statement, found only %s." signature incorrectBlockType
+            | ID003 signature -> sprintf "The proof %s is missing a theorem-like statement to be associated with." signature 
+            | ID004 (signature, candidates)  -> sprintf "Cannot associate proof %s with a single theorem-like statement. Found more candidates: %s." signature candidates
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 identifier -> sprintf "Duplicate variable %s declaration detected." identifier
