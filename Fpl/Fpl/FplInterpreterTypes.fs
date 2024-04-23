@@ -319,6 +319,7 @@ type FplBlockType =
 
 type Provable = 
     | FoundCorrect of string 
+    | FoundMultiple of string
     | FoundIncorrect of FplBlockType
     | NotFound
     | NotApplicable
@@ -466,12 +467,10 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         || fplValue.BlockType = FplBlockType.Lemma
         || fplValue.BlockType = FplBlockType.Proposition
 
-    /// The function returns a Provable of FplBlockType 
-    /// (B,C) = (Some <FplValue>, Some <FplBlockType>) iif a provable theorem FplValue with the proof's name was found (whose FplBlockType then equals one of theorem, proposition, lemma, or corollary).
-    /// (B,C) = (None, Some <FplBlockType>) if some block with the proof's name was found which is not a provable theorem (whose FplBlockType is then something else)
-    /// (B,C) = (None, None) if no block with the proof's name was found.
+    /// Tries to find a therem-like statement for a proof and returns different cases of Provable, depending
+    /// handling different semantical error situations. 
     static member TryFindProvable(fplValue:FplValue) = 
-        if fplValue.BlockType = FplBlockType.Proof || fplValue.BlockType = FplBlockType.Corollary then
+        if fplValue.BlockType = FplBlockType.Proof then
             let potentialTheoremName =
                 // the potential theorem name of the proof or corollary is the 
                 // concatenated type signature of the name of the proof or corollary 
@@ -484,20 +483,32 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
             match fplValue.Parent with
             | Some theory ->
                 // The parent node of the proof is the theory. In its scope 
-                // we should find the theorem we are looking for
-                let potentialTheoremList = 
+                // we should find the theorem we are looking for.
+                let buildingBlocksMatchingDollarDigitNameList = 
                     theory.Scope
                     |> Seq.filter (fun keyValuePair -> 
                         keyValuePair.Key.StartsWith(potentialTheoremName + "(")  
                         || keyValuePair.Key = potentialTheoremName
                     )
                     |> Seq.toList
-                if potentialTheoremList.Length > 0 then 
-                    let potentialTheorem = potentialTheoremList.Head
-                    if FplValue.IsProvable(potentialTheorem.Value) then 
-                        Provable.FoundCorrect potentialTheorem.Value.Name
-                    else
-                        Provable.FoundIncorrect potentialTheorem.Value.BlockType
+                let theoremLikeList = 
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun keyValuePair ->
+                        FplValue.IsProvable(keyValuePair.Value)
+                    )
+                let notTheoremLikeList = 
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun keyValuePair ->
+                        not (FplValue.IsProvable(keyValuePair.Value))
+                    )
+                if theoremLikeList.Length > 1 then
+                    Provable.FoundMultiple (theoremLikeList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
+                elif theoremLikeList.Length > 0 then 
+                    let potentialTheorem = theoremLikeList.Head
+                    Provable.FoundCorrect potentialTheorem.Value.Name
+                elif notTheoremLikeList.Length > 0 then 
+                    let potentialOther = notTheoremLikeList.Head
+                    Provable.FoundIncorrect potentialOther.Value.BlockType
                 else
                     Provable.NotFound
             | None -> Provable.NotApplicable

@@ -79,6 +79,7 @@ type DiagnosticCode =
     | ID001 of string
     | ID002 of string * string
     | ID003 of string
+    | ID004 of string * string
     // variable-related error codes
     | VAR00 
     | VAR01 of string
@@ -126,6 +127,7 @@ type DiagnosticCode =
             | ID001 _ -> "ID001"
             | ID002 (_, _) -> "ID002"
             | ID003 _ -> "ID003"
+            | ID004 (_, _) -> "ID004"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _ -> "VAR01"
@@ -133,7 +135,7 @@ type DiagnosticCode =
     member this.Message = 
         match this with
             // parser error messages
-            | SYN000 -> "Other syntax error" 
+            | SYN000 -> "Other syntax error"
             | SYN001 -> "Characters found after namespace"
             | DEF000 -> "Syntax error in definition"
             | PRP000 -> "Syntax error in property"
@@ -173,6 +175,7 @@ type DiagnosticCode =
             | ID001 signature -> sprintf "Duplicate signature %s detected." signature
             | ID002 (signature, incorrectBlockType) -> sprintf "The proof %s is missing a provable block; cannot prove %s." signature incorrectBlockType
             | ID003 signature -> sprintf "The proof %s is missing a provable block." signature 
+            | ID004 (signature, candidates)  -> sprintf "Cannot associate proof %s; found more than one candidate: %s." signature candidates
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 identifier -> sprintf "Duplicate variable %s declaration detected." identifier

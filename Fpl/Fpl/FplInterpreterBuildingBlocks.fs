@@ -134,6 +134,18 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
+    let emitID004diagnostics (fplValue:FplValue) listOfCandidates = 
+        let diagnostic = { 
+            Diagnostic.Uri = uri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID004 (fplValue.Name, listOfCandidates)
+            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
+        }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
     match FplValue.TryFindProvable(fplValue) with
     | Provable.FoundCorrect parentsName -> 
         // everything is ok, change the parent of the provable from theory to the found parent 
@@ -143,6 +155,8 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         emitID002diagnostics fplValue blockType.Name
     | Provable.NotFound ->
         emitID003diagnostics fplValue 
+    | Provable.FoundMultiple listOfKandidates ->
+        emitID004diagnostics fplValue listOfKandidates
 
     if FplValue.InScopeOfParent(fplValue) then 
         emitVAR01orID001diagnostics fplValue

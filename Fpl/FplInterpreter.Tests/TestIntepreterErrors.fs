@@ -474,6 +474,7 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test() {true} proof Test$1 {1. |- trivial};", 1, "predicate definition")>]
     [<DataRow("def cl Test:obj {intr} proof Test$1 {1. |- trivial};", 1, "class definition")>]
     [<DataRow("def func Test()->obj {intr} proof Test$1 {1. |- trivial};", 1, "functional term definition")>]
+    [<DataRow("proof Test$1 {1. |- trivial} proof Test$1$1 {1. |- trivial};", 1, "functional term definition")>]
     [<TestMethod>]
     member this.TestID002(fplCode:string, expected, falseType) =
         let code = ID002 ("Test$1",falseType)
@@ -490,6 +491,18 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID003(fplCode:string, expected) =
         let code = ID003 "Test$1"
+        FplParser.parserDiagnostics.Clear()
+        printf "Trying %s" code.Message
+        prepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(expected, result.Length)
+        prepareFplCode("", true) |> ignore
+
+    [<DataRow("theorem Test() {true} lemma Test(x:obj) {true} proof Test$1 {1. |- trivial};", 1, "theorem Test(), lemma Test(obj)")>]
+    [<DataRow("theorem Test(x:ind) {true} theorem Test() {true} proof Test$1 {1. |- trivial};", 1, "theorem Test(ind), theorem Test()")>]
+    [<TestMethod>]
+    member this.TestID004(fplCode:string, expected, candidates) =
+        let code = ID004 ("Test$1", candidates) 
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
