@@ -755,6 +755,8 @@ type TestFplValue() =
     [<DataRow("conjecture TestId(x:*obj[y:+tpl,z:index]) {true};", "TestId(*obj[+tpl, ind])", "TestId ( * obj [ + tpl ind ] )")>]
 
     [<DataRow("corollary TestId$1() {true};", "TestId$1()", "TestId $1 ( )")>]
+    [<DataRow("corollary TestId$1$2() {true};", "TestId$1$2()", "TestId $1 $2 ( )")>]
+    [<DataRow("corollary TestId$1$2$3() {true};", "TestId$1$2$3()", "TestId $1 $2 $3 ( )")>]
     [<DataRow("corollary TestId$1(x:ind) {true};", "TestId$1(ind)", "TestId $1 ( ind )")>]
     [<DataRow("corollary TestId$1(x:pred) {true};", "TestId$1(pred)", "TestId $1 ( pred )")>]
     [<DataRow("corollary TestId$1(x:func) {true};", "TestId$1(func)", "TestId $1 ( func )")>]
@@ -820,6 +822,8 @@ type TestFplValue() =
     [<DataRow("corollary TestId$1(x:*obj[y:+tpl,z:index]) {true};", "TestId$1(*obj[+tpl, ind])", "TestId $1 ( * obj [ + tpl ind ] )")>]
 
     [<DataRow("proof TestId$1 {1. |- trivial} ;", "TestId$1", "TestId $1")>]
+    [<DataRow("proof TestId$1$2 {1. |- trivial} ;", "TestId$1$2", "TestId $1 $2")>]
+    [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", "TestId$1$2$3", "TestId $1 $2 $3")>]
 
     [<DataRow("def class TestId:obj {intrinsic} ;", "TestId", "TestId obj")>]
     [<DataRow("def class TestId:Nat1, Nat2, Nat3, Nat4 {intrinsic} ;", "TestId", "TestId Nat1 Nat2 Nat3 Nat4")>]

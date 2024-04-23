@@ -77,6 +77,8 @@ type DiagnosticCode =
     // identifier-related error codes
     | ID000 of string
     | ID001 of string
+    | ID002 of string * string
+    | ID003 of string
     // variable-related error codes
     | VAR00 
     | VAR01 of string
@@ -122,6 +124,8 @@ type DiagnosticCode =
             // identifier-related error codes 
             | ID000 _ -> "ID000"
             | ID001 _ -> "ID001"
+            | ID002 (_, _) -> "ID002"
+            | ID003 _ -> "ID003"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _ -> "VAR01"
@@ -167,6 +171,8 @@ type DiagnosticCode =
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
             | ID001 signature -> sprintf "Duplicate signature %s detected." signature
+            | ID002 (signature, incorrectBlockType) -> sprintf "The proof %s is missing a provable, cannot prove %s." signature incorrectBlockType
+            | ID003 signature -> sprintf "The proof %s is missing a provable." signature 
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 identifier -> sprintf "Duplicate variable %s declaration detected." identifier
@@ -204,14 +210,14 @@ type Diagnostic =
             match this.Code with 
             | DEF000 -> 
                 if alternatives.StartsWith("':'") then 
-                    (this.Code.Message + ": " + alternatives).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
+                    (this.Code.Message + " " + alternatives).Replace("Expecting:", "Missing '~' before the variable(s) or expecting:")
                 else
                     this.Code.Message 
             | _ -> this.Code.Message
         if alternatives = "" then   
             tranlatedMsg
         else
-            tranlatedMsg + ": " + alternatives 
+            tranlatedMsg + " " + alternatives 
 
     member this.DiagnosticID = 
         (sprintf "%07d" this.StartPos.Index) + this.Emitter.ToString() + this.Code.Code
@@ -244,7 +250,7 @@ type Diagnostics() =
         |> Seq.map (fun d -> 
             d.Emitter.ToString() + ":" +
             d.Code.Code + ":" +
-            d.Code.Message) 
+            d.Message) 
         |> String.concat "\n"
     member this.Clear() = myDictionary.Clear()
 

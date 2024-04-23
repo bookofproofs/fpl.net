@@ -352,7 +352,8 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """proof %s {1. |- trivial} ;""" blockName 
         prepareFplCode(fplCode, false) |> ignore
-        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(0, result.Length)
         prepareFplCode("", true) |> ignore
 
     [<DataRow("SomeCorollary$1()", "SomeCorollary$1()")>]
@@ -377,7 +378,8 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """corollary %s {true} ;""" blockName 
         prepareFplCode(fplCode, false) |> ignore
-        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(0, result.Length)
         prepareFplCode("", true) |> ignore
 
     [<DataRow("Test(x,y:* pred)", 1)>]
@@ -458,6 +460,32 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestVAR02(fplCode:string, expected) =
         let code = VAR02 "x"
+        FplParser.parserDiagnostics.Clear()
+        printf "Trying %s" code.Message
+        prepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(expected, result.Length)
+        prepareFplCode("", true) |> ignore
+
+
+    [<DataRow("axiom Test() {true} proof Test$1 {1. |- trivial};", 1, "axiom")>]
+    [<DataRow("conjecture Test() {true} proof Test$1 {1. |- trivial};", 1, "conjecture")>]
+    [<TestMethod>]
+    member this.TestID002(fplCode:string, expected, falseType) =
+        let code = ID002 ("Test$1",falseType)
+        FplParser.parserDiagnostics.Clear()
+        printf "Trying %s" code.Message
+        prepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code
+        Assert.AreEqual(expected, result.Length)
+        prepareFplCode("", true) |> ignore
+
+
+    [<DataRow("theorem Test() {true} proof Test$1 {1. |- trivial};", 0)>]
+    [<DataRow("theorem TestTypo() {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<TestMethod>]
+    member this.TestID003(fplCode:string, expected) =
+        let code = ID003 "Test$1"
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore

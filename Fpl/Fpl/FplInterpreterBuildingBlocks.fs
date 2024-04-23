@@ -110,6 +110,40 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
+    let emitID002diagnostics (fplValue:FplValue) incorrectBlockType = 
+        let diagnostic = { 
+            Diagnostic.Uri = uri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID002 (fplValue.Name, incorrectBlockType)
+            Diagnostic.Alternatives = Some "Expected a theorem, a lemma, a proposition or a corollary." 
+        }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+    let emitID003diagnostics (fplValue:FplValue) = 
+        let diagnostic = { 
+            Diagnostic.Uri = uri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID003 fplValue.Name
+            Diagnostic.Alternatives = Some "Expected a theorem, a lemma, a proposition or a corollary." 
+        }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+    match FplValue.TryFindProvable(fplValue) with
+    | Provable.FoundCorrect parentsName -> 
+        // everything is ok, change the parent of the provable from theory to the found parent 
+        fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
+    | Provable.NotApplicable -> () 
+    | Provable.FoundIncorrect blockType ->
+        emitID002diagnostics fplValue blockType.Name
+    | Provable.NotFound ->
+        emitID003diagnostics fplValue 
+
     if FplValue.InScopeOfParent(fplValue) then 
         emitVAR01orID001diagnostics fplValue
     elif FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) then 
@@ -1066,7 +1100,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Class, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Proof, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval uri st referencingIdentifierAst
             tryAddBlock uri fplValue 

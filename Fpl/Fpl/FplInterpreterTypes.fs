@@ -291,6 +291,37 @@ type FplBlockType =
     | FunctionalTerm
     | Theory
     | Root
+    member this.Name = 
+        match this with
+            // parser error messages
+            | Variable -> "var"
+            | VariadicVariableMany -> "*var"
+            | VariadicVariableMany1 -> "+var"
+            | Expression -> "expression"
+            | MandatoryProperty -> "property"
+            | OptionalProperty -> "optional property"
+            | Constructor -> "constructor"
+            | Class -> "class"
+            | Theorem -> "theorem"
+            | Lemma -> "lemma"
+            | Proposition -> "proposition"
+            | Corollary -> "corollary"
+            | Proof -> "proof"
+            | Conjecture -> "conjecture"
+            | Axiom -> "axiom"
+            | RuleOfInference -> "rule of inference"
+            | Premise -> "premise"
+            | Conclusion -> "conclusion"
+            | Predicate -> "predicate definition"
+            | FunctionalTerm -> "functional term definition"
+            | Theory -> "theory"
+            | Root -> "root"
+
+type Provable = 
+    | FoundCorrect of string 
+    | FoundIncorrect of FplBlockType
+    | NotFound
+    | NotApplicable
 
 type FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions: Positions, parent: FplValue option) =
     let mutable _name = name
@@ -300,6 +331,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     let mutable _representation = ""
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
+    let mutable _parent = parent
     let _auxiliaryUniqueChilds = HashSet<string>()
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
 
@@ -346,7 +378,11 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     /// Ending position of this FplValue
     member this.EndPos = snd positions
     /// Parent FplValue of this FplValue
-    member this.Parent = parent
+    member this.Parent 
+        with get () = _parent
+        and set (value) = _parent <- value
+
+
     /// A list of asserted predicates for this FplValue
     member this.AssertedPredicates = System.Collections.Generic.List<Ast>()
     /// A scope inside this FplValue
@@ -421,6 +457,51 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
             | None -> false
         else
             false
+
+    /// Checks if an fplValue is provable. This will only be true if 
+    /// it is a theorem, a lemma, a proposition, or a corollary
+    static member IsProvable(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Theorem
+        || fplValue.BlockType = FplBlockType.Corollary
+        || fplValue.BlockType = FplBlockType.Lemma
+        || fplValue.BlockType = FplBlockType.Proposition
+
+    /// The function returns a Provable of FplBlockType 
+    /// (B,C) = (Some <FplValue>, Some <FplBlockType>) iif a provable theorem FplValue with the proof's name was found (whose FplBlockType then equals one of theorem, proposition, lemma, or corollary).
+    /// (B,C) = (None, Some <FplBlockType>) if some block with the proof's name was found which is not a provable theorem (whose FplBlockType is then something else)
+    /// (B,C) = (None, None) if no block with the proof's name was found.
+    static member TryFindProvable(fplValue:FplValue) = 
+        if fplValue.BlockType = FplBlockType.Proof || fplValue.BlockType = FplBlockType.Corollary then
+            let potentialTheoremName =
+                // the potential theorem name of the proof or corollary is the 
+                // concatenated type signature of the name of the proof or corollary 
+                // without the last dollar digit
+                fplValue.TypeSignature 
+                |> List.rev 
+                |> List.tail 
+                |> List.rev 
+                |> String.concat ""
+            match fplValue.Parent with
+            | Some theory ->
+                // The parent node of the proof is the theory. In its scope 
+                // we should find the theorem we are looking for
+                let potentialTheoremList = 
+                    theory.Scope
+                    |> Seq.filter (fun keyValuePair -> 
+                        keyValuePair.Key.StartsWith(potentialTheoremName + "(")
+                    )
+                    |> Seq.toList
+                if potentialTheoremList.Length > 0 then 
+                    let potentialTheorem = potentialTheoremList.Head
+                    if FplValue.IsProvable(potentialTheorem.Value) then 
+                        Provable.FoundCorrect potentialTheorem.Value.Name
+                    else
+                        Provable.FoundIncorrect potentialTheorem.Value.BlockType
+                else
+                    Provable.NotFound
+            | None -> Provable.NotApplicable
+        else
+            Provable.NotApplicable
 
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
