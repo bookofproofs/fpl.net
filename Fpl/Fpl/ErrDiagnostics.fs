@@ -171,8 +171,8 @@ type DiagnosticCode =
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
             | ID001 signature -> sprintf "Duplicate signature %s detected." signature
-            | ID002 (signature, incorrectBlockType) -> sprintf "The proof %s is missing a provable, cannot prove %s." signature incorrectBlockType
-            | ID003 signature -> sprintf "The proof %s is missing a provable." signature 
+            | ID002 (signature, incorrectBlockType) -> sprintf "The proof %s is missing a provable block; cannot prove %s." signature incorrectBlockType
+            | ID003 signature -> sprintf "The proof %s is missing a provable block." signature 
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 identifier -> sprintf "Duplicate variable %s declaration detected." identifier

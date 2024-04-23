@@ -1057,7 +1057,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Predicate, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.FunctionalTerm, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval uri st functionalTermSignatureAst
             tryAddBlock uri fplValue 

@@ -301,7 +301,7 @@ type FplBlockType =
             | MandatoryProperty -> "property"
             | OptionalProperty -> "optional property"
             | Constructor -> "constructor"
-            | Class -> "class"
+            | Class -> "class definition"
             | Theorem -> "theorem"
             | Lemma -> "lemma"
             | Proposition -> "proposition"
@@ -488,7 +488,8 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                 let potentialTheoremList = 
                     theory.Scope
                     |> Seq.filter (fun keyValuePair -> 
-                        keyValuePair.Key.StartsWith(potentialTheoremName + "(")
+                        keyValuePair.Key.StartsWith(potentialTheoremName + "(")  
+                        || keyValuePair.Key = potentialTheoremName
                     )
                     |> Seq.toList
                 if potentialTheoremList.Length > 0 then 

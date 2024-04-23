@@ -469,7 +469,11 @@ type TestInterpreterErrors() =
 
 
     [<DataRow("axiom Test() {true} proof Test$1 {1. |- trivial};", 1, "axiom")>]
+    [<DataRow("postulate Test() {true} proof Test$1 {1. |- trivial};", 1, "axiom")>]
     [<DataRow("conjecture Test() {true} proof Test$1 {1. |- trivial};", 1, "conjecture")>]
+    [<DataRow("def pred Test() {true} proof Test$1 {1. |- trivial};", 1, "predicate definition")>]
+    [<DataRow("def cl Test:obj {intr} proof Test$1 {1. |- trivial};", 1, "class definition")>]
+    [<DataRow("def func Test()->obj {intr} proof Test$1 {1. |- trivial};", 1, "functional term definition")>]
     [<TestMethod>]
     member this.TestID002(fplCode:string, expected, falseType) =
         let code = ID002 ("Test$1",falseType)
