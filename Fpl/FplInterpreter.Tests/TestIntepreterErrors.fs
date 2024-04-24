@@ -198,189 +198,68 @@ type TestInterpreterErrors() =
         Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
         this.PrepareTestNSP05CrossCheck(true) |> ignore
 
-    [<DataRow("axiom", "SomeAxiom()", "SomeAxiom()", "an axiom")>]
-    [<DataRow("postulate", "SomePostulate()", "SomePostulate()", "an axiom")>]
-    [<DataRow("theorem", "SomeTheorem()", "SomeTheorem()", "a theorem")>]
-    [<DataRow("lemma", "SomeLemma()", "SomeLemma()", "a lemma")>]
-    [<DataRow("proposition", "SomeProposition()", "SomeProposition()", "a proposition")>]
-    [<DataRow("conjecture", "SomeConjecture()", "SomeConjecture()", "a conjecture")>]
+    [<DataRow("theorem SomeTheorem() {true} theorem SomeTheorem() {true} ;", 1)>]
+    [<DataRow("theorem SomeTheorem() {true} ;", 0)>]
+
+    [<DataRow("lemma SomeLemma() {true} lemma SomeLemma() {true} ;", 1)>]
+    [<DataRow("lemma SomeLemma() {true} ;", 0)>]
+
+    [<DataRow("conj TestId() {true} conj TestId() {true} ;", 1)>]
+    [<DataRow("conj TestId() {true} ;", 0)>]
+
+    [<DataRow("prop TestId() {true} prop TestId() {true} ;", 1)>]
+    [<DataRow("prop TestId() {true} ;", 0)>]
+
+    [<DataRow("axiom TestId() {true} axiom TestId() {true} ;", 1)>]
+    [<DataRow("axiom TestId() {true} ;", 0)>]
+
+    [<DataRow("axiom TestId() {true} postulate TestId() {true} ;", 1)>]
+
+    [<DataRow("def pred TestId() {true} postulate TestId() {true} ;", 1)>]
+
+    [<DataRow("theorem TestId() {true} postulate TestId() {true} ;", 1)>]
+
+    [<DataRow("theorem TestId() {true} def pred TestId() {true} ;", 1)>]
+
+    [<DataRow("postulate SomePostulate() {true} postulate SomePostulate() {true} ;", 1)>]
+    [<DataRow("postulate SomePostulate() {true} ;", 0)>]
+
+    [<DataRow("def func SomeFunctionalTerm(x,y:pred(u,v,w:obj)) -> obj {intrinsic} def func SomeFunctionalTerm(x,y:pred(u,v,w:obj)) -> obj {intrinsic} ;", 1)>]
+    [<DataRow("def func SomeFunctionalTerm(x,y:pred(u,v,w:obj)) -> obj {intrinsic} ;", 0)>]
+
+    [<DataRow("def class SomeClass:obj {intrinsic} def class SomeClass:obj {intrinsic} ;", 1)>]
+    [<DataRow("def class SomeClass:obj {intrinsic} ;", 0)>]
+
+    [<DataRow("def predicate SomePredicate() {intrinsic} def predicate SomePredicate() {intrinsic} ;", 1)>]
+    [<DataRow("def predicate SomePredicate() {intrinsic} ;", 0)>]
+
+    [<DataRow("inf SomeRuleOfInference() {pre: true con: true} inf SomeRuleOfInference() {pre: true con: true};", 1)>]
+    [<DataRow("inf SomeRuleOfInference() {pre: true con: true} ;", 0)>]
+
+    [<DataRow("corollary SomeCorollary$1() {true} corollary SomeCorollary$1() {true};", 1)>]
+    [<DataRow("corollary SomeCorollary$1$2() {true} corollary SomeCorollary$1$2() {true};", 1)>]
+    [<DataRow("corollary SomeCorollary$1$1$2() {true} corollary SomeCorollary$1$1$2() {true};", 1)>]
+    [<DataRow("corollary SomeCorollary$1() {true} ;", 0)>]
+    [<DataRow("corollary SomeCorollary$1$2() {true} ;", 0)>]
+    [<DataRow("corollary SomeCorollary$1$1$2() {true} ;", 0)>]
+
+    [<DataRow("proof TestId$1 {1. |- trivial} proof TestId$1 {1. |- trivial};", 1)>]
+    [<DataRow("proof TestId$1$2 {1. |- trivial} proof TestId$1$2 {1. |- trivial};", 1)>]
+    [<DataRow("proof TestId$1$2$3 {1. |- trivial} proof TestId$1$2$3 {1. |- trivial};", 1)>]
+    [<DataRow("proof TestId$1 {1. |- trivial} ;", 0)>]
+    [<DataRow("proof TestId$1$2 {1. |- trivial} ;", 0)>]
+    [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", 0)>]
     [<TestMethod>]
-    member this.TestID001Predicative(blockType:string, blockName:string, expected:string, qualified) =
-        let code = ID001 (expected, qualified)
+    member this.TestID001(fplCode:string, expected:int) =
+        let code = ID001 ("", "")
         printf "Trying %s" code.Message
-        let fplCode = sprintf """%s %s {true} %s %s {true} ;""" blockType blockName blockType blockName
         prepareFplCode(fplCode, false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
+        if result.Length > 0 then 
+            printf "Result %s" result.Head.Message
+        Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore
 
-    [<DataRow("axiom", "SomeAxiom()", "an axiom")>]
-    [<DataRow("postulate", "SomePostulate()", "an axiom")>]
-    [<DataRow("theorem", "SomeTheorem()", "a theorem")>]
-    [<DataRow("lemma", "SomeLemma()", "a lemma")>]
-    [<DataRow("proposition", "SomeProposition()", "a proposition")>]
-    [<DataRow("conjecture", "SomeConjecture()", "a conjecture")>]
-    [<TestMethod>]
-    member this.TestID001PredicativeCrossCheck(blockType:string, blockName:string, qualified:string) =
-        let code = ID001 (blockName, qualified)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """%s %s {true} ;""" blockType blockName 
-        prepareFplCode(fplCode, false) |> ignore
-        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomeFunctionalTerm() -> obj", "SomeFunctionalTerm() -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:ind) -> obj", "SomeFunctionalTerm(ind) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:pred) -> obj", "SomeFunctionalTerm(pred) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:func) -> obj", "SomeFunctionalTerm(func) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:obj) -> obj", "SomeFunctionalTerm(obj) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:index) -> obj", "SomeFunctionalTerm(ind) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:predicate) -> obj", "SomeFunctionalTerm(pred) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:function) -> obj", "SomeFunctionalTerm(func) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:object) -> obj", "SomeFunctionalTerm(obj) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:Nat) -> obj", "SomeFunctionalTerm(Nat) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:@Nat) -> obj", "SomeFunctionalTerm(@Nat) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:tpl) -> obj", "SomeFunctionalTerm(tpl) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:template) -> obj", "SomeFunctionalTerm(template) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:tplTest) -> obj", "SomeFunctionalTerm(tplTest) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x:templateTest) -> obj", "SomeFunctionalTerm(templateTest) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x,y,z:obj) -> obj", "SomeFunctionalTerm(obj, obj, obj) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x,y:pred(z:obj)) -> obj", "SomeFunctionalTerm(pred(obj), pred(obj)) -> obj")>]
-    [<DataRow("SomeFunctionalTerm(x,y:pred(u,v,w:obj)) -> obj", "SomeFunctionalTerm(pred(obj, obj, obj), pred(obj, obj, obj)) -> obj")>]
-    [<TestMethod>]
-    member this.TestID001Function(blockName:string, expected:string) =
-        let code = ID001 (expected, FplBlockType.FunctionalTerm.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """def function %s {intrinsic} def function %s {intrinsic} ;""" blockName blockName
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomeFunctionalTerm() -> obj")>]
-    [<TestMethod>]
-    member this.TestID001FunctionCrossCheck(blockName:string) =
-        let code = ID001 (blockName, FplBlockType.FunctionalTerm.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """def function %s {intrinsic} ;""" blockName 
-        prepareFplCode(fplCode, false) |> ignore
-        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomeClass")>]
-    [<TestMethod>]
-    member this.TestID001Class(blockName:string) =
-        let code = ID001 (blockName, FplBlockType.Class.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """def class %s: obj {intrinsic} def class %s: obj {intrinsic} ;""" blockName blockName
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomeClass")>]
-    [<TestMethod>]
-    member this.TestID001ClassCrossCheck(blockName:string) =
-        let code = ID001 (blockName, FplBlockType.Class.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """def class %s: obj {intrinsic} ;""" blockName 
-        prepareFplCode(fplCode, false) |> ignore
-        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomePredicate()", "SomePredicate()")>]
-    [<TestMethod>]
-    member this.TestID001Predicate(blockName:string, expected:string) =
-        let code = ID001 (expected, FplBlockType.Predicate.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """def predicate %s {intrinsic} def predicate %s {intrinsic} ;""" blockName blockName
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomePredicate()")>]
-    [<TestMethod>]
-    member this.TestID001PredicateCrossCheck(expected:string) =
-        let code = ID001 (expected, FplBlockType.Predicate.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """def predicate %s {intrinsic} ;""" expected 
-        prepareFplCode(fplCode, false) |> ignore
-        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomeRuleOfInference()", "SomeRuleOfInference()")>]
-    [<TestMethod>]
-    member this.TestID001RuleOfInference(blockName:string, expected:string) =
-        let code = ID001 (expected, FplBlockType.RuleOfInference.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """inference %s {pre: true con: true} inference %s {pre: true con: true} ;""" blockName blockName
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomeRuleOfInference()")>]
-    [<TestMethod>]
-    member this.TestID001RuleOfInferenceCrossCheck(blockName:string) =
-        let code = ID001 (blockName, FplBlockType.RuleOfInference.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """inference %s {pre: true con: true} ;""" blockName 
-        prepareFplCode(fplCode, false) |> ignore
-        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomeProof$1", "SomeProof$1")>]
-    [<DataRow("SomeProof$1$2", "SomeProof$1$2")>]
-    [<DataRow("SomeProof$1$1$2", "SomeProof$1$1$2")>]
-    [<TestMethod>]
-    member this.TestID001Proof(blockName:string, expected:string) =
-        let code = ID001 (expected, FplBlockType.Proof.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """proof %s {1. |- trivial} proof %s {1. |- trivial} ;""" blockName blockName
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomeProof$1")>]
-    [<DataRow("SomeProof$1$2")>]
-    [<DataRow("SomeProof$1$1$2")>]
-    [<TestMethod>]
-    member this.TestID001ProofCrossCheck(blockName:string) =
-        let code = ID001 (blockName, FplBlockType.Proof.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """proof %s {1. |- trivial} ;""" blockName 
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(0, result.Length)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomeCorollary$1()", "SomeCorollary$1()")>]
-    [<DataRow("SomeCorollary$1$2()", "SomeCorollary$1$2()")>]
-    [<DataRow("SomeCorollary$1$1$2()", "SomeCorollary$1$1$2()")>]
-    [<TestMethod>]
-    member this.TestID001Corollary(blockName:string, expected:string) =
-        let code = ID001 (expected, FplBlockType.Corollary.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """corollary %s {true} corollary %s {true} ;""" blockName blockName
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("SomeCorollary$1()")>]
-    [<DataRow("SomeCorollary$1$2()")>]
-    [<DataRow("SomeCorollary$1$1$2()")>]
-    [<TestMethod>]
-    member this.TestID001CorollaryCrossCheck(blockName:string) =
-        let code = ID001 (blockName, FplBlockType.Corollary.Name)
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """corollary %s {true} ;""" blockName 
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(0, result.Length)
-        prepareFplCode("", true) |> ignore
 
     [<DataRow("Test(x,y:* pred)", 1)>]
     [<DataRow("Test(x,y:+ pred)", 1)>]
@@ -413,7 +292,9 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test() {true prty func X(x,x: pred)->obj {intr} };", 1)>]
     [<DataRow("def pred Test() {true prty func X(x: pred)->obj {intr} };", 0)>]
     [<DataRow("def pred Test() {true prty func X(x:+ pred)->obj {dec ~x:obj; return x} };", 1)>]
-
+    [<DataRow("inf ModusPonens() {dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q};", 0)>]
+    [<DataRow("def pred Test() {true prty pred X(y:+ pred) {dec ~x:obj; ex x {true}} };", 0)>]
+    [<DataRow("def pred Test() {true prty func X(y:+ pred)->obj {dec ~x:obj; ex x {true}} };", 0)>]
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
         let code = VAR01 "x"
@@ -423,21 +304,6 @@ type TestInterpreterErrors() =
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore
-
-
-    [<DataRow("inf ModusPonens() {dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q};", "p")>]
-    [<DataRow("def pred Test() {true prty pred X(y:+ pred) {dec ~x:obj; ex x {true}} };", "x")>]
-    [<DataRow("def pred Test() {true prty func X(y:+ pred)->obj {dec ~x:obj; ex x {true}} };", "x")>]
-    [<TestMethod>]
-    member this.TestVAR01CrossCheck(fplCode:string, duplicateCandidate:string) =
-        let code = VAR01 duplicateCandidate
-        FplParser.parserDiagnostics.Clear()
-        printf "Trying %s" code.Message
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(0, result.Length)
-        prepareFplCode("", true) |> ignore
-
 
     [<DataRow("def pred Test(x: ind) {true prty pred X(x: pred) {true} };", 1)>]
     [<DataRow("def pred Test(x: ind) {true prty pred X(x:* pred) {true} };", 1)>]
@@ -459,7 +325,7 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x:+ obj; self} };", 1)>]
     [<TestMethod>]
     member this.TestVAR02(fplCode:string, expected) =
-        let code = VAR02 "x"
+        let code = VAR02 ""
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
@@ -468,16 +334,16 @@ type TestInterpreterErrors() =
         prepareFplCode("", true) |> ignore
 
 
-    [<DataRow("axiom Test() {true} proof Test$1 {1. |- trivial};", 1, "Test$1", "an axiom Test()")>]
-    [<DataRow("postulate Test() {true} proof Test$1 {1. |- trivial};", 1, "Test$1", "an axiom Test()")>]
-    [<DataRow("conjecture Test() {true} proof Test$1 {1. |- trivial};", 1, "Test$1", "a conjecture Test()")>]
-    [<DataRow("def pred Test() {true} proof Test$1 {1. |- trivial};", 1, "Test$1", "a predicate definition Test()")>]
-    [<DataRow("def cl Test:obj {intr} proof Test$1 {1. |- trivial};", 1, "Test$1", "a class definition Test")>]
-    [<DataRow("def func Test()->obj {intr} proof Test$1 {1. |- trivial};", 1, "Test$1", "a functional term definition Test() -> obj")>]
-    [<DataRow("proof Test$1 {1. |- trivial} proof Test$1$1 {1. |- trivial};", 1, "Test$1$1", "a proof Test$1")>]
+    [<DataRow("axiom Test() {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("postulate Test() {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("conjecture Test() {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("def pred Test() {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("def cl Test:obj {intr} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("def func Test()->obj {intr} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("proof Test$1 {1. |- trivial} proof Test$1$1 {1. |- trivial};", 1)>]
     [<TestMethod>]
-    member this.TestID002(fplCode:string, expected, proofName, falseType) =
-        let code = ID002 (proofName,falseType)
+    member this.TestID002(fplCode:string, expected) =
+        let code = ID002 ("","")
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
@@ -490,7 +356,7 @@ type TestInterpreterErrors() =
     [<DataRow("theorem TestTypo() {true} proof Test$1 {1. |- trivial};", 1)>]
     [<TestMethod>]
     member this.TestID003(fplCode:string, expected) =
-        let code = ID003 "Test$1"
+        let code = ID003 ""
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
@@ -498,11 +364,11 @@ type TestInterpreterErrors() =
         Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore
 
-    [<DataRow("theorem Test() {true} lemma Test(x:obj) {true} proof Test$1 {1. |- trivial};", 1, "a theorem Test(), a lemma Test(obj)")>]
-    [<DataRow("theorem Test(x:ind) {true} theorem Test() {true} proof Test$1 {1. |- trivial};", 1, "a theorem Test(ind), a theorem Test()")>]
+    [<DataRow("theorem Test() {true} lemma Test(x:obj) {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("theorem Test(x:ind) {true} theorem Test() {true} proof Test$1 {1. |- trivial};", 1)>]
     [<TestMethod>]
-    member this.TestID004(fplCode:string, expected, candidates) =
-        let code = ID004 ("Test$1", candidates) 
+    member this.TestID004(fplCode:string, expected) =
+        let code = ID004 ("", "") 
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
