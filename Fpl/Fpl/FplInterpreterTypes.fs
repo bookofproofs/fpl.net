@@ -485,26 +485,37 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// Tries to find a therem-like statement for a proof and returns different cases of Provable, depending
     /// handling different semantical error situations. 
-    static member TryFindProvable(fplValue:FplValue) = 
-        if fplValue.BlockType = FplBlockType.Proof then
-            let potentialTheoremName =
-                // the potential theorem name of the proof or corollary is the 
-                // concatenated type signature of the name of the proof or corollary 
-                // without the last dollar digit
-                fplValue.TypeSignature 
-                |> List.rev 
-                |> List.tail 
-                |> List.rev 
-                |> String.concat ""
+    static member TryFindAssociated(fplValue:FplValue) blockType = 
+        // the potential theorem name of the proof or corollary is the 
+        // concatenated type signature of the name of the proof or corollary 
+        // without the last dollar digit
+        let potentialTheoremName blockType = 
+            if blockType = FplBlockType.Proof then 
+                let positionButLast = fplValue.TypeSignature.Length
+                if positionButLast < 0 then
+                    failwith "Type signature of a proof to short."
+                else
+                    fplValue.TypeSignature |> List.take (positionButLast - 1) |> String.concat ""
+            else
+                try
+                    let positionParenthesis = fplValue.TypeSignature |> List.findIndex ((=) "(")
+                    if positionParenthesis >= 2 then
+                        fplValue.TypeSignature |> List.take (positionParenthesis - 1) |> String.concat ""
+                    else    
+                        failwith "Corollary has a malformed Type signature, could not find the opening parenthesis at least at the 2th position."
+                with ex -> raise (ArgumentException(ex.Message))
+                
+
+        if fplValue.BlockType = blockType then
             match fplValue.Parent with
             | Some theory ->
                 // The parent node of the proof is the theory. In its scope 
                 // we should find the theorem we are looking for.
                 let buildingBlocksMatchingDollarDigitNameList = 
+                    let ptn = potentialTheoremName blockType
                     theory.Scope
                     |> Seq.filter (fun keyValuePair -> 
-                        keyValuePair.Key.StartsWith(potentialTheoremName + "(")  
-                        || keyValuePair.Key = potentialTheoremName
+                        keyValuePair.Key.StartsWith(ptn + "(") || keyValuePair.Key = ptn 
                     )
                     |> Seq.toList
                 let theoremLikeList = 

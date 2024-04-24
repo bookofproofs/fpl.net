@@ -149,7 +149,7 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-    match FplValue.TryFindProvable(fplValue) with
+    match FplValue.TryFindAssociated fplValue FplBlockType.Proof with
     | ScopeSearchResult.FoundCorrect parentsName -> 
         // everything is ok, change the parent of the provable from theory to the found parent 
         fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]

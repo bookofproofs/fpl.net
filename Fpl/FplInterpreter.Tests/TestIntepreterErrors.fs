@@ -21,7 +21,7 @@ type TestInterpreterErrors() =
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
         FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
 
     [<TestMethod>]
@@ -36,7 +36,7 @@ type TestInterpreterErrors() =
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
         FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true |> ignore 
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
 
     member this.PrepareTestNSP04CircularAA(delete:bool) =
@@ -60,7 +60,7 @@ type TestInterpreterErrors() =
         let code = NSP04 "Test1_A -> Test1_A"
         printf "Trying %s" code.Message
         this.PrepareTestNSP04CircularAA(false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
         this.PrepareTestNSP04CircularAA(true) |> ignore
 
@@ -89,7 +89,7 @@ type TestInterpreterErrors() =
         let code = NSP04 "Test2_A -> Test2_B -> Test2_C -> Test2_A"
         printf "Trying %s" code.Message
         this.PrepareTestNSP04CircularABCA(false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
         this.PrepareTestNSP04CircularABCA(true) |> ignore
 
@@ -141,7 +141,7 @@ type TestInterpreterErrors() =
         let code = NSP05 ( ["./"; "https"], "Fpl.Commons", "./")
         printf "Trying %s" code.Message
         this.PrepareTestNSP05(false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
         this.PrepareTestNSP05(true) |> ignore
 
@@ -168,7 +168,7 @@ type TestInterpreterErrors() =
         let code = NSP05 (["./"; "./lib"; "https"], "Fpl.Commons", "./")
         printf "Trying %s" code.Message
         this.PrepareTestNSP05a(false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
         this.PrepareTestNSP05a(true) |> ignore
 
@@ -210,7 +210,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """%s %s {true} %s %s {true} ;""" blockType blockName blockType blockName
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -253,7 +253,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """def function %s {intrinsic} def function %s {intrinsic} ;""" blockName blockName
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -274,7 +274,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """def class %s: obj {intrinsic} def class %s: obj {intrinsic} ;""" blockName blockName
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -295,7 +295,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """def predicate %s {intrinsic} def predicate %s {intrinsic} ;""" blockName blockName
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -316,7 +316,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """inference %s {pre: true con: true} inference %s {pre: true con: true} ;""" blockName blockName
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -339,7 +339,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """proof %s {1. |- trivial} proof %s {1. |- trivial} ;""" blockName blockName
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -352,7 +352,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """proof %s {1. |- trivial} ;""" blockName 
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(0, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -365,7 +365,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """corollary %s {true} corollary %s {true} ;""" blockName blockName
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -378,7 +378,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """corollary %s {true} ;""" blockName 
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(0, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -393,7 +393,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         let fplCode = sprintf """def predicate %s {true} ;""" signature 
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -420,7 +420,7 @@ type TestInterpreterErrors() =
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -434,7 +434,7 @@ type TestInterpreterErrors() =
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(0, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -463,7 +463,7 @@ type TestInterpreterErrors() =
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -481,7 +481,7 @@ type TestInterpreterErrors() =
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -494,7 +494,7 @@ type TestInterpreterErrors() =
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore
 
@@ -506,6 +506,6 @@ type TestInterpreterErrors() =
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore

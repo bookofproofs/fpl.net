@@ -13,7 +13,7 @@ let deleteFilesWithExtension dir extension =
 
 let filterByErrorCode (input: Diagnostics) errCode =
     input.Collection
-    |> List.filter (fun d -> d.Code = errCode)
+    |> List.filter (fun d -> d.Code.Code = errCode)
 
 
 let prepareFplCode(fplCode:string, delete:bool) =
