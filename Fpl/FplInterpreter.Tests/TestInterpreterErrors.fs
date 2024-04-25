@@ -11,6 +11,11 @@ open CommonTestHelpers
 type TestInterpreterErrors() =
 
     [<TestMethod>]
+    member this.TestGEN00() =
+        let code = GEN00 ""
+        runTestHelper """;""" code 1
+
+    [<TestMethod>]
     member this.TestNSP00() =
         let code = NSP00 "Bla.fpl"
         printf "Trying %s" code.Message

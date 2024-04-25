@@ -68,6 +68,7 @@ type DiagnosticCode =
     | TRL000
     | TYD000
     // interpreter error codes
+    | GEN00 of string
     | NSP00 of string
     | NSP01 of string * string
     | NSP02 of string * string
@@ -119,6 +120,7 @@ type DiagnosticCode =
             | TRL000 -> "TRL000"
             | TYD000 -> "TYD000"
             // interpreter error messages
+            | GEN00 _ -> "GEN00"
             | NSP00 _ -> "NSP00"
             | NSP01 _ -> "NSP01"
             | NSP02 (_, _) -> "NSP02"
@@ -170,6 +172,7 @@ type DiagnosticCode =
             | TRL000 -> "Syntax error in translation"
             | TYD000 -> "Syntax error in type declaration"
             // interpreter error messages
+            | GEN00 message -> sprintf "Unexpected error occurred: %s" message
             | NSP00 fileNamePattern -> sprintf "%s not found" fileNamePattern
             | NSP01 (fileName, innerErrMsg) -> sprintf "%s found but could not be loaded: %s" fileName innerErrMsg
             | NSP02 (url, innerErrMsg) -> sprintf "%s found but could not be downloaded: %s" url innerErrMsg

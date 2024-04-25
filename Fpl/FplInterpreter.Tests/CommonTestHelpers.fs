@@ -20,6 +20,7 @@ let prepareFplCode(fplCode:string, delete:bool) =
     FplParser.parserDiagnostics.Clear()
     let currDir = Directory.GetCurrentDirectory()
 
+    printf "\n"
     File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
     let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
     let fplLibUrl =
@@ -29,7 +30,7 @@ let prepareFplCode(fplCode:string, delete:bool) =
         None
     else
         let parsedAsts = ParsedAstList()
-        Some (FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts false)
+        Some (FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts true)
 
 let runTestHelper fplCode (code:ErrDiagnostics.DiagnosticCode) expected =
     printf "Trying %s" code.Message

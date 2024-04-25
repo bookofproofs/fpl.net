@@ -498,7 +498,6 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                     let potentialBlockName = 
                         let positionButLast = fplValue.TypeSignature.Length
                         if positionButLast < 0 then
-                            // todo 2024-04-25: return a ScopeSearchResult rather than raising an error
                             failwith "Type signature of a proof to short."
                         else
                             fplValue.TypeSignature |> List.take (positionButLast - 1) |> String.concat ""
@@ -545,7 +544,6 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                     // concatenated type signature of the name of the corollary 
                     // without the last dollar digit
                     let potentialBlockName = 
-                        // todo 2024-04-25: return a ScopeSearchResult rather than raising an error
                         try
                             let positionParenthesis = fplValue.TypeSignature |> List.findIndex ((=) "(")
                             if positionParenthesis >= 2 then
@@ -656,7 +654,10 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     member this.EvalPush(astName:string) = 
         _evalPath.Push(astName)
         if debug then
-            System.Console.WriteLine(this.EvalPath())
+            let path = this.EvalPath()
+            System.Console.WriteLine(path)
+            if path = "AST" then 
+                raise(Exception("Test error message"))
 
     /// Remove the current ast name from the recursive evaluation path.
     member this.EvalPop() = 
