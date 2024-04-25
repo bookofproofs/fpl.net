@@ -10,7 +10,7 @@
   <ItemGroup>
     <Compile Include="CommonTestHelpers.fs" />
     <Compile Include="TestFplValue.fs" />
-    <Compile Include="TestIntepreterErrors.fs" />
+    <Compile Include="TestInterpreterErrors.fs" />
     <Compile Include="TestEvalAliasedNamespaceIdentifier.fs" />
   </ItemGroup>
 

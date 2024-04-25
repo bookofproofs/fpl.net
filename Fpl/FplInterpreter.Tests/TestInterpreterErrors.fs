@@ -198,6 +198,17 @@ type TestInterpreterErrors() =
         Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
         this.PrepareTestNSP05CrossCheck(true) |> ignore
 
+
+    member this.Helper fplCode (code:ErrDiagnostics.DiagnosticCode) expected =
+        FplParser.parserDiagnostics.Clear()
+        printf "Trying %s" code.Message
+        prepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        if result.Length > 0 then 
+            printf "Result %s" result.Head.Message
+        Assert.AreEqual(expected, result.Length)
+        prepareFplCode("", true) |> ignore
+
     [<DataRow("theorem SomeTheorem() {true} theorem SomeTheorem() {true} ;", 1)>]
     [<DataRow("theorem SomeTheorem() {true} ;", 0)>]
 
@@ -252,29 +263,17 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID001(fplCode:string, expected:int) =
         let code = ID001 ("", "")
-        printf "Trying %s" code.Message
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        if result.Length > 0 then 
-            printf "Result %s" result.Head.Message
-        Assert.AreEqual(expected, result.Length)
-        prepareFplCode("", true) |> ignore
+        this.Helper fplCode code expected
 
-
-    [<DataRow("Test(x,y:* pred)", 1)>]
-    [<DataRow("Test(x,y:+ pred)", 1)>]
-    [<DataRow("Test(x,y: pred)", 0)>]
-    [<DataRow("Test(x:* pred)", 0)>]
-    [<DataRow("Test(x:+ pred)", 0)>]
+    [<DataRow("def predicate Test(x,y:* pred) {true};", 1)>]
+    [<DataRow("def predicate Test(x,y:+ pred) {true};", 1)>]
+    [<DataRow("def predicate Test(x,y: pred) {true};", 0)>]
+    [<DataRow("def predicate Test(x:* pred) {true};", 0)>]
+    [<DataRow("def predicate Test(x:+ pred) {true};", 0)>]
     [<TestMethod>]
-    member this.TestVAR00(signature:string, expected) =
+    member this.TestVAR00(fplCode:string, expected) =
         let code = VAR00
-        printf "Trying %s" code.Message
-        let fplCode = sprintf """def predicate %s {true} ;""" signature 
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(expected, result.Length)
-        prepareFplCode("", true) |> ignore
+        this.Helper fplCode code expected
 
     [<DataRow("def pred Test(x,x:* pred) {true};", 1)>]
     [<DataRow("def pred Test(x,x:+ pred) {true};", 1)>]
@@ -298,12 +297,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
         let code = VAR01 "x"
-        FplParser.parserDiagnostics.Clear()
-        printf "Trying %s" code.Message
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(expected, result.Length)
-        prepareFplCode("", true) |> ignore
+        this.Helper fplCode code expected
 
     [<DataRow("def pred Test(x: ind) {true prty pred X(x: pred) {true} };", 1)>]
     [<DataRow("def pred Test(x: ind) {true prty pred X(x:* pred) {true} };", 1)>]
@@ -326,12 +320,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestVAR02(fplCode:string, expected) =
         let code = VAR02 ""
-        FplParser.parserDiagnostics.Clear()
-        printf "Trying %s" code.Message
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(expected, result.Length)
-        prepareFplCode("", true) |> ignore
+        this.Helper fplCode code expected
 
 
     [<DataRow("axiom Test() {true} proof Test$1 {1. |- trivial};", 1)>]
@@ -348,12 +337,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID002(fplCode:string, expected) =
         let code = ID002 ("","")
-        FplParser.parserDiagnostics.Clear()
-        printf "Trying %s" code.Message
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(expected, result.Length)
-        prepareFplCode("", true) |> ignore
+        this.Helper fplCode code expected
 
     [<DataRow("def pred Test() {true} corollary Test$1() {true};", 1)>]
     [<DataRow("def cl Test:obj {intr} corollary Test$1() {true};", 1)>]
@@ -369,57 +353,32 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID005(fplCode:string, expected) =
         let code = ID005 ("","")
-        FplParser.parserDiagnostics.Clear()
-        printf "Trying %s" code.Message
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(expected, result.Length)
-        prepareFplCode("", true) |> ignore
+        this.Helper fplCode code expected
 
     [<DataRow("theorem Test() {true} proof Test$1 {1. |- trivial};", 0)>]
     [<DataRow("theorem TestTypo() {true} proof Test$1 {1. |- trivial};", 1)>]
     [<TestMethod>]
     member this.TestID003(fplCode:string, expected) =
         let code = ID003 ""
-        FplParser.parserDiagnostics.Clear()
-        printf "Trying %s" code.Message
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(expected, result.Length)
-        prepareFplCode("", true) |> ignore
+        this.Helper fplCode code expected
 
     [<DataRow("theorem Test() {true} corollary Test$1() {true};", 0)>]
     [<DataRow("theorem TestTypo() {true} corollary Test$1() {true};", 1)>]
     [<TestMethod>]
     member this.TestID006(fplCode:string, expected) =
         let code = ID006 ""
-        FplParser.parserDiagnostics.Clear()
-        printf "Trying %s" code.Message
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(expected, result.Length)
-        prepareFplCode("", true) |> ignore
+        this.Helper fplCode code expected
 
     [<DataRow("theorem Test() {true} lemma Test(x:obj) {true} proof Test$1 {1. |- trivial};", 1)>]
     [<DataRow("theorem Test(x:ind) {true} theorem Test() {true} proof Test$1 {1. |- trivial};", 1)>]
     [<TestMethod>]
     member this.TestID004(fplCode:string, expected) =
         let code = ID004 ("", "") 
-        FplParser.parserDiagnostics.Clear()
-        printf "Trying %s" code.Message
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(expected, result.Length)
-        prepareFplCode("", true) |> ignore
+        this.Helper fplCode code expected
 
     [<DataRow("theorem Test() {true} lemma Test(x:obj) {true} corollary Test$1() {true};", 1)>]
     [<DataRow("theorem Test(x:ind) {true} theorem Test() {true} corollary Test$1() {true};", 1)>]
     [<TestMethod>]
     member this.TestID007(fplCode:string, expected) =
         let code = ID007 ("", "") 
-        FplParser.parserDiagnostics.Clear()
-        printf "Trying %s" code.Message
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(expected, result.Length)
-        prepareFplCode("", true) |> ignore
+        this.Helper fplCode code expected
