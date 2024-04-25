@@ -199,16 +199,6 @@ type TestInterpreterErrors() =
         this.PrepareTestNSP05CrossCheck(true) |> ignore
 
 
-    member this.Helper fplCode (code:ErrDiagnostics.DiagnosticCode) expected =
-        FplParser.parserDiagnostics.Clear()
-        printf "Trying %s" code.Message
-        prepareFplCode(fplCode, false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        if result.Length > 0 then 
-            printf "Result %s" result.Head.Message
-        Assert.AreEqual(expected, result.Length)
-        prepareFplCode("", true) |> ignore
-
     [<DataRow("theorem SomeTheorem() {true} theorem SomeTheorem() {true} ;", 1)>]
     [<DataRow("theorem SomeTheorem() {true} ;", 0)>]
 
@@ -263,7 +253,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID001(fplCode:string, expected:int) =
         let code = ID001 ("", "")
-        this.Helper fplCode code expected
+        runTestHelper fplCode code expected
 
     [<DataRow("def predicate Test(x,y:* pred) {true};", 1)>]
     [<DataRow("def predicate Test(x,y:+ pred) {true};", 1)>]
@@ -273,7 +263,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestVAR00(fplCode:string, expected) =
         let code = VAR00
-        this.Helper fplCode code expected
+        runTestHelper fplCode code expected
 
     [<DataRow("def pred Test(x,x:* pred) {true};", 1)>]
     [<DataRow("def pred Test(x,x:+ pred) {true};", 1)>]
@@ -297,7 +287,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
         let code = VAR01 "x"
-        this.Helper fplCode code expected
+        runTestHelper fplCode code expected
 
     [<DataRow("def pred Test(x: ind) {true prty pred X(x: pred) {true} };", 1)>]
     [<DataRow("def pred Test(x: ind) {true prty pred X(x:* pred) {true} };", 1)>]
@@ -320,7 +310,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestVAR02(fplCode:string, expected) =
         let code = VAR02 ""
-        this.Helper fplCode code expected
+        runTestHelper fplCode code expected
 
 
     [<DataRow("axiom Test() {true} proof Test$1 {1. |- trivial};", 1)>]
@@ -337,7 +327,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID002(fplCode:string, expected) =
         let code = ID002 ("","")
-        this.Helper fplCode code expected
+        runTestHelper fplCode code expected
 
     [<DataRow("def pred Test() {true} corollary Test$1() {true};", 1)>]
     [<DataRow("def cl Test:obj {intr} corollary Test$1() {true};", 1)>]
@@ -353,32 +343,32 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID005(fplCode:string, expected) =
         let code = ID005 ("","")
-        this.Helper fplCode code expected
+        runTestHelper fplCode code expected
 
     [<DataRow("theorem Test() {true} proof Test$1 {1. |- trivial};", 0)>]
     [<DataRow("theorem TestTypo() {true} proof Test$1 {1. |- trivial};", 1)>]
     [<TestMethod>]
     member this.TestID003(fplCode:string, expected) =
         let code = ID003 ""
-        this.Helper fplCode code expected
+        runTestHelper fplCode code expected
 
     [<DataRow("theorem Test() {true} corollary Test$1() {true};", 0)>]
     [<DataRow("theorem TestTypo() {true} corollary Test$1() {true};", 1)>]
     [<TestMethod>]
     member this.TestID006(fplCode:string, expected) =
         let code = ID006 ""
-        this.Helper fplCode code expected
+        runTestHelper fplCode code expected
 
     [<DataRow("theorem Test() {true} lemma Test(x:obj) {true} proof Test$1 {1. |- trivial};", 1)>]
     [<DataRow("theorem Test(x:ind) {true} theorem Test() {true} proof Test$1 {1. |- trivial};", 1)>]
     [<TestMethod>]
     member this.TestID004(fplCode:string, expected) =
         let code = ID004 ("", "") 
-        this.Helper fplCode code expected
+        runTestHelper fplCode code expected
 
     [<DataRow("theorem Test() {true} lemma Test(x:obj) {true} corollary Test$1() {true};", 1)>]
     [<DataRow("theorem Test(x:ind) {true} theorem Test() {true} corollary Test$1() {true};", 1)>]
     [<TestMethod>]
     member this.TestID007(fplCode:string, expected) =
         let code = ID007 ("", "") 
-        this.Helper fplCode code expected
+        runTestHelper fplCode code expected

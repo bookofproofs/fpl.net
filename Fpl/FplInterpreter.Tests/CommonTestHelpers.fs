@@ -29,5 +29,13 @@ let prepareFplCode(fplCode:string, delete:bool) =
         None
     else
         let parsedAsts = ParsedAstList()
-        Some (FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts true)
+        Some (FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts false)
 
+let runTestHelper fplCode (code:ErrDiagnostics.DiagnosticCode) expected =
+    printf "Trying %s" code.Message
+    prepareFplCode(fplCode, false) |> ignore
+    let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+    if result.Length > 0 then 
+        printf "Result %s" result.Head.Message
+    Assert.AreEqual(expected, result.Length)
+    prepareFplCode("", true) |> ignore
