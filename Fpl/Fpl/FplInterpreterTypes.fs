@@ -329,7 +329,7 @@ type FplBlockType =
 type ScopeSearchResult = 
     | FoundCorrect of string 
     | FoundMultiple of string
-    | FoundIncorrect of string
+    | FoundIncorrectBlock of string
     | FoundConflict of string
     | NotFound
     | NotApplicable
@@ -483,60 +483,103 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         || fplValue.BlockType = FplBlockType.Lemma
         || fplValue.BlockType = FplBlockType.Proposition
 
-    /// Tries to find a therem-like statement for a proof and returns different cases of Provable, depending
-    /// handling different semantical error situations. 
-    static member TryFindAssociated(fplValue:FplValue) blockType = 
-        // the potential theorem name of the proof or corollary is the 
-        // concatenated type signature of the name of the proof or corollary 
-        // without the last dollar digit
-        let potentialTheoremName blockType = 
-            if blockType = FplBlockType.Proof then 
-                let positionButLast = fplValue.TypeSignature.Length
-                if positionButLast < 0 then
-                    failwith "Type signature of a proof to short."
-                else
-                    fplValue.TypeSignature |> List.take (positionButLast - 1) |> String.concat ""
-            else
-                try
-                    let positionParenthesis = fplValue.TypeSignature |> List.findIndex ((=) "(")
-                    if positionParenthesis >= 2 then
-                        fplValue.TypeSignature |> List.take (positionParenthesis - 1) |> String.concat ""
-                    else    
-                        failwith "Corollary has a malformed Type signature, could not find the opening parenthesis at least at the 2th position."
-                with ex -> raise (ArgumentException(ex.Message))
-                
-
-        if fplValue.BlockType = blockType then
+    /// Tries to find a therem-like statement for a proof 
+    /// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
+    static member TryFindAssociatedBlockForProof(fplValue:FplValue) = 
+        if fplValue.BlockType = FplBlockType.Proof then
             match fplValue.Parent with
             | Some theory ->
                 // The parent node of the proof is the theory. In its scope 
                 // we should find the theorem we are looking for.
                 let buildingBlocksMatchingDollarDigitNameList = 
-                    let ptn = potentialTheoremName blockType
+                    // the potential block name of the proof is the 
+                    // concatenated type signature of the name of the proof 
+                    // without the last dollar digit
+                    let potentialBlockName = 
+                        let positionButLast = fplValue.TypeSignature.Length
+                        if positionButLast < 0 then
+                            // todo 2024-04-25: return a ScopeSearchResult rather than raising an error
+                            failwith "Type signature of a proof to short."
+                        else
+                            fplValue.TypeSignature |> List.take (positionButLast - 1) |> String.concat ""
                     theory.Scope
                     |> Seq.filter (fun keyValuePair -> 
-                        keyValuePair.Key.StartsWith(ptn + "(") || keyValuePair.Key = ptn 
+                        keyValuePair.Key.StartsWith(potentialBlockName + "(") || keyValuePair.Key = potentialBlockName
                     )
                     |> Seq.toList
-                let theoremLikeList = 
+                let potentialBlockList = 
                     buildingBlocksMatchingDollarDigitNameList
                     |> List.filter (fun keyValuePair ->
                         FplValue.IsProvable(keyValuePair.Value)
                     )
-                let notTheoremLikeList = 
+                let notPotentialBlockList = 
                     buildingBlocksMatchingDollarDigitNameList
                     |> List.filter (fun keyValuePair ->
                         not (FplValue.IsProvable(keyValuePair.Value))
                     )
-                if theoremLikeList.Length > 1 then
-                    ScopeSearchResult.FoundMultiple (theoremLikeList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
-                elif theoremLikeList.Length > 0 then 
-                    let potentialTheorem = theoremLikeList.Head
-                    ScopeSearchResult.FoundCorrect  potentialTheorem.Value.Name
-                elif notTheoremLikeList.Length > 0 then 
-                    let potentialOther = notTheoremLikeList.Head
-                    let fplBlockType = potentialOther.Value.BlockType
-                    ScopeSearchResult.FoundIncorrect potentialOther.Value.QualifiedName
+                if potentialBlockList.Length > 1 then
+                    ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
+                elif potentialBlockList.Length > 0 then 
+                    let potentialTheorem = potentialBlockList.Head
+                    ScopeSearchResult.FoundCorrect potentialTheorem.Value.Name
+                elif notPotentialBlockList.Length > 0 then 
+                    let potentialOther = notPotentialBlockList.Head
+                    ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
+                else
+                    ScopeSearchResult.NotFound
+            | None -> ScopeSearchResult.NotApplicable
+        else
+            ScopeSearchResult.NotApplicable
+
+    /// Tries to find a therem-like statement, a conjecture, or an axiom for a corollary 
+    /// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
+    static member TryFindAssociatedBlockForCorollary(fplValue:FplValue) = 
+
+        if fplValue.BlockType = FplBlockType.Corollary then
+            match fplValue.Parent with
+            | Some theory ->
+                // The parent node of the proof is the theory. In its scope 
+                // we should find the theorem we are looking for.
+                let buildingBlocksMatchingDollarDigitNameList = 
+                    // the potential theorem name of the corollary is the 
+                    // concatenated type signature of the name of the corollary 
+                    // without the last dollar digit
+                    let potentialBlockName = 
+                        // todo 2024-04-25: return a ScopeSearchResult rather than raising an error
+                        try
+                            let positionParenthesis = fplValue.TypeSignature |> List.findIndex ((=) "(")
+                            if positionParenthesis >= 2 then
+                                fplValue.TypeSignature |> List.take (positionParenthesis - 1) |> String.concat ""
+                            else    
+                                failwith "Corollary has a malformed type signature, could not find the opening parenthesis at least at the 2th position."
+                        with ex -> raise (ArgumentException(ex.Message))
+                    theory.Scope
+                    |> Seq.filter (fun keyValuePair -> 
+                        keyValuePair.Key.StartsWith(potentialBlockName + "(") || keyValuePair.Key = potentialBlockName 
+                    )
+                    |> Seq.toList
+                let potentialBlockList = 
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun keyValuePair ->
+                        FplValue.IsProvable(keyValuePair.Value) 
+                        || keyValuePair.Value.BlockType = FplBlockType.Conjecture
+                        || keyValuePair.Value.BlockType = FplBlockType.Axiom
+                    )
+                let notPotentialBlockList = 
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun keyValuePair ->
+                        not (FplValue.IsProvable(keyValuePair.Value) 
+                        || keyValuePair.Value.BlockType = FplBlockType.Conjecture
+                        || keyValuePair.Value.BlockType = FplBlockType.Axiom)
+                    )
+                if potentialBlockList.Length > 1 then
+                    ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
+                elif potentialBlockList.Length > 0 then 
+                    let potentialTheorem = potentialBlockList.Head
+                    ScopeSearchResult.FoundCorrect potentialTheorem.Value.Name
+                elif notPotentialBlockList.Length > 0 then 
+                    let potentialOther = notPotentialBlockList.Head
+                    ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
                 else
                     ScopeSearchResult.NotFound
             | None -> ScopeSearchResult.NotApplicable

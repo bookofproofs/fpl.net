@@ -341,6 +341,10 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Test:obj {intr} proof Test$1 {1. |- trivial};", 1)>]
     [<DataRow("def func Test()->obj {intr} proof Test$1 {1. |- trivial};", 1)>]
     [<DataRow("proof Test$1 {1. |- trivial} proof Test$1$1 {1. |- trivial};", 1)>]
+    [<DataRow("theorem Test() {true} proof Test$1 {1. |- trivial};", 0)>]
+    [<DataRow("lemma Test() {true} proof Test$1 {1. |- trivial};", 0)>]
+    [<DataRow("proposition Test() {true} proof Test$1 {1. |- trivial};", 0)>]
+    [<DataRow("corollary Test$1() {true} proof Test$1$1 {1. |- trivial};", 0)>]
     [<TestMethod>]
     member this.TestID002(fplCode:string, expected) =
         let code = ID002 ("","")
@@ -351,6 +355,26 @@ type TestInterpreterErrors() =
         Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore
 
+    [<DataRow("def pred Test() {true} corollary Test$1() {true};", 1)>]
+    [<DataRow("def cl Test:obj {intr} corollary Test$1() {true};", 1)>]
+    [<DataRow("def func Test()->obj {intr} corollary Test$1() {true};", 1)>]
+    [<DataRow("proof Test$1 {1. |- trivial} corollary Test$1$1() {true};", 1)>] // corollaries of proofs are not allowed
+    [<DataRow("theorem Test() {true} corollary Test$1() {true};", 0)>]
+    [<DataRow("lemma Test() {true} proof corollary Test$1() {true};", 0)>]
+    [<DataRow("proposition Test() {true} corollary Test$1() {true};", 0)>]
+    [<DataRow("axiom Test() {true} corollary Test$1() {true};", 0)>] // corollaries of axioms are allowed
+    [<DataRow("postulate Test() {true} corollary Test$1() {true};", 0)>] // corollaries of postulates (axioms) not allowed
+    [<DataRow("conjecture Test() {true} corollary Test$1() {true};", 0)>] // corollaries of conjectures are not allowed
+    [<DataRow("corollary Test$1() {true} corollary Test$1$1() {true};", 0)>] // corollaries of corollaries are allowed
+    [<TestMethod>]
+    member this.TestID005(fplCode:string, expected) =
+        let code = ID005 ("","")
+        FplParser.parserDiagnostics.Clear()
+        printf "Trying %s" code.Message
+        prepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        Assert.AreEqual(expected, result.Length)
+        prepareFplCode("", true) |> ignore
 
     [<DataRow("theorem Test() {true} proof Test$1 {1. |- trivial};", 0)>]
     [<DataRow("theorem TestTypo() {true} proof Test$1 {1. |- trivial};", 1)>]
@@ -364,11 +388,35 @@ type TestInterpreterErrors() =
         Assert.AreEqual(expected, result.Length)
         prepareFplCode("", true) |> ignore
 
+    [<DataRow("theorem Test() {true} corollary Test$1() {true};", 0)>]
+    [<DataRow("theorem TestTypo() {true} corollary Test$1() {true};", 1)>]
+    [<TestMethod>]
+    member this.TestID006(fplCode:string, expected) =
+        let code = ID006 ""
+        FplParser.parserDiagnostics.Clear()
+        printf "Trying %s" code.Message
+        prepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        Assert.AreEqual(expected, result.Length)
+        prepareFplCode("", true) |> ignore
+
     [<DataRow("theorem Test() {true} lemma Test(x:obj) {true} proof Test$1 {1. |- trivial};", 1)>]
     [<DataRow("theorem Test(x:ind) {true} theorem Test() {true} proof Test$1 {1. |- trivial};", 1)>]
     [<TestMethod>]
     member this.TestID004(fplCode:string, expected) =
         let code = ID004 ("", "") 
+        FplParser.parserDiagnostics.Clear()
+        printf "Trying %s" code.Message
+        prepareFplCode(fplCode, false) |> ignore
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        Assert.AreEqual(expected, result.Length)
+        prepareFplCode("", true) |> ignore
+
+    [<DataRow("theorem Test() {true} lemma Test(x:obj) {true} corollary Test$1() {true};", 1)>]
+    [<DataRow("theorem Test(x:ind) {true} theorem Test() {true} corollary Test$1() {true};", 1)>]
+    [<TestMethod>]
+    member this.TestID007(fplCode:string, expected) =
+        let code = ID007 ("", "") 
         FplParser.parserDiagnostics.Clear()
         printf "Trying %s" code.Message
         prepareFplCode(fplCode, false) |> ignore

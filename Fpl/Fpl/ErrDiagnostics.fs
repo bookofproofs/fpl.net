@@ -80,6 +80,9 @@ type DiagnosticCode =
     | ID002 of string * string
     | ID003 of string
     | ID004 of string * string
+    | ID005 of string * string
+    | ID006 of string
+    | ID007 of string * string
     // variable-related error codes
     | VAR00 
     | VAR01 of string
@@ -128,6 +131,9 @@ type DiagnosticCode =
             | ID002 (_, _) -> "ID002"
             | ID003 _ -> "ID003"
             | ID004 (_, _) -> "ID004"
+            | ID005 (_, _) -> "ID005"
+            | ID006 _ -> "ID006"
+            | ID007 (_, _) -> "ID007"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _ -> "VAR01"
@@ -173,9 +179,12 @@ type DiagnosticCode =
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
             | ID001 (signature, duplicate) -> sprintf "Duplicate signature %s detected; %s with the same signature was already declared." signature duplicate
-            | ID002 (signature, incorrectBlockType) -> sprintf "Cannot associate proof %s with a theorem-like statement, found only %s." signature incorrectBlockType
-            | ID003 signature -> sprintf "The proof %s is missing a theorem-like statement to be associated with." signature 
-            | ID004 (signature, candidates)  -> sprintf "Cannot associate proof %s with a single theorem-like statement. Found more candidates: %s." signature candidates
+            | ID002 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the proof %s, found only %s." signature incorrectBlockType
+            | ID003 signature -> sprintf "The proof %s is missing a block to be associated with." signature 
+            | ID004 (signature, candidates)  -> sprintf "Cannot associate proof %s with a single block. Found more candidates: %s." signature candidates
+            | ID005 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the corollary %s, found only %s." signature incorrectBlockType
+            | ID006 signature -> sprintf "The corollary %s is missing a block to be associated with." signature 
+            | ID007 (signature, candidates)  -> sprintf "Cannot associate corollary %s with a single block. Found more candidates: %s." signature candidates
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 identifier -> sprintf "Duplicate variable %s declaration detected." identifier

@@ -121,7 +121,19 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
             Diagnostic.StartPos = fplValue.StartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = ID002 (fplValue.Name, incorrectBlockType)
-            Diagnostic.Alternatives = Some "Expected a theorem, a lemma, a proposition or a corollary." 
+            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+        }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+    let emitID005diagnostics (fplValue:FplValue) incorrectBlockType = 
+        let diagnostic = { 
+            Diagnostic.Uri = uri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID005 (fplValue.Name, incorrectBlockType)
+            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
@@ -133,7 +145,19 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
             Diagnostic.StartPos = fplValue.StartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = ID003 fplValue.Name
-            Diagnostic.Alternatives = Some "Expected a theorem, a lemma, a proposition or a corollary." 
+            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+        }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+    let emitID006diagnostics (fplValue:FplValue) = 
+        let diagnostic = { 
+            Diagnostic.Uri = uri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID006 fplValue.Name
+            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
@@ -149,16 +173,40 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-    match FplValue.TryFindAssociated fplValue FplBlockType.Proof with
+    let emitID007diagnostics (fplValue:FplValue) listOfCandidates = 
+        let diagnostic = { 
+            Diagnostic.Uri = uri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID007 (fplValue.Name, listOfCandidates)
+            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
+        }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+    match FplValue.TryFindAssociatedBlockForProof fplValue with
     | ScopeSearchResult.FoundCorrect parentsName -> 
         // everything is ok, change the parent of the provable from theory to the found parent 
         fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
-    | ScopeSearchResult.FoundIncorrect block ->
+    | ScopeSearchResult.FoundIncorrectBlock block ->
         emitID002diagnostics fplValue block
     | ScopeSearchResult.NotFound ->
         emitID003diagnostics fplValue 
     | ScopeSearchResult.FoundMultiple listOfKandidates ->
         emitID004diagnostics fplValue listOfKandidates
+    | _ -> ()
+
+    match FplValue.TryFindAssociatedBlockForCorollary fplValue with
+    | ScopeSearchResult.FoundCorrect parentsName -> 
+        // everything is ok, change the parent of the provable from theory to the found parent 
+        fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
+    | ScopeSearchResult.FoundIncorrectBlock block ->
+        emitID005diagnostics fplValue block
+    | ScopeSearchResult.NotFound ->
+        emitID006diagnostics fplValue 
+    | ScopeSearchResult.FoundMultiple listOfKandidates ->
+        emitID007diagnostics fplValue listOfKandidates
     | _ -> ()
 
     match FplValue.InScopeOfParent(fplValue) with
