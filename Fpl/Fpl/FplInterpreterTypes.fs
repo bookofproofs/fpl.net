@@ -353,7 +353,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// Qualified name of this FplValue 
     member this.QualifiedName
-        with get () = _blockType.Name + " " + _name
+        with get () = _blockType.Name + " " + _name + " at " + this.StartPos.ToString()
 
     /// This FplValue's name's end position that can be different from its endig position
     member this.NameEndPos
@@ -390,6 +390,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// Starting position of this FplValue
     member this.StartPos = fst positions
+
     /// Ending position of this FplValue
     member this.EndPos = snd positions
     /// Parent FplValue of this FplValue
@@ -419,6 +420,10 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         || fplValue.BlockType = FplBlockType.FunctionalTerm 
         || fplValue.BlockType = FplBlockType.Class 
 
+    /// Indicates if this FplValue is an root of the symbol table.
+    static member IsRoot(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Root
+
     /// Indicates if this FplValue is a constructor.
     static member IsConstructor(fplValue:FplValue) = 
         fplValue.BlockType = FplBlockType.Constructor
@@ -431,6 +436,25 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     /// Indicates if this FplValue is a constructor or a property
     static member IsConstructorOrProperty(fplValue:FplValue)  = 
         FplValue.IsConstructor(fplValue) || FplValue.IsProperty(fplValue)
+
+
+    /// Qualified starting position of this FplValue
+    member this.QualifiedStartPos = 
+        let rec getFullName (fplValue:FplValue) (first:bool) =
+            if fplValue.BlockType = FplBlockType.Root then
+                ""
+            elif first then 
+                if FplValue.IsRoot(fplValue.Parent.Value) then 
+                    getFullName fplValue.Parent.Value false + fplValue.Name + " at " + fplValue.StartPos.ToString() 
+                else
+                    getFullName fplValue.Parent.Value false + "." + fplValue.Name + " at " + fplValue.StartPos.ToString() 
+            else
+                if FplValue.IsRoot(fplValue.Parent.Value) then 
+                    getFullName fplValue.Parent.Value false + fplValue.Name 
+                else
+                    getFullName fplValue.Parent.Value false + "." + fplValue.Name 
+        getFullName this true
+
 
     /// Indicates if this FplValue is a variable.
     static member IsVariable(fplValue:FplValue) = 
@@ -465,15 +489,15 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
             match fplValue.Parent with
             | Some parent ->
                 if (FplValue.IsConstructorOrProperty(parent)) then 
-                    if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
-                        true
-                    else
-                        false
+                     if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
+                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                     else
+                        ScopeSearchResult.NotFound
                 else
-                    false
-            | None -> false
+                    ScopeSearchResult.NotApplicable
+            | None -> ScopeSearchResult.NotApplicable
         else
-            false
+            ScopeSearchResult.NotApplicable
 
     /// Checks if an fplValue is provable. This will only be true if 
     /// it is a theorem, a lemma, a proposition, or a corollary

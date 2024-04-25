@@ -9,34 +9,37 @@ open FplInterpreterTypes
 
 let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str = 
     if str <> "" && not (FplValue.IsVariable(fplValue)) then
-        // note: the Name attribute of variables are set in Ast.Var directly
-        // and we do not want to append the type to the names of variables.
-        if str = "(" || str = ")" 
-            || str = "[" || str = "]" 
-            || str = "->"
-            || fplValue.Name.EndsWith "(" 
-            || fplValue.Name.EndsWith "[" 
-            || fplValue.Name.Length = 0 
-            || fplValue.Name.EndsWith "-> " 
-            || str.StartsWith "$" then
-            if str = "->" then 
-                fplValue.Name <- fplValue.Name + " " + str + " "
-            else
-                fplValue.Name <- fplValue.Name + str
+        if fplValue.BlockType = FplBlockType.Class && fplValue.Name <> "" then 
+            () // for classes, the name is ready if it is not empty for the first time
         else
-            if fplValue.BlockType = FplBlockType.Class && fplValue.Name <> "" then 
-                () // for classes, the name is ready if it is not empty for the first time
+            // note: the Name attribute of variables are set in Ast.Var directly
+            // and we do not want to append the type to the names of variables.
+            if str = "(" || str = ")" 
+                || str = "[" || str = "]" 
+                || str = "->"
+                || fplValue.Name.EndsWith "(" 
+                || fplValue.Name.EndsWith "[" 
+                || fplValue.Name.Length = 0 
+                || fplValue.Name.EndsWith "-> " 
+                || str.StartsWith "$" then
+                if str = "->" then 
+                    fplValue.Name <- fplValue.Name + " " + str + " "
+                else
+                    fplValue.Name <- fplValue.Name + str
             else
                 fplValue.Name <- fplValue.Name + ", " + str
 
     if str <> "" then
-        // note: the manipulation of the TypeSignature is necessary for all kinds of fplValue
-        if str.StartsWith("*") then
-            fplValue.TypeSignature <- fplValue.TypeSignature @ ["*"; str.Substring(1)]
-        elif str.StartsWith("+") then
-            fplValue.TypeSignature <- fplValue.TypeSignature @ ["+"; str.Substring(1)]
+        if fplValue.BlockType = FplBlockType.Class && fplValue.TypeSignature.Length > 0 then 
+            () // for classes, the name TypeSignature is ready if it not empty
         else
-            fplValue.TypeSignature <- fplValue.TypeSignature @ [str]
+            // note: the manipulation of the TypeSignature is necessary for all kinds of fplValue
+            if str.StartsWith("*") then
+                fplValue.TypeSignature <- fplValue.TypeSignature @ ["*"; str.Substring(1)]
+            elif str.StartsWith("+") then
+                fplValue.TypeSignature <- fplValue.TypeSignature @ ["+"; str.Substring(1)]
+            else
+                fplValue.TypeSignature <- fplValue.TypeSignature @ [str]
         match st.CurrentContext with
         | EvalContext.InPropertySignature _
         | EvalContext.InConstructorSignature _
@@ -101,14 +104,14 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-    let emitVAR02diagnostics (fplValue:FplValue) = 
+    let emitVAR02diagnostics (fplValue:FplValue) conflict = 
         let diagnostic = { 
             Diagnostic.Uri = uri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.StartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = VAR02 fplValue.Name
+            Diagnostic.Code = VAR02 (fplValue.Name, conflict)
             Diagnostic.Alternatives = None 
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
@@ -213,9 +216,10 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
     | ScopeSearchResult.FoundConflict qualifiedName -> 
         emitVAR01orID001diagnostics fplValue qualifiedName
     | _ -> 
-        if FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) then 
-            emitVAR02diagnostics fplValue
-        else        
+        match FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) with
+        | ScopeSearchResult.FoundConflict other ->
+            emitVAR02diagnostics fplValue other
+        | _ -> 
             fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
 
 let tryAddVariadicVariables (uri:System.Uri) numberOfVariadicVars (startPos:Position) (endPos:Position) =

@@ -314,7 +314,7 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x:+ obj; self} };", 1)>]
     [<TestMethod>]
     member this.TestVAR02(fplCode:string, expected) =
-        let code = VAR02 ""
+        let code = VAR02 ("", "")
         runTestHelper fplCode code expected
 
 

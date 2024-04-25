@@ -826,10 +826,10 @@ type TestFplValue() =
     [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", "TestId$1$2$3", "TestId $1 $2 $3")>]
 
     
-    [<DataRow("def class Test:obj {intr} proof Test$1 {1. |- trivial};", "Test", "Test obj")>]
-    [<DataRow("def class TestId:obj {intrinsic} ;", "TestId", "TestId obj")>]
-    [<DataRow("def class TestId:Nat1, Nat2, Nat3, Nat4 {intrinsic} ;", "TestId", "TestId Nat1 Nat2 Nat3 Nat4")>]
-    [<DataRow("def class TestId:obj, Nat3 {intrinsic} ;", "TestId", "TestId obj Nat3")>]
+    [<DataRow("def class Test:obj {intr} proof Test$1 {1. |- trivial};", "Test", "Test")>]
+    [<DataRow("def class TestId:obj {intrinsic} ;", "TestId", "TestId")>]
+    [<DataRow("def class TestId:Nat1, Nat2, Nat3, Nat4 {intrinsic} ;", "TestId", "TestId")>]
+    [<DataRow("def class TestId:obj, Nat3 {intrinsic} ;", "TestId", "TestId")>]
 
     [<DataRow("def pred TestId() {true};", "TestId()", "TestId ( )")>]
     [<DataRow("def pred TestId(x:ind) {true};", "TestId(ind)", "TestId ( ind )")>]
@@ -1124,6 +1124,55 @@ type TestFplValue() =
             Assert.IsTrue(true)
         with
         | ex -> 
+            Assert.IsTrue(false)
+
+
+    [<DataRow("a root  at (Ln: 1, Col: 1)", "r")>]
+    [<DataRow("a theory Test at (Ln: 1, Col: 1)", "theory")>]
+    [<DataRow("a class definition TestId at (Ln: 2, Col: 13)", "block")>]
+    [<DataRow("a constructor TestId() at (Ln: 4, Col: 13)", "t1")>]
+    [<DataRow("a constructor TestId(obj) at (Ln: 5, Col: 13)", "t2")>]
+    [<DataRow("a constructor TestId(pred) at (Ln: 6, Col: 13)", "t3")>]
+    [<DataRow("a constructor TestId(ind) at (Ln: 7, Col: 13)", "t4")>]
+    [<TestMethod>]
+    member this.TestScopeConstructorsQualifiedName(expected, var) =
+        let res = this.ScopeConstructors() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(expected, r.QualifiedName)
+            | "theory" -> Assert.AreEqual(expected, theory.QualifiedName)
+            | "block" -> Assert.AreEqual(expected, block.QualifiedName)
+            | "t1" -> Assert.AreEqual(expected, t1.QualifiedName)
+            | "t2" -> Assert.AreEqual(expected, t2.QualifiedName)
+            | "t3" -> Assert.AreEqual(expected, t3.QualifiedName)
+            | "t4" -> Assert.AreEqual(expected, t4.QualifiedName)
+            | _ -> ()
+        | _ -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("", "r")>]
+    [<DataRow("Test at (Ln: 1, Col: 1)", "theory")>]
+    [<DataRow("Test.TestId at (Ln: 2, Col: 13)", "block")>]
+    [<DataRow("Test.TestId.TestId() at (Ln: 4, Col: 13)", "t1")>]
+    [<DataRow("Test.TestId.TestId(obj) at (Ln: 5, Col: 13)", "t2")>]
+    [<DataRow("Test.TestId.TestId(pred) at (Ln: 6, Col: 13)", "t3")>]
+    [<DataRow("Test.TestId.TestId(ind) at (Ln: 7, Col: 13)", "t4")>]
+    [<TestMethod>]
+    member this.TestScopeConstructorsQualifiedStartPos(expected, var) =
+        let res = this.ScopeConstructors() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(expected, r.QualifiedStartPos)
+            | "theory" -> Assert.AreEqual(expected, theory.QualifiedStartPos)
+            | "block" -> Assert.AreEqual(expected, block.QualifiedStartPos)
+            | "t1" -> Assert.AreEqual(expected, t1.QualifiedStartPos)
+            | "t2" -> Assert.AreEqual(expected, t2.QualifiedStartPos)
+            | "t3" -> Assert.AreEqual(expected, t3.QualifiedStartPos)
+            | "t4" -> Assert.AreEqual(expected, t4.QualifiedStartPos)
+            | _ -> ()
+        | _ -> 
             Assert.IsTrue(false)
 
     [<DataRow("def pred TestId() { intr prty pred T() {intr} };", "T()", true)>]
