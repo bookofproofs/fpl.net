@@ -656,7 +656,7 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         if debug then
             let path = this.EvalPath()
             System.Console.WriteLine(path)
-            if path = "AST" then 
+            if path = "Error" then 
                 raise(Exception("Test error message"))
 
     /// Remove the current ast name from the recursive evaluation path.
