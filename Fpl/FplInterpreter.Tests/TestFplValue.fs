@@ -298,6 +298,75 @@ type TestFplValue() =
             Assert.AreEqual([], r.TypeSignature)
         | None -> ()
 
+    [<DataRow("", "r")>]
+    [<DataRow("Test at (Ln: 1, Col: 1)", "theory")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)) at (Ln: 2, Col: 13)", "block")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x at (Ln: 2, Col: 32)", "x")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y at (Ln: 2, Col: 34)", "y")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.w at (Ln: 2, Col: 45)", "xw")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.u at (Ln: 2, Col: 41)", "xu")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.v at (Ln: 2, Col: 43)", "xv")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.w at (Ln: 2, Col: 45)", "yw")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.u at (Ln: 2, Col: 41)", "yu")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.v at (Ln: 2, Col: 43)", "yv")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.w.a at (Ln: 2, Col: 52)", "xwa")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.w.b at (Ln: 2, Col: 54)", "xwb")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.w.c at (Ln: 2, Col: 56)", "xwc")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.u.a at (Ln: 2, Col: 52)", "xua")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.u.b at (Ln: 2, Col: 54)", "xub")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.u.c at (Ln: 2, Col: 56)", "xuc")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.v.a at (Ln: 2, Col: 52)", "xva")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.v.b at (Ln: 2, Col: 54)", "xvb")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).x.v.c at (Ln: 2, Col: 56)", "xvc")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.w.a at (Ln: 2, Col: 52)", "ywa")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.w.b at (Ln: 2, Col: 54)", "ywb")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.w.c at (Ln: 2, Col: 56)", "ywc")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.u.a at (Ln: 2, Col: 52)", "yua")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.u.b at (Ln: 2, Col: 54)", "yub")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.u.c at (Ln: 2, Col: 56)", "yuc")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.v.a at (Ln: 2, Col: 52)", "yva")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.v.b at (Ln: 2, Col: 54)", "yvb")>]
+    [<DataRow("Test.TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)).y.v.c at (Ln: 2, Col: 56)", "yvc")>]
+    [<TestMethod>]
+    member this.TestScopeVariablesInSignatureQualifiedStartingPos(expected, var) =
+        let result = this.ScopeVariablesInSignature()
+        match result with
+        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+            match var with 
+            | "ywc" -> Assert.AreEqual(expected, ywc.QualifiedStartPos)
+            | "ywb" -> Assert.AreEqual(expected, ywb.QualifiedStartPos)
+            | "ywa" -> Assert.AreEqual(expected, ywa.QualifiedStartPos)
+            | "yvc" -> Assert.AreEqual(expected, yvc.QualifiedStartPos)
+            | "yvb" -> Assert.AreEqual(expected, yvb.QualifiedStartPos)
+            | "yva" -> Assert.AreEqual(expected, yva.QualifiedStartPos)
+            | "yuc" -> Assert.AreEqual(expected, yuc.QualifiedStartPos)
+            | "yub" -> Assert.AreEqual(expected, yub.QualifiedStartPos)
+            | "yua" -> Assert.AreEqual(expected, yua.QualifiedStartPos)
+            | "xwc" -> Assert.AreEqual(expected, xwc.QualifiedStartPos)
+            | "xwb" -> Assert.AreEqual(expected, xwb.QualifiedStartPos)
+            | "xwa" -> Assert.AreEqual(expected, xwa.QualifiedStartPos)
+            | "xvc" -> Assert.AreEqual(expected, xvc.QualifiedStartPos)
+            | "xvb" -> Assert.AreEqual(expected, xvb.QualifiedStartPos)
+            | "xva" -> Assert.AreEqual(expected, xva.QualifiedStartPos)
+            | "xuc" -> Assert.AreEqual(expected, xuc.QualifiedStartPos)
+            | "xub" -> Assert.AreEqual(expected, xub.QualifiedStartPos)
+            | "xua" -> Assert.AreEqual(expected, xua.QualifiedStartPos)
+
+            | "yw" -> Assert.AreEqual(expected, yw.QualifiedStartPos)
+            | "yv" -> Assert.AreEqual(expected, yv.QualifiedStartPos)
+            | "yu" -> Assert.AreEqual(expected, yu.QualifiedStartPos)
+            | "xw" -> Assert.AreEqual(expected, xw.QualifiedStartPos)
+            | "xv" -> Assert.AreEqual(expected, xv.QualifiedStartPos)
+            | "xu" -> Assert.AreEqual(expected,  xu.QualifiedStartPos)
+            | "y" -> Assert.AreEqual(expected, y.QualifiedStartPos)
+            | "x" -> Assert.AreEqual(expected, x.QualifiedStartPos)
+            | "block" -> Assert.AreEqual(expected, block.QualifiedStartPos)
+            | "theory" -> Assert.AreEqual(expected, theory.QualifiedStartPos)
+            | "r" -> Assert.AreEqual(expected, r.QualifiedStartPos)
+            | _ -> 
+                Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
 
     [<DataRow("inference TestId() {pre: true con: true};", "TestId()", "TestId ( )")>]
     [<DataRow("inference TestId(x:ind) {pre: true con: true};", "TestId(ind)", "TestId ( ind )")>]
@@ -1086,6 +1155,30 @@ type TestFplValue() =
             Assert.IsTrue(true)
         with
         | ex -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("", "r")>]
+    [<DataRow("Test at (Ln: 1, Col: 1)", "theory")>]
+    [<DataRow("Test.TestId() at (Ln: 2, Col: 13)", "block")>]
+    [<DataRow("Test.TestId().T1() at (Ln: 5, Col: 13)", "t1")>]
+    [<DataRow("Test.TestId().T2() at (Ln: 6, Col: 13)", "t2")>]
+    [<DataRow("Test.TestId().T3() -> obj at (Ln: 7, Col: 13)", "t3")>]
+    [<DataRow("Test.TestId().T4() -> obj at (Ln: 8, Col: 13)", "t4")>]
+    [<TestMethod>]
+    member this.TestScopePropertiesQualifiedStartPos(expected, var) =
+        let res = this.ScopeProperties() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(expected, r.QualifiedStartPos)
+            | "theory" -> Assert.AreEqual(expected, theory.QualifiedStartPos)
+            | "block" -> Assert.AreEqual(expected, block.QualifiedStartPos)
+            | "t1" -> Assert.AreEqual(expected, t1.QualifiedStartPos)
+            | "t2" -> Assert.AreEqual(expected, t2.QualifiedStartPos)
+            | "t3" -> Assert.AreEqual(expected, t3.QualifiedStartPos)
+            | "t4" -> Assert.AreEqual(expected, t4.QualifiedStartPos)
+            | _ -> ()
+        | _ -> 
             Assert.IsTrue(false)
 
 

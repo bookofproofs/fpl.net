@@ -336,6 +336,7 @@ type ScopeSearchResult =
 
 type FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions: Positions, parent: FplValue option) =
     let mutable _name = name
+    let mutable _nameFinal = false
     let mutable _nameEndPos = Position("", 0, 1, 1)
     let mutable _evalType = evalType
     let mutable _typeSignature = []
@@ -346,10 +347,24 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     let _auxiliaryUniqueChilds = HashSet<string>()
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
 
-    /// Identifier of this FplValue that is unique in its scope
+    /// Identifier of this FplValue that is unique in its scope.
     member this.Name
         with get () = _name
-        and set (value) = _name <- value
+        and set (value) = 
+            if _nameFinal then 
+                raise (ArgumentException($"Cannot set readonly Name {_name} again since it has been finally evaluated."))
+            else
+                _name <- value
+
+    /// Indicates, if the Name has been finally determined during the evaluation process.
+    /// If true, the Name property becomes immutable.
+    member this.NameIsFinal
+        with get () = _nameFinal
+        and set (value) = 
+            if _nameFinal then 
+                raise (ArgumentException($"Cannot change the readonly NameIsFinal property since it has been finally evaluated."))
+            else
+                _nameFinal <- value
 
     /// Qualified name of this FplValue 
     member this.QualifiedName
@@ -405,7 +420,6 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     member this.Scope = _scope
 
 
-
     /// Indicates if this FplValue is an FPL building block.
     static member IsFplBlock(fplValue:FplValue) = 
         fplValue.BlockType = FplBlockType.Axiom
@@ -417,6 +431,12 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         || fplValue.BlockType = FplBlockType.Proof 
         || fplValue.BlockType = FplBlockType.RuleOfInference 
         || fplValue.BlockType = FplBlockType.Predicate 
+        || fplValue.BlockType = FplBlockType.FunctionalTerm 
+        || fplValue.BlockType = FplBlockType.Class 
+
+    /// Indicates if this FplValue is a definition
+    static member IsDefinition(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Predicate 
         || fplValue.BlockType = FplBlockType.FunctionalTerm 
         || fplValue.BlockType = FplBlockType.Class 
 

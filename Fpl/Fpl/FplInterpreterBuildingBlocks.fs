@@ -9,8 +9,8 @@ open FplInterpreterTypes
 
 let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str = 
     if str <> "" && not (FplValue.IsVariable(fplValue)) then
-        if fplValue.BlockType = FplBlockType.Class && fplValue.Name <> "" then 
-            () // for classes, the name is ready if it is not empty for the first time
+        if FplValue.IsDefinition(fplValue) && fplValue.NameIsFinal then 
+            () // for definitions with final name stop changing the name
         else
             // note: the Name attribute of variables are set in Ast.Var directly
             // and we do not want to append the type to the names of variables.
@@ -30,8 +30,8 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
                 fplValue.Name <- fplValue.Name + ", " + str
 
     if str <> "" then
-        if fplValue.BlockType = FplBlockType.Class && fplValue.TypeSignature.Length > 0 then 
-            () // for classes, the name TypeSignature is ready if it not empty
+        if FplValue.IsDefinition(fplValue) && fplValue.NameIsFinal then  
+            () //  for definitions with final name stop changing the TypeSignature
         else
             // note: the manipulation of the TypeSignature is necessary for all kinds of fplValue
             if str.StartsWith("*") then
@@ -221,6 +221,7 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
             emitVAR02diagnostics fplValue other
         | _ -> 
             fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
+            fplValue.NameIsFinal <- true
 
 let tryAddVariadicVariables (uri:System.Uri) numberOfVariadicVars (startPos:Position) (endPos:Position) =
     if numberOfVariadicVars > 1 then
@@ -382,6 +383,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             varValue.Name <- s
             varValue.NameEndPos <- pos2
             tryAddBlock uri varValue 
+            
         | _ -> ()
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
