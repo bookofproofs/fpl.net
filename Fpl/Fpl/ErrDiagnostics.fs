@@ -183,7 +183,7 @@ type DiagnosticCode =
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
-            | ID001 (signature, duplicate) -> sprintf "Duplicate signature %s detected; %s with the same signature was already declared." signature duplicate
+            | ID001 (signature, conflict) -> sprintf "Duplicate signature %s detected; %s with the same signature was already declared." signature conflict
             | ID002 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the proof %s, found only %s." signature incorrectBlockType
             | ID003 signature -> sprintf "The proof %s is missing a block to be associated with." signature 
             | ID004 (signature, candidates)  -> sprintf "Cannot associate proof %s with a single block. Found more candidates: %s." signature candidates

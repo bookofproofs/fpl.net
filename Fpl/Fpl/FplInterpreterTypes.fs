@@ -466,8 +466,12 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         FplValue.IsConstructor(fplValue) || FplValue.IsProperty(fplValue)
 
     /// Indicates if this FplValue is a constructor or a property
-    static member IsProofOrCorollary(fplValue:FplValue)  = 
+    static member IsProofOrCorollary(fplValue:FplValue) = 
         FplValue.IsProof(fplValue) || FplValue.IsCorollary(fplValue)
+
+    /// Indicates if this FplValue is a constructor or a theory
+    static member IsTheory (fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Theory
 
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos = 
@@ -503,14 +507,41 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// Checks if a block is in the scope of its parent 
     static member InScopeOfParent(fplValue:FplValue) = 
+        let conflictInSiblingTheory (parent:FplValue) = 
+            // if the parent is as theory, look also for its sibling theories
+            let (conflicts:ScopeSearchResult list) = 
+                let root = parent.Parent.Value
+                root.Scope
+                |> Seq.filter (fun siblingTheory ->
+                    // look only for sibling theories 
+                    siblingTheory.Value <> parent
+                )
+                |> Seq.choose (fun siblingTheory ->
+                        if siblingTheory.Value.Scope.ContainsKey(fplValue.Name) then
+                            let foundConflict = siblingTheory.Value.Scope[fplValue.Name]
+                            let foundConflictBlockType = foundConflict.BlockType
+                            Some (ScopeSearchResult.FoundConflict foundConflictBlockType.Name)
+                        else
+                            None
+                )
+                |> Seq.toList
+            let res = conflicts 
+            if res.Length > 0 then 
+                conflicts.Head
+            else
+                ScopeSearchResult.NotFound
+
         match fplValue.Parent with
         | Some parent ->
             if parent.Scope.ContainsKey(fplValue.Name) then
                 let foundConflict = parent.Scope[fplValue.Name]
                 let foundConflictBlockType = foundConflict.BlockType
                 ScopeSearchResult.FoundConflict foundConflictBlockType.Name 
-            else    
-                ScopeSearchResult.NotFound
+            else 
+                if FplValue.IsTheory(parent) then 
+                    conflictInSiblingTheory parent
+                else
+                    ScopeSearchResult.NotFound
         | None -> ScopeSearchResult.NotApplicable
 
     /// Checks if a variable defined in the scope of a constructor or a property

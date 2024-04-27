@@ -260,6 +260,15 @@ type TestInterpreterErrors() =
         let code = ID001 ("", "")
         runTestHelper fplCode code expected
 
+    [<DataRow("uses Fpl.Commons inf ModusPonens() {pre:true con:true} ;", 1)>]
+    [<DataRow("uses Fpl.Commons theorem ModusTollens() {true} ;", 1)>]
+    [<DataRow("uses Fpl.Commons def pred HypotheticalSyllogism() {true} ;", 1)>]
+    [<DataRow("uses Fpl.Commons axiom DisjunctiveSyllogism() {true} ;", 1)>]
+    [<TestMethod>]
+    member this.TestID001ConflictWithOtherTheories(fplCode:string, expected:int) =
+        let code = ID001 ("", "")
+        runTestHelper fplCode code expected
+
     [<DataRow("def predicate Test(x,y:* pred) {true};", 1)>]
     [<DataRow("def predicate Test(x,y:+ pred) {true};", 1)>]
     [<DataRow("def predicate Test(x,y: pred) {true};", 0)>]
