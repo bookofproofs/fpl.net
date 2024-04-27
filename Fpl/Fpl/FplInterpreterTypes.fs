@@ -530,9 +530,9 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         else
             ScopeSearchResult.NotApplicable
 
-    /// Checks if a variable defined in the scope of a corollary or a proof
+    /// Checks if a variable defined in the scope of a proof
     /// was already defined in the scope of its parent definition. 
-    static member ProofOrCorollaryVariableInOuterScope(fplValue:FplValue) =
+    static member ProofVariableInOuterScope(fplValue:FplValue) =
         if (FplValue.IsVariable(fplValue)) then 
             match fplValue.Parent with
             | Some parent ->
@@ -547,6 +547,22 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         else
             ScopeSearchResult.NotApplicable
     
+    /// Checks if a variable defined in the scope of a corollary 
+    /// was already defined in the scope of its parent definition. 
+    static member CorollaryVariableInOuterScope(fplValue:FplValue) =
+        if (FplValue.IsVariable(fplValue)) then 
+            match fplValue.Parent with
+            | Some parent ->
+                if (FplValue.IsProofOrCorollary(parent)) then 
+                     if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
+                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                     else
+                        ScopeSearchResult.NotFound
+                else
+                    ScopeSearchResult.NotApplicable
+            | None -> ScopeSearchResult.NotApplicable
+        else
+            ScopeSearchResult.NotApplicable
 
     /// Checks if an fplValue is provable. This will only be true if 
     /// it is a theorem, a lemma, a proposition, or a corollary

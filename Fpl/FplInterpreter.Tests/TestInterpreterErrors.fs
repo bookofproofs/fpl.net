@@ -317,18 +317,18 @@ type TestInterpreterErrors() =
         let code = VAR02 ("", "")
         runTestHelper fplCode code expected
 
-    [<DataRow("theorem Test(x: ind) {true}       proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
-    [<DataRow("theorem Test() {dec ~x:ind; true} proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
-    [<DataRow("theorem Test(x: ind) {true}       proof TestId$1 { 1. |- trivial };", 0)>]
-    [<DataRow("theorem Test() {dec ~x:ind; true} proof TestId$1 { 1. |- trivial };", 0)>]
-    [<DataRow("theorem Test(x: ind) {true}       corollary TestId$1() { dec ~x:obj; true };", 1)>]
-    [<DataRow("theorem Test() {dec ~x:ind; true} corollary TestId$1() { dec ~x:obj; true };", 1)>]
-    [<DataRow("theorem Test(x: ind) {true}       corollary TestId$1() { true };", 0)>]
-    [<DataRow("theorem Test() {dec ~x:ind; true} corollary TestId$1() { true };", 0)>]
-    [<DataRow("theorem Test(x: ind) {true}       corollary TestId$1(x:obj) { true };", 1)>]
-    [<DataRow("theorem Test() {dec ~x:ind; true} corollary TestId$1(x:obj) { true };", 1)>]
-    [<DataRow("theorem Test(x: ind) {true}       corollary TestId$1() { true };", 0)>]
-    [<DataRow("theorem Test() {dec ~x:ind; true} corollary TestId$1() { true };", 0)>]
+    [<DataRow("theorem TestId(x: ind) {true}       proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
+    [<DataRow("theorem TestId(x: ind) {true}       proof TestId$1 { 1. |- trivial };", 0)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} proof TestId$1 { 1. |- trivial };", 0)>]
+    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { dec ~x:obj; true };", 1)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1() { dec ~x:obj; true };", 1)>]
+    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { true };", 0)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1() { true };", 0)>]
+    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1(x:obj) { true };", 1)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1(x:obj) { true };", 1)>]
+    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { true };", 0)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1() { true };", 0)>]
     [<TestMethod>]
     member this.TestVAR03(fplCode:string, expected) =
         let code = VAR03 ("", "")

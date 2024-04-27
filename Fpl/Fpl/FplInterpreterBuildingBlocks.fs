@@ -128,6 +128,15 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
+    let emitVAR03diagnosticsForCorollarysSignatureVariale (fplValue:FplValue) = 
+        if FplValue.IsCorollary(fplValue) then
+            for kv in fplValue.Scope do
+                let res = FplValue.CorollaryVariableInOuterScope(kv.Value) 
+                match res with
+                | ScopeSearchResult.FoundConflict conflict ->
+                    emitVAR03diagnostics kv.Value conflict
+                | _ -> ()
+
     let emitID002diagnostics (fplValue:FplValue) incorrectBlockType = 
         let diagnostic = { 
             Diagnostic.Uri = uri
@@ -216,6 +225,8 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
     | ScopeSearchResult.FoundCorrect parentsName -> 
         // everything is ok, change the parent of the provable from theory to the found parent 
         fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
+        // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
+        emitVAR03diagnosticsForCorollarysSignatureVariale fplValue
     | ScopeSearchResult.FoundIncorrectBlock block ->
         emitID005diagnostics fplValue block
     | ScopeSearchResult.NotFound ->
@@ -232,7 +243,7 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         | ScopeSearchResult.FoundConflict other ->
             emitVAR02diagnostics fplValue other
         | _ -> 
-            match FplValue.ProofOrCorollaryVariableInOuterScope(fplValue) with
+            match FplValue.ProofVariableInOuterScope(fplValue) with
             | ScopeSearchResult.FoundConflict other ->
                 emitVAR03diagnostics fplValue other
             | _ -> 
