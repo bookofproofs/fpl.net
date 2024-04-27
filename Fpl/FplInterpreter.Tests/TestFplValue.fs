@@ -1268,6 +1268,38 @@ type TestFplValue() =
         | _ -> 
             Assert.IsTrue(false)
 
+
+    member this.ScopeProofsAndCorollaries(fplCode, name, subName) =
+        FplParser.parserDiagnostics.Clear()
+        let stOption = prepareFplCode(fplCode, false) 
+        let result = match stOption with
+                        | Some st -> 
+                            let r = st.Root
+                            let theory = r.Scope["Test"]
+                            let block = theory.Scope[name]
+                            let subclock = block.Scope[subName]
+                            Some (r,theory,block,subclock)
+                        | None -> None
+        prepareFplCode("", true) |> ignore
+        result
+
+
+    [<DataRow("theorem TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1")>]
+    [<DataRow("lemma TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1")>]
+    [<DataRow("proposition TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1")>]
+    [<DataRow("corollary TestId$2() {true} proof TestId$2$1 {1. |- trivial} ;", "TestId$2()", "TestId$2$1")>]
+    [<DataRow("theorem TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()")>]
+    [<DataRow("lemma TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()")>]
+    [<DataRow("proposition TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()")>]
+    [<TestMethod>]
+    member this.TestScopeProofsAndCorollariesComplete(fplCode, name, subName) =
+        try
+            this.ScopeProofsAndCorollaries(fplCode, name, subName) |> ignore
+            Assert.IsTrue(true)
+        with
+        | ex -> 
+            Assert.IsTrue(false)
+
     [<DataRow("def pred TestId() { intr prty pred T() {intr} };", "T()", true)>]
     [<DataRow("def pred TestId() { intr prty opt pred T() {intr} };", "T()", false)>]
     [<DataRow("def pred TestId() { intr prty func T()->obj {intr} };", "T() -> obj", true)>]

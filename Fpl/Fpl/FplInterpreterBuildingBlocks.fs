@@ -116,6 +116,18 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
+    let emitVAR03diagnostics (fplValue:FplValue) conflict = 
+        let diagnostic = { 
+            Diagnostic.Uri = uri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = VAR03 (fplValue.Name, conflict)
+            Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
+        }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
     let emitID002diagnostics (fplValue:FplValue) incorrectBlockType = 
         let diagnostic = { 
             Diagnostic.Uri = uri
@@ -220,8 +232,12 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
         | ScopeSearchResult.FoundConflict other ->
             emitVAR02diagnostics fplValue other
         | _ -> 
-            fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
-            fplValue.NameIsFinal <- true
+            match FplValue.ProofOrCorollaryVariableInOuterScope(fplValue) with
+            | ScopeSearchResult.FoundConflict other ->
+                emitVAR03diagnostics fplValue other
+            | _ -> 
+                fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
+                fplValue.NameIsFinal <- true
 
 let tryAddVariadicVariables (uri:System.Uri) numberOfVariadicVars (startPos:Position) (endPos:Position) =
     if numberOfVariadicVars > 1 then

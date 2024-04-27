@@ -448,6 +448,14 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     static member IsConstructor(fplValue:FplValue) = 
         fplValue.BlockType = FplBlockType.Constructor
 
+    /// Indicates if this FplValue is a proof.
+    static member IsProof(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Proof
+
+    /// Indicates if this FplValue is a corollary.
+    static member IsCorollary(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Corollary
+
     /// Indicates if this FplValue is a property.
     static member IsProperty(fplValue:FplValue) = 
         fplValue.BlockType = FplBlockType.MandatoryProperty
@@ -457,6 +465,9 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     static member IsConstructorOrProperty(fplValue:FplValue)  = 
         FplValue.IsConstructor(fplValue) || FplValue.IsProperty(fplValue)
 
+    /// Indicates if this FplValue is a constructor or a property
+    static member IsProofOrCorollary(fplValue:FplValue)  = 
+        FplValue.IsProof(fplValue) || FplValue.IsCorollary(fplValue)
 
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos = 
@@ -518,6 +529,24 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
             | None -> ScopeSearchResult.NotApplicable
         else
             ScopeSearchResult.NotApplicable
+
+    /// Checks if a variable defined in the scope of a corollary or a proof
+    /// was already defined in the scope of its parent definition. 
+    static member ProofOrCorollaryVariableInOuterScope(fplValue:FplValue) =
+        if (FplValue.IsVariable(fplValue)) then 
+            match fplValue.Parent with
+            | Some parent ->
+                if (FplValue.IsProofOrCorollary(parent)) then 
+                     if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
+                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                     else
+                        ScopeSearchResult.NotFound
+                else
+                    ScopeSearchResult.NotApplicable
+            | None -> ScopeSearchResult.NotApplicable
+        else
+            ScopeSearchResult.NotApplicable
+    
 
     /// Checks if an fplValue is provable. This will only be true if 
     /// it is a theorem, a lemma, a proposition, or a corollary
