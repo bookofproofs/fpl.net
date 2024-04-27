@@ -88,7 +88,7 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
 let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
-    let emitVAR01orID001diagnostics (fplValue:FplValue) qualifiedName = 
+    let emitVAR01orID001diagnostics (fplValue:FplValue) conflict = 
         let diagnostic = { 
             Diagnostic.Uri = uri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
@@ -97,9 +97,9 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = 
                 if (FplValue.IsVariable(fplValue)) then 
-                    VAR01 fplValue.Name
+                    VAR01 (fplValue.Name, conflict)
                 else
-                    ID001 (fplValue.Name, qualifiedName)
+                    ID001 (fplValue.Name, conflict)
             Diagnostic.Alternatives = None 
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
@@ -236,8 +236,8 @@ let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
     | _ -> ()
 
     match FplValue.InScopeOfParent(fplValue) with
-    | ScopeSearchResult.FoundConflict qualifiedName -> 
-        emitVAR01orID001diagnostics fplValue qualifiedName
+    | ScopeSearchResult.FoundConflict conflict -> 
+        emitVAR01orID001diagnostics fplValue conflict
     | _ -> 
         match FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) with
         | ScopeSearchResult.FoundConflict other ->

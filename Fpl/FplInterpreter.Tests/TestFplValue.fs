@@ -43,218 +43,40 @@ type TestFplValue() =
         testFactory FplBlockType.OptionalProperty FplType.Object
         testFactory FplBlockType.Class FplType.Object 
 
-    member this.ScopeVariablesInSignature() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def pred TestPredicate(x,y:pred(u,v,w:func(a,b,c:obj)->obj)) 
-            {true}
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj))"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
-                            Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
-
     [<TestMethod>]
     member this.TestScopeVariablesInSignatureIsComplete() =
         try
-            this.ScopeVariablesInSignature() |> ignore
+            CommonFplValueTestCases.ScopeVariablesInSignature() |> ignore
             Assert.IsTrue(true)
         with
         | ex -> 
             Assert.IsTrue(false)
 
 
-    member this.ScopeVariablesInSignatureWithVariadic() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def pred TestPredicate(x,y:+pred(u,v,w:func(a,b,c:*obj)->obj)) 
-            {true}
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestPredicate(+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj), +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj))"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
-                            Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
 
     [<TestMethod>]
     member this.TestScopeVariablesInSignatureWithVariadicIsComplete() =
         try
-            this.ScopeVariablesInSignatureWithVariadic() |> ignore
+            CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
             Assert.IsTrue(true)
         with
         | ex -> 
             Assert.IsTrue(false)
 
-    member this.ScopeVariablesInBlock() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def pred TestPredicate() 
-            {dec ~x,y:pred(u,v,w:func(a,b,c:obj)->obj); true}
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestPredicate()"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
-                            Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
 
     [<TestMethod>]
     member this.TestScopeVariablesInBlockIsComplete() =
         try
-            this.ScopeVariablesInBlock() |> ignore
+            CommonFplValueTestCases.ScopeVariablesInBlock() |> ignore
             Assert.IsTrue(true)
         with
         | ex -> 
             Assert.IsTrue(false)
 
-    member this.ScopeVariablesInBlockWithVariadic() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def pred TestPredicate() 
-            {dec ~x,y:+pred(u,v,w:func(a,b,c:*obj)->obj); true}
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestPredicate()"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
-                            Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
-
     [<TestMethod>]
     member this.TestScopeVariablesInBlockWithVariadicIsComplete() =
         try
-            this.ScopeVariablesInBlockWithVariadic() |> ignore
+            CommonFplValueTestCases.ScopeVariablesInBlockWithVariadic() |> ignore
             Assert.IsTrue(true)
         with
         | ex -> 
@@ -262,7 +84,7 @@ type TestFplValue() =
 
     [<TestMethod>]
     member this.TestScopeVariablesInSignatureTypeSignature() =
-        let result = this.ScopeVariablesInSignature()
+        let result = CommonFplValueTestCases.ScopeVariablesInSignature()
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
 
@@ -299,37 +121,37 @@ type TestFplValue() =
         | None -> ()
 
     [<DataRow("", "r")>]
-    [<DataRow("Test at (Ln: 1, Col: 1)", "theory")>]
-    [<DataRow("Test at (Ln: 2, Col: 13)", "block")>]
-    [<DataRow("Test at (Ln: 2, Col: 32)", "x")>]
-    [<DataRow("Test at (Ln: 2, Col: 34)", "y")>]
-    [<DataRow("Test at (Ln: 2, Col: 45)", "xw")>]
-    [<DataRow("Test at (Ln: 2, Col: 41)", "xu")>]
-    [<DataRow("Test at (Ln: 2, Col: 43)", "xv")>]
-    [<DataRow("Test at (Ln: 2, Col: 45)", "yw")>]
-    [<DataRow("Test at (Ln: 2, Col: 41)", "yu")>]
-    [<DataRow("Test at (Ln: 2, Col: 43)", "yv")>]
-    [<DataRow("Test at (Ln: 2, Col: 52)", "xwa")>]
-    [<DataRow("Test at (Ln: 2, Col: 54)", "xwb")>]
-    [<DataRow("Test at (Ln: 2, Col: 56)", "xwc")>]
-    [<DataRow("Test at (Ln: 2, Col: 52)", "xua")>]
-    [<DataRow("Test at (Ln: 2, Col: 54)", "xub")>]
-    [<DataRow("Test at (Ln: 2, Col: 56)", "xuc")>]
-    [<DataRow("Test at (Ln: 2, Col: 52)", "xva")>]
-    [<DataRow("Test at (Ln: 2, Col: 54)", "xvb")>]
-    [<DataRow("Test at (Ln: 2, Col: 56)", "xvc")>]
-    [<DataRow("Test at (Ln: 2, Col: 52)", "ywa")>]
-    [<DataRow("Test at (Ln: 2, Col: 54)", "ywb")>]
-    [<DataRow("Test at (Ln: 2, Col: 56)", "ywc")>]
-    [<DataRow("Test at (Ln: 2, Col: 52)", "yua")>]
-    [<DataRow("Test at (Ln: 2, Col: 54)", "yub")>]
-    [<DataRow("Test at (Ln: 2, Col: 56)", "yuc")>]
-    [<DataRow("Test at (Ln: 2, Col: 52)", "yva")>]
-    [<DataRow("Test at (Ln: 2, Col: 54)", "yvb")>]
-    [<DataRow("Test at (Ln: 2, Col: 56)", "yvc")>]
+    [<DataRow("Test(Ln: 1, Col: 1)", "theory")>]
+    [<DataRow("Test(Ln: 2, Col: 13)", "block")>]
+    [<DataRow("Test(Ln: 2, Col: 32)", "x")>]
+    [<DataRow("Test(Ln: 2, Col: 34)", "y")>]
+    [<DataRow("Test(Ln: 2, Col: 45)", "xw")>]
+    [<DataRow("Test(Ln: 2, Col: 41)", "xu")>]
+    [<DataRow("Test(Ln: 2, Col: 43)", "xv")>]
+    [<DataRow("Test(Ln: 2, Col: 45)", "yw")>]
+    [<DataRow("Test(Ln: 2, Col: 41)", "yu")>]
+    [<DataRow("Test(Ln: 2, Col: 43)", "yv")>]
+    [<DataRow("Test(Ln: 2, Col: 52)", "xwa")>]
+    [<DataRow("Test(Ln: 2, Col: 54)", "xwb")>]
+    [<DataRow("Test(Ln: 2, Col: 56)", "xwc")>]
+    [<DataRow("Test(Ln: 2, Col: 52)", "xua")>]
+    [<DataRow("Test(Ln: 2, Col: 54)", "xub")>]
+    [<DataRow("Test(Ln: 2, Col: 56)", "xuc")>]
+    [<DataRow("Test(Ln: 2, Col: 52)", "xva")>]
+    [<DataRow("Test(Ln: 2, Col: 54)", "xvb")>]
+    [<DataRow("Test(Ln: 2, Col: 56)", "xvc")>]
+    [<DataRow("Test(Ln: 2, Col: 52)", "ywa")>]
+    [<DataRow("Test(Ln: 2, Col: 54)", "ywb")>]
+    [<DataRow("Test(Ln: 2, Col: 56)", "ywc")>]
+    [<DataRow("Test(Ln: 2, Col: 52)", "yua")>]
+    [<DataRow("Test(Ln: 2, Col: 54)", "yub")>]
+    [<DataRow("Test(Ln: 2, Col: 56)", "yuc")>]
+    [<DataRow("Test(Ln: 2, Col: 52)", "yva")>]
+    [<DataRow("Test(Ln: 2, Col: 54)", "yvb")>]
+    [<DataRow("Test(Ln: 2, Col: 56)", "yvc")>]
     [<TestMethod>]
     member this.TestScopeVariablesInSignatureQualifiedStartingPos(expected, var) =
-        let result = this.ScopeVariablesInSignature()
+        let result = CommonFplValueTestCases.ScopeVariablesInSignature()
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with 
@@ -398,7 +220,7 @@ type TestFplValue() =
     [<DataRow("yvc")>]
     [<TestMethod>]
     member this.TestParentVariablesInSignature(var) =
-        let result = this.ScopeVariablesInSignature()
+        let result = CommonFplValueTestCases.ScopeVariablesInSignature()
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with 
@@ -1187,54 +1009,25 @@ type TestFplValue() =
         Assert.AreEqual(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore
 
-    member this.ScopeProperties() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def pred TestId() 
-        {
-            intr 
-            prty pred T1() {intr}
-            prty opt pred T2() {intr}
-            prty func T3()->obj {intr}
-            prty func opt func T4()->obj {intr}
-        }
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestId()"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let t1 = block.Scope["T1()"]
-                            let t2 = block.Scope["T2()"]
-                            let t3 = block.Scope["T3() -> obj"]
-                            let t4 = block.Scope["T4() -> obj"]
-                            Some (r,theory,block,t1,t2,t3,t4)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
-
     [<TestMethod>]
     member this.TestScopePropertiesIsComplete() =
         try
-            this.ScopeProperties() |> ignore
+            CommonFplValueTestCases.ScopeProperties() |> ignore
             Assert.IsTrue(true)
         with
         | ex -> 
             Assert.IsTrue(false)
 
     [<DataRow("", "r")>]
-    [<DataRow("Test at (Ln: 1, Col: 1)", "theory")>]
-    [<DataRow("Test at (Ln: 2, Col: 13)", "block")>]
-    [<DataRow("Test at (Ln: 5, Col: 13)", "t1")>]
-    [<DataRow("Test at (Ln: 6, Col: 13)", "t2")>]
-    [<DataRow("Test at (Ln: 7, Col: 13)", "t3")>]
-    [<DataRow("Test at (Ln: 8, Col: 13)", "t4")>]
+    [<DataRow("Test(Ln: 1, Col: 1)", "theory")>]
+    [<DataRow("Test(Ln: 2, Col: 13)", "block")>]
+    [<DataRow("Test(Ln: 5, Col: 13)", "t1")>]
+    [<DataRow("Test(Ln: 6, Col: 13)", "t2")>]
+    [<DataRow("Test(Ln: 7, Col: 13)", "t3")>]
+    [<DataRow("Test(Ln: 8, Col: 13)", "t4")>]
     [<TestMethod>]
     member this.TestScopePropertiesQualifiedStartPos(expected, var) =
-        let res = this.ScopeProperties() 
+        let res = CommonFplValueTestCases.ScopeProperties() 
         match res with
         | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
@@ -1256,7 +1049,7 @@ type TestFplValue() =
     [<DataRow("t4")>]
     [<TestMethod>]
     member this.TestParentProperties(var) =
-        let res = this.ScopeProperties() 
+        let res = CommonFplValueTestCases.ScopeProperties() 
         match res with
         | Some (_,_,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
@@ -1267,38 +1060,11 @@ type TestFplValue() =
             | _ -> ()
         | _ -> 
             Assert.IsTrue(false)
-    member this.ScopeConstructors() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def cl TestId:obj 
-        {
-            ctor TestId() {self} 
-            ctor TestId(x:obj) {self} 
-            ctor TestId(x:pred) {self} 
-            ctor TestId(x:ind) {self} 
-        }
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestId"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let t1 = block.Scope["TestId()"]
-                            let t2 = block.Scope["TestId(obj)"]
-                            let t3 = block.Scope["TestId(pred)"]
-                            let t4 = block.Scope["TestId(ind)"]
-                            Some (r,theory,block,t1,t2,t3,t4)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
 
     [<TestMethod>]
     member this.TestScopeConstructorsIsComplete() =
         try
-            this.ScopeConstructors() |> ignore
+            CommonFplValueTestCases.ScopeConstructors() |> ignore
             Assert.IsTrue(true)
         with
         | ex -> 
@@ -1314,7 +1080,7 @@ type TestFplValue() =
     [<DataRow("a constructor TestId(ind) at (Ln: 7, Col: 13)", "t4")>]
     [<TestMethod>]
     member this.TestScopeConstructorsQualifiedName(expected, var) =
-        let res = this.ScopeConstructors() 
+        let res = CommonFplValueTestCases.ScopeConstructors() 
         match res with
         | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
@@ -1335,7 +1101,7 @@ type TestFplValue() =
     [<DataRow("t4")>]
     [<TestMethod>]
     member this.TestParentConstructors(var) =
-        let res = this.ScopeConstructors() 
+        let res = CommonFplValueTestCases.ScopeConstructors() 
         match res with
         | Some (_,_,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
@@ -1348,15 +1114,15 @@ type TestFplValue() =
             Assert.IsTrue(false)
 
     [<DataRow("", "r")>]
-    [<DataRow("Test at (Ln: 1, Col: 1)", "theory")>]
-    [<DataRow("Test at (Ln: 2, Col: 13)", "block")>]
-    [<DataRow("Test at (Ln: 4, Col: 13)", "t1")>]
-    [<DataRow("Test at (Ln: 5, Col: 13)", "t2")>]
-    [<DataRow("Test at (Ln: 6, Col: 13)", "t3")>]
-    [<DataRow("Test at (Ln: 7, Col: 13)", "t4")>]
+    [<DataRow("Test(Ln: 1, Col: 1)", "theory")>]
+    [<DataRow("Test(Ln: 2, Col: 13)", "block")>]
+    [<DataRow("Test(Ln: 4, Col: 13)", "t1")>]
+    [<DataRow("Test(Ln: 5, Col: 13)", "t2")>]
+    [<DataRow("Test(Ln: 6, Col: 13)", "t3")>]
+    [<DataRow("Test(Ln: 7, Col: 13)", "t4")>]
     [<TestMethod>]
     member this.TestScopeConstructorsQualifiedStartPos(expected, var) =
-        let res = this.ScopeConstructors() 
+        let res = CommonFplValueTestCases.ScopeConstructors() 
         match res with
         | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
@@ -1371,21 +1137,77 @@ type TestFplValue() =
         | _ -> 
             Assert.IsTrue(false)
 
+    [<TestMethod>]
+    member this.TestScopeBlocksIsComplete() =
+        try
+            CommonFplValueTestCases.ScopeBlocks() |> ignore
+            Assert.IsTrue(true)
+        with
+        | ex -> 
+            Assert.IsTrue(false)
 
-    member this.ScopeProofsAndCorollaries(fplCode, name, subName) =
-        FplParser.parserDiagnostics.Clear()
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let subclock = block.Scope[subName]
-                            Some (r,theory,block,subclock)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
 
+    [<DataRow("r", "")>]
+    [<DataRow("theory", "Test")>]
+    [<DataRow("inf1", "SomeInference1()")>]
+    [<DataRow("inf2", "SomeInference2()")>]
+    [<DataRow("axi1", "SomeAxiom1()")>]
+    [<DataRow("axi2", "SomeAxiom2()")>]
+    [<DataRow("pst1", "SomePostulate1()")>]
+    [<DataRow("pst2", "SomePostulate2()")>]
+    [<DataRow("thm1", "SomeTheorem1()")>]
+    [<DataRow("thm2", "SomeTheorem2()")>]
+    [<DataRow("pro1", "SomeProposition1()")>]
+    [<DataRow("pro2", "SomeProposition2()")>]
+    [<DataRow("lem1", "SomeLemma1()")>]
+    [<DataRow("lem2", "SomeLemma2()")>]
+    [<DataRow("cor1", "SomeLemma1$1()")>]
+    [<DataRow("cor2", "SomeLemma2$1()")>]
+    [<DataRow("con1", "SomeConjecture1()")>]
+    [<DataRow("con2", "SomeConjecture1()")>]
+    [<DataRow("cla1", "SomeClass1")>]
+    [<DataRow("cla2", "SomeClass1")>]
+    [<DataRow("pre1", "SomePredicate1()")>]
+    [<DataRow("pre2", "SomePredicate2()")>]
+    [<DataRow("fun1", "SomeFunctionalTerm1() -> obj")>]
+    [<DataRow("fun2", "SomeFunctionalTerm2() -> obj")>]
+    [<DataRow("prf1", "SomeTheorem1$1")>]
+    [<DataRow("prf2", "SomeTheorem2$1")>]
+    [<TestMethod>]
+    member this.TestScopeBlocksQualifiedName(var, expected) =
+        let res = CommonFplValueTestCases.ScopeBlocks() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(expected, r.QualifiedName)
+            | "theory" -> Assert.AreEqual(expected, theory.QualifiedName)
+            | "inf1" -> Assert.AreEqual(expected, inf1.QualifiedName)
+            | "inf2" -> Assert.AreEqual(expected, inf2.QualifiedName)
+            | "axi1" -> Assert.AreEqual(expected, axi1.QualifiedName)
+            | "axi2" -> Assert.AreEqual(expected, axi2.QualifiedName)
+            | "pst1" -> Assert.AreEqual(expected, pst1.QualifiedName)
+            | "pst2" -> Assert.AreEqual(expected, pst2.QualifiedName)
+            | "thm1" -> Assert.AreEqual(expected, thm1.QualifiedName)
+            | "thm2" -> Assert.AreEqual(expected, thm2.QualifiedName)
+            | "pro1" -> Assert.AreEqual(expected, pro1.QualifiedName)
+            | "pro2" -> Assert.AreEqual(expected, pro2.QualifiedName)
+            | "lem1" -> Assert.AreEqual(expected, lem1.QualifiedName)
+            | "lem2" -> Assert.AreEqual(expected, lem2.QualifiedName)
+            | "cor1" -> Assert.AreEqual(expected, cor1.QualifiedName)
+            | "cor2" -> Assert.AreEqual(expected, cor2.QualifiedName)
+            | "con1" -> Assert.AreEqual(expected, con1.QualifiedName)
+            | "con2" -> Assert.AreEqual(expected, con2.QualifiedName)
+            | "cla1" -> Assert.AreEqual(expected, cla1.QualifiedName)
+            | "cla2" -> Assert.AreEqual(expected, cla2.QualifiedName)
+            | "pre1" -> Assert.AreEqual(expected, pre1.QualifiedName)
+            | "pre2" -> Assert.AreEqual(expected, pre2.QualifiedName)
+            | "fun1" -> Assert.AreEqual(expected, fun1.QualifiedName)
+            | "fun2" -> Assert.AreEqual(expected, fun2.QualifiedName)
+            | "prf1" -> Assert.AreEqual(expected, prf1.QualifiedName)
+            | "prf2" -> Assert.AreEqual(expected, prf2.QualifiedName)
+            | _ -> ()
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<DataRow("theorem TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1")>]
     [<DataRow("lemma TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1")>]
@@ -1397,7 +1219,7 @@ type TestFplValue() =
     [<TestMethod>]
     member this.TestScopeProofsAndCorollariesComplete(fplCode, name, subName) =
         try
-            this.ScopeProofsAndCorollaries(fplCode, name, subName) |> ignore
+            CommonFplValueTestCases.ScopeProofsAndCorollaries(fplCode, name, subName) |> ignore
             Assert.IsTrue(true)
         with
         | ex -> 
@@ -1412,7 +1234,7 @@ type TestFplValue() =
     [<DataRow("proposition TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()")>]
     [<TestMethod>]
     member this.TestParentProofsAndCorollaries(fplCode, name, subName) =
-        let res = this.ScopeProofsAndCorollaries(fplCode, name, subName) 
+        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries(fplCode, name, subName) 
         match res with
         | Some (_,_,block:FplValue,subBlock:FplValue) -> 
                 Assert.AreEqual(block, subBlock.Parent.Value)
@@ -1420,16 +1242,16 @@ type TestFplValue() =
         | _ -> 
             Assert.IsTrue(false)
 
-    [<DataRow("theorem TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test at (Ln: 1, Col: 25)")>]
-    [<DataRow("lemma TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test at (Ln: 1, Col: 23)")>]
-    [<DataRow("proposition TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test at (Ln: 1, Col: 29)")>]
-    [<DataRow("corollary TestId$2() {true} proof TestId$2$1 {1. |- trivial} ;", "TestId$2()", "TestId$2$1", "Test at (Ln: 1, Col: 29)")>]
-    [<DataRow("theorem TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test at (Ln: 1, Col: 25)")>]
-    [<DataRow("lemma TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test at (Ln: 1, Col: 23)")>]
-    [<DataRow("proposition TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test at (Ln: 1, Col: 29)")>]
+    [<DataRow("theorem TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test(Ln: 1, Col: 25)")>]
+    [<DataRow("lemma TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test(Ln: 1, Col: 23)")>]
+    [<DataRow("proposition TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test(Ln: 1, Col: 29)")>]
+    [<DataRow("corollary TestId$2() {true} proof TestId$2$1 {1. |- trivial} ;", "TestId$2()", "TestId$2$1", "Test(Ln: 1, Col: 29)")>]
+    [<DataRow("theorem TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test(Ln: 1, Col: 25)")>]
+    [<DataRow("lemma TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test(Ln: 1, Col: 23)")>]
+    [<DataRow("proposition TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test(Ln: 1, Col: 29)")>]
     [<TestMethod>]
     member this.TestScopeProofsAndCorollariesCompleteQualifiedStartPos(fplCode, name, subName, expected) =
-        let res = this.ScopeProofsAndCorollaries(fplCode, name, subName) 
+        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries(fplCode, name, subName) 
         match res with
         | Some (_,_,_,subBlock:FplValue) -> 
                 Assert.AreEqual(expected, subBlock.QualifiedStartPos)

@@ -480,9 +480,9 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                 ""
             elif first then 
                 if FplValue.IsRoot(fplValue.Parent.Value) then 
-                    getFullName fplValue.Parent.Value false + fplValue.Name + " at " + fplValue.StartPos.ToString() 
+                    getFullName fplValue.Parent.Value false + fplValue.Name + fplValue.StartPos.ToString() 
                 else
-                    getFullName fplValue.Parent.Value false + " at " + fplValue.StartPos.ToString() 
+                    getFullName fplValue.Parent.Value false + fplValue.StartPos.ToString() 
             else
                 if FplValue.IsRoot(fplValue.Parent.Value) then 
                     getFullName fplValue.Parent.Value false + fplValue.Name 
@@ -519,8 +519,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                 |> Seq.choose (fun siblingTheory ->
                         if siblingTheory.Value.Scope.ContainsKey(fplValue.Name) then
                             let foundConflict = siblingTheory.Value.Scope[fplValue.Name]
-                            let foundConflictBlockType = foundConflict.BlockType
-                            Some (ScopeSearchResult.FoundConflict foundConflictBlockType.Name)
+                            Some (ScopeSearchResult.FoundConflict foundConflict.QualifiedStartPos)
                         else
                             None
                 )
@@ -535,8 +534,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         | Some parent ->
             if parent.Scope.ContainsKey(fplValue.Name) then
                 let foundConflict = parent.Scope[fplValue.Name]
-                let foundConflictBlockType = foundConflict.BlockType
-                ScopeSearchResult.FoundConflict foundConflictBlockType.Name 
+                ScopeSearchResult.FoundConflict foundConflict.QualifiedStartPos 
             else 
                 if FplValue.IsTheory(parent) then 
                     conflictInSiblingTheory parent

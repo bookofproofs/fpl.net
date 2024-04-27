@@ -141,6 +141,13 @@ type TestParserErrors() =
         let code = VAR000
         printf "Trying %s" code.Message
         let input = """
+        def pred A() 
+        {
+            dec
+                x := 
+            ;
+            true
+        }
         ;
         """
         let ast = fplParser (System.Uri("file://x")) input
@@ -193,7 +200,7 @@ type TestParserErrors() =
     member this.TestUSE000() =
         let code = USE000
         printf "Trying %s" code.Message
-        let input = """
+        let input = """uses   R alias %
         ;
         """
         let ast = fplParser (System.Uri("file://x")) input

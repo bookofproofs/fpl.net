@@ -300,7 +300,7 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test() {true prty func X(y:+ pred)->obj {dec ~x:obj; ex x {true}} };", 0)>]
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
-        let code = VAR01 "x"
+        let code = VAR01 ("","")
         runTestHelper fplCode code expected
 
     [<DataRow("def pred Test(x: ind) {true prty pred X(x: pred) {true} };", 1)>]
