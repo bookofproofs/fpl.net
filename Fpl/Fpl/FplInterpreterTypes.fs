@@ -478,12 +478,12 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                 if FplValue.IsRoot(fplValue.Parent.Value) then 
                     getFullName fplValue.Parent.Value false + fplValue.Name + " at " + fplValue.StartPos.ToString() 
                 else
-                    getFullName fplValue.Parent.Value false + "." + fplValue.Name + " at " + fplValue.StartPos.ToString() 
+                    getFullName fplValue.Parent.Value false + " at " + fplValue.StartPos.ToString() 
             else
                 if FplValue.IsRoot(fplValue.Parent.Value) then 
                     getFullName fplValue.Parent.Value false + fplValue.Name 
                 else
-                    getFullName fplValue.Parent.Value false + "." + fplValue.Name 
+                    getFullName fplValue.Parent.Value false 
         getFullName this true
 
 
