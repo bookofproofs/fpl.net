@@ -1300,6 +1300,23 @@ type TestFplValue() =
         | ex -> 
             Assert.IsTrue(false)
 
+    [<DataRow("theorem TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test at (Ln: 1, Col: 25)")>]
+    [<DataRow("lemma TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test at (Ln: 1, Col: 23)")>]
+    [<DataRow("proposition TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test at (Ln: 1, Col: 29)")>]
+    [<DataRow("corollary TestId$2() {true} proof TestId$2$1 {1. |- trivial} ;", "TestId$2()", "TestId$2$1", "Test at (Ln: 1, Col: 29)")>]
+    [<DataRow("theorem TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test at (Ln: 1, Col: 25)")>]
+    [<DataRow("lemma TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test at (Ln: 1, Col: 23)")>]
+    [<DataRow("proposition TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test at (Ln: 1, Col: 29)")>]
+    [<TestMethod>]
+    member this.TestScopeProofsAndCorollariesCompleteQualifiedStartPos(fplCode, name, subName, expected) =
+        let res = this.ScopeProofsAndCorollaries(fplCode, name, subName) 
+        match res with
+        | Some (_,_,_,subBlock:FplValue) -> 
+                Assert.AreEqual(expected, subBlock.QualifiedStartPos)
+            | _ -> ()
+        | _ -> 
+            Assert.IsTrue(false)
+
     [<DataRow("def pred TestId() { intr prty pred T() {intr} };", "T()", true)>]
     [<DataRow("def pred TestId() { intr prty opt pred T() {intr} };", "T()", false)>]
     [<DataRow("def pred TestId() { intr prty func T()->obj {intr} };", "T() -> obj", true)>]
