@@ -294,9 +294,9 @@ type FplBlockType =
     member private this.UnqualifiedName = 
         match this with
             // parser error messages
-            | Variable -> "var"
-            | VariadicVariableMany -> "*var"
-            | VariadicVariableMany1 -> "+var"
+            | Variable -> "variable"
+            | VariadicVariableMany -> "0 or more variable"
+            | VariadicVariableMany1 -> "1 ore more variable"
             | Expression -> "expression"
             | MandatoryProperty -> "property"
             | OptionalProperty -> "optional property"
