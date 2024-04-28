@@ -53,7 +53,7 @@ type TestFplValueScopeCompleteness() =
     [<TestMethod>]
     member this.TestVariablesInBlockWithVariadic() =
         try
-            CommonFplValueTestCases.ScopeVariablesInBlockWithVariadic() |> ignore
+            CommonFplValueTestCases.ScopeVariablesInBlockVariadic() |> ignore
             Assert.IsTrue(true)
         with
         | ex -> 

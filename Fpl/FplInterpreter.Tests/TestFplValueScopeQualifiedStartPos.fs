@@ -207,42 +207,106 @@ type TestFplValueScopeQualifiedStartPos() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual("", r.Name)
-            | "theory" -> Assert.AreEqual("Test", theory.Name)
-            | "block" -> Assert.AreEqual("TestPredicate()", block.Name); 
-            | "x" -> Assert.AreEqual("x", x.Name)
-            | "y" -> Assert.AreEqual("y", y.Name)
-            | "xu" -> Assert.AreEqual("u", xu.Name)
-            | "xv" -> Assert.AreEqual("v", xv.Name)
-            | "xw" -> Assert.AreEqual("w", xw.Name)
-            | "yu" -> Assert.AreEqual("u", yu.Name)
-            | "yv" -> Assert.AreEqual("v", yv.Name)
-            | "yw" -> Assert.AreEqual("w", yw.Name)
-            | "xua" -> Assert.AreEqual("a", xua.Name)
-            | "xub" -> Assert.AreEqual("b", xub.Name)
-            | "xuc" -> Assert.AreEqual("c", xuc.Name)
-            | "xva" -> Assert.AreEqual("a", xva.Name)
-            | "xvb" -> Assert.AreEqual("b", xvb.Name)
-            | "xvc" -> Assert.AreEqual("c", xvc.Name)
-            | "xwa" -> Assert.AreEqual("a", xwa.Name)
-            | "xwb" -> Assert.AreEqual("b", xwb.Name)
-            | "xwc" -> Assert.AreEqual("c", xwc.Name)
-            | "yua" -> Assert.AreEqual("a", yua.Name)
-            | "yub" -> Assert.AreEqual("b", yub.Name)
-            | "yuc" -> Assert.AreEqual("c", yuc.Name)
-            | "yva" -> Assert.AreEqual("a", yva.Name)
-            | "yvb" -> Assert.AreEqual("b", yvb.Name)
-            | "yvc" -> Assert.AreEqual("c", yvc.Name)
-            | "ywa" -> Assert.AreEqual("a", ywa.Name)
-            | "ywb" -> Assert.AreEqual("b", ywb.Name)
-            | "ywc" -> Assert.AreEqual("c", ywc.Name)
+            | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+            | "theory" -> Assert.AreEqual("Test(Ln: 1, Col: 1)", theory.QualifiedStartPos)
+            | "block" -> Assert.AreEqual("Test(Ln: 2, Col: 13)", block.QualifiedStartPos); 
+            | "x" -> Assert.AreEqual("Test(Ln: 3, Col: 19)", x.QualifiedStartPos)
+            | "y" -> Assert.AreEqual("Test(Ln: 3, Col: 21)", y.QualifiedStartPos)
+            | "xu" -> Assert.AreEqual("Test(Ln: 3, Col: 28)", xu.QualifiedStartPos)
+            | "xv" -> Assert.AreEqual("Test(Ln: 3, Col: 30)", xv.QualifiedStartPos)
+            | "xw" -> Assert.AreEqual("Test(Ln: 3, Col: 32)", xw.QualifiedStartPos)
+            | "yu" -> Assert.AreEqual("Test(Ln: 3, Col: 28)", yu.QualifiedStartPos)
+            | "yv" -> Assert.AreEqual("Test(Ln: 3, Col: 30)", yv.QualifiedStartPos)
+            | "yw" -> Assert.AreEqual("Test(Ln: 3, Col: 32)", yw.QualifiedStartPos)
+            | "xua" -> Assert.AreEqual("Test(Ln: 3, Col: 39)", xua.QualifiedStartPos)
+            | "xub" -> Assert.AreEqual("Test(Ln: 3, Col: 41)", xub.QualifiedStartPos)
+            | "xuc" -> Assert.AreEqual("Test(Ln: 3, Col: 43)", xuc.QualifiedStartPos)
+            | "xva" -> Assert.AreEqual("Test(Ln: 3, Col: 39)", xva.QualifiedStartPos)
+            | "xvb" -> Assert.AreEqual("Test(Ln: 3, Col: 41)", xvb.QualifiedStartPos)
+            | "xvc" -> Assert.AreEqual("Test(Ln: 3, Col: 43)", xvc.QualifiedStartPos)
+            | "xwa" -> Assert.AreEqual("Test(Ln: 3, Col: 39)", xwa.QualifiedStartPos)
+            | "xwb" -> Assert.AreEqual("Test(Ln: 3, Col: 41)", xwb.QualifiedStartPos)
+            | "xwc" -> Assert.AreEqual("Test(Ln: 3, Col: 43)", xwc.QualifiedStartPos)
+            | "yua" -> Assert.AreEqual("Test(Ln: 3, Col: 39)", yua.QualifiedStartPos)
+            | "yub" -> Assert.AreEqual("Test(Ln: 3, Col: 41)", yub.QualifiedStartPos)
+            | "yuc" -> Assert.AreEqual("Test(Ln: 3, Col: 43)", yuc.QualifiedStartPos)
+            | "yva" -> Assert.AreEqual("Test(Ln: 3, Col: 39)", yva.QualifiedStartPos)
+            | "yvb" -> Assert.AreEqual("Test(Ln: 3, Col: 41)", yvb.QualifiedStartPos)
+            | "yvc" -> Assert.AreEqual("Test(Ln: 3, Col: 43)", yvc.QualifiedStartPos)
+            | "ywa" -> Assert.AreEqual("Test(Ln: 3, Col: 39)", ywa.QualifiedStartPos)
+            | "ywb" -> Assert.AreEqual("Test(Ln: 3, Col: 41)", ywb.QualifiedStartPos)
+            | "ywc" -> Assert.AreEqual("Test(Ln: 3, Col: 43)", ywc.QualifiedStartPos)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
         
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("x")>]
+    [<DataRow("y")>]
+    [<DataRow("xu")>]
+    [<DataRow("xv")>]
+    [<DataRow("xw")>]
+    [<DataRow("yu")>]
+    [<DataRow("yv")>]
+    [<DataRow("yw")>]
+    [<DataRow("xua")>]
+    [<DataRow("xub")>]
+    [<DataRow("xuc")>]
+    [<DataRow("xva")>]
+    [<DataRow("xvb")>]
+    [<DataRow("xvc")>]
+    [<DataRow("xwa")>]
+    [<DataRow("xwb")>]
+    [<DataRow("xwc")>]
+    [<DataRow("yua")>]
+    [<DataRow("yub")>]
+    [<DataRow("yuc")>]
+    [<DataRow("yva")>]
+    [<DataRow("yvb")>]
+    [<DataRow("yvc")>]
+    [<DataRow("ywa")>]
+    [<DataRow("ywb")>]
+    [<DataRow("ywc")>]
     [<TestMethod>]
-    member this.TestVariablesInBlockWithVariadic() =
-        Assert.IsTrue(false)
+    member this.TestVariablesInBlockVariadic(var) =
+        let result = CommonFplValueTestCases.ScopeVariablesInBlockVariadic()
+        match result with
+        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+            match var with
+            | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+            | "theory" -> Assert.AreEqual("Test(Ln: 1, Col: 1)", theory.QualifiedStartPos)
+            | "block" -> Assert.AreEqual("Test(Ln: 2, Col: 13)", block.QualifiedStartPos); 
+            | "x" -> Assert.AreEqual("Test(Ln: 3, Col: 19)", x.QualifiedStartPos)
+            | "y" -> Assert.AreEqual("Test(Ln: 3, Col: 21)", y.QualifiedStartPos)
+            | "xu" -> Assert.AreEqual("Test(Ln: 3, Col: 29)", xu.QualifiedStartPos)
+            | "xv" -> Assert.AreEqual("Test(Ln: 3, Col: 31)", xv.QualifiedStartPos)
+            | "xw" -> Assert.AreEqual("Test(Ln: 3, Col: 33)", xw.QualifiedStartPos)
+            | "yu" -> Assert.AreEqual("Test(Ln: 3, Col: 29)", yu.QualifiedStartPos)
+            | "yv" -> Assert.AreEqual("Test(Ln: 3, Col: 31)", yv.QualifiedStartPos)
+            | "yw" -> Assert.AreEqual("Test(Ln: 3, Col: 33)", yw.QualifiedStartPos)
+            | "xua" -> Assert.AreEqual("Test(Ln: 3, Col: 40)", xua.QualifiedStartPos)
+            | "xub" -> Assert.AreEqual("Test(Ln: 3, Col: 42)", xub.QualifiedStartPos)
+            | "xuc" -> Assert.AreEqual("Test(Ln: 3, Col: 44)", xuc.QualifiedStartPos)
+            | "xva" -> Assert.AreEqual("Test(Ln: 3, Col: 40)", xva.QualifiedStartPos)
+            | "xvb" -> Assert.AreEqual("Test(Ln: 3, Col: 42)", xvb.QualifiedStartPos)
+            | "xvc" -> Assert.AreEqual("Test(Ln: 3, Col: 44)", xvc.QualifiedStartPos)
+            | "xwa" -> Assert.AreEqual("Test(Ln: 3, Col: 40)", xwa.QualifiedStartPos)
+            | "xwb" -> Assert.AreEqual("Test(Ln: 3, Col: 42)", xwb.QualifiedStartPos)
+            | "xwc" -> Assert.AreEqual("Test(Ln: 3, Col: 44)", xwc.QualifiedStartPos)
+            | "yua" -> Assert.AreEqual("Test(Ln: 3, Col: 40)", yua.QualifiedStartPos)
+            | "yub" -> Assert.AreEqual("Test(Ln: 3, Col: 42)", yub.QualifiedStartPos)
+            | "yuc" -> Assert.AreEqual("Test(Ln: 3, Col: 44)", yuc.QualifiedStartPos)
+            | "yva" -> Assert.AreEqual("Test(Ln: 3, Col: 40)", yva.QualifiedStartPos)
+            | "yvb" -> Assert.AreEqual("Test(Ln: 3, Col: 42)", yvb.QualifiedStartPos)
+            | "yvc" -> Assert.AreEqual("Test(Ln: 3, Col: 44)", yvc.QualifiedStartPos)
+            | "ywa" -> Assert.AreEqual("Test(Ln: 3, Col: 40)", ywa.QualifiedStartPos)
+            | "ywb" -> Assert.AreEqual("Test(Ln: 3, Col: 42)", ywb.QualifiedStartPos)
+            | "ywc" -> Assert.AreEqual("Test(Ln: 3, Col: 44)", ywc.QualifiedStartPos)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
