@@ -10,10 +10,29 @@ type TestFplValueScopeQualifiedStartPos() =
         CommonFplValueTestCases.ScopeBlocks() |> ignore
         Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("t1")>]
+    [<DataRow("t2")>]
+    [<DataRow("t3")>]
+    [<DataRow("t4")>]
     [<TestMethod>]
-    member this.TestConstructors() =
-        CommonFplValueTestCases.ScopeConstructors() |> ignore
-        Assert.IsTrue(false)
+    member this.TestConstructors(var) =
+        let res = CommonFplValueTestCases.ScopeConstructors() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+            | "theory" -> Assert.AreEqual("Test(Ln: 1, Col: 1)", theory.QualifiedStartPos)
+            | "block" -> Assert.AreEqual("Test(Ln: 2, Col: 13)", block.QualifiedStartPos)
+            | "t1" -> Assert.AreEqual("Test(Ln: 4, Col: 13)", t1.QualifiedStartPos)
+            | "t2" -> Assert.AreEqual("Test(Ln: 5, Col: 13)", t2.QualifiedStartPos)
+            | "t3" -> Assert.AreEqual("Test(Ln: 6, Col: 13)", t3.QualifiedStartPos)
+            | "t4" -> Assert.AreEqual("Test(Ln: 7, Col: 13)", t4.QualifiedStartPos)
+            | _ -> ()
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestProofsAndCorollaries() =

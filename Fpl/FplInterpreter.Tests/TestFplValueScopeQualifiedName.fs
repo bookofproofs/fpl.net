@@ -10,10 +10,29 @@ type TestFplValueScopeQualifiedName() =
         CommonFplValueTestCases.ScopeBlocks() |> ignore
         Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("t1")>]
+    [<DataRow("t2")>]
+    [<DataRow("t3")>]
+    [<DataRow("t4")>]
     [<TestMethod>]
-    member this.TestConstructors() =
-        CommonFplValueTestCases.ScopeConstructors() |> ignore
-        Assert.IsTrue(false)
+    member this.TestConstructors(var) =
+        let res = CommonFplValueTestCases.ScopeConstructors() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual("", r.QualifiedName)
+            | "theory" -> Assert.AreEqual("Test", theory.QualifiedName)
+            | "block" -> Assert.AreEqual("Test.TestId", block.QualifiedName)
+            | "t1" -> Assert.AreEqual("Test.TestId.TestId()", t1.QualifiedName)
+            | "t2" -> Assert.AreEqual("Test.TestId.TestId(obj)", t2.QualifiedName)
+            | "t3" -> Assert.AreEqual("Test.TestId.TestId(pred)", t3.QualifiedName)
+            | "t4" -> Assert.AreEqual("Test.TestId.TestId(ind)", t4.QualifiedName)
+            | _ -> ()
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestProofsAndCorollaries() =
@@ -28,7 +47,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("t3")>]
     [<DataRow("t4")>]
     [<TestMethod>]
-    member this.TestScopeProperties(var) =
+    member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
         match res with
         | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 

@@ -10,10 +10,29 @@ type TestFplValueScopeNameIsFinal() =
         CommonFplValueTestCases.ScopeBlocks() |> ignore
         Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("t1")>]
+    [<DataRow("t2")>]
+    [<DataRow("t3")>]
+    [<DataRow("t4")>]
     [<TestMethod>]
-    member this.TestConstructors() =
-        CommonFplValueTestCases.ScopeConstructors() |> ignore
-        Assert.IsTrue(false)
+    member this.TestConstructors(var) =
+        let res = CommonFplValueTestCases.ScopeConstructors() 
+        match res with
+        | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(true, r.NameIsFinal)
+            | "theory" -> Assert.AreEqual(true, theory.NameIsFinal)
+            | "block" -> Assert.AreEqual(true, block.NameIsFinal)
+            | "t1" -> Assert.AreEqual(true, t1.NameIsFinal)
+            | "t2" -> Assert.AreEqual(true, t2.NameIsFinal)
+            | "t3" -> Assert.AreEqual(true, t3.NameIsFinal)
+            | "t4" -> Assert.AreEqual(true, t4.NameIsFinal)
+            | _ -> ()
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestProofsAndCorollaries() =

@@ -10,10 +10,29 @@ type TestFplValueScopeBlockType() =
         CommonFplValueTestCases.ScopeBlocks() |> ignore
         Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("t1")>]
+    [<DataRow("t2")>]
+    [<DataRow("t3")>]
+    [<DataRow("t4")>]
     [<TestMethod>]
-    member this.TestConstructors() =
-        CommonFplValueTestCases.ScopeConstructors() |> ignore
-        Assert.IsTrue(false)
+    member this.TestConstructors(var) =
+        let res = CommonFplValueTestCases.ScopeConstructors() 
+        match res with
+        | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(FplBlockType.Root, r.BlockType)
+            | "theory" -> Assert.AreEqual(FplBlockType.Theory, theory.BlockType)
+            | "block" -> Assert.AreEqual(FplBlockType.Class, block.BlockType)
+            | "t1" -> Assert.AreEqual(FplBlockType.Constructor, t1.BlockType)
+            | "t2" -> Assert.AreEqual(FplBlockType.Constructor, t2.BlockType)
+            | "t3" -> Assert.AreEqual(FplBlockType.Constructor, t3.BlockType)
+            | "t4" -> Assert.AreEqual(FplBlockType.Constructor, t4.BlockType)
+            | _ -> ()
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestProofsAndCorollaries() =

@@ -795,31 +795,6 @@ type TestFplValue() =
         Assert.AreEqual(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore
 
-
-    [<DataRow("a root  at (Ln: 1, Col: 1)", "r")>]
-    [<DataRow("a theory Test at (Ln: 1, Col: 1)", "theory")>]
-    [<DataRow("a class definition TestId at (Ln: 2, Col: 13)", "block")>]
-    [<DataRow("a constructor TestId() at (Ln: 4, Col: 13)", "t1")>]
-    [<DataRow("a constructor TestId(obj) at (Ln: 5, Col: 13)", "t2")>]
-    [<DataRow("a constructor TestId(pred) at (Ln: 6, Col: 13)", "t3")>]
-    [<DataRow("a constructor TestId(ind) at (Ln: 7, Col: 13)", "t4")>]
-    [<TestMethod>]
-    member this.TestScopeConstructorsQualifiedName(expected, var) =
-        let res = CommonFplValueTestCases.ScopeConstructors() 
-        match res with
-        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
-            match var with 
-            | "r" -> Assert.AreEqual(expected, r.QualifiedName)
-            | "theory" -> Assert.AreEqual(expected, theory.QualifiedName)
-            | "block" -> Assert.AreEqual(expected, block.QualifiedName)
-            | "t1" -> Assert.AreEqual(expected, t1.QualifiedName)
-            | "t2" -> Assert.AreEqual(expected, t2.QualifiedName)
-            | "t3" -> Assert.AreEqual(expected, t3.QualifiedName)
-            | "t4" -> Assert.AreEqual(expected, t4.QualifiedName)
-            | _ -> ()
-        | _ -> 
-            Assert.IsTrue(false)
-
     [<DataRow("", "r")>]
     [<DataRow("Test(Ln: 1, Col: 1)", "theory")>]
     [<DataRow("Test(Ln: 2, Col: 13)", "block")>]

@@ -11,10 +11,29 @@ type TestFplValueScopeNameEndPos() =
         CommonFplValueTestCases.ScopeBlocks() |> ignore
         Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("t1")>]
+    [<DataRow("t2")>]
+    [<DataRow("t3")>]
+    [<DataRow("t4")>]
     [<TestMethod>]
-    member this.TestConstructors() =
-        CommonFplValueTestCases.ScopeConstructors() |> ignore
-        Assert.IsTrue(false)
+    member this.TestConstructors(var) =
+        let res = CommonFplValueTestCases.ScopeConstructors() 
+        match res with
+        | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual("(Ln: 1, Col: 1)", r.NameEndPos.ToString())
+            | "theory" -> Assert.AreEqual("(Ln: 1, Col: 1)", theory.NameEndPos.ToString())
+            | "block" -> Assert.AreEqual("(Ln: 2, Col: 22)", block.NameEndPos.ToString())
+            | "t1" -> Assert.AreEqual("(Ln: 4, Col: 26)", t1.NameEndPos.ToString())
+            | "t2" -> Assert.AreEqual("(Ln: 5, Col: 31)", t2.NameEndPos.ToString())
+            | "t3" -> Assert.AreEqual("(Ln: 6, Col: 32)", t3.NameEndPos.ToString())
+            | "t4" -> Assert.AreEqual("(Ln: 7, Col: 31)", t4.NameEndPos.ToString())
+            | _ -> ()
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestProofsAndCorollaries() =
