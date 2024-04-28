@@ -43,44 +43,7 @@ type TestFplValue() =
         testFactory FplBlockType.OptionalProperty FplType.Object
         testFactory FplBlockType.Class FplType.Object 
 
-    [<TestMethod>]
-    member this.TestScopeVariablesInSignatureIsComplete() =
-        try
-            CommonFplValueTestCases.ScopeVariablesInSignature() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
 
-
-
-    [<TestMethod>]
-    member this.TestScopeVariablesInSignatureWithVariadicIsComplete() =
-        try
-            CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
-
-
-    [<TestMethod>]
-    member this.TestScopeVariablesInBlockIsComplete() =
-        try
-            CommonFplValueTestCases.ScopeVariablesInBlock() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
-
-    [<TestMethod>]
-    member this.TestScopeVariablesInBlockWithVariadicIsComplete() =
-        try
-            CommonFplValueTestCases.ScopeVariablesInBlockWithVariadic() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestScopeVariablesInSignatureTypeSignature() =
@@ -190,73 +153,6 @@ type TestFplValue() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("theory")>]
-    [<DataRow("block")>]
-    [<DataRow("x")>]
-    [<DataRow("y")>]
-    [<DataRow("xw")>]
-    [<DataRow("xu")>]
-    [<DataRow("xv")>]
-    [<DataRow("yw")>]
-    [<DataRow("yu")>]
-    [<DataRow("yv")>]
-    [<DataRow("xwa")>]
-    [<DataRow("xwb")>]
-    [<DataRow("xwc")>]
-    [<DataRow("xua")>]
-    [<DataRow("xub")>]
-    [<DataRow("xuc")>]
-    [<DataRow("xva")>]
-    [<DataRow("xvb")>]
-    [<DataRow("xvc")>]
-    [<DataRow("ywa")>]
-    [<DataRow("ywb")>]
-    [<DataRow("ywc")>]
-    [<DataRow("yua")>]
-    [<DataRow("yub")>]
-    [<DataRow("yuc")>]
-    [<DataRow("yva")>]
-    [<DataRow("yvb")>]
-    [<DataRow("yvc")>]
-    [<TestMethod>]
-    member this.TestParentVariablesInSignature(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignature()
-        match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
-            match var with 
-            | "ywc" -> Assert.AreEqual(yw, ywc.Parent.Value)
-            | "ywb" -> Assert.AreEqual(yw, ywb.Parent.Value)
-            | "ywa" -> Assert.AreEqual(yw, ywa.Parent.Value)
-            | "yvc" -> Assert.AreEqual(yv, yvc.Parent.Value)
-            | "yvb" -> Assert.AreEqual(yv, yvb.Parent.Value)
-            | "yva" -> Assert.AreEqual(yv, yva.Parent.Value)
-            | "yuc" -> Assert.AreEqual(yu, yuc.Parent.Value)
-            | "yub" -> Assert.AreEqual(yu, yub.Parent.Value)
-            | "yua" -> Assert.AreEqual(yu, yua.Parent.Value)
-            | "xwc" -> Assert.AreEqual(xw, xwc.Parent.Value)
-            | "xwb" -> Assert.AreEqual(xw, xwb.Parent.Value)
-            | "xwa" -> Assert.AreEqual(xw, xwa.Parent.Value)
-            | "xvc" -> Assert.AreEqual(xv, xvc.Parent.Value)
-            | "xvb" -> Assert.AreEqual(xv, xvb.Parent.Value)
-            | "xva" -> Assert.AreEqual(xv, xva.Parent.Value)
-            | "xuc" -> Assert.AreEqual(xu, xuc.Parent.Value)
-            | "xub" -> Assert.AreEqual(xu, xub.Parent.Value)
-            | "xua" -> Assert.AreEqual(xu, xua.Parent.Value)
-
-            | "yw" -> Assert.AreEqual(y, yw.Parent.Value)
-            | "yv" -> Assert.AreEqual(y, yv.Parent.Value)
-            | "yu" -> Assert.AreEqual(y, yu.Parent.Value)
-            | "xw" -> Assert.AreEqual(x, xw.Parent.Value)
-            | "xv" -> Assert.AreEqual(x, xv.Parent.Value)
-            | "xu" -> Assert.AreEqual(x,  xu.Parent.Value)
-            | "y" -> Assert.AreEqual(block, y.Parent.Value)
-            | "x" -> Assert.AreEqual(block, x.Parent.Value)
-            | "block" -> Assert.AreEqual(theory, block.Parent.Value)
-            | "theory" -> Assert.AreEqual(r, theory.Parent.Value)
-            | _ -> 
-                Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
 
     [<DataRow("inference TestId() {pre: true con: true};", "TestId()", "TestId ( )")>]
     [<DataRow("inference TestId(x:ind) {pre: true con: true};", "TestId(ind)", "TestId ( ind )")>]
@@ -1009,14 +905,6 @@ type TestFplValue() =
         Assert.AreEqual(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore
 
-    [<TestMethod>]
-    member this.TestScopePropertiesIsComplete() =
-        try
-            CommonFplValueTestCases.ScopeProperties() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
 
     [<DataRow("", "r")>]
     [<DataRow("Test(Ln: 1, Col: 1)", "theory")>]
@@ -1040,34 +928,6 @@ type TestFplValue() =
             | "t4" -> Assert.AreEqual(expected, t4.QualifiedStartPos)
             | _ -> ()
         | _ -> 
-            Assert.IsTrue(false)
-
-
-    [<DataRow("t1")>]
-    [<DataRow("t2")>]
-    [<DataRow("t3")>]
-    [<DataRow("t4")>]
-    [<TestMethod>]
-    member this.TestParentProperties(var) =
-        let res = CommonFplValueTestCases.ScopeProperties() 
-        match res with
-        | Some (_,_,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
-            match var with 
-            | "t1" -> Assert.AreEqual(block, t1.Parent.Value)
-            | "t2" -> Assert.AreEqual(block, t2.Parent.Value)
-            | "t3" -> Assert.AreEqual(block, t3.Parent.Value)
-            | "t4" -> Assert.AreEqual(block, t4.Parent.Value)
-            | _ -> ()
-        | _ -> 
-            Assert.IsTrue(false)
-
-    [<TestMethod>]
-    member this.TestScopeConstructorsIsComplete() =
-        try
-            CommonFplValueTestCases.ScopeConstructors() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
             Assert.IsTrue(false)
 
 
@@ -1095,24 +955,6 @@ type TestFplValue() =
         | _ -> 
             Assert.IsTrue(false)
 
-    [<DataRow("t1")>]
-    [<DataRow("t2")>]
-    [<DataRow("t3")>]
-    [<DataRow("t4")>]
-    [<TestMethod>]
-    member this.TestParentConstructors(var) =
-        let res = CommonFplValueTestCases.ScopeConstructors() 
-        match res with
-        | Some (_,_,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
-            match var with 
-            | "t1" -> Assert.AreEqual(block, t1.Parent.Value)
-            | "t2" -> Assert.AreEqual(block, t2.Parent.Value)
-            | "t3" -> Assert.AreEqual(block, t3.Parent.Value)
-            | "t4" -> Assert.AreEqual(block, t4.Parent.Value)
-            | _ -> ()
-        | _ -> 
-            Assert.IsTrue(false)
-
     [<DataRow("", "r")>]
     [<DataRow("Test(Ln: 1, Col: 1)", "theory")>]
     [<DataRow("Test(Ln: 2, Col: 13)", "block")>]
@@ -1135,15 +977,6 @@ type TestFplValue() =
             | "t4" -> Assert.AreEqual(expected, t4.QualifiedStartPos)
             | _ -> ()
         | _ -> 
-            Assert.IsTrue(false)
-
-    [<TestMethod>]
-    member this.TestScopeBlocksIsComplete() =
-        try
-            CommonFplValueTestCases.ScopeBlocks() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
             Assert.IsTrue(false)
 
 
@@ -1209,53 +1042,60 @@ type TestFplValue() =
         | _ -> 
             Assert.IsTrue(false)
 
-    [<DataRow("theorem TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1")>]
-    [<DataRow("lemma TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1")>]
-    [<DataRow("proposition TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1")>]
-    [<DataRow("corollary TestId$2() {true} proof TestId$2$1 {1. |- trivial} ;", "TestId$2()", "TestId$2$1")>]
-    [<DataRow("theorem TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()")>]
-    [<DataRow("lemma TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()")>]
-    [<DataRow("proposition TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()")>]
-    [<TestMethod>]
-    member this.TestScopeProofsAndCorollariesComplete(fplCode, name, subName) =
-        try
-            CommonFplValueTestCases.ScopeProofsAndCorollaries(fplCode, name, subName) |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
 
-    [<DataRow("theorem TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1")>]
-    [<DataRow("lemma TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1")>]
-    [<DataRow("proposition TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1")>]
-    [<DataRow("corollary TestId$2() {true} proof TestId$2$1 {1. |- trivial} ;", "TestId$2()", "TestId$2$1")>]
-    [<DataRow("theorem TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()")>]
-    [<DataRow("lemma TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()")>]
-    [<DataRow("proposition TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()")>]
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("thm1")>]
+    [<DataRow("proofThm1")>]
+    [<DataRow("lem1")>]
+    [<DataRow("proofLem1")>]
+    [<DataRow("prp1")>]
+    [<DataRow("proofPrp1")>]
+    [<DataRow("cor1")>]
+    [<DataRow("proofCor1")>]
+    [<DataRow("thm2")>]
+    [<DataRow("corThm2")>]
+    [<DataRow("lem2")>]
+    [<DataRow("corLem2")>]
+    [<DataRow("prp2")>]
+    [<DataRow("corPrp2")>]
+    [<DataRow("cor2")>]
+    [<DataRow("corCor2")>]
+    [<DataRow("con1")>]
+    [<DataRow("corCon1")>]
+    [<DataRow("axi1")>]
+    [<DataRow("corAxi1")>]
     [<TestMethod>]
-    member this.TestParentProofsAndCorollaries(fplCode, name, subName) =
-        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries(fplCode, name, subName) 
+    member this.TestScopeProofsAndCorollariesCompleteQualifiedStartPos(var) =
+        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries() 
         match res with
-        | Some (_,_,block:FplValue,subBlock:FplValue) -> 
-                Assert.AreEqual(block, subBlock.Parent.Value)
-            | _ -> ()
-        | _ -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("theorem TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test(Ln: 1, Col: 25)")>]
-    [<DataRow("lemma TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test(Ln: 1, Col: 23)")>]
-    [<DataRow("proposition TestId() {true} proof TestId$1 {1. |- trivial} ;", "TestId()", "TestId$1", "Test(Ln: 1, Col: 29)")>]
-    [<DataRow("corollary TestId$2() {true} proof TestId$2$1 {1. |- trivial} ;", "TestId$2()", "TestId$2$1", "Test(Ln: 1, Col: 29)")>]
-    [<DataRow("theorem TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test(Ln: 1, Col: 25)")>]
-    [<DataRow("lemma TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test(Ln: 1, Col: 23)")>]
-    [<DataRow("proposition TestId() {true} corollary TestId$1() {true}  ;", "TestId()", "TestId$1()", "Test(Ln: 1, Col: 29)")>]
-    [<TestMethod>]
-    member this.TestScopeProofsAndCorollariesCompleteQualifiedStartPos(fplCode, name, subName, expected) =
-        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries(fplCode, name, subName) 
-        match res with
-        | Some (_,_,_,subBlock:FplValue) -> 
-                Assert.AreEqual(expected, subBlock.QualifiedStartPos)
-            | _ -> ()
+        | Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
+                                corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
+                                axi1,corAxi1) -> 
+                match var with
+                | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+                | "theory" -> Assert.AreEqual("", theory.QualifiedStartPos)
+                | "thm1" -> Assert.AreEqual("", thm1.QualifiedStartPos)
+                | "proofThm1" -> Assert.AreEqual("", proofThm1.QualifiedStartPos)
+                | "lem1" -> Assert.AreEqual("", lem1.QualifiedStartPos)
+                | "proofLem1" -> Assert.AreEqual("", proofLem1.QualifiedStartPos)
+                | "prp1" -> Assert.AreEqual("", prp1.QualifiedStartPos)
+                | "proofPrp1" -> Assert.AreEqual("", proofPrp1.QualifiedStartPos)
+                | "cor1" -> Assert.AreEqual("", cor1.QualifiedStartPos)
+                | "proofCor1" -> Assert.AreEqual("", proofCor1.QualifiedStartPos)
+                | "thm2" -> Assert.AreEqual("", thm2.QualifiedStartPos)
+                | "corThm2" -> Assert.AreEqual("", corThm2.QualifiedStartPos)
+                | "lem2" -> Assert.AreEqual("", lem2.QualifiedStartPos)
+                | "corLem2" -> Assert.AreEqual("", corLem2.QualifiedStartPos)
+                | "prp2" -> Assert.AreEqual("", prp2.QualifiedStartPos)
+                | "corPrp2" -> Assert.AreEqual("", corPrp2.QualifiedStartPos)
+                | "cor2" -> Assert.AreEqual("", cor2.QualifiedStartPos)
+                | "corCor2" -> Assert.AreEqual("", corCor2.QualifiedStartPos)
+                | "con1" -> Assert.AreEqual("", con1.QualifiedStartPos)
+                | "corCon1" -> Assert.AreEqual("", corCon1.QualifiedStartPos)
+                | "axi1" -> Assert.AreEqual("", axi1.QualifiedStartPos)
+                | "corAxi1"  -> Assert.AreEqual("", corAxi1.QualifiedStartPos) 
+                | _ -> ()
         | _ -> 
             Assert.IsTrue(false)
 

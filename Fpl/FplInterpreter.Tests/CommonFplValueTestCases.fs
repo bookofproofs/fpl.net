@@ -241,20 +241,6 @@ type CommonFplValueTestCases =
         prepareFplCode("", true) |> ignore
         result
 
-    static member ScopeProofsAndCorollaries(fplCode, name, subName) =
-        FplParser.parserDiagnostics.Clear()
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let subclock = block.Scope[subName]
-                            Some (r,theory,block,subclock)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
-
     static member ScopeBlocks() =
         FplParser.parserDiagnostics.Clear()
         let fplCode = """
@@ -314,6 +300,73 @@ type CommonFplValueTestCases =
                             let prf1 = thm1.Scope["SomeTheorem1$1"]
                             let prf2 = thm2.Scope["SomeTheorem2$1"]
                             Some (r,theory,inf1,inf2,axi1,axi2,pst1,pst2,thm1,thm2,pro1,pro2,lem1,lem2,cor1,cor2,con1,con2,cla1,cla2,pre1,pre2,fun1,fun2,prf1,prf2)
+                        | None -> None
+        prepareFplCode("", true) |> ignore
+        result
+
+    static member ScopeProofsAndCorollaries() =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = """
+
+            theorem TestTheorem1() {true} 
+            proof TestTheorem1$1 {1. |- trivial} 
+            
+            lemma TestLemma1() {true} 
+            proof TestLemma1$1 {1. |- trivial} 
+            
+            proposition TestProposition1() {true} 
+            proof TestProposition1$1 {1. |- trivial} 
+            
+            corollary TestCorollary1$2() {true} 
+            proof TestCorollary1$2$1 {1. |- trivial} 
+
+            theorem TestTheorem2() {true} 
+            corollary TestTheorem2$1() {true}  
+            
+            lemma TestLemma2() {true} 
+            corollary TestLemma2$1() {true}  
+            
+            proposition TestPropositions2() {true} 
+            corollary TestPropositions2$1() {true}  
+
+            corollary TestCorollary2$2() {true} 
+            corollary TestCorollary2$2$1() {true}  
+
+            conjecture TestConjecture() {true} 
+            corollary TestConjecture$1() {true}  
+
+            axiom TestAxiom() {true} 
+            corollary TestAxiom$1() {true}  
+        ;
+        """
+        let stOption = prepareFplCode(fplCode, false) 
+        let result = match stOption with
+                        | Some st -> 
+                            let r = st.Root
+                            let theory = r.Scope["Test"]
+                            let thm1 = theory.Scope["TestTheorem1()"]
+                            let proofThm1 = thm1.Scope["TestTheorem1$1"]
+                            let lem1 = theory.Scope["TestLemma1()"]
+                            let proofLem1 = lem1.Scope["TestLemma1$1"]
+                            let prp1 = theory.Scope["TestProposition1()"]
+                            let proofPrp1 = prp1.Scope["TestProposition1$1"]
+                            let cor1 = theory.Scope["TestCorollary1$2()"]
+                            let proofCor1 = cor1.Scope["TestCorollary1$2$1"]
+                            let thm2 = theory.Scope["TestTheorem2()"]
+                            let corThm2 = thm2.Scope["TestTheorem2$1()"]
+                            let lem2 = theory.Scope["TestLemma2()"]
+                            let corLem2 = lem2.Scope["TestLemma2$1()"]
+                            let prp2 = theory.Scope["TestPropositions2()"]
+                            let corPrp2 = prp2.Scope["TestPropositions2$1()"]
+                            let cor2 = theory.Scope["TestCorollary2$2()"]
+                            let corCor2 = cor2.Scope["TestCorollary2$2$1()"]
+                            let con1 = theory.Scope["TestConjecture()"]
+                            let corCon1 = con1.Scope["TestConjecture$1()"]
+                            let axi1 = theory.Scope["TestAxiom()"]
+                            let corAxi1 = axi1.Scope["TestAxiom$1()"]
+                            Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
+                                corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
+                                axi1,corAxi1)
                         | None -> None
         prepareFplCode("", true) |> ignore
         result

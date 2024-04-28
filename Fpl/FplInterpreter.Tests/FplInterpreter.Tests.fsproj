@@ -10,6 +10,9 @@
   <ItemGroup>
     <Compile Include="CommonTestHelpers.fs" />
     <Compile Include="CommonFplValueTestCases.fs" />
+    <Compile Include="TestFplValueScopeQualifiedStartPos.fs" />
+    <Compile Include="TestFplValueScopeParent.fs" />
+    <Compile Include="TestFplValueScopeCompleteness.fs" />
     <Compile Include="TestFplValue.fs" />
     <Compile Include="TestInterpreterErrors.fs" />
     <Compile Include="TestEvalAliasedNamespaceIdentifier.fs" />
