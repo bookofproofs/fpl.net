@@ -49,7 +49,7 @@ type CommonFplValueTestCases =
         prepareFplCode("", true) |> ignore
         result
 
-    static member ScopeVariablesInSignatureWithVariadic() =
+    static member ScopeVariablesInSignatureVariadic() =
         FplParser.parserDiagnostics.Clear()
         let fplCode = """
         def pred TestPredicate(x,y:+pred(u,v,w:func(a,b,c:*obj)->obj)) 

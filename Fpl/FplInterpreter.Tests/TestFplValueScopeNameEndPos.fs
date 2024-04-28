@@ -123,28 +123,28 @@ type TestFplValueScopeNameEndPos() =
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
                                 axi1,corAxi1) -> 
                 match var with
-                | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
-                | "theory" -> Assert.AreEqual("", theory.QualifiedStartPos)
-                | "thm1" -> Assert.AreEqual("", thm1.QualifiedStartPos)
-                | "proofThm1" -> Assert.AreEqual("", proofThm1.QualifiedStartPos)
-                | "lem1" -> Assert.AreEqual("", lem1.QualifiedStartPos)
-                | "proofLem1" -> Assert.AreEqual("", proofLem1.QualifiedStartPos)
-                | "prp1" -> Assert.AreEqual("", prp1.QualifiedStartPos)
-                | "proofPrp1" -> Assert.AreEqual("", proofPrp1.QualifiedStartPos)
-                | "cor1" -> Assert.AreEqual("", cor1.QualifiedStartPos)
-                | "proofCor1" -> Assert.AreEqual("", proofCor1.QualifiedStartPos)
-                | "thm2" -> Assert.AreEqual("", thm2.QualifiedStartPos)
-                | "corThm2" -> Assert.AreEqual("", corThm2.QualifiedStartPos)
-                | "lem2" -> Assert.AreEqual("", lem2.QualifiedStartPos)
-                | "corLem2" -> Assert.AreEqual("", corLem2.QualifiedStartPos)
-                | "prp2" -> Assert.AreEqual("", prp2.QualifiedStartPos)
-                | "corPrp2" -> Assert.AreEqual("", corPrp2.QualifiedStartPos)
-                | "cor2" -> Assert.AreEqual("", cor2.QualifiedStartPos)
-                | "corCor2" -> Assert.AreEqual("", corCor2.QualifiedStartPos)
-                | "con1" -> Assert.AreEqual("", con1.QualifiedStartPos)
-                | "corCon1" -> Assert.AreEqual("", corCon1.QualifiedStartPos)
-                | "axi1" -> Assert.AreEqual("", axi1.QualifiedStartPos)
-                | "corAxi1"  -> Assert.AreEqual("", corAxi1.QualifiedStartPos) 
+                | "r" -> Assert.AreEqual("(Ln: 1, Col: 1)", r.NameEndPos.ToString())
+                | "theory" -> Assert.AreEqual("(Ln: 1, Col: 1)", theory.NameEndPos.ToString())
+                | "thm1" -> Assert.AreEqual("(Ln: 3, Col: 35)", thm1.NameEndPos.ToString())
+                | "proofThm1" -> Assert.AreEqual("(Ln: 4, Col: 33)", proofThm1.NameEndPos.ToString())
+                | "lem1" -> Assert.AreEqual("(Ln: 6, Col: 31)", lem1.NameEndPos.ToString())
+                | "proofLem1" -> Assert.AreEqual("(Ln: 7, Col: 31)", proofLem1.NameEndPos.ToString())
+                | "prp1" -> Assert.AreEqual("(Ln: 9, Col: 43)", prp1.NameEndPos.ToString())
+                | "proofPrp1" -> Assert.AreEqual("(Ln: 10, Col: 37)", proofPrp1.NameEndPos.ToString())
+                | "cor1" -> Assert.AreEqual("(Ln: 12, Col: 41)", cor1.NameEndPos.ToString())
+                | "proofCor1" -> Assert.AreEqual("(Ln: 13, Col: 37)", proofCor1.NameEndPos.ToString())
+                | "thm2" -> Assert.AreEqual("(Ln: 15, Col: 35)", thm2.NameEndPos.ToString())
+                | "corThm2" -> Assert.AreEqual("(Ln: 16, Col: 39)", corThm2.NameEndPos.ToString())
+                | "lem2" -> Assert.AreEqual("(Ln: 18, Col: 31)", lem2.NameEndPos.ToString())
+                | "corLem2" -> Assert.AreEqual("(Ln: 19, Col: 37)", corLem2.NameEndPos.ToString())
+                | "prp2" -> Assert.AreEqual("(Ln: 21, Col: 43)", prp2.NameEndPos.ToString())
+                | "corPrp2" -> Assert.AreEqual("(Ln: 22, Col: 43)", corPrp2.NameEndPos.ToString())
+                | "cor2" -> Assert.AreEqual("(Ln: 24, Col: 41)", cor2.NameEndPos.ToString())
+                | "corCor2" -> Assert.AreEqual("(Ln: 25, Col: 43)", corCor2.NameEndPos.ToString())
+                | "con1" -> Assert.AreEqual("(Ln: 27, Col: 40)", con1.NameEndPos.ToString())
+                | "corCon1" -> Assert.AreEqual("(Ln: 28, Col: 41)", corCon1.NameEndPos.ToString())
+                | "axi1" -> Assert.AreEqual("(Ln: 30, Col: 30)", axi1.NameEndPos.ToString())
+                | "corAxi1"  -> Assert.AreEqual("(Ln: 31, Col: 36)", corAxi1.NameEndPos.ToString()) 
                 | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -163,13 +163,13 @@ type TestFplValueScopeNameEndPos() =
         match res with
         | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual(Position("", 0, 1, 1), r.NameEndPos)
-            | "theory" -> Assert.AreEqual(Position("", 0, 1, 1), theory.NameEndPos)
-            | "block" -> Assert.AreEqual(Position("", 27, 2, 26), block.NameEndPos)
-            | "t1" -> Assert.AreEqual(Position("", 0, 5, 27), t1.NameEndPos)
-            | "t2" -> Assert.AreEqual(Position("", 0, 6, 31), t2.NameEndPos)
-            | "t3" -> Assert.AreEqual(Position("", 0, 7, 32), t3.NameEndPos)
-            | "t4" -> Assert.AreEqual(Position("", 0, 8, 41), t4.NameEndPos)
+            | "r" -> Assert.AreEqual("(Ln: 1, Col: 1)", r.NameEndPos.ToString())
+            | "theory" -> Assert.AreEqual("(Ln: 1, Col: 1)", theory.NameEndPos.ToString())
+            | "block" -> Assert.AreEqual("(Ln: 2, Col: 26)", block.NameEndPos.ToString())
+            | "t1" -> Assert.AreEqual("(Ln: 5, Col: 27)", t1.NameEndPos.ToString())
+            | "t2" -> Assert.AreEqual("(Ln: 6, Col: 31)", t2.NameEndPos.ToString())
+            | "t3" -> Assert.AreEqual("(Ln: 7, Col: 32)", t3.NameEndPos.ToString())
+            | "t4" -> Assert.AreEqual("(Ln: 8, Col: 36)", t4.NameEndPos.ToString())
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -345,40 +345,104 @@ type TestFplValueScopeNameEndPos() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual(Position("", 0, 1, 1), r.NameEndPos)
-            | "theory" -> Assert.AreEqual(Position("", 0, 1, 1), theory.NameEndPos)
-            | "block" -> Assert.AreEqual(Position("", 70, 2, 69), block.NameEndPos); 
-            | "x" -> Assert.AreEqual(Position("", 69, 2, 68), x.NameEndPos)
-            | "y" -> Assert.AreEqual(Position("", 69, 2, 68), y.NameEndPos)
-            | "xu" -> Assert.AreEqual(Position("", 68, 2, 67), xu.NameEndPos)
-            | "xv" -> Assert.AreEqual(Position("", 68, 2, 67), xv.NameEndPos)
-            | "xw" -> Assert.AreEqual(Position("", 68, 2, 67), xw.NameEndPos)
-            | "yu" -> Assert.AreEqual(Position("", 68, 2, 67), yu.NameEndPos)
-            | "yv" -> Assert.AreEqual(Position("", 68, 2, 67), yv.NameEndPos)
-            | "yw" -> Assert.AreEqual(Position("", 68, 2, 67), yw.NameEndPos)
-            | "xua" -> Assert.AreEqual(Position("", 54, 2, 53), xua.NameEndPos)
-            | "xub" -> Assert.AreEqual(Position("", 56, 2, 55), xub.NameEndPos)
-            | "xuc" -> Assert.AreEqual(Position("", 58, 2, 57), xuc.NameEndPos)
-            | "xva" -> Assert.AreEqual(Position("", 54, 2, 53), xva.NameEndPos)
-            | "xvb" -> Assert.AreEqual(Position("", 56, 2, 55), xvb.NameEndPos)
-            | "xvc" -> Assert.AreEqual(Position("", 58, 2, 57), xvc.NameEndPos)
-            | "xwa" -> Assert.AreEqual(Position("", 54, 2, 53), xwa.NameEndPos)
-            | "xwb" -> Assert.AreEqual(Position("", 56, 2, 55), xwb.NameEndPos)
-            | "xwc" -> Assert.AreEqual(Position("", 58, 2, 57), xwc.NameEndPos)
-            | "yua" -> Assert.AreEqual(Position("", 54, 2, 53), yua.NameEndPos)
-            | "yub" -> Assert.AreEqual(Position("", 56, 2, 55), yub.NameEndPos)
-            | "yuc" -> Assert.AreEqual(Position("", 58, 2, 57), yuc.NameEndPos)
-            | "yva" -> Assert.AreEqual(Position("", 54, 2, 53), yva.NameEndPos)
-            | "yvb" -> Assert.AreEqual(Position("", 56, 2, 55), yvb.NameEndPos)
-            | "yvc" -> Assert.AreEqual(Position("", 58, 2, 57), yvc.NameEndPos)
-            | "ywa" -> Assert.AreEqual(Position("", 54, 2, 53), ywa.NameEndPos)
-            | "ywb" -> Assert.AreEqual(Position("", 56, 2, 55), ywb.NameEndPos)
-            | "ywc" -> Assert.AreEqual(Position("", 58, 2, 57), ywc.NameEndPos)
+            | "r" -> Assert.AreEqual("(Ln: 1, Col: 1)", r.NameEndPos.ToString())
+            | "theory" -> Assert.AreEqual("(Ln: 1, Col: 1)", theory.NameEndPos.ToString())
+            | "block" -> Assert.AreEqual("(Ln: 2, Col: 69)", block.NameEndPos.ToString()); 
+            | "x" -> Assert.AreEqual("(Ln: 2, Col: 68)", x.NameEndPos.ToString())
+            | "y" -> Assert.AreEqual("(Ln: 2, Col: 68)", y.NameEndPos.ToString())
+            | "xu" -> Assert.AreEqual("(Ln: 2, Col: 67)", xu.NameEndPos.ToString())
+            | "xv" -> Assert.AreEqual("(Ln: 2, Col: 67)", xv.NameEndPos.ToString())
+            | "xw" -> Assert.AreEqual("(Ln: 2, Col: 67)", xw.NameEndPos.ToString())
+            | "yu" -> Assert.AreEqual("(Ln: 2, Col: 67)", yu.NameEndPos.ToString())
+            | "yv" -> Assert.AreEqual("(Ln: 2, Col: 67)", yv.NameEndPos.ToString())
+            | "yw" -> Assert.AreEqual("(Ln: 2, Col: 67)", yw.NameEndPos.ToString())
+            | "xua" -> Assert.AreEqual("(Ln: 2, Col: 53)", xua.NameEndPos.ToString())
+            | "xub" -> Assert.AreEqual("(Ln: 2, Col: 55)", xub.NameEndPos.ToString())
+            | "xuc" -> Assert.AreEqual("(Ln: 2, Col: 57)", xuc.NameEndPos.ToString())
+            | "xva" -> Assert.AreEqual("(Ln: 2, Col: 53)", xva.NameEndPos.ToString())
+            | "xvb" -> Assert.AreEqual("(Ln: 2, Col: 55)", xvb.NameEndPos.ToString())
+            | "xvc" -> Assert.AreEqual("(Ln: 2, Col: 57)", xvc.NameEndPos.ToString())
+            | "xwa" -> Assert.AreEqual("(Ln: 2, Col: 53)", xwa.NameEndPos.ToString())
+            | "xwb" -> Assert.AreEqual("(Ln: 2, Col: 55)", xwb.NameEndPos.ToString())
+            | "xwc" -> Assert.AreEqual("(Ln: 2, Col: 57)", xwc.NameEndPos.ToString())
+            | "yua" -> Assert.AreEqual("(Ln: 2, Col: 53)", yua.NameEndPos.ToString())
+            | "yub" -> Assert.AreEqual("(Ln: 2, Col: 55)", yub.NameEndPos.ToString())
+            | "yuc" -> Assert.AreEqual("(Ln: 2, Col: 57)", yuc.NameEndPos.ToString())
+            | "yva" -> Assert.AreEqual("(Ln: 2, Col: 53)", yva.NameEndPos.ToString())
+            | "yvb" -> Assert.AreEqual("(Ln: 2, Col: 55)", yvb.NameEndPos.ToString())
+            | "yvc" -> Assert.AreEqual("(Ln: 2, Col: 57)", yvc.NameEndPos.ToString())
+            | "ywa" -> Assert.AreEqual("(Ln: 2, Col: 53)", ywa.NameEndPos.ToString())
+            | "ywb" -> Assert.AreEqual("(Ln: 2, Col: 55)", ywb.NameEndPos.ToString())
+            | "ywc" -> Assert.AreEqual("(Ln: 2, Col: 57)", ywc.NameEndPos.ToString())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("x")>]
+    [<DataRow("y")>]
+    [<DataRow("xu")>]
+    [<DataRow("xv")>]
+    [<DataRow("xw")>]
+    [<DataRow("yu")>]
+    [<DataRow("yv")>]
+    [<DataRow("yw")>]
+    [<DataRow("xua")>]
+    [<DataRow("xub")>]
+    [<DataRow("xuc")>]
+    [<DataRow("xva")>]
+    [<DataRow("xvb")>]
+    [<DataRow("xvc")>]
+    [<DataRow("xwa")>]
+    [<DataRow("xwb")>]
+    [<DataRow("xwc")>]
+    [<DataRow("yua")>]
+    [<DataRow("yub")>]
+    [<DataRow("yuc")>]
+    [<DataRow("yva")>]
+    [<DataRow("yvb")>]
+    [<DataRow("yvc")>]
+    [<DataRow("ywa")>]
+    [<DataRow("ywb")>]
+    [<DataRow("ywc")>]
     [<TestMethod>]
-    member this.TestVariablesInSignatureWithVariadic() =
-        Assert.IsTrue(false)
+    member this.TestVariablesInSignatureVariadic(var) =
+        let result = CommonFplValueTestCases.ScopeVariablesInSignatureVariadic()
+        match result with
+        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+            match var with
+            | "r" -> Assert.AreEqual("(Ln: 1, Col: 1)", r.NameEndPos.ToString())
+            | "theory" -> Assert.AreEqual("(Ln: 1, Col: 1)", theory.NameEndPos.ToString())
+            | "block" -> Assert.AreEqual("(Ln: 2, Col: 71)", block.NameEndPos.ToString()); 
+            | "x" -> Assert.AreEqual("(Ln: 2, Col: 70)", x.NameEndPos.ToString())
+            | "y" -> Assert.AreEqual("(Ln: 2, Col: 70)", y.NameEndPos.ToString())
+            | "xu" -> Assert.AreEqual("(Ln: 2, Col: 69)", xu.NameEndPos.ToString())
+            | "xv" -> Assert.AreEqual("(Ln: 2, Col: 69)", xv.NameEndPos.ToString())
+            | "xw" -> Assert.AreEqual("(Ln: 2, Col: 69)", xw.NameEndPos.ToString())
+            | "yu" -> Assert.AreEqual("(Ln: 2, Col: 69)", yu.NameEndPos.ToString())
+            | "yv" -> Assert.AreEqual("(Ln: 2, Col: 69)", yv.NameEndPos.ToString())
+            | "yw" -> Assert.AreEqual("(Ln: 2, Col: 69)", yw.NameEndPos.ToString())
+            | "xua" -> Assert.AreEqual("(Ln: 2, Col: 54)", xua.NameEndPos.ToString())
+            | "xub" -> Assert.AreEqual("(Ln: 2, Col: 56)", xub.NameEndPos.ToString())
+            | "xuc" -> Assert.AreEqual("(Ln: 2, Col: 58)", xuc.NameEndPos.ToString())
+            | "xva" -> Assert.AreEqual("(Ln: 2, Col: 54)", xva.NameEndPos.ToString())
+            | "xvb" -> Assert.AreEqual("(Ln: 2, Col: 56)", xvb.NameEndPos.ToString())
+            | "xvc" -> Assert.AreEqual("(Ln: 2, Col: 58)", xvc.NameEndPos.ToString())
+            | "xwa" -> Assert.AreEqual("(Ln: 2, Col: 54)", xwa.NameEndPos.ToString())
+            | "xwb" -> Assert.AreEqual("(Ln: 2, Col: 56)", xwb.NameEndPos.ToString())
+            | "xwc" -> Assert.AreEqual("(Ln: 2, Col: 58)", xwc.NameEndPos.ToString())
+            | "yua" -> Assert.AreEqual("(Ln: 2, Col: 54)", yua.NameEndPos.ToString())
+            | "yub" -> Assert.AreEqual("(Ln: 2, Col: 56)", yub.NameEndPos.ToString())
+            | "yuc" -> Assert.AreEqual("(Ln: 2, Col: 58)", yuc.NameEndPos.ToString())
+            | "yva" -> Assert.AreEqual("(Ln: 2, Col: 54)", yva.NameEndPos.ToString())
+            | "yvb" -> Assert.AreEqual("(Ln: 2, Col: 56)", yvb.NameEndPos.ToString())
+            | "yvc" -> Assert.AreEqual("(Ln: 2, Col: 58)", yvc.NameEndPos.ToString())
+            | "ywa" -> Assert.AreEqual("(Ln: 2, Col: 54)", ywa.NameEndPos.ToString())
+            | "ywb" -> Assert.AreEqual("(Ln: 2, Col: 56)", ywb.NameEndPos.ToString())
+            | "ywc" -> Assert.AreEqual("(Ln: 2, Col: 58)", ywc.NameEndPos.ToString())
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)

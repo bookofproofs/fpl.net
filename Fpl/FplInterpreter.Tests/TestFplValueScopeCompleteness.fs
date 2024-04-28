@@ -71,7 +71,7 @@ type TestFplValueScopeCompleteness() =
     [<TestMethod>]
     member this.TestVariablesInSignatureWithVariadic() =
         try
-            CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
+            CommonFplValueTestCases.ScopeVariablesInSignatureVariadic() |> ignore
             Assert.IsTrue(true)
         with
         | ex -> 

@@ -122,28 +122,28 @@ type TestFplValueScopeBlockType() =
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
                                 axi1,corAxi1) -> 
                 match var with
-                | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
-                | "theory" -> Assert.AreEqual("", theory.QualifiedStartPos)
-                | "thm1" -> Assert.AreEqual("", thm1.QualifiedStartPos)
-                | "proofThm1" -> Assert.AreEqual("", proofThm1.QualifiedStartPos)
-                | "lem1" -> Assert.AreEqual("", lem1.QualifiedStartPos)
-                | "proofLem1" -> Assert.AreEqual("", proofLem1.QualifiedStartPos)
-                | "prp1" -> Assert.AreEqual("", prp1.QualifiedStartPos)
-                | "proofPrp1" -> Assert.AreEqual("", proofPrp1.QualifiedStartPos)
-                | "cor1" -> Assert.AreEqual("", cor1.QualifiedStartPos)
-                | "proofCor1" -> Assert.AreEqual("", proofCor1.QualifiedStartPos)
-                | "thm2" -> Assert.AreEqual("", thm2.QualifiedStartPos)
-                | "corThm2" -> Assert.AreEqual("", corThm2.QualifiedStartPos)
-                | "lem2" -> Assert.AreEqual("", lem2.QualifiedStartPos)
-                | "corLem2" -> Assert.AreEqual("", corLem2.QualifiedStartPos)
-                | "prp2" -> Assert.AreEqual("", prp2.QualifiedStartPos)
-                | "corPrp2" -> Assert.AreEqual("", corPrp2.QualifiedStartPos)
-                | "cor2" -> Assert.AreEqual("", cor2.QualifiedStartPos)
-                | "corCor2" -> Assert.AreEqual("", corCor2.QualifiedStartPos)
-                | "con1" -> Assert.AreEqual("", con1.QualifiedStartPos)
-                | "corCon1" -> Assert.AreEqual("", corCon1.QualifiedStartPos)
-                | "axi1" -> Assert.AreEqual("", axi1.QualifiedStartPos)
-                | "corAxi1"  -> Assert.AreEqual("", corAxi1.QualifiedStartPos) 
+                | "r" -> Assert.AreEqual(FplBlockType.Root, r.BlockType)
+                | "theory" -> Assert.AreEqual(FplBlockType.Theory, theory.BlockType)
+                | "thm1" -> Assert.AreEqual(FplBlockType.Theorem, thm1.BlockType)
+                | "proofThm1" -> Assert.AreEqual(FplBlockType.Proof, proofThm1.BlockType)
+                | "lem1" -> Assert.AreEqual(FplBlockType.Lemma, lem1.BlockType)
+                | "proofLem1" -> Assert.AreEqual(FplBlockType.Proof, proofLem1.BlockType)
+                | "prp1" -> Assert.AreEqual(FplBlockType.Proposition, prp1.BlockType)
+                | "proofPrp1" -> Assert.AreEqual(FplBlockType.Proof, proofPrp1.BlockType)
+                | "cor1" -> Assert.AreEqual(FplBlockType.Corollary, cor1.BlockType)
+                | "proofCor1" -> Assert.AreEqual(FplBlockType.Proof, proofCor1.BlockType)
+                | "thm2" -> Assert.AreEqual(FplBlockType.Theorem, thm2.BlockType)
+                | "corThm2" -> Assert.AreEqual(FplBlockType.Corollary, corThm2.BlockType)
+                | "lem2" -> Assert.AreEqual(FplBlockType.Lemma, lem2.BlockType)
+                | "corLem2" -> Assert.AreEqual(FplBlockType.Corollary, corLem2.BlockType)
+                | "prp2" -> Assert.AreEqual(FplBlockType.Proposition, prp2.BlockType)
+                | "corPrp2" -> Assert.AreEqual(FplBlockType.Corollary, corPrp2.BlockType)
+                | "cor2" -> Assert.AreEqual(FplBlockType.Corollary, cor2.BlockType)
+                | "corCor2" -> Assert.AreEqual(FplBlockType.Corollary, corCor2.BlockType)
+                | "con1" -> Assert.AreEqual(FplBlockType.Conjecture, con1.BlockType)
+                | "corCon1" -> Assert.AreEqual(FplBlockType.Corollary, corCon1.BlockType)
+                | "axi1" -> Assert.AreEqual(FplBlockType.Axiom, axi1.BlockType)
+                | "corAxi1"  -> Assert.AreEqual(FplBlockType.Corollary, corAxi1.BlockType) 
                 | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -378,6 +378,70 @@ type TestFplValueScopeBlockType() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("x")>]
+    [<DataRow("y")>]
+    [<DataRow("xu")>]
+    [<DataRow("xv")>]
+    [<DataRow("xw")>]
+    [<DataRow("yu")>]
+    [<DataRow("yv")>]
+    [<DataRow("yw")>]
+    [<DataRow("xua")>]
+    [<DataRow("xub")>]
+    [<DataRow("xuc")>]
+    [<DataRow("xva")>]
+    [<DataRow("xvb")>]
+    [<DataRow("xvc")>]
+    [<DataRow("xwa")>]
+    [<DataRow("xwb")>]
+    [<DataRow("xwc")>]
+    [<DataRow("yua")>]
+    [<DataRow("yub")>]
+    [<DataRow("yuc")>]
+    [<DataRow("yva")>]
+    [<DataRow("yvb")>]
+    [<DataRow("yvc")>]
+    [<DataRow("ywa")>]
+    [<DataRow("ywb")>]
+    [<DataRow("ywc")>]
     [<TestMethod>]
-    member this.TestVariablesInSignatureWithVariadic() =
-        Assert.IsTrue(false)
+    member this.TestVariablesInSignatureVariadic(var) =
+        let result = CommonFplValueTestCases.ScopeVariablesInSignatureVariadic()
+        match result with
+        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+            match var with
+            | "r" -> Assert.AreEqual(FplBlockType.Root, r.BlockType)
+            | "theory" -> Assert.AreEqual(FplBlockType.Theory, theory.BlockType)
+            | "block" -> Assert.AreEqual(FplBlockType.Predicate, block.BlockType)
+            | "x" -> Assert.AreEqual(FplBlockType.VariadicVariableMany1, x.BlockType)
+            | "y" -> Assert.AreEqual(FplBlockType.VariadicVariableMany1, y.BlockType)
+            | "xu" -> Assert.AreEqual(FplBlockType.Variable, xu.BlockType)
+            | "xv" -> Assert.AreEqual(FplBlockType.Variable, xv.BlockType)
+            | "xw" -> Assert.AreEqual(FplBlockType.Variable, xw.BlockType)
+            | "yu" -> Assert.AreEqual(FplBlockType.Variable, yu.BlockType)
+            | "yv" -> Assert.AreEqual(FplBlockType.Variable, yv.BlockType)
+            | "yw" -> Assert.AreEqual(FplBlockType.Variable, yw.BlockType)
+            | "xua" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, xua.BlockType)
+            | "xub" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, xub.BlockType)
+            | "xuc" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, xuc.BlockType)
+            | "xva" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, xva.BlockType)
+            | "xvb" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, xvb.BlockType)
+            | "xvc" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, xvc.BlockType)
+            | "xwa" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, xwa.BlockType)
+            | "xwb" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, xwb.BlockType)
+            | "xwc" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, xwc.BlockType)
+            | "yua" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, yua.BlockType)
+            | "yub" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, yub.BlockType)
+            | "yuc" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, yuc.BlockType)
+            | "yva" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, yva.BlockType)
+            | "yvb" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, yvb.BlockType)
+            | "yvc" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, yvc.BlockType)
+            | "ywa" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, ywa.BlockType)
+            | "ywb" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, ywb.BlockType)
+            | "ywc" -> Assert.AreEqual(FplBlockType.VariadicVariableMany, ywc.BlockType)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)

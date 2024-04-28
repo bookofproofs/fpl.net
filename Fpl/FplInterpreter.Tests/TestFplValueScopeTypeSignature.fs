@@ -17,7 +17,7 @@ type TestFplValueScopeTypeSignature() =
 
     [<TestMethod>]
     member this.TestProofsAndCorollaries() =
-        CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
+        CommonFplValueTestCases.ScopeVariablesInSignatureVariadic() |> ignore
         Assert.IsTrue(false)
 
     [<TestMethod>]
