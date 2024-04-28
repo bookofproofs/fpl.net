@@ -326,8 +326,8 @@ type CommonFplValueTestCases =
             lemma TestLemma2() {true} 
             corollary TestLemma2$1() {true}  
             
-            proposition TestPropositions2() {true} 
-            corollary TestPropositions2$1() {true}  
+            proposition TestProposition2() {true} 
+            corollary TestProposition2$1() {true}  
 
             corollary TestCorollary2$2() {true} 
             corollary TestCorollary2$2$1() {true}  
@@ -356,8 +356,8 @@ type CommonFplValueTestCases =
                             let corThm2 = thm2.Scope["TestTheorem2$1()"]
                             let lem2 = theory.Scope["TestLemma2()"]
                             let corLem2 = lem2.Scope["TestLemma2$1()"]
-                            let prp2 = theory.Scope["TestPropositions2()"]
-                            let corPrp2 = prp2.Scope["TestPropositions2$1()"]
+                            let prp2 = theory.Scope["TestProposition2()"]
+                            let corPrp2 = prp2.Scope["TestProposition2$1()"]
                             let cor2 = theory.Scope["TestCorollary2$2()"]
                             let corCor2 = cor2.Scope["TestCorollary2$2$1()"]
                             let con1 = theory.Scope["TestConjecture()"]

@@ -146,10 +146,62 @@ type TestFplValueScopeParent() =
         | _ -> 
             Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("thm1")>]
+    [<DataRow("proofThm1")>]
+    [<DataRow("lem1")>]
+    [<DataRow("proofLem1")>]
+    [<DataRow("prp1")>]
+    [<DataRow("proofPrp1")>]
+    [<DataRow("cor1")>]
+    [<DataRow("proofCor1")>]
+    [<DataRow("thm2")>]
+    [<DataRow("corThm2")>]
+    [<DataRow("lem2")>]
+    [<DataRow("corLem2")>]
+    [<DataRow("prp2")>]
+    [<DataRow("corPrp2")>]
+    [<DataRow("cor2")>]
+    [<DataRow("corCor2")>]
+    [<DataRow("con1")>]
+    [<DataRow("corCon1")>]
+    [<DataRow("axi1")>]
+    [<DataRow("corAxi1")>]
     [<TestMethod>]
-    member this.TestProofsAndCorollaries() =
-        CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
-        Assert.IsTrue(false)
+    member this.TestProofsAndCorollaries(var) =
+        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries() 
+        match res with
+        | Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
+                                corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
+                                axi1,corAxi1) -> 
+                match var with
+                | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+                | "theory" -> Assert.AreEqual("", theory.QualifiedStartPos)
+                | "thm1" -> Assert.AreEqual("", thm1.QualifiedStartPos)
+                | "proofThm1" -> Assert.AreEqual("", proofThm1.QualifiedStartPos)
+                | "lem1" -> Assert.AreEqual("", lem1.QualifiedStartPos)
+                | "proofLem1" -> Assert.AreEqual("", proofLem1.QualifiedStartPos)
+                | "prp1" -> Assert.AreEqual("", prp1.QualifiedStartPos)
+                | "proofPrp1" -> Assert.AreEqual("", proofPrp1.QualifiedStartPos)
+                | "cor1" -> Assert.AreEqual("", cor1.QualifiedStartPos)
+                | "proofCor1" -> Assert.AreEqual("", proofCor1.QualifiedStartPos)
+                | "thm2" -> Assert.AreEqual("", thm2.QualifiedStartPos)
+                | "corThm2" -> Assert.AreEqual("", corThm2.QualifiedStartPos)
+                | "lem2" -> Assert.AreEqual("", lem2.QualifiedStartPos)
+                | "corLem2" -> Assert.AreEqual("", corLem2.QualifiedStartPos)
+                | "prp2" -> Assert.AreEqual("", prp2.QualifiedStartPos)
+                | "corPrp2" -> Assert.AreEqual("", corPrp2.QualifiedStartPos)
+                | "cor2" -> Assert.AreEqual("", cor2.QualifiedStartPos)
+                | "corCor2" -> Assert.AreEqual("", corCor2.QualifiedStartPos)
+                | "con1" -> Assert.AreEqual("", con1.QualifiedStartPos)
+                | "corCon1" -> Assert.AreEqual("", corCon1.QualifiedStartPos)
+                | "axi1" -> Assert.AreEqual("", axi1.QualifiedStartPos)
+                | "corAxi1"  -> Assert.AreEqual("", corAxi1.QualifiedStartPos) 
+                | _ -> Assert.IsTrue(false)
+        | _ -> 
+            Assert.IsTrue(false)
+
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
@@ -175,9 +227,74 @@ type TestFplValueScopeParent() =
         | _ -> 
             Assert.IsTrue(false)
 
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("x")>]
+    [<DataRow("y")>]
+    [<DataRow("xw")>]
+    [<DataRow("xu")>]
+    [<DataRow("xv")>]
+    [<DataRow("yw")>]
+    [<DataRow("yu")>]
+    [<DataRow("yv")>]
+    [<DataRow("xwa")>]
+    [<DataRow("xwb")>]
+    [<DataRow("xwc")>]
+    [<DataRow("xua")>]
+    [<DataRow("xub")>]
+    [<DataRow("xuc")>]
+    [<DataRow("xva")>]
+    [<DataRow("xvb")>]
+    [<DataRow("xvc")>]
+    [<DataRow("ywa")>]
+    [<DataRow("ywb")>]
+    [<DataRow("ywc")>]
+    [<DataRow("yua")>]
+    [<DataRow("yub")>]
+    [<DataRow("yuc")>]
+    [<DataRow("yva")>]
+    [<DataRow("yvb")>]
+    [<DataRow("yvc")>]
     [<TestMethod>]
-    member this.TestVariablesInBlock() =
-        Assert.IsTrue(false)
+    member this.TestVariablesInBlock(var) =
+        let result = CommonFplValueTestCases.ScopeVariablesInBlock()
+        match result with
+        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+            match var with 
+            | "ywc" -> Assert.AreEqual(yw, ywc.Parent.Value)
+            | "ywb" -> Assert.AreEqual(yw, ywb.Parent.Value)
+            | "ywa" -> Assert.AreEqual(yw, ywa.Parent.Value)
+            | "yvc" -> Assert.AreEqual(yv, yvc.Parent.Value)
+            | "yvb" -> Assert.AreEqual(yv, yvb.Parent.Value)
+            | "yva" -> Assert.AreEqual(yv, yva.Parent.Value)
+            | "yuc" -> Assert.AreEqual(yu, yuc.Parent.Value)
+            | "yub" -> Assert.AreEqual(yu, yub.Parent.Value)
+            | "yua" -> Assert.AreEqual(yu, yua.Parent.Value)
+            | "xwc" -> Assert.AreEqual(xw, xwc.Parent.Value)
+            | "xwb" -> Assert.AreEqual(xw, xwb.Parent.Value)
+            | "xwa" -> Assert.AreEqual(xw, xwa.Parent.Value)
+            | "xvc" -> Assert.AreEqual(xv, xvc.Parent.Value)
+            | "xvb" -> Assert.AreEqual(xv, xvb.Parent.Value)
+            | "xva" -> Assert.AreEqual(xv, xva.Parent.Value)
+            | "xuc" -> Assert.AreEqual(xu, xuc.Parent.Value)
+            | "xub" -> Assert.AreEqual(xu, xub.Parent.Value)
+            | "xua" -> Assert.AreEqual(xu, xua.Parent.Value)
+
+            | "yw" -> Assert.AreEqual(y, yw.Parent.Value)
+            | "yv" -> Assert.AreEqual(y, yv.Parent.Value)
+            | "yu" -> Assert.AreEqual(y, yu.Parent.Value)
+            | "xw" -> Assert.AreEqual(x, xw.Parent.Value)
+            | "xv" -> Assert.AreEqual(x, xv.Parent.Value)
+            | "xu" -> Assert.AreEqual(x,  xu.Parent.Value)
+            | "y" -> Assert.AreEqual(block, y.Parent.Value)
+            | "x" -> Assert.AreEqual(block, x.Parent.Value)
+            | "block" -> Assert.AreEqual(theory, block.Parent.Value)
+            | "theory" -> Assert.AreEqual(r, theory.Parent.Value)
+            | _ -> 
+                Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
 
     [<TestMethod>]
     member this.TestVariablesInBlockWithVariadic() =

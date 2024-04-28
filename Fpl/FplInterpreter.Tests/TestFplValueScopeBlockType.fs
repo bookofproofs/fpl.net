@@ -92,10 +92,62 @@ type TestFplValueScopeBlockType() =
         | _ -> 
             Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("thm1")>]
+    [<DataRow("proofThm1")>]
+    [<DataRow("lem1")>]
+    [<DataRow("proofLem1")>]
+    [<DataRow("prp1")>]
+    [<DataRow("proofPrp1")>]
+    [<DataRow("cor1")>]
+    [<DataRow("proofCor1")>]
+    [<DataRow("thm2")>]
+    [<DataRow("corThm2")>]
+    [<DataRow("lem2")>]
+    [<DataRow("corLem2")>]
+    [<DataRow("prp2")>]
+    [<DataRow("corPrp2")>]
+    [<DataRow("cor2")>]
+    [<DataRow("corCor2")>]
+    [<DataRow("con1")>]
+    [<DataRow("corCon1")>]
+    [<DataRow("axi1")>]
+    [<DataRow("corAxi1")>]
     [<TestMethod>]
-    member this.TestProofsAndCorollaries() =
-        CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
-        Assert.IsTrue(false)
+    member this.TestProofsAndCorollaries(var) =
+        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries() 
+        match res with
+        | Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
+                                corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
+                                axi1,corAxi1) -> 
+                match var with
+                | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+                | "theory" -> Assert.AreEqual("", theory.QualifiedStartPos)
+                | "thm1" -> Assert.AreEqual("", thm1.QualifiedStartPos)
+                | "proofThm1" -> Assert.AreEqual("", proofThm1.QualifiedStartPos)
+                | "lem1" -> Assert.AreEqual("", lem1.QualifiedStartPos)
+                | "proofLem1" -> Assert.AreEqual("", proofLem1.QualifiedStartPos)
+                | "prp1" -> Assert.AreEqual("", prp1.QualifiedStartPos)
+                | "proofPrp1" -> Assert.AreEqual("", proofPrp1.QualifiedStartPos)
+                | "cor1" -> Assert.AreEqual("", cor1.QualifiedStartPos)
+                | "proofCor1" -> Assert.AreEqual("", proofCor1.QualifiedStartPos)
+                | "thm2" -> Assert.AreEqual("", thm2.QualifiedStartPos)
+                | "corThm2" -> Assert.AreEqual("", corThm2.QualifiedStartPos)
+                | "lem2" -> Assert.AreEqual("", lem2.QualifiedStartPos)
+                | "corLem2" -> Assert.AreEqual("", corLem2.QualifiedStartPos)
+                | "prp2" -> Assert.AreEqual("", prp2.QualifiedStartPos)
+                | "corPrp2" -> Assert.AreEqual("", corPrp2.QualifiedStartPos)
+                | "cor2" -> Assert.AreEqual("", cor2.QualifiedStartPos)
+                | "corCor2" -> Assert.AreEqual("", corCor2.QualifiedStartPos)
+                | "con1" -> Assert.AreEqual("", con1.QualifiedStartPos)
+                | "corCon1" -> Assert.AreEqual("", corCon1.QualifiedStartPos)
+                | "axi1" -> Assert.AreEqual("", axi1.QualifiedStartPos)
+                | "corAxi1"  -> Assert.AreEqual("", corAxi1.QualifiedStartPos) 
+                | _ -> Assert.IsTrue(false)
+        | _ -> 
+            Assert.IsTrue(false)
+
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
@@ -121,9 +173,73 @@ type TestFplValueScopeBlockType() =
         | _ -> 
             Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("x")>]
+    [<DataRow("y")>]
+    [<DataRow("xu")>]
+    [<DataRow("xv")>]
+    [<DataRow("xw")>]
+    [<DataRow("yu")>]
+    [<DataRow("yv")>]
+    [<DataRow("yw")>]
+    [<DataRow("xua")>]
+    [<DataRow("xub")>]
+    [<DataRow("xuc")>]
+    [<DataRow("xva")>]
+    [<DataRow("xvb")>]
+    [<DataRow("xvc")>]
+    [<DataRow("xwa")>]
+    [<DataRow("xwb")>]
+    [<DataRow("xwc")>]
+    [<DataRow("yua")>]
+    [<DataRow("yub")>]
+    [<DataRow("yuc")>]
+    [<DataRow("yva")>]
+    [<DataRow("yvb")>]
+    [<DataRow("yvc")>]
+    [<DataRow("ywa")>]
+    [<DataRow("ywb")>]
+    [<DataRow("ywc")>]
     [<TestMethod>]
-    member this.TestVariablesInBlock() =
-        Assert.IsTrue(false)
+    member this.TestVariablesInBlock(var) =
+        let result = CommonFplValueTestCases.ScopeVariablesInBlock()
+        match result with
+        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+            match var with
+            | "r" -> Assert.AreEqual(FplBlockType.Root, r.BlockType)
+            | "theory" -> Assert.AreEqual(FplBlockType.Theory, theory.BlockType)
+            | "block" -> Assert.AreEqual(FplBlockType.Predicate, block.BlockType)
+            | "x" -> Assert.AreEqual(FplBlockType.Variable, x.BlockType)
+            | "y" -> Assert.AreEqual(FplBlockType.Variable, y.BlockType)
+            | "xu" -> Assert.AreEqual(FplBlockType.Variable, xu.BlockType)
+            | "xv" -> Assert.AreEqual(FplBlockType.Variable, xv.BlockType)
+            | "xw" -> Assert.AreEqual(FplBlockType.Variable, xw.BlockType)
+            | "yu" -> Assert.AreEqual(FplBlockType.Variable, yu.BlockType)
+            | "yv" -> Assert.AreEqual(FplBlockType.Variable, yv.BlockType)
+            | "yw" -> Assert.AreEqual(FplBlockType.Variable, yw.BlockType)
+            | "xua" -> Assert.AreEqual(FplBlockType.Variable, xua.BlockType)
+            | "xub" -> Assert.AreEqual(FplBlockType.Variable, xub.BlockType)
+            | "xuc" -> Assert.AreEqual(FplBlockType.Variable, xuc.BlockType)
+            | "xva" -> Assert.AreEqual(FplBlockType.Variable, xva.BlockType)
+            | "xvb" -> Assert.AreEqual(FplBlockType.Variable, xvb.BlockType)
+            | "xvc" -> Assert.AreEqual(FplBlockType.Variable, xvc.BlockType)
+            | "xwa" -> Assert.AreEqual(FplBlockType.Variable, xwa.BlockType)
+            | "xwb" -> Assert.AreEqual(FplBlockType.Variable, xwb.BlockType)
+            | "xwc" -> Assert.AreEqual(FplBlockType.Variable, xwc.BlockType)
+            | "yua" -> Assert.AreEqual(FplBlockType.Variable, yua.BlockType)
+            | "yub" -> Assert.AreEqual(FplBlockType.Variable, yub.BlockType)
+            | "yuc" -> Assert.AreEqual(FplBlockType.Variable, yuc.BlockType)
+            | "yva" -> Assert.AreEqual(FplBlockType.Variable, yva.BlockType)
+            | "yvb" -> Assert.AreEqual(FplBlockType.Variable, yvb.BlockType)
+            | "yvc" -> Assert.AreEqual(FplBlockType.Variable, yvc.BlockType)
+            | "ywa" -> Assert.AreEqual(FplBlockType.Variable, ywa.BlockType)
+            | "ywb" -> Assert.AreEqual(FplBlockType.Variable, ywb.BlockType)
+            | "ywc" -> Assert.AreEqual(FplBlockType.Variable, ywc.BlockType)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestVariablesInBlockWithVariadic() =

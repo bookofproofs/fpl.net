@@ -795,62 +795,6 @@ type TestFplValue() =
         Assert.AreEqual(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore
 
-    [<DataRow("r")>]
-    [<DataRow("theory")>]
-    [<DataRow("thm1")>]
-    [<DataRow("proofThm1")>]
-    [<DataRow("lem1")>]
-    [<DataRow("proofLem1")>]
-    [<DataRow("prp1")>]
-    [<DataRow("proofPrp1")>]
-    [<DataRow("cor1")>]
-    [<DataRow("proofCor1")>]
-    [<DataRow("thm2")>]
-    [<DataRow("corThm2")>]
-    [<DataRow("lem2")>]
-    [<DataRow("corLem2")>]
-    [<DataRow("prp2")>]
-    [<DataRow("corPrp2")>]
-    [<DataRow("cor2")>]
-    [<DataRow("corCor2")>]
-    [<DataRow("con1")>]
-    [<DataRow("corCon1")>]
-    [<DataRow("axi1")>]
-    [<DataRow("corAxi1")>]
-    [<TestMethod>]
-    member this.TestScopeProofsAndCorollariesCompleteQualifiedStartPos(var) =
-        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries() 
-        match res with
-        | Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
-                                corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
-                                axi1,corAxi1) -> 
-                match var with
-                | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
-                | "theory" -> Assert.AreEqual("", theory.QualifiedStartPos)
-                | "thm1" -> Assert.AreEqual("", thm1.QualifiedStartPos)
-                | "proofThm1" -> Assert.AreEqual("", proofThm1.QualifiedStartPos)
-                | "lem1" -> Assert.AreEqual("", lem1.QualifiedStartPos)
-                | "proofLem1" -> Assert.AreEqual("", proofLem1.QualifiedStartPos)
-                | "prp1" -> Assert.AreEqual("", prp1.QualifiedStartPos)
-                | "proofPrp1" -> Assert.AreEqual("", proofPrp1.QualifiedStartPos)
-                | "cor1" -> Assert.AreEqual("", cor1.QualifiedStartPos)
-                | "proofCor1" -> Assert.AreEqual("", proofCor1.QualifiedStartPos)
-                | "thm2" -> Assert.AreEqual("", thm2.QualifiedStartPos)
-                | "corThm2" -> Assert.AreEqual("", corThm2.QualifiedStartPos)
-                | "lem2" -> Assert.AreEqual("", lem2.QualifiedStartPos)
-                | "corLem2" -> Assert.AreEqual("", corLem2.QualifiedStartPos)
-                | "prp2" -> Assert.AreEqual("", prp2.QualifiedStartPos)
-                | "corPrp2" -> Assert.AreEqual("", corPrp2.QualifiedStartPos)
-                | "cor2" -> Assert.AreEqual("", cor2.QualifiedStartPos)
-                | "corCor2" -> Assert.AreEqual("", corCor2.QualifiedStartPos)
-                | "con1" -> Assert.AreEqual("", con1.QualifiedStartPos)
-                | "corCon1" -> Assert.AreEqual("", corCon1.QualifiedStartPos)
-                | "axi1" -> Assert.AreEqual("", axi1.QualifiedStartPos)
-                | "corAxi1"  -> Assert.AreEqual("", corAxi1.QualifiedStartPos) 
-                | _ -> Assert.IsTrue(false)
-        | _ -> 
-            Assert.IsTrue(false)
-
     [<DataRow("def cl T:obj {intr prty pred TestId() {intrinsic}};", "TestId()", "TestId ( )")>]
     [<DataRow("def cl T:obj {intr prty pred TestId(x:ind) {intrinsic}};", "TestId(ind)", "TestId ( ind )")>]
     [<DataRow("def cl T:obj {intr prty pred TestId(x:pred) {intrinsic}};", "TestId(pred)", "TestId ( pred )")>]

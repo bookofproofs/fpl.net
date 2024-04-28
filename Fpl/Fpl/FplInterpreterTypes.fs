@@ -453,13 +453,19 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                     if FplValue.IsRoot(fplValue.Parent.Value) then 
                         getFullName fplValue.Parent.Value false + fplValue.Name 
                     else
-                        getFullName fplValue.Parent.Value false + "." + fplValue.Name 
+                        if FplValue.IsVariable(fplValue) && not (FplValue.IsVariable(fplValue.Parent.Value)) then
+                            fplValue.Name
+                        else
+                            getFullName fplValue.Parent.Value false + "." + fplValue.Name 
                 else
                     if FplValue.IsRoot(fplValue.Parent.Value) then 
                         getFullName fplValue.Parent.Value false + fplValue.Name 
                     else
-                        getFullName fplValue.Parent.Value false + "." + fplValue.Name
-            getFullName this true
+                        if FplValue.IsVariable(fplValue) && not (FplValue.IsVariable(fplValue.Parent.Value)) then
+                            fplValue.Name
+                        else
+                            getFullName fplValue.Parent.Value false + "." + fplValue.Name
+            getFullName this true 
 
     /// Indicates if this FplValue is a constructor.
     static member IsConstructor(fplValue:FplValue) = 

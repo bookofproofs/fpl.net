@@ -92,10 +92,62 @@ type TestFplValueScopeName() =
         | _ -> 
             Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("thm1")>]
+    [<DataRow("proofThm1")>]
+    [<DataRow("lem1")>]
+    [<DataRow("proofLem1")>]
+    [<DataRow("prp1")>]
+    [<DataRow("proofPrp1")>]
+    [<DataRow("cor1")>]
+    [<DataRow("proofCor1")>]
+    [<DataRow("thm2")>]
+    [<DataRow("corThm2")>]
+    [<DataRow("lem2")>]
+    [<DataRow("corLem2")>]
+    [<DataRow("prp2")>]
+    [<DataRow("corPrp2")>]
+    [<DataRow("cor2")>]
+    [<DataRow("corCor2")>]
+    [<DataRow("con1")>]
+    [<DataRow("corCon1")>]
+    [<DataRow("axi1")>]
+    [<DataRow("corAxi1")>]
     [<TestMethod>]
-    member this.TestProofsAndCorollaries() =
-        CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
-        Assert.IsTrue(false)
+    member this.TestProofsAndCorollaries(var) =
+        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries() 
+        match res with
+        | Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
+                                corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
+                                axi1,corAxi1) -> 
+                match var with
+                | "r" -> Assert.AreEqual("", r.Name)
+                | "theory" -> Assert.AreEqual("Test", theory.Name)
+                | "thm1" -> Assert.AreEqual("TestTheorem1()", thm1.Name)
+                | "proofThm1" -> Assert.AreEqual("TestTheorem1$1", proofThm1.Name)
+                | "lem1" -> Assert.AreEqual("TestLemma1()", lem1.Name)
+                | "proofLem1" -> Assert.AreEqual("TestLemma1$1", proofLem1.Name)
+                | "prp1" -> Assert.AreEqual("TestProposition1()", prp1.Name)
+                | "proofPrp1" -> Assert.AreEqual("TestProposition1$1", proofPrp1.Name)
+                | "cor1" -> Assert.AreEqual("TestCorollary1$2()", cor1.Name)
+                | "proofCor1" -> Assert.AreEqual("TestCorollary1$2$1", proofCor1.Name)
+                | "thm2" -> Assert.AreEqual("TestTheorem2()", thm2.Name)
+                | "corThm2" -> Assert.AreEqual("TestTheorem2$1()", corThm2.Name)
+                | "lem2" -> Assert.AreEqual("TestLemma2()", lem2.Name)
+                | "corLem2" -> Assert.AreEqual("TestLemma2$1()", corLem2.Name)
+                | "prp2" -> Assert.AreEqual("TestProposition2()", prp2.Name)
+                | "corPrp2" -> Assert.AreEqual("TestProposition2$1()", corPrp2.Name)
+                | "cor2" -> Assert.AreEqual("TestCorollary2$2()", cor2.Name)
+                | "corCor2" -> Assert.AreEqual("TestCorollary2$2$1()", corCor2.Name)
+                | "con1" -> Assert.AreEqual("TestConjecture()", con1.Name)
+                | "corCon1" -> Assert.AreEqual("TestConjecture$1()", corCon1.Name)
+                | "axi1" -> Assert.AreEqual("TestAxiom()", axi1.Name)
+                | "corAxi1"  -> Assert.AreEqual("TestAxiom$1()", corAxi1.Name) 
+                | _ -> Assert.IsTrue(false)
+        | _ -> 
+            Assert.IsTrue(false)
+
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
@@ -121,9 +173,74 @@ type TestFplValueScopeName() =
         | _ -> 
             Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("x")>]
+    [<DataRow("y")>]
+    [<DataRow("xu")>]
+    [<DataRow("xv")>]
+    [<DataRow("xw")>]
+    [<DataRow("yu")>]
+    [<DataRow("yv")>]
+    [<DataRow("yw")>]
+    [<DataRow("xua")>]
+    [<DataRow("xub")>]
+    [<DataRow("xuc")>]
+    [<DataRow("xva")>]
+    [<DataRow("xvb")>]
+    [<DataRow("xvc")>]
+    [<DataRow("xwa")>]
+    [<DataRow("xwb")>]
+    [<DataRow("xwc")>]
+    [<DataRow("yua")>]
+    [<DataRow("yub")>]
+    [<DataRow("yuc")>]
+    [<DataRow("yva")>]
+    [<DataRow("yvb")>]
+    [<DataRow("yvc")>]
+    [<DataRow("ywa")>]
+    [<DataRow("ywb")>]
+    [<DataRow("ywc")>]
     [<TestMethod>]
-    member this.TestVariablesInBlock() =
-        Assert.IsTrue(false)
+    member this.TestVariablesInBlock(var) =
+        let result = CommonFplValueTestCases.ScopeVariablesInBlock()
+        match result with
+        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+            match var with
+            | "r" -> Assert.AreEqual("", r.Name)
+            | "theory" -> Assert.AreEqual("Test", theory.Name)
+            | "block" -> Assert.AreEqual("TestPredicate()", block.Name); 
+            | "x" -> Assert.AreEqual("x", x.Name)
+            | "y" -> Assert.AreEqual("y", y.Name)
+            | "xu" -> Assert.AreEqual("u", xu.Name)
+            | "xv" -> Assert.AreEqual("v", xv.Name)
+            | "xw" -> Assert.AreEqual("w", xw.Name)
+            | "yu" -> Assert.AreEqual("u", yu.Name)
+            | "yv" -> Assert.AreEqual("v", yv.Name)
+            | "yw" -> Assert.AreEqual("w", yw.Name)
+            | "xua" -> Assert.AreEqual("a", xua.Name)
+            | "xub" -> Assert.AreEqual("b", xub.Name)
+            | "xuc" -> Assert.AreEqual("c", xuc.Name)
+            | "xva" -> Assert.AreEqual("a", xva.Name)
+            | "xvb" -> Assert.AreEqual("b", xvb.Name)
+            | "xvc" -> Assert.AreEqual("c", xvc.Name)
+            | "xwa" -> Assert.AreEqual("a", xwa.Name)
+            | "xwb" -> Assert.AreEqual("b", xwb.Name)
+            | "xwc" -> Assert.AreEqual("c", xwc.Name)
+            | "yua" -> Assert.AreEqual("a", yua.Name)
+            | "yub" -> Assert.AreEqual("b", yub.Name)
+            | "yuc" -> Assert.AreEqual("c", yuc.Name)
+            | "yva" -> Assert.AreEqual("a", yva.Name)
+            | "yvb" -> Assert.AreEqual("b", yvb.Name)
+            | "yvc" -> Assert.AreEqual("c", yvc.Name)
+            | "ywa" -> Assert.AreEqual("a", ywa.Name)
+            | "ywb" -> Assert.AreEqual("b", ywb.Name)
+            | "ywc" -> Assert.AreEqual("c", ywc.Name)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
 
     [<TestMethod>]
     member this.TestVariablesInBlockWithVariadic() =
