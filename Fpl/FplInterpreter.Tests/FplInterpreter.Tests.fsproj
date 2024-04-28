@@ -10,6 +10,14 @@
   <ItemGroup>
     <Compile Include="CommonTestHelpers.fs" />
     <Compile Include="CommonFplValueTestCases.fs" />
+    <Compile Include="TestFplValueScopeEvaluationType.fs" />
+    <Compile Include="TestFplValueScopeTypeSignature.fs" />
+    <Compile Include="TestFplValueScopeNameEndPos.fs" />
+    <Compile Include="TestFplValueScopeQualifiedName.fs" />
+    <Compile Include="TestFplValueScopeBlockTypeName.fs" />
+    <Compile Include="TestFplValueScopeBlockType.fs" />
+    <Compile Include="TestFplValueScopeNameIsFinal.fs" />
+    <Compile Include="TestFplValueScopeName.fs" />
     <Compile Include="TestFplValueScopeQualifiedStartPos.fs" />
     <Compile Include="TestFplValueScopeParent.fs" />
     <Compile Include="TestFplValueScopeCompleteness.fs" />

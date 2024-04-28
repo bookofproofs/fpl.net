@@ -44,45 +44,6 @@ type TestFplValue() =
         testFactory FplBlockType.Class FplType.Object 
 
 
-
-    [<TestMethod>]
-    member this.TestScopeVariablesInSignatureTypeSignature() =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignature()
-        match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
-
-            Assert.AreEqual(["obj"], ywc.TypeSignature)
-            Assert.AreEqual(["obj"], ywb.TypeSignature)
-            Assert.AreEqual(["obj"], ywa.TypeSignature)
-            Assert.AreEqual(["obj"], yvc.TypeSignature)
-            Assert.AreEqual(["obj"], yvb.TypeSignature)
-            Assert.AreEqual(["obj"], yva.TypeSignature)
-            Assert.AreEqual(["obj"], yuc.TypeSignature)
-            Assert.AreEqual(["obj"], yub.TypeSignature)
-            Assert.AreEqual(["obj"], yua.TypeSignature)
-            Assert.AreEqual(["obj"], xwc.TypeSignature)
-            Assert.AreEqual(["obj"], xwb.TypeSignature)
-            Assert.AreEqual(["obj"], xwa.TypeSignature)
-            Assert.AreEqual(["obj"], xvc.TypeSignature)
-            Assert.AreEqual(["obj"], xvb.TypeSignature)
-            Assert.AreEqual(["obj"], xva.TypeSignature)
-            Assert.AreEqual(["obj"], xuc.TypeSignature)
-            Assert.AreEqual(["obj"], xub.TypeSignature)
-            Assert.AreEqual(["obj"], xua.TypeSignature)
-
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], yw.TypeSignature)
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], yv.TypeSignature)
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], yu.TypeSignature)
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], xw.TypeSignature)
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], xv.TypeSignature)
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], xu.TypeSignature)
-            Assert.AreEqual(["pred"; "("; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; ")"], y.TypeSignature)
-            Assert.AreEqual(["pred"; "("; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; ")"], x.TypeSignature)
-            Assert.AreEqual(["TestPredicate"; "("; "pred"; "("; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; ")"; "pred"; "("; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; ")"; ")"], block.TypeSignature)
-            Assert.AreEqual([], theory.TypeSignature)
-            Assert.AreEqual([], r.TypeSignature)
-        | None -> ()
-
     [<DataRow("", "r")>]
     [<DataRow("Test(Ln: 1, Col: 1)", "theory")>]
     [<DataRow("Test(Ln: 2, Col: 13)", "block")>]

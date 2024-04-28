@@ -366,9 +366,33 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
             else
                 _nameFinal <- value
 
+    /// Type of the FPL block within this FplValue
+    member this.BlockType
+        with get () = _blockType
+        and set (value) = _blockType <- value
+
+    /// Name of the FPL block type within this FplValue
+    member this.BlockTypeName
+        with get () = _blockType.Name
+
     /// Qualified name of this FplValue 
     member this.QualifiedName
-        with get () = _blockType.Name + " " + _name + " at " + this.StartPos.ToString()
+        with get () = 
+            let rec getFullQualifiedName (fplValue:FplValue) (first:bool) =
+                if fplValue.BlockType = FplBlockType.Root then
+                    ""
+                elif first then 
+                    if FplValue.IsRoot(_parent.Value) then 
+                        getFullQualifiedName _parent.Value false + "." + _name 
+                    else
+                        getFullQualifiedName _parent.Value false + "." 
+                else
+                    if FplValue.IsRoot(_parent.Value) then 
+                        getFullQualifiedName _parent.Value false + "." + _name 
+                    else
+                        getFullQualifiedName _parent.Value false + "." 
+            getFullQualifiedName this true
+
 
     /// This FplValue's name's end position that can be different from its endig position
     member this.NameEndPos
@@ -379,11 +403,6 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     member this.TypeSignature
         with get () = _typeSignature
         and set (value:string list) = _typeSignature <- value
-
-    /// Type of the FPL block with this FplValue
-    member this.BlockType
-        with get () = _blockType
-        and set (value) = _blockType <- value
 
     /// The primary type of the FplValue
     member this.EvaluationType
@@ -412,7 +431,6 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     member this.Parent 
         with get () = _parent
         and set (value) = _parent <- value
-
 
     /// A list of asserted predicates for this FplValue
     member this.AssertedPredicates = System.Collections.Generic.List<Ast>()
@@ -704,7 +722,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
-        new FplValue("", FplBlockType.Root, FplType.Predicate, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+        new FplValue("", FplBlockType.Root, FplType.Object, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
 
     /// A factory method for the evaluation of Fpl class definitions
     static member CreateFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =
