@@ -5,10 +5,68 @@ open FplInterpreterTypes
 [<TestClass>]
 type TestFplValueScopeNameIsFinal() =
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("inf1")>]
+    [<DataRow("inf2")>]
+    [<DataRow("axi1")>]
+    [<DataRow("axi2")>]
+    [<DataRow("pst1")>]
+    [<DataRow("pst2")>]
+    [<DataRow("thm1")>]
+    [<DataRow("thm2")>]
+    [<DataRow("pro1")>]
+    [<DataRow("pro2")>]
+    [<DataRow("lem1")>]
+    [<DataRow("lem2")>]
+    [<DataRow("cor1")>]
+    [<DataRow("cor2")>]
+    [<DataRow("con1")>]
+    [<DataRow("con2")>]
+    [<DataRow("cla1")>]
+    [<DataRow("cla2")>]
+    [<DataRow("pre1")>]
+    [<DataRow("pre2")>]
+    [<DataRow("fun1")>]
+    [<DataRow("fun2")>]
+    [<DataRow("prf1")>]
+    [<DataRow("prf2")>]
     [<TestMethod>]
-    member this.TestBlocks() =
-        CommonFplValueTestCases.ScopeBlocks() |> ignore
-        Assert.IsTrue(false)
+    member this.TestBlocks(var) =
+        let res = CommonFplValueTestCases.ScopeBlocks() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(true, r.NameIsFinal)
+            | "theory" -> Assert.AreEqual(true, theory.NameIsFinal)
+            | "inf1" -> Assert.AreEqual(true, inf1.NameIsFinal)
+            | "inf2" -> Assert.AreEqual(true, inf2.NameIsFinal)
+            | "axi1" -> Assert.AreEqual(true, axi1.NameIsFinal)
+            | "axi2" -> Assert.AreEqual(true, axi2.NameIsFinal)
+            | "pst1" -> Assert.AreEqual(true, pst1.NameIsFinal)
+            | "pst2" -> Assert.AreEqual(true, pst2.NameIsFinal)
+            | "thm1" -> Assert.AreEqual(true, thm1.NameIsFinal)
+            | "thm2" -> Assert.AreEqual(true, thm2.NameIsFinal)
+            | "pro1" -> Assert.AreEqual(true, pro1.NameIsFinal)
+            | "pro2" -> Assert.AreEqual(true, pro2.NameIsFinal)
+            | "lem1" -> Assert.AreEqual(true, lem1.NameIsFinal)
+            | "lem2" -> Assert.AreEqual(true, lem2.NameIsFinal)
+            | "cor1" -> Assert.AreEqual(true, cor1.NameIsFinal)
+            | "cor2" -> Assert.AreEqual(true, cor2.NameIsFinal)
+            | "con1" -> Assert.AreEqual(true, con1.NameIsFinal)
+            | "con2" -> Assert.AreEqual(true, con2.NameIsFinal)
+            | "cla1" -> Assert.AreEqual(true, cla1.NameIsFinal)
+            | "cla2" -> Assert.AreEqual(true, cla2.NameIsFinal)
+            | "pre1" -> Assert.AreEqual(true, pre1.NameIsFinal)
+            | "pre2" -> Assert.AreEqual(true, pre2.NameIsFinal)
+            | "fun1" -> Assert.AreEqual(true, fun1.NameIsFinal)
+            | "fun2" -> Assert.AreEqual(true, fun2.NameIsFinal)
+            | "prf1" -> Assert.AreEqual(true, prf1.NameIsFinal)
+            | "prf2" -> Assert.AreEqual(true, prf2.NameIsFinal)
+            | _ -> Assert.IsTrue(false)
+        | _ -> 
+            Assert.IsTrue(false)
+
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
@@ -30,7 +88,7 @@ type TestFplValueScopeNameIsFinal() =
             | "t2" -> Assert.AreEqual(true, t2.NameIsFinal)
             | "t3" -> Assert.AreEqual(true, t3.NameIsFinal)
             | "t4" -> Assert.AreEqual(true, t4.NameIsFinal)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
@@ -59,7 +117,7 @@ type TestFplValueScopeNameIsFinal() =
             | "t2" -> Assert.AreEqual(true, t2.NameIsFinal)
             | "t3" -> Assert.AreEqual(true, t3.NameIsFinal)
             | "t4" -> Assert.AreEqual(true, t4.NameIsFinal)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
@@ -135,7 +193,7 @@ type TestFplValueScopeNameIsFinal() =
             | "ywa" -> Assert.AreEqual(true, ywa.NameIsFinal)
             | "ywb" -> Assert.AreEqual(true, ywb.NameIsFinal)
             | "ywc" -> Assert.AreEqual(true, ywc.NameIsFinal)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 

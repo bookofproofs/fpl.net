@@ -5,9 +5,67 @@ open FplInterpreterTypes
 [<TestClass>]
 type TestFplValueScopeParent() =
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("inf1")>]
+    [<DataRow("inf2")>]
+    [<DataRow("axi1")>]
+    [<DataRow("axi2")>]
+    [<DataRow("pst1")>]
+    [<DataRow("pst2")>]
+    [<DataRow("thm1")>]
+    [<DataRow("thm2")>]
+    [<DataRow("pro1")>]
+    [<DataRow("pro2")>]
+    [<DataRow("lem1")>]
+    [<DataRow("lem2")>]
+    [<DataRow("cor1")>]
+    [<DataRow("cor2")>]
+    [<DataRow("con1")>]
+    [<DataRow("con2")>]
+    [<DataRow("cla1")>]
+    [<DataRow("cla2")>]
+    [<DataRow("pre1")>]
+    [<DataRow("pre2")>]
+    [<DataRow("fun1")>]
+    [<DataRow("fun2")>]
+    [<DataRow("prf1")>]
+    [<DataRow("prf2")>]
     [<TestMethod>]
-    member this.TestBlocks() =
-        Assert.IsTrue(false)
+    member this.TestBlocks(var) =
+        let res = CommonFplValueTestCases.ScopeBlocks() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(None, r.Parent)
+            | "theory" -> Assert.AreEqual(r, theory.Parent.Value)
+            | "inf1" -> Assert.AreEqual(theory, inf1.Parent.Value)
+            | "inf2" -> Assert.AreEqual(theory, inf2.Parent.Value)
+            | "axi1" -> Assert.AreEqual(theory, axi1.Parent.Value)
+            | "axi2" -> Assert.AreEqual(theory, axi2.Parent.Value)
+            | "pst1" -> Assert.AreEqual(theory, pst1.Parent.Value)
+            | "pst2" -> Assert.AreEqual(theory, pst2.Parent.Value)
+            | "thm1" -> Assert.AreEqual(theory, thm1.Parent.Value)
+            | "thm2" -> Assert.AreEqual(theory, thm2.Parent.Value)
+            | "pro1" -> Assert.AreEqual(theory, pro1.Parent.Value)
+            | "pro2" -> Assert.AreEqual(theory, pro2.Parent.Value)
+            | "lem1" -> Assert.AreEqual(theory, lem1.Parent.Value)
+            | "lem2" -> Assert.AreEqual(theory, lem2.Parent.Value)
+            | "cor1" -> Assert.AreEqual(lem1, cor1.Parent.Value)
+            | "cor2" -> Assert.AreEqual(lem2, cor2.Parent.Value)
+            | "con1" -> Assert.AreEqual(theory, con1.Parent.Value)
+            | "con2" -> Assert.AreEqual(theory, con2.Parent.Value)
+            | "cla1" -> Assert.AreEqual(theory, cla1.Parent.Value)
+            | "cla2" -> Assert.AreEqual(theory, cla2.Parent.Value)
+            | "pre1" -> Assert.AreEqual(theory, pre1.Parent.Value)
+            | "pre2" -> Assert.AreEqual(theory, pre2.Parent.Value)
+            | "fun1" -> Assert.AreEqual(theory, fun1.Parent.Value)
+            | "fun2" -> Assert.AreEqual(theory, fun2.Parent.Value)
+            | "prf1" -> Assert.AreEqual(thm1, prf1.Parent.Value)
+            | "prf2" -> Assert.AreEqual(thm2, prf2.Parent.Value)
+            | _ -> Assert.IsTrue(false)
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
@@ -60,7 +118,7 @@ type TestFplValueScopeParent() =
                 | "corCon1" -> Assert.AreEqual(con1, corCon1.Parent.Value)
                 | "axi1" -> Assert.AreEqual(theory, axi1.Parent.Value)
                 | "corAxi1"  -> Assert.AreEqual(axi1, corAxi1.Parent.Value) 
-                | _ -> ()
+                | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
@@ -84,7 +142,7 @@ type TestFplValueScopeParent() =
             | "t2" -> Assert.AreEqual(block, t2.Parent.Value)
             | "t3" -> Assert.AreEqual(block, t3.Parent.Value)
             | "t4" -> Assert.AreEqual(block, t4.Parent.Value)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
@@ -113,7 +171,7 @@ type TestFplValueScopeParent() =
             | "t2" -> Assert.AreEqual(block, t2.Parent.Value)
             | "t3" -> Assert.AreEqual(block, t3.Parent.Value)
             | "t4" -> Assert.AreEqual(block, t4.Parent.Value)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 

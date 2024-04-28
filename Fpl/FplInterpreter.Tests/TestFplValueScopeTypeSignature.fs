@@ -97,8 +97,8 @@ type TestFplValueScopeTypeSignature() =
             | "ywa" -> Assert.AreEqual(["obj"], ywa.TypeSignature)
             | "ywb" -> Assert.AreEqual(["obj"], ywb.TypeSignature)
             | "ywc" -> Assert.AreEqual(["obj"], ywc.TypeSignature)
-            | _ -> ()
-        | None -> ()
+            | _ -> Assert.IsTrue(false)
+        | None -> Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestVariablesInSignatureWithVariadic() =

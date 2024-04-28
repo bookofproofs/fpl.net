@@ -5,10 +5,67 @@ open FplInterpreterTypes
 [<TestClass>]
 type TestFplValueScopeEvaluationType() =
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("inf1")>]
+    [<DataRow("inf2")>]
+    [<DataRow("axi1")>]
+    [<DataRow("axi2")>]
+    [<DataRow("pst1")>]
+    [<DataRow("pst2")>]
+    [<DataRow("thm1")>]
+    [<DataRow("thm2")>]
+    [<DataRow("pro1")>]
+    [<DataRow("pro2")>]
+    [<DataRow("lem1")>]
+    [<DataRow("lem2")>]
+    [<DataRow("cor1")>]
+    [<DataRow("cor2")>]
+    [<DataRow("con1")>]
+    [<DataRow("con2")>]
+    [<DataRow("cla1")>]
+    [<DataRow("cla2")>]
+    [<DataRow("pre1")>]
+    [<DataRow("pre2")>]
+    [<DataRow("fun1")>]
+    [<DataRow("fun2")>]
+    [<DataRow("prf1")>]
+    [<DataRow("prf2")>]
     [<TestMethod>]
-    member this.TestBlocks() =
-        CommonFplValueTestCases.ScopeBlocks() |> ignore
-        Assert.IsTrue(false)
+    member this.TestBlocks(var) =
+        let res = CommonFplValueTestCases.ScopeBlocks() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(FplType.Object, r.EvaluationType)
+            | "theory" -> Assert.AreEqual(FplType.Predicate, theory.EvaluationType)
+            | "inf1" -> Assert.AreEqual(FplType.Predicate, inf1.EvaluationType)
+            | "inf2" -> Assert.AreEqual(FplType.Predicate, inf2.EvaluationType)
+            | "axi1" -> Assert.AreEqual(FplType.Predicate, axi1.EvaluationType)
+            | "axi2" -> Assert.AreEqual(FplType.Predicate, axi2.EvaluationType)
+            | "pst1" -> Assert.AreEqual(FplType.Predicate, pst1.EvaluationType)
+            | "pst2" -> Assert.AreEqual(FplType.Predicate, pst2.EvaluationType)
+            | "thm1" -> Assert.AreEqual(FplType.Predicate, thm1.EvaluationType)
+            | "thm2" -> Assert.AreEqual(FplType.Predicate, thm2.EvaluationType)
+            | "pro1" -> Assert.AreEqual(FplType.Predicate, pro1.EvaluationType)
+            | "pro2" -> Assert.AreEqual(FplType.Predicate, pro2.EvaluationType)
+            | "lem1" -> Assert.AreEqual(FplType.Predicate, lem1.EvaluationType)
+            | "lem2" -> Assert.AreEqual(FplType.Predicate, lem2.EvaluationType)
+            | "cor1" -> Assert.AreEqual(FplType.Predicate, cor1.EvaluationType)
+            | "cor2" -> Assert.AreEqual(FplType.Predicate, cor2.EvaluationType)
+            | "con1" -> Assert.AreEqual(FplType.Predicate, con1.EvaluationType)
+            | "con2" -> Assert.AreEqual(FplType.Predicate, con2.EvaluationType)
+            | "cla1" -> Assert.AreEqual(FplType.Object, cla1.EvaluationType)
+            | "cla2" -> Assert.AreEqual(FplType.Object, cla2.EvaluationType)
+            | "pre1" -> Assert.AreEqual(FplType.Predicate, pre1.EvaluationType)
+            | "pre2" -> Assert.AreEqual(FplType.Predicate, pre2.EvaluationType)
+            | "fun1" -> Assert.AreEqual(FplType.Object, fun1.EvaluationType)
+            | "fun2" -> Assert.AreEqual(FplType.Object, fun2.EvaluationType)
+            | "prf1" -> Assert.AreEqual(FplType.Predicate, prf1.EvaluationType)
+            | "prf2" -> Assert.AreEqual(FplType.Predicate, prf2.EvaluationType)
+            | _ -> Assert.IsTrue(false)
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
@@ -30,7 +87,7 @@ type TestFplValueScopeEvaluationType() =
             | "t2" -> Assert.AreEqual(FplType.Object, t2.EvaluationType)
             | "t3" -> Assert.AreEqual(FplType.Object, t3.EvaluationType)
             | "t4" -> Assert.AreEqual(FplType.Object, t4.EvaluationType)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
@@ -59,7 +116,7 @@ type TestFplValueScopeEvaluationType() =
             | "t2" -> Assert.AreEqual(FplType.Predicate, t2.EvaluationType)
             | "t3" -> Assert.AreEqual(FplType.Object, t3.EvaluationType)
             | "t4" -> Assert.AreEqual(FplType.Object, t4.EvaluationType)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
@@ -135,7 +192,7 @@ type TestFplValueScopeEvaluationType() =
             | "ywa" -> Assert.AreEqual(FplType.Object, ywa.EvaluationType)
             | "ywb" -> Assert.AreEqual(FplType.Object, ywb.EvaluationType)
             | "ywc" -> Assert.AreEqual(FplType.Object, ywc.EvaluationType)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 

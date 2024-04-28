@@ -250,8 +250,8 @@ type CommonFplValueTestCases =
             axiom SomeAxiom2() {true}
             postulate SomePostulate1() {true}
             postulate SomePostulate2() {true}
-            theorem SomeTheorem2() {true}
             theorem SomeTheorem1() {true}
+            theorem SomeTheorem2() {true}
             proposition SomeProposition1() {true}
             proposition SomeProposition2() {true}
             lemma SomeLemma1() {true}
@@ -290,9 +290,9 @@ type CommonFplValueTestCases =
                             let cor1 = lem1.Scope["SomeLemma1$1()"]
                             let cor2 = lem2.Scope["SomeLemma2$1()"]
                             let con1 = theory.Scope["SomeConjecture1()"]
-                            let con2 = theory.Scope["SomeConjecture1()"]
+                            let con2 = theory.Scope["SomeConjecture2()"]
                             let cla1 = theory.Scope["SomeClass1"]
-                            let cla2 = theory.Scope["SomeClass1"]
+                            let cla2 = theory.Scope["SomeClass2"]
                             let pre1 = theory.Scope["SomePredicate1()"]
                             let pre2 = theory.Scope["SomePredicate2()"]
                             let fun1 = theory.Scope["SomeFunctionalTerm1() -> obj"]

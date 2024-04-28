@@ -5,10 +5,68 @@ open FplInterpreterTypes
 [<TestClass>]
 type TestFplValueScopeQualifiedStartPos() =
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("inf1")>]
+    [<DataRow("inf2")>]
+    [<DataRow("axi1")>]
+    [<DataRow("axi2")>]
+    [<DataRow("pst1")>]
+    [<DataRow("pst2")>]
+    [<DataRow("thm1")>]
+    [<DataRow("thm2")>]
+    [<DataRow("pro1")>]
+    [<DataRow("pro2")>]
+    [<DataRow("lem1")>]
+    [<DataRow("lem2")>]
+    [<DataRow("cor1")>]
+    [<DataRow("cor2")>]
+    [<DataRow("con1")>]
+    [<DataRow("con2")>]
+    [<DataRow("cla1")>]
+    [<DataRow("cla2")>]
+    [<DataRow("pre1")>]
+    [<DataRow("pre2")>]
+    [<DataRow("fun1")>]
+    [<DataRow("fun2")>]
+    [<DataRow("prf1")>]
+    [<DataRow("prf2")>]
     [<TestMethod>]
-    member this.TestBlocks() =
-        CommonFplValueTestCases.ScopeBlocks() |> ignore
-        Assert.IsTrue(false)
+    member this.TestBlocks(var) =
+        let res = CommonFplValueTestCases.ScopeBlocks() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+            | "theory" -> Assert.AreEqual("Test(Ln: 1, Col: 1)", theory.QualifiedStartPos)
+            | "inf1" -> Assert.AreEqual("Test(Ln: 2, Col: 13)", inf1.QualifiedStartPos)
+            | "inf2" -> Assert.AreEqual("Test(Ln: 3, Col: 13)", inf2.QualifiedStartPos)
+            | "axi1" -> Assert.AreEqual("Test(Ln: 4, Col: 13)", axi1.QualifiedStartPos)
+            | "axi2" -> Assert.AreEqual("Test(Ln: 5, Col: 13)", axi2.QualifiedStartPos)
+            | "pst1" -> Assert.AreEqual("Test(Ln: 6, Col: 13)", pst1.QualifiedStartPos)
+            | "pst2" -> Assert.AreEqual("Test(Ln: 7, Col: 13)", pst2.QualifiedStartPos)
+            | "thm1" -> Assert.AreEqual("Test(Ln: 8, Col: 13)", thm1.QualifiedStartPos)
+            | "thm2" -> Assert.AreEqual("Test(Ln: 9, Col: 13)", thm2.QualifiedStartPos)
+            | "pro1" -> Assert.AreEqual("Test(Ln: 10, Col: 13)", pro1.QualifiedStartPos)
+            | "pro2" -> Assert.AreEqual("Test(Ln: 11, Col: 13)", pro2.QualifiedStartPos)
+            | "lem1" -> Assert.AreEqual("Test(Ln: 12, Col: 13)", lem1.QualifiedStartPos)
+            | "lem2" -> Assert.AreEqual("Test(Ln: 13, Col: 13)", lem2.QualifiedStartPos)
+            | "cor1" -> Assert.AreEqual("Test(Ln: 14, Col: 13)", cor1.QualifiedStartPos)
+            | "cor2" -> Assert.AreEqual("Test(Ln: 15, Col: 13)", cor2.QualifiedStartPos)
+            | "con1" -> Assert.AreEqual("Test(Ln: 16, Col: 13)", con1.QualifiedStartPos)
+            | "con2" -> Assert.AreEqual("Test(Ln: 17, Col: 13)", con2.QualifiedStartPos)
+            | "cla1" -> Assert.AreEqual("Test(Ln: 18, Col: 17)", cla1.QualifiedStartPos)
+            | "cla2" -> Assert.AreEqual("Test(Ln: 19, Col: 17)", cla2.QualifiedStartPos)
+            | "pre1" -> Assert.AreEqual("Test(Ln: 20, Col: 17)", pre1.QualifiedStartPos)
+            | "pre2" -> Assert.AreEqual("Test(Ln: 21, Col: 17)", pre2.QualifiedStartPos)
+            | "fun1" -> Assert.AreEqual("Test(Ln: 22, Col: 17)", fun1.QualifiedStartPos)
+            | "fun2" -> Assert.AreEqual("Test(Ln: 23, Col: 17)", fun2.QualifiedStartPos)
+            | "prf1" -> Assert.AreEqual("Test(Ln: 24, Col: 13)", prf1.QualifiedStartPos)
+            | "prf2" -> Assert.AreEqual("Test(Ln: 25, Col: 13)", prf2.QualifiedStartPos)
+            | _ -> Assert.IsTrue(false)
+        | _ -> 
+            Assert.IsTrue(false)
+
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
@@ -30,7 +88,7 @@ type TestFplValueScopeQualifiedStartPos() =
             | "t2" -> Assert.AreEqual("Test(Ln: 5, Col: 13)", t2.QualifiedStartPos)
             | "t3" -> Assert.AreEqual("Test(Ln: 6, Col: 13)", t3.QualifiedStartPos)
             | "t4" -> Assert.AreEqual("Test(Ln: 7, Col: 13)", t4.QualifiedStartPos)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
@@ -59,14 +117,14 @@ type TestFplValueScopeQualifiedStartPos() =
             | "t2" -> Assert.AreEqual("Test(Ln: 6, Col: 13)", t2.QualifiedStartPos)
             | "t3" -> Assert.AreEqual("Test(Ln: 7, Col: 13)", t3.QualifiedStartPos)
             | "t4" -> Assert.AreEqual("Test(Ln: 8, Col: 13)", t4.QualifiedStartPos)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestVariablesInBlock() =
         Assert.IsTrue(false)
-
+        
     [<TestMethod>]
     member this.TestVariablesInBlockWithVariadic() =
         Assert.IsTrue(false)
@@ -135,8 +193,8 @@ type TestFplValueScopeQualifiedStartPos() =
             | "ywa" -> Assert.AreEqual("Test(Ln: 2, Col: 52)", ywa.QualifiedStartPos)
             | "ywb" -> Assert.AreEqual("Test(Ln: 2, Col: 54)", ywb.QualifiedStartPos)
             | "ywc" -> Assert.AreEqual("Test(Ln: 2, Col: 56)", ywc.QualifiedStartPos)
-            | _ -> ()
-        | None -> ()
+            | _ -> Assert.IsTrue(false)
+        | None -> Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestVariablesInSignatureWithVariadic() =

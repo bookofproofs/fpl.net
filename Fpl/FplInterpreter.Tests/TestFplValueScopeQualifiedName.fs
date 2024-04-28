@@ -5,10 +5,67 @@ open FplInterpreterTypes
 [<TestClass>]
 type TestFplValueScopeQualifiedName() =
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("inf1")>]
+    [<DataRow("inf2")>]
+    [<DataRow("axi1")>]
+    [<DataRow("axi2")>]
+    [<DataRow("pst1")>]
+    [<DataRow("pst2")>]
+    [<DataRow("thm1")>]
+    [<DataRow("thm2")>]
+    [<DataRow("pro1")>]
+    [<DataRow("pro2")>]
+    [<DataRow("lem1")>]
+    [<DataRow("lem2")>]
+    [<DataRow("cor1")>]
+    [<DataRow("cor2")>]
+    [<DataRow("con1")>]
+    [<DataRow("con2")>]
+    [<DataRow("cla1")>]
+    [<DataRow("cla2")>]
+    [<DataRow("pre1")>]
+    [<DataRow("pre2")>]
+    [<DataRow("fun1")>]
+    [<DataRow("fun2")>]
+    [<DataRow("prf1")>]
+    [<DataRow("prf2")>]
     [<TestMethod>]
-    member this.TestBlocks() =
-        CommonFplValueTestCases.ScopeBlocks() |> ignore
-        Assert.IsTrue(false)
+    member this.TestBlocks(var) =
+        let res = CommonFplValueTestCases.ScopeBlocks() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual("", r.QualifiedName)
+            | "theory" -> Assert.AreEqual("Test", theory.QualifiedName)
+            | "inf1" -> Assert.AreEqual("Test.SomeInference1()", inf1.QualifiedName)
+            | "inf2" -> Assert.AreEqual("Test.SomeInference2()", inf2.QualifiedName)
+            | "axi1" -> Assert.AreEqual("Test.SomeAxiom1()", axi1.QualifiedName)
+            | "axi2" -> Assert.AreEqual("Test.SomeAxiom2()", axi2.QualifiedName)
+            | "pst1" -> Assert.AreEqual("Test.SomePostulate1()", pst1.QualifiedName)
+            | "pst2" -> Assert.AreEqual("Test.SomePostulate2()", pst2.QualifiedName)
+            | "thm1" -> Assert.AreEqual("Test.SomeTheorem1()", thm1.QualifiedName)
+            | "thm2" -> Assert.AreEqual("Test.SomeTheorem2()", thm2.QualifiedName)
+            | "pro1" -> Assert.AreEqual("Test.SomeProposition1()", pro1.QualifiedName)
+            | "pro2" -> Assert.AreEqual("Test.SomeProposition2()", pro2.QualifiedName)
+            | "lem1" -> Assert.AreEqual("Test.SomeLemma1()", lem1.QualifiedName)
+            | "lem2" -> Assert.AreEqual("Test.SomeLemma2()", lem2.QualifiedName)
+            | "cor1" -> Assert.AreEqual("Test.SomeLemma1().SomeLemma1$1()", cor1.QualifiedName)
+            | "cor2" -> Assert.AreEqual("Test.SomeLemma2().SomeLemma2$1()", cor2.QualifiedName)
+            | "con1" -> Assert.AreEqual("Test.SomeConjecture1()", con1.QualifiedName)
+            | "con2" -> Assert.AreEqual("Test.SomeConjecture2()", con2.QualifiedName)
+            | "cla1" -> Assert.AreEqual("Test.SomeClass1", cla1.QualifiedName)
+            | "cla2" -> Assert.AreEqual("Test.SomeClass2", cla2.QualifiedName)
+            | "pre1" -> Assert.AreEqual("Test.SomePredicate1()", pre1.QualifiedName)
+            | "pre2" -> Assert.AreEqual("Test.SomePredicate2()", pre2.QualifiedName)
+            | "fun1" -> Assert.AreEqual("Test.SomeFunctionalTerm1() -> obj", fun1.QualifiedName)
+            | "fun2" -> Assert.AreEqual("Test.SomeFunctionalTerm2() -> obj", fun2.QualifiedName)
+            | "prf1" -> Assert.AreEqual("Test.SomeTheorem1().SomeTheorem1$1", prf1.QualifiedName)
+            | "prf2" -> Assert.AreEqual("Test.SomeTheorem2().SomeTheorem2$1", prf2.QualifiedName)
+            | _ -> Assert.IsTrue(false)
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
@@ -30,7 +87,7 @@ type TestFplValueScopeQualifiedName() =
             | "t2" -> Assert.AreEqual("Test.TestId.TestId(obj)", t2.QualifiedName)
             | "t3" -> Assert.AreEqual("Test.TestId.TestId(pred)", t3.QualifiedName)
             | "t4" -> Assert.AreEqual("Test.TestId.TestId(ind)", t4.QualifiedName)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
@@ -59,7 +116,7 @@ type TestFplValueScopeQualifiedName() =
             | "t2" -> Assert.AreEqual("Test.TestId().T2()", t2.QualifiedName)
             | "t3" -> Assert.AreEqual("Test.TestId().T3() -> obj", t3.QualifiedName)
             | "t4" -> Assert.AreEqual("Test.TestId().T4() -> obj", t4.QualifiedName)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
@@ -135,8 +192,8 @@ type TestFplValueScopeQualifiedName() =
             | "ywa" -> Assert.AreEqual("y.w.a", ywa.QualifiedName)
             | "ywb" -> Assert.AreEqual("y.w.b", ywb.QualifiedName)
             | "ywc" -> Assert.AreEqual("y.w.c", ywc.QualifiedName)
-            | _ -> ()
-        | None -> ()
+            | _ -> Assert.IsTrue(false)
+        | None -> Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestVariablesInSignatureWithVariadic() =

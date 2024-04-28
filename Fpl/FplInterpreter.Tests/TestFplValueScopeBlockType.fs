@@ -5,10 +5,68 @@ open FplInterpreterTypes
 [<TestClass>]
 type TestFplValueScopeBlockType() =
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("inf1")>]
+    [<DataRow("inf2")>]
+    [<DataRow("axi1")>]
+    [<DataRow("axi2")>]
+    [<DataRow("pst1")>]
+    [<DataRow("pst2")>]
+    [<DataRow("thm1")>]
+    [<DataRow("thm2")>]
+    [<DataRow("pro1")>]
+    [<DataRow("pro2")>]
+    [<DataRow("lem1")>]
+    [<DataRow("lem2")>]
+    [<DataRow("cor1")>]
+    [<DataRow("cor2")>]
+    [<DataRow("con1")>]
+    [<DataRow("con2")>]
+    [<DataRow("cla1")>]
+    [<DataRow("cla2")>]
+    [<DataRow("pre1")>]
+    [<DataRow("pre2")>]
+    [<DataRow("fun1")>]
+    [<DataRow("fun2")>]
+    [<DataRow("prf1")>]
+    [<DataRow("prf2")>]
     [<TestMethod>]
-    member this.TestBlocks() =
-        CommonFplValueTestCases.ScopeBlocks() |> ignore
-        Assert.IsTrue(false)
+    member this.TestBlocks(var) =
+        let res = CommonFplValueTestCases.ScopeBlocks() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(FplBlockType.Root, r.BlockType)
+            | "theory" -> Assert.AreEqual(FplBlockType.Theory, theory.BlockType)
+            | "inf1" -> Assert.AreEqual(FplBlockType.RuleOfInference, inf1.BlockType)
+            | "inf2" -> Assert.AreEqual(FplBlockType.RuleOfInference, inf2.BlockType)
+            | "axi1" -> Assert.AreEqual(FplBlockType.Axiom, axi1.BlockType)
+            | "axi2" -> Assert.AreEqual(FplBlockType.Axiom, axi2.BlockType)
+            | "pst1" -> Assert.AreEqual(FplBlockType.Axiom, pst1.BlockType)
+            | "pst2" -> Assert.AreEqual(FplBlockType.Axiom, pst2.BlockType)
+            | "thm1" -> Assert.AreEqual(FplBlockType.Theorem, thm1.BlockType)
+            | "thm2" -> Assert.AreEqual(FplBlockType.Theorem, thm2.BlockType)
+            | "pro1" -> Assert.AreEqual(FplBlockType.Proposition, pro1.BlockType)
+            | "pro2" -> Assert.AreEqual(FplBlockType.Proposition, pro2.BlockType)
+            | "lem1" -> Assert.AreEqual(FplBlockType.Lemma, lem1.BlockType)
+            | "lem2" -> Assert.AreEqual(FplBlockType.Lemma, lem2.BlockType)
+            | "cor1" -> Assert.AreEqual(FplBlockType.Corollary, cor1.BlockType)
+            | "cor2" -> Assert.AreEqual(FplBlockType.Corollary, cor1.BlockType)
+            | "con1" -> Assert.AreEqual(FplBlockType.Conjecture, con1.BlockType)
+            | "con2" -> Assert.AreEqual(FplBlockType.Conjecture, con2.BlockType)
+            | "cla1" -> Assert.AreEqual(FplBlockType.Class, cla1.BlockType)
+            | "cla2" -> Assert.AreEqual(FplBlockType.Class, cla2.BlockType)
+            | "pre1" -> Assert.AreEqual(FplBlockType.Predicate, pre1.BlockType)
+            | "pre2" -> Assert.AreEqual(FplBlockType.Predicate, pre2.BlockType)
+            | "fun1" -> Assert.AreEqual(FplBlockType.FunctionalTerm, fun1.BlockType)
+            | "fun2" -> Assert.AreEqual(FplBlockType.FunctionalTerm, fun2.BlockType)
+            | "prf1" -> Assert.AreEqual(FplBlockType.Proof, prf1.BlockType)
+            | "prf2" -> Assert.AreEqual(FplBlockType.Proof, prf2.BlockType)
+            | _ -> Assert.IsTrue(false)
+        | _ -> 
+            Assert.IsTrue(false)
+
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
@@ -30,7 +88,7 @@ type TestFplValueScopeBlockType() =
             | "t2" -> Assert.AreEqual(FplBlockType.Constructor, t2.BlockType)
             | "t3" -> Assert.AreEqual(FplBlockType.Constructor, t3.BlockType)
             | "t4" -> Assert.AreEqual(FplBlockType.Constructor, t4.BlockType)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
@@ -59,7 +117,7 @@ type TestFplValueScopeBlockType() =
             | "t2" -> Assert.AreEqual(FplBlockType.OptionalProperty, t2.BlockType)
             | "t3" -> Assert.AreEqual(FplBlockType.MandatoryProperty, t3.BlockType)
             | "t4" -> Assert.AreEqual(FplBlockType.OptionalProperty, t4.BlockType)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
 
@@ -135,7 +193,7 @@ type TestFplValueScopeBlockType() =
             | "ywa" -> Assert.AreEqual(FplBlockType.Variable, ywa.BlockType)
             | "ywb" -> Assert.AreEqual(FplBlockType.Variable, ywb.BlockType)
             | "ywc" -> Assert.AreEqual(FplBlockType.Variable, ywc.BlockType)
-            | _ -> ()
+            | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 

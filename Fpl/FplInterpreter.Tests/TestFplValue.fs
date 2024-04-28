@@ -795,94 +795,6 @@ type TestFplValue() =
         Assert.AreEqual(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore
 
-    [<DataRow("", "r")>]
-    [<DataRow("Test(Ln: 1, Col: 1)", "theory")>]
-    [<DataRow("Test(Ln: 2, Col: 13)", "block")>]
-    [<DataRow("Test(Ln: 4, Col: 13)", "t1")>]
-    [<DataRow("Test(Ln: 5, Col: 13)", "t2")>]
-    [<DataRow("Test(Ln: 6, Col: 13)", "t3")>]
-    [<DataRow("Test(Ln: 7, Col: 13)", "t4")>]
-    [<TestMethod>]
-    member this.TestScopeConstructorsQualifiedStartPos(expected, var) =
-        let res = CommonFplValueTestCases.ScopeConstructors() 
-        match res with
-        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
-            match var with 
-            | "r" -> Assert.AreEqual(expected, r.QualifiedStartPos)
-            | "theory" -> Assert.AreEqual(expected, theory.QualifiedStartPos)
-            | "block" -> Assert.AreEqual(expected, block.QualifiedStartPos)
-            | "t1" -> Assert.AreEqual(expected, t1.QualifiedStartPos)
-            | "t2" -> Assert.AreEqual(expected, t2.QualifiedStartPos)
-            | "t3" -> Assert.AreEqual(expected, t3.QualifiedStartPos)
-            | "t4" -> Assert.AreEqual(expected, t4.QualifiedStartPos)
-            | _ -> ()
-        | _ -> 
-            Assert.IsTrue(false)
-
-
-    [<DataRow("r", "")>]
-    [<DataRow("theory", "Test")>]
-    [<DataRow("inf1", "SomeInference1()")>]
-    [<DataRow("inf2", "SomeInference2()")>]
-    [<DataRow("axi1", "SomeAxiom1()")>]
-    [<DataRow("axi2", "SomeAxiom2()")>]
-    [<DataRow("pst1", "SomePostulate1()")>]
-    [<DataRow("pst2", "SomePostulate2()")>]
-    [<DataRow("thm1", "SomeTheorem1()")>]
-    [<DataRow("thm2", "SomeTheorem2()")>]
-    [<DataRow("pro1", "SomeProposition1()")>]
-    [<DataRow("pro2", "SomeProposition2()")>]
-    [<DataRow("lem1", "SomeLemma1()")>]
-    [<DataRow("lem2", "SomeLemma2()")>]
-    [<DataRow("cor1", "SomeLemma1$1()")>]
-    [<DataRow("cor2", "SomeLemma2$1()")>]
-    [<DataRow("con1", "SomeConjecture1()")>]
-    [<DataRow("con2", "SomeConjecture1()")>]
-    [<DataRow("cla1", "SomeClass1")>]
-    [<DataRow("cla2", "SomeClass1")>]
-    [<DataRow("pre1", "SomePredicate1()")>]
-    [<DataRow("pre2", "SomePredicate2()")>]
-    [<DataRow("fun1", "SomeFunctionalTerm1() -> obj")>]
-    [<DataRow("fun2", "SomeFunctionalTerm2() -> obj")>]
-    [<DataRow("prf1", "SomeTheorem1$1")>]
-    [<DataRow("prf2", "SomeTheorem2$1")>]
-    [<TestMethod>]
-    member this.TestScopeBlocksQualifiedName(var, expected) =
-        let res = CommonFplValueTestCases.ScopeBlocks() 
-        match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
-            match var with 
-            | "r" -> Assert.AreEqual(expected, r.QualifiedName)
-            | "theory" -> Assert.AreEqual(expected, theory.QualifiedName)
-            | "inf1" -> Assert.AreEqual(expected, inf1.QualifiedName)
-            | "inf2" -> Assert.AreEqual(expected, inf2.QualifiedName)
-            | "axi1" -> Assert.AreEqual(expected, axi1.QualifiedName)
-            | "axi2" -> Assert.AreEqual(expected, axi2.QualifiedName)
-            | "pst1" -> Assert.AreEqual(expected, pst1.QualifiedName)
-            | "pst2" -> Assert.AreEqual(expected, pst2.QualifiedName)
-            | "thm1" -> Assert.AreEqual(expected, thm1.QualifiedName)
-            | "thm2" -> Assert.AreEqual(expected, thm2.QualifiedName)
-            | "pro1" -> Assert.AreEqual(expected, pro1.QualifiedName)
-            | "pro2" -> Assert.AreEqual(expected, pro2.QualifiedName)
-            | "lem1" -> Assert.AreEqual(expected, lem1.QualifiedName)
-            | "lem2" -> Assert.AreEqual(expected, lem2.QualifiedName)
-            | "cor1" -> Assert.AreEqual(expected, cor1.QualifiedName)
-            | "cor2" -> Assert.AreEqual(expected, cor2.QualifiedName)
-            | "con1" -> Assert.AreEqual(expected, con1.QualifiedName)
-            | "con2" -> Assert.AreEqual(expected, con2.QualifiedName)
-            | "cla1" -> Assert.AreEqual(expected, cla1.QualifiedName)
-            | "cla2" -> Assert.AreEqual(expected, cla2.QualifiedName)
-            | "pre1" -> Assert.AreEqual(expected, pre1.QualifiedName)
-            | "pre2" -> Assert.AreEqual(expected, pre2.QualifiedName)
-            | "fun1" -> Assert.AreEqual(expected, fun1.QualifiedName)
-            | "fun2" -> Assert.AreEqual(expected, fun2.QualifiedName)
-            | "prf1" -> Assert.AreEqual(expected, prf1.QualifiedName)
-            | "prf2" -> Assert.AreEqual(expected, prf2.QualifiedName)
-            | _ -> ()
-        | _ -> 
-            Assert.IsTrue(false)
-
-
     [<DataRow("r")>]
     [<DataRow("theory")>]
     [<DataRow("thm1")>]
@@ -935,36 +847,9 @@ type TestFplValue() =
                 | "corCon1" -> Assert.AreEqual("", corCon1.QualifiedStartPos)
                 | "axi1" -> Assert.AreEqual("", axi1.QualifiedStartPos)
                 | "corAxi1"  -> Assert.AreEqual("", corAxi1.QualifiedStartPos) 
-                | _ -> ()
+                | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
-
-    [<DataRow("def pred TestId() { intr prty pred T() {intr} };", "T()", true)>]
-    [<DataRow("def pred TestId() { intr prty opt pred T() {intr} };", "T()", false)>]
-    [<DataRow("def pred TestId() { intr prty func T()->obj {intr} };", "T() -> obj", true)>]
-    [<DataRow("def pred TestId() { intr prty opt func T()->obj {intr} };", "T() -> obj", false)>]
-    [<TestMethod>]
-    member this.TestMandatoryAndOptionalProperties(fplCode:string, expectedPropertyName:string, isMandatory) =
-        let result = prepareFplCode(fplCode, false) 
-        let fplBlock = result.Value.Root.Scope["Test"].Scope["TestId()"]
-        let propertyValue = fplBlock.Scope[expectedPropertyName]
-        if isMandatory then
-            Assert.AreEqual(FplBlockType.MandatoryProperty, propertyValue.BlockType)
-        else
-            Assert.AreEqual(FplBlockType.OptionalProperty, propertyValue.BlockType)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("def cl TestId:obj {ctor TestId() {self} };", "TestId()")>]
-    [<DataRow("def cl TestId:obj {ctor TestId(x:obj) {self} };", "TestId(obj)")>]
-    [<DataRow("def cl TestId:obj {ctor TestId(x:ind) {self} };", "TestId(ind)")>]
-    [<DataRow("def cl TestId:obj {ctor TestId(x:pred) {self} };", "TestId(pred)")>]
-    [<TestMethod>]
-    member this.TestConstructor(fplCode:string, expectedConstructorName:string) =
-        let result = prepareFplCode(fplCode, false) 
-        let fplBlock = result.Value.Root.Scope["Test"].Scope["TestId"]
-        let constructorName = fplBlock.Scope[expectedConstructorName]
-        Assert.AreEqual(FplBlockType.Constructor, constructorName.BlockType)
-        prepareFplCode("", true) |> ignore
 
     [<DataRow("def cl T:obj {intr prty pred TestId() {intrinsic}};", "TestId()", "TestId ( )")>]
     [<DataRow("def cl T:obj {intr prty pred TestId(x:ind) {intrinsic}};", "TestId(ind)", "TestId ( ind )")>]
