@@ -3,104 +3,55 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplInterpreterTypes
 
 [<TestClass>]
-type TestFplValueScopeBlockTypeName() =
+type TestFplBlockType() =
 
+    [<DataRow("Variable")>]
+    [<DataRow("VariadicVariableMany")>]
+    [<DataRow("VariadicVariableMany1")>]
+    [<DataRow("Expression")>]
+    [<DataRow("MandatoryProperty")>]
+    [<DataRow("OptionalProperty")>]
+    [<DataRow("Constructor")>]
+    [<DataRow("Class")>]
+    [<DataRow("Theorem")>]
+    [<DataRow("Lemma")>]
+    [<DataRow("Proposition")>]
+    [<DataRow("Corollary")>]
+    [<DataRow("Proof")>]
+    [<DataRow("Conjecture")>]
+    [<DataRow("Axiom")>]
+    [<DataRow("RuleOfInference")>]
+    [<DataRow("Premise")>]
+    [<DataRow("Conclusion")>]
+    [<DataRow("Predicate")>]
+    [<DataRow("FunctionalTerm")>]
+    [<DataRow("Theory")>]
+    [<DataRow("Root")>]
     [<TestMethod>]
-    member this.TestBlocks() =
-        CommonFplValueTestCases.ScopeBlocks() |> ignore
-        Assert.IsTrue(false)
-
-    [<TestMethod>]
-    member this.TestConstructors() =
-        CommonFplValueTestCases.ScopeConstructors() |> ignore
-        Assert.IsTrue(false)
-
-    [<TestMethod>]
-    member this.TestProofsAndCorollaries() =
-        CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
-        Assert.IsTrue(false)
-
-    [<TestMethod>]
-    member this.TestProperties() =
-        CommonFplValueTestCases.ScopeProperties() |> ignore
-        Assert.IsTrue(false)
-
-    [<TestMethod>]
-    member this.TestVariablesInBlock() =
-        Assert.IsTrue(false)
-
-    [<TestMethod>]
-    member this.TestVariablesInBlockWithVariadic() =
-        Assert.IsTrue(false)
-
-    [<DataRow("r")>]
-    [<DataRow("theory")>]
-    [<DataRow("block")>]
-    [<DataRow("x")>]
-    [<DataRow("y")>]
-    [<DataRow("xu")>]
-    [<DataRow("xv")>]
-    [<DataRow("xw")>]
-    [<DataRow("yu")>]
-    [<DataRow("yv")>]
-    [<DataRow("yw")>]
-    [<DataRow("xua")>]
-    [<DataRow("xub")>]
-    [<DataRow("xuc")>]
-    [<DataRow("xva")>]
-    [<DataRow("xvb")>]
-    [<DataRow("xvc")>]
-    [<DataRow("xwa")>]
-    [<DataRow("xwb")>]
-    [<DataRow("xwc")>]
-    [<DataRow("yua")>]
-    [<DataRow("yub")>]
-    [<DataRow("yuc")>]
-    [<DataRow("yva")>]
-    [<DataRow("yvb")>]
-    [<DataRow("yvc")>]
-    [<DataRow("ywa")>]
-    [<DataRow("ywb")>]
-    [<DataRow("ywc")>]
-    [<TestMethod>]
-    member this.TestVariablesInSignature(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignature()
-        match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
-            match var with
-            | "r" -> Assert.AreEqual("a root", r.BlockType.Name)
-            | "theory" -> Assert.AreEqual("a theory", theory.BlockType.Name)
-            | "block" -> Assert.AreEqual("a predicate definition", block.BlockType.Name)
-            | "x" -> Assert.AreEqual("a variable", x.BlockType.Name)
-            | "y" -> Assert.AreEqual("a variable", y.BlockType.Name)
-            | "xu" -> Assert.AreEqual("a variable", xu.BlockType.Name)
-            | "xv" -> Assert.AreEqual("a variable", xv.BlockType.Name)
-            | "xw" -> Assert.AreEqual("a variable", xw.BlockType.Name)
-            | "yu" -> Assert.AreEqual("a variable", yu.BlockType.Name)
-            | "yv" -> Assert.AreEqual("a variable", yv.BlockType.Name)
-            | "yw" -> Assert.AreEqual("a variable", yw.BlockType.Name)
-            | "xua" -> Assert.AreEqual("a variable", xua.BlockType.Name)
-            | "xub" -> Assert.AreEqual("a variable", xub.BlockType.Name)
-            | "xuc" -> Assert.AreEqual("a variable", xuc.BlockType.Name)
-            | "xva" -> Assert.AreEqual("a variable", xva.BlockType.Name)
-            | "xvb" -> Assert.AreEqual("a variable", xvb.BlockType.Name)
-            | "xvc" -> Assert.AreEqual("a variable", xvc.BlockType.Name)
-            | "xwa" -> Assert.AreEqual("a variable", xwa.BlockType.Name)
-            | "xwb" -> Assert.AreEqual("a variable", xwb.BlockType.Name)
-            | "xwc" -> Assert.AreEqual("a variable", xwc.BlockType.Name)
-            | "yua" -> Assert.AreEqual("a variable", yua.BlockType.Name)
-            | "yub" -> Assert.AreEqual("a variable", yub.BlockType.Name)
-            | "yuc" -> Assert.AreEqual("a variable", yuc.BlockType.Name)
-            | "yva" -> Assert.AreEqual("a variable", yva.BlockType.Name)
-            | "yvb" -> Assert.AreEqual("a variable", yvb.BlockType.Name)
-            | "yvc" -> Assert.AreEqual("a variable", yvc.BlockType.Name)
-            | "ywa" -> Assert.AreEqual("a variable", ywa.BlockType.Name)
-            | "ywb" -> Assert.AreEqual("a variable", ywb.BlockType.Name)
-            | "ywc" -> Assert.AreEqual("a variable", ywc.BlockType.Name)
-            | _ -> ()
-        | None -> 
+    member this.TestBlockTypeName(var) =
+        match var with
+        | "Variable" -> Assert.AreEqual("a variable",FplBlockType.Variable.Name)
+        | "VariadicVariableMany" -> Assert.AreEqual("a zero-or-more variable",FplBlockType.VariadicVariableMany.Name)
+        | "VariadicVariableMany1" -> Assert.AreEqual("a one-or-more variable",FplBlockType.VariadicVariableMany1.Name)
+        | "Expression" -> Assert.AreEqual("an expression",FplBlockType.Expression.Name)
+        | "MandatoryProperty" -> Assert.AreEqual("a property",FplBlockType.MandatoryProperty.Name)
+        | "OptionalProperty" -> Assert.AreEqual("an optional property",FplBlockType.OptionalProperty.Name)
+        | "Constructor" -> Assert.AreEqual("a constructor",FplBlockType.Constructor.Name)
+        | "Class" -> Assert.AreEqual("a class definition",FplBlockType.Class.Name)
+        | "Theorem" -> Assert.AreEqual("a theorem",FplBlockType.Theorem.Name)
+        | "Lemma" -> Assert.AreEqual("a lemma",FplBlockType.Lemma.Name)
+        | "Proposition" -> Assert.AreEqual("a proposition",FplBlockType.Proposition.Name)
+        | "Corollary" -> Assert.AreEqual("a corollary",FplBlockType.Corollary.Name)
+        | "Proof" -> Assert.AreEqual("a proof",FplBlockType.Proof.Name)
+        | "Conjecture" -> Assert.AreEqual("a conjecture",FplBlockType.Conjecture.Name)
+        | "Axiom" -> Assert.AreEqual("an axiom",FplBlockType.Axiom.Name)
+        | "RuleOfInference" -> Assert.AreEqual("a rule of inference",FplBlockType.RuleOfInference.Name)
+        | "Premise" -> Assert.AreEqual("a premise",FplBlockType.Premise.Name)
+        | "Conclusion" -> Assert.AreEqual("a conclusion",FplBlockType.Conclusion.Name)
+        | "Predicate" -> Assert.AreEqual("a predicate definition",FplBlockType.Predicate.Name)
+        | "FunctionalTerm" -> Assert.AreEqual("a functional term definition",FplBlockType.FunctionalTerm.Name)
+        | "Theory" -> Assert.AreEqual("a theory",FplBlockType.Theory.Name)
+        | "Root" -> Assert.AreEqual("a root",FplBlockType.Root.Name)
+        | _ -> 
             Assert.IsTrue(false)
 
-    [<TestMethod>]
-    member this.TestVariablesInSignatureWithVariadic() =
-        Assert.IsTrue(false)

@@ -21,10 +21,29 @@ type TestFplValueScopeNameEndPos() =
         CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
         Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("t1")>]
+    [<DataRow("t2")>]
+    [<DataRow("t3")>]
+    [<DataRow("t4")>]
     [<TestMethod>]
-    member this.TestProperties() =
-        CommonFplValueTestCases.ScopeProperties() |> ignore
-        Assert.IsTrue(false)
+    member this.TestProperties(var) =
+        let res = CommonFplValueTestCases.ScopeProperties() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(Position("", 0, 1, 1), r.NameEndPos)
+            | "theory" -> Assert.AreEqual(Position("", 0, 1, 1), theory.NameEndPos)
+            | "block" -> Assert.AreEqual(Position("", 27, 2, 26), block.NameEndPos)
+            | "t1" -> Assert.AreEqual(Position("", 0, 5, 27), t1.NameEndPos)
+            | "t2" -> Assert.AreEqual(Position("", 0, 6, 31), t2.NameEndPos)
+            | "t3" -> Assert.AreEqual(Position("", 0, 7, 32), t3.NameEndPos)
+            | "t4" -> Assert.AreEqual(Position("", 0, 8, 41), t4.NameEndPos)
+            | _ -> ()
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestVariablesInBlock() =

@@ -295,8 +295,8 @@ type FplBlockType =
         match this with
             // parser error messages
             | Variable -> "variable"
-            | VariadicVariableMany -> "0 or more variable"
-            | VariadicVariableMany1 -> "1 ore more variable"
+            | VariadicVariableMany -> "zero-or-more variable"
+            | VariadicVariableMany1 -> "one-or-more variable"
             | Expression -> "expression"
             | MandatoryProperty -> "property"
             | OptionalProperty -> "optional property"
@@ -375,25 +375,6 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     member this.BlockTypeName
         with get () = _blockType.Name
 
-    /// Qualified name of this FplValue 
-    member this.QualifiedName
-        with get () = 
-            let rec getFullQualifiedName (fplValue:FplValue) (first:bool) =
-                if fplValue.BlockType = FplBlockType.Root then
-                    ""
-                elif first then 
-                    if FplValue.IsRoot(_parent.Value) then 
-                        getFullQualifiedName _parent.Value false + "." + _name 
-                    else
-                        getFullQualifiedName _parent.Value false + "." 
-                else
-                    if FplValue.IsRoot(_parent.Value) then 
-                        getFullQualifiedName _parent.Value false + "." + _name 
-                    else
-                        getFullQualifiedName _parent.Value false + "." 
-            getFullQualifiedName this true
-
-
     /// This FplValue's name's end position that can be different from its endig position
     member this.NameEndPos
         with get () = _nameEndPos
@@ -461,6 +442,24 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     /// Indicates if this FplValue is an root of the symbol table.
     static member IsRoot(fplValue:FplValue) = 
         fplValue.BlockType = FplBlockType.Root
+
+    /// Qualified name of this FplValue 
+    member this.QualifiedName
+        with get () = 
+            let rec getFullName (fplValue:FplValue) (first:bool) =
+                if fplValue.BlockType = FplBlockType.Root then
+                    ""
+                elif first then 
+                    if FplValue.IsRoot(fplValue.Parent.Value) then 
+                        getFullName fplValue.Parent.Value false + fplValue.Name 
+                    else
+                        getFullName fplValue.Parent.Value false + "." + fplValue.Name 
+                else
+                    if FplValue.IsRoot(fplValue.Parent.Value) then 
+                        getFullName fplValue.Parent.Value false + fplValue.Name 
+                    else
+                        getFullName fplValue.Parent.Value false + "." + fplValue.Name
+            getFullName this true
 
     /// Indicates if this FplValue is a constructor.
     static member IsConstructor(fplValue:FplValue) = 

@@ -88,6 +88,9 @@ type TestFplValueScopeParent() =
         CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
         Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
     [<DataRow("t3")>]
@@ -96,8 +99,11 @@ type TestFplValueScopeParent() =
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
         match res with
-        | Some (_,_,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
+            | "r" -> Assert.AreEqual(None, r.Parent)
+            | "theory" -> Assert.AreEqual(r, theory.Parent.Value)
+            | "block" -> Assert.AreEqual(theory, block.Parent.Value)
             | "t1" -> Assert.AreEqual(block, t1.Parent.Value)
             | "t2" -> Assert.AreEqual(block, t2.Parent.Value)
             | "t3" -> Assert.AreEqual(block, t3.Parent.Value)

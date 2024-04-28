@@ -193,7 +193,7 @@ type CommonFplValueTestCases =
             prty pred T1() {intr}
             prty opt pred T2() {intr}
             prty func T3()->obj {intr}
-            prty func opt func T4()->obj {intr}
+            prty opt func T4()->obj {intr}
         }
         ;
         """

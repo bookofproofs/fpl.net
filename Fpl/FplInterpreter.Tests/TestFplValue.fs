@@ -44,77 +44,6 @@ type TestFplValue() =
         testFactory FplBlockType.Class FplType.Object 
 
 
-    [<DataRow("", "r")>]
-    [<DataRow("Test(Ln: 1, Col: 1)", "theory")>]
-    [<DataRow("Test(Ln: 2, Col: 13)", "block")>]
-    [<DataRow("Test(Ln: 2, Col: 32)", "x")>]
-    [<DataRow("Test(Ln: 2, Col: 34)", "y")>]
-    [<DataRow("Test(Ln: 2, Col: 45)", "xw")>]
-    [<DataRow("Test(Ln: 2, Col: 41)", "xu")>]
-    [<DataRow("Test(Ln: 2, Col: 43)", "xv")>]
-    [<DataRow("Test(Ln: 2, Col: 45)", "yw")>]
-    [<DataRow("Test(Ln: 2, Col: 41)", "yu")>]
-    [<DataRow("Test(Ln: 2, Col: 43)", "yv")>]
-    [<DataRow("Test(Ln: 2, Col: 52)", "xwa")>]
-    [<DataRow("Test(Ln: 2, Col: 54)", "xwb")>]
-    [<DataRow("Test(Ln: 2, Col: 56)", "xwc")>]
-    [<DataRow("Test(Ln: 2, Col: 52)", "xua")>]
-    [<DataRow("Test(Ln: 2, Col: 54)", "xub")>]
-    [<DataRow("Test(Ln: 2, Col: 56)", "xuc")>]
-    [<DataRow("Test(Ln: 2, Col: 52)", "xva")>]
-    [<DataRow("Test(Ln: 2, Col: 54)", "xvb")>]
-    [<DataRow("Test(Ln: 2, Col: 56)", "xvc")>]
-    [<DataRow("Test(Ln: 2, Col: 52)", "ywa")>]
-    [<DataRow("Test(Ln: 2, Col: 54)", "ywb")>]
-    [<DataRow("Test(Ln: 2, Col: 56)", "ywc")>]
-    [<DataRow("Test(Ln: 2, Col: 52)", "yua")>]
-    [<DataRow("Test(Ln: 2, Col: 54)", "yub")>]
-    [<DataRow("Test(Ln: 2, Col: 56)", "yuc")>]
-    [<DataRow("Test(Ln: 2, Col: 52)", "yva")>]
-    [<DataRow("Test(Ln: 2, Col: 54)", "yvb")>]
-    [<DataRow("Test(Ln: 2, Col: 56)", "yvc")>]
-    [<TestMethod>]
-    member this.TestScopeVariablesInSignatureQualifiedStartingPos(expected, var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignature()
-        match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
-            match var with 
-            | "ywc" -> Assert.AreEqual(expected, ywc.QualifiedStartPos)
-            | "ywb" -> Assert.AreEqual(expected, ywb.QualifiedStartPos)
-            | "ywa" -> Assert.AreEqual(expected, ywa.QualifiedStartPos)
-            | "yvc" -> Assert.AreEqual(expected, yvc.QualifiedStartPos)
-            | "yvb" -> Assert.AreEqual(expected, yvb.QualifiedStartPos)
-            | "yva" -> Assert.AreEqual(expected, yva.QualifiedStartPos)
-            | "yuc" -> Assert.AreEqual(expected, yuc.QualifiedStartPos)
-            | "yub" -> Assert.AreEqual(expected, yub.QualifiedStartPos)
-            | "yua" -> Assert.AreEqual(expected, yua.QualifiedStartPos)
-            | "xwc" -> Assert.AreEqual(expected, xwc.QualifiedStartPos)
-            | "xwb" -> Assert.AreEqual(expected, xwb.QualifiedStartPos)
-            | "xwa" -> Assert.AreEqual(expected, xwa.QualifiedStartPos)
-            | "xvc" -> Assert.AreEqual(expected, xvc.QualifiedStartPos)
-            | "xvb" -> Assert.AreEqual(expected, xvb.QualifiedStartPos)
-            | "xva" -> Assert.AreEqual(expected, xva.QualifiedStartPos)
-            | "xuc" -> Assert.AreEqual(expected, xuc.QualifiedStartPos)
-            | "xub" -> Assert.AreEqual(expected, xub.QualifiedStartPos)
-            | "xua" -> Assert.AreEqual(expected, xua.QualifiedStartPos)
-
-            | "yw" -> Assert.AreEqual(expected, yw.QualifiedStartPos)
-            | "yv" -> Assert.AreEqual(expected, yv.QualifiedStartPos)
-            | "yu" -> Assert.AreEqual(expected, yu.QualifiedStartPos)
-            | "xw" -> Assert.AreEqual(expected, xw.QualifiedStartPos)
-            | "xv" -> Assert.AreEqual(expected, xv.QualifiedStartPos)
-            | "xu" -> Assert.AreEqual(expected,  xu.QualifiedStartPos)
-            | "y" -> Assert.AreEqual(expected, y.QualifiedStartPos)
-            | "x" -> Assert.AreEqual(expected, x.QualifiedStartPos)
-            | "block" -> Assert.AreEqual(expected, block.QualifiedStartPos)
-            | "theory" -> Assert.AreEqual(expected, theory.QualifiedStartPos)
-            | "r" -> Assert.AreEqual(expected, r.QualifiedStartPos)
-            | _ -> 
-                Assert.IsTrue(false)
-        | None -> 
-            Assert.IsTrue(false)
-
-
     [<DataRow("inference TestId() {pre: true con: true};", "TestId()", "TestId ( )")>]
     [<DataRow("inference TestId(x:ind) {pre: true con: true};", "TestId(ind)", "TestId ( ind )")>]
     [<DataRow("inference TestId(x:pred) {pre: true con: true};", "TestId(pred)", "TestId ( pred )")>]
@@ -865,31 +794,6 @@ type TestFplValue() =
                 (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
         Assert.AreEqual(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore
-
-
-    [<DataRow("", "r")>]
-    [<DataRow("Test(Ln: 1, Col: 1)", "theory")>]
-    [<DataRow("Test(Ln: 2, Col: 13)", "block")>]
-    [<DataRow("Test(Ln: 5, Col: 13)", "t1")>]
-    [<DataRow("Test(Ln: 6, Col: 13)", "t2")>]
-    [<DataRow("Test(Ln: 7, Col: 13)", "t3")>]
-    [<DataRow("Test(Ln: 8, Col: 13)", "t4")>]
-    [<TestMethod>]
-    member this.TestScopePropertiesQualifiedStartPos(expected, var) =
-        let res = CommonFplValueTestCases.ScopeProperties() 
-        match res with
-        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
-            match var with 
-            | "r" -> Assert.AreEqual(expected, r.QualifiedStartPos)
-            | "theory" -> Assert.AreEqual(expected, theory.QualifiedStartPos)
-            | "block" -> Assert.AreEqual(expected, block.QualifiedStartPos)
-            | "t1" -> Assert.AreEqual(expected, t1.QualifiedStartPos)
-            | "t2" -> Assert.AreEqual(expected, t2.QualifiedStartPos)
-            | "t3" -> Assert.AreEqual(expected, t3.QualifiedStartPos)
-            | "t4" -> Assert.AreEqual(expected, t4.QualifiedStartPos)
-            | _ -> ()
-        | _ -> 
-            Assert.IsTrue(false)
 
 
     [<DataRow("a root  at (Ln: 1, Col: 1)", "r")>]

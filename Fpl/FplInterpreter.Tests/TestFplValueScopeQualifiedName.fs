@@ -20,10 +20,29 @@ type TestFplValueScopeQualifiedName() =
         CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
         Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("t1")>]
+    [<DataRow("t2")>]
+    [<DataRow("t3")>]
+    [<DataRow("t4")>]
     [<TestMethod>]
-    member this.TestProperties() =
-        CommonFplValueTestCases.ScopeProperties() |> ignore
-        Assert.IsTrue(false)
+    member this.TestScopeProperties(var) =
+        let res = CommonFplValueTestCases.ScopeProperties() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual("", r.QualifiedName)
+            | "theory" -> Assert.AreEqual("Test", theory.QualifiedName)
+            | "block" -> Assert.AreEqual("Test.TestId()", block.QualifiedName)
+            | "t1" -> Assert.AreEqual("Test.TestId().T1()", t1.QualifiedName)
+            | "t2" -> Assert.AreEqual("Test.TestId().T2()", t2.QualifiedName)
+            | "t3" -> Assert.AreEqual("Test.TestId().T3() -> obj", t3.QualifiedName)
+            | "t4" -> Assert.AreEqual("Test.TestId().T4() -> obj", t4.QualifiedName)
+            | _ -> ()
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestVariablesInBlock() =

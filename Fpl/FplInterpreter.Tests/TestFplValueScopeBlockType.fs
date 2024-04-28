@@ -20,10 +20,29 @@ type TestFplValueScopeBlockType() =
         CommonFplValueTestCases.ScopeVariablesInSignatureWithVariadic() |> ignore
         Assert.IsTrue(false)
 
+    [<DataRow("r")>]
+    [<DataRow("theory")>]
+    [<DataRow("block")>]
+    [<DataRow("t1")>]
+    [<DataRow("t2")>]
+    [<DataRow("t3")>]
+    [<DataRow("t4")>]
     [<TestMethod>]
-    member this.TestProperties() =
-        CommonFplValueTestCases.ScopeProperties() |> ignore
-        Assert.IsTrue(false)
+    member this.TestProperties(var) =
+        let res = CommonFplValueTestCases.ScopeProperties() 
+        match res with
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+            match var with 
+            | "r" -> Assert.AreEqual(FplBlockType.Root, r.BlockType)
+            | "theory" -> Assert.AreEqual(FplBlockType.Theory, theory.BlockType)
+            | "block" -> Assert.AreEqual(FplBlockType.Predicate, block.BlockType)
+            | "t1" -> Assert.AreEqual(FplBlockType.MandatoryProperty, t1.BlockType)
+            | "t2" -> Assert.AreEqual(FplBlockType.OptionalProperty, t2.BlockType)
+            | "t3" -> Assert.AreEqual(FplBlockType.MandatoryProperty, t3.BlockType)
+            | "t4" -> Assert.AreEqual(FplBlockType.OptionalProperty, t4.BlockType)
+            | _ -> ()
+        | _ -> 
+            Assert.IsTrue(false)
 
     [<TestMethod>]
     member this.TestVariablesInBlock() =
