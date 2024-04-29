@@ -155,11 +155,19 @@ type TestFplValueScopeParent() =
     [<DataRow("t2")>]
     [<DataRow("t3")>]
     [<DataRow("t4")>]
+    [<DataRow("t5")>]
+    [<DataRow("t6")>]
+    [<DataRow("t7")>]
+    [<DataRow("t8")>]
+    [<DataRow("t9")>]
+    [<DataRow("t10")>]
+    [<DataRow("t11")>]
+    [<DataRow("t12")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
         match res with
-        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual(None, r.Parent)
             | "theory" -> Assert.AreEqual(r, theory.Parent.Value)
@@ -168,6 +176,14 @@ type TestFplValueScopeParent() =
             | "t2" -> Assert.AreEqual(block, t2.Parent.Value)
             | "t3" -> Assert.AreEqual(block, t3.Parent.Value)
             | "t4" -> Assert.AreEqual(block, t4.Parent.Value)
+            | "t5" -> Assert.AreEqual(block, t4.Parent.Value)
+            | "t6" -> Assert.AreEqual(block, t5.Parent.Value)
+            | "t7" -> Assert.AreEqual(block, t6.Parent.Value)
+            | "t8" -> Assert.AreEqual(block, t7.Parent.Value)
+            | "t9" -> Assert.AreEqual(block, t8.Parent.Value)
+            | "t10" -> Assert.AreEqual(block, t9.Parent.Value)
+            | "t11" -> Assert.AreEqual(block, t10.Parent.Value)
+            | "t12" -> Assert.AreEqual(block, t11.Parent.Value)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

@@ -194,6 +194,14 @@ type CommonFplValueTestCases =
             prty opt pred T2() {intr}
             prty func T3()->obj {intr}
             prty opt func T4()->obj {intr}
+            prty func T5()->ind {intr}
+            prty opt func T6()->ind {intr}
+            prty func T7()->pred {intr}
+            prty opt func T8()->pred {intr}
+            prty func T9()->tpl {intr}
+            prty opt func T10()->tpl {intr}
+            prty func T11()->Nat {intr}
+            prty opt func T12()->Nat {intr}
         }
         ;
         """
@@ -208,7 +216,15 @@ type CommonFplValueTestCases =
                             let t2 = block.Scope["T2()"]
                             let t3 = block.Scope["T3() -> obj"]
                             let t4 = block.Scope["T4() -> obj"]
-                            Some (r,theory,block,t1,t2,t3,t4)
+                            let t5 = block.Scope["T5() -> ind"]
+                            let t6 = block.Scope["T6() -> ind"]
+                            let t7 = block.Scope["T7() -> pred"]
+                            let t8 = block.Scope["T8() -> pred"]
+                            let t9 = block.Scope["T9() -> tpl"]
+                            let t10 = block.Scope["T10() -> tpl"]
+                            let t11 = block.Scope["T11() -> Nat"]
+                            let t12 = block.Scope["T12() -> Nat"]
+                            Some (r,theory,block,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12)
                         | None -> None
         prepareFplCode("", true) |> ignore
         result

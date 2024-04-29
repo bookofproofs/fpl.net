@@ -259,14 +259,11 @@ type ParsedAstList() =
         else
             None
 
-
-
-        
-
 type FplType =
     | Object
     | Predicate
     | Template
+    | Index
 
 type FplBlockType =
     | Variable

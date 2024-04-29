@@ -157,11 +157,19 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("t2")>]
     [<DataRow("t3")>]
     [<DataRow("t4")>]
+    [<DataRow("t5")>]
+    [<DataRow("t6")>]
+    [<DataRow("t7")>]
+    [<DataRow("t8")>]
+    [<DataRow("t9")>]
+    [<DataRow("t10")>]
+    [<DataRow("t11")>]
+    [<DataRow("t12")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
         match res with
-        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual("(Ln: 1, Col: 1)", r.NameEndPos.ToString())
             | "theory" -> Assert.AreEqual("(Ln: 1, Col: 1)", theory.NameEndPos.ToString())
@@ -170,6 +178,14 @@ type TestFplValueScopeNameEndPos() =
             | "t2" -> Assert.AreEqual("(Ln: 6, Col: 31)", t2.NameEndPos.ToString())
             | "t3" -> Assert.AreEqual("(Ln: 7, Col: 32)", t3.NameEndPos.ToString())
             | "t4" -> Assert.AreEqual("(Ln: 8, Col: 36)", t4.NameEndPos.ToString())
+            | "t5" -> Assert.AreEqual("(Ln: 9, Col: 32)", t5.NameEndPos.ToString())
+            | "t6" -> Assert.AreEqual("(Ln: 10, Col: 36)", t6.NameEndPos.ToString())
+            | "t7" -> Assert.AreEqual("(Ln: 11, Col: 33)", t7.NameEndPos.ToString())
+            | "t8" -> Assert.AreEqual("(Ln: 12, Col: 37)", t8.NameEndPos.ToString())
+            | "t9" -> Assert.AreEqual("(Ln: 13, Col: 32)", t9.NameEndPos.ToString())
+            | "t10" -> Assert.AreEqual("(Ln: 14, Col: 37)", t10.NameEndPos.ToString())
+            | "t11" -> Assert.AreEqual("(Ln: 15, Col: 33)", t11.NameEndPos.ToString())
+            | "t12" -> Assert.AreEqual("(Ln: 16, Col: 37)", t12.NameEndPos.ToString())
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

@@ -155,11 +155,19 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("t2")>]
     [<DataRow("t3")>]
     [<DataRow("t4")>]
+    [<DataRow("t5")>]
+    [<DataRow("t6")>]
+    [<DataRow("t7")>]
+    [<DataRow("t8")>]
+    [<DataRow("t9")>]
+    [<DataRow("t10")>]
+    [<DataRow("t11")>]
+    [<DataRow("t12")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
         match res with
-        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual("", r.QualifiedName)
             | "theory" -> Assert.AreEqual("Test", theory.QualifiedName)
@@ -168,6 +176,14 @@ type TestFplValueScopeQualifiedName() =
             | "t2" -> Assert.AreEqual("Test.TestId().T2()", t2.QualifiedName)
             | "t3" -> Assert.AreEqual("Test.TestId().T3() -> obj", t3.QualifiedName)
             | "t4" -> Assert.AreEqual("Test.TestId().T4() -> obj", t4.QualifiedName)
+            | "t5" -> Assert.AreEqual("Test.TestId().T5() -> ind", t5.QualifiedName)
+            | "t6" -> Assert.AreEqual("Test.TestId().T6() -> ind", t6.QualifiedName)
+            | "t7" -> Assert.AreEqual("Test.TestId().T7() -> pred", t7.QualifiedName)
+            | "t8" -> Assert.AreEqual("Test.TestId().T8() -> pred", t8.QualifiedName)
+            | "t9" -> Assert.AreEqual("Test.TestId().T9() -> tpl", t9.QualifiedName)
+            | "t10" -> Assert.AreEqual("Test.TestId().T10() -> tpl", t10.QualifiedName)
+            | "t11" -> Assert.AreEqual("Test.TestId().T11() -> Nat", t11.QualifiedName)
+            | "t12" -> Assert.AreEqual("Test.TestId().T12() -> Nat", t12.QualifiedName)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
