@@ -260,9 +260,10 @@ type ParsedAstList() =
             None
 
 type FplType =
-    | Object
-    | Predicate
-    | Template
+    | Object 
+    | Predicate 
+    | FunctionalTerm 
+    | Template 
     | Index
 
 type FplBlockType =
@@ -277,6 +278,7 @@ type FplBlockType =
     | Constructor
     | Class
     | Theorem
+    | Localization
     | Lemma
     | Proposition
     | Corollary
@@ -303,6 +305,7 @@ type FplBlockType =
             | OptionalFunctionalTerm -> "optional functional term property"
             | Constructor -> "constructor"
             | Class -> "class definition"
+            | Localization -> "localization"
             | Theorem -> "theorem"
             | Lemma -> "lemma"
             | Proposition -> "proposition"
@@ -434,6 +437,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         || fplValue.BlockType = FplBlockType.Predicate 
         || fplValue.BlockType = FplBlockType.FunctionalTerm 
         || fplValue.BlockType = FplBlockType.Class 
+        || fplValue.BlockType = FplBlockType.Localization 
 
     /// Indicates if this FplValue is a definition
     static member IsDefinition(fplValue:FplValue) = 
@@ -487,6 +491,12 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         || fplValue.BlockType = FplBlockType.OptionalFunctionalTerm
         || fplValue.BlockType = FplBlockType.MandatoryPredicate
         || fplValue.BlockType = FplBlockType.OptionalPredicate
+
+    /// Indicates if this FplValue is a functional term.
+    static member IsFunctionalTerm(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.MandatoryFunctionalTerm
+        || fplValue.BlockType = FplBlockType.OptionalFunctionalTerm
+        || fplValue.BlockType = FplBlockType.FunctionalTerm
 
     /// Indicates if this FplValue is a constructor or a property
     static member IsConstructorOrProperty(fplValue:FplValue)  = 

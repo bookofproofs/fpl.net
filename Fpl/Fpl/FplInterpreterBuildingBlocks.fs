@@ -287,15 +287,26 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             )
         | _ -> ()
 
+    let correctFplTypeOfFunctionalTerms fplType = 
+        match st.CurrentContext with
+        | EvalContext.InSignature fplValue 
+        | EvalContext.InPropertySignature fplValue ->
+            if FplValue.IsFunctionalTerm(fplValue) then
+                fplValue.EvaluationType <- fplType
+        | _ -> ()
+        
+
     match ast with
     // units: | Star
     | Ast.IndexType -> 
         st.EvalPush("IndexType")
         eval_units st "ind"
+        correctFplTypeOfFunctionalTerms FplType.Index
         st.EvalPop() |> ignore
     | Ast.ObjectType -> 
         st.EvalPush("ObjectType")
         eval_units st "obj"
+        correctFplTypeOfFunctionalTerms FplType.Object
         st.EvalPop()
     | Ast.PredicateType -> 
         st.EvalPush("PredicateType")
@@ -304,6 +315,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
     | Ast.FunctionalTermType -> 
         st.EvalPush("FunctionalTermType")
         eval_units st "func"  
+        correctFplTypeOfFunctionalTerms FplType.FunctionalTerm
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
@@ -394,6 +406,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                 adjustSignature st fplValue ("+" + s)
             else
                 adjustSignature st fplValue s
+            correctFplTypeOfFunctionalTerms FplType.Template
         | _ -> ()
         st.EvalPop() 
     | Ast.Var((pos1, pos2), s) ->
@@ -596,6 +609,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                 adjustSignature st fplValue ("+" + identifier)
             else
                 adjustSignature st fplValue identifier
+            correctFplTypeOfFunctionalTerms FplType.Object
         | _ -> ()
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), asts) ->

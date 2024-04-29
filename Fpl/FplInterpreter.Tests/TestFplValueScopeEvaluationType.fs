@@ -163,11 +163,14 @@ type TestFplValueScopeEvaluationType() =
     [<DataRow("t10")>]
     [<DataRow("t11")>]
     [<DataRow("t12")>]
+    [<DataRow("t13")>]
+    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
         match res with
-        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
+            t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual(FplType.Object, r.EvaluationType)
             | "theory" -> Assert.AreEqual(FplType.Predicate, theory.EvaluationType)
@@ -184,6 +187,8 @@ type TestFplValueScopeEvaluationType() =
             | "t10" -> Assert.AreEqual(FplType.Template, t10.EvaluationType)
             | "t11" -> Assert.AreEqual(FplType.Object, t11.EvaluationType)
             | "t12" -> Assert.AreEqual(FplType.Object, t12.EvaluationType)
+            | "t13" -> Assert.AreEqual(FplType.FunctionalTerm, t13.EvaluationType)
+            | "t14" -> Assert.AreEqual(FplType.FunctionalTerm, t14.EvaluationType)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

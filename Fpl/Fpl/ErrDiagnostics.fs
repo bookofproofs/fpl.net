@@ -183,7 +183,7 @@ type DiagnosticCode =
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type %s not yet implemented." identifier
-            | ID001 (signature, conflict) -> sprintf "Duplicate signature %s declaration detected at %s." signature conflict
+            | ID001 (signature, conflict) -> sprintf "Duplicate signature declaration %s detected at %s." signature conflict
             | ID002 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the proof %s, found only %s." signature incorrectBlockType
             | ID003 signature -> sprintf "The proof %s is missing a block to be associated with." signature 
             | ID004 (signature, candidates)  -> sprintf "Cannot associate proof %s with a single block. Found more candidates: %s." signature candidates
@@ -192,7 +192,7 @@ type DiagnosticCode =
             | ID007 (signature, candidates)  -> sprintf "Cannot associate corollary %s with a single block. Found more candidates: %s." signature candidates
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
-            | VAR01 (identifier, conflict) -> sprintf "Duplicate variable %s declaration detected at %s" identifier conflict
+            | VAR01 (identifier, conflict) -> sprintf "Duplicate variable declaration %s detected at %s" identifier conflict
             | VAR02 (identifier, conflict) -> sprintf "Variable %s was already declared in the outer scope of definition at %s" identifier conflict
             | VAR03 (identifier, conflict) -> sprintf "Variable %s was already declared in the scope of the associated block at %s" identifier conflict
 type DiagnosticEmitter =

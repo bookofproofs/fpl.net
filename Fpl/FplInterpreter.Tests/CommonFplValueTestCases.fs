@@ -202,6 +202,8 @@ type CommonFplValueTestCases =
             prty func opt T10()->tpl {intr}
             prty func T11()->Nat {intr}
             prty func opt T12()->Nat {intr}
+            prty func T13()->func {intr}
+            prty func opt T14()->func {intr}
         }
         ;
         """
@@ -224,7 +226,9 @@ type CommonFplValueTestCases =
                             let t10 = block.Scope["T10() -> tpl"]
                             let t11 = block.Scope["T11() -> Nat"]
                             let t12 = block.Scope["T12() -> Nat"]
-                            Some (r,theory,block,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12)
+                            let t13 = block.Scope["T13() -> func"]
+                            let t14 = block.Scope["T14() -> func"]
+                            Some (r,theory,block,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14)
                         | None -> None
         prepareFplCode("", true) |> ignore
         result
