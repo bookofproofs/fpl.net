@@ -227,7 +227,7 @@ type TestClasses () =
                 return x
 	        } 
 
-            property optional pred T() 
+            property pred optional T() 
 	        {
                 true
 	        } 
@@ -288,7 +288,7 @@ type TestClasses () =
                 self
             }
 
-            property optional pred T() 
+            property pred opt T() 
 	        {
                 true
 	        } 
@@ -358,7 +358,7 @@ type TestClasses () =
                 return x
 	        } 
 
-            property optional pred T() 
+            property pred optional T() 
 	        {
                 true
 	        } 

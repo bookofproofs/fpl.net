@@ -259,25 +259,27 @@ type ParsedAstList() =
         else
             None
 
-
-
-        
-
 type FplType =
-    | Object
-    | Predicate
-    | Template
+    | Object 
+    | Predicate 
+    | FunctionalTerm 
+    | Template 
+    | Index
+    | Localization
 
 type FplBlockType =
     | Variable
     | VariadicVariableMany
     | VariadicVariableMany1
     | Expression
-    | MandatoryProperty
-    | OptionalProperty
+    | MandatoryPredicate
+    | OptionalPredicate
+    | MandatoryFunctionalTerm
+    | OptionalFunctionalTerm
     | Constructor
     | Class
     | Theorem
+    | Localization
     | Lemma
     | Proposition
     | Corollary
@@ -291,22 +293,93 @@ type FplBlockType =
     | FunctionalTerm
     | Theory
     | Root
+    member private this.UnqualifiedName = 
+        match this with
+            // parser error messages
+            | Variable -> "variable"
+            | VariadicVariableMany -> "zero-or-more variable"
+            | VariadicVariableMany1 -> "one-or-more variable"
+            | Expression -> "expression"
+            | MandatoryPredicate -> "predicate property"
+            | OptionalPredicate -> "optional predicate property"
+            | MandatoryFunctionalTerm -> "functional term property"
+            | OptionalFunctionalTerm -> "optional functional term property"
+            | Constructor -> "constructor"
+            | Class -> "class definition"
+            | Localization -> "localization"
+            | Theorem -> "theorem"
+            | Lemma -> "lemma"
+            | Proposition -> "proposition"
+            | Corollary -> "corollary"
+            | Proof -> "proof"
+            | Conjecture -> "conjecture"
+            | Axiom -> "axiom"
+            | RuleOfInference -> "rule of inference"
+            | Premise -> "premise"
+            | Conclusion -> "conclusion"
+            | Predicate -> "predicate definition"
+            | FunctionalTerm -> "functional term definition"
+            | Theory -> "theory"
+            | Root -> "root"
+    member private this.Article = 
+        match this with
+        | OptionalPredicate
+        | OptionalFunctionalTerm
+        | Expression 
+        | Axiom -> "an"
+        | _ -> "a"
+
+    member this.Name = this.Article + " " + this.UnqualifiedName
+
+
+type ScopeSearchResult = 
+    | FoundCorrect of string 
+    | FoundMultiple of string
+    | FoundIncorrectBlock of string
+    | FoundConflict of string
+    | NotFound
+    | NotApplicable
 
 type FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions: Positions, parent: FplValue option) =
     let mutable _name = name
+    let mutable _nameFinal = false
     let mutable _nameEndPos = Position("", 0, 1, 1)
     let mutable _evalType = evalType
     let mutable _typeSignature = []
     let mutable _representation = ""
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
+    let mutable _parent = parent
     let _auxiliaryUniqueChilds = HashSet<string>()
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
 
-    /// Identifier of this FplValue that is unique in its scope
+    /// Identifier of this FplValue that is unique in its scope.
     member this.Name
         with get () = _name
-        and set (value) = _name <- value
+        and set (value) = 
+            if _nameFinal then 
+                raise (ArgumentException($"Cannot set readonly Name {_name} again since it has been finally evaluated."))
+            else
+                _name <- value
+
+    /// Indicates, if the Name has been finally determined during the evaluation process.
+    /// If true, the Name property becomes immutable.
+    member this.NameIsFinal
+        with get () = _nameFinal
+        and set (value) = 
+            if _nameFinal then 
+                raise (ArgumentException($"Cannot change the readonly NameIsFinal property since it has been finally evaluated."))
+            else
+                _nameFinal <- value
+
+    /// Type of the FPL block within this FplValue
+    member this.BlockType
+        with get () = _blockType
+        and set (value) = _blockType <- value
+
+    /// Name of the FPL block type within this FplValue
+    member this.BlockTypeName
+        with get () = _blockType.Name
 
     /// This FplValue's name's end position that can be different from its endig position
     member this.NameEndPos
@@ -317,11 +390,6 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     member this.TypeSignature
         with get () = _typeSignature
         and set (value:string list) = _typeSignature <- value
-
-    /// Type of the FPL block with this FplValue
-    member this.BlockType
-        with get () = _blockType
-        and set (value) = _blockType <- value
 
     /// The primary type of the FplValue
     member this.EvaluationType
@@ -343,48 +411,340 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// Starting position of this FplValue
     member this.StartPos = fst positions
+
     /// Ending position of this FplValue
     member this.EndPos = snd positions
     /// Parent FplValue of this FplValue
-    member this.Parent = parent
+    member this.Parent 
+        with get () = _parent
+        and set (value) = _parent <- value
+
     /// A list of asserted predicates for this FplValue
     member this.AssertedPredicates = System.Collections.Generic.List<Ast>()
     /// A scope inside this FplValue
     member this.Scope = _scope
 
 
+    /// Indicates if this FplValue is an FPL building block.
+    static member IsFplBlock(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Axiom
+        || fplValue.BlockType = FplBlockType.Theorem 
+        || fplValue.BlockType = FplBlockType.Lemma 
+        || fplValue.BlockType = FplBlockType.Proposition 
+        || fplValue.BlockType = FplBlockType.Corollary 
+        || fplValue.BlockType = FplBlockType.Conjecture 
+        || fplValue.BlockType = FplBlockType.Proof 
+        || fplValue.BlockType = FplBlockType.RuleOfInference 
+        || fplValue.BlockType = FplBlockType.Predicate 
+        || fplValue.BlockType = FplBlockType.FunctionalTerm 
+        || fplValue.BlockType = FplBlockType.Class 
+        || fplValue.BlockType = FplBlockType.Localization 
+
+    /// Indicates if this FplValue is a definition
+    static member IsDefinition(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Predicate 
+        || fplValue.BlockType = FplBlockType.FunctionalTerm 
+        || fplValue.BlockType = FplBlockType.Class 
+
+    /// Indicates if this FplValue is an root of the symbol table.
+    static member IsRoot(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Root
+
+    /// Qualified name of this FplValue 
+    member this.QualifiedName
+        with get () = 
+            let rec getFullName (fplValue:FplValue) (first:bool) =
+                if fplValue.BlockType = FplBlockType.Root then
+                    ""
+                elif first then 
+                    if FplValue.IsRoot(fplValue.Parent.Value) then 
+                        getFullName fplValue.Parent.Value false + fplValue.Name 
+                    else
+                        if FplValue.IsVariable(fplValue) && not (FplValue.IsVariable(fplValue.Parent.Value)) then
+                            fplValue.Name
+                        else
+                            getFullName fplValue.Parent.Value false + "." + fplValue.Name 
+                else
+                    if FplValue.IsRoot(fplValue.Parent.Value) then 
+                        getFullName fplValue.Parent.Value false + fplValue.Name 
+                    else
+                        if FplValue.IsVariable(fplValue) && not (FplValue.IsVariable(fplValue.Parent.Value)) then
+                            fplValue.Name
+                        else
+                            getFullName fplValue.Parent.Value false + "." + fplValue.Name
+            getFullName this true 
+
+    /// Indicates if this FplValue is a constructor.
+    static member IsConstructor(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Constructor
+
+    /// Indicates if this FplValue is a proof.
+    static member IsProof(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Proof
+
+    /// Indicates if this FplValue is a corollary.
+    static member IsCorollary(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Corollary
+
+    /// Indicates if this FplValue is a property.
+    static member IsProperty(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.MandatoryFunctionalTerm
+        || fplValue.BlockType = FplBlockType.OptionalFunctionalTerm
+        || fplValue.BlockType = FplBlockType.MandatoryPredicate
+        || fplValue.BlockType = FplBlockType.OptionalPredicate
+
+    /// Indicates if this FplValue is a functional term.
+    static member IsFunctionalTerm(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.MandatoryFunctionalTerm
+        || fplValue.BlockType = FplBlockType.OptionalFunctionalTerm
+        || fplValue.BlockType = FplBlockType.FunctionalTerm
+
+    /// Indicates if this FplValue is a constructor or a property
+    static member IsConstructorOrProperty(fplValue:FplValue)  = 
+        FplValue.IsConstructor(fplValue) || FplValue.IsProperty(fplValue)
+
+    /// Indicates if this FplValue is a constructor or a property
+    static member IsProofOrCorollary(fplValue:FplValue) = 
+        FplValue.IsProof(fplValue) || FplValue.IsCorollary(fplValue)
+
+    /// Indicates if this FplValue is a constructor or a theory
+    static member IsTheory (fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Theory
+
+    /// Qualified starting position of this FplValue
+    member this.QualifiedStartPos = 
+        let rec getFullName (fplValue:FplValue) (first:bool) =
+            if fplValue.BlockType = FplBlockType.Root then
+                ""
+            elif first then 
+                if FplValue.IsRoot(fplValue.Parent.Value) then 
+                    getFullName fplValue.Parent.Value false + fplValue.Name + fplValue.StartPos.ToString() 
+                else
+                    getFullName fplValue.Parent.Value false + fplValue.StartPos.ToString() 
+            else
+                if FplValue.IsRoot(fplValue.Parent.Value) then 
+                    getFullName fplValue.Parent.Value false + fplValue.Name 
+                else
+                    getFullName fplValue.Parent.Value false 
+        getFullName this true
+
+
+    /// Indicates if this FplValue is a variable.
+    static member IsVariable(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Variable
+        || fplValue.BlockType = FplBlockType.VariadicVariableMany
+        || fplValue.BlockType = FplBlockType.VariadicVariableMany1
+
+    /// Indicates if this FplValue is a variadic * variable.
+    static member IsVariadicVariableMany(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.VariadicVariableMany
+
+    /// Indicates if this FplValue is a variadic + variable.
+    static member IsVariadicVariableMany1(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.VariadicVariableMany1
+
+    /// Checks if a block is in the scope of its parent 
+    static member InScopeOfParent(fplValue:FplValue) = 
+        let conflictInSiblingTheory (parent:FplValue) = 
+            // if the parent is as theory, look also for its sibling theories
+            let (conflicts:ScopeSearchResult list) = 
+                let root = parent.Parent.Value
+                root.Scope
+                |> Seq.filter (fun siblingTheory ->
+                    // look only for sibling theories 
+                    siblingTheory.Value <> parent
+                )
+                |> Seq.choose (fun siblingTheory ->
+                        if siblingTheory.Value.Scope.ContainsKey(fplValue.Name) then
+                            let foundConflict = siblingTheory.Value.Scope[fplValue.Name]
+                            Some (ScopeSearchResult.FoundConflict foundConflict.QualifiedStartPos)
+                        else
+                            None
+                )
+                |> Seq.toList
+            let res = conflicts 
+            if res.Length > 0 then 
+                conflicts.Head
+            else
+                ScopeSearchResult.NotFound
+
+        match fplValue.Parent with
+        | Some parent ->
+            if parent.Scope.ContainsKey(fplValue.Name) then
+                let foundConflict = parent.Scope[fplValue.Name]
+                ScopeSearchResult.FoundConflict foundConflict.QualifiedStartPos 
+            else 
+                if FplValue.IsTheory(parent) then 
+                    conflictInSiblingTheory parent
+                else
+                    ScopeSearchResult.NotFound
+        | None -> ScopeSearchResult.NotApplicable
+
+    /// Checks if a variable defined in the scope of a constructor or a property
+    /// was already defined in the scope of its parent definition. 
+    static member ConstructorOrPropertyVariableInOuterScope(fplValue:FplValue) =
+        if (FplValue.IsVariable(fplValue)) then 
+            match fplValue.Parent with
+            | Some parent ->
+                if (FplValue.IsConstructorOrProperty(parent)) then 
+                     if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
+                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                     else
+                        ScopeSearchResult.NotFound
+                else
+                    ScopeSearchResult.NotApplicable
+            | None -> ScopeSearchResult.NotApplicable
+        else
+            ScopeSearchResult.NotApplicable
+
+    /// Checks if a variable defined in the scope of a proof
+    /// was already defined in the scope of its parent definition. 
+    static member ProofVariableInOuterScope(fplValue:FplValue) =
+        if (FplValue.IsVariable(fplValue)) then 
+            match fplValue.Parent with
+            | Some parent ->
+                if (FplValue.IsProofOrCorollary(parent)) then 
+                     if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
+                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                     else
+                        ScopeSearchResult.NotFound
+                else
+                    ScopeSearchResult.NotApplicable
+            | None -> ScopeSearchResult.NotApplicable
+        else
+            ScopeSearchResult.NotApplicable
+    
+    /// Checks if a variable defined in the scope of a corollary 
+    /// was already defined in the scope of its parent definition. 
+    static member CorollaryVariableInOuterScope(fplValue:FplValue) =
+        if (FplValue.IsVariable(fplValue)) then 
+            match fplValue.Parent with
+            | Some parent ->
+                if (FplValue.IsProofOrCorollary(parent)) then 
+                     if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
+                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                     else
+                        ScopeSearchResult.NotFound
+                else
+                    ScopeSearchResult.NotApplicable
+            | None -> ScopeSearchResult.NotApplicable
+        else
+            ScopeSearchResult.NotApplicable
+
+    /// Checks if an fplValue is provable. This will only be true if 
+    /// it is a theorem, a lemma, a proposition, or a corollary
+    static member IsProvable(fplValue:FplValue) = 
+        fplValue.BlockType = FplBlockType.Theorem
+        || fplValue.BlockType = FplBlockType.Corollary
+        || fplValue.BlockType = FplBlockType.Lemma
+        || fplValue.BlockType = FplBlockType.Proposition
+
+    /// Tries to find a therem-like statement for a proof 
+    /// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
+    static member TryFindAssociatedBlockForProof(fplValue:FplValue) = 
+        if fplValue.BlockType = FplBlockType.Proof then
+            match fplValue.Parent with
+            | Some theory ->
+                // The parent node of the proof is the theory. In its scope 
+                // we should find the theorem we are looking for.
+                let buildingBlocksMatchingDollarDigitNameList = 
+                    // the potential block name of the proof is the 
+                    // concatenated type signature of the name of the proof 
+                    // without the last dollar digit
+                    let potentialBlockName = 
+                        let positionButLast = fplValue.TypeSignature.Length
+                        if positionButLast < 0 then
+                            failwith "Type signature of a proof to short."
+                        else
+                            fplValue.TypeSignature |> List.take (positionButLast - 1) |> String.concat ""
+                    theory.Scope
+                    |> Seq.filter (fun keyValuePair -> 
+                        keyValuePair.Key.StartsWith(potentialBlockName + "(") || keyValuePair.Key = potentialBlockName
+                    )
+                    |> Seq.toList
+                let potentialBlockList = 
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun keyValuePair ->
+                        FplValue.IsProvable(keyValuePair.Value)
+                    )
+                let notPotentialBlockList = 
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun keyValuePair ->
+                        not (FplValue.IsProvable(keyValuePair.Value))
+                    )
+                if potentialBlockList.Length > 1 then
+                    ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
+                elif potentialBlockList.Length > 0 then 
+                    let potentialTheorem = potentialBlockList.Head
+                    ScopeSearchResult.FoundCorrect potentialTheorem.Value.Name
+                elif notPotentialBlockList.Length > 0 then 
+                    let potentialOther = notPotentialBlockList.Head
+                    ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
+                else
+                    ScopeSearchResult.NotFound
+            | None -> ScopeSearchResult.NotApplicable
+        else
+            ScopeSearchResult.NotApplicable
+
+    /// Tries to find a therem-like statement, a conjecture, or an axiom for a corollary 
+    /// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
+    static member TryFindAssociatedBlockForCorollary(fplValue:FplValue) = 
+
+        if fplValue.BlockType = FplBlockType.Corollary then
+            match fplValue.Parent with
+            | Some theory ->
+                // The parent node of the proof is the theory. In its scope 
+                // we should find the theorem we are looking for.
+                let buildingBlocksMatchingDollarDigitNameList = 
+                    // the potential theorem name of the corollary is the 
+                    // concatenated type signature of the name of the corollary 
+                    // without the last dollar digit
+                    let potentialBlockName = 
+                        try
+                            let positionParenthesis = fplValue.TypeSignature |> List.findIndex ((=) "(")
+                            if positionParenthesis >= 2 then
+                                fplValue.TypeSignature |> List.take (positionParenthesis - 1) |> String.concat ""
+                            else    
+                                failwith "Corollary has a malformed type signature, could not find the opening parenthesis at least at the 2th position."
+                        with ex -> raise (ArgumentException(ex.Message))
+                    theory.Scope
+                    |> Seq.filter (fun keyValuePair -> 
+                        keyValuePair.Key.StartsWith(potentialBlockName + "(") || keyValuePair.Key = potentialBlockName 
+                    )
+                    |> Seq.toList
+                let potentialBlockList = 
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun keyValuePair ->
+                        FplValue.IsProvable(keyValuePair.Value) 
+                        || keyValuePair.Value.BlockType = FplBlockType.Conjecture
+                        || keyValuePair.Value.BlockType = FplBlockType.Axiom
+                    )
+                let notPotentialBlockList = 
+                    buildingBlocksMatchingDollarDigitNameList
+                    |> List.filter (fun keyValuePair ->
+                        not (FplValue.IsProvable(keyValuePair.Value) 
+                        || keyValuePair.Value.BlockType = FplBlockType.Conjecture
+                        || keyValuePair.Value.BlockType = FplBlockType.Axiom)
+                    )
+                if potentialBlockList.Length > 1 then
+                    ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
+                elif potentialBlockList.Length > 0 then 
+                    let potentialTheorem = potentialBlockList.Head
+                    ScopeSearchResult.FoundCorrect potentialTheorem.Value.Name
+                elif notPotentialBlockList.Length > 0 then 
+                    let potentialOther = notPotentialBlockList.Head
+                    ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
+                else
+                    ScopeSearchResult.NotFound
+            | None -> ScopeSearchResult.NotApplicable
+        else
+            ScopeSearchResult.NotApplicable
 
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
-        new FplValue("", FplBlockType.Root, FplType.Predicate, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
-
-    /// Indicates if this FplValue is an FPL building block.
-    member this.IsFplBlock = 
-        this.BlockType = FplBlockType.Axiom
-        || this.BlockType = FplBlockType.Theorem 
-        || this.BlockType = FplBlockType.Lemma 
-        || this.BlockType = FplBlockType.Proposition 
-        || this.BlockType = FplBlockType.Corollary 
-        || this.BlockType = FplBlockType.Conjecture 
-        || this.BlockType = FplBlockType.Proof 
-        || this.BlockType = FplBlockType.RuleOfInference 
-        || this.BlockType = FplBlockType.Predicate 
-        || this.BlockType = FplBlockType.FunctionalTerm 
-        || this.BlockType = FplBlockType.Class 
-
-    /// Indicates if this FplValue is a variable.
-    member this.IsVariable = 
-        this.BlockType = FplBlockType.Variable
-        || this.BlockType = FplBlockType.VariadicVariableMany
-        || this.BlockType = FplBlockType.VariadicVariableMany1
-
-    /// Indicates if this FplValue is a variadic * variable.
-    member this.IsVariadicVariableMany = 
-        this.BlockType = FplBlockType.VariadicVariableMany
-
-    /// Indicates if this FplValue is a variadic + variable.
-    member this.IsVariadicVariableMany1 = 
-        this.BlockType = FplBlockType.VariadicVariableMany1
+        let root = new FplValue("", FplBlockType.Root, FplType.Object, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+        root.NameIsFinal <- true
+        root
 
     /// A factory method for the evaluation of Fpl class definitions
     static member CreateFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =
@@ -401,16 +761,19 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         | FplBlockType.RuleOfInference
         | FplBlockType.Expression
         | FplBlockType.Theory
+        | FplBlockType.MandatoryPredicate
+        | FplBlockType.OptionalPredicate
         | FplBlockType.Predicate -> new FplValue("", fplBlockType, FplType.Predicate, positions, Some parent)
         | FplBlockType.Constructor
         | FplBlockType.FunctionalTerm
         | FplBlockType.Variable
         | FplBlockType.VariadicVariableMany
         | FplBlockType.VariadicVariableMany1
-        | FplBlockType.MandatoryProperty
-        | FplBlockType.OptionalProperty
+        | FplBlockType.MandatoryFunctionalTerm
+        | FplBlockType.OptionalFunctionalTerm
         | FplBlockType.Class -> new FplValue("", fplBlockType, FplType.Object, positions, Some parent)
         | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
+        | FplBlockType.Localization -> new FplValue("", fplBlockType, FplType.Localization, positions, Some parent)
 
 type EvalContext =
     | ContextNone
@@ -452,7 +815,10 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     member this.EvalPush(astName:string) = 
         _evalPath.Push(astName)
         if debug then
-            System.Console.WriteLine(this.EvalPath())
+            let path = this.EvalPath()
+            System.Console.WriteLine(path)
+            if path = "Error" then 
+                raise(Exception("Test error message"))
 
     /// Remove the current ast name from the recursive evaluation path.
     member this.EvalPop() = 

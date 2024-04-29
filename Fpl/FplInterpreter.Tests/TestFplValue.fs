@@ -39,264 +39,11 @@ type TestFplValue() =
         testFactory FplBlockType.Constructor FplType.Object
         testFactory FplBlockType.FunctionalTerm FplType.Object
         testFactory FplBlockType.Variable FplType.Object
-        testFactory FplBlockType.MandatoryProperty FplType.Object
-        testFactory FplBlockType.OptionalProperty FplType.Object
+        testFactory FplBlockType.MandatoryFunctionalTerm FplType.Object
+        testFactory FplBlockType.OptionalFunctionalTerm FplType.Object
+        testFactory FplBlockType.MandatoryPredicate FplType.Predicate
+        testFactory FplBlockType.OptionalPredicate FplType.Predicate
         testFactory FplBlockType.Class FplType.Object 
-
-    member this.ScopeVariablesInSignature() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def pred TestPredicate(x,y:pred(u,v,w:func(a,b,c:obj)->obj)) 
-            {true}
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj))"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
-                            Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
-
-    [<TestMethod>]
-    member this.TestScopeVariablesInSignatureIsComplete() =
-        try
-            this.ScopeVariablesInSignature() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
-
-
-    member this.ScopeVariablesInSignatureWithVariadic() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def pred TestPredicate(x,y:+pred(u,v,w:func(a,b,c:*obj)->obj)) 
-            {true}
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestPredicate(+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj), +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj))"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
-                            Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
-
-    [<TestMethod>]
-    member this.TestScopeVariablesInSignatureWithVariadicIsComplete() =
-        try
-            this.ScopeVariablesInSignatureWithVariadic() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
-
-    member this.ScopeVariablesInBlock() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def pred TestPredicate() 
-            {dec ~x,y:pred(u,v,w:func(a,b,c:obj)->obj); true}
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestPredicate()"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
-                            Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
-
-    [<TestMethod>]
-    member this.TestScopeVariablesInBlockIsComplete() =
-        try
-            this.ScopeVariablesInBlock() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
-
-    member this.ScopeVariablesInBlockWithVariadic() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def pred TestPredicate() 
-            {dec ~x,y:+pred(u,v,w:func(a,b,c:*obj)->obj); true}
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestPredicate()"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
-                            Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
-
-    [<TestMethod>]
-    member this.TestScopeVariablesInBlockWithVariadicIsComplete() =
-        try
-            this.ScopeVariablesInBlockWithVariadic() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
-
-    [<TestMethod>]
-    member this.TestScopeVariablesInSignatureTypeSignature() =
-        let result = this.ScopeVariablesInSignature()
-        match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
-
-            Assert.AreEqual(["obj"], ywc.TypeSignature)
-            Assert.AreEqual(["obj"], ywb.TypeSignature)
-            Assert.AreEqual(["obj"], ywa.TypeSignature)
-            Assert.AreEqual(["obj"], yvc.TypeSignature)
-            Assert.AreEqual(["obj"], yvb.TypeSignature)
-            Assert.AreEqual(["obj"], yva.TypeSignature)
-            Assert.AreEqual(["obj"], yuc.TypeSignature)
-            Assert.AreEqual(["obj"], yub.TypeSignature)
-            Assert.AreEqual(["obj"], yua.TypeSignature)
-            Assert.AreEqual(["obj"], xwc.TypeSignature)
-            Assert.AreEqual(["obj"], xwb.TypeSignature)
-            Assert.AreEqual(["obj"], xwa.TypeSignature)
-            Assert.AreEqual(["obj"], xvc.TypeSignature)
-            Assert.AreEqual(["obj"], xvb.TypeSignature)
-            Assert.AreEqual(["obj"], xva.TypeSignature)
-            Assert.AreEqual(["obj"], xuc.TypeSignature)
-            Assert.AreEqual(["obj"], xub.TypeSignature)
-            Assert.AreEqual(["obj"], xua.TypeSignature)
-
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], yw.TypeSignature)
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], yv.TypeSignature)
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], yu.TypeSignature)
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], xw.TypeSignature)
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], xv.TypeSignature)
-            Assert.AreEqual(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], xu.TypeSignature)
-            Assert.AreEqual(["pred"; "("; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; ")"], y.TypeSignature)
-            Assert.AreEqual(["pred"; "("; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; ")"], x.TypeSignature)
-            Assert.AreEqual(["TestPredicate"; "("; "pred"; "("; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; ")"; "pred"; "("; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; ")"; ")"], block.TypeSignature)
-            Assert.AreEqual([], theory.TypeSignature)
-            Assert.AreEqual([], r.TypeSignature)
-        | None -> ()
 
 
     [<DataRow("inference TestId() {pre: true con: true};", "TestId()", "TestId ( )")>]
@@ -755,6 +502,8 @@ type TestFplValue() =
     [<DataRow("conjecture TestId(x:*obj[y:+tpl,z:index]) {true};", "TestId(*obj[+tpl, ind])", "TestId ( * obj [ + tpl ind ] )")>]
 
     [<DataRow("corollary TestId$1() {true};", "TestId$1()", "TestId $1 ( )")>]
+    [<DataRow("corollary TestId$1$2() {true};", "TestId$1$2()", "TestId $1 $2 ( )")>]
+    [<DataRow("corollary TestId$1$2$3() {true};", "TestId$1$2$3()", "TestId $1 $2 $3 ( )")>]
     [<DataRow("corollary TestId$1(x:ind) {true};", "TestId$1(ind)", "TestId $1 ( ind )")>]
     [<DataRow("corollary TestId$1(x:pred) {true};", "TestId$1(pred)", "TestId $1 ( pred )")>]
     [<DataRow("corollary TestId$1(x:func) {true};", "TestId$1(func)", "TestId $1 ( func )")>]
@@ -820,10 +569,14 @@ type TestFplValue() =
     [<DataRow("corollary TestId$1(x:*obj[y:+tpl,z:index]) {true};", "TestId$1(*obj[+tpl, ind])", "TestId $1 ( * obj [ + tpl ind ] )")>]
 
     [<DataRow("proof TestId$1 {1. |- trivial} ;", "TestId$1", "TestId $1")>]
+    [<DataRow("proof TestId$1$2 {1. |- trivial} ;", "TestId$1$2", "TestId $1 $2")>]
+    [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", "TestId$1$2$3", "TestId $1 $2 $3")>]
 
-    [<DataRow("def class TestId:obj {intrinsic} ;", "TestId", "TestId obj")>]
-    [<DataRow("def class TestId:Nat1, Nat2, Nat3, Nat4 {intrinsic} ;", "TestId", "TestId Nat1 Nat2 Nat3 Nat4")>]
-    [<DataRow("def class TestId:obj, Nat3 {intrinsic} ;", "TestId", "TestId obj Nat3")>]
+    
+    [<DataRow("def class Test:obj {intr} proof Test$1 {1. |- trivial};", "Test", "Test")>]
+    [<DataRow("def class TestId:obj {intrinsic} ;", "TestId", "TestId")>]
+    [<DataRow("def class TestId:Nat1, Nat2, Nat3, Nat4 {intrinsic} ;", "TestId", "TestId")>]
+    [<DataRow("def class TestId:obj, Nat3 {intrinsic} ;", "TestId", "TestId")>]
 
     [<DataRow("def pred TestId() {true};", "TestId()", "TestId ( )")>]
     [<DataRow("def pred TestId(x:ind) {true};", "TestId(ind)", "TestId ( ind )")>]
@@ -1025,6 +778,7 @@ type TestFplValue() =
         let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
         let result = prepareFplCode(fplCode, false) 
         let fplValue = result.Value.Root.Scope["Test"].Scope[expectedName]
+        Assert.AreEqual(expectedName, fplValue.Name)
         let actualTypeSignature = fplValue.TypeSignature
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
@@ -1041,109 +795,6 @@ type TestFplValue() =
             else
                 (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
         Assert.AreEqual(expectedEnd, actualSignatureEnd)
-        prepareFplCode("", true) |> ignore
-
-    member this.ScopeProperties() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def pred TestId() 
-        {
-            intr 
-            prty pred T1() {intr}
-            prty opt pred T2() {intr}
-            prty func T3()->obj {intr}
-            prty func opt func T4()->obj {intr}
-        }
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestId()"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let t1 = block.Scope["T1()"]
-                            let t2 = block.Scope["T2()"]
-                            let t3 = block.Scope["T3() -> obj"]
-                            let t4 = block.Scope["T4() -> obj"]
-                            Some (r,theory,block,t1,t2,t3,t4)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
-
-    [<TestMethod>]
-    member this.TestScopePropertiesIsComplete() =
-        try
-            this.ScopeProperties() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
-
-
-    member this.ScopeConstructors() =
-        FplParser.parserDiagnostics.Clear()
-        let fplCode = """
-        def cl TestId:obj 
-        {
-            ctor TestId() {self} 
-            ctor TestId(x:obj) {self} 
-            ctor TestId(x:pred) {self} 
-            ctor TestId(x:ind) {self} 
-        }
-        ;
-        """
-        let stOption = prepareFplCode(fplCode, false) 
-        let result = match stOption with
-                        | Some st -> 
-                            let name = "TestId"
-                            let r = st.Root
-                            let theory = r.Scope["Test"]
-                            let block = theory.Scope[name]
-                            let t1 = block.Scope["TestId()"]
-                            let t2 = block.Scope["TestId(obj)"]
-                            let t3 = block.Scope["TestId(pred)"]
-                            let t4 = block.Scope["TestId(ind)"]
-                            Some (r,theory,block,t1,t2,t3,t4)
-                        | None -> None
-        prepareFplCode("", true) |> ignore
-        result
-
-    [<TestMethod>]
-    member this.TestScopeConstructorsIsComplete() =
-        try
-            this.ScopeConstructors() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("def pred TestId() { intr prty pred T() {intr} };", "T()", true)>]
-    [<DataRow("def pred TestId() { intr prty opt pred T() {intr} };", "T()", false)>]
-    [<DataRow("def pred TestId() { intr prty func T()->obj {intr} };", "T() -> obj", true)>]
-    [<DataRow("def pred TestId() { intr prty opt func T()->obj {intr} };", "T() -> obj", false)>]
-    [<TestMethod>]
-    member this.TestMandatoryAndOptionalProperties(fplCode:string, expectedPropertyName:string, isMandatory) =
-        let result = prepareFplCode(fplCode, false) 
-        let fplBlock = result.Value.Root.Scope["Test"].Scope["TestId()"]
-        let propertyValue = fplBlock.Scope[expectedPropertyName]
-        if isMandatory then
-            Assert.AreEqual(FplBlockType.MandatoryProperty, propertyValue.BlockType)
-        else
-            Assert.AreEqual(FplBlockType.OptionalProperty, propertyValue.BlockType)
-        prepareFplCode("", true) |> ignore
-
-    [<DataRow("def cl TestId:obj {ctor TestId() {self} };", "TestId()")>]
-    [<DataRow("def cl TestId:obj {ctor TestId(x:obj) {self} };", "TestId(obj)")>]
-    [<DataRow("def cl TestId:obj {ctor TestId(x:ind) {self} };", "TestId(ind)")>]
-    [<DataRow("def cl TestId:obj {ctor TestId(x:pred) {self} };", "TestId(pred)")>]
-    [<TestMethod>]
-    member this.TestConstructor(fplCode:string, expectedConstructorName:string) =
-        let result = prepareFplCode(fplCode, false) 
-        let fplBlock = result.Value.Root.Scope["Test"].Scope["TestId"]
-        let constructorName = fplBlock.Scope[expectedConstructorName]
-        Assert.AreEqual(FplBlockType.Constructor, constructorName.BlockType)
         prepareFplCode("", true) |> ignore
 
     [<DataRow("def cl T:obj {intr prty pred TestId() {intrinsic}};", "TestId()", "TestId ( )")>]

@@ -1,5 +1,9 @@
-def func TestId() -> func(x:obj[y:@Nat])->obj {intrinsic}
+uses Fpl.Commons
 
-def func TestId() -> func(x:obj[y:@Nat])->obj {intrinsic};
+inf ModusPonens()
+{
+    pre:true
+    con:true
+}
 
 ;

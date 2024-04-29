@@ -602,7 +602,7 @@ type TestKeywordSpaces() =
     [<DataRow("opt")>]
     [<TestMethod>]
     member this.TestSpacesOptional (word:string) =
-        let result = run (property .>> eof) ($"property {word}x" + " T() {true}")
+        let result = run (property .>> eof) ($"property pred {word}x" + " T() {true}")
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))

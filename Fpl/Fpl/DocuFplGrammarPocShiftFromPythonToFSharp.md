@@ -558,7 +558,7 @@ The property marker keyword `mandatory` (short form `mand`) were abandoned and t
         ...
     }
 
-    property optional predicate SomePredicate() 
+    property predicate optional SomePredicate() 
     {
         ...
     }
@@ -584,7 +584,7 @@ Moreover, in previous versions, properties could have one of three types: they c
 ```
 *Now*
 ```        
-    property optional func NeutralElement() -> tplSetElem
+    property func optional NeutralElement() -> tplSetElem
     {
         dec 
             ~result:tplSetElem 

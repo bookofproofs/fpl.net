@@ -292,7 +292,7 @@ type TestDefinitionPredicates () =
                 return x
 	        } 
 
-            property optional pred T() 
+            property pred opt T() 
 	        {
                 true
 	        } 
@@ -389,7 +389,7 @@ type TestDefinitionPredicates () =
                 return x
 	        } 
 
-            property optional pred T() 
+            property  pred opt T() 
 	        {
                 true
 	        } 

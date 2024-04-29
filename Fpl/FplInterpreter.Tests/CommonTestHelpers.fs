@@ -13,13 +13,14 @@ let deleteFilesWithExtension dir extension =
 
 let filterByErrorCode (input: Diagnostics) errCode =
     input.Collection
-    |> List.filter (fun d -> d.Code = errCode)
+    |> List.filter (fun d -> d.Code.Code = errCode)
 
 
 let prepareFplCode(fplCode:string, delete:bool) =
     FplParser.parserDiagnostics.Clear()
     let currDir = Directory.GetCurrentDirectory()
 
+    printf "\n"
     File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
     let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
     let fplLibUrl =
@@ -31,3 +32,11 @@ let prepareFplCode(fplCode:string, delete:bool) =
         let parsedAsts = ParsedAstList()
         Some (FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts true)
 
+let runTestHelper fplCode (code:ErrDiagnostics.DiagnosticCode) expected =
+    printf "Trying %s" code.Message
+    prepareFplCode(fplCode, false) |> ignore
+    let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+    if result.Length > 0 then 
+        printf "Result %s" result.Head.Message
+    Assert.AreEqual(expected, result.Length)
+    prepareFplCode("", true) |> ignore
