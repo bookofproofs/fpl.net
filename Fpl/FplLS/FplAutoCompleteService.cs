@@ -13,26 +13,25 @@ namespace FplLS
 {
     public partial class FplAutoCompleteService
     {
-        const string prefix = "_ ";
 
-        public async Task<CompletionList> GetParserChoices(StringBuilder builder, int index, ILanguageServer languageServer)
+        public static async Task<CompletionList> GetParserChoices(StringBuilder builder, int index, ILanguageServer languageServer)
         {
             // make sure we get the parser choices from the position before the typed character, not after it
             string s;
             if (index > 0)
             {
-                s = builder.ToString().Substring(0, index - 1) + "§";
+                s = builder.ToString()[..(index - 1)] + "§";
             }
             else
             {
-                s = builder.ToString().Substring(0, index);
+                s = builder.ToString()[..index];
             }
             var modChoices = new List<FplCompletionItem>();
             try
             {
                 var choicesTuple = FplParser.getParserChoicesAtPosition(s, index);
                 var choices = choicesTuple.Item1;
-                HashSet<string> uniqueSymbols = new HashSet<string>();
+                HashSet<string> uniqueSymbols = [];
                 foreach (var choice in choices)
                 {
                     var defaultCi = new FplCompletionItem(choice);

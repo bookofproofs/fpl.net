@@ -35,25 +35,18 @@ namespace FplLS
     SOFTWARE.  
     */
 
-    public class TextDocumentSyncHandler : ITextDocumentSyncHandler
+    public class TextDocumentSyncHandler(ILanguageServer router, BufferManager bufferManager) : ITextDocumentSyncHandler
     {
-        private readonly ILanguageServer _languageServer;
-        private readonly BufferManager _bufferManager;
+        private readonly ILanguageServer _languageServer = router;
+        private readonly BufferManager _bufferManager = bufferManager;
 
-        private readonly DocumentSelector _documentSelector = new DocumentSelector(
+        private readonly DocumentSelector _documentSelector = new(
             new DocumentFilter()
             {
                 Pattern = "**/*.fpl"
             }
         );
-
         private SynchronizationCapability? _capability;
-
-        public TextDocumentSyncHandler(ILanguageServer router, BufferManager bufferManager)
-        {
-            _languageServer = router;
-            _bufferManager = bufferManager;
-        }
 
         public TextDocumentSyncKind Change { get; } = TextDocumentSyncKind.Full;
 

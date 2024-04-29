@@ -265,6 +265,7 @@ type FplType =
     | FunctionalTerm 
     | Template 
     | Index
+    | Localization
 
 type FplBlockType =
     | Variable
@@ -772,6 +773,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         | FplBlockType.OptionalFunctionalTerm
         | FplBlockType.Class -> new FplValue("", fplBlockType, FplType.Object, positions, Some parent)
         | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
+        | FplBlockType.Localization -> new FplValue("", fplBlockType, FplType.Localization, positions, Some parent)
 
 type EvalContext =
     | ContextNone

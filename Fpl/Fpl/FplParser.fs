@@ -255,7 +255,7 @@ let userDefinedObjSym = positions (keywordSymbol >>. objectSymbolString) .>> IW 
 let userDefinedInfix = positions (keywordInfix >>. infixString) .>> IW |>> Ast.Infix
 let userDefinedPostfix = positions (keywordPostfix >>. postfixString) .>> IW |>> Ast.Postfix
 let userDefinedPrefix = positions (keywordPrefix >>. prefixString) .>> IW |>> Ast.Prefix
-let userDefinedSymbol = opt choice[ userDefinedPrefix; userDefinedInfix; userDefinedPostfix ]
+let userDefinedSymbol = opt (choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ])
 
 let signatureWithUserDefinedString = positions (predicateIdentifier .>> IW .>>. userDefinedSymbol .>>. paramTuple) .>> IW |>> Ast.SignatureWithUserDefinedString
 (* Statements *)

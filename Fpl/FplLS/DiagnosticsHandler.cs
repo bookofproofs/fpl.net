@@ -1,15 +1,7 @@
-﻿using System.Text;
-using FParsec;
-using Microsoft.FSharp.Collections;
-using System.Collections.Generic;
-using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using static FplParser;
+﻿using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+using System.Text;
 using static FplInterpreterTypes;
-using static FplInterpreter;
-using static FplInterpreterUsesClause;
-using static ErrDiagnostics;
-using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {
@@ -19,18 +11,20 @@ namespace FplLS
 
         public UriDiagnostics()
         {
-            _diagnostics = new Dictionary<Uri, List<Model.Diagnostic>>();
+            _diagnostics = [];
         }
 
 
         public void AddDiagnostics(Uri uri, Model.Diagnostic diagnostic)
         {
             var key = FplSources.EscapedUri(uri.AbsoluteUri);
-            if (!_diagnostics.ContainsKey(key))
+            if (!_diagnostics.TryGetValue(key, out List<Model.Diagnostic>? value))
             {
-                _diagnostics.Add(key, new List<Model.Diagnostic>());
+                value = ([]);
+                _diagnostics.Add(key, value);
             }
-            _diagnostics[key].Add(diagnostic);
+
+            value.Add(diagnostic);
         }
 
         public Dictionary<Uri, List<Model.Diagnostic>> Enumerator()
@@ -41,19 +35,10 @@ namespace FplLS
     }
 
 
-    public class DiagnosticsHandler
+    public class DiagnosticsHandler(ILanguageServer languageServer)
     {
-        private readonly ILanguageServer _languageServer;
-        private readonly BufferManager _bufferManager;
-        private readonly ParsedAstList _parsedAstsList;
-
-        public DiagnosticsHandler(ILanguageServer languageServer, BufferManager bufferManager)
-        {
-            _languageServer = languageServer;
-            _bufferManager = bufferManager;
-            _parsedAstsList = new ParsedAstList();
-        }
-
+        private readonly ILanguageServer _languageServer = languageServer;
+        private readonly ParsedAstList _parsedAstsList = [];
 
         public void PublishDiagnostics(Uri uri, StringBuilder? buffer)
         {
@@ -66,7 +51,7 @@ namespace FplLS
                     parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
                     var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
                     FplInterpreter.fplInterpreter(sourceCode, uri, fplLibUri, _parsedAstsList, false);
-                    var diagnostics = CastDiagnostics(uri, parserDiagnostics, new TextPositions(sourceCode));
+                    var diagnostics = CastDiagnostics(parserDiagnostics, new TextPositions(sourceCode));
                     foreach (var diagnostic in diagnostics.Enumerator())
                     {
                         _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
@@ -75,7 +60,7 @@ namespace FplLS
                             Diagnostics = diagnostic.Value
                         });
                     }
-                    if (diagnostics.Enumerator().Count == 0) 
+                    if (diagnostics.Enumerator().Count == 0)
                     {
                         _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
                         {
@@ -102,7 +87,7 @@ namespace FplLS
         /// <param name="diagnostics">Input list</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted list</returns>
-        public UriDiagnostics CastDiagnostics(Uri uri, ErrDiagnostics.Diagnostics listDiagnostics, TextPositions tp)
+        public UriDiagnostics CastDiagnostics(ErrDiagnostics.Diagnostics listDiagnostics, TextPositions tp)
         {
             var sb = new StringBuilder();
             var castedListDiagnostics = new UriDiagnostics();
@@ -120,14 +105,16 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted diagnostic</returns>
-        public Model.Diagnostic CastDiagnostic(ErrDiagnostics.Diagnostic diagnostic, TextPositions tp, StringBuilder sb)
+        public static Model.Diagnostic CastDiagnostic(ErrDiagnostics.Diagnostic diagnostic, TextPositions tp, StringBuilder sb)
         {
-            var castedDiagnostic = new Model.Diagnostic();
-            castedDiagnostic.Source = diagnostic.Emitter.ToString();
-            castedDiagnostic.Severity = CastSeverity(diagnostic.Severity);
-            castedDiagnostic.Message = CastMessage(diagnostic, sb);
-            castedDiagnostic.Range = tp.GetRange(diagnostic.StartPos.Index, diagnostic.EndPos.Index);
-            castedDiagnostic.Code = CastCode(diagnostic.Code.Code);
+            var castedDiagnostic = new Model.Diagnostic
+            {
+                Source = diagnostic.Emitter.ToString(),
+                Severity = CastSeverity(diagnostic.Severity),
+                Message = CastMessage(diagnostic, sb),
+                Range = tp.GetRange(diagnostic.StartPos.Index, diagnostic.EndPos.Index),
+                Code = CastCode(diagnostic.Code.Code)
+            };
             return castedDiagnostic;
         }
 
@@ -137,7 +124,7 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <param name="sb">A reference to a string builder object that we do not want to recreate all the time for performance reasons.</param>
         /// <returns>A custom diagnostic message.</returns>
-        private string CastMessage(ErrDiagnostics.Diagnostic diagnostic, StringBuilder sb)
+        private static string CastMessage(ErrDiagnostics.Diagnostic diagnostic, StringBuilder sb)
         {
             sb.Clear();
             sb.Append(CastDiagnosticCodeMessage(diagnostic));
@@ -149,7 +136,7 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <returns>"semantics " if emitter was Interpreter, "syntax " if emitter was Parser</returns>
         /// <exception cref="NotImplementedException"></exception>
-        private string CastDiagnosticCodeMessage(ErrDiagnostics.Diagnostic diagnostic)
+        private static string CastDiagnosticCodeMessage(ErrDiagnostics.Diagnostic diagnostic)
         {
             return diagnostic.Message;
         }
@@ -158,9 +145,9 @@ namespace FplLS
         /// </summary>
         /// <param name="severity">Input severity</param>
         /// <returns>Casted severity</returns>
-        private Model.DiagnosticSeverity CastSeverity(ErrDiagnostics.DiagnosticSeverity severity)
+        private static Model.DiagnosticSeverity CastSeverity(ErrDiagnostics.DiagnosticSeverity severity)
         {
-            var castedSeverity = new Model.DiagnosticSeverity();
+            Model.DiagnosticSeverity castedSeverity;
             if (severity.IsError)
             {
                 castedSeverity = Model.DiagnosticSeverity.Error;
@@ -184,7 +171,7 @@ namespace FplLS
             return castedSeverity;
         }
 
-        private Model.DiagnosticCode CastCode(string code)
+        private static Model.DiagnosticCode CastCode(string code)
         {
             return new Model.DiagnosticCode(code);
         }

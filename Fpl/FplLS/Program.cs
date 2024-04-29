@@ -32,7 +32,7 @@ namespace FplLS
         SOFTWARE.  
         */
 
-        static async Task Main(string[] args)
+        static async Task Main()
         {
             var server = await LanguageServer.From(options =>
                 options

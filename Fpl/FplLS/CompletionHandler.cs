@@ -74,7 +74,7 @@ class CompletionHandler : ICompletionHandler
         (int)request.Position.Line,
         (int)request.Position.Character);
 
-        var complList = await _fplAutoComplService.GetParserChoices(buffer, position, _languageServer);
+        var complList = await FplAutoCompleteService.GetParserChoices(buffer, position, _languageServer);
 
         return complList;
 
