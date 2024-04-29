@@ -402,3 +402,11 @@ type TestInterpreterErrors() =
     member this.TestID007(fplCode:string, expected) =
         let code = ID007 ("", "") 
         runTestHelper fplCode code expected
+
+    [<DataRow("def cl Test:obj {ctor TestTypo(x:Nat) {self}};", 1)>]
+    [<DataRow("def cl Test:obj {ctor TestTypo1() {self}};", 1)>]
+    [<DataRow("def cl Test:obj {ctor Test() {self}};", 0)>]
+    [<TestMethod>]
+    member this.TestID008(fplCode:string, expected) =
+        let code = ID008 ("", "") 
+        runTestHelper fplCode code expected

@@ -594,6 +594,23 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     // | NamespaceIdentifier of Positions * Ast list
     | Ast.PredicateIdentifier((pos1, pos2), asts) ->
+        let checkID008Diagnostics (fplValue:FplValue) =
+            if FplValue.IsConstructor(fplValue) && fplValue.TypeSignature.Length = 1 then 
+                let nameStart = fplValue.TypeSignature.Head
+                let className = fplValue.Parent.Value.Name
+                if nameStart <> className then
+                    let diagnostic =
+                        { 
+                            Diagnostic.Uri = uri
+                            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                            Diagnostic.Severity = DiagnosticSeverity.Error
+                            Diagnostic.StartPos = pos1
+                            Diagnostic.EndPos = pos2
+                            Diagnostic.Code = ID008(nameStart, className)
+                            Diagnostic.Alternatives = None 
+                        }
+                    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
         st.EvalPush("PredicateIdentifier")
         let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
@@ -601,7 +618,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory fplValue
         | EvalContext.NamedVarDeclarationInBlock fplValue
         | EvalContext.InPropertySignature fplValue 
-        | EvalContext.InConstructorSignature fplValue
+        | EvalContext.InConstructorSignature fplValue 
         | EvalContext.InSignature fplValue -> 
             if (FplValue.IsVariadicVariableMany(fplValue)) then 
                 adjustSignature st fplValue ("*" + identifier)
@@ -610,6 +627,8 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             else
                 adjustSignature st fplValue identifier
             correctFplTypeOfFunctionalTerms FplType.Object
+            checkID008Diagnostics fplValue
+
         | _ -> ()
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), asts) ->
@@ -1132,7 +1151,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Constructor, classBlock)
             st.CurrentContext <- EvalContext.InConstructorSignature fplValue
             eval uri st signatureAst
-            tryAddBlock uri fplValue 
+            tryAddBlock uri fplValue
             st.CurrentContext <- EvalContext.InConstructorBlock fplValue
             match optVarDeclOrSpecListAst with
             | Some astList -> astList |> List.map (eval uri st) |> ignore
