@@ -727,7 +727,9 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
-        new FplValue("", FplBlockType.Root, FplType.Object, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+        let root = new FplValue("", FplBlockType.Root, FplType.Object, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+        root.NameIsFinal <- true
+        root
 
     /// A factory method for the evaluation of Fpl class definitions
     static member CreateFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =

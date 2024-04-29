@@ -1251,4 +1251,5 @@ let evaluateSymbolTable (uri:System.Uri) (st: SymbolTable) =
             st.CurrentContext <- EvalContext.InTheory theoryValue
             eval uri st pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.Evaluated
+            theoryValue.NameIsFinal <- true
         | None -> found <- false
