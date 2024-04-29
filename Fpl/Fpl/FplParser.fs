@@ -447,10 +447,10 @@ let keywordOptional = positions (skipString "optional" <|> skipString "opt") .>>
 let keywordProperty = positions (skipString "property" <|> skipString "prty") .>> SW >>% Ast.Property
 
 let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
-let predicateInstance = positions (keywordPredicate >>. SW >>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
+let predicateInstance = positions ((keywordPredicate >>. SW >>. opt keywordOptional) .>>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
 
 mappingRef.Value <- toArrow >>. IW >>. variableType
-let functionalTermSignature = positions ((keywordFunction >>. SW >>. signatureWithUserDefinedString) .>>. (IW >>. mapping)) .>> IW |>> Ast.FunctionalTermSignature
+let functionalTermSignature = positions ((keywordFunction >>. SW >>. opt keywordOptional) .>>. signatureWithUserDefinedString .>>. (IW >>. mapping)) .>> IW |>> Ast.FunctionalTermSignature
 
 let returnStatement = positions (keywordReturn >>. (fplDelegate <|> predicateWithQualification)) .>> IW |>> Ast.Return
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
@@ -461,7 +461,7 @@ let definitionProperty = choice [
     predicateInstance
     functionalTermInstance
 ]
-let propertyHeader = IW >>. keywordProperty .>>. opt keywordOptional 
+let propertyHeader = IW >>. keywordProperty 
 let property = positions (propertyHeader .>>. definitionProperty) |>> Ast.PropertyBlock
 let propertyList = opt (many1 (property .>> IW)) 
 

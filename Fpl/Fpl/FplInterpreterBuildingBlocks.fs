@@ -335,10 +335,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Optional -> 
         st.EvalPush("Optional")
-        match st.CurrentContext with
-        | EvalContext.InPropertySignature fplValue -> 
-            fplValue.BlockType <- FplBlockType.OptionalProperty
-        | _ -> ()
+        eval_units st ""
         st.EvalPop()
     | Ast.Error ->   
         st.EvalPush("Error")
@@ -792,15 +789,14 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         |> ignore
         eval uri st paramTupleAst
         st.EvalPop()
-    | Ast.PropertyBlock((pos1, pos2), ((keywordPropertyAst, keywordOptionalAst), definitionPropertyAst)) ->
+    | Ast.PropertyBlock((pos1, pos2), (keywordPropertyAst, definitionPropertyAst)) ->
         st.EvalPush("PropertyBlock")
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InBlock fplBlock -> 
             eval uri st keywordPropertyAst
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.MandatoryProperty, fplBlock)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.MandatoryPredicate, fplBlock)
             st.CurrentContext <- EvalContext.InPropertySignature fplValue
-            keywordOptionalAst |> Option.map (eval uri st) |> Option.defaultValue () |> ignore
             eval uri st definitionPropertyAst
             tryAddBlock uri fplValue 
         | _ -> ()
@@ -863,12 +859,25 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         eval uri st ast3
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
-    | Ast.FunctionalTermSignature((pos1, pos2), (signatureWithUserDefinedStringAst, mappingAst)) -> 
+    | Ast.FunctionalTermSignature((pos1, pos2), ((optAst, signatureWithUserDefinedStringAst), mappingAst)) -> 
         st.EvalPush("FunctionalTermSignature")
         eval uri st signatureWithUserDefinedStringAst
         match st.CurrentContext with 
-        | EvalContext.InPropertySignature fplValue 
+        | EvalContext.InPropertySignature fplValue -> 
+            match optAst with
+            | Some ast1 -> 
+                eval uri st ast1
+                fplValue.BlockType <- FplBlockType.OptionalFunctionalTerm
+            | None -> 
+                fplValue.BlockType <- FplBlockType.MandatoryFunctionalTerm
+            adjustSignature st fplValue "->"
+            fplValue.NameEndPos <- pos2
         | EvalContext.InSignature fplValue -> 
+            match optAst with
+            | Some ast1 -> 
+                eval uri st ast1
+                fplValue.BlockType <- FplBlockType.FunctionalTerm
+            | None -> ()
             adjustSignature st fplValue "->"
             fplValue.NameEndPos <- pos2
         | _ -> ()
@@ -912,13 +921,19 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         eval uri st ast1
         eval uri st ast2
         st.EvalPop()
-    | Ast.PredicateInstance((pos1, pos2), (signatureAst, predInstanceBlockAst)) ->
+    | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")
         eval uri st signatureAst
         let oldContext = st.CurrentContext 
         match st.CurrentContext with
         | EvalContext.InPropertySignature fplValue ->
             st.CurrentContext <- EvalContext.InPropertyBlock fplValue
+            match optAst with
+            | Some ast1 -> 
+                eval uri st ast1
+                fplValue.BlockType <- FplBlockType.OptionalPredicate
+            | None -> 
+                fplValue.BlockType <- FplBlockType.MandatoryPredicate
         | _ -> ()
         eval uri st predInstanceBlockAst
         st.CurrentContext <- oldContext

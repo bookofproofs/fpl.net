@@ -9,8 +9,10 @@ type TestFplBlockType() =
     [<DataRow("VariadicVariableMany")>]
     [<DataRow("VariadicVariableMany1")>]
     [<DataRow("Expression")>]
-    [<DataRow("MandatoryProperty")>]
-    [<DataRow("OptionalProperty")>]
+    [<DataRow("MandatoryFunctionalTerm")>]
+    [<DataRow("OptionalFunctionalTerm")>]
+    [<DataRow("MandatoryPredicate")>]
+    [<DataRow("OptionalPredicate")>]
     [<DataRow("Constructor")>]
     [<DataRow("Class")>]
     [<DataRow("Theorem")>]
@@ -34,8 +36,10 @@ type TestFplBlockType() =
         | "VariadicVariableMany" -> Assert.AreEqual("a zero-or-more variable",FplBlockType.VariadicVariableMany.Name)
         | "VariadicVariableMany1" -> Assert.AreEqual("a one-or-more variable",FplBlockType.VariadicVariableMany1.Name)
         | "Expression" -> Assert.AreEqual("an expression",FplBlockType.Expression.Name)
-        | "MandatoryProperty" -> Assert.AreEqual("a property",FplBlockType.MandatoryProperty.Name)
-        | "OptionalProperty" -> Assert.AreEqual("an optional property",FplBlockType.OptionalProperty.Name)
+        | "MandatoryFunctionalTerm" -> Assert.AreEqual("a functional term property",FplBlockType.MandatoryFunctionalTerm.Name)
+        | "OptionalFunctionalTerm" -> Assert.AreEqual("an optional functional term property",FplBlockType.OptionalFunctionalTerm.Name)
+        | "MandatoryPredicate" -> Assert.AreEqual("a predicate property",FplBlockType.MandatoryPredicate.Name)
+        | "OptionalPredicate" -> Assert.AreEqual("an optional predicate property",FplBlockType.OptionalPredicate.Name)
         | "Constructor" -> Assert.AreEqual("a constructor",FplBlockType.Constructor.Name)
         | "Class" -> Assert.AreEqual("a class definition",FplBlockType.Class.Name)
         | "Theorem" -> Assert.AreEqual("a theorem",FplBlockType.Theorem.Name)

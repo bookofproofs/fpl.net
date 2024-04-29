@@ -270,8 +270,10 @@ type FplBlockType =
     | VariadicVariableMany
     | VariadicVariableMany1
     | Expression
-    | MandatoryProperty
-    | OptionalProperty
+    | MandatoryPredicate
+    | OptionalPredicate
+    | MandatoryFunctionalTerm
+    | OptionalFunctionalTerm
     | Constructor
     | Class
     | Theorem
@@ -295,8 +297,10 @@ type FplBlockType =
             | VariadicVariableMany -> "zero-or-more variable"
             | VariadicVariableMany1 -> "one-or-more variable"
             | Expression -> "expression"
-            | MandatoryProperty -> "property"
-            | OptionalProperty -> "optional property"
+            | MandatoryPredicate -> "predicate property"
+            | OptionalPredicate -> "optional predicate property"
+            | MandatoryFunctionalTerm -> "functional term property"
+            | OptionalFunctionalTerm -> "optional functional term property"
             | Constructor -> "constructor"
             | Class -> "class definition"
             | Theorem -> "theorem"
@@ -315,7 +319,8 @@ type FplBlockType =
             | Root -> "root"
     member private this.Article = 
         match this with
-        | OptionalProperty 
+        | OptionalPredicate
+        | OptionalFunctionalTerm
         | Expression 
         | Axiom -> "an"
         | _ -> "a"
@@ -478,8 +483,10 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// Indicates if this FplValue is a property.
     static member IsProperty(fplValue:FplValue) = 
-        fplValue.BlockType = FplBlockType.MandatoryProperty
-        || fplValue.BlockType = FplBlockType.OptionalProperty
+        fplValue.BlockType = FplBlockType.MandatoryFunctionalTerm
+        || fplValue.BlockType = FplBlockType.OptionalFunctionalTerm
+        || fplValue.BlockType = FplBlockType.MandatoryPredicate
+        || fplValue.BlockType = FplBlockType.OptionalPredicate
 
     /// Indicates if this FplValue is a constructor or a property
     static member IsConstructorOrProperty(fplValue:FplValue)  = 
@@ -743,14 +750,16 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         | FplBlockType.RuleOfInference
         | FplBlockType.Expression
         | FplBlockType.Theory
+        | FplBlockType.MandatoryPredicate
+        | FplBlockType.OptionalPredicate
         | FplBlockType.Predicate -> new FplValue("", fplBlockType, FplType.Predicate, positions, Some parent)
         | FplBlockType.Constructor
         | FplBlockType.FunctionalTerm
         | FplBlockType.Variable
         | FplBlockType.VariadicVariableMany
         | FplBlockType.VariadicVariableMany1
-        | FplBlockType.MandatoryProperty
-        | FplBlockType.OptionalProperty
+        | FplBlockType.MandatoryFunctionalTerm
+        | FplBlockType.OptionalFunctionalTerm
         | FplBlockType.Class -> new FplValue("", fplBlockType, FplType.Object, positions, Some parent)
         | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
 

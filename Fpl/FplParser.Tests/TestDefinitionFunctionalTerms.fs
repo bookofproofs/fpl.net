@@ -353,7 +353,7 @@ type TestDefinitionFunctionalTerms01 () =
                 return x
 	        } 
 
-            property optional pred T() 
+            property  pred optional T() 
 	        {
                 true
 	        } 
@@ -450,7 +450,7 @@ type TestDefinitionFunctionalTerms01 () =
                 return x
 	        } 
 
-            property optional pred T() 
+            property  pred opt T() 
 	        {
                 true
 	        } 

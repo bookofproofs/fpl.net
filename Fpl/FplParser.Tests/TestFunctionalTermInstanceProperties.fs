@@ -89,7 +89,7 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2a () =
         // a function term instance with a return statement 
-        let result = run (property .>> eof) """property optional func X() -> Y
+        let result = run (property .>> eof) """property func opt X() -> Y
 	        {
                 dec ~a:obj ;
                 return x
@@ -113,7 +113,7 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2c () =
         // a function term instance with a return statement 
-        let result = run (property .>> eof) """property optional func X() -> Y
+        let result = run (property .>> eof) """property func opt X() -> Y
 	        {
                 dec ~a:obj ;
                 return x
@@ -137,7 +137,7 @@ type TestFunctionalTermProperties () =
     [<TestMethod>]
     member this.TestFunctionalTermInstance2e () =
         // a function term instance with a return statement 
-        let result = run (property .>> eof) """property optional func X() -> Y
+        let result = run (property .>> eof) """property func optional X() -> Y
 	        {
                 dec ~a:obj ;
                 return x

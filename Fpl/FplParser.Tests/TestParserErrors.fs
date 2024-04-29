@@ -318,7 +318,7 @@ type TestParserErrors() =
     member this.TestCON000() =
         let code = CON000
         printf "Trying %s" code.Message
-        let input = """
+        let input = """ conjecture Test() {#}
         ;
         """
         let ast = fplParser (System.Uri("file://x")) input

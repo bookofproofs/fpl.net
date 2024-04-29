@@ -39,8 +39,10 @@ type TestFplValue() =
         testFactory FplBlockType.Constructor FplType.Object
         testFactory FplBlockType.FunctionalTerm FplType.Object
         testFactory FplBlockType.Variable FplType.Object
-        testFactory FplBlockType.MandatoryProperty FplType.Object
-        testFactory FplBlockType.OptionalProperty FplType.Object
+        testFactory FplBlockType.MandatoryFunctionalTerm FplType.Object
+        testFactory FplBlockType.OptionalFunctionalTerm FplType.Object
+        testFactory FplBlockType.MandatoryPredicate FplType.Predicate
+        testFactory FplBlockType.OptionalPredicate FplType.Predicate
         testFactory FplBlockType.Class FplType.Object 
 
 
