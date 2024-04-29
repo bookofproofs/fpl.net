@@ -79,7 +79,7 @@ type TestFplValueScopeNameIsFinal() =
     member this.TestConstructors(var) =
         let res = CommonFplValueTestCases.ScopeConstructors() 
         match res with
-        | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual(true, r.NameIsFinal)
             | "theory" -> Assert.AreEqual(true, theory.NameIsFinal)

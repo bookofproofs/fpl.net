@@ -69,62 +69,6 @@ type TestFplValueScopeParent() =
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
-    [<DataRow("thm1")>]
-    [<DataRow("proofThm1")>]
-    [<DataRow("lem1")>]
-    [<DataRow("proofLem1")>]
-    [<DataRow("prp1")>]
-    [<DataRow("proofPrp1")>]
-    [<DataRow("cor1")>]
-    [<DataRow("proofCor1")>]
-    [<DataRow("thm2")>]
-    [<DataRow("corThm2")>]
-    [<DataRow("lem2")>]
-    [<DataRow("corLem2")>]
-    [<DataRow("prp2")>]
-    [<DataRow("corPrp2")>]
-    [<DataRow("cor2")>]
-    [<DataRow("corCor2")>]
-    [<DataRow("con1")>]
-    [<DataRow("corCon1")>]
-    [<DataRow("axi1")>]
-    [<DataRow("corAxi1")>]
-    [<TestMethod>]
-    member this.TestScopeProofsAndCorollariesCompleteQualifiedStartPos(var) =
-        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries() 
-        match res with
-        | Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
-                                corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
-                                axi1,corAxi1) -> 
-                match var with
-                | "r" -> Assert.AreEqual(None, r.Parent)
-                | "theory" -> Assert.AreEqual(r, theory.Parent.Value)
-                | "thm1" -> Assert.AreEqual(theory, thm1.Parent.Value)
-                | "proofThm1" -> Assert.AreEqual(thm1, proofThm1.Parent.Value)
-                | "lem1" -> Assert.AreEqual(theory, lem1.Parent.Value)
-                | "proofLem1" -> Assert.AreEqual(lem1, proofLem1.Parent.Value)
-                | "prp1" -> Assert.AreEqual(theory, prp1.Parent.Value)
-                | "proofPrp1" -> Assert.AreEqual(prp1, proofPrp1.Parent.Value)
-                | "cor1" -> Assert.AreEqual(theory, cor1.Parent.Value)
-                | "proofCor1" -> Assert.AreEqual(cor1, proofCor1.Parent.Value)
-                | "thm2" -> Assert.AreEqual(theory, thm2.Parent.Value)
-                | "corThm2" -> Assert.AreEqual(thm2, corThm2.Parent.Value)
-                | "lem2" -> Assert.AreEqual(theory, lem2.Parent.Value)
-                | "corLem2" -> Assert.AreEqual(lem2, corLem2.Parent.Value)
-                | "prp2" -> Assert.AreEqual(theory, prp2.Parent.Value)
-                | "corPrp2" -> Assert.AreEqual(prp2, corPrp2.Parent.Value)
-                | "cor2" -> Assert.AreEqual(theory, cor2.Parent.Value)
-                | "corCor2" -> Assert.AreEqual(cor2, corCor2.Parent.Value)
-                | "con1" -> Assert.AreEqual(theory, con1.Parent.Value)
-                | "corCon1" -> Assert.AreEqual(con1, corCon1.Parent.Value)
-                | "axi1" -> Assert.AreEqual(theory, axi1.Parent.Value)
-                | "corAxi1"  -> Assert.AreEqual(axi1, corAxi1.Parent.Value) 
-                | _ -> Assert.IsTrue(false)
-        | _ -> 
-            Assert.IsTrue(false)
-
-    [<DataRow("r")>]
-    [<DataRow("theory")>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -228,6 +172,7 @@ type TestFplValueScopeParent() =
         | _ -> 
             Assert.IsTrue(false)
 
+    [<DataRow("r")>]
     [<DataRow("theory")>]
     [<DataRow("block")>]
     [<DataRow("x")>]
@@ -291,12 +236,14 @@ type TestFplValueScopeParent() =
             | "x" -> Assert.AreEqual(block, x.Parent.Value)
             | "block" -> Assert.AreEqual(theory, block.Parent.Value)
             | "theory" -> Assert.AreEqual(r, theory.Parent.Value)
+            | "r" -> Assert.AreEqual(None, r.Parent)
             | _ -> 
                 Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
 
+    [<DataRow("r")>]
     [<DataRow("theory")>]
     [<DataRow("block")>]
     [<DataRow("x")>]
@@ -360,11 +307,13 @@ type TestFplValueScopeParent() =
             | "x" -> Assert.AreEqual(block, x.Parent.Value)
             | "block" -> Assert.AreEqual(theory, block.Parent.Value)
             | "theory" -> Assert.AreEqual(r, theory.Parent.Value)
+            | "r" -> Assert.AreEqual(None, r.Parent)
             | _ -> 
                 Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("r")>]
     [<DataRow("theory")>]
     [<DataRow("block")>]
     [<DataRow("x")>]
@@ -428,11 +377,13 @@ type TestFplValueScopeParent() =
             | "x" -> Assert.AreEqual(block, x.Parent.Value)
             | "block" -> Assert.AreEqual(theory, block.Parent.Value)
             | "theory" -> Assert.AreEqual(r, theory.Parent.Value)
+            | "r" -> Assert.AreEqual(None, r.Parent)
             | _ -> 
                 Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("r")>]
     [<DataRow("theory")>]
     [<DataRow("block")>]
     [<DataRow("x")>]
@@ -496,6 +447,7 @@ type TestFplValueScopeParent() =
             | "x" -> Assert.AreEqual(block, x.Parent.Value)
             | "block" -> Assert.AreEqual(theory, block.Parent.Value)
             | "theory" -> Assert.AreEqual(r, theory.Parent.Value)
+            | "r" -> Assert.AreEqual(None, r.Parent)
             | _ -> 
                 Assert.IsTrue(false)
         | None -> 
