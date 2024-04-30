@@ -611,6 +611,27 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                         }
                     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
+        let checkID009Diagnostics (fplValue:FplValue) name =
+            match fplValue.BlockType with
+            | Class (inheritance) -> 
+                if fplValue.NameIsFinal then
+                    if fplValue.Name = name then 
+                        let diagnostic =
+                            { 
+                                Diagnostic.Uri = uri
+                                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                                Diagnostic.Severity = DiagnosticSeverity.Error
+                                Diagnostic.StartPos = pos1
+                                Diagnostic.EndPos = pos2
+                                Diagnostic.Code = ID009 name
+                                Diagnostic.Alternatives = None 
+                            }
+                        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                    else
+                        inheritance.From <- inheritance.From @ [name]
+                        fplValue.BlockType <- Class inheritance
+            | _ -> ()
+
         st.EvalPush("PredicateIdentifier")
         let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
@@ -628,7 +649,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                 adjustSignature st fplValue identifier
             correctFplTypeOfFunctionalTerms FplType.Object
             checkID008Diagnostics fplValue
-
+            checkID009Diagnostics fplValue identifier
         | _ -> ()
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), asts) ->
@@ -971,10 +992,10 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         eval uri st predInstanceBlockAst
         st.CurrentContext <- oldContext
         st.EvalPop()
-    | Ast.ParentConstructorCall((pos1, pos2), (ast1, ast2)) ->
+    | Ast.ParentConstructorCall((pos1, pos2), (specificClassTypeAst, argumentTupleAst)) ->
         st.EvalPush("ParentConstructorCall")
-        eval uri st ast1
-        eval uri st ast2
+        eval uri st specificClassTypeAst
+        eval uri st argumentTupleAst
         st.EvalPop()
     | Ast.JustifiedArgument((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("JustifiedArgument")
@@ -1223,7 +1244,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Class, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Class {Inheritance.From = []}, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval uri st predicateIdentifierAst
             tryAddBlock uri fplValue 

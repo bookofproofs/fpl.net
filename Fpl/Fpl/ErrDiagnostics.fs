@@ -85,6 +85,7 @@ type DiagnosticCode =
     | ID006 of string
     | ID007 of string * string
     | ID008 of string * string
+    | ID009 of string
     // variable-related error codes
     | VAR00 
     | VAR01 of string * string
@@ -139,6 +140,7 @@ type DiagnosticCode =
             | ID006 _ -> "ID006"
             | ID007 (_, _) -> "ID007"
             | ID008 (_, _) -> "ID008"
+            | ID009 _ -> "ID009"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 (_, _) -> "VAR01"
@@ -193,6 +195,7 @@ type DiagnosticCode =
             | ID006 signature -> sprintf "The corollary %s is missing a block to be associated with." signature 
             | ID007 (signature, candidates)  -> sprintf "Cannot associate corollary %s with a single block. Found more candidates: %s." signature candidates
             | ID008 (name, expectedName)  -> sprintf "Mispelled constructor name %s, expecting %s." name expectedName
+            | ID009 name -> sprintf "Circular base type dependency involving %s." name
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 (identifier, conflict) -> sprintf "Duplicate variable declaration %s detected at %s" identifier conflict

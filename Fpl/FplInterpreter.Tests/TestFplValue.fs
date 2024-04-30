@@ -43,7 +43,7 @@ type TestFplValue() =
         testFactory FplBlockType.OptionalFunctionalTerm FplType.Object
         testFactory FplBlockType.MandatoryPredicate FplType.Predicate
         testFactory FplBlockType.OptionalPredicate FplType.Predicate
-        testFactory FplBlockType.Class FplType.Object 
+        testFactory (FplBlockType.Class {Inheritance.From = []}) FplType.Object 
 
 
     [<DataRow("inference TestId() {pre: true con: true};", "TestId()", "TestId ( )")>]

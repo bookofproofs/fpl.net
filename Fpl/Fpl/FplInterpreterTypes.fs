@@ -267,6 +267,11 @@ type FplType =
     | Index
     | Localization
 
+type Inheritance =
+    {
+        mutable From: string list
+    }
+
 type FplBlockType =
     | Variable
     | VariadicVariableMany
@@ -277,7 +282,7 @@ type FplBlockType =
     | MandatoryFunctionalTerm
     | OptionalFunctionalTerm
     | Constructor
-    | Class
+    | Class of Inheritance
     | Theorem
     | Localization
     | Lemma
@@ -305,7 +310,7 @@ type FplBlockType =
             | MandatoryFunctionalTerm -> "functional term property"
             | OptionalFunctionalTerm -> "optional functional term property"
             | Constructor -> "constructor"
-            | Class -> "class definition"
+            | Class(_) -> "class definition"
             | Localization -> "localization"
             | Theorem -> "theorem"
             | Lemma -> "lemma"
@@ -427,24 +432,28 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// Indicates if this FplValue is an FPL building block.
     static member IsFplBlock(fplValue:FplValue) = 
-        fplValue.BlockType = FplBlockType.Axiom
-        || fplValue.BlockType = FplBlockType.Theorem 
-        || fplValue.BlockType = FplBlockType.Lemma 
-        || fplValue.BlockType = FplBlockType.Proposition 
-        || fplValue.BlockType = FplBlockType.Corollary 
-        || fplValue.BlockType = FplBlockType.Conjecture 
-        || fplValue.BlockType = FplBlockType.Proof 
-        || fplValue.BlockType = FplBlockType.RuleOfInference 
-        || fplValue.BlockType = FplBlockType.Predicate 
-        || fplValue.BlockType = FplBlockType.FunctionalTerm 
-        || fplValue.BlockType = FplBlockType.Class 
-        || fplValue.BlockType = FplBlockType.Localization 
+        match fplValue.BlockType with 
+        | FplBlockType.Axiom
+        | FplBlockType.Theorem 
+        | FplBlockType.Lemma 
+        | FplBlockType.Proposition 
+        | FplBlockType.Corollary 
+        | FplBlockType.Conjecture 
+        | FplBlockType.Proof 
+        | FplBlockType.RuleOfInference 
+        | FplBlockType.Predicate 
+        | FplBlockType.FunctionalTerm 
+        | FplBlockType.Class(_) 
+        | FplBlockType.Localization -> true
+        | _ -> false
 
     /// Indicates if this FplValue is a definition
     static member IsDefinition(fplValue:FplValue) = 
-        fplValue.BlockType = FplBlockType.Predicate 
-        || fplValue.BlockType = FplBlockType.FunctionalTerm 
-        || fplValue.BlockType = FplBlockType.Class 
+        match fplValue.BlockType with 
+        | FplBlockType.Predicate 
+        | FplBlockType.FunctionalTerm 
+        | FplBlockType.Class(_) -> true
+        | _ -> false
 
     /// Indicates if this FplValue is an root of the symbol table.
     static member IsRoot(fplValue:FplValue) = 
@@ -477,6 +486,12 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     /// Indicates if this FplValue is a constructor.
     static member IsConstructor(fplValue:FplValue) = 
         fplValue.BlockType = FplBlockType.Constructor
+
+    /// Indicates if this FplValue is a class.
+    static member IsClass(fplValue:FplValue) = 
+        match fplValue.BlockType with
+        | FplBlockType.Class (_) -> true
+        | _ -> false
 
     /// Indicates if this FplValue is a proof.
     static member IsProof(fplValue:FplValue) = 
@@ -771,7 +786,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         | FplBlockType.VariadicVariableMany1
         | FplBlockType.MandatoryFunctionalTerm
         | FplBlockType.OptionalFunctionalTerm
-        | FplBlockType.Class -> new FplValue("", fplBlockType, FplType.Object, positions, Some parent)
+        | FplBlockType.Class(_) -> new FplValue("", fplBlockType, FplType.Object, positions, Some parent)
         | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
         | FplBlockType.Localization -> new FplValue("", fplBlockType, FplType.Localization, positions, Some parent)
 
