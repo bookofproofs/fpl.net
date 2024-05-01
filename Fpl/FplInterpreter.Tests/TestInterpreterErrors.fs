@@ -419,3 +419,14 @@ type TestInterpreterErrors() =
     member this.TestID009(fplCode:string, expected) =
         let code = ID009 ""
         runTestHelper fplCode code expected
+
+    [<DataRow("def cl Test:obj {intr};", 0)>]
+    [<DataRow("def cl Test:Set {intr};", 1)>]
+    [<DataRow("def class Set: obj {intr} def cl Test:Set {intr};", 0)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet {intr};", 0)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySetTypo {intr};", 1)>]
+    [<TestMethod>]
+    member this.TestID010(fplCode:string, expected) =
+        let code = ID010 ""
+        runTestHelper fplCode code expected

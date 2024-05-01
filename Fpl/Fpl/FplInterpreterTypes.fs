@@ -271,7 +271,6 @@ type Inheritance =
     {
         mutable From: string list
     }
-
 type FplBlockType =
     | Variable
     | VariadicVariableMany
@@ -338,14 +337,13 @@ type FplBlockType =
 
 
 type ScopeSearchResult = 
-    | FoundCorrect of string 
+    | FoundAssociate of string 
     | FoundMultiple of string
     | FoundIncorrectBlock of string
-    | FoundConflict of string
+    | Found of FplValue
     | NotFound
     | NotApplicable
-
-type FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions: Positions, parent: FplValue option) =
+and FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions: Positions, parent: FplValue option) =
     let mutable _name = name
     let mutable _nameFinal = false
     let mutable _nameEndPos = Position("", 0, 1, 1)
@@ -357,6 +355,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     let mutable _parent = parent
     let _auxiliaryUniqueChilds = HashSet<string>()
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
+    let _valueList = System.Collections.Generic.List<FplValue>()
 
     /// Identifier of this FplValue that is unique in its scope.
     member this.Name
@@ -426,9 +425,12 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// A list of asserted predicates for this FplValue
     member this.AssertedPredicates = System.Collections.Generic.List<Ast>()
+
     /// A scope inside this FplValue
     member this.Scope = _scope
 
+    /// A value list inside this FplValue
+    member this.ValueList = _valueList
 
     /// Indicates if this FplValue is an FPL building block.
     static member IsFplBlock(fplValue:FplValue) = 
@@ -559,7 +561,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         fplValue.BlockType = FplBlockType.VariadicVariableMany1
 
     /// Checks if a block is in the scope of its parent 
-    static member InScopeOfParent(fplValue:FplValue) = 
+    static member InScopeOfParent(fplValue:FplValue) name = 
         let conflictInSiblingTheory (parent:FplValue) = 
             // if the parent is as theory, look also for its sibling theories
             let (conflicts:ScopeSearchResult list) = 
@@ -570,9 +572,9 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                     siblingTheory.Value <> parent
                 )
                 |> Seq.choose (fun siblingTheory ->
-                        if siblingTheory.Value.Scope.ContainsKey(fplValue.Name) then
-                            let foundConflict = siblingTheory.Value.Scope[fplValue.Name]
-                            Some (ScopeSearchResult.FoundConflict foundConflict.QualifiedStartPos)
+                        if siblingTheory.Value.Scope.ContainsKey(name) then
+                            let foundConflict = siblingTheory.Value.Scope[name]
+                            Some (ScopeSearchResult.Found foundConflict)
                         else
                             None
                 )
@@ -585,9 +587,9 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
         match fplValue.Parent with
         | Some parent ->
-            if parent.Scope.ContainsKey(fplValue.Name) then
-                let foundConflict = parent.Scope[fplValue.Name]
-                ScopeSearchResult.FoundConflict foundConflict.QualifiedStartPos 
+            if parent.Scope.ContainsKey(name) then
+                let foundConflict = parent.Scope[name]
+                ScopeSearchResult.Found foundConflict 
             else 
                 if FplValue.IsTheory(parent) then 
                     conflictInSiblingTheory parent
@@ -603,7 +605,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
             | Some parent ->
                 if (FplValue.IsConstructorOrProperty(parent)) then 
                      if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
-                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                        ScopeSearchResult.Found (parent.Parent.Value.Scope[fplValue.Name])
                      else
                         ScopeSearchResult.NotFound
                 else
@@ -620,7 +622,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
             | Some parent ->
                 if (FplValue.IsProofOrCorollary(parent)) then 
                      if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
-                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                        ScopeSearchResult.Found (parent.Parent.Value.Scope[fplValue.Name])
                      else
                         ScopeSearchResult.NotFound
                 else
@@ -637,7 +639,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
             | Some parent ->
                 if (FplValue.IsProofOrCorollary(parent)) then 
                      if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
-                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                        ScopeSearchResult.Found (parent.Parent.Value.Scope[fplValue.Name])
                      else
                         ScopeSearchResult.NotFound
                 else
@@ -691,7 +693,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                     ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
                 elif potentialBlockList.Length > 0 then 
                     let potentialTheorem = potentialBlockList.Head
-                    ScopeSearchResult.FoundCorrect potentialTheorem.Value.Name
+                    ScopeSearchResult.FoundAssociate potentialTheorem.Value.Name
                 elif notPotentialBlockList.Length > 0 then 
                     let potentialOther = notPotentialBlockList.Head
                     ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
@@ -745,7 +747,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                     ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
                 elif potentialBlockList.Length > 0 then 
                     let potentialTheorem = potentialBlockList.Head
-                    ScopeSearchResult.FoundCorrect potentialTheorem.Value.Name
+                    ScopeSearchResult.FoundAssociate potentialTheorem.Value.Name
                 elif notPotentialBlockList.Length > 0 then 
                     let potentialOther = notPotentialBlockList.Head
                     ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
