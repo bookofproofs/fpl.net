@@ -594,6 +594,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     // | NamespaceIdentifier of Positions * Ast list
     | Ast.PredicateIdentifier((pos1, pos2), asts) ->
+        st.EvalPush("PredicateIdentifier")
         let checkID008Diagnostics (fplValue:FplValue) =
             if FplValue.IsConstructor(fplValue) && fplValue.TypeSignature.Length = 1 then 
                 let nameStart = fplValue.TypeSignature.Head
@@ -606,39 +607,15 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                             Diagnostic.Severity = DiagnosticSeverity.Error
                             Diagnostic.StartPos = pos1
                             Diagnostic.EndPos = pos2
-                            Diagnostic.Code = ID008(nameStart, className)
+                            Diagnostic.Code = ID008(nameStart, className) // misspelled constructor name 
                             Diagnostic.Alternatives = None 
                         }
                     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-        let checkID009Diagnostics (fplValue:FplValue) name =
-            match fplValue.BlockType with
-            | Class (inheritance) -> 
-                if fplValue.NameIsFinal then
-                    if fplValue.Name = name then 
-                        let diagnostic =
-                            { 
-                                Diagnostic.Uri = uri
-                                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                                Diagnostic.Severity = DiagnosticSeverity.Error
-                                Diagnostic.StartPos = pos1
-                                Diagnostic.EndPos = pos2
-                                Diagnostic.Code = ID009 name
-                                Diagnostic.Alternatives = None 
-                            }
-                        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-                    else
-                        inheritance.From <- inheritance.From @ [name]
-                        fplValue.BlockType <- Class inheritance
-            | _ -> ()
-
-        let checkID010Diagnostics (fplValue:FplValue) name =
+        let checkID009_ID010_ID011_Diagnostics (fplValue:FplValue) name =
             let rightContext = st.EvalPath() = "AST.Namespace.DefinitionClass.InheritedClassType.PredicateIdentifier"
             if rightContext then
-                match FplValue.InScopeOfParent(fplValue) name with
-                | ScopeSearchResult.Found classCandidate -> 
-                    fplValue.ValueList.Add classCandidate
-                | _ -> 
+                if fplValue.Name = name then 
                     let diagnostic =
                         { 
                             Diagnostic.Uri = uri
@@ -646,13 +623,74 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                             Diagnostic.Severity = DiagnosticSeverity.Error
                             Diagnostic.StartPos = pos1
                             Diagnostic.EndPos = pos2
-                            Diagnostic.Code = ID010 name
+                            Diagnostic.Code = ID009 name // circular base dependency
                             Diagnostic.Alternatives = None 
                         }
                     FplParser.parserDiagnostics.AddDiagnostic diagnostic
-            else ()
+                else
+                    match FplValue.InScopeOfParent(fplValue) name with
+                    | ScopeSearchResult.Found classCandidate ->
+                        let rec findPath (root: FplValue) (candidateName: string) =
+                            if root.Name = candidateName then
+                                Some(root.Name)
+                            else
+                                root.ValueList
+                                |> Seq.collect (fun child -> 
+                                    match findPath child candidateName with
+                                    | Some path -> [root.Name + ":" + path]
+                                    | None -> [])
+                                |> Seq.tryLast
 
-        st.EvalPush("PredicateIdentifier")
+                        let classInheritanceChain = findPath fplValue name 
+                        match classInheritanceChain with
+                        | Some chain ->
+                            let diagnostic =
+                                { 
+                                    Diagnostic.Uri = uri
+                                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                                    Diagnostic.Severity = DiagnosticSeverity.Error
+                                    Diagnostic.StartPos = pos1
+                                    Diagnostic.EndPos = pos2
+                                    Diagnostic.Code = ID011(name, chain) // class not found
+                                    Diagnostic.Alternatives = None 
+                                }
+                            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                        | _ -> 
+                            let mutable found = false
+                            fplValue.ValueList
+                            |> Seq.iter (fun child -> 
+                                let classInheritanceChain = findPath classCandidate child.Name 
+                                match classInheritanceChain with
+                                | Some chain ->
+                                    let diagnostic =
+                                        { 
+                                            Diagnostic.Uri = uri
+                                            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                                            Diagnostic.Severity = DiagnosticSeverity.Error
+                                            Diagnostic.StartPos = pos1
+                                            Diagnostic.EndPos = pos2
+                                            Diagnostic.Code = ID011(child.Name, chain) // class not found
+                                            Diagnostic.Alternatives = None 
+                                        }
+                                    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                                    found <- true
+                                | _ -> ()
+                            )
+                            if not found then 
+                                fplValue.ValueList.Add classCandidate
+                    | _ -> 
+                        let diagnostic =
+                            { 
+                                Diagnostic.Uri = uri
+                                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                                Diagnostic.Severity = DiagnosticSeverity.Error
+                                Diagnostic.StartPos = pos1
+                                Diagnostic.EndPos = pos2
+                                Diagnostic.Code = ID010 name // class not found
+                                Diagnostic.Alternatives = None 
+                            }
+                        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
         let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
         match st.CurrentContext with
@@ -669,8 +707,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                 adjustSignature st fplValue identifier
             correctFplTypeOfFunctionalTerms FplType.Object
             checkID008Diagnostics fplValue
-            checkID009Diagnostics fplValue identifier
-            checkID010Diagnostics fplValue identifier
+            checkID009_ID010_ID011_Diagnostics fplValue identifier
         | _ -> ()
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), asts) ->
@@ -1265,7 +1302,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Class {Inheritance.From = []}, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Class, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval uri st predicateIdentifierAst
             tryAddBlock uri fplValue 

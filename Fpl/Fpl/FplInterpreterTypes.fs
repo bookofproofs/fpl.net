@@ -267,10 +267,6 @@ type FplType =
     | Index
     | Localization
 
-type Inheritance =
-    {
-        mutable From: string list
-    }
 type FplBlockType =
     | Variable
     | VariadicVariableMany
@@ -281,7 +277,7 @@ type FplBlockType =
     | MandatoryFunctionalTerm
     | OptionalFunctionalTerm
     | Constructor
-    | Class of Inheritance
+    | Class 
     | Theorem
     | Localization
     | Lemma
@@ -309,7 +305,7 @@ type FplBlockType =
             | MandatoryFunctionalTerm -> "functional term property"
             | OptionalFunctionalTerm -> "optional functional term property"
             | Constructor -> "constructor"
-            | Class(_) -> "class definition"
+            | Class -> "class definition"
             | Localization -> "localization"
             | Theorem -> "theorem"
             | Lemma -> "lemma"

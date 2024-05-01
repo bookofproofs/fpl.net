@@ -41,7 +41,7 @@ type TestFplBlockType() =
         | "MandatoryPredicate" -> Assert.AreEqual("a predicate property",FplBlockType.MandatoryPredicate.Name)
         | "OptionalPredicate" -> Assert.AreEqual("an optional predicate property",FplBlockType.OptionalPredicate.Name)
         | "Constructor" -> Assert.AreEqual("a constructor",FplBlockType.Constructor.Name)
-        | "Class" -> Assert.AreEqual("a class definition",FplBlockType.Class({Inheritance.From = []}).Name)
+        | "Class" -> Assert.AreEqual("a class definition",FplBlockType.Class.Name)
         | "Theorem" -> Assert.AreEqual("a theorem",FplBlockType.Theorem.Name)
         | "Lemma" -> Assert.AreEqual("a lemma",FplBlockType.Lemma.Name)
         | "Proposition" -> Assert.AreEqual("a proposition",FplBlockType.Proposition.Name)

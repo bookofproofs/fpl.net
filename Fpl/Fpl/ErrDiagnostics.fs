@@ -87,6 +87,7 @@ type DiagnosticCode =
     | ID008 of string * string
     | ID009 of string
     | ID010 of string
+    | ID011 of string * string
     // variable-related error codes
     | VAR00 
     | VAR01 of string * string
@@ -143,6 +144,7 @@ type DiagnosticCode =
             | ID008 (_, _) -> "ID008"
             | ID009 _ -> "ID009"
             | ID010 _ -> "ID010"
+            | ID011 (_, _) -> "ID011"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 (_, _) -> "VAR01"
@@ -196,9 +198,10 @@ type DiagnosticCode =
             | ID005 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the corollary '%s', found only %s." signature incorrectBlockType
             | ID006 signature -> sprintf "The corollary '%s' is missing a block to be associated with." signature 
             | ID007 (signature, candidates)  -> sprintf "Cannot associate corollary '%s' with a single block. Found more candidates: %s." signature candidates
-            | ID008 (name, expectedName)  -> sprintf "Mispelled constructor name '%s', expecting %s." name expectedName
+            | ID008 (name, expectedName)  -> sprintf "Misspelled constructor name '%s', expecting %s." name expectedName
             | ID009 name -> sprintf "Circular base type dependency involving '%s'." name
             | ID010 name -> sprintf "The type or namespace name '%s' could not be found (are you missing a uses clause?)" name
+            | ID011 (name, inheritanceChain) -> sprintf "Inheritance from '%s' can be dropped because of the inheritance chain %s." name inheritanceChain
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 (identifier, conflict) -> sprintf "Duplicate variable declaration '%s' detected at %s" identifier conflict
