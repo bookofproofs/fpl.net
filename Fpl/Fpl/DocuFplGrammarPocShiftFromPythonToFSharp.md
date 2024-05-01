@@ -95,11 +95,13 @@ class A :B
 ``` 
 *Now*
 ``` 
-class A :B, :C
+class A: B, C
 {
 ...
 }
 ``` 
+
+Moreover, inheritance is only possible from other class identifiers or the object keyword. Templates or extensions (see 13 below) are not possible. 
 
 #### 4) Syntax of class constructors
 

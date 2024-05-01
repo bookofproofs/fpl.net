@@ -4,7 +4,7 @@ uses Fpl.SetTheory
 uses Fpl.Examples.Algebra.Structures 
 
 
-def class FieldPowerN: Sets 
+def class FieldPowerN: Set
 {
     dec
         ~myField: Field  

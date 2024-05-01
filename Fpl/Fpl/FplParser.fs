@@ -512,7 +512,7 @@ let keywordClass = (skipString "class" <|> skipString "cl")
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
 let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace
-let inheritedClassType = positions (specificClassType) .>> IW |>> Ast.InheritedClassType
+let inheritedClassType = positions (choice [keywordObject; predicateIdentifier]) .>> IW |>> Ast.InheritedClassType
 let inheritedClassTypeList = sepBy1 inheritedClassType comma
 
 let classIdentifier = positions (predicateIdentifier .>> IW) |>> Ast.ClassIdentifier

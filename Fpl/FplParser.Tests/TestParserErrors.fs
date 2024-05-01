@@ -17,7 +17,12 @@ type TestParserErrors() =
         let code = SYN000
         printf "Trying %s" code.Message
         let input = """
-        xxx
+        def pred T()
+        {
+            dec ~x:tpl[! ;
+            true
+        }
+        y
         ;
         """
         let ast = fplParser (System.Uri("file://x")) input
@@ -141,11 +146,9 @@ type TestParserErrors() =
         let code = VAR000
         printf "Trying %s" code.Message
         let input = """
-        def pred A() 
+        def pred T()
         {
-            dec
-                x := 
-            ;
+            dec~x:ind: ;
             true
         }
         ;
@@ -330,6 +333,7 @@ type TestParserErrors() =
         let code = TRL000
         printf "Trying %s" code.Message
         let input = """
+        
         ;
         """
         let ast = fplParser (System.Uri("file://x")) input
@@ -341,6 +345,12 @@ type TestParserErrors() =
         let code = TYD000
         printf "Trying %s" code.Message
         let input = """
+        inf D()
+        {
+            dec ~x ;
+            pre:true
+            con:true
+        }
         ;
         """
         let ast = fplParser (System.Uri("file://x")) input

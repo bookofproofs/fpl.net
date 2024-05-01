@@ -200,7 +200,7 @@ type DiagnosticCode =
             | ID007 (signature, candidates)  -> sprintf "Cannot associate corollary '%s' with a single block. Found more candidates: %s." signature candidates
             | ID008 (name, expectedName)  -> sprintf "Misspelled constructor name '%s', expecting %s." name expectedName
             | ID009 name -> sprintf "Circular base type dependency involving '%s'." name
-            | ID010 name -> sprintf "The type or namespace name '%s' could not be found (are you missing a uses clause?)" name
+            | ID010 name -> sprintf "The type '%s' could not be found (are you missing a uses clause?)" name
             | ID011 (name, inheritanceChain) -> sprintf "Inheritance from '%s' can be dropped because of the inheritance chain %s." name inheritanceChain
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."

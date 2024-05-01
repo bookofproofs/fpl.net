@@ -1,9 +1,4 @@
 uses Fpl.Commons
 
-inf ModusPonens()
-{
-    pre:true
-    con:true
-}
 
 ;

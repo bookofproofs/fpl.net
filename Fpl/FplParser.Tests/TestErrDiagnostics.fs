@@ -1050,7 +1050,7 @@ type TestErrDiagnostics() =
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN001"))
+        Assert.IsTrue(actualDiag.Contains("INF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003i003Diag () =
@@ -1087,8 +1087,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope001Diag () =
@@ -1352,8 +1352,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("INF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003i002Diag () =
@@ -1411,8 +1411,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred002Diag () =
@@ -1429,8 +1429,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(5, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003aDiag () =
@@ -1448,8 +1448,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(5, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003_Diag () =
@@ -1466,8 +1466,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003bDiag () =
@@ -1484,8 +1484,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(5, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
 
     [<TestMethod>]
@@ -1522,8 +1522,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("VAR000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003fDiag () =
@@ -1540,8 +1540,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("VAR000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003gDiag () =
@@ -1558,8 +1558,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(7, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("VAR000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003hDiag () =
@@ -1630,8 +1630,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003i002Diag () =
@@ -1648,8 +1648,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003i003Diag () =
@@ -1666,8 +1666,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass001Diag () =
@@ -1734,8 +1734,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003bDiag () =
@@ -1751,8 +1751,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003cDiag () =
@@ -1768,8 +1768,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003dDiag () =
@@ -1785,8 +1785,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003eDiag () =
@@ -1802,8 +1802,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003fDiag () =
@@ -1819,8 +1819,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003gDiag () =
@@ -1836,8 +1836,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003hDiag () =
@@ -1853,8 +1853,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003iDiag () =
@@ -1870,8 +1870,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i000Diag () =
@@ -1887,8 +1887,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i001Diag () =
@@ -1904,8 +1904,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i002Diag () =
@@ -1921,8 +1921,8 @@ type TestErrDiagnostics() =
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i003Diag () =

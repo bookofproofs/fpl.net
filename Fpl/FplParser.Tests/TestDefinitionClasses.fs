@@ -20,7 +20,7 @@ type TestClasses () =
     [<TestMethod>]
     member this.TestClass01 () =
         // if empty then intrinsic
-        let result = run (definitionClass .>> eof) """class FieldPowerN: tpl
+        let result = run (definitionClass .>> eof) """class FieldPowerN: obj
         {
             intr
         }"""

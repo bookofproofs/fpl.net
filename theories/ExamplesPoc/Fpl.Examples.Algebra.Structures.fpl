@@ -9,32 +9,32 @@ uses Fpl.SetTheory
 def func BinOp(x,y: tplSetElem) -> tplSetElem
 {
     intr
-    property optional pred IsAssociative()
+    property pred optional IsAssociative()
     {
         all a,b,c is tplSetElem {  (@self(a,@self(b,c)) = @self(@self(a,b),c))  }
     }
 
-    property optional pred IsCommutative()
+    property pred optional IsCommutative()
     {
         all a,b is tplSetElem { (@self(a,b) = @self(b,a)) }
     }
 
-    property optional pred IsLeftNeutralElement(e: tplSetElem)
+    property pred optional IsLeftNeutralElement(e: tplSetElem)
     {
         all x is tplSetElem { (@self(e,x) = x) }
     }
 
-    property optional pred IsRightNeutralElement(e: tplSetElem)
+    property pred optional IsRightNeutralElement(e: tplSetElem)
     {
         all x is tplSetElem { (@self(x,e) = x) }
     }
 
-    property optional pred IsNeutralElement(e: tplSetElem)
+    property pred optional IsNeutralElement(e: tplSetElem)
     {
         and (IsLeftNeutralElement(e), IsRightNeutralElement(e))
     }
 
-    property optional pred HasLeftNeutralElement()
+    property pred optional HasLeftNeutralElement()
     {
         ex e is tplSetElem { IsLeftNeutralElement(e) }
     }
@@ -44,12 +44,12 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
         ex e is tplSetElem { IsRightNeutralElement(e) }
     }
 
-    property optional pred HasNeutralElement()
+    property pred optional HasNeutralElement()
     {
         ex e is tplSetElem { IsNeutralElement(e) }
     }
 
-    property optional func LeftNeutralElement() -> tplSetElem
+    property func optional LeftNeutralElement() -> tplSetElem
     {
         dec 
             ~result:tplSetElem 
@@ -57,7 +57,7 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
         return result
     }
 
-    property optional func RightNeutralElement() -> tplSetElem
+    property func optional RightNeutralElement() -> tplSetElem
     {
         dec 
             ~result:tplSetElem 
@@ -65,7 +65,7 @@ def func BinOp(x,y: tplSetElem) -> tplSetElem
         return result
     }
 
-    property optional func NeutralElement() -> tplSetElem
+    property func optional NeutralElement() -> tplSetElem
     {
         dec 
             ~result:tplSetElem 
