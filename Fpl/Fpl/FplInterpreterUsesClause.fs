@@ -169,7 +169,8 @@ let private getParsedAstsFromSources
     (eani:EvalAliasedNamespaceIdentifier) 
     (fplSources: seq<string>) (
     getContent: Uri -> string -> EvalAliasedNamespaceIdentifier -> string) 
-    (parsedAsts:ParsedAstList) =
+    (parsedAsts:ParsedAstList) 
+    =
 
     fplSources
     |> Seq.iter (fun fileLoc ->
@@ -319,36 +320,39 @@ let rearrangeList element list =
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
-let loadAllUsesClauses input (uri:Uri) fplLibUrl (parsedAsts:ParsedAstList) = 
+let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl = 
     let sources = acquireSources uri fplLibUrl
     emitDiagnosticsForDuplicateFiles uri sources (EvalAliasedNamespaceIdentifier.CreateEani(uri))
 
-    let currentName = addOrUpdateParsedAst input uri.LocalPath parsedAsts
+    let currentName = addOrUpdateParsedAst input uri.LocalPath st.ParsedAsts
     let mutable found = true
 
     while found do
-        let loadedParsedAst = parsedAsts.TryFindLoadedAst()
+        let loadedParsedAst = st.ParsedAsts.TryFindLoadedAst()
         match loadedParsedAst with
         | Some pa -> 
+            // reset the symbol table for the pa
+            if st.Root.Scope.ContainsKey(pa.Id) then
+                st.Root.Scope[pa.Id].Reset()
             // evaluate the EvalAliasedNamespaceIdentifier list of the ast
             pa.Sorting.EANIList <- eval_uses_clause pa.Parsing.Ast 
             pa.Status <- ParsedAstStatus.UsesClausesEvaluated
             findDuplicateAliases (FplSources.EscapedUri(pa.Parsing.UriPath)) pa.Sorting.EANIList |> ignore
             pa.Sorting.EANIList
             |> List.iter (fun (eani:EvalAliasedNamespaceIdentifier) -> 
-                getParsedAstsMatchingAliasedNamespaceIdentifier uri sources parsedAsts eani
+                getParsedAstsMatchingAliasedNamespaceIdentifier uri sources st.ParsedAsts eani
                 emitDiagnosticsForDuplicateFiles (FplSources.EscapedUri(pa.Parsing.UriPath)) sources eani
-                chainParsedAsts parsedAsts pa eani
+                chainParsedAsts st.ParsedAsts pa eani
             ) |> ignore
         | None -> 
             found <- false
-    if isCircular parsedAsts then
-        let cycle = findCycle parsedAsts
+    if isCircular st.ParsedAsts then
+        let cycle = findCycle st.ParsedAsts
         match cycle with
         | Some lst -> 
             let lstWithCurrentAsHead = rearrangeList currentName lst @ [currentName]
             let path = String.concat " -> " lstWithCurrentAsHead
-            let parsedAstThatStartsTheCycle = parsedAsts.TryFindAstById(lstWithCurrentAsHead.Head)
+            let parsedAstThatStartsTheCycle = st.ParsedAsts.TryFindAstById(lstWithCurrentAsHead.Head)
             let circularReferencedName = List.item 1 lstWithCurrentAsHead
             match parsedAstThatStartsTheCycle with 
             | Some pa -> 

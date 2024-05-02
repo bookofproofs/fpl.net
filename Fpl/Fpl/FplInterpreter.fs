@@ -18,13 +18,12 @@ let private emitUnexpectedErrorDiagnostics uri errMsg =
         }
         FplParser.parserDiagnostics.AddDiagnostic(diagnostic)
 
-let fplInterpreter input (uri:Uri) fplLibUrl (parsedAsts:ParsedAstList) debug = 
-    let st = SymbolTable(parsedAsts, debug)
+let fplInterpreter (st:SymbolTable) input (uri:Uri) fplLibUrl = 
     try
         let escapedUri = Uri(Uri.UnescapeDataString(uri.AbsoluteUri))
-        loadAllUsesClauses input escapedUri fplLibUrl parsedAsts 
+        loadAllUsesClauses st input escapedUri fplLibUrl 
         evaluateSymbolTable uri st
     with ex -> 
         emitUnexpectedErrorDiagnostics uri ex.Message
-    st
+    ()
  

@@ -7,6 +7,7 @@ open System.Collections.Generic
 open System.Text
 open System.IO
 open FParsec
+open Newtonsoft.Json
 open FplGrammarTypes
 open FplParser
 
@@ -788,6 +789,23 @@ and FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions
         | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
         | FplBlockType.Localization -> new FplValue("", fplBlockType, FplType.Localization, positions, Some parent)
 
+    /// Clears this FplValue
+    member this.Reset() = 
+        let rec clearAll (root:FplValue) =
+            root.ValueList
+            |> Seq.iter (fun child ->
+                clearAll child
+            )
+            root.ValueList.Clear()
+            root.Scope
+            |> Seq.iter (fun child ->
+                clearAll child.Value
+            )
+            root.Scope.Clear()
+            
+        clearAll this
+
+ 
 type EvalContext =
     | ContextNone
     | InTheory of FplValue
@@ -844,3 +862,37 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
             Comparer<ParsedAst>.Create(fun b a -> compare a.Sorting.TopologicalSorting b.Sorting.TopologicalSorting)
         )
 
+    /// serializes the symbol table as json
+    member this.ToJson() = 
+        let sb = StringBuilder()
+        let rec createJson (root:FplValue) (sb:StringBuilder) level isLast =
+            let indent = String(' ', level)
+            sb.AppendLine(String(' ', level - 1) + "{") |> ignore
+            sb.AppendLine($"{indent}\"Name\": \"{root.Name}\",") |> ignore
+            sb.AppendLine($"{indent}\"Scope\": [") |> ignore
+            let mutable counterScope = 0
+            root.Scope
+            |> Seq.iter (fun child ->
+                counterScope <- counterScope + 1
+                createJson child.Value sb (level + 1) (counterScope = root.Scope.Count)
+            )
+            sb.AppendLine($"{indent}],") |> ignore
+            sb.AppendLine($"{indent}\"ValueList\": [") |> ignore
+
+            let mutable valueList = 0
+            root.ValueList
+            |> Seq.iter (fun child ->
+                valueList <- valueList + 1
+                createJson child sb (level + 1) (valueList = root.ValueList.Count)
+            )
+            sb.AppendLine($"{indent}]") |> ignore
+            if isLast then
+                sb.AppendLine(String(' ', level - 1) + "}") |> ignore
+            else
+                sb.AppendLine(String(' ', level - 1) + "},") |> ignore
+        createJson this.Root sb 1 false
+        let res = sb.ToString().TrimEnd()
+        if res.EndsWith(',') then 
+            res.Substring(0,res.Length - 1)
+        else
+            res

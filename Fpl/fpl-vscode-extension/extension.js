@@ -157,6 +157,7 @@ function dispatchRuntime(runtimeName) {
     }
 }
 
+
 /**
  * @param {string} runtimeName
  * @param {string} relPathToDotnetRuntime
@@ -200,6 +201,55 @@ function acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime) {
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
+
+// A custom TreeItem
+class MyTreeItem extends vscode.TreeItem {
+    constructor(label, scope, valueList) {
+        super(label);
+        this.scope = scope;
+        this.valueList = valueList;
+        this.collapsibleState = scope.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
+    }
+}
+
+// Define your TreeDataProvider
+class FplTheoriesProvider {
+    constructor() {
+        this._onDidChangeTreeData = new vscode.EventEmitter();
+        this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+    }
+
+    getTreeItem(element) {
+        return element;
+    }
+
+    getChildren(element) {
+        console.log("getChildren called " + element)
+        if (!element) {
+            // If no element is passed, return the root nodes of your tree
+            return client.sendRequest('getTreeData').then(json => {
+                let treeData = JSON.parse(json);
+                console.log(treeData);
+                return this.parseScope(treeData.Scope);
+            }).catch(error => {
+                console.error('Failed to get tree data', error);
+                return [];  // Return an empty array on error
+            });
+        } else if (element.scope) {
+            // If the element has a 'Scope' property, return its children
+            return this.parseScope(element.scope);
+        } else {
+            // If the element has no children, return an empty array
+            return Promise.resolve([]);
+        }
+    }
+
+    parseScope(scope) {
+        // Convert each item in the scope to a MyTreeItem
+        return scope.map(item => new MyTreeItem(item.Name, item.Scope, item.ValueList));
+    }
+}
+
 
 const { LanguageClient } = require('vscode-languageclient');
 
@@ -251,12 +301,23 @@ function activate(context) {
            
             let disposableClient = client.start();
     
+
+            
+            // Create an instance of your TreeDataProvider
+            const fplTheoriesProvider = new FplTheoriesProvider();
+
+            // Register your TreeDataProvider
+            vscode.window.registerTreeDataProvider('fplTheories', fplTheoriesProvider);
+
             // The command has been defined in the package.json file
             // Now provide the implementation of the command with  registerCommand
             // The commandId parameter must match the command field in package.json
             let disposableCommand = vscode.commands.registerCommand('fpl-vscode-extension.helloWorld', function () {
-                // The code you place here will be executed every time your command is executed
+                
+            // The code you place here will be executed every time your command is executed
     
+                
+
                 // Display a message box to the user
                 vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
             });

@@ -25,7 +25,8 @@ type TestInterpreterErrors() =
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
-        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true |> ignore
+        let st = SymbolTable(parsedAsts, true)
+        FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
 
@@ -40,7 +41,8 @@ type TestInterpreterErrors() =
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
-        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true |> ignore 
+        let st = SymbolTable(parsedAsts, true)
+        FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore 
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
 
@@ -58,7 +60,9 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some (FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts true)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP04CircularAA() =
@@ -87,7 +91,9 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some(FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts true)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP04CircularABCA() =
@@ -116,7 +122,9 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some (FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts false)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP04NonCircular() =
@@ -139,7 +147,9 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP05() =
@@ -166,7 +176,9 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP05a() =
@@ -193,7 +205,9 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP05CrossCheck() =
@@ -438,9 +452,11 @@ type TestInterpreterErrors() =
     [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:B {intr};", 0)>]
     [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet {intr};", 0)>]
     [<DataRow("uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
+    [<DataRow("uses Fpl.Commons uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
     [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:A {intr};", 0)>]
     [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:A,A {intr};", 1)>]
-    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:B,D,E,B {intr};", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:obj,object {intr};", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:object,D,E,obj {intr};", 1)>]
     [<TestMethod>]
     member this.TestID011(fplCode:string, expected) =
         let code = ID011 ("","")

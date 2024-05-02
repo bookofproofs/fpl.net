@@ -64,7 +64,6 @@ proof Theorem_003$1
     // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( AddNat(n,1) )` is true.
     
     dec 
-         ~x : object
          ~m : Set // let m be a set 
          assert (1 ∈ m) // such that 1 belongs to m
          assert 
@@ -145,8 +144,6 @@ proof Theorem_004_A$1
     // Then do the "inductive step": Prove that if `p(n)` is true, then also `p( Sum(n,1) )` is true.
     
     declaration 
-         ~x : N // for a fixed x
-        // and for all y we define 
         for y in N 
         {
             // such that
@@ -453,7 +450,6 @@ proof Theorem_009$1
     
     // Part B (by induction)
     declaration
-        ~x,y: N // let x be fixed
         ~m: Set // and let m b the set of all y 
         assert
             (

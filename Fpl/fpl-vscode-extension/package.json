@@ -60,7 +60,15 @@
         "command": "fpl-vscode-extension.helloWorld",
         "title": "Hello World"
       }
-    ]
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "fplTheories",
+          "name": "FPL Theories"
+        }
+      ]
+    }
   },
   "scripts": {
     "lint": "eslint .",

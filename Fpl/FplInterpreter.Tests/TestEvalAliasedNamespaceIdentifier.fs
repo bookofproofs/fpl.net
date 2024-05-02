@@ -213,7 +213,8 @@ type TestEvalAliasedNamespaceIdentifier() =
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let parsedAsts = ParsedAstList()
-        loadAllUsesClauses input uri fplLibUrl parsedAsts
+        let st = SymbolTable(parsedAsts, false)
+        loadAllUsesClauses st input uri fplLibUrl 
         parsedAsts
 
 
@@ -267,7 +268,8 @@ type TestEvalAliasedNamespaceIdentifier() =
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let parsedAsts = ParsedAstList()
-        loadAllUsesClauses input uri fplLibUrl parsedAsts
+        let st = SymbolTable(parsedAsts, false)
+        loadAllUsesClauses st input uri fplLibUrl 
         parsedAsts
 
     [<TestMethod>]
