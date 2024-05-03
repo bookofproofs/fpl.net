@@ -224,12 +224,10 @@ class FplTheoriesProvider {
     }
 
     getChildren(element) {
-        console.log("getChildren called " + element)
         if (!element) {
             // If no element is passed, return the root nodes of your tree
             return client.sendRequest('getTreeData').then(json => {
                 let treeData = JSON.parse(json);
-                console.log(treeData);
                 return this.parseScope(treeData.Scope);
             }).catch(error => {
                 console.error('Failed to get tree data', error);

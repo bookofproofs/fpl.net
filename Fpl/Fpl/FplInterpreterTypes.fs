@@ -862,7 +862,7 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
             Comparer<ParsedAst>.Create(fun b a -> compare a.Sorting.TopologicalSorting b.Sorting.TopologicalSorting)
         )
 
-    /// serializes the symbol table as json
+    /// Serializes the symbol table as json
     member this.ToJson() = 
         let sb = StringBuilder()
         let rec createJson (root:FplValue) (sb:StringBuilder) level isLast =
@@ -896,3 +896,27 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
             res.Substring(0,res.Length - 1)
         else
             res
+
+    /// Returns the uses dependencies of this symbol table
+    member this.UsesDependencies() =
+        let sb = StringBuilder()
+        sb.AppendLine() |> ignore
+        sb.AppendLine("SymbolTable: ") |> ignore
+        this.Root.Scope
+        |> Seq.map (fun theory -> 
+            $"{theory.Value.Name} ({theory.Value.Scope.Count})"
+        )
+        |> String.concat Environment.NewLine
+        |> sb.AppendLine
+        |> ignore
+
+        sb.AppendLine("ParsedAsts: ") |> ignore
+        this.ParsedAsts
+        |> Seq.map (fun pa -> 
+            $"[{pa.Id}, {pa.Sorting.TopologicalSorting}, {pa.Sorting.ReferencedAsts}, {pa.Sorting.ReferencingAsts}]"
+        )
+        |> String.concat Environment.NewLine
+        |> sb.AppendLine
+        |> ignore
+
+        sb.ToString()

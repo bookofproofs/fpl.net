@@ -90,7 +90,7 @@ namespace FplLS
         {
             var sb = new StringBuilder();
             var castedListDiagnostics = new UriDiagnostics();
-            FplLsTraceLogger.LogMsg(_languageServer, st.ToJson(), "");
+            FplLsTraceLogger.LogMsg(_languageServer, st.UsesDependencies(), "");
             FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.DiagnosticsToString, "~~~~~Diagnostics");
             foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
             {
