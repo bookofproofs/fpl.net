@@ -68,6 +68,26 @@
           "name": "FPL Theories"
         }
       ]
+    },
+    "configuration": {
+      "title": "FPL",
+      "properties": {
+        "fplExtension.entryPoint": {
+            "type": "string",
+            "default": "MyFplTheory.fpl",
+            "description": "The fpl file containing the top entry point of your mathematical theory."
+        },
+        "fplExtension.textEditor.setting1": {
+            "type": "number",
+            "default": 1,
+            "description": "Test number."
+        },
+        "fplExtension.textEditor.setting2": {
+          "type": "boolean",
+          "default": true,
+          "description": "Test boolean."
+        }
+      }
     }
   },
   "scripts": {

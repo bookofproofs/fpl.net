@@ -307,15 +307,20 @@ function activate(context) {
             // Register your TreeDataProvider
             vscode.window.registerTreeDataProvider('fplTheories', fplTheoriesProvider);
 
+            let config = vscode.workspace.getConfiguration('fplExtension');
+            let entryPoint = config.get('entryPoint');
+            let textEditor = config.get('textEditor');
+        
+            console.log(`Entry Point: ${entryPoint}`);
+            console.log(`Text Editor: ${JSON.stringify(textEditor)}`);
+
+
             // The command has been defined in the package.json file
             // Now provide the implementation of the command with  registerCommand
             // The commandId parameter must match the command field in package.json
             let disposableCommand = vscode.commands.registerCommand('fpl-vscode-extension.helloWorld', function () {
                 
-            // The code you place here will be executed every time your command is executed
-    
-                
-
+                // The code you place here will be executed every time your command is executed
                 // Display a message box to the user
                 vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
             });
