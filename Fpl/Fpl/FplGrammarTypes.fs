@@ -1,10 +1,27 @@
 ﻿module FplGrammarTypes
+open System.Collections.Generic
 open FParsec
 
 /// our FPL grammar needs starting and ending position for each Ast node since we
 /// will need these information for the diagnostics of the interpreter even after the 
 /// parsing was done
 type Positions = Position * Position 
+
+type Token =
+    { Name:string
+      StartPos: Position
+      EndPos:Position
+    }
+
+type Tokenizer() =
+    let _parsedTokens = new System.Collections.Generic.List<Token>(); 
+    
+    /// Increases the context of this tokenizer
+    member this.Push(token:Token) = 
+        _parsedTokens.Add(token)
+
+    /// The list of successfully parsed tokens
+    member this.ParsedTokens = _parsedTokens
 
 
 type Ast = 

@@ -14,7 +14,7 @@ type TestAxioms () =
 
     [<TestMethod>]
     member this.TestAxiom01 () =
-        let result = run (axiom .>> eof) """axiom ZeroIsNat()
+        let result = run (axiom .>> eof) """axiom ZeroIsNat(x:obj)
         {
             is(Zero,Nat)
         }"""
