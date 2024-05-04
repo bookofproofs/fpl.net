@@ -57,11 +57,11 @@ type Ast =
     | Many of Positions * unit
     | Many1 of Positions * unit  
     | TemplateType of Positions * string
-    | ObjectType 
+    | ObjectType of Positions * unit
     | ClassIdentifier of Positions * Ast
-    | PredicateType 
-    | FunctionalTermType 
-    | IndexType
+    | PredicateType of Positions * unit
+    | FunctionalTermType of Positions * unit
+    | IndexType of Positions * unit
     | VariableType of Positions * Ast 
     | BracketedCoordsInType of Positions * Ast list 
     | InheritedClassType of Positions * Ast

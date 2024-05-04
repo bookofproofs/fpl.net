@@ -279,6 +279,7 @@ type FplBlockType =
     | OptionalFunctionalTerm
     | Constructor
     | Class 
+    | Object
     | Theorem
     | Localization
     | Lemma
@@ -307,6 +308,7 @@ type FplBlockType =
             | OptionalFunctionalTerm -> "optional functional term property"
             | Constructor -> "constructor"
             | Class -> "class definition"
+            | Object -> "object"
             | Localization -> "localization"
             | Theorem -> "theorem"
             | Lemma -> "lemma"
@@ -327,6 +329,7 @@ type FplBlockType =
         | OptionalPredicate
         | OptionalFunctionalTerm
         | Expression 
+        | Object 
         | Axiom -> "an"
         | _ -> "a"
 
@@ -442,7 +445,7 @@ and FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions
         | FplBlockType.RuleOfInference 
         | FplBlockType.Predicate 
         | FplBlockType.FunctionalTerm 
-        | FplBlockType.Class(_) 
+        | FplBlockType.Class 
         | FplBlockType.Localization -> true
         | _ -> false
 
@@ -451,7 +454,7 @@ and FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions
         match fplValue.BlockType with 
         | FplBlockType.Predicate 
         | FplBlockType.FunctionalTerm 
-        | FplBlockType.Class(_) -> true
+        | FplBlockType.Class -> true
         | _ -> false
 
     /// Indicates if this FplValue is an root of the symbol table.
@@ -760,6 +763,12 @@ and FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions
         root.NameIsFinal <- true
         root
 
+    /// A factory method for the FPL primitive Object
+    static member CreateObject(pos1,pos2) =
+        let obj = new FplValue("obj", FplBlockType.Object, FplType.Object, (pos1, pos2), None)
+        obj.NameIsFinal <- true
+        obj
+
     /// A factory method for the evaluation of Fpl class definitions
     static member CreateFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =
         match fplBlockType with
@@ -785,9 +794,10 @@ and FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions
         | FplBlockType.VariadicVariableMany1
         | FplBlockType.MandatoryFunctionalTerm
         | FplBlockType.OptionalFunctionalTerm
-        | FplBlockType.Class(_) -> new FplValue("", fplBlockType, FplType.Object, positions, Some parent)
+        | FplBlockType.Class -> new FplValue("", fplBlockType, FplType.Object, positions, Some parent)
         | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
         | FplBlockType.Localization -> new FplValue("", fplBlockType, FplType.Localization, positions, Some parent)
+        | FplBlockType.Object -> raise (ArgumentException("Please use CreateObject for creating a primitive object instead"))
 
     /// Clears this FplValue
     member this.Reset() = 

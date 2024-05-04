@@ -16,6 +16,7 @@
     <None Include="DocuFplGrammarPocShiftFromPythonToFSharp.md" />
     <Compile Include="FplParser.fs" />
     <Compile Include="FplInterpreterTypes.fs" />
+    <Compile Include="FplInterpreterDiagnosticsEmitter.fs" />
     <Compile Include="FplInterpreterUsesClause.fs" />
     <Compile Include="FplInterpreterBuildingBlocks.fs" />
     <Compile Include="FplInterpreter.fs" />

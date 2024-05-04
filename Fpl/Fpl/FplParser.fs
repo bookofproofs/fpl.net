@@ -124,7 +124,7 @@ let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
 let keywordSelf = positions "Self" (skipString "self") .>> IW |>> Ast.Self
 let keywordBaseClassReference = skipString "base" .>> IW
-let keywordIndex = (skipString "index" <|> skipString "ind") >>% Ast.IndexType
+let keywordIndex = positions "IndexType" (skipString "index" <|> skipString "ind") |>> Ast.IndexType
 
 
 (* FplBlock-related Keywords *)
@@ -166,15 +166,15 @@ let templateTail = choice [ idStartsWithCap; (regex @"\d+") ]
 
 let templateWithTail = positions "TemplateType" (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) |>>  Ast.TemplateType
 
-let keywordObject = (skipString "object" <|> skipString "obj") >>% Ast.ObjectType 
+let keywordObject = positions "ObjectType" (skipString "object" <|> skipString "obj") |>> Ast.ObjectType 
 
 let objectHeader = choice [
     keywordObject
     (attempt templateWithTail) <|> keywordTemplate
 ] 
 
-let keywordPredicate = (skipString "predicate" <|> skipString "pred") >>% Ast.PredicateType
-let keywordFunction = (skipString "function" <|> skipString "func") >>% Ast.FunctionalTermType
+let keywordPredicate = positions "PredicateType" (skipString "predicate" <|> skipString "pred") |>> Ast.PredicateType
+let keywordFunction = positions "FunctionalTermType" (skipString "function" <|> skipString "func") |>> Ast.FunctionalTermType
 
 
 let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
