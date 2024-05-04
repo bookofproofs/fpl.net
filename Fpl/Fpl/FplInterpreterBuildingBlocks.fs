@@ -90,121 +90,17 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
 let tryAddBlock (uri:Uri) (fplValue:FplValue) =
-    let emitVAR02diagnostics (fplValue:FplValue) (conflict:FplValue) = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = VAR02 (fplValue.Name, conflict.QualifiedStartPos)
-            Diagnostic.Alternatives = None 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitVAR03diagnostics (fplValue:FplValue) (conflict:FplValue) = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = VAR03 (fplValue.Name, conflict.QualifiedStartPos)
-            Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitVAR03diagnosticsForCorollarysSignatureVariale (fplValue:FplValue) = 
-        if FplValue.IsCorollary(fplValue) then
-            for kv in fplValue.Scope do
-                let res = FplValue.CorollaryVariableInOuterScope(kv.Value) 
-                match res with
-                | ScopeSearchResult.Found conflict ->
-                    emitVAR03diagnostics kv.Value conflict
-                | _ -> ()
-
-    let emitID002diagnostics (fplValue:FplValue) incorrectBlockType = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID002 (fplValue.Name, incorrectBlockType)
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitID005diagnostics (fplValue:FplValue) incorrectBlockType = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID005 (fplValue.Name, incorrectBlockType)
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitID003diagnostics (fplValue:FplValue) = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID003 fplValue.Name
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitID006diagnostics (fplValue:FplValue) = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID006 fplValue.Name
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitID004diagnostics (fplValue:FplValue) listOfCandidates = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID004 (fplValue.Name, listOfCandidates)
-            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitID007diagnostics (fplValue:FplValue) listOfCandidates = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID007 (fplValue.Name, listOfCandidates)
-            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
     match FplValue.TryFindAssociatedBlockForProof fplValue with
     | ScopeSearchResult.FoundAssociate parentsName -> 
         // everything is ok, change the parent of the provable from theory to the found parent 
         fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
     | ScopeSearchResult.FoundIncorrectBlock block ->
-        emitID002diagnostics fplValue block
+        emitID002diagnostics fplValue block uri 
     | ScopeSearchResult.NotFound ->
-        emitID003diagnostics fplValue 
+        emitID003diagnostics fplValue uri 
     | ScopeSearchResult.FoundMultiple listOfKandidates ->
-        emitID004diagnostics fplValue listOfKandidates
+        emitID004diagnostics fplValue listOfKandidates uri 
     | _ -> ()
 
     match FplValue.TryFindAssociatedBlockForCorollary fplValue with
@@ -212,13 +108,13 @@ let tryAddBlock (uri:Uri) (fplValue:FplValue) =
         // everything is ok, change the parent of the provable from theory to the found parent 
         fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
-        emitVAR03diagnosticsForCorollarysSignatureVariale fplValue
+        emitVAR03diagnosticsForCorollarysSignatureVariale fplValue uri 
     | ScopeSearchResult.FoundIncorrectBlock block ->
-        emitID005diagnostics fplValue block
+        emitID005diagnostics fplValue block uri 
     | ScopeSearchResult.NotFound ->
-        emitID006diagnostics fplValue 
+        emitID006diagnostics fplValue uri 
     | ScopeSearchResult.FoundMultiple listOfKandidates ->
-        emitID007diagnostics fplValue listOfKandidates
+        emitID007diagnostics fplValue listOfKandidates uri 
     | _ -> ()
 
     match FplValue.InScopeOfParent(fplValue) fplValue.Name with
@@ -227,27 +123,14 @@ let tryAddBlock (uri:Uri) (fplValue:FplValue) =
     | _ -> 
         match FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) with
         | ScopeSearchResult.Found other ->
-            emitVAR02diagnostics fplValue other
+            emitVAR02diagnostics fplValue other uri 
         | _ -> 
             match FplValue.ProofVariableInOuterScope(fplValue) with
             | ScopeSearchResult.Found other ->
-                emitVAR03diagnostics fplValue other
+                emitVAR03diagnostics fplValue other uri
             | _ -> 
                 fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
                 fplValue.NameIsFinal <- true
-
-let tryAddVariadicVariables (uri:System.Uri) numberOfVariadicVars (startPos:Position) (endPos:Position) =
-    if numberOfVariadicVars > 1 then
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = startPos
-            Diagnostic.EndPos = endPos
-            Diagnostic.Code = VAR00 
-            Diagnostic.Alternatives = None 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -1231,18 +1114,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     | ast1 ->
         let astType = ast1.GetType().Name
-
-        let diagnostic =
-            { 
-                Diagnostic.Uri = uri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = Position("", 0, 1, 1)
-                Diagnostic.EndPos = Position("", 0, 1, 1)
-                Diagnostic.Code = ID000 astType
-                Diagnostic.Alternatives = None 
-            }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+        emitID000Diagnostics uri astType
 
 
 let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =

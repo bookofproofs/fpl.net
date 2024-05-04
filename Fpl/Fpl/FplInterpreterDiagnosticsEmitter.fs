@@ -1,5 +1,5 @@
 ﻿module FplInterpreterDiagnosticsEmitter
-open System
+open FParsec
 open ErrDiagnostics
 open FplGrammarTypes
 open FplParser
@@ -22,6 +22,123 @@ let emitVAR01orID001diagnostics (fplValue:FplValue) (conflict:FplValue) uri =
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
+let emitVAR02diagnostics (fplValue:FplValue) (conflict:FplValue) uri = 
+    let diagnostic = { 
+        Diagnostic.Uri = uri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = fplValue.StartPos
+        Diagnostic.EndPos = fplValue.NameEndPos
+        Diagnostic.Code = VAR02 (fplValue.Name, conflict.QualifiedStartPos)
+        Diagnostic.Alternatives = None 
+    }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+let emitVAR03diagnostics (fplValue:FplValue) (conflict:FplValue) uri = 
+    let diagnostic = { 
+        Diagnostic.Uri = uri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = fplValue.StartPos
+        Diagnostic.EndPos = fplValue.NameEndPos
+        Diagnostic.Code = VAR03 (fplValue.Name, conflict.QualifiedStartPos)
+        Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
+    }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+let emitVAR03diagnosticsForCorollarysSignatureVariale (fplValue:FplValue) uri = 
+    if FplValue.IsCorollary(fplValue) then
+        for kv in fplValue.Scope do
+            let res = FplValue.CorollaryVariableInOuterScope(kv.Value) 
+            match res with
+            | ScopeSearchResult.Found conflict ->
+                emitVAR03diagnostics kv.Value conflict uri
+            | _ -> ()
+
+let emitID002diagnostics (fplValue:FplValue) incorrectBlockType uri = 
+    let diagnostic = { 
+        Diagnostic.Uri = uri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = fplValue.StartPos
+        Diagnostic.EndPos = fplValue.NameEndPos
+        Diagnostic.Code = ID002 (fplValue.Name, incorrectBlockType)
+        Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+    }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+let emitID005diagnostics (fplValue:FplValue) incorrectBlockType uri = 
+    let diagnostic = { 
+        Diagnostic.Uri = uri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = fplValue.StartPos
+        Diagnostic.EndPos = fplValue.NameEndPos
+        Diagnostic.Code = ID005 (fplValue.Name, incorrectBlockType)
+        Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
+    }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+let emitID003diagnostics (fplValue:FplValue) uri = 
+    let diagnostic = { 
+        Diagnostic.Uri = uri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = fplValue.StartPos
+        Diagnostic.EndPos = fplValue.NameEndPos
+        Diagnostic.Code = ID003 fplValue.Name
+        Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+    }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+let emitID006diagnostics (fplValue:FplValue) uri = 
+    let diagnostic = { 
+        Diagnostic.Uri = uri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = fplValue.StartPos
+        Diagnostic.EndPos = fplValue.NameEndPos
+        Diagnostic.Code = ID006 fplValue.Name
+        Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
+    }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+let emitID004diagnostics (fplValue:FplValue) listOfCandidates uri = 
+    let diagnostic = { 
+        Diagnostic.Uri = uri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = fplValue.StartPos
+        Diagnostic.EndPos = fplValue.NameEndPos
+        Diagnostic.Code = ID004 (fplValue.Name, listOfCandidates)
+        Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
+    }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+let emitID007diagnostics (fplValue:FplValue) listOfCandidates uri = 
+    let diagnostic = { 
+        Diagnostic.Uri = uri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = fplValue.StartPos
+        Diagnostic.EndPos = fplValue.NameEndPos
+        Diagnostic.Code = ID007 (fplValue.Name, listOfCandidates)
+        Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
+    }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+let tryAddVariadicVariables (uri:System.Uri) numberOfVariadicVars startPos endPos =
+    if numberOfVariadicVars > 1 then
+        let diagnostic = { 
+            Diagnostic.Uri = uri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = startPos
+            Diagnostic.EndPos = endPos
+            Diagnostic.Code = VAR00 
+            Diagnostic.Alternatives = None 
+        }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
 let checkID008Diagnostics (fplValue:FplValue) uri pos1 pos2 =
     if FplValue.IsConstructor(fplValue) && fplValue.TypeSignature.Length = 1 then 
@@ -157,3 +274,15 @@ let checkID009_ID010_ID011_Diagnostics (st:SymbolTable) (fplValue:FplValue) name
                 fplValue.ValueList.Add obj
 
 
+let emitID000Diagnostics uri astType = 
+    let diagnostic =
+        { 
+            Diagnostic.Uri = uri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = Position("", 0, 1, 1)
+            Diagnostic.EndPos = Position("", 0, 1, 1)
+            Diagnostic.Code = ID000 astType
+            Diagnostic.Alternatives = None 
+        }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
