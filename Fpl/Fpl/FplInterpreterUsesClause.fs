@@ -310,11 +310,47 @@ let private chainParsedAsts (alreadyLoaded:ParsedAstList) parsedAst (eani:EvalAl
     | None -> ()
 
 
-let rearrangeList element list =
+let private rearrangeList element list =
     let afterElement = list |> List.skipWhile ((<>) element)
     let beforeElement = list |> List.takeWhile ((<>) element)
     afterElement @ beforeElement
 
+let garbageCollector (st:SymbolTable) (uri:Uri) = 
+    let currentTheory = Path.GetFileNameWithoutExtension(uri.LocalPath)
+    let referencedAstsOfCurrentTheory = 
+        match st.ParsedAsts.TryFindAstById(currentTheory) with
+        | Some pa -> pa.Sorting.ReferencedAsts
+        | _ -> []
+    // remove the current theory from the ReferencingAsts list of each parsedAst, if they are not contained 
+    // in the current theory's reference Asts
+    st.ParsedAsts 
+    |> Seq.iter (fun pa ->
+        match pa.Sorting.ReferencingAsts |> List.tryFindIndex (fun referencedTheory -> 
+            referencedTheory = currentTheory
+            && not (referencedAstsOfCurrentTheory |> List.contains pa.Id)
+            ) with
+        | Some indexOfCurrentTheory -> 
+            pa.Sorting.ReferencingAsts <- pa.Sorting.ReferencingAsts |> List.removeAt(indexOfCurrentTheory)
+        | _ -> ()
+    )
+    // remember the names of parsedAsts if they have empty referencing asts, except if it is the current theory
+    let willBeRemoved = 
+        st.ParsedAsts
+        |> Seq.filter (fun pa -> pa.Id <> currentTheory && pa.Sorting.ReferencingAsts.Length = 0)
+        |> Seq.map (fun pa -> pa.Id)
+        |> Seq.toList
+    // remove the parsedAsts if they have no referencing asts, except if it is the current theory
+    st.ParsedAsts.RemoveAll (fun pa -> pa.Id <> currentTheory && pa.Sorting.ReferencingAsts.Length = 0) |> ignore
+    // remove all theories from symbol table root's scope that are no more contained in parsed asts
+    willBeRemoved 
+    |> List.iter (fun theoryName ->
+        if st.Root.Scope.ContainsKey(theoryName) then
+            let toBeRemoved = st.Root.Scope[theoryName]
+            toBeRemoved.Reset()
+            st.Root.Scope.Remove theoryName |> ignore
+        else
+            ()
+    ) 
 
 
 /// Parses the input at Uri and loads all referenced namespaces until
@@ -331,9 +367,6 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl =
         let loadedParsedAst = st.ParsedAsts.TryFindLoadedAst()
         match loadedParsedAst with
         | Some pa -> 
-            // reset the symbol table for the pa
-            if st.Root.Scope.ContainsKey(pa.Id) then
-                st.Root.Scope[pa.Id].Reset()
             // evaluate the EvalAliasedNamespaceIdentifier list of the ast
             pa.Sorting.EANIList <- eval_uses_clause pa.Parsing.Ast 
             pa.Status <- ParsedAstStatus.UsesClausesEvaluated
@@ -346,6 +379,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl =
             ) |> ignore
         | None -> 
             found <- false
+    garbageCollector st uri
     if isCircular st.ParsedAsts then
         let cycle = findCycle st.ParsedAsts
         match cycle with
