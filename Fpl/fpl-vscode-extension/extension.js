@@ -297,10 +297,6 @@ function activate(context) {
                 clientOptions
             );
            
-            let disposableClient = client.start();
-    
-
-            
             // Create an instance of your TreeDataProvider
             const fplTheoriesProvider = new FplTheoriesProvider();
 
@@ -308,13 +304,23 @@ function activate(context) {
             vscode.window.registerTreeDataProvider('fplTheories', fplTheoriesProvider);
 
             let config = vscode.workspace.getConfiguration('fplExtension');
-            let entryPoint = config.get('entryPoint');
-            let textEditor = config.get('textEditor');
-        
-            console.log(`Entry Point: ${entryPoint}`);
-            console.log(`Text Editor: ${JSON.stringify(textEditor)}`);
 
+            // Convert the configuration to a JSON string.
+            let configJson = JSON.stringify(config, null, 2);
 
+            // Write the configuration to a file.
+            let fs = require('fs');
+            let relPathToConfig = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'vsfplconfig.json');
+            fs.writeFile(relPathToConfig, configJson, (err) => {
+                if (err) {
+                    console.error('Error writing file:', err);
+                } else {
+                    console.log('Configuration written to config.json');
+                }
+            });
+            
+            let disposableClient = client.start();
+ 
             // The command has been defined in the package.json file
             // Now provide the implementation of the command with  registerCommand
             // The commandId parameter must match the command field in package.json
