@@ -314,8 +314,6 @@ function activate(context) {
             fs.writeFile(relPathToConfig, configJson, (err) => {
                 if (err) {
                     console.error('Error writing file:', err);
-                } else {
-                    console.log('Configuration written to config.json');
                 }
             });
             

@@ -338,6 +338,97 @@ type TestEvalAliasedNamespaceIdentifier() =
         let actual = result.Value.Sorting.ReferencingAsts
         Assert.AreEqual(["Test"; "Fpl.SetTheory"], actual)
 
+    member this.PrepareTestLoadAllUsesClauses03() =
+        let input = """
+            uses Fpl * 
+            ;"""
+        let pathToFile =
+            Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl")
+        let uri = System.Uri(pathToFile)
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        let parsedAsts = ParsedAstList()
+        let st = SymbolTable(parsedAsts, false)
+        loadAllUsesClauses st input uri fplLibUrl 
+        parsedAsts
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses03Number() =
+        let result = this.PrepareTestLoadAllUsesClauses03()
+        Assert.AreEqual(5, result.Count)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses03Id1() =
+        let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Test")
+        let actual = result.Value.Id
+        Assert.AreEqual("Test", actual)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses03Id1ReferencedAsts() =
+        let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Test")
+        // "Test" knows that it references to "Fpl.Commons"
+        let actual = result.Value.Sorting.ReferencedAsts
+        Assert.AreEqual(["Fpl.Commons"; "Fpl.Commons.Structures"; "Fpl.SetTheory"; "Fpl.PeanoArithmetics"], actual)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses03Id1ReferencingAsts() =
+        let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Test")
+        // "Test" knows that nothing is referencing to it
+        let actual = result.Value.Sorting.ReferencingAsts
+        Assert.AreEqual([], actual)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses03Id2() =
+        let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.SetTheory")
+        let actual = result.Value.Id
+        Assert.AreEqual("Fpl.SetTheory", actual)
+
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses03Id2ReferencedAsts() =
+        let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.SetTheory")
+        // "Fpl.SetTheory" references to FplCommons
+        let actual = result.Value.Sorting.ReferencedAsts
+        Assert.AreEqual(["Fpl.Commons"], actual)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses03Id2ReferencingAsts() =
+        let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.SetTheory")
+        // "Fpl.Commons" knows that "Test" is referencing to it
+        let actual = result.Value.Sorting.ReferencingAsts
+        Assert.AreEqual(["Test"; "Fpl.Commons.Structures"; "Fpl.PeanoArithmetics"], actual)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses03Id3() =
+        let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.Commons")
+        let actual = result.Value.Id
+        Assert.AreEqual("Fpl.Commons", actual)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses03Id3ReferencedAsts() =
+        let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.Commons")
+        // "Fpl.Commons" knows that it doesn't reference to anything
+        let actual = result.Value.Sorting.ReferencedAsts
+        Assert.AreEqual([], actual)
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClauses03Id3ReferencingAsts() =
+        let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.Commons")
+        // "Fpl.Commons" knows that "Test" is referencing to it
+        let actual = result.Value.Sorting.ReferencingAsts
+        Assert.AreEqual(["Test"; "Fpl.Commons.Structures"; "Fpl.SetTheory"; "Fpl.PeanoArithmetics"], actual)
+
+
+    [<TestMethod>]
+    member this.TestLoadAllUsesClausesTopologicalSorting01() =
+        let result = this.PrepareTestLoadAllUsesClauses01()
+        let ra = result.TryFindAstById("Fpl.Commons")
+        let rc = result.TryFindAstById("Test")
+        let a = ra.Value.Sorting.TopologicalSorting
+        let c = rc.Value.Sorting.TopologicalSorting
+        Assert.AreEqual(1, a)
+        Assert.AreEqual(0, c)
+
     [<TestMethod>]
     member this.TestLoadAllUsesClausesTopologicalSorting02() =
         let result = this.PrepareTestLoadAllUsesClauses02()
@@ -352,13 +443,22 @@ type TestEvalAliasedNamespaceIdentifier() =
         Assert.AreEqual(0, c)
 
     [<TestMethod>]
-    member this.TestLoadAllUsesClausesTopologicalSorting01() =
-        let result = this.PrepareTestLoadAllUsesClauses01()
+    member this.TestLoadAllUsesClausesTopologicalSorting03() =
+        let result = this.PrepareTestLoadAllUsesClauses03()
         let ra = result.TryFindAstById("Fpl.Commons")
-        let rc = result.TryFindAstById("Test")
+        let rb = result.TryFindAstById("Fpl.SetTheory")
+        let rc = result.TryFindAstById("Fpl.PeanoArithmetics")
+        let rd = result.TryFindAstById("Fpl.Commons.Structures")
+        let re = result.TryFindAstById("Test")
         let a = ra.Value.Sorting.TopologicalSorting
+        let b = rb.Value.Sorting.TopologicalSorting
         let c = rc.Value.Sorting.TopologicalSorting
-        Assert.AreEqual(1, a)
-        Assert.AreEqual(0, c)
+        let d = rd.Value.Sorting.TopologicalSorting
+        let e = re.Value.Sorting.TopologicalSorting
+        Assert.AreEqual(4, a)
+        Assert.AreEqual(3, b)
+        Assert.AreEqual(2, c)
+        Assert.AreEqual(1, d)
+        Assert.AreEqual(0, e)
     
 

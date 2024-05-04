@@ -222,8 +222,20 @@ let private emitDiagnosticsForDuplicateFiles (uri:System.Uri) (availableSources:
     )
     |> ignore
 
+let private chainParsedAsts (alreadyLoaded:ParsedAstList) parsedAst (eaniName:string) = 
+    // complement referenced asts 
+    if not (List.contains eaniName parsedAst.Sorting.ReferencedAsts) then 
+        parsedAst.Sorting.ReferencedAsts <- parsedAst.Sorting.ReferencedAsts @ [eaniName]
+    // complement referencing asts in the specific parsedAst even if it was already loaded
+    let referencedPa = alreadyLoaded.TryFindAstById(eaniName)
+    match referencedPa with
+    | Some pa -> 
+        if not (List.contains parsedAst.Id pa.Sorting.ReferencingAsts) then 
+            pa.Sorting.ReferencingAsts <- pa.Sorting.ReferencingAsts @ [parsedAst.Id]
+    | None -> ()
 
-let getParsedAstsMatchingAliasedNamespaceIdentifier (uri:System.Uri) (sources:FplSources) (parsedAsts:ParsedAstList) (eani:EvalAliasedNamespaceIdentifier) =
+
+let getParsedAstsMatchingAliasedNamespaceIdentifier (uri:System.Uri) (sources:FplSources) (parsedAsts:ParsedAstList) (eani:EvalAliasedNamespaceIdentifier) (currenParsedAst: ParsedAst)=
     let filtered = sources.FindWithPattern eani.FileNamePattern
     if filtered.IsEmpty then
         // Emits diagnostics if there are no files for the pattern 
@@ -240,14 +252,20 @@ let getParsedAstsMatchingAliasedNamespaceIdentifier (uri:System.Uri) (sources:Fp
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
     else
         filtered
-        |> Seq.iter (fun (_, path, _, _, _) ->
-            let p = path
+        |> Seq.map (fun (_, path, _, _, theoryName) ->
             if FplSources.IsFilePath(path) then
                 getParsedAstsFromSources uri eani [path] loadFile parsedAsts 
             else
                 getParsedAstsFromSources uri eani [path] downloadFile parsedAsts 
+            
+            theoryName
         ) 
-        |> ignore
+        |> Seq.iter (fun theoryName ->
+            match parsedAsts.TryFindAstById(theoryName) with
+            | Some pa -> 
+                chainParsedAsts parsedAsts currenParsedAst theoryName 
+            | _ -> ()
+        )
     
 /// Calculates the ParsedAst.TopologicalSorting property of the all ParsedAsts 
 /// unless the resulting directed graph is circular. If the function returns false, 
@@ -295,20 +313,6 @@ let private findCycle (parsedAsts:List<ParsedAst>) =
             |> List.choose (fun x -> if List.contains x.Id node.Sorting.ReferencingAsts then Some x else None)
             |> List.tryPick (dfs visited path)
     parsedAsts |> Seq.toList |> List.tryPick (dfs Set.empty [])
-
-
-let private chainParsedAsts (alreadyLoaded:ParsedAstList) parsedAst (eani:EvalAliasedNamespaceIdentifier) = 
-    // complement referenced asts 
-    if not (List.contains eani.Name parsedAst.Sorting.ReferencedAsts) then 
-        parsedAst.Sorting.ReferencedAsts <- parsedAst.Sorting.ReferencedAsts @ [eani.Name]
-    // complement referencing asts in the specific parsedAst even if it was already loaded
-    let referencedPa = alreadyLoaded.TryFindAstById(eani.Name)
-    match referencedPa with
-    | Some pa -> 
-        if not (List.contains parsedAst.Id pa.Sorting.ReferencingAsts) then 
-            pa.Sorting.ReferencingAsts <- pa.Sorting.ReferencingAsts @ [parsedAst.Id]
-    | None -> ()
-
 
 let private rearrangeList element list =
     let afterElement = list |> List.skipWhile ((<>) element)
@@ -373,9 +377,8 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl =
             findDuplicateAliases (FplSources.EscapedUri(pa.Parsing.UriPath)) pa.Sorting.EANIList |> ignore
             pa.Sorting.EANIList
             |> List.iter (fun (eani:EvalAliasedNamespaceIdentifier) -> 
-                getParsedAstsMatchingAliasedNamespaceIdentifier uri sources st.ParsedAsts eani
+                getParsedAstsMatchingAliasedNamespaceIdentifier uri sources st.ParsedAsts eani pa 
                 emitDiagnosticsForDuplicateFiles (FplSources.EscapedUri(pa.Parsing.UriPath)) sources eani
-                chainParsedAsts st.ParsedAsts pa eani
             ) |> ignore
         | None -> 
             found <- false
