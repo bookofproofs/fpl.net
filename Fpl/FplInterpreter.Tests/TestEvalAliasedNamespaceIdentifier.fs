@@ -461,4 +461,54 @@ type TestEvalAliasedNamespaceIdentifier() =
         Assert.AreEqual(1, d)
         Assert.AreEqual(0, e)
     
+    [<TestMethod>]
+    member this.TestGarbageCollector() =
+        match CommonTestHelpers.prepareFplCode("uses Fpl.SetTheory;", false) with
+        | Some (st:SymbolTable) -> 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual(3, st.ParsedAsts.Count)
+            Assert.AreEqual(3, st.Root.Scope.Count)
+            let currDir = Directory.GetCurrentDirectory()
+            let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            // reparse the Test.fpl after removing the uses clause
+            FplInterpreter.fplInterpreter st ";" uri fplLibUrl
+            Assert.AreEqual(1, st.ParsedAsts.Count)
+            Assert.AreEqual(1, st.Root.Scope.Count)
+
+        | None -> Assert.IsTrue(false)
+
+    [<TestMethod>]
+    member this.TestGarbageCollector01() =
+        match CommonTestHelpers.prepareFplCode("uses Fpl.SetTheory;", false) with
+        | Some (st:SymbolTable) -> 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual(3, st.ParsedAsts.Count)
+            Assert.AreEqual(3, st.Root.Scope.Count)
+            let currDir = Directory.GetCurrentDirectory()
+            let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            // reparse the Test.fpl after removing the uses clause
+            FplInterpreter.fplInterpreter st "uses Fpl.Commons ;" uri fplLibUrl
+            Assert.AreEqual(2, st.ParsedAsts.Count)
+            Assert.AreEqual(2, st.Root.Scope.Count)
+
+        | None -> Assert.IsTrue(false)
+        
+    [<TestMethod>]
+    member this.TestGarbageCollector02() =
+        match CommonTestHelpers.prepareFplCode("uses Fpl.SetTheory;", false) with
+        | Some (st:SymbolTable) -> 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual(3, st.ParsedAsts.Count)
+            Assert.AreEqual(3, st.Root.Scope.Count)
+            let currDir = Directory.GetCurrentDirectory()
+            let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            // reparse the Test.fpl after removing the uses clause
+            FplInterpreter.fplInterpreter st "uses BlaTypo ;" uri fplLibUrl
+            Assert.AreEqual(1, st.ParsedAsts.Count)
+            Assert.AreEqual(1, st.Root.Scope.Count)
+
+        | None -> Assert.IsTrue(false)
 

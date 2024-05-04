@@ -321,41 +321,48 @@ let private rearrangeList element list =
 
 let garbageCollector (st:SymbolTable) (uri:Uri) = 
     let currentTheory = Path.GetFileNameWithoutExtension(uri.LocalPath)
-    let referencedAstsOfCurrentTheory = 
-        match st.ParsedAsts.TryFindAstById(currentTheory) with
+    let referencedAstsOfCurrentTheory ct = 
+        match st.ParsedAsts.TryFindAstById(ct) with
         | Some pa -> pa.Sorting.ReferencedAsts
         | _ -> []
     // remove the current theory from the ReferencingAsts list of each parsedAst, if they are not contained 
     // in the current theory's reference Asts
-    st.ParsedAsts 
-    |> Seq.iter (fun pa ->
-        match pa.Sorting.ReferencingAsts |> List.tryFindIndex (fun referencedTheory -> 
-            referencedTheory = currentTheory
-            && not (referencedAstsOfCurrentTheory |> List.contains pa.Id)
-            ) with
-        | Some indexOfCurrentTheory -> 
-            pa.Sorting.ReferencingAsts <- pa.Sorting.ReferencingAsts |> List.removeAt(indexOfCurrentTheory)
-        | _ -> ()
-    )
-    // remember the names of parsedAsts if they have empty referencing asts, except if it is the current theory
-    let willBeRemoved = 
-        st.ParsedAsts
-        |> Seq.filter (fun pa -> pa.Id <> currentTheory && pa.Sorting.ReferencingAsts.Length = 0)
-        |> Seq.map (fun pa -> pa.Id)
-        |> Seq.toList
-    // remove the parsedAsts if they have no referencing asts, except if it is the current theory
-    st.ParsedAsts.RemoveAll (fun pa -> pa.Id <> currentTheory && pa.Sorting.ReferencingAsts.Length = 0) |> ignore
-    // remove all theories from symbol table root's scope that are no more contained in parsed asts
-    willBeRemoved 
-    |> List.iter (fun theoryName ->
-        if st.Root.Scope.ContainsKey(theoryName) then
-            let toBeRemoved = st.Root.Scope[theoryName]
-            toBeRemoved.Reset()
-            st.Root.Scope.Remove theoryName |> ignore
-        else
-            ()
-    ) 
+    let rec removeNotReferencedAsts ct = 
+        st.ParsedAsts 
+        |> Seq.iter (fun pa ->
+            match pa.Sorting.ReferencingAsts |> List.tryFindIndex (fun referencedTheory -> 
+                referencedTheory = ct
+                && not (referencedAstsOfCurrentTheory ct |> List.contains pa.Id)
+                ) with
+            | Some indexOfCurrentTheory -> 
+                pa.Sorting.ReferencingAsts <- pa.Sorting.ReferencingAsts |> List.removeAt(indexOfCurrentTheory)
+            | _ -> ()
+        )
+        // remember the names of parsedAsts if they have empty referencing asts, except if it is the current theory
+        let willBeRemoved = 
+            st.ParsedAsts
+            |> Seq.filter (fun pa -> pa.Id <> currentTheory && pa.Sorting.ReferencingAsts.Length = 0)
+            |> Seq.map (fun pa -> pa.Id)
+            |> Seq.toList
+        // remove the corresponding parsedAsts 
+        st.ParsedAsts.RemoveAll (fun pa -> willBeRemoved |> List.contains pa.Id) |> ignore
+        // remove the removed asts from the Referncing Asts of the remaining 
+        willBeRemoved 
+        |> List.iter (fun theoryName ->
+            if st.Root.Scope.ContainsKey(theoryName) then
+                let toBeRemoved = st.Root.Scope[theoryName]
+                toBeRemoved.Reset()
+                st.Root.Scope.Remove theoryName |> ignore
+            else
+                ()
+        )
+        // remove the removed theories 
+        willBeRemoved 
+        |> List.iter (fun removedTheory ->
+            removeNotReferencedAsts removedTheory
+        )
 
+    removeNotReferencedAsts currentTheory
 
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
