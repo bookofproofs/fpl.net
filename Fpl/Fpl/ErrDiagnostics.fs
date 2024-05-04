@@ -88,6 +88,7 @@ type DiagnosticCode =
     | ID009 of string
     | ID010 of string
     | ID011 of string * string
+    | ID012 of string * string 
     // variable-related error codes
     | VAR00 
     | VAR01 of string * string
@@ -145,6 +146,7 @@ type DiagnosticCode =
             | ID009 _ -> "ID009"
             | ID010 _ -> "ID010"
             | ID011 (_, _) -> "ID011"
+            | ID012 (_, _) -> "ID012"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 (_, _) -> "VAR01"
@@ -202,6 +204,7 @@ type DiagnosticCode =
             | ID009 name -> sprintf "Circular base type dependency involving '%s'." name
             | ID010 name -> sprintf "The type '%s' could not be found (are you missing a uses clause?)" name
             | ID011 (name, inheritanceChain) -> sprintf "Inheritance from '%s' can be dropped because of the inheritance chain %s." name inheritanceChain
+            | ID012 (name, candidates) -> sprintf "Base class '%s' not found, candidates are %s." name candidates
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 (identifier, conflict) -> sprintf "Duplicate variable declaration '%s' detected at %s" identifier conflict

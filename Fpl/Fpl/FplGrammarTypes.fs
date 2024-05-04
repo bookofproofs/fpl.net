@@ -24,6 +24,7 @@ type Tokenizer() =
     member this.ParsedTokens = _parsedTokens
 
 
+
 type Ast = 
     // Literals
     | Star 

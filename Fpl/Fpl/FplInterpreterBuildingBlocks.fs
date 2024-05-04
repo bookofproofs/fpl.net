@@ -651,7 +651,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                                     Diagnostic.Severity = DiagnosticSeverity.Error
                                     Diagnostic.StartPos = pos1
                                     Diagnostic.EndPos = pos2
-                                    Diagnostic.Code = ID011(name, chain) // class not found
+                                    Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
                                     Diagnostic.Alternatives = None 
                                 }
                             FplParser.parserDiagnostics.AddDiagnostic diagnostic
@@ -669,7 +669,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                                             Diagnostic.Severity = DiagnosticSeverity.Error
                                             Diagnostic.StartPos = pos1
                                             Diagnostic.EndPos = pos2
-                                            Diagnostic.Code = ID011(child.Name, chain) // class not found
+                                            Diagnostic.Code = ID011(child.Name, chain) // inheritance chain duplicate
                                             Diagnostic.Alternatives = None 
                                         }
                                     FplParser.parserDiagnostics.AddDiagnostic diagnostic
@@ -1050,9 +1050,9 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         eval uri st predInstanceBlockAst
         st.CurrentContext <- oldContext
         st.EvalPop()
-    | Ast.ParentConstructorCall((pos1, pos2), (specificClassTypeAst, argumentTupleAst)) ->
+    | Ast.ParentConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
         st.EvalPush("ParentConstructorCall")
-        eval uri st specificClassTypeAst
+        eval uri st inheritedClassTypeAst
         eval uri st argumentTupleAst
         st.EvalPop()
     | Ast.JustifiedArgument((pos1, pos2), (ast1, ast2)) ->

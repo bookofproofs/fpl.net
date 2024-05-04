@@ -33,19 +33,29 @@ let positions (tokenName:string) (p: Parser<_,_>): Parser<Positions * _,_> =
             (Positions(startPos, endPos), result)
         )
 
+/// Takes the parser `p` and returns a result with the side effect of remembering the parsed token 
+let tokenize (tokenName:string) (p: Parser<_,_>): Parser<_,_> =
+    pipe2
+        (_position .>>. p)
+        (_position)
+        (fun (startPos, result) endPos -> 
+            let token = { Token.Name = tokenName; Token.StartPos = startPos; Token.EndPos = endPos}
+            tokenizer.Push(token)
+            result
+        )
 
 (* Literals *)
 
-let leftBrace = skipChar '{' >>. spaces 
-let rightBrace = skipChar '}' >>. spaces
-let leftParen = skipChar '(' >>. spaces 
-let rightParen = skipChar ')' 
-let comma = skipChar ',' >>. spaces 
-let dot = skipChar '.' >>% Ast.Dot
-let colon = skipChar ':' >>. spaces >>% Ast.One
+let leftBrace = tokenize "LeftBrace" (skipChar '{') >>. spaces 
+let rightBrace = tokenize "RightBrace" (skipChar '}') >>. spaces
+let leftParen = tokenize "LeftParen" (skipChar '(') >>. spaces 
+let rightParen = tokenize "RightParen" (skipChar ')') 
+let comma = tokenize "Comma" (skipChar ',') >>. spaces 
+let dot = tokenize "Dot" (skipChar '.') >>% Ast.Dot
+let colon = tokenize "One" (skipChar ':') >>. spaces >>% Ast.One
 let colonStar = positions "Many" (skipString ":*") .>> spaces |>> Ast.Many
 let colonPlus = positions "Many1" (skipString ":+") .>> spaces |>> Ast.Many1
-let colonEqual = skipString ":=" >>. spaces 
+let colonEqual = tokenize ":=" (skipString ":=") >>. spaces 
 let at = pchar '@'
 let case = skipChar '|' >>. spaces
 let elseCase = skipChar '?' >>. spaces
@@ -72,7 +82,7 @@ let attemptSW = SW <|> (IW .>> attempt (lookAhead (choice [skipChar '('; skipCha
 // the IsOperand choice
 // the PredicateOrFunctionalTerm choice
 let digits = regex @"\d+" <?> "<digits>" |>> Ast.Digits
-let extDigits: Parser<_, unit> = positions "ExtDigits" (digits) |>> Ast.ExtDigits
+let extDigits = positions "ExtDigits" (digits) |>> Ast.ExtDigits
 
 (* Identifiers *)
 
@@ -299,8 +309,8 @@ let forStatement = positions "ForIn" (keywordFor >>. forInBody) |>> Ast.ForIn
 //// the scope of a definition. An assertion uses a predicate referring to existing identifiers in the whole theory
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
 let assertionStatement = positions "Assertion" (keywordAssert >>. predicate) |>> Ast.Assertion
-
-let callConstructorParentClass = positions "ParentConstructorCall" (keywordBaseClassReference >>. dot >>. specificClassType .>>. argumentTuple .>> IW) |>> Ast.ParentConstructorCall
+let inheritedClassType = positions "InheritedClassType" (choice [keywordObject; predicateIdentifier]) .>> IW |>> Ast.InheritedClassType
+let callConstructorParentClass = positions "ParentConstructorCall" (keywordBaseClassReference >>. dot >>. inheritedClassType .>>. argumentTuple .>> IW) |>> Ast.ParentConstructorCall
 
 let statement = 
     (choice [
@@ -515,7 +525,6 @@ let keywordClass = (skipString "class" <|> skipString "cl")
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
 let classDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> classCompleteContent) .>> IW) .>>. propertyList .>> spacesRightBrace
-let inheritedClassType = positions "InheritedClassType" (choice [keywordObject; predicateIdentifier]) .>> IW |>> Ast.InheritedClassType
 let inheritedClassTypeList = sepBy1 inheritedClassType comma
 
 let classIdentifier = positions "ClassIdentifier" (predicateIdentifier .>> IW) |>> Ast.ClassIdentifier
