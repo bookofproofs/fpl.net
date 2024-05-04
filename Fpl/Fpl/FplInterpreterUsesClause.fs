@@ -31,10 +31,10 @@ let rec eval_uses_clause = function
                                         EndPos = p2
                                         AliasOrStar = s
                                     }
-                          | Some Ast.Star -> 
+                          | Some (Ast.Star ((p1,p2),())) -> 
                                     { 
-                                        StartPos = pos1
-                                        EndPos = pos2
+                                        StartPos = p1
+                                        EndPos = p2
                                         AliasOrStar = "*"
                                     }
 

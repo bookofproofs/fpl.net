@@ -90,22 +90,6 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
 let tryAddBlock (uri:Uri) (fplValue:FplValue) =
-    let emitVAR01orID001diagnostics (fplValue:FplValue) (conflict:FplValue) = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = 
-                if (FplValue.IsVariable(fplValue)) then 
-                    VAR01 (fplValue.Name, conflict.QualifiedStartPos)
-                else
-                    ID001 (fplValue.Name, conflict.QualifiedStartPos)
-            Diagnostic.Alternatives = None 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
     let emitVAR02diagnostics (fplValue:FplValue) (conflict:FplValue) = 
         let diagnostic = { 
             Diagnostic.Uri = uri
@@ -239,7 +223,7 @@ let tryAddBlock (uri:Uri) (fplValue:FplValue) =
 
     match FplValue.InScopeOfParent(fplValue) fplValue.Name with
     | ScopeSearchResult.Found conflict -> 
-        emitVAR01orID001diagnostics fplValue conflict
+        emitVAR01orID001diagnostics fplValue conflict uri
     | _ -> 
         match FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) with
         | ScopeSearchResult.Found other ->
@@ -327,33 +311,34 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPush("Many1")
         evalMany st FplBlockType.VariadicVariableMany1 pos1 pos2
         st.EvalPop()
-    | Ast.One -> 
+    | Ast.One((pos1, pos2),()) ->
         st.EvalPush("One")
-        eval_units st ""
+        eval_units st "" uri pos1 pos2  
         st.EvalPop()
-    | Ast.Star -> 
+    | Ast.Star((pos1, pos2),()) ->
         st.EvalPush("Star")
-        eval_units st ""
+        eval_units st "" uri pos1 pos2  
         st.EvalPop()
-    | Ast.Dot -> 
+    | Ast.Dot((pos1, pos2),()) ->
         st.EvalPush("Dot")
-        eval_units st ""
+        eval_units st "" uri pos1 pos2  
         st.EvalPop()
-    | Ast.Intrinsic -> 
+    | Ast.Intrinsic((pos1, pos2),()) -> 
         st.EvalPush("Intrinsic")
-        eval_units st ""
+        eval_units st "" uri pos1 pos2  
         st.EvalPop()
-    | Ast.Property -> 
+    | Ast.Property((pos1, pos2),()) -> 
         st.EvalPush("Property")
-        eval_units st ""
+        eval_units st "" uri pos1 pos2  
         st.EvalPop()
-    | Ast.Optional -> 
+    | Ast.Optional((pos1, pos2),()) -> 
         st.EvalPush("Optional")
-        eval_units st ""
+        eval_units st "" uri pos1 pos2  
         st.EvalPop()
-    | Ast.Error ->   
+    | Ast.Error  ->   
         st.EvalPush("Error")
-        eval_units st ""
+        let pos = Position("",0,1,1)
+        eval_units st "" uri pos pos
         st.EvalPop()
     // strings: | Digits of string
     | Ast.Digits s -> 

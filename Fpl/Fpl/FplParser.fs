@@ -51,8 +51,8 @@ let rightBrace = tokenize "RightBrace" (skipChar '}') >>. spaces
 let leftParen = tokenize "LeftParen" (skipChar '(') >>. spaces 
 let rightParen = tokenize "RightParen" (skipChar ')') 
 let comma = tokenize "Comma" (skipChar ',') >>. spaces 
-let dot = tokenize "Dot" (skipChar '.') >>% Ast.Dot
-let colon = tokenize "One" (skipChar ':') >>. spaces >>% Ast.One
+let dot = positions "Dot" (skipChar '.') |>> Ast.Dot
+let colon = positions "One" (skipChar ':') .>> spaces |>> Ast.One
 let colonStar = positions "Many" (skipString ":*") .>> spaces |>> Ast.Many
 let colonPlus = positions "Many1" (skipString ":+") .>> spaces |>> Ast.Many1
 let colonEqual = tokenize ":=" (skipString ":=") >>. spaces 
@@ -96,7 +96,7 @@ let namespaceIdentifier = positions "NamespaceIdentifier" (sepBy1 pascalCaseId d
 let predicateIdentifier = positions "PredicateIdentifier" (sepBy1 pascalCaseId dot) |>> Ast.PredicateIdentifier 
 
 let alias = positions "Alias" (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
-let star = positions "Star" (skipChar '*') >>% Ast.Star
+let star = positions "Star" (skipChar '*') |>> Ast.Star
 
 let aliasedNamespaceIdentifier = positions "AliasedNamespaceIdentifier" (namespaceIdentifier .>>. opt (alias <|> star)) |>> Ast.AliasedNamespaceIdentifier
 let tplRegex = Regex(@"^(tpl|template)(([A-Z]\w*)|\d*)$", RegexOptions.Compiled)
@@ -447,7 +447,7 @@ let axiom = positions "Axiom" (keywordAxiom >>. signatureWithTheoremLikeBlock) |
 
 (* FPL building blocks - Constructors *)
 
-let keywordIntrinsic = (skipString "intrinsic" <|> skipString "intr") .>> IW >>% Ast.Intrinsic
+let keywordIntrinsic = positions "Intrinsic" (skipString "intrinsic" <|> skipString "intr") .>> IW |>> Ast.Intrinsic
 
 let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateContent
 
@@ -456,8 +456,8 @@ let constructorBlock = leftBrace >>. varDeclOrSpecList .>>. keywordSelf .>> spac
 let constructor = positions "Constructor" (keywordConstructor >>. signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
-let keywordOptional = positions "Optional" (skipString "optional" <|> skipString "opt") .>> SW >>% Ast.Optional
-let keywordProperty = positions "Property" (skipString "property" <|> skipString "prty") .>> SW >>% Ast.Property
+let keywordOptional = positions "Optional" (skipString "optional" <|> skipString "opt") .>> SW |>> Ast.Optional
+let keywordProperty = positions "Property" (skipString "property" <|> skipString "prty") .>> SW |>> Ast.Property
 
 let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
 let predicateInstance = positions "PredicateInstance" ((keywordPredicate >>. SW >>. opt keywordOptional) .>>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance

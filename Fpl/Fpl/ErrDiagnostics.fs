@@ -634,7 +634,7 @@ let rec tryGetAst someParser input lastCorrectedIndex =
             tryGetAst someParser newInput restInput.Position.Index
         else
             // only if the error occurs at the end of the input, the ast generation fails
-            Ast.Error
+            Ast.Error 
 
 
 /// A simple helper function for printing trace information to the console (taken from FParsec Docs)

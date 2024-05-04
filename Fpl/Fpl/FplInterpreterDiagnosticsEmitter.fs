@@ -6,6 +6,23 @@ open FplParser
 open FplInterpreterTypes
 
 
+let emitVAR01orID001diagnostics (fplValue:FplValue) (conflict:FplValue) uri = 
+    let diagnostic = { 
+        Diagnostic.Uri = uri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = fplValue.StartPos
+        Diagnostic.EndPos = fplValue.NameEndPos
+        Diagnostic.Code = 
+            if (FplValue.IsVariable(fplValue)) then 
+                VAR01 (fplValue.Name, conflict.QualifiedStartPos)
+            else
+                ID001 (fplValue.Name, conflict.QualifiedStartPos)
+        Diagnostic.Alternatives = None 
+    }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+
 let checkID008Diagnostics (fplValue:FplValue) uri pos1 pos2 =
     if FplValue.IsConstructor(fplValue) && fplValue.TypeSignature.Length = 1 then 
         let nameStart = fplValue.TypeSignature.Head

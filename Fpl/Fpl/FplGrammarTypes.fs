@@ -27,8 +27,8 @@ type Tokenizer() =
 
 type Ast = 
     // Literals
-    | Star 
-    | Dot
+    | Star of Positions * unit
+    | Dot of Positions * unit
     // Identifiers
     | Digits of string
     | ExtDigits of Positions * Ast
@@ -53,7 +53,7 @@ type Ast =
     | BrackedCoordList of Positions * Ast list
     | ReferencingIdentifier of Positions * (Ast * Ast list)
     // Types
-    | One 
+    | One of Positions * unit
     | Many of Positions * unit
     | Many1 of Positions * unit  
     | TemplateType of Positions * string
@@ -116,7 +116,7 @@ type Ast =
     | ForIn of Positions * ((Ast * Ast) * Ast list)
     | Return of Positions * Ast
     // FPL Blocks
-    | Intrinsic
+    | Intrinsic of Positions * unit
     | VarDeclBlock of Positions * Ast list 
     | StatementList of Positions * Ast list
     | PremiseConclusionBlock of Positions * ((Ast list option * Ast) * Ast)
@@ -135,8 +135,8 @@ type Ast =
     | Axiom of Positions * (Ast * (Ast list option * Ast))
     | ParentConstructorCall of Positions * (Ast * Ast)
     | Constructor of Positions * (Ast * (Ast list option * Ast)) 
-    | Property
-    | Optional 
+    | Property of Positions * unit
+    | Optional of Positions * unit
     | PredicateInstance of Positions * ((Ast option * Ast) * Ast) 
     | FunctionalTermInstance of Positions * (Ast * Ast)
     | PropertyBlock of Positions * (Ast * Ast)
