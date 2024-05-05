@@ -91,7 +91,7 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
-let tryAddBlock (uri:Uri) (fplValue:FplValue) =
+let tryAddBlock (fplValue:FplValue) =
 
     match FplValue.TryFindAssociatedBlockForProof fplValue with
     | ScopeSearchResult.FoundAssociate parentsName -> 
@@ -136,12 +136,12 @@ let tryAddBlock (uri:Uri) (fplValue:FplValue) =
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
-let rec eval (uri:System.Uri) (st: SymbolTable) ast =
+let rec eval (st: SymbolTable) ast =
     let evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst =
         match optVarDeclOrSpecList with
-        | Some astList -> astList |> List.map (eval uri st) |> ignore
+        | Some astList -> astList |> List.map (eval st) |> ignore
         | None -> ()
-        eval uri st predicateAst
+        eval st predicateAst
 
     let evalMany (st:SymbolTable) blockType pos1 pos2 = 
         match st.CurrentContext with
@@ -222,7 +222,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Error  ->   
         st.EvalPush("Error")
-        let pos = Position(uri.AbsolutePath,0,1,1)
+        let pos = Position(FplParser.parserDiagnostics.StreamName,0,1,1)
         eval_units st "" pos pos
         st.EvalPop()
     // strings: | Digits of string
@@ -291,7 +291,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             let varValue = FplValue.CreateFplValue((pos1,pos2), FplBlockType.Variable, fplValue)
             varValue.Name <- s
             varValue.NameEndPos <- pos2
-            tryAddBlock uri varValue 
+            tryAddBlock varValue 
             
         | _ -> ()
         st.EvalPop() 
@@ -376,16 +376,16 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.RuleOfInference, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval uri st signatureAst
+            eval st signatureAst
             st.CurrentContext <- EvalContext.InBlock fplValue
-            eval uri st premiseConclusionBlockAst
-            tryAddBlock uri fplValue 
+            eval st premiseConclusionBlockAst
+            tryAddBlock fplValue 
         | _ -> ()
         st.CurrentContext <- oldContext
         st.EvalPop() 
     | Ast.ClassIdentifier((pos1, pos2), ast1) ->
         st.EvalPush("ClassIdentifier")
-        eval uri st ast1
+        eval st ast1
         match st.CurrentContext with 
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue
@@ -396,72 +396,72 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.ExtDigits((pos1, pos2), ast1) ->
         st.EvalPush("ExtDigits")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.ExtensionType((pos1, pos2), ast1) ->
         st.EvalPush("ExtensionType")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.UsesClause((pos1, pos2), ast1) ->
         st.EvalPush("UsesClause")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.Not((pos1, pos2), ast1) ->
         st.EvalPush("Not")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.InEntity((pos1, pos2), ast1) ->
         st.EvalPush("InEntity")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.IsType((pos1, pos2), ast1) ->
         st.EvalPush("IsType")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.Assertion((pos1, pos2), ast1) ->
         st.EvalPush("Assertion")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.ByDef((pos1, pos2), ast1) ->
         st.EvalPush("ByDef")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.DottedPredicate((pos1, pos2), ast1) ->
         st.EvalPush("DottedPredicate")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.Return((pos1, pos2), ast1) ->
         st.EvalPush("Return")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.AssumeArgument((pos1, pos2), ast1) ->
         st.EvalPush("AssumeArgument")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.RevokeArgument((pos1, pos2), ast1) ->
         st.EvalPush("RevokeArgument")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.VariableType((pos1, pos2), ast1) ->
         st.EvalPush("VariableType")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.AST((pos1, pos2), ast1) ->
         st.EvalPush("AST")
-        eval uri st ast1
+        eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     // | NamespaceIdentifier of Positions * Ast list
@@ -497,7 +497,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
             adjustSignature st fplValue "("
-            asts |> List.map (eval uri st) |> ignore
+            asts |> List.map (eval st) |> ignore
             adjustSignature st fplValue ")"
             fplValue.NameEndPos <- pos2
         | _ -> ()
@@ -513,7 +513,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             adjustSignature st fplValue "["
             asts 
             |> List.map (fun ast1 ->
-                eval uri st ast1
+                eval st ast1
             ) |> ignore
             adjustSignature st fplValue "]"
             fplValue.NameEndPos <- pos2
@@ -521,68 +521,68 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
         st.EvalPush("NamespaceIdentifier")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.LocalizationTerm((pos1, pos2), asts) ->
         st.EvalPush("LocalizationTerm")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.LocalizationTermList((pos1, pos2), asts) ->
         st.EvalPush("LocalizationTermList")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.BrackedCoordList((pos1, pos2), asts) ->
         st.EvalPush("BrackedCoordList")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.And((pos1, pos2), asts) ->
         st.EvalPush("And")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.Or((pos1, pos2), asts) ->
         st.EvalPush("Or")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.Xor((pos1, pos2), asts) ->
         st.EvalPush("Xor")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), asts) ->
         st.EvalPush("VarDeclBlock")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.StatementList((pos1, pos2), asts) ->
         st.EvalPush("StatementList")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.DefaultResult((pos1, pos2), asts) ->
         st.EvalPush("DefaultResult")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.Justification((pos1, pos2), asts) ->
         st.EvalPush("Justification")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.ArgumentTuple((pos1, pos2), asts) ->
         st.EvalPush("ArgumentTuple")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
         st.EvalPush("QualificationList")
-        asts |> List.map (eval uri st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     // | Namespace of Ast option * Ast list
     | Ast.Namespace(optAst, asts) ->
         st.EvalPush("Namespace")
-        optAst |> Option.map (eval uri st) |> ignore
-        asts |> List.map (eval uri st) |> ignore
+        optAst |> Option.map (eval st) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     // CompoundFunctionalTermType of Positions * ((Ast * Ast) option)
     | Ast.CompoundFunctionalTermType((pos1, pos2), (ast1, astTupleOption)) ->
         st.EvalPush("CompoundFunctionalTermType")
-        eval uri st ast1
+        eval st ast1
         match astTupleOption with 
-        | Some (ast2, _) -> eval uri st ast2 |> ignore
+        | Some (ast2, _) -> eval st ast2 |> ignore
         | _ -> ()
         match astTupleOption with 
         | Some (_, ast3) -> 
@@ -594,38 +594,38 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                 adjustSignature st fplValue "->"
                 fplValue.NameEndPos <- pos2
             | _ -> ()
-            eval uri st ast3 |> ignore
+            eval st ast3 |> ignore
         | _ -> ()
         st.EvalPop()
     // AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
     | Ast.AliasedNamespaceIdentifier((pos1, pos2), (ast1, optAst)) ->
         st.EvalPush("AliasedNamespaceIdentifier")
-        eval uri st ast1
-        optAst |> Option.map (eval uri st) |> ignore
+        eval st ast1
+        optAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.ClassType((pos1, pos2), (ast1, optAst)) ->
         st.EvalPush("ClassType")
-        eval uri st ast1
-        optAst |> Option.map (eval uri st) |> ignore
+        eval st ast1
+        optAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.CompoundPredicateType((pos1, pos2), (ast1, optAst)) ->
         st.EvalPush("CompoundPredicateType")
-        eval uri st ast1
-        optAst |> Option.map (eval uri st) |> ignore
+        eval st ast1
+        optAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.ReferenceToProofOrCorollary((pos1, pos2), (ast1, optAst)) ->
         st.EvalPush("ReferenceToProofOrCorollary")
-        eval uri st ast1
-        optAst |> Option.map (eval uri st) |> ignore
+        eval st ast1
+        optAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.PredicateWithOptSpecification((pos1, pos2), (ast1, optAst)) ->
         st.EvalPush("PredicateWithOptSpecification")
-        eval uri st ast1
-        optAst |> Option.map (eval uri st) |> ignore
+        eval st ast1
+        optAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     // | SelfAts of Positions * char list
@@ -636,128 +636,128 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
     // | Translation of string * Ast
     | Ast.Translation(s, ast1) ->
         st.EvalPush("Translation")
-        eval uri st ast1
+        eval st ast1
         eval_pos_string_ast st s
         st.EvalPop()
     // | ExtensionBlock of Positions * (Ast * Ast)
     | Ast.InheritedClassType((pos1, pos2), ast1) -> 
         st.EvalPush("InheritedClassType")
-        eval uri st ast1
+        eval st ast1
         st.EvalPop()
     | Ast.ExtensionBlock((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("ExtensionBlock")
-        eval uri st ast1
-        eval uri st ast2
+        eval st ast1
+        eval st ast2
         st.EvalPop()
     | Ast.Impl((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("Impl")
-        eval uri st ast1
-        eval uri st ast2
+        eval st ast1
+        eval st ast2
         st.EvalPop()
     | Ast.Iif((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("Iif")
-        eval uri st ast1
-        eval uri st ast2
+        eval st ast1
+        eval st ast2
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("IsOperator")
-        eval uri st ast1
-        eval uri st ast2
+        eval st ast1
+        eval st ast2
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("Delegate")
-        eval uri st ast1
-        eval uri st ast2
+        eval st ast1
+        eval st ast2
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | Ast.SignatureWithUserDefinedString((pos1, pos2),
                                          ((predicateIdentifierAst, optUserDefinedSymbolAst), paramTupleAst)) ->
         st.EvalPush("SignatureWithUserDefinedString")
-        eval uri st predicateIdentifierAst
+        eval st predicateIdentifierAst
         optUserDefinedSymbolAst
-        |> Option.map (eval uri st)
+        |> Option.map (eval st)
         |> Option.defaultValue ()
         |> ignore
-        eval uri st paramTupleAst
+        eval st paramTupleAst
         st.EvalPop()
     | Ast.PropertyBlock((pos1, pos2), (keywordPropertyAst, definitionPropertyAst)) ->
         st.EvalPush("PropertyBlock")
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InBlock fplBlock -> 
-            eval uri st keywordPropertyAst
+            eval st keywordPropertyAst
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.MandatoryPredicate, fplBlock)
             st.CurrentContext <- EvalContext.InPropertySignature fplValue
-            eval uri st definitionPropertyAst
-            tryAddBlock uri fplValue 
+            eval st definitionPropertyAst
+            tryAddBlock fplValue 
         | _ -> ()
         st.CurrentContext <- oldContext
         st.EvalPop()
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
     | ReferencingIdentifier((pos1, pos2), (ast1, asts)) ->
         st.EvalPush("ReferencingIdentifier")
-        eval uri st ast1
-        asts |> List.map (eval uri st) |> ignore
+        eval st ast1
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.ConditionFollowedByResult((pos1, pos2), (ast1, asts)) ->
         st.EvalPush("ConditionFollowedByResult")
-        eval uri st ast1
-        asts |> List.map (eval uri st) |> ignore
+        eval st ast1
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.Localization((pos1, pos2), (ast1, asts)) ->
         st.EvalPush("Localization")
-        eval uri st ast1
-        asts |> List.map (eval uri st) |> ignore
+        eval st ast1
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermSignatureAst, functionalTermInstanceBlockAst)) ->
         st.EvalPush("FunctionalTermInstance")
-        eval uri st functionalTermSignatureAst
+        eval st functionalTermSignatureAst
         let oldContext = st.CurrentContext 
         match st.CurrentContext with
         | EvalContext.InPropertySignature fplValue ->
             st.CurrentContext <- EvalContext.InPropertyBlock fplValue
         | _ -> ()
-        eval uri st functionalTermInstanceBlockAst
+        eval st functionalTermInstanceBlockAst
         st.CurrentContext <- oldContext
         st.EvalPop()
     // | All of Positions * ((Ast list * Ast option) list * Ast)
     | Ast.All((pos1, pos2), (astsOpts, ast1)) ->
         st.EvalPush("All")
-        eval uri st ast1
+        eval st ast1
         astsOpts
         |> List.map (fun (asts, optAst) ->
-            asts |> List.map (eval uri st) |> ignore
-            optAst |> Option.map (eval uri st) |> Option.defaultValue ()
+            asts |> List.map (eval st) |> ignore
+            optAst |> Option.map (eval st) |> Option.defaultValue ()
             ())
         |> ignore
         st.EvalPop()
     | Ast.Exists((pos1, pos2), (astsOpts, ast1)) ->
         st.EvalPush("Exists")
-        eval uri st ast1
+        eval st ast1
         astsOpts
         |> List.map (fun (asts, optAst) ->
-            asts |> List.map (eval uri st) |> ignore
-            optAst |> Option.map (eval uri st) |> Option.defaultValue ()
+            asts |> List.map (eval st) |> ignore
+            optAst |> Option.map (eval st) |> Option.defaultValue ()
             ())
         |> ignore
         st.EvalPop()
     // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
     | Ast.ExistsN((pos1, pos2), ((ast1, (ast2, optAst)), ast3)) ->
         st.EvalPush("ExistsN")
-        eval uri st ast1
-        eval uri st ast2
-        optAst |> Option.map (eval uri st) |> Option.defaultValue () |> ignore
-        eval uri st ast3
+        eval st ast1
+        eval st ast2
+        optAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
+        eval st ast3
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature((pos1, pos2), ((optAst, signatureWithUserDefinedStringAst), mappingAst)) -> 
         st.EvalPush("FunctionalTermSignature")
-        eval uri st signatureWithUserDefinedStringAst
+        eval st signatureWithUserDefinedStringAst
         match st.CurrentContext with 
         | EvalContext.InPropertySignature fplValue -> 
             match optAst with
             | Some ast1 -> 
-                eval uri st ast1
+                eval st ast1
                 fplValue.BlockType <- FplBlockType.OptionalFunctionalTerm
             | None -> 
                 fplValue.BlockType <- FplBlockType.MandatoryFunctionalTerm
@@ -766,97 +766,97 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InSignature fplValue -> 
             match optAst with
             | Some ast1 -> 
-                eval uri st ast1
+                eval st ast1
                 fplValue.BlockType <- FplBlockType.FunctionalTerm
             | None -> ()
             adjustSignature st fplValue "->"
             fplValue.NameEndPos <- pos2
         | _ -> ()
-        eval uri st mappingAst
+        eval st mappingAst
         st.EvalPop()
     | Ast.PredicateWithQualification(ast1, ast2) ->
         st.EvalPush("PredicateWithQualification")
-        eval uri st ast1
-        eval uri st ast2
+        eval st ast1
+        eval st ast2
         st.EvalPop()
     // | InfixOperation of Positions * (Ast * Ast option) list
     | Ast.InfixOperation((pos1, pos2), astsOpts) ->
         st.EvalPush("InfixOperation")
         astsOpts
-        |> List.map (fun (ast1, optAst) -> optAst |> Option.map (eval uri st) |> Option.defaultValue ())
+        |> List.map (fun (ast1, optAst) -> optAst |> Option.map (eval st) |> Option.defaultValue ())
         |> ignore
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((optAst1, ast1), optAst2), optAst3), ast2)) ->
         st.EvalPush("Expression")
-        optAst1 |> Option.map (eval uri st) |> Option.defaultValue ()
-        eval uri st ast1
-        optAst2 |> Option.map (eval uri st) |> Option.defaultValue ()
-        optAst3 |> Option.map (eval uri st) |> Option.defaultValue ()
-        eval uri st ast2
+        optAst1 |> Option.map (eval st) |> Option.defaultValue ()
+        eval st ast1
+        optAst2 |> Option.map (eval st) |> Option.defaultValue ()
+        optAst3 |> Option.map (eval st) |> Option.defaultValue ()
+        eval st ast2
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
     | Ast.Cases((pos1, pos2), (asts, ast1)) ->
         st.EvalPush("Cases")
-        asts |> List.map (eval uri st) |> ignore
-        eval uri st ast1
+        asts |> List.map (eval st) |> ignore
+        eval st ast1
         st.EvalPop()
     // | Assignment of Positions * (Ast * Ast)
     | Ast.Signature((pos1, pos2), (predicateIdentifierAst, paramTupleAst)) ->
         st.EvalPush("Signature")
-        eval uri st predicateIdentifierAst
-        eval uri st paramTupleAst
+        eval st predicateIdentifierAst
+        eval st paramTupleAst
         st.EvalPop()
     | Ast.Assignment((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("Assignment")
-        eval uri st ast1
-        eval uri st ast2
+        eval st ast1
+        eval st ast2
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")
-        eval uri st signatureAst
+        eval st signatureAst
         let oldContext = st.CurrentContext 
         match st.CurrentContext with
         | EvalContext.InPropertySignature fplValue ->
             st.CurrentContext <- EvalContext.InPropertyBlock fplValue
             match optAst with
             | Some ast1 -> 
-                eval uri st ast1
+                eval st ast1
                 fplValue.BlockType <- FplBlockType.OptionalPredicate
             | None -> 
                 fplValue.BlockType <- FplBlockType.MandatoryPredicate
         | _ -> ()
-        eval uri st predInstanceBlockAst
+        eval st predInstanceBlockAst
         st.CurrentContext <- oldContext
         st.EvalPop()
     | Ast.ParentConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
         st.EvalPush("ParentConstructorCall")
-        eval uri st inheritedClassTypeAst
-        eval uri st argumentTupleAst
+        eval st inheritedClassTypeAst
+        eval st argumentTupleAst
         st.EvalPop()
     | Ast.JustifiedArgument((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("JustifiedArgument")
-        eval uri st ast1
-        eval uri st ast2
+        eval st ast1
+        eval st ast2
         st.EvalPop()
     | Ast.Argument((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("Argument")
-        eval uri st ast1
-        eval uri st ast2
+        eval st ast1
+        eval st ast2
         st.EvalPop()
     // | ForIn of Positions * ((Ast * Ast) * Ast list)
     | Ast.ForIn((pos1, pos2), ((ast1, ast2), asts)) ->
         st.EvalPush("ForIn")
-        eval uri st ast1
-        eval uri st ast2
-        asts |> List.map (eval uri st) |> ignore
+        eval st ast1
+        eval st ast2
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     // | SignatureWithPreConBlock of Ast * ((Ast list option * Ast) * Ast)
     | Ast.PremiseConclusionBlock((pos1, pos2), ((optVarDeclOrSpecList, premiseAst), conclusionAst)) ->
         st.EvalPush("PremiseConclusionBlock")
-        optVarDeclOrSpecList |> Option.map (List.map (eval uri st) >> ignore) |> Option.defaultValue ()
-        eval uri st premiseAst
-        eval uri st conclusionAst
+        optVarDeclOrSpecList |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+        eval st premiseAst
+        eval st conclusionAst
         st.EvalPop()
     // | Theorem of Positions * (Ast * (Ast list option * Ast))
     | Ast.Theorem((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
@@ -866,8 +866,8 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Theorem, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval uri st signatureAst
-            tryAddBlock uri fplValue 
+            eval st signatureAst
+            tryAddBlock fplValue 
             st.CurrentContext <- EvalContext.InBlock fplValue
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         | _ -> ()
@@ -880,8 +880,8 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Lemma, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval uri st signatureAst
-            tryAddBlock uri fplValue 
+            eval st signatureAst
+            tryAddBlock fplValue 
             st.CurrentContext <- EvalContext.InBlock fplValue
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         | _ -> ()
@@ -894,8 +894,8 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Proposition, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval uri st signatureAst
-            tryAddBlock uri fplValue 
+            eval st signatureAst
+            tryAddBlock fplValue 
             st.CurrentContext <- EvalContext.InBlock fplValue
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         | _ -> ()
@@ -908,8 +908,8 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Conjecture, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval uri st signatureAst
-            tryAddBlock uri fplValue 
+            eval st signatureAst
+            tryAddBlock fplValue 
             st.CurrentContext <- EvalContext.InBlock fplValue
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         | _ -> ()
@@ -922,8 +922,8 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Axiom, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval uri st signatureAst
-            tryAddBlock uri fplValue 
+            eval st signatureAst
+            tryAddBlock fplValue 
             st.CurrentContext <- EvalContext.InBlock fplValue
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         | _ -> ()
@@ -932,8 +932,8 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
     // | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
     | Ast.CorollarySignature(referencingIdentifierAst, paramTupleAst) ->
         st.EvalPush("CorollarySignature")
-        eval uri st referencingIdentifierAst
-        eval uri st paramTupleAst
+        eval st referencingIdentifierAst
+        eval st paramTupleAst
         st.EvalPop()
     | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Corollary")
@@ -942,8 +942,8 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Corollary, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval uri st corollarySignatureAst
-            tryAddBlock uri fplValue 
+            eval st corollarySignatureAst
+            tryAddBlock fplValue 
             st.CurrentContext <- EvalContext.InBlock fplValue
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         | _ -> ()
@@ -956,7 +956,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
 
         let evalNamedVarDecl (fplValue:FplValue) (context:string) = 
             fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
-            eval uri st varDeclModifierAst
+            eval st varDeclModifierAst
             fplValue.Scope 
             |> Seq.filter (fun varKeyValue -> FplValue.IsVariable(varKeyValue.Value))
             |> Seq.iter (fun childKeyValue -> 
@@ -971,7 +971,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
                         st.CurrentContext <- EvalContext.InSignature (childKeyValue.Value)
                     else
                         raise (ArgumentException(sprintf "Unknown context %s" context))
-                    eval uri st variableTypeAst
+                    eval st variableTypeAst
                     st.CurrentContext <- oldContext
                     childKeyValue.Value.Parent.Value.AuxiliaryUniqueChilds.Add(childKeyValue.Value.Name) |> ignore
             )
@@ -983,7 +983,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InPropertyBlock fplValue ->
             st.CurrentContext <- EvalContext.NamedVarDeclarationInBlock (fplValue)
         | _ -> ()
-        variableListAst |> List.map (eval uri st) |> ignore 
+        variableListAst |> List.map (eval st) |> ignore 
 
         match st.CurrentContext with 
         | EvalContext.InBlock fplValue
@@ -1008,13 +1008,13 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InBlock classBlock -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Constructor, classBlock)
             st.CurrentContext <- EvalContext.InConstructorSignature fplValue
-            eval uri st signatureAst
-            tryAddBlock uri fplValue
+            eval st signatureAst
+            tryAddBlock fplValue
             st.CurrentContext <- EvalContext.InConstructorBlock fplValue
             match optVarDeclOrSpecListAst with
-            | Some astList -> astList |> List.map (eval uri st) |> ignore
+            | Some astList -> astList |> List.map (eval st) |> ignore
             | None -> ()
-            eval uri st keywordSelfAst
+            eval st keywordSelfAst
         | _ -> ()
         st.CurrentContext <- oldContext
         st.EvalPop()
@@ -1022,24 +1022,24 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
     | Ast.DefPredicateContent(optAsts, ast1) ->
         st.EvalPush("DefPredicateContent")
         optAsts
-        |> Option.map (List.map (eval uri st) >> ignore)
+        |> Option.map (List.map (eval st) >> ignore)
         |> Option.defaultValue ()
         |> ignore
-        eval uri st ast1
+        eval st ast1
         st.EvalPop()
     | Ast.DefFunctionContent(optAsts, ast1) ->
         st.EvalPush("DefFunctionContent")
         optAsts
-        |> Option.map (List.map (eval uri st) >> ignore)
+        |> Option.map (List.map (eval st) >> ignore)
         |> Option.defaultValue ()
         |> ignore
-        eval uri st ast1
+        eval st ast1
         st.EvalPop()
     // | DefClassCompleteContent of Ast list option * Ast list
     | Ast.DefClassCompleteContent(optAsts, asts) ->
         st.EvalPush("DefClassCompleteContent")
-        optAsts |> Option.map (List.map (eval uri st) >> ignore) |> Option.defaultValue ()
-        asts |> List.map (eval uri st) |> ignore
+        optAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     // | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | Ast.DefinitionPredicate((pos1, pos2), (signatureWithUserDefinedStringAst, (predicateContentAst, optPropertyListAsts))) ->
@@ -1049,11 +1049,11 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Predicate, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval uri st signatureWithUserDefinedStringAst
-            tryAddBlock uri fplValue 
+            eval st signatureWithUserDefinedStringAst
+            tryAddBlock fplValue 
             st.CurrentContext <- EvalContext.InBlock fplValue
-            eval uri st predicateContentAst
-            optPropertyListAsts |> Option.map (List.map (eval uri st) >> ignore) |> Option.defaultValue ()
+            eval st predicateContentAst
+            optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         | _ -> ()
         st.CurrentContext <- oldContext
         st.EvalPop()
@@ -1065,11 +1065,11 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.FunctionalTerm, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval uri st functionalTermSignatureAst
-            tryAddBlock uri fplValue 
+            eval st functionalTermSignatureAst
+            tryAddBlock fplValue 
             st.CurrentContext <- EvalContext.InBlock fplValue
-            eval uri st funcContentAst
-            optPropertyListAsts |> Option.map (List.map (eval uri st) >> ignore) |> Option.defaultValue ()
+            eval st funcContentAst
+            optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         | _ -> ()
         st.CurrentContext <- oldContext
         st.EvalPop()
@@ -1083,14 +1083,14 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Class, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval uri st predicateIdentifierAst
-            tryAddBlock uri fplValue 
-            optUserDefinedObjSymAst |> Option.map (eval uri st) |> Option.defaultValue ()
-            classTypeListAsts |> List.map (eval uri st) |> ignore
+            eval st predicateIdentifierAst
+            tryAddBlock fplValue 
+            optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
+            classTypeListAsts |> List.map (eval st) |> ignore
             st.CurrentContext <- EvalContext.InBlock fplValue
-            eval uri st classContentAst
+            eval st classContentAst
             optPropertyListAsts
-            |> Option.map (List.map (eval uri st) >> ignore)
+            |> Option.map (List.map (eval st) >> ignore)
             |> Option.defaultValue ()
         | _ -> ()
         st.CurrentContext <- oldContext
@@ -1098,7 +1098,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
     // | DerivedPredicate of Ast
     | Ast.DerivedPredicate ast1 -> 
         st.EvalPush("DefinitionClass")
-        eval uri st ast1
+        eval st ast1
         st.EvalPop()
     // | Proof of Positions * (Ast * (Ast list * Ast option))
     | Ast.Proof((pos1, pos2), (referencingIdentifierAst, (proofArgumentListAst, optQedAst))) ->
@@ -1108,17 +1108,17 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InTheory theoryValue -> 
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Proof, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
-            eval uri st referencingIdentifierAst
-            tryAddBlock uri fplValue 
+            eval st referencingIdentifierAst
+            tryAddBlock fplValue 
             st.CurrentContext <- EvalContext.InBlock fplValue
-            proofArgumentListAst |> List.map (eval uri st) |> ignore
-            optQedAst |> Option.map (eval uri st) |> Option.defaultValue ()
+            proofArgumentListAst |> List.map (eval st) |> ignore
+            optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         | _ -> ()
         st.CurrentContext <- oldContext
         st.EvalPop()
     | ast1 ->
         let astType = ast1.GetType().Name
-        emitID000Diagnostics uri.AbsolutePath astType
+        emitID000Diagnostics FplParser.parserDiagnostics.StreamName astType
 
 
 let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =
@@ -1144,7 +1144,7 @@ let evaluateSymbolTable (uri:System.Uri) (st: SymbolTable) =
                 st.Root.Scope.Add(pa.Id, theoryValue)
             theoryValue.Name <- pa.Id
             st.CurrentContext <- EvalContext.InTheory theoryValue
-            eval (FplSources.EscapedUri(pa.Parsing.UriPath)) st pa.Parsing.Ast
+            eval st pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.Evaluated
             theoryValue.NameIsFinal <- true
         | None -> found <- false
