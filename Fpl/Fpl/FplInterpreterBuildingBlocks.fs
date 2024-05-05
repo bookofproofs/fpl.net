@@ -58,7 +58,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
             | None -> ()
         | _ -> ()
 
-let eval_units (st: SymbolTable) unitType (uri:Uri) pos1 pos2 = 
+let eval_units (st: SymbolTable) unitType pos1 pos2 = 
     match st.CurrentContext with
     | EvalContext.NamedVarDeclarationInBlock fplValue 
     | EvalContext.InPropertySignature fplValue 
@@ -71,9 +71,9 @@ let eval_units (st: SymbolTable) unitType (uri:Uri) pos1 pos2 =
                 adjustSignature st fplValue $"+{unitType}"
             else
                 adjustSignature st fplValue unitType
-                checkID009_ID010_ID011_Diagnostics st fplValue unitType uri pos1 pos2
+                checkID009_ID010_ID011_Diagnostics st fplValue unitType pos1 pos2
     | EvalContext.InConstructorBlock fplValue ->
-        checkID012Diagnostics st fplValue unitType uri pos1 pos2
+        checkID012Diagnostics st fplValue unitType pos1 pos2
     | _ -> ()
 
 let eval_string (st: SymbolTable) s = ()
@@ -98,11 +98,11 @@ let tryAddBlock (uri:Uri) (fplValue:FplValue) =
         // everything is ok, change the parent of the provable from theory to the found parent 
         fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
     | ScopeSearchResult.FoundIncorrectBlock block ->
-        emitID002diagnostics fplValue block uri 
+        emitID002diagnostics fplValue block  
     | ScopeSearchResult.NotFound ->
-        emitID003diagnostics fplValue uri 
+        emitID003diagnostics fplValue  
     | ScopeSearchResult.FoundMultiple listOfKandidates ->
-        emitID004diagnostics fplValue listOfKandidates uri 
+        emitID004diagnostics fplValue listOfKandidates  
     | _ -> ()
 
     match FplValue.TryFindAssociatedBlockForCorollary fplValue with
@@ -110,26 +110,26 @@ let tryAddBlock (uri:Uri) (fplValue:FplValue) =
         // everything is ok, change the parent of the provable from theory to the found parent 
         fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
-        emitVAR03diagnosticsForCorollarysSignatureVariale fplValue uri 
+        emitVAR03diagnosticsForCorollarysSignatureVariale fplValue  
     | ScopeSearchResult.FoundIncorrectBlock block ->
-        emitID005diagnostics fplValue block uri 
+        emitID005diagnostics fplValue block  
     | ScopeSearchResult.NotFound ->
-        emitID006diagnostics fplValue uri 
+        emitID006diagnostics fplValue  
     | ScopeSearchResult.FoundMultiple listOfKandidates ->
-        emitID007diagnostics fplValue listOfKandidates uri 
+        emitID007diagnostics fplValue listOfKandidates  
     | _ -> ()
 
     match FplValue.InScopeOfParent(fplValue) fplValue.Name with
     | ScopeSearchResult.Found conflict -> 
-        emitVAR01orID001diagnostics fplValue conflict uri
+        emitVAR01orID001diagnostics fplValue conflict 
     | _ -> 
         match FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) with
         | ScopeSearchResult.Found other ->
-            emitVAR02diagnostics fplValue other uri 
+            emitVAR02diagnostics fplValue other  
         | _ -> 
             match FplValue.ProofVariableInOuterScope(fplValue) with
             | ScopeSearchResult.Found other ->
-                emitVAR03diagnostics fplValue other uri
+                emitVAR03diagnostics fplValue other 
             | _ -> 
                 fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
                 fplValue.NameIsFinal <- true
@@ -149,7 +149,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InPropertySignature fplValue
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
-            tryAddVariadicVariables uri fplValue.AuxiliaryInfo pos1 pos2
+            tryAddVariadicVariables fplValue.AuxiliaryInfo pos1 pos2
             // adjust type of variables to variadic variables, if their type has not yet been established
             fplValue.Scope
             |> Seq.filter (fun varKeyValue -> FplValue.IsVariable(varKeyValue.Value) && varKeyValue.Value.TypeSignature = [])
@@ -171,21 +171,21 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
     // units: | Star
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
-        eval_units st "ind" uri pos1 pos2 
+        eval_units st "ind" pos1 pos2 
         correctFplTypeOfFunctionalTerms FplType.Index
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
-        eval_units st "obj" uri pos1 pos2 
+        eval_units st "obj" pos1 pos2 
         correctFplTypeOfFunctionalTerms FplType.Object
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
-        eval_units st "pred" uri pos1 pos2 
+        eval_units st "pred" pos1 pos2 
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
-        eval_units st "func" uri pos1 pos2  
+        eval_units st "func" pos1 pos2  
         correctFplTypeOfFunctionalTerms FplType.FunctionalTerm
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
@@ -198,32 +198,32 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.One((pos1, pos2),()) ->
         st.EvalPush("One")
-        eval_units st "" uri pos1 pos2  
+        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Star((pos1, pos2),()) ->
         st.EvalPush("Star")
-        eval_units st "" uri pos1 pos2  
+        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Dot((pos1, pos2),()) ->
         st.EvalPush("Dot")
-        eval_units st "" uri pos1 pos2  
+        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Intrinsic((pos1, pos2),()) -> 
         st.EvalPush("Intrinsic")
-        eval_units st "" uri pos1 pos2  
+        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Property((pos1, pos2),()) -> 
         st.EvalPush("Property")
-        eval_units st "" uri pos1 pos2  
+        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Optional((pos1, pos2),()) -> 
         st.EvalPush("Optional")
-        eval_units st "" uri pos1 pos2  
+        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Error  ->   
         st.EvalPush("Error")
         let pos = Position(uri.AbsolutePath,0,1,1)
-        eval_units st "" uri pos pos
+        eval_units st "" pos pos
         st.EvalPop()
     // strings: | Digits of string
     | Ast.Digits s -> 
@@ -483,10 +483,10 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             else
                 adjustSignature st fplValue identifier
             correctFplTypeOfFunctionalTerms FplType.Object
-            checkID008Diagnostics fplValue uri pos1 pos2
-            checkID009_ID010_ID011_Diagnostics st fplValue identifier uri pos1 pos2
+            checkID008Diagnostics fplValue pos1 pos2
+            checkID009_ID010_ID011_Diagnostics st fplValue identifier pos1 pos2
         | EvalContext.InConstructorBlock fplValue ->
-            checkID012Diagnostics st fplValue identifier uri pos1 pos2
+            checkID012Diagnostics st fplValue identifier pos1 pos2
         | _ -> ()
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), asts) ->

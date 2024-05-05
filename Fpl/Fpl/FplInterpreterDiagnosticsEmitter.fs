@@ -16,7 +16,7 @@ let emitUnexpectedErrorDiagnostics streamName errMsg =
         }
         FplParser.parserDiagnostics.AddDiagnostic(diagnostic)
 
-let emitVAR01orID001diagnostics (fplValue:FplValue) (conflict:FplValue) uri = 
+let emitVAR01orID001diagnostics (fplValue:FplValue) (conflict:FplValue) = 
     let diagnostic = { 
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Error
@@ -31,7 +31,7 @@ let emitVAR01orID001diagnostics (fplValue:FplValue) (conflict:FplValue) uri =
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let emitVAR02diagnostics (fplValue:FplValue) (conflict:FplValue) uri = 
+let emitVAR02diagnostics (fplValue:FplValue) (conflict:FplValue) = 
     let diagnostic = { 
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Error
@@ -42,7 +42,7 @@ let emitVAR02diagnostics (fplValue:FplValue) (conflict:FplValue) uri =
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let emitVAR03diagnostics (fplValue:FplValue) (conflict:FplValue) uri = 
+let emitVAR03diagnostics (fplValue:FplValue) (conflict:FplValue) = 
     let diagnostic = { 
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Error
@@ -53,16 +53,16 @@ let emitVAR03diagnostics (fplValue:FplValue) (conflict:FplValue) uri =
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let emitVAR03diagnosticsForCorollarysSignatureVariale (fplValue:FplValue) uri = 
+let emitVAR03diagnosticsForCorollarysSignatureVariale (fplValue:FplValue) = 
     if FplValue.IsCorollary(fplValue) then
         for kv in fplValue.Scope do
             let res = FplValue.CorollaryVariableInOuterScope(kv.Value) 
             match res with
             | ScopeSearchResult.Found conflict ->
-                emitVAR03diagnostics kv.Value conflict uri
+                emitVAR03diagnostics kv.Value conflict 
             | _ -> ()
 
-let emitID002diagnostics (fplValue:FplValue) incorrectBlockType uri = 
+let emitID002diagnostics (fplValue:FplValue) incorrectBlockType = 
     let diagnostic = { 
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Error
@@ -73,7 +73,7 @@ let emitID002diagnostics (fplValue:FplValue) incorrectBlockType uri =
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let emitID005diagnostics (fplValue:FplValue) incorrectBlockType uri = 
+let emitID005diagnostics (fplValue:FplValue) incorrectBlockType = 
     let diagnostic = { 
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Error
@@ -84,7 +84,7 @@ let emitID005diagnostics (fplValue:FplValue) incorrectBlockType uri =
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let emitID003diagnostics (fplValue:FplValue) uri = 
+let emitID003diagnostics (fplValue:FplValue) = 
     let diagnostic = { 
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Error
@@ -95,7 +95,7 @@ let emitID003diagnostics (fplValue:FplValue) uri =
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let emitID006diagnostics (fplValue:FplValue) uri = 
+let emitID006diagnostics (fplValue:FplValue) = 
     let diagnostic = { 
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Error
@@ -106,7 +106,7 @@ let emitID006diagnostics (fplValue:FplValue) uri =
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let emitID004diagnostics (fplValue:FplValue) listOfCandidates uri = 
+let emitID004diagnostics (fplValue:FplValue) listOfCandidates = 
     let diagnostic = { 
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Error
@@ -117,7 +117,7 @@ let emitID004diagnostics (fplValue:FplValue) listOfCandidates uri =
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let emitID007diagnostics (fplValue:FplValue) listOfCandidates uri = 
+let emitID007diagnostics (fplValue:FplValue) listOfCandidates = 
     let diagnostic = { 
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Error
@@ -128,7 +128,7 @@ let emitID007diagnostics (fplValue:FplValue) listOfCandidates uri =
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let tryAddVariadicVariables (uri:System.Uri) numberOfVariadicVars startPos endPos =
+let tryAddVariadicVariables numberOfVariadicVars startPos endPos =
     if numberOfVariadicVars > 1 then
         let diagnostic = { 
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
@@ -140,7 +140,7 @@ let tryAddVariadicVariables (uri:System.Uri) numberOfVariadicVars startPos endPo
         }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let checkID008Diagnostics (fplValue:FplValue) uri pos1 pos2 =
+let checkID008Diagnostics (fplValue:FplValue) pos1 pos2 =
     if FplValue.IsConstructor(fplValue) && fplValue.TypeSignature.Length = 1 then 
         let nameStart = fplValue.TypeSignature.Head
         let className = fplValue.Parent.Value.Name
@@ -156,7 +156,7 @@ let checkID008Diagnostics (fplValue:FplValue) uri pos1 pos2 =
                 }
             FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let checkID009_ID010_ID011_Diagnostics (st:SymbolTable) (fplValue:FplValue) name uri pos1 pos2 =
+let checkID009_ID010_ID011_Diagnostics (st:SymbolTable) (fplValue:FplValue) name pos1 pos2 =
     let rec findPath (root: FplValue) (candidateName: string) =
         if root.Name = candidateName then
             Some(root.Name)
@@ -266,7 +266,7 @@ let checkID009_ID010_ID011_Diagnostics (st:SymbolTable) (fplValue:FplValue) name
                 let obj = FplValue.CreateObject((pos1,pos2))
                 fplValue.ValueList.Add obj
 
-let checkID012Diagnostics (st:SymbolTable) (constructor:FplValue) identifier uri (pos1:Position) pos2 =
+let checkID012Diagnostics (st:SymbolTable) (constructor:FplValue) identifier (pos1:Position) pos2 =
     let context = st.EvalPath()
     if context.EndsWith("ParentConstructorCall.InheritedClassType.ObjectType") || context.EndsWith("ParentConstructorCall.InheritedClassType.PredicateIdentifier")  then
         let classOfConstructor = constructor.Parent.Value

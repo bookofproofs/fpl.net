@@ -52,7 +52,7 @@ let rec eval_uses_clause = function
         | _ -> []
     | _ -> []
 
-let private downloadFile (uri:System.Uri) url (e:EvalAliasedNamespaceIdentifier) =
+let private downloadFile url (e:EvalAliasedNamespaceIdentifier) =
     let client = new HttpClient()
     try
         async {
@@ -73,7 +73,7 @@ let private downloadFile (uri:System.Uri) url (e:EvalAliasedNamespaceIdentifier)
         FplParser.parserDiagnostics.AddDiagnostic diagnostic 
         ""
 
-let private loadFile (uri:System.Uri) fileName (e:EvalAliasedNamespaceIdentifier) =
+let private loadFile fileName (e:EvalAliasedNamespaceIdentifier) =
     try
         File.ReadAllText fileName
     with
@@ -107,7 +107,7 @@ let createLibSubfolder (uri: Uri) =
 
 let downloadLibMap (uri:System.Uri) (currentWebRepo: string) =
     let pos = Position(uri.AbsolutePath, 0, 1, 1)
-    let libMap = downloadFile uri (currentWebRepo + "/libmap.txt") (EvalAliasedNamespaceIdentifier.CreateEani("","", pos, pos))
+    let libMap = downloadFile (currentWebRepo + "/libmap.txt") (EvalAliasedNamespaceIdentifier.CreateEani("","", pos, pos))
     libMap    
 
 /// Acquires FPL sources that can be found with a single uses clause.
@@ -163,17 +163,16 @@ let private addOrUpdateParsedAst fileContent (fileLoc:string) (parsedAsts:Parsed
 /// Generates a list of ParsedAsts in a collection, in which even more ParseAsts will 
 /// be added if this ast contains some 'uses' clauses.
 let private getParsedAstsFromSources 
-    (uri: System.Uri)
     (eani:EvalAliasedNamespaceIdentifier) 
     (fplSources: seq<string>) (
-    getContent: Uri -> string -> EvalAliasedNamespaceIdentifier -> string) 
+    getContent: string -> EvalAliasedNamespaceIdentifier -> string) 
     (parsedAsts:ParsedAstList) 
     =
 
     fplSources
     |> Seq.iter (fun fileLoc ->
         // load the content of every source
-        let fileContent = getContent uri fileLoc eani
+        let fileContent = getContent fileLoc eani
         addOrUpdateParsedAst fileContent fileLoc parsedAsts |> ignore
     ) 
 
@@ -249,9 +248,9 @@ let getParsedAstsMatchingAliasedNamespaceIdentifier (uri:System.Uri) (sources:Fp
         filtered
         |> Seq.map (fun (_, path, _, _, theoryName) ->
             if FplSources.IsFilePath(path) then
-                getParsedAstsFromSources uri eani [path] loadFile parsedAsts 
+                getParsedAstsFromSources eani [path] loadFile parsedAsts 
             else
-                getParsedAstsFromSources uri eani [path] downloadFile parsedAsts 
+                getParsedAstsFromSources eani [path] downloadFile parsedAsts 
             
             theoryName
         ) 
