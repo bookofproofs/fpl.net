@@ -363,6 +363,7 @@ let garbageCollector (st:SymbolTable) (uri:Uri) =
         )
 
     removeNotReferencedAsts currentTheory
+    st.Root.Scope.Remove currentTheory |> ignore
 
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,

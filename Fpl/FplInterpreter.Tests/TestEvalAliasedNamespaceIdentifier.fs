@@ -512,3 +512,23 @@ type TestEvalAliasedNamespaceIdentifier() =
 
         | None -> Assert.IsTrue(false)
 
+
+    [<TestMethod>]
+    member this.TestGarbageCollector03() =
+        let currDir = Directory.GetCurrentDirectory()
+        let uri = System.Uri(Path.Combine(currDir, "../../../../../theories/lib/Fpl.SetTheory.fpl"))
+        let fplCode = File.ReadAllText(uri.LocalPath)
+        let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        let parsedAsts = ParsedAstList()
+        let st = SymbolTable(parsedAsts, true)
+        FplInterpreter.fplInterpreter st fplCode uri fplLibUrl |> ignore
+        // initial counts of parsed ast and theories in root
+        let parsedAstsFirstTime = st.ParsedAsts.Count
+        let scopeCountFirstTime = st.Root.Scope.Count
+        let errorCountfirstTime = FplParser.parserDiagnostics.CountDiagnostics
+
+        // reparse the Test.fpl after slightly modifying the uses clause
+        FplInterpreter.fplInterpreter st (fplCode + " ") uri fplLibUrl
+        Assert.AreEqual(parsedAstsFirstTime, st.ParsedAsts.Count)
+        Assert.AreEqual(scopeCountFirstTime, st.Root.Scope.Count)
+        Assert.AreEqual(errorCountfirstTime, FplParser.parserDiagnostics.CountDiagnostics)

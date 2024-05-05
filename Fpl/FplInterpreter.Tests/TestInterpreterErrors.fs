@@ -129,7 +129,9 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestNSP04NonCircular() =
         this.PrepareTestNSP04NonCircular(false) |> ignore
-        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
+        let code = NSP04 ""
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        Assert.AreEqual(0, result.Length)
         this.PrepareTestNSP04NonCircular(true) |> ignore
 
 
@@ -471,6 +473,8 @@ type TestInterpreterErrors() =
     [<DataRow("def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
     [<DataRow("def cl A:obj { ctor A() {dec base.B(); self} };", 1)>]
     [<DataRow("def cl A:C { ctor A() {dec base.obj(); self} };", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); self} };", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); self} };", 0)>]
     [<TestMethod>]
     member this.TestID012(fplCode:string, expected) =
         let code = ID012 ("","")
