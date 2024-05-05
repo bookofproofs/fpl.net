@@ -215,7 +215,7 @@ type ParsingProperties =
             // then replace the ast, checksum, location, sourcecode, the
             this.UriPath <- codeLoc
             FplParser.parserDiagnostics.StreamName <- codeLoc
-            this.Ast <- fplParser (FplSources.EscapedUri(codeLoc)) fplCode
+            this.Ast <- fplParser fplCode
             this.FplSourceCode <- fplCode
             this.Checksum <- checksum
             true
@@ -227,7 +227,7 @@ type ParsingProperties =
         {
             ParsingProperties.UriPath = fileLoc
             ParsingProperties.FplSourceCode = fileContent
-            ParsingProperties.Ast = FplParser.fplParser (FplSources.EscapedUri(fileLoc)) fileContent
+            ParsingProperties.Ast = FplParser.fplParser fileContent
             ParsingProperties.Checksum = computeMD5Checksum fileContent
         }
 

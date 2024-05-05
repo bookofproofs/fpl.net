@@ -449,7 +449,7 @@ let inputStringManipulator (input:string) errorIndex =
         replaceFirstNonWhitespace (input)
 
 /// If the source code is not syntax-error-free, this function will find the first error and emit it.
-let tryParseFirstError someParser (uri: System.Uri) input (code:DiagnosticCode) =
+let tryParseFirstError someParser input (code:DiagnosticCode) =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -474,7 +474,7 @@ let tryParseFirstError someParser (uri: System.Uri) input (code:DiagnosticCode) 
 /// position with spaces as long as the parser reaches a position where another parser should be 
 /// applied according to the applied synchronizing tokens. The recursive call stop also in rare cases, 
 /// in which this strategy would fail because the error occurs at the same position in consecutive recursive calls of the function.
-let rec tryParse someParser (uri: System.Uri) input startIndexOfInput nextIndex (code:DiagnosticCode) lastCorrectedIndex lastChoices =
+let rec tryParse someParser input startIndexOfInput nextIndex (code:DiagnosticCode) lastCorrectedIndex lastChoices =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -517,7 +517,7 @@ let rec tryParse someParser (uri: System.Uri) input startIndexOfInput nextIndex 
             let newInput = inputStringManipulator input (int restInput.Position.Index)
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
             // and cond1 are still met.
-            tryParse someParser uri newInput startIndexOfInput nextIndex code correctedIndex previousChoices
+            tryParse someParser newInput startIndexOfInput nextIndex code correctedIndex previousChoices
         else
             // We return -1 if in the first recursive call the error position did not met the conditions cond0 and cond1
             // Otherwise, we return an error position of the previous error in the recursive call that still 
@@ -527,7 +527,7 @@ let rec tryParse someParser (uri: System.Uri) input startIndexOfInput nextIndex 
 
 /// This function emits diagnostics for chunks of input between the end of parsing result of someParser and the starting index
 /// where another parser should be applied according to the applied synchronizing tokens.
-let rec tryParseRemainingChunk someParser (uri: System.Uri) (input:string) startIndexOfInput nextIndex (code:DiagnosticCode) lastCorrectedIndex lastChoices =
+let rec tryParseRemainingChunk someParser (input:string) startIndexOfInput nextIndex (code:DiagnosticCode) lastCorrectedIndex lastChoices =
     
     if input.Trim() <> "" then
          match run someParser input with
@@ -539,7 +539,7 @@ let rec tryParseRemainingChunk someParser (uri: System.Uri) (input:string) start
                     () // end the recursion, since we have probably an infinite loop
                 else
                     if userState.Index < input.Length then
-                        tryParseRemainingChunk someParser uri newInput startIndexOfInput nextIndex code correctedIndex ""
+                        tryParseRemainingChunk someParser newInput startIndexOfInput nextIndex code correctedIndex ""
             | Failure(errorMsg, restInput, userState) ->
                 let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
                 let previousChoices = String.concat ", " choices
@@ -570,7 +570,7 @@ let rec tryParseRemainingChunk someParser (uri: System.Uri) (input:string) start
                     // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions cond0 
                     // and cond1 are still met.
                     if restInput.Position.Index < input.Length && lastCorrectedIndex <> correctedIndex then
-                        tryParseRemainingChunk someParser uri newInput startIndexOfInput nextIndex code correctedIndex previousChoices
+                        tryParseRemainingChunk someParser newInput startIndexOfInput nextIndex code correctedIndex previousChoices
         
 
 let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) num = 
@@ -582,7 +582,7 @@ let isNotInAnyInterval (intervals: System.Collections.Generic.List<Interval>) nu
 
 
 /// Emits diagnostics for the error positions (if any) that are not overlapped by the intervals
-let rec tryParseRemainingOnly someParser (uri: System.Uri) input (code:DiagnosticCode) (intervals:System.Collections.Generic.List<Interval>) lastCorrectedIndex lastChoices =
+let rec tryParseRemainingOnly someParser input (code:DiagnosticCode) (intervals:System.Collections.Generic.List<Interval>) lastCorrectedIndex lastChoices =
    
     match run someParser input with
     | Success(result, restInput, userState) -> 
@@ -592,7 +592,7 @@ let rec tryParseRemainingOnly someParser (uri: System.Uri) input (code:Diagnosti
             let newInput = inputStringManipulator input (int userState.Index)
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions 
             // are still met.
-            tryParseRemainingOnly someParser uri newInput code intervals userState.Index ""
+            tryParseRemainingOnly someParser newInput code intervals userState.Index ""
     | Failure(errorMsg, restInput, userState) ->
         let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         let previousChoices = (String.concat ", " choices)
@@ -619,7 +619,7 @@ let rec tryParseRemainingOnly someParser (uri: System.Uri) input (code:Diagnosti
             // replace the input by manipulating the input string depending on the error position
             let newInput = inputStringManipulator input (int restInput.Position.Index)
             // emit further diagnostics recursively for this manipulated input, as long as the recursion breaking conditions are still met.
-            tryParseRemainingOnly someParser uri newInput code intervals restInput.Position.Index previousChoices
+            tryParseRemainingOnly someParser newInput code intervals restInput.Position.Index previousChoices
 
 /// Generate an ast on a best-effort basis, no matter if there are syntax errors, without emitting any diagnostics
 let rec tryGetAst someParser input lastCorrectedIndex =
