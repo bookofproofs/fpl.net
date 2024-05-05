@@ -63,7 +63,6 @@ let private downloadFile (uri:System.Uri) url (e:EvalAliasedNamespaceIdentifier)
     | ex -> 
         let diagnostic =
             { 
-                Diagnostic.Uri = uri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = e.StartPos
@@ -81,7 +80,6 @@ let private loadFile (uri:System.Uri) fileName (e:EvalAliasedNamespaceIdentifier
     | ex -> 
         let diagnostic =
             { 
-                Diagnostic.Uri = uri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = e.StartPos
@@ -190,7 +188,6 @@ let private findDuplicateAliases (uri:System.Uri) (eaniList: EvalAliasedNamespac
         if uniqueAliases.Contains alias.AliasOrStar then
             let diagnostic =
                 { 
-                    Diagnostic.Uri = uri
                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = alias.StartPos
@@ -210,7 +207,6 @@ let private emitDiagnosticsForDuplicateFiles (uri:System.Uri) (availableSources:
         if FplSources.HasPattern(fileName, eani.FileNamePattern) && pathTypes.Length > 1 then 
             let diagnostic =
                 { 
-                    Diagnostic.Uri = uri
                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = eani.StartPos
@@ -241,7 +237,6 @@ let getParsedAstsMatchingAliasedNamespaceIdentifier (uri:System.Uri) (sources:Fp
         // Emits diagnostics if there are no files for the pattern 
         let diagnostic =
             { 
-                Diagnostic.Uri = uri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = eani.StartPos
@@ -407,7 +402,6 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl =
                         let circularEaniReference = circularEaniReferenceList |> List.head
                         let diagnostic =
                                 { 
-                                    Diagnostic.Uri = (FplSources.EscapedUri(pa.Parsing.UriPath))
                                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                                     Diagnostic.Severity = DiagnosticSeverity.Error
                                     Diagnostic.StartPos = circularEaniReference.StartPos

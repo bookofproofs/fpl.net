@@ -1118,7 +1118,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     | ast1 ->
         let astType = ast1.GetType().Name
-        emitID000Diagnostics uri astType
+        emitID000Diagnostics uri.AbsolutePath astType
 
 
 let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =

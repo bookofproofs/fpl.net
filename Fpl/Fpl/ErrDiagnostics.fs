@@ -223,7 +223,6 @@ type DiagnosticSeverity =
 
 type Diagnostic =
     {
-        Uri: System.Uri
         Emitter: DiagnosticEmitter
         Severity: DiagnosticSeverity
         StartPos: Position
@@ -460,7 +459,6 @@ let tryParseFirstError someParser (uri: System.Uri) input (code:DiagnosticCode) 
         let newErrMsg, _ = mapErrMsgToRecText input errorMsg restInput.Position
         let diagnostic =
             { 
-                Diagnostic.Uri = uri
                 Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = restInput.Position
@@ -506,7 +504,6 @@ let rec tryParse someParser (uri: System.Uri) input startIndexOfInput nextIndex 
                 )
             let diagnostic =
                 { 
-                    Diagnostic.Uri = uri
                     Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = correctedPosition
@@ -559,7 +556,6 @@ let rec tryParseRemainingChunk someParser (uri: System.Uri) (input:string) start
                         )
                     let diagnostic =
                         { 
-                            Diagnostic.Uri = uri
                             Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                             Diagnostic.Severity = DiagnosticSeverity.Error
                             Diagnostic.StartPos = correctedPosition
@@ -610,7 +606,6 @@ let rec tryParseRemainingOnly someParser (uri: System.Uri) input (code:Diagnosti
             if cond then
                 let diagnostic =
                     { 
-                        Diagnostic.Uri = uri
                         Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                         Diagnostic.Severity = DiagnosticSeverity.Error
                         Diagnostic.StartPos = restInput.Position

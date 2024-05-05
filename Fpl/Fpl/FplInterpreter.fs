@@ -13,5 +13,5 @@ let fplInterpreter (st:SymbolTable) input (uri:Uri) fplLibUrl =
         loadAllUsesClauses st input escapedUri fplLibUrl 
         evaluateSymbolTable uri st
     with ex -> 
-        emitUnexpectedErrorDiagnostics uri (ex.Message + Environment.NewLine + ex.StackTrace)
+        emitUnexpectedErrorDiagnostics (uri.AbsolutePath) (ex.Message + Environment.NewLine + ex.StackTrace)
     
