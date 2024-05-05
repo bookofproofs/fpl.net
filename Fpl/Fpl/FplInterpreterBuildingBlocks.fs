@@ -72,6 +72,8 @@ let eval_units (st: SymbolTable) unitType (uri:Uri) pos1 pos2 =
             else
                 adjustSignature st fplValue unitType
                 checkID009_ID010_ID011_Diagnostics st fplValue unitType uri pos1 pos2
+    | EvalContext.InConstructorBlock fplValue ->
+        checkID012Diagnostics fplValue unitType uri pos1 pos2
     | _ -> ()
 
 let eval_string (st: SymbolTable) s = ()
@@ -483,6 +485,8 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             correctFplTypeOfFunctionalTerms FplType.Object
             checkID008Diagnostics fplValue uri pos1 pos2
             checkID009_ID010_ID011_Diagnostics st fplValue identifier uri pos1 pos2
+        | EvalContext.InConstructorBlock fplValue ->
+            checkID012Diagnostics fplValue identifier uri pos1 pos2
         | _ -> ()
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), asts) ->

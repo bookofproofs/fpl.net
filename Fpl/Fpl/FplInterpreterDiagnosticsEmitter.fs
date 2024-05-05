@@ -200,7 +200,7 @@ let checkID009_ID010_ID011_Diagnostics (st:SymbolTable) (fplValue:FplValue) name
             | _ -> 
             match FplValue.InScopeOfParent(fplValue) name with
             | ScopeSearchResult.Found classCandidate ->
-                let mutable found = false
+                let mutable duplicateInheritanceChainFound = false
                 fplValue.ValueList
                 |> Seq.iter (fun child -> 
                     let classInheritanceChain = findPath classCandidate child.Name 
@@ -217,10 +217,10 @@ let checkID009_ID010_ID011_Diagnostics (st:SymbolTable) (fplValue:FplValue) name
                                 Diagnostic.Alternatives = None 
                             }
                         FplParser.parserDiagnostics.AddDiagnostic diagnostic
-                        found <- true
+                        duplicateInheritanceChainFound <- true
                     | _ -> ()
                 )
-                if not found then 
+                if not duplicateInheritanceChainFound then 
                     fplValue.ValueList.Add classCandidate
             | _ -> 
                 let diagnostic =
@@ -249,7 +249,7 @@ let checkID009_ID010_ID011_Diagnostics (st:SymbolTable) (fplValue:FplValue) name
                 }
             FplParser.parserDiagnostics.AddDiagnostic diagnostic
         | _ -> 
-            let mutable found = false
+            let mutable duplicateInheritanceChainFound = false
             fplValue.ValueList
             |> Seq.iter (fun child -> 
                 let classInheritanceChain = findPath child name 
@@ -266,13 +266,36 @@ let checkID009_ID010_ID011_Diagnostics (st:SymbolTable) (fplValue:FplValue) name
                             Diagnostic.Alternatives = None 
                         }
                     FplParser.parserDiagnostics.AddDiagnostic diagnostic
-                    found <- true
+                    duplicateInheritanceChainFound <- true
                 | _ -> ()
             )
-            if not found then 
+            if not duplicateInheritanceChainFound then 
                 let obj = FplValue.CreateObject((pos1,pos2))
                 fplValue.ValueList.Add obj
 
+let checkID012Diagnostics (constructor:FplValue) identifier uri pos1 pos2 =
+    let classOfConstructor = constructor.Parent.Value
+    let mutable foundInheritanceClass = false
+    let candidates = 
+        classOfConstructor.ValueList
+        |> Seq.map (fun inheritanceClass ->
+            if inheritanceClass.Name = identifier then 
+                foundInheritanceClass <- true
+            inheritanceClass.Name
+        )
+        |> String.concat ", "
+    if not foundInheritanceClass then 
+        let diagnostic =
+            { 
+                Diagnostic.Uri = uri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = ID012 (identifier, candidates)
+                Diagnostic.Alternatives = None 
+            }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
 let emitID000Diagnostics uri astType = 
     let diagnostic =

@@ -465,3 +465,13 @@ type TestInterpreterErrors() =
     member this.TestID011(fplCode:string, expected) =
         let code = ID011 ("","")
         runTestHelper fplCode code expected
+
+    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); self} };", 0)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.C(); self} };", 1)>]
+    [<DataRow("def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
+    [<DataRow("def cl A:obj { ctor A() {dec base.B(); self} };", 1)>]
+    [<DataRow("def cl A:C { ctor A() {dec base.obj(); self} };", 1)>]
+    [<TestMethod>]
+    member this.TestID012(fplCode:string, expected) =
+        let code = ID012 ("","")
+        runTestHelper fplCode code expected
