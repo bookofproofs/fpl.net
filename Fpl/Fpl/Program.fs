@@ -39,7 +39,7 @@ let loadFplFile(path:string) =
     let parsedAsts = ParsedAstList()
     let fplCode = File.ReadAllText(path)
     let st = SymbolTable(parsedAsts, false)
-    Some (FplInterpreter.fplInterpreter st fplCode uri fplLibUrl)
+    FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
 
 
 let input = """
@@ -60,16 +60,17 @@ ad.PrintDiagnostics
 
 // let st = prepareFplCode(@"D:\Forschung\fpl.net\theories\lib\Fpl.Commons.Structures.fpl")
 
-
+(*
 let st = prepareFplCode(input,true) 
 
 
-printf "\n--------------------------------\n"
-ad.PrintDiagnostics
-
 prepareFplCode("",false) |> ignore
 printf "\n--------------------------------\n"
+*)
 
+loadFplFile(@"D:\Forschung\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.3.Ordering.fpl")
 
+printf "\n--------------------------------\n"
+ad.PrintDiagnostics
 
 

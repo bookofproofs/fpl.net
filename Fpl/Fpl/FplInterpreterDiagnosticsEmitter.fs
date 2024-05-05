@@ -5,6 +5,17 @@ open FplGrammarTypes
 open FplParser
 open FplInterpreterTypes
 
+let emitUnexpectedErrorDiagnostics uri errMsg = 
+        let diagnostic = { 
+            Diagnostic.Uri = uri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = Position(uri.AbsolutePath,0,1,1)
+            Diagnostic.EndPos = Position(uri.AbsolutePath,0,1,1)
+            Diagnostic.Code = GEN00 errMsg
+            Diagnostic.Alternatives = None 
+        }
+        FplParser.parserDiagnostics.AddDiagnostic(diagnostic)
 
 let emitVAR01orID001diagnostics (fplValue:FplValue) (conflict:FplValue) uri = 
     let diagnostic = { 
@@ -273,29 +284,31 @@ let checkID009_ID010_ID011_Diagnostics (st:SymbolTable) (fplValue:FplValue) name
                 let obj = FplValue.CreateObject((pos1,pos2))
                 fplValue.ValueList.Add obj
 
-let checkID012Diagnostics (constructor:FplValue) identifier uri pos1 pos2 =
-    let classOfConstructor = constructor.Parent.Value
-    let mutable foundInheritanceClass = false
-    let candidates = 
-        classOfConstructor.ValueList
-        |> Seq.map (fun inheritanceClass ->
-            if inheritanceClass.Name = identifier then 
-                foundInheritanceClass <- true
-            inheritanceClass.Name
-        )
-        |> String.concat ", "
-    if not foundInheritanceClass then 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = uri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = ID012 (identifier, candidates)
-                Diagnostic.Alternatives = None 
-            }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+let checkID012Diagnostics (st:SymbolTable) (constructor:FplValue) identifier uri (pos1:Position) pos2 =
+    let context = st.EvalPath()
+    if context.EndsWith("ParentConstructorCall.InheritedClassType.ObjectType") || context.EndsWith("ParentConstructorCall.InheritedClassType.PredicateIdentifier")  then
+        let classOfConstructor = constructor.Parent.Value
+        let mutable foundInheritanceClass = false
+        let candidates = 
+            classOfConstructor.ValueList
+            |> Seq.map (fun inheritanceClass ->
+                if inheritanceClass.Name = identifier then 
+                    foundInheritanceClass <- true
+                inheritanceClass.Name
+            )
+            |> String.concat ", "
+        if not foundInheritanceClass then 
+            let diagnostic =
+                { 
+                    Diagnostic.Uri = System.Uri(pos1.StreamName)
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = ID012 (identifier, candidates)
+                    Diagnostic.Alternatives = None 
+                }
+            FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
 let emitID000Diagnostics uri astType = 
     let diagnostic =
@@ -303,8 +316,8 @@ let emitID000Diagnostics uri astType =
             Diagnostic.Uri = uri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = Position("", 0, 1, 1)
-            Diagnostic.EndPos = Position("", 0, 1, 1)
+            Diagnostic.StartPos = Position(uri.AbsolutePath, 0, 1, 1)
+            Diagnostic.EndPos = Position(uri.AbsolutePath, 0, 1, 1)
             Diagnostic.Code = ID000 astType
             Diagnostic.Alternatives = None 
         }

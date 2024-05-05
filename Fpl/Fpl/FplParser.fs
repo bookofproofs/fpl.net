@@ -28,9 +28,11 @@ let positions (tokenName:string) (p: Parser<_,_>): Parser<Positions * _,_> =
         (_position .>>. p)
         (_position)
         (fun (startPos, result) endPos -> 
-            let token = { Token.Name = tokenName; Token.StartPos = startPos; Token.EndPos = endPos}
+            let pos1 = Position(ad.StreamName, startPos.Index, startPos.Line, startPos.Column)
+            let pos2 = Position(ad.StreamName, endPos.Index, endPos.Line, endPos.Column)
+            let token = { Token.Name = tokenName; Token.StartPos = pos1; Token.EndPos = pos2}
             tokenizer.Push(token)
-            (Positions(startPos, endPos), result)
+            (Positions(pos1, pos2), result)
         )
 
 /// Takes the parser `p` and returns a result with the side effect of remembering the parsed token 
@@ -39,7 +41,9 @@ let tokenize (tokenName:string) (p: Parser<_,_>): Parser<_,_> =
         (_position .>>. p)
         (_position)
         (fun (startPos, result) endPos -> 
-            let token = { Token.Name = tokenName; Token.StartPos = startPos; Token.EndPos = endPos}
+            let pos1 = Position(ad.StreamName, startPos.Index, startPos.Line, startPos.Column)
+            let pos2 = Position(ad.StreamName, endPos.Index, endPos.Line, endPos.Column)
+            let token = { Token.Name = tokenName; Token.StartPos = pos1; Token.EndPos = pos2}
             tokenizer.Push(token)
             result
         )

@@ -131,7 +131,7 @@ type FplSources(paths: string list) =
         if FplSources.IsFilePath(pathNew) then  
             Uri($"{pathNew}")
         else
-            Uri($"fplregistry://{pathNew}")
+            Uri($"{pathNew}")
 
     member this.Urls = List.filter FplSources.IsUrl this.Paths
     member this.FilePaths = List.filter FplSources.IsFilePath this.Paths
@@ -214,6 +214,7 @@ type ParsingProperties =
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, sourcecode, the
             this.UriPath <- codeLoc
+            FplParser.parserDiagnostics.StreamName <- codeLoc
             this.Ast <- fplParser (FplSources.EscapedUri(codeLoc)) fplCode
             this.FplSourceCode <- fplCode
             this.Checksum <- checksum
@@ -222,6 +223,7 @@ type ParsingProperties =
             false
 
     static member Create(fileLoc, fileContent) = 
+        FplParser.parserDiagnostics.StreamName <- fileLoc
         {
             ParsingProperties.UriPath = fileLoc
             ParsingProperties.FplSourceCode = fileContent
@@ -846,6 +848,8 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     member this.ParsedAsts = _parsedAsts
 
     /// Returns the path of the current recursive evaluation. The path is reversed, i.e. starting with the root ast name.
+    /// This path can be used to avoid false positives of interpreter diagnostics by further narrowing the parsing context
+    /// in which they occur.
     member this.EvalPath() = 
         _evalPath 
         |> Seq.toList 

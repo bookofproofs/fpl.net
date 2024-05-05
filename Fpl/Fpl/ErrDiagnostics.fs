@@ -256,6 +256,7 @@ type Diagnostic =
         (sprintf "%07d" this.StartPos.Index) + this.Emitter.ToString() + this.Code.Code
 
 type Diagnostics() =
+    let mutable _streamName = ""
     let myDictionary = new Dictionary<string, Diagnostic>()
     member this.Collection = 
         myDictionary
@@ -263,6 +264,10 @@ type Diagnostics() =
         |> Seq.sortBy fst
         |> Seq.map snd
         |> Seq.toList
+
+    member this.StreamName 
+        with get() = _streamName
+        and set (value) = _streamName <- value
 
     member this.AddDiagnostic (d:Diagnostic) =
         let keyOfd = d.DiagnosticID

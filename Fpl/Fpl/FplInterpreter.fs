@@ -5,18 +5,7 @@ open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterUsesClause
 open FplInterpreterBuildingBlocks
-
-let private emitUnexpectedErrorDiagnostics uri errMsg = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = Position("",0,1,1)
-            Diagnostic.EndPos = Position("",0,1,1)
-            Diagnostic.Code = GEN00 errMsg
-            Diagnostic.Alternatives = None 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic(diagnostic)
+open FplInterpreterDiagnosticsEmitter
 
 let fplInterpreter (st:SymbolTable) input (uri:Uri) fplLibUrl = 
     try
@@ -24,6 +13,5 @@ let fplInterpreter (st:SymbolTable) input (uri:Uri) fplLibUrl =
         loadAllUsesClauses st input escapedUri fplLibUrl 
         evaluateSymbolTable uri st
     with ex -> 
-        emitUnexpectedErrorDiagnostics uri ex.Message
-    ()
- 
+        emitUnexpectedErrorDiagnostics uri (ex.Message + Environment.NewLine + ex.StackTrace)
+    

@@ -108,7 +108,7 @@ let createLibSubfolder (uri: Uri) =
 
 
 let downloadLibMap (uri:System.Uri) (currentWebRepo: string) =
-    let pos = Position("", 0, 1, 1)
+    let pos = Position(uri.AbsolutePath, 0, 1, 1)
     let libMap = downloadFile uri (currentWebRepo + "/libmap.txt") (EvalAliasedNamespaceIdentifier.CreateEani("","", pos, pos))
     libMap    
 
@@ -385,7 +385,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl =
             findDuplicateAliases (FplSources.EscapedUri(pa.Parsing.UriPath)) pa.Sorting.EANIList |> ignore
             pa.Sorting.EANIList
             |> List.iter (fun (eani:EvalAliasedNamespaceIdentifier) -> 
-                getParsedAstsMatchingAliasedNamespaceIdentifier uri sources st.ParsedAsts eani pa 
+                getParsedAstsMatchingAliasedNamespaceIdentifier (FplSources.EscapedUri(pa.Parsing.UriPath)) sources st.ParsedAsts eani pa 
                 emitDiagnosticsForDuplicateFiles (FplSources.EscapedUri(pa.Parsing.UriPath)) sources eani
             ) |> ignore
         | None -> 
@@ -401,18 +401,21 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl =
             let circularReferencedName = List.item 1 lstWithCurrentAsHead
             match parsedAstThatStartsTheCycle with 
             | Some pa -> 
-                let circularEaniReference = pa.Sorting.EANIList |> List.filter (fun eani -> eani.Name = circularReferencedName) |> List.head
-                let diagnostic =
-                        { 
-                            Diagnostic.Uri = (FplSources.EscapedUri(pa.Parsing.UriPath))
-                            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                            Diagnostic.Severity = DiagnosticSeverity.Error
-                            Diagnostic.StartPos = circularEaniReference.StartPos
-                            Diagnostic.EndPos = circularEaniReference.EndPos
-                            Diagnostic.Code = NSP04 path
-                            Diagnostic.Alternatives = None
-                        }
-                FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                    let circularEaniReferenceList = 
+                        pa.Sorting.EANIList |> List.filter (fun eani -> eani.Name = circularReferencedName)
+                    if circularEaniReferenceList.Length > 0 then 
+                        let circularEaniReference = circularEaniReferenceList |> List.head
+                        let diagnostic =
+                                { 
+                                    Diagnostic.Uri = (FplSources.EscapedUri(pa.Parsing.UriPath))
+                                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+                                    Diagnostic.Severity = DiagnosticSeverity.Error
+                                    Diagnostic.StartPos = circularEaniReference.StartPos
+                                    Diagnostic.EndPos = circularEaniReference.EndPos
+                                    Diagnostic.Code = NSP04 path
+                                    Diagnostic.Alternatives = None
+                                }
+                        FplParser.parserDiagnostics.AddDiagnostic diagnostic
             | None -> ()
         | None -> ()
 

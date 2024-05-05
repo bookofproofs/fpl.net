@@ -34,7 +34,7 @@ def class EmptySet: Set
     ctor EmptySet()
     {
         dec 
-            base.obj()
+            base.Set()
             assert IsEmpty(self) 
         ;
         self

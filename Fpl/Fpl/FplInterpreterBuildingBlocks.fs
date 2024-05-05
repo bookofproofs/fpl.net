@@ -73,7 +73,7 @@ let eval_units (st: SymbolTable) unitType (uri:Uri) pos1 pos2 =
                 adjustSignature st fplValue unitType
                 checkID009_ID010_ID011_Diagnostics st fplValue unitType uri pos1 pos2
     | EvalContext.InConstructorBlock fplValue ->
-        checkID012Diagnostics fplValue unitType uri pos1 pos2
+        checkID012Diagnostics st fplValue unitType uri pos1 pos2
     | _ -> ()
 
 let eval_string (st: SymbolTable) s = ()
@@ -222,7 +222,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Error  ->   
         st.EvalPush("Error")
-        let pos = Position("",0,1,1)
+        let pos = Position(uri.AbsolutePath,0,1,1)
         eval_units st "" uri pos pos
         st.EvalPop()
     // strings: | Digits of string
@@ -486,7 +486,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             checkID008Diagnostics fplValue uri pos1 pos2
             checkID009_ID010_ID011_Diagnostics st fplValue identifier uri pos1 pos2
         | EvalContext.InConstructorBlock fplValue ->
-            checkID012Diagnostics fplValue identifier uri pos1 pos2
+            checkID012Diagnostics st fplValue identifier uri pos1 pos2
         | _ -> ()
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), asts) ->
@@ -1139,12 +1139,12 @@ let evaluateSymbolTable (uri:System.Uri) (st: SymbolTable) =
         match usesClausesEvaluatedParsedAst with
         | Some pa ->
             // evaluate the ParsedAst
-            let theoryValue = FplValue.CreateFplValue((Position("",0,1,1), Position("",0,1,1)), FplBlockType.Theory, st.Root)
+            let theoryValue = FplValue.CreateFplValue((Position(pa.Parsing.UriPath,0,1,1), Position(pa.Parsing.UriPath,0,1,1)), FplBlockType.Theory, st.Root)
             if not (st.Root.Scope.ContainsKey(pa.Id)) then
                 st.Root.Scope.Add(pa.Id, theoryValue)
             theoryValue.Name <- pa.Id
             st.CurrentContext <- EvalContext.InTheory theoryValue
-            eval uri st pa.Parsing.Ast
+            eval (FplSources.EscapedUri(pa.Parsing.UriPath)) st pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.Evaluated
             theoryValue.NameIsFinal <- true
         | None -> found <- false
