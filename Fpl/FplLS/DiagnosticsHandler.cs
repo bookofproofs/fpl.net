@@ -38,9 +38,8 @@ namespace FplLS
     public class DiagnosticsHandler(ILanguageServer languageServer)
     {
         private readonly ILanguageServer _languageServer = languageServer;
-        private readonly ParsedAstList _parsedAstsList = [];
 
-        public void PublishDiagnostics(Uri uri, StringBuilder? buffer)
+        public void PublishDiagnostics(SymbolTable st, Uri uri, StringBuilder? buffer)
         {
             if (buffer != null)
             {
@@ -50,8 +49,8 @@ namespace FplLS
                     var parserDiagnostics = FplParser.parserDiagnostics;
                     parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
                     var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
-                    FplInterpreter.fplInterpreter(sourceCode, uri, fplLibUri, _parsedAstsList, false);
-                    var diagnostics = CastDiagnostics(parserDiagnostics, new TextPositions(sourceCode));
+                    FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
+                    var diagnostics = CastDiagnostics(st, parserDiagnostics, new TextPositions(sourceCode));
                     foreach (var diagnostic in diagnostics.Enumerator())
                     {
                         _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
@@ -87,14 +86,15 @@ namespace FplLS
         /// <param name="diagnostics">Input list</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted list</returns>
-        public UriDiagnostics CastDiagnostics(ErrDiagnostics.Diagnostics listDiagnostics, TextPositions tp)
+        public UriDiagnostics CastDiagnostics(FplInterpreterTypes.SymbolTable st, ErrDiagnostics.Diagnostics listDiagnostics, TextPositions tp)
         {
             var sb = new StringBuilder();
             var castedListDiagnostics = new UriDiagnostics();
+            FplLsTraceLogger.LogMsg(_languageServer, st.UsesDependencies(), "");
             FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.DiagnosticsToString, "~~~~~Diagnostics");
             foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
             {
-                castedListDiagnostics.AddDiagnostics(FplSources.EscapedUri(diagnostic.Uri.AbsoluteUri), CastDiagnostic(diagnostic, tp, sb));
+                castedListDiagnostics.AddDiagnostics(FplSources.EscapedUri(diagnostic.StartPos.StreamName), CastDiagnostic(diagnostic, tp, sb));
             }
             return castedListDiagnostics;
         }

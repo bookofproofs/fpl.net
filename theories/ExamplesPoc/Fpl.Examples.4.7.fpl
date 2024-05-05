@@ -105,7 +105,7 @@ proof Example4$1
         ~a:A
         ~b:B
         ~c:C
-        ~x,y,z: obj
+
     ;
     1. GreaterAB |- (a > b) 
     2. GreaterBC |- (b > c) 

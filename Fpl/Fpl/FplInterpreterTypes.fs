@@ -7,6 +7,7 @@ open System.Collections.Generic
 open System.Text
 open System.IO
 open FParsec
+open Newtonsoft.Json
 open FplGrammarTypes
 open FplParser
 
@@ -99,9 +100,13 @@ let computeMD5Checksum (input: string) =
 /// A type that encapsulates the sources found for a uses clause
 /// and provides members to filter those from the file system and those from
 /// the web.
-type FplSources(paths: string list) =
+type FplSources(paths: string list, pathToLocalRegistry:string) =
+    let _pathToLocalRegistry = pathToLocalRegistry
     /// All found paths for a uses clause, including those from the web.
     member this.Paths = paths
+
+    /// Path to local copies of the registry.
+    member this.PathToLocalRegistry = pathToLocalRegistry
 
     /// Returns all loaded FPL theories loaded by a uses clause grouped by name with lists of potential locations
     member this.Grouped 
@@ -130,7 +135,7 @@ type FplSources(paths: string list) =
         if FplSources.IsFilePath(pathNew) then  
             Uri($"{pathNew}")
         else
-            Uri($"fplregistry://{pathNew}")
+            Uri($"{pathNew}")
 
     member this.Urls = List.filter FplSources.IsUrl this.Paths
     member this.FilePaths = List.filter FplSources.IsFilePath this.Paths
@@ -213,7 +218,8 @@ type ParsingProperties =
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, sourcecode, the
             this.UriPath <- codeLoc
-            this.Ast <- fplParser (FplSources.EscapedUri(codeLoc)) fplCode
+            FplParser.parserDiagnostics.StreamName <- FplSources.EscapedUri(codeLoc).AbsolutePath
+            this.Ast <- fplParser fplCode
             this.FplSourceCode <- fplCode
             this.Checksum <- checksum
             true
@@ -221,10 +227,11 @@ type ParsingProperties =
             false
 
     static member Create(fileLoc, fileContent) = 
+        FplParser.parserDiagnostics.StreamName <- fileLoc
         {
             ParsingProperties.UriPath = fileLoc
             ParsingProperties.FplSourceCode = fileContent
-            ParsingProperties.Ast = FplParser.fplParser (FplSources.EscapedUri(fileLoc)) fileContent
+            ParsingProperties.Ast = FplParser.fplParser fileContent
             ParsingProperties.Checksum = computeMD5Checksum fileContent
         }
 
@@ -277,7 +284,8 @@ type FplBlockType =
     | MandatoryFunctionalTerm
     | OptionalFunctionalTerm
     | Constructor
-    | Class
+    | Class 
+    | Object
     | Theorem
     | Localization
     | Lemma
@@ -306,6 +314,7 @@ type FplBlockType =
             | OptionalFunctionalTerm -> "optional functional term property"
             | Constructor -> "constructor"
             | Class -> "class definition"
+            | Object -> "object"
             | Localization -> "localization"
             | Theorem -> "theorem"
             | Lemma -> "lemma"
@@ -326,6 +335,7 @@ type FplBlockType =
         | OptionalPredicate
         | OptionalFunctionalTerm
         | Expression 
+        | Object 
         | Axiom -> "an"
         | _ -> "a"
 
@@ -333,14 +343,13 @@ type FplBlockType =
 
 
 type ScopeSearchResult = 
-    | FoundCorrect of string 
+    | FoundAssociate of string 
     | FoundMultiple of string
     | FoundIncorrectBlock of string
-    | FoundConflict of string
+    | Found of FplValue
     | NotFound
     | NotApplicable
-
-type FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions: Positions, parent: FplValue option) =
+and FplValue(name: string, blockType: FplBlockType, evalType: FplType, positions: Positions, parent: FplValue option) =
     let mutable _name = name
     let mutable _nameFinal = false
     let mutable _nameEndPos = Position("", 0, 1, 1)
@@ -352,6 +361,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     let mutable _parent = parent
     let _auxiliaryUniqueChilds = HashSet<string>()
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
+    let _valueList = System.Collections.Generic.List<FplValue>()
 
     /// Identifier of this FplValue that is unique in its scope.
     member this.Name
@@ -421,30 +431,37 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
     /// A list of asserted predicates for this FplValue
     member this.AssertedPredicates = System.Collections.Generic.List<Ast>()
+
     /// A scope inside this FplValue
     member this.Scope = _scope
 
+    /// A value list inside this FplValue
+    member this.ValueList = _valueList
 
     /// Indicates if this FplValue is an FPL building block.
     static member IsFplBlock(fplValue:FplValue) = 
-        fplValue.BlockType = FplBlockType.Axiom
-        || fplValue.BlockType = FplBlockType.Theorem 
-        || fplValue.BlockType = FplBlockType.Lemma 
-        || fplValue.BlockType = FplBlockType.Proposition 
-        || fplValue.BlockType = FplBlockType.Corollary 
-        || fplValue.BlockType = FplBlockType.Conjecture 
-        || fplValue.BlockType = FplBlockType.Proof 
-        || fplValue.BlockType = FplBlockType.RuleOfInference 
-        || fplValue.BlockType = FplBlockType.Predicate 
-        || fplValue.BlockType = FplBlockType.FunctionalTerm 
-        || fplValue.BlockType = FplBlockType.Class 
-        || fplValue.BlockType = FplBlockType.Localization 
+        match fplValue.BlockType with 
+        | FplBlockType.Axiom
+        | FplBlockType.Theorem 
+        | FplBlockType.Lemma 
+        | FplBlockType.Proposition 
+        | FplBlockType.Corollary 
+        | FplBlockType.Conjecture 
+        | FplBlockType.Proof 
+        | FplBlockType.RuleOfInference 
+        | FplBlockType.Predicate 
+        | FplBlockType.FunctionalTerm 
+        | FplBlockType.Class 
+        | FplBlockType.Localization -> true
+        | _ -> false
 
     /// Indicates if this FplValue is a definition
     static member IsDefinition(fplValue:FplValue) = 
-        fplValue.BlockType = FplBlockType.Predicate 
-        || fplValue.BlockType = FplBlockType.FunctionalTerm 
-        || fplValue.BlockType = FplBlockType.Class 
+        match fplValue.BlockType with 
+        | FplBlockType.Predicate 
+        | FplBlockType.FunctionalTerm 
+        | FplBlockType.Class -> true
+        | _ -> false
 
     /// Indicates if this FplValue is an root of the symbol table.
     static member IsRoot(fplValue:FplValue) = 
@@ -477,6 +494,12 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
     /// Indicates if this FplValue is a constructor.
     static member IsConstructor(fplValue:FplValue) = 
         fplValue.BlockType = FplBlockType.Constructor
+
+    /// Indicates if this FplValue is a class.
+    static member IsClass(fplValue:FplValue) = 
+        match fplValue.BlockType with
+        | FplBlockType.Class (_) -> true
+        | _ -> false
 
     /// Indicates if this FplValue is a proof.
     static member IsProof(fplValue:FplValue) = 
@@ -544,7 +567,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         fplValue.BlockType = FplBlockType.VariadicVariableMany1
 
     /// Checks if a block is in the scope of its parent 
-    static member InScopeOfParent(fplValue:FplValue) = 
+    static member InScopeOfParent(fplValue:FplValue) name = 
         let conflictInSiblingTheory (parent:FplValue) = 
             // if the parent is as theory, look also for its sibling theories
             let (conflicts:ScopeSearchResult list) = 
@@ -555,9 +578,9 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                     siblingTheory.Value <> parent
                 )
                 |> Seq.choose (fun siblingTheory ->
-                        if siblingTheory.Value.Scope.ContainsKey(fplValue.Name) then
-                            let foundConflict = siblingTheory.Value.Scope[fplValue.Name]
-                            Some (ScopeSearchResult.FoundConflict foundConflict.QualifiedStartPos)
+                        if siblingTheory.Value.Scope.ContainsKey(name) then
+                            let foundConflict = siblingTheory.Value.Scope[name]
+                            Some (ScopeSearchResult.Found foundConflict)
                         else
                             None
                 )
@@ -570,9 +593,9 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
 
         match fplValue.Parent with
         | Some parent ->
-            if parent.Scope.ContainsKey(fplValue.Name) then
-                let foundConflict = parent.Scope[fplValue.Name]
-                ScopeSearchResult.FoundConflict foundConflict.QualifiedStartPos 
+            if parent.Scope.ContainsKey(name) then
+                let foundConflict = parent.Scope[name]
+                ScopeSearchResult.Found foundConflict 
             else 
                 if FplValue.IsTheory(parent) then 
                     conflictInSiblingTheory parent
@@ -588,7 +611,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
             | Some parent ->
                 if (FplValue.IsConstructorOrProperty(parent)) then 
                      if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
-                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                        ScopeSearchResult.Found (parent.Parent.Value.Scope[fplValue.Name])
                      else
                         ScopeSearchResult.NotFound
                 else
@@ -605,7 +628,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
             | Some parent ->
                 if (FplValue.IsProofOrCorollary(parent)) then 
                      if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
-                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                        ScopeSearchResult.Found (parent.Parent.Value.Scope[fplValue.Name])
                      else
                         ScopeSearchResult.NotFound
                 else
@@ -622,7 +645,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
             | Some parent ->
                 if (FplValue.IsProofOrCorollary(parent)) then 
                      if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
-                        ScopeSearchResult.FoundConflict (parent.Parent.Value.Scope[fplValue.Name].StartPos.ToString())
+                        ScopeSearchResult.Found (parent.Parent.Value.Scope[fplValue.Name])
                      else
                         ScopeSearchResult.NotFound
                 else
@@ -676,7 +699,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                     ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
                 elif potentialBlockList.Length > 0 then 
                     let potentialTheorem = potentialBlockList.Head
-                    ScopeSearchResult.FoundCorrect potentialTheorem.Value.Name
+                    ScopeSearchResult.FoundAssociate potentialTheorem.Value.Name
                 elif notPotentialBlockList.Length > 0 then 
                     let potentialOther = notPotentialBlockList.Head
                     ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
@@ -730,7 +753,7 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
                     ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
                 elif potentialBlockList.Length > 0 then 
                     let potentialTheorem = potentialBlockList.Head
-                    ScopeSearchResult.FoundCorrect potentialTheorem.Value.Name
+                    ScopeSearchResult.FoundAssociate potentialTheorem.Value.Name
                 elif notPotentialBlockList.Length > 0 then 
                     let potentialOther = notPotentialBlockList.Head
                     ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
@@ -745,6 +768,12 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         let root = new FplValue("", FplBlockType.Root, FplType.Object, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
         root.NameIsFinal <- true
         root
+
+    /// A factory method for the FPL primitive Object
+    static member CreateObject(pos1,pos2) =
+        let obj = new FplValue("obj", FplBlockType.Object, FplType.Object, (pos1, pos2), None)
+        obj.NameIsFinal <- true
+        obj
 
     /// A factory method for the evaluation of Fpl class definitions
     static member CreateFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =
@@ -774,7 +803,25 @@ type FplValue(name: string, blockType: FplBlockType, evalType: FplType, position
         | FplBlockType.Class -> new FplValue("", fplBlockType, FplType.Object, positions, Some parent)
         | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
         | FplBlockType.Localization -> new FplValue("", fplBlockType, FplType.Localization, positions, Some parent)
+        | FplBlockType.Object -> raise (ArgumentException("Please use CreateObject for creating a primitive object instead"))
 
+    /// Clears this FplValue
+    member this.Reset() = 
+        let rec clearAll (root:FplValue) =
+            root.ValueList
+            |> Seq.iter (fun child ->
+                clearAll child
+            )
+            root.ValueList.Clear()
+            root.Scope
+            |> Seq.iter (fun child ->
+                clearAll child.Value
+            )
+            root.Scope.Clear()
+            
+        clearAll this
+
+ 
 type EvalContext =
     | ContextNone
     | InTheory of FplValue
@@ -805,6 +852,8 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     member this.ParsedAsts = _parsedAsts
 
     /// Returns the path of the current recursive evaluation. The path is reversed, i.e. starting with the root ast name.
+    /// This path can be used to avoid false positives of interpreter diagnostics by further narrowing the parsing context
+    /// in which they occur.
     member this.EvalPath() = 
         _evalPath 
         |> Seq.toList 
@@ -831,3 +880,61 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
             Comparer<ParsedAst>.Create(fun b a -> compare a.Sorting.TopologicalSorting b.Sorting.TopologicalSorting)
         )
 
+    /// Serializes the symbol table as json
+    member this.ToJson() = 
+        let sb = StringBuilder()
+        let rec createJson (root:FplValue) (sb:StringBuilder) level isLast =
+            let indent = String(' ', level)
+            sb.AppendLine(String(' ', level - 1) + "{") |> ignore
+            sb.AppendLine($"{indent}\"Name\": \"{root.Name}\",") |> ignore
+            sb.AppendLine($"{indent}\"Scope\": [") |> ignore
+            let mutable counterScope = 0
+            root.Scope
+            |> Seq.iter (fun child ->
+                counterScope <- counterScope + 1
+                createJson child.Value sb (level + 1) (counterScope = root.Scope.Count)
+            )
+            sb.AppendLine($"{indent}],") |> ignore
+            sb.AppendLine($"{indent}\"ValueList\": [") |> ignore
+
+            let mutable valueList = 0
+            root.ValueList
+            |> Seq.iter (fun child ->
+                valueList <- valueList + 1
+                createJson child sb (level + 1) (valueList = root.ValueList.Count)
+            )
+            sb.AppendLine($"{indent}]") |> ignore
+            if isLast then
+                sb.AppendLine(String(' ', level - 1) + "}") |> ignore
+            else
+                sb.AppendLine(String(' ', level - 1) + "},") |> ignore
+        createJson this.Root sb 1 false
+        let res = sb.ToString().TrimEnd()
+        if res.EndsWith(',') then 
+            res.Substring(0,res.Length - 1)
+        else
+            res
+
+    /// Returns the uses dependencies of this symbol table
+    member this.UsesDependencies() =
+        let sb = StringBuilder()
+        sb.AppendLine() |> ignore
+        sb.AppendLine("SymbolTable: ") |> ignore
+        this.Root.Scope
+        |> Seq.map (fun theory -> 
+            $"{theory.Value.Name} ({theory.Value.Scope.Count})"
+        )
+        |> String.concat Environment.NewLine
+        |> sb.AppendLine
+        |> ignore
+
+        sb.AppendLine("ParsedAsts: ") |> ignore
+        this.ParsedAsts
+        |> Seq.map (fun pa -> 
+            $"[{pa.Id}, {pa.Sorting.TopologicalSorting}, {pa.Sorting.ReferencedAsts}, {pa.Sorting.ReferencingAsts}]"
+        )
+        |> String.concat Environment.NewLine
+        |> sb.AppendLine
+        |> ignore
+
+        sb.ToString()

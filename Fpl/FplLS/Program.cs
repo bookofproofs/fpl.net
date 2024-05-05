@@ -1,7 +1,11 @@
 ﻿using FplLS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using OmniSharp.Extensions.JsonRpc;
 using OmniSharp.Extensions.LanguageServer.Server;
+using System.Diagnostics;
 using static FplInterpreterTypes;
 
 namespace FplLS
@@ -34,6 +38,10 @@ namespace FplLS
 
         static async Task Main()
         {
+            ParsedAstList _parsedAstsList = [];
+
+            var st = new SymbolTable(_parsedAstsList, false);
+
             var server = await LanguageServer.From(options =>
                 options
                     .WithInput(Console.OpenStandardInput())
@@ -53,7 +61,7 @@ namespace FplLS
                             var diagnosticsHandler = serviceProvider.GetService<DiagnosticsHandler>();
 
                             // Hook up diagnostics
-                            bufferManager.BufferUpdated += (__, x) => diagnosticsHandler.PublishDiagnostics(FplSources.EscapedUri(x.Uri.AbsoluteUri), bufferManager.GetBuffer(x.Uri));
+                            bufferManager.BufferUpdated += (__, x) => diagnosticsHandler.PublishDiagnostics(st, FplSources.EscapedUri(x.Uri.AbsoluteUri), bufferManager.GetBuffer(x.Uri));
 
                             return Task.CompletedTask;
                         }
@@ -62,7 +70,10 @@ namespace FplLS
                             throw new Exception("Failed to cast s to LanguageServer");
                         }
                     })
-                );
+                    .OnRequest<JToken, string>("getTreeData", (request) =>
+                    {
+                        return Task.FromResult(st.ToJson());
+                    }));
 
             await server.WaitForExit;
         }

@@ -14,10 +14,16 @@ type TestFplValue() =
         FplParser.parserDiagnostics.Clear()
         let r = FplValue.CreateRoot()
         Assert.AreEqual (FplBlockType.Root, r.BlockType)
+        let testCreateFactory fplBlockType = 
+            if fplBlockType = FplBlockType.Object then
+                ("obj", FplValue.CreateObject(Position("",0,1,1),Position("",0,1,1)))
+                
+            else
+                ("", FplValue.CreateFplValue((Position("",0,1,1),Position("",0,1,1)), fplBlockType, r))
         let testFactory fplBlockType fplType =
-            let fv = FplValue.CreateFplValue((Position("",0,1,1),Position("",0,1,1)), fplBlockType, r)
+            let name, fv = testCreateFactory fplBlockType
             Assert.AreEqual (fplBlockType, fv.BlockType)
-            Assert.AreEqual ("", fv.Name)
+            Assert.AreEqual (name, fv.Name)
             Assert.AreEqual ("", fv.FplRepresentation)
             Assert.AreEqual ([], fv.TypeSignature)
             Assert.AreEqual (fplType, fv.EvaluationType)
@@ -44,6 +50,7 @@ type TestFplValue() =
         testFactory FplBlockType.MandatoryPredicate FplType.Predicate
         testFactory FplBlockType.OptionalPredicate FplType.Predicate
         testFactory FplBlockType.Class FplType.Object 
+        testFactory FplBlockType.Object FplType.Object 
 
 
     [<DataRow("inference TestId() {pre: true con: true};", "TestId()", "TestId ( )")>]

@@ -1,4 +1,5 @@
 module CommonTestHelpers
+open System
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
@@ -30,7 +31,9 @@ let prepareFplCode(fplCode:string, delete:bool) =
         None
     else
         let parsedAsts = ParsedAstList()
-        Some (FplInterpreter.fplInterpreter fplCode uri fplLibUrl parsedAsts true)
+        let st = SymbolTable(parsedAsts, true)
+        FplInterpreter.fplInterpreter st fplCode uri fplLibUrl |> ignore
+        Some (st)
 
 let runTestHelper fplCode (code:ErrDiagnostics.DiagnosticCode) expected =
     printf "Trying %s" code.Message
@@ -38,5 +41,10 @@ let runTestHelper fplCode (code:ErrDiagnostics.DiagnosticCode) expected =
     let result = filterByErrorCode FplParser.parserDiagnostics code.Code
     if result.Length > 0 then 
         printf "Result %s" result.Head.Message
+    let syntaxErrorFound = 
+        result
+        |> Seq.exists(fun d -> d.Emitter = DiagnosticEmitter.FplParser)
+    if syntaxErrorFound then 
+        raise (ArgumentException("Syntax error found."))
     Assert.AreEqual(expected, result.Length)
     prepareFplCode("", true) |> ignore

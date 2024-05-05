@@ -1,4 +1,5 @@
 ﻿module FplGrammarTypes
+open System.Collections.Generic
 open FParsec
 
 /// our FPL grammar needs starting and ending position for each Ast node since we
@@ -6,11 +7,28 @@ open FParsec
 /// parsing was done
 type Positions = Position * Position 
 
+type Token =
+    { Name:string
+      StartPos: Position
+      EndPos:Position
+    }
+
+type Tokenizer() =
+    let _parsedTokens = new System.Collections.Generic.List<Token>(); 
+    
+    /// Increases the context of this tokenizer
+    member this.Push(token:Token) = 
+        _parsedTokens.Add(token)
+
+    /// The list of successfully parsed tokens
+    member this.ParsedTokens = _parsedTokens
+
+
 
 type Ast = 
     // Literals
-    | Star 
-    | Dot
+    | Star of Positions * unit
+    | Dot of Positions * unit
     // Identifiers
     | Digits of string
     | ExtDigits of Positions * Ast
@@ -35,15 +53,15 @@ type Ast =
     | BrackedCoordList of Positions * Ast list
     | ReferencingIdentifier of Positions * (Ast * Ast list)
     // Types
-    | One 
+    | One of Positions * unit
     | Many of Positions * unit
     | Many1 of Positions * unit  
     | TemplateType of Positions * string
-    | ObjectType 
+    | ObjectType of Positions * unit
     | ClassIdentifier of Positions * Ast
-    | PredicateType 
-    | FunctionalTermType 
-    | IndexType
+    | PredicateType of Positions * unit
+    | FunctionalTermType of Positions * unit
+    | IndexType of Positions * unit
     | VariableType of Positions * Ast 
     | BracketedCoordsInType of Positions * Ast list 
     | InheritedClassType of Positions * Ast
@@ -98,7 +116,7 @@ type Ast =
     | ForIn of Positions * ((Ast * Ast) * Ast list)
     | Return of Positions * Ast
     // FPL Blocks
-    | Intrinsic
+    | Intrinsic of Positions * unit
     | VarDeclBlock of Positions * Ast list 
     | StatementList of Positions * Ast list
     | PremiseConclusionBlock of Positions * ((Ast list option * Ast) * Ast)
@@ -117,8 +135,8 @@ type Ast =
     | Axiom of Positions * (Ast * (Ast list option * Ast))
     | ParentConstructorCall of Positions * (Ast * Ast)
     | Constructor of Positions * (Ast * (Ast list option * Ast)) 
-    | Property
-    | Optional 
+    | Property of Positions * unit
+    | Optional of Positions * unit
     | PredicateInstance of Positions * ((Ast option * Ast) * Ast) 
     | FunctionalTermInstance of Positions * (Ast * Ast)
     | PropertyBlock of Positions * (Ast * Ast)

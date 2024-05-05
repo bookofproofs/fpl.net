@@ -16,7 +16,7 @@ type TestErrDiagnostics() =
     [<TestMethod>]
     member this.TestTryParseExtension000Diag () =
         ad.Clear()
-        let result = fplParser (System.Uri("file://x")) """
+        let result = fplParser """
         x
         y 
 ;"""
@@ -29,7 +29,7 @@ type TestErrDiagnostics() =
     [<TestMethod>]
     member this.TestTryParseExtension001Diag () =
         ad.Clear()
-        let result = fplParser (System.Uri("file://x")) """
+        let result = fplParser """
     :
         y
 ;"""
@@ -42,7 +42,7 @@ type TestErrDiagnostics() =
     [<TestMethod>]
     member this.TestTryParseExtension002Diag () =
         ad.Clear()
-        let result = fplParser (System.Uri("file://x")) """
+        let result = fplParser """
     :ext
         y
 ;"""
@@ -55,7 +55,7 @@ type TestErrDiagnostics() =
     [<TestMethod>]
     member this.TestTryParseExtension003Diag () =
         ad.Clear()
-        let result = fplParser (System.Uri("file://x")) """
+        let result = fplParser """
     :ext T
         y
 ;"""
@@ -68,7 +68,7 @@ type TestErrDiagnostics() =
     [<TestMethod>]
     member this.TestTryParseExtension004Diag () =
         ad.Clear()
-        let result = fplParser (System.Uri("file://x")) """
+        let result = fplParser """
     :ext T:
         y
 ;"""
@@ -81,7 +81,7 @@ type TestErrDiagnostics() =
     [<TestMethod>]
     member this.TestTryParseExtension005Diag () =
         ad.Clear()
-        let result = fplParser (System.Uri("file://x")) """
+        let result = fplParser """
     :ext T: /d/
         y
 ;"""
@@ -94,7 +94,7 @@ type TestErrDiagnostics() =
     [<TestMethod>]
     member this.TestTryParseExtension006Diag () =
         ad.Clear()
-        let result = fplParser (System.Uri("file://x")) """
+        let result = fplParser """
     :ext T: /d/ :end
         y
 ;"""
@@ -111,7 +111,7 @@ type TestErrDiagnostics() =
     uses
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -125,7 +125,7 @@ type TestErrDiagnostics() =
     uses T  
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -139,7 +139,7 @@ type TestErrDiagnostics() =
     uses   R a
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -153,7 +153,7 @@ type TestErrDiagnostics() =
     uses   R alias
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -167,7 +167,7 @@ type TestErrDiagnostics() =
     uses   R alias %
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -181,7 +181,7 @@ type TestErrDiagnostics() =
     uses   R alias s
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -195,7 +195,7 @@ type TestErrDiagnostics() =
     uses   R alias I
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(1, ad.CountDiagnostics)
@@ -208,7 +208,7 @@ type TestErrDiagnostics() =
     uses   a alias I 
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(2, ad.CountDiagnostics)
@@ -221,7 +221,7 @@ type TestErrDiagnostics() =
     i
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -235,7 +235,7 @@ type TestErrDiagnostics() =
     inf
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -249,7 +249,7 @@ type TestErrDiagnostics() =
     inf T
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -265,7 +265,7 @@ type TestErrDiagnostics() =
         y
     }
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -281,7 +281,7 @@ type TestErrDiagnostics() =
         y
     }
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -297,7 +297,7 @@ type TestErrDiagnostics() =
         y
     }
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -314,7 +314,7 @@ type TestErrDiagnostics() =
         y
     }
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -331,7 +331,7 @@ type TestErrDiagnostics() =
         y
     }
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -347,7 +347,7 @@ type TestErrDiagnostics() =
         y
     }
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -362,7 +362,7 @@ type TestErrDiagnostics() =
         D() { pre: true con: true }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -377,7 +377,7 @@ type TestErrDiagnostics() =
         D() { pre: true con: true } }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -390,7 +390,7 @@ type TestErrDiagnostics() =
         let input = """
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -403,7 +403,7 @@ type TestErrDiagnostics() =
         let input = """
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -416,7 +416,7 @@ type TestErrDiagnostics() =
         let input = """
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -429,7 +429,7 @@ type TestErrDiagnostics() =
         let input = """    
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -442,7 +442,7 @@ type TestErrDiagnostics() =
         let input = """
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -455,7 +455,7 @@ type TestErrDiagnostics() =
         let input = """
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -468,7 +468,7 @@ type TestErrDiagnostics() =
         let input = """
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -483,7 +483,7 @@ type TestErrDiagnostics() =
         a
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -497,7 +497,7 @@ type TestErrDiagnostics() =
         ax
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -512,7 +512,7 @@ type TestErrDiagnostics() =
         ax T
         y    
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -526,7 +526,7 @@ type TestErrDiagnostics() =
         ax T (
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -541,7 +541,7 @@ type TestErrDiagnostics() =
         ax T ()
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -558,7 +558,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -575,7 +575,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -592,7 +592,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -606,7 +606,7 @@ type TestErrDiagnostics() =
         def func
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -620,7 +620,7 @@ type TestErrDiagnostics() =
         def func A
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -634,7 +634,7 @@ type TestErrDiagnostics() =
         def func A (
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -648,7 +648,7 @@ type TestErrDiagnostics() =
         def func A ()
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -662,7 +662,7 @@ type TestErrDiagnostics() =
         def func A () ->
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -676,7 +676,7 @@ type TestErrDiagnostics() =
         def func A () -> T
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -691,7 +691,7 @@ type TestErrDiagnostics() =
         {
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -707,7 +707,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -723,7 +723,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -739,7 +739,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -755,7 +755,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -773,7 +773,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -792,7 +792,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -811,7 +811,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -829,7 +829,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -847,7 +847,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -865,7 +865,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -883,7 +883,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -901,7 +901,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -919,7 +919,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -937,7 +937,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -955,7 +955,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -973,7 +973,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -991,7 +991,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1009,7 +1009,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1027,7 +1027,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1045,12 +1045,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN001"))
+        Assert.IsTrue(actualDiag.Contains("INF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDecl003i003Diag () =
@@ -1063,7 +1063,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1083,12 +1083,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope001Diag () =
@@ -1102,7 +1102,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
         Assert.AreEqual(3, ad.CountDiagnostics)
@@ -1120,7 +1120,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1139,7 +1139,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1158,7 +1158,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1177,7 +1177,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1196,7 +1196,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1215,7 +1215,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1234,7 +1234,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1253,7 +1253,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1272,7 +1272,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1291,7 +1291,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1310,7 +1310,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1329,7 +1329,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1348,12 +1348,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("INF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScope003i002Diag () =
@@ -1369,7 +1369,7 @@ type TestErrDiagnostics() =
         y
     }
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1389,7 +1389,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1407,12 +1407,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred002Diag () =
@@ -1425,12 +1425,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(5, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003aDiag () =
@@ -1444,12 +1444,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(5, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003_Diag () =
@@ -1462,12 +1462,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003bDiag () =
@@ -1480,12 +1480,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(5, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
 
     [<TestMethod>]
@@ -1500,7 +1500,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1518,12 +1518,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("VAR000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003fDiag () =
@@ -1536,12 +1536,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(2, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(3, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("VAR000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003gDiag () =
@@ -1554,12 +1554,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(7, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("VAR000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003hDiag () =
@@ -1572,7 +1572,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1590,7 +1590,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1608,7 +1608,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1626,12 +1626,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003i002Diag () =
@@ -1644,12 +1644,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(1, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopePred003i003Diag () =
@@ -1662,12 +1662,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(5, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("TYD000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass001Diag () =
@@ -1679,7 +1679,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1696,7 +1696,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1713,7 +1713,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1730,12 +1730,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003bDiag () =
@@ -1747,12 +1747,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003cDiag () =
@@ -1764,12 +1764,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003dDiag () =
@@ -1781,12 +1781,12 @@ type TestErrDiagnostics() =
         }
     }
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003eDiag () =
@@ -1798,12 +1798,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003fDiag () =
@@ -1815,12 +1815,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003gDiag () =
@@ -1832,12 +1832,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003hDiag () =
@@ -1849,12 +1849,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003iDiag () =
@@ -1866,12 +1866,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i000Diag () =
@@ -1883,12 +1883,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i001Diag () =
@@ -1900,12 +1900,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i002Diag () =
@@ -1917,12 +1917,12 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual(4, ad.CountDiagnostics)
-        Assert.IsTrue(actualDiag.Contains("SYN000"))
+        Assert.AreEqual(2, ad.CountDiagnostics)
+        Assert.IsTrue(actualDiag.Contains("DEF000"))
 
     [<TestMethod>]
     member this.TestTryParseVarDeclInScopeClass003i003Diag () =
@@ -1934,7 +1934,7 @@ type TestErrDiagnostics() =
         }
         y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1948,7 +1948,7 @@ type TestErrDiagnostics() =
         def cl
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1962,7 +1962,7 @@ type TestErrDiagnostics() =
         def cl x
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1976,7 +1976,7 @@ type TestErrDiagnostics() =
         def cl .
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -1990,7 +1990,7 @@ type TestErrDiagnostics() =
         def cl ,
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2004,7 +2004,7 @@ type TestErrDiagnostics() =
         def cl A
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2018,7 +2018,7 @@ type TestErrDiagnostics() =
         def cl A #
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2032,7 +2032,7 @@ type TestErrDiagnostics() =
         def cl A -
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2046,7 +2046,7 @@ type TestErrDiagnostics() =
         def cl A:
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2060,7 +2060,7 @@ type TestErrDiagnostics() =
         def cl A:@
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2074,7 +2074,7 @@ type TestErrDiagnostics() =
         def cl A:obj
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2089,7 +2089,7 @@ type TestErrDiagnostics() =
         {
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2106,7 +2106,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2123,7 +2123,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2138,7 +2138,7 @@ type TestErrDiagnostics() =
         def pred
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2153,7 +2153,7 @@ type TestErrDiagnostics() =
         def pred x
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2168,7 +2168,7 @@ type TestErrDiagnostics() =
         def pred .
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2183,7 +2183,7 @@ type TestErrDiagnostics() =
         def pred ,
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2198,7 +2198,7 @@ type TestErrDiagnostics() =
         def pred A
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2213,7 +2213,7 @@ type TestErrDiagnostics() =
         def pred A #
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2228,7 +2228,7 @@ type TestErrDiagnostics() =
         def pred A -
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2243,7 +2243,7 @@ type TestErrDiagnostics() =
         def pred A:
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2258,7 +2258,7 @@ type TestErrDiagnostics() =
         def pred A(
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2273,7 +2273,7 @@ type TestErrDiagnostics() =
         def pred A(#
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2288,7 +2288,7 @@ type TestErrDiagnostics() =
         def pred A()
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2304,7 +2304,7 @@ type TestErrDiagnostics() =
         {
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2321,7 +2321,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2339,7 +2339,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2357,7 +2357,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2375,7 +2375,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2393,7 +2393,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2412,7 +2412,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2430,7 +2430,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2451,7 +2451,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2472,7 +2472,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2493,7 +2493,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
@@ -2514,7 +2514,7 @@ type TestErrDiagnostics() =
         }
     y
 ;"""
-        let result = fplParser (System.Uri("file://x")) input
+        let result = fplParser input
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag

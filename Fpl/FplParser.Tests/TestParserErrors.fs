@@ -17,10 +17,15 @@ type TestParserErrors() =
         let code = SYN000
         printf "Trying %s" code.Message
         let input = """
-        xxx
+        def pred T()
+        {
+            dec ~x:tpl[! ;
+            true
+        }
+        y
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -31,7 +36,7 @@ type TestParserErrors() =
         let input = """
         ;
         c"""
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -43,7 +48,7 @@ type TestParserErrors() =
     y
 ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -54,7 +59,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -68,7 +73,7 @@ type TestParserErrors() =
         axiom x() { true }
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(2, result.Length)
 
@@ -82,7 +87,7 @@ type TestParserErrors() =
         thm x() { true }
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(2, result.Length)
 
@@ -93,7 +98,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -107,7 +112,7 @@ type TestParserErrors() =
         lem x() { true } 
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(2, result.Length)
 
@@ -118,7 +123,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -132,7 +137,7 @@ type TestParserErrors() =
         conj x() { true } 
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(2, result.Length)
 
@@ -141,16 +146,14 @@ type TestParserErrors() =
         let code = VAR000
         printf "Trying %s" code.Message
         let input = """
-        def pred A() 
+        def pred T()
         {
-            dec
-                x := 
-            ;
+            dec~x:ind: ;
             true
         }
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -161,7 +164,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -172,7 +175,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -181,7 +184,7 @@ type TestParserErrors() =
         let code = INF000
         printf "Trying %s" code.Message
         let input = """inf D(x) {pre:true con:true};"""
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -192,7 +195,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -203,7 +206,7 @@ type TestParserErrors() =
         let input = """uses   R alias %
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -214,7 +217,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -225,7 +228,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -235,7 +238,7 @@ type TestParserErrors() =
         let code = AGI000
         printf "Trying %s" code.Message
         let input = """def pred T() { 1. |- :: };"""
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -256,7 +259,7 @@ type TestParserErrors() =
                 true
              };
             """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -267,7 +270,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -277,7 +280,7 @@ type TestParserErrors() =
         let code = ASS000
         printf "Trying %s" code.Message
         let input = """proof T$1 { 1. |- assume :: };"""
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -288,7 +291,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -299,7 +302,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -310,7 +313,7 @@ type TestParserErrors() =
         let input = """
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -321,7 +324,7 @@ type TestParserErrors() =
         let input = """ conjecture Test() {#}
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -330,9 +333,10 @@ type TestParserErrors() =
         let code = TRL000
         printf "Trying %s" code.Message
         let input = """
+        
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 
@@ -341,9 +345,15 @@ type TestParserErrors() =
         let code = TYD000
         printf "Trying %s" code.Message
         let input = """
+        inf D()
+        {
+            dec ~x ;
+            pre:true
+            con:true
+        }
         ;
         """
-        let ast = fplParser (System.Uri("file://x")) input
+        let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual(1, result.Length)
 

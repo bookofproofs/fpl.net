@@ -6,12 +6,12 @@ namespace FplLS
     {
         public static void LogException(ILanguageServer languageServer, Exception ex, string context)
         {
-            languageServer.Window.LogInfo(pre + context + ": " + ExtractErrorMsg(ex).Substring(2));
+            languageServer.Window.LogInfo(Pre + context + ": " + ExtractErrorMsg(ex).Substring(2));
         }
 
         public static void LogMsg(ILanguageServer languageServer, string message, string context) 
         {
-            languageServer.Window.LogInfo(pre + context + ": " + message);
+            languageServer.Window.LogInfo(Pre + context + ": " + message);
         }
 
         private static string ExtractErrorMsg(Exception ex)
@@ -26,6 +26,6 @@ namespace FplLS
             }
         }
 
-        public static string pre => "######### ";
+        public static string Pre => "######### ";
     }
 }

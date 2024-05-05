@@ -6,6 +6,7 @@ open FParsec
 open ErrDiagnostics
 open FplGrammarTypes
 open FplInterpreterTypes
+open FplInterpreterDiagnosticsEmitter
 
 let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str = 
     if str <> "" && not (FplValue.IsVariable(fplValue)) then
@@ -57,7 +58,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
             | None -> ()
         | _ -> ()
 
-let eval_units (st: SymbolTable) unitType = 
+let eval_units (st: SymbolTable) unitType pos1 pos2 = 
     match st.CurrentContext with
     | EvalContext.NamedVarDeclarationInBlock fplValue 
     | EvalContext.InPropertySignature fplValue 
@@ -70,6 +71,9 @@ let eval_units (st: SymbolTable) unitType =
                 adjustSignature st fplValue $"+{unitType}"
             else
                 adjustSignature st fplValue unitType
+                checkID009_ID010_ID011_Diagnostics st fplValue unitType pos1 pos2
+    | EvalContext.InConstructorBlock fplValue ->
+        checkID012Diagnostics st fplValue unitType pos1 pos2
     | _ -> ()
 
 let eval_string (st: SymbolTable) s = ()
@@ -87,181 +91,48 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
-let tryAddBlock (uri:System.Uri) (fplValue:FplValue) =
-    let emitVAR01orID001diagnostics (fplValue:FplValue) conflict = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = 
-                if (FplValue.IsVariable(fplValue)) then 
-                    VAR01 (fplValue.Name, conflict)
-                else
-                    ID001 (fplValue.Name, conflict)
-            Diagnostic.Alternatives = None 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitVAR02diagnostics (fplValue:FplValue) conflict = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = VAR02 (fplValue.Name, conflict)
-            Diagnostic.Alternatives = None 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitVAR03diagnostics (fplValue:FplValue) conflict = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = VAR03 (fplValue.Name, conflict)
-            Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitVAR03diagnosticsForCorollarysSignatureVariale (fplValue:FplValue) = 
-        if FplValue.IsCorollary(fplValue) then
-            for kv in fplValue.Scope do
-                let res = FplValue.CorollaryVariableInOuterScope(kv.Value) 
-                match res with
-                | ScopeSearchResult.FoundConflict conflict ->
-                    emitVAR03diagnostics kv.Value conflict
-                | _ -> ()
-
-    let emitID002diagnostics (fplValue:FplValue) incorrectBlockType = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID002 (fplValue.Name, incorrectBlockType)
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitID005diagnostics (fplValue:FplValue) incorrectBlockType = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID005 (fplValue.Name, incorrectBlockType)
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitID003diagnostics (fplValue:FplValue) = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID003 fplValue.Name
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitID006diagnostics (fplValue:FplValue) = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID006 fplValue.Name
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitID004diagnostics (fplValue:FplValue) listOfCandidates = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID004 (fplValue.Name, listOfCandidates)
-            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-    let emitID007diagnostics (fplValue:FplValue) listOfCandidates = 
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID007 (fplValue.Name, listOfCandidates)
-            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+let tryAddBlock (uri:Uri) (fplValue:FplValue) =
 
     match FplValue.TryFindAssociatedBlockForProof fplValue with
-    | ScopeSearchResult.FoundCorrect parentsName -> 
+    | ScopeSearchResult.FoundAssociate parentsName -> 
         // everything is ok, change the parent of the provable from theory to the found parent 
         fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
     | ScopeSearchResult.FoundIncorrectBlock block ->
-        emitID002diagnostics fplValue block
+        emitID002diagnostics fplValue block  
     | ScopeSearchResult.NotFound ->
-        emitID003diagnostics fplValue 
+        emitID003diagnostics fplValue  
     | ScopeSearchResult.FoundMultiple listOfKandidates ->
-        emitID004diagnostics fplValue listOfKandidates
+        emitID004diagnostics fplValue listOfKandidates  
     | _ -> ()
 
     match FplValue.TryFindAssociatedBlockForCorollary fplValue with
-    | ScopeSearchResult.FoundCorrect parentsName -> 
+    | ScopeSearchResult.FoundAssociate parentsName -> 
         // everything is ok, change the parent of the provable from theory to the found parent 
         fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
-        emitVAR03diagnosticsForCorollarysSignatureVariale fplValue
+        emitVAR03diagnosticsForCorollarysSignatureVariale fplValue  
     | ScopeSearchResult.FoundIncorrectBlock block ->
-        emitID005diagnostics fplValue block
+        emitID005diagnostics fplValue block  
     | ScopeSearchResult.NotFound ->
-        emitID006diagnostics fplValue 
+        emitID006diagnostics fplValue  
     | ScopeSearchResult.FoundMultiple listOfKandidates ->
-        emitID007diagnostics fplValue listOfKandidates
+        emitID007diagnostics fplValue listOfKandidates  
     | _ -> ()
 
-    match FplValue.InScopeOfParent(fplValue) with
-    | ScopeSearchResult.FoundConflict conflict -> 
-        emitVAR01orID001diagnostics fplValue conflict
+    match FplValue.InScopeOfParent(fplValue) fplValue.Name with
+    | ScopeSearchResult.Found conflict -> 
+        emitVAR01orID001diagnostics fplValue conflict 
     | _ -> 
         match FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) with
-        | ScopeSearchResult.FoundConflict other ->
-            emitVAR02diagnostics fplValue other
+        | ScopeSearchResult.Found other ->
+            emitVAR02diagnostics fplValue other  
         | _ -> 
             match FplValue.ProofVariableInOuterScope(fplValue) with
-            | ScopeSearchResult.FoundConflict other ->
-                emitVAR03diagnostics fplValue other
+            | ScopeSearchResult.Found other ->
+                emitVAR03diagnostics fplValue other 
             | _ -> 
                 fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
                 fplValue.NameIsFinal <- true
-
-let tryAddVariadicVariables (uri:System.Uri) numberOfVariadicVars (startPos:Position) (endPos:Position) =
-    if numberOfVariadicVars > 1 then
-        let diagnostic = { 
-            Diagnostic.Uri = uri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = startPos
-            Diagnostic.EndPos = endPos
-            Diagnostic.Code = VAR00 
-            Diagnostic.Alternatives = None 
-        }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -278,7 +149,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         | EvalContext.InPropertySignature fplValue
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
-            tryAddVariadicVariables uri fplValue.AuxiliaryInfo pos1 pos2
+            tryAddVariadicVariables fplValue.AuxiliaryInfo pos1 pos2
             // adjust type of variables to variadic variables, if their type has not yet been established
             fplValue.Scope
             |> Seq.filter (fun varKeyValue -> FplValue.IsVariable(varKeyValue.Value) && varKeyValue.Value.TypeSignature = [])
@@ -298,23 +169,23 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
 
     match ast with
     // units: | Star
-    | Ast.IndexType -> 
+    | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
-        eval_units st "ind"
+        eval_units st "ind" pos1 pos2 
         correctFplTypeOfFunctionalTerms FplType.Index
         st.EvalPop() |> ignore
-    | Ast.ObjectType -> 
+    | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
-        eval_units st "obj"
+        eval_units st "obj" pos1 pos2 
         correctFplTypeOfFunctionalTerms FplType.Object
         st.EvalPop()
-    | Ast.PredicateType -> 
+    | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
-        eval_units st "pred"
+        eval_units st "pred" pos1 pos2 
         st.EvalPop()
-    | Ast.FunctionalTermType -> 
+    | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
-        eval_units st "func"  
+        eval_units st "func" pos1 pos2  
         correctFplTypeOfFunctionalTerms FplType.FunctionalTerm
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
@@ -325,33 +196,34 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPush("Many1")
         evalMany st FplBlockType.VariadicVariableMany1 pos1 pos2
         st.EvalPop()
-    | Ast.One -> 
+    | Ast.One((pos1, pos2),()) ->
         st.EvalPush("One")
-        eval_units st ""
+        eval_units st "" pos1 pos2  
         st.EvalPop()
-    | Ast.Star -> 
+    | Ast.Star((pos1, pos2),()) ->
         st.EvalPush("Star")
-        eval_units st ""
+        eval_units st "" pos1 pos2  
         st.EvalPop()
-    | Ast.Dot -> 
+    | Ast.Dot((pos1, pos2),()) ->
         st.EvalPush("Dot")
-        eval_units st ""
+        eval_units st "" pos1 pos2  
         st.EvalPop()
-    | Ast.Intrinsic -> 
+    | Ast.Intrinsic((pos1, pos2),()) -> 
         st.EvalPush("Intrinsic")
-        eval_units st ""
+        eval_units st "" pos1 pos2  
         st.EvalPop()
-    | Ast.Property -> 
+    | Ast.Property((pos1, pos2),()) -> 
         st.EvalPush("Property")
-        eval_units st ""
+        eval_units st "" pos1 pos2  
         st.EvalPop()
-    | Ast.Optional -> 
+    | Ast.Optional((pos1, pos2),()) -> 
         st.EvalPush("Optional")
-        eval_units st ""
+        eval_units st "" pos1 pos2  
         st.EvalPop()
-    | Ast.Error ->   
+    | Ast.Error  ->   
         st.EvalPush("Error")
-        eval_units st ""
+        let pos = Position(uri.AbsolutePath,0,1,1)
+        eval_units st "" pos pos
         st.EvalPop()
     // strings: | Digits of string
     | Ast.Digits s -> 
@@ -595,13 +467,14 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
     // | NamespaceIdentifier of Positions * Ast list
     | Ast.PredicateIdentifier((pos1, pos2), asts) ->
         st.EvalPush("PredicateIdentifier")
+
         let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
         match st.CurrentContext with
         | EvalContext.InTheory fplValue
         | EvalContext.NamedVarDeclarationInBlock fplValue
         | EvalContext.InPropertySignature fplValue 
-        | EvalContext.InConstructorSignature fplValue
+        | EvalContext.InConstructorSignature fplValue 
         | EvalContext.InSignature fplValue -> 
             if (FplValue.IsVariadicVariableMany(fplValue)) then 
                 adjustSignature st fplValue ("*" + identifier)
@@ -610,6 +483,10 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             else
                 adjustSignature st fplValue identifier
             correctFplTypeOfFunctionalTerms FplType.Object
+            checkID008Diagnostics fplValue pos1 pos2
+            checkID009_ID010_ID011_Diagnostics st fplValue identifier pos1 pos2
+        | EvalContext.InConstructorBlock fplValue ->
+            checkID012Diagnostics st fplValue identifier pos1 pos2
         | _ -> ()
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), asts) ->
@@ -952,10 +829,10 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         eval uri st predInstanceBlockAst
         st.CurrentContext <- oldContext
         st.EvalPop()
-    | Ast.ParentConstructorCall((pos1, pos2), (ast1, ast2)) ->
+    | Ast.ParentConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
         st.EvalPush("ParentConstructorCall")
-        eval uri st ast1
-        eval uri st ast2
+        eval uri st inheritedClassTypeAst
+        eval uri st argumentTupleAst
         st.EvalPop()
     | Ast.JustifiedArgument((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("JustifiedArgument")
@@ -1132,7 +1009,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
             let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Constructor, classBlock)
             st.CurrentContext <- EvalContext.InConstructorSignature fplValue
             eval uri st signatureAst
-            tryAddBlock uri fplValue 
+            tryAddBlock uri fplValue
             st.CurrentContext <- EvalContext.InConstructorBlock fplValue
             match optVarDeclOrSpecListAst with
             | Some astList -> astList |> List.map (eval uri st) |> ignore
@@ -1241,18 +1118,7 @@ let rec eval (uri:System.Uri) (st: SymbolTable) ast =
         st.EvalPop()
     | ast1 ->
         let astType = ast1.GetType().Name
-
-        let diagnostic =
-            { 
-                Diagnostic.Uri = uri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = Position("", 0, 1, 1)
-                Diagnostic.EndPos = Position("", 0, 1, 1)
-                Diagnostic.Code = ID000 astType
-                Diagnostic.Alternatives = None 
-            }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+        emitID000Diagnostics uri.AbsolutePath astType
 
 
 let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =
@@ -1273,12 +1139,12 @@ let evaluateSymbolTable (uri:System.Uri) (st: SymbolTable) =
         match usesClausesEvaluatedParsedAst with
         | Some pa ->
             // evaluate the ParsedAst
-            let theoryValue = FplValue.CreateFplValue((Position("",0,1,1), Position("",0,1,1)), FplBlockType.Theory, st.Root)
+            let theoryValue = FplValue.CreateFplValue((Position(pa.Parsing.UriPath,0,1,1), Position(pa.Parsing.UriPath,0,1,1)), FplBlockType.Theory, st.Root)
             if not (st.Root.Scope.ContainsKey(pa.Id)) then
                 st.Root.Scope.Add(pa.Id, theoryValue)
             theoryValue.Name <- pa.Id
             st.CurrentContext <- EvalContext.InTheory theoryValue
-            eval uri st pa.Parsing.Ast
+            eval (FplSources.EscapedUri(pa.Parsing.UriPath)) st pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.Evaluated
             theoryValue.NameIsFinal <- true
         | None -> found <- false

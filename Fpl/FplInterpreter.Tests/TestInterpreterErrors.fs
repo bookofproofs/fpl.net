@@ -25,7 +25,8 @@ type TestInterpreterErrors() =
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
-        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true |> ignore
+        let st = SymbolTable(parsedAsts, true)
+        FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
 
@@ -40,7 +41,8 @@ type TestInterpreterErrors() =
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
-        FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true |> ignore 
+        let st = SymbolTable(parsedAsts, true)
+        FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore 
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual(1, result.Length)
 
@@ -58,7 +60,9 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some (FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts true)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP04CircularAA() =
@@ -87,7 +91,9 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some(FplInterpreter.fplInterpreter A uri fplLibUrl parsedAsts true)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP04CircularABCA() =
@@ -116,12 +122,16 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some (FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts false)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP04NonCircular() =
         this.PrepareTestNSP04NonCircular(false) |> ignore
-        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
+        let code = NSP04 ""
+        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        Assert.AreEqual(0, result.Length)
         this.PrepareTestNSP04NonCircular(true) |> ignore
 
 
@@ -139,7 +149,9 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP05() =
@@ -166,7 +178,9 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP05a() =
@@ -193,7 +207,9 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            Some(FplInterpreter.fplInterpreter input uri fplLibUrl parsedAsts true)
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
 
     [<TestMethod>]
     member this.TestNSP05CrossCheck() =
@@ -401,4 +417,65 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID007(fplCode:string, expected) =
         let code = ID007 ("", "") 
+        runTestHelper fplCode code expected
+
+    [<DataRow("def cl Test:obj {ctor TestTypo(x:Nat) {self}};", 1)>]
+    [<DataRow("def cl Test:obj {ctor TestTypo1() {self}};", 1)>]
+    [<DataRow("def cl Test:obj {ctor Test() {self}};", 0)>]
+    [<TestMethod>]
+    member this.TestID008(fplCode:string, expected) =
+        let code = ID008 ("", "") 
+        runTestHelper fplCode code expected
+
+    [<DataRow("def cl Test:obj {intr};", 0)>]
+    [<DataRow("def cl Test:Test {intr};", 1)>]
+    [<DataRow("def cl Test:Test1, Test2, Test3 {intr};", 0)>]
+    [<DataRow("def cl Test:Test1, Test2, Test3, Test {intr};", 1)>]
+    [<TestMethod>]
+    member this.TestID009(fplCode:string, expected) =
+        let code = ID009 ""
+        runTestHelper fplCode code expected
+
+    [<DataRow("def cl Test:obj {intr};", 0)>]
+    [<DataRow("def cl Test:Set {intr};", 1)>]
+    [<DataRow("def class Set: obj {intr} def cl Test:Set {intr};", 0)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet {intr};", 0)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySetTypo {intr};", 1)>]
+    [<TestMethod>]
+    member this.TestID010(fplCode:string, expected) =
+        let code = ID010 ""
+        runTestHelper fplCode code expected
+
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:B,A {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet,Set {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set, EmptySet {intr};", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:A,B {intr};", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:B {intr};", 0)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet {intr};", 0)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
+    [<DataRow("uses Fpl.Commons uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:A {intr};", 0)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:A,A {intr};", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:obj,object {intr};", 1)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:object,D,E,obj {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set,obj {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet,obj {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:obj,Set {intr};", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:obj,EmptySet {intr};", 1)>]
+    [<TestMethod>]
+    member this.TestID011(fplCode:string, expected) =
+        let code = ID011 ("","")
+        runTestHelper fplCode code expected
+
+    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); self} };", 0)>]
+    [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.C(); self} };", 1)>]
+    [<DataRow("def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
+    [<DataRow("def cl A:obj { ctor A() {dec base.B(); self} };", 1)>]
+    [<DataRow("def cl A:C { ctor A() {dec base.obj(); self} };", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); self} };", 1)>]
+    [<DataRow("uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); self} };", 0)>]
+    [<TestMethod>]
+    member this.TestID012(fplCode:string, expected) =
+        let code = ID012 ("","")
         runTestHelper fplCode code expected
