@@ -100,9 +100,13 @@ let computeMD5Checksum (input: string) =
 /// A type that encapsulates the sources found for a uses clause
 /// and provides members to filter those from the file system and those from
 /// the web.
-type FplSources(paths: string list) =
+type FplSources(paths: string list, pathToLocalRegistry:string) =
+    let _pathToLocalRegistry = pathToLocalRegistry
     /// All found paths for a uses clause, including those from the web.
     member this.Paths = paths
+
+    /// Path to local copies of the registry.
+    member this.PathToLocalRegistry = pathToLocalRegistry
 
     /// Returns all loaded FPL theories loaded by a uses clause grouped by name with lists of potential locations
     member this.Grouped 
@@ -214,7 +218,7 @@ type ParsingProperties =
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, sourcecode, the
             this.UriPath <- codeLoc
-            FplParser.parserDiagnostics.StreamName <- codeLoc
+            FplParser.parserDiagnostics.StreamName <- FplSources.EscapedUri(codeLoc).AbsolutePath
             this.Ast <- fplParser fplCode
             this.FplSourceCode <- fplCode
             this.Checksum <- checksum

@@ -65,7 +65,7 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestCreateLibSubfolder01() =
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let expected = Directory.GetCurrentDirectory()
-        let (directoryPath, libDirectoryPath) = createLibSubfolder uri
+        let (directoryPath, libDirectoryPath) = createSubfolder uri "lib"
         Assert.AreEqual(expected, directoryPath)
 
         if Directory.Exists(libDirectoryPath) then
@@ -75,7 +75,7 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestCreateLibSubfolder02() =
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let expected = Path.Combine(Directory.GetCurrentDirectory(), "lib")
-        let (directoryPath, libDirectoryPath) = createLibSubfolder uri
+        let (directoryPath, libDirectoryPath) = createSubfolder uri "lib"
         Assert.AreEqual(expected, libDirectoryPath)
 
         if Directory.Exists(libDirectoryPath) then
@@ -85,7 +85,7 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestCreateLibSubfolder03() =
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let expected = Path.Combine(Directory.GetCurrentDirectory(), "lib")
-        let (directoryPath, libDirectoryPath) = createLibSubfolder uri
+        let (directoryPath, libDirectoryPath) = createSubfolder uri "lib"
         Assert.IsTrue(Directory.Exists(libDirectoryPath))
 
         if Directory.Exists(libDirectoryPath) then
@@ -195,12 +195,12 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestFplSourcesUrls() =
-        let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"])
+        let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"],"c:\temp\repo")
         Assert.AreEqual(1, fplSources.Urls.Length)
 
     [<TestMethod>]
     member this.TestFplSourcesFiles() =
-        let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"])
+        let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"], "c:\temp\repo")
         Assert.AreEqual(2, fplSources.FilePaths.Length)
 
     member this.PrepareTestLoadAllUsesClauses01() =

@@ -1,4 +1,3 @@
-uses Fpl.SetTheory
 uses Landau *
 
 // If x = y + u then x > y ( > to b read "is greater than")
