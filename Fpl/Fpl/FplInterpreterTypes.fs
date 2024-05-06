@@ -825,7 +825,11 @@ and FplValue(name: string, blockType: FplValueType, evalType: FplType, positions
             
         clearAll this
 
- 
+type LogContext = 
+    | Start
+    | Replace
+    | End
+
 type EvalContext =
     | ContextNone
     | InTheory of FplValue
@@ -875,10 +879,9 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     let _root = FplValue.CreateRoot()
     let _debug = debug
 
-    /// Sets and gets the current evaluation context.
-    member this.CurrentContext
-        with get () = _currentContext
-        and set (value) = _currentContext <- value
+    /// Returns the current evaluation context.
+    member this.CurrentContext = _currentContext
+
     /// Returns the evaluation root node of the symbol table.
     member this.Root = _root
 
@@ -902,28 +905,18 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
             let enrichedMsg = sprintf "%s%s at context %s: %s" (String(' ',depth)) message (this.CurrentContext.Name) (this.EvalPath()) 
             _evalLog.Add(enrichedMsg)
 
-            (*
-    /// Saves the current context
-    member this.SaveContext() = 
-        _oldContext <- _context
-        this.Log("Begin")
-
-    /// Starts a new evaluation context.
-    member this.SetContext (context: EvalContext) = 
-        _context <- context
-        this.Log("Begin")
-
-    /// Replaces the current evaluation context by another one.
-    member this.ReplaceContext (context: EvalContext) = 
-        this.Log("End")
-        _context <- context
-        this.Log("Start")
-
-    /// Restores the original context
-    member this.RestorePreviousContext() = 
-        this.Log("End")
-        _context <- _oldContext 
-*)
+    member this.SetContext (context:EvalContext) (logContext:LogContext) = 
+        match logContext with
+        | LogContext.Start ->
+            _currentContext <- context
+            this.Log("Begin")
+        | LogContext.Replace ->
+            this.Log("End")
+            _currentContext <- context
+            this.Log("Start")
+        | LogContext.End -> 
+            this.Log("End")
+            _currentContext <- context 
 
     /// Returns the logged state transformation of the SymbolTable (only non-empty of debug = true).
     member this.LoggedState = 
