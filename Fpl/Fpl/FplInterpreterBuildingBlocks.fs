@@ -190,11 +190,11 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
-        evalMany st FplBlockType.VariadicVariableMany pos1 pos2
+        evalMany st FplValueType.VariadicVariableMany pos1 pos2
         st.EvalPop()
     | Ast.Many1((pos1, pos2),()) ->
         st.EvalPush("Many1")
-        evalMany st FplBlockType.VariadicVariableMany1 pos1 pos2
+        evalMany st FplValueType.VariadicVariableMany1 pos1 pos2
         st.EvalPop()
     | Ast.One((pos1, pos2),()) ->
         st.EvalPush("One")
@@ -288,7 +288,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
-            let varValue = FplValue.CreateFplValue((pos1,pos2), FplBlockType.Variable, fplValue)
+            let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fplValue)
             varValue.Name <- s
             varValue.NameEndPos <- pos2
             tryAddBlock varValue 
@@ -374,7 +374,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.RuleOfInference, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.RuleOfInference, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st signatureAst
             st.CurrentContext <- EvalContext.InBlock fplValue
@@ -686,7 +686,7 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InBlock fplBlock -> 
             eval st keywordPropertyAst
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.MandatoryPredicate, fplBlock)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.MandatoryPredicate, fplBlock)
             st.CurrentContext <- EvalContext.InPropertySignature fplValue
             eval st definitionPropertyAst
             tryAddBlock fplValue 
@@ -758,16 +758,16 @@ let rec eval (st: SymbolTable) ast =
             match optAst with
             | Some ast1 -> 
                 eval st ast1
-                fplValue.BlockType <- FplBlockType.OptionalFunctionalTerm
+                fplValue.BlockType <- FplValueType.OptionalFunctionalTerm
             | None -> 
-                fplValue.BlockType <- FplBlockType.MandatoryFunctionalTerm
+                fplValue.BlockType <- FplValueType.MandatoryFunctionalTerm
             adjustSignature st fplValue "->"
             fplValue.NameEndPos <- pos2
         | EvalContext.InSignature fplValue -> 
             match optAst with
             | Some ast1 -> 
                 eval st ast1
-                fplValue.BlockType <- FplBlockType.FunctionalTerm
+                fplValue.BlockType <- FplValueType.FunctionalTerm
             | None -> ()
             adjustSignature st fplValue "->"
             fplValue.NameEndPos <- pos2
@@ -822,9 +822,9 @@ let rec eval (st: SymbolTable) ast =
             match optAst with
             | Some ast1 -> 
                 eval st ast1
-                fplValue.BlockType <- FplBlockType.OptionalPredicate
+                fplValue.BlockType <- FplValueType.OptionalPredicate
             | None -> 
-                fplValue.BlockType <- FplBlockType.MandatoryPredicate
+                fplValue.BlockType <- FplValueType.MandatoryPredicate
         | _ -> ()
         eval st predInstanceBlockAst
         st.CurrentContext <- oldContext
@@ -864,7 +864,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Theorem, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Theorem, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st signatureAst
             tryAddBlock fplValue 
@@ -878,7 +878,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Lemma, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Lemma, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st signatureAst
             tryAddBlock fplValue 
@@ -892,7 +892,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Proposition, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Proposition, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st signatureAst
             tryAddBlock fplValue 
@@ -906,7 +906,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Conjecture, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Conjecture, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st signatureAst
             tryAddBlock fplValue 
@@ -920,7 +920,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Axiom, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Axiom, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st signatureAst
             tryAddBlock fplValue 
@@ -940,7 +940,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Corollary, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Corollary, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st corollarySignatureAst
             tryAddBlock fplValue 
@@ -1006,7 +1006,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InBlock classBlock -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Constructor, classBlock)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Constructor, classBlock)
             st.CurrentContext <- EvalContext.InConstructorSignature fplValue
             eval st signatureAst
             tryAddBlock fplValue
@@ -1047,7 +1047,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Predicate, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Predicate, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st signatureWithUserDefinedStringAst
             tryAddBlock fplValue 
@@ -1063,7 +1063,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.FunctionalTerm, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.FunctionalTerm, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st functionalTermSignatureAst
             tryAddBlock fplValue 
@@ -1081,7 +1081,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Class, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Class, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st predicateIdentifierAst
             tryAddBlock fplValue 
@@ -1106,7 +1106,7 @@ let rec eval (st: SymbolTable) ast =
         let oldContext = st.CurrentContext
         match st.CurrentContext with
         | EvalContext.InTheory theoryValue -> 
-            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Proof, theoryValue)
+            let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Proof, theoryValue)
             st.CurrentContext <- EvalContext.InSignature fplValue
             eval st referencingIdentifierAst
             tryAddBlock fplValue 
@@ -1139,7 +1139,7 @@ let evaluateSymbolTable (uri:System.Uri) (st: SymbolTable) =
         match usesClausesEvaluatedParsedAst with
         | Some pa ->
             // evaluate the ParsedAst
-            let theoryValue = FplValue.CreateFplValue((Position(pa.Parsing.UriPath,0,1,1), Position(pa.Parsing.UriPath,0,1,1)), FplBlockType.Theory, st.Root)
+            let theoryValue = FplValue.CreateFplValue((Position(pa.Parsing.UriPath,0,1,1), Position(pa.Parsing.UriPath,0,1,1)), FplValueType.Theory, st.Root)
             if not (st.Root.Scope.ContainsKey(pa.Id)) then
                 st.Root.Scope.Add(pa.Id, theoryValue)
             theoryValue.Name <- pa.Id

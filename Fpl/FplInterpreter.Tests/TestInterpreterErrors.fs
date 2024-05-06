@@ -131,7 +131,7 @@ type TestInterpreterErrors() =
         this.PrepareTestNSP04NonCircular(false) |> ignore
         let code = NSP04 ""
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(0, result.Length)
+        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
         this.PrepareTestNSP04NonCircular(true) |> ignore
 
 
