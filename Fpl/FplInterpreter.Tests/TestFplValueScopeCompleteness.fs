@@ -7,72 +7,44 @@ type TestFplValueScopeCompleteness() =
 
     [<TestMethod>]
     member this.TestBlocks() =
-        try
-            CommonFplValueTestCases.ScopeBlocks() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
+        CommonFplValueTestCases.ScopeBlocks() |> ignore
 
     [<TestMethod>]
     member this.TestConstructors() =
-        try
-            CommonFplValueTestCases.ScopeConstructors() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
+        CommonFplValueTestCases.ScopeConstructors() |> ignore
 
     [<TestMethod>]
     member this.TestProofsAndCorollaries() =
-        try
-            CommonFplValueTestCases.ScopeProofsAndCorollaries() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
+        CommonFplValueTestCases.ScopeProofsAndCorollaries() |> ignore
 
     [<TestMethod>]
     member this.TestProperties() =
-        try
-            CommonFplValueTestCases.ScopeProperties() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
+        CommonFplValueTestCases.ScopeProperties() |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInBlock() =
-        try
-            CommonFplValueTestCases.ScopeVariablesInBlock() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
+        CommonFplValueTestCases.ScopeVariablesInBlock() |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInBlockWithVariadic() =
-        try
-            CommonFplValueTestCases.ScopeVariablesInBlockVariadic() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
+        CommonFplValueTestCases.ScopeVariablesInBlockVariadic() |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInSignature() =
-        try
-            CommonFplValueTestCases.ScopeVariablesInSignature() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
+        CommonFplValueTestCases.ScopeVariablesInSignature() |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInSignatureWithVariadic() =
-        try
-            CommonFplValueTestCases.ScopeVariablesInSignatureVariadic() |> ignore
-            Assert.IsTrue(true)
-        with
-        | ex -> 
-            Assert.IsTrue(false)
+        CommonFplValueTestCases.ScopeVariablesInSignatureVariadic() |> ignore
+
+    [<TestMethod>]
+    member this.TestCallConstructorParentClass() =
+        CommonFplValueTestCases.ScopeCallConstructorParentClass() |> ignore
+
+    [<TestMethod>]
+    member this.TestDelegate() =
+        CommonFplValueTestCases.ScopeDelegate() |> ignore
+
+    [<TestMethod>]
+    member this.TestPredicateWithArguments() =
+        CommonFplValueTestCases.ScopePredicateWithArguments() |> ignore

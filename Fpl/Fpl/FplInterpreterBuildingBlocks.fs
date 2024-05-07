@@ -136,7 +136,7 @@ let tryAddBlock (fplValue:FplValue) =
 
 let tryReferenceBlockByName (fplValue:FplValue) name =
     let parent = fplValue.Parent.Value
-    if fplValue.Name.EndsWith "(" then
+    if fplValue.Name.EndsWith "(" || fplValue.Name = "" then
         fplValue.Name <- fplValue.Name + name
     else
         fplValue.Name <- fplValue.Name + ", " + name
@@ -647,7 +647,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("PredicateWithOptSpecification")
         let oldContext = st.CurrentContext 
         match st.CurrentContext with 
-        | EvalContext.InConstructorBlock fplValue ->
+        | EvalContext.InBlock fplValue 
+        | EvalContext.InPropertyBlock fplValue 
+        | EvalContext.InConstructorBlock fplValue 
+        | EvalContext.InReferenceCreation fplValue ->
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             eval st fplIdentifierAst
@@ -696,7 +699,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Delegate")
         let oldContext = st.CurrentContext 
         match st.CurrentContext with 
-        | EvalContext.InConstructorBlock fplValue ->
+        | EvalContext.InBlock fplValue 
+        | EvalContext.InPropertyBlock fplValue 
+        | EvalContext.InConstructorBlock fplValue 
+        | EvalContext.InReferenceCreation fplValue ->
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             eval st fplDelegateIdentifierAst
@@ -1031,6 +1037,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InBlock fplValue
         | EvalContext.InConstructorBlock fplValue
         | EvalContext.InPropertyBlock fplValue
+        | EvalContext.InReferenceCreation fplValue
         | EvalContext.NamedVarDeclarationInBlock fplValue ->
             evalNamedVarDecl fplValue "NamedVarDeclarationInBlock"
         | EvalContext.InPropertySignature fplValue -> 

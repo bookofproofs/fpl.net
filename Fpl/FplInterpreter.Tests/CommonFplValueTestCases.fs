@@ -390,3 +390,116 @@ type CommonFplValueTestCases =
                         | None -> None
         prepareFplCode("", true) |> ignore
         result
+
+    static member ScopeCallConstructorParentClass() =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = """
+
+            def cl B:obj {intr}
+            def cl C:obj {intr}
+            def cl D:obj {intr}
+
+            def cl A:B,C,D,E
+            {
+                ctor A(a:T1, b:func, c:ind, d:pred) 
+                {
+                    dec
+                        base.B()
+                        base.C(a,b,c,d)
+                        base.D(self,b,c)
+                        base.B(In(x))
+                        base.C(Test1(a),Test2(b,c,d))
+                        base.E(true, undef, false)
+                    ;
+                    self
+                }
+            }
+        ;
+        """
+        let stOption = prepareFplCode(fplCode, false) 
+        let result = match stOption with
+                        | Some st -> 
+                            let r = st.Root
+                            let theory = r.Scope["Test"]
+                            let cl = theory.Scope["A"]
+                            let ctor = cl.Scope["A(T1, func, ind, pred)"]
+                            let base1 = ctor.Scope["base.B()"]
+                            let base2 = ctor.Scope["base.C(a, b, c, d)"]
+                            let base3 = ctor.Scope["base.D(self, a, b)"]
+                            let base4 = ctor.Scope["base.B(In(x))"]
+                            let base5 = ctor.Scope["base.C(Test1(a), Test2(b, c, d))"]
+                            let base6 = ctor.Scope["base.E(true, undef, false)"]
+                            Some (base1,base2,base3,base4,base5,base6)
+                        | None -> None
+        prepareFplCode("", true) |> ignore
+        result
+
+    static member ScopeDelegate() =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = """
+
+            def pred TestPredicate(a:T1, b:func, c:ind, d:pred) 
+            {
+                dec
+                    delegate.B()
+                    delegate.C(a,b,c,d)
+                    delegate.D(self,b,c)
+                    delegate.B(In(x))
+                    delegate.C(Test1(a),Test2(b,c,d))
+                    delegate.E(true, undef, false)
+                ;
+                true
+            }
+        ;
+        """
+        let stOption = prepareFplCode(fplCode, false) 
+        let result = match stOption with
+                        | Some st -> 
+                            let r = st.Root
+                            let theory = r.Scope["Test"]
+                            let pr = theory.Scope["TestPredicate(T1, func, ind, pred)"]
+                            let base1 = pr.Scope["delegate.B()"]
+                            let base2 = pr.Scope["delegate.C(a, b, c, d)"]
+                            let base3 = pr.Scope["delegate.D(self, a, b)"]
+                            let base4 = pr.Scope["delegate.B(In(x))"]
+                            let base5 = pr.Scope["delegate.C(Test1(a), Test2(b, c, d))"]
+                            let base6 = pr.Scope["delegate.E(true, undef, false)"]
+                            Some (base1,base2,base3,base4,base5,base6)
+                        | None -> None
+        prepareFplCode("", true) |> ignore
+        result
+
+    static member ScopePredicateWithArguments() =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = """
+
+            def pred TestPredicate(a:T1, b:func, c:ind, d:pred) 
+            {
+                dec
+                    B()
+                    C(a,b,c,d)
+                    D(self,b,c)
+                    B(In(x))
+                    C(Test1(a),Test2(b,c,d))
+                    E(true, undef, false)
+                ;
+                true
+            }
+        ;
+        """
+        let stOption = prepareFplCode(fplCode, false) 
+        let result = match stOption with
+                        | Some st -> 
+                            let r = st.Root
+                            let theory = r.Scope["Test"]
+                            let pr = theory.Scope["TestPredicate(T1, func, ind, pred)"]
+                            let base1 = pr.Scope["B()"]
+                            let base2 = pr.Scope["C(a, b, c, d)"]
+                            let base3 = pr.Scope["D(self, a, b)"]
+                            let base4 = pr.Scope["B(In(x))"]
+                            let base5 = pr.Scope["C(Test1(a), Test2(b, c, d))"]
+                            let base6 = pr.Scope["E(true, undef, false)"]
+                            Some (base1,base2,base3,base4,base5,base6)
+                        | None -> None
+        prepareFplCode("", true) |> ignore
+        result
