@@ -468,6 +468,7 @@ type TestInterpreterErrors() =
         let code = ID011 ("","")
         runTestHelper fplCode code expected
 
+    [<DataRow("def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); self} };", 1)>]
     [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); self} };", 0)>]
     [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.C(); self} };", 1)>]
     [<DataRow("def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]

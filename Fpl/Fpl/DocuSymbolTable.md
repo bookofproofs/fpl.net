@@ -55,14 +55,14 @@ Since the ST is constructed during the AST traversal, it depends on the AST type
 	|-Name: ""
 	|-Parent: None
 	|-Scope: Contains a non-empty <string,FplValue> dictionary of all here created Theory nodes
-	|-ValueList: <empty>
+	|-ValueList: Contains (a possibly empty) list of nodes, from which the class
+		inherits. These can be class nodes or primitive objects. The values are
+		only added if they were previously declared in the code.
 ```
 
-**Output**: 
-```
-	Theory
-	|-Name: <NameSpaceName>
-	|-Parent: Some Root
-	|-Scope: Contains a (possibly) empty <string,FplValue> dictionary of all FPL blocks inside this theory
-	|-ValueList: <empty>
-```
+**Created at traversal**: `AST.Namespace.DefinitionClass`
+
+* *Context*: `InSignature` - here, the ValueList gets constructed 
+* *Context*: `InBlock` - here, the ValueList gets constructed and all variables, constructors and properties of the class declared in the block are added to the Scope of the class.
+
+

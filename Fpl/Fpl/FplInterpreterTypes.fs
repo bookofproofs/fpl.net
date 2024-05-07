@@ -344,6 +344,37 @@ type FplValueType =
 
     member this.Name = this.Article + " " + this.UnqualifiedName
 
+    member this.ShortName = 
+        match this with
+            // parser error messages
+            | Variable -> "var"
+            | VariadicVariableMany -> "*var"
+            | VariadicVariableMany1 -> "+var"
+            | Expression -> "expr"
+            | MandatoryPredicate 
+            | OptionalPredicate 
+            | MandatoryFunctionalTerm 
+            | OptionalFunctionalTerm -> "prop"
+            | Constructor -> "ctor"
+            | Class -> "cl"
+            | Object -> "obj"
+            | Localization -> "loc"
+            | Theorem -> "thm"
+            | Lemma -> "lem"
+            | Proposition -> "prop"
+            | Corollary -> "cor"
+            | Proof -> "prf"
+            | Conjecture -> "conj"
+            | Axiom -> "ax"
+            | RuleOfInference -> "inf"
+            | Premise -> "pre"
+            | Conclusion -> "con"
+            | Predicate -> "pred"
+            | FunctionalTerm -> "func"
+            | Reference -> "ref"
+            | Theory -> "th"
+            | Root -> "root"
+
 
 type ScopeSearchResult = 
     | FoundAssociate of string 
@@ -393,6 +424,10 @@ and FplValue(name: string, blockType: FplValueType, evalType: FplType, positions
     /// Name of the FPL block type within this FplValue
     member this.BlockTypeName
         with get () = _blockType.Name
+
+    /// Short name of the FPL block type within this FplValue
+    member this.BlockTypeShortName
+        with get () = _blockType.ShortName
 
     /// This FplValue's name's end position that can be different from its endig position
     member this.NameEndPos
@@ -842,7 +877,15 @@ type EvalContext =
     | NamedVarDeclarationInBlock of FplValue
     | InReferenceCreation of FplValue
     member this.Name = 
-        let short (fplValue:FplValue) = $"{fplValue.QualifiedName}[{fplValue.Scope.Count},{fplValue.ValueList.Count}]"
+        let short (fplValue:FplValue) = 
+            let aggr (lst:seq<FplValue>) = 
+                lst
+                |> Seq.countBy (fun fv -> fv.BlockTypeShortName)
+                |> Seq.map (fun (g,i) -> g + sprintf ":%i" i)
+                |> String.concat " "
+
+            let p = fplValue.Parent.Value
+            $"{fplValue.BlockTypeShortName} {fplValue.QualifiedName}[{aggr fplValue.Scope.Values},{aggr fplValue.ValueList}]^{p.BlockTypeShortName} {p.QualifiedName}[{aggr p.Scope.Values},{aggr p.ValueList}]"
         match this with
         | ContextNone -> "ContextNone"
         | InTheory(fplValue) -> $"InTheory({short fplValue})"
@@ -902,7 +945,7 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     member this.Log(message) = 
         if _debug then 
             let depth = this.CurrentContext.Depth
-            let enrichedMsg = sprintf "%s%s at context %s: %s" (String(' ',depth)) message (this.CurrentContext.Name) (this.EvalPath()) 
+            let enrichedMsg = sprintf "%s%s at %s: %s" (String(' ',depth)) message (this.CurrentContext.Name) (this.EvalPath()) 
             _evalLog.Add(enrichedMsg)
 
     member this.SetContext (context:EvalContext) (logContext:LogContext) = 
