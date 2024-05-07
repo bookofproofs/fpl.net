@@ -286,7 +286,7 @@ let checkID012Diagnostics (st:SymbolTable) (constructor:FplValue) identifier (po
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = pos1
                     Diagnostic.EndPos = pos2
-                    Diagnostic.Code = ID012 (identifier, candidates)
+                    Diagnostic.Code = ID012 (identifier, candidates) // call of parent class does not match the class id
                     Diagnostic.Alternatives = None 
                 }
             FplParser.parserDiagnostics.AddDiagnostic diagnostic

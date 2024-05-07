@@ -72,7 +72,7 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
             else
                 adjustSignature st fplValue unitType
                 checkID009_ID010_ID011_Diagnostics st fplValue unitType pos1 pos2
-    | EvalContext.InConstructorBlock fplValue ->
+    | EvalContext.InConstructorBlock fplValue -> 
         checkID012Diagnostics st fplValue unitType pos1 pos2
     | _ -> ()
 
@@ -485,7 +485,7 @@ let rec eval (st: SymbolTable) ast =
             correctFplTypeOfFunctionalTerms FplType.Object
             checkID008Diagnostics fplValue pos1 pos2
             checkID009_ID010_ID011_Diagnostics st fplValue identifier pos1 pos2
-        | EvalContext.InConstructorBlock fplValue ->
+        | EvalContext.InConstructorBlock fplValue -> 
             checkID012Diagnostics st fplValue identifier pos1 pos2
         | _ -> ()
         st.EvalPop()

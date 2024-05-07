@@ -40,29 +40,46 @@ Since the ST is constructed during the AST traversal, it depends on the AST type
 **Output**: 
 ```
 	Theory
-	|-Name: <NameSpaceName>
+	|-Name: <Name>
 	|-Parent: Some Root
 	|-Scope: Contains a (possibly) empty <string,FplValue> dictionary of all FPL blocks inside this theory
 	|-ValueList: <empty>
 ```
 
 ### ST.Root.Theory.Class
-**Created in**: In `FplInterpreterBuildingBlocks.eval | Ast.DefinitionClass`
+**Created in**: In `AST.Namespace.DefinitionClass`
 
 **Output (parent)**: 
 ```
-	Root
-	|-Name: ""
-	|-Parent: None
-	|-Scope: Contains a non-empty <string,FplValue> dictionary of all here created Theory nodes
+	Class
+	|-Name: "<Name>"
+	|-Parent: Theory
+	|-Scope: Contains a non-empty <string,FplValue> dictionary of nodes of 
+		all variables, constructors and properties of the class 
 	|-ValueList: Contains (a possibly empty) list of nodes, from which the class
 		inherits. These can be class nodes or primitive objects. The values are
 		only added if they were previously declared in the code.
 ```
 
-**Created at traversal**: `AST.Namespace.DefinitionClass`
+* *Context*: `InSignature` - the ValueList and the Name get constructed 
+* *Context*: `InBlock` - the Scope gets constructed 
 
-* *Context*: `InSignature` - here, the ValueList gets constructed 
-* *Context*: `InBlock` - here, the ValueList gets constructed and all variables, constructors and properties of the class declared in the block are added to the Scope of the class.
+### ST.Root.Theory.Class.Constructor
+**Created in**: In `AST.Namespace.DefinitionClass.DefClassCompleteContent.Constructor`
 
+**Output (parent)**: 
+```
+	Constructor
+	|-Name: "<Name>"
+	|-Parent: Class
+	|-Scope: Contains a non-empty <string,FplValue> dictionary of all scope 
+		nodes (like variables) declared in the constructor.
+	|-ValueList: Contains (a possibly empty) list of reference nodes that
+		represent the calls to some base classes constructors. Due to semantical
+		errors in the code, the latter do not necessarily have to match the
+		actual base classes of this constructor class.
+```
+
+* *Context*: `InConstructorSignature` - the Scope and the Name get constructed 
+* *Context*: `InConstructorBlock` - the ValueList gets constructed 
 
