@@ -72,7 +72,7 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
             else
                 adjustSignature st fplValue unitType
                 checkID009_ID010_ID011_Diagnostics st fplValue unitType pos1 pos2
-    | EvalContext.InConstructorBlock fplValue -> 
+    | EvalContext.InReferenceCreation fplValue -> 
         checkID012Diagnostics st fplValue unitType pos1 pos2
     | _ -> ()
 
@@ -133,6 +133,18 @@ let tryAddBlock (fplValue:FplValue) =
             | _ -> 
                 fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
                 fplValue.NameIsFinal <- true
+
+let tryReferenceBlockByName (fplValue:FplValue) name =
+    let parent = fplValue.Parent.Value
+    if fplValue.Name.EndsWith "(" then
+        fplValue.Name <- fplValue.Name + name
+    else
+        fplValue.Name <- fplValue.Name + ", " + name
+    if parent.Scope.ContainsKey(name) then
+        let namedChild = parent.Scope[name]
+        fplValue.TypeSignature <- fplValue.TypeSignature @ namedChild.TypeSignature
+    else
+        fplValue.TypeSignature <- fplValue.TypeSignature @ ["undef"]
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -292,7 +304,8 @@ let rec eval (st: SymbolTable) ast =
             varValue.Name <- s
             varValue.NameEndPos <- pos2
             tryAddBlock varValue 
-            
+        | EvalContext.InReferenceCreation fplValue ->
+            tryReferenceBlockByName fplValue s
         | _ -> ()
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
@@ -485,7 +498,8 @@ let rec eval (st: SymbolTable) ast =
             correctFplTypeOfFunctionalTerms FplType.Object
             checkID008Diagnostics fplValue pos1 pos2
             checkID009_ID010_ID011_Diagnostics st fplValue identifier pos1 pos2
-        | EvalContext.InConstructorBlock fplValue -> 
+        | EvalContext.InReferenceCreation fplValue -> 
+            adjustSignature st fplValue identifier
             checkID012Diagnostics st fplValue identifier pos1 pos2
         | _ -> ()
         st.EvalPop()
@@ -565,7 +579,14 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.ArgumentTuple((pos1, pos2), asts) ->
         st.EvalPush("ArgumentTuple")
-        asts |> List.map (eval st) |> ignore
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue -> 
+            adjustSignature st fplValue "("
+            asts |> List.map (eval st) |> ignore
+            adjustSignature st fplValue ")"
+            fplValue.NameEndPos <- pos2
+            tryAddBlock fplValue
+        | _-> ()
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
         st.EvalPush("QualificationList")
@@ -622,11 +643,18 @@ let rec eval (st: SymbolTable) ast =
         optAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
-    | Ast.PredicateWithOptSpecification((pos1, pos2), (ast1, optAst)) ->
+    | Ast.PredicateWithOptSpecification((pos1, pos2), (fplIdentifierAst, optionalSpecificationAst)) ->
         st.EvalPush("PredicateWithOptSpecification")
-        eval st ast1
-        optAst |> Option.map (eval st) |> ignore
-        eval_pos_ast_ast_opt st pos1 pos2
+        let oldContext = st.CurrentContext 
+        match st.CurrentContext with 
+        | EvalContext.InConstructorBlock fplValue ->
+            let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
+            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
+            eval st fplIdentifierAst
+            optionalSpecificationAst |> Option.map (eval st) |> ignore
+            eval_pos_ast_ast_opt st pos1 pos2
+        | _ -> ()
+        st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | SelfAts of Positions * char list
     | Ast.SelfAts((pos1, pos2), chars) -> 
@@ -664,10 +692,17 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         eval st ast2
         st.EvalPop()
-    | Ast.Delegate((pos1, pos2), (ast1, ast2)) ->
+    | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
         st.EvalPush("Delegate")
-        eval st ast1
-        eval st ast2
+        let oldContext = st.CurrentContext 
+        match st.CurrentContext with 
+        | EvalContext.InConstructorBlock fplValue ->
+            let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
+            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
+            eval st fplDelegateIdentifierAst
+            eval st argumentTupleAst
+        | _ -> ()
+        st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | Ast.SignatureWithUserDefinedString((pos1, pos2),
@@ -814,8 +849,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")
-        eval st signatureAst
         let oldContext = st.CurrentContext 
+        eval st signatureAst
         match st.CurrentContext with
         | EvalContext.InPropertySignature fplValue ->
             st.SetContext(EvalContext.InPropertyBlock fplValue) LogContext.Start
@@ -831,8 +866,15 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.ParentConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
         st.EvalPush("ParentConstructorCall")
-        eval st inheritedClassTypeAst
-        eval st argumentTupleAst
+        let oldContext = st.CurrentContext 
+        match st.CurrentContext with 
+        | EvalContext.InConstructorBlock fplValue ->
+            let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
+            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
+            eval st inheritedClassTypeAst
+            eval st argumentTupleAst
+        | _ -> ()
+        st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     | Ast.JustifiedArgument((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("JustifiedArgument")
