@@ -22,6 +22,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
                 || fplValue.Name.EndsWith "[" 
                 || fplValue.Name.Length = 0 
                 || fplValue.Name.EndsWith "-> " 
+                || fplValue.Name.EndsWith "." 
                 || str.StartsWith "$" then
                 if str = "->" then 
                     fplValue.Name <- fplValue.Name + " " + str + " "
@@ -649,10 +650,17 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with 
         | EvalContext.InBlock fplValue 
         | EvalContext.InPropertyBlock fplValue 
-        | EvalContext.InConstructorBlock fplValue 
-        | EvalContext.InReferenceCreation fplValue ->
+        | EvalContext.InConstructorBlock fplValue -> 
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
+            eval st fplIdentifierAst
+            optionalSpecificationAst |> Option.map (eval st) |> ignore
+            eval_pos_ast_ast_opt st pos1 pos2
+        | EvalContext.InReferenceCreation fplValue ->
+            if fplValue.NameIsFinal then 
+                // replace the context with a new reference node only if the previous one was fully constructed 
+                let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
+                st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
             eval st fplIdentifierAst
             optionalSpecificationAst |> Option.map (eval st) |> ignore
             eval_pos_ast_ast_opt st pos1 pos2
@@ -704,6 +712,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InConstructorBlock fplValue 
         | EvalContext.InReferenceCreation fplValue ->
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
+            refBlock.Name <- "__del."
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             eval st fplDelegateIdentifierAst
             eval st argumentTupleAst
@@ -876,6 +885,7 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with 
         | EvalContext.InConstructorBlock fplValue ->
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
+            refBlock.Name <- "__bas."
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             eval st inheritedClassTypeAst
             eval st argumentTupleAst
