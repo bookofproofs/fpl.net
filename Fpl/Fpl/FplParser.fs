@@ -323,7 +323,6 @@ let statement =
         assertionStatement
         forStatement
         assignmentStatement
-        fplDelegate
     ])
 
 statementListRef.Value <- many (IW >>. statement .>> IW)

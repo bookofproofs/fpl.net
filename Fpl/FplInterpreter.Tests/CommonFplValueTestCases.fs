@@ -423,12 +423,12 @@ type CommonFplValueTestCases =
                             let theory = r.Scope["Test"]
                             let cl = theory.Scope["A"]
                             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-                            let base1 = ctor.Scope["base.B()"]
-                            let base2 = ctor.Scope["base.C(a, b, c, d)"]
-                            let base3 = ctor.Scope["base.D(self, a, b)"]
-                            let base4 = ctor.Scope["base.B(In(x))"]
-                            let base5 = ctor.Scope["base.C(Test1(a), Test2(b, c, d))"]
-                            let base6 = ctor.Scope["base.E(true, undef, false)"]
+                            let base1 = ctor.Scope["__bas.B()"]
+                            let base2 = ctor.Scope["__bas.C(a, b, c, d)"]
+                            let base3 = ctor.Scope["__bas.D(self, a, b)"]
+                            let base4 = ctor.Scope["__bas.B(In(x))"]
+                            let base5 = ctor.Scope["__bas.C(Test1(a), Test2(b, c, d))"]
+                            let base6 = ctor.Scope["__bas.E(true, undef, false)"]
                             Some (base1,base2,base3,base4,base5,base6)
                         | None -> None
         prepareFplCode("", true) |> ignore
@@ -440,15 +440,33 @@ type CommonFplValueTestCases =
 
             def pred TestPredicate(a:T1, b:func, c:ind, d:pred) 
             {
-                dec
-                    delegate.B()
-                    delegate.C(a,b,c,d)
-                    delegate.D(self,b,c)
-                    delegate.B(In(x))
-                    delegate.C(Test1(a),Test2(b,c,d))
-                    delegate.E(true, undef, false)
-                ;
                 true
+
+                property pred T1() 
+                {
+                    delegate.B()
+                }
+                property pred T2() 
+                {
+                    delegate.C(a,b,c,d)
+                }
+                property pred T3() 
+                {
+                    delegate.D(self,b,c)
+                }
+                property pred T4() 
+                {
+                    delegate.B(In(x))
+                }
+                property pred T5() 
+                {
+                    delegate.C(Test1(a),Test2(b,c,d))
+                }
+                property pred T6() 
+                {
+                    delegate.E(true, undef, false)
+                }
+
             }
         ;
         """
@@ -458,12 +476,18 @@ type CommonFplValueTestCases =
                             let r = st.Root
                             let theory = r.Scope["Test"]
                             let pr = theory.Scope["TestPredicate(T1, func, ind, pred)"]
-                            let base1 = pr.Scope["delegate.B()"]
-                            let base2 = pr.Scope["delegate.C(a, b, c, d)"]
-                            let base3 = pr.Scope["delegate.D(self, a, b)"]
-                            let base4 = pr.Scope["delegate.B(In(x))"]
-                            let base5 = pr.Scope["delegate.C(Test1(a), Test2(b, c, d))"]
-                            let base6 = pr.Scope["delegate.E(true, undef, false)"]
+                            let pr1 = pr.Scope["T1()"]
+                            let pr2 = pr.Scope["T2()"]
+                            let pr3 = pr.Scope["T3()"]
+                            let pr4 = pr.Scope["T4()"]
+                            let pr5 = pr.Scope["T5()"]
+                            let pr6 = pr.Scope["T6()"]
+                            let base1 = pr1.Scope["__del.B()"]
+                            let base2 = pr2.Scope["__del.C(a, b, c, d)"]
+                            let base3 = pr3.Scope["__del.D(self, a, b)"]
+                            let base4 = pr4.Scope["__del.B(In(x))"]
+                            let base5 = pr5.Scope["__del.C(Test1(a), Test2(b, c, d))"]
+                            let base6 = pr6.Scope["__del.E(true, undef, false)"]
                             Some (base1,base2,base3,base4,base5,base6)
                         | None -> None
         prepareFplCode("", true) |> ignore
@@ -475,15 +499,33 @@ type CommonFplValueTestCases =
 
             def pred TestPredicate(a:T1, b:func, c:ind, d:pred) 
             {
-                dec
-                    B()
-                    C(a,b,c,d)
-                    D(self,b,c)
-                    B(In(x))
-                    C(Test1(a),Test2(b,c,d))
-                    E(true, undef, false)
-                ;
                 true
+
+                property pred T1() 
+                {
+                    B()
+                }
+                property pred T2() 
+                {
+                    C(a,b,c,d)
+                }
+                property pred T3() 
+                {
+                    D(self,b,c)
+                }
+                property pred T4() 
+                {
+                    B(In(x))
+                }
+                property pred T5() 
+                {
+                    C(Test1(a),Test2(b,c,d))
+                }
+                property pred T6() 
+                {
+                    E(true, undef, false)
+                }
+
             }
         ;
         """
@@ -493,6 +535,12 @@ type CommonFplValueTestCases =
                             let r = st.Root
                             let theory = r.Scope["Test"]
                             let pr = theory.Scope["TestPredicate(T1, func, ind, pred)"]
+                            let pr1 = pr.Scope["T1()"]
+                            let pr2 = pr.Scope["T2()"]
+                            let pr3 = pr.Scope["T3()"]
+                            let pr4 = pr.Scope["T4()"]
+                            let pr5 = pr.Scope["T5()"]
+                            let pr6 = pr.Scope["T6()"]
                             let base1 = pr.Scope["B()"]
                             let base2 = pr.Scope["C(a, b, c, d)"]
                             let base3 = pr.Scope["D(self, a, b)"]
