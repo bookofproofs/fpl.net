@@ -375,70 +375,19 @@ type FplValueType =
             | Theory -> "th"
             | Root -> "root"
 
+type InfixType = {Precedence : int}
+
 type ExprType = 
-    | Infix
+    | Infix of InfixType
     | Postfix
     | Prefix
     | NoType
     member this.Type = 
         match this with 
-        | Infix -> "Infix"
+        | Infix precValue -> sprintf "Infix %i" precValue.Precedence
         | Postfix -> "Postfix"
         | Prefix -> "Prefix"
         | NoType -> "None"
-
-type Expr() = 
-    let mutable _name = ""
-    let mutable _nameFinal = false
-    let mutable _precedence = 0 
-    let mutable _precedenceAlreadySet = false 
-    let mutable _exprType = ExprType.NoType
-    let mutable _exprTypeAlreadySet = false 
-
-    /// Name of the Expr
-    member this.Name
-        with get () = _name
-        and set (value) = 
-            if _nameFinal then 
-                raise (ArgumentException($"Cannot set readonly Name {_name} again since it has been finally evaluated."))
-            else
-                _name <- value
-
-    /// Indicates, if the Name has been finally determined during the evaluation process.
-    /// If true, the Name property becomes immutable.
-    member this.NameIsFinal
-        with get () = _nameFinal
-        and set (value) = 
-            if _nameFinal then 
-                raise (ArgumentException($"Cannot change the readonly NameIsFinal property since it has been finally evaluated."))
-            else
-                _nameFinal <- value
-
-    /// Precedence of the Expr
-    member this.Precedence
-        with get () = _precedence
-        and set (value) = 
-            if _exprTypeAlreadySet = true then
-                if _exprType = ExprType.Infix then
-                    if _precedenceAlreadySet then 
-                        raise (ArgumentException($"Precedence was already initialized with {_precedence}, cannot set it again with {value}."))
-                    else
-                        _precedence <- value
-                        _precedenceAlreadySet <- true
-                else
-                    raise (ArgumentException($"Cannot set Precedence for {_exprType.Type} (setting this property is allowed only for {ExprType.Infix.Type})."))
-            else
-                raise (ArgumentException($"Please set the Type before being able to set Precedence."))
-
-    /// Type of the Expr
-    member this.Type
-        with get () = _exprType
-        and set (value) = 
-            if not _exprTypeAlreadySet then 
-                    _exprType <- value
-                    _exprTypeAlreadySet <- true
-            else
-                raise (ArgumentException($"Type was already initialized with {_exprType.Type}, cannot set it again with {value.Type}."))
 
 type ScopeSearchResult = 
     | FoundAssociate of string 
@@ -450,13 +399,15 @@ type ScopeSearchResult =
 
 and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions: Positions, parent: FplValue option) =
     let mutable _name = name
+    let mutable _expression = ""
+    let mutable _expressionType = ExprType.NoType
+    let mutable _exprTypeAlreadySet = false 
     let mutable _nameFinal = false
     let mutable _nameEndPos = Position("", 0, 1, 1)
     let mutable _evalType = evalType
     let mutable _typeSignature = []
     let mutable _representation = ""
     let mutable _blockType = blockType
-    let _expr = Expr()
     let mutable _auxiliaryInfo = 0
 
     let mutable _parent = parent
@@ -464,8 +415,14 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
     let _valueList = System.Collections.Generic.List<FplValue>()
 
-    /// Expression of this FplValue.
-    member this.Expr = _expr
+    /// Expression of this FplValue that is unique in its scope.
+    member this.Expression
+        with get () = _expression
+        and set (value) = 
+            if _nameFinal then 
+                raise (ArgumentException($"Cannot set readonly Expression {_expression} again since it has been finally evaluated."))
+            else
+                _expression <- value
 
     /// Identifier of this FplValue that is unique in its scope.
     member this.Name
@@ -475,6 +432,16 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
                 raise (ArgumentException($"Cannot set readonly Name {_name} again since it has been finally evaluated."))
             else
                 _name <- value
+
+    /// Type of the Expr
+    member this.ExpressionType
+        with get () = _expressionType
+        and set (value) = 
+            if not _exprTypeAlreadySet then 
+                    _expressionType <- value
+                    _exprTypeAlreadySet <- true
+            else
+                raise (ArgumentException($"Type was already initialized with {_expressionType.Type}, cannot set it again with {value.Type}."))
 
     /// Indicates, if the Name has been finally determined during the evaluation process.
     /// If true, the Name property becomes immutable.
