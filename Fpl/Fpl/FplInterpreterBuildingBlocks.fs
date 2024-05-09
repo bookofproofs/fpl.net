@@ -650,17 +650,10 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with 
         | EvalContext.InBlock fplValue 
         | EvalContext.InPropertyBlock fplValue 
-        | EvalContext.InConstructorBlock fplValue -> 
-            let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
-            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
-            eval st fplIdentifierAst
-            optionalSpecificationAst |> Option.map (eval st) |> ignore
-            eval_pos_ast_ast_opt st pos1 pos2
+        | EvalContext.InConstructorBlock fplValue 
         | EvalContext.InReferenceCreation fplValue ->
-            if fplValue.NameIsFinal then 
-                // replace the context with a new reference node only if the previous one was fully constructed 
-                let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
-                st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
+            let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
+            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
             eval st fplIdentifierAst
             optionalSpecificationAst |> Option.map (eval st) |> ignore
             eval_pos_ast_ast_opt st pos1 pos2
