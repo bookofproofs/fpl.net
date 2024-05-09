@@ -48,3 +48,12 @@ type TestFplValueScopeCompleteness() =
     [<TestMethod>]
     member this.TestPredicateWithArguments() =
         CommonFplValueTestCases.ScopePredicateWithArguments() |> ignore
+
+    [<TestMethod>]
+    member this.TestFixNotation() =
+        CommonFplValueTestCases.ScopeFixNotation() |> ignore
+
+    [<TestMethod>]
+    member this.TestPredicate() =
+        CommonFplValueTestCases.ScopePredicate() |> ignore
+
