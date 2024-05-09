@@ -551,3 +551,46 @@ type CommonFplValueTestCases =
                         | None -> None
         prepareFplCode("", true) |> ignore
         result
+
+    static member ScopePredicate() =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = """
+
+            def pred infix ">" T1() 
+            {
+                true
+            }
+
+            def pred infix "<" T2() 
+            {
+                false
+            }
+
+            def pred infix "<" T2() 
+            {
+                false
+            }
+        ;
+        """
+        let stOption = prepareFplCode(fplCode, false) 
+        let result = match stOption with
+                        | Some st -> 
+                            let r = st.Root
+                            let theory = r.Scope["Test"]
+                            let pr = theory.Scope["TestPredicate(T1, func, ind, pred)"]
+                            let pr1 = pr.Scope["T1()"]
+                            let pr2 = pr.Scope["T2()"]
+                            let pr3 = pr.Scope["T3()"]
+                            let pr4 = pr.Scope["T4()"]
+                            let pr5 = pr.Scope["T5()"]
+                            let pr6 = pr.Scope["T6()"]
+                            let base1 = pr1.Scope["__del.B()"]
+                            let base2 = pr2.Scope["__del.C(a, b, c, d)"]
+                            let base3 = pr3.Scope["__del.D(self, a, b)"]
+                            let base4 = pr4.Scope["__del.B(In(x))"]
+                            let base5 = pr5.Scope["__del.C(Test1(a), Test2(b, c, d))"]
+                            let base6 = pr6.Scope["__del.E(true, undef, false)"]
+                            Some (base1,base2,base3,base4,base5,base6)
+                        | None -> None
+        prepareFplCode("", true) |> ignore
+        result

@@ -135,7 +135,7 @@ type TestInfixPostfixPrefix () =
 
     [<TestMethod>]
     member this.TestInfix () =
-        let result = run (definition .>> eof) """def func Add infix "+" (x,y: Nat) -> Nat { intr }"""
+        let result = run (definition .>> eof) """def func Add infix "+" 2 (x,y: Nat) -> Nat { intr }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

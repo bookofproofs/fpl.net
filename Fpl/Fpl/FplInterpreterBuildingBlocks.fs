@@ -1168,6 +1168,9 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
+    | Ast.Precedence((pos1, pos2), precedence) ->
+        st.EvalPush("Precedence")
+        st.EvalPop()
     | ast1 ->
         let astType = ast1.GetType().Name
         emitID000Diagnostics FplParser.parserDiagnostics.StreamName astType

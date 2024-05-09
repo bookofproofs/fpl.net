@@ -271,7 +271,9 @@ let keywordPostfix = pstring "postfix" >>. IW
 let prefixString = pchar '"' >>. prefixMathSymbols .>> pchar '"' 
 let keywordPrefix = pstring "prefix" >>. IW
 let userDefinedObjSym = positions "Symbol" (keywordSymbol >>. objectSymbolString) .>> IW |>> Ast.Symbol
-let userDefinedInfix = positions "Infix" (keywordInfix >>. infixString) .>> IW |>> Ast.Infix
+let precedence = positions "Precedence" (pint32) .>> IW |>> Ast.Precedence
+
+let userDefinedInfix = positions "Infix" (keywordInfix >>. (infixString .>>. (IW >>. precedence))) .>> IW |>> Ast.Infix
 let userDefinedPostfix = positions "Postfix" (keywordPostfix >>. postfixString) .>> IW |>> Ast.Postfix
 let userDefinedPrefix = positions "Prefix" (keywordPrefix >>. prefixString) .>> IW |>> Ast.Prefix
 let userDefinedSymbol = opt (choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ])
