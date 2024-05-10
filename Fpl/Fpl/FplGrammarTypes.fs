@@ -99,7 +99,8 @@ type Ast =
     | PredicateWithQualification of (Ast * Ast) 
     | ObjectSymbol of Positions * string
     | Prefix of Positions * string
-    | Infix of Positions * string 
+    | Precedence of Positions * int
+    | Infix of Positions * (string * Ast)
     | Postfix of Positions * string
     | Symbol of Positions * string
     | InfixOperator of Positions * string

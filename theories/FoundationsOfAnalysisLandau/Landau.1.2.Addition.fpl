@@ -102,7 +102,7 @@ proof Theorem_003$1
 // (2) x + y = (x + y)'
 // x + y is called the sum of x and y, or the number obtained by addition of y to x.
 
-definition function Sum infix "+" (x,y: Nat) -> Nat
+definition function Sum infix "+" 5 (x,y: Nat) -> Nat
 {
     declaration
         ~res: Nat

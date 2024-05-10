@@ -13,9 +13,9 @@ type TestFplValue() =
     member this.TestInitialFactory() =
         FplParser.parserDiagnostics.Clear()
         let r = FplValue.CreateRoot()
-        Assert.AreEqual (FplBlockType.Root, r.BlockType)
+        Assert.AreEqual (FplValueType.Root, r.BlockType)
         let testCreateFactory fplBlockType = 
-            if fplBlockType = FplBlockType.Object then
+            if fplBlockType = FplValueType.Object then
                 ("obj", FplValue.CreateObject(Position("",0,1,1),Position("",0,1,1)))
                 
             else
@@ -27,30 +27,30 @@ type TestFplValue() =
             Assert.AreEqual ("", fv.FplRepresentation)
             Assert.AreEqual ([], fv.TypeSignature)
             Assert.AreEqual (fplType, fv.EvaluationType)
-        testFactory FplBlockType.VariadicVariableMany FplType.Object
-        testFactory FplBlockType.VariadicVariableMany1 FplType.Object
-        testFactory FplBlockType.Axiom FplType.Predicate
-        testFactory FplBlockType.Theorem FplType.Predicate
-        testFactory FplBlockType.Lemma FplType.Predicate
-        testFactory FplBlockType.Proposition FplType.Predicate
-        testFactory FplBlockType.Corollary FplType.Predicate
-        testFactory FplBlockType.Conjecture FplType.Predicate
-        testFactory FplBlockType.Premise FplType.Predicate
-        testFactory FplBlockType.Conclusion FplType.Predicate
-        testFactory FplBlockType.Proof FplType.Predicate
-        testFactory FplBlockType.RuleOfInference FplType.Predicate
-        testFactory FplBlockType.Expression FplType.Predicate
-        testFactory FplBlockType.Theory FplType.Predicate
-        testFactory FplBlockType.Predicate FplType.Predicate 
-        testFactory FplBlockType.Constructor FplType.Object
-        testFactory FplBlockType.FunctionalTerm FplType.Object
-        testFactory FplBlockType.Variable FplType.Object
-        testFactory FplBlockType.MandatoryFunctionalTerm FplType.Object
-        testFactory FplBlockType.OptionalFunctionalTerm FplType.Object
-        testFactory FplBlockType.MandatoryPredicate FplType.Predicate
-        testFactory FplBlockType.OptionalPredicate FplType.Predicate
-        testFactory FplBlockType.Class FplType.Object 
-        testFactory FplBlockType.Object FplType.Object 
+        testFactory FplValueType.VariadicVariableMany FplType.Object
+        testFactory FplValueType.VariadicVariableMany1 FplType.Object
+        testFactory FplValueType.Axiom FplType.Predicate
+        testFactory FplValueType.Theorem FplType.Predicate
+        testFactory FplValueType.Lemma FplType.Predicate
+        testFactory FplValueType.Proposition FplType.Predicate
+        testFactory FplValueType.Corollary FplType.Predicate
+        testFactory FplValueType.Conjecture FplType.Predicate
+        testFactory FplValueType.Premise FplType.Predicate
+        testFactory FplValueType.Conclusion FplType.Predicate
+        testFactory FplValueType.Proof FplType.Predicate
+        testFactory FplValueType.RuleOfInference FplType.Predicate
+        testFactory FplValueType.Expression FplType.Predicate
+        testFactory FplValueType.Theory FplType.Predicate
+        testFactory FplValueType.Predicate FplType.Predicate 
+        testFactory FplValueType.Constructor FplType.Object
+        testFactory FplValueType.FunctionalTerm FplType.Object
+        testFactory FplValueType.Variable FplType.Object
+        testFactory FplValueType.MandatoryFunctionalTerm FplType.Object
+        testFactory FplValueType.OptionalFunctionalTerm FplType.Object
+        testFactory FplValueType.MandatoryPredicate FplType.Predicate
+        testFactory FplValueType.OptionalPredicate FplType.Predicate
+        testFactory FplValueType.Class FplType.Object 
+        testFactory FplValueType.Object FplType.Object 
 
 
     [<DataRow("inference TestId() {pre: true con: true};", "TestId()", "TestId ( )")>]

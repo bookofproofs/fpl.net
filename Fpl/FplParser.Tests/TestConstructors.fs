@@ -202,3 +202,21 @@ type TestConstructors () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<TestMethod>]
+    member this.TestConstructor07 () =
+        let result = run (constructor .>> eof) """ctor A(a:T1, b:func, c:ind, d:pred) 
+                {
+                    dec
+                    base.B()
+                    base.C(a,b,c,d)
+                    base.D(self,b,c)
+                    base.B(In(x))
+                    base.C(Test1(a),Test2(b,c,d))
+                    base.D(self,b,c)
+                    base.E(true, undef)
+                    ;
+                    self
+                }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Compile Include="TestParserErrors.fs" />
+    <Compile Include="TestExpressions.fs" />
     <Compile Include="TestUsesClause.fs" />
     <Compile Include="TestAxioms.fs" />
     <Compile Include="TestClassInheritanceTypes.fs" />

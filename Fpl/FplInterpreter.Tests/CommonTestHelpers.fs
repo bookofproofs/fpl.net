@@ -4,6 +4,7 @@ open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterTypes
+open FplInterpreterDiagnosticsEmitter
 
 let deleteFilesWithExtension dir extension =
     if Directory.Exists(dir) then
@@ -33,6 +34,12 @@ let prepareFplCode(fplCode:string, delete:bool) =
         let parsedAsts = ParsedAstList()
         let st = SymbolTable(parsedAsts, true)
         FplInterpreter.fplInterpreter st fplCode uri fplLibUrl |> ignore
+        let syntaxErrorFound = 
+            FplParser.parserDiagnostics.Collection
+            |> Seq.exists(fun d -> d.Emitter = DiagnosticEmitter.FplParser)
+        if syntaxErrorFound then 
+            emitUnexpectedErrorDiagnostics (uri.AbsolutePath) ("Syntax error found.")
+        Console.WriteLine(st.LoggedState)
         Some (st)
 
 let runTestHelper fplCode (code:ErrDiagnostics.DiagnosticCode) expected =
@@ -41,10 +48,5 @@ let runTestHelper fplCode (code:ErrDiagnostics.DiagnosticCode) expected =
     let result = filterByErrorCode FplParser.parserDiagnostics code.Code
     if result.Length > 0 then 
         printf "Result %s" result.Head.Message
-    let syntaxErrorFound = 
-        result
-        |> Seq.exists(fun d -> d.Emitter = DiagnosticEmitter.FplParser)
-    if syntaxErrorFound then 
-        raise (ArgumentException("Syntax error found."))
     Assert.AreEqual(expected, result.Length)
     prepareFplCode("", true) |> ignore

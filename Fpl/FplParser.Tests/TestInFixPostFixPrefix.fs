@@ -135,7 +135,7 @@ type TestInfixPostfixPrefix () =
 
     [<TestMethod>]
     member this.TestInfix () =
-        let result = run (definition .>> eof) """def func Add infix "+" (x,y: Nat) -> Nat { intr }"""
+        let result = run (definition .>> eof) """def func Add infix "+" 2 (x,y: Nat) -> Nat { intr }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -369,6 +369,48 @@ type TestInfixPostfixPrefix () =
     [<TestMethod>]
     member this.TestAnd03 () =
         let result = run (predicate .>> eof) """(x and not x)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplestPrefix () =
+        let result = run (predicate .>> eof) """-x"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplestPostfix () =
+        let result = run (predicate .>> eof) """x'"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplestInfix () =
+        let result = run (predicate .>> eof) """(x + y)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplestInfixPrecedence01 () =
+        let result = run (predicate .>> eof) """(x + y = 1)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplestInfixPrecedence02 () =
+        let result = run (predicate .>> eof) """(x = y + 1)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSimplest () =
+        let result = run (predicate .>> eof) """x"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

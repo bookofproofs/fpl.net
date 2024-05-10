@@ -266,9 +266,11 @@ let checkID009_ID010_ID011_Diagnostics (st:SymbolTable) (fplValue:FplValue) name
                 let obj = FplValue.CreateObject((pos1,pos2))
                 fplValue.ValueList.Add obj
 
-let checkID012Diagnostics (st:SymbolTable) (constructor:FplValue) identifier (pos1:Position) pos2 =
+let checkID012Diagnostics (st:SymbolTable) (parentConstructorCall:FplValue) identifier (pos1:Position) pos2 =
     let context = st.EvalPath()
-    if context.EndsWith("ParentConstructorCall.InheritedClassType.ObjectType") || context.EndsWith("ParentConstructorCall.InheritedClassType.PredicateIdentifier")  then
+    if context.EndsWith("ParentConstructorCall.InheritedClassType.PredicateIdentifier") || context.EndsWith("ParentConstructorCall.InheritedClassType.ObjectType") then
+        let constructor = parentConstructorCall.Parent.Value
+        constructor.ValueList.Add(parentConstructorCall)
         let classOfConstructor = constructor.Parent.Value
         let mutable foundInheritanceClass = false
         let candidates = 
@@ -286,7 +288,7 @@ let checkID012Diagnostics (st:SymbolTable) (constructor:FplValue) identifier (po
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = pos1
                     Diagnostic.EndPos = pos2
-                    Diagnostic.Code = ID012 (identifier, candidates)
+                    Diagnostic.Code = ID012 (identifier, candidates) // call of parent class does not match the class id
                     Diagnostic.Alternatives = None 
                 }
             FplParser.parserDiagnostics.AddDiagnostic diagnostic
