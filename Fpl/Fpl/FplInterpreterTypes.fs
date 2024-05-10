@@ -399,7 +399,6 @@ type ScopeSearchResult =
 
 and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions: Positions, parent: FplValue option) =
     let mutable _name = name
-    let mutable _expression = ""
     let mutable _expressionType = ExprType.NoType
     let mutable _exprTypeAlreadySet = false 
     let mutable _nameFinal = false
@@ -414,15 +413,6 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
     let _auxiliaryUniqueChilds = HashSet<string>()
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
     let _valueList = System.Collections.Generic.List<FplValue>()
-
-    /// Expression of this FplValue that is unique in its scope.
-    member this.Expression
-        with get () = _expression
-        and set (value) = 
-            if _nameFinal then 
-                raise (ArgumentException($"Cannot set readonly Expression {_expression} again since it has been finally evaluated."))
-            else
-                _expression <- value
 
     /// Identifier of this FplValue that is unique in its scope.
     member this.Name
