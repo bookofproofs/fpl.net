@@ -1,13 +1,13 @@
 uses Landau *
 
 // If x = y + u then x > y ( > to b read "is greater than")
-definition predicate Greater infix ">" (x,y: Nat)
+definition predicate Greater infix ">" 5 (x,y: Nat)
 {
     (ex u in N {(x = y + u)} => x > y)
 }
 
 // If y = x + v then x < y ( < to b read "is smaller than")
-definition predicate Smaller infix "<" (x,y: Nat)
+definition predicate Smaller infix "<" 5 (x,y: Nat)
 {
     (ex v in N {(x + v = y)} => x < y)
 }
@@ -84,13 +84,13 @@ proof Theorem_012$1
 }
 
 // x >= y means x > y or x = y (">=" to be read "is greater than or equal to")
-definition predicate GreaterOrEqual infix ">=" (x,y: Nat)
+definition predicate GreaterOrEqual infix ">=" 5 (x,y: Nat)
 {
     (x = y or x > y => x >= y)
 }
 
 // x <= y means x < y or x = y ("<=" to be read "is greater than or equal to")
-definition predicate SmallerOrEqual infix "<=" (x,y: Nat)
+definition predicate SmallerOrEqual infix "<=" 5 (x,y: Nat)
 {
     (x = y or x < y => x <= y)
 }
