@@ -466,3 +466,116 @@ type TestFplValueScopeEvaluationType() =
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("base1")>]
+    [<DataRow("base2")>]
+    [<DataRow("base3")>]
+    [<DataRow("base4")>]
+    [<DataRow("base5")>]
+    [<DataRow("base6")>]
+    [<DataRow("base7")>]
+    [<DataRow("base8")>]
+    [<DataRow("base9")>]
+    [<DataRow("base10")>]
+    [<DataRow("base11")>]
+    [<DataRow("base12")>]
+    [<DataRow("base13")>]
+    [<DataRow("base11a")>]
+    [<DataRow("base12a")>]
+    [<DataRow("base10b")>]
+    [<DataRow("base11b")>]
+    [<DataRow("base12b")>]
+    [<DataRow("base13b")>]
+    [<DataRow("base10c")>]
+    [<DataRow("base11c")>]
+    [<DataRow("base12c")>]
+    [<DataRow("base13c")>]
+    [<DataRow("base10d")>]
+    [<DataRow("base11d")>]
+    [<DataRow("base12d")>]
+    [<DataRow("base13d")>]
+    [<DataRow("base10e")>]
+    [<DataRow("base11e")>]
+    [<DataRow("base12e")>]
+    [<DataRow("base13e")>]
+    [<DataRow("base10f")>]
+    [<DataRow("base11f")>]
+    [<DataRow("base12f")>]
+    [<DataRow("base13f")>]
+    [<DataRow("base14")>]
+    [<DataRow("base15")>]
+    [<DataRow("base16")>]
+    [<DataRow("base17")>]
+    [<DataRow("base18")>]
+    [<DataRow("base19")>]
+    [<DataRow("base20")>]
+    [<DataRow("base21")>]
+    [<DataRow("base22")>]
+    [<DataRow("base23")>]
+    [<DataRow("base24")>]
+    [<DataRow("base25")>]
+    [<DataRow("base26")>]
+    [<TestMethod>]
+    member this.TestPredicate(var) =
+        let result = CommonFplValueTestCases.ScopePredicate()
+        match result with
+        | Some (base1,base2,base3,base4,base5, base6, base7, 
+                                    base8, base9, base10, base11, base12, base13,
+                                    base11a, base12a, base10b, base11b, base12b, base13b,
+                                    base10c, base11c, base12c, base13c, base10d, base11d,
+                                    base12d, base10e, base11e, base12e, base13d, base13e,
+                                    base10f, base11f, base12f, base13f, base14, base15,
+                                    base16, base17, base18, base19, base20, base21, base22,
+                                    base23, base24, base25, base26) ->
+            match var with
+            | "base1" -> Assert.AreEqual(FplType.Object, base1.EvaluationType)
+            | "base2" -> Assert.AreEqual(FplType.Object, base2.EvaluationType)
+            | "base3" -> Assert.AreEqual(FplType.Object, base3.EvaluationType)
+            | "base4" -> Assert.AreEqual(FplType.Object, base4.EvaluationType)
+            | "base5" -> Assert.AreEqual(FplType.Object, base5.EvaluationType)
+            | "base6" -> Assert.AreEqual(FplType.Object, base6.EvaluationType)
+            | "base7" -> Assert.AreEqual(FplType.Object, base7.EvaluationType)
+            | "base8" -> Assert.AreEqual(FplType.Object, base8.EvaluationType)
+            | "base9" -> Assert.AreEqual(FplType.Object, base9.EvaluationType)
+            | "base10" -> Assert.AreEqual(FplType.Object, base10.EvaluationType)
+            | "base11" -> Assert.AreEqual(FplType.Object, base11.EvaluationType)
+            | "base12" -> Assert.AreEqual(FplType.Object, base12.EvaluationType)
+            | "base13" -> Assert.AreEqual(FplType.Object, base13.EvaluationType)
+            | "base11a" -> Assert.AreEqual(FplType.Object, base11a.EvaluationType)
+            | "base12a" -> Assert.AreEqual(FplType.Object, base12a.EvaluationType)
+            | "base10b" -> Assert.AreEqual(FplType.Object, base10b.EvaluationType)
+            | "base11b" -> Assert.AreEqual(FplType.Object, base11b.EvaluationType)
+            | "base12b" -> Assert.AreEqual(FplType.Object, base12b.EvaluationType)
+            | "base13b" -> Assert.AreEqual(FplType.Object, base13b.EvaluationType)
+            | "base10c" -> Assert.AreEqual(FplType.Object, base10c.EvaluationType)
+            | "base11c" -> Assert.AreEqual(FplType.Object, base11c.EvaluationType)
+            | "base12c" -> Assert.AreEqual(FplType.Object, base12c.EvaluationType)
+            | "base13c" -> Assert.AreEqual(FplType.Object, base13c.EvaluationType)
+            | "base10d" -> Assert.AreEqual(FplType.Object, base10d.EvaluationType)
+            | "base11d" -> Assert.AreEqual(FplType.Object, base11d.EvaluationType)
+            | "base12d" -> Assert.AreEqual(FplType.Object, base12d.EvaluationType)
+            | "base13d" -> Assert.AreEqual(FplType.Object, base13d.EvaluationType)
+            | "base10e" -> Assert.AreEqual(FplType.Object, base10e.EvaluationType)
+            | "base11e" -> Assert.AreEqual(FplType.Object, base11e.EvaluationType)
+            | "base12e" -> Assert.AreEqual(FplType.Object, base12e.EvaluationType)
+            | "base13e" -> Assert.AreEqual(FplType.Object, base13e.EvaluationType)
+            | "base10f" -> Assert.AreEqual(FplType.Object, base10f.EvaluationType)
+            | "base11f" -> Assert.AreEqual(FplType.Object, base11f.EvaluationType)
+            | "base12f" -> Assert.AreEqual(FplType.Object, base12f.EvaluationType)
+            | "base13f" -> Assert.AreEqual(FplType.Object, base13f.EvaluationType)
+            | "base14" -> Assert.AreEqual(FplType.Object, base14.EvaluationType)
+            | "base15" -> Assert.AreEqual(FplType.Object, base15.EvaluationType)
+            | "base16" -> Assert.AreEqual(FplType.Object, base16.EvaluationType)
+            | "base17" -> Assert.AreEqual(FplType.Object, base17.EvaluationType)
+            | "base18" -> Assert.AreEqual(FplType.Object, base18.EvaluationType)
+            | "base19" -> Assert.AreEqual(FplType.Object, base19.EvaluationType)
+            | "base20" -> Assert.AreEqual(FplType.Object, base20.EvaluationType)
+            | "base21" -> Assert.AreEqual(FplType.Object, base21.EvaluationType)
+            | "base22" -> Assert.AreEqual(FplType.Object, base22.EvaluationType)
+            | "base23" -> Assert.AreEqual(FplType.Object, base23.EvaluationType)
+            | "base24" -> Assert.AreEqual(FplType.Object, base24.EvaluationType)
+            | "base25" -> Assert.AreEqual(FplType.Object, base25.EvaluationType)
+            | "base26" -> Assert.AreEqual(FplType.Object, base26.EvaluationType)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
