@@ -464,3 +464,116 @@ type TestFplValueScopeNameIsFinal() =
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("base1")>]
+    [<DataRow("base2")>]
+    [<DataRow("base3")>]
+    [<DataRow("base4")>]
+    [<DataRow("base5")>]
+    [<DataRow("base6")>]
+    [<DataRow("base7")>]
+    [<DataRow("base8")>]
+    [<DataRow("base9")>]
+    [<DataRow("base10")>]
+    [<DataRow("base11")>]
+    [<DataRow("base12")>]
+    [<DataRow("base13")>]
+    [<DataRow("base11a")>]
+    [<DataRow("base12a")>]
+    [<DataRow("base10b")>]
+    [<DataRow("base11b")>]
+    [<DataRow("base12b")>]
+    [<DataRow("base13b")>]
+    [<DataRow("base10c")>]
+    [<DataRow("base11c")>]
+    [<DataRow("base12c")>]
+    [<DataRow("base13c")>]
+    [<DataRow("base10d")>]
+    [<DataRow("base11d")>]
+    [<DataRow("base12d")>]
+    [<DataRow("base13d")>]
+    [<DataRow("base10e")>]
+    [<DataRow("base11e")>]
+    [<DataRow("base12e")>]
+    [<DataRow("base13e")>]
+    [<DataRow("base10f")>]
+    [<DataRow("base11f")>]
+    [<DataRow("base12f")>]
+    [<DataRow("base13f")>]
+    [<DataRow("base14")>]
+    [<DataRow("base15")>]
+    [<DataRow("base16")>]
+    [<DataRow("base17")>]
+    [<DataRow("base18")>]
+    [<DataRow("base19")>]
+    [<DataRow("base20")>]
+    [<DataRow("base21")>]
+    [<DataRow("base22")>]
+    [<DataRow("base23")>]
+    [<DataRow("base24")>]
+    [<DataRow("base25")>]
+    [<DataRow("base26")>]
+    [<TestMethod>]
+    member this.TestPredicate(var) =
+        let result = CommonFplValueTestCases.ScopePredicate()
+        match result with
+        | Some (base1,base2,base3,base4,base5, base6, base7, 
+                                    base8, base9, base10, base11, base12, base13,
+                                    base11a, base12a, base10b, base11b, base12b, base13b,
+                                    base10c, base11c, base12c, base13c, base10d, base11d,
+                                    base12d, base10e, base11e, base12e, base13d, base13e,
+                                    base10f, base11f, base12f, base13f, base14, base15,
+                                    base16, base17, base18, base19, base20, base21, base22,
+                                    base23, base24, base25, base26) ->
+            match var with
+            | "base1" -> Assert.AreEqual(true, base1.NameIsFinal)
+            | "base2" -> Assert.AreEqual(true, base2.NameIsFinal)
+            | "base3" -> Assert.AreEqual(true, base3.NameIsFinal)
+            | "base4" -> Assert.AreEqual(true, base4.NameIsFinal)
+            | "base5" -> Assert.AreEqual(true, base5.NameIsFinal)
+            | "base6" -> Assert.AreEqual(true, base6.NameIsFinal)
+            | "base7" -> Assert.AreEqual(true, base7.NameIsFinal)
+            | "base8" -> Assert.AreEqual(true, base8.NameIsFinal)
+            | "base9" -> Assert.AreEqual(true, base9.NameIsFinal)
+            | "base10" -> Assert.AreEqual(true, base10.NameIsFinal)
+            | "base11" -> Assert.AreEqual(true, base11.NameIsFinal)
+            | "base12" -> Assert.AreEqual(true, base12.NameIsFinal)
+            | "base13" -> Assert.AreEqual(true, base13.NameIsFinal)
+            | "base11a" -> Assert.AreEqual(true, base11a.NameIsFinal)
+            | "base12a" -> Assert.AreEqual(true, base12a.NameIsFinal)
+            | "base10b" -> Assert.AreEqual(true, base10b.NameIsFinal)
+            | "base11b" -> Assert.AreEqual(true, base11b.NameIsFinal)
+            | "base12b" -> Assert.AreEqual(true, base12b.NameIsFinal)
+            | "base13b" -> Assert.AreEqual(true, base13b.NameIsFinal)
+            | "base10c" -> Assert.AreEqual(true, base10c.NameIsFinal)
+            | "base11c" -> Assert.AreEqual(true, base11c.NameIsFinal)
+            | "base12c" -> Assert.AreEqual(true, base12c.NameIsFinal)
+            | "base13c" -> Assert.AreEqual(true, base13c.NameIsFinal)
+            | "base10d" -> Assert.AreEqual(true, base10d.NameIsFinal)
+            | "base11d" -> Assert.AreEqual(true, base11d.NameIsFinal)
+            | "base12d" -> Assert.AreEqual(true, base12d.NameIsFinal)
+            | "base13d" -> Assert.AreEqual(true, base13d.NameIsFinal)
+            | "base10e" -> Assert.AreEqual(true, base10e.NameIsFinal)
+            | "base11e" -> Assert.AreEqual(true, base11e.NameIsFinal)
+            | "base12e" -> Assert.AreEqual(true, base12e.NameIsFinal)
+            | "base13e" -> Assert.AreEqual(true, base13e.NameIsFinal)
+            | "base10f" -> Assert.AreEqual(true, base10f.NameIsFinal)
+            | "base11f" -> Assert.AreEqual(true, base11f.NameIsFinal)
+            | "base12f" -> Assert.AreEqual(true, base12f.NameIsFinal)
+            | "base13f" -> Assert.AreEqual(true, base13f.NameIsFinal)
+            | "base14" -> Assert.AreEqual(true, base14.NameIsFinal)
+            | "base15" -> Assert.AreEqual(true, base15.NameIsFinal)
+            | "base16" -> Assert.AreEqual(true, base16.NameIsFinal)
+            | "base17" -> Assert.AreEqual(true, base17.NameIsFinal)
+            | "base18" -> Assert.AreEqual(true, base18.NameIsFinal)
+            | "base19" -> Assert.AreEqual(true, base19.NameIsFinal)
+            | "base20" -> Assert.AreEqual(true, base20.NameIsFinal)
+            | "base21" -> Assert.AreEqual(true, base21.NameIsFinal)
+            | "base22" -> Assert.AreEqual(true, base22.NameIsFinal)
+            | "base23" -> Assert.AreEqual(true, base23.NameIsFinal)
+            | "base24" -> Assert.AreEqual(true, base24.NameIsFinal)
+            | "base25" -> Assert.AreEqual(true, base25.NameIsFinal)
+            | "base26" -> Assert.AreEqual(true, base26.NameIsFinal)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
