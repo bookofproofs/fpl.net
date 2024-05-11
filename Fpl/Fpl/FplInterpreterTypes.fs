@@ -858,7 +858,7 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
         | FplValueType.MandatoryPredicate
         | FplValueType.OptionalPredicate
         | FplValueType.Predicate -> new FplValue("", fplBlockType, FplType.Predicate, positions, Some parent)
-        | FplValueType.Reference -> new FplValue("__", fplBlockType, FplType.Undetermined, positions, Some parent)
+        | FplValueType.Reference -> new FplValue("", fplBlockType, FplType.Undetermined, positions, Some parent)
         | FplValueType.Constructor
         | FplValueType.FunctionalTerm
         | FplValueType.Variable

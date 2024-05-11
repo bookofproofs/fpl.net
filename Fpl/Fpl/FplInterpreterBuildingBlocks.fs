@@ -148,6 +148,15 @@ let tryReferenceBlockByName (fplValue:FplValue) name =
     else
         fplValue.TypeSignature <- fplValue.TypeSignature @ ["undef"]
 
+
+let propagateReference (refBlock:FplValue) = 
+    let fplValue = refBlock.Parent.Value
+    if fplValue.BlockType = FplValueType.Reference &&  not fplValue.NameIsFinal then
+        tryAddBlock refBlock
+        fplValue.Name <- fplValue.Name + refBlock.Name
+        fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
+
+
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval (st: SymbolTable) ast =
@@ -312,7 +321,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")
-        eval_pos_string st pos1 pos2 s
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue s
+        | _ -> ()
         st.EvalPop() 
     | Ast.Alias((pos1, pos2), s) -> 
         st.EvalPush("Alias")
@@ -598,8 +610,6 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue "("
             asts |> List.map (eval st) |> ignore
             adjustSignature st fplValue ")"
-            fplValue.NameEndPos <- pos2
-            tryAddBlock fplValue
         | _-> ()
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
@@ -718,10 +728,11 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InConstructorBlock fplValue 
         | EvalContext.InReferenceCreation fplValue ->
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
-            refBlock.Name <- "__del."
+            adjustSignature st refBlock "del."
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             eval st fplDelegateIdentifierAst
             eval st argumentTupleAst
+            propagateReference refBlock
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
@@ -858,6 +869,7 @@ let rec eval (st: SymbolTable) ast =
             postfixOpAst |> Option.map (eval st) |> Option.defaultValue ()
             optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
             eval st qualificationListAst
+            refBlock.Name <- "__" + refBlock.Name
             tryAddBlock refBlock
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
