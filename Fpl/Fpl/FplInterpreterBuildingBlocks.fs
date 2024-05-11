@@ -268,6 +268,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue
+        | EvalContext.InReferenceCreation fplValue
         | EvalContext.InSignature fplValue ->
             adjustSignature st fplValue s
             fplValue.NameEndPos <- pos2 // the full name ends where the dollar digits end 
