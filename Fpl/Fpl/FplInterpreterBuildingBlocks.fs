@@ -252,7 +252,10 @@ let rec eval (st: SymbolTable) ast =
     // strings: | Digits of string
     | Ast.Digits s -> 
         st.EvalPush("Digits")
-        eval_string st s
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue s
+        | _ -> ()
         st.EvalPop()
     | Ast.PascalCaseId s -> 
         st.EvalPush("PascalCaseId")
