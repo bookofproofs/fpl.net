@@ -515,7 +515,7 @@ type TestFplValueScopeExpressionType() =
     member this.TestPredicate(var) =
         let result = CommonFplValueTestCases.ScopePredicate()
         match result with
-        | Some (base1,base2,base3,base4,base5, base6, base7, 
+        | Some (theory, base1,base2,base3,base4,base5, base6, base7, 
                                     base8, base9, base10, base11, base12, base13,
                                     base11a, base12a, base10b, base11b, base12b, base13b,
                                     base10c, base11c, base12c, base13c, base10d, base11d,
