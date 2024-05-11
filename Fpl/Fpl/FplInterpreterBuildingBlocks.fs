@@ -149,10 +149,11 @@ let tryReferenceBlockByName (fplValue:FplValue) name =
         fplValue.TypeSignature <- fplValue.TypeSignature @ ["undef"]
 
 
-let propagateReference (refBlock:FplValue) = 
+let propagateReference (refBlock:FplValue) withAdding = 
     let fplValue = refBlock.Parent.Value
     if fplValue.BlockType = FplValueType.Reference &&  not fplValue.NameIsFinal then
-        tryAddBlock refBlock
+        if withAdding then 
+            tryAddBlock refBlock
         fplValue.Name <- fplValue.Name + refBlock.Name
         fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
 
@@ -469,10 +470,13 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
-    | Ast.ByDef((pos1, pos2), ast1) ->
+    | Ast.ByDef((pos1, pos2), predicateWithQualificationAst) ->
         st.EvalPush("ByDef")
-        eval st ast1
-        eval_pos_ast st pos1 pos2
+        match st.CurrentContext with 
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue "bydef "
+            eval st predicateWithQualificationAst
+        | _ -> ()
         st.EvalPop()
     | Ast.DottedPredicate((pos1, pos2), ast1) ->
         st.EvalPush("DottedPredicate")
@@ -615,7 +619,14 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
         st.EvalPush("QualificationList")
-        asts |> List.map (eval st) |> ignore
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue -> 
+            if asts.Length = 0 then
+                propagateReference fplValue false
+            else
+                asts |> List.map (eval st) |> ignore
+                propagateReference fplValue true
+        | _-> ()
         st.EvalPop()
     // | Namespace of Ast option * Ast list
     | Ast.Namespace(optAst, asts) ->
@@ -674,13 +685,23 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with 
         | EvalContext.InBlock fplValue 
         | EvalContext.InPropertyBlock fplValue 
-        | EvalContext.InConstructorBlock fplValue 
-        | EvalContext.InReferenceCreation fplValue ->
+        | EvalContext.InConstructorBlock fplValue -> 
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
             eval st fplIdentifierAst
             optionalSpecificationAst |> Option.map (eval st) |> ignore
-            eval_pos_ast_ast_opt st pos1 pos2
+        | EvalContext.InReferenceCreation fplValue ->
+            match optionalSpecificationAst with
+            | Some specificationAst -> 
+                let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
+                st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
+                eval st fplIdentifierAst
+                eval st specificationAst |> ignore
+                propagateReference refBlock true
+            | None -> 
+                // if no specification was found then simply continue in the same context
+                eval st fplIdentifierAst
+                propagateReference fplValue false
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
@@ -733,7 +754,8 @@ let rec eval (st: SymbolTable) ast =
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             eval st fplDelegateIdentifierAst
             eval st argumentTupleAst
-            propagateReference refBlock
+            // forget refBlock but propagate its name and typesignature into its parent
+            propagateReference refBlock false 
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
@@ -842,10 +864,10 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         eval st mappingAst
         st.EvalPop()
-    | Ast.PredicateWithQualification(ast1, ast2) ->
+    | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         st.EvalPush("PredicateWithQualification")
-        eval st ast1
-        eval st ast2
+        eval st predicateWithOptSpecificationAst
+        eval st qualificationListAst
         st.EvalPop()
     // | InfixOperation of Positions * (Ast * Ast option) list
     | Ast.InfixOperation((pos1, pos2), astsOpts) ->
