@@ -463,3 +463,116 @@ type TestFplValueScopeName() =
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("base1")>]
+    [<DataRow("base2")>]
+    [<DataRow("base3")>]
+    [<DataRow("base4")>]
+    [<DataRow("base5")>]
+    [<DataRow("base6")>]
+    [<DataRow("base7")>]
+    [<DataRow("base8")>]
+    [<DataRow("base9")>]
+    [<DataRow("base10")>]
+    [<DataRow("base11")>]
+    [<DataRow("base12")>]
+    [<DataRow("base13")>]
+    [<DataRow("base11a")>]
+    [<DataRow("base12a")>]
+    [<DataRow("base10b")>]
+    [<DataRow("base11b")>]
+    [<DataRow("base12b")>]
+    [<DataRow("base13b")>]
+    [<DataRow("base10c")>]
+    [<DataRow("base11c")>]
+    [<DataRow("base12c")>]
+    [<DataRow("base13c")>]
+    [<DataRow("base10d")>]
+    [<DataRow("base11d")>]
+    [<DataRow("base12d")>]
+    [<DataRow("base13d")>]
+    [<DataRow("base10e")>]
+    [<DataRow("base11e")>]
+    [<DataRow("base12e")>]
+    [<DataRow("base13e")>]
+    [<DataRow("base10f")>]
+    [<DataRow("base11f")>]
+    [<DataRow("base12f")>]
+    [<DataRow("base13f")>]
+    [<DataRow("base14")>]
+    [<DataRow("base15")>]
+    [<DataRow("base16")>]
+    [<DataRow("base17")>]
+    [<DataRow("base18")>]
+    [<DataRow("base19")>]
+    [<DataRow("base20")>]
+    [<DataRow("base21")>]
+    [<DataRow("base22")>]
+    [<DataRow("base23")>]
+    [<DataRow("base24")>]
+    [<DataRow("base25")>]
+    [<DataRow("base26")>]
+    [<TestMethod>]
+    member this.TestPredicate(var) =
+        let result = CommonFplValueTestCases.ScopePredicate()
+        match result with
+        | Some (base1,base2,base3,base4,base5, base6, base7, 
+                                    base8, base9, base10, base11, base12, base13,
+                                    base11a, base12a, base10b, base11b, base12b, base13b,
+                                    base10c, base11c, base12c, base13c, base10d, base11d,
+                                    base12d, base10e, base11e, base12e, base13d, base13e,
+                                    base10f, base11f, base12f, base13f, base14, base15,
+                                    base16, base17, base18, base19, base20, base21, base22,
+                                    base23, base24, base25, base26) ->
+            match var with
+            | "base1" -> Assert.AreEqual("", base1.Name)
+            | "base2" -> Assert.AreEqual("", base2.Name)
+            | "base3" -> Assert.AreEqual("", base3.Name)
+            | "base4" -> Assert.AreEqual("", base4.Name)
+            | "base5" -> Assert.AreEqual("", base5.Name)
+            | "base6" -> Assert.AreEqual("", base6.Name)
+            | "base7" -> Assert.AreEqual("", base7.Name)
+            | "base8" -> Assert.AreEqual("", base8.Name)
+            | "base9" -> Assert.AreEqual("", base9.Name)
+            | "base10" -> Assert.AreEqual("", base10.Name)
+            | "base11" -> Assert.AreEqual("", base11.Name)
+            | "base12" -> Assert.AreEqual("", base12.Name)
+            | "base13" -> Assert.AreEqual("", base13.Name)
+            | "base11a" -> Assert.AreEqual("", base11a.Name)
+            | "base12a" -> Assert.AreEqual("", base12a.Name)
+            | "base10b" -> Assert.AreEqual("", base10b.Name)
+            | "base11b" -> Assert.AreEqual("", base11b.Name)
+            | "base12b" -> Assert.AreEqual("", base12b.Name)
+            | "base13b" -> Assert.AreEqual("", base13b.Name)
+            | "base10c" -> Assert.AreEqual("", base10c.Name)
+            | "base11c" -> Assert.AreEqual("", base11c.Name)
+            | "base12c" -> Assert.AreEqual("", base12c.Name)
+            | "base13c" -> Assert.AreEqual("", base13c.Name)
+            | "base10d" -> Assert.AreEqual("", base10d.Name)
+            | "base11d" -> Assert.AreEqual("", base11d.Name)
+            | "base12d" -> Assert.AreEqual("", base12d.Name)
+            | "base13d" -> Assert.AreEqual("", base13d.Name)
+            | "base10e" -> Assert.AreEqual("", base10e.Name)
+            | "base11e" -> Assert.AreEqual("", base11e.Name)
+            | "base12e" -> Assert.AreEqual("", base12e.Name)
+            | "base13e" -> Assert.AreEqual("", base13e.Name)
+            | "base10f" -> Assert.AreEqual("", base10f.Name)
+            | "base11f" -> Assert.AreEqual("", base11f.Name)
+            | "base12f" -> Assert.AreEqual("", base12f.Name)
+            | "base13f" -> Assert.AreEqual("", base13f.Name)
+            | "base14" -> Assert.AreEqual("", base14.Name)
+            | "base15" -> Assert.AreEqual("", base15.Name)
+            | "base16" -> Assert.AreEqual("", base16.Name)
+            | "base17" -> Assert.AreEqual("", base17.Name)
+            | "base18" -> Assert.AreEqual("", base18.Name)
+            | "base19" -> Assert.AreEqual("", base19.Name)
+            | "base20" -> Assert.AreEqual("", base20.Name)
+            | "base21" -> Assert.AreEqual("", base21.Name)
+            | "base22" -> Assert.AreEqual("", base22.Name)
+            | "base23" -> Assert.AreEqual("", base23.Name)
+            | "base24" -> Assert.AreEqual("", base24.Name)
+            | "base25" -> Assert.AreEqual("", base25.Name)
+            | "base26" -> Assert.AreEqual("", base26.Name)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
