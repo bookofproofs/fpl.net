@@ -1,6 +1,8 @@
-namespace FplInterpreter.Tests
+﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplInterpreterTypes
+open CommonTestHelpers
+
 
 [<TestClass>]
 type TestFplValueScopeBlockType() =
@@ -462,3 +464,118 @@ type TestFplValueScopeBlockType() =
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
+
+
+    [<DataRow("base1")>]
+    [<DataRow("base2")>]
+    [<DataRow("base3")>]
+    [<DataRow("base4")>]
+    [<DataRow("base5")>]
+    [<DataRow("base6")>]
+    [<DataRow("base7")>]
+    [<DataRow("base8")>]
+    [<DataRow("base9")>]
+    [<DataRow("base10")>]
+    [<DataRow("base11")>]
+    [<DataRow("base12")>]
+    [<DataRow("base13")>]
+    [<DataRow("base11a")>]
+    [<DataRow("base12a")>]
+    [<DataRow("base10b")>]
+    [<DataRow("base11b")>]
+    [<DataRow("base12b")>]
+    [<DataRow("base13b")>]
+    [<DataRow("base10c")>]
+    [<DataRow("base11c")>]
+    [<DataRow("base12c")>]
+    [<DataRow("base13c")>]
+    [<DataRow("base10d")>]
+    [<DataRow("base11d")>]
+    [<DataRow("base12d")>]
+    [<DataRow("base13d")>]
+    [<DataRow("base10e")>]
+    [<DataRow("base11e")>]
+    [<DataRow("base12e")>]
+    [<DataRow("base13e")>]
+    [<DataRow("base10f")>]
+    [<DataRow("base11f")>]
+    [<DataRow("base12f")>]
+    [<DataRow("base13f")>]
+    [<DataRow("base14")>]
+    [<DataRow("base15")>]
+    [<DataRow("base16")>]
+    [<DataRow("base17")>]
+    [<DataRow("base18")>]
+    [<DataRow("base19")>]
+    [<DataRow("base20")>]
+    [<DataRow("base21")>]
+    [<DataRow("base22")>]
+    [<DataRow("base23")>]
+    [<DataRow("base24")>]
+    [<DataRow("base25")>]
+    [<DataRow("base26")>]
+    [<TestMethod>]
+    member this.TestPredicate(var) =
+        let result = CommonFplValueTestCases.ScopePredicate()
+        match result with
+        | Some (base1,base2,base3,base4,base5, base6, base7, 
+                                    base8, base9, base10, base11, base12, base13,
+                                    base11a, base12a, base10b, base11b, base12b, base13b,
+                                    base10c, base11c, base12c, base13c, base10d, base11d,
+                                    base12d, base10e, base11e, base12e, base13d, base13e,
+                                    base10f, base11f, base12f, base13f, base14, base15,
+                                    base16, base17, base18, base19, base20, base21, base22,
+                                    base23, base24, base25, base26) ->
+            match var with
+            | "base1" -> Assert.AreEqual(FplValueType.Expression, base1.BlockType)
+            | "base2" -> Assert.AreEqual(FplValueType.Expression, base2.BlockType)
+            | "base3" -> Assert.AreEqual(FplValueType.Expression, base3.BlockType)
+            | "base4" -> Assert.AreEqual(FplValueType.Expression, base4.BlockType)
+            | "base5" -> Assert.AreEqual(FplValueType.Expression, base5.BlockType)
+            | "base6" -> Assert.AreEqual(FplValueType.Expression, base6.BlockType)
+            | "base7" -> Assert.AreEqual(FplValueType.Expression, base7.BlockType)
+            | "base8" -> Assert.AreEqual(FplValueType.Expression, base8.BlockType)
+            | "base9" -> Assert.AreEqual(FplValueType.Expression, base9.BlockType)
+            | "base10" -> Assert.AreEqual(FplValueType.Expression, base10.BlockType)
+            | "base11" -> Assert.AreEqual(FplValueType.Expression, base11.BlockType)
+            | "base12" -> Assert.AreEqual(FplValueType.Expression, base12.BlockType)
+            | "base13" -> Assert.AreEqual(FplValueType.Expression, base13.BlockType)
+            | "base11a" -> Assert.AreEqual(FplValueType.Expression, base11a.BlockType)
+            | "base12a" -> Assert.AreEqual(FplValueType.Expression, base12a.BlockType)
+            | "base10b" -> Assert.AreEqual(FplValueType.Expression, base10b.BlockType)
+            | "base11b" -> Assert.AreEqual(FplValueType.Expression, base11b.BlockType)
+            | "base12b" -> Assert.AreEqual(FplValueType.Expression, base12b.BlockType)
+            | "base13b" -> Assert.AreEqual(FplValueType.Expression, base13b.BlockType)
+            | "base10c" -> Assert.AreEqual(FplValueType.Expression, base10c.BlockType)
+            | "base11c" -> Assert.AreEqual(FplValueType.Expression, base11c.BlockType)
+            | "base12c" -> Assert.AreEqual(FplValueType.Expression, base12c.BlockType)
+            | "base13c" -> Assert.AreEqual(FplValueType.Expression, base13c.BlockType)
+            | "base10d" -> Assert.AreEqual(FplValueType.Expression, base10d.BlockType)
+            | "base11d" -> Assert.AreEqual(FplValueType.Expression, base11d.BlockType)
+            | "base12d" -> Assert.AreEqual(FplValueType.Expression, base12d.BlockType)
+            | "base13d" -> Assert.AreEqual(FplValueType.Expression, base13d.BlockType)
+            | "base10e" -> Assert.AreEqual(FplValueType.Expression, base10e.BlockType)
+            | "base11e" -> Assert.AreEqual(FplValueType.Expression, base11e.BlockType)
+            | "base12e" -> Assert.AreEqual(FplValueType.Expression, base12e.BlockType)
+            | "base13e" -> Assert.AreEqual(FplValueType.Expression, base13e.BlockType)
+            | "base10f" -> Assert.AreEqual(FplValueType.Expression, base10f.BlockType)
+            | "base11f" -> Assert.AreEqual(FplValueType.Expression, base11f.BlockType)
+            | "base12f" -> Assert.AreEqual(FplValueType.Expression, base12f.BlockType)
+            | "base13f" -> Assert.AreEqual(FplValueType.Expression, base13f.BlockType)
+            | "base14" -> Assert.AreEqual(FplValueType.Expression, base14.BlockType)
+            | "base15" -> Assert.AreEqual(FplValueType.Expression, base15.BlockType)
+            | "base16" -> Assert.AreEqual(FplValueType.Expression, base16.BlockType)
+            | "base17" -> Assert.AreEqual(FplValueType.Expression, base17.BlockType)
+            | "base18" -> Assert.AreEqual(FplValueType.Expression, base18.BlockType)
+            | "base19" -> Assert.AreEqual(FplValueType.Expression, base19.BlockType)
+            | "base20" -> Assert.AreEqual(FplValueType.Expression, base20.BlockType)
+            | "base21" -> Assert.AreEqual(FplValueType.Expression, base21.BlockType)
+            | "base22" -> Assert.AreEqual(FplValueType.Expression, base22.BlockType)
+            | "base23" -> Assert.AreEqual(FplValueType.Expression, base23.BlockType)
+            | "base24" -> Assert.AreEqual(FplValueType.Expression, base24.BlockType)
+            | "base25" -> Assert.AreEqual(FplValueType.Expression, base25.BlockType)
+            | "base26" -> Assert.AreEqual(FplValueType.Expression, base26.BlockType)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+

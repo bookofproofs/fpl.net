@@ -943,7 +943,7 @@ type CommonFplValueTestCases =
                             let base12e = pr12e.Scope["self(x,y).3[a,b]"]
 
                             let pr13e = theory.Scope["T13e()"] 
-                            let base13d = pr13e.Scope["1(x,y).T[a,b]"]
+                            let base13e = pr13e.Scope["1(x,y).T[a,b]"]
 
                             let pr10f = theory.Scope["T10f()"] 
                             let base10f = pr10f.Scope["Test[x,y].x(a,b)"]
@@ -1000,7 +1000,7 @@ type CommonFplValueTestCases =
                                     base8, base9, base10, base11, base12, base13,
                                     base11a, base12a, base10b, base11b, base12b, base13b,
                                     base10c, base11c, base12c, base13c, base10d, base11d,
-                                    base12d, base13d, base10e, base11e, base12e, base13d,
+                                    base12d, base10e, base11e, base12e, base13d, base13e,
                                     base10f, base11f, base12f, base13f, base14, base15,
                                     base16, base17, base18, base19, base20, base21, base22,
                                     base23, base24, base25, base26)
