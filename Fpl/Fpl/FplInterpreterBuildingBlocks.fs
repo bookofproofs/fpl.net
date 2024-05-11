@@ -328,7 +328,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
-        eval_pos_string st pos1 pos2 s
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue s
+        | _ -> ()
         st.EvalPop() 
     | Ast.Prefix((pos1, pos2), s) -> 
         st.EvalPush("Prefix")
