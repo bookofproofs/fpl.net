@@ -457,3 +457,116 @@ type TestFplValueScopeQualifiedName() =
             | "ywc" -> Assert.AreEqual("y.w.c", ywc.QualifiedName)
             | _ -> Assert.IsTrue(false)
         | None -> Assert.IsTrue(false)
+
+    [<DataRow("base1")>]
+    [<DataRow("base2")>]
+    [<DataRow("base3")>]
+    [<DataRow("base4")>]
+    [<DataRow("base5")>]
+    [<DataRow("base6")>]
+    [<DataRow("base7")>]
+    [<DataRow("base8")>]
+    [<DataRow("base9")>]
+    [<DataRow("base10")>]
+    [<DataRow("base11")>]
+    [<DataRow("base12")>]
+    [<DataRow("base13")>]
+    [<DataRow("base11a")>]
+    [<DataRow("base12a")>]
+    [<DataRow("base10b")>]
+    [<DataRow("base11b")>]
+    [<DataRow("base12b")>]
+    [<DataRow("base13b")>]
+    [<DataRow("base10c")>]
+    [<DataRow("base11c")>]
+    [<DataRow("base12c")>]
+    [<DataRow("base13c")>]
+    [<DataRow("base10d")>]
+    [<DataRow("base11d")>]
+    [<DataRow("base12d")>]
+    [<DataRow("base13d")>]
+    [<DataRow("base10e")>]
+    [<DataRow("base11e")>]
+    [<DataRow("base12e")>]
+    [<DataRow("base13e")>]
+    [<DataRow("base10f")>]
+    [<DataRow("base11f")>]
+    [<DataRow("base12f")>]
+    [<DataRow("base13f")>]
+    [<DataRow("base14")>]
+    [<DataRow("base15")>]
+    [<DataRow("base16")>]
+    [<DataRow("base17")>]
+    [<DataRow("base18")>]
+    [<DataRow("base19")>]
+    [<DataRow("base20")>]
+    [<DataRow("base21")>]
+    [<DataRow("base22")>]
+    [<DataRow("base23")>]
+    [<DataRow("base24")>]
+    [<DataRow("base25")>]
+    [<DataRow("base26")>]
+    [<TestMethod>]
+    member this.TestPredicate(var) =
+        let result = CommonFplValueTestCases.ScopePredicate()
+        match result with
+        | Some (theory, base1,base2,base3,base4,base5, base6, base7, 
+                                    base8, base9, base10, base11, base12, base13,
+                                    base11a, base12a, base10b, base11b, base12b, base13b,
+                                    base10c, base11c, base12c, base13c, base10d, base11d,
+                                    base12d, base10e, base11e, base12e, base13d, base13e,
+                                    base10f, base11f, base12f, base13f, base14, base15,
+                                    base16, base17, base18, base19, base20, base21, base22,
+                                    base23, base24, base25, base26) ->
+            match var with
+            | "base1" -> Assert.AreEqual("", base1.QualifiedName)
+            | "base2" -> Assert.AreEqual("", base2.QualifiedName)
+            | "base3" -> Assert.AreEqual("", base3.QualifiedName)
+            | "base4" -> Assert.AreEqual("", base4.QualifiedName)
+            | "base5" -> Assert.AreEqual("", base5.QualifiedName)
+            | "base6" -> Assert.AreEqual("", base6.QualifiedName)
+            | "base7" -> Assert.AreEqual("", base7.QualifiedName)
+            | "base8" -> Assert.AreEqual("", base8.QualifiedName)
+            | "base9" -> Assert.AreEqual("", base9.QualifiedName)
+            | "base10" -> Assert.AreEqual("", base10.QualifiedName)
+            | "base11" -> Assert.AreEqual("", base11.QualifiedName)
+            | "base12" -> Assert.AreEqual("", base12.QualifiedName)
+            | "base13" -> Assert.AreEqual("", base13.QualifiedName)
+            | "base11a" -> Assert.AreEqual("", base11a.QualifiedName)
+            | "base12a" -> Assert.AreEqual("", base12a.QualifiedName)
+            | "base10b" -> Assert.AreEqual("", base10b.QualifiedName)
+            | "base11b" -> Assert.AreEqual("", base11b.QualifiedName)
+            | "base12b" -> Assert.AreEqual("", base12b.QualifiedName)
+            | "base13b" -> Assert.AreEqual("", base13b.QualifiedName)
+            | "base10c" -> Assert.AreEqual("", base10c.QualifiedName)
+            | "base11c" -> Assert.AreEqual("", base11c.QualifiedName)
+            | "base12c" -> Assert.AreEqual("", base12c.QualifiedName)
+            | "base13c" -> Assert.AreEqual("", base13c.QualifiedName)
+            | "base10d" -> Assert.AreEqual("", base10d.QualifiedName)
+            | "base11d" -> Assert.AreEqual("", base11d.QualifiedName)
+            | "base12d" -> Assert.AreEqual("", base12d.QualifiedName)
+            | "base13d" -> Assert.AreEqual("", base13d.QualifiedName)
+            | "base10e" -> Assert.AreEqual("", base10e.QualifiedName)
+            | "base11e" -> Assert.AreEqual("", base11e.QualifiedName)
+            | "base12e" -> Assert.AreEqual("", base12e.QualifiedName)
+            | "base13e" -> Assert.AreEqual("", base13e.QualifiedName)
+            | "base10f" -> Assert.AreEqual("", base10f.QualifiedName)
+            | "base11f" -> Assert.AreEqual("", base11f.QualifiedName)
+            | "base12f" -> Assert.AreEqual("", base12f.QualifiedName)
+            | "base13f" -> Assert.AreEqual("", base13f.QualifiedName)
+            | "base14" -> Assert.AreEqual("", base14.QualifiedName)
+            | "base15" -> Assert.AreEqual("", base15.QualifiedName)
+            | "base16" -> Assert.AreEqual("", base16.QualifiedName)
+            | "base17" -> Assert.AreEqual("", base17.QualifiedName)
+            | "base18" -> Assert.AreEqual("", base18.QualifiedName)
+            | "base19" -> Assert.AreEqual("", base19.QualifiedName)
+            | "base20" -> Assert.AreEqual("", base20.QualifiedName)
+            | "base21" -> Assert.AreEqual("", base21.QualifiedName)
+            | "base22" -> Assert.AreEqual("", base22.QualifiedName)
+            | "base23" -> Assert.AreEqual("", base23.QualifiedName)
+            | "base24" -> Assert.AreEqual("", base24.QualifiedName)
+            | "base25" -> Assert.AreEqual("", base25.QualifiedName)
+            | "base26" -> Assert.AreEqual("", base26.QualifiedName)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
