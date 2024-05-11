@@ -462,3 +462,116 @@ type TestFplValueScopeExpressionType() =
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("base1")>]
+    [<DataRow("base2")>]
+    [<DataRow("base3")>]
+    [<DataRow("base4")>]
+    [<DataRow("base5")>]
+    [<DataRow("base6")>]
+    [<DataRow("base7")>]
+    [<DataRow("base8")>]
+    [<DataRow("base9")>]
+    [<DataRow("base10")>]
+    [<DataRow("base11")>]
+    [<DataRow("base12")>]
+    [<DataRow("base13")>]
+    [<DataRow("base11a")>]
+    [<DataRow("base12a")>]
+    [<DataRow("base10b")>]
+    [<DataRow("base11b")>]
+    [<DataRow("base12b")>]
+    [<DataRow("base13b")>]
+    [<DataRow("base10c")>]
+    [<DataRow("base11c")>]
+    [<DataRow("base12c")>]
+    [<DataRow("base13c")>]
+    [<DataRow("base10d")>]
+    [<DataRow("base11d")>]
+    [<DataRow("base12d")>]
+    [<DataRow("base13d")>]
+    [<DataRow("base10e")>]
+    [<DataRow("base11e")>]
+    [<DataRow("base12e")>]
+    [<DataRow("base13e")>]
+    [<DataRow("base10f")>]
+    [<DataRow("base11f")>]
+    [<DataRow("base12f")>]
+    [<DataRow("base13f")>]
+    [<DataRow("base14")>]
+    [<DataRow("base15")>]
+    [<DataRow("base16")>]
+    [<DataRow("base17")>]
+    [<DataRow("base18")>]
+    [<DataRow("base19")>]
+    [<DataRow("base20")>]
+    [<DataRow("base21")>]
+    [<DataRow("base22")>]
+    [<DataRow("base23")>]
+    [<DataRow("base24")>]
+    [<DataRow("base25")>]
+    [<DataRow("base26")>]
+    [<TestMethod>]
+    member this.TestPredicate(var) =
+        let result = CommonFplValueTestCases.ScopePredicate()
+        match result with
+        | Some (base1,base2,base3,base4,base5, base6, base7, 
+                                    base8, base9, base10, base11, base12, base13,
+                                    base11a, base12a, base10b, base11b, base12b, base13b,
+                                    base10c, base11c, base12c, base13c, base10d, base11d,
+                                    base12d, base10e, base11e, base12e, base13d, base13e,
+                                    base10f, base11f, base12f, base13f, base14, base15,
+                                    base16, base17, base18, base19, base20, base21, base22,
+                                    base23, base24, base25, base26) ->
+            match var with
+            | "base1" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
+            | "base2" -> Assert.AreEqual(ExprType.NoType, base2.ExpressionType)
+            | "base3" -> Assert.AreEqual(ExprType.NoType, base3.ExpressionType)
+            | "base4" -> Assert.AreEqual(ExprType.NoType, base4.ExpressionType)
+            | "base5" -> Assert.AreEqual(ExprType.NoType, base5.ExpressionType)
+            | "base6" -> Assert.AreEqual(ExprType.NoType, base6.ExpressionType)
+            | "base7" -> Assert.AreEqual(ExprType.NoType, base7.ExpressionType)
+            | "base8" -> Assert.AreEqual(ExprType.NoType, base8.ExpressionType)
+            | "base9" -> Assert.AreEqual(ExprType.NoType, base9.ExpressionType)
+            | "base10" -> Assert.AreEqual(ExprType.NoType, base10.ExpressionType)
+            | "base11" -> Assert.AreEqual(ExprType.NoType, base11.ExpressionType)
+            | "base12" -> Assert.AreEqual(ExprType.NoType, base12.ExpressionType)
+            | "base13" -> Assert.AreEqual(ExprType.NoType, base13.ExpressionType)
+            | "base11a" -> Assert.AreEqual(ExprType.NoType, base11a.ExpressionType)
+            | "base12a" -> Assert.AreEqual(ExprType.NoType, base12a.ExpressionType)
+            | "base10b" -> Assert.AreEqual(ExprType.NoType, base10b.ExpressionType)
+            | "base11b" -> Assert.AreEqual(ExprType.NoType, base11b.ExpressionType)
+            | "base12b" -> Assert.AreEqual(ExprType.NoType, base12b.ExpressionType)
+            | "base13b" -> Assert.AreEqual(ExprType.NoType, base13b.ExpressionType)
+            | "base10c" -> Assert.AreEqual(ExprType.NoType, base10c.ExpressionType)
+            | "base11c" -> Assert.AreEqual(ExprType.NoType, base11c.ExpressionType)
+            | "base12c" -> Assert.AreEqual(ExprType.NoType, base12c.ExpressionType)
+            | "base13c" -> Assert.AreEqual(ExprType.NoType, base13c.ExpressionType)
+            | "base10d" -> Assert.AreEqual(ExprType.NoType, base10d.ExpressionType)
+            | "base11d" -> Assert.AreEqual(ExprType.NoType, base11d.ExpressionType)
+            | "base12d" -> Assert.AreEqual(ExprType.NoType, base12d.ExpressionType)
+            | "base13d" -> Assert.AreEqual(ExprType.NoType, base13d.ExpressionType)
+            | "base10e" -> Assert.AreEqual(ExprType.NoType, base10e.ExpressionType)
+            | "base11e" -> Assert.AreEqual(ExprType.NoType, base11e.ExpressionType)
+            | "base12e" -> Assert.AreEqual(ExprType.NoType, base12e.ExpressionType)
+            | "base13e" -> Assert.AreEqual(ExprType.NoType, base13e.ExpressionType)
+            | "base10f" -> Assert.AreEqual(ExprType.NoType, base10f.ExpressionType)
+            | "base11f" -> Assert.AreEqual(ExprType.NoType, base11f.ExpressionType)
+            | "base12f" -> Assert.AreEqual(ExprType.NoType, base12f.ExpressionType)
+            | "base13f" -> Assert.AreEqual(ExprType.NoType, base13f.ExpressionType)
+            | "base14" -> Assert.AreEqual(ExprType.NoType, base14.ExpressionType)
+            | "base15" -> Assert.AreEqual(ExprType.NoType, base15.ExpressionType)
+            | "base16" -> Assert.AreEqual(ExprType.NoType, base16.ExpressionType)
+            | "base17" -> Assert.AreEqual(ExprType.NoType, base17.ExpressionType)
+            | "base18" -> Assert.AreEqual(ExprType.NoType, base18.ExpressionType)
+            | "base19" -> Assert.AreEqual(ExprType.NoType, base19.ExpressionType)
+            | "base20" -> Assert.AreEqual(ExprType.NoType, base20.ExpressionType)
+            | "base21" -> Assert.AreEqual(ExprType.NoType, base21.ExpressionType)
+            | "base22" -> Assert.AreEqual(ExprType.NoType, base22.ExpressionType)
+            | "base23" -> Assert.AreEqual(ExprType.NoType, base23.ExpressionType)
+            | "base24" -> Assert.AreEqual(ExprType.NoType, base24.ExpressionType)
+            | "base25" -> Assert.AreEqual(ExprType.NoType, base25.ExpressionType)
+            | "base26" -> Assert.AreEqual(ExprType.NoType, base26.ExpressionType)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
