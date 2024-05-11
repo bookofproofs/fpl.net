@@ -708,7 +708,11 @@ let rec eval (st: SymbolTable) ast =
     // | SelfAts of Positions * char list
     | Ast.SelfAts((pos1, pos2), chars) -> 
         st.EvalPush("SelfAts")
-        eval_pos_char_list st pos1 pos2 chars
+        let identifier = (chars |> List.map (fun c -> c.ToString()) |>  String.concat "") + "self"
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue identifier
+        | _ -> ()
         st.EvalPop()
     // | Translation of string * Ast
     | Ast.Translation(s, ast1) ->
