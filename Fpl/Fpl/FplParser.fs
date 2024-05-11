@@ -339,7 +339,7 @@ predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualif
 
 let dollarDigitList = many1 dollarDigits
 let referencingIdentifier = positions "ReferencingIdentifier" (predicateIdentifier .>>. dollarDigitList) .>> IW |>> Ast.ReferencingIdentifier
-let referenceToProofOrCorollary = positions "ReferenceToProofOrCorollary" (referencingIdentifier .>>. opt paramTuple) .>> IW |>> Ast.ReferenceToProofOrCorollary
+let referenceToProofOrCorollary = positions "ReferenceToProofOrCorollary" (referencingIdentifier .>>. opt argumentTuple) .>> IW |>> Ast.ReferenceToProofOrCorollary
 
 let byDefinition = positions "ByDef" (keywordBydef >>. predicateWithQualification ) |>> Ast.ByDef 
 
