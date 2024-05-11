@@ -138,7 +138,7 @@ let tryAddBlock (fplValue:FplValue) =
 
 let tryReferenceBlockByName (fplValue:FplValue) name =
     let parent = fplValue.Parent.Value
-    if fplValue.Name.EndsWith "(" || fplValue.Name = "" then
+    if fplValue.Name.EndsWith "(" || fplValue.Name = "" || fplValue.Name.EndsWith "." then
         fplValue.Name <- fplValue.Name + name
     else
         fplValue.Name <- fplValue.Name + ", " + name
@@ -481,10 +481,17 @@ let rec eval (st: SymbolTable) ast =
             eval st predicateWithQualificationAst
         | _ -> ()
         st.EvalPop()
-    | Ast.DottedPredicate((pos1, pos2), ast1) ->
+    | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->
         st.EvalPush("DottedPredicate")
-        eval st ast1
-        eval_pos_ast st pos1 pos2
+        let oldContext = st.CurrentContext
+        match st.CurrentContext with 
+        | EvalContext.InReferenceCreation fplValue -> 
+            let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
+            adjustSignature st refBlock "."
+            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
+            eval st predicateWithOptSpecificationAst
+        | _ -> ()
+        st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     | Ast.Return((pos1, pos2), ast1) ->
         st.EvalPush("Return")
