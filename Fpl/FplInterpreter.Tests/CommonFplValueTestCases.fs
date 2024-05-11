@@ -853,9 +853,9 @@ type CommonFplValueTestCases =
                             let theory = r.Scope["Test"]
 
                             let pr1 = theory.Scope["T1()"] 
-                            let base1 = pr1.Scope["true"]
+                            let base1 = pr1.Scope["__true"]
 
-                            let pr2 = theory.Scope["T2() "]
+                            let pr2 = theory.Scope["T2()"]
                             let base2 = pr2.Scope["false"]
 
                             let pr3 = theory.Scope["T3()"]

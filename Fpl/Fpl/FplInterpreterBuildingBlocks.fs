@@ -23,6 +23,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
                 || fplValue.Name.Length = 0 
                 || fplValue.Name.EndsWith "-> " 
                 || fplValue.Name.EndsWith "." 
+                || fplValue.Name.EndsWith "__" 
                 || str.StartsWith "$" then
                 if str = "->" then 
                     fplValue.Name <- fplValue.Name + " " + str + " "
@@ -364,7 +365,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.True((pos1, pos2), _) -> 
         st.EvalPush("True")
-        eval_pos_unit st pos1 pos2
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue "true"
+        | _ -> ()
         st.EvalPop() 
     | Ast.False((pos1, pos2), _) -> 
         st.EvalPush("False")
@@ -830,13 +834,24 @@ let rec eval (st: SymbolTable) ast =
         |> ignore
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
-    | Ast.Expression((pos1, pos2), ((((optAst1, ast1), optAst2), optAst3), ast2)) ->
+    | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
         st.EvalPush("Expression")
-        optAst1 |> Option.map (eval st) |> Option.defaultValue ()
-        eval st ast1
-        optAst2 |> Option.map (eval st) |> Option.defaultValue ()
-        optAst3 |> Option.map (eval st) |> Option.defaultValue ()
-        eval st ast2
+        let oldContext = st.CurrentContext 
+        match st.CurrentContext with 
+        | EvalContext.InBlock fplValue 
+        | EvalContext.InPropertyBlock fplValue 
+        | EvalContext.InConstructorBlock fplValue 
+        | EvalContext.InReferenceCreation fplValue ->
+            let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
+            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
+            prefixOpAst |> Option.map (eval st) |> Option.defaultValue ()
+            eval st predicateAst
+            postfixOpAst |> Option.map (eval st) |> Option.defaultValue ()
+            optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
+            eval st qualificationListAst
+            tryAddBlock refBlock
+        | _ -> ()
+        st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
     | Ast.Cases((pos1, pos2), (asts, ast1)) ->
