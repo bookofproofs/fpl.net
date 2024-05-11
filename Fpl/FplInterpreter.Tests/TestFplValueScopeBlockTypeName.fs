@@ -59,3 +59,57 @@ type TestFplBlockType() =
         | _ -> 
             Assert.IsTrue(false)
 
+    [<DataRow("Variable")>]
+    [<DataRow("VariadicVariableMany")>]
+    [<DataRow("VariadicVariableMany1")>]
+    [<DataRow("Expression")>]
+    [<DataRow("MandatoryFunctionalTerm")>]
+    [<DataRow("OptionalFunctionalTerm")>]
+    [<DataRow("MandatoryPredicate")>]
+    [<DataRow("OptionalPredicate")>]
+    [<DataRow("Constructor")>]
+    [<DataRow("Class")>]
+    [<DataRow("Theorem")>]
+    [<DataRow("Lemma")>]
+    [<DataRow("Proposition")>]
+    [<DataRow("Corollary")>]
+    [<DataRow("Proof")>]
+    [<DataRow("Conjecture")>]
+    [<DataRow("Axiom")>]
+    [<DataRow("RuleOfInference")>]
+    [<DataRow("Premise")>]
+    [<DataRow("Conclusion")>]
+    [<DataRow("Predicate")>]
+    [<DataRow("FunctionalTerm")>]
+    [<DataRow("Theory")>]
+    [<DataRow("Root")>]
+    [<TestMethod>]
+    member this.TestBlockTypeShortName(var) =
+        match var with
+        | "Variable" -> Assert.AreEqual("var",FplValueType.Variable.ShortName)
+        | "VariadicVariableMany" -> Assert.AreEqual("*var",FplValueType.VariadicVariableMany.ShortName)
+        | "VariadicVariableMany1" -> Assert.AreEqual("+var",FplValueType.VariadicVariableMany1.ShortName)
+        | "Expression" -> Assert.AreEqual("expr",FplValueType.Expression.ShortName)
+        | "MandatoryFunctionalTerm" -> Assert.AreEqual("prop",FplValueType.MandatoryFunctionalTerm.ShortName)
+        | "OptionalFunctionalTerm" -> Assert.AreEqual("prop",FplValueType.OptionalFunctionalTerm.ShortName)
+        | "MandatoryPredicate" -> Assert.AreEqual("prop",FplValueType.MandatoryPredicate.ShortName)
+        | "OptionalPredicate" -> Assert.AreEqual("prop",FplValueType.OptionalPredicate.ShortName)
+        | "Constructor" -> Assert.AreEqual("ctor",FplValueType.Constructor.ShortName)
+        | "Class" -> Assert.AreEqual("cl",FplValueType.Class.ShortName)
+        | "Theorem" -> Assert.AreEqual("thm",FplValueType.Theorem.ShortName)
+        | "Lemma" -> Assert.AreEqual("lem",FplValueType.Lemma.ShortName)
+        | "Proposition" -> Assert.AreEqual("prop",FplValueType.Proposition.ShortName)
+        | "Corollary" -> Assert.AreEqual("cor",FplValueType.Corollary.ShortName)
+        | "Proof" -> Assert.AreEqual("prf",FplValueType.Proof.ShortName)
+        | "Conjecture" -> Assert.AreEqual("conj",FplValueType.Conjecture.ShortName)
+        | "Axiom" -> Assert.AreEqual("ax",FplValueType.Axiom.ShortName)
+        | "RuleOfInference" -> Assert.AreEqual("inf",FplValueType.RuleOfInference.ShortName)
+        | "Premise" -> Assert.AreEqual("pre",FplValueType.Premise.ShortName)
+        | "Conclusion" -> Assert.AreEqual("con",FplValueType.Conclusion.ShortName)
+        | "Predicate" -> Assert.AreEqual("pred",FplValueType.Predicate.ShortName)
+        | "FunctionalTerm" -> Assert.AreEqual("func",FplValueType.FunctionalTerm.ShortName)
+        | "Theory" -> Assert.AreEqual("th",FplValueType.Theory.ShortName)
+        | "Root" -> Assert.AreEqual("root",FplValueType.Root.ShortName)
+        | _ -> 
+            Assert.IsTrue(false)
+
