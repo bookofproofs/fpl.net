@@ -56,7 +56,7 @@ type TestParserErrors() =
     member this.TestPRP000() =
         let code = PRP000
         printf "Trying %s" code.Message
-        let input = """
+        let input = """def pred T() {true property pred T(){#}}
         ;
         """
         let ast = fplParser input
@@ -162,7 +162,7 @@ type TestParserErrors() =
     member this.TestCTR000() =
         let code = CTR000
         printf "Trying %s" code.Message
-        let input = """
+        let input = """def cl T:obj {ctor x() {self}}
         ;
         """
         let ast = fplParser input
@@ -173,7 +173,7 @@ type TestParserErrors() =
     member this.TestPRF000() =
         let code = PRF000
         printf "Trying %s" code.Message
-        let input = """
+        let input = """ prf #
         ;
         """
         let ast = fplParser input
@@ -193,7 +193,7 @@ type TestParserErrors() =
     member this.TestLOC000() =
         let code = LOC000
         printf "Trying %s" code.Message
-        let input = """
+        let input = """loc X#
         ;
         """
         let ast = fplParser input
@@ -300,7 +300,7 @@ type TestParserErrors() =
     member this.TestRET000() =
         let code = RET000
         printf "Trying %s" code.Message
-        let input = """
+        let input = """def func T()->obj {return #}
         ;
         """
         let ast = fplParser input
