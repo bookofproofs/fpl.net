@@ -12,6 +12,7 @@
     <Compile Include="CommonFplValueTestCases.fs" />
     <Compile Include="TestFplValueScopeExpressionType.fs" />
     <Compile Include="TestFplValueScopeEvaluationType.fs" />
+    <Compile Include="TestFplValueScopeFplRepresentation.fs" />
     <Compile Include="TestFplValueScopeTypeSignature.fs" />
     <Compile Include="TestFplValueScopeNameEndPos.fs" />
     <Compile Include="TestFplValueScopeQualifiedName.fs" />
