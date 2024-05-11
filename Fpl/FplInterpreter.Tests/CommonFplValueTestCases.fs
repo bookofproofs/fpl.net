@@ -856,145 +856,145 @@ type CommonFplValueTestCases =
                             let base1 = pr1.Scope["__true"]
 
                             let pr2 = theory.Scope["T2()"]
-                            let base2 = pr2.Scope["false"]
+                            let base2 = pr2.Scope["__false"]
 
                             let pr3 = theory.Scope["T3()"]
-                            let base3 = pr3.Scope["undef"]
+                            let base3 = pr3.Scope["__undef"]
 
                             let pr4 = theory.Scope["T4()"] 
-                            let base4 = pr4.Scope["1."]
+                            let base4 = pr4.Scope["__1."]
 
                             let pr5 = theory.Scope["T5()"] 
-                            let base5 = pr5.Scope["del.Test()"]
+                            let base5 = pr5.Scope["__del.Test()"]
 
                             let pr6 = theory.Scope["T6()"] 
-                            let base6 = pr6.Scope["$1"]
+                            let base6 = pr6.Scope["__$1"]
 
                             let pr7 = theory.Scope["T7()"] 
-                            let base7 = pr7.Scope["bydef Test()"] 
+                            let base7 = pr7.Scope["__bydef Test()"] 
 
                             let pr8 = theory.Scope["T8()"] 
-                            let base8 = pr8.Scope["Test$1"]
+                            let base8 = pr8.Scope["__Test$1"]
             
                             let pr9 = theory.Scope["T9()"] 
-                            let base9 = pr9.Scope["Test$1()"]
+                            let base9 = pr9.Scope["__Test$1()"]
             
                             let pr10 = theory.Scope["T10()"] 
-                            let base10 = pr10.Scope["Test"]
+                            let base10 = pr10.Scope["__Test"]
 
                             let pr11 = theory.Scope["T11()"] 
-                            let base11 = pr11.Scope["v"]
+                            let base11 = pr11.Scope["__v"]
 
                             let pr12 = theory.Scope["T12()"] 
-                            let base12 = pr12.Scope["self"]
+                            let base12 = pr12.Scope["__self"]
 
                             let pr13 = theory.Scope["T13()"] 
-                            let base13 = pr13.Scope["1"]
+                            let base13 = pr13.Scope["__1"]
 
                             let pr11a = theory.Scope["T11a()"] 
-                            let base11a = pr11a.Scope["v.x"]
+                            let base11a = pr11a.Scope["__v.x"]
 
                             let pr12a = theory.Scope["T12a()"] 
-                            let base12a = pr12a.Scope["self.x"]
+                            let base12a = pr12a.Scope["__self.x"]
 
                             let pr10b = theory.Scope["T10b()"] 
-                            let base10b = pr10b.Scope["Test()"]
+                            let base10b = pr10b.Scope["__Test()"]
 
                             let pr11b = theory.Scope["T11b()"] 
-                            let base11b = pr11b.Scope["v()"]
+                            let base11b = pr11b.Scope["__v()"]
 
                             let pr12b = theory.Scope["T12b()"] 
-                            let base12b = pr12b.Scope["self()"]
+                            let base12b = pr12b.Scope["__self()"]
 
                             let pr13b = theory.Scope["T13b()"] 
-                            let base13b = pr13b.Scope["1()"]
+                            let base13b = pr13b.Scope["__1()"]
 
                             let pr10c = theory.Scope["T10c()"] 
-                            let base10c = pr10c.Scope["Test(x,y)"]
+                            let base10c = pr10c.Scope["__Test(x,y)"]
 
                             let pr11c = theory.Scope["T11c()"] 
-                            let base11c = pr11c.Scope["v(x,y)"]
+                            let base11c = pr11c.Scope["__v(x,y)"]
 
                             let pr12c = theory.Scope["T12c()"] 
-                            let base12c = pr12c.Scope["self(x,y)"]
+                            let base12c = pr12c.Scope["__self(x,y)"]
 
                             let pr13c = theory.Scope["T13c()"] 
-                            let base13c = pr13c.Scope["1(x,y)"]
+                            let base13c = pr13c.Scope["__1(x,y)"]
 
                             let pr10d = theory.Scope["T10d()"] 
-                            let base10d = pr10d.Scope["Test[x,y]"]
+                            let base10d = pr10d.Scope["__Test[x,y]"]
 
                             let pr11d = theory.Scope["T11d()"] 
-                            let base11d = pr11d.Scope["v[x,y]"]
+                            let base11d = pr11d.Scope["__v[x,y]"]
 
                             let pr12d = theory.Scope["T12d()"] 
-                            let base12d = pr12d.Scope["self[x,y]"]
+                            let base12d = pr12d.Scope["__self[x,y]"]
 
                             let pr13d = theory.Scope["T13d()"] 
-                            let base13d = pr13d.Scope["1[x.y]"]
+                            let base13d = pr13d.Scope["__1[x.y]"]
 
                             let pr10e = theory.Scope["T10e()"] 
-                            let base10e = pr10e.Scope["Test(x,y).@self[a,b]"]
+                            let base10e = pr10e.Scope["__Test(x,y).@self[a,b]"]
 
                             let pr11e = theory.Scope["T11e()"] 
-                            let base11e = pr11e.Scope["v(x,y).x[a,b]"]
+                            let base11e = pr11e.Scope["__v(x,y).x[a,b]"]
 
                             let pr12e = theory.Scope["T12e()"] 
-                            let base12e = pr12e.Scope["self(x,y).3[a,b]"]
+                            let base12e = pr12e.Scope["__self(x,y).3[a,b]"]
 
                             let pr13e = theory.Scope["T13e()"] 
-                            let base13e = pr13e.Scope["1(x,y).T[a,b]"]
+                            let base13e = pr13e.Scope["__1(x,y).T[a,b]"]
 
                             let pr10f = theory.Scope["T10f()"] 
-                            let base10f = pr10f.Scope["Test[x,y].x(a,b)"]
+                            let base10f = pr10f.Scope["__Test[x,y].x(a,b)"]
 
                             let pr11f = theory.Scope["T11f()"] 
-                            let base11f = pr11f.Scope["v[x,y].x(a,b)"]
+                            let base11f = pr11f.Scope["__v[x,y].x(a,b)"]
 
                             let pr12f = theory.Scope["T12f()"] 
-                            let base12f = pr12f.Scope["self[x,y].self(a,b)"]
+                            let base12f = pr12f.Scope["__self[x,y].self(a,b)"]
 
                             let pr13f = theory.Scope["T13f()"] 
-                            let base13f = pr13f.Scope["1[x.y].T(a,b)"]
+                            let base13f = pr13f.Scope["__1[x.y].T(a,b)"]
 
                             let pr14 = theory.Scope["T14()"]
-                            let base14 = pr14.Scope["∅"]
+                            let base14 = pr14.Scope["__∅"]
 
                             let pr15 = theory.Scope["T15()"]
-                            let base15 = pr15.Scope["-x"]
+                            let base15 = pr15.Scope["__-x"]
 
                             let pr16 = theory.Scope["T16()"]
-                            let base16 = pr16.Scope["-(y + x = 2 * x)"]
+                            let base16 = pr16.Scope["__-(y + x = 2 * x)"]
 
                             let pr17 = theory.Scope["T17()"]
-                            let base17 = pr17.Scope["(y + x' = 2 * x)'"]
+                            let base17 = pr17.Scope["__(y + x' = 2 * x)'"]
 
                             let pr18 = theory.Scope["T18()"]
-                            let base18 = pr18.Scope["ex x in Range(a,b), y in c, z {and (a,b,c)}"]
+                            let base18 = pr18.Scope["__ex x in Range(a,b), y in c, z {and (a,b,c)}"]
 
                             let pr19 = theory.Scope["T19()"]
-                            let base19 = pr19.Scope["exn$1 x {all y {true}}"]
+                            let base19 = pr19.Scope["__exn$1 x {all y {true}}"]
 
                             let pr20 = theory.Scope["T20()"]
-                            let base20 = pr20.Scope["all x {not x}"]
+                            let base20 = pr20.Scope["__all x {not x}"]
 
                             let pr21 = theory.Scope["T21()"]
-                            let base21 = pr21.Scope["and (x,y,z)"]
+                            let base21 = pr21.Scope["__and (x,y,z)"]
 
                             let pr22 = theory.Scope["T22()"]
-                            let base22 = pr22.Scope["xor (x,y,z)"]
+                            let base22 = pr22.Scope["__xor (x,y,z)"]
 
                             let pr23 = theory.Scope["T23()"]
-                            let base23 = pr23.Scope["or (x,y,z)"]
+                            let base23 = pr23.Scope["__or (x,y,z)"]
 
                             let pr24 = theory.Scope["T24()"]
-                            let base24 = pr24.Scope["iif (x,y)"]
+                            let base24 = pr24.Scope["__iif (x,y)"]
 
                             let pr25 = theory.Scope["T25()"]
-                            let base25 = pr25.Scope["impl (x,y)"]
+                            let base25 = pr25.Scope["__impl (x,y)"]
 
                             let pr26 = theory.Scope["T26()"]
-                            let base26 = pr26.Scope["is (x,Nat)"]
+                            let base26 = pr26.Scope["__is (x,Nat)"]
 
                             Some (theory, base1,base2,base3,base4,base5, base6, base7, 
                                     base8, base9, base10, base11, base12, base13,
