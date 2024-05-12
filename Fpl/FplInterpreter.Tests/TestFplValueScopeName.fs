@@ -476,7 +476,7 @@ type TestFplValueScopeName() =
     [<DataRow("base4", "1.")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "bydef.Test()")>] 
+    [<DataRow("base7", "bydef Test()")>] 
     [<DataRow("base8", "Test$1")>]
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
@@ -519,10 +519,10 @@ type TestFplValueScopeName() =
     [<DataRow("base25", "impl (x, y)")>]
     [<DataRow("base26", "is (x, Nat)")>]
     [<DataRow("base27", "B()")>]
-    [<DataRow("base28", "C(a,b,c,d)")>]
-    [<DataRow("base29", "D(self,b,c)")>]
+    [<DataRow("base28", "C(a, b, c, d)")>]
+    [<DataRow("base29", "D(self, b, c)")>]
     [<DataRow("base30", "B(In(x))")>]
-    [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
+    [<DataRow("base31", "C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
@@ -539,60 +539,60 @@ type TestFplValueScopeName() =
             let base1 = pr1.ValueList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base2" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base3" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base4" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base5" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base6" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base7" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base8" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base9" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base10" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base11" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base12" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base13" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base11a" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base12a" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base10b" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base11b" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base12b" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base13b" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base10c" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base11c" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base12c" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base13c" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base10d" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base11d" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base12d" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base13d" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base10e" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base11e" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base12e" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base13e" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base10f" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base11f" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base12f" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base13f" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base14" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base15" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base16" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base17" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base18" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base19" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base20" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base21" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base22" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base23" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base24" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base25" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base26" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base27" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base28" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base29" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base30" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base31" -> Assert.AreEqual("__" + varVal, base1.Name)
-            | "base32" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base1" -> Assert.AreEqual(varVal, base1.Name)
+            | "base2" -> Assert.AreEqual(varVal, base1.Name)
+            | "base3" -> Assert.AreEqual(varVal, base1.Name)
+            | "base4" -> Assert.AreEqual(varVal, base1.Name)
+            | "base5" -> Assert.AreEqual(varVal, base1.Name)
+            | "base6" -> Assert.AreEqual(varVal, base1.Name)
+            | "base7" -> Assert.AreEqual("bydef.Test()", base1.Name)
+            | "base8" -> Assert.AreEqual(varVal, base1.Name)
+            | "base9" -> Assert.AreEqual(varVal, base1.Name)
+            | "base10" -> Assert.AreEqual(varVal, base1.Name)
+            | "base11" -> Assert.AreEqual(varVal, base1.Name)
+            | "base12" -> Assert.AreEqual(varVal, base1.Name)
+            | "base13" -> Assert.AreEqual(varVal, base1.Name)
+            | "base11a" -> Assert.AreEqual(varVal, base1.Name)
+            | "base12a" -> Assert.AreEqual(varVal, base1.Name)
+            | "base10b" -> Assert.AreEqual(varVal, base1.Name)
+            | "base11b" -> Assert.AreEqual(varVal, base1.Name)
+            | "base12b" -> Assert.AreEqual(varVal, base1.Name)
+            | "base13b" -> Assert.AreEqual(varVal, base1.Name)
+            | "base10c" -> Assert.AreEqual(varVal, base1.Name)
+            | "base11c" -> Assert.AreEqual(varVal, base1.Name)
+            | "base12c" -> Assert.AreEqual(varVal, base1.Name)
+            | "base13c" -> Assert.AreEqual(varVal, base1.Name)
+            | "base10d" -> Assert.AreEqual(varVal, base1.Name)
+            | "base11d" -> Assert.AreEqual(varVal, base1.Name)
+            | "base12d" -> Assert.AreEqual(varVal, base1.Name)
+            | "base13d" -> Assert.AreEqual(varVal, base1.Name)
+            | "base10e" -> Assert.AreEqual(varVal, base1.Name)
+            | "base11e" -> Assert.AreEqual(varVal, base1.Name)
+            | "base12e" -> Assert.AreEqual(varVal, base1.Name)
+            | "base13e" -> Assert.AreEqual(varVal, base1.Name)
+            | "base10f" -> Assert.AreEqual(varVal, base1.Name)
+            | "base11f" -> Assert.AreEqual(varVal, base1.Name)
+            | "base12f" -> Assert.AreEqual(varVal, base1.Name)
+            | "base13f" -> Assert.AreEqual(varVal, base1.Name)
+            | "base14" -> Assert.AreEqual(varVal, base1.Name)
+            | "base15" -> Assert.AreEqual(varVal, base1.Name)
+            | "base16" -> Assert.AreEqual(varVal, base1.Name)
+            | "base17" -> Assert.AreEqual(varVal, base1.Name)
+            | "base18" -> Assert.AreEqual(varVal, base1.Name)
+            | "base19" -> Assert.AreEqual(varVal, base1.Name)
+            | "base20" -> Assert.AreEqual(varVal, base1.Name)
+            | "base21" -> Assert.AreEqual(varVal, base1.Name)
+            | "base22" -> Assert.AreEqual(varVal, base1.Name)
+            | "base23" -> Assert.AreEqual(varVal, base1.Name)
+            | "base24" -> Assert.AreEqual(varVal, base1.Name)
+            | "base25" -> Assert.AreEqual(varVal, base1.Name)
+            | "base26" -> Assert.AreEqual(varVal, base1.Name)
+            | "base27" -> Assert.AreEqual(varVal, base1.Name)
+            | "base28" -> Assert.AreEqual(varVal, base1.Name)
+            | "base29" -> Assert.AreEqual(varVal, base1.Name)
+            | "base30" -> Assert.AreEqual(varVal, base1.Name)
+            | "base31" -> Assert.AreEqual(varVal, base1.Name)
+            | "base32" -> Assert.AreEqual(varVal, base1.Name)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

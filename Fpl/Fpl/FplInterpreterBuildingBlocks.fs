@@ -497,8 +497,9 @@ let rec eval (st: SymbolTable) ast =
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
             fplValue.Name <- fplValue.Name + "."
             fplValue.TypeSignature <- fplValue.TypeSignature @ ["."]
-            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
+            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
             eval st predicateWithOptSpecificationAst
+            propagateReference refBlock true
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
@@ -638,9 +639,11 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ArgumentTuple")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue -> 
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
             adjustSignature st fplValue "("
             asts |> List.map (eval st) |> ignore
             adjustSignature st fplValue ")"
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened braces
         | _-> ()
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
@@ -711,7 +714,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InPropertyBlock fplValue 
         | EvalContext.InConstructorBlock fplValue -> 
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
-            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
+            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             eval st fplIdentifierAst
             optionalSpecificationAst |> Option.map (eval st) |> ignore
         | EvalContext.InReferenceCreation fplValue ->
@@ -721,11 +724,10 @@ let rec eval (st: SymbolTable) ast =
                 st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
                 eval st fplIdentifierAst
                 eval st specificationAst |> ignore
-                propagateReference refBlock true
+                propagateReference refBlock false
             | None -> 
                 // if no specification was found then simply continue in the same context
                 eval st fplIdentifierAst
-                propagateReference fplValue false 
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
@@ -914,13 +916,12 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InConstructorBlock fplValue 
         | EvalContext.InReferenceCreation fplValue ->
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
-            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
+            st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             prefixOpAst |> Option.map (eval st) |> Option.defaultValue ()
             eval st predicateAst
             postfixOpAst |> Option.map (eval st) |> Option.defaultValue ()
             optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
             eval st qualificationListAst
-            refBlock.Name <- "__" + refBlock.Name
             propagateReference refBlock true
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
