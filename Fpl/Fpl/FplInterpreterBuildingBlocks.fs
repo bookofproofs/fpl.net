@@ -143,10 +143,7 @@ let tryAddBlock (fplValue:FplValue) =
 
 let tryReferenceBlockByName (fplValue:FplValue) name =
     let parent = fplValue.Parent.Value
-    if fplValue.Name.EndsWith "(" || fplValue.Name = "" || fplValue.Name.EndsWith "." then
-        fplValue.Name <- fplValue.Name + name
-    else
-        fplValue.Name <- fplValue.Name + ", " + name
+    fplValue.Name <- addWithComma fplValue.Name name
     if parent.Scope.ContainsKey(name) then
         let namedChild = parent.Scope[name]
         fplValue.TypeSignature <- fplValue.TypeSignature @ namedChild.TypeSignature
@@ -156,7 +153,8 @@ let tryReferenceBlockByName (fplValue:FplValue) name =
 
 let propagateReference (refBlock:FplValue) withAdding = 
     let fplValue = refBlock.Parent.Value
-    if fplValue.BlockType = FplValueType.Reference &&  not fplValue.NameIsFinal then
+    if fplValue.BlockType = FplValueType.Reference && not fplValue.NameIsFinal && refBlock.AuxiliaryInfo = 0 then
+        // propagate only if refblock has all opened brackets closed and the name of its reference-typed parent is not yet ready
         if withAdding then 
             tryAddBlock refBlock
         fplValue.Name <- addWithComma fplValue.Name refBlock.Name
@@ -594,7 +592,14 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.BrackedCoordList((pos1, pos2), asts) ->
         st.EvalPush("BrackedCoordList")
-        asts |> List.map (eval st) |> ignore
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue -> 
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened brackes
+            adjustSignature st fplValue "["
+            asts |> List.map (eval st) |> ignore
+            adjustSignature st fplValue "]"
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened brackes
+        | _-> ()
         st.EvalPop()
     | Ast.And((pos1, pos2), asts) ->
         st.EvalPush("And")
@@ -715,7 +720,7 @@ let rec eval (st: SymbolTable) ast =
             | None -> 
                 // if no specification was found then simply continue in the same context
                 eval st fplIdentifierAst
-                propagateReference fplValue false
+                propagateReference fplValue false 
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
