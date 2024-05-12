@@ -164,6 +164,8 @@ type TestFplValueScopeParent() =
     [<DataRow("t10")>]
     [<DataRow("t11")>]
     [<DataRow("t12")>]
+    [<DataRow("t13")>]
+    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
@@ -186,6 +188,8 @@ type TestFplValueScopeParent() =
             | "t10" -> Assert.AreEqual(block, t9.Parent.Value)
             | "t11" -> Assert.AreEqual(block, t10.Parent.Value)
             | "t12" -> Assert.AreEqual(block, t11.Parent.Value)
+            | "t13" -> Assert.AreEqual(block, t13.Parent.Value)
+            | "t14" -> Assert.AreEqual(block, t14.Parent.Value)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

@@ -163,6 +163,8 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow("t10")>]
     [<DataRow("t11")>]
     [<DataRow("t12")>]
+    [<DataRow("t13")>]
+    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
@@ -185,6 +187,8 @@ type TestFplValueScopeTypeSignature() =
             | "t10" -> Assert.AreEqual(["T10"; "("; ")"; "->"; "tpl"], t10.TypeSignature)
             | "t11" -> Assert.AreEqual(["T11"; "("; ")"; "->"; "Nat"], t11.TypeSignature)
             | "t12" -> Assert.AreEqual(["T12"; "("; ")"; "->"; "Nat"], t12.TypeSignature)
+            | "t13" -> Assert.AreEqual(["T13"; "("; ")"; "->"; "func"], t13.TypeSignature)
+            | "t14" -> Assert.AreEqual(["T14"; "("; ")"; "->"; "func"], t14.TypeSignature)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

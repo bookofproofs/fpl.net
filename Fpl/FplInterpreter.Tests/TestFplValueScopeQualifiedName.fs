@@ -164,6 +164,8 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("t10")>]
     [<DataRow("t11")>]
     [<DataRow("t12")>]
+    [<DataRow("t13")>]
+    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
@@ -186,6 +188,8 @@ type TestFplValueScopeQualifiedName() =
             | "t10" -> Assert.AreEqual("Test.TestId().T10() -> tpl", t10.QualifiedName)
             | "t11" -> Assert.AreEqual("Test.TestId().T11() -> Nat", t11.QualifiedName)
             | "t12" -> Assert.AreEqual("Test.TestId().T12() -> Nat", t12.QualifiedName)
+            | "t13" -> Assert.AreEqual("Test.TestId().T13() -> func", t13.QualifiedName)
+            | "t14" -> Assert.AreEqual("Test.TestId().T14() -> func", t14.QualifiedName)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

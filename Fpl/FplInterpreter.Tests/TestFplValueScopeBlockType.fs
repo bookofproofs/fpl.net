@@ -166,6 +166,8 @@ type TestFplValueScopeBlockType() =
     [<DataRow("t10")>]
     [<DataRow("t11")>]
     [<DataRow("t12")>]
+    [<DataRow("t13")>]
+    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
@@ -188,6 +190,8 @@ type TestFplValueScopeBlockType() =
             | "t10" -> Assert.AreEqual(FplValueType.OptionalFunctionalTerm, t10.BlockType)
             | "t11" -> Assert.AreEqual(FplValueType.MandatoryFunctionalTerm, t11.BlockType)
             | "t12" -> Assert.AreEqual(FplValueType.OptionalFunctionalTerm, t12.BlockType)
+            | "t13" -> Assert.AreEqual(FplValueType.MandatoryFunctionalTerm, t13.BlockType)
+            | "t14" -> Assert.AreEqual(FplValueType.OptionalFunctionalTerm, t14.BlockType)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

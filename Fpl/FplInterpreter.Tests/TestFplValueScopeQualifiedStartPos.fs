@@ -164,6 +164,8 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("t10")>]
     [<DataRow("t11")>]
     [<DataRow("t12")>]
+    [<DataRow("t13")>]
+    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
@@ -186,6 +188,8 @@ type TestFplValueScopeQualifiedStartPos() =
             | "t10" -> Assert.IsTrue(t10.QualifiedStartPos.Contains("Ln: 14, Col: 13)"))
             | "t11" -> Assert.IsTrue(t11.QualifiedStartPos.Contains("Ln: 15, Col: 13)"))
             | "t12" -> Assert.IsTrue(t12.QualifiedStartPos.Contains("Ln: 16, Col: 13)"))
+            | "t13" -> Assert.IsTrue(t11.QualifiedStartPos.Contains("Ln: 17, Col: 13)"))
+            | "t14" -> Assert.IsTrue(t12.QualifiedStartPos.Contains("Ln: 18, Col: 13)"))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

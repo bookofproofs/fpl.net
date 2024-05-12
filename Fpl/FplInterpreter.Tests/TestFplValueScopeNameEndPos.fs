@@ -166,6 +166,8 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("t10")>]
     [<DataRow("t11")>]
     [<DataRow("t12")>]
+    [<DataRow("t13")>]
+    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
@@ -188,6 +190,8 @@ type TestFplValueScopeNameEndPos() =
             | "t10" -> Assert.IsTrue(t10.NameEndPos.ToString().Contains("Ln: 14, Col: 37)"))
             | "t11" -> Assert.IsTrue(t11.NameEndPos.ToString().Contains("Ln: 15, Col: 33)"))
             | "t12" -> Assert.IsTrue(t12.NameEndPos.ToString().Contains("Ln: 16, Col: 37)"))
+            | "t13" -> Assert.IsTrue(t13.NameEndPos.ToString().Contains("Ln: 17, Col: 34)"))
+            | "t14" -> Assert.IsTrue(t14.NameEndPos.ToString().Contains("Ln: 18, Col: 38)"))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

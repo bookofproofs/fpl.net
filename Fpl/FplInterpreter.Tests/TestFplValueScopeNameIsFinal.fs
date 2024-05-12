@@ -165,6 +165,8 @@ type TestFplValueScopeNameIsFinal() =
     [<DataRow("t10")>]
     [<DataRow("t11")>]
     [<DataRow("t12")>]
+    [<DataRow("t13")>]
+    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
@@ -179,14 +181,16 @@ type TestFplValueScopeNameIsFinal() =
             | "t2" -> Assert.AreEqual(true, t2.NameIsFinal)
             | "t3" -> Assert.AreEqual(true, t3.NameIsFinal)
             | "t4" -> Assert.AreEqual(true, t4.NameIsFinal)
-            | "t5" -> Assert.AreEqual(true, t4.NameIsFinal)
-            | "t6" -> Assert.AreEqual(true, t4.NameIsFinal)
-            | "t7" -> Assert.AreEqual(true, t4.NameIsFinal)
-            | "t8" -> Assert.AreEqual(true, t4.NameIsFinal)
-            | "t9" -> Assert.AreEqual(true, t4.NameIsFinal)
-            | "t10" -> Assert.AreEqual(true, t4.NameIsFinal)
-            | "t11" -> Assert.AreEqual(true, t4.NameIsFinal)
-            | "t12" -> Assert.AreEqual(true, t4.NameIsFinal)
+            | "t5" -> Assert.AreEqual(true, t5.NameIsFinal)
+            | "t6" -> Assert.AreEqual(true, t6.NameIsFinal)
+            | "t7" -> Assert.AreEqual(true, t7.NameIsFinal)
+            | "t8" -> Assert.AreEqual(true, t8.NameIsFinal)
+            | "t9" -> Assert.AreEqual(true, t9.NameIsFinal)
+            | "t10" -> Assert.AreEqual(true, t10.NameIsFinal)
+            | "t11" -> Assert.AreEqual(true, t11.NameIsFinal)
+            | "t12" -> Assert.AreEqual(true, t12.NameIsFinal)
+            | "t13" -> Assert.AreEqual(true, t13.NameIsFinal)
+            | "t14" -> Assert.AreEqual(true, t14.NameIsFinal)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

@@ -165,6 +165,8 @@ type TestFplValueScopeExpressionType() =
     [<DataRow("t10")>]
     [<DataRow("t11")>]
     [<DataRow("t12")>]
+    [<DataRow("t13")>]
+    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
@@ -187,6 +189,8 @@ type TestFplValueScopeExpressionType() =
             | "t10" -> Assert.AreEqual(ExprType.NoType, t10.ExpressionType)
             | "t11" -> Assert.AreEqual(ExprType.NoType, t11.ExpressionType)
             | "t12" -> Assert.AreEqual(ExprType.NoType, t12.ExpressionType)
+            | "t13" -> Assert.AreEqual(ExprType.NoType, t13.ExpressionType)
+            | "t14" -> Assert.AreEqual(ExprType.NoType, t14.ExpressionType)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

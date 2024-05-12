@@ -165,6 +165,8 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("t10")>]
     [<DataRow("t11")>]
     [<DataRow("t12")>]
+    [<DataRow("t13")>]
+    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties() 
@@ -187,6 +189,8 @@ type TestFplValueScopeFplRepresentation() =
             | "t10" -> Assert.AreEqual("T10() -> tpl", t10.FplRepresentation)
             | "t11" -> Assert.AreEqual("T11() -> Nat", t11.FplRepresentation)
             | "t12" -> Assert.AreEqual("T12() -> Nat", t12.FplRepresentation)
+            | "t13" -> Assert.AreEqual("T11() -> func", t13.FplRepresentation)
+            | "t14" -> Assert.AreEqual("T12() -> func", t14.FplRepresentation)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
