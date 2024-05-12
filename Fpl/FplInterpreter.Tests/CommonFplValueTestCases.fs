@@ -871,7 +871,7 @@ type CommonFplValueTestCases =
                             let base6 = pr6.Scope["__$1"]
 
                             let pr7 = theory.Scope["T7()"] 
-                            let base7 = pr7.Scope["__bydef Test()"] 
+                            let base7 = pr7.Scope["__bydef.Test()"] 
 
                             let pr8 = theory.Scope["T8()"] 
                             let base8 = pr8.Scope["__Test$1"]
@@ -910,52 +910,52 @@ type CommonFplValueTestCases =
                             let base13b = pr13b.Scope["__1()"]
 
                             let pr10c = theory.Scope["T10c()"] 
-                            let base10c = pr10c.Scope["__Test(x,y)"]
+                            let base10c = pr10c.Scope["__Test(x, y)"]
 
                             let pr11c = theory.Scope["T11c()"] 
-                            let base11c = pr11c.Scope["__v(x,y)"]
+                            let base11c = pr11c.Scope["__v(x, y)"]
 
                             let pr12c = theory.Scope["T12c()"] 
-                            let base12c = pr12c.Scope["__self(x,y)"]
+                            let base12c = pr12c.Scope["__self(x, y)"]
 
                             let pr13c = theory.Scope["T13c()"] 
-                            let base13c = pr13c.Scope["__1(x,y)"]
+                            let base13c = pr13c.Scope["__1(x, y)"]
 
                             let pr10d = theory.Scope["T10d()"] 
-                            let base10d = pr10d.Scope["__Test[x,y]"]
+                            let base10d = pr10d.Scope["__Test[x, y]"]
 
                             let pr11d = theory.Scope["T11d()"] 
-                            let base11d = pr11d.Scope["__v[x,y]"]
+                            let base11d = pr11d.Scope["__v[x, y]"]
 
                             let pr12d = theory.Scope["T12d()"] 
-                            let base12d = pr12d.Scope["__self[x,y]"]
+                            let base12d = pr12d.Scope["__self[x, y]"]
 
                             let pr13d = theory.Scope["T13d()"] 
                             let base13d = pr13d.Scope["__1[x.y]"]
 
                             let pr10e = theory.Scope["T10e()"] 
-                            let base10e = pr10e.Scope["__Test(x,y).@self[a,b]"]
+                            let base10e = pr10e.Scope["__Test(x, y).@self[a, b]"]
 
                             let pr11e = theory.Scope["T11e()"] 
-                            let base11e = pr11e.Scope["__v(x,y).x[a,b]"]
+                            let base11e = pr11e.Scope["__v(x, y).x[a, b]"]
 
                             let pr12e = theory.Scope["T12e()"] 
-                            let base12e = pr12e.Scope["__self(x,y).3[a,b]"]
+                            let base12e = pr12e.Scope["__self(x, y).3[a, b]"]
 
                             let pr13e = theory.Scope["T13e()"] 
-                            let base13e = pr13e.Scope["__1(x,y).T[a,b]"]
+                            let base13e = pr13e.Scope["__1(x, y).T[a, b]"]
 
                             let pr10f = theory.Scope["T10f()"] 
-                            let base10f = pr10f.Scope["__Test[x,y].x(a,b)"]
+                            let base10f = pr10f.Scope["__Test[x, y].x(a, b)"]
 
                             let pr11f = theory.Scope["T11f()"] 
-                            let base11f = pr11f.Scope["__v[x,y].x(a,b)"]
+                            let base11f = pr11f.Scope["__v[x, y].x(a, b)"]
 
                             let pr12f = theory.Scope["T12f()"] 
-                            let base12f = pr12f.Scope["__self[x,y].self(a,b)"]
+                            let base12f = pr12f.Scope["__self[x, y].self(a, b)"]
 
                             let pr13f = theory.Scope["T13f()"] 
-                            let base13f = pr13f.Scope["__1[x.y].T(a,b)"]
+                            let base13f = pr13f.Scope["__1[x.y].T(a, b)"]
 
                             let pr14 = theory.Scope["T14()"]
                             let base14 = pr14.Scope["__∅"]
@@ -970,7 +970,7 @@ type CommonFplValueTestCases =
                             let base17 = pr17.Scope["__(y + x' = 2 * x)'"]
 
                             let pr18 = theory.Scope["T18()"]
-                            let base18 = pr18.Scope["__ex x in Range(a,b), y in c, z {and (a,b,c)}"]
+                            let base18 = pr18.Scope["__ex x in Range(a, b), y in c, z {and (a, b, c)}"]
 
                             let pr19 = theory.Scope["T19()"]
                             let base19 = pr19.Scope["__exn$1 x {all y {true}}"]
@@ -979,22 +979,22 @@ type CommonFplValueTestCases =
                             let base20 = pr20.Scope["__all x {not x}"]
 
                             let pr21 = theory.Scope["T21()"]
-                            let base21 = pr21.Scope["__and (x,y,z)"]
+                            let base21 = pr21.Scope["__and (x, y, z)"]
 
                             let pr22 = theory.Scope["T22()"]
-                            let base22 = pr22.Scope["__xor (x,y,z)"]
+                            let base22 = pr22.Scope["__xor (x, y, z)"]
 
                             let pr23 = theory.Scope["T23()"]
-                            let base23 = pr23.Scope["__or (x,y,z)"]
+                            let base23 = pr23.Scope["__or (x, y, z)"]
 
                             let pr24 = theory.Scope["T24()"]
-                            let base24 = pr24.Scope["__iif (x,y)"]
+                            let base24 = pr24.Scope["__iif (x, y)"]
 
                             let pr25 = theory.Scope["T25()"]
-                            let base25 = pr25.Scope["__impl (x,y)"]
+                            let base25 = pr25.Scope["__impl (x, y)"]
 
                             let pr26 = theory.Scope["T26()"]
-                            let base26 = pr26.Scope["__is (x,Nat)"]
+                            let base26 = pr26.Scope["__is (x, Nat)"]
 
                             Some (theory, base1,base2,base3,base4,base5, base6, base7, 
                                     base8, base9, base10, base11, base12, base13,

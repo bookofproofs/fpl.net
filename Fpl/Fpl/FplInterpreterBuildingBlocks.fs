@@ -159,7 +159,7 @@ let propagateReference (refBlock:FplValue) withAdding =
     if fplValue.BlockType = FplValueType.Reference &&  not fplValue.NameIsFinal then
         if withAdding then 
             tryAddBlock refBlock
-        fplValue.Name <- fplValue.Name + refBlock.Name
+        fplValue.Name <- addWithComma fplValue.Name refBlock.Name
         fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
 
 
@@ -482,7 +482,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ByDef")
         match st.CurrentContext with 
         | EvalContext.InReferenceCreation fplValue ->
-            adjustSignature st fplValue "bydef "
+            adjustSignature st fplValue "bydef."
             eval st predicateWithQualificationAst
         | _ -> ()
         st.EvalPop()
@@ -492,7 +492,8 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with 
         | EvalContext.InReferenceCreation fplValue -> 
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
-            adjustSignature st refBlock "."
+            fplValue.Name <- fplValue.Name + "."
+            fplValue.TypeSignature <- fplValue.TypeSignature @ ["."]
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             eval st predicateWithOptSpecificationAst
         | _ -> ()
@@ -636,9 +637,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("QualificationList")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue -> 
-            if asts.Length = 0 then
-                propagateReference fplValue false
-            else
+            if asts.Length > 0 then
                 asts |> List.map (eval st) |> ignore
                 propagateReference fplValue true
         | _-> ()
