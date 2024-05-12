@@ -8,6 +8,27 @@ open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 
+
+let private addWithComma (name:string) str = 
+    if str <> "" then
+        if str = "(" || str = ")" 
+            || str = "[" || str = "]" 
+            || str = "->"
+            || name.EndsWith "(" 
+            || name.EndsWith "[" 
+            || name.Length = 0 
+            || name.EndsWith "-> " 
+            || name.EndsWith "." 
+            || name.EndsWith "__" 
+            || str.StartsWith "$" then
+                if str = "->" then 
+                    name + " " + str + " "
+                else
+                    name + str
+        else
+            name + ", " + str
+    else name
+
 let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str = 
     if str <> "" && not (FplValue.IsVariable(fplValue)) then
         if FplValue.IsDefinition(fplValue) && fplValue.NameIsFinal then 
@@ -15,23 +36,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
         else
             // note: the Name attribute of variables are set in Ast.Var directly
             // and we do not want to append the type to the names of variables.
-            if str = "(" || str = ")" 
-                || str = "[" || str = "]" 
-                || str = "->"
-                || fplValue.Name.EndsWith "(" 
-                || fplValue.Name.EndsWith "[" 
-                || fplValue.Name.Length = 0 
-                || fplValue.Name.EndsWith "-> " 
-                || fplValue.Name.EndsWith "." 
-                || fplValue.Name.EndsWith "__" 
-                || str.StartsWith "$" then
-                if str = "->" then 
-                    fplValue.Name <- fplValue.Name + " " + str + " "
-                else
-                    fplValue.Name <- fplValue.Name + str
-            else
-                fplValue.Name <- fplValue.Name + ", " + str
-
+            fplValue.Name <- addWithComma fplValue.Name str
     if str <> "" then
         if FplValue.IsDefinition(fplValue) && fplValue.NameIsFinal then  
             () //  for definitions with final name stop changing the TypeSignature
