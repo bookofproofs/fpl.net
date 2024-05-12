@@ -619,7 +619,7 @@ type TestFplValueScopeQualifiedName() =
             let theory = r.Scope["Test"]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.Scope["__" + varVal]
+            let base1 = ctor.ValueList[0]
 
             match var with
             | "base1" -> Assert.AreEqual("", base1.QualifiedName)

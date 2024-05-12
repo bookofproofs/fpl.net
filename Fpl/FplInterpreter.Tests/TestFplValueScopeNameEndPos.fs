@@ -625,7 +625,7 @@ type TestFplValueScopeNameEndPos() =
             let theory = r.Scope["Test"]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.Scope["__" + varVal]
+            let base1 = ctor.ValueList[0]
 
             match var with
             | "base1" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
@@ -657,7 +657,7 @@ type TestFplValueScopeNameEndPos() =
             let theory = r.Scope["Test"]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.Scope["__" + varVal]
+            let base1 = pr1.ValueList[0]
 
             match var with
             | "base1" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))

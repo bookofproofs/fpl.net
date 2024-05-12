@@ -153,12 +153,17 @@ let tryReferenceBlockByName (fplValue:FplValue) name =
 
 let propagateReference (refBlock:FplValue) withAdding = 
     let fplValue = refBlock.Parent.Value
-    if fplValue.BlockType = FplValueType.Reference && not fplValue.NameIsFinal && refBlock.AuxiliaryInfo = 0 then
-        // propagate only if refblock has all opened brackets closed and the name of its reference-typed parent is not yet ready
+    if fplValue.BlockType = FplValueType.Reference then
+        if not fplValue.NameIsFinal && refBlock.AuxiliaryInfo = 0 then
+            // propagate only if refblock has all opened brackets closed and the name of its reference-typed parent is not yet ready
+            if withAdding then 
+                fplValue.ValueList.Add(refBlock)
+            fplValue.Name <- addWithComma fplValue.Name refBlock.Name
+            fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
+    else
         if withAdding then 
-            tryAddBlock refBlock
-        fplValue.Name <- addWithComma fplValue.Name refBlock.Name
-        fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
+            fplValue.ValueList.Add(refBlock)
+
 
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
@@ -916,7 +921,7 @@ let rec eval (st: SymbolTable) ast =
             optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
             eval st qualificationListAst
             refBlock.Name <- "__" + refBlock.Name
-            tryAddBlock refBlock
+            propagateReference refBlock true
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
