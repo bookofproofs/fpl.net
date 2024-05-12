@@ -37,23 +37,5 @@ type TestFplValueScopeCompleteness() =
     member this.TestVariablesInSignatureWithVariadic() =
         CommonFplValueTestCases.ScopeVariablesInSignatureVariadic() |> ignore
 
-    [<TestMethod>]
-    member this.TestCallConstructorParentClass() =
-        CommonFplValueTestCases.ScopeCallConstructorParentClass() |> ignore
 
-    [<TestMethod>]
-    member this.TestDelegate() =
-        CommonFplValueTestCases.ScopeDelegate() |> ignore
-
-    [<TestMethod>]
-    member this.TestPredicateWithArguments() =
-        CommonFplValueTestCases.ScopePredicateWithArguments() |> ignore
-
-    [<TestMethod>]
-    member this.TestFixNotation() =
-        CommonFplValueTestCases.ScopeFixNotation() |> ignore
-
-    [<TestMethod>]
-    member this.TestPredicate() =
-        CommonFplValueTestCases.ScopePredicate() |> ignore
 

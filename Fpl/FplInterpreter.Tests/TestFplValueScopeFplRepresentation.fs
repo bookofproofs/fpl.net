@@ -1,6 +1,7 @@
-namespace FplInterpreter.Tests
+﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplInterpreterTypes
+open CommonTestHelpers
 
 [<TestClass>]
 type TestFplValueScopeFplRepresentation() =
@@ -464,115 +465,129 @@ type TestFplValueScopeFplRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1")>]
-    [<DataRow("base2")>]
-    [<DataRow("base3")>]
-    [<DataRow("base4")>]
-    [<DataRow("base5")>]
-    [<DataRow("base6")>]
-    [<DataRow("base7")>]
-    [<DataRow("base8")>]
-    [<DataRow("base9")>]
-    [<DataRow("base10")>]
-    [<DataRow("base11")>]
-    [<DataRow("base12")>]
-    [<DataRow("base13")>]
-    [<DataRow("base11a")>]
-    [<DataRow("base12a")>]
-    [<DataRow("base10b")>]
-    [<DataRow("base11b")>]
-    [<DataRow("base12b")>]
-    [<DataRow("base13b")>]
-    [<DataRow("base10c")>]
-    [<DataRow("base11c")>]
-    [<DataRow("base12c")>]
-    [<DataRow("base13c")>]
-    [<DataRow("base10d")>]
-    [<DataRow("base11d")>]
-    [<DataRow("base12d")>]
-    [<DataRow("base13d")>]
-    [<DataRow("base10e")>]
-    [<DataRow("base11e")>]
-    [<DataRow("base12e")>]
-    [<DataRow("base13e")>]
-    [<DataRow("base10f")>]
-    [<DataRow("base11f")>]
-    [<DataRow("base12f")>]
-    [<DataRow("base13f")>]
-    [<DataRow("base14")>]
-    [<DataRow("base15")>]
-    [<DataRow("base16")>]
-    [<DataRow("base17")>]
-    [<DataRow("base18")>]
-    [<DataRow("base19")>]
-    [<DataRow("base20")>]
-    [<DataRow("base21")>]
-    [<DataRow("base22")>]
-    [<DataRow("base23")>]
-    [<DataRow("base24")>]
-    [<DataRow("base25")>]
-    [<DataRow("base26")>]
+    [<DataRow("base1", "true")>]
+    [<DataRow("base2", "false")>]
+    [<DataRow("base3", "undef")>]
+    [<DataRow("base4", "1.")>]
+    [<DataRow("base5", "del.Test()")>]
+    [<DataRow("base6", "$1")>]
+    [<DataRow("base7", "bydef.Test()")>] 
+    [<DataRow("base8", "Test$1")>]
+    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base10", "Test")>]
+    [<DataRow("base11", "v")>]
+    [<DataRow("base12", "self")>]
+    [<DataRow("base13", "1")>]
+    [<DataRow("base11a", "v.x")>]
+    [<DataRow("base12a", "self.x")>]
+    [<DataRow("base10b", "Test()")>]
+    [<DataRow("base11b", "v()")>]
+    [<DataRow("base12b", "self()")>]
+    [<DataRow("base13b", "1()")>]
+    [<DataRow("base10c", "Test(x, y)")>]
+    [<DataRow("base11c", "v(x, y)")>]
+    [<DataRow("base12c", "self(x, y)")>]
+    [<DataRow("base13c", "1(x, y)")>]
+    [<DataRow("base10d", "Test[x, y]")>]
+    [<DataRow("base11d", "v[x, y]")>]
+    [<DataRow("base12d", "self[x, y]")>]
+    [<DataRow("base13d", "1[x.y]")>]
+    [<DataRow("base10e", "Test(x, y).@self[a, b]")>]
+    [<DataRow("base11e", "v(x, y).x[a, b]")>]
+    [<DataRow("base12e", "self(x, y).3[a, b]")>]
+    [<DataRow("base13e", "1(x, y).T[a, b]")>]
+    [<DataRow("base10f", "Test[x, y].x(a, b)")>]
+    [<DataRow("base11f", "v[x, y].x(a, b)")>]
+    [<DataRow("base12f", "self[x, y].self(a, b)")>]
+    [<DataRow("base13f", "1[x.y].T(a, b)")>]
+    [<DataRow("base14", "∅")>]
+    [<DataRow("base15", "-x")>]
+    [<DataRow("base16", "-(y + x = 2 * x)")>]
+    [<DataRow("base17", "(y + x' = 2 * x)'")>]
+    [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
+    [<DataRow("base19", "exn$1 x {all y {true}}")>]
+    [<DataRow("base20", "all x {not x}")>]
+    [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base22", "xor (x, y, z)")>]
+    [<DataRow("base23", "or (x, y, z)")>]
+    [<DataRow("base24", "iif (x, y)")>]
+    [<DataRow("base25", "impl (x, y)")>]
+    [<DataRow("base26", "is (x, Nat)")>]
+    [<DataRow("base27", "B()")>]
+    [<DataRow("base28", "C(a,b,c,d)")>]
+    [<DataRow("base29", "D(self,b,c)")>]
+    [<DataRow("base30", "B(In(x))")>]
+    [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
+    [<DataRow("base32", "E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestPredicate(var) =
-        let result = CommonFplValueTestCases.ScopePredicate()
-        match result with
-        | Some (theory, base1,base2,base3,base4,base5, base6, base7, 
-                                    base8, base9, base10, base11, base12, base13,
-                                    base11a, base12a, base10b, base11b, base12b, base13b,
-                                    base10c, base11c, base12c, base13c, base10d, base11d,
-                                    base12d, base10e, base11e, base12e, base13d, base13e,
-                                    base10f, base11f, base12f, base13f, base14, base15,
-                                    base16, base17, base18, base19, base20, base21, base22,
-                                    base23, base24, base25, base26) ->
+    member this.TestPredicate(var, varVal) =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let stOption = prepareFplCode(fplCode, false) 
+        prepareFplCode("", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope["Test"]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.Scope[""]
+
             match var with
             | "base1" -> Assert.AreEqual("", base1.FplRepresentation)
-            | "base2" -> Assert.AreEqual("", base2.FplRepresentation)
-            | "base3" -> Assert.AreEqual("", base3.FplRepresentation)
-            | "base4" -> Assert.AreEqual("", base4.FplRepresentation)
-            | "base5" -> Assert.AreEqual("", base5.FplRepresentation)
-            | "base6" -> Assert.AreEqual("", base6.FplRepresentation)
-            | "base7" -> Assert.AreEqual("", base7.FplRepresentation)
-            | "base8" -> Assert.AreEqual("", base8.FplRepresentation)
-            | "base9" -> Assert.AreEqual("", base9.FplRepresentation)
-            | "base10" -> Assert.AreEqual("", base10.FplRepresentation)
-            | "base11" -> Assert.AreEqual("", base11.FplRepresentation)
-            | "base12" -> Assert.AreEqual("", base12.FplRepresentation)
-            | "base13" -> Assert.AreEqual("", base13.FplRepresentation)
-            | "base11a" -> Assert.AreEqual("", base11a.FplRepresentation)
-            | "base12a" -> Assert.AreEqual("", base12a.FplRepresentation)
-            | "base10b" -> Assert.AreEqual("", base10b.FplRepresentation)
-            | "base11b" -> Assert.AreEqual("", base11b.FplRepresentation)
-            | "base12b" -> Assert.AreEqual("", base12b.FplRepresentation)
-            | "base13b" -> Assert.AreEqual("", base13b.FplRepresentation)
-            | "base10c" -> Assert.AreEqual("", base10c.FplRepresentation)
-            | "base11c" -> Assert.AreEqual("", base11c.FplRepresentation)
-            | "base12c" -> Assert.AreEqual("", base12c.FplRepresentation)
-            | "base13c" -> Assert.AreEqual("", base13c.FplRepresentation)
-            | "base10d" -> Assert.AreEqual("", base10d.FplRepresentation)
-            | "base11d" -> Assert.AreEqual("", base11d.FplRepresentation)
-            | "base12d" -> Assert.AreEqual("", base12d.FplRepresentation)
-            | "base13d" -> Assert.AreEqual("", base13d.FplRepresentation)
-            | "base10e" -> Assert.AreEqual("", base10e.FplRepresentation)
-            | "base11e" -> Assert.AreEqual("", base11e.FplRepresentation)
-            | "base12e" -> Assert.AreEqual("", base12e.FplRepresentation)
-            | "base13e" -> Assert.AreEqual("", base13e.FplRepresentation)
-            | "base10f" -> Assert.AreEqual("", base10f.FplRepresentation)
-            | "base11f" -> Assert.AreEqual("", base11f.FplRepresentation)
-            | "base12f" -> Assert.AreEqual("", base12f.FplRepresentation)
-            | "base13f" -> Assert.AreEqual("", base13f.FplRepresentation)
-            | "base14" -> Assert.AreEqual("", base14.FplRepresentation)
-            | "base15" -> Assert.AreEqual("", base15.FplRepresentation)
-            | "base16" -> Assert.AreEqual("", base16.FplRepresentation)
-            | "base17" -> Assert.AreEqual("", base17.FplRepresentation)
-            | "base18" -> Assert.AreEqual("", base18.FplRepresentation)
-            | "base19" -> Assert.AreEqual("", base19.FplRepresentation)
-            | "base20" -> Assert.AreEqual("", base20.FplRepresentation)
-            | "base21" -> Assert.AreEqual("", base21.FplRepresentation)
-            | "base22" -> Assert.AreEqual("", base22.FplRepresentation)
-            | "base23" -> Assert.AreEqual("", base23.FplRepresentation)
-            | "base24" -> Assert.AreEqual("", base24.FplRepresentation)
-            | "base25" -> Assert.AreEqual("", base25.FplRepresentation)
-            | "base26" -> Assert.AreEqual("", base26.FplRepresentation)
+            | "base2" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base3" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base4" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base5" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base6" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base7" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base8" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base9" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base10" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base11" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base12" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base13" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base11a" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base12a" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base10b" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base11b" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base12b" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base13b" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base10c" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base11c" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base12c" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base13c" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base10d" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base11d" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base12d" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base13d" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base10e" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base11e" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base12e" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base13e" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base10f" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base11f" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base12f" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base13f" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base14" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base15" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base16" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base17" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base18" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base19" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base20" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base21" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base22" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base23" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base24" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base25" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base26" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base27" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base28" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base29" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base30" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base31" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base32" -> Assert.AreEqual("", base1.FplRepresentation)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

@@ -1,7 +1,8 @@
-namespace FplInterpreter.Tests
+﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open FplInterpreterTypes
+open CommonTestHelpers
 
 [<TestClass>]
 type TestFplValueScopeNameEndPos() =
@@ -464,115 +465,129 @@ type TestFplValueScopeNameEndPos() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1")>]
-    [<DataRow("base2")>]
-    [<DataRow("base3")>]
-    [<DataRow("base4")>]
-    [<DataRow("base5")>]
-    [<DataRow("base6")>]
-    [<DataRow("base7")>]
-    [<DataRow("base8")>]
-    [<DataRow("base9")>]
-    [<DataRow("base10")>]
-    [<DataRow("base11")>]
-    [<DataRow("base12")>]
-    [<DataRow("base13")>]
-    [<DataRow("base11a")>]
-    [<DataRow("base12a")>]
-    [<DataRow("base10b")>]
-    [<DataRow("base11b")>]
-    [<DataRow("base12b")>]
-    [<DataRow("base13b")>]
-    [<DataRow("base10c")>]
-    [<DataRow("base11c")>]
-    [<DataRow("base12c")>]
-    [<DataRow("base13c")>]
-    [<DataRow("base10d")>]
-    [<DataRow("base11d")>]
-    [<DataRow("base12d")>]
-    [<DataRow("base13d")>]
-    [<DataRow("base10e")>]
-    [<DataRow("base11e")>]
-    [<DataRow("base12e")>]
-    [<DataRow("base13e")>]
-    [<DataRow("base10f")>]
-    [<DataRow("base11f")>]
-    [<DataRow("base12f")>]
-    [<DataRow("base13f")>]
-    [<DataRow("base14")>]
-    [<DataRow("base15")>]
-    [<DataRow("base16")>]
-    [<DataRow("base17")>]
-    [<DataRow("base18")>]
-    [<DataRow("base19")>]
-    [<DataRow("base20")>]
-    [<DataRow("base21")>]
-    [<DataRow("base22")>]
-    [<DataRow("base23")>]
-    [<DataRow("base24")>]
-    [<DataRow("base25")>]
-    [<DataRow("base26")>]
+    [<DataRow("base1", "true")>]
+    [<DataRow("base2", "false")>]
+    [<DataRow("base3", "undef")>]
+    [<DataRow("base4", "1.")>]
+    [<DataRow("base5", "del.Test()")>]
+    [<DataRow("base6", "$1")>]
+    [<DataRow("base7", "bydef.Test()")>] 
+    [<DataRow("base8", "Test$1")>]
+    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base10", "Test")>]
+    [<DataRow("base11", "v")>]
+    [<DataRow("base12", "self")>]
+    [<DataRow("base13", "1")>]
+    [<DataRow("base11a", "v.x")>]
+    [<DataRow("base12a", "self.x")>]
+    [<DataRow("base10b", "Test()")>]
+    [<DataRow("base11b", "v()")>]
+    [<DataRow("base12b", "self()")>]
+    [<DataRow("base13b", "1()")>]
+    [<DataRow("base10c", "Test(x, y)")>]
+    [<DataRow("base11c", "v(x, y)")>]
+    [<DataRow("base12c", "self(x, y)")>]
+    [<DataRow("base13c", "1(x, y)")>]
+    [<DataRow("base10d", "Test[x, y]")>]
+    [<DataRow("base11d", "v[x, y]")>]
+    [<DataRow("base12d", "self[x, y]")>]
+    [<DataRow("base13d", "1[x.y]")>]
+    [<DataRow("base10e", "Test(x, y).@self[a, b]")>]
+    [<DataRow("base11e", "v(x, y).x[a, b]")>]
+    [<DataRow("base12e", "self(x, y).3[a, b]")>]
+    [<DataRow("base13e", "1(x, y).T[a, b]")>]
+    [<DataRow("base10f", "Test[x, y].x(a, b)")>]
+    [<DataRow("base11f", "v[x, y].x(a, b)")>]
+    [<DataRow("base12f", "self[x, y].self(a, b)")>]
+    [<DataRow("base13f", "1[x.y].T(a, b)")>]
+    [<DataRow("base14", "∅")>]
+    [<DataRow("base15", "-x")>]
+    [<DataRow("base16", "-(y + x = 2 * x)")>]
+    [<DataRow("base17", "(y + x' = 2 * x)'")>]
+    [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
+    [<DataRow("base19", "exn$1 x {all y {true}}")>]
+    [<DataRow("base20", "all x {not x}")>]
+    [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base22", "xor (x, y, z)")>]
+    [<DataRow("base23", "or (x, y, z)")>]
+    [<DataRow("base24", "iif (x, y)")>]
+    [<DataRow("base25", "impl (x, y)")>]
+    [<DataRow("base26", "is (x, Nat)")>]
+    [<DataRow("base27", "B()")>]
+    [<DataRow("base28", "C(a,b,c,d)")>]
+    [<DataRow("base29", "D(self,b,c)")>]
+    [<DataRow("base30", "B(In(x))")>]
+    [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
+    [<DataRow("base32", "E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestPredicate(var) =
-        let result = CommonFplValueTestCases.ScopePredicate()
-        match result with
-        | Some (theory, base1,base2,base3,base4,base5, base6, base7, 
-                                    base8, base9, base10, base11, base12, base13,
-                                    base11a, base12a, base10b, base11b, base12b, base13b,
-                                    base10c, base11c, base12c, base13c, base10d, base11d,
-                                    base12d, base10e, base11e, base12e, base13d, base13e,
-                                    base10f, base11f, base12f, base13f, base14, base15,
-                                    base16, base17, base18, base19, base20, base21, base22,
-                                    base23, base24, base25, base26) ->
+    member this.TestPredicate(var, varVal) =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let stOption = prepareFplCode(fplCode, false) 
+        prepareFplCode("", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope["Test"]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.Scope[""]
+
             match var with
             | "base1" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base2" -> Assert.IsTrue(base2.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base3" -> Assert.IsTrue(base3.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base4" -> Assert.IsTrue(base4.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base5" -> Assert.IsTrue(base5.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base6" -> Assert.IsTrue(base6.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base7" -> Assert.IsTrue(base7.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base8" -> Assert.IsTrue(base8.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base9" -> Assert.IsTrue(base9.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base10" -> Assert.IsTrue(base10.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base11" -> Assert.IsTrue(base11.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base12" -> Assert.IsTrue(base12.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base13" -> Assert.IsTrue(base13.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base11a" -> Assert.IsTrue(base11a.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base12a" -> Assert.IsTrue(base12a.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base10b" -> Assert.IsTrue(base10b.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base11b" -> Assert.IsTrue(base11b.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base12b" -> Assert.IsTrue(base12b.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base13b" -> Assert.IsTrue(base13b.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base10c" -> Assert.IsTrue(base10c.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base11c" -> Assert.IsTrue(base11c.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base12c" -> Assert.IsTrue(base12c.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base13c" -> Assert.IsTrue(base13c.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base10d" -> Assert.IsTrue(base10d.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base11d" -> Assert.IsTrue(base11d.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base12d" -> Assert.IsTrue(base12d.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base13d" -> Assert.IsTrue(base13d.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base10e" -> Assert.IsTrue(base10e.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base11e" -> Assert.IsTrue(base11e.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base12e" -> Assert.IsTrue(base12e.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base13e" -> Assert.IsTrue(base13e.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base10f" -> Assert.IsTrue(base10f.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base11f" -> Assert.IsTrue(base11f.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base12f" -> Assert.IsTrue(base12f.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base13f" -> Assert.IsTrue(base13f.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base14" -> Assert.IsTrue(base14.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base15" -> Assert.IsTrue(base15.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base16" -> Assert.IsTrue(base16.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base17" -> Assert.IsTrue(base17.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base18" -> Assert.IsTrue(base18.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base19" -> Assert.IsTrue(base19.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base20" -> Assert.IsTrue(base20.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base21" -> Assert.IsTrue(base21.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base22" -> Assert.IsTrue(base22.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base23" -> Assert.IsTrue(base23.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base24" -> Assert.IsTrue(base24.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base25" -> Assert.IsTrue(base25.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "base26" -> Assert.IsTrue(base26.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base2" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base3" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base4" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base5" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base6" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base7" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base8" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base9" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base10" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base11" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base12" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base13" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base11a" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base12a" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base10b" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base11b" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base12b" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base13b" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base10c" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base11c" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base12c" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base13c" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base10d" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base11d" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base12d" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base13d" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base10e" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base11e" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base12e" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base13e" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base10f" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base11f" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base12f" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base13f" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base14" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base15" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base16" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base17" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base18" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base19" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base20" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base21" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base22" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base23" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base24" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base25" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base26" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base27" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base28" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base29" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base30" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base31" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base32" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

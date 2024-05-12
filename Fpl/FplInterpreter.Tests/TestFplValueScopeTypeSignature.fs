@@ -1,6 +1,7 @@
-namespace FplInterpreter.Tests
+﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplInterpreterTypes
+open CommonTestHelpers
 
 [<TestClass>]
 type TestFplValueScopeTypeSignature() =
@@ -461,115 +462,129 @@ type TestFplValueScopeTypeSignature() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1")>]
-    [<DataRow("base2")>]
-    [<DataRow("base3")>]
-    [<DataRow("base4")>]
-    [<DataRow("base5")>]
-    [<DataRow("base6")>]
-    [<DataRow("base7")>]
-    [<DataRow("base8")>]
-    [<DataRow("base9")>]
-    [<DataRow("base10")>]
-    [<DataRow("base11")>]
-    [<DataRow("base12")>]
-    [<DataRow("base13")>]
-    [<DataRow("base11a")>]
-    [<DataRow("base12a")>]
-    [<DataRow("base10b")>]
-    [<DataRow("base11b")>]
-    [<DataRow("base12b")>]
-    [<DataRow("base13b")>]
-    [<DataRow("base10c")>]
-    [<DataRow("base11c")>]
-    [<DataRow("base12c")>]
-    [<DataRow("base13c")>]
-    [<DataRow("base10d")>]
-    [<DataRow("base11d")>]
-    [<DataRow("base12d")>]
-    [<DataRow("base13d")>]
-    [<DataRow("base10e")>]
-    [<DataRow("base11e")>]
-    [<DataRow("base12e")>]
-    [<DataRow("base13e")>]
-    [<DataRow("base10f")>]
-    [<DataRow("base11f")>]
-    [<DataRow("base12f")>]
-    [<DataRow("base13f")>]
-    [<DataRow("base14")>]
-    [<DataRow("base15")>]
-    [<DataRow("base16")>]
-    [<DataRow("base17")>]
-    [<DataRow("base18")>]
-    [<DataRow("base19")>]
-    [<DataRow("base20")>]
-    [<DataRow("base21")>]
-    [<DataRow("base22")>]
-    [<DataRow("base23")>]
-    [<DataRow("base24")>]
-    [<DataRow("base25")>]
-    [<DataRow("base26")>]
+    [<DataRow("base1", "true")>]
+    [<DataRow("base2", "false")>]
+    [<DataRow("base3", "undef")>]
+    [<DataRow("base4", "1.")>]
+    [<DataRow("base5", "del.Test()")>]
+    [<DataRow("base6", "$1")>]
+    [<DataRow("base7", "bydef.Test()")>] 
+    [<DataRow("base8", "Test$1")>]
+    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base10", "Test")>]
+    [<DataRow("base11", "v")>]
+    [<DataRow("base12", "self")>]
+    [<DataRow("base13", "1")>]
+    [<DataRow("base11a", "v.x")>]
+    [<DataRow("base12a", "self.x")>]
+    [<DataRow("base10b", "Test()")>]
+    [<DataRow("base11b", "v()")>]
+    [<DataRow("base12b", "self()")>]
+    [<DataRow("base13b", "1()")>]
+    [<DataRow("base10c", "Test(x, y)")>]
+    [<DataRow("base11c", "v(x, y)")>]
+    [<DataRow("base12c", "self(x, y)")>]
+    [<DataRow("base13c", "1(x, y)")>]
+    [<DataRow("base10d", "Test[x, y]")>]
+    [<DataRow("base11d", "v[x, y]")>]
+    [<DataRow("base12d", "self[x, y]")>]
+    [<DataRow("base13d", "1[x.y]")>]
+    [<DataRow("base10e", "Test(x, y).@self[a, b]")>]
+    [<DataRow("base11e", "v(x, y).x[a, b]")>]
+    [<DataRow("base12e", "self(x, y).3[a, b]")>]
+    [<DataRow("base13e", "1(x, y).T[a, b]")>]
+    [<DataRow("base10f", "Test[x, y].x(a, b)")>]
+    [<DataRow("base11f", "v[x, y].x(a, b)")>]
+    [<DataRow("base12f", "self[x, y].self(a, b)")>]
+    [<DataRow("base13f", "1[x.y].T(a, b)")>]
+    [<DataRow("base14", "∅")>]
+    [<DataRow("base15", "-x")>]
+    [<DataRow("base16", "-(y + x = 2 * x)")>]
+    [<DataRow("base17", "(y + x' = 2 * x)'")>]
+    [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
+    [<DataRow("base19", "exn$1 x {all y {true}}")>]
+    [<DataRow("base20", "all x {not x}")>]
+    [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base22", "xor (x, y, z)")>]
+    [<DataRow("base23", "or (x, y, z)")>]
+    [<DataRow("base24", "iif (x, y)")>]
+    [<DataRow("base25", "impl (x, y)")>]
+    [<DataRow("base26", "is (x, Nat)")>]
+    [<DataRow("base27", "B()")>]
+    [<DataRow("base28", "C(a,b,c,d)")>]
+    [<DataRow("base29", "D(self,b,c)")>]
+    [<DataRow("base30", "B(In(x))")>]
+    [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
+    [<DataRow("base32", "E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestPredicate(var) =
-        let result = CommonFplValueTestCases.ScopePredicate()
-        match result with
-        | Some (theory, base1,base2,base3,base4,base5, base6, base7, 
-                                    base8, base9, base10, base11, base12, base13,
-                                    base11a, base12a, base10b, base11b, base12b, base13b,
-                                    base10c, base11c, base12c, base13c, base10d, base11d,
-                                    base12d, base10e, base11e, base12e, base13d, base13e,
-                                    base10f, base11f, base12f, base13f, base14, base15,
-                                    base16, base17, base18, base19, base20, base21, base22,
-                                    base23, base24, base25, base26) ->
+    member this.TestPredicate(var, varVal) =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let stOption = prepareFplCode(fplCode, false) 
+        prepareFplCode("", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope["Test"]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.Scope["__" + varVal]
+
             match var with
             | "base1" -> Assert.AreEqual([], base1.TypeSignature)
-            | "base2" -> Assert.AreEqual([], base2.TypeSignature)
-            | "base3" -> Assert.AreEqual([], base3.TypeSignature)
-            | "base4" -> Assert.AreEqual([], base4.TypeSignature)
-            | "base5" -> Assert.AreEqual([], base5.TypeSignature)
-            | "base6" -> Assert.AreEqual([], base6.TypeSignature)
-            | "base7" -> Assert.AreEqual([], base7.TypeSignature)
-            | "base8" -> Assert.AreEqual([], base8.TypeSignature)
-            | "base9" -> Assert.AreEqual([], base9.TypeSignature)
-            | "base10" -> Assert.AreEqual([], base10.TypeSignature)
-            | "base11" -> Assert.AreEqual([], base11.TypeSignature)
-            | "base12" -> Assert.AreEqual([], base12.TypeSignature)
-            | "base13" -> Assert.AreEqual([], base13.TypeSignature)
-            | "base11a" -> Assert.AreEqual([], base11a.TypeSignature)
-            | "base12a" -> Assert.AreEqual([], base12a.TypeSignature)
-            | "base10b" -> Assert.AreEqual([], base10b.TypeSignature)
-            | "base11b" -> Assert.AreEqual([], base11b.TypeSignature)
-            | "base12b" -> Assert.AreEqual([], base12b.TypeSignature)
-            | "base13b" -> Assert.AreEqual([], base13b.TypeSignature)
-            | "base10c" -> Assert.AreEqual([], base10c.TypeSignature)
-            | "base11c" -> Assert.AreEqual([], base11c.TypeSignature)
-            | "base12c" -> Assert.AreEqual([], base12c.TypeSignature)
-            | "base13c" -> Assert.AreEqual([], base13c.TypeSignature)
-            | "base10d" -> Assert.AreEqual([], base10d.TypeSignature)
-            | "base11d" -> Assert.AreEqual([], base11d.TypeSignature)
-            | "base12d" -> Assert.AreEqual([], base12d.TypeSignature)
-            | "base13d" -> Assert.AreEqual([], base13d.TypeSignature)
-            | "base10e" -> Assert.AreEqual([], base10e.TypeSignature)
-            | "base11e" -> Assert.AreEqual([], base11e.TypeSignature)
-            | "base12e" -> Assert.AreEqual([], base12e.TypeSignature)
-            | "base13e" -> Assert.AreEqual([], base13e.TypeSignature)
-            | "base10f" -> Assert.AreEqual([], base10f.TypeSignature)
-            | "base11f" -> Assert.AreEqual([], base11f.TypeSignature)
-            | "base12f" -> Assert.AreEqual([], base12f.TypeSignature)
-            | "base13f" -> Assert.AreEqual([], base13f.TypeSignature)
-            | "base14" -> Assert.AreEqual([], base14.TypeSignature)
-            | "base15" -> Assert.AreEqual([], base15.TypeSignature)
-            | "base16" -> Assert.AreEqual([], base16.TypeSignature)
-            | "base17" -> Assert.AreEqual([], base17.TypeSignature)
-            | "base18" -> Assert.AreEqual([], base18.TypeSignature)
-            | "base19" -> Assert.AreEqual([], base19.TypeSignature)
-            | "base20" -> Assert.AreEqual([], base20.TypeSignature)
-            | "base21" -> Assert.AreEqual([], base21.TypeSignature)
-            | "base22" -> Assert.AreEqual([], base22.TypeSignature)
-            | "base23" -> Assert.AreEqual([], base23.TypeSignature)
-            | "base24" -> Assert.AreEqual([], base24.TypeSignature)
-            | "base25" -> Assert.AreEqual([], base25.TypeSignature)
-            | "base26" -> Assert.AreEqual([], base26.TypeSignature)
+            | "base2" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base3" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base4" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base5" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base6" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base7" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base8" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base9" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base10" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base11" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base12" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base13" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base11a" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base12a" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base10b" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base11b" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base12b" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base13b" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base10c" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base11c" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base12c" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base13c" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base10d" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base11d" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base12d" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base13d" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base10e" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base11e" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base12e" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base13e" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base10f" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base11f" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base12f" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base13f" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base14" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base15" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base16" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base17" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base18" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base19" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base20" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base21" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base22" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base23" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base24" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base25" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base26" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base27" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base28" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base29" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base30" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base31" -> Assert.AreEqual([], base1.TypeSignature)
+            | "base32" -> Assert.AreEqual([], base1.TypeSignature)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

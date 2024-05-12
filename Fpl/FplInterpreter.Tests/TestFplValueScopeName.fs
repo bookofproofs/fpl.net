@@ -1,6 +1,8 @@
-namespace FplInterpreter.Tests
+﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FplInterpreterTypes
+open CommonTestHelpers
+
 
 [<TestClass>]
 type TestFplValueScopeName() =
@@ -464,115 +466,250 @@ type TestFplValueScopeName() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1")>]
-    [<DataRow("base2")>]
-    [<DataRow("base3")>]
-    [<DataRow("base4")>]
-    [<DataRow("base5")>]
-    [<DataRow("base6")>]
-    [<DataRow("base7")>]
-    [<DataRow("base8")>]
-    [<DataRow("base9")>]
-    [<DataRow("base10")>]
-    [<DataRow("base11")>]
-    [<DataRow("base12")>]
-    [<DataRow("base13")>]
-    [<DataRow("base11a")>]
-    [<DataRow("base12a")>]
-    [<DataRow("base10b")>]
-    [<DataRow("base11b")>]
-    [<DataRow("base12b")>]
-    [<DataRow("base13b")>]
-    [<DataRow("base10c")>]
-    [<DataRow("base11c")>]
-    [<DataRow("base12c")>]
-    [<DataRow("base13c")>]
-    [<DataRow("base10d")>]
-    [<DataRow("base11d")>]
-    [<DataRow("base12d")>]
-    [<DataRow("base13d")>]
-    [<DataRow("base10e")>]
-    [<DataRow("base11e")>]
-    [<DataRow("base12e")>]
-    [<DataRow("base13e")>]
-    [<DataRow("base10f")>]
-    [<DataRow("base11f")>]
-    [<DataRow("base12f")>]
-    [<DataRow("base13f")>]
-    [<DataRow("base14")>]
-    [<DataRow("base15")>]
-    [<DataRow("base16")>]
-    [<DataRow("base17")>]
-    [<DataRow("base18")>]
-    [<DataRow("base19")>]
-    [<DataRow("base20")>]
-    [<DataRow("base21")>]
-    [<DataRow("base22")>]
-    [<DataRow("base23")>]
-    [<DataRow("base24")>]
-    [<DataRow("base25")>]
-    [<DataRow("base26")>]
+    [<DataRow("base1", "true")>]
+    [<DataRow("base2", "false")>]
+    [<DataRow("base3", "undef")>]
+    [<DataRow("base4", "1.")>]
+    [<DataRow("base5", "del.Test()")>]
+    [<DataRow("base6", "$1")>]
+    [<DataRow("base7", "bydef.Test()")>] 
+    [<DataRow("base8", "Test$1")>]
+    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base10", "Test")>]
+    [<DataRow("base11", "v")>]
+    [<DataRow("base12", "self")>]
+    [<DataRow("base13", "1")>]
+    [<DataRow("base11a", "v.x")>]
+    [<DataRow("base12a", "self.x")>]
+    [<DataRow("base10b", "Test()")>]
+    [<DataRow("base11b", "v()")>]
+    [<DataRow("base12b", "self()")>]
+    [<DataRow("base13b", "1()")>]
+    [<DataRow("base10c", "Test(x, y)")>]
+    [<DataRow("base11c", "v(x, y)")>]
+    [<DataRow("base12c", "self(x, y)")>]
+    [<DataRow("base13c", "1(x, y)")>]
+    [<DataRow("base10d", "Test[x, y]")>]
+    [<DataRow("base11d", "v[x, y]")>]
+    [<DataRow("base12d", "self[x, y]")>]
+    [<DataRow("base13d", "1[x.y]")>]
+    [<DataRow("base10e", "Test(x, y).@self[a, b]")>]
+    [<DataRow("base11e", "v(x, y).x[a, b]")>]
+    [<DataRow("base12e", "self(x, y).3[a, b]")>]
+    [<DataRow("base13e", "1(x, y).T[a, b]")>]
+    [<DataRow("base10f", "Test[x, y].x(a, b)")>]
+    [<DataRow("base11f", "v[x, y].x(a, b)")>]
+    [<DataRow("base12f", "self[x, y].self(a, b)")>]
+    [<DataRow("base13f", "1[x.y].T(a, b)")>]
+    [<DataRow("base14", "∅")>]
+    [<DataRow("base15", "-x")>]
+    [<DataRow("base16", "-(y + x = 2 * x)")>]
+    [<DataRow("base17", "(y + x' = 2 * x)'")>]
+    [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
+    [<DataRow("base19", "exn$1 x {all y {true}}")>]
+    [<DataRow("base20", "all x {not x}")>]
+    [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base22", "xor (x, y, z)")>]
+    [<DataRow("base23", "or (x, y, z)")>]
+    [<DataRow("base24", "iif (x, y)")>]
+    [<DataRow("base25", "impl (x, y)")>]
+    [<DataRow("base26", "is (x, Nat)")>]
+    [<DataRow("base27", "B()")>]
+    [<DataRow("base28", "C(a,b,c,d)")>]
+    [<DataRow("base29", "D(self,b,c)")>]
+    [<DataRow("base30", "B(In(x))")>]
+    [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
+    [<DataRow("base32", "E(true, undef, false)")>]
     [<TestMethod>]
-    member this.TestPredicate(var) =
-        let result = CommonFplValueTestCases.ScopePredicate()
-        match result with
-        | Some (theory, base1,base2,base3,base4,base5, base6, base7, 
-                                    base8, base9, base10, base11, base12, base13,
-                                    base11a, base12a, base10b, base11b, base12b, base13b,
-                                    base10c, base11c, base12c, base13c, base10d, base11d,
-                                    base12d, base10e, base11e, base12e, base13d, base13e,
-                                    base10f, base11f, base12f, base13f, base14, base15,
-                                    base16, base17, base18, base19, base20, base21, base22,
-                                    base23, base24, base25, base26) ->
+    member this.TestPredicate(var, varVal) =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let stOption = prepareFplCode(fplCode, false) 
+        prepareFplCode("", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope["Test"]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.Scope["__" + varVal]
+
             match var with
-            | "base1" -> Assert.AreEqual("", base1.Name)
-            | "base2" -> Assert.AreEqual("", base2.Name)
-            | "base3" -> Assert.AreEqual("", base3.Name)
-            | "base4" -> Assert.AreEqual("", base4.Name)
-            | "base5" -> Assert.AreEqual("", base5.Name)
-            | "base6" -> Assert.AreEqual("", base6.Name)
-            | "base7" -> Assert.AreEqual("", base7.Name)
-            | "base8" -> Assert.AreEqual("", base8.Name)
-            | "base9" -> Assert.AreEqual("", base9.Name)
-            | "base10" -> Assert.AreEqual("", base10.Name)
-            | "base11" -> Assert.AreEqual("", base11.Name)
-            | "base12" -> Assert.AreEqual("", base12.Name)
-            | "base13" -> Assert.AreEqual("", base13.Name)
-            | "base11a" -> Assert.AreEqual("", base11a.Name)
-            | "base12a" -> Assert.AreEqual("", base12a.Name)
-            | "base10b" -> Assert.AreEqual("", base10b.Name)
-            | "base11b" -> Assert.AreEqual("", base11b.Name)
-            | "base12b" -> Assert.AreEqual("", base12b.Name)
-            | "base13b" -> Assert.AreEqual("", base13b.Name)
-            | "base10c" -> Assert.AreEqual("", base10c.Name)
-            | "base11c" -> Assert.AreEqual("", base11c.Name)
-            | "base12c" -> Assert.AreEqual("", base12c.Name)
-            | "base13c" -> Assert.AreEqual("", base13c.Name)
-            | "base10d" -> Assert.AreEqual("", base10d.Name)
-            | "base11d" -> Assert.AreEqual("", base11d.Name)
-            | "base12d" -> Assert.AreEqual("", base12d.Name)
-            | "base13d" -> Assert.AreEqual("", base13d.Name)
-            | "base10e" -> Assert.AreEqual("", base10e.Name)
-            | "base11e" -> Assert.AreEqual("", base11e.Name)
-            | "base12e" -> Assert.AreEqual("", base12e.Name)
-            | "base13e" -> Assert.AreEqual("", base13e.Name)
-            | "base10f" -> Assert.AreEqual("", base10f.Name)
-            | "base11f" -> Assert.AreEqual("", base11f.Name)
-            | "base12f" -> Assert.AreEqual("", base12f.Name)
-            | "base13f" -> Assert.AreEqual("", base13f.Name)
-            | "base14" -> Assert.AreEqual("", base14.Name)
-            | "base15" -> Assert.AreEqual("", base15.Name)
-            | "base16" -> Assert.AreEqual("", base16.Name)
-            | "base17" -> Assert.AreEqual("", base17.Name)
-            | "base18" -> Assert.AreEqual("", base18.Name)
-            | "base19" -> Assert.AreEqual("", base19.Name)
-            | "base20" -> Assert.AreEqual("", base20.Name)
-            | "base21" -> Assert.AreEqual("", base21.Name)
-            | "base22" -> Assert.AreEqual("", base22.Name)
-            | "base23" -> Assert.AreEqual("", base23.Name)
-            | "base24" -> Assert.AreEqual("", base24.Name)
-            | "base25" -> Assert.AreEqual("", base25.Name)
-            | "base26" -> Assert.AreEqual("", base26.Name)
+            | "base1" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base2" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base3" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base4" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base5" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base6" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base7" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base8" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base9" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base10" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base11" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base12" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base13" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base11a" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base12a" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base10b" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base11b" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base12b" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base13b" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base10c" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base11c" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base12c" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base13c" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base10d" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base11d" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base12d" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base13d" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base10e" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base11e" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base12e" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base13e" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base10f" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base11f" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base12f" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base13f" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base14" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base15" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base16" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base17" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base18" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base19" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base20" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base21" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base22" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base23" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base24" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base25" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base26" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base27" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base28" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base29" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base30" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base31" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base32" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "base.B()")>]
+    [<DataRow("base2", "base.C(a, b, c, d)")>]
+    [<DataRow("base3", "base.D(self, a, b)")>]
+    [<DataRow("base4", "base.B(In(x))")>]
+    [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
+    [<DataRow("base6", "base.E(true, undef, false)")>]
+    [<TestMethod>]
+    member this.TestCallConstructorParentClass(var, varVal) =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = sprintf """
+                        def cl B:obj {intr}
+                        def cl C:obj {intr}
+                        def cl D:obj {intr}
+
+                        def cl A:B,C,D,E
+                        {
+                            ctor A(a:T1, b:func, c:ind, d:pred) 
+                            {
+                                dec
+                                    %s
+                                ;
+                                self
+                            }
+                        }
+                        ;""" varVal
+        let stOption = prepareFplCode(fplCode, false) 
+        prepareFplCode("", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope["Test"]
+            let cl = theory.Scope["A"]
+            let ctor = cl.Scope["A(T1, func, ind, pred)"]
+            let base1 = ctor.Scope["__" + varVal]
+
+            match var with
+            | "base1" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base2" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base3" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base4" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base5" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base6" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "del.B()")>]
+    [<DataRow("base2", "del.C(a,b,c,d)")>]
+    [<DataRow("base3", "del.D(self,b,c)")>]
+    [<DataRow("base4", "del.B(In(x))")>]
+    [<DataRow("base5", "del.Test()")>]
+    [<DataRow("base6", "del.C(Test1(a),Test2(b,c,d))")>]
+    [<DataRow("base7", "del.E(true, undef, false)")>] 
+    [<TestMethod>]
+    member this.TestDelegate(var, varVal) =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let stOption = prepareFplCode(fplCode, false) 
+        prepareFplCode("", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope["Test"]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.Scope["__" + varVal]
+
+            match var with
+            | "base1" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base2" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base3" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base4" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base5" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | "base6" -> Assert.AreEqual("__" + varVal, base1.Name)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", """def pred T1() {intr};""")>]
+    [<DataRow("base2", """def pred infix ">" -1 T1() {intr};""")>]
+    [<DataRow("base3", """def pred postfix "'" T1() {intr};""")>]
+    [<DataRow("base4", """def pred prefix "-" T1() {intr};""")>]
+    [<DataRow("base5", """def cl symbol "∅" T1:obj {intr};""")>]
+    [<DataRow("base5a", """def cl T1:obj {intr};""")>]
+    [<DataRow("base6", """def func T1()->obj {intr};""")>]
+    [<DataRow("base7", """def func infix ">" -1 T1()->obj {intr};""")>]
+    [<DataRow("base8", """def func postfix "'" T1()->obj {intr};""")>]
+    [<DataRow("base9", """def func prefix "-" T1()->obj {intr};""")>]
+    [<TestMethod>]
+    member this.TestFixNotation(var, varVal) =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = sprintf "%s;" varVal
+        let stOption = prepareFplCode(fplCode, false) 
+        prepareFplCode("", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope["Test"]
+            let base1 = 
+                if varVal.Contains "cl" then 
+                    theory.Scope["T1"]
+                elif varVal.Contains "func" then 
+                    theory.Scope["T1() -> obj"]
+                else 
+                    theory.Scope["T1()"]
+
+            match var with
+            | "base1" -> Assert.AreEqual("T1()", base1.Name)
+            | "base2" -> Assert.AreEqual("T1()", base1.Name)
+            | "base3" -> Assert.AreEqual("T1()", base1.Name)
+            | "base4" -> Assert.AreEqual("T1()", base1.Name)
+            | "base5" -> Assert.AreEqual("T1", base1.Name)
+            | "base5a" -> Assert.AreEqual("T1", base1.Name)
+            | "base6" -> Assert.AreEqual("T1() -> obj", base1.Name)
+            | "base7" -> Assert.AreEqual("T1() -> obj", base1.Name)
+            | "base8" -> Assert.AreEqual("T1() -> obj", base1.Name)
+            | "base9" -> Assert.AreEqual("T1() -> obj", base1.Name)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
