@@ -591,3 +591,124 @@ type TestFplValueScopeFplRepresentation() =
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("base1", "base.B()")>]
+    [<DataRow("base2", "base.C(a, b, c, d)")>]
+    [<DataRow("base3", "base.D(self, a, b)")>]
+    [<DataRow("base4", "base.B(In(x))")>]
+    [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
+    [<DataRow("base6", "base.E(true, undef, false)")>]
+    [<TestMethod>]
+    member this.TestCallConstructorParentClass(var, varVal) =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = sprintf """
+                        def cl B:obj {intr}
+                        def cl C:obj {intr}
+                        def cl D:obj {intr}
+
+                        def cl A:B,C,D,E
+                        {
+                            ctor A(a:T1, b:func, c:ind, d:pred) 
+                            {
+                                dec
+                                    %s
+                                ;
+                                self
+                            }
+                        }
+                        ;""" varVal
+        let stOption = prepareFplCode(fplCode, false) 
+        prepareFplCode("", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope["Test"]
+            let cl = theory.Scope["A"]
+            let ctor = cl.Scope["A(T1, func, ind, pred)"]
+            let base1 = ctor.Scope["__" + varVal]
+
+            match var with
+            | "base1" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base2" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base3" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base4" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base5" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base6" -> Assert.AreEqual("", base1.FplRepresentation)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "del.B()")>]
+    [<DataRow("base2", "del.C(a,b,c,d)")>]
+    [<DataRow("base3", "del.D(self,b,c)")>]
+    [<DataRow("base4", "del.B(In(x))")>]
+    [<DataRow("base5", "del.Test()")>]
+    [<DataRow("base6", "del.C(Test1(a),Test2(b,c,d))")>]
+    [<DataRow("base7", "del.E(true, undef, false)")>] 
+    [<TestMethod>]
+    member this.TestDelegate(var, varVal) =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let stOption = prepareFplCode(fplCode, false) 
+        prepareFplCode("", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope["Test"]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.Scope["__" + varVal]
+
+            match var with
+            | "base1" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base2" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base3" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base4" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base5" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base6" -> Assert.AreEqual("", base1.FplRepresentation)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", """def pred T1() {intr};""")>]
+    [<DataRow("base2", """def pred infix ">" -1 T1() {intr};""")>]
+    [<DataRow("base3", """def pred postfix "'" T1() {intr};""")>]
+    [<DataRow("base4", """def pred prefix "-" T1() {intr};""")>]
+    [<DataRow("base5", """def cl symbol "∅" T1:obj {intr};""")>]
+    [<DataRow("base5a", """def cl T1:obj {intr};""")>]
+    [<DataRow("base6", """def func T1()->obj {intr};""")>]
+    [<DataRow("base7", """def func infix ">" -1 T1()->obj {intr};""")>]
+    [<DataRow("base8", """def func postfix "'" T1()->obj {intr};""")>]
+    [<DataRow("base9", """def func prefix "-" T1()->obj {intr};""")>]
+    [<TestMethod>]
+    member this.TestFixNotation(var, varVal) =
+        FplParser.parserDiagnostics.Clear()
+        let fplCode = sprintf "%s;" varVal
+        let stOption = prepareFplCode(fplCode, false) 
+        prepareFplCode("", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope["Test"]
+            let base1 = 
+                if varVal.Contains "cl" then 
+                    theory.Scope["T1"]
+                elif varVal.Contains "func" then 
+                    theory.Scope["T1() -> obj"]
+                else 
+                    theory.Scope["T1()"]
+
+            match var with
+            | "base1" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base2" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base3" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base4" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base5" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base5a" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base6" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base7" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base8" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base9" -> Assert.AreEqual("", base1.FplRepresentation)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
