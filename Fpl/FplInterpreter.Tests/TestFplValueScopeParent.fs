@@ -518,6 +518,8 @@ type TestFplValueScopeParent() =
     [<DataRow("base19", "exn$1 x {all y {true}}")>]
     [<DataRow("base20", "all x {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base21a", "not x")>]
+    [<DataRow("base21b", "not (x)")>]
     [<DataRow("base22", "xor (x, y, z)")>]
     [<DataRow("base23", "or (x, y, z)")>]
     [<DataRow("base24", "iif (x, y)")>]
@@ -587,6 +589,8 @@ type TestFplValueScopeParent() =
             | "base19" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base20" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base21" -> Assert.AreEqual(pr1, base1.Parent.Value)
+            | "base21a" -> Assert.AreEqual(pr1, base1.Parent.Value)
+            | "base21b" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base22" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base23" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base24" -> Assert.AreEqual(pr1, base1.Parent.Value)

@@ -512,6 +512,8 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base19", "exn$1 x {all y {true}}")>]
     [<DataRow("base20", "all x {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base21a", "not x")>]
+    [<DataRow("base21b", "not (x)")>]
     [<DataRow("base22", "xor (x, y, z)")>]
     [<DataRow("base23", "or (x, y, z)")>]
     [<DataRow("base24", "iif (x, y)")>]
@@ -581,6 +583,8 @@ type TestFplValueScopeNameEndPos() =
             | "base19" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "base20" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "base21" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base21a" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base21b" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "base22" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "base23" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "base24" -> Assert.IsTrue(base1.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))

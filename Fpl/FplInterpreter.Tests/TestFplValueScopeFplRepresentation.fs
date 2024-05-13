@@ -512,6 +512,8 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base19", "exn$1 x {all y {true}}")>]
     [<DataRow("base20", "all x {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base21a", "not x")>]
+    [<DataRow("base21b", "not (x)")>]
     [<DataRow("base22", "xor (x, y, z)")>]
     [<DataRow("base23", "or (x, y, z)")>]
     [<DataRow("base24", "iif (x, y)")>]
@@ -581,6 +583,8 @@ type TestFplValueScopeFplRepresentation() =
             | "base19" -> Assert.AreEqual("", base1.FplRepresentation)
             | "base20" -> Assert.AreEqual("", base1.FplRepresentation)
             | "base21" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base21a" -> Assert.AreEqual("", base1.FplRepresentation)
+            | "base21b" -> Assert.AreEqual("", base1.FplRepresentation)
             | "base22" -> Assert.AreEqual("", base1.FplRepresentation)
             | "base23" -> Assert.AreEqual("", base1.FplRepresentation)
             | "base24" -> Assert.AreEqual("", base1.FplRepresentation)

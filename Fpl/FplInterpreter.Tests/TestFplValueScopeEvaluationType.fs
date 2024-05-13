@@ -511,6 +511,8 @@ type TestFplValueScopeEvaluationType() =
     [<DataRow("base19", "exn$1 x {all y {true}}")>]
     [<DataRow("base20", "all x {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base21a", "not x")>]
+    [<DataRow("base21b", "not (x)")>]
     [<DataRow("base22", "xor (x, y, z)")>]
     [<DataRow("base23", "or (x, y, z)")>]
     [<DataRow("base24", "iif (x, y)")>]
@@ -580,6 +582,8 @@ type TestFplValueScopeEvaluationType() =
             | "base19" -> Assert.AreEqual(FplType.Object, base1.EvaluationType)
             | "base20" -> Assert.AreEqual(FplType.Object, base1.EvaluationType)
             | "base21" -> Assert.AreEqual(FplType.Object, base1.EvaluationType)
+            | "base21a" -> Assert.AreEqual(FplType.Object, base1.EvaluationType)
+            | "base21b" -> Assert.AreEqual(FplType.Object, base1.EvaluationType)
             | "base22" -> Assert.AreEqual(FplType.Object, base1.EvaluationType)
             | "base23" -> Assert.AreEqual(FplType.Object, base1.EvaluationType)
             | "base24" -> Assert.AreEqual(FplType.Object, base1.EvaluationType)

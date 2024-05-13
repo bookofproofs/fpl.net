@@ -18,9 +18,8 @@ let private addWithComma (name:string) str =
             || name.EndsWith "(" 
             || name.EndsWith "[" 
             || name.Length = 0 
-            || name.EndsWith "-> " 
+            || name.EndsWith " " 
             || name.EndsWith "." 
-            || name.EndsWith "__" 
             || str.StartsWith "$" then
                 if str = "->" then 
                     name + " " + str + " "
@@ -474,10 +473,16 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
-    | Ast.Not((pos1, pos2), ast1) ->
+    | Ast.Not((pos1, pos2), predicateAst) ->
         st.EvalPush("Not")
-        eval st ast1
-        eval_pos_ast st pos1 pos2
+        match st.CurrentContext with
+        | EvalContext.InBlock fplValue
+        | EvalContext.InPropertyBlock fplValue 
+        | EvalContext.InConstructorBlock fplValue 
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue "not "
+            eval st predicateAst
+        | _ -> ()
         st.EvalPop()
     | Ast.InEntity((pos1, pos2), ast1) ->
         st.EvalPush("InEntity")
@@ -620,17 +625,41 @@ let rec eval (st: SymbolTable) ast =
             fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened brackes
         | _-> ()
         st.EvalPop()
-    | Ast.And((pos1, pos2), asts) ->
+    | Ast.And((pos1, pos2), predicateAsts) ->
         st.EvalPush("And")
-        asts |> List.map (eval st) |> ignore
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue -> 
+            adjustSignature st fplValue "and"
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
+            adjustSignature st fplValue "("
+            predicateAsts |> List.map (eval st) |> ignore
+            adjustSignature st fplValue ")"
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened braces
+        | _-> ()
         st.EvalPop()
-    | Ast.Or((pos1, pos2), asts) ->
+    | Ast.Or((pos1, pos2), predicateAsts) ->
         st.EvalPush("Or")
-        asts |> List.map (eval st) |> ignore
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue -> 
+            adjustSignature st fplValue "or"
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
+            adjustSignature st fplValue "("
+            predicateAsts |> List.map (eval st) |> ignore
+            adjustSignature st fplValue ")"
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened braces
+        | _-> ()
         st.EvalPop()
-    | Ast.Xor((pos1, pos2), asts) ->
+    | Ast.Xor((pos1, pos2), predicateAsts) ->
         st.EvalPush("Xor")
-        asts |> List.map (eval st) |> ignore
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue -> 
+            adjustSignature st fplValue "xor"
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
+            adjustSignature st fplValue "("
+            predicateAsts |> List.map (eval st) |> ignore
+            adjustSignature st fplValue ")"
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened braces
+        | _-> ()
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), asts) ->
         st.EvalPush("VarDeclBlock")

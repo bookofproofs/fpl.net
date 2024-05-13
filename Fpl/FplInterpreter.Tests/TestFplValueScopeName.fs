@@ -513,6 +513,8 @@ type TestFplValueScopeName() =
     [<DataRow("base19", "exn$1 x {all y {true}}")>]
     [<DataRow("base20", "all x {not x}")>]
     [<DataRow("base21", "and(x, y, z)")>]
+    [<DataRow("base21a", "not x")>]
+    [<DataRow("base21b", "not (x)")>]
     [<DataRow("base22", "xor(x, y, z)")>]
     [<DataRow("base23", "or(x, y, z)")>]
     [<DataRow("base24", "iif(x, y)")>]
@@ -582,6 +584,8 @@ type TestFplValueScopeName() =
             | "base19" -> Assert.AreEqual(varVal, base1.Name)
             | "base20" -> Assert.AreEqual(varVal, base1.Name)
             | "base21" -> Assert.AreEqual(varVal, base1.Name)
+            | "base21a" -> Assert.AreEqual("not x", base1.Name)
+            | "base21b" -> Assert.AreEqual("not(x)", base1.Name)
             | "base22" -> Assert.AreEqual(varVal, base1.Name)
             | "base23" -> Assert.AreEqual(varVal, base1.Name)
             | "base24" -> Assert.AreEqual(varVal, base1.Name)

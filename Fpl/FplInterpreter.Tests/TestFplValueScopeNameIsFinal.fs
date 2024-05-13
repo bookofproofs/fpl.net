@@ -513,6 +513,8 @@ type TestFplValueScopeNameIsFinal() =
     [<DataRow("base19", "exn$1 x {all y {true}}")>]
     [<DataRow("base20", "all x {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base21a", "not x")>]
+    [<DataRow("base21b", "not (x)")>]
     [<DataRow("base22", "xor (x, y, z)")>]
     [<DataRow("base23", "or (x, y, z)")>]
     [<DataRow("base24", "iif (x, y)")>]
@@ -582,6 +584,8 @@ type TestFplValueScopeNameIsFinal() =
             | "base19" -> Assert.AreEqual(true, base1.NameIsFinal)
             | "base20" -> Assert.AreEqual(true, base1.NameIsFinal)
             | "base21" -> Assert.AreEqual(true, base1.NameIsFinal)
+            | "base21a" -> Assert.AreEqual(true, base1.NameIsFinal)
+            | "base21b" -> Assert.AreEqual(true, base1.NameIsFinal)
             | "base22" -> Assert.AreEqual(true, base1.NameIsFinal)
             | "base23" -> Assert.AreEqual(true, base1.NameIsFinal)
             | "base24" -> Assert.AreEqual(true, base1.NameIsFinal)
