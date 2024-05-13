@@ -361,17 +361,27 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue s
         | _ -> ()
         st.EvalPop() 
-    | Ast.Prefix((pos1, pos2), s) -> 
+    | Ast.Prefix((pos1, pos2), symbol) -> 
         st.EvalPush("Prefix")
-        eval_pos_string st pos1 pos2 s
+        match st.CurrentContext with
+        | EvalContext.InSignature fplValue ->
+            fplValue.ExpressionType <- ExprType.Prefix symbol
+        | _ -> ()
         st.EvalPop() 
-    | Ast.Infix((pos1, pos2), s) -> 
+    | Ast.Infix((pos1, pos2), (symbol, precedenceAsts)) -> 
         st.EvalPush("Infix")
-        eval_pos_string st pos1 pos2 s
+        eval st precedenceAsts
+        match st.CurrentContext with
+        | EvalContext.InSignature fplValue ->
+            fplValue.ExpressionType <- ExprType.Infix (symbol, fplValue.AuxiliaryInfo)
+        | _ -> ()
         st.EvalPop() 
-    | Ast.Postfix((pos1, pos2), s) -> 
+    | Ast.Postfix((pos1, pos2), symbol) -> 
         st.EvalPush("Postfix")
-        eval_pos_string st pos1 pos2 s
+        match st.CurrentContext with
+        | EvalContext.InSignature fplValue ->
+            fplValue.ExpressionType <- ExprType.Postfix symbol
+        | _ -> ()
         st.EvalPop() 
     | Ast.Symbol((pos1, pos2), s) -> 
         st.EvalPush("Symbol")
@@ -572,7 +582,8 @@ let rec eval (st: SymbolTable) ast =
             checkID012Diagnostics st fplValue identifier pos1 pos2
         | _ -> ()
         st.EvalPop()
-    | Ast.ParamTuple((pos1, pos2), asts) ->
+    | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
+        
         st.EvalPush("ParamTuple")
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue 
@@ -580,7 +591,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
             adjustSignature st fplValue "("
-            asts |> List.map (eval st) |> ignore
+            namedVariableDeclarationListAsts |> List.map (eval st) |> ignore
             adjustSignature st fplValue ")"
             fplValue.NameEndPos <- pos2
         | _ -> ()
@@ -868,6 +879,10 @@ let rec eval (st: SymbolTable) ast =
         |> Option.defaultValue ()
         |> ignore
         eval st paramTupleAst
+        match st.CurrentContext with
+        | EvalContext.InSignature fplValue ->
+            emitSIG00Diagnostics fplValue pos1 pos2
+        | _ -> ()
         st.EvalPop()
     | Ast.PropertyBlock((pos1, pos2), (keywordPropertyAst, definitionPropertyAst)) ->
         st.EvalPush("PropertyBlock")
@@ -1330,6 +1345,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Precedence((pos1, pos2), precedence) ->
         st.EvalPush("Precedence")
+        match st.CurrentContext with
+        | EvalContext.InSignature fplValue -> 
+            fplValue.AuxiliaryInfo <- precedence
+        | _ -> ()
         st.EvalPop()
     | ast1 ->
         let astType = ast1.GetType().Name

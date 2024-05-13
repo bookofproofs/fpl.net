@@ -304,3 +304,26 @@ let emitID000Diagnostics streamName astType =
             Diagnostic.Alternatives = None 
         }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+let emitSIG00Diagnostics (fplValue:FplValue) pos1 pos2 = 
+    let detailed (exprType:ExprType) expectedArity actualArity pos1 pos2 = 
+        let diagnostic =
+            { 
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = SIG00 (exprType.Type, actualArity)
+                Diagnostic.Alternatives = Some $"Arity of {expectedArity} expected."
+            }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+    match fplValue.ExpressionType with 
+    | ExprType.Infix _ when fplValue.AuxiliaryInfo <> 2 -> 
+        detailed fplValue.ExpressionType 2 fplValue.AuxiliaryInfo pos1 pos2
+    | ExprType.Prefix _ when fplValue.AuxiliaryInfo <> 1 -> 
+        detailed fplValue.ExpressionType 1 fplValue.AuxiliaryInfo pos1 pos2
+    | ExprType.Postfix _ when fplValue.AuxiliaryInfo <> 1 -> 
+        detailed fplValue.ExpressionType 1 fplValue.AuxiliaryInfo pos1 pos2
+    | _ -> ()
+
+

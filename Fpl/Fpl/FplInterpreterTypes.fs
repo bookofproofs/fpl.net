@@ -375,18 +375,17 @@ type FplValueType =
             | Theory -> "th"
             | Root -> "root"
 
-type InfixType = {Precedence : int}
 
 type ExprType = 
-    | Infix of InfixType
-    | Postfix
-    | Prefix
+    | Infix of string * int
+    | Postfix of string 
+    | Prefix of string 
     | NoType
     member this.Type = 
         match this with 
-        | Infix precValue -> sprintf "Infix %i" precValue.Precedence
-        | Postfix -> "Postfix"
-        | Prefix -> "Prefix"
+        | Infix (symbol,precedence) -> sprintf """Infix "%s" %i""" symbol precedence
+        | Postfix symbol -> sprintf """Postfix "%s" """ symbol
+        | Prefix symbol -> sprintf """Prefix "%s" """ symbol
         | NoType -> "None"
 
 type ScopeSearchResult = 

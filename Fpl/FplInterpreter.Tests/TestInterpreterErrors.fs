@@ -480,3 +480,28 @@ type TestInterpreterErrors() =
     member this.TestID012(fplCode:string, expected) =
         let code = ID012 ("","")
         runTestHelper fplCode code expected
+
+    [<DataRow("""def pred T infix "+" 0 () {true};""", 1)>]
+    [<DataRow("""def pred T infix "+" 0 (x:obj) {true};""", 1)>]
+    [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true};""", 0)>]
+    [<DataRow("""def pred T infix "+" 0 (x,y,z:obj) {true};""", 1)>]
+    [<DataRow("""def func T infix "+" 0 ()->obj {intr};""", 1)>]
+    [<DataRow("""def func T infix "+" 0 (x:obj)->obj {intr};""", 1)>]
+    [<DataRow("""def func T infix "+" 0 (x,y:obj)->obj {intr};""", 0)>]
+    [<DataRow("""def func T infix "+" 0 (x,y,z:obj)->obj {intr};""", 1)>]
+    [<DataRow("""def pred T prefix "+" () {true};""", 1)>]
+    [<DataRow("""def pred T prefix "+" (x:obj) {true};""", 0)>]
+    [<DataRow("""def pred T prefix "+" (x,y:obj) {true};""", 1)>]
+    [<DataRow("""def func T prefix "+" ()->obj {intr};""", 1)>]
+    [<DataRow("""def func T prefix "+" (x:obj)->obj {intr};""", 0)>]
+    [<DataRow("""def func T prefix "+" (x,y:obj)->obj {intr};""", 1)>]
+    [<DataRow("""def pred T postfix "+" () {true};""", 1)>]
+    [<DataRow("""def pred T postfix "+" (x:obj) {true};""", 0)>]
+    [<DataRow("""def pred T postfix "+" (x,y:obj) {true};""", 1)>]
+    [<DataRow("""def func T postfix "+" ()->obj {intr};""", 1)>]
+    [<DataRow("""def func T postfix "+" (x:obj)->obj {intr};""", 0)>]
+    [<DataRow("""def func T postfix "+" (x,y:obj)->obj {intr};""", 1)>]
+    [<TestMethod>]
+    member this.TestSIG00(fplCode:string, expected) =
+        let code = SIG00 ("",0)
+        runTestHelper fplCode code expected
