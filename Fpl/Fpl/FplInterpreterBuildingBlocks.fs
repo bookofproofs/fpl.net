@@ -1,6 +1,7 @@
 ﻿module FplInterpreterBuildingBlocks
 
 open System
+open System.Linq
 open System.Collections.Generic
 open FParsec
 open ErrDiagnostics
@@ -36,7 +37,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
         else
             // note: the Name attribute of variables are set in Ast.Var directly
             // and we do not want to append the type to the names of variables.
-            fplValue.Name <- addWithComma fplValue.Name str
+            fplValue.Name <- addWithComma fplValue.Name str 
     if str <> "" then
         if FplValue.IsDefinition(fplValue) && fplValue.NameIsFinal then  
             () //  for definitions with final name stop changing the TypeSignature
@@ -143,7 +144,7 @@ let tryAddBlock (fplValue:FplValue) =
 
 let tryReferenceBlockByName (fplValue:FplValue) name =
     let parent = fplValue.Parent.Value
-    fplValue.Name <- addWithComma fplValue.Name name
+    fplValue.Name <- addWithComma fplValue.Name name 
     if parent.Scope.ContainsKey(name) then
         let namedChild = parent.Scope[name]
         fplValue.TypeSignature <- fplValue.TypeSignature @ namedChild.TypeSignature
@@ -158,7 +159,7 @@ let propagateReference (refBlock:FplValue) withAdding =
             // propagate only if refblock has all opened brackets closed and the name of its reference-typed parent is not yet ready
             if withAdding then 
                 fplValue.ValueList.Add(refBlock)
-            fplValue.Name <- addWithComma fplValue.Name refBlock.Name
+            fplValue.Name <- addWithComma fplValue.Name refBlock.Name 
             fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
     else
         if withAdding then 
@@ -349,7 +350,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.ObjectSymbol((pos1, pos2), s) -> 
         st.EvalPush("ObjectSymbol")
-        eval_pos_string st pos1 pos2 s
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue s
+        | _ -> ()
         st.EvalPop() 
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
@@ -376,15 +380,24 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.InfixOperator((pos1, pos2), s) -> 
         st.EvalPush("InfixOperator")
-        eval_pos_string st pos1 pos2 s
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue s
+        | _ -> ()
         st.EvalPop() 
     | Ast.PostfixOperator((pos1, pos2), s) -> 
         st.EvalPush("PostfixOperator")
-        eval_pos_string st pos1 pos2 s
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue s
+        | _ -> ()
         st.EvalPop() 
     | Ast.PrefixOperator((pos1, pos2), s) -> 
         st.EvalPush("PrefixOperator")
-        eval_pos_string st pos1 pos2 s
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue s
+        | _ -> ()
         st.EvalPop() 
     // | Self of Positions * unit
     | Ast.Self((pos1, pos2), _) -> 
@@ -756,20 +769,47 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         eval st ast2
         st.EvalPop()
-    | Ast.Impl((pos1, pos2), (ast1, ast2)) ->
+    | Ast.Impl((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Impl")
-        eval st ast1
-        eval st ast2
+        match st.CurrentContext with
+        | EvalContext.InBlock fplValue
+        | EvalContext.InPropertyBlock fplValue 
+        | EvalContext.InConstructorBlock fplValue 
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue "impl"
+            adjustSignature st fplValue "("
+            eval st predicateAst1
+            eval st predicateAst2
+            adjustSignature st fplValue ")"
+        | _ -> ()
         st.EvalPop()
-    | Ast.Iif((pos1, pos2), (ast1, ast2)) ->
+    | Ast.Iif((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Iif")
-        eval st ast1
-        eval st ast2
+        match st.CurrentContext with
+        | EvalContext.InBlock fplValue
+        | EvalContext.InPropertyBlock fplValue 
+        | EvalContext.InConstructorBlock fplValue 
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue "iif"
+            adjustSignature st fplValue "("
+            eval st predicateAst1
+            eval st predicateAst2
+            adjustSignature st fplValue ")"
+        | _ -> ()
         st.EvalPop()
-    | Ast.IsOperator((pos1, pos2), (ast1, ast2)) ->
+    | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
         st.EvalPush("IsOperator")
-        eval st ast1
-        eval st ast2
+        match st.CurrentContext with
+        | EvalContext.InBlock fplValue
+        | EvalContext.InPropertyBlock fplValue 
+        | EvalContext.InConstructorBlock fplValue 
+        | EvalContext.InReferenceCreation fplValue ->
+            adjustSignature st fplValue "is"
+            adjustSignature st fplValue "("
+            eval st isOpArgAst
+            eval st variableTypeAst
+            adjustSignature st fplValue ")"
+        | _ -> ()
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
         st.EvalPush("Delegate")
@@ -922,6 +962,13 @@ let rec eval (st: SymbolTable) ast =
             postfixOpAst |> Option.map (eval st) |> Option.defaultValue ()
             optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
             eval st qualificationListAst
+            (*
+            if refBlock.AuxiliaryUniqueChilds.Count > 0 then
+                // normalize prefix/postfix/and infix notation to a Polish notation
+                let symbol = refBlock.AuxiliaryUniqueChilds.FirstOrDefault()
+                refBlock.Name <- $"{symbol}({refBlock.Name})"
+                refBlock.TypeSignature <- [symbol; "("] @ refBlock.TypeSignature @ [")"]
+            *)
             propagateReference refBlock true
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
