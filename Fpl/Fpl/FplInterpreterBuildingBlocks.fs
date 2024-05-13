@@ -969,10 +969,13 @@ let rec eval (st: SymbolTable) ast =
         eval st qualificationListAst
         st.EvalPop()
     // | InfixOperation of Positions * (Ast * Ast option) list
-    | Ast.InfixOperation((pos1, pos2), astsOpts) ->
+    | Ast.InfixOperation((pos1, pos2), separatedPredicateListAst) ->
         st.EvalPush("InfixOperation")
-        astsOpts
-        |> List.map (fun (ast1, optAst) -> optAst |> Option.map (eval st) |> Option.defaultValue ())
+        separatedPredicateListAst
+        |> List.map (fun (predicateAst, optSeparatorAst) -> 
+            eval st predicateAst
+            optSeparatorAst |> Option.map (eval st) |> Option.defaultValue ()
+        )
         |> ignore
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
@@ -991,13 +994,6 @@ let rec eval (st: SymbolTable) ast =
             postfixOpAst |> Option.map (eval st) |> Option.defaultValue ()
             optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
             eval st qualificationListAst
-            (*
-            if refBlock.AuxiliaryUniqueChilds.Count > 0 then
-                // normalize prefix/postfix/and infix notation to a Polish notation
-                let symbol = refBlock.AuxiliaryUniqueChilds.FirstOrDefault()
-                refBlock.Name <- $"{symbol}({refBlock.Name})"
-                refBlock.TypeSignature <- [symbol; "("] @ refBlock.TypeSignature @ [")"]
-            *)
             propagateReference refBlock true
         | _ -> ()
         st.SetContext(oldContext) LogContext.End

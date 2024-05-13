@@ -6,7 +6,7 @@ def class Set: obj
 }
 
 // "in relation" ("is element of") relation
-def pred In infix "in" (x,y: Set)
+def pred In infix "in" 5 (x,y: Set)
 {
     intr
 }

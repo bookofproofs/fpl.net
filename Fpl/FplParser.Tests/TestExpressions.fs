@@ -232,6 +232,16 @@ type TestExpressions () =
                 and (x,y,z)
             }
 
+            def pred T21a()
+            {
+                not x
+            }
+
+            def pred T21b()
+            {
+                not (x)
+            }
+
             def pred T22()
             {
                 xor (x,y,z)

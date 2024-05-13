@@ -585,7 +585,7 @@ type TestFplValueScopeName() =
             | "base20" -> Assert.AreEqual(varVal, base1.Name)
             | "base21" -> Assert.AreEqual(varVal, base1.Name)
             | "base21a" -> Assert.AreEqual("not x", base1.Name)
-            | "base21b" -> Assert.AreEqual("not(x)", base1.Name)
+            | "base21b" -> Assert.AreEqual("not x", base1.Name)
             | "base22" -> Assert.AreEqual(varVal, base1.Name)
             | "base23" -> Assert.AreEqual(varVal, base1.Name)
             | "base24" -> Assert.AreEqual(varVal, base1.Name)
