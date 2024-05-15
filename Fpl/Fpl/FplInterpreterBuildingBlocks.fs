@@ -387,25 +387,28 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Symbol")
         eval_pos_string st pos1 pos2 s
         st.EvalPop() 
-    | Ast.InfixOperator((pos1, pos2), s) -> 
+    | Ast.InfixOperator((pos1, pos2), symbol) -> 
         st.EvalPush("InfixOperator")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
-            adjustSignature st fplValue s
+            adjustSignature st fplValue symbol
+            emitSIG01Diagnostics st fplValue pos1 pos2 true
         | _ -> ()
         st.EvalPop() 
-    | Ast.PostfixOperator((pos1, pos2), s) -> 
+    | Ast.PostfixOperator((pos1, pos2), symbol) -> 
         st.EvalPush("PostfixOperator")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
-            adjustSignature st fplValue s
+            adjustSignature st fplValue symbol
+            emitSIG01Diagnostics st fplValue pos1 pos2 true
         | _ -> ()
         st.EvalPop() 
-    | Ast.PrefixOperator((pos1, pos2), s) -> 
+    | Ast.PrefixOperator((pos1, pos2), symbol) -> 
         st.EvalPush("PrefixOperator")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
-            adjustSignature st fplValue s
+            adjustSignature st fplValue symbol
+            emitSIG01Diagnostics st fplValue pos1 pos2 true
         | _ -> ()
         st.EvalPop() 
     // | Self of Positions * unit

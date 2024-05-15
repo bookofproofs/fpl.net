@@ -131,7 +131,7 @@ type TestInterpreterErrors() =
         this.PrepareTestNSP04NonCircular(false) |> ignore
         let code = NSP04 ""
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
+        Assert.AreEqual(0, result.Length)
         this.PrepareTestNSP04NonCircular(true) |> ignore
 
 
@@ -504,4 +504,27 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestSIG00(fplCode:string, expected) =
         let code = SIG00 ("",0)
+        runTestHelper fplCode code expected
+
+    [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {(x + y)};""", 0)>]
+    [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {+x};""", 0)>]
+    [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {x+};""", 0)>]
+    [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {(x - y)};""", 1)>]
+    [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {-x};""", 1)>]
+    [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {x-};""", 1)>]
+    [<DataRow("""def pred T prefix "+" (x,y:obj) {true} def pred Test() {(x + y)};""", 0)>]
+    [<DataRow("""def pred T prefix "+" (x,y:obj) {true} def pred Test() {+x};""", 0)>]
+    [<DataRow("""def pred T prefix "+" (x,y:obj) {true} def pred Test() {x+};""", 0)>]
+    [<DataRow("""def pred T prefix "+" (x,y:obj) {true} def pred Test() {(x - y)};""", 1)>]
+    [<DataRow("""def pred T prefix "+" (x,y:obj) {true} def pred Test() {-x};""", 1)>]
+    [<DataRow("""def pred T prefix "+" (x,y:obj) {true} def pred Test() {x-};""", 1)>]
+    [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {(x + y)};""", 0)>]
+    [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {+x};""", 0)>]
+    [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {x+};""", 0)>]
+    [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {(x - y)};""", 1)>]
+    [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {-x};""", 1)>]
+    [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {x-};""", 1)>]
+    [<TestMethod>]
+    member this.TestSIG01(fplCode:string, expected) =
+        let code = SIG01 ""
         runTestHelper fplCode code expected

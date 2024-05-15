@@ -383,9 +383,9 @@ type ExprType =
     | NoType
     member this.Type = 
         match this with 
-        | Infix (symbol,precedence) -> sprintf """Infix "%s" %i""" symbol precedence
-        | Postfix symbol -> sprintf """Postfix "%s" """ symbol
-        | Prefix symbol -> sprintf """Prefix "%s" """ symbol
+        | Infix (symbol,precedence) -> sprintf "Infix %s preference %i" symbol precedence
+        | Postfix symbol -> sprintf "Postfix %s " symbol
+        | Prefix symbol -> sprintf "Prefix %s " symbol
         | NoType -> "None"
 
 type ScopeSearchResult = 
@@ -421,6 +421,9 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
                 raise (ArgumentException($"Cannot set readonly Name {_name} again since it has been finally evaluated."))
             else
                 _name <- value
+
+    /// First element of the type signature.
+    member this.FplId = _typeSignature.Head
 
     /// Type of the Expr
     member this.ExpressionType
@@ -726,7 +729,7 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
         || fplValue.BlockType = FplValueType.Lemma
         || fplValue.BlockType = FplValueType.Proposition
 
-    /// Tries to find a therem-like statement for a proof 
+    /// Tries to find a theorem-like statement for a proof 
     /// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
     static member TryFindAssociatedBlockForProof(fplValue:FplValue) = 
         if fplValue.BlockType = FplValueType.Proof then

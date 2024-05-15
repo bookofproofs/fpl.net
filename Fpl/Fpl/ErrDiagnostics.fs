@@ -96,6 +96,7 @@ type DiagnosticCode =
     | VAR03 of string * string
     // signature-related error codes
     | SIG00 of string * int
+    | SIG01 of string 
     member this.Code = 
         match this with
             // parser error messages
@@ -156,6 +157,7 @@ type DiagnosticCode =
             | VAR03 (_, _)  -> "VAR03"
             // signature-related error codes
             | SIG00 (_,_) -> "SIG00"
+            | SIG01 _ -> "SIG01"
     member this.Message = 
         match this with
             // parser error messages
@@ -216,6 +218,7 @@ type DiagnosticCode =
             | VAR03 (identifier, conflict) -> sprintf "Variable '%s' was already declared in the scope of the associated block at %s" identifier conflict
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity {arity} using {fixType} notation."
+            | SIG01 symbol -> $"The symbol {symbol} was not declared." 
 type DiagnosticEmitter =
     // replace your language-specific emitters here
     | FplParser

@@ -327,3 +327,42 @@ let emitSIG00Diagnostics (fplValue:FplValue) pos1 pos2 =
     | _ -> ()
 
 
+let emitSIG01Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 isSymbolic = 
+    if fplValue.BlockType = FplValueType.Reference then 
+        // collect candidates to match this reference from all theories and
+        // add them to fplValues's scope
+        let expressionId = fplValue.FplId
+        st.Root.Scope
+        |> Seq.map (fun kv -> kv.Value)
+        |> Seq.iter (fun theory ->
+            theory.Scope
+            |> Seq.map (fun kv -> kv.Value) 
+            |> Seq.iter (fun block ->
+                if expressionId = block.FplId then
+                    fplValue.Scope.Add(block.Name, block)
+                else 
+                    match block.ExpressionType with 
+                    | ExprType.Prefix symbol 
+                    | ExprType.Postfix symbol -> 
+                        if expressionId = symbol then 
+                            fplValue.Scope.Add(block.Name, block)
+                    | ExprType.Infix (symbol, _) ->
+                        if expressionId = symbol then 
+                            fplValue.Scope.Add(block.Name, block)
+                    | _ -> ()
+            )
+        )
+        if fplValue.Scope.Count = 0 then
+            if isSymbolic then 
+                let diagnostic =
+                    { 
+                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                        Diagnostic.Severity = DiagnosticSeverity.Error
+                        Diagnostic.StartPos = pos1
+                        Diagnostic.EndPos = pos2
+                        Diagnostic.Code = SIG01 expressionId
+                        Diagnostic.Alternatives = Some "Declare a functional term or predicate with this symbol."
+                    }
+                FplParser.parserDiagnostics.AddDiagnostic diagnostic
+            
+        
