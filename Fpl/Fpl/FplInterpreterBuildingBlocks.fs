@@ -30,13 +30,6 @@ let private addWithComma (name:string) str =
     else name
 
 let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str = 
-    if str <> "" && not (FplValue.IsVariable(fplValue)) then
-        if FplValue.IsDefinition(fplValue) && fplValue.NameIsFinal then 
-            () // for definitions with final name stop changing the name
-        else
-            // note: the Name attribute of variables are set in Ast.Var directly
-            // and we do not want to append the type to the names of variables.
-            fplValue.Name <- addWithComma fplValue.Name str 
     if str <> "" then
         if FplValue.IsDefinition(fplValue) && fplValue.NameIsFinal then  
             () //  for definitions with final name stop changing the TypeSignature
@@ -46,6 +39,10 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
                 fplValue.TypeSignature <- fplValue.TypeSignature @ ["*"; str.Substring(1)]
             elif str.StartsWith("+") then
                 fplValue.TypeSignature <- fplValue.TypeSignature @ ["+"; str.Substring(1)]
+            elif str.StartsWith("$") then
+                fplValue.TypeSignature <- fplValue.TypeSignature @ ["ind"]
+            elif str = "true" || str = "false" then
+                fplValue.TypeSignature <- fplValue.TypeSignature @ ["pred"]
             else
                 fplValue.TypeSignature <- fplValue.TypeSignature @ [str]
         match st.CurrentContext with
@@ -64,6 +61,15 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
                     adjustSignature st parent str
             | None -> ()
         | _ -> ()
+
+    if str <> "" && not (FplValue.IsVariable(fplValue)) then
+        if FplValue.IsDefinition(fplValue) && fplValue.NameIsFinal then 
+            () // for definitions with final name stop changing the name
+        else
+            // note: the Name attribute of variables are set in Ast.Var directly
+            // and we do not want to append the type to the names of variables.
+            fplValue.Name <- addWithComma fplValue.Name str 
+            if str = "not" then fplValue.Name <- fplValue.Name + " "
 
 let eval_units (st: SymbolTable) unitType pos1 pos2 = 
     match st.CurrentContext with
@@ -493,7 +499,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InPropertyBlock fplValue 
         | EvalContext.InConstructorBlock fplValue 
         | EvalContext.InReferenceCreation fplValue ->
-            adjustSignature st fplValue "not "
+            adjustSignature st fplValue "not"
             eval st predicateAst
         | _ -> ()
         st.EvalPop()
@@ -863,7 +869,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InConstructorBlock fplValue 
         | EvalContext.InReferenceCreation fplValue ->
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
-            adjustSignature st refBlock "__del."
+            adjustSignature st refBlock "del."
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             eval st fplDelegateIdentifierAst
             eval st argumentTupleAst
@@ -989,12 +995,21 @@ let rec eval (st: SymbolTable) ast =
     // | InfixOperation of Positions * (Ast * Ast option) list
     | Ast.InfixOperation((pos1, pos2), separatedPredicateListAst) ->
         st.EvalPush("InfixOperation")
-        separatedPredicateListAst
-        |> List.map (fun (predicateAst, optSeparatorAst) -> 
-            eval st predicateAst
-            optSeparatorAst |> Option.map (eval st) |> Option.defaultValue ()
-        )
-        |> ignore
+        match st.CurrentContext with
+        | EvalContext.InReferenceCreation fplValue -> 
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
+            adjustSignature st fplValue "("
+            separatedPredicateListAst
+            |> List.map (fun (predicateAst, optSeparatorAst) -> 
+                eval st predicateAst
+                optSeparatorAst |> Option.map (eval st) |> Option.defaultValue ()
+            )
+            |> ignore
+            adjustSignature st fplValue ")"
+            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened braces
+        | _-> ()
+
+        
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->

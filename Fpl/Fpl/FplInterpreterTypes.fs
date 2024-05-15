@@ -741,12 +741,14 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
                     // the potential block name of the proof is the 
                     // concatenated type signature of the name of the proof 
                     // without the last dollar digit
-                    let potentialBlockName = 
-                        let positionButLast = fplValue.TypeSignature.Length
-                        if positionButLast < 0 then
-                            failwith "Type signature of a proof to short."
+                    let stripLastDollarDigit (s: string) =
+                        let lastIndex = s.LastIndexOf('$')
+                        if lastIndex <> -1 then
+                            s.Substring(0, lastIndex)
                         else
-                            fplValue.TypeSignature |> List.take (positionButLast - 1) |> String.concat ""
+                            s
+                    let potentialBlockName = 
+                        stripLastDollarDigit fplValue.Name
                     theory.Scope
                     |> Seq.filter (fun keyValuePair -> 
                         keyValuePair.Key.StartsWith(potentialBlockName + "(") || keyValuePair.Key = potentialBlockName
@@ -789,14 +791,14 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
                     // the potential theorem name of the corollary is the 
                     // concatenated type signature of the name of the corollary 
                     // without the last dollar digit
+                    let stripLastDollarDigit (s: string) =
+                        let lastIndex = s.LastIndexOf('$')
+                        if lastIndex <> -1 then
+                            s.Substring(0, lastIndex)
+                        else
+                            s
                     let potentialBlockName = 
-                        try
-                            let positionParenthesis = fplValue.TypeSignature |> List.findIndex ((=) "(")
-                            if positionParenthesis >= 2 then
-                                fplValue.TypeSignature |> List.take (positionParenthesis - 1) |> String.concat ""
-                            else    
-                                failwith "Corollary has a malformed type signature, could not find the opening parenthesis at least at the 2th position."
-                        with ex -> raise (ArgumentException(ex.Message))
+                        stripLastDollarDigit fplValue.Name
                     theory.Scope
                     |> Seq.filter (fun keyValuePair -> 
                         keyValuePair.Key.StartsWith(potentialBlockName + "(") || keyValuePair.Key = potentialBlockName 
