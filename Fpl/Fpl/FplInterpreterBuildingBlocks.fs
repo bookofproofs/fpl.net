@@ -398,6 +398,8 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue symbol
+        | EvalContext.InInfixOperation fplValue ->
+            adjustSignature st fplValue symbol
             emitSIG01Diagnostics st fplValue pos1 pos2 true
         | _ -> ()
         st.EvalPop() 
@@ -995,22 +997,66 @@ let rec eval (st: SymbolTable) ast =
     // | InfixOperation of Positions * (Ast * Ast option) list
     | Ast.InfixOperation((pos1, pos2), separatedPredicateListAst) ->
         st.EvalPush("InfixOperation")
+        let oldContext = st.CurrentContext 
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue -> 
+            let dictOfOperators = Dictionary<string,FplValue>()
             separatedPredicateListAst
             |> List.map (fun (_, optSeparatorAst) -> 
+                let infixOperator = FplValue.CreateFplValue((pos1,pos2),FplValueType.Expression,fplValue)
+                st.SetContext(EvalContext.InInfixOperation infixOperator) LogContext.Start
                 optSeparatorAst |> Option.map (eval st) |> Option.defaultValue ()
+                st.SetContext(oldContext) LogContext.End
+                dictOfOperators.Add(infixOperator.Name, infixOperator)
             )
             |> ignore
 
-            separatedPredicateListAst
-            |> List.map (fun (predicateAst, _) -> 
-                eval st predicateAst
-            )
-            |> ignore
+            let sortedSeparatedPredicateListAst = 
+                separatedPredicateListAst 
+                |> List.sortBy (fun (_,opOpt) -> 
+                    if opOpt.IsSome then 
+                        match opOpt.Value with
+                        | Ast.InfixOperator ((p1,p2),symbol) -> 
+                            if dictOfOperators.ContainsKey(symbol) then 
+                                dictOfOperators[symbol].AuxiliaryInfo
+                            else
+                                Int32.MaxValue
+                        | _ -> Int32.MaxValue
+                    else
+                        Int32.MaxValue
+                )
+
+            /// Tranforms a precedence-sorted list infix-operations into a nested binary infix operations in reversed Polish notation
+            let rec createReversedPolishNotation (sortedSeparatedPredicateList:(Ast * Ast option) list) (fv:FplValue) =
+                match sortedSeparatedPredicateList with
+                | (predicateAst,optOp) :: xs -> 
+                    if optOp.IsSome then
+                        match optOp.Value with 
+                        | Ast.InfixOperator ((p1,p2),symbol) ->
+                            // add any found candidate FPL blocks matching this symbol to the newly created nested infix operation
+                            dictOfOperators[symbol].Scope 
+                            |> Seq.iter (fun kv -> fv.Scope.Add(kv.Key,kv.Value))
+                            if dictOfOperators.ContainsKey(symbol) then 
+                                adjustSignature st fv symbol
+                                fv.AuxiliaryInfo <- fv.AuxiliaryInfo + 1 // increase the number of opened braces
+                                adjustSignature st fv "("
+                                eval st predicateAst 
+                                if xs.Length > 0 then
+                                    let nextInfixOperation = FplValue.CreateFplValue((p1,p2),FplValueType.Reference,fv)
+                                    st.SetContext(EvalContext.InReferenceCreation nextInfixOperation) LogContext.Replace
+                                    createReversedPolishNotation xs nextInfixOperation
+                                
+                                adjustSignature st fv ")"
+                                fv.AuxiliaryInfo <- fv.AuxiliaryInfo - 1 // decrease the number of opened braces
+                                propagateReference fv true
+                        | _ -> ()
+                    else
+                        eval st predicateAst 
+                        propagateReference fv true
+                | [] -> ()
+
+            createReversedPolishNotation sortedSeparatedPredicateListAst fplValue
         | _-> ()
-
-        
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->

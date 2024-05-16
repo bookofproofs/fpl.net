@@ -907,6 +907,7 @@ type EvalContext =
     | InConstructorBlock of FplValue
     | NamedVarDeclarationInBlock of FplValue
     | InReferenceCreation of FplValue
+    | InInfixOperation of FplValue
     member this.Name = 
         let short (fplValue:FplValue) = 
             let aggr (lst:seq<FplValue>) = 
@@ -928,6 +929,7 @@ type EvalContext =
         | InConstructorBlock(fplValue) -> $"InConstructorBlock({short fplValue})"
         | NamedVarDeclarationInBlock(fplValue) -> $"NamedVarDeclarationInBlock({short fplValue})"
         | InReferenceCreation(fplValue) -> $"InReferenceCreation({short fplValue})"
+        | InInfixOperation(fplValue) -> $"InInfixOperation({short fplValue})"
     member this.Depth = 
         let rec depth (fv:FplValue) = 
             match fv.Parent with 
@@ -943,7 +945,8 @@ type EvalContext =
         | InConstructorSignature(fv) 
         | InConstructorBlock(fv) 
         | NamedVarDeclarationInBlock(fv) 
-        | InReferenceCreation(fv) -> depth fv
+        | InReferenceCreation(fv) 
+        | InInfixOperation(fv) -> depth fv
 
 type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     let _parsedAsts = parsedAsts

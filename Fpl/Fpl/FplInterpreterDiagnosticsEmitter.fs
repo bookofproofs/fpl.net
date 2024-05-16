@@ -328,7 +328,7 @@ let emitSIG00Diagnostics (fplValue:FplValue) pos1 pos2 =
 
 
 let emitSIG01Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 isSymbolic = 
-    if fplValue.BlockType = FplValueType.Reference then 
+    if fplValue.BlockType = FplValueType.Reference || fplValue.BlockType = FplValueType.Expression then 
         // collect candidates to match this reference from all theories and
         // add them to fplValues's scope
         let expressionId = fplValue.FplId
@@ -346,9 +346,10 @@ let emitSIG01Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 isSymbol
                     | ExprType.Postfix symbol -> 
                         if expressionId = symbol then 
                             fplValue.Scope.Add(block.Name, block)
-                    | ExprType.Infix (symbol, _) ->
+                    | ExprType.Infix (symbol, precedence) ->
                         if expressionId = symbol then 
                             fplValue.Scope.Add(block.Name, block)
+                            fplValue.AuxiliaryInfo <- precedence
                     | _ -> ()
             )
         )
