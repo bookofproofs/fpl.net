@@ -1000,9 +1000,14 @@ let rec eval (st: SymbolTable) ast =
             fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
             adjustSignature st fplValue "("
             separatedPredicateListAst
-            |> List.map (fun (predicateAst, optSeparatorAst) -> 
-                eval st predicateAst
+            |> List.map (fun (_, optSeparatorAst) -> 
                 optSeparatorAst |> Option.map (eval st) |> Option.defaultValue ()
+            )
+            |> ignore
+
+            separatedPredicateListAst
+            |> List.map (fun (predicateAst, _) -> 
+                eval st predicateAst
             )
             |> ignore
             adjustSignature st fplValue ")"
@@ -1022,9 +1027,36 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InReferenceCreation fplValue ->
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
-            prefixOpAst |> Option.map (eval st) |> Option.defaultValue ()
-            eval st predicateAst
-            postfixOpAst |> Option.map (eval st) |> Option.defaultValue ()
+            let ensureReversedPolishNotation = 
+                if prefixOpAst.IsSome && postfixOpAst.IsSome then 
+                    postfixOpAst |> Option.map (eval st) |> Option.defaultValue ()
+                    fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
+                    adjustSignature st refBlock "("
+                    prefixOpAst |> Option.map (eval st) |> Option.defaultValue ()
+                    fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
+                    adjustSignature st refBlock "("
+                    eval st predicateAst
+                    adjustSignature st refBlock ")"
+                    fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened braces
+                    adjustSignature st refBlock ")"
+                    fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened braces
+                elif prefixOpAst.IsSome then 
+                    prefixOpAst |> Option.map (eval st) |> Option.defaultValue ()
+                    fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
+                    adjustSignature st refBlock "("
+                    eval st predicateAst
+                    adjustSignature st refBlock ")"
+                    fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened braces
+                elif postfixOpAst.IsSome then 
+                    postfixOpAst |> Option.map (eval st) |> Option.defaultValue ()
+                    fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
+                    adjustSignature st refBlock "("
+                    eval st predicateAst
+                    adjustSignature st refBlock ")"
+                    fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened braces
+                else
+                    eval st predicateAst
+            ensureReversedPolishNotation
             optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
             eval st qualificationListAst
             propagateReference refBlock true

@@ -507,6 +507,8 @@ type TestFplValueScopeName() =
     [<DataRow("base13f", "1[x.y].T(a, b)")>]
     [<DataRow("base14", "∅")>]
     [<DataRow("base15", "-x")>]
+    [<DataRow("base15a", "x'")>]
+    [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
     [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
@@ -577,7 +579,9 @@ type TestFplValueScopeName() =
             | "base12f" -> Assert.AreEqual(varVal, base1.Name)
             | "base13f" -> Assert.AreEqual(varVal, base1.Name)
             | "base14" -> Assert.AreEqual(varVal, base1.Name)
-            | "base15" -> Assert.AreEqual(varVal, base1.Name)
+            | "base15" -> Assert.AreEqual("-(x)", base1.Name)
+            | "base15a" -> Assert.AreEqual("'(x)", base1.Name)
+            | "base15b" -> Assert.AreEqual("'(-(x))", base1.Name)
             | "base16" -> Assert.AreEqual(varVal, base1.Name)
             | "base17" -> Assert.AreEqual(varVal, base1.Name)
             | "base18" -> Assert.AreEqual(varVal, base1.Name)
@@ -669,13 +673,13 @@ type TestFplValueScopeName() =
             let base1 = pr1.ValueList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual("__del.B()", base1.Name)
-            | "base2" -> Assert.AreEqual("__del.C(a, b, c, d)", base1.Name)
-            | "base3" -> Assert.AreEqual("__del.D(self, b, c)", base1.Name)
-            | "base4" -> Assert.AreEqual("__del.B(In(x))", base1.Name)
-            | "base5" -> Assert.AreEqual("__del.Test()", base1.Name)
-            | "base6" -> Assert.AreEqual("__del.C(Test1(a), Test2(b, c, d))", base1.Name)
-            | "base7" -> Assert.AreEqual("__del.E(true, undef, false)", base1.Name)
+            | "base1" -> Assert.AreEqual("del.B()", base1.Name)
+            | "base2" -> Assert.AreEqual("del.C(a, b, c, d)", base1.Name)
+            | "base3" -> Assert.AreEqual("del.D(self, b, c)", base1.Name)
+            | "base4" -> Assert.AreEqual("del.B(In(x))", base1.Name)
+            | "base5" -> Assert.AreEqual("del.Test()", base1.Name)
+            | "base6" -> Assert.AreEqual("del.C(Test1(a), Test2(b, c, d))", base1.Name)
+            | "base7" -> Assert.AreEqual("del.E(true, undef, false)", base1.Name)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

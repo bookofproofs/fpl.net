@@ -505,6 +505,8 @@ type TestFplValueScopeExpressionType() =
     [<DataRow("base13f", "1[x.y].T(a, b)")>]
     [<DataRow("base14", "∅")>]
     [<DataRow("base15", "-x")>]
+    [<DataRow("base15a", "x'")>]
+    [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
     [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
@@ -536,7 +538,7 @@ type TestFplValueScopeExpressionType() =
             let theory = r.Scope["Test"]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.Scope["__" + varVal]
+            let base1 = pr1.ValueList[0]
 
             match var with
             | "base1" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
@@ -576,6 +578,8 @@ type TestFplValueScopeExpressionType() =
             | "base13f" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
             | "base14" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
             | "base15" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
+            | "base15a" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
+            | "base15b" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
             | "base16" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
             | "base17" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
             | "base18" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)

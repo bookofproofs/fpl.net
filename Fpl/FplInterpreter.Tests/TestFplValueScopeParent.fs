@@ -512,6 +512,8 @@ type TestFplValueScopeParent() =
     [<DataRow("base13f", "1[x.y].T(a, b)")>]
     [<DataRow("base14", "∅")>]
     [<DataRow("base15", "-x")>]
+    [<DataRow("base15a", "x'")>]
+    [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
     [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
@@ -543,7 +545,7 @@ type TestFplValueScopeParent() =
             let theory = r.Scope["Test"]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.Scope["__" + varVal]
+            let base1 = pr1.ValueList[0]
 
             match var with
             | "base1" -> Assert.AreEqual(pr1, base1.Parent.Value)
@@ -583,6 +585,8 @@ type TestFplValueScopeParent() =
             | "base13f" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base14" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base15" -> Assert.AreEqual(pr1, base1.Parent.Value)
+            | "base15a" -> Assert.AreEqual(pr1, base1.Parent.Value)
+            | "base15b" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base16" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base17" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base18" -> Assert.AreEqual(pr1, base1.Parent.Value)

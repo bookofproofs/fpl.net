@@ -501,6 +501,8 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base13f", "1[x.y].T(a, b)")>]
     [<DataRow("base14", "∅")>]
     [<DataRow("base15", "-x")>]
+    [<DataRow("base15a", "x'")>]
+    [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
     [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
@@ -532,7 +534,7 @@ type TestFplValueScopeQualifiedStartPos() =
             let theory = r.Scope["Test"]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.Scope[""]
+            let base1 = pr1.ValueList[0]
 
             match var with
             | "base1" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 1)"))
@@ -572,6 +574,8 @@ type TestFplValueScopeQualifiedStartPos() =
             | "base13f" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "base14" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "base15" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base15a" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | "base15b" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "base16" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "base17" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "base18" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 1)"))
