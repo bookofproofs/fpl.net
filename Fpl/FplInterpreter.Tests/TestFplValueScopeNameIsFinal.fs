@@ -679,6 +679,7 @@ type TestFplValueScopeNameIsFinal() =
             | "base4" -> Assert.AreEqual(true, base1.NameIsFinal)
             | "base5" -> Assert.AreEqual(true, base1.NameIsFinal)
             | "base6" -> Assert.AreEqual(true, base1.NameIsFinal)
+            | "base7" -> Assert.AreEqual(true, base1.NameIsFinal)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

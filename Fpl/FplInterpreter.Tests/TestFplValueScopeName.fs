@@ -641,12 +641,12 @@ type TestFplValueScopeName() =
             let base1 = ctor.ValueList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual("__bas.B()", base1.Name)
-            | "base2" -> Assert.AreEqual("__bas.C(a, b, c, d)", base1.Name)
-            | "base3" -> Assert.AreEqual("__bas.D(self, a, b)", base1.Name)
-            | "base4" -> Assert.AreEqual("__bas.B(In(x))", base1.Name)
-            | "base5" -> Assert.AreEqual("__bas.C(Test1(a), Test2(b, c, d))", base1.Name)
-            | "base6" -> Assert.AreEqual("__bas.E(true, undef, false)", base1.Name)
+            | "base1" -> Assert.AreEqual("bas.B()", base1.Name)
+            | "base2" -> Assert.AreEqual("bas.C(a, b, c, d)", base1.Name)
+            | "base3" -> Assert.AreEqual("bas.D(self, a, b)", base1.Name)
+            | "base4" -> Assert.AreEqual("bas.B(In(x))", base1.Name)
+            | "base5" -> Assert.AreEqual("bas.C(Test1(a), Test2(b, c, d))", base1.Name)
+            | "base6" -> Assert.AreEqual("bas.E(true, undef, false)", base1.Name)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

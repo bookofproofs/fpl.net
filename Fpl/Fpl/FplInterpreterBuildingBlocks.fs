@@ -1104,6 +1104,7 @@ let rec eval (st: SymbolTable) ast =
             optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
             eval st qualificationListAst
             propagateReference refBlock true
+            refBlock.NameIsFinal <- true
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
@@ -1147,10 +1148,11 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with 
         | EvalContext.InConstructorBlock fplValue ->
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
-            refBlock.Name <- "__bas."
+            refBlock.Name <- "bas."
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             eval st inheritedClassTypeAst
             eval st argumentTupleAst
+            refBlock.NameIsFinal <- true
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
