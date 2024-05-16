@@ -684,6 +684,7 @@ type TestFplValueScopeParent() =
             | "base4" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base5" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | "base6" -> Assert.AreEqual(pr1, base1.Parent.Value)
+            | "base7" -> Assert.AreEqual(pr1, base1.Parent.Value)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

@@ -1105,6 +1105,7 @@ let rec eval (st: SymbolTable) ast =
             eval st qualificationListAst
             propagateReference refBlock true
             refBlock.NameIsFinal <- true
+            refBlock.NameEndPos <- pos2
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
