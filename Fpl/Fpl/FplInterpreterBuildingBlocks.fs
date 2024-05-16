@@ -35,11 +35,11 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
             () //  for definitions with final name stop changing the TypeSignature
         else
             // note: the manipulation of the TypeSignature is necessary for all kinds of fplValue
-            if str.StartsWith("*") then
+            if str.StartsWith("*") && str <> "*" then
                 fplValue.TypeSignature <- fplValue.TypeSignature @ ["*"; str.Substring(1)]
-            elif str.StartsWith("+") then
+            elif str.StartsWith("+") && str <> "+" then
                 fplValue.TypeSignature <- fplValue.TypeSignature @ ["+"; str.Substring(1)]
-            elif str.StartsWith("$") then
+            elif str.StartsWith("$") && str <> "$" then
                 fplValue.TypeSignature <- fplValue.TypeSignature @ ["ind"]
             elif str = "true" || str = "false" then
                 fplValue.TypeSignature <- fplValue.TypeSignature @ ["pred"]
