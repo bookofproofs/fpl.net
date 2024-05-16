@@ -997,8 +997,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("InfixOperation")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue -> 
-            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
-            adjustSignature st fplValue "("
             separatedPredicateListAst
             |> List.map (fun (_, optSeparatorAst) -> 
                 optSeparatorAst |> Option.map (eval st) |> Option.defaultValue ()
@@ -1010,8 +1008,6 @@ let rec eval (st: SymbolTable) ast =
                 eval st predicateAst
             )
             |> ignore
-            adjustSignature st fplValue ")"
-            fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened braces
         | _-> ()
 
         
@@ -1029,9 +1025,11 @@ let rec eval (st: SymbolTable) ast =
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             let ensureReversedPolishNotation = 
                 if prefixOpAst.IsSome && postfixOpAst.IsSome then 
-                    postfixOpAst |> Option.map (eval st) |> Option.defaultValue ()
+                    // for heuristic reasons, we choose a precedence of postfix ...
+                    postfixOpAst |> Option.map (eval st) |> Option.defaultValue () 
                     fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
                     adjustSignature st refBlock "("
+                    // ... over prefix notation in mathematics
                     prefixOpAst |> Option.map (eval st) |> Option.defaultValue ()
                     fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
                     adjustSignature st refBlock "("

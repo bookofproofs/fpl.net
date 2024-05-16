@@ -677,6 +677,7 @@ type TestFplValueScopeExpressionType() =
             | "base4" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
             | "base5" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
             | "base6" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
+            | "base7" -> Assert.AreEqual(ExprType.NoType, base1.ExpressionType)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
