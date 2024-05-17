@@ -327,7 +327,31 @@ let emitSIG00Diagnostics (fplValue:FplValue) pos1 pos2 =
     | _ -> ()
 
 
-let emitSIG01Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 isSymbolic = 
+let emitSIG02Diagnostics (fplValue:FplValue) pos1 pos2 = 
+    let precedenceDict = System.Collections.Generic.Dictionary<int,FplValue>()
+    fplValue.Scope
+    |> Seq.iter (fun kv ->
+        match kv.Value.ExpressionType with
+        | ExprType.Infix (symbol,precedence) -> 
+            if not (precedenceDict.TryAdd(precedence, kv.Value)) then
+                let conflictList = 
+                    kv.Value.QualifiedStartPos + ", " + precedenceDict[precedence].QualifiedStartPos
+                
+                let diagnostic =
+                    { 
+                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                        Diagnostic.Severity = DiagnosticSeverity.Warning
+                        Diagnostic.StartPos = pos1
+                        Diagnostic.EndPos = pos2
+                        Diagnostic.Code = SIG02 (symbol,precedence,conflictList)
+                        Diagnostic.Alternatives = Some "Consider disambiguating the precedence to avoid unexpected results."
+                    }
+                FplParser.parserDiagnostics.AddDiagnostic diagnostic
+        | _ -> ()
+    )
+   
+
+let emitSIG01Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 = 
     if fplValue.BlockType = FplValueType.Reference || fplValue.BlockType = FplValueType.Expression then 
         // collect candidates to match this reference from all theories and
         // add them to fplValues's scope
@@ -354,16 +378,15 @@ let emitSIG01Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 isSymbol
             )
         )
         if fplValue.Scope.Count = 0 then
-            if isSymbolic then 
-                let diagnostic =
-                    { 
-                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                        Diagnostic.Severity = DiagnosticSeverity.Error
-                        Diagnostic.StartPos = pos1
-                        Diagnostic.EndPos = pos2
-                        Diagnostic.Code = SIG01 expressionId
-                        Diagnostic.Alternatives = Some "Declare a functional term or predicate with this symbol."
-                    }
-                FplParser.parserDiagnostics.AddDiagnostic diagnostic
+            let diagnostic =
+                { 
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = SIG01 expressionId
+                    Diagnostic.Alternatives = Some "Declare a functional term or predicate with this symbol."
+                }
+            FplParser.parserDiagnostics.AddDiagnostic diagnostic
             
         

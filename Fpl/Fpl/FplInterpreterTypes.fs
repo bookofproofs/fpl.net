@@ -607,16 +607,21 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
             if fplValue.BlockType = FplValueType.Root then
                 ""
             elif first then 
-                let starPosWithoutFileName = $"(Ln: {fplValue.StartPos.Line}, Col: {fplValue.StartPos.Column})"
-                if FplValue.IsRoot(fplValue.Parent.Value) then 
+                let starPosWithoutFileName = $", (Ln: {fplValue.StartPos.Line}, Col: {fplValue.StartPos.Column})"
+                if FplValue.IsTheory(fplValue) then 
                     getFullName fplValue.Parent.Value false + fplValue.Name + starPosWithoutFileName
+                elif FplValue.IsFplBlock(fplValue) then 
+                    getFullName fplValue.Parent.Value false + "." + fplValue.Name + starPosWithoutFileName
                 else
                     getFullName fplValue.Parent.Value false + starPosWithoutFileName
             else
-                if FplValue.IsRoot(fplValue.Parent.Value) then 
+                if FplValue.IsTheory(fplValue) then 
                     getFullName fplValue.Parent.Value false + fplValue.Name 
+                elif FplValue.IsFplBlock(fplValue) then 
+                    getFullName fplValue.Parent.Value false + "." + fplValue.Name 
                 else
                     getFullName fplValue.Parent.Value false 
+
         getFullName this true
 
 

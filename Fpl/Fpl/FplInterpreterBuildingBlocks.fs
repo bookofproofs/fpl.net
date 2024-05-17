@@ -400,7 +400,8 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue symbol
         | EvalContext.InInfixOperation fplValue ->
             adjustSignature st fplValue symbol
-            emitSIG01Diagnostics st fplValue pos1 pos2 true
+            emitSIG01Diagnostics st fplValue pos1 pos2 
+            emitSIG02Diagnostics fplValue pos1 pos2 
         | _ -> ()
         st.EvalPop() 
     | Ast.PostfixOperator((pos1, pos2), symbol) -> 
@@ -408,7 +409,7 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue symbol
-            emitSIG01Diagnostics st fplValue pos1 pos2 true
+            emitSIG01Diagnostics st fplValue pos1 pos2 
         | _ -> ()
         st.EvalPop() 
     | Ast.PrefixOperator((pos1, pos2), symbol) -> 
@@ -416,7 +417,7 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue symbol
-            emitSIG01Diagnostics st fplValue pos1 pos2 true
+            emitSIG01Diagnostics st fplValue pos1 pos2 
         | _ -> ()
         st.EvalPop() 
     // | Self of Positions * unit
