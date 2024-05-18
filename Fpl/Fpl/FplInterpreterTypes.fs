@@ -607,18 +607,14 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
             if fplValue.BlockType = FplValueType.Root then
                 ""
             elif first then 
-                let starPosWithoutFileName = $", (Ln: {fplValue.StartPos.Line}, Col: {fplValue.StartPos.Column})"
+                let starPosWithoutFileName = $"(Ln: {fplValue.StartPos.Line}, Col: {fplValue.StartPos.Column})"
                 if FplValue.IsTheory(fplValue) then 
                     getFullName fplValue.Parent.Value false + fplValue.Name + starPosWithoutFileName
-                elif FplValue.IsFplBlock(fplValue) then 
-                    getFullName fplValue.Parent.Value false + "." + fplValue.Name + starPosWithoutFileName
                 else
                     getFullName fplValue.Parent.Value false + starPosWithoutFileName
             else
                 if FplValue.IsTheory(fplValue) then 
                     getFullName fplValue.Parent.Value false + fplValue.Name 
-                elif FplValue.IsFplBlock(fplValue) then 
-                    getFullName fplValue.Parent.Value false + "." + fplValue.Name 
                 else
                     getFullName fplValue.Parent.Value false 
 
@@ -970,7 +966,6 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
 
     /// Returns the list of parsed asts
     member this.ParsedAsts = _parsedAsts
-
 
     /// Returns the path of the current recursive evaluation. The path is reversed, i.e. starting with the root ast name.
     /// This path can be used to avoid false positives of interpreter diagnostics by further narrowing the parsing context

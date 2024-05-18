@@ -330,7 +330,7 @@ let garbageCollector (st:SymbolTable) (uri:Uri) =
             |> Seq.toList
         // remove the corresponding parsedAsts 
         st.ParsedAsts.RemoveAll (fun pa -> willBeRemoved |> List.contains pa.Id) |> ignore
-        // remove the removed asts from the Referncing Asts of the remaining 
+        // remove the removed asts from the Referencing Asts of the remaining 
         willBeRemoved 
         |> List.iter (fun theoryName ->
             if st.Root.Scope.ContainsKey(theoryName) then
@@ -348,6 +348,7 @@ let garbageCollector (st:SymbolTable) (uri:Uri) =
 
     removeNotReferencedAsts currentTheory
     st.Root.Scope.Remove currentTheory |> ignore
+
 
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,

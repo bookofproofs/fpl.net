@@ -90,7 +90,7 @@ namespace FplLS
 
         public Task<Unit> Handle(DidOpenTextDocumentParams request, CancellationToken cancellationToken)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, "(DidOpenTextDocumentParams)", "TextDocumentSyncHandler.Handle");
+            FplLsTraceLogger.LogMsg(_languageServer, "x(DidOpenTextDocumentParams)", "TextDocumentSyncHandler.Handle");
             try
             {
                 var uri = FplSources.EscapedUri(request.TextDocument.Uri.AbsoluteUri);
@@ -107,13 +107,13 @@ namespace FplLS
 
         public Task<Unit> Handle(DidCloseTextDocumentParams request, CancellationToken cancellationToken)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, $"(DidCloseTextDocumentParams)", "TextDocumentSyncHandler.Handle");
+            FplLsTraceLogger.LogMsg(_languageServer, $"y(DidCloseTextDocumentParams)", "TextDocumentSyncHandler.Handle");
             return Unit.Task;
         }
 
         public Task<Unit> Handle(DidSaveTextDocumentParams request, CancellationToken cancellationToken)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, $"(DidSaveTextDocumentParams)", "TextDocumentSyncHandler.Handle");
+            FplLsTraceLogger.LogMsg(_languageServer, $"z(DidSaveTextDocumentParams)", "TextDocumentSyncHandler.Handle");
             return Unit.Task;
         }
 
