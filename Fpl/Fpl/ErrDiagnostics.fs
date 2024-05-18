@@ -98,6 +98,7 @@ type DiagnosticCode =
     | SIG00 of string * int
     | SIG01 of string 
     | SIG02 of string * int * string
+    | SIG03 
     member this.Code = 
         match this with
             // parser error messages
@@ -160,6 +161,7 @@ type DiagnosticCode =
             | SIG00 (_,_) -> "SIG00"
             | SIG01 _ -> "SIG01"
             | SIG02 (_,_,_) -> "SIG02"
+            | SIG03 -> "SIG03"
     member this.Message = 
         match this with
             // parser error messages
@@ -222,6 +224,7 @@ type DiagnosticCode =
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity {arity} using {fixType} notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
+            | SIG03 -> $"The infix symbol `=` is reserved in FPL." 
 type DiagnosticEmitter =
     // replace your language-specific emitters here
     | FplParser

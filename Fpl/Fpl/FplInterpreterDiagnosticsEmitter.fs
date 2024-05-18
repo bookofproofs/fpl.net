@@ -327,51 +327,6 @@ let emitSIG00Diagnostics (fplValue:FplValue) pos1 pos2 =
         detailed fplValue.ExpressionType 1 fplValue.AuxiliaryInfo pos1 pos2
     | _ -> ()
 
-
-let emitSIG02Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 = 
-    let precedences = Dictionary<int,FplValue>()
-    match fplValue.ExpressionType with
-    | ExprType.Infix (symbol, precedence) -> 
-        let precedenceWasAlreadyThere precedence fv = 
-            if not (precedences.ContainsKey(precedence)) then
-                precedences.Add(precedence,fv)
-                false
-            else
-                true
-        st.Root.Scope
-        |> Seq.map (fun kv -> kv.Value)
-        |> Seq.iter (fun theory ->
-            theory.Scope
-            |> Seq.map (fun kv1 -> kv1.Value)
-            |> Seq.iter (fun block -> 
-                match block.ExpressionType with
-                | ExprType.Infix(_, precedence) -> 
-                    precedenceWasAlreadyThere precedence block |> ignore
-                | _ -> ()
-            )
-        )
-
-        if precedenceWasAlreadyThere precedence fplValue then
-            let conflictList = 
-                precedences.Values
-                |> Seq.toList
-                |> List.map (fun fv -> fv.QualifiedStartPos)
-                |> String.concat ", "
-            match fplValue.ExpressionType with
-            | ExprType.Infix (symbol, precedence) ->
-                let diagnostic =
-                    { 
-                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                        Diagnostic.Severity = DiagnosticSeverity.Information
-                        Diagnostic.StartPos = pos1
-                        Diagnostic.EndPos = pos2
-                        Diagnostic.Code = SIG02 (symbol,precedence,conflictList)
-                        Diagnostic.Alternatives = Some "Consider disambiguating the precedence to avoid unexpected results."
-                    }
-                FplParser.parserDiagnostics.AddDiagnostic diagnostic
-            | _ -> ()
-    | _ -> ()
-
 let emitSIG01Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 = 
     if fplValue.BlockType = FplValueType.Reference || fplValue.BlockType = FplValueType.Expression then 
         // collect candidates to match this reference from all theories and
@@ -410,4 +365,63 @@ let emitSIG01Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 =
                 }
             FplParser.parserDiagnostics.AddDiagnostic diagnostic
             
+let emitSIG02Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 = 
+    let precedences = Dictionary<int,FplValue>()
+    match fplValue.ExpressionType with
+    | ExprType.Infix (symbol, precedence) -> 
+        let precedenceWasAlreadyThere precedence fv = 
+            if not (precedences.ContainsKey(precedence)) then
+                precedences.Add(precedence,fv)
+                false
+            else
+                true
+        st.Root.Scope
+        |> Seq.map (fun kv -> kv.Value)
+        |> Seq.iter (fun theory ->
+            theory.Scope
+            |> Seq.map (fun kv1 -> kv1.Value)
+            |> Seq.iter (fun block -> 
+                match block.ExpressionType with
+                | ExprType.Infix(_, precedence) -> 
+                    precedenceWasAlreadyThere precedence block |> ignore
+                | _ -> ()
+            )
+        )
+
+        if precedenceWasAlreadyThere precedence fplValue then
+            let conflictList = 
+                precedences.Values
+                |> Seq.toList
+                |> List.map (fun fv -> fv.QualifiedStartPos)
+                |> String.concat ", "
+            let diagnostic =
+                { 
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Information
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = SIG02 (symbol,precedence,conflictList)
+                    Diagnostic.Alternatives = Some "Consider disambiguating the precedence to avoid unexpected results."
+                }
+            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+    | _ -> ()
         
+let emitSIG03Diagnostics (fplValue:FplValue) pos1 pos2 = 
+    let precedences = Dictionary<int,FplValue>()
+    match fplValue.ExpressionType with
+    | ExprType.Infix (symbol, _) -> 
+        if symbol = "=" then
+            match fplValue.ExpressionType with
+            | ExprType.Infix (symbol, precedence) ->
+                let diagnostic =
+                    { 
+                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                        Diagnostic.Severity = DiagnosticSeverity.Error
+                        Diagnostic.StartPos = pos1
+                        Diagnostic.EndPos = pos2
+                        Diagnostic.Code = SIG03 
+                        Diagnostic.Alternatives = None
+                    }
+                FplParser.parserDiagnostics.AddDiagnostic diagnostic
+            | _ -> ()
+    | _ -> ()
