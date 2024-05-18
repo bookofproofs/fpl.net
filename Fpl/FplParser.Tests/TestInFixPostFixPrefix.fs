@@ -20,6 +20,13 @@ type TestInfixPostfixPrefix () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
+    member this.TestPostfixA () =
+        let result = run (definition .>> eof) """def pred T postfix "" () {intr}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
     member this.TestPostfixUsage01 () =
         let result = run (predicate .>> eof) """x'"""
         let actual = sprintf "%O" result
@@ -139,6 +146,13 @@ type TestInfixPostfixPrefix () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestInfixA () =
+        let result = run (definition .>> eof) """def pred T infix "" 0 () {intr}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestInfixUsage01 () =
@@ -281,6 +295,13 @@ type TestInfixPostfixPrefix () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPrefixA () =
+        let result = run (definition .>> eof) """def pred T prefix "" () {intr}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestPrefixUsage01 () =

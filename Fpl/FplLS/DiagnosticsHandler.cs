@@ -90,11 +90,10 @@ namespace FplLS
         {
             var sb = new StringBuilder();
             var castedListDiagnostics = new UriDiagnostics();
-            FplLsTraceLogger.LogMsg(_languageServer, st.UsesDependencies(), "");
             FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.DiagnosticsToString, "~~~~~Diagnostics");
             foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
             {
-                castedListDiagnostics.AddDiagnostics(FplSources.EscapedUri(diagnostic.StartPos.StreamName), CastDiagnostic(diagnostic, tp, sb));
+                castedListDiagnostics.AddDiagnostics(FplSources.EscapedUri(FplParser.parserDiagnostics.StreamName), CastDiagnostic(diagnostic, tp, sb));
             }
             return castedListDiagnostics;
         }
