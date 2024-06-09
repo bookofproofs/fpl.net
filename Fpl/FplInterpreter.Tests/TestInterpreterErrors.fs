@@ -542,3 +542,11 @@ type TestInterpreterErrors() =
     member this.TestSIG03(fplCode:string, expected) =
         let code = SIG03 
         runTestHelper fplCode code expected
+
+    [<DataRow("""def pred T (x:obj) {true}; def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]
+    [<DataRow("""def pred T (x:obj) {true}; def pred Caller() {dec ~x:Nat; T(x)} ;""", 0)>]
+    [<DataRow("""def pred T (x:obj) {true}; def pred Caller() {dec ~x:ind; T(x)} ;""", 1)>]
+    [<TestMethod>]
+    member this.TestSIG04(fplCode:string, expected) =
+        let code = SIG04 ("","")
+        runTestHelper fplCode code expected
