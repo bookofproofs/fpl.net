@@ -99,6 +99,7 @@ type DiagnosticCode =
     | SIG01 of string 
     | SIG02 of string * int * string
     | SIG03 
+    | SIG04 of string * string
     member this.Code = 
         match this with
             // parser error messages
@@ -162,6 +163,7 @@ type DiagnosticCode =
             | SIG01 _ -> "SIG01"
             | SIG02 (_,_,_) -> "SIG02"
             | SIG03 -> "SIG03"
+            | SIG04 (_,_) -> "SIG04"
     member this.Message = 
         match this with
             // parser error messages
@@ -225,6 +227,7 @@ type DiagnosticCode =
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
             | SIG03 -> $"The infix symbol `=` is reserved in FPL." 
+            | SIG04 (signature,candidates) -> $"No overload matching {signature}, candidates: {candidates}" 
 type DiagnosticEmitter =
     // replace your language-specific emitters here
     | FplParser
