@@ -791,6 +791,11 @@ let rec eval (st: SymbolTable) ast =
                 eval st fplIdentifierAst
                 eval st specificationAst |> ignore
                 propagateReference refBlock false
+                match tryMatchSignatures st refBlock with
+                | (_, _, Some matchedFplValue) -> ()
+                | (firstFailingArgument, candidates, None) -> 
+                    emitSIG04Diagnostics refBlock candidates firstFailingArgument pos1 pos2 
+
             | None -> 
                 // if no specification was found then simply continue in the same context
                 eval st fplIdentifierAst

@@ -425,3 +425,20 @@ let emitSIG03Diagnostics (fplValue:FplValue) pos1 pos2 =
                 FplParser.parserDiagnostics.AddDiagnostic diagnostic
             | _ -> ()
     | _ -> ()
+
+let emitSIG04Diagnostics (fplValue:FplValue) (candidates: FplValue list) firstFailingArgument pos1 pos2 =
+    let candidateNames =
+        candidates
+        |> List.map (fun fv -> fv.QualifiedName)
+        |> String.concat ", "
+    let diagnostic =
+        { 
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG04 (fplValue.Name, candidateNames, firstFailingArgument) 
+            Diagnostic.Alternatives = None
+        }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic 
+    

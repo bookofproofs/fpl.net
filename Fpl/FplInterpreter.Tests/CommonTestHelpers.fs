@@ -40,6 +40,7 @@ let prepareFplCode(fplCode:string, delete:bool) =
         if syntaxErrorFound then 
             emitUnexpectedErrorDiagnostics (uri.AbsolutePath) ("Syntax error found.")
         Console.WriteLine(st.LoggedState)
+        Console.WriteLine(st.AstsToString)
         Some (st)
 
 let runTestHelper fplCode (code:ErrDiagnostics.DiagnosticCode) expected =

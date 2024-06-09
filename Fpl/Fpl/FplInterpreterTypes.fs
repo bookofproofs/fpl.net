@@ -638,7 +638,7 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
     /// Checks if a block is in the scope of its parent 
     static member InScopeOfParent(fplValue:FplValue) name = 
         let conflictInSiblingTheory (parent:FplValue) = 
-            // if the parent is as theory, look also for its sibling theories
+            // if the parent is a theory, look also for its sibling theories
             let (conflicts:ScopeSearchResult list) = 
                 let root = parent.Parent.Value
                 root.Scope
@@ -1001,6 +1001,13 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         let log = _evalLog |> String.concat Environment.NewLine
         Environment.NewLine + log + Environment.NewLine
 
+    /// Returns the string representation of all asts .
+    member this.AstsToString = 
+        let res = _parsedAsts
+                    |> Seq.map(fun pa -> pa.Parsing.Ast.ToString())
+                    |> String.concat Environment.NewLine
+        res
+
     /// Add the current ast name to the recursive evaluation path.
     member this.EvalPush(astName:string) = 
         _evalPath.Push(astName)
@@ -1074,3 +1081,55 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         |> ignore
 
         sb.ToString()
+
+/// Tries to match the signature of a reference FplValue with some overload. 
+/// Returns a tuple (a,b,c) where 
+/// a = a string indicating the first mismatching argument that couln't be matched,
+/// b = a list of candidates that were identifierd to match the reference,
+/// c = Some or None candidate that was matched.
+let tryMatchSignatures (st:SymbolTable) (reference:FplValue) = 
+    let candidates = 
+        let pm = List<FplValue>()
+        st.Root.Scope // iterate all theories
+        |> Seq.iter (fun theory -> 
+            theory.Value.Scope
+            // filter only blocks starting with the same FplId as the reference
+            |> Seq.filter (fun fv -> fv.Value.FplId = reference.FplId) 
+            |> Seq.iter (fun block -> pm.Add(block.Value)) 
+        ) |> ignore
+        pm |> Seq.toList
+
+    let rec checkCandidates (toBeMatchedTypeSignature: string list) (candidates: FplValue list) accResult =
+        /// Compares two string lists and returns a tuple of (a,b,c) where c is None, 
+        /// if a both lists are identical. If c = Some index, then a and b contain strings that are not equal.
+        let findFirstMismatchPosition list1 list2 =
+            let rec compareLists index l1 l2 =
+                match l1, l2 with
+                | [], [] -> ("","", None)
+                | hd1 :: tl1, hd2 :: tl2 ->
+                    if hd1 <> hd2 then (hd1, hd2, Some index)
+                    else compareLists (index + 1) tl1 tl2
+                | hd1 :: _, [] -> (hd1, "", Some index)
+                | [], hd2 :: _ -> ("", hd2, Some index)
+            compareLists 0 list1 list2
+        /// matches the TypeSignature of every candidate with a toBeMatchedTypeSignature
+        match candidates with
+        | [] -> (accResult, None) // all candidates mismatch toBeMatchedTypeSignature
+        | x :: xs ->
+            match findFirstMismatchPosition toBeMatchedTypeSignature x.TypeSignature with
+            | ("", "", None) -> (accResult, Some x) // there is a candidate that matches toBeMatchedTypeSignature
+            | ("", elem2, Some index) -> 
+                checkCandidates toBeMatchedTypeSignature xs $"missing {elem2} (argument #{index})" // first reason for mismatch
+            | (elem1, "", Some index) -> 
+                checkCandidates toBeMatchedTypeSignature xs $"superfluous {elem1} (argument #{index})" // second reason for mismatch
+            | (elem1, elem2, Some index) -> 
+                checkCandidates toBeMatchedTypeSignature xs $"{elem1}<>{elem2} (argument #{index})" // third reason for mismatch
+            | _ -> checkCandidates toBeMatchedTypeSignature xs accResult // accumulate reasons
+        
+
+    if candidates.IsEmpty then 
+        ("", candidates, None)
+    else
+        let accResult, matchedCandidate = checkCandidates reference.TypeSignature candidates ""
+        (accResult, candidates, matchedCandidate)
+
