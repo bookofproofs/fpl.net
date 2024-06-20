@@ -12,7 +12,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesString().GetChoices(detailCi);
-            Assert.AreEqual(1, actual.Count);
+            Assert.AreEqual<int>(1, actual.Count);
         }
 
         [DataRow("language-specific string")]
@@ -26,7 +26,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Value) count++;
             }
-            Assert.AreEqual(actual.Count, count);
+            Assert.AreEqual<int>(actual.Count, count);
         }
 
         [DataRow("language-specific string", "\"\"")]
@@ -37,7 +37,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesString().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.AreEqual(l, item.SortText);
+                Assert.AreEqual<string>(l, item.SortText);
             }
         }
 
@@ -73,7 +73,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesString().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.AreEqual(l, item.InsertText);
+                Assert.AreEqual<string>(l, item.InsertText);
             }
         }
     }

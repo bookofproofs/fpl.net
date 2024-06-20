@@ -19,7 +19,7 @@ namespace FplLSTests
         public void TestGetCompletionItemStrippingBracketsAndQuotes(string input, string expected)
         {
             var actual = FplCompletionItem.StripQuotesOrBrackets(input);
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual<string>(expected, actual);
         }
 
         [TestMethod]
@@ -86,7 +86,7 @@ namespace FplLSTests
         public void TestGetCompletionItemLabels(string input)
         {
             var actual = new FplCompletionItem(input);
-            Assert.AreEqual("_ " + input, actual.Label);
+            Assert.AreEqual<string>("_ " + input, actual.Label);
         }
 
         [TestMethod]
@@ -121,7 +121,7 @@ namespace FplLSTests
         public void TestGetDetailShortForms(string input, string expected)
         {
             var actual = new FplCompletionItem(input);
-            Assert.AreEqual(expected, actual.Detail);
+            Assert.AreEqual<string>(expected, actual.Detail);
         }
 
         [TestMethod]
@@ -184,7 +184,7 @@ namespace FplLSTests
         public void TestGetDetailLongForms(string input, string expected)
         {
             var actual = new FplCompletionItem(input);
-            Assert.AreEqual(expected, actual.Detail);
+            Assert.AreEqual<string>(expected, actual.Detail);
         }
 
 
@@ -276,7 +276,7 @@ namespace FplLSTests
         public void TestGetDetailCompletionKind(string input, CompletionItemKind expected)
         {
             var actual = new FplCompletionItem(input);
-            Assert.AreEqual(expected, actual.Kind);
+            Assert.AreEqual<CompletionItemKind>(expected, actual.Kind);
         }
 
         [TestMethod]
@@ -368,7 +368,7 @@ namespace FplLSTests
         {
             var actual = new FplCompletionItem(input);
             Console.WriteLine(input);
-            Assert.AreEqual(expected, actual.SortText.Replace("zzz", ""));
+            Assert.AreEqual<string>(expected, actual.SortText.Replace("zzz", ""));
         }
 
         [TestMethod]
@@ -460,7 +460,7 @@ namespace FplLSTests
         {
             var actual = new FplCompletionItem(input, "xxx");
             Console.WriteLine(input);
-            Assert.AreEqual(expected, actual.SortText);
+            Assert.AreEqual<string>(expected, actual.SortText);
         }
 
 
@@ -552,7 +552,7 @@ namespace FplLSTests
         public void TestGetDetailIsShort(string input, bool expected)
         {
             var actual = new FplCompletionItem(input);
-            Assert.AreEqual(expected, actual.IsShort);
+            Assert.AreEqual<bool>(expected, actual.IsShort);
         }
     }
 }

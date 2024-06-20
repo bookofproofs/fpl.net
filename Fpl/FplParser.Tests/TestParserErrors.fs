@@ -75,7 +75,7 @@ type TestParserErrors() =
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual(2, result.Length)
+        Assert.AreEqual<int>(2, result.Length)
 
     [<TestMethod>]
     member this.TestTHM000() =
@@ -89,7 +89,7 @@ type TestParserErrors() =
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual(2, result.Length)
+        Assert.AreEqual<int>(2, result.Length)
 
     [<TestMethod>]
     member this.TestCOR000() =
@@ -115,7 +115,7 @@ type TestParserErrors() =
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual(2, result.Length)
+        Assert.AreEqual<int>(2, result.Length)
 
     [<TestMethod>]
     member this.TestPPS000() =
@@ -140,7 +140,7 @@ type TestParserErrors() =
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual(2, result.Length)
+        Assert.AreEqual<int>(2, result.Length)
 
     [<TestMethod>]
     member this.TestVAR000() =
@@ -327,7 +327,7 @@ type TestParserErrors() =
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual(2, result.Length)
+        Assert.AreEqual<int>(2, result.Length)
 
     [<TestMethod>]
     member this.TestTRL000() =

@@ -34,7 +34,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascelCaseId.Split('.') |> Array.toList 
             }
 
-        Assert.AreEqual(expected, eval.FileNamePattern)
+        Assert.AreEqual<string>(expected, eval.FileNamePattern)
 
     [<DataRow("*", "Test1", "Test1")>]
     [<DataRow("*", "Test1.Test2", "Test1.Test2")>]
@@ -59,14 +59,14 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascelCaseId ] 
             }
 
-        Assert.AreEqual(expected, eval.Name)
+        Assert.AreEqual<string>(expected, eval.Name)
 
     [<TestMethod>]
     member this.TestCreateLibSubfolder01() =
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let expected = Directory.GetCurrentDirectory()
         let (directoryPath, libDirectoryPath) = createSubfolder uri "lib"
-        Assert.AreEqual(expected, directoryPath)
+        Assert.AreEqual<string>(expected, directoryPath)
 
         if Directory.Exists(libDirectoryPath) then
             Directory.Delete(libDirectoryPath, true)
@@ -76,7 +76,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let expected = Path.Combine(Directory.GetCurrentDirectory(), "lib")
         let (directoryPath, libDirectoryPath) = createSubfolder uri "lib"
-        Assert.AreEqual(expected, libDirectoryPath)
+        Assert.AreEqual<string>(expected, libDirectoryPath)
 
         if Directory.Exists(libDirectoryPath) then
             Directory.Delete(libDirectoryPath, true)
@@ -117,7 +117,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             }
         let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos)
         let libMap = downloadLibMap (System.Uri(url)) url
-        Assert.AreEqual(0, ad.CountDiagnostics)
+        Assert.AreEqual<int>(0, ad.CountDiagnostics)
 
     [<DataRow("Fpl *", 4)>]
     [<DataRow("Fpl.Test *", 0)>]
@@ -126,7 +126,7 @@ type TestEvalAliasedNamespaceIdentifier() =
     [<DataRow("Fpl.SetTheory", 1)>]
     [<DataRow("FpX *", 0)>]
     [<TestMethod>]
-    member this.TestFindFilesInLibMapWithWildcard(usesClause: string, expected) =
+    member this.TestFindFilesInLibMapWithWildcard(usesClause: string, expected:int) =
         let st = prepareFplCode (sprintf "uses %s;" usesClause, false) 
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
@@ -137,10 +137,10 @@ type TestEvalAliasedNamespaceIdentifier() =
         let testAst = st.Value.ParsedAsts.TryFindAstById("Test").Value
         let eaniList = eval_uses_clause testAst.Parsing.Ast
         if eaniList.IsEmpty then 
-            Assert.AreEqual(expected, 0)
+            Assert.AreEqual<int>(expected, 0)
         else
             let filtered = sources.FindWithPattern eaniList.Head.FileNamePattern
-            Assert.AreEqual(expected, filtered.Length)
+            Assert.AreEqual<int>(expected, filtered.Length)
         prepareFplCode ("", true) |> ignore
 
 
@@ -154,7 +154,7 @@ type TestEvalAliasedNamespaceIdentifier() =
     member this.TestParsedAstsCount(usesClause: string, expected: int) =
         let st = prepareFplCode (sprintf "uses %s;" usesClause, false) 
         let result = st.Value.ParsedAsts
-        Assert.AreEqual(expected, result.Count)
+        Assert.AreEqual<int>(expected, result.Count)
         prepareFplCode ("", true) |> ignore
 
     [<DataRow("Test1")>]
@@ -181,7 +181,7 @@ type TestEvalAliasedNamespaceIdentifier() =
 
         // perform test
         let sources = acquireSources uri fplLibUrl 
-        Assert.AreEqual(5, sources.Length)
+        Assert.AreEqual<int>(5, sources.Length)
 
         // clean up test
         File.Delete(pathToFile)
@@ -191,17 +191,17 @@ type TestEvalAliasedNamespaceIdentifier() =
         let input = "Hello world"
         let actual = computeMD5Checksum input
         let expected = "3e25960a79dbc69b674cd4ec67a72c62"
-        Assert.AreEqual(expected, actual)
+        Assert.AreEqual<string>(expected, actual)
 
     [<TestMethod>]
     member this.TestFplSourcesUrls() =
         let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"],"c:\temp\repo")
-        Assert.AreEqual(1, fplSources.Urls.Length)
+        Assert.AreEqual<int>(1, fplSources.Urls.Length)
 
     [<TestMethod>]
     member this.TestFplSourcesFiles() =
         let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"], "c:\temp\repo")
-        Assert.AreEqual(2, fplSources.FilePaths.Length)
+        Assert.AreEqual<int>(2, fplSources.FilePaths.Length)
 
     member this.PrepareTestLoadAllUsesClauses01() =
         let input = """
@@ -221,41 +221,41 @@ type TestEvalAliasedNamespaceIdentifier() =
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Number() =
         let result = this.PrepareTestLoadAllUsesClauses01()
-        Assert.AreEqual(2, result.Count)
+        Assert.AreEqual<int>(2, result.Count)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id1() =
         let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Test")
-        Assert.AreEqual("Test", result.Value.Id)
+        Assert.AreEqual<string>("Test", result.Value.Id)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id2() =
         let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Fpl.Commons")
-        Assert.AreEqual("Fpl.Commons", result.Value.Id)
+        Assert.AreEqual<string>("Fpl.Commons", result.Value.Id)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id1ReferencedAsts() =
         let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Test")
         // "Test" knows that it references to "Fpl.Commons"
-        Assert.AreEqual(["Fpl.Commons"], result.Value.Sorting.ReferencedAsts)
+        Assert.AreEqual<string list>(["Fpl.Commons"], result.Value.Sorting.ReferencedAsts)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id1ReferencingAsts() =
         let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Test")
         // "Test" knows that nothing is referencing to it
-        Assert.AreEqual([], result.Value.Sorting.ReferencingAsts)
+        Assert.AreEqual<string list>([], result.Value.Sorting.ReferencingAsts)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id2ReferencedAsts() =
         let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Fpl.Commons")
         // "Fpl.Commons" knows that it doesn't reference to anything
-        Assert.AreEqual([], result.Value.Sorting.ReferencedAsts)
+        Assert.AreEqual<string list>([], result.Value.Sorting.ReferencedAsts)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id2ReferencingAsts() =
         let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Fpl.Commons")
         // "Fpl.Commons" knows that "Test" is referencing to it
-        Assert.AreEqual(["Test"], result.Value.Sorting.ReferencingAsts)
+        Assert.AreEqual<string list>(["Test"], result.Value.Sorting.ReferencingAsts)
 
     member this.PrepareTestLoadAllUsesClauses02() =
         let input = """
@@ -275,33 +275,33 @@ type TestEvalAliasedNamespaceIdentifier() =
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Number() =
         let result = this.PrepareTestLoadAllUsesClauses02()
-        Assert.AreEqual(3, result.Count)
+        Assert.AreEqual<int>(3, result.Count)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id1() =
         let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Test")
         let actual = result.Value.Id
-        Assert.AreEqual("Test", actual)
+        Assert.AreEqual<string>("Test", actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id1ReferencedAsts() =
         let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Test")
         // "Test" knows that it references to "Fpl.Commons"
         let actual = result.Value.Sorting.ReferencedAsts
-        Assert.AreEqual(["Fpl.Commons"; "Fpl.SetTheory"], actual)
+        Assert.AreEqual<string list>(["Fpl.Commons"; "Fpl.SetTheory"], actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id1ReferencingAsts() =
         let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Test")
         // "Test" knows that nothing is referencing to it
         let actual = result.Value.Sorting.ReferencingAsts
-        Assert.AreEqual([], actual)
+        Assert.AreEqual<string list>([], actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id2() =
         let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.SetTheory")
         let actual = result.Value.Id
-        Assert.AreEqual("Fpl.SetTheory", actual)
+        Assert.AreEqual<string>("Fpl.SetTheory", actual)
 
 
     [<TestMethod>]
@@ -309,34 +309,34 @@ type TestEvalAliasedNamespaceIdentifier() =
         let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.SetTheory")
         // "Fpl.SetTheory" references to FplCommons
         let actual = result.Value.Sorting.ReferencedAsts
-        Assert.AreEqual(["Fpl.Commons"], actual)
+        Assert.AreEqual<string list>(["Fpl.Commons"], actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id2ReferencingAsts() =
         let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.SetTheory")
         // "Fpl.Commons" knows that "Test" is referencing to it
         let actual = result.Value.Sorting.ReferencingAsts
-        Assert.AreEqual(["Test"], actual)
+        Assert.AreEqual<string list>(["Test"], actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id3() =
         let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.Commons")
         let actual = result.Value.Id
-        Assert.AreEqual("Fpl.Commons", actual)
+        Assert.AreEqual<string>("Fpl.Commons", actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id3ReferencedAsts() =
         let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.Commons")
         // "Fpl.Commons" knows that it doesn't reference to anything
         let actual = result.Value.Sorting.ReferencedAsts
-        Assert.AreEqual([], actual)
+        Assert.AreEqual<string list>([], actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id3ReferencingAsts() =
         let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.Commons")
         // "Fpl.Commons" knows that "Test" is referencing to it
         let actual = result.Value.Sorting.ReferencingAsts
-        Assert.AreEqual(["Test"; "Fpl.SetTheory"], actual)
+        Assert.AreEqual<string list>(["Test"; "Fpl.SetTheory"], actual)
 
     member this.PrepareTestLoadAllUsesClauses03() =
         let input = """
@@ -355,33 +355,33 @@ type TestEvalAliasedNamespaceIdentifier() =
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Number() =
         let result = this.PrepareTestLoadAllUsesClauses03()
-        Assert.AreEqual(5, result.Count)
+        Assert.AreEqual<int>(5, result.Count)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id1() =
         let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Test")
         let actual = result.Value.Id
-        Assert.AreEqual("Test", actual)
+        Assert.AreEqual<string>("Test", actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id1ReferencedAsts() =
         let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Test")
         // "Test" knows that it references to "Fpl.Commons"
         let actual = result.Value.Sorting.ReferencedAsts
-        Assert.AreEqual(["Fpl.Commons"; "Fpl.Commons.Structures"; "Fpl.SetTheory"; "Fpl.PeanoArithmetics"], actual)
+        Assert.AreEqual<string list>(["Fpl.Commons"; "Fpl.Commons.Structures"; "Fpl.SetTheory"; "Fpl.PeanoArithmetics"], actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id1ReferencingAsts() =
         let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Test")
         // "Test" knows that nothing is referencing to it
         let actual = result.Value.Sorting.ReferencingAsts
-        Assert.AreEqual([], actual)
+        Assert.AreEqual<string list>([], actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id2() =
         let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.SetTheory")
         let actual = result.Value.Id
-        Assert.AreEqual("Fpl.SetTheory", actual)
+        Assert.AreEqual<string>("Fpl.SetTheory", actual)
 
 
     [<TestMethod>]
@@ -389,34 +389,34 @@ type TestEvalAliasedNamespaceIdentifier() =
         let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.SetTheory")
         // "Fpl.SetTheory" references to FplCommons
         let actual = result.Value.Sorting.ReferencedAsts
-        Assert.AreEqual(["Fpl.Commons"], actual)
+        Assert.AreEqual<string list>(["Fpl.Commons"], actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id2ReferencingAsts() =
         let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.SetTheory")
         // "Fpl.Commons" knows that "Test" is referencing to it
         let actual = result.Value.Sorting.ReferencingAsts
-        Assert.AreEqual(["Test"; "Fpl.Commons.Structures"; "Fpl.PeanoArithmetics"], actual)
+        Assert.AreEqual<string list>(["Test"; "Fpl.Commons.Structures"; "Fpl.PeanoArithmetics"], actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id3() =
         let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.Commons")
         let actual = result.Value.Id
-        Assert.AreEqual("Fpl.Commons", actual)
+        Assert.AreEqual<string>("Fpl.Commons", actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id3ReferencedAsts() =
         let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.Commons")
         // "Fpl.Commons" knows that it doesn't reference to anything
         let actual = result.Value.Sorting.ReferencedAsts
-        Assert.AreEqual([], actual)
+        Assert.AreEqual<string list>([], actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id3ReferencingAsts() =
         let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Fpl.Commons")
         // "Fpl.Commons" knows that "Test" is referencing to it
         let actual = result.Value.Sorting.ReferencingAsts
-        Assert.AreEqual(["Test"; "Fpl.Commons.Structures"; "Fpl.SetTheory"; "Fpl.PeanoArithmetics"], actual)
+        Assert.AreEqual<string list>(["Test"; "Fpl.Commons.Structures"; "Fpl.SetTheory"; "Fpl.PeanoArithmetics"], actual)
 
 
     [<TestMethod>]
@@ -426,8 +426,8 @@ type TestEvalAliasedNamespaceIdentifier() =
         let rc = result.TryFindAstById("Test")
         let a = ra.Value.Sorting.TopologicalSorting
         let c = rc.Value.Sorting.TopologicalSorting
-        Assert.AreEqual(1, a)
-        Assert.AreEqual(0, c)
+        Assert.AreEqual<int>(1, a)
+        Assert.AreEqual<int>(0, c)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClausesTopologicalSorting02() =
@@ -438,9 +438,9 @@ type TestEvalAliasedNamespaceIdentifier() =
         let a = ra.Value.Sorting.TopologicalSorting
         let b = rb.Value.Sorting.TopologicalSorting
         let c = rc.Value.Sorting.TopologicalSorting
-        Assert.AreEqual(2, a)
-        Assert.AreEqual(1, b)
-        Assert.AreEqual(0, c)
+        Assert.AreEqual<int>(2, a)
+        Assert.AreEqual<int>(1, b)
+        Assert.AreEqual<int>(0, c)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClausesTopologicalSorting03() =
@@ -455,26 +455,26 @@ type TestEvalAliasedNamespaceIdentifier() =
         let c = rc.Value.Sorting.TopologicalSorting
         let d = rd.Value.Sorting.TopologicalSorting
         let e = re.Value.Sorting.TopologicalSorting
-        Assert.AreEqual(4, a)
-        Assert.AreEqual(3, b)
-        Assert.AreEqual(2, c)
-        Assert.AreEqual(1, d)
-        Assert.AreEqual(0, e)
+        Assert.AreEqual<int>(4, a)
+        Assert.AreEqual<int>(3, b)
+        Assert.AreEqual<int>(2, c)
+        Assert.AreEqual<int>(1, d)
+        Assert.AreEqual<int>(0, e)
     
     [<TestMethod>]
     member this.TestGarbageCollector() =
         match CommonTestHelpers.prepareFplCode("uses Fpl.SetTheory;", false) with
         | Some (st:SymbolTable) -> 
             // initial counts of parsed ast and theories in root
-            Assert.AreEqual(3, st.ParsedAsts.Count)
-            Assert.AreEqual(3, st.Root.Scope.Count)
+            Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+            Assert.AreEqual<int>(3, st.Root.Scope.Count)
             let currDir = Directory.GetCurrentDirectory()
             let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             // reparse the Test.fpl after removing the uses clause
             FplInterpreter.fplInterpreter st ";" uri fplLibUrl
-            Assert.AreEqual(1, st.ParsedAsts.Count)
-            Assert.AreEqual(1, st.Root.Scope.Count)
+            Assert.AreEqual<int>(1, st.ParsedAsts.Count)
+            Assert.AreEqual<int>(1, st.Root.Scope.Count)
 
         | None -> Assert.IsTrue(false)
 
@@ -483,15 +483,15 @@ type TestEvalAliasedNamespaceIdentifier() =
         match CommonTestHelpers.prepareFplCode("uses Fpl.SetTheory;", false) with
         | Some (st:SymbolTable) -> 
             // initial counts of parsed ast and theories in root
-            Assert.AreEqual(3, st.ParsedAsts.Count)
-            Assert.AreEqual(3, st.Root.Scope.Count)
+            Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+            Assert.AreEqual<int>(3, st.Root.Scope.Count)
             let currDir = Directory.GetCurrentDirectory()
             let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             // reparse the Test.fpl after removing the uses clause
             FplInterpreter.fplInterpreter st "uses Fpl.Commons ;" uri fplLibUrl
-            Assert.AreEqual(2, st.ParsedAsts.Count)
-            Assert.AreEqual(2, st.Root.Scope.Count)
+            Assert.AreEqual<int>(2, st.ParsedAsts.Count)
+            Assert.AreEqual<int>(2, st.Root.Scope.Count)
 
         | None -> Assert.IsTrue(false)
         
@@ -500,15 +500,15 @@ type TestEvalAliasedNamespaceIdentifier() =
         match CommonTestHelpers.prepareFplCode("uses Fpl.SetTheory;", false) with
         | Some (st:SymbolTable) -> 
             // initial counts of parsed ast and theories in root
-            Assert.AreEqual(3, st.ParsedAsts.Count)
-            Assert.AreEqual(3, st.Root.Scope.Count)
+            Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+            Assert.AreEqual<int>(3, st.Root.Scope.Count)
             let currDir = Directory.GetCurrentDirectory()
             let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             // reparse the Test.fpl after removing the uses clause
             FplInterpreter.fplInterpreter st "uses BlaTypo ;" uri fplLibUrl
-            Assert.AreEqual(1, st.ParsedAsts.Count)
-            Assert.AreEqual(1, st.Root.Scope.Count)
+            Assert.AreEqual<int>(1, st.ParsedAsts.Count)
+            Assert.AreEqual<int>(1, st.Root.Scope.Count)
 
         | None -> Assert.IsTrue(false)
 
@@ -529,6 +529,6 @@ type TestEvalAliasedNamespaceIdentifier() =
 
         // reparse the Test.fpl after slightly modifying the uses clause
         FplInterpreter.fplInterpreter st (fplCode + " ") uri fplLibUrl
-        Assert.AreEqual(parsedAstsFirstTime, st.ParsedAsts.Count)
-        Assert.AreEqual(scopeCountFirstTime, st.Root.Scope.Count)
-        Assert.AreEqual(errorCountfirstTime, FplParser.parserDiagnostics.CountDiagnostics)
+        Assert.AreEqual<int>(parsedAstsFirstTime, st.ParsedAsts.Count)
+        Assert.AreEqual<int>(scopeCountFirstTime, st.Root.Scope.Count)
+        Assert.AreEqual<int>(errorCountfirstTime, FplParser.parserDiagnostics.CountDiagnostics)

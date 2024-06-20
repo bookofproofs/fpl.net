@@ -13,7 +13,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesVariable().GetChoices(detailCi);
-            Assert.AreEqual(1, actual.Count);
+            Assert.AreEqual<int>(1, actual.Count);
         }
 
         [DataRow("variable")]
@@ -29,7 +29,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Variable) count++;
             }
-            Assert.AreEqual(1, count);
+            Assert.AreEqual<int>(1, count);
         }
 
         [DataRow("variable", CompletionItemKind.Reference, "variable")]
@@ -42,7 +42,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesVariable().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.AreEqual(expected, item.SortText);
+                Assert.AreEqual<string>(expected, item.SortText);
             }
         }
 
@@ -101,7 +101,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesVariable().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.AreEqual(l + " ", item.InsertText);
+                Assert.AreEqual<string>(l + " ", item.InsertText);
             }
         }
     }

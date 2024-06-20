@@ -22,7 +22,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesPredicate().GetChoices(detailCi);
-            Assert.AreEqual(expected, actual.Count);
+            Assert.AreEqual<int>(expected, actual.Count);
         }
 
         [DataRow("true")]
@@ -51,7 +51,7 @@ namespace FplLSTests
                 }
                 if (item.Kind == CompletionItemKind.Keyword) count++;
             }
-            Assert.AreEqual(expected, count);
+            Assert.AreEqual<int>(expected, count);
         }
 
         [DataRow("true", CompletionItemKind.Keyword, "zzztrue")]
@@ -80,7 +80,7 @@ namespace FplLSTests
             {
                 if (item.Label.Contains("_ " + choice) && item.Kind == isKeyword)
                 {
-                    Assert.AreEqual(expected, item.SortText);
+                    Assert.AreEqual<string>(expected, item.SortText);
                 }
             }
         }
@@ -152,7 +152,7 @@ namespace FplLSTests
             {
                 if (item.Kind != CompletionItemKind.Keyword)
                 {
-                    Assert.AreEqual(l, item.Detail);
+                    Assert.AreEqual<string>(l, item.Detail);
                 }
             }
         }
@@ -178,7 +178,7 @@ namespace FplLSTests
             {
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
             }
-            Assert.AreEqual(actual.Count, counterSnippets);
+            Assert.AreEqual<int>(actual.Count, counterSnippets);
         }
     }
 }

@@ -1,5 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RunSettings>
   <MaxCpuCount>0</MaxCpuCount>
-  <Execution parallelTestCount="0" />
+  <!-- MSTest adapter -->
+  <MSTest>
+    <Parallelize>
+      <Workers>7</Workers>
+      <Scope>ClassLevel</Scope>
+    </Parallelize>
+  </MSTest>
 </RunSettings>

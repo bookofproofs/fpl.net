@@ -43,11 +43,11 @@ let prepareFplCode(fplCode:string, delete:bool) =
         Console.WriteLine(st.AstsToString)
         Some (st)
 
-let runTestHelper fplCode (code:ErrDiagnostics.DiagnosticCode) expected =
+let runTestHelper fplCode (code:ErrDiagnostics.DiagnosticCode) (expected:int) =
     printf "Trying %s" code.Message
     prepareFplCode(fplCode, false) |> ignore
     let result = filterByErrorCode FplParser.parserDiagnostics code.Code
     if result.Length > 0 then 
         printf "Result %s" result.Head.Message
-    Assert.AreEqual(expected, result.Length)
+    Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode("", true) |> ignore

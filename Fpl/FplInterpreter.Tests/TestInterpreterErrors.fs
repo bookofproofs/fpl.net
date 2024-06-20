@@ -28,7 +28,7 @@ type TestInterpreterErrors() =
         let st = SymbolTable(parsedAsts, true)
         FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
+        Assert.AreEqual<int>(1, result.Length)
 
     [<TestMethod>]
     member this.TestNSP03() =
@@ -44,7 +44,7 @@ type TestInterpreterErrors() =
         let st = SymbolTable(parsedAsts, true)
         FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore 
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
+        Assert.AreEqual<int>(1, result.Length)
 
     member this.PrepareTestNSP04CircularAA(delete:bool) =
         FplParser.parserDiagnostics.Clear()
@@ -70,7 +70,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         this.PrepareTestNSP04CircularAA(false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
+        Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP04CircularAA(true) |> ignore
 
     member this.PrepareTestNSP04CircularABCA(delete:bool) =
@@ -101,7 +101,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         this.PrepareTestNSP04CircularABCA(false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
+        Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP04CircularABCA(true) |> ignore
 
 
@@ -131,7 +131,7 @@ type TestInterpreterErrors() =
         this.PrepareTestNSP04NonCircular(false) |> ignore
         let code = NSP04 ""
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(0, result.Length)
+        Assert.AreEqual<int>(0, result.Length)
         this.PrepareTestNSP04NonCircular(true) |> ignore
 
 
@@ -159,7 +159,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         this.PrepareTestNSP05(false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
+        Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP05(true) |> ignore
 
     member this.PrepareTestNSP05a (delete:bool) =
@@ -188,7 +188,7 @@ type TestInterpreterErrors() =
         printf "Trying %s" code.Message
         this.PrepareTestNSP05a(false) |> ignore
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-        Assert.AreEqual(1, result.Length)
+        Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP05a(true) |> ignore
 
 
@@ -216,7 +216,7 @@ type TestInterpreterErrors() =
         let code = NSP05 (["./"], "Test", "./")
         printf "Trying %s" code.Message
         this.PrepareTestNSP05CrossCheck(false) |> ignore
-        Assert.AreEqual(0, FplParser.parserDiagnostics.CountDiagnostics)
+        Assert.AreEqual<int>(0, FplParser.parserDiagnostics.CountDiagnostics)
         this.PrepareTestNSP05CrossCheck(true) |> ignore
 
 

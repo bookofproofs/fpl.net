@@ -12,7 +12,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesIso639().GetChoices(detailCi);
-            Assert.AreEqual(490, actual.Count);
+            Assert.AreEqual<int>(490, actual.Count);
         }
 
         [DataRow("ISO 639 language code")]
@@ -26,7 +26,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Value) count++;
             }
-            Assert.AreEqual(actual.Count, count);
+            Assert.AreEqual<int>(actual.Count, count);
         }
 
         [DataRow("ISO 639 language code")]

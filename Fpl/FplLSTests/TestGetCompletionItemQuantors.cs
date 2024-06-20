@@ -14,7 +14,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesQuantor().GetChoices(detailCi);
-            Assert.AreEqual(number, actual.Count);
+            Assert.AreEqual<int>(number, actual.Count);
         }
 
         [DataRow("all", 1)]
@@ -31,7 +31,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Keyword) count++;
             }
-            Assert.AreEqual(number, count);
+            Assert.AreEqual<int>(number, count);
         }
 
         [DataRow("all", "all ...", CompletionItemKind.Operator, "all01")]
@@ -60,7 +60,7 @@ namespace FplLSTests
             {
                 if (item.Label.Contains(choice) && item.Label.Contains(subType) && item.Kind == isKeyword)
                 {
-                    Assert.AreEqual(expected, item.SortText);
+                    Assert.AreEqual<string>(expected, item.SortText);
                 }
             }
         }

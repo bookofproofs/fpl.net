@@ -13,20 +13,20 @@ type TestFplValue() =
     member this.TestInitialFactory() =
         FplParser.parserDiagnostics.Clear()
         let r = FplValue.CreateRoot()
-        Assert.AreEqual (FplValueType.Root, r.BlockType)
+        Assert.AreEqual<FplValueType>(FplValueType.Root, r.BlockType)
         let testCreateFactory fplBlockType = 
             if fplBlockType = FplValueType.Object then
                 ("obj", FplValue.CreateObject(Position("",0,1,1),Position("",0,1,1)))
                 
             else
                 ("", FplValue.CreateFplValue((Position("",0,1,1),Position("",0,1,1)), fplBlockType, r))
-        let testFactory fplBlockType fplType =
+        let testFactory fplBlockType (fplType:FplType) =
             let name, fv = testCreateFactory fplBlockType
-            Assert.AreEqual (fplBlockType, fv.BlockType)
-            Assert.AreEqual (name, fv.Name)
-            Assert.AreEqual ("", fv.FplRepresentation)
-            Assert.AreEqual ([], fv.TypeSignature)
-            Assert.AreEqual (fplType, fv.EvaluationType)
+            Assert.AreEqual<FplValueType>(fplBlockType, fv.BlockType)
+            Assert.AreEqual<string>(name, fv.Name)
+            Assert.AreEqual<string>("", fv.FplRepresentation)
+            Assert.AreEqual<string list>([], fv.TypeSignature)
+            Assert.AreEqual<FplType>(fplType, fv.EvaluationType)
         testFactory FplValueType.VariadicVariableMany FplType.Object
         testFactory FplValueType.VariadicVariableMany1 FplType.Object
         testFactory FplValueType.Axiom FplType.Predicate
@@ -785,23 +785,23 @@ type TestFplValue() =
         let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
         let result = prepareFplCode(fplCode, false) 
         let fplValue = result.Value.Root.Scope["Test"].Scope[expectedName]
-        Assert.AreEqual(expectedName, fplValue.Name)
+        Assert.AreEqual<string>(expectedName, fplValue.Name)
         let actualTypeSignature = fplValue.TypeSignature
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
-        Assert.AreEqual(expectedTypeSignature, actualTypeSignature)
+        Assert.AreEqual<string list>(expectedTypeSignature, actualTypeSignature)
         let expectedStart =
             if fplCode.StartsWith("def ") then 
                 (int64)4
             else
                 (int64)0
-        Assert.AreEqual(expectedStart, actualSignatureStart)
+        Assert.AreEqual<int64>(expectedStart, actualSignatureStart)
         let expectedEnd =
             if fplCode.StartsWith("def class") then 
                 (int64)(fplCode.IndexOf(":", System.StringComparison.OrdinalIgnoreCase))
             else
                 (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
-        Assert.AreEqual(expectedEnd, actualSignatureEnd)
+        Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore
 
     [<DataRow("def cl T:obj {intr prty pred TestId() {intrinsic}};", "TestId()", "TestId ( )")>]
@@ -1007,13 +1007,13 @@ type TestFplValue() =
         let actualTypeSignature = fplValue.TypeSignature
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
-        Assert.AreEqual(expectedTypeSignature, actualTypeSignature)
+        Assert.AreEqual<string list>(expectedTypeSignature, actualTypeSignature)
         let expectedStart =
                 (int64)19
-        Assert.AreEqual(expectedStart, actualSignatureStart)
+        Assert.AreEqual<int64>(expectedStart, actualSignatureStart)
         let expectedEnd =
                 (int64)(fplCode.IndexOf(" {intrinsic", System.StringComparison.OrdinalIgnoreCase))
-        Assert.AreEqual(expectedEnd, actualSignatureEnd)
+        Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore
 
 
@@ -1090,11 +1090,11 @@ type TestFplValue() =
         let actualTypeSignature = fplValue.TypeSignature
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
-        Assert.AreEqual(expectedTypeSignature, actualTypeSignature)
+        Assert.AreEqual<string list>(expectedTypeSignature, actualTypeSignature)
         let expectedStart =
                 (int64)14
-        Assert.AreEqual(expectedStart, actualSignatureStart)
+        Assert.AreEqual<int64>(expectedStart, actualSignatureStart)
         let expectedEnd =
                 (int64)(fplCode.IndexOf(" {self", System.StringComparison.OrdinalIgnoreCase))
-        Assert.AreEqual(expectedEnd, actualSignatureEnd)
+        Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
         prepareFplCode("", true) |> ignore

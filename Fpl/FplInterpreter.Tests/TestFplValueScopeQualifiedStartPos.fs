@@ -38,7 +38,7 @@ type TestFplValueScopeQualifiedStartPos() =
         match res with
         | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+            | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | "theory" -> Assert.IsTrue(theory.QualifiedStartPos.Contains("Ln: 1, Col: 1)"))
             | "inf1" -> Assert.IsTrue(inf1.QualifiedStartPos.Contains("Ln: 2, Col: 13)"))
             | "inf2" -> Assert.IsTrue(inf2.QualifiedStartPos.Contains("Ln: 3, Col: 13)"))
@@ -82,7 +82,7 @@ type TestFplValueScopeQualifiedStartPos() =
         match res with
         | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+            | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | "theory" -> Assert.IsTrue(theory.QualifiedStartPos.Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.QualifiedStartPos.Contains("Ln: 2, Col: 13)"))
             | "t1" -> Assert.IsTrue(t1.QualifiedStartPos.Contains("Ln: 4, Col: 13)"))
@@ -123,7 +123,7 @@ type TestFplValueScopeQualifiedStartPos() =
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
                                 axi1,corAxi1) -> 
                 match var with
-                | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+                | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
                 | "theory" -> Assert.IsTrue(theory.QualifiedStartPos.Contains("Ln: 1, Col: 1)"))
                 | "thm1" -> Assert.IsTrue(thm1.QualifiedStartPos.Contains("Ln: 3, Col: 13)"))
                 | "proofThm1" -> Assert.IsTrue(proofThm1.QualifiedStartPos.Contains("Ln: 4, Col: 13)"))
@@ -173,7 +173,7 @@ type TestFplValueScopeQualifiedStartPos() =
         | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
             t13:FplValue,t14:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+            | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | "theory" -> Assert.IsTrue(theory.QualifiedStartPos.Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.QualifiedStartPos.Contains("Ln: 2, Col: 13)"))
             | "t1" -> Assert.IsTrue(t1.QualifiedStartPos.Contains("Ln: 5, Col: 13)"))
@@ -229,7 +229,7 @@ type TestFplValueScopeQualifiedStartPos() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+            | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | "theory" -> Assert.IsTrue(theory.QualifiedStartPos.Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.QualifiedStartPos.Contains("Ln: 2, Col: 13)")); 
             | "x" -> Assert.IsTrue(x.QualifiedStartPos.Contains("Ln: 3, Col: 19)"))
@@ -297,7 +297,7 @@ type TestFplValueScopeQualifiedStartPos() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+            | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | "theory" -> Assert.IsTrue(theory.QualifiedStartPos.Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.QualifiedStartPos.Contains("Ln: 2, Col: 13)")); 
             | "x" -> Assert.IsTrue(x.QualifiedStartPos.Contains("Ln: 3, Col: 19)"))
@@ -365,7 +365,7 @@ type TestFplValueScopeQualifiedStartPos() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+            | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | "theory" -> Assert.IsTrue(theory.QualifiedStartPos.Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.QualifiedStartPos.Contains("Ln: 2, Col: 13)"))
             | "x" -> Assert.IsTrue(x.QualifiedStartPos.Contains("Ln: 2, Col: 32)"))
@@ -432,7 +432,7 @@ type TestFplValueScopeQualifiedStartPos() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual("", r.QualifiedStartPos)
+            | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | "theory" -> Assert.IsTrue(theory.QualifiedStartPos.Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.QualifiedStartPos.Contains("Ln: 2, Col: 13)"))
             | "x" -> Assert.IsTrue(x.QualifiedStartPos.Contains("Ln: 2, Col: 32)"))
