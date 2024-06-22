@@ -266,15 +266,6 @@ type ParsedAstList() =
         else
             None
 
-type FplType =
-    | Object 
-    | Predicate 
-    | FunctionalTerm 
-    | Template 
-    | Index
-    | Localization
-    | Undetermined 
-
 type FplValueType =
     | Variable
     | VariadicVariableMany
@@ -396,13 +387,12 @@ type ScopeSearchResult =
     | NotFound
     | NotApplicable
 
-and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions: Positions, parent: FplValue option) =
+and FplValue(name:string, blockType: FplValueType, positions: Positions, parent: FplValue option) =
     let mutable _name = name
     let mutable _expressionType = ExprType.NoType
     let mutable _exprTypeAlreadySet = false 
     let mutable _nameFinal = false
     let mutable _nameEndPos = Position("", 0, 1, 1)
-    let mutable _evalType = evalType
     let mutable _typeSignature = []
     let mutable _representation = ""
     let mutable _blockType = blockType
@@ -467,11 +457,6 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
     member this.TypeSignature
         with get () = _typeSignature
         and set (value:string list) = _typeSignature <- value
-
-    /// The primary type of the FplValue
-    member this.EvaluationType
-        with get () = _evalType
-        and set (value) = _evalType <- value
 
     /// A representation of the constructed object (if any)
     member this.FplRepresentation
@@ -836,13 +821,13 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
 
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
-        let root = new FplValue("", FplValueType.Root, FplType.Object, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+        let root = new FplValue("", FplValueType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
         root.NameIsFinal <- true
         root
 
     /// A factory method for the FPL primitive Object
     static member CreateObject(pos1,pos2) =
-        let obj = new FplValue("obj", FplValueType.Object, FplType.Object, (pos1, pos2), None)
+        let obj = new FplValue("obj", FplValueType.Object, (pos1, pos2), None)
         obj.NameIsFinal <- true
         obj
 
@@ -863,8 +848,8 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
         | FplValueType.Theory
         | FplValueType.MandatoryPredicate
         | FplValueType.OptionalPredicate
-        | FplValueType.Predicate -> new FplValue("", fplBlockType, FplType.Predicate, positions, Some parent)
-        | FplValueType.Reference -> new FplValue("", fplBlockType, FplType.Undetermined, positions, Some parent)
+        | FplValueType.Predicate -> new FplValue("", fplBlockType, positions, Some parent)
+        | FplValueType.Reference -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Constructor
         | FplValueType.FunctionalTerm
         | FplValueType.Variable
@@ -872,9 +857,9 @@ and FplValue(name:string, blockType: FplValueType, evalType: FplType, positions:
         | FplValueType.VariadicVariableMany1
         | FplValueType.MandatoryFunctionalTerm
         | FplValueType.OptionalFunctionalTerm
-        | FplValueType.Class -> new FplValue("", fplBlockType, FplType.Object, positions, Some parent)
+        | FplValueType.Class -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
-        | FplValueType.Localization -> new FplValue("", fplBlockType, FplType.Localization, positions, Some parent)
+        | FplValueType.Localization -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Object -> raise (ArgumentException("Please use CreateObject for creating a primitive object instead"))
 
     /// Clears this FplValue

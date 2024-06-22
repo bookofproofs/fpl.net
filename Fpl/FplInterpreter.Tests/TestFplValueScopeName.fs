@@ -40,7 +40,7 @@ type TestFplValueScopeName() =
         | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Name)
-            | "theory" -> Assert.AreEqual<string>("Test", theory.Name)
+            | "theory" -> Assert.AreEqual<string>("TestScopeBlocksName", theory.Name)
             | "inf1" -> Assert.AreEqual<string>("SomeInference1()", inf1.Name)
             | "inf2" -> Assert.AreEqual<string>("SomeInference2()", inf2.Name)
             | "axi1" -> Assert.AreEqual<string>("SomeAxiom1()", axi1.Name)
@@ -84,7 +84,7 @@ type TestFplValueScopeName() =
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Name)
-            | "theory" -> Assert.AreEqual<string>("Test", theory.Name)
+            | "theory" -> Assert.AreEqual<string>("TestScopeConstructorsName", theory.Name)
             | "block" -> Assert.AreEqual<string>("TestId", block.Name)
             | "t1" -> Assert.AreEqual<string>("TestId()", t1.Name)
             | "t2" -> Assert.AreEqual<string>("TestId(obj)", t2.Name)
@@ -125,7 +125,7 @@ type TestFplValueScopeName() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.AreEqual<string>("", r.Name)
-                | "theory" -> Assert.AreEqual<string>("Test", theory.Name)
+                | "theory" -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesName", theory.Name)
                 | "thm1" -> Assert.AreEqual<string>("TestTheorem1()", thm1.Name)
                 | "proofThm1" -> Assert.AreEqual<string>("TestTheorem1$1", proofThm1.Name)
                 | "lem1" -> Assert.AreEqual<string>("TestLemma1()", lem1.Name)
@@ -176,7 +176,7 @@ type TestFplValueScopeName() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Name)
-            | "theory" -> Assert.AreEqual<string>("Test", theory.Name)
+            | "theory" -> Assert.AreEqual<string>("TestScopePropertiesName", theory.Name)
             | "block" -> Assert.AreEqual<string>("TestId()", block.Name)
             | "t1" -> Assert.AreEqual<string>("T1()", t1.Name)
             | "t2" -> Assert.AreEqual<string>("T2()", t2.Name)
@@ -301,7 +301,7 @@ type TestFplValueScopeName() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Name)
-            | "theory" -> Assert.AreEqual<string>("Test", theory.Name)
+            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockVariadicName", theory.Name)
             | "block" -> Assert.AreEqual<string>("TestPredicate()", block.Name); 
             | "x" -> Assert.AreEqual<string>("x", x.Name)
             | "y" -> Assert.AreEqual<string>("y", y.Name)
@@ -370,7 +370,7 @@ type TestFplValueScopeName() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Name)
-            | "theory" -> Assert.AreEqual<string>("Test", theory.Name)
+            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInSignatureName", theory.Name)
             | "block" -> Assert.AreEqual<string>("TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj))", block.Name); 
             | "x" -> Assert.AreEqual<string>("x", x.Name)
             | "y" -> Assert.AreEqual<string>("y", y.Name)
@@ -438,7 +438,7 @@ type TestFplValueScopeName() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Name)
-            | "theory" -> Assert.AreEqual<string>("Test", theory.Name)
+            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicName", theory.Name)
             | "block" -> Assert.AreEqual<string>("TestPredicate(+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj), +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj))", block.Name); 
             | "x" -> Assert.AreEqual<string>("x", x.Name)
             | "y" -> Assert.AreEqual<string>("y", y.Name)

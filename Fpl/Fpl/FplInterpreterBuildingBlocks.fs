@@ -196,26 +196,15 @@ let rec eval (st: SymbolTable) ast =
             )
         | _ -> ()
 
-    let correctFplTypeOfFunctionalTerms fplType = 
-        match st.CurrentContext with
-        | EvalContext.InSignature fplValue 
-        | EvalContext.InPropertySignature fplValue ->
-            if FplValue.IsFunctionalTerm(fplValue) then
-                fplValue.EvaluationType <- fplType
-        | _ -> ()
-        
-
     match ast with
     // units: | Star
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
         eval_units st "ind" pos1 pos2 
-        correctFplTypeOfFunctionalTerms FplType.Index
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         eval_units st "obj" pos1 pos2 
-        correctFplTypeOfFunctionalTerms FplType.Object
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
@@ -224,7 +213,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
         eval_units st "func" pos1 pos2  
-        correctFplTypeOfFunctionalTerms FplType.FunctionalTerm
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
@@ -320,7 +308,6 @@ let rec eval (st: SymbolTable) ast =
                 adjustSignature st fplValue ("+" + s)
             else
                 adjustSignature st fplValue s
-            correctFplTypeOfFunctionalTerms FplType.Template
         | _ -> ()
         st.EvalPop() 
     | Ast.Var((pos1, pos2), s) ->
@@ -587,7 +574,6 @@ let rec eval (st: SymbolTable) ast =
                 adjustSignature st fplValue ("+" + identifier)
             else
                 adjustSignature st fplValue identifier
-            correctFplTypeOfFunctionalTerms FplType.Object
             checkID008Diagnostics fplValue pos1 pos2
             checkID009_ID010_ID011_Diagnostics st fplValue identifier pos1 pos2
         | EvalContext.InReferenceCreation fplValue -> 
