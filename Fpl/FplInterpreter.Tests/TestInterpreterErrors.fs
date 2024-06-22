@@ -13,7 +13,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestGEN00() =
         let code = GEN00 ""
-        runTestHelper """x;""" code 1
+        runTestHelper "TestGEN00.fpl" """x;""" code 1
 
     [<TestMethod>]
     member this.TestNSP00() =
@@ -274,7 +274,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID001(fplCode:string, expected:int) =
         let code = ID001 ("", "")
-        runTestHelper fplCode code expected
+        runTestHelper "TestID001.fpl" fplCode code expected
 
     [<DataRow("uses Fpl.Commons inf ModusPonens() {pre:true con:true} ;", 1)>]
     [<DataRow("uses Fpl.Commons theorem ModusTollens() {true} ;", 1)>]
@@ -283,7 +283,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID001ConflictWithOtherTheories(fplCode:string, expected:int) =
         let code = ID001 ("", "")
-        runTestHelper fplCode code expected
+        runTestHelper "TestID001ConflictWithOtherTheories.fpl" fplCode code expected
 
     [<DataRow("def predicate Test(x,y:* pred) {true};", 1)>]
     [<DataRow("def predicate Test(x,y:+ pred) {true};", 1)>]
@@ -293,7 +293,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestVAR00(fplCode:string, expected) =
         let code = VAR00
-        runTestHelper fplCode code expected
+        runTestHelper "TestVAR00.fpl" fplCode code expected
 
     [<DataRow("def pred Test(x,x:* pred) {true};", 1)>]
     [<DataRow("def pred Test(x,x:+ pred) {true};", 1)>]
@@ -317,7 +317,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
         let code = VAR01 ("","")
-        runTestHelper fplCode code expected
+        runTestHelper "TestVAR01.fpl" fplCode code expected
 
     [<DataRow("def pred Test(x: ind) {true prty pred X(x: pred) {true} };", 1)>]
     [<DataRow("def pred Test(x: ind) {true prty pred X(x:* pred) {true} };", 1)>]
@@ -340,7 +340,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestVAR02(fplCode:string, expected) =
         let code = VAR02 ("", "")
-        runTestHelper fplCode code expected
+        runTestHelper "TestVAR02.fpl" fplCode code expected
 
     [<DataRow("theorem TestId(x: ind) {true}       proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
     [<DataRow("theorem TestId() {dec ~x:ind; true} proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
@@ -357,7 +357,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestVAR03(fplCode:string, expected) =
         let code = VAR03 ("", "")
-        runTestHelper fplCode code expected
+        runTestHelper "TestVAR03.fpl" fplCode code expected
 
     [<DataRow("axiom Test() {true} proof Test$1 {1. |- trivial};", 1)>]
     [<DataRow("postulate Test() {true} proof Test$1 {1. |- trivial};", 1)>]
@@ -373,7 +373,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID002(fplCode:string, expected) =
         let code = ID002 ("","")
-        runTestHelper fplCode code expected
+        runTestHelper "TestID002.fpl" fplCode code expected
 
     [<DataRow("def pred Test() {true} corollary Test$1() {true};", 1)>]
     [<DataRow("def cl Test:obj {intr} corollary Test$1() {true};", 1)>]
@@ -389,35 +389,35 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID005(fplCode:string, expected) =
         let code = ID005 ("","")
-        runTestHelper fplCode code expected
+        runTestHelper "TestID005.fpl" fplCode code expected
 
     [<DataRow("theorem Test() {true} proof Test$1 {1. |- trivial};", 0)>]
     [<DataRow("theorem TestTypo() {true} proof Test$1 {1. |- trivial};", 1)>]
     [<TestMethod>]
     member this.TestID003(fplCode:string, expected) =
         let code = ID003 ""
-        runTestHelper fplCode code expected
+        runTestHelper "TestID003.fpl" fplCode code expected
 
     [<DataRow("theorem Test() {true} corollary Test$1() {true};", 0)>]
     [<DataRow("theorem TestTypo() {true} corollary Test$1() {true};", 1)>]
     [<TestMethod>]
     member this.TestID006(fplCode:string, expected) =
         let code = ID006 ""
-        runTestHelper fplCode code expected
+        runTestHelper "TestID006.fpl" fplCode code expected
 
     [<DataRow("theorem Test() {true} lemma Test(x:obj) {true} proof Test$1 {1. |- trivial};", 1)>]
     [<DataRow("theorem Test(x:ind) {true} theorem Test() {true} proof Test$1 {1. |- trivial};", 1)>]
     [<TestMethod>]
     member this.TestID004(fplCode:string, expected) =
         let code = ID004 ("", "") 
-        runTestHelper fplCode code expected
+        runTestHelper "TestID004.fpl" fplCode code expected
 
     [<DataRow("theorem Test() {true} lemma Test(x:obj) {true} corollary Test$1() {true};", 1)>]
     [<DataRow("theorem Test(x:ind) {true} theorem Test() {true} corollary Test$1() {true};", 1)>]
     [<TestMethod>]
     member this.TestID007(fplCode:string, expected) =
         let code = ID007 ("", "") 
-        runTestHelper fplCode code expected
+        runTestHelper "TestID007.fpl" fplCode code expected
 
     [<DataRow("def cl Test:obj {ctor TestTypo(x:Nat) {self}};", 1)>]
     [<DataRow("def cl Test:obj {ctor TestTypo1() {self}};", 1)>]
@@ -425,7 +425,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID008(fplCode:string, expected) =
         let code = ID008 ("", "") 
-        runTestHelper fplCode code expected
+        runTestHelper "TestID008.fpl" fplCode code expected
 
     [<DataRow("def cl Test:obj {intr};", 0)>]
     [<DataRow("def cl Test:Test {intr};", 1)>]
@@ -434,7 +434,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID009(fplCode:string, expected) =
         let code = ID009 ""
-        runTestHelper fplCode code expected
+        runTestHelper "TestID009.fpl" fplCode code expected
 
     [<DataRow("def cl Test:obj {intr};", 0)>]
     [<DataRow("def cl Test:Set {intr};", 1)>]
@@ -445,7 +445,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID010(fplCode:string, expected) =
         let code = ID010 ""
-        runTestHelper fplCode code expected
+        runTestHelper "TestID010.fpl" fplCode code expected
 
     [<DataRow("def cl A:obj {intr} def cl B:A {intr} def cl C:B,A {intr};", 1)>]
     [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet,Set {intr};", 1)>]
@@ -466,7 +466,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID011(fplCode:string, expected) =
         let code = ID011 ("","")
-        runTestHelper fplCode code expected
+        runTestHelper "TestID011.fpl" fplCode code expected
 
     [<DataRow("def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C,E {ctor D() {dec base.A() base.B() base.C() base.F(); self} };", 1)>]
     [<DataRow("def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); self} };", 0)>]
@@ -479,7 +479,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestID012(fplCode:string, expected) =
         let code = ID012 ("","")
-        runTestHelper fplCode code expected
+        runTestHelper "TestID012.fpl" fplCode code expected
 
     [<DataRow("""def pred T infix "+" 0 () {true};""", 1)>]
     [<DataRow("""def pred T infix "+" 0 (x:obj) {true};""", 1)>]
@@ -504,7 +504,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestSIG00(fplCode:string, expected) =
         let code = SIG00 ("",0)
-        runTestHelper fplCode code expected
+        runTestHelper "TestSIG00.fpl" fplCode code expected
 
     [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {(x + y)};""", 0)>]
     [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {+x};""", 0)>]
@@ -527,21 +527,21 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestSIG01(fplCode:string, expected) =
         let code = SIG01 ""
-        runTestHelper fplCode code expected
+        runTestHelper "TestSIG01.fpl" fplCode code expected
 
     [<DataRow("""def pred T infix "+" 1 (x,y:obj) {true};""", 0)>]
     [<DataRow("""def pred T1 infix "+" 1 (x,y:obj) {true} def pred T2 infix "+" 1 (x,y:obj) {true};""", 1)>]
     [<TestMethod>]
     member this.TestSIG02(fplCode:string, expected) =
         let code = SIG02 ("",0, "")
-        runTestHelper fplCode code expected
+        runTestHelper "TestSIG02.fpl" fplCode code expected
 
     [<DataRow("""def pred T infix "=" 1 (x,y:obj) {true};""", 1)>]
     [<DataRow("""def pred T1 infix "+" 1 (x,y:obj) {true};""", 0)>]
     [<TestMethod>]
     member this.TestSIG03(fplCode:string, expected) =
         let code = SIG03 
-        runTestHelper fplCode code expected
+        runTestHelper "TestSIG03.fpl" fplCode code expected
 
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:Nat; T(x)} ;""", 0)>]
@@ -549,4 +549,4 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =
         let code = SIG04 ("","","")
-        runTestHelper fplCode code expected
+        runTestHelper "TestSIG04.fpl" fplCode code expected

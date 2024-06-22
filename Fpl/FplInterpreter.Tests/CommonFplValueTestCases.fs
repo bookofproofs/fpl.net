@@ -4,19 +4,20 @@ open CommonTestHelpers
 
 type CommonFplValueTestCases =
 
-    static member ScopeVariablesInSignature() =
+    static member ScopeVariablesInSignature(subtype) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = """
         def pred TestPredicate(x,y:pred(u,v,w:func(a,b,c:obj)->obj)) 
             {true}
         ;
         """
-        let stOption = prepareFplCode(fplCode, false) 
+        let filename = "TestScopeVariablesInSignature" + subtype
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let result = match stOption with
                         | Some st -> 
                             let name = "TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj))"
                             let r = st.Root
-                            let theory = r.Scope["Test"]
+                            let theory = r.Scope[filename]
                             let block = theory.Scope[name]
                             let x = block.Scope["x"]
                             let y = block.Scope["y"]
@@ -46,22 +47,23 @@ type CommonFplValueTestCases =
                             let yvc = yv.Scope["c"]
                             Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
                         | None -> None
-        prepareFplCode("", true) |> ignore
+        prepareFplCode(filename, "", true) |> ignore
         result
 
-    static member ScopeVariablesInSignatureVariadic() =
+    static member ScopeVariablesInSignatureVariadic(subtype) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = """
         def pred TestPredicate(x,y:+pred(u,v,w:func(a,b,c:*obj)->obj)) 
             {true}
         ;
         """
-        let stOption = prepareFplCode(fplCode, false) 
+        let filename = "TestScopeVariablesInSignatureVariadic" + subtype
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let result = match stOption with
                         | Some st -> 
                             let name = "TestPredicate(+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj), +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj))"
                             let r = st.Root
-                            let theory = r.Scope["Test"]
+                            let theory = r.Scope[filename]
                             let block = theory.Scope[name]
                             let x = block.Scope["x"]
                             let y = block.Scope["y"]
@@ -91,22 +93,23 @@ type CommonFplValueTestCases =
                             let yvc = yv.Scope["c"]
                             Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
                         | None -> None
-        prepareFplCode("", true) |> ignore
+        prepareFplCode(filename, "", true) |> ignore
         result
 
-    static member ScopeVariablesInBlock() =
+    static member ScopeVariablesInBlock(subtype) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = """
         def pred TestPredicate() 
             {dec ~x,y:pred(u,v,w:func(a,b,c:obj)->obj); true}
         ;
         """
-        let stOption = prepareFplCode(fplCode, false) 
+        let filename = "TestScopeVariablesInBlock" + subtype
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let result = match stOption with
                         | Some st -> 
                             let name = "TestPredicate()"
                             let r = st.Root
-                            let theory = r.Scope["Test"]
+                            let theory = r.Scope[filename]
                             let block = theory.Scope[name]
                             let x = block.Scope["x"]
                             let y = block.Scope["y"]
@@ -136,22 +139,23 @@ type CommonFplValueTestCases =
                             let yvc = yv.Scope["c"]
                             Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
                         | None -> None
-        prepareFplCode("", true) |> ignore
+        prepareFplCode(filename, "", true) |> ignore
         result
 
-    static member ScopeVariablesInBlockVariadic() =
+    static member ScopeVariablesInBlockVariadic(subtype) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = """
         def pred TestPredicate() 
             {dec ~x,y:+pred(u,v,w:func(a,b,c:*obj)->obj); true}
         ;
         """
-        let stOption = prepareFplCode(fplCode, false) 
+        let filename = "TestScopeVariablesInBlockVariadic" + subtype
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let result = match stOption with
                         | Some st -> 
                             let name = "TestPredicate()"
                             let r = st.Root
-                            let theory = r.Scope["Test"]
+                            let theory = r.Scope[filename]
                             let block = theory.Scope[name]
                             let x = block.Scope["x"]
                             let y = block.Scope["y"]
@@ -181,10 +185,10 @@ type CommonFplValueTestCases =
                             let yvc = yv.Scope["c"]
                             Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
                         | None -> None
-        prepareFplCode("", true) |> ignore
+        prepareFplCode(filename, "", true) |> ignore
         result
 
-    static member ScopeProperties() =
+    static member ScopeProperties(subtype) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = """
         def pred TestId() 
@@ -207,12 +211,13 @@ type CommonFplValueTestCases =
         }
         ;
         """
-        let stOption = prepareFplCode(fplCode, false) 
+        let filename = "TestScopeProperties" + subtype
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let result = match stOption with
                         | Some st -> 
                             let name = "TestId()"
                             let r = st.Root
-                            let theory = r.Scope["Test"]
+                            let theory = r.Scope[filename]
                             let block = theory.Scope[name]
                             let t1 = block.Scope["T1()"]
                             let t2 = block.Scope["T2()"]
@@ -230,10 +235,10 @@ type CommonFplValueTestCases =
                             let t14 = block.Scope["T14() -> func"]
                             Some (r,theory,block,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14)
                         | None -> None
-        prepareFplCode("", true) |> ignore
+        prepareFplCode(filename, "", true) |> ignore
         result
 
-    static member ScopeConstructors() =
+    static member ScopeConstructors(subtype) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = """
         def cl TestId:obj 
@@ -245,12 +250,13 @@ type CommonFplValueTestCases =
         }
         ;
         """
-        let stOption = prepareFplCode(fplCode, false) 
+        let filename = "TestScopeConstructors" + subtype
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let result = match stOption with
                         | Some st -> 
                             let name = "TestId"
                             let r = st.Root
-                            let theory = r.Scope["Test"]
+                            let theory = r.Scope[filename]
                             let block = theory.Scope[name]
                             let t1 = block.Scope["TestId()"]
                             let t2 = block.Scope["TestId(obj)"]
@@ -258,10 +264,10 @@ type CommonFplValueTestCases =
                             let t4 = block.Scope["TestId(ind)"]
                             Some (r,theory,block,t1,t2,t3,t4)
                         | None -> None
-        prepareFplCode("", true) |> ignore
+        prepareFplCode(filename, "", true) |> ignore
         result
 
-    static member ScopeBlocks() =
+    static member ScopeBlocks(subtype) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = """
             inf SomeInference1() {pre:true con:true}
@@ -290,11 +296,12 @@ type CommonFplValueTestCases =
             proof SomeTheorem2$1 {1. |- trivial}
         ;
         """
-        let stOption = prepareFplCode(fplCode, false) 
+        let filename = "TestScopeBlocks" + subtype
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let result = match stOption with
                         | Some st -> 
                             let r = st.Root
-                            let theory = r.Scope["Test"]
+                            let theory = r.Scope[filename]
                             let inf1 = theory.Scope["SomeInference1()"]
                             let inf2 = theory.Scope["SomeInference2()"]
                             let axi1 = theory.Scope["SomeAxiom1()"]
@@ -321,10 +328,10 @@ type CommonFplValueTestCases =
                             let prf2 = thm2.Scope["SomeTheorem2$1"]
                             Some (r,theory,inf1,inf2,axi1,axi2,pst1,pst2,thm1,thm2,pro1,pro2,lem1,lem2,cor1,cor2,con1,con2,cla1,cla2,pre1,pre2,fun1,fun2,prf1,prf2)
                         | None -> None
-        prepareFplCode("", true) |> ignore
+        prepareFplCode(filename, "", true) |> ignore
         result
 
-    static member ScopeProofsAndCorollaries() =
+    static member ScopeProofsAndCorollaries(subtype) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = """
 
@@ -359,11 +366,13 @@ type CommonFplValueTestCases =
             corollary TestAxiom$1() {true}  
         ;
         """
-        let stOption = prepareFplCode(fplCode, false) 
+        let filename = "TestScopeProofsAndCorollaries" + subtype
+
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         let result = match stOption with
                         | Some st -> 
                             let r = st.Root
-                            let theory = r.Scope["Test"]
+                            let theory = r.Scope[filename]
                             let thm1 = theory.Scope["TestTheorem1()"]
                             let proofThm1 = thm1.Scope["TestTheorem1$1"]
                             let lem1 = theory.Scope["TestLemma1()"]
@@ -388,5 +397,5 @@ type CommonFplValueTestCases =
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
                                 axi1,corAxi1)
                         | None -> None
-        prepareFplCode("", true) |> ignore
+        prepareFplCode(filename, "", true) |> ignore
         result

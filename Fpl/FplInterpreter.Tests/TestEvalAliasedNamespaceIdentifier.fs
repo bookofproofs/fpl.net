@@ -127,21 +127,22 @@ type TestEvalAliasedNamespaceIdentifier() =
     [<DataRow("FpX *", 0)>]
     [<TestMethod>]
     member this.TestFindFilesInLibMapWithWildcard(usesClause: string, expected:int) =
-        let st = prepareFplCode (sprintf "uses %s;" usesClause, false) 
+        let filename = "TestFindFilesInLibMapWithWildcard.fpl"
+        let st = prepareFplCode (filename, sprintf "uses %s;" usesClause, false) 
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         
         let uri =
             System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let sources = acquireSources uri fplLibUrl
-        let testAst = st.Value.ParsedAsts.TryFindAstById("Test").Value
+        let testAst = st.Value.ParsedAsts.TryFindAstById("TestFindFilesInLibMapWithWildcard").Value
         let eaniList = eval_uses_clause testAst.Parsing.Ast
         if eaniList.IsEmpty then 
             Assert.AreEqual<int>(expected, 0)
         else
             let filtered = sources.FindWithPattern eaniList.Head.FileNamePattern
             Assert.AreEqual<int>(expected, filtered.Length)
-        prepareFplCode ("", true) |> ignore
+        prepareFplCode (filename, "", true) |> ignore
 
 
     [<DataRow("Fpl *", 5)>]
@@ -152,10 +153,11 @@ type TestEvalAliasedNamespaceIdentifier() =
     [<DataRow("Fpl.Commons", 2)>]
     [<TestMethod>]
     member this.TestParsedAstsCount(usesClause: string, expected: int) =
-        let st = prepareFplCode (sprintf "uses %s;" usesClause, false) 
+        let filename = "TestParsedAstsCount.fpl"
+        let st = prepareFplCode (filename, sprintf "uses %s;" usesClause, false) 
         let result = st.Value.ParsedAsts
         Assert.AreEqual<int>(expected, result.Count)
-        prepareFplCode ("", true) |> ignore
+        prepareFplCode (filename, "", true) |> ignore
 
     [<DataRow("Test1")>]
     [<DataRow("Test1.Test2")>]
@@ -463,7 +465,8 @@ type TestEvalAliasedNamespaceIdentifier() =
     
     [<TestMethod>]
     member this.TestGarbageCollector() =
-        match CommonTestHelpers.prepareFplCode("uses Fpl.SetTheory;", false) with
+        let filename = "TestGarbageCollector.fpl"
+        match CommonTestHelpers.prepareFplCode(filename, "uses Fpl.SetTheory;", false) with
         | Some (st:SymbolTable) -> 
             // initial counts of parsed ast and theories in root
             Assert.AreEqual<int>(3, st.ParsedAsts.Count)
@@ -480,7 +483,7 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestGarbageCollector01() =
-        match CommonTestHelpers.prepareFplCode("uses Fpl.SetTheory;", false) with
+        match CommonTestHelpers.prepareFplCode("TestGarbageCollector01.fpl", "uses Fpl.SetTheory;", false) with
         | Some (st:SymbolTable) -> 
             // initial counts of parsed ast and theories in root
             Assert.AreEqual<int>(3, st.ParsedAsts.Count)
@@ -497,7 +500,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         
     [<TestMethod>]
     member this.TestGarbageCollector02() =
-        match CommonTestHelpers.prepareFplCode("uses Fpl.SetTheory;", false) with
+        match CommonTestHelpers.prepareFplCode("TestGarbageCollector02.fpl", "uses Fpl.SetTheory;", false) with
         | Some (st:SymbolTable) -> 
             // initial counts of parsed ast and theories in root
             Assert.AreEqual<int>(3, st.ParsedAsts.Count)

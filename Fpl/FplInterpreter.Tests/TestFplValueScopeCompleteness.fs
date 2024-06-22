@@ -7,35 +7,35 @@ type TestFplValueScopeCompleteness() =
 
     [<TestMethod>]
     member this.TestBlocks() =
-        CommonFplValueTestCases.ScopeBlocks() |> ignore
+        CommonFplValueTestCases.ScopeBlocks("") |> ignore
 
     [<TestMethod>]
     member this.TestConstructors() =
-        CommonFplValueTestCases.ScopeConstructors() |> ignore
+        CommonFplValueTestCases.ScopeConstructors("") |> ignore
 
     [<TestMethod>]
     member this.TestProofsAndCorollaries() =
-        CommonFplValueTestCases.ScopeProofsAndCorollaries() |> ignore
+        CommonFplValueTestCases.ScopeProofsAndCorollaries("") |> ignore
 
     [<TestMethod>]
     member this.TestProperties() =
-        CommonFplValueTestCases.ScopeProperties() |> ignore
+        CommonFplValueTestCases.ScopeProperties("") |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInBlock() =
-        CommonFplValueTestCases.ScopeVariablesInBlock() |> ignore
+        CommonFplValueTestCases.ScopeVariablesInBlock("") |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInBlockWithVariadic() =
-        CommonFplValueTestCases.ScopeVariablesInBlockVariadic() |> ignore
+        CommonFplValueTestCases.ScopeVariablesInBlockVariadic("") |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInSignature() =
-        CommonFplValueTestCases.ScopeVariablesInSignature() |> ignore
+        CommonFplValueTestCases.ScopeVariablesInSignature("") |> ignore
 
     [<TestMethod>]
     member this.TestVariablesInSignatureWithVariadic() =
-        CommonFplValueTestCases.ScopeVariablesInSignatureVariadic() |> ignore
+        CommonFplValueTestCases.ScopeVariablesInSignatureVariadic("") |> ignore
 
 
 

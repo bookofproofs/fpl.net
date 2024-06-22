@@ -783,8 +783,9 @@ type TestFplValue() =
     [<TestMethod>]
     member this.TestTypeSignatureOfFplBlocks(fplCode:string, expectedName:string, expectedTypeSignatureStr:string) =
         let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
-        let result = prepareFplCode(fplCode, false) 
-        let fplValue = result.Value.Root.Scope["Test"].Scope[expectedName]
+        let filename = "TestTypeSignatureOfFplBlocks"
+        let result = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let fplValue = result.Value.Root.Scope[filename].Scope[expectedName]
         Assert.AreEqual<string>(expectedName, fplValue.Name)
         let actualTypeSignature = fplValue.TypeSignature
         let actualSignatureStart = fplValue.StartPos.Index
@@ -802,7 +803,7 @@ type TestFplValue() =
             else
                 (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
         Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
-        prepareFplCode("", true) |> ignore
+        prepareFplCode(filename, "", true) |> ignore
 
     [<DataRow("def cl T:obj {intr prty pred TestId() {intrinsic}};", "TestId()", "TestId ( )")>]
     [<DataRow("def cl T:obj {intr prty pred TestId(x:ind) {intrinsic}};", "TestId(ind)", "TestId ( ind )")>]
@@ -1002,8 +1003,9 @@ type TestFplValue() =
     [<TestMethod>]
     member this.TestTypeSignatureOfFplProperties(fplCode:string, expectedName:string, expectedTypeSignatureStr:string) =
         let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
-        let result = prepareFplCode(fplCode, false) 
-        let fplValue = result.Value.Root.Scope["Test"].Scope["T"].Scope[expectedName]
+        let filename = "TestTypeSignatureOfFplProperties"
+        let result = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let fplValue = result.Value.Root.Scope[filename].Scope["T"].Scope[expectedName]
         let actualTypeSignature = fplValue.TypeSignature
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
@@ -1014,7 +1016,7 @@ type TestFplValue() =
         let expectedEnd =
                 (int64)(fplCode.IndexOf(" {intrinsic", System.StringComparison.OrdinalIgnoreCase))
         Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
-        prepareFplCode("", true) |> ignore
+        prepareFplCode(filename, "", true) |> ignore
 
 
     [<DataRow("def cl T:obj {ctor T() {self}};", "T()", "T ( )")>]
@@ -1085,8 +1087,9 @@ type TestFplValue() =
     [<TestMethod>]
     member this.TestTypeSignatureOfConstructors(fplCode:string, expectedName:string, expectedTypeSignatureStr:string) =
         let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
-        let result = prepareFplCode(fplCode, false) 
-        let fplValue = result.Value.Root.Scope["Test"].Scope["T"].Scope[expectedName]
+        let filename = "TestTypeSignatureOfConstructors"
+        let result = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let fplValue = result.Value.Root.Scope[filename].Scope["T"].Scope[expectedName]
         let actualTypeSignature = fplValue.TypeSignature
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
@@ -1097,4 +1100,4 @@ type TestFplValue() =
         let expectedEnd =
                 (int64)(fplCode.IndexOf(" {self", System.StringComparison.OrdinalIgnoreCase))
         Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
-        prepareFplCode("", true) |> ignore
+        prepareFplCode(filename, "", true) |> ignore

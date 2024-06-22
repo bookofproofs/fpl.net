@@ -35,7 +35,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("prf2")>]
     [<TestMethod>]
     member this.TestBlocks(var) =
-        let res = CommonFplValueTestCases.ScopeBlocks() 
+        let res = CommonFplValueTestCases.ScopeBlocks("NameEndPos") 
         match res with
         | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
             match var with 
@@ -79,7 +79,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("t4")>]
     [<TestMethod>]
     member this.TestConstructors(var) =
-        let res = CommonFplValueTestCases.ScopeConstructors() 
+        let res = CommonFplValueTestCases.ScopeConstructors("NameEndPos") 
         match res with
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
@@ -118,7 +118,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("corAxi1")>]
     [<TestMethod>]
     member this.TestProofsAndCorollaries(var) =
-        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries() 
+        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries("NameEndPos") 
         match res with
         | Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
@@ -170,7 +170,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
-        let res = CommonFplValueTestCases.ScopeProperties() 
+        let res = CommonFplValueTestCases.ScopeProperties("NameEndPos") 
         match res with
         | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
             t13:FplValue,t14:FplValue) -> 
@@ -227,7 +227,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInBlock(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInBlock()
+        let result = CommonFplValueTestCases.ScopeVariablesInBlock("NameEndPos")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -295,7 +295,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInBlockVariadic(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInBlockVariadic()
+        let result = CommonFplValueTestCases.ScopeVariablesInBlockVariadic("NameEndPos")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -363,7 +363,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInSignature(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignature()
+        let result = CommonFplValueTestCases.ScopeVariablesInSignature("NameEndPos")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -432,7 +432,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInSignatureVariadic(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignatureVariadic()
+        let result = CommonFplValueTestCases.ScopeVariablesInSignatureVariadic("NameEndPos")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -531,12 +531,13 @@ type TestFplValueScopeNameEndPos() =
     member this.TestPredicate(var, varVal) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
-        let stOption = prepareFplCode(fplCode, false) 
-        prepareFplCode("", false) |> ignore
+        let filename = "TestPredicate.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
         match stOption with
         | Some st -> 
             let r = st.Root
-            let theory = r.Scope["Test"]
+            let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
@@ -629,12 +630,13 @@ type TestFplValueScopeNameEndPos() =
                             }
                         }
                         ;""" varVal
-        let stOption = prepareFplCode(fplCode, false) 
-        prepareFplCode("", false) |> ignore
+        let filename = "TestCallConstructorParentClassNameEndPos"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
         match stOption with
         | Some st -> 
             let r = st.Root
-            let theory = r.Scope["Test"]
+            let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
             let base1 = ctor.ValueList[0]
@@ -661,12 +663,13 @@ type TestFplValueScopeNameEndPos() =
     member this.TestDelegate(var, varVal) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
-        let stOption = prepareFplCode(fplCode, false) 
-        prepareFplCode("", false) |> ignore
+        let filename = "TestDelegateNameEndPos"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
         match stOption with
         | Some st -> 
             let r = st.Root
-            let theory = r.Scope["Test"]
+            let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
@@ -697,12 +700,13 @@ type TestFplValueScopeNameEndPos() =
     member this.TestFixNotation(var, varVal) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = sprintf "%s;" varVal
-        let stOption = prepareFplCode(fplCode, false) 
-        prepareFplCode("", false) |> ignore
+        let filename = "TestFixNotationNameEndPos"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
         match stOption with
         | Some st -> 
             let r = st.Root
-            let theory = r.Scope["Test"]
+            let theory = r.Scope[filename]
             let base1 = 
                 if varVal.Contains "cl" then 
                     theory.Scope["T1"]

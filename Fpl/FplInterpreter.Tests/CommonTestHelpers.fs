@@ -6,6 +6,13 @@ open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 
+let deleteFiles dir fileName =
+    if Directory.Exists(dir) then
+        Directory.GetFiles(dir, fileName)
+        |> Array.iter File.Delete
+    else
+        printfn "Directory %s does not exist." dir
+
 let deleteFilesWithExtension dir extension =
     if Directory.Exists(dir) then
         Directory.GetFiles(dir, "*." + extension)
@@ -18,17 +25,17 @@ let filterByErrorCode (input: Diagnostics) errCode =
     |> List.filter (fun d -> d.Code.Code = errCode)
 
 
-let prepareFplCode(fplCode:string, delete:bool) =
+let prepareFplCode(filename:string, fplCode:string, delete:bool) =
     FplParser.parserDiagnostics.Clear()
     let currDir = Directory.GetCurrentDirectory()
 
     printf "\n"
-    File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
-    let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+    File.WriteAllText(Path.Combine(currDir, filename), fplCode)
+    let uri = System.Uri(Path.Combine(currDir, filename))
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
     if delete then 
-        deleteFilesWithExtension currDir "fpl"
+        deleteFiles currDir filename
         None
     else
         let parsedAsts = ParsedAstList()
@@ -43,11 +50,11 @@ let prepareFplCode(fplCode:string, delete:bool) =
         Console.WriteLine(st.AstsToString)
         Some (st)
 
-let runTestHelper fplCode (code:ErrDiagnostics.DiagnosticCode) (expected:int) =
+let runTestHelper filename fplCode (code:ErrDiagnostics.DiagnosticCode) (expected:int) =
     printf "Trying %s" code.Message
-    prepareFplCode(fplCode, false) |> ignore
+    prepareFplCode(filename, fplCode, false) |> ignore
     let result = filterByErrorCode FplParser.parserDiagnostics code.Code
     if result.Length > 0 then 
         printf "Result %s" result.Head.Message
     Assert.AreEqual<int>(expected, result.Length)
-    prepareFplCode("", true) |> ignore
+    prepareFplCode(filename, "", true) |> ignore
