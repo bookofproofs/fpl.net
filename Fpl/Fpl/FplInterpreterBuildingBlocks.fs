@@ -770,10 +770,12 @@ let rec eval (st: SymbolTable) ast =
         optAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
-    | Ast.ReferenceToProofOrCorollary((pos1, pos2), (ast1, optAst)) ->
+    | Ast.ReferenceToProofOrCorollary((pos1, pos2), (referencingIdentifierAst, optArgumentTuple)) ->
         st.EvalPush("ReferenceToProofOrCorollary")
-        eval st ast1
-        optAst |> Option.map (eval st) |> ignore
+        eval st referencingIdentifierAst
+        if optArgumentTuple.IsNone then
+            emitPR002Diagnostics pos1 pos2 // avoid referencing to proofs in general considering it not best practice in mathematics
+        optArgumentTuple |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.PredicateWithOptSpecification((pos1, pos2), (fplIdentifierAst, optionalSpecificationAst)) ->

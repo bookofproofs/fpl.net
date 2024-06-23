@@ -481,3 +481,15 @@ let emitPR001Diagnostics (fplValue:FplValue) pos1 pos2 =
                 Diagnostic.Alternatives = None
             }
         FplParser.parserDiagnostics.AddDiagnostic diagnostic 
+
+let emitPR002Diagnostics pos1 pos2 = 
+    let diagnostic =
+        { 
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR002 
+            Diagnostic.Alternatives = None
+        }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic 
