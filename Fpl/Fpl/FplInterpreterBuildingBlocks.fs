@@ -771,10 +771,11 @@ let rec eval (st: SymbolTable) ast =
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.ReferenceToProofOrCorollary((pos1, pos2), (referencingIdentifierAst, optArgumentTuple)) ->
-        st.EvalPush("ReferenceToProofOrCorollary")
-        eval st referencingIdentifierAst
         if optArgumentTuple.IsNone then
-            emitPR002Diagnostics pos1 pos2 // avoid referencing to proofs in general considering it not best practice in mathematics
+            st.EvalPush("ReferenceToProof")
+        else
+            st.EvalPush("ReferenceToCorollary")
+        eval st referencingIdentifierAst
         optArgumentTuple |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
@@ -923,9 +924,12 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
     | ReferencingIdentifier((pos1, pos2), (ast1, asts)) ->
+        let parentEvalPath = st.EvalPath()
         st.EvalPush("ReferencingIdentifier")
         eval st ast1
         asts |> List.map (eval st) |> ignore
+        if parentEvalPath.EndsWith(".ReferenceToProof") then
+            emitPR002Diagnostics pos1 pos2 // avoid referencing to proofs in general considering it not best practice in mathematics
         st.EvalPop()
     | Ast.ConditionFollowedByResult((pos1, pos2), (ast1, asts)) ->
         st.EvalPush("ConditionFollowedByResult")
