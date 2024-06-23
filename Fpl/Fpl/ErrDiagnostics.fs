@@ -100,6 +100,8 @@ type DiagnosticCode =
     | SIG02 of string * int * string
     | SIG03 
     | SIG04 of string * string * string
+    // proof-related error codes
+    | PR000 of string 
     member this.Code = 
         match this with
             // parser error messages
@@ -164,6 +166,8 @@ type DiagnosticCode =
             | SIG02 (_,_,_) -> "SIG02"
             | SIG03 -> "SIG03"
             | SIG04 (_,_,_) -> "SIG04"
+            // proof-related error codes
+            | PR000 _ -> "PR000"
     member this.Message = 
         match this with
             // parser error messages
@@ -227,7 +231,12 @@ type DiagnosticCode =
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
             | SIG03 -> $"The infix symbol `=` is reserved in FPL." 
-            | SIG04 (signature,candidates,firstFailingArgument) -> $"No overload matching {signature}, failed to match {firstFailingArgument}, candidates were: {candidates}" 
+            | SIG04 (signature,candidates,firstFailingArgument) -> 
+                if candidates.Length = 0 then 
+                    $"No overload matching {signature}, no candidates were found (are you missing a uses clause?)" 
+                else
+                    $"No overload matching {signature}, failed to match {firstFailingArgument}, candidates were: {candidates}" 
+            | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
 type DiagnosticEmitter =
     // replace your language-specific emitters here
     | FplParser

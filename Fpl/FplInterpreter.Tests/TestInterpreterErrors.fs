@@ -544,6 +544,7 @@ type TestInterpreterErrors() =
         runTestHelper "TestSIG03.fpl" fplCode code expected
 
     [<DataRow("""def pred T1() {true} def pred Test() { dec ~x:obj; T1(x) };""", 1)>]
+    [<DataRow("""def pred T1() {true} def pred Test() { OtherTest(X) };""", 1)>]
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:Nat; T(x)} ;""", 0)>]
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 1)>]
@@ -551,3 +552,10 @@ type TestInterpreterErrors() =
     member this.TestSIG04(fplCode:string, expected) =
         let code = SIG04 ("","","")
         runTestHelper "TestSIG04.fpl" fplCode code expected
+
+    [<DataRow("""def pred T() { 1. };;""", 1)>]
+    [<DataRow("""proof T$1 {1. |- trivial };""", 0)>]
+    [<TestMethod>]
+    member this.TestPR000(fplCode:string, expected) =
+        let code = PR000 ""
+        runTestHelper "TestPR000.fpl" fplCode code expected

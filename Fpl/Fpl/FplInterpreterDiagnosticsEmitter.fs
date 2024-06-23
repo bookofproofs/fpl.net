@@ -442,3 +442,29 @@ let emitSIG04Diagnostics (fplValue:FplValue) (candidates: FplValue list) firstFa
         }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic 
     
+let emitPR000Diagnostics (fplValue:FplValue) identifier pos1 pos2 =
+    let rec blocktIsProof (fplValue:FplValue) =
+        if FplValue.IsProof(fplValue) then 
+            true
+        else
+            match fplValue.Parent with
+            | Some parent -> 
+                if FplValue.IsTheory(parent) then 
+                    false
+                elif FplValue.IsFplBlock(parent) then
+                    FplValue.IsProof(parent)
+                else
+                    blocktIsProof parent
+            | None -> false
+                
+    if not (blocktIsProof fplValue) then 
+        let diagnostic =
+            { 
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = PR000 identifier 
+                Diagnostic.Alternatives = None
+            }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic 

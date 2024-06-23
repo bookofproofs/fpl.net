@@ -352,7 +352,16 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue s
-        | _ -> ()
+            emitPR000Diagnostics fplValue s pos1 pos2
+        | EvalContext.InBlock fplValue
+        | EvalContext.InConstructorBlock fplValue
+        | EvalContext.InConstructorSignature fplValue
+        | EvalContext.InInfixOperation fplValue
+        | EvalContext.InPropertyBlock fplValue
+        | EvalContext.InPropertySignature fplValue
+        | EvalContext.InSignature fplValue ->
+            emitPR000Diagnostics fplValue s pos1 pos2
+        | _ -> () 
         st.EvalPop() 
     | Ast.Prefix((pos1, pos2), symbol) -> 
         st.EvalPush("Prefix")
