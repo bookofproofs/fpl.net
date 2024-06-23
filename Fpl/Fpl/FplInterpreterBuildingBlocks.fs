@@ -524,6 +524,15 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue "bydef."
             eval st predicateWithQualificationAst
+            emitPR001Diagnostics fplValue pos1 pos2
+        | EvalContext.InBlock fplValue
+        | EvalContext.InConstructorBlock fplValue
+        | EvalContext.InConstructorSignature fplValue
+        | EvalContext.InInfixOperation fplValue
+        | EvalContext.InPropertyBlock fplValue
+        | EvalContext.InPropertySignature fplValue
+        | EvalContext.InSignature fplValue ->
+            emitPR001Diagnostics fplValue pos1 pos2
         | _ -> ()
         st.EvalPop()
     | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->

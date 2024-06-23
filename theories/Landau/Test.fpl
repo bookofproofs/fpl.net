@@ -1,4 +1,4 @@
 def pred T1 infix "+" 1 (x,y:obj) {true}
-def pred T2 infix "" 1 (x,y:obj) {true} 
-def pred Test() {(x + y)};
+
+def pred Test() { bydef A };
 ;

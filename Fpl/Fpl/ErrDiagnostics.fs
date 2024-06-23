@@ -102,6 +102,7 @@ type DiagnosticCode =
     | SIG04 of string * string * string
     // proof-related error codes
     | PR000 of string 
+    | PR001 
     member this.Code = 
         match this with
             // parser error messages
@@ -168,6 +169,7 @@ type DiagnosticCode =
             | SIG04 (_,_,_) -> "SIG04"
             // proof-related error codes
             | PR000 _ -> "PR000"
+            | PR001 -> "PR001"
     member this.Message = 
         match this with
             // parser error messages
@@ -237,6 +239,8 @@ type DiagnosticCode =
                 else
                     $"No overload matching {signature}, failed to match {firstFailingArgument}, candidates were: {candidates}" 
             | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
+            | PR001 -> $"Cannot refer to a definition outside a proof."
+
 type DiagnosticEmitter =
     // replace your language-specific emitters here
     | FplParser

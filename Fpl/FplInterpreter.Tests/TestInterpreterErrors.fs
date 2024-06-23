@@ -559,3 +559,10 @@ type TestInterpreterErrors() =
     member this.TestPR000(fplCode:string, expected) =
         let code = PR000 ""
         runTestHelper "TestPR000.fpl" fplCode code expected
+
+    [<DataRow("""def pred T() { bydef A };;""", 1)>]
+    [<DataRow("""proof T$1 {1. bydef A |- true qed };""", 0)>]
+    [<TestMethod>]
+    member this.TestPR001(fplCode:string, expected) =
+        let code = PR001 
+        runTestHelper "TestPR001.fpl" fplCode code expected
