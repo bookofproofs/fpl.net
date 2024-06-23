@@ -232,7 +232,7 @@ type TestFplValueScopeName() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Name)
-            | "theory" -> Assert.AreEqual<string>("Test", theory.Name)
+            | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockName", theory.Name)
             | "block" -> Assert.AreEqual<string>("TestPredicate()", block.Name); 
             | "x" -> Assert.AreEqual<string>("x", x.Name)
             | "y" -> Assert.AreEqual<string>("y", y.Name)

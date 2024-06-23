@@ -1069,8 +1069,8 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
 
 /// Tries to match the signature of a reference FplValue with some overload. 
 /// Returns a tuple (a,b,c) where 
-/// a = a string indicating the first mismatching argument that couln't be matched,
-/// b = a list of candidates that were identifierd to match the reference,
+/// a = a string indicating the first mismatching argument that couldn't be matched,
+/// b = a list of candidates that were identified to match the reference,
 /// c = Some or None candidate that was matched.
 let tryMatchSignatures (st:SymbolTable) (reference:FplValue) = 
     let candidates = 
@@ -1085,8 +1085,8 @@ let tryMatchSignatures (st:SymbolTable) (reference:FplValue) =
         pm |> Seq.toList
 
     let rec checkCandidates (toBeMatchedTypeSignature: string list) (candidates: FplValue list) accResult =
-        /// Compares two string lists and returns a tuple of (a,b,c) where c is None, 
-        /// if a both lists are identical. If c = Some index, then a and b contain strings that are not equal.
+        /// Compares two string lists and returns a tuple of (a,b,i) where i is None, 
+        /// if a both lists are identical. If i = Some index, then a and b contain strings that are not equal at that index.
         let findFirstMismatchPosition list1 list2 =
             let rec compareLists index l1 l2 =
                 match l1, l2 with
@@ -1104,11 +1104,11 @@ let tryMatchSignatures (st:SymbolTable) (reference:FplValue) =
             match findFirstMismatchPosition toBeMatchedTypeSignature x.TypeSignature with
             | ("", "", None) -> (accResult, Some x) // there is a candidate that matches toBeMatchedTypeSignature
             | ("", elem2, Some index) -> 
-                checkCandidates toBeMatchedTypeSignature xs $"missing {elem2} (argument #{index})" // first reason for mismatch
+                checkCandidates toBeMatchedTypeSignature xs $"missing {elem2} at position {index}" // first reason for mismatch
             | (elem1, "", Some index) -> 
-                checkCandidates toBeMatchedTypeSignature xs $"superfluous {elem1} (argument #{index})" // second reason for mismatch
+                checkCandidates toBeMatchedTypeSignature xs $"superfluous {elem1} at position {index}" // second reason for mismatch
             | (elem1, elem2, Some index) -> 
-                checkCandidates toBeMatchedTypeSignature xs $"{elem1}<>{elem2} (argument #{index})" // third reason for mismatch
+                checkCandidates toBeMatchedTypeSignature xs $"`{elem1}` with `{elem2}` at position {index}" // third reason for mismatch
             | _ -> checkCandidates toBeMatchedTypeSignature xs accResult // accumulate reasons
         
 
