@@ -18,7 +18,10 @@ type TestReferencesTypeOfSignature() =
     //[<DataRow("base8", "Test$1")>]
     //[<DataRow("base9", "Test$1()")>]
     //[<DataRow("base10", "Test")>]
-    //[<DataRow("base11", "v")>]
+    [<DataRow("base11", "def pred T() { v };")>]
+    [<DataRow("base11v1", "def pred T() { dec ~v:obj; v };")>]
+    [<DataRow("base11v2", "def pred T() { dec ~v:ind; v };")>]
+    [<DataRow("base11v3", "def pred T() { dec ~v:Nat; v };")>]
     //[<DataRow("base12", "self")>]
     //[<DataRow("base13", "1")>]
     //[<DataRow("base11a", "v.x")>]
@@ -27,7 +30,7 @@ type TestReferencesTypeOfSignature() =
     //[<DataRow("base11b", "v()")>]
     //[<DataRow("base12b", "self()")>]
     //[<DataRow("base13b", "1()")>]
-    //[<DataRow("base10c", "Test(x, y)")>]
+    [<DataRow("base10c", "def pred Test(x,y:Nat) {true} def pred T() { dec ~x,y:Nat; Test(x, y) };")>]
     //[<DataRow("base11c", "v(x, y)")>]
     //[<DataRow("base12c", "self(x, y)")>]
     //[<DataRow("base13c", "1(x, y)")>]
@@ -92,6 +95,9 @@ type TestReferencesTypeOfSignature() =
             | "base9" -> Assert.AreEqual<string list>(["Test"; "ind"; "("; ")"], base1.TypeSignature)
             | "base10" -> Assert.AreEqual<string list>(["Test"], base1.TypeSignature)
             | "base11" -> Assert.AreEqual<string list>(["undef"], base1.TypeSignature)
+            | "base11v1" -> Assert.AreEqual<string list>(["obj"], base1.TypeSignature)
+            | "base11v2" -> Assert.AreEqual<string list>(["ind"], base1.TypeSignature)
+            | "base11v3" -> Assert.AreEqual<string list>(["Nat"], base1.TypeSignature)
             | "base12" -> Assert.AreEqual<string list>(["self"], base1.TypeSignature)
             | "base13" -> Assert.AreEqual<string list>(["1"], base1.TypeSignature)
             | "base11a" -> Assert.AreEqual<string list>(["undef"; "."; "undef"], base1.TypeSignature)
@@ -100,7 +106,7 @@ type TestReferencesTypeOfSignature() =
             | "base11b" -> Assert.AreEqual<string list>(["undef"; "("; ")"], base1.TypeSignature)
             | "base12b" -> Assert.AreEqual<string list>(["self"; "("; ")"], base1.TypeSignature)
             | "base13b" -> Assert.AreEqual<string list>(["1"; "("; ")"], base1.TypeSignature)
-            | "base10c" -> Assert.AreEqual<string list>(["Test"; "("; "undef"; "undef"; ")"], base1.TypeSignature)
+            | "base10c" -> Assert.AreEqual<string list>(["Test"; "("; "Nat"; "Nat"; ")"], base1.TypeSignature)
             | "base11c" -> Assert.AreEqual<string list>(["undef"; "("; "undef"; "undef"; ")"], base1.TypeSignature)
             | "base12c" -> Assert.AreEqual<string list>(["self"; "("; "undef"; "undef"; ")"], base1.TypeSignature)
             | "base13c" -> Assert.AreEqual<string list>(["1"; "("; "undef"; "undef"; ")"], base1.TypeSignature)

@@ -301,6 +301,7 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test(x: pred) {true};", 0)>]
     [<DataRow("def pred Test(x:+ pred) {dec ~x:obj; true};", 1)>]
 
+    [<DataRow("def cl Test:obj {dec x:obj; prty func X(x: pred)->obj {intr} };", 1)>]
     [<DataRow("def pred Test() {true prty pred X(x,x:* pred) {true} };", 1)>]
     [<DataRow("def pred Test() {true prty pred X(x,x:+ pred) {true} };", 1)>]
     [<DataRow("def pred Test() {true prty pred X(x,x: pred) {true} };", 1)>]

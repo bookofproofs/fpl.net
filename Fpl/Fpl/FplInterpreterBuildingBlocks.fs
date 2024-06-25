@@ -123,7 +123,7 @@ let tryAddBlock (fplValue:FplValue) =
         // everything is ok, change the parent of the provable from theory to the found parent 
         fplValue.Parent <- Some fplValue.Parent.Value.Scope[parentsName]
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
-        emitVAR03diagnosticsForCorollarysSignatureVariale fplValue  
+        emitVAR03diagnosticsForCorollarysSignatureVariable fplValue  
     | ScopeSearchResult.FoundIncorrectBlock block ->
         emitID005diagnostics fplValue block  
     | ScopeSearchResult.NotFound ->
@@ -140,14 +140,15 @@ let tryAddBlock (fplValue:FplValue) =
         | ScopeSearchResult.Found other ->
             emitVAR02diagnostics fplValue other  
         | _ -> 
-            match FplValue.ProofVariableInOuterScope(fplValue) with
+            match FplValue.VariableInBlockScope(fplValue) with
             | ScopeSearchResult.Found other ->
                 emitVAR03diagnostics fplValue other 
             | _ -> 
                 fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
                 fplValue.NameIsFinal <- true
 
-let tryReferenceBlockByName (fplValue:FplValue) name =
+let tryVariableInScopeOfBlockByName (fplValue:FplValue) name =
+    // todo: identify the parent of the block recursively
     let parent = fplValue.Parent.Value
     fplValue.Name <- addWithComma fplValue.Name name 
     if parent.Scope.ContainsKey(name) then
@@ -322,7 +323,7 @@ let rec eval (st: SymbolTable) ast =
             varValue.NameEndPos <- pos2
             tryAddBlock varValue 
         | EvalContext.InReferenceCreation fplValue ->
-            tryReferenceBlockByName fplValue s
+            tryVariableInScopeOfBlockByName fplValue s
         | _ -> ()
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 

@@ -366,6 +366,12 @@ type FplValueType =
             | Theory -> "th"
             | Root -> "root"
 
+type VariableScopeHolder = 
+    | Property
+    | Constructor
+    | Proof
+    | Corollary
+    | Block
 
 type ExprType = 
     | Infix of string * int
@@ -674,37 +680,35 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         else
             ScopeSearchResult.NotApplicable
 
-    /// Checks if a variable defined in the scope of a proof
-    /// was already defined in the scope of its parent definition. 
-    static member ProofVariableInOuterScope(fplValue:FplValue) =
-        if (FplValue.IsVariable(fplValue)) then 
-            match fplValue.Parent with
-            | Some parent ->
-                if (FplValue.IsProofOrCorollary(parent)) then 
-                     if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
-                        ScopeSearchResult.Found (parent.Parent.Value.Scope[fplValue.Name])
-                     else
-                        ScopeSearchResult.NotFound
+    /// Checks if a variable is defined in the scope of block, if any
+    /// looking for it recursively, up the symbol tree.
+    static member VariableInBlockScope(fplValue:FplValue) = 
+        let rec firstBlockParent (fv:FplValue) =
+            if fv.Scope.ContainsKey fplValue.Name then
+                if FplValue.IsProperty(fv) then
+                    ScopeSearchResult.Found (fv.Scope[fplValue.Name])
+                elif FplValue.IsConstructor(fv) then 
+                    ScopeSearchResult.Found (fv.Scope[fplValue.Name])
+                elif FplValue.IsProof(fv) then 
+                    ScopeSearchResult.Found (fv.Scope[fplValue.Name])
+                elif FplValue.IsCorollary(fv) then 
+                    ScopeSearchResult.Found (fv.Scope[fplValue.Name])
+                elif FplValue.IsFplBlock(fv) then 
+                    ScopeSearchResult.Found (fv.Scope[fplValue.Name])
+                elif FplValue.IsTheory(fv) then
+                    ScopeSearchResult.NotFound
+                elif fv.Parent.IsSome then 
+                    firstBlockParent fv.Parent.Value
                 else
-                    ScopeSearchResult.NotApplicable
-            | None -> ScopeSearchResult.NotApplicable
-        else
-            ScopeSearchResult.NotApplicable
-    
-    /// Checks if a variable defined in the scope of a corollary 
-    /// was already defined in the scope of its parent definition. 
-    static member CorollaryVariableInOuterScope(fplValue:FplValue) =
-        if (FplValue.IsVariable(fplValue)) then 
-            match fplValue.Parent with
-            | Some parent ->
-                if (FplValue.IsProofOrCorollary(parent)) then 
-                     if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
-                        ScopeSearchResult.Found (parent.Parent.Value.Scope[fplValue.Name])
-                     else
-                        ScopeSearchResult.NotFound
+                    ScopeSearchResult.NotFound
+            else
+                if fv.Parent.IsSome then 
+                    firstBlockParent fv.Parent.Value
                 else
-                    ScopeSearchResult.NotApplicable
-            | None -> ScopeSearchResult.NotApplicable
+                    ScopeSearchResult.NotFound
+        
+        if (FplValue.IsVariable(fplValue)) then 
+            firstBlockParent fplValue
         else
             ScopeSearchResult.NotApplicable
 
