@@ -301,7 +301,6 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test(x: pred) {true};", 0)>]
     [<DataRow("def pred Test(x:+ pred) {dec ~x:obj; true};", 1)>]
 
-    [<DataRow("def cl Test:obj {dec x:obj; prty func X(x: pred)->obj {intr} };", 1)>]
     [<DataRow("def pred Test() {true prty pred X(x,x:* pred) {true} };", 1)>]
     [<DataRow("def pred Test() {true prty pred X(x,x:+ pred) {true} };", 1)>]
     [<DataRow("def pred Test() {true prty pred X(x,x: pred) {true} };", 1)>]
@@ -338,6 +337,10 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x: obj; self} };", 1)>]
     [<DataRow("def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x:* obj; self} };", 1)>]
     [<DataRow("def cl Test:obj {dec ~x:ind; ctor Test() {dec ~x:+ obj; self} };", 1)>]
+    [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test() {self} prty func X(x: pred)->obj {intr} };", 1)>]
+    [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test(x: pred) {self} prty func X()->obj {intr} };", 1)>]
+    [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test() {dec ~x: pred; self} prty func X()->obj {intr} };", 1)>]
+    [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test() {self} prty func X()->obj {dec ~x: pred; return x} };", 1)>]
     [<TestMethod>]
     member this.TestVAR02(fplCode:string, expected) =
         let code = VAR02 ("", "")

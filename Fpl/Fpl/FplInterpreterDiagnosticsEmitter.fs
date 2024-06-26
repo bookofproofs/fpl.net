@@ -57,7 +57,7 @@ let emitVAR03diagnostics (fplValue:FplValue) (conflict:FplValue) =
 let emitVAR03diagnosticsForCorollarysSignatureVariable (fplValue:FplValue) = 
     if FplValue.IsCorollary(fplValue) then
         for kv in fplValue.Scope do
-            let res = FplValue.VariableInBlockScope(kv.Value) 
+            let res = FplValue.VariableInBlockScopeByName(kv.Value) kv.Value.Name
             match res with
             | ScopeSearchResult.Found conflict ->
                 emitVAR03diagnostics kv.Value conflict 

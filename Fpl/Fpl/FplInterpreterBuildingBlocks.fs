@@ -140,7 +140,7 @@ let tryAddBlock (fplValue:FplValue) =
         | ScopeSearchResult.Found other ->
             emitVAR02diagnostics fplValue other  
         | _ -> 
-            match FplValue.VariableInBlockScope(fplValue) with
+            match FplValue.VariableInBlockScopeByName(fplValue) fplValue.Name with
             | ScopeSearchResult.Found other ->
                 emitVAR03diagnostics fplValue other 
             | _ -> 
@@ -148,13 +148,11 @@ let tryAddBlock (fplValue:FplValue) =
                 fplValue.NameIsFinal <- true
 
 let tryVariableInScopeOfBlockByName (fplValue:FplValue) name =
-    // todo: identify the parent of the block recursively
-    let parent = fplValue.Parent.Value
     fplValue.Name <- addWithComma fplValue.Name name 
-    if parent.Scope.ContainsKey(name) then
-        let namedChild = parent.Scope[name]
-        fplValue.TypeSignature <- fplValue.TypeSignature @ namedChild.TypeSignature
-    else
+    match FplValue.VariableInBlockScopeByName fplValue name with 
+    | ScopeSearchResult.Found variableInScope ->
+        fplValue.TypeSignature <- fplValue.TypeSignature @ variableInScope.TypeSignature
+    | _ -> 
         fplValue.TypeSignature <- fplValue.TypeSignature @ ["undef"]
 
 

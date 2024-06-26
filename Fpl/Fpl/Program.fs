@@ -8,7 +8,6 @@ open FParsec
 open System.Text.RegularExpressions
 open System.Collections.Generic
 
-(*
 let deleteFilesWithExtension dir extension =
     if Directory.Exists(dir) then
         Directory.GetFiles(dir, "*." + extension)
@@ -44,12 +43,8 @@ let loadFplFile(path:string) =
 
 
 let input = """
-uses Fpl.SetTheory
-
-def cl SomeFplClass: Set
-{
-    intr
-}
+def pred Test(x: obj) {true prty pred X(x: pred) {true} };
+def pred Test1(x: obj) {true prty pred X(x: pred) {true} };
 ;"""
 
 let result = fplParser input
@@ -67,29 +62,8 @@ prepareFplCode("",false) |> ignore
 printf "\n--------------------------------\n"
 
 
-loadFplFile(@"D:\Forschung\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.3.Ordering.fpl")
+// loadFplFile(@"D:\Forschung\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.3.Ordering.fpl")
 
 printf "\n--------------------------------\n"
 ad.PrintDiagnostics
-*)
 
-let splitList (input: string list) =
-    let evens = List.mapi (fun i x -> if i % 2 = 0 then Some x else None) input |> List.choose id
-    let odds = List.mapi (fun i x -> if i % 2 <> 0 then Some x else None) input |> List.choose id
-    (evens, odds)
-
-let createRPN (evens: string list, odds: string list) =
-    let rec helper (evens: string list) (odds: string list) (output: string list) =
-        match evens, odds with
-        | e :: es, o :: os -> (helper es os (output @ [o; "("; e])) @ [")"]
-        | e, [] -> output @ e
-        | _ -> []
-    helper evens odds [] 
-
-let precedence = Map.ofList [("+", 1); ("-", 2); ("~", 3); ("%", 1)]
-let input = ["a"; "~"; "b"; "+"; "c"; "-"; "a"; "%"; "c"; "~"; "d"]
-let (evens, odds) = splitList input
-let sortedOdds = odds |> List.sortBy (fun op -> precedence.[op])
-let output = createRPN (evens, sortedOdds)
-
-printf "%A" output

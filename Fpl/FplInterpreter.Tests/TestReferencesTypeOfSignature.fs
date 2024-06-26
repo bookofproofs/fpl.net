@@ -71,9 +71,9 @@ type TestReferencesTypeOfSignature() =
     //[<DataRow("base32", "E(true, undef, false)")>]
     
     [<TestMethod>]
-    member this.TestPredicate(var, fplCode) =
+    member this.TestPredicateReference(var, fplCode) =
         FplParser.parserDiagnostics.Clear()
-        let filename = "TestPredicate"
+        let filename = "TestPredicateReference"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with

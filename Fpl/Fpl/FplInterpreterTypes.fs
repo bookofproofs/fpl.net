@@ -682,19 +682,19 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
 
     /// Checks if a variable is defined in the scope of block, if any
     /// looking for it recursively, up the symbol tree.
-    static member VariableInBlockScope(fplValue:FplValue) = 
+    static member VariableInBlockScopeByName(fplValue:FplValue) name = 
         let rec firstBlockParent (fv:FplValue) =
-            if fv.Scope.ContainsKey fplValue.Name then
+            if fv.Scope.ContainsKey name then
                 if FplValue.IsProperty(fv) then
-                    ScopeSearchResult.Found (fv.Scope[fplValue.Name])
+                    ScopeSearchResult.Found (fv.Scope[name])
                 elif FplValue.IsConstructor(fv) then 
-                    ScopeSearchResult.Found (fv.Scope[fplValue.Name])
+                    ScopeSearchResult.Found (fv.Scope[name])
                 elif FplValue.IsProof(fv) then 
-                    ScopeSearchResult.Found (fv.Scope[fplValue.Name])
+                    ScopeSearchResult.Found (fv.Scope[name])
                 elif FplValue.IsCorollary(fv) then 
-                    ScopeSearchResult.Found (fv.Scope[fplValue.Name])
+                    ScopeSearchResult.Found (fv.Scope[name])
                 elif FplValue.IsFplBlock(fv) then 
-                    ScopeSearchResult.Found (fv.Scope[fplValue.Name])
+                    ScopeSearchResult.Found (fv.Scope[name])
                 elif FplValue.IsTheory(fv) then
                     ScopeSearchResult.NotFound
                 elif fv.Parent.IsSome then 
@@ -707,10 +707,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 else
                     ScopeSearchResult.NotFound
         
-        if (FplValue.IsVariable(fplValue)) then 
-            firstBlockParent fplValue
-        else
-            ScopeSearchResult.NotApplicable
+        firstBlockParent fplValue
 
     /// Checks if an fplValue is provable. This will only be true if 
     /// it is a theorem, a lemma, a proposition, or a corollary
