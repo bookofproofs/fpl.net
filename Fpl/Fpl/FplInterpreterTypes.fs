@@ -366,13 +366,6 @@ type FplValueType =
             | Theory -> "th"
             | Root -> "root"
 
-type VariableScopeHolder = 
-    | Property
-    | Constructor
-    | Proof
-    | Corollary
-    | Block
-
 type ExprType = 
     | Infix of string * int
     | Postfix of string 
