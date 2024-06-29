@@ -20,36 +20,36 @@ type TestFplValue() =
                 
             else
                 ("", FplValue.CreateFplValue((Position("",0,1,1),Position("",0,1,1)), fplBlockType, r))
-        let testFactory fplBlockType =
+        let testFactory fplBlockType (repr:FplRepresentation) =
             let name, fv = testCreateFactory fplBlockType
             Assert.AreEqual<FplValueType>(fplBlockType, fv.BlockType)
             Assert.AreEqual<string>(name, fv.Name)
-            Assert.AreEqual<string>("", fv.FplRepresentation)
+            Assert.AreEqual<FplRepresentation>(repr, fv.FplRepresentation)
             Assert.AreEqual<string list>([], fv.TypeSignature)
-        testFactory FplValueType.VariadicVariableMany 
-        testFactory FplValueType.VariadicVariableMany1 
-        testFactory FplValueType.Axiom 
-        testFactory FplValueType.Theorem 
-        testFactory FplValueType.Lemma 
-        testFactory FplValueType.Proposition 
-        testFactory FplValueType.Corollary 
-        testFactory FplValueType.Conjecture 
-        testFactory FplValueType.Premise 
-        testFactory FplValueType.Conclusion 
-        testFactory FplValueType.Proof 
-        testFactory FplValueType.RuleOfInference 
-        testFactory FplValueType.Expression 
-        testFactory FplValueType.Theory 
-        testFactory FplValueType.Predicate 
-        testFactory FplValueType.Constructor 
-        testFactory FplValueType.FunctionalTerm 
-        testFactory FplValueType.Variable 
-        testFactory FplValueType.MandatoryFunctionalTerm 
-        testFactory FplValueType.OptionalFunctionalTerm 
-        testFactory FplValueType.MandatoryPredicate 
-        testFactory FplValueType.OptionalPredicate 
-        testFactory FplValueType.Class 
-        testFactory FplValueType.Object 
+        testFactory FplValueType.VariadicVariableMany FplRepresentation.Undef
+        testFactory FplValueType.VariadicVariableMany1 FplRepresentation.Undef 
+        testFactory FplValueType.Axiom FplRepresentation.Undef
+        testFactory FplValueType.Theorem FplRepresentation.Undef
+        testFactory FplValueType.Lemma FplRepresentation.Undef
+        testFactory FplValueType.Proposition FplRepresentation.Undef
+        testFactory FplValueType.Corollary FplRepresentation.Undef
+        testFactory FplValueType.Conjecture FplRepresentation.Undef
+        testFactory FplValueType.Premise FplRepresentation.Undef
+        testFactory FplValueType.Conclusion FplRepresentation.Undef
+        testFactory FplValueType.Proof FplRepresentation.Undef
+        testFactory FplValueType.RuleOfInference FplRepresentation.Undef
+        testFactory FplValueType.Expression FplRepresentation.Undef
+        testFactory FplValueType.Theory FplRepresentation.Undef
+        testFactory FplValueType.Predicate FplRepresentation.Undef
+        testFactory FplValueType.Constructor FplRepresentation.Undef
+        testFactory FplValueType.FunctionalTerm FplRepresentation.Undef
+        testFactory FplValueType.Variable FplRepresentation.Undef
+        testFactory FplValueType.MandatoryFunctionalTerm FplRepresentation.Undef
+        testFactory FplValueType.OptionalFunctionalTerm FplRepresentation.Undef
+        testFactory FplValueType.MandatoryPredicate FplRepresentation.Undef
+        testFactory FplValueType.OptionalPredicate FplRepresentation.Undef
+        testFactory FplValueType.Class FplRepresentation.Undef
+        testFactory FplValueType.Object FplRepresentation.Undef
 
 
     [<DataRow("inference TestId() {pre: true con: true};", "TestId()", "TestId ( )")>]

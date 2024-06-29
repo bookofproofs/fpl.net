@@ -7,7 +7,6 @@ open System.Collections.Generic
 open System.Text
 open System.IO
 open FParsec
-open Newtonsoft.Json
 open FplGrammarTypes
 open FplParser
 
@@ -366,6 +365,19 @@ type FplValueType =
             | Theory -> "th"
             | Root -> "root"
 
+type FplPredicate =
+    | True
+    | False
+    | Undetermined
+    
+type FplLanguageConstruct =
+    | Predicate
+    | Function
+    | Class
+    | Inference
+    | Proof
+    | Extension
+
 type ExprType = 
     | Infix of string * int
     | Postfix of string 
@@ -378,7 +390,14 @@ type ExprType =
         | Prefix symbol -> sprintf "Prefix %s " symbol
         | NoType -> "None"
 
-type ScopeSearchResult = 
+type FplRepresentation = 
+    | PredRepr of FplPredicate
+    | ObjRepr of string
+    | Localization of FplValue * string
+    | LangRepr of FplLanguageConstruct
+    | Index of int
+    | Undef
+and ScopeSearchResult = 
     | FoundAssociate of string 
     | FoundMultiple of string
     | FoundIncorrectBlock of string
@@ -393,7 +412,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _nameFinal = false
     let mutable _nameEndPos = Position("", 0, 1, 1)
     let mutable _typeSignature = []
-    let mutable _representation = ""
+    let mutable _representation = FplRepresentation.Undef
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
 
