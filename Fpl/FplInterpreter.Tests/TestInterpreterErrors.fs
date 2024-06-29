@@ -295,6 +295,7 @@ type TestInterpreterErrors() =
         let code = VAR00
         runTestHelper "TestVAR00.fpl" fplCode code expected
 
+
     [<DataRow("def pred Test(x,x:* pred) {true};", 1)>]
     [<DataRow("def pred Test(x,x:+ pred) {true};", 1)>]
     [<DataRow("def pred Test(x,x: pred) {true};", 1)>]
@@ -314,11 +315,18 @@ type TestInterpreterErrors() =
     [<DataRow("inf ModusPonens() {dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q};", 0)>]
     [<DataRow("def pred Test() {true prty pred X(y:+ pred) {dec ~x:obj; ex x {true}} };", 0)>]
     [<DataRow("def pred Test() {true prty func X(y:+ pred)->obj {dec ~x:obj; ex x {true}} };", 0)>]
-    [<TestMethod>]
-    member this.TestVAR01(fplCode:string, expected) =
-        let code = VAR01 ("","")
-        runTestHelper "TestVAR01.fpl" fplCode code expected
-
+    [<DataRow("theorem TestId(x: ind) {true}       proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
+    [<DataRow("theorem TestId(x: ind) {true}       proof TestId$1 { 1. |- trivial };", 0)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} proof TestId$1 { 1. |- trivial };", 0)>]
+    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { dec ~x:obj; true };", 1)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1() { dec ~x:obj; true };", 1)>]
+    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { true };", 0)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1() { true };", 0)>]
+    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1(x:obj) { true };", 1)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1(x:obj) { true };", 1)>]
+    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { true };", 0)>]
+    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1() { true };", 0)>]
     [<DataRow("def pred Test(x: ind) {true prty pred X(x: pred) {true} };", 1)>]
     [<DataRow("def pred Test(x: ind) {true prty pred X(x:* pred) {true} };", 1)>]
     [<DataRow("def pred Test(x: ind) {true prty pred X(x:+ pred) {true} };", 1)>]
@@ -341,23 +349,6 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test(x: pred) {self} prty func X()->obj {intr} };", 1)>]
     [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test() {dec ~x: pred; self} prty func X()->obj {intr} };", 1)>]
     [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test() {self} prty func X()->obj {dec ~x: pred; return x} };", 1)>]
-    [<TestMethod>]
-    member this.TestVAR02(fplCode:string, expected) =
-        let code = VAR02 ("", "")
-        runTestHelper "TestVAR02.fpl" fplCode code expected
-
-    [<DataRow("theorem TestId(x: ind) {true}       proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
-    [<DataRow("theorem TestId() {dec ~x:ind; true} proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
-    [<DataRow("theorem TestId(x: ind) {true}       proof TestId$1 { 1. |- trivial };", 0)>]
-    [<DataRow("theorem TestId() {dec ~x:ind; true} proof TestId$1 { 1. |- trivial };", 0)>]
-    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { dec ~x:obj; true };", 1)>]
-    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1() { dec ~x:obj; true };", 1)>]
-    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { true };", 0)>]
-    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1() { true };", 0)>]
-    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1(x:obj) { true };", 1)>]
-    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1(x:obj) { true };", 1)>]
-    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { true };", 0)>]
-    [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1() { true };", 0)>]
     [<TestMethod>]
     member this.TestVAR03(fplCode:string, expected) =
         let code = VAR03 ("", "")

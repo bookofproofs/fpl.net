@@ -132,20 +132,16 @@ let tryAddBlock (fplValue:FplValue) =
         emitID007diagnostics fplValue listOfKandidates  
     | _ -> ()
 
-    match FplValue.InScopeOfParent(fplValue) fplValue.Name with
-    | ScopeSearchResult.Found conflict -> 
-        emitVAR01orID001diagnostics fplValue conflict 
+    match FplValue.VariableInBlockScopeByName(fplValue) fplValue.Name with
+    | ScopeSearchResult.Found other ->
+        emitVAR03diagnostics fplValue other 
     | _ -> 
-        match FplValue.ConstructorOrPropertyVariableInOuterScope(fplValue) with
-        | ScopeSearchResult.Found other ->
-            emitVAR02diagnostics fplValue other  
+        match FplValue.InScopeOfParent(fplValue) fplValue.Name with
+        | ScopeSearchResult.Found conflict -> 
+            emitID001diagnostics fplValue conflict 
         | _ -> 
-            match FplValue.VariableInBlockScopeByName(fplValue) fplValue.Name with
-            | ScopeSearchResult.Found other ->
-                emitVAR03diagnostics fplValue other 
-            | _ -> 
-                fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
-                fplValue.NameIsFinal <- true
+            fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
+            fplValue.NameIsFinal <- true
 
 let tryVariableInScopeOfBlockByName (fplValue:FplValue) name =
     fplValue.Name <- addWithComma fplValue.Name name 

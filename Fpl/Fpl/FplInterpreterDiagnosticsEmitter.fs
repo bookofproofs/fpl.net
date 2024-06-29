@@ -17,28 +17,13 @@ let emitUnexpectedErrorDiagnostics streamName errMsg =
         }
         FplParser.parserDiagnostics.AddDiagnostic(diagnostic)
 
-let emitVAR01orID001diagnostics (fplValue:FplValue) (conflict:FplValue) = 
+let emitID001diagnostics (fplValue:FplValue) (conflict:FplValue) = 
     let diagnostic = { 
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
         Diagnostic.Severity = DiagnosticSeverity.Error
         Diagnostic.StartPos = fplValue.StartPos
         Diagnostic.EndPos = fplValue.NameEndPos
-        Diagnostic.Code = 
-            if (FplValue.IsVariable(fplValue)) then 
-                VAR01 (fplValue.Name, conflict.QualifiedStartPos)
-            else
-                ID001 (fplValue.Name, conflict.QualifiedStartPos)
-        Diagnostic.Alternatives = None 
-    }
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
-
-let emitVAR02diagnostics (fplValue:FplValue) (conflict:FplValue) = 
-    let diagnostic = { 
-        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-        Diagnostic.Severity = DiagnosticSeverity.Error
-        Diagnostic.StartPos = fplValue.StartPos
-        Diagnostic.EndPos = fplValue.NameEndPos
-        Diagnostic.Code = VAR02 (fplValue.Name, conflict.QualifiedStartPos)
+        Diagnostic.Code = ID001 (fplValue.Name, conflict.QualifiedStartPos)
         Diagnostic.Alternatives = None 
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic

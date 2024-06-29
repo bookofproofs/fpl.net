@@ -675,23 +675,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     ScopeSearchResult.NotFound
         | None -> ScopeSearchResult.NotApplicable
 
-    /// Checks if a variable defined in the scope of a constructor or a property
-    /// was already defined in the scope of its parent definition. 
-    static member ConstructorOrPropertyVariableInOuterScope(fplValue:FplValue) =
-        if (FplValue.IsVariable(fplValue)) then 
-            match fplValue.Parent with
-            | Some parent ->
-                if (FplValue.IsConstructorOrProperty(parent)) then 
-                     if parent.Parent.Value.Scope.ContainsKey fplValue.Name then
-                        ScopeSearchResult.Found (parent.Parent.Value.Scope[fplValue.Name])
-                     else
-                        ScopeSearchResult.NotFound
-                else
-                    ScopeSearchResult.NotApplicable
-            | None -> ScopeSearchResult.NotApplicable
-        else
-            ScopeSearchResult.NotApplicable
-
     /// Checks if a variable is defined in the scope of block, if any
     /// looking for it recursively, up the symbol tree.
     static member VariableInBlockScopeByName(fplValue:FplValue) name = 
@@ -718,8 +701,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     firstBlockParent fv.Parent.Value
                 else
                     ScopeSearchResult.NotFound
-        
-        firstBlockParent fplValue
+
+        if FplValue.IsVariable(fplValue) then
+            firstBlockParent fplValue
+        else
+            ScopeSearchResult.NotApplicable
 
     /// Checks if an fplValue is provable. This will only be true if 
     /// it is a theorem, a lemma, a proposition, or a corollary
