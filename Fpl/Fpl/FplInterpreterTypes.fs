@@ -395,7 +395,7 @@ type FplRepresentation =
     | ObjRepr of string
     | Localization of FplValue * string
     | LangRepr of FplLanguageConstruct
-    | Index of int
+    | Index of uint
     | Undef
 and ScopeSearchResult = 
     | FoundAssociate of string 

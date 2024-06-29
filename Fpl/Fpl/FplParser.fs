@@ -206,7 +206,7 @@ let extensionBlock = positions "ExtensionBlock" (extensionHeader >>. IW >>. exte
 
 let xId = positions "ExtensionType" (at >>. extensionName) |>> Ast.ExtensionType 
 
-let dollarDigits = positions "DollarDigits" (regex "\$\d+" <?> "<dollarDigits>") |>> Ast.DollarDigits
+let dollarDigits = positions "DollarDigits" (regex "\$" >>. puint32 <?> "<dollarDigits>") |>> Ast.DollarDigits
 
 let atList = many at
 

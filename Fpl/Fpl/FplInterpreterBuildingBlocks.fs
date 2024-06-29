@@ -262,7 +262,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ExtensionRegex")
         eval_string st s
         st.EvalPop() 
-    // | DollarDigits of Positions * string
+    // | DollarDigits of Positions * int
     | Ast.DollarDigits((pos1, pos2), s) -> 
         st.EvalPush("DollarDigits")
         match st.CurrentContext with
@@ -271,8 +271,9 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InReferenceCreation fplValue
         | EvalContext.InSignature fplValue ->
-            adjustSignature st fplValue s
+            adjustSignature st fplValue (s.ToString())
             fplValue.NameEndPos <- pos2 // the full name ends where the dollar digits end 
+            fplValue.FplRepresentation <- FplRepresentation.Index s
         | _ -> ()
         st.EvalPop() 
     | Ast.Extensionname((pos1, pos2), s) ->
@@ -421,6 +422,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("True")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
+            fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.True
             adjustSignature st fplValue "true"
         | _ -> ()
         st.EvalPop() 
@@ -428,6 +430,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("False")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
+            fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.False
             adjustSignature st fplValue "false"
         | _ -> ()
         st.EvalPop() 
