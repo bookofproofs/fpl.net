@@ -397,6 +397,19 @@ type FplRepresentation =
     | LangRepr of FplLanguageConstruct
     | Index of uint
     | Undef
+    member this.ToString = 
+        match this with
+        | PredRepr _ -> "predicate"
+        | ObjRepr _ -> "object"
+        | Localization _ -> "localization"
+        | Index _ -> "index"
+        | LangRepr FplLanguageConstruct.Class -> "class type"
+        | LangRepr FplLanguageConstruct.Extension -> "extension type"
+        | LangRepr FplLanguageConstruct.Function -> "function type"
+        | LangRepr FplLanguageConstruct.Predicate -> "predicate type"
+        | LangRepr FplLanguageConstruct.Proof -> "proof type"
+        | LangRepr FplLanguageConstruct.Inference -> "inference type"
+        | Undef -> "undefined"
 and ScopeSearchResult = 
     | FoundAssociate of string 
     | FoundMultiple of string

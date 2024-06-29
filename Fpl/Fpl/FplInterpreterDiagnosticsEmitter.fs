@@ -478,3 +478,35 @@ let emitPR002Diagnostics pos1 pos2 =
             Diagnostic.Alternatives = None
         }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic 
+
+let emitLG000orLG001Diagnostics (fplValue:FplValue) typeOfPredicate =
+    let arg = fplValue.ValueList[0]
+    match arg.FplRepresentation with
+    | FplRepresentation.PredRepr FplPredicate.True ->
+        fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.False
+    | FplRepresentation.PredRepr FplPredicate.False ->
+        fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.True
+    | FplRepresentation.PredRepr FplPredicate.Undetermined ->
+        fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+        let diagnostic =
+            { 
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = arg.StartPos
+                Diagnostic.EndPos = arg.EndPos
+                Diagnostic.Code = LG000 (typeOfPredicate,arg.Name)
+                Diagnostic.Alternatives = None
+            }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic 
+    | _ -> 
+        fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+        let diagnostic =
+            { 
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = arg.StartPos
+                Diagnostic.EndPos = arg.EndPos
+                Diagnostic.Code = LG001 (typeOfPredicate, arg.Name, arg.FplRepresentation.ToString)
+                Diagnostic.Alternatives = None
+            }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic 

@@ -102,6 +102,9 @@ type DiagnosticCode =
     | PR000 of string 
     | PR001 
     | PR002 
+    // logic-related error codes
+    | LG000 of string * string 
+    | LG001 of string * string * string
     member this.Code = 
         match this with
             // parser error messages
@@ -137,37 +140,40 @@ type DiagnosticCode =
             | GEN00 _ -> "GEN00"
             | NSP00 _ -> "NSP00"
             | NSP01 _ -> "NSP01"
-            | NSP02 (_, _) -> "NSP02"
+            | NSP02 _ -> "NSP02"
             | NSP03 _ -> "NSP03"
             | NSP04 _ -> "NSP04"
             | NSP05 _ -> "NSP05"
             // identifier-related error codes 
             | ID000 _ -> "ID000"
-            | ID001 (_, _) -> "ID001"
-            | ID002 (_, _) -> "ID002"
+            | ID001 _ -> "ID001"
+            | ID002 _ -> "ID002"
             | ID003 _ -> "ID003"
-            | ID004 (_, _) -> "ID004"
-            | ID005 (_, _) -> "ID005"
+            | ID004 _ -> "ID004"
+            | ID005 _ -> "ID005"
             | ID006 _ -> "ID006"
-            | ID007 (_, _) -> "ID007"
-            | ID008 (_, _) -> "ID008"
+            | ID007 _ -> "ID007"
+            | ID008 _ -> "ID008"
             | ID009 _ -> "ID009"
             | ID010 _ -> "ID010"
-            | ID011 (_, _) -> "ID011"
-            | ID012 (_, _) -> "ID012"
+            | ID011 _ -> "ID011"
+            | ID012 _ -> "ID012"
             // variable-related error codes
             | VAR00 -> "VAR00"
-            | VAR03 (_, _)  -> "VAR03"
+            | VAR03 _  -> "VAR03"
             // signature-related error codes
-            | SIG00 (_,_) -> "SIG00"
+            | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
-            | SIG02 (_,_,_) -> "SIG02"
+            | SIG02 _ -> "SIG02"
             | SIG03 -> "SIG03"
-            | SIG04 (_,_,_) -> "SIG04"
+            | SIG04 _ -> "SIG04"
             // proof-related error codes
             | PR000 _ -> "PR000"
             | PR001 -> "PR001"
             | PR002 -> "PR002"
+            // logic-related error codes
+            | LG000 _ -> "LG000"
+            | LG001 _ -> "LG001"
     member this.Message = 
         match this with
             // parser error messages
@@ -234,9 +240,14 @@ type DiagnosticCode =
                     $"No overload matching {signature}, no candidates were found (are you missing a uses clause?)" 
                 else
                     $"No overload matching {signature}, failed to match {firstFailingArgument}, candidates were: {candidates}" 
+            // proof-related error codes
             | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
             | PR001 -> $"Cannot refer to a definition outside a proof."
             | PR002 -> $"Avoid referencing to proofs directly."
+            // logic-related error codes
+            | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate {typeOfPredicate}; its argument `{argument}` is a predicate but couldn't be determined."
+            | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate {typeOfPredicate}; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
+
 
 type DiagnosticEmitter =
     // replace your language-specific emitters here

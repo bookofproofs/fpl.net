@@ -271,7 +271,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InReferenceCreation fplValue
         | EvalContext.InSignature fplValue ->
-            adjustSignature st fplValue (s.ToString())
+            adjustSignature st fplValue ("$"+s.ToString())
             fplValue.NameEndPos <- pos2 // the full name ends where the dollar digits end 
             fplValue.FplRepresentation <- FplRepresentation.Index s
         | _ -> ()
@@ -499,6 +499,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue "not"
             eval st predicateAst
+            emitLG000orLG001Diagnostics fplValue "negation"
         | _ -> ()
         st.EvalPop()
     | Ast.InEntity((pos1, pos2), ast1) ->

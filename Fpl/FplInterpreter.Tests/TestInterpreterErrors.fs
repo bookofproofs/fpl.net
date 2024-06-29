@@ -570,3 +570,20 @@ type TestInterpreterErrors() =
     member this.TestPR002(fplCode:string, expected) =
         let code = PR002
         runTestHelper "TestPR002.fpl" fplCode code expected
+
+
+    [<DataRow("""def pred T() { not true };""", 0)>]
+    [<DataRow("""def pred T() { dec ~x:pred; not x };""", 1)>]
+    [<DataRow("""def pred T() { dec ~x:ind; not x };""", 0)>]
+    [<TestMethod>]
+    member this.TestLG000(fplCode:string, expected) =
+        let code = LG000 ("","")
+        runTestHelper "TestLG000.fpl" fplCode code expected
+
+    [<DataRow("""def pred T() { not true };""", 0)>]
+    [<DataRow("""def pred T() { dec ~x:pred; not x };""", 0)>]
+    [<DataRow("""def pred T() { dec ~x:ind; not x };""", 1)>]
+    [<TestMethod>]
+    member this.TestLG001(fplCode:string, expected) =
+        let code = LG001 ("","","")
+        runTestHelper "TestLG000.fpl" fplCode code expected
