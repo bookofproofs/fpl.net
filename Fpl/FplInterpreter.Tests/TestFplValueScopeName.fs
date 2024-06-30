@@ -532,7 +532,7 @@ type TestFplValueScopeName() =
     member this.TestPredicate(var, varVal) =
         FplParser.parserDiagnostics.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
-        let filename = "TestPredicate.fpl"
+        let filename = "TestPredicateName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with

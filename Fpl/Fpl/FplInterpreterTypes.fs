@@ -394,15 +394,17 @@ type FplRepresentation =
     | PredRepr of FplPredicate
     | ObjRepr of string
     | Localization of FplValue * string
+    | Pointer of FplValue
     | LangRepr of FplLanguageConstruct
     | Index of uint
     | Undef
-    member this.ToString = 
+    member this.String() = 
         match this with
         | PredRepr _ -> "predicate"
         | ObjRepr _ -> "object"
         | Localization _ -> "localization"
         | Index _ -> "index"
+        | Pointer _ -> "pointer"
         | LangRepr FplLanguageConstruct.Class -> "class type"
         | LangRepr FplLanguageConstruct.Extension -> "extension type"
         | LangRepr FplLanguageConstruct.Function -> "function type"
@@ -716,6 +718,8 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     ScopeSearchResult.NotFound
 
         if FplValue.IsVariable(fplValue) then
+            firstBlockParent fplValue
+        elif fplValue.BlockType = FplValueType.Reference then 
             firstBlockParent fplValue
         else
             ScopeSearchResult.NotApplicable

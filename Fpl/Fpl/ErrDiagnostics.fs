@@ -91,6 +91,7 @@ type DiagnosticCode =
     | ID012 of string * string 
     // variable-related error codes
     | VAR00 
+    | VAR01 of string 
     | VAR03 of string * string
     // signature-related error codes
     | SIG00 of string * int
@@ -160,6 +161,7 @@ type DiagnosticCode =
             | ID012 _ -> "ID012"
             // variable-related error codes
             | VAR00 -> "VAR00"
+            | VAR01 _  -> "VAR01"
             | VAR03 _  -> "VAR03"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
@@ -229,6 +231,7 @@ type DiagnosticCode =
             | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are %s." name candidates
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
+            | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
             | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity {arity} using {fixType} notation."

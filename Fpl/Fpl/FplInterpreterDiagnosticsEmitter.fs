@@ -28,6 +28,17 @@ let emitID001diagnostics (fplValue:FplValue) (conflict:FplValue) =
     }
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
+let emitVAR01diagnostics name pos1 pos2 = 
+    let diagnostic = { 
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = pos1
+        Diagnostic.EndPos = pos2
+        Diagnostic.Code = VAR01 name
+        Diagnostic.Alternatives = None
+    }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
 let emitVAR03diagnostics (fplValue:FplValue) (conflict:FplValue) = 
     let diagnostic = { 
         Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
@@ -480,33 +491,45 @@ let emitPR002Diagnostics pos1 pos2 =
     FplParser.parserDiagnostics.AddDiagnostic diagnostic 
 
 let emitLG000orLG001Diagnostics (fplValue:FplValue) typeOfPredicate =
+    let emitLG000Diagnostics (fv:FplValue) (arg:FplValue) = 
+        match fv.FplRepresentation with
+        | FplRepresentation.PredRepr FplPredicate.True ->
+            fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.False
+        | FplRepresentation.PredRepr FplPredicate.False ->
+            fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.True
+        | FplRepresentation.PredRepr FplPredicate.Undetermined ->
+            fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+            let diagnostic =
+                { 
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = arg.StartPos
+                    Diagnostic.EndPos = arg.EndPos
+                    Diagnostic.Code = LG000 (typeOfPredicate,fv.Name)
+                    Diagnostic.Alternatives = None
+                }
+            FplParser.parserDiagnostics.AddDiagnostic diagnostic 
+        | _ -> ()
+
+    let emitLG001Diagnostics (fv:FplValue) (arg:FplValue) = 
+        fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+        let diagnostic =
+            { 
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = arg.StartPos
+                Diagnostic.EndPos = arg.EndPos
+                Diagnostic.Code = LG001 (typeOfPredicate, arg.Name, arg.FplRepresentation.String())
+                Diagnostic.Alternatives = None
+            }
+        FplParser.parserDiagnostics.AddDiagnostic diagnostic 
+
     let arg = fplValue.ValueList[0]
     match arg.FplRepresentation with
-    | FplRepresentation.PredRepr FplPredicate.True ->
-        fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.False
-    | FplRepresentation.PredRepr FplPredicate.False ->
-        fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.True
-    | FplRepresentation.PredRepr FplPredicate.Undetermined ->
-        fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
-        let diagnostic =
-            { 
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = arg.StartPos
-                Diagnostic.EndPos = arg.EndPos
-                Diagnostic.Code = LG000 (typeOfPredicate,arg.Name)
-                Diagnostic.Alternatives = None
-            }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic 
+    | FplRepresentation.PredRepr _ -> emitLG000Diagnostics arg arg
+    | FplRepresentation.Pointer variable -> 
+        match variable.FplRepresentation with
+        | FplRepresentation.PredRepr _ -> emitLG000Diagnostics variable arg
+        | _ -> emitLG001Diagnostics variable arg
     | _ -> 
-        fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
-        let diagnostic =
-            { 
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = arg.StartPos
-                Diagnostic.EndPos = arg.EndPos
-                Diagnostic.Code = LG001 (typeOfPredicate, arg.Name, arg.FplRepresentation.ToString)
-                Diagnostic.Alternatives = None
-            }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic 
+        emitLG001Diagnostics fplValue arg

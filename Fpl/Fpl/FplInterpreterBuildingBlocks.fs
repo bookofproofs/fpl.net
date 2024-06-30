@@ -72,6 +72,11 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
             if str = "not" then fplValue.Name <- fplValue.Name + " "
 
 let eval_units (st: SymbolTable) unitType pos1 pos2 = 
+    let setRepresentation (fv:FplValue) = 
+        if fv.FplRepresentation = FplRepresentation.Undef then
+            match unitType with
+            | "pred" -> fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+            | _ -> ()
     match st.CurrentContext with
     | EvalContext.NamedVarDeclarationInBlock fplValue 
     | EvalContext.InPropertySignature fplValue 
@@ -84,6 +89,7 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
                 adjustSignature st fplValue $"+{unitType}"
             else
                 adjustSignature st fplValue unitType
+                setRepresentation fplValue
                 checkID009_ID010_ID011_Diagnostics st fplValue unitType pos1 pos2
     | EvalContext.InReferenceCreation fplValue -> 
         checkID012Diagnostics st fplValue unitType pos1 pos2
@@ -143,15 +149,6 @@ let tryAddBlock (fplValue:FplValue) =
             fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
             fplValue.NameIsFinal <- true
 
-let tryVariableInScopeOfBlockByName (fplValue:FplValue) name =
-    fplValue.Name <- addWithComma fplValue.Name name 
-    match FplValue.VariableInBlockScopeByName fplValue name with 
-    | ScopeSearchResult.Found variableInScope ->
-        fplValue.TypeSignature <- fplValue.TypeSignature @ variableInScope.TypeSignature
-    | _ -> 
-        fplValue.TypeSignature <- fplValue.TypeSignature @ ["undef"]
-
-
 let propagateReference (refBlock:FplValue) withAdding = 
     let fplValue = refBlock.Parent.Value
     if fplValue.BlockType = FplValueType.Reference then
@@ -159,8 +156,13 @@ let propagateReference (refBlock:FplValue) withAdding =
             // propagate only if refblock has all opened brackets closed and the name of its reference-typed parent is not yet ready
             if withAdding then 
                 fplValue.ValueList.Add(refBlock)
-            fplValue.Name <- addWithComma fplValue.Name refBlock.Name 
-            fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
+            match fplValue.FplRepresentation with
+            | FplRepresentation.Pointer variable ->
+                fplValue.Name <- addWithComma variable.Name refBlock.Name 
+                fplValue.TypeSignature <- variable.TypeSignature @ refBlock.TypeSignature
+            | _ -> 
+                fplValue.Name <- addWithComma fplValue.Name refBlock.Name 
+                fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
     else
         if withAdding then 
             fplValue.ValueList.Add(refBlock)
@@ -204,6 +206,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
         eval_units st "pred" pos1 pos2 
+
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
@@ -306,7 +309,7 @@ let rec eval (st: SymbolTable) ast =
                 adjustSignature st fplValue s
         | _ -> ()
         st.EvalPop() 
-    | Ast.Var((pos1, pos2), s) ->
+    | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue 
@@ -314,11 +317,19 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
             let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fplValue)
-            varValue.Name <- s
+            varValue.Name <- name
             varValue.NameEndPos <- pos2
             tryAddBlock varValue 
         | EvalContext.InReferenceCreation fplValue ->
-            tryVariableInScopeOfBlockByName fplValue s
+            match FplValue.VariableInBlockScopeByName fplValue name with 
+            | ScopeSearchResult.Found variableInScope ->
+                // replace the reference by a pointer to an existing declared variable
+                fplValue.FplRepresentation <- FplRepresentation.Pointer variableInScope
+            | _ -> 
+                // otherwise, the variable is not declared, emit VAR01 diagnostics 
+                fplValue.Name <- addWithComma fplValue.Name name
+                fplValue.TypeSignature <- fplValue.TypeSignature @ ["undef"]
+                emitVAR01diagnostics name pos1 pos2
         | _ -> ()
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 

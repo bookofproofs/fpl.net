@@ -296,6 +296,14 @@ type TestInterpreterErrors() =
         runTestHelper "TestVAR00.fpl" fplCode code expected
 
 
+    [<DataRow("def pred Test() {x};", 1)>]
+    [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
+    [<TestMethod>]
+    member this.TestVAR01(fplCode:string, expected) =
+        let code = VAR01 ""
+        runTestHelper "TestVAR01.fpl" fplCode code expected
+
+
     [<DataRow("def pred Test(x,x:* pred) {true};", 1)>]
     [<DataRow("def pred Test(x,x:+ pred) {true};", 1)>]
     [<DataRow("def pred Test(x,x: pred) {true};", 1)>]
@@ -543,6 +551,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:Nat; T(x)} ;""", 0)>]
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 1)>]
+    [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =
         let code = SIG04 ("","","")
@@ -575,6 +584,8 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T() { not true };""", 0)>]
     [<DataRow("""def pred T() { dec ~x:pred; not x };""", 1)>]
     [<DataRow("""def pred T() { dec ~x:ind; not x };""", 0)>]
+    [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not (p)};""", 0)>]
+    [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not p};""", 0)>]
     [<TestMethod>]
     member this.TestLG000(fplCode:string, expected) =
         let code = LG000 ("","")
@@ -583,7 +594,10 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T() { not true };""", 0)>]
     [<DataRow("""def pred T() { dec ~x:pred; not x };""", 0)>]
     [<DataRow("""def pred T() { dec ~x:ind; not x };""", 1)>]
+    [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not (p)};""", 0)>]
+    [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not p};""", 0)>]
     [<TestMethod>]
     member this.TestLG001(fplCode:string, expected) =
         let code = LG001 ("","","")
-        runTestHelper "TestLG000.fpl" fplCode code expected
+        runTestHelper "TestLG001.fpl" fplCode code expected
+
