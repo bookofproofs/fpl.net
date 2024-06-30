@@ -156,10 +156,10 @@ let propagateReference (refBlock:FplValue) withAdding =
             // propagate only if refblock has all opened brackets closed and the name of its reference-typed parent is not yet ready
             if withAdding then 
                 fplValue.ValueList.Add(refBlock)
-            match fplValue.FplRepresentation with
+            match refBlock.FplRepresentation with
             | FplRepresentation.Pointer variable ->
-                fplValue.Name <- addWithComma variable.Name refBlock.Name 
-                fplValue.TypeSignature <- variable.TypeSignature @ refBlock.TypeSignature
+                fplValue.Name <- addWithComma fplValue.Name variable.Name 
+                fplValue.TypeSignature <- fplValue.TypeSignature @ variable.TypeSignature
             | _ -> 
                 fplValue.Name <- addWithComma fplValue.Name refBlock.Name 
                 fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
