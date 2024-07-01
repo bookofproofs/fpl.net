@@ -284,7 +284,8 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue ("$"+s.ToString())
             fplValue.NameEndPos <- pos2 // the full name ends where the dollar digits end 
-            fplValue.FplRepresentation <- FplRepresentation.Index s
+            if fplValue.FplRepresentation = FplRepresentation.Undef then
+                fplValue.FplRepresentation <- FplRepresentation.Index s
         | _ -> ()
         st.EvalPop() 
     | Ast.Extensionname((pos1, pos2), s) ->
@@ -309,6 +310,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
+            setRepresentation st (FplRepresentation.ObjRepr "obj")
             if (FplValue.IsVariadicVariableMany(fplValue)) then 
                 adjustSignature st fplValue ("*" + s)
             elif (FplValue.IsVariadicVariableMany1(fplValue)) then 
@@ -540,6 +542,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ByDef")
         match st.CurrentContext with 
         | EvalContext.InReferenceCreation fplValue ->
+            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
             adjustSignature st fplValue "bydef."
             eval st predicateWithQualificationAst
             emitPR001Diagnostics fplValue pos1 pos2
@@ -675,6 +678,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("And")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue -> 
+            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
             adjustSignature st fplValue "and"
             fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
             adjustSignature st fplValue "("
@@ -687,6 +691,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Or")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue -> 
+            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
             adjustSignature st fplValue "or"
             fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
             adjustSignature st fplValue "("
@@ -699,6 +704,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Xor")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue -> 
+            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
             adjustSignature st fplValue "xor"
             fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1 // increase the number of opened braces
             adjustSignature st fplValue "("
@@ -859,6 +865,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InPropertyBlock fplValue 
         | EvalContext.InConstructorBlock fplValue 
         | EvalContext.InReferenceCreation fplValue ->
+            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
             adjustSignature st fplValue "impl"
             adjustSignature st fplValue "("
             eval st predicateAst1
@@ -873,11 +880,13 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InPropertyBlock fplValue 
         | EvalContext.InConstructorBlock fplValue 
         | EvalContext.InReferenceCreation fplValue ->
+            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
             adjustSignature st fplValue "iif"
             adjustSignature st fplValue "("
             eval st predicateAst1
             eval st predicateAst2
             adjustSignature st fplValue ")"
+
         | _ -> ()
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
@@ -887,6 +896,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InPropertyBlock fplValue 
         | EvalContext.InConstructorBlock fplValue 
         | EvalContext.InReferenceCreation fplValue ->
+            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
             adjustSignature st fplValue "is"
             adjustSignature st fplValue "("
             eval st isOpArgAst
@@ -974,6 +984,7 @@ let rec eval (st: SymbolTable) ast =
     // | All of Positions * ((Ast list * Ast option) list * Ast)
     | Ast.All((pos1, pos2), (astsOpts, ast1)) ->
         st.EvalPush("All")
+        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
         eval st ast1
         astsOpts
         |> List.map (fun (asts, optAst) ->
@@ -984,6 +995,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Exists((pos1, pos2), (astsOpts, ast1)) ->
         st.EvalPush("Exists")
+        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
         eval st ast1
         astsOpts
         |> List.map (fun (asts, optAst) ->
@@ -995,6 +1007,7 @@ let rec eval (st: SymbolTable) ast =
     // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
     | Ast.ExistsN((pos1, pos2), ((ast1, (ast2, optAst)), ast3)) ->
         st.EvalPush("ExistsN")
+        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
         eval st ast1
         eval st ast2
         optAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
@@ -1168,6 +1181,7 @@ let rec eval (st: SymbolTable) ast =
         eval st signatureAst
         match st.CurrentContext with
         | EvalContext.InPropertySignature fplValue ->
+            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
             st.SetContext(EvalContext.InPropertyBlock fplValue) LogContext.Start
             match optAst with
             | Some ast1 -> 
