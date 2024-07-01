@@ -316,7 +316,10 @@ let emitSIG00Diagnostics (fplValue:FplValue) pos1 pos2 =
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
     match fplValue.ExpressionType with 
     | ExprType.Infix _ when fplValue.AuxiliaryInfo <> 2 -> 
-        detailed fplValue.ExpressionType 2 fplValue.AuxiliaryInfo pos1 pos2
+        if fplValue.TypeSignature.Length>2 && (fplValue.TypeSignature[2] = "+" || fplValue.TypeSignature[2] = "*") then 
+            () // avoid false positives for variadic variables 
+        else
+            detailed fplValue.ExpressionType 2 fplValue.AuxiliaryInfo pos1 pos2
     | ExprType.Prefix _ when fplValue.AuxiliaryInfo <> 1 -> 
         detailed fplValue.ExpressionType 1 fplValue.AuxiliaryInfo pos1 pos2
     | ExprType.Postfix _ when fplValue.AuxiliaryInfo <> 1 -> 

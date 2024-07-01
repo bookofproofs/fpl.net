@@ -484,6 +484,8 @@ type TestInterpreterErrors() =
         let code = ID012 ("","")
         runTestHelper "TestID012.fpl" fplCode code expected
 
+    [<DataRow("""def pred Or infix "or" 0 (x:+ pred) {true};""", 0)>]
+    [<DataRow("""def pred Or infix "or" 0 (x:* pred) {true};""", 0)>]
     [<DataRow("""def pred T infix "+" 0 () {true};""", 1)>]
     [<DataRow("""def pred T infix "+" 0 (x:obj) {true};""", 1)>]
     [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true};""", 0)>]
