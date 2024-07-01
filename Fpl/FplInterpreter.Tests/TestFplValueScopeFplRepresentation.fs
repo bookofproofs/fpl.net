@@ -40,8 +40,8 @@ type TestFplValueScopeFplRepresentation() =
             match var with 
             | "r" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, r.FplRepresentation)
             | "theory" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, theory.FplRepresentation)
-            | "inf1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.LangRepr FplLanguageConstruct.Inference, inf1.FplRepresentation)
-            | "inf2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.LangRepr FplLanguageConstruct.Inference, inf2.FplRepresentation)
+            | "inf1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, inf1.FplRepresentation)
+            | "inf2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, inf2.FplRepresentation)
             | "axi1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, axi1.FplRepresentation)
             | "axi2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, axi2.FplRepresentation)
             | "pst1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, pst1.FplRepresentation)
@@ -58,12 +58,12 @@ type TestFplValueScopeFplRepresentation() =
             | "con2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, con2.FplRepresentation)
             | "cla1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.LangRepr FplLanguageConstruct.Class, cla1.FplRepresentation)
             | "cla2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.LangRepr FplLanguageConstruct.Class, cla2.FplRepresentation)
-            | "pre1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.LangRepr FplLanguageConstruct.Predicate, pre1.FplRepresentation)
-            | "pre2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.LangRepr FplLanguageConstruct.Predicate, pre2.FplRepresentation)
+            | "pre1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, pre1.FplRepresentation)
+            | "pre2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, pre2.FplRepresentation)
             | "fun1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", fun1.FplRepresentation)
             | "fun2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", fun2.FplRepresentation)
-            | "prf1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, prf1.FplRepresentation)
-            | "prf2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, prf2.FplRepresentation)
+            | "prf1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, prf1.FplRepresentation)
+            | "prf2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, prf2.FplRepresentation)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -125,26 +125,26 @@ type TestFplValueScopeFplRepresentation() =
                 match var with
                 | "r" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, r.FplRepresentation)
                 | "theory" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, theory.FplRepresentation)
-                | "thm1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, thm1.FplRepresentation)
-                | "proofThm1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, proofThm1.FplRepresentation)
-                | "lem1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, lem1.FplRepresentation)
-                | "proofLem1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, proofLem1.FplRepresentation)
-                | "prp1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, prp1.FplRepresentation)
-                | "proofPrp1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, proofPrp1.FplRepresentation)
-                | "cor1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, cor1.FplRepresentation)
-                | "proofCor1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, proofCor1.FplRepresentation)
-                | "thm2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, thm2.FplRepresentation)
-                | "corThm2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, corThm2.FplRepresentation)
-                | "lem2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, lem2.FplRepresentation)
-                | "corLem2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, corLem2.FplRepresentation)
-                | "prp2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, prp2.FplRepresentation)
-                | "corPrp2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, corPrp2.FplRepresentation)
-                | "cor2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, cor2.FplRepresentation)
-                | "corCor2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, corCor2.FplRepresentation)
-                | "con1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, con1.FplRepresentation)
-                | "corCon1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, corCon1.FplRepresentation)
-                | "axi1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, axi1.FplRepresentation)
-                | "corAxi1"  -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, corAxi1.FplRepresentation) 
+                | "thm1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, thm1.FplRepresentation)
+                | "proofThm1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, proofThm1.FplRepresentation)
+                | "lem1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, lem1.FplRepresentation)
+                | "proofLem1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, proofLem1.FplRepresentation)
+                | "prp1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, prp1.FplRepresentation)
+                | "proofPrp1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, proofPrp1.FplRepresentation)
+                | "cor1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, cor1.FplRepresentation)
+                | "proofCor1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, proofCor1.FplRepresentation)
+                | "thm2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, thm2.FplRepresentation)
+                | "corThm2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, corThm2.FplRepresentation)
+                | "lem2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, lem2.FplRepresentation)
+                | "corLem2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, corLem2.FplRepresentation)
+                | "prp2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, prp2.FplRepresentation)
+                | "corPrp2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, corPrp2.FplRepresentation)
+                | "cor2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, cor2.FplRepresentation)
+                | "corCor2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, corCor2.FplRepresentation)
+                | "con1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, con1.FplRepresentation)
+                | "corCon1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, corCon1.FplRepresentation)
+                | "axi1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, axi1.FplRepresentation)
+                | "corAxi1"  -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, corAxi1.FplRepresentation) 
                 | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -232,7 +232,7 @@ type TestFplValueScopeFplRepresentation() =
             match var with
             | "r" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, r.FplRepresentation)
             | "theory" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, theory.FplRepresentation)
-            | "block" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, block.FplRepresentation); 
+            | "block" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, block.FplRepresentation); 
             | "x" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, x.FplRepresentation)
             | "y" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, y.FplRepresentation)
             | "xu" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", xu.FplRepresentation)
@@ -301,7 +301,7 @@ type TestFplValueScopeFplRepresentation() =
             match var with
             | "r" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, r.FplRepresentation)
             | "theory" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, theory.FplRepresentation)
-            | "block" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, block.FplRepresentation); 
+            | "block" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, block.FplRepresentation); 
             | "x" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, x.FplRepresentation)
             | "y" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, y.FplRepresentation)
             | "xu" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", xu.FplRepresentation)
@@ -370,7 +370,7 @@ type TestFplValueScopeFplRepresentation() =
             match var with
             | "r" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, r.FplRepresentation)
             | "theory" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, theory.FplRepresentation)
-            | "block" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, block.FplRepresentation); 
+            | "block" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, block.FplRepresentation); 
             | "x" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, x.FplRepresentation)
             | "y" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, y.FplRepresentation)
             | "xu" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", xu.FplRepresentation)
@@ -438,7 +438,7 @@ type TestFplValueScopeFplRepresentation() =
             match var with
             | "r" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, r.FplRepresentation)
             | "theory" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, theory.FplRepresentation)
-            | "block" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.True, block.FplRepresentation); 
+            | "block" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, block.FplRepresentation); 
             | "x" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, x.FplRepresentation)
             | "y" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, y.FplRepresentation)
             | "xu" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", xu.FplRepresentation)
@@ -550,7 +550,7 @@ type TestFplValueScopeFplRepresentation() =
             | "base5" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, base1.FplRepresentation)
             | "base6" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Index ((uint)1), base1.FplRepresentation)
             | "base7" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, base1.FplRepresentation)
-            | "base8" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.LangRepr FplLanguageConstruct.Proof, base1.FplRepresentation)
+            | "base8" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, base1.FplRepresentation)
             | "base9" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, base1.FplRepresentation)
             | "base10" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.LangRepr FplLanguageConstruct.Class, base1.FplRepresentation)
             | "base11" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, base1.FplRepresentation)

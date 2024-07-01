@@ -71,12 +71,17 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
             fplValue.Name <- addWithComma fplValue.Name str 
             if str = "not" then fplValue.Name <- fplValue.Name + " "
 
+let setRepresentation (st: SymbolTable) representation = 
+    match st.CurrentContext with
+    | EvalContext.NamedVarDeclarationInBlock fplValue 
+    | EvalContext.InPropertySignature fplValue 
+    | EvalContext.InConstructorSignature fplValue
+    | EvalContext.InSignature fplValue 
+    | EvalContext.InReferenceCreation fplValue -> 
+        fplValue.FplRepresentation <- representation
+    | _ -> ()
+
 let eval_units (st: SymbolTable) unitType pos1 pos2 = 
-    let setRepresentation (fv:FplValue) = 
-        if fv.FplRepresentation = FplRepresentation.Undef then
-            match unitType with
-            | "pred" -> fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
-            | _ -> ()
     match st.CurrentContext with
     | EvalContext.NamedVarDeclarationInBlock fplValue 
     | EvalContext.InPropertySignature fplValue 
@@ -89,7 +94,6 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
                 adjustSignature st fplValue $"+{unitType}"
             else
                 adjustSignature st fplValue unitType
-                setRepresentation fplValue
                 checkID009_ID010_ID011_Diagnostics st fplValue unitType pos1 pos2
     | EvalContext.InReferenceCreation fplValue -> 
         checkID012Diagnostics st fplValue unitType pos1 pos2
@@ -198,15 +202,17 @@ let rec eval (st: SymbolTable) ast =
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
         eval_units st "ind" pos1 pos2 
+        setRepresentation st (FplRepresentation.Index ((uint)0))
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         eval_units st "obj" pos1 pos2 
+        setRepresentation st (FplRepresentation.ObjRepr "obj")
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
         eval_units st "pred" pos1 pos2 
-
+        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
@@ -272,8 +278,10 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.NamedVarDeclarationInBlock fplValue 
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue
-        | EvalContext.InReferenceCreation fplValue
         | EvalContext.InSignature fplValue ->
+            adjustSignature st fplValue ("$"+s.ToString())
+            fplValue.NameEndPos <- pos2 // the full name ends where the dollar digits end 
+        | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue ("$"+s.ToString())
             fplValue.NameEndPos <- pos2 // the full name ends where the dollar digits end 
             fplValue.FplRepresentation <- FplRepresentation.Index s
@@ -884,6 +892,7 @@ let rec eval (st: SymbolTable) ast =
             eval st isOpArgAst
             eval st variableTypeAst
             adjustSignature st fplValue ")"
+
         | _ -> ()
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->

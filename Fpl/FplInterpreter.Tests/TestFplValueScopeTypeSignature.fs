@@ -639,10 +639,10 @@ type TestFplValueScopeTypeSignature() =
 
             match var with
             | "base1" -> Assert.AreEqual<string list>(["B"; "("; ")"], base1.TypeSignature)
-            | "base2" -> Assert.AreEqual<string list>(["C"; "("; "undef"; "undef"; "undef"; "undef"; ")"], base1.TypeSignature)
-            | "base3" -> Assert.AreEqual<string list>(["D"; "("; "self"; "undef"; "undef"; ")"], base1.TypeSignature)
+            | "base2" -> Assert.AreEqual<string list>(["C"; "("; "T1"; "func"; "ind"; "pred"; ")"], base1.TypeSignature)
+            | "base3" -> Assert.AreEqual<string list>(["D"; "("; "self"; "T1"; "func"; ")"], base1.TypeSignature)
             | "base4" -> Assert.AreEqual<string list>(["B"; "("; "In"; "("; "undef"; ")"; ")"], base1.TypeSignature)
-            | "base5" -> Assert.AreEqual<string list>(["C"; "("; "Test1"; "("; "undef"; ")"; "Test2"; "("; "undef"; "undef"; "undef"; ")"; ")"], base1.TypeSignature)
+            | "base5" -> Assert.AreEqual<string list>(["C"; "("; "Test1"; "("; "T1"; ")"; "Test2"; "("; "func"; "ind"; "pred"; ")"; ")"], base1.TypeSignature)
             | "base6" -> Assert.AreEqual<string list>(["E"; "("; "pred"; "undef"; "pred"; ")"], base1.TypeSignature)
             | _ -> Assert.IsTrue(false)
         | None -> 

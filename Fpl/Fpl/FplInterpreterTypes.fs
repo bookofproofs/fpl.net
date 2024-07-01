@@ -371,11 +371,8 @@ type FplPredicate =
     | Undetermined
     
 type FplLanguageConstruct =
-    | Predicate
     | Function
     | Class
-    | Inference
-    | Proof
     | Extension
 
 type ExprType = 
@@ -385,9 +382,9 @@ type ExprType =
     | NoType
     member this.Type = 
         match this with 
-        | Infix (symbol,precedence) -> sprintf "Infix %s preference %i" symbol precedence
-        | Postfix symbol -> sprintf "Postfix %s " symbol
-        | Prefix symbol -> sprintf "Prefix %s " symbol
+        | Infix (symbol,precedence) -> sprintf "infix `%s` (with precedence `%i`)" symbol precedence
+        | Postfix symbol -> sprintf "postfix `%s` " symbol
+        | Prefix symbol -> sprintf "prefix `%s` " symbol
         | NoType -> "None"
 
 type FplRepresentation = 
@@ -408,9 +405,6 @@ type FplRepresentation =
         | LangRepr FplLanguageConstruct.Class -> "class type"
         | LangRepr FplLanguageConstruct.Extension -> "extension type"
         | LangRepr FplLanguageConstruct.Function -> "function type"
-        | LangRepr FplLanguageConstruct.Predicate -> "predicate type"
-        | LangRepr FplLanguageConstruct.Proof -> "proof type"
-        | LangRepr FplLanguageConstruct.Inference -> "inference type"
         | Undef -> "undefined"
 and ScopeSearchResult = 
     | FoundAssociate of string 
@@ -845,6 +839,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     static member CreateObject(pos1,pos2) =
         let obj = new FplValue("obj", FplValueType.Object, (pos1, pos2), None)
         obj.NameIsFinal <- true
+        obj.FplRepresentation <- FplRepresentation.ObjRepr "obj"
         obj
 
     /// A factory method for the evaluation of Fpl class definitions
@@ -855,25 +850,34 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.Lemma
         | FplValueType.Proposition
         | FplValueType.Corollary
-        | FplValueType.Conjecture
+        | FplValueType.Proof
+        | FplValueType.Predicate 
+        | FplValueType.RuleOfInference
         | FplValueType.Premise
         | FplValueType.Conclusion
-        | FplValueType.Proof
-        | FplValueType.RuleOfInference
+        | FplValueType.Conjecture -> 
+            let ret = new FplValue("", fplBlockType, positions, Some parent)
+            ret.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+            ret
+        | FplValueType.Constructor -> 
+            let ret = new FplValue("", fplBlockType, positions, Some parent)
+            ret.FplRepresentation <- FplRepresentation.ObjRepr "obj"
+            ret
         | FplValueType.Expression
         | FplValueType.Theory
         | FplValueType.MandatoryPredicate
         | FplValueType.OptionalPredicate
-        | FplValueType.Predicate -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Reference -> new FplValue("", fplBlockType, positions, Some parent)
-        | FplValueType.Constructor
         | FplValueType.FunctionalTerm
         | FplValueType.Variable
         | FplValueType.VariadicVariableMany
         | FplValueType.VariadicVariableMany1
         | FplValueType.MandatoryFunctionalTerm
-        | FplValueType.OptionalFunctionalTerm
-        | FplValueType.Class -> new FplValue("", fplBlockType, positions, Some parent)
+        | FplValueType.OptionalFunctionalTerm -> new FplValue("", fplBlockType, positions, Some parent)
+        | FplValueType.Class -> 
+            let ret = new FplValue("", fplBlockType, positions, Some parent)
+            ret.FplRepresentation <- FplRepresentation.LangRepr FplLanguageConstruct.Class
+            ret
         | FplValueType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
         | FplValueType.Localization -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Object -> raise (ArgumentException("Please use CreateObject for creating a primitive object instead"))

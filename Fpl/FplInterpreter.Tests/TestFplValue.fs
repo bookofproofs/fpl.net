@@ -28,28 +28,28 @@ type TestFplValue() =
             Assert.AreEqual<string list>([], fv.TypeSignature)
         testFactory FplValueType.VariadicVariableMany FplRepresentation.Undef
         testFactory FplValueType.VariadicVariableMany1 FplRepresentation.Undef 
-        testFactory FplValueType.Axiom FplRepresentation.Undef
-        testFactory FplValueType.Theorem FplRepresentation.Undef
-        testFactory FplValueType.Lemma FplRepresentation.Undef
-        testFactory FplValueType.Proposition FplRepresentation.Undef
-        testFactory FplValueType.Corollary FplRepresentation.Undef
-        testFactory FplValueType.Conjecture FplRepresentation.Undef
-        testFactory FplValueType.Premise FplRepresentation.Undef
-        testFactory FplValueType.Conclusion FplRepresentation.Undef
-        testFactory FplValueType.Proof FplRepresentation.Undef
-        testFactory FplValueType.RuleOfInference FplRepresentation.Undef
+        testFactory FplValueType.Axiom (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Theorem (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Lemma (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Proposition (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Corollary (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Conjecture (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Premise (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Conclusion (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Proof (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.RuleOfInference (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Predicate (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Object (FplRepresentation.ObjRepr "obj")
+        testFactory FplValueType.Constructor (FplRepresentation.ObjRepr "obj")
         testFactory FplValueType.Expression FplRepresentation.Undef
         testFactory FplValueType.Theory FplRepresentation.Undef
-        testFactory FplValueType.Predicate FplRepresentation.Undef
-        testFactory FplValueType.Constructor FplRepresentation.Undef
         testFactory FplValueType.FunctionalTerm FplRepresentation.Undef
         testFactory FplValueType.Variable FplRepresentation.Undef
         testFactory FplValueType.MandatoryFunctionalTerm FplRepresentation.Undef
         testFactory FplValueType.OptionalFunctionalTerm FplRepresentation.Undef
         testFactory FplValueType.MandatoryPredicate FplRepresentation.Undef
         testFactory FplValueType.OptionalPredicate FplRepresentation.Undef
-        testFactory FplValueType.Class FplRepresentation.Undef
-        testFactory FplValueType.Object FplRepresentation.Undef
+        testFactory FplValueType.Class (FplRepresentation.LangRepr FplLanguageConstruct.Class)
 
 
     [<DataRow("inference TestId() {pre: true con: true};", "TestId()", "TestId ( )")>]
