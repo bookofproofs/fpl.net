@@ -327,7 +327,8 @@ let emitSIG00Diagnostics (fplValue:FplValue) pos1 pos2 =
     | _ -> ()
 
 let emitSIG01Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 = 
-    if fplValue.BlockType = FplValueType.Reference || fplValue.BlockType = FplValueType.Expression then 
+    if (fplValue.BlockType = FplValueType.Reference || 
+       fplValue.BlockType = FplValueType.Expression) then 
         // collect candidates to match this reference from all theories and
         // add them to fplValues's scope
         let expressionId = fplValue.FplId
@@ -352,7 +353,9 @@ let emitSIG01Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 =
                     | _ -> ()
             )
         )
-        if fplValue.Scope.Count = 0 then
+        if expressionId = "=" then 
+            () // ignore the inbuilt-symbol "=" for SIG01 diagnostics
+        elif fplValue.Scope.Count = 0 then
             let diagnostic =
                 { 
                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter

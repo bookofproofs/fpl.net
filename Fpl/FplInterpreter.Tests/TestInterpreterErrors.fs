@@ -511,6 +511,7 @@ type TestInterpreterErrors() =
         let code = SIG00 ("",0)
         runTestHelper "TestSIG00.fpl" fplCode code expected
 
+    [<DataRow("""def pred NotEqual infix "<>" 5 (x,y: tpl) { not (x = y) };""", 0)>]
     [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {(x + y)};""", 0)>]
     [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {+x};""", 0)>]
     [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {x+};""", 0)>]
