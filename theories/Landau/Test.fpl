@@ -1,4 +1,4 @@
-theorem T () { true    }
+theorem T () { false    }
 
-proof T$1 {1. |- Test$1$2              };
+proof T$1 {1. |- trivial };
 ;

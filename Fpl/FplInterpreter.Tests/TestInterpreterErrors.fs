@@ -511,7 +511,8 @@ type TestInterpreterErrors() =
         let code = SIG00 ("",0)
         runTestHelper "TestSIG00.fpl" fplCode code expected
 
-    [<DataRow("""def pred NotEqual infix "<>" 5 (x,y: tpl) { not (x = y) };""", 0)>]
+    [<DataRow("""def pred Equal infix "=" 0 (x,y:tpl) { delegate.Equal(x,y) } def pred NotEqual (x,y: tpl) { not (x = y) };""", 0)>]
+    [<DataRow("""def pred NotEqual (x,y: tpl) { not (x = y) };""", 1)>]
     [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {(x + y)};""", 0)>]
     [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {+x};""", 0)>]
     [<DataRow("""def pred T infix "+" 0 (x,y:obj) {true} def pred Test() {x+};""", 0)>]
@@ -541,13 +542,6 @@ type TestInterpreterErrors() =
     member this.TestSIG02(fplCode:string, expected) =
         let code = SIG02 ("",0, "")
         runTestHelper "TestSIG02.fpl" fplCode code expected
-
-    [<DataRow("""def pred T infix "=" 1 (x,y:obj) {true};""", 1)>]
-    [<DataRow("""def pred T1 infix "+" 1 (x,y:obj) {true};""", 0)>]
-    [<TestMethod>]
-    member this.TestSIG03(fplCode:string, expected) =
-        let code = SIG03 
-        runTestHelper "TestSIG03.fpl" fplCode code expected
 
     [<DataRow("""def pred T1() {true} def pred Test() { dec ~x:obj; T1(x) };""", 1)>]
     [<DataRow("""def pred T1() {true} def pred Test() { OtherTest(X) };""", 1)>]

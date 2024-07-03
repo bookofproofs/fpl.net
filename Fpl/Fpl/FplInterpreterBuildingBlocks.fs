@@ -394,7 +394,6 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InSignature fplValue ->
             fplValue.ExpressionType <- ExprType.Infix (symbol, fplValue.AuxiliaryInfo)
             emitSIG02Diagnostics st fplValue pos1 pos2 
-            emitSIG03Diagnostics fplValue pos1 pos2
         | _ -> ()
         st.EvalPop() 
     | Ast.Postfix((pos1, pos2), symbol) -> 

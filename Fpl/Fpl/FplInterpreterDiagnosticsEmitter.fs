@@ -353,9 +353,7 @@ let emitSIG01Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 =
                     | _ -> ()
             )
         )
-        if expressionId = "=" then 
-            () // ignore the inbuilt-symbol "=" for SIG01 diagnostics
-        elif fplValue.Scope.Count = 0 then
+        if fplValue.Scope.Count = 0 then
             let diagnostic =
                 { 
                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
@@ -408,26 +406,6 @@ let emitSIG02Diagnostics (st:SymbolTable) (fplValue:FplValue) pos1 pos2 =
             FplParser.parserDiagnostics.AddDiagnostic diagnostic
     | _ -> ()
         
-let emitSIG03Diagnostics (fplValue:FplValue) pos1 pos2 = 
-    let precedences = Dictionary<int,FplValue>()
-    match fplValue.ExpressionType with
-    | ExprType.Infix (symbol, _) -> 
-        if symbol = "=" then
-            match fplValue.ExpressionType with
-            | ExprType.Infix (symbol, precedence) ->
-                let diagnostic =
-                    { 
-                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                        Diagnostic.Severity = DiagnosticSeverity.Error
-                        Diagnostic.StartPos = pos1
-                        Diagnostic.EndPos = pos2
-                        Diagnostic.Code = SIG03 
-                        Diagnostic.Alternatives = None
-                    }
-                FplParser.parserDiagnostics.AddDiagnostic diagnostic
-            | _ -> ()
-    | _ -> ()
-
 let emitSIG04Diagnostics (fplValue:FplValue) (candidates: FplValue list) firstFailingArgument pos1 pos2 =
     let candidateNames =
         candidates
