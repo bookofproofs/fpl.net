@@ -27,11 +27,15 @@ type Delegates() =
     let _equal (a:FplValue) (b:FplValue) =
         match a.FplRepresentation with
         | FplRepresentation.PredRepr FplPredicate.Undetermined -> 
-            failwithf "Predicate `=` cannot be evaluated because the first argument is undertermined."
+            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undertermined." a.FplId
+        | FplRepresentation.Undef -> 
+            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." a.FplId
         | _ -> 
             match b.FplRepresentation with
             | FplRepresentation.PredRepr FplPredicate.Undetermined -> 
-                failwithf "Predicate `=` cannot be evaluated because the second argument is undertermined."
+                failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undertermined." a.FplId
+            | FplRepresentation.Undef -> 
+                failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." a.FplId
             | _ -> 
                 failwithf "OK:%b" (a.FplRepresentation = b.FplRepresentation)
 
@@ -46,9 +50,7 @@ type Delegates() =
         ]
 
     member this.CallExternalDelegate(name: string, args: FplValue list) =
-        let nameParams = name + ":" + args.Length.ToString()
-        
-        match _externalDelegates.TryFind(nameParams) with
+        match _externalDelegates.TryFind(name) with
         | Some func -> func args
         | None -> failwithf "Unknown delegate `%s`" name 
 

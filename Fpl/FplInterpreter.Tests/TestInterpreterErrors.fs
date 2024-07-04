@@ -484,6 +484,8 @@ type TestInterpreterErrors() =
         runTestHelper "TestID012.fpl" fplCode code expected
 
     [<DataRow("def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
+    [<DataRow("def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
+    [<DataRow("def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `x` is undefined.")>]
     [<TestMethod>]
     member this.TestID013(fplCode:string, expected, expectedErrMsg:string) =
         let code = ID013 ""

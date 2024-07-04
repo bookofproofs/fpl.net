@@ -444,6 +444,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         match this.TypeSignature with
         | "del."::x::xs -> x
         | "bas."::x::xs -> x
+        | "undef"::[] -> this.Name
         | _ -> this.TypeSignature.Head
 
     /// Type of the Expr
