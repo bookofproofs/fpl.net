@@ -2,7 +2,7 @@
 open System.Collections.Generic
 open FParsec
 open ErrDiagnostics
-open FplGrammarTypes
+open FplDelegates
 open FplParser
 open FplInterpreterTypes
 
@@ -58,6 +58,18 @@ let emitVAR03diagnosticsForCorollarysSignatureVariable (fplValue:FplValue) =
             | ScopeSearchResult.Found conflict ->
                 emitVAR03diagnostics kv.Value conflict 
             | _ -> ()
+
+let emitID000Diagnostics streamName astType = 
+    let diagnostic =
+        { 
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = Position(streamName, 0, 1, 1)
+            Diagnostic.EndPos = Position(streamName, 0, 1, 1)
+            Diagnostic.Code = ID000 astType
+            Diagnostic.Alternatives = None 
+        }
+    FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
 let emitID002diagnostics (fplValue:FplValue) incorrectBlockType = 
     let diagnostic = { 
@@ -290,17 +302,25 @@ let checkID012Diagnostics (st:SymbolTable) (parentConstructorCall:FplValue) iden
                 }
             FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-let emitID000Diagnostics streamName astType = 
-    let diagnostic =
-        { 
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = Position(streamName, 0, 1, 1)
-            Diagnostic.EndPos = Position(streamName, 0, 1, 1)
-            Diagnostic.Code = ID000 astType
-            Diagnostic.Alternatives = None 
-        }
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+let emitID013Diagnostics (fplValue:FplValue) pos1 pos2 = 
+    let d = Delegates()
+    try
+        d.CallExternalDelegate(fplValue.FplId, fplValue.ValueList |> Seq.toList)
+    with ex -> 
+        if ex.Message.StartsWith("OK:") then
+            match ex.Message.Substring(3) with
+            | _ -> () // todo
+        else
+            let diagnostic =
+                { 
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = ID013 ex.Message
+                    Diagnostic.Alternatives = None
+                }
+            FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
 let emitSIG00Diagnostics (fplValue:FplValue) pos1 pos2 = 
     let detailed (exprType:ExprType) expectedArity actualArity pos1 pos2 = 

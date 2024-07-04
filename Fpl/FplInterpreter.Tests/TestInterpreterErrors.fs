@@ -2,7 +2,6 @@ namespace FplInterpreter.Tests
 
 open System.IO
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open FParsec
 open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
@@ -322,7 +321,7 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test() {true prty func X(x:+ pred)->obj {dec ~x:obj; return x} };", 1)>]
     [<DataRow("inf ModusPonens() {dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q};", 0)>]
     [<DataRow("def pred Test() {true prty pred X(y:+ pred) {dec ~x:obj; ex x {true}} };", 0)>]
-    [<DataRow("def pred Test() {true prty func X(y:+ pred)->obj {dec ~x:obj; ex x {true}} };", 0)>]
+    [<DataRow("def pred Test() {true prty func X(y:+ pred)->obj {dec ~x:obj; return x} };", 0)>]
     [<DataRow("theorem TestId(x: ind) {true}       proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
     [<DataRow("theorem TestId() {dec ~x:ind; true} proof TestId$1 { dec ~x:obj; 1. |- trivial };", 1)>]
     [<DataRow("theorem TestId(x: ind) {true}       proof TestId$1 { 1. |- trivial };", 0)>]
@@ -483,6 +482,13 @@ type TestInterpreterErrors() =
     member this.TestID012(fplCode:string, expected) =
         let code = ID012 ("","")
         runTestHelper "TestID012.fpl" fplCode code expected
+
+    [<DataRow("def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
+    [<TestMethod>]
+    member this.TestID013(fplCode:string, expected, expectedErrMsg:string) =
+        let code = ID013 ""
+        let errMsg = runTestHelper "TestID013.fpl" fplCode code expected
+        Assert.AreEqual<string>(expectedErrMsg, errMsg)
 
     [<DataRow("""def pred Or infix "or" 0 (x:+ pred) {true};""", 0)>]
     [<DataRow("""def pred Or infix "or" 0 (x:* pred) {true};""", 0)>]

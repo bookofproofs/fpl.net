@@ -57,7 +57,10 @@ let runTestHelper filename fplCode (code:ErrDiagnostics.DiagnosticCode) (expecte
     if syntaxErrors.Length > 0 then
         failwithf "Syntax errors detected."
     let result = filterByErrorCode FplParser.parserDiagnostics code.Code
-    if result.Length > 0 then 
-        printf "Result %s" result.Head.Message
     Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode(filename, "", true) |> ignore
+    if result.Length > 0 then 
+        printf "Result %s" result.Head.Message
+        result.Head.Message
+    else    
+        "missing error message"

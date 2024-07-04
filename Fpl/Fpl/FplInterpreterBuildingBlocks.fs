@@ -918,6 +918,7 @@ let rec eval (st: SymbolTable) ast =
             eval st fplDelegateIdentifierAst
             eval st argumentTupleAst
             // forget refBlock but propagate its name and typesignature into its parent
+            emitID013Diagnostics refBlock pos1 pos2
             propagateReference refBlock false 
         | _ -> ()
         st.SetContext(oldContext) LogContext.End

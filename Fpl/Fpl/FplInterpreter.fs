@@ -1,7 +1,5 @@
 ﻿module FplInterpreter
 open System
-open FParsec
-open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterUsesClause
 open FplInterpreterBuildingBlocks

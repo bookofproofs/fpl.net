@@ -89,6 +89,7 @@ type DiagnosticCode =
     | ID010 of string
     | ID011 of string * string
     | ID012 of string * string 
+    | ID013 of string
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -158,6 +159,7 @@ type DiagnosticCode =
             | ID010 _ -> "ID010"
             | ID011 _ -> "ID011"
             | ID012 _ -> "ID012"
+            | ID013 _ -> "ID013"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -227,6 +229,7 @@ type DiagnosticCode =
             | ID010 name -> sprintf "The type `%s` could not be found (are you missing a uses clause?)" name
             | ID011 (name, inheritanceChain) -> sprintf "Inheritance from `%s` can be dropped because of the inheritance chain %s." name inheritanceChain
             | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are %s." name candidates
+            | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."

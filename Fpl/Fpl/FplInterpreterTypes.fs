@@ -440,7 +440,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 _name <- value
 
     /// First element of the type signature.
-    member this.FplId = _typeSignature.Head
+    member this.FplId = 
+        match this.TypeSignature with
+        | "del."::x::xs -> x
+        | "bas."::x::xs -> x
+        | _ -> this.TypeSignature.Head
 
     /// Type of the Expr
     member this.ExpressionType
