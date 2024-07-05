@@ -441,11 +441,22 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
 
     /// First element of the type signature.
     member this.FplId = 
-        match this.TypeSignature with
-        | "del."::x::xs -> x
-        | "bas."::x::xs -> x
-        | "undef"::[] -> this.Name
-        | _ -> this.TypeSignature.Head
+        match this.BlockType with 
+        | FplValueType.Variable 
+        | FplValueType.VariadicVariableMany 
+        | FplValueType.VariadicVariableMany1 
+        | FplValueType.Proof -> this.Name
+        | FplValueType.Corollary -> this.Name.Substring(0,this.Name.IndexOf('('))
+        | FplValueType.Reference -> 
+            match this.TypeSignature with
+            | x::xs when this.Name.StartsWith("bas.") -> $"bas.{x}"
+            | x::y::xs when this.Name.StartsWith("del.") -> $"del.{y}"
+            | x::xs -> if x = "ind" || x = "undef" || x = "pred" || x = "func" then this.Name else x
+            | _ -> this.Name
+        | _ -> 
+            match this.TypeSignature with
+            | x::xs -> x
+            | _ -> this.Name
 
     /// Type of the Expr
     member this.ExpressionType
