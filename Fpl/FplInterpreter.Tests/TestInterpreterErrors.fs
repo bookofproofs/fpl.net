@@ -486,6 +486,8 @@ type TestInterpreterErrors() =
     [<DataRow("def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
     [<DataRow("def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
     [<DataRow("def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `x` is undefined.")>]
+    [<DataRow("def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `y` is undefined.")>]
+    [<DataRow("def pred T(x,y:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `y` is undefined.")>]
     [<TestMethod>]
     member this.TestID013(fplCode:string, expected, expectedErrMsg:string) =
         let code = ID013 ""

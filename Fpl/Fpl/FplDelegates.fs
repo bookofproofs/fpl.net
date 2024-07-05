@@ -25,19 +25,27 @@ operator of the FPL language. Instead, if needed, try to rewrite it according to
 type Delegates() = 
 
     let _equal (a:FplValue) (b:FplValue) =
-        match a.FplRepresentation with
+        let getActual (x:FplValue) = 
+            match x.FplRepresentation with
+            | FplRepresentation.Pointer variable -> variable
+            | _ -> x
+
+        let a1 = getActual(a)
+        let b1 = getActual(b)
+
+        match a1.FplRepresentation with
         | FplRepresentation.PredRepr FplPredicate.Undetermined -> 
-            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undertermined." a.FplId
+            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undertermined." a1.FplId
         | FplRepresentation.Undef -> 
-            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." a.FplId
+            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." a1.FplId
         | _ -> 
-            match b.FplRepresentation with
+            match b1.FplRepresentation with
             | FplRepresentation.PredRepr FplPredicate.Undetermined -> 
-                failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undertermined." a.FplId
+                failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undertermined." b1.FplId
             | FplRepresentation.Undef -> 
-                failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." a.FplId
+                failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." b1.FplId
             | _ -> 
-                failwithf "OK:%b" (a.FplRepresentation = b.FplRepresentation)
+                failwithf "OK:%b" (a1.FplRepresentation = b1.FplRepresentation)
 
     let _externalDelegates = 
         Map.ofList [
