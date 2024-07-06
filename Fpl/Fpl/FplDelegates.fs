@@ -34,23 +34,29 @@ type Delegates() =
         let b1 = getActual(b)
 
         match a1.FplRepresentation with
-        | FplRepresentation.PredRepr FplPredicate.Undetermined -> 
-            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undertermined." a1.FplId
         | FplRepresentation.Undef -> 
             failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." a1.FplId
+        | _ -> ()
+
+        match b1.FplRepresentation with
+        | FplRepresentation.Undef -> 
+            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." b1.FplId
+        | _ -> ()
+
+        match a1.FplRepresentation with
+        | FplRepresentation.PredRepr FplPredicate.Undetermined -> 
+            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undetermined." a1.FplId
         | _ -> 
             match b1.FplRepresentation with
             | FplRepresentation.PredRepr FplPredicate.Undetermined -> 
-                failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undertermined." b1.FplId
-            | FplRepresentation.Undef -> 
-                failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." b1.FplId
+                failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undetermined." b1.FplId
             | _ -> 
                 failwithf "OK:%b" (a1.FplRepresentation = b1.FplRepresentation)
 
     let _externalDelegates = 
         Map.ofList [
             (
-                "Equal", fun values -> 
+                "del.Equal", fun values -> 
                     match values with
                     | x::y::[] -> _equal x y
                     | _ -> failwithf "Predicate `=` takes 2 arguments, got %i." values.Length

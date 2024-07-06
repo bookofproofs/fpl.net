@@ -9,6 +9,124 @@ open CommonTestHelpers
 [<TestClass>]
 type TestInterpreterErrors() =
 
+    member this.PrepareTestNSP05a (delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let input = """;"""
+        let currDir = Directory.GetCurrentDirectory()
+
+        File.WriteAllText(Path.Combine(currDir, "Fpl.Commons.fpl"), input)
+        File.WriteAllText(Path.Combine(currDir, "lib", "Fpl.Commons.fpl"), input)
+        let uri = System.Uri(Path.Combine(currDir, "Fpl.Commons.fpl"))
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            deleteFilesWithExtension currDir "fpl"
+            deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
+            None
+        else
+            let parsedAsts = ParsedAstList()
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
+
+    member this.PrepareTestNSP04CircularABCA(delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let A = """uses Test2_B;"""
+        let B = """uses Test2_C;"""
+        let C = """uses Test2_A;"""
+        let currDir = Directory.GetCurrentDirectory()
+
+        File.WriteAllText(Path.Combine(currDir, "Test2_A.fpl"), A)
+        File.WriteAllText(Path.Combine(currDir, "Test2_B.fpl"), B)
+        File.WriteAllText(Path.Combine(currDir, "Test2_C.fpl"), C)
+        let uri = System.Uri(Path.Combine(currDir, "Test2_A.fpl"))
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            deleteFilesWithExtension currDir "fpl"
+            None
+        else
+            let parsedAsts = ParsedAstList()
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
+            Some (st)
+
+    member this.PrepareTestNSP04CircularAA(delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let A = """uses Test1_A;"""
+        let pathToFile =
+            Path.Combine(Directory.GetCurrentDirectory(), "Test1_A.fpl")
+        File.WriteAllText(pathToFile, A)
+        let uri = System.Uri(pathToFile)
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            File.Delete(pathToFile)
+            None
+        else
+            let parsedAsts = ParsedAstList()
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
+            Some (st)
+
+    member this.PrepareTestNSP04NonCircular(delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let input = """
+            uses Fpl.Commons
+            uses Fpl.SetTheory
+            ;"""
+        let pathToFile =
+            Path.Combine(Directory.GetCurrentDirectory(), "Test1_A.fpl")
+        File.WriteAllText(pathToFile, input)
+        let uri = System.Uri(pathToFile)
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            File.Delete(pathToFile)
+            None
+        else
+            let parsedAsts = ParsedAstList()
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
+
+    member this.PrepareTestNSP05 (delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let input = """;"""
+        let currDir = Directory.GetCurrentDirectory()
+
+        File.WriteAllText(Path.Combine(currDir, "Fpl.Commons.fpl"), input)
+        let uri = System.Uri(Path.Combine(currDir, "Fpl.Commons.fpl"))
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            deleteFilesWithExtension currDir "fpl"
+            None
+        else
+            let parsedAsts = ParsedAstList()
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
+
+    member this.PrepareTestNSP05CrossCheck (delete:bool) =
+        FplParser.parserDiagnostics.Clear()
+        let input = """;"""
+        let currDir = Directory.GetCurrentDirectory()
+
+        File.WriteAllText(Path.Combine(currDir, "Test.fpl"), input)
+        let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+        let fplLibUrl =
+            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        if delete then 
+            deleteFilesWithExtension currDir "fpl"
+            deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
+            None
+        else
+            let parsedAsts = ParsedAstList()
+            let st = SymbolTable(parsedAsts, true)
+            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
+            Some (st)
+
     [<TestMethod>]
     member this.TestGEN00() =
         let code = GEN00 ""
@@ -45,24 +163,6 @@ type TestInterpreterErrors() =
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual<int>(1, result.Length)
 
-    member this.PrepareTestNSP04CircularAA(delete:bool) =
-        FplParser.parserDiagnostics.Clear()
-        let A = """uses Test1_A;"""
-        let pathToFile =
-            Path.Combine(Directory.GetCurrentDirectory(), "Test1_A.fpl")
-        File.WriteAllText(pathToFile, A)
-        let uri = System.Uri(pathToFile)
-        let fplLibUrl =
-            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        if delete then 
-            File.Delete(pathToFile)
-            None
-        else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
-            FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
-            Some (st)
-
     [<TestMethod>]
     member this.TestNSP04CircularAA() =
         let code = NSP04 "Test1_A -> Test1_A"
@@ -71,28 +171,6 @@ type TestInterpreterErrors() =
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP04CircularAA(true) |> ignore
-
-    member this.PrepareTestNSP04CircularABCA(delete:bool) =
-        FplParser.parserDiagnostics.Clear()
-        let A = """uses Test2_B;"""
-        let B = """uses Test2_C;"""
-        let C = """uses Test2_A;"""
-        let currDir = Directory.GetCurrentDirectory()
-
-        File.WriteAllText(Path.Combine(currDir, "Test2_A.fpl"), A)
-        File.WriteAllText(Path.Combine(currDir, "Test2_B.fpl"), B)
-        File.WriteAllText(Path.Combine(currDir, "Test2_C.fpl"), C)
-        let uri = System.Uri(Path.Combine(currDir, "Test2_A.fpl"))
-        let fplLibUrl =
-            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        if delete then 
-            deleteFilesWithExtension currDir "fpl"
-            None
-        else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
-            FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
-            Some (st)
 
     [<TestMethod>]
     member this.TestNSP04CircularABCA() =
@@ -103,28 +181,6 @@ type TestInterpreterErrors() =
         Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP04CircularABCA(true) |> ignore
 
-
-    member this.PrepareTestNSP04NonCircular(delete:bool) =
-        FplParser.parserDiagnostics.Clear()
-        let input = """
-            uses Fpl.Commons
-            uses Fpl.SetTheory
-            ;"""
-        let pathToFile =
-            Path.Combine(Directory.GetCurrentDirectory(), "Test1_A.fpl")
-        File.WriteAllText(pathToFile, input)
-        let uri = System.Uri(pathToFile)
-        let fplLibUrl =
-            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        if delete then 
-            File.Delete(pathToFile)
-            None
-        else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
-            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
-            Some (st)
-
     [<TestMethod>]
     member this.TestNSP04NonCircular() =
         this.PrepareTestNSP04NonCircular(false) |> ignore
@@ -132,25 +188,6 @@ type TestInterpreterErrors() =
         let result = filterByErrorCode FplParser.parserDiagnostics code.Code
         Assert.AreEqual<int>(0, result.Length)
         this.PrepareTestNSP04NonCircular(true) |> ignore
-
-
-    member this.PrepareTestNSP05 (delete:bool) =
-        FplParser.parserDiagnostics.Clear()
-        let input = """;"""
-        let currDir = Directory.GetCurrentDirectory()
-
-        File.WriteAllText(Path.Combine(currDir, "Fpl.Commons.fpl"), input)
-        let uri = System.Uri(Path.Combine(currDir, "Fpl.Commons.fpl"))
-        let fplLibUrl =
-            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        if delete then 
-            deleteFilesWithExtension currDir "fpl"
-            None
-        else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
-            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
-            Some (st)
 
     [<TestMethod>]
     member this.TestNSP05() =
@@ -161,26 +198,6 @@ type TestInterpreterErrors() =
         Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP05(true) |> ignore
 
-    member this.PrepareTestNSP05a (delete:bool) =
-        FplParser.parserDiagnostics.Clear()
-        let input = """;"""
-        let currDir = Directory.GetCurrentDirectory()
-
-        File.WriteAllText(Path.Combine(currDir, "Fpl.Commons.fpl"), input)
-        File.WriteAllText(Path.Combine(currDir, "lib", "Fpl.Commons.fpl"), input)
-        let uri = System.Uri(Path.Combine(currDir, "Fpl.Commons.fpl"))
-        let fplLibUrl =
-            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        if delete then 
-            deleteFilesWithExtension currDir "fpl"
-            deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
-            None
-        else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
-            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
-            Some (st)
-
     [<TestMethod>]
     member this.TestNSP05a() =
         let code = NSP05 (["./"; "./lib"; "https"], "Fpl.Commons", "./")
@@ -190,25 +207,6 @@ type TestInterpreterErrors() =
         Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP05a(true) |> ignore
 
-
-    member this.PrepareTestNSP05CrossCheck (delete:bool) =
-        FplParser.parserDiagnostics.Clear()
-        let input = """;"""
-        let currDir = Directory.GetCurrentDirectory()
-
-        File.WriteAllText(Path.Combine(currDir, "Test.fpl"), input)
-        let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
-        let fplLibUrl =
-            "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        if delete then 
-            deleteFilesWithExtension currDir "fpl"
-            deleteFilesWithExtension (Path.Combine(currDir, "lib")) "fpl"
-            None
-        else
-            let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
-            FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
-            Some (st)
 
     [<TestMethod>]
     member this.TestNSP05CrossCheck() =
@@ -487,11 +485,11 @@ type TestInterpreterErrors() =
     [<DataRow("def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
     [<DataRow("def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `x` is undefined.")>]
     [<DataRow("def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `y` is undefined.")>]
-    [<DataRow("def pred T(x,y:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `y` is undefined.")>]
+    [<DataRow("def pred T(x,y:pred) {del.Equal(true,y)};", 1, "Predicate `=` cannot be evaluated because the argument `y` is undetermined.")>]
     [<TestMethod>]
     member this.TestID013(fplCode:string, expected, expectedErrMsg:string) =
         let code = ID013 ""
-        let errMsg = runTestHelper "TestID013.fpl" fplCode code expected
+        let errMsg = runTestHelperWithText "TestID013.fpl" fplCode code expected
         Assert.AreEqual<string>(expectedErrMsg, errMsg)
 
     [<DataRow("""def pred Or infix "or" 0 (x:+ pred) {true};""", 0)>]
@@ -591,6 +589,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T() { not true };""", 0)>]
     [<DataRow("""def pred T() { dec ~x:pred; not x };""", 1)>]
     [<DataRow("""def pred T() { dec ~x:ind; not x };""", 0)>]
+    [<DataRow("""def pred T() { all x {true} };""", 0)>]
     [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not (p)};""", 0)>]
     [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not p};""", 0)>]
     [<TestMethod>]
@@ -601,6 +600,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T() { not true };""", 0)>]
     [<DataRow("""def pred T() { dec ~x:pred; not x };""", 0)>]
     [<DataRow("""def pred T() { dec ~x:ind; not x };""", 1)>]
+    [<DataRow("""def pred T() { all x {true} };""", 0)>]
     [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not (p)};""", 0)>]
     [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not p};""", 0)>]
     [<TestMethod>]

@@ -982,16 +982,25 @@ let rec eval (st: SymbolTable) ast =
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | All of Positions * ((Ast list * Ast option) list * Ast)
-    | Ast.All((pos1, pos2), (astsOpts, ast1)) ->
+    | Ast.All((pos1, pos2), (variableListInOptDomainListAst, predicateAst)) ->
         st.EvalPush("All")
-        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        eval st ast1
-        astsOpts
-        |> List.map (fun (asts, optAst) ->
-            asts |> List.map (eval st) |> ignore
-            optAst |> Option.map (eval st) |> Option.defaultValue ()
-            ())
-        |> ignore
+        match st.CurrentContext with
+        | EvalContext.InBlock fplValue
+        | EvalContext.InPropertyBlock fplValue 
+        | EvalContext.InConstructorBlock fplValue 
+        | EvalContext.InReferenceCreation fplValue ->
+            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
+            adjustSignature st fplValue "all"
+            eval st predicateAst
+            variableListInOptDomainListAst
+            |> List.map (fun (asts, optAst) ->
+                asts |> List.map (eval st) |> ignore
+                optAst |> Option.map (eval st) |> Option.defaultValue ()
+                ())
+            |> ignore
+            emitLG000orLG001Diagnostics fplValue "all quantor"
+        | _ -> ()
+
         st.EvalPop()
     | Ast.Exists((pos1, pos2), (astsOpts, ast1)) ->
         st.EvalPush("Exists")
