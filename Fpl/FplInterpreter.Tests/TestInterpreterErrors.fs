@@ -380,7 +380,7 @@ type TestInterpreterErrors() =
     [<DataRow("def func Test()->obj {intr} corollary Test$1() {true};", 1)>]
     [<DataRow("proof Test$1 {1. |- trivial} corollary Test$1$1() {true};", 1)>] // corollaries of proofs are not allowed
     [<DataRow("theorem Test() {true} corollary Test$1() {true};", 0)>]
-    [<DataRow("lemma Test() {true} proof corollary Test$1() {true};", 0)>]
+    [<DataRow("lemma Test() {true} corollary Test$1() {true};", 0)>]
     [<DataRow("proposition Test() {true} corollary Test$1() {true};", 0)>]
     [<DataRow("axiom Test() {true} corollary Test$1() {true};", 0)>] // corollaries of axioms are allowed
     [<DataRow("postulate Test() {true} corollary Test$1() {true};", 0)>] // corollaries of postulates (axioms) not allowed
@@ -590,6 +590,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T() { dec ~x:pred; not x };""", 1)>]
     [<DataRow("""def pred T() { dec ~x:ind; not x };""", 0)>]
     [<DataRow("""def pred T() { all x {true} };""", 0)>]
+    [<DataRow("""def pred T() { all y {and(x,y)} };""", 1)>]
     [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not (p)};""", 0)>]
     [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not p};""", 0)>]
     [<TestMethod>]

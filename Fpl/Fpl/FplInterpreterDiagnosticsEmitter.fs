@@ -305,7 +305,7 @@ let checkID012Diagnostics (st:SymbolTable) (parentConstructorCall:FplValue) iden
 let emitID013Diagnostics (fplValue:FplValue) pos1 pos2 = 
     let d = Delegates()
     try
-        d.CallExternalDelegate(fplValue.FplId, fplValue.ValueList |> Seq.toList)
+        d.CallExternalDelegate(fplValue.FplId.Substring(4), fplValue.ValueList |> Seq.toList)
     with ex -> 
         if ex.Message.StartsWith("OK:") then
             match ex.Message.Substring(3) with

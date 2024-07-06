@@ -157,7 +157,7 @@ let propagateReference (refBlock:FplValue) withAdding =
     let fplValue = refBlock.Parent.Value
     if fplValue.BlockType = FplValueType.Reference then
         if not fplValue.NameIsFinal && refBlock.AuxiliaryInfo = 0 then
-            // propagate only if refblock has all opened brackets closed and the name of its reference-typed parent is not yet ready
+            // propagate references only if refblock has all opened brackets closed and the name of its reference-typed parent is not yet ready
             if withAdding then 
                 fplValue.ValueList.Add(refBlock)
             match refBlock.FplRepresentation with
@@ -165,6 +165,7 @@ let propagateReference (refBlock:FplValue) withAdding =
                 fplValue.Name <- addWithComma fplValue.Name variable.Name 
                 fplValue.TypeSignature <- fplValue.TypeSignature @ variable.TypeSignature
             | _ -> 
+
                 fplValue.Name <- addWithComma fplValue.Name refBlock.Name 
                 fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
     else
@@ -918,7 +919,7 @@ let rec eval (st: SymbolTable) ast =
             eval st fplDelegateIdentifierAst
             eval st argumentTupleAst
             // forget refBlock but propagate its name and typesignature into its parent
-            emitID013Diagnostics refBlock pos1 pos2
+            emitID013Diagnostics refBlock pos1 pos2 |> ignore
             propagateReference refBlock false 
         | _ -> ()
         st.SetContext(oldContext) LogContext.End
@@ -1084,7 +1085,7 @@ let rec eval (st: SymbolTable) ast =
                         Int32.MaxValue
                 )
 
-            /// Tranforms a precedence-sorted list infix-operations into a nested binary infix operations in reversed Polish notation
+            /// Transforms a precedence-sorted list infix-operations into a nested binary infix operations in reversed Polish notation
             let rec createReversedPolishNotation (sortedSeparatedPredicateList:(Ast * Ast option) list) (fv:FplValue) =
                 match sortedSeparatedPredicateList with
                 | (predicateAst,optOp) :: xs -> 
