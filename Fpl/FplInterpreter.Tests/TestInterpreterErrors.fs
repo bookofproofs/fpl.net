@@ -587,10 +587,12 @@ type TestInterpreterErrors() =
 
 
     [<DataRow("""def pred T() { not true };""", 0)>]
-    [<DataRow("""def pred T() { dec ~x:pred; not x };""", 1)>]
+    [<DataRow("""def pred T() { dec ~x:pred; not x };""", 0)>] // no LG000 diagnostics because of intrinsic use x
     [<DataRow("""def pred T() { dec ~x:ind; not x };""", 0)>]
     [<DataRow("""def pred T() { all x {true} };""", 0)>]
-    [<DataRow("""def pred T() { all y {and(x,y)} };""", 1)>]
+    [<DataRow("""def pred T() { dec ~x:pred; and(x,true) };""", 1)>]
+    [<DataRow("""def pred T() { dec ~x:pred; all y {and(x,true)} };""", 1)>]
+    [<DataRow("""def pred T() { all y {and(x,y)} };""", 0)>]
     [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not (p)};""", 0)>]
     [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not p};""", 0)>]
     [<TestMethod>]
@@ -604,6 +606,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T() { all x {true} };""", 0)>]
     [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not (p)};""", 0)>]
     [<DataRow("""inf ModusTollens() {dec ~p,q: pred; pre: and (not q, impl(p,q) ) con: not p};""", 0)>]
+    [<DataRow("""def pred T() { and(true,x,true) };""", 1)>]
     [<TestMethod>]
     member this.TestLG001(fplCode:string, expected) =
         let code = LG001 ("","","")

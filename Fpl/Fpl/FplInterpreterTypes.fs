@@ -424,6 +424,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _representation = FplRepresentation.Undef
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
+    let mutable _arity = 0
 
     let mutable _parent = parent
     let _auxiliaryUniqueChilds = HashSet<string>()
@@ -510,6 +511,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     member this.AuxiliaryInfo
         with get () = _auxiliaryInfo
         and set (value) = _auxiliaryInfo <- value
+
+    /// An arity of this FplValue
+    member this.Arity
+        with get () = _arity
+        and set (value) = _arity <- value
 
     /// Am aixiliary storage that is used e.g. for remembering the names of already processed variables when traversing the Ast recursively.
     member this.AuxiliaryUniqueChilds = _auxiliaryUniqueChilds

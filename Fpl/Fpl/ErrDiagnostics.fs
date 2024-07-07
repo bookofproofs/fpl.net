@@ -235,21 +235,21 @@ type DiagnosticCode =
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
             | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
             // signature-related error codes
-            | SIG00 (fixType, arity) -> sprintf $"Illegal arity {arity} using {fixType} notation."
+            | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
             | SIG04 (signature,candidates,firstFailingArgument) -> 
                 if candidates.Length = 0 then 
                     $"No overload matching {signature}, no candidates were found (are you missing a uses clause?)" 
                 else
-                    $"No overload matching {signature}, failed to match {firstFailingArgument}, candidates were: {candidates}" 
+                    $"No overload matching {signature}, failed to match `{firstFailingArgument}`, candidates were: {candidates}" 
             // proof-related error codes
             | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
             | PR001 -> $"Cannot refer to a definition outside a proof."
             | PR002 -> $"Avoid referencing to proofs directly."
             // logic-related error codes
-            | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate {typeOfPredicate}; its argument `{argument}` is a predicate but couldn't be determined."
-            | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate {typeOfPredicate}; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
+            | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
+            | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
 
 
 type DiagnosticEmitter =
