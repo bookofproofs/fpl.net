@@ -26,4 +26,14 @@ let evaluateConjunction (fplValue:FplValue) =
     | Some true -> fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.True
     | Some false -> fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.False
     | _ -> fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+
+let evaluateImplication (fplValue:FplValue) = 
+    let arg1 = fplValue.ValueList[0]
+    let arg2 = fplValue.ValueList[1]
+    match (arg1.FplRepresentation, arg2.FplRepresentation) with
+    | (FplRepresentation.PredRepr FplPredicate.True, FplRepresentation.PredRepr FplPredicate.False) -> 
+        fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.False
+    | (FplRepresentation.PredRepr _, FplRepresentation.PredRepr _) -> 
+        fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.True
+    | _ -> fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
     
