@@ -585,7 +585,7 @@ type TestFplValueScopeTypeSignature() =
             | "base20" -> Assert.AreEqual<string list>([], base1.TypeSignature)
             | "base21" -> Assert.AreEqual<string list>(["and"; "("; "undef"; "undef"; "undef"; ")"], base1.TypeSignature)
             | "base21a" -> Assert.AreEqual<string list>(["not"; "("; "undef"; ")"], base1.TypeSignature)
-            | "base21b" -> Assert.AreEqual<string list>(["not"; "("; "("; "undef"; ")"; ")"], base1.TypeSignature)
+            | "base21b" -> Assert.AreEqual<string list>(["not"; "("; "undef"; ")"], base1.TypeSignature)
             | "base22" -> Assert.AreEqual<string list>(["xor"; "("; "undef"; "undef"; "undef"; ")"], base1.TypeSignature)
             | "base23" -> Assert.AreEqual<string list>(["or"; "("; "undef"; "undef"; "undef"; ")"], base1.TypeSignature)
             | "base24" -> Assert.AreEqual<string list>(["iif"; "("; "undef"; "undef"; ")"], base1.TypeSignature)

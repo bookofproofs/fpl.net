@@ -162,18 +162,20 @@ let propagateReference (refBlock:FplValue) withAdding =
     if fplValue.BlockType = FplValueType.Reference then
         if not fplValue.NameIsFinal && refBlock.AuxiliaryInfo = 0 then
             // propagate references only if refblock has all opened brackets closed and the name of its reference-typed parent is not yet ready
-            if withAdding then 
-                fplValue.ValueList.Add(refBlock)
-            match refBlock.FplRepresentation with
-            | FplRepresentation.Pointer variable ->
-                fplValue.Name <- addWithComma fplValue.Name variable.Name 
-                fplValue.TypeSignature <- fplValue.TypeSignature @ variable.TypeSignature
-            | _ -> 
-                fplValue.Name <- addWithComma fplValue.Name refBlock.Name 
-                fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
+            if not (fplValue.ValueList.Contains(refBlock)) then 
+                if withAdding then 
+                    fplValue.ValueList.Add(refBlock)
+                match refBlock.FplRepresentation with
+                | FplRepresentation.Pointer variable ->
+                    fplValue.Name <- addWithComma fplValue.Name variable.Name 
+                    fplValue.TypeSignature <- fplValue.TypeSignature @ variable.TypeSignature
+                | _ -> 
+                    fplValue.Name <- addWithComma fplValue.Name refBlock.Name 
+                    fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
     else
         if withAdding then 
-            fplValue.ValueList.Add(refBlock)
+            if not (fplValue.ValueList.Contains(refBlock)) then 
+                fplValue.ValueList.Add(refBlock)
 
 
 
