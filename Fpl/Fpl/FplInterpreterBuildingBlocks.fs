@@ -725,6 +725,8 @@ let rec eval (st: SymbolTable) ast =
             predicateAsts |> List.map (eval st) |> ignore
             adjustSignature st fplValue ")"
             fplValue.NameEndPos <- pos2
+            evaluateExclusiveOr fplValue
+            emitLG000orLG001Diagnostics fplValue "exclusive-or"
         | _-> ()
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), asts) ->
