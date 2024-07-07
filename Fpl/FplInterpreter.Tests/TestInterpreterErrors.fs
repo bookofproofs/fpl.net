@@ -598,6 +598,9 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T() { dec ~x:pred; impl(true,x) };""", 1)>]
     [<DataRow("""def pred T() { dec ~x,y:pred; impl(x,y) };""", 0)>]
     [<DataRow("""def pred T() { impl(true,true) };""", 0)>]
+    [<DataRow("""def pred T() { dec ~x:pred; iif(true,x) };""", 1)>]
+    [<DataRow("""def pred T() { dec ~x,y:pred; iif(x,y) };""", 0)>]
+    [<DataRow("""def pred T() { iif(true,true) };""", 0)>]
     [<TestMethod>]
     member this.TestLG000(fplCode:string, expected) =
         let code = LG000 ("","")
@@ -612,6 +615,8 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T() { and(true,x,true) };""", 1)>]
     [<DataRow("""def pred T() { impl(true,x) };""", 1)>]
     [<DataRow("""def pred T() { impl(true,true) };""", 0)>]
+    [<DataRow("""def pred T() { dec ~x:pred; iif(true,x) };""", 0)>]
+    [<DataRow("""def pred T() { iif(true,x) };""", 1)>]
     [<TestMethod>]
     member this.TestLG001(fplCode:string, expected) =
         let code = LG001 ("","","")

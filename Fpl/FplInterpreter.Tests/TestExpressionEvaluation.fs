@@ -127,3 +127,33 @@ type TestExpressionEvaluation() =
             printfn "%s" (evalTreeFplId(expr))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
+
+    [<DataRow("def pred T() { iif(true,true) };", "PredRepr True{PredRepr True, PredRepr True}")>]
+    [<DataRow("def pred T() { iif(true,false) };", "PredRepr False{PredRepr True, PredRepr False}")>]
+    [<DataRow("def pred T() { iif(false,true) };", "PredRepr False{PredRepr False, PredRepr True}")>]
+    [<DataRow("def pred T() { iif(false,false) };", "PredRepr True{PredRepr False, PredRepr False}")>]
+    [<TestMethod>]
+    member this.TestExpressionEvaluationEquivalence(fplCode, expected: string) =
+        FplParser.parserDiagnostics.Clear()
+        let filename = "TestExpressionEvaluationEquivalence.fpl"
+        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename, "", false) |> ignore
+
+        match stOption with
+        | Some st ->
+            let r = st.Root
+            let theory = r.Scope[filename]
+
+            let pr1 = theory.Scope["T()"]
+            let expr = 
+                if pr1.ValueList.Count > 0 then
+                    pr1.ValueList[0]
+                else 
+                    pr1
+            let actual = evalTreeFplRepresentation(expr)
+            printfn "expected: %s" expected 
+            printfn "actual  : %s" actual
+            printfn "%s" expr.Name
+            printfn "%s" (evalTreeFplId(expr))
+            Assert.AreEqual<string>(expected, actual)
+        | None -> Assert.IsTrue(false)

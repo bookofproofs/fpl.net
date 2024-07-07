@@ -900,7 +900,9 @@ let rec eval (st: SymbolTable) ast =
             eval st predicateAst1
             eval st predicateAst2
             adjustSignature st fplValue ")"
-
+            fplValue.NameEndPos <- pos2
+            evaluateEquivalence fplValue
+            emitLG000orLG001Diagnostics fplValue "equivalence"
         | _ -> ()
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
