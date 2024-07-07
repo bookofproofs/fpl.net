@@ -169,7 +169,6 @@ let propagateReference (refBlock:FplValue) withAdding =
                 fplValue.Name <- addWithComma fplValue.Name variable.Name 
                 fplValue.TypeSignature <- fplValue.TypeSignature @ variable.TypeSignature
             | _ -> 
-
                 fplValue.Name <- addWithComma fplValue.Name refBlock.Name 
                 fplValue.TypeSignature <- fplValue.TypeSignature @ refBlock.TypeSignature
     else
@@ -830,6 +829,7 @@ let rec eval (st: SymbolTable) ast =
                 st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
                 eval st fplIdentifierAst
                 eval st specificationAst |> ignore
+                // forget refBlock but propagate its name and typesignature into its parent
                 propagateReference refBlock false
                 match tryMatchSignatures st refBlock with
                 | (_, _, Some matchedFplValue) -> ()
@@ -1106,7 +1106,6 @@ let rec eval (st: SymbolTable) ast =
                             |> Seq.iter (fun kv -> fv.Scope.Add(kv.Key,kv.Value))
                             if dictOfOperators.ContainsKey(symbol) then 
                                 adjustSignature st fv symbol
-                                fv.AuxiliaryInfo <- fv.AuxiliaryInfo + 1 // increase the number of opened braces
                                 adjustSignature st fv "("
                                 eval st predicateAst 
                                 if xs.Length > 0 then
@@ -1115,7 +1114,6 @@ let rec eval (st: SymbolTable) ast =
                                     createReversedPolishNotation xs nextInfixOperation
                                 
                                 adjustSignature st fv ")"
-                                fv.AuxiliaryInfo <- fv.AuxiliaryInfo - 1 // decrease the number of opened braces
                                 propagateReference fv true
                         | _ -> ()
                     else

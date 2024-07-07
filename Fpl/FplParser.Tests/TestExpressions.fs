@@ -21,6 +21,16 @@ type TestExpressions () =
                 true
             }
 
+            def pred T1a() 
+            {
+                not x
+            }
+
+            def pred T1b() 
+            {
+                not (x)
+            }
+
             def pred T2() 
             {
                 false
