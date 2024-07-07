@@ -475,7 +475,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         with get () = _nameFinal
         and set (value) = 
             if _nameFinal then 
-                raise (ArgumentException($"Cannot change the readonly NameIsFinal property since it has been finally evaluated."))
+                () // raise (ArgumentException($"Cannot change the readonly NameIsFinal property since it has been finally evaluated."))
             else
                 _nameFinal <- value
 

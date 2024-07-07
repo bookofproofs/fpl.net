@@ -695,7 +695,7 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue "("
             predicateAsts |> List.map (eval st) |> ignore
             adjustSignature st fplValue ")"
-            fplValue.NameIsFinal <- true
+            fplValue.NameEndPos <- pos2
             evaluateConjunction fplValue
             emitLG000orLG001Diagnostics fplValue "conjunction"
         | _-> ()
@@ -709,7 +709,7 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue "("
             predicateAsts |> List.map (eval st) |> ignore
             adjustSignature st fplValue ")"
-            fplValue.NameIsFinal <- true
+            fplValue.NameEndPos <- pos2
         | _-> ()
         st.EvalPop()
     | Ast.Xor((pos1, pos2), predicateAsts) ->
@@ -721,7 +721,7 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue "("
             predicateAsts |> List.map (eval st) |> ignore
             adjustSignature st fplValue ")"
-            fplValue.NameIsFinal <- true
+            fplValue.NameEndPos <- pos2
         | _-> ()
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), asts) ->
