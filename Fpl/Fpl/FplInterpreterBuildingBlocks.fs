@@ -711,6 +711,8 @@ let rec eval (st: SymbolTable) ast =
             predicateAsts |> List.map (eval st) |> ignore
             adjustSignature st fplValue ")"
             fplValue.NameEndPos <- pos2
+            evaluateDisjunction fplValue
+            emitLG000orLG001Diagnostics fplValue "disjunction"
         | _-> ()
         st.EvalPop()
     | Ast.Xor((pos1, pos2), predicateAsts) ->

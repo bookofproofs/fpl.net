@@ -98,6 +98,39 @@ type TestExpressionEvaluation() =
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
+    [<DataRow("def pred T() { or(false,false,false) };", "PredRepr False{PredRepr False, PredRepr False, PredRepr False}")>]
+    [<DataRow("def pred T() { or(false,true,false) };", "PredRepr True{PredRepr False, PredRepr True, PredRepr False}")>]
+    [<DataRow("def pred T() { or(false,false,true) };", "PredRepr True{PredRepr False, PredRepr False, PredRepr True}")>]
+    [<DataRow("def pred T() { or(true,false,false) };", "PredRepr True{PredRepr True, PredRepr False, PredRepr False}")>]
+    [<DataRow("def pred T() { or(false,x,false) };", "PredRepr Undetermined{PredRepr False, Undef, PredRepr False}")>]
+    [<DataRow("def pred T() { or(false,false,x) };", "PredRepr Undetermined{PredRepr False, PredRepr False, Undef}")>]
+    [<DataRow("def pred T() { or(x,false,false) };", "PredRepr Undetermined{Undef, PredRepr False, PredRepr False}")>]
+    [<TestMethod>]
+    member this.TestExpressionEvaluationDisjunction(fplCode, expected: string) =
+        FplParser.parserDiagnostics.Clear()
+        let filename = "TestExpressionEvaluationDisjunction.fpl"
+        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename, "", false) |> ignore
+
+        match stOption with
+        | Some st ->
+            let r = st.Root
+            let theory = r.Scope[filename]
+
+            let pr1 = theory.Scope["T()"]
+            let expr = 
+                if pr1.ValueList.Count > 0 then
+                    pr1.ValueList[0]
+                else 
+                    pr1
+            let actual = evalTreeFplRepresentation(expr)
+            printfn "expected: %s" expected 
+            printfn "actual  : %s" actual
+            printfn "%s" expr.Name
+            printfn "%s" (evalTreeFplId(expr))
+            Assert.AreEqual<string>(expected, actual)
+        | None -> Assert.IsTrue(false)
+
     [<DataRow("def pred T() { impl(true,true) };", "PredRepr True{PredRepr True, PredRepr True}")>]
     [<DataRow("def pred T() { impl(true,false) };", "PredRepr False{PredRepr True, PredRepr False}")>]
     [<DataRow("def pred T() { impl(false,true) };", "PredRepr True{PredRepr False, PredRepr True}")>]

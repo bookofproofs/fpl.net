@@ -27,6 +27,21 @@ let evaluateConjunction (fplValue:FplValue) =
     | Some false -> fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.False
     | _ -> fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
 
+let evaluateDisjunction (fplValue:FplValue) = 
+    let vlist = fplValue.ValueList |> Seq.toList 
+    let rec aggr (fv: FplValue list) =
+        match fv with
+        | x::xs -> 
+            match x.FplRepresentation with
+            | FplRepresentation.PredRepr FplPredicate.False -> aggr xs 
+            | FplRepresentation.PredRepr FplPredicate.True -> Some true
+            | _ -> None
+        | [] -> Some false
+    match aggr vlist with 
+    | Some true -> fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.True
+    | Some false -> fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.False
+    | _ -> fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+
 let evaluateImplication (fplValue:FplValue) = 
     let arg1 = fplValue.ValueList[0]
     let arg2 = fplValue.ValueList[1]
