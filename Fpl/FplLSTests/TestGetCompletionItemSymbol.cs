@@ -87,7 +87,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesSymbol(choice, declarative).GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(!item.InsertText.EndsWith(" "));
+                Assert.IsTrue(!item.InsertText.EndsWith(' '));
             }
         }
 

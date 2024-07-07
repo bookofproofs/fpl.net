@@ -11,6 +11,7 @@
     <Compile Include="CommonTestHelpers.fs" />
     <Compile Include="CommonFplValueTestCases.fs" />
     <Compile Include="TestFplValueScopeExpressionType.fs" />
+    <Compile Include="TestExpressionEvaluation.fs" />
     <Compile Include="TestFplValueScopeFplRepresentation.fs" />
     <Compile Include="TestFplValueScopeFplId.fs" />
     <Compile Include="TestReferencesTypeOfSignature.fs" />

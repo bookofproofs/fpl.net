@@ -20,6 +20,7 @@
     <Compile Include="FplDelegates.fs" />
     <Compile Include="FplInterpreterDiagnosticsEmitter.fs" />
     <Compile Include="FplInterpreterUsesClause.fs" />
+    <Compile Include="FplInterpreterPredicateEvaluator.fs" />
     <Compile Include="FplInterpreterBuildingBlocks.fs" />
     <Compile Include="FplInterpreter.fs" />
     <Compile Include="Program.fs" />

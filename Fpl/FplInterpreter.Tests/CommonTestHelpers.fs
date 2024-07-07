@@ -46,8 +46,8 @@ let prepareFplCode(filename:string, fplCode:string, delete:bool) =
             |> Seq.exists(fun d -> d.Emitter = DiagnosticEmitter.FplParser)
         if syntaxErrorFound then 
             emitUnexpectedErrorDiagnostics (uri.AbsolutePath) ("Syntax error found.")
-        Console.WriteLine(st.LoggedState)
-        Console.WriteLine(st.AstsToString)
+        //Console.WriteLine(st.LoggedState)
+        //Console.WriteLine(st.AstsToString)
         Some (st)
 
 let runTestHelper filename fplCode (code:ErrDiagnostics.DiagnosticCode) (expected:int) =

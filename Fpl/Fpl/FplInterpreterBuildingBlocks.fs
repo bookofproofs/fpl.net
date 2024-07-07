@@ -8,7 +8,7 @@ open ErrDiagnostics
 open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
-
+open FplInterpreterPredicateEvaluator
 
 let private addWithComma (name:string) str = 
     if str <> "" then
@@ -685,6 +685,8 @@ let rec eval (st: SymbolTable) ast =
             predicateAsts |> List.map (eval st) |> ignore
             adjustSignature st fplValue ")"
             fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo - 1 // decrease the number of opened braces
+            // evaluate and
+            aggregateConjunction fplValue
         | _-> ()
         st.EvalPop()
     | Ast.Or((pos1, pos2), predicateAsts) ->

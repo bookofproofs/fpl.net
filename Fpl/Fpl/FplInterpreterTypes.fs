@@ -1133,7 +1133,7 @@ let tryMatchSignatures (st:SymbolTable) (reference:FplValue) =
                 | hd1 :: _, [] -> (hd1, "", Some index)
                 | [], hd2 :: _ -> ("", hd2, Some index)
             compareLists 0 list1 list2
-        /// matches the TypeSignature of every candidate with a toBeMatchedTypeSignature
+        // matches the TypeSignature of every candidate with a toBeMatchedTypeSignature
         match candidates with
         | [] -> (accResult, None) // all candidates mismatch toBeMatchedTypeSignature
         | x :: xs ->
