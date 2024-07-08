@@ -358,8 +358,7 @@ let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
 
 let emitSIG01Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
     if
-        (fplValue.BlockType = FplValueType.Reference
-         || fplValue.BlockType = FplValueType.Expression)
+        (fplValue.BlockType = FplValueType.Reference)
     then
         // collect candidates to match this reference from all theories and
         // add them to fplValues's scope

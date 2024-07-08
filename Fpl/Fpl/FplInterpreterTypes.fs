@@ -269,7 +269,6 @@ type FplValueType =
     | Variable
     | VariadicVariableMany
     | VariadicVariableMany1
-    | Expression
     | MandatoryPredicate
     | OptionalPredicate
     | MandatoryFunctionalTerm
@@ -299,7 +298,6 @@ type FplValueType =
             | Variable -> "variable"
             | VariadicVariableMany -> "zero-or-more variable"
             | VariadicVariableMany1 -> "one-or-more variable"
-            | Expression -> "expression"
             | MandatoryPredicate -> "predicate property"
             | OptionalPredicate -> "optional predicate property"
             | MandatoryFunctionalTerm -> "functional term property"
@@ -327,7 +325,6 @@ type FplValueType =
         match this with
         | OptionalPredicate
         | OptionalFunctionalTerm
-        | Expression 
         | Object 
         | Axiom -> "an"
         | _ -> "a"
@@ -340,7 +337,6 @@ type FplValueType =
             | Variable -> "var"
             | VariadicVariableMany -> "*var"
             | VariadicVariableMany1 -> "+var"
-            | Expression -> "expr"
             | MandatoryPredicate 
             | OptionalPredicate 
             | MandatoryFunctionalTerm 
@@ -885,7 +881,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             let ret = new FplValue("", fplBlockType, positions, Some parent)
             ret.FplRepresentation <- FplRepresentation.ObjRepr "obj"
             ret
-        | FplValueType.Expression
         | FplValueType.Theory
         | FplValueType.MandatoryPredicate
         | FplValueType.OptionalPredicate

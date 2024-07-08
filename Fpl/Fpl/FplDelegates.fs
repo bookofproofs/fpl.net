@@ -56,7 +56,7 @@ type Delegates() =
     let _externalDelegates = 
         Map.ofList [
             (
-                "del.Equal", fun values -> 
+                "Equal", fun values -> 
                     match values with
                     | x::y::[] -> _equal x y
                     | _ -> failwithf "Predicate `=` takes 2 arguments, got %i." values.Length

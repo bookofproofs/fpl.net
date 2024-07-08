@@ -41,7 +41,6 @@ type TestFplValue() =
         testFactory FplValueType.Predicate (FplRepresentation.PredRepr FplPredicate.Undetermined)
         testFactory FplValueType.Object (FplRepresentation.ObjRepr "obj")
         testFactory FplValueType.Constructor (FplRepresentation.ObjRepr "obj")
-        testFactory FplValueType.Expression FplRepresentation.Undef
         testFactory FplValueType.Theory FplRepresentation.Undef
         testFactory FplValueType.FunctionalTerm FplRepresentation.Undef
         testFactory FplValueType.Variable FplRepresentation.Undef

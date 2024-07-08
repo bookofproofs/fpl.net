@@ -1012,36 +1012,36 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InReferenceCreation fplValue ->
             setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
             adjustSignature st fplValue "all"
-            eval st predicateAst
             variableListInOptDomainListAst
             |> List.map (fun (asts, optAst) ->
                 asts |> List.map (eval st) |> ignore
                 optAst |> Option.map (eval st) |> Option.defaultValue ()
                 ())
             |> ignore
+            eval st predicateAst
             emitLG000orLG001Diagnostics fplValue "all quantor"
         | _ -> ()
 
         st.EvalPop()
-    | Ast.Exists((pos1, pos2), (astsOpts, ast1)) ->
+    | Ast.Exists((pos1, pos2), (variableListInOptDomainListAst, predicateAst)) ->
         st.EvalPush("Exists")
         setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        eval st ast1
-        astsOpts
+        variableListInOptDomainListAst
         |> List.map (fun (asts, optAst) ->
             asts |> List.map (eval st) |> ignore
             optAst |> Option.map (eval st) |> Option.defaultValue ()
             ())
         |> ignore
+        eval st predicateAst
         st.EvalPop()
     // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
-    | Ast.ExistsN((pos1, pos2), ((ast1, (ast2, optAst)), ast3)) ->
+    | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, (variableAst, inOptDomainAst)), predicateAst)) ->
         st.EvalPush("ExistsN")
         setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        eval st ast1
-        eval st ast2
-        optAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
-        eval st ast3
+        eval st dollarDigitsAst
+        eval st variableAst
+        inOptDomainAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
+        eval st predicateAst
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature((pos1, pos2), ((optAst, signatureWithUserDefinedStringAst), mappingAst)) -> 
@@ -1082,7 +1082,7 @@ let rec eval (st: SymbolTable) ast =
             let dictOfOperators = Dictionary<string,FplValue>()
             separatedPredicateListAst
             |> List.map (fun (_, optSeparatorAst) -> 
-                let infixOperator = FplValue.CreateFplValue((pos1,pos2),FplValueType.Expression,fplValue)
+                let infixOperator = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,fplValue)
                 st.SetContext(EvalContext.InInfixOperation infixOperator) LogContext.Start
                 optSeparatorAst |> Option.map (eval st) |> Option.defaultValue ()
                 st.SetContext(oldContext) LogContext.End
