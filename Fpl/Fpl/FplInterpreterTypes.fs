@@ -442,14 +442,22 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.Variable 
         | FplValueType.VariadicVariableMany 
         | FplValueType.VariadicVariableMany1 
-        | FplValueType.Proof -> this.Name
-        | FplValueType.Corollary -> this.Name.Substring(0,this.Name.IndexOf('('))
+        | FplValueType.Proof 
+        | FplValueType.Corollary 
         | FplValueType.Reference -> 
-            match this.TypeSignature with
-            | x::xs when this.Name.StartsWith("bas.") -> $"bas.{x}"
-            | x::y::xs when this.Name.StartsWith("del.") -> $"del.{y}"
-            | x::xs -> if x = "ind" || x = "undef" || x = "pred" || x = "func" then this.Name else x
-            | _ -> this.Name
+            if this.Name.IndexOf("$") > 0 then 
+                let posParen = this.Name.IndexOf('(')
+                if posParen > 0 then 
+                    this.Name.Substring(0,posParen)
+                else
+                    this.Name
+            else
+                match this.TypeSignature with
+                | x::xs when this.Name.StartsWith("bas.") -> $"bas.{x}"
+                | x::y::xs when this.Name.StartsWith("del.") -> $"del.{y}"
+                | x::y::xs when x="bydef." -> $"bydef.{y}"
+                | x::xs -> if x = "*" || x = "+" || x = "obj" || x = "ind" || x = "undef" || x = "pred" || x = "func" then this.Name else x
+                | _ -> this.Name
         | _ -> 
             match this.TypeSignature with
             | x::xs -> x

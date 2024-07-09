@@ -652,7 +652,7 @@ type TestFplValueScopeFplRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "del.B()")>]
+    [<DataRow("base1", "del.Equal(x,y)")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
     [<DataRow("base3", "del.D(self,b,c)")>]
     [<DataRow("base4", "del.B(In(x))")>]
@@ -676,11 +676,12 @@ type TestFplValueScopeFplRepresentation() =
 
             match var with
             | "base1" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, base1.FplRepresentation)
-            | "base2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, base1.FplRepresentation)
-            | "base3" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, base1.FplRepresentation)
-            | "base4" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, base1.FplRepresentation)
-            | "base5" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, base1.FplRepresentation)
-            | "base6" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, base1.FplRepresentation)
+            | "base2" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, base1.FplRepresentation)
+            | "base3" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, base1.FplRepresentation)
+            | "base4" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, base1.FplRepresentation)
+            | "base5" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, base1.FplRepresentation)
+            | "base6" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, base1.FplRepresentation)
+            | "base7" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, base1.FplRepresentation)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

@@ -316,7 +316,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
-            setRepresentation st (FplRepresentation.ObjRepr "obj")
+            fplValue.FplRepresentation <- FplRepresentation.ObjRepr "obj"
             if (FplValue.IsVariadicVariableMany(fplValue)) then 
                 adjustSignature st fplValue ("*" + s)
             elif (FplValue.IsVariadicVariableMany1(fplValue)) then 
@@ -551,7 +551,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ByDef")
         match st.CurrentContext with 
         | EvalContext.InReferenceCreation fplValue ->
-            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
+            fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
             adjustSignature st fplValue "bydef."
             eval st predicateWithQualificationAst
             emitPR001Diagnostics fplValue pos1 pos2
@@ -691,7 +691,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("And")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue -> 
-            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
+            fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
             adjustSignature st fplValue "and"
             adjustSignature st fplValue "("
             predicateAsts |> List.map (eval st) |> ignore
@@ -705,7 +705,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Or")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue -> 
-            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
+            fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
             adjustSignature st fplValue "or"
             adjustSignature st fplValue "("
             predicateAsts |> List.map (eval st) |> ignore
@@ -1010,7 +1010,8 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InPropertyBlock fplValue 
         | EvalContext.InConstructorBlock fplValue 
         | EvalContext.InReferenceCreation fplValue ->
-            setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
+            st.SetContext(EvalContext.InQuantorCreation fplValue) LogContext.Replace
+            fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
             adjustSignature st fplValue "all"
             variableListInOptDomainListAst
             |> List.map (fun (asts, optAst) ->
@@ -1025,23 +1026,41 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Exists((pos1, pos2), (variableListInOptDomainListAst, predicateAst)) ->
         st.EvalPush("Exists")
-        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        variableListInOptDomainListAst
-        |> List.map (fun (asts, optAst) ->
-            asts |> List.map (eval st) |> ignore
-            optAst |> Option.map (eval st) |> Option.defaultValue ()
-            ())
-        |> ignore
-        eval st predicateAst
+        match st.CurrentContext with
+        | EvalContext.InBlock fplValue
+        | EvalContext.InPropertyBlock fplValue 
+        | EvalContext.InConstructorBlock fplValue 
+        | EvalContext.InReferenceCreation fplValue ->
+            st.SetContext(EvalContext.InQuantorCreation fplValue) LogContext.Replace
+            fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+            adjustSignature st fplValue "ex"
+            variableListInOptDomainListAst
+            |> List.map (fun (asts, optAst) ->
+                asts |> List.map (eval st) |> ignore
+                optAst |> Option.map (eval st) |> Option.defaultValue ()
+                ())
+            |> ignore
+            eval st predicateAst
+            emitLG000orLG001Diagnostics fplValue "exists quantor"
+        | _ -> ()
         st.EvalPop()
     // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
     | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, (variableAst, inOptDomainAst)), predicateAst)) ->
         st.EvalPush("ExistsN")
-        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        eval st dollarDigitsAst
-        eval st variableAst
-        inOptDomainAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
-        eval st predicateAst
+        match st.CurrentContext with
+        | EvalContext.InBlock fplValue
+        | EvalContext.InPropertyBlock fplValue 
+        | EvalContext.InConstructorBlock fplValue 
+        | EvalContext.InReferenceCreation fplValue ->
+            st.SetContext(EvalContext.InQuantorCreation fplValue) LogContext.Replace
+            fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+            adjustSignature st fplValue "exn"
+            eval st dollarDigitsAst
+            eval st variableAst
+            inOptDomainAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
+            eval st predicateAst
+            emitLG000orLG001Diagnostics fplValue "exists n times quantor"
+        | _ -> ()
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature((pos1, pos2), ((optAst, signatureWithUserDefinedStringAst), mappingAst)) -> 
