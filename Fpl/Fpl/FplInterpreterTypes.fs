@@ -384,7 +384,7 @@ type ExprType =
         | NoType -> "None"
 
 type FplRepresentation = 
-    | PredRepr of FplPredicate
+    | PredRepr of FplPredicate 
     | ObjRepr of string
     | Localization of FplValue * string
     | Pointer of FplValue
@@ -932,6 +932,7 @@ type EvalContext =
     | NamedVarDeclarationInBlock of FplValue
     | InReferenceCreation of FplValue
     | InInfixOperation of FplValue
+    | InQuantorCreation of FplValue
     member this.Name = 
         let short (fplValue:FplValue) = 
             let aggr (lst:seq<FplValue>) = 
@@ -944,16 +945,17 @@ type EvalContext =
             $"{fplValue.BlockTypeShortName} {fplValue.QualifiedName}[{aggr fplValue.Scope.Values},{aggr fplValue.ValueList}]^{p.BlockTypeShortName} {p.QualifiedName}[{aggr p.Scope.Values},{aggr p.ValueList}]"
         match this with
         | ContextNone -> "ContextNone"
-        | InTheory(fplValue) -> $"InTheory({short fplValue})"
-        | InSignature(fplValue) -> $"InSignature({short fplValue})"
-        | InBlock(fplValue) -> $"InBlock({short fplValue})"
-        | InPropertySignature(fplValue) -> $"InPropertySignature({short fplValue})"
-        | InPropertyBlock(fplValue) -> $"InPropertyBlock({short fplValue})"
-        | InConstructorSignature(fplValue) -> $"InConstructorSignature({short fplValue})"
-        | InConstructorBlock(fplValue) -> $"InConstructorBlock({short fplValue})"
-        | NamedVarDeclarationInBlock(fplValue) -> $"NamedVarDeclarationInBlock({short fplValue})"
-        | InReferenceCreation(fplValue) -> $"InReferenceCreation({short fplValue})"
-        | InInfixOperation(fplValue) -> $"InInfixOperation({short fplValue})"
+        | InTheory fplValue -> $"InTheory({short fplValue})"
+        | InSignature fplValue -> $"InSignature({short fplValue})"
+        | InBlock fplValue -> $"InBlock({short fplValue})"
+        | InPropertySignature fplValue -> $"InPropertySignature({short fplValue})"
+        | InPropertyBlock fplValue -> $"InPropertyBlock({short fplValue})"
+        | InConstructorSignature fplValue -> $"InConstructorSignature({short fplValue})"
+        | InConstructorBlock fplValue -> $"InConstructorBlock({short fplValue})"
+        | NamedVarDeclarationInBlock fplValue -> $"NamedVarDeclarationInBlock({short fplValue})"
+        | InReferenceCreation fplValue -> $"InReferenceCreation({short fplValue})"
+        | InInfixOperation fplValue -> $"InInfixOperation({short fplValue})"
+        | InQuantorCreation fplValue -> $"InAllQuantorCreation({short fplValue})"
     member this.Depth = 
         let rec depth (fv:FplValue) = 
             match fv.Parent with 
@@ -961,16 +963,17 @@ type EvalContext =
             | None -> 0
         match this with
         | ContextNone -> 0
-        | InTheory(fv) 
-        | InSignature(fv) 
-        | InBlock(fv) 
-        | InPropertySignature(fv) 
-        | InPropertyBlock(fv) 
-        | InConstructorSignature(fv) 
-        | InConstructorBlock(fv) 
-        | NamedVarDeclarationInBlock(fv) 
-        | InReferenceCreation(fv) 
-        | InInfixOperation(fv) -> depth fv
+        | InTheory fv
+        | InSignature fv
+        | InBlock fv
+        | InPropertySignature fv
+        | InPropertyBlock fv
+        | InConstructorSignature fv
+        | InConstructorBlock fv
+        | NamedVarDeclarationInBlock fv
+        | InReferenceCreation fv
+        | InInfixOperation fv
+        | InQuantorCreation fv -> depth fv
 
 type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     let _parsedAsts = parsedAsts

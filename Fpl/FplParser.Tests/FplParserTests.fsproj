@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TestQuantors.fs" />
     <Compile Include="TestParserErrors.fs" />
     <Compile Include="TestExpressions.fs" />
     <Compile Include="TestUsesClause.fs" />
