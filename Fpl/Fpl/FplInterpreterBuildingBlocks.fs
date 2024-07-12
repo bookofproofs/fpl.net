@@ -9,6 +9,7 @@ open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterPredicateEvaluator
+open System.Text
 
 let private addWithComma (name:string) str = 
     if str <> "" then
@@ -223,6 +224,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
         eval_units st "func" pos1 pos2  
+        setRepresentation st (FplRepresentation.LangRepr FplLanguageConstruct.Function)
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
@@ -624,6 +626,16 @@ let rec eval (st: SymbolTable) ast =
                 adjustSignature st fplValue identifier
             checkID008Diagnostics fplValue pos1 pos2
             checkID009_ID010_ID011_Diagnostics st fplValue identifier pos1 pos2
+            match st.CurrentContext with 
+            | EvalContext.InPropertySignature _ -> 
+                let repr = 
+                    fplValue.ValueList
+                    |> Seq.map(fun baseClass -> baseClass.Name)
+                    |> Seq.toList
+                    |> List.append ["obj"]
+                    |> String.concat ","
+                fplValue.FplRepresentation <- FplRepresentation.ObjRepr repr
+            | _ -> ()
         | EvalContext.InReferenceCreation fplValue -> 
             adjustSignature st fplValue identifier
             checkID012Diagnostics st fplValue identifier pos1 pos2
