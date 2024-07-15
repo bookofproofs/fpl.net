@@ -521,7 +521,8 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         with get () = _arity
         and set (value) = _arity <- value
 
-    /// Am aixiliary storage that is used e.g. for remembering the names of already processed variables when traversing the Ast recursively.
+    /// Am auxiliary storage that is used e.g. for remembering the names of already processed variables 
+    /// when traversing the Ast recursively.
     member this.AuxiliaryUniqueChilds = _auxiliaryUniqueChilds
 
     /// Starting position of this FplValue
@@ -665,11 +666,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         || fplValue.BlockType = FplValueType.VariadicVariableMany
         || fplValue.BlockType = FplValueType.VariadicVariableMany1
 
-    /// Indicates if this FplValue is a variadic * variable.
+    /// Indicates if this FplValue is a variadic *variable.
     static member IsVariadicVariableMany(fplValue:FplValue) = 
         fplValue.BlockType = FplValueType.VariadicVariableMany
 
-    /// Indicates if this FplValue is a variadic + variable.
+    /// Indicates if this FplValue is a variadic +variable.
     static member IsVariadicVariableMany1(fplValue:FplValue) = 
         fplValue.BlockType = FplValueType.VariadicVariableMany1
 

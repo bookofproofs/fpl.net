@@ -155,8 +155,20 @@ let tryAddBlock (fplValue:FplValue) =
         | ScopeSearchResult.Found conflict -> 
             emitID001diagnostics fplValue conflict 
         | _ -> 
-            fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
-            fplValue.NameIsFinal <- true
+            match fplValue.Parent with
+            | Some parent when FplValue.IsVariable(parent) -> 
+                parent.Scope.Add(fplValue.Name,fplValue)
+                fplValue.NameIsFinal <- true
+                let rec addAlsoToTheScopeToWhichTheLastParentVariableBelongsTo (p:FplValue) =
+                    match p.Parent with
+                    | Some otherParent when FplValue.IsVariable(otherParent) -> addAlsoToTheScopeToWhichTheLastParentVariableBelongsTo (otherParent)
+                    | Some otherParent -> otherParent.Scope.Add(fplValue.Name,fplValue)
+                    | _ -> ()
+                addAlsoToTheScopeToWhichTheLastParentVariableBelongsTo(parent)
+            | Some parent -> 
+                parent.Scope.Add(fplValue.Name,fplValue)
+                fplValue.NameIsFinal <- true
+            | _ -> ()
 
 let propagateReference (refBlock:FplValue) withAdding = 
     let fplValue = refBlock.Parent.Value
@@ -1382,8 +1394,9 @@ let rec eval (st: SymbolTable) ast =
             fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
             eval st varDeclModifierAst
             fplValue.Scope 
-            |> Seq.filter (fun varKeyValue -> FplValue.IsVariable(varKeyValue.Value))
-            |> Seq.iter (fun childKeyValue -> 
+            |> Seq.toList
+            |> List.filter (fun varKeyValue -> FplValue.IsVariable(varKeyValue.Value))
+            |> List.iter (fun childKeyValue -> 
                 if not (childKeyValue.Value.Parent.Value.AuxiliaryUniqueChilds.Contains(childKeyValue.Value.Name)) then 
                     if context = "NamedVarDeclarationInBlock" then 
                         st.SetContext(EvalContext.NamedVarDeclarationInBlock (childKeyValue.Value)) LogContext.Replace

@@ -354,6 +354,8 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test(x: pred) {self} prty func X()->obj {intr} };", 1)>]
     [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test() {dec ~x: pred; self} prty func X()->obj {intr} };", 1)>]
     [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test() {self} prty func X()->obj {dec ~x: pred; return x} };", 1)>]
+    [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
+    [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~c: obj; pre: true con: true};", 1)>]
     [<TestMethod>]
     member this.TestVAR03(fplCode:string, expected) =
         let code = VAR03 ("", "")
