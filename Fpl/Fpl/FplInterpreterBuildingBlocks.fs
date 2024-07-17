@@ -1394,7 +1394,7 @@ let rec eval (st: SymbolTable) ast =
             fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
             eval st varDeclModifierAst
             fplValue.Scope 
-            |> Seq.toList
+            |> Seq.toList // Make this collection immutable since it might be changed in the below iteration
             |> List.filter (fun varKeyValue -> FplValue.IsVariable(varKeyValue.Value))
             |> List.iter (fun childKeyValue -> 
                 if not (childKeyValue.Value.Parent.Value.AuxiliaryUniqueChilds.Contains(childKeyValue.Value.Name)) then 
