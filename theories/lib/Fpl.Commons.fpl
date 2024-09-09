@@ -46,17 +46,17 @@ inf ExistsByExample(p: pred(c: obj))
         ex x {p(x)}
 }
 
-def pred Equal infix "=" 0 (x,y: tpl)
+def pred Equal infix "=" 50 (x,y: tpl)
 {
-    delegate.Equal(x,y) 
+    intrinsic
 }
 
-def pred NotEqual infix "<>" 10 (x,y: tpl)
+def pred NotEqual infix "<>" 60 (x,y: tpl)
 {
     not (x = y) 
 }
 
-def pred Implies infix "=>" 50 (x,y: pred)
+def pred Implies infix "=>" 70 (x,y: pred)
 {
     impl
     (
@@ -66,7 +66,7 @@ def pred Implies infix "=>" 50 (x,y: pred)
     )
 }
 
-def pred IfAndOnlyIf infix "<=>" 60 (x,y: pred)
+def pred IfAndOnlyIf infix "<=>" 80 (x,y: pred)
 {
     iif
     (
@@ -76,17 +76,17 @@ def pred IfAndOnlyIf infix "<=>" 60 (x,y: pred)
     )
 }
 
-def pred And infix "and" 30 (x:+ pred)
+def pred And infix "and" 5 (x:+ pred)
 {
     and (x)
 }
 
-def pred Or infix "or" 40 (x:+ pred)
+def pred Or infix "or" 10 (x:+ pred)
 {
     or (x)
 }
 
-def pred Xor infix "xor" 35 (x:+ pred)
+def pred Xor infix "xor" 20 (x:+ pred)
 {
     xor (x)
 }
