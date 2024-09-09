@@ -41,28 +41,22 @@ let loadFplFile(path:string) =
     let st = SymbolTable(parsedAsts, false)
     FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
 
-
 let input = """
 def pred Test(x: obj) {true prty pred X(x: pred) {true} };
 def pred Test1(x: obj) {true prty pred X(x: pred) {true} };
 ;"""
 
+(*
 let result = fplParser input
 
 printf "%O" result
 
 ad.PrintDiagnostics
-
-// let st = prepareFplCode(@"D:\Forschung\fpl.net\theories\lib\Fpl.Commons.Structures.fpl")
-
-let st = prepareFplCode(input,true) 
+*)
 
 
-prepareFplCode("",false) |> ignore
-printf "\n--------------------------------\n"
 
-
-// loadFplFile(@"D:\Forschung\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.3.Ordering.fpl")
+loadFplFile(@"D:\Forschung\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.1.Axioms.fpl")
 
 printf "\n--------------------------------\n"
 ad.PrintDiagnostics

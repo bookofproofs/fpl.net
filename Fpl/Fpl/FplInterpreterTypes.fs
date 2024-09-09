@@ -226,7 +226,7 @@ type ParsingProperties =
             false
 
     static member Create(fileLoc, fileContent) = 
-        FplParser.parserDiagnostics.StreamName <- fileLoc
+        FplParser.parserDiagnostics.StreamName <- FplSources.EscapedUri(fileLoc).AbsolutePath
         {
             ParsingProperties.UriPath = fileLoc
             ParsingProperties.FplSourceCode = fileContent

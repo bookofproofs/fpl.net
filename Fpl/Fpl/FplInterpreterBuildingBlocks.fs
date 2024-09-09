@@ -1590,6 +1590,7 @@ let evaluateSymbolTable (uri:System.Uri) (st: SymbolTable) =
                 st.Root.Scope.Add(pa.Id, theoryValue)
             theoryValue.Name <- pa.Id
             st.SetContext(EvalContext.InTheory theoryValue) LogContext.Start
+            FplParser.parserDiagnostics.StreamName <- FplSources.EscapedUri(pa.Parsing.UriPath).AbsolutePath
             eval st pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.Evaluated
             theoryValue.NameIsFinal <- true
