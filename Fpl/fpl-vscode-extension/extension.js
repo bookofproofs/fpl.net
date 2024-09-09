@@ -142,13 +142,13 @@ function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
  */
 function dispatchRuntime(runtimeName) {
     if (runtimeName == 'win32-x64') {
-        return ['https://download.visualstudio.microsoft.com/download/pr/420ca01f-4528-43c0-893b-321ed0f9087a/c340930ab3e48da2abe868244415c846', 'dotnet-runtime-8.0.3-win-x64.zip'];
+        return ['https://download.visualstudio.microsoft.com/download/pr/d9d43c59-b9f4-47b7-a520-da3a7fa255dc/95b26e342a1ecfa29c527faebdc272e4', 'dotnet-runtime-8.0.8-win-x64.zip'];
     }
     else if (runtimeName == "linux-x64") {
-        return ['https://download.visualstudio.microsoft.com/download/pr/ed0c9129-950a-48db-80be-e770daf2db41/53879e5802bc6e76bac55c1b8154ed06', 'dotnet-runtime-8.0.3-linux-x64.tar.gz'];
+        return ['https://download.visualstudio.microsoft.com/download/pr/68c87f8a-862c-4870-a792-9c89b3c8aa2d/2319ebfb46d3a903341966586e8b0898', 'dotnet-runtime-8.0.8-linux-x64.tar.gz'];
     }
     else if (runtimeName == "darwin-x64") {
-        return ['https://download.visualstudio.microsoft.com/download/pr/564a929b-4f15-490b-895e-5260338cbae1/1db7fd97d0907d3911ac3e4dda32fbb2', 'dotnet-runtime-8.0.3-osx-x64.tar.gz'];
+        return ['https://download.visualstudio.microsoft.com/download/pr/0159972b-a4d6-4683-b32a-9da824d5689e/ffb0784119abf49015be375b5a016413', 'dotnet-runtime-8.0.8-osx-x64.tar.gz'];
     }
     else {
         let errorMsg = "Unfortunately, no runtime found for your system " + runtimeName;

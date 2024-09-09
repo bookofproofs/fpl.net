@@ -4,6 +4,9 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.6.0
+* FPL interpreter (alpha version)
+
 ## 1.5.2-4
 * Bugfix spawn UNKNOWN
 

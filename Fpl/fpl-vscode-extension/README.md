@@ -34,6 +34,9 @@ None
 
 ## Release Notes
 
+### 1.6.0
+* First FPL interpreter (alpha)
+
 ### 1.5.x
 * Newest FPL parser including many mathematical symbols further simplifying the syntax
 
