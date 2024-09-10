@@ -1,4 +1,6 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+using System;
+using System.Linq;
 using System.Text;
 using static FplInterpreterTypes;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
@@ -50,7 +52,7 @@ namespace FplLS
                     parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
                     var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
                     FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
-                    var diagnostics = CastDiagnostics(st, parserDiagnostics, new TextPositions(sourceCode));
+                    var diagnostics = CastDiagnostics(st, parserDiagnostics, sourceCode);
                     foreach (var diagnostic in diagnostics.Enumerator())
                     {
                         _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
@@ -83,19 +85,37 @@ namespace FplLS
         /// <summary>
         /// Casts a list of F# ErrReccovery module diagnostics into a list of OmniSharp's Diagnostics
         /// </summary>
-        /// <param name="diagnostics">Input list</param>
-        /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
+        /// <param name="st">Symbol table from the FPL interpreter</param>
+        /// <param name="listDiagnostics">List of diagnostics</param>
+        /// <param name="origSourceCode">source code of the current file</param>
         /// <returns>Casted list</returns>
-        public UriDiagnostics CastDiagnostics(FplInterpreterTypes.SymbolTable st, ErrDiagnostics.Diagnostics listDiagnostics, TextPositions tp)
+        public UriDiagnostics CastDiagnostics(FplInterpreterTypes.SymbolTable st, ErrDiagnostics.Diagnostics listDiagnostics, string sourceCodeCurrentFile)
         {
             var sb = new StringBuilder();
             var castedListDiagnostics = new UriDiagnostics();
             FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.DiagnosticsToString, "~~~~~Diagnostics");
+            var sourceCodes = GetTextPositionsByUri(st);
+            TextPositions tp;
             foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
             {
+                if (sourceCodes.TryGetValue(diagnostic.StartPos.StreamName, out TextPositions tpByUri))
+                {
+                    tp = tpByUri;
+                }
+                else
+                {
+                    tp = new TextPositions(sourceCodeCurrentFile);
+                }
                 castedListDiagnostics.AddDiagnostics(FplSources.EscapedUri(diagnostic.StartPos.StreamName), CastDiagnostic(diagnostic, tp, sb));
             }
             return castedListDiagnostics;
+
+        }
+
+        private static Dictionary<string, TextPositions> GetTextPositionsByUri(SymbolTable st)
+        {
+            var sourceCodes = st.ParsedAsts.DictionaryOfStreamNameFplSourceCode();
+            return sourceCodes.Select(x => new KeyValuePair<string, TextPositions>(FplSources.EscapedUri(x.Key).AbsolutePath, new TextPositions(x.Value))).ToDictionary<string, TextPositions>();
         }
 
         /// <summary>

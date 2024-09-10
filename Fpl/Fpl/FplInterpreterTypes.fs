@@ -129,12 +129,12 @@ type FplSources(paths: string list, pathToLocalRegistry:string) =
             false
 
     /// Uri of this ParsingProperties
-    static member EscapedUri(path:string) = 
-        let pathNew = Uri.UnescapeDataString(path.Replace("\\","/"))
+    static member EscapedUri(path:string):System.Uri = 
+        let pathNew = System.Uri.UnescapeDataString(path.Replace("\\","/"))
         if FplSources.IsFilePath(pathNew) then  
-            Uri($"{pathNew}")
+            System.Uri($"{pathNew}")
         else
-            Uri($"{pathNew}")
+            System.Uri($"{pathNew}")
 
     member this.Urls = List.filter FplSources.IsUrl this.Paths
     member this.FilePaths = List.filter FplSources.IsFilePath this.Paths
