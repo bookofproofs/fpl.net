@@ -265,6 +265,13 @@ type ParsedAstList() =
         else
             None
 
+    /// Returns a dictionof <StreamName,SourceCode> of all ParsedAsts in the list
+    member this.DictionaryOfStreamNameFplSourceCode()  = 
+        let ret = System.Collections.Generic.Dictionary<string,string>()
+        this
+        |> Seq.iter (fun pa -> ret.TryAdd(pa.Parsing.UriPath,pa.Parsing.FplSourceCode) |> ignore)
+        ret 
+
 type FplValueType =
     | Variable
     | VariadicVariableMany
