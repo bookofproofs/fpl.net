@@ -216,7 +216,7 @@ type ParsingProperties =
             // if there ist a Parsed Ast with the same Name as the eani.Name
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, sourcecode, the
-            this.UriPath <- codeLoc
+            this.UriPath <- FplSources.EscapedUri(codeLoc).AbsolutePath
             FplParser.parserDiagnostics.StreamName <- FplSources.EscapedUri(codeLoc).AbsolutePath
             this.Ast <- fplParser fplCode
             this.FplSourceCode <- fplCode
@@ -228,7 +228,7 @@ type ParsingProperties =
     static member Create(fileLoc, fileContent) = 
         FplParser.parserDiagnostics.StreamName <- FplSources.EscapedUri(fileLoc).AbsolutePath
         {
-            ParsingProperties.UriPath = fileLoc
+            ParsingProperties.UriPath = FplSources.EscapedUri(fileLoc).AbsolutePath
             ParsingProperties.FplSourceCode = fileContent
             ParsingProperties.Ast = FplParser.fplParser fileContent
             ParsingProperties.Checksum = computeMD5Checksum fileContent

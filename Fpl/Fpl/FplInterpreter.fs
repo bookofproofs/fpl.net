@@ -7,7 +7,7 @@ open FplInterpreterDiagnosticsEmitter
 
 let fplInterpreter (st:SymbolTable) input (uri:Uri) fplLibUrl = 
     try
-        let escapedUri = Uri(Uri.UnescapeDataString(uri.AbsoluteUri))
+        let escapedUri = FplSources.EscapedUri(uri.AbsoluteUri)
         loadAllUsesClauses st input escapedUri fplLibUrl 
         evaluateSymbolTable uri st
     with ex -> 

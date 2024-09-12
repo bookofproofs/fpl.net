@@ -1,4 +1,5 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+﻿using Microsoft.Testing.Platform.Extensions.TestHostControllers;
+using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System;
 using System.Linq;
 using System.Text;
@@ -47,12 +48,7 @@ namespace FplLS
             {
                 try
                 {
-                    var sourceCode = buffer.ToString();
-                    var parserDiagnostics = FplParser.parserDiagnostics;
-                    parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
-                    var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
-                    FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
-                    var diagnostics = CastDiagnostics(st, parserDiagnostics, sourceCode);
+                    UriDiagnostics diagnostics = RefreshFplDiagnosticsStorage(st, uri, buffer);
                     foreach (var diagnostic in diagnostics.Enumerator())
                     {
                         _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
@@ -82,6 +78,41 @@ namespace FplLS
             }
         }
 
+        private UriDiagnostics RefreshFplDiagnosticsStorage(SymbolTable st, Uri uri, StringBuilder? buffer)
+        {
+            FplLsTraceLogger.LogMsg(_languageServer, uri.AbsolutePath, "Uri in RefreshFplDiagnosticsStorage");
+            string sourceCode;
+            string bufferSourceCode = buffer.ToString();
+            var pa = st.ParsedAsts.FirstOrDefault<ParsedAst>();
+            if (pa == null)
+            {
+                sourceCode = bufferSourceCode;
+            }
+            else
+            {
+                FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", st.ParsedAsts.Select(pa => pa.Parsing.UriPath)), "st ids in PublishDiagnostics");
+                if (st.ParsedAsts.Any(pAst => pAst.Parsing.UriPath.Equals(uri.AbsolutePath, StringComparison.Ordinal)))
+                {
+                    // if there buffer's uri is among the ParsedAst, set the sourceCode to the buffer's SourceCode
+                    sourceCode = bufferSourceCode;
+                    FplLsTraceLogger.LogMsg(_languageServer, "buffer replaced by current", "Uri in RefreshFplDiagnosticsStorage");
+                }
+                else
+                {
+                    // otherwise set the source code to the first source code in the symbol table
+                    sourceCode = pa.Parsing.FplSourceCode;
+                    FplLsTraceLogger.LogMsg(_languageServer, "buffer set to root", "Uri in RefreshFplDiagnosticsStorage");
+                }
+            }
+
+            var parserDiagnostics = FplParser.parserDiagnostics;
+
+            var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
+            FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
+            var diagnostics = CastDiagnostics(st, parserDiagnostics, sourceCode);
+            return diagnostics;
+        }
+
         /// <summary>
         /// Casts a list of F# ErrReccovery module diagnostics into a list of OmniSharp's Diagnostics
         /// </summary>
@@ -98,7 +129,7 @@ namespace FplLS
             TextPositions tp;
             foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
             {
-                if (sourceCodes.TryGetValue(diagnostic.StartPos.StreamName, out TextPositions tpByUri))
+                if (sourceCodes.TryGetValue(diagnostic.StartPos.StreamName, out TextPositions? tpByUri))
                 {
                     tp = tpByUri;
                 }
