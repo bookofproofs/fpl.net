@@ -298,12 +298,14 @@ type Diagnostic =
 
 type Diagnostics() =
     let mutable _streamName = ""
-    let myDictionary = new Dictionary<string, Diagnostic>()
+    let _diagnosticStorageTotal = new Dictionary<string,Dictionary<string, Diagnostic>>()
     member this.Collection = 
-        myDictionary
+        _diagnosticStorageTotal
         |> Seq.map (fun kvp -> (kvp.Key, kvp.Value))
         |> Seq.sortBy fst
         |> Seq.map snd
+        |> Seq.concat
+        |> Seq.map (fun kvp -> kvp.Value)
         |> Seq.toList
 
     member this.StreamName 
@@ -312,11 +314,13 @@ type Diagnostics() =
 
     member this.AddDiagnostic (d:Diagnostic) =
         let keyOfd = d.DiagnosticID
-        if not (myDictionary.ContainsKey(keyOfd)) then
-            myDictionary.Add(keyOfd, d) |> ignore
+        if not (_diagnosticStorageTotal.ContainsKey(d.StartPos.StreamName)) then
+            _diagnosticStorageTotal.Add(d.StartPos.StreamName, new Dictionary<string, Diagnostic>())
+        if not (_diagnosticStorageTotal[d.StartPos.StreamName].ContainsKey(keyOfd)) then
+            _diagnosticStorageTotal[d.StartPos.StreamName].Add(keyOfd, d) |> ignore
 
     member this.CountDiagnostics  =
-        myDictionary.Count
+        this.Collection.Length
 
     member this.PrintDiagnostics =
         for d in this.Collection do
@@ -331,7 +335,15 @@ type Diagnostics() =
             d.Code.Code + ":" +
             d.Message) 
         |> String.concat "\n"
-    member this.Clear() = myDictionary.Clear()
+
+    member this.Clear(streamName:string) =
+        if not (_diagnosticStorageTotal.ContainsKey(streamName)) then
+            _diagnosticStorageTotal[streamName].Clear() |> ignore
+
+    member this.Clear() = 
+        _diagnosticStorageTotal.Values
+        |> Seq.iter (fun dict -> dict.Clear())
+        _diagnosticStorageTotal.Clear()
 
 let ad = Diagnostics()
 
