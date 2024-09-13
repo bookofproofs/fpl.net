@@ -82,6 +82,7 @@ namespace FplLS
         {
             FplLsTraceLogger.LogMsg(_languageServer, uri.AbsolutePath, "Uri in RefreshFplDiagnosticsStorage");
             string sourceCode;
+            ArgumentNullException.ThrowIfNull(buffer);
             string bufferSourceCode = buffer.ToString();
             var pa = st.ParsedAsts.FirstOrDefault<ParsedAst>();
             if (pa == null)
@@ -93,7 +94,7 @@ namespace FplLS
                 FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", st.ParsedAsts.Select(pa => pa.Parsing.UriPath)), "st ids in PublishDiagnostics");
                 if (st.ParsedAsts.Any(pAst => pAst.Parsing.UriPath.Equals(uri.AbsolutePath, StringComparison.Ordinal)))
                 {
-                    // if there buffer's uri is among the ParsedAst, set the sourceCode to the buffer's SourceCode
+                    // if there buffer's Uri is among the ParsedAst, set the sourceCode to the buffer's SourceCode
                     sourceCode = bufferSourceCode;
                     FplLsTraceLogger.LogMsg(_languageServer, "buffer replaced by current", "Uri in RefreshFplDiagnosticsStorage");
                 }

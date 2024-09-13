@@ -310,7 +310,6 @@ type Diagnostics() =
 
     member this.StreamName 
         with get() = _streamName
-        and set (value) = _streamName <- value
 
     member this.AddDiagnostic (d:Diagnostic) =
         let keyOfd = d.DiagnosticID
@@ -337,7 +336,8 @@ type Diagnostics() =
         |> String.concat "\n"
 
     member this.Clear(streamName:string) =
-        if not (_diagnosticStorageTotal.ContainsKey(streamName)) then
+        _streamName <- streamName
+        if (_diagnosticStorageTotal.ContainsKey(streamName)) then
             _diagnosticStorageTotal[streamName].Clear() |> ignore
 
     member this.Clear() = 
