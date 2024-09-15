@@ -266,8 +266,7 @@ type UpdatingSymbolTableNavigation() =
         Assert.AreEqual<int>(0, result.Length)
 
         // the repo files are supposed to be in the repository (https source)
-        // we now copy the repo file to the lib file and pretend to have the same file 
-        // in our lib subfolder
+        // we now copy the repo file to the lib subfolder
         File.Copy(Path.Combine(currentPathRepo,"Fpl.Commons.fpl"),Path.Combine(currentPath,"Fpl.Commons.fpl"))
 
         // do the test - now, open a file in the lib subdirectory
@@ -281,3 +280,123 @@ type UpdatingSymbolTableNavigation() =
 
         // remove the test file from Main
         deleteFiles currentPath "Fpl.Commons.fpl"
+
+    [<TestMethod>]
+    member this.HavingRepoFileInLibDoesPreventItToBeDownloadedInRepo() =
+        // prepare test, making sure there is an empty 
+        // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+        FplParser.parserDiagnostics.Clear()
+        // first delete lib and repo subdirectories (if any)
+        let currentPath = Directory.GetCurrentDirectory()
+        let currentPathLib = Path.Combine(currentPath,"lib")
+        let currentPathRepo = Path.Combine(currentPath,"repo")
+        deleteDirectory currentPathLib
+        deleteDirectory currentPathRepo
+
+        let fplCode = """
+            uses Fpl.SetTheory;
+        """
+        let filename = "HavingRepoFileInLibDoesNotPreventItToBeDownloadedInRepo"  
+        // file processing creates the subdirectories lib and repo
+        prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+        // the repo files are supposed to be in the repository (https source)
+        // we now copy the repo file to the lib subfolder
+        File.Copy(Path.Combine(currentPathRepo,"Fpl.Commons.fpl"),Path.Combine(currentPathLib,"Fpl.Commons.fpl"))
+
+        // and delete it from the repo subfolder
+        deleteFiles currentPathRepo "Fpl.Commons.fpl"
+
+        // now, process the main file again. This should complement the repo folder again
+        prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+        // do the test - check, if the repo file was downloaded again although it exists in lib subfolder
+        Assert.IsFalse(File.Exists(Path.Combine(currentPathRepo,"Fpl.Commons.fpl")))
+        Assert.IsTrue(File.Exists(Path.Combine(currentPathLib,"Fpl.Commons.fpl")))
+
+        // remove the test file
+        prepareFplCode(filename, "", true) |> ignore
+        // remove the test file from lib
+        deleteFiles currentPathLib "Fpl.Commons.fpl"
+
+    [<TestMethod>]
+    member this.HavingRepoFileInMainDoesPreventItToBeDownloadedInRepo() =
+        // prepare test, making sure there is an empty 
+        // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+        FplParser.parserDiagnostics.Clear()
+        // first delete lib and repo subdirectories (if any)
+        let currentPath = Directory.GetCurrentDirectory()
+        let currentPathLib = Path.Combine(currentPath,"lib")
+        let currentPathRepo = Path.Combine(currentPath,"repo")
+        deleteDirectory currentPathLib
+        deleteDirectory currentPathRepo
+
+        let fplCode = """
+            uses Fpl.SetTheory;
+        """
+        let filename = "HavingRepoFileInMainDoesPreventItToBeDownloadedInRepo"  
+        // file processing creates the subdirectories lib and repo
+        prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+        // the repo files are supposed to be in the repository (https source)
+        // we now copy the repo file to main folder 
+        File.Copy(Path.Combine(currentPathRepo,"Fpl.Commons.fpl"),Path.Combine(currentPath,"Fpl.Commons.fpl"))
+
+        // and delete it from the repo subfolder
+        deleteFiles currentPathRepo "Fpl.Commons.fpl"
+
+        // now, process the main file again. This should complement the repo folder again
+        prepareFplCode(filename + ".fpl", fplCode, false) |> ignore
+
+        // do the test - check, if the repo file was downloaded again although it exists in lib subfolder
+        Assert.IsFalse(File.Exists(Path.Combine(currentPathRepo,"Fpl.Commons.fpl")))
+        Assert.IsTrue(File.Exists(Path.Combine(currentPath,"Fpl.Commons.fpl")))
+
+        // remove the test file
+        prepareFplCode(filename, "", true) |> ignore
+        // remove the test file from lib
+        deleteFiles currentPath "Fpl.Commons.fpl"
+
+    [<TestMethod>]
+    member this.OpeningFileInRepoAndChangingItChangesAlsoTheDiagnosticsOfThisFile() =
+        // prepare test, making sure there is an empty 
+        // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+        FplParser.parserDiagnostics.Clear()
+        // first delete lib and repo subdirectories (if any)
+        let currentPath = Directory.GetCurrentDirectory()
+        let currentPathLib = Path.Combine(currentPath,"lib")
+        let currentPathRepo = Path.Combine(currentPath,"repo")
+        deleteDirectory currentPathLib
+        deleteDirectory currentPathRepo
+
+        let fplCode = """
+            uses Fpl.SetTheory;
+        """
+        let filename = "OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo"  
+        // file processing creates the subdirectories
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        match stOption with
+        | Some st -> 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+        | None -> Assert.IsTrue(false)
+
+        let pathToTestFile = Path.Combine(currentPathRepo,"Fpl.Commons.fpl")
+        let diagnosticsOfFile = FplParser.parserDiagnostics.GetStreamDiagnostics(pathToTestFile.Replace("\\","/"))
+        let rememberDiagnosticsOfOriginalFile = diagnosticsOfFile.Count
+        // now manipulate the file and reprocess it
+        
+        // now, conserve the symbol table for the test's next step and reprocess the manipulated file
+        let st = SymbolTable(stOption.Value.ParsedAsts, false)
+        let uri = System.Uri(pathToTestFile)
+        let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        let fplCodeOriginal = File.ReadAllText(pathToTestFile)
+        let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() };"
+        FplInterpreter.fplInterpreter st fplCodeManipulated uri fplLibUrl
+
+        // do the test - check, if the diagnostics changed
+        let diagnosticsOfManipulatedFile = FplParser.parserDiagnostics.GetStreamDiagnostics(pathToTestFile.Replace("\\","/"))
+        Assert.IsTrue(diagnosticsOfManipulatedFile.Count > rememberDiagnosticsOfOriginalFile)
+
+        // remove the test file
+        prepareFplCode(filename, "", true) |> ignore

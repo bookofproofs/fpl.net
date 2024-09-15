@@ -345,6 +345,13 @@ type Diagnostics() =
         |> Seq.iter (fun dict -> dict.Clear())
         _diagnosticStorageTotal.Clear()
 
+    member this.GetStreamDiagnostics(streamName:string) =
+        if (_diagnosticStorageTotal.ContainsKey(streamName)) then
+            _diagnosticStorageTotal[streamName]
+        else
+            Dictionary<string, Diagnostic>()
+        
+
 let ad = Diagnostics()
 
 type Interval = 
