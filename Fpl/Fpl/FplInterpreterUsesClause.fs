@@ -99,10 +99,15 @@ let createSubfolder (uri: Uri) subFolder =
         else
             p
     let directoryPath = Path.GetDirectoryName(unescapedPath)
-    let subDirectoryPath = Path.Combine(directoryPath, subFolder)
-    if not <| Directory.Exists(subDirectoryPath) then
-        Directory.CreateDirectory(subDirectoryPath) |> ignore
-    (directoryPath, subDirectoryPath)
+    let directoryName = Path.GetFileName(directoryPath)
+    if directoryName = "lib" || directoryName = "repo" then
+        let subDirectoryPath = Path.Combine(Path.GetDirectoryName(directoryPath), subFolder)
+        (Path.GetDirectoryName(directoryPath), subDirectoryPath)
+    else
+        let subDirectoryPath = Path.Combine(directoryPath, subFolder)
+        if not <| Directory.Exists(subDirectoryPath) then
+            Directory.CreateDirectory(subDirectoryPath) |> ignore
+        (directoryPath, subDirectoryPath)
 
 
 let downloadLibMap (uri:System.Uri) (currentWebRepo: string) =
@@ -304,7 +309,7 @@ let private rearrangeList element list =
     afterElement @ beforeElement
 
 let garbageCollector (st:SymbolTable) (uri:Uri) = 
-    let currentTheory = Path.GetFileNameWithoutExtension(uri.LocalPath)
+    let currentTheory = Path.GetFileNameWithoutExtension(uri.AbsolutePath)
     let referencedAstsOfCurrentTheory ct = 
         match st.ParsedAsts.TryFindAstById(ct) with
         | Some pa -> pa.Sorting.ReferencedAsts

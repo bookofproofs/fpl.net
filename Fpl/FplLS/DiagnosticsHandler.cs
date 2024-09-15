@@ -88,22 +88,13 @@ namespace FplLS
             if (pa == null)
             {
                 sourceCode = bufferSourceCode;
+                FplLsTraceLogger.LogMsg(_languageServer, $"buffer initialized with {uri.AbsolutePath}", "RefreshFplDiagnosticsStorage");
             }
             else
             {
                 FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", st.ParsedAsts.Select(pa => pa.Parsing.UriPath)), "st ids in PublishDiagnostics");
-                if (st.ParsedAsts.Any(pAst => pAst.Parsing.UriPath.Equals(uri.AbsolutePath, StringComparison.Ordinal)))
-                {
-                    // if there buffer's Uri is among the ParsedAst, set the sourceCode to the buffer's SourceCode
-                    sourceCode = bufferSourceCode;
-                    FplLsTraceLogger.LogMsg(_languageServer, "buffer replaced by current", "Uri in RefreshFplDiagnosticsStorage");
-                }
-                else
-                {
-                    // otherwise set the source code to the first source code in the symbol table
-                    sourceCode = pa.Parsing.FplSourceCode;
-                    FplLsTraceLogger.LogMsg(_languageServer, "buffer set to root", "Uri in RefreshFplDiagnosticsStorage");
-                }
+                sourceCode = bufferSourceCode;
+                FplLsTraceLogger.LogMsg(_languageServer, $"buffer replaced by {uri.AbsolutePath}", "RefreshFplDiagnosticsStorage");
             }
 
             var parserDiagnostics = FplParser.parserDiagnostics;

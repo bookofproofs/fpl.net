@@ -10,6 +10,7 @@
   <ItemGroup>
     <Compile Include="CommonTestHelpers.fs" />
     <Compile Include="CommonFplValueTestCases.fs" />
+    <Compile Include="UpdatingSymbolTableNavigation.fs" />
     <Compile Include="TestFplValueScopeExpressionType.fs" />
     <Compile Include="TestExpressionEvaluation.fs" />
     <Compile Include="TestFplValueScopeFplRepresentation.fs" />
