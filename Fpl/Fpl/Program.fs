@@ -17,11 +17,11 @@ let deleteFilesWithExtension dir extension =
 
 
 let prepareFplCode(fplCode:string, delete:bool) =
-    FplParser.parserDiagnostics.Clear()
     let currDir = Directory.GetCurrentDirectory()
 
     File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
     let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+    FplParser.parserDiagnostics.Clear()
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
     if delete then 

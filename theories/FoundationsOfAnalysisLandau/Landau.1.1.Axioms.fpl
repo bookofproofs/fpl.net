@@ -1,4 +1,8 @@
 uses Fpl.SetTheory
 
-
+axiom SomeFplAxiom1()
+{
+    
+    is (T,N)
+}
 ;
