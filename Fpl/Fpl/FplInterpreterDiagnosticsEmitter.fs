@@ -278,6 +278,20 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
             if not duplicateInheritanceChainFound then
                 let obj = FplValue.CreateObject((pos1, pos2))
                 fplValue.ValueList.Add obj
+    elif rightContext.EndsWith("VariableType.ClassType.PredicateIdentifier") then
+        match FplValue.InScopeOfParent (fplValue) name with
+        | ScopeSearchResult.Found someCandidate -> ()
+        | _ ->
+            let diagnostic =
+                {   Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = ID010 name // class not found
+                    Diagnostic.Alternatives = None 
+                }
+            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
 
 let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) identifier (pos1: Position) pos2 =
     let context = st.EvalPath()

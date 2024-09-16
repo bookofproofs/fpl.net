@@ -441,9 +441,14 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Test:obj {intr};", 0)>]
     [<DataRow("def cl Test:Set {intr};", 1)>]
     [<DataRow("def class Set: obj {intr} def cl Test:Set {intr};", 0)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:Set {intr};", 0)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySet {intr};", 0)>]
-    [<DataRow("uses Fpl.SetTheory def cl Test:EmptySetTypo {intr};", 1)>]
+    [<DataRow("def cl Set:obj {intr} def cl Test:Set {intr};", 0)>]
+    [<DataRow("def cl Set:obj {intr} def cl Test:SetTypo {intr};", 1)>]
+    [<DataRow("def pred Test(x:Set) {intr};", 1)>]
+    [<DataRow("def cl Set:obj {intr} def pred Test(x:Set) {intr};", 0)>]
+    [<DataRow("def pred Test() {dec ~x:Set; true};", 1)>]
+    [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:Set; true};", 0)>]
+    [<DataRow("def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
+    [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
     [<TestMethod>]
     member this.TestID010(fplCode:string, expected) =
         let code = ID010 ""

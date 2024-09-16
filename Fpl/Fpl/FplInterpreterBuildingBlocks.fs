@@ -629,6 +629,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.NamedVarDeclarationInBlock fplValue
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue 
+        | EvalContext.InReferenceCreation fplValue 
         | EvalContext.InSignature fplValue -> 
             if (FplValue.IsVariadicVariableMany(fplValue)) then 
                 adjustSignature st fplValue ("*" + identifier)
