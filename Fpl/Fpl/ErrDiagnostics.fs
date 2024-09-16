@@ -310,6 +310,12 @@ type Diagnostics() =
 
     member this.StreamName 
         with get() = _streamName
+        and set (value:string) = 
+            if value.Trim() = "" then 
+                raise (ArgumentException($"Cannot set empty stream name."))
+            else
+                _streamName <- value
+
 
     member this.AddDiagnostic (d:Diagnostic) =
         let keyOfd = d.DiagnosticID
@@ -330,13 +336,14 @@ type Diagnostics() =
     member this.DiagnosticsToString = 
         this.Collection 
         |> Seq.map (fun d -> 
+            this.StreamName + ":" +
             d.Emitter.ToString() + ":" +
             d.Code.Code + ":" +
             d.Message) 
         |> String.concat "\n"
 
     member this.Clear(streamName:string) =
-        _streamName <- streamName
+        this.StreamName <- streamName
         if (_diagnosticStorageTotal.ContainsKey(streamName)) then
             _diagnosticStorageTotal[streamName].Clear() |> ignore
 
@@ -350,7 +357,14 @@ type Diagnostics() =
             _diagnosticStorageTotal[streamName]
         else
             Dictionary<string, Diagnostic>()
-        
+
+    member this.NamedPosition (p:Position) = 
+        Position(
+                    this.StreamName,
+                    p.Index,
+                    p.Line,
+                    p.Column 
+                )
 
 let ad = Diagnostics()
 
@@ -517,13 +531,14 @@ let tryParseFirstError someParser input (code:DiagnosticCode) =
         // In the success case, we always return the current parser position in the input
         result, (int userState.Index)
     | Failure(errorMsg, restInput, userState) ->
-        let newErrMsg, _ = mapErrMsgToRecText input errorMsg restInput.Position
+        let namedPos = ad.NamedPosition restInput.Position
+        let newErrMsg, _ = mapErrMsgToRecText input errorMsg namedPos
         let diagnostic =
             { 
                 Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                 Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = restInput.Position
-                Diagnostic.EndPos = restInput.Position
+                Diagnostic.StartPos = namedPos
+                Diagnostic.EndPos = namedPos
                 Diagnostic.Code = code
                 Diagnostic.Alternatives = Some newErrMsg
             }
@@ -542,7 +557,8 @@ let rec tryParse someParser input startIndexOfInput nextIndex (code:DiagnosticCo
         // In the success case, we always return the current parser position in the input
         result, (int userState.Index + startIndexOfInput), true
     | Failure(errorMsg, restInput, userState) ->
-        let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
+        let namedPos = ad.NamedPosition restInput.Position
+        let newErrMsg, choices = mapErrMsgToRecText input errorMsg namedPos
         let previousChoices = String.concat ", " choices
         // calculate the index in the original input because the error index points to the input that might be a 
         // substring of the original input
@@ -558,10 +574,10 @@ let rec tryParse someParser input startIndexOfInput nextIndex (code:DiagnosticCo
         if cond then
             let correctedPosition = 
                 Position(
-                    restInput.Position.StreamName,
+                    namedPos.StreamName,
                     correctedIndex,
-                    restInput.Position.Line,
-                    restInput.Position.Column 
+                    namedPos.Line,
+                    namedPos.Column 
                 )
             let diagnostic =
                 { 
@@ -602,7 +618,8 @@ let rec tryParseRemainingChunk someParser (input:string) startIndexOfInput nextI
                     if userState.Index < input.Length then
                         tryParseRemainingChunk someParser newInput startIndexOfInput nextIndex code correctedIndex ""
             | Failure(errorMsg, restInput, userState) ->
-                let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
+                let namedPos = ad.NamedPosition restInput.Position
+                let newErrMsg, choices = mapErrMsgToRecText input errorMsg namedPos
                 let previousChoices = String.concat ", " choices
                 // calculate the index in the original input because the error index points to the input that might be a 
                 // substring of the original input
@@ -610,10 +627,10 @@ let rec tryParseRemainingChunk someParser (input:string) startIndexOfInput nextI
                 if correctedIndex < nextIndex && previousChoices<>lastChoices then 
                     let correctedPosition = 
                         Position(
-                            restInput.Position.StreamName,
+                            namedPos.StreamName,
                             correctedIndex,
-                            restInput.Position.Line,
-                            restInput.Position.Column 
+                            namedPos.Line,
+                            namedPos.Column 
                         )
                     let diagnostic =
                         { 
@@ -655,7 +672,8 @@ let rec tryParseRemainingOnly someParser input (code:DiagnosticCode) (intervals:
             // are still met.
             tryParseRemainingOnly someParser newInput code intervals userState.Index ""
     | Failure(errorMsg, restInput, userState) ->
-        let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
+        let namedPos = ad.NamedPosition restInput.Position
+        let newErrMsg, choices = mapErrMsgToRecText input errorMsg namedPos
         let previousChoices = (String.concat ", " choices)
         let stringBetweenRecursiveCalls = 
             if restInput.Position.Index> lastCorrectedIndex && lastCorrectedIndex >= 0  then
@@ -669,8 +687,8 @@ let rec tryParseRemainingOnly someParser input (code:DiagnosticCode) (intervals:
                     { 
                         Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                         Diagnostic.Severity = DiagnosticSeverity.Error
-                        Diagnostic.StartPos = restInput.Position
-                        Diagnostic.EndPos = restInput.Position
+                        Diagnostic.StartPos = namedPos
+                        Diagnostic.EndPos = namedPos
                         Diagnostic.Code = code 
                         Diagnostic.Alternatives = Some newErrMsg
                     }

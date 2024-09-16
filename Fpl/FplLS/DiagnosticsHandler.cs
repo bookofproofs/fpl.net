@@ -94,13 +94,13 @@ namespace FplLS
             {
                 FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", st.ParsedAsts.Select(pa => pa.Parsing.UriPath)), "st ids in PublishDiagnostics");
                 sourceCode = bufferSourceCode;
-                FplLsTraceLogger.LogMsg(_languageServer, $"buffer replaced by {uri.AbsolutePath}", "RefreshFplDiagnosticsStorage");
                 FplLsTraceLogger.LogMsg(_languageServer, $"{sourceCode}", "RefreshFplDiagnosticsStorage");
             }
 
             var parserDiagnostics = FplParser.parserDiagnostics;
 
             var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
+            FplParser.parserDiagnostics.StreamName = uri.AbsolutePath;
             FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
             var diagnostics = CastDiagnostics(st, parserDiagnostics);
             return diagnostics;
@@ -117,17 +117,17 @@ namespace FplLS
         {
             var sb = new StringBuilder();
             var castedListDiagnostics = new UriDiagnostics();
-            FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.DiagnosticsToString, "~~~~~Diagnostics");
             var sourceCodes = GetTextPositionsByUri(st);
             foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
             {
-                FplLsTraceLogger.LogMsg(_languageServer, diagnostic.StartPos.StreamName, "~~~~~Stream Name");
                 if (sourceCodes.TryGetValue(diagnostic.StartPos.StreamName, out TextPositions? tpByUri))
                 {
                     castedListDiagnostics.AddDiagnostics(FplSources.EscapedUri(diagnostic.StartPos.StreamName), CastDiagnostic(diagnostic, tpByUri, sb));
                 }
             }
-            FplLsTraceLogger.LogMsg(_languageServer, castedListDiagnostics.Enumerator().Count.ToString(), "~~~~~Diagnostics Count");
+            FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.Collection.Length.ToString(), "~~~~~Diagnostics Count Orig");
+            FplLsTraceLogger.LogMsg(_languageServer, st.ParsedAsts.Count.ToString(), "~~~~~ParsedAstsCount");
+            FplLsTraceLogger.LogMsg(_languageServer, castedListDiagnostics.Enumerator().Count.ToString(), "~~~~~Diagnostics Count VS Code");
             return castedListDiagnostics;
 
         }

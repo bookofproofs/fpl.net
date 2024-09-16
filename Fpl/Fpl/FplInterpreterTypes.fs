@@ -44,8 +44,8 @@ type EvalAliasedNamespaceIdentifier =
 
     /// Creates an EvalAliasedNamespaceIdentifier with a given Uri.
     static member CreateEani(uri:System.Uri) = 
-        let pascalCaseId = Path.GetFileNameWithoutExtension(uri.LocalPath)
-        let pos = Position(uri.LocalPath, 0, 1, 1)
+        let pascalCaseId = Path.GetFileNameWithoutExtension(uri.AbsolutePath)
+        let pos = Position(uri.AbsolutePath, 0, 1, 1)
         EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseId, "*", pos, pos)
 
     member this.FileNamePattern =
@@ -226,7 +226,6 @@ type ParsingProperties =
             false
 
     static member Create(fileLoc, fileContent) = 
-        FplParser.parserDiagnostics.Clear(FplSources.EscapedUri(fileLoc).AbsolutePath)
         {
             ParsingProperties.UriPath = FplSources.EscapedUri(fileLoc).AbsolutePath
             ParsingProperties.FplSourceCode = fileContent
