@@ -1122,22 +1122,25 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
 
         sb.ToString()
 
+/// Looks for all declared building blocks with a specific name.
+let findCandidatesByName (st:SymbolTable) (name:string) =
+    let pm = List<FplValue>()
+    st.Root.Scope // iterate all theories
+    |> Seq.iter (fun theory -> 
+        theory.Value.Scope
+        // filter only blocks starting with the same FplId as the reference
+        |> Seq.filter (fun fv -> fv.Value.FplId = name) 
+        |> Seq.iter (fun block -> pm.Add(block.Value)) 
+    ) |> ignore
+    pm |> Seq.toList
+
 /// Tries to match the signature of a reference FplValue with some overload. 
 /// Returns a tuple (a,b,c) where 
 /// a = a string indicating the first mismatching argument that couldn't be matched,
 /// b = a list of candidates that were identified to match the reference,
 /// c = Some or None candidate that was matched.
 let tryMatchSignatures (st:SymbolTable) (reference:FplValue) = 
-    let candidates = 
-        let pm = List<FplValue>()
-        st.Root.Scope // iterate all theories
-        |> Seq.iter (fun theory -> 
-            theory.Value.Scope
-            // filter only blocks starting with the same FplId as the reference
-            |> Seq.filter (fun fv -> fv.Value.FplId = reference.FplId) 
-            |> Seq.iter (fun block -> pm.Add(block.Value)) 
-        ) |> ignore
-        pm |> Seq.toList
+    let candidates = findCandidatesByName st (reference.FplId)
 
     let rec checkCandidates (toBeMatchedTypeSignature: string list) (candidates: FplValue list) accResult =
         /// Compares two string lists and returns a tuple of (a,b,i) where i is None, 

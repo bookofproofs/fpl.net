@@ -279,6 +279,8 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 let obj = FplValue.CreateObject((pos1, pos2))
                 fplValue.ValueList.Add obj
     elif rightContext.EndsWith("VariableType.ClassType.PredicateIdentifier") then
+
+        
         match FplValue.InScopeOfParent (fplValue) name with
         | ScopeSearchResult.Found someCandidate -> ()
         | _ ->
