@@ -578,3 +578,12 @@ type TestVariableTypes () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestVariableType059 () =
+        let result = run (variableType .>> eof) """Set(y:Nat)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+        

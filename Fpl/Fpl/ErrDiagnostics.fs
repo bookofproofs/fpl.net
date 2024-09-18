@@ -240,9 +240,9 @@ type DiagnosticCode =
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
             | SIG04 (signature,candidates,firstFailingArgument) -> 
                 if candidates.Length = 0 then 
-                    $"No overload matching {signature}, no candidates were found (are you missing a uses clause?)" 
+                    $"No overload matching `{signature}`, no candidates were found (are you missing a uses clause?)" 
                 else
-                    $"No overload matching {signature}, failed to match `{firstFailingArgument}`, candidates were: {candidates}" 
+                    $"No overload matching `{signature}`, failed to match `{firstFailingArgument}`, candidates were: {candidates}" 
             // proof-related error codes
             | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
             | PR001 -> $"Cannot refer to a definition outside a proof."

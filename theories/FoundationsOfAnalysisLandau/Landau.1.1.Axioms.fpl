@@ -1,8 +1,2 @@
-uses Fpl.SetTheory
-
-axiom SomeFplAxiom1()
-{
-    
-    axiom
-}
+def pred Test() {dec ~x:Set; true};
 ;

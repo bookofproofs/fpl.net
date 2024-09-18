@@ -1134,6 +1134,34 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
     ) |> ignore
     pm |> Seq.toList
 
+
+let rec checkCandidates (toBeMatchedTypeSignature: string list) (candidates: FplValue list) accResult =
+    /// Compares two string lists and returns a tuple of (a,b,i) where i is None, 
+    /// if a both lists are identical. If i = Some index, then a and b contain strings that are not equal at that index.
+    let findFirstMismatchPosition list1 list2 =
+        let rec compareLists index l1 l2 =
+            match l1, l2 with
+            | [], [] -> ("","", None)
+            | hd1 :: tl1, hd2 :: tl2 ->
+                if hd1 <> hd2 then (hd1, hd2, Some index)
+                else compareLists (index + 1) tl1 tl2
+            | hd1 :: _, [] -> (hd1, "", Some index)
+            | [], hd2 :: _ -> ("", hd2, Some index)
+        compareLists 0 list1 list2
+    // matches the TypeSignature of every candidate with a toBeMatchedTypeSignature
+    match candidates with
+    | [] -> (accResult, None) // all candidates mismatch toBeMatchedTypeSignature
+    | x :: xs ->
+        match findFirstMismatchPosition toBeMatchedTypeSignature x.TypeSignature with
+        | ("", "", None) -> (accResult, Some x) // there is a candidate that matches toBeMatchedTypeSignature
+        | ("", elem2, Some index) -> 
+            checkCandidates toBeMatchedTypeSignature xs $"missing {elem2} at position {index}" // first reason for mismatch
+        | (elem1, "", Some index) -> 
+            checkCandidates toBeMatchedTypeSignature xs $"superfluous {elem1} at position {index}" // second reason for mismatch
+        | (elem1, elem2, Some index) -> 
+            checkCandidates toBeMatchedTypeSignature xs $"`{elem1}` with `{elem2}` at position {index}" // third reason for mismatch
+        | _ -> checkCandidates toBeMatchedTypeSignature xs accResult // accumulate reasons
+
 /// Tries to match the signature of a reference FplValue with some overload. 
 /// Returns a tuple (a,b,c) where 
 /// a = a string indicating the first mismatching argument that couldn't be matched,
@@ -1142,37 +1170,22 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
 let tryMatchSignatures (st:SymbolTable) (reference:FplValue) = 
     let candidates = findCandidatesByName st (reference.FplId)
 
-    let rec checkCandidates (toBeMatchedTypeSignature: string list) (candidates: FplValue list) accResult =
-        /// Compares two string lists and returns a tuple of (a,b,i) where i is None, 
-        /// if a both lists are identical. If i = Some index, then a and b contain strings that are not equal at that index.
-        let findFirstMismatchPosition list1 list2 =
-            let rec compareLists index l1 l2 =
-                match l1, l2 with
-                | [], [] -> ("","", None)
-                | hd1 :: tl1, hd2 :: tl2 ->
-                    if hd1 <> hd2 then (hd1, hd2, Some index)
-                    else compareLists (index + 1) tl1 tl2
-                | hd1 :: _, [] -> (hd1, "", Some index)
-                | [], hd2 :: _ -> ("", hd2, Some index)
-            compareLists 0 list1 list2
-        // matches the TypeSignature of every candidate with a toBeMatchedTypeSignature
-        match candidates with
-        | [] -> (accResult, None) // all candidates mismatch toBeMatchedTypeSignature
-        | x :: xs ->
-            match findFirstMismatchPosition toBeMatchedTypeSignature x.TypeSignature with
-            | ("", "", None) -> (accResult, Some x) // there is a candidate that matches toBeMatchedTypeSignature
-            | ("", elem2, Some index) -> 
-                checkCandidates toBeMatchedTypeSignature xs $"missing {elem2} at position {index}" // first reason for mismatch
-            | (elem1, "", Some index) -> 
-                checkCandidates toBeMatchedTypeSignature xs $"superfluous {elem1} at position {index}" // second reason for mismatch
-            | (elem1, elem2, Some index) -> 
-                checkCandidates toBeMatchedTypeSignature xs $"`{elem1}` with `{elem2}` at position {index}" // third reason for mismatch
-            | _ -> checkCandidates toBeMatchedTypeSignature xs accResult // accumulate reasons
-        
-
     if candidates.IsEmpty then 
         ("", candidates, None)
     else
         let accResult, matchedCandidate = checkCandidates reference.TypeSignature candidates ""
         (accResult, candidates, matchedCandidate)
 
+/// Tries to match the signatures of two types.
+/// Returns a tuple (a,b,c) where 
+/// a = a string indicating the first mismatching argument that couldn't be matched,
+/// b = a list of candidates that were identified to match the reference,
+/// c = Some or None candidate that was matched.
+let tryMatchTypes (st:SymbolTable) (typeFplValue:FplValue) name = 
+    let candidates = findCandidatesByName st name
+
+    if candidates.IsEmpty then 
+        ("", candidates, None)
+    else
+        let accResult, matchedCandidate = checkCandidates typeFplValue.TypeSignature candidates ""
+        (accResult, candidates, matchedCandidate)

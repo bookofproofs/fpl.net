@@ -608,9 +608,9 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
-    | Ast.VariableType((pos1, pos2), ast1) ->
+    | Ast.VariableType((pos1, pos2), compoundVariableTypeAst) ->
         st.EvalPush("VariableType")
-        eval st ast1
+        eval st compoundVariableTypeAst
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.AST((pos1, pos2), ast1) ->
@@ -625,11 +625,11 @@ let rec eval (st: SymbolTable) ast =
         let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
         match st.CurrentContext with
+        | EvalContext.NamedVarDeclarationInBlock fplValue ->
+            emitSIG04TypeDiagnostics st identifier fplValue pos1 pos2
         | EvalContext.InTheory fplValue
-        | EvalContext.NamedVarDeclarationInBlock fplValue
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue 
-        | EvalContext.InReferenceCreation fplValue 
         | EvalContext.InSignature fplValue -> 
             if (FplValue.IsVariadicVariableMany(fplValue)) then 
                 adjustSignature st fplValue ("*" + identifier)
@@ -639,6 +639,7 @@ let rec eval (st: SymbolTable) ast =
                 adjustSignature st fplValue identifier
             checkID008Diagnostics fplValue pos1 pos2
             checkID009_ID010_ID011_Diagnostics st fplValue identifier pos1 pos2
+            emitSIG04TypeDiagnostics st identifier fplValue pos1 pos2
             match st.CurrentContext with 
             | EvalContext.InPropertySignature _ -> 
                 let repr = 

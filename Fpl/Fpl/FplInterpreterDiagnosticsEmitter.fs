@@ -294,7 +294,6 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 }
             FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
-
 let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) identifier (pos1: Position) pos2 =
     let context = st.EvalPath()
 
@@ -464,6 +463,25 @@ let emitSIG04Diagnostics (fplValue: FplValue) (candidates: FplValue list) firstF
           Diagnostic.Alternatives = None }
 
     FplParser.parserDiagnostics.AddDiagnostic diagnostic
+
+let emitSIG04TypeDiagnostics (st:SymbolTable) name (fplValue:FplValue) pos1 pos2 =
+
+    let rightContext = st.EvalPath()
+    if rightContext.EndsWith(".VariableType.ClassType.PredicateIdentifier") then
+        match tryMatchTypes st fplValue name with
+        | (_, _, Some matchedFplValue) -> ()
+        | (firstFailingArgument, candidates, None) -> 
+            let candidateNames =
+                candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
+            let diagnostic =
+                { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                  Diagnostic.Severity = DiagnosticSeverity.Error
+                  Diagnostic.StartPos = pos1
+                  Diagnostic.EndPos = pos2
+                  Diagnostic.Code = SIG04(name, candidateNames, firstFailingArgument)
+                  Diagnostic.Alternatives = None }
+
+            FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
 let rec blocktIsProof (fplValue: FplValue) =
     if FplValue.IsProof(fplValue) then
