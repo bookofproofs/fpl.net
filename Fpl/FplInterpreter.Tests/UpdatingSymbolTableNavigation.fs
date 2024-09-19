@@ -254,6 +254,8 @@ type UpdatingSymbolTableNavigation() =
         let currentPathRepo = Path.Combine(currentPath,"repo")
         deleteDirectory currentPathLib
         deleteDirectory currentPathRepo
+        deleteFiles currentPath "Fpl.Commons.fpl"
+        deleteFiles currentPath "Fpl.SetTheory.fpl"
 
         let fplCode = """
             uses Fpl.SetTheory;
@@ -292,6 +294,8 @@ type UpdatingSymbolTableNavigation() =
         let currentPathRepo = Path.Combine(currentPath,"repo")
         deleteDirectory currentPathLib
         deleteDirectory currentPathRepo
+        deleteFiles currentPath "Fpl.Commons.fpl"
+        deleteFiles currentPath "Fpl.SetTheory.fpl"
 
         let fplCode = """
             uses Fpl.SetTheory;
@@ -330,6 +334,8 @@ type UpdatingSymbolTableNavigation() =
         let currentPathRepo = Path.Combine(currentPath,"repo")
         deleteDirectory currentPathLib
         deleteDirectory currentPathRepo
+        deleteFiles currentPath "Fpl.Commons.fpl"
+        deleteFiles currentPath "Fpl.SetTheory.fpl"
 
         let fplCode = """
             uses Fpl.SetTheory;
@@ -368,6 +374,8 @@ type UpdatingSymbolTableNavigation() =
         let currentPathRepo = Path.Combine(currentPath,"repo")
         deleteDirectory currentPathLib
         deleteDirectory currentPathRepo
+        deleteFiles currentPath "Fpl.Commons.fpl"
+        deleteFiles currentPath "Fpl.SetTheory.fpl"
 
         let fplCode = """
             uses Fpl.SetTheory;

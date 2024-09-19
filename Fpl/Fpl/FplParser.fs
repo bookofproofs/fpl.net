@@ -623,7 +623,6 @@ let errInformation = [
     (RET000, ["ret"], returnStatement)
     (PRE000, ["pre"], premise)
     (CON000, ["con"], conclusion)
-    (TRL000, ["!"], translation)
     (TYD000, ["~"], varDecl)
 ]
 /// Finds the error information tuple based on a prefix of a string from the errInformation list. 

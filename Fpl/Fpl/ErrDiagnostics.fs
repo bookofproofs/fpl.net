@@ -65,7 +65,6 @@ type DiagnosticCode =
     | RET000
     | PRE000
     | CON000
-    | TRL000
     | TYD000
     // interpreter error codes
     | GEN00 of string
@@ -135,7 +134,6 @@ type DiagnosticCode =
             | RET000 -> "RET000"
             | PRE000 -> "PRE000"
             | CON000 -> "CON000"
-            | TRL000 -> "TRL000"
             | TYD000 -> "TYD000"
             // interpreter error messages
             | GEN00 _ -> "GEN00"

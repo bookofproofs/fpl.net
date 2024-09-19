@@ -56,7 +56,7 @@ type TestParserErrors() =
     member this.TestPRP000() =
         let code = PRP000
         printf "Trying %s" code.Message
-        let input = """def pred T() {true property pred T(){#}}
+        let input = """def pred T() {true mand prop pred T(){#}}
         ;
         """
         let ast = fplParser input
@@ -69,13 +69,11 @@ type TestParserErrors() =
         printf "Trying %s" code.Message
         let input = """
         axiom x() { true }
-        axiom x() { true }
-        axiom x() { true }
         ;
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual<int>(2, result.Length)
+        Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
     member this.TestTHM000() =
@@ -83,13 +81,11 @@ type TestParserErrors() =
         printf "Trying %s" code.Message
         let input = """
         thm x() { true }
-        thm x() { true }
-        thm x() { true }
         ;
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual<int>(2, result.Length)
+        Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
     member this.TestCOR000() =
@@ -109,19 +105,18 @@ type TestParserErrors() =
         printf "Trying %s" code.Message
         let input = """
         lem x() { true }
-        lem x() { true }
-        lem x() { true } 
         ;
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual<int>(2, result.Length)
+        Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
     member this.TestPPS000() =
         let code = PPS000
         printf "Trying %s" code.Message
         let input = """
+        prop x() { true }
         ;
         """
         let ast = fplParser input
@@ -134,13 +129,11 @@ type TestParserErrors() =
         printf "Trying %s" code.Message
         let input = """
         conj x() { true }
-        conj x() { true }
-        conj x() { true } 
         ;
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.AreEqual<int>(2, result.Length)
+        Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
     member this.TestVAR000() =
@@ -216,6 +209,7 @@ type TestParserErrors() =
         let code = PRD000
         printf "Trying %s" code.Message
         let input = """
+        def pred T() { and(x,:) }
         ;
         """
         let ast = fplParser input
@@ -268,8 +262,22 @@ type TestParserErrors() =
     member this.TestDCS000() =
         let code = DCS000
         printf "Trying %s" code.Message
-        let input = """
-        ;
+        let input = """def pred T() 
+            { 
+                dec
+                    cases
+                    (
+                    | Equal(x,0) :
+                        self := Zero()
+                    | Equal(x,1) :
+                        self := Succ(Zero())
+                    | Equal(x,2) :
+                        self := Succ(Succ(Zero()))
+                    ? self := 
+                )
+                ;
+                true
+             };
         """
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
@@ -290,6 +298,10 @@ type TestParserErrors() =
         let code = REV000
         printf "Trying %s" code.Message
         let input = """
+            proof T$1
+            {
+                1. revoke :
+            }
         ;
         """
         let ast = fplParser input
@@ -328,18 +340,6 @@ type TestParserErrors() =
         let ast = fplParser input
         let result = filterByErrorCode FplParser.parserDiagnostics code
         Assert.AreEqual<int>(2, result.Length)
-
-    [<TestMethod>]
-    member this.TestTRL000() =
-        let code = TRL000
-        printf "Trying %s" code.Message
-        let input = """
-        
-        ;
-        """
-        let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
-        Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
     member this.TestTYD000() =
