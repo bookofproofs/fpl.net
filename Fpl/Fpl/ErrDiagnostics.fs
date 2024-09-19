@@ -296,6 +296,13 @@ type Diagnostic =
     member this.DiagnosticID = 
         (sprintf "%07d" this.StartPos.Index) + this.Emitter.ToString() + this.Code.Code
 
+    member this.ShortForm = 
+        this.Emitter.ToString() + ":" +
+        this.Code.Code + ":" +
+        this.Message
+
+
+
 type Diagnostics() =
     let mutable _streamName = ""
     let _diagnosticStorageTotal = new Dictionary<string,Dictionary<string, Diagnostic>>()
@@ -327,22 +334,23 @@ type Diagnostics() =
     member this.CountDiagnostics  =
         this.Collection.Length
 
-    member this.PrintDiagnostics =
-        for d in this.Collection do
-            printfn "%s" d.Message
+    member this.DiagnosticsToString = 
+        _diagnosticStorageTotal
+        |> Seq.collect (fun kvpOuter ->
+            let a = kvpOuter.Key
+            kvpOuter.Value
+            |> Seq.map (fun kvpInner ->
+                $"{a}: {kvpInner.Value.ShortForm}"
+            )
+            |> Seq.sortBy id
+        )
+        |> String.concat Environment.NewLine
 
+    member this.PrintDiagnostics =
+        printfn "%s" this.DiagnosticsToString
         printfn "%s" "\n^------------------------^\n"
 
-    member this.DiagnosticsToString = 
-        this.Collection 
-        |> Seq.map (fun d -> 
-            this.StreamName + ":" +
-            d.Emitter.ToString() + ":" +
-            d.Code.Code + ":" +
-            d.Message) 
-        |> String.concat "\n"
-
-    member this.Clear(streamName:string) =
+    member this.ResetStream(streamName:string) =
         this.StreamName <- streamName
         if (_diagnosticStorageTotal.ContainsKey(streamName)) then
             _diagnosticStorageTotal[streamName].Clear() |> ignore

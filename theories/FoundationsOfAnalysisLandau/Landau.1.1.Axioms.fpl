@@ -1,2 +1,2 @@
-def pred Test() {dec ~x:Set; true};
+uses Fpl.SetTheory
 ;

@@ -359,6 +359,7 @@ let garbageCollector (st:SymbolTable) (uri:Uri) =
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
 let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl = 
+    FplParser.parserDiagnostics.StreamName <- uri.AbsolutePath
     let sources = acquireSources uri fplLibUrl
     emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri))
 

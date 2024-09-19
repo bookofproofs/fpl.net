@@ -118,6 +118,7 @@ namespace FplLS
             var sb = new StringBuilder();
             var castedListDiagnostics = new UriDiagnostics();
             var sourceCodes = GetTextPositionsByUri(st);
+            FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.DiagnosticsToString, "~~~~~Diagnostics");
             foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
             {
                 if (sourceCodes.TryGetValue(diagnostic.StartPos.StreamName, out TextPositions? tpByUri))

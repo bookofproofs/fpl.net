@@ -1593,11 +1593,13 @@ let evaluateSymbolTable (uri:System.Uri) (st: SymbolTable) =
         match usesClausesEvaluatedParsedAst with
         | Some pa ->
             // evaluate the ParsedAst
-            let theoryValue = FplValue.CreateFplValue((Position(pa.Parsing.UriPath,0,1,1), Position(pa.Parsing.UriPath,0,1,1)), FplValueType.Theory, st.Root)
+            let currentUriPath = pa.Parsing.UriPath
+            let theoryValue = FplValue.CreateFplValue((Position(currentUriPath,0,1,1), Position(currentUriPath,0,1,1)), FplValueType.Theory, st.Root)
             if not (st.Root.Scope.ContainsKey(pa.Id)) then
                 st.Root.Scope.Add(pa.Id, theoryValue)
             theoryValue.Name <- pa.Id
             st.SetContext(EvalContext.InTheory theoryValue) LogContext.Start
+            FplParser.parserDiagnostics.StreamName <- currentUriPath
             eval st pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.Evaluated
             theoryValue.NameIsFinal <- true

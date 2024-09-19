@@ -41,7 +41,7 @@ let loadFplFile(path:string) =
     let st = SymbolTable(parsedAsts, false)
     FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
 
-let input = """def pred Test(x:Set) {intr};"""
+let input = """uses Fpl.SetTheory;"""
 
 (*
 let result = fplParser input

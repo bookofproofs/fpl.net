@@ -217,7 +217,7 @@ type ParsingProperties =
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, sourcecode, the
             this.UriPath <- FplSources.EscapedUri(codeLoc).AbsolutePath
-            FplParser.parserDiagnostics.Clear(FplSources.EscapedUri(codeLoc).AbsolutePath)
+            FplParser.parserDiagnostics.ResetStream(FplSources.EscapedUri(codeLoc).AbsolutePath)
             this.Ast <- fplParser fplCode
             this.FplSourceCode <- fplCode
             this.Checksum <- checksum
@@ -226,8 +226,9 @@ type ParsingProperties =
             false
 
     static member Create(fileLoc, fileContent) = 
+        FplParser.parserDiagnostics.ResetStream(FplSources.EscapedUri(fileLoc).AbsolutePath)
         {
-            ParsingProperties.UriPath = FplSources.EscapedUri(fileLoc).AbsolutePath
+            ParsingProperties.UriPath = FplParser.parserDiagnostics.StreamName
             ParsingProperties.FplSourceCode = fileContent
             ParsingProperties.Ast = FplParser.fplParser fileContent
             ParsingProperties.Checksum = computeMD5Checksum fileContent
