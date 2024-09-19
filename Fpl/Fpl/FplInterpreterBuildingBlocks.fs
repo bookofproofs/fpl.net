@@ -155,6 +155,10 @@ let tryAddBlock (fplValue:FplValue) =
         | ScopeSearchResult.Found conflict -> 
             emitID001diagnostics fplValue conflict 
         | _ -> 
+            fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
+            fplValue.NameIsFinal <- true
+            (* This code will fix a single VAR03 test but break ~1400 other unit tests!!!
+               we leave the code for future inspiration of correctly fixing VAR03 
             match fplValue.Parent with
             | Some parent when FplValue.IsVariable(parent) -> 
                 parent.Scope.Add(fplValue.Name,fplValue)
@@ -169,6 +173,7 @@ let tryAddBlock (fplValue:FplValue) =
                 parent.Scope.Add(fplValue.Name,fplValue)
                 fplValue.NameIsFinal <- true
             | _ -> ()
+            *)
 
 let propagateReference (refBlock:FplValue) withAdding = 
     let fplValue = refBlock.Parent.Value
