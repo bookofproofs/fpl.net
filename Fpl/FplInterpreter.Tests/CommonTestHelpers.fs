@@ -35,7 +35,9 @@ let deleteFiles dir fileName =
 
 let deleteFilesWithExtension dir extension =
     if Directory.Exists(dir) then
-        Directory.GetFiles(dir, "*." + extension) |> Array.iter File.Delete
+        Directory.GetFiles(dir, "*." + extension) |> Array.iter (fun f ->
+            File.SetAttributes(f, FileAttributes.Normal)
+            File.Delete f)
     else
         printfn "Directory %s does not exist." dir
 

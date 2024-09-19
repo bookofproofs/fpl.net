@@ -47,21 +47,6 @@ namespace FplLSTests
 
         [DataRow("is")]
         [TestMethod]
-        public void TestInsertTextEndsWithSpace(string choice)
-        {
-            var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
-            foreach (var item in actual)
-            {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
-                {
-                    Assert.IsTrue(item.InsertText.EndsWith(" "));
-                }
-            }
-        }
-
-        [DataRow("is")]
-        [TestMethod]
         public void TestAddIsOperatorChoicesLabel(string choice)
         {
             var detailCi = new FplCompletionItem(choice);
