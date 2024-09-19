@@ -653,6 +653,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InReferenceCreation fplValue -> 
             adjustSignature st fplValue identifier
             checkID012Diagnostics st fplValue identifier pos1 pos2
+            emitSIG04TypeDiagnostics st identifier fplValue pos1 pos2
         | _ -> ()
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
