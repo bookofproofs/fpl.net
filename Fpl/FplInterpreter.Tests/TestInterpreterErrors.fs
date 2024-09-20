@@ -14,6 +14,8 @@ type TestInterpreterErrors() =
         let input = """;"""
         let currDir = Directory.GetCurrentDirectory()
 
+        deleteFiles currDir "Fpl.Commons.fpl"
+        deleteFiles (Path.Combine(currDir, "lib")) "Fpl.Commons.fpl"
         File.WriteAllText(Path.Combine(currDir, "Fpl.Commons.fpl"), input)
         File.WriteAllText(Path.Combine(currDir, "lib", "Fpl.Commons.fpl"), input)
         let uri = System.Uri(Path.Combine(currDir, "Fpl.Commons.fpl"))
@@ -95,6 +97,7 @@ type TestInterpreterErrors() =
         let input = """;"""
         let currDir = Directory.GetCurrentDirectory()
 
+        deleteFiles currDir "Fpl.Commons.fpl"
         File.WriteAllText(Path.Combine(currDir, "Fpl.Commons.fpl"), input)
         let uri = System.Uri(Path.Combine(currDir, "Fpl.Commons.fpl"))
         let fplLibUrl =

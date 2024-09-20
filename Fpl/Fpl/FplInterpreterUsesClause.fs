@@ -189,7 +189,7 @@ let private findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list)
 let private emitDiagnosticsForDuplicateFiles (availableSources:FplSources) (eani:EvalAliasedNamespaceIdentifier) =
     availableSources.GroupedWithPreferedSource
     |> List.iter (fun (fileName, path, chosenPathType, pathTypes, theoryName) ->
-        if FplSources.HasPattern(fileName, eani.FileNamePattern) && pathTypes.Length > 1 then 
+        if pathTypes.Length > 1 then 
             let diagnostic =
                 { 
                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
@@ -361,9 +361,8 @@ let garbageCollector (st:SymbolTable) (uri:Uri) =
 let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl = 
     FplParser.parserDiagnostics.StreamName <- uri.AbsolutePath
     let sources = acquireSources uri fplLibUrl
-    emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri))
-
     let currentName = addOrUpdateParsedAst input uri.LocalPath st.ParsedAsts
+    emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri))
     let mutable found = true
 
     while found do

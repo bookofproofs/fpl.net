@@ -203,7 +203,6 @@ type DiagnosticCode =
             | RET000 -> "Syntax error in return statement"
             | PRE000 -> "Syntax error in premise"
             | CON000 -> "Syntax error in conclusion"
-            | TRL000 -> "Syntax error in translation"
             | TYD000 -> "Syntax error in type declaration"
             // interpreter error messages
             | GEN00 message -> sprintf "Unexpected error occurred: %s" message
@@ -263,11 +262,11 @@ type DiagnosticSeverity =
 
 type Diagnostic =
     {
+        Code: DiagnosticCode
         Emitter: DiagnosticEmitter
         Severity: DiagnosticSeverity
         StartPos: Position
         EndPos: Position
-        Code: DiagnosticCode
         Alternatives: string option
     }
     member this.Message = 
@@ -338,11 +337,10 @@ type Diagnostics() =
             let a = kvpOuter.Key
             kvpOuter.Value
             |> Seq.map (fun kvpInner ->
-                $"{a}: {kvpInner.Value.ShortForm}"
+                $"{a}: {kvpInner.Value.ShortForm}{Environment.NewLine}"
             )
-            |> Seq.sortBy id
         )
-        |> String.concat Environment.NewLine
+        |> String.concat ""
 
     member this.PrintDiagnostics =
         printfn "%s" this.DiagnosticsToString

@@ -7,6 +7,7 @@ open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterUsesClause
 open CommonTestHelpers
+open System
 
 [<TestClass>]
 type UpdatingSymbolTableNavigation() =
@@ -216,6 +217,7 @@ type UpdatingSymbolTableNavigation() =
         let currentPathRepo = Path.Combine(currentPath,"repo")
         deleteDirectory currentPathLib
         deleteDirectory currentPathRepo
+        deleteFiles currentPath "*.fpl"
 
         let fplCode = """
             uses Fpl.SetTheory;
@@ -408,3 +410,4 @@ type UpdatingSymbolTableNavigation() =
 
         // remove the test file
         prepareFplCode(filename, "", true) |> ignore
+

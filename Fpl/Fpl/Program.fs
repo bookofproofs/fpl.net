@@ -49,10 +49,11 @@ let result = fplParser input
 printf "%O" result
 
 ad.PrintDiagnostics
-*)
 
 prepareFplCode(input,false) |> ignore
+*)
 
+loadFplFile(@"C:\Users\Peaq\source\repos\bookofproofs\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.1.Axioms.fpl")
 // loadFplFile(@"D:\Forschung\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.1.Axioms.fpl")
 
 printf "\n--------------------------------\n"

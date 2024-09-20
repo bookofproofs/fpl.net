@@ -122,3 +122,13 @@ let loadFplFile (path: string) =
     let st = SymbolTable(parsedAsts, false)
     FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
     Some(st)
+
+let loadFplFileWithTheSameSymbolTable (st:SymbolTable) (path: string) =
+    let uri = System.Uri(path)
+
+    let fplLibUrl =
+        "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+
+    let fplCode = File.ReadAllText(path)
+    FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
+    Some(st)
