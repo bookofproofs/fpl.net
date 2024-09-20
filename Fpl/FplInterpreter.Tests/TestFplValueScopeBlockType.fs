@@ -201,6 +201,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
+    [<DataRow("s")>]
     [<DataRow("xu")>]
     [<DataRow("xv")>]
     [<DataRow("xw")>]
@@ -229,13 +230,14 @@ type TestFplValueScopeBlockType() =
     member this.TestVariablesInBlock(var) =
         let result = CommonFplValueTestCases.ScopeVariablesInBlock("BlockType")
         match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+        | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<FplValueType>(FplValueType.Root, r.BlockType)
             | "theory" -> Assert.AreEqual<FplValueType>(FplValueType.Theory, theory.BlockType)
             | "block" -> Assert.AreEqual<FplValueType>(FplValueType.Predicate, block.BlockType)
             | "x" -> Assert.AreEqual<FplValueType>(FplValueType.Variable, x.BlockType)
             | "y" -> Assert.AreEqual<FplValueType>(FplValueType.Variable, y.BlockType)
+            | "s" -> Assert.AreEqual<FplValueType>(FplValueType.Variable, s.BlockType)
             | "xu" -> Assert.AreEqual<FplValueType>(FplValueType.Variable, xu.BlockType)
             | "xv" -> Assert.AreEqual<FplValueType>(FplValueType.Variable, xv.BlockType)
             | "xw" -> Assert.AreEqual<FplValueType>(FplValueType.Variable, xw.BlockType)

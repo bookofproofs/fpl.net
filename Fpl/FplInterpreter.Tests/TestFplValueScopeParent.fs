@@ -199,6 +199,7 @@ type TestFplValueScopeParent() =
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
+    [<DataRow("s")>]
     [<DataRow("xw")>]
     [<DataRow("xu")>]
     [<DataRow("xv")>]
@@ -227,7 +228,7 @@ type TestFplValueScopeParent() =
     member this.TestVariablesInBlock(var) =
         let result = CommonFplValueTestCases.ScopeVariablesInBlock("Parent")
         match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+        | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with 
             | "ywc" -> Assert.AreEqual<FplValue>(yw, ywc.Parent.Value)
             | "ywb" -> Assert.AreEqual<FplValue>(yw, ywb.Parent.Value)
@@ -256,6 +257,7 @@ type TestFplValueScopeParent() =
             | "xu" -> Assert.AreEqual<FplValue>(x,  xu.Parent.Value)
             | "y" -> Assert.AreEqual<FplValue>(block, y.Parent.Value)
             | "x" -> Assert.AreEqual<FplValue>(block, x.Parent.Value)
+            | "s" -> Assert.AreEqual<FplValue>(block, s.Parent.Value)
             | "block" -> Assert.AreEqual<FplValue>(theory, block.Parent.Value)
             | "theory" -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)

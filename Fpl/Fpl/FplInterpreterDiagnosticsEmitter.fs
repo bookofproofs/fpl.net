@@ -278,21 +278,6 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
             if not duplicateInheritanceChainFound then
                 let obj = FplValue.CreateObject((pos1, pos2))
                 fplValue.ValueList.Add obj
-    elif rightContext.EndsWith("VariableType.ClassType.PredicateIdentifier") then
-
-        
-        match FplValue.InScopeOfParent (fplValue) name with
-        | ScopeSearchResult.Found someCandidate -> ()
-        | _ ->
-            let diagnostic =
-                {   Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = pos1
-                    Diagnostic.EndPos = pos2
-                    Diagnostic.Code = ID010 name // class not found
-                    Diagnostic.Alternatives = None 
-                }
-            FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
 let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) identifier (pos1: Position) pos2 =
     let context = st.EvalPath()
@@ -347,7 +332,7 @@ let emitID013Diagnostics (fplValue: FplValue) pos1 pos2 =
             FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
 let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
-    let detailed (exprType: ExprType) expectedArity actualArity pos1 pos2 =
+    let detailed (exprType: FixType) expectedArity actualArity pos1 pos2 =
         let diagnostic =
             { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
               Diagnostic.Severity = DiagnosticSeverity.Error
@@ -359,7 +344,7 @@ let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
         FplParser.parserDiagnostics.AddDiagnostic diagnostic
 
     match fplValue.ExpressionType with
-    | ExprType.Infix _ when fplValue.Arity <> 2 ->
+    | FixType.Infix _ when fplValue.Arity <> 2 ->
         if
             fplValue.TypeSignature.Length > 2
             && (fplValue.TypeSignature[2] = "+" || fplValue.TypeSignature[2] = "*")
@@ -367,8 +352,8 @@ let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
             () // avoid false positives for variadic variables
         else
             detailed fplValue.ExpressionType 2 fplValue.Arity pos1 pos2
-    | ExprType.Prefix _ when fplValue.Arity <> 1 -> detailed fplValue.ExpressionType 1 fplValue.Arity pos1 pos2
-    | ExprType.Postfix _ when fplValue.Arity <> 1 -> detailed fplValue.ExpressionType 1 fplValue.Arity pos1 pos2
+    | FixType.Prefix _ when fplValue.Arity <> 1 -> detailed fplValue.ExpressionType 1 fplValue.Arity pos1 pos2
+    | FixType.Postfix _ when fplValue.Arity <> 1 -> detailed fplValue.ExpressionType 1 fplValue.Arity pos1 pos2
     | _ -> ()
 
 let emitSIG01Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
@@ -389,11 +374,11 @@ let emitSIG01Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
                     fplValue.Scope.Add(block.Name, block)
                 else
                     match block.ExpressionType with
-                    | ExprType.Prefix symbol
-                    | ExprType.Postfix symbol ->
+                    | FixType.Prefix symbol
+                    | FixType.Postfix symbol ->
                         if expressionId = symbol then
                             fplValue.Scope.Add(block.Name, block)
-                    | ExprType.Infix(symbol, precedence) ->
+                    | FixType.Infix(symbol, precedence) ->
                         if expressionId = symbol then
                             fplValue.Scope.Add(block.Name, block)
                             fplValue.AuxiliaryInfo <- precedence
@@ -414,7 +399,7 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
     let precedences = Dictionary<int, FplValue>()
 
     match fplValue.ExpressionType with
-    | ExprType.Infix(symbol, precedence) ->
+    | FixType.Infix(symbol, precedence) ->
         let precedenceWasAlreadyThere precedence fv =
             if not (precedences.ContainsKey(precedence)) then
                 precedences.Add(precedence, fv)
@@ -429,7 +414,7 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
             |> Seq.map (fun kv1 -> kv1.Value)
             |> Seq.iter (fun block ->
                 match block.ExpressionType with
-                | ExprType.Infix(_, precedence) -> precedenceWasAlreadyThere precedence block |> ignore
+                | FixType.Infix(_, precedence) -> precedenceWasAlreadyThere precedence block |> ignore
                 | _ -> ()))
 
         if precedenceWasAlreadyThere precedence fplValue then

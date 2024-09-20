@@ -229,13 +229,14 @@ type TestFplValueScopeName() =
     member this.TestVariablesInBlock(var) =
         let result = CommonFplValueTestCases.ScopeVariablesInBlock("Name")
         match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+        | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Name)
             | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockName", theory.Name)
             | "block" -> Assert.AreEqual<string>("TestPredicate()", block.Name); 
             | "x" -> Assert.AreEqual<string>("x", x.Name)
             | "y" -> Assert.AreEqual<string>("y", y.Name)
+            | "s" -> Assert.AreEqual<string>("s", s.Name)
             | "xu" -> Assert.AreEqual<string>("u", xu.Name)
             | "xv" -> Assert.AreEqual<string>("v", xv.Name)
             | "xw" -> Assert.AreEqual<string>("w", xw.Name)

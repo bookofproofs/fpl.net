@@ -199,6 +199,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
+    [<DataRow("s")>]
     [<DataRow("xu")>]
     [<DataRow("xv")>]
     [<DataRow("xw")>]
@@ -227,13 +228,14 @@ type TestFplValueScopeQualifiedName() =
     member this.TestVariablesInBlock(var) =
         let result = CommonFplValueTestCases.ScopeVariablesInBlock("QualifiedName")
         match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+        | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.QualifiedName)
             | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockQualifiedName", theory.QualifiedName)
             | "block" -> Assert.AreEqual<string>("TestScopeVariablesInBlockQualifiedName.TestPredicate()", block.QualifiedName)
             | "x" -> Assert.AreEqual<string>("x", x.QualifiedName)
             | "y" -> Assert.AreEqual<string>("y", y.QualifiedName)
+            | "s" -> Assert.AreEqual<string>("s", s.QualifiedName)
             | "xu" -> Assert.AreEqual<string>("x.u", xu.QualifiedName)
             | "xv" -> Assert.AreEqual<string>("x.v", xv.QualifiedName)
             | "xw" -> Assert.AreEqual<string>("x.w", xw.QualifiedName)

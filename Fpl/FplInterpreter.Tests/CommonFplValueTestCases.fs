@@ -100,7 +100,12 @@ type CommonFplValueTestCases =
         FplParser.parserDiagnostics.Clear()
         let fplCode = """
         def pred TestPredicate() 
-            {dec ~x,y:pred(u,v,w:func(a,b,c:obj)->obj); true}
+        {   dec 
+                ~x,y:pred(u,v,w:func(a,b,c:obj)->obj)
+                ~s:Set
+            ; 
+            true
+        }
         ;
         """
         let filename = "TestScopeVariablesInBlock" + subtype
@@ -113,6 +118,7 @@ type CommonFplValueTestCases =
                             let block = theory.Scope[name]
                             let x = block.Scope["x"]
                             let y = block.Scope["y"]
+                            let s = block.Scope["s"]
                             let xw = x.Scope["w"]
                             let xu = x.Scope["u"]
                             let xv = x.Scope["v"]
@@ -137,7 +143,7 @@ type CommonFplValueTestCases =
                             let yva = yv.Scope["a"]
                             let yvb = yv.Scope["b"]
                             let yvc = yv.Scope["c"]
-                            Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
+                            Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
         result

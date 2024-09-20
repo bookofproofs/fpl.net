@@ -199,6 +199,7 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
+    [<DataRow("s")>]
     [<DataRow("xu")>]
     [<DataRow("xv")>]
     [<DataRow("xw")>]
@@ -227,37 +228,38 @@ type TestFplValueScopeQualifiedStartPos() =
     member this.TestVariablesInBlock(var) =
         let result = CommonFplValueTestCases.ScopeVariablesInBlock("QualifiedStartPos")
         match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+        | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | "theory" -> Assert.IsTrue(theory.QualifiedStartPos.Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.QualifiedStartPos.Contains("Ln: 2, Col: 13)")); 
-            | "x" -> Assert.IsTrue(x.QualifiedStartPos.Contains("Ln: 3, Col: 19)"))
-            | "y" -> Assert.IsTrue(y.QualifiedStartPos.Contains("Ln: 3, Col: 21)"))
-            | "xu" -> Assert.IsTrue(xu.QualifiedStartPos.Contains("Ln: 3, Col: 28)"))
-            | "xv" -> Assert.IsTrue(xv.QualifiedStartPos.Contains("Ln: 3, Col: 30)"))
-            | "xw" -> Assert.IsTrue(xw.QualifiedStartPos.Contains("Ln: 3, Col: 32)"))
-            | "yu" -> Assert.IsTrue(yu.QualifiedStartPos.Contains("Ln: 3, Col: 28)"))
-            | "yv" -> Assert.IsTrue(yv.QualifiedStartPos.Contains("Ln: 3, Col: 30)"))
-            | "yw" -> Assert.IsTrue(yw.QualifiedStartPos.Contains("Ln: 3, Col: 32)"))
-            | "xua" -> Assert.IsTrue(xua.QualifiedStartPos.Contains("Ln: 3, Col: 39)"))
-            | "xub" -> Assert.IsTrue(xub.QualifiedStartPos.Contains("Ln: 3, Col: 41)"))
-            | "xuc" -> Assert.IsTrue(xuc.QualifiedStartPos.Contains("Ln: 3, Col: 43)"))
-            | "xva" -> Assert.IsTrue(xva.QualifiedStartPos.Contains("Ln: 3, Col: 39)"))
-            | "xvb" -> Assert.IsTrue(xvb.QualifiedStartPos.Contains("Ln: 3, Col: 41)"))
-            | "xvc" -> Assert.IsTrue(xvc.QualifiedStartPos.Contains("Ln: 3, Col: 43)"))
-            | "xwa" -> Assert.IsTrue(xwa.QualifiedStartPos.Contains("Ln: 3, Col: 39)"))
-            | "xwb" -> Assert.IsTrue(xwb.QualifiedStartPos.Contains("Ln: 3, Col: 41)"))
-            | "xwc" -> Assert.IsTrue(xwc.QualifiedStartPos.Contains("Ln: 3, Col: 43)"))
-            | "yua" -> Assert.IsTrue(yua.QualifiedStartPos.Contains("Ln: 3, Col: 39)"))
-            | "yub" -> Assert.IsTrue(yub.QualifiedStartPos.Contains("Ln: 3, Col: 41)"))
-            | "yuc" -> Assert.IsTrue(yuc.QualifiedStartPos.Contains("Ln: 3, Col: 43)"))
-            | "yva" -> Assert.IsTrue(yva.QualifiedStartPos.Contains("Ln: 3, Col: 39)"))
-            | "yvb" -> Assert.IsTrue(yvb.QualifiedStartPos.Contains("Ln: 3, Col: 41)"))
-            | "yvc" -> Assert.IsTrue(yvc.QualifiedStartPos.Contains("Ln: 3, Col: 43)"))
-            | "ywa" -> Assert.IsTrue(ywa.QualifiedStartPos.Contains("Ln: 3, Col: 39)"))
-            | "ywb" -> Assert.IsTrue(ywb.QualifiedStartPos.Contains("Ln: 3, Col: 41)"))
-            | "ywc" -> Assert.IsTrue(ywc.QualifiedStartPos.Contains("Ln: 3, Col: 43)"))
+            | "x" -> Assert.IsTrue(x.QualifiedStartPos.Contains("Ln: 4, Col: 18)"))
+            | "y" -> Assert.IsTrue(y.QualifiedStartPos.Contains("Ln: 4, Col: 20)"))
+            | "s" -> Assert.IsTrue(s.QualifiedStartPos.Contains("Ln: 5, Col: 18)"))
+            | "xu" -> Assert.IsTrue(xu.QualifiedStartPos.Contains("Ln: 4, Col: 27)"))
+            | "xv" -> Assert.IsTrue(xv.QualifiedStartPos.Contains("Ln: 4, Col: 29)"))
+            | "xw" -> Assert.IsTrue(xw.QualifiedStartPos.Contains("Ln: 4, Col: 31)"))
+            | "yu" -> Assert.IsTrue(yu.QualifiedStartPos.Contains("Ln: 4, Col: 27)"))
+            | "yv" -> Assert.IsTrue(yv.QualifiedStartPos.Contains("Ln: 4, Col: 29)"))
+            | "yw" -> Assert.IsTrue(yw.QualifiedStartPos.Contains("Ln: 4, Col: 31)"))
+            | "xua" -> Assert.IsTrue(xua.QualifiedStartPos.Contains("Ln: 4, Col: 38)"))
+            | "xub" -> Assert.IsTrue(xub.QualifiedStartPos.Contains("Ln: 4, Col: 40)"))
+            | "xuc" -> Assert.IsTrue(xuc.QualifiedStartPos.Contains("Ln: 4, Col: 42)"))
+            | "xva" -> Assert.IsTrue(xva.QualifiedStartPos.Contains("Ln: 4, Col: 38)"))
+            | "xvb" -> Assert.IsTrue(xvb.QualifiedStartPos.Contains("Ln: 4, Col: 40)"))
+            | "xvc" -> Assert.IsTrue(xvc.QualifiedStartPos.Contains("Ln: 4, Col: 42)"))
+            | "xwa" -> Assert.IsTrue(xwa.QualifiedStartPos.Contains("Ln: 4, Col: 38)"))
+            | "xwb" -> Assert.IsTrue(xwb.QualifiedStartPos.Contains("Ln: 4, Col: 40)"))
+            | "xwc" -> Assert.IsTrue(xwc.QualifiedStartPos.Contains("Ln: 4, Col: 42)"))
+            | "yua" -> Assert.IsTrue(yua.QualifiedStartPos.Contains("Ln: 4, Col: 38)"))
+            | "yub" -> Assert.IsTrue(yub.QualifiedStartPos.Contains("Ln: 4, Col: 40)"))
+            | "yuc" -> Assert.IsTrue(yuc.QualifiedStartPos.Contains("Ln: 4, Col: 42)"))
+            | "yva" -> Assert.IsTrue(yva.QualifiedStartPos.Contains("Ln: 4, Col: 38)"))
+            | "yvb" -> Assert.IsTrue(yvb.QualifiedStartPos.Contains("Ln: 4, Col: 40)"))
+            | "yvc" -> Assert.IsTrue(yvc.QualifiedStartPos.Contains("Ln: 4, Col: 42)"))
+            | "ywa" -> Assert.IsTrue(ywa.QualifiedStartPos.Contains("Ln: 4, Col: 38)"))
+            | "ywb" -> Assert.IsTrue(ywb.QualifiedStartPos.Contains("Ln: 4, Col: 40)"))
+            | "ywc" -> Assert.IsTrue(ywc.QualifiedStartPos.Contains("Ln: 4, Col: 42)"))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

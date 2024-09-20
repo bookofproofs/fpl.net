@@ -16,6 +16,7 @@ namespace FplLSTests
         {
             using (HttpClient client = new HttpClient())
             {
+                client.Timeout = TimeSpan.FromSeconds(10);
                 try
                 {
                     var response = await client.GetAsync(url);

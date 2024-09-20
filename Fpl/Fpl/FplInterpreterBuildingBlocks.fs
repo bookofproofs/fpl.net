@@ -409,7 +409,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Prefix")
         match st.CurrentContext with
         | EvalContext.InSignature fplValue ->
-            fplValue.ExpressionType <- ExprType.Prefix symbol
+            fplValue.ExpressionType <- FixType.Prefix symbol
         | _ -> ()
         st.EvalPop() 
     | Ast.Infix((pos1, pos2), (symbol, precedenceAsts)) -> 
@@ -417,7 +417,7 @@ let rec eval (st: SymbolTable) ast =
         eval st precedenceAsts
         match st.CurrentContext with
         | EvalContext.InSignature fplValue ->
-            fplValue.ExpressionType <- ExprType.Infix (symbol, fplValue.AuxiliaryInfo)
+            fplValue.ExpressionType <- FixType.Infix (symbol, fplValue.AuxiliaryInfo)
             emitSIG02Diagnostics st fplValue pos1 pos2 
         | _ -> ()
         st.EvalPop() 
@@ -425,7 +425,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Postfix")
         match st.CurrentContext with
         | EvalContext.InSignature fplValue ->
-            fplValue.ExpressionType <- ExprType.Postfix symbol
+            fplValue.ExpressionType <- FixType.Postfix symbol
         | _ -> ()
         st.EvalPop() 
     | Ast.Symbol((pos1, pos2), s) -> 
@@ -631,6 +631,12 @@ let rec eval (st: SymbolTable) ast =
         let identifier = String.concat "." pascalCaseIdList
         match st.CurrentContext with
         | EvalContext.NamedVarDeclarationInBlock fplValue ->
+            if (FplValue.IsVariadicVariableMany(fplValue)) then 
+                adjustSignature st fplValue ("*" + identifier)
+            elif (FplValue.IsVariadicVariableMany1(fplValue)) then 
+                adjustSignature st fplValue ("+" + identifier)
+            else
+                adjustSignature st fplValue identifier
             emitSIG04TypeDiagnostics st identifier fplValue pos1 pos2
         | EvalContext.InTheory fplValue
         | EvalContext.InPropertySignature fplValue 

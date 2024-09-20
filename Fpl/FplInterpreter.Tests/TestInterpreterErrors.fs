@@ -446,9 +446,11 @@ type TestInterpreterErrors() =
     [<DataRow("def class Set: obj {intr} def cl Test:Set {intr};", 0)>]
     [<DataRow("def cl Set:obj {intr} def cl Test:Set {intr};", 0)>]
     [<DataRow("def cl Set:obj {intr} def cl Test:SetTypo {intr};", 1)>]
-    [<DataRow("def pred Test(x:Set) {intr};", 1)>]
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:Set; true};", 0)>]
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
+    // the following examples should not emit ID010 because this context is covered by the SIG04 diagnostics
+    [<DataRow("def pred Test(x:Set) {intr};", 0)>]
+    [<DataRow("def class Set: obj {intr} def pred IsEmpty(x: Set) {true};", 0)>]
     [<TestMethod>]
     member this.TestID010(fplCode:string, expected) =
         let code = ID010 ""
@@ -565,6 +567,11 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Set:obj {intr} def cl Test:SetTypo {intr};", 0)>] // this should cause the ID010 error only and not SIG04
     [<DataRow("def pred Test(x:Set) {intr};", 1)>]
     [<DataRow("def cl Set:obj {intr} def pred Test(x:Set) {intr};", 0)>]
+    [<DataRow("def cl Set:obj {intr} def pred Test(x:SetTypo) {intr};", 1)>]
+    [<DataRow("def cl Set:obj {intr} axiom Test(x:SetTypo) {true};", 1)>]
+    [<DataRow("def cl Set:obj {intr} axiom Test(x:Set) {true};", 0)>]
+    [<DataRow("def cl Set:obj {intr} axiom Test() {dec ~x:Set; true};", 0)>]
+    [<DataRow("def cl Set:obj {intr} axiom Test() {dec ~x:SetTypo; true};", 1)>]
     [<DataRow("def pred Test() {dec ~x:Set; true};", 1)>]
     [<DataRow("def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]

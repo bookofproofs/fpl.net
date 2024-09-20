@@ -199,6 +199,7 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
+    [<DataRow("s")>]
     [<DataRow("xu")>]
     [<DataRow("xv")>]
     [<DataRow("xw")>]
@@ -227,13 +228,14 @@ type TestFplValueScopeTypeSignature() =
     member this.TestVariablesInBlock(var) =
         let result = CommonFplValueTestCases.ScopeVariablesInBlock("TypeSignature")
         match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+        | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string list>([], r.TypeSignature)
             | "theory" -> Assert.AreEqual<string list>([], theory.TypeSignature)
             | "block" -> Assert.AreEqual<string list>(["TestPredicate"; "("; ")"], block.TypeSignature); 
             | "x" -> Assert.AreEqual<string list>(["pred"; "("; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; ")"], x.TypeSignature)
             | "y" -> Assert.AreEqual<string list>(["pred"; "("; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; "func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"; ")"], y.TypeSignature)
+            | "s" -> Assert.AreEqual<string list>(["Set"], s.TypeSignature)
             | "xu" -> Assert.AreEqual<string list>(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], xu.TypeSignature)
             | "xv" -> Assert.AreEqual<string list>(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], xv.TypeSignature)
             | "xw" -> Assert.AreEqual<string list>(["func"; "("; "obj"; "obj"; "obj"; ")"; "->"; "obj"], xw.TypeSignature)

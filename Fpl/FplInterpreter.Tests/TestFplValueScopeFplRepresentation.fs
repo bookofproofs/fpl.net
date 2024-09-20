@@ -200,6 +200,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
+    [<DataRow("s")>]
     [<DataRow("xu")>]
     [<DataRow("xv")>]
     [<DataRow("xw")>]
@@ -228,13 +229,14 @@ type TestFplValueScopeFplRepresentation() =
     member this.TestVariablesInBlock(var) =
         let result = CommonFplValueTestCases.ScopeVariablesInBlock("FplRepresentation")
         match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+        | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, r.FplRepresentation)
             | "theory" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, theory.FplRepresentation)
             | "block" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, block.FplRepresentation); 
             | "x" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, x.FplRepresentation)
             | "y" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, y.FplRepresentation)
+            | "s" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, s.FplRepresentation)
             | "xu" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", xu.FplRepresentation)
             | "xv" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", xv.FplRepresentation)
             | "xw" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", xw.FplRepresentation)

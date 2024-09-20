@@ -201,6 +201,7 @@ type TestFplValueScopeFplId() =
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
+    [<DataRow("s")>]
     [<DataRow("xu")>]
     [<DataRow("xv")>]
     [<DataRow("xw")>]
@@ -229,13 +230,14 @@ type TestFplValueScopeFplId() =
     member this.TestVariablesInBlock(var) =
         let result = CommonFplValueTestCases.ScopeVariablesInBlock("FplId")
         match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+        | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.FplId)
             | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockFplId", theory.FplId)
             | "block" -> Assert.AreEqual<string>("TestPredicate", block.FplId); 
             | "x" -> Assert.AreEqual<string>("x", x.FplId)
             | "y" -> Assert.AreEqual<string>("y", y.FplId)
+            | "s" -> Assert.AreEqual<string>("s", s.FplId)
             | "xu" -> Assert.AreEqual<string>("u", xu.FplId)
             | "xv" -> Assert.AreEqual<string>("v", xv.FplId)
             | "xw" -> Assert.AreEqual<string>("w", xw.FplId)

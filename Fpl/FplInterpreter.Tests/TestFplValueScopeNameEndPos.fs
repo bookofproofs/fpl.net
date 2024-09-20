@@ -201,6 +201,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
+    [<DataRow("s")>]
     [<DataRow("xu")>]
     [<DataRow("xv")>]
     [<DataRow("xw")>]
@@ -229,37 +230,38 @@ type TestFplValueScopeNameEndPos() =
     member this.TestVariablesInBlock(var) =
         let result = CommonFplValueTestCases.ScopeVariablesInBlock("NameEndPos")
         match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+        | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsTrue(r.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "theory" -> Assert.IsTrue(theory.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.NameEndPos.ToString().Contains("Ln: 2, Col: 33)")); 
-            | "x" -> Assert.IsTrue(x.NameEndPos.ToString().Contains("Ln: 3, Col: 55)"))
-            | "y" -> Assert.IsTrue(y.NameEndPos.ToString().Contains("Ln: 3, Col: 55)"))
-            | "xu" -> Assert.IsTrue(xu.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "xv" -> Assert.IsTrue(xv.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "xw" -> Assert.IsTrue(xw.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "yu" -> Assert.IsTrue(yu.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "yv" -> Assert.IsTrue(yv.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "yw" -> Assert.IsTrue(yw.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "xua" -> Assert.IsTrue(xua.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "xub" -> Assert.IsTrue(xub.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "xuc" -> Assert.IsTrue(xuc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
-            | "xva" -> Assert.IsTrue(xva.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "xvb" -> Assert.IsTrue(xvb.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "xvc" -> Assert.IsTrue(xvc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
-            | "xwa" -> Assert.IsTrue(xwa.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "xwb" -> Assert.IsTrue(xwb.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "xwc" -> Assert.IsTrue(xwc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
-            | "yua" -> Assert.IsTrue(yua.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "yub" -> Assert.IsTrue(yub.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "yuc" -> Assert.IsTrue(yuc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
-            | "yva" -> Assert.IsTrue(yva.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "yvb" -> Assert.IsTrue(yvb.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "yvc" -> Assert.IsTrue(yvc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
-            | "ywa" -> Assert.IsTrue(ywa.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "ywb" -> Assert.IsTrue(ywb.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "ywc" -> Assert.IsTrue(ywc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
+            | "x" -> Assert.IsTrue(x.NameEndPos.ToString().Contains("Ln: 4, Col: 54)"))
+            | "y" -> Assert.IsTrue(y.NameEndPos.ToString().Contains("Ln: 4, Col: 54)"))
+            | "s" -> Assert.IsTrue(s.NameEndPos.ToString().Contains("Ln: 5, Col: 19)"))
+            | "xu" -> Assert.IsTrue(xu.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "xv" -> Assert.IsTrue(xv.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "xw" -> Assert.IsTrue(xw.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "yu" -> Assert.IsTrue(yu.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "yv" -> Assert.IsTrue(yv.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "yw" -> Assert.IsTrue(yw.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "xua" -> Assert.IsTrue(xua.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "xub" -> Assert.IsTrue(xub.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "xuc" -> Assert.IsTrue(xuc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
+            | "xva" -> Assert.IsTrue(xva.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "xvb" -> Assert.IsTrue(xvb.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "xvc" -> Assert.IsTrue(xvc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
+            | "xwa" -> Assert.IsTrue(xwa.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "xwb" -> Assert.IsTrue(xwb.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "xwc" -> Assert.IsTrue(xwc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
+            | "yua" -> Assert.IsTrue(yua.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "yub" -> Assert.IsTrue(yub.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "yuc" -> Assert.IsTrue(yuc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
+            | "yva" -> Assert.IsTrue(yva.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "yvb" -> Assert.IsTrue(yvb.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "yvc" -> Assert.IsTrue(yvc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
+            | "ywa" -> Assert.IsTrue(ywa.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "ywb" -> Assert.IsTrue(ywb.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "ywc" -> Assert.IsTrue(ywc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
