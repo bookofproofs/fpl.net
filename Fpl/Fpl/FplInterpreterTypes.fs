@@ -448,7 +448,8 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         match this.BlockType with 
         | FplValueType.Variable 
         | FplValueType.VariadicVariableMany 
-        | FplValueType.VariadicVariableMany1 
+        | FplValueType.VariadicVariableMany1 ->
+            this.Name
         | FplValueType.Proof 
         | FplValueType.Corollary 
         | FplValueType.Reference -> 
