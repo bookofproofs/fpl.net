@@ -361,7 +361,7 @@ let garbageCollector (st:SymbolTable) (uri:Uri) =
 let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl = 
     FplParser.parserDiagnostics.StreamName <- uri.AbsolutePath
     let sources = acquireSources uri fplLibUrl
-    let currentName = addOrUpdateParsedAst input uri.LocalPath st.ParsedAsts
+    let currentName = addOrUpdateParsedAst input uri.AbsolutePath st.ParsedAsts
     emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri))
     let mutable found = true
 

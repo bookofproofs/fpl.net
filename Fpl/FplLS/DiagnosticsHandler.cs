@@ -20,11 +20,10 @@ namespace FplLS
 
         public void AddDiagnostics(Uri uri, Model.Diagnostic diagnostic)
         {
-            var key = FplSources.EscapedUri(uri.AbsoluteUri);
-            if (!_diagnostics.TryGetValue(key, out List<Model.Diagnostic>? value))
+            if (!_diagnostics.TryGetValue(uri, out List<Model.Diagnostic>? value))
             {
                 value = ([]);
-                _diagnostics.Add(key, value);
+                _diagnostics.Add(uri, value);
             }
 
             value.Add(diagnostic);
@@ -65,7 +64,7 @@ namespace FplLS
                             Diagnostics = new List<Model.Diagnostic>()
                         });
                     }
-
+                    FplLsTraceLogger.LogMsg(_languageServer, $"{diagnostics.Enumerator().Count} diagnostics published", "PublishDiagnostics");
                 }
                 catch (Exception ex)
                 {
@@ -100,7 +99,18 @@ namespace FplLS
 
             var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
             FplParser.parserDiagnostics.StreamName = uri.AbsolutePath;
+
+            var name = Path.GetFileNameWithoutExtension(uri.AbsolutePath);
+            var idAlreadyFound = st.ParsedAsts.TryFindAstById(name);
+            if (idAlreadyFound != null) 
+            {
+                FplLsTraceLogger.LogMsg(_languageServer, $"{idAlreadyFound.Value.Parsing.Checksum}", "CheckSum Before");
+            }
             FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
+            if (idAlreadyFound != null)
+            {
+                FplLsTraceLogger.LogMsg(_languageServer, $"{idAlreadyFound.Value.Parsing.Checksum}", "CheckSum After");
+            }
             var diagnostics = CastDiagnostics(st, parserDiagnostics);
             return diagnostics;
         }
@@ -114,16 +124,12 @@ namespace FplLS
         /// <returns>Casted list</returns>
         public UriDiagnostics CastDiagnostics(FplInterpreterTypes.SymbolTable st, ErrDiagnostics.Diagnostics listDiagnostics)
         {
-            var sb = new StringBuilder();
             var castedListDiagnostics = new UriDiagnostics();
             var sourceCodes = GetTextPositionsByUri(st);
-            FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.DiagnosticsToString, "~~~~~Diagnostics");
             foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
             {
-                if (sourceCodes.TryGetValue(diagnostic.StartPos.StreamName, out TextPositions? tpByUri))
-                {
-                    castedListDiagnostics.AddDiagnostics(FplSources.EscapedUri(diagnostic.StartPos.StreamName), CastDiagnostic(diagnostic, tpByUri, sb));
-                }
+                var tpByUri = sourceCodes[FplSources.EscapedUri(diagnostic.StartPos.StreamName).AbsolutePath];
+                castedListDiagnostics.AddDiagnostics(FplSources.EscapedUri(diagnostic.StartPos.StreamName), CastDiagnostic(diagnostic, tpByUri));
             }
             FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.Collection.Length.ToString(), "~~~~~Diagnostics Count Orig");
             FplLsTraceLogger.LogMsg(_languageServer, st.ParsedAsts.Count.ToString(), "~~~~~ParsedAstsCount");
@@ -144,13 +150,13 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted diagnostic</returns>
-        public static Model.Diagnostic CastDiagnostic(ErrDiagnostics.Diagnostic diagnostic, TextPositions tp, StringBuilder sb)
+        public static Model.Diagnostic CastDiagnostic(ErrDiagnostics.Diagnostic diagnostic, TextPositions tp)
         {
             var castedDiagnostic = new Model.Diagnostic
             {
                 Source = diagnostic.Emitter.ToString(),
                 Severity = CastSeverity(diagnostic.Severity),
-                Message = CastMessage(diagnostic, sb),
+                Message = CastMessage(diagnostic),
                 Range = tp.GetRange(diagnostic.StartPos.Index, diagnostic.EndPos.Index),
                 Code = CastCode(diagnostic.Code.Code)
             };
@@ -161,13 +167,10 @@ namespace FplLS
         /// Casts the error message depending on the emitter and severity
         /// </summary>
         /// <param name="diagnostic">Input diagnostic</param>
-        /// <param name="sb">A reference to a string builder object that we do not want to recreate all the time for performance reasons.</param>
         /// <returns>A custom diagnostic message.</returns>
-        private static string CastMessage(ErrDiagnostics.Diagnostic diagnostic, StringBuilder sb)
+        private static string CastMessage(ErrDiagnostics.Diagnostic diagnostic)
         {
-            sb.Clear();
-            sb.Append(CastDiagnosticCodeMessage(diagnostic));
-            return sb.ToString();
+            return CastDiagnosticCodeMessage(diagnostic);
         }
         /// <summary>
         /// Returns a message depending on the code of the diagnostic.
