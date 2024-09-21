@@ -1104,7 +1104,7 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         else
             res
 
-    /// Returns the uses dependencies of this symbol table
+    /// Returns the uses dependencies of this symbol table needed e.g. for debugging purposes in the FPL language server.
     member this.UsesDependencies() =
         let sb = StringBuilder()
         sb.AppendLine() |> ignore
@@ -1127,6 +1127,22 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         |> ignore
 
         sb.ToString()
+
+    /// Creates trace statistics needed e.g. for debugging purposes in the FPL language server.
+    member this.TraceStatistics =
+        let sb = StringBuilder()
+        this.ParsedAsts
+        |> Seq.iter (fun pa -> 
+            let paDiagnostics = FplParser.parserDiagnostics.GetStreamDiagnostics(pa.Parsing.UriPath)
+            let statsDiags = 
+                paDiagnostics.Values
+                |> Seq.groupBy (fun d -> $"{d.Emitter}({d.Code.Code})")
+                |> Seq.map (fun (groupId,group) -> $"{groupId}:{Seq.length group}")
+                |> String.concat ", "
+            sb.AppendLine $"{pa.Id}(chksm {pa.Parsing.Checksum}): #total diags {paDiagnostics.Count}, {statsDiags}" |> ignore
+        )
+        sb.ToString()
+
 
 /// Looks for all declared building blocks with a specific name.
 let findCandidatesByName (st:SymbolTable) (name:string) =

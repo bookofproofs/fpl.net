@@ -20,12 +20,12 @@ namespace FplLS
 
         public void AddDiagnostics(Uri uri, Model.Diagnostic diagnostic)
         {
-            if (!_diagnostics.TryGetValue(uri, out List<Model.Diagnostic>? value))
+            var key = FplSources.EscapedUri(uri.AbsoluteUri);
+            if (!_diagnostics.TryGetValue(key, out List<Model.Diagnostic>? value))
             {
                 value = ([]);
-                _diagnostics.Add(uri, value);
+                _diagnostics.Add(key, value);
             }
-
             value.Add(diagnostic);
         }
 
@@ -47,14 +47,17 @@ namespace FplLS
             {
                 try
                 {
+                    var allUris = st.ParsedAsts.Select(pa => pa.Parsing.UriPath).ToHashSet();
                     UriDiagnostics diagnostics = RefreshFplDiagnosticsStorage(st, uri, buffer);
-                    foreach (var diagnostic in diagnostics.Enumerator())
+                    foreach (var diagnosticsPerUri in diagnostics.Enumerator())
                     {
                         _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
                         {
-                            Uri = diagnostic.Key,
-                            Diagnostics = diagnostic.Value
+                            Uri = diagnosticsPerUri.Key,
+                            Diagnostics = diagnosticsPerUri.Value
                         });
+                        // remove uri path from allUris because we have published them 
+                        allUris.Remove(diagnosticsPerUri.Key.AbsolutePath);
                     }
                     if (diagnostics.Enumerator().Count == 0)
                     {
@@ -64,7 +67,29 @@ namespace FplLS
                             Diagnostics = new List<Model.Diagnostic>()
                         });
                     }
-                    FplLsTraceLogger.LogMsg(_languageServer, $"{diagnostics.Enumerator().Count} diagnostics published", "PublishDiagnostics");
+                    // if they are still remaining allUris then publish empty diagnostics for them
+                    // this might happen if the user corrects the last error in the source code, 
+                    // leaving it not emitting any more diagnostics. In this case we have to 
+                    // delete the last language server diagnostics by explicitly publishing an empty diagnostics model list
+                    foreach (var uriPath in allUris)
+                    {
+                        if (uri.AbsolutePath == uriPath) 
+                        {
+                            _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
+                            {
+                                Uri = uri, // use the reference of current file
+                                Diagnostics = new List<Model.Diagnostic>()
+                            });
+                        }
+                        else
+                        {
+                            _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
+                            {
+                                Uri = new Uri(uriPath), // otherwise reset other files
+                                Diagnostics = new List<Model.Diagnostic>()
+                            });
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -128,12 +153,16 @@ namespace FplLS
             var sourceCodes = GetTextPositionsByUri(st);
             foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
             {
-                var tpByUri = sourceCodes[FplSources.EscapedUri(diagnostic.StartPos.StreamName).AbsolutePath];
-                castedListDiagnostics.AddDiagnostics(FplSources.EscapedUri(diagnostic.StartPos.StreamName), CastDiagnostic(diagnostic, tpByUri));
+                var uri = FplSources.EscapedUri(diagnostic.StartPos.StreamName);
+                var tpByUri = sourceCodes[uri.AbsolutePath];
+                castedListDiagnostics.AddDiagnostics(uri, CastDiagnostic(diagnostic, tpByUri));
             }
             FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.Collection.Length.ToString(), "~~~~~Diagnostics Count Orig");
-            FplLsTraceLogger.LogMsg(_languageServer, st.ParsedAsts.Count.ToString(), "~~~~~ParsedAstsCount");
-            FplLsTraceLogger.LogMsg(_languageServer, castedListDiagnostics.Enumerator().Count.ToString(), "~~~~~Diagnostics Count VS Code");
+            FplLsTraceLogger.LogMsg(_languageServer, st.TraceStatistics, "~~~~~Statistics");
+            foreach (var kvp in castedListDiagnostics.Enumerator())
+            {
+                FplLsTraceLogger.LogMsg(_languageServer, $"{kvp.Value.Count} diagnostics in {kvp.Key.AbsolutePath}", "~~~~~Diagnostics Count VS Code");
+            }
             return castedListDiagnostics;
 
         }
