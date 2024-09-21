@@ -63,7 +63,7 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestCreateLibSubfolder01() =
-        let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
+        let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let expected = Directory.GetCurrentDirectory()
         let (directoryPath, libDirectoryPath) = createSubfolder uri "lib"
         Assert.AreEqual<string>(expected, directoryPath)
@@ -73,7 +73,7 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestCreateLibSubfolder02() =
-        let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
+        let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let expected = Path.Combine(Directory.GetCurrentDirectory(), "lib")
         let (directoryPath, libDirectoryPath) = createSubfolder uri "lib"
         Assert.AreEqual<string>(expected, libDirectoryPath)
@@ -83,7 +83,7 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestCreateLibSubfolder03() =
-        let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
+        let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let expected = Path.Combine(Directory.GetCurrentDirectory(), "lib")
         let (directoryPath, libDirectoryPath) = createSubfolder uri "lib"
         Assert.IsTrue(Directory.Exists(libDirectoryPath))
@@ -102,7 +102,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAlias.AliasOrStar = ""
             }
         let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos)
-        let libMap = downloadLibMap (System.Uri(url)) url
+        let libMap = downloadLibMap (PathEquivalentUri(url)) url
         Assert.IsTrue(libMap.Length > 0)
 
     [<TestMethod>]
@@ -116,7 +116,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAlias.AliasOrStar = ""
             }
         let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos)
-        let libMap = downloadLibMap (System.Uri(url)) url
+        let libMap = downloadLibMap (PathEquivalentUri(url)) url
         Assert.AreEqual<int>(0, ad.CountDiagnostics)
 
     [<DataRow("Fpl *", 4)>]
@@ -133,7 +133,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         
         let uri =
-            System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
+            PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let sources = acquireSources uri fplLibUrl
         let testAst = st.Value.ParsedAsts.TryFindAstById("TestFindFilesInLibMapWithWildcard").Value
         let eaniList = eval_uses_clause testAst.Parsing.Ast
@@ -146,7 +146,7 @@ type TestEvalAliasedNamespaceIdentifier() =
 
 
     [<DataRow("Fpl *", 5)>]
-    [<DataRow("Fpl.Commons *", 5)>]
+    [<DataRow("Fpl.Commons *", 3)>]
     [<DataRow("Fpl alias T1", 1)>]
     [<DataRow("Fpl.Commons alias T2", 2)>]
     [<DataRow("Fpl", 1)>]
@@ -176,7 +176,7 @@ type TestEvalAliasedNamespaceIdentifier() =
 
         File.WriteAllText(pathToFile, ";")
 
-        let uri = System.Uri(pathToFile)
+        let uri = PathEquivalentUri(pathToFile)
 
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
@@ -197,12 +197,12 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestFplSourcesUrls() =
-        let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"],"c:\temp\repo")
+        let fplSources = FplSources([PathEquivalentUri.EscapedUri(@"c:\temp\Test1.fpl"); PathEquivalentUri.EscapedUri(@"c:\temp\Test2.fpl"); PathEquivalentUri.EscapedUri("https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl")],"c:\temp\repo")
         Assert.AreEqual<int>(1, fplSources.Urls.Length)
 
     [<TestMethod>]
     member this.TestFplSourcesFiles() =
-        let fplSources = FplSources(["c:\temp\Test1.fpl"; "c:\temp\Test2.fpl"; "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl"], "c:\temp\repo")
+        let fplSources = FplSources([PathEquivalentUri.EscapedUri(@"c:\temp\Test1.fpl"); PathEquivalentUri.EscapedUri(@"c:\temp\Test2.fpl"); PathEquivalentUri.EscapedUri("https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib/Test3.fpl")], "c:\temp\repo")
         Assert.AreEqual<int>(2, fplSources.FilePaths.Length)
 
     member this.PrepareTestLoadAllUsesClauses01() =
@@ -211,7 +211,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             ;"""
         let pathToFile =
             Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl")
-        let uri = System.Uri(pathToFile)
+        let uri = PathEquivalentUri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let parsedAsts = ParsedAstList()
@@ -266,7 +266,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             ;"""
         let pathToFile =
             Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl")
-        let uri = System.Uri(pathToFile)
+        let uri = PathEquivalentUri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let parsedAsts = ParsedAstList()
@@ -346,7 +346,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             ;"""
         let pathToFile =
             Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl")
-        let uri = System.Uri(pathToFile)
+        let uri = PathEquivalentUri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let parsedAsts = ParsedAstList()
@@ -472,7 +472,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             Assert.AreEqual<int>(3, st.ParsedAsts.Count)
             Assert.AreEqual<int>(3, st.Root.Scope.Count)
             let currDir = Directory.GetCurrentDirectory()
-            let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+            let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             // reparse the Test.fpl after removing the uses clause
             FplInterpreter.fplInterpreter st ";" uri fplLibUrl
@@ -489,7 +489,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             Assert.AreEqual<int>(3, st.ParsedAsts.Count)
             Assert.AreEqual<int>(3, st.Root.Scope.Count)
             let currDir = Directory.GetCurrentDirectory()
-            let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+            let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             // reparse the Test.fpl after removing the uses clause
             FplInterpreter.fplInterpreter st "uses Fpl.Commons ;" uri fplLibUrl
@@ -506,7 +506,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             Assert.AreEqual<int>(3, st.ParsedAsts.Count)
             Assert.AreEqual<int>(3, st.Root.Scope.Count)
             let currDir = Directory.GetCurrentDirectory()
-            let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+            let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             // reparse the Test.fpl after removing the uses clause
             FplInterpreter.fplInterpreter st "uses BlaTypo ;" uri fplLibUrl
@@ -519,7 +519,7 @@ type TestEvalAliasedNamespaceIdentifier() =
     [<TestMethod>]
     member this.TestGarbageCollector03() =
         let currDir = Directory.GetCurrentDirectory()
-        let uri = System.Uri(Path.Combine(currDir, "../../../../../theories/lib/Fpl.SetTheory.fpl"))
+        let uri = PathEquivalentUri(Path.Combine(currDir, "../../../../../theories/lib/Fpl.SetTheory.fpl"))
         let fplCode = File.ReadAllText(uri.LocalPath)
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let parsedAsts = ParsedAstList()
@@ -528,10 +528,10 @@ type TestEvalAliasedNamespaceIdentifier() =
         // initial counts of parsed ast and theories in root
         let parsedAstsFirstTime = st.ParsedAsts.Count
         let scopeCountFirstTime = st.Root.Scope.Count
-        let errorCountfirstTime = FplParser.parserDiagnostics.CountDiagnostics
+        let errorCountfirstTime = ad.CountDiagnostics
 
         // reparse the Test.fpl after slightly modifying the uses clause
         FplInterpreter.fplInterpreter st (fplCode + " ") uri fplLibUrl
         Assert.AreEqual<int>(parsedAstsFirstTime, st.ParsedAsts.Count)
         Assert.AreEqual<int>(scopeCountFirstTime, st.Root.Scope.Count)
-        Assert.AreEqual<int>(errorCountfirstTime, FplParser.parserDiagnostics.CountDiagnostics)
+        Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)

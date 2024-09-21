@@ -1,5 +1,6 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
 
@@ -528,7 +529,7 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestPredicateQualifiedStartPos"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -614,7 +615,7 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestCallConstructorParentClass(var, varVal) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = sprintf """
                         def cl B:obj {intr}
                         def cl C:obj {intr}
@@ -662,7 +663,7 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestDelegateQualifiedStartPos"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -699,7 +700,7 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base9", """def func prefix "-" T1()->obj {intr};""")>]
     [<TestMethod>]
     member this.TestFixNotation(var, varVal) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = sprintf "%s;" varVal
         let filename = "TestFixNotationQualifiedStartPos"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 

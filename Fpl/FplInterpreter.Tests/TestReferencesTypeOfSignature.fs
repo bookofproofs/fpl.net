@@ -1,6 +1,6 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open FplInterpreterTypes
+open ErrDiagnostics
 open CommonTestHelpers
 
 [<TestClass>]
@@ -74,7 +74,7 @@ type TestReferencesTypeOfSignature() =
     
     [<TestMethod>]
     member this.TestPredicateReference(var, fplCode) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let filename = "TestPredicateReference"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -160,7 +160,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base6", "base.E(true, undef, false)")>]
     [<TestMethod>]
     member this.TestCallConstructorParentClass(var, varVal) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = sprintf """
                         def cl B:obj {intr}
                         def cl C:obj {intr}
@@ -208,7 +208,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base7", "del.E(true, undef, false)")>] 
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
         let filename = "TestDelegateTypeSignature"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -245,7 +245,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base9", """def func prefix "-" T1()->obj {intr};""")>]
     [<TestMethod>]
     member this.TestFixNotation(var, varVal) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = sprintf "%s;" varVal
         let filename = "TestFixNotationTypeSignature"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 

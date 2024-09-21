@@ -1,11 +1,12 @@
 ﻿namespace FplInterpreter.Tests
 
 open CommonTestHelpers
+open ErrDiagnostics
 
 type CommonFplValueTestCases =
 
     static member ScopeVariablesInSignature(subtype) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = """
         def pred TestPredicate(x,y:pred(u,v,w:func(a,b,c:obj)->obj)) 
             {true}
@@ -51,7 +52,7 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeVariablesInSignatureVariadic(subtype) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = """
         def pred TestPredicate(x,y:+pred(u,v,w:func(a,b,c:*obj)->obj)) 
             {true}
@@ -97,7 +98,7 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeVariablesInBlock(subtype) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = """
         def pred TestPredicate() 
         {   dec 
@@ -149,7 +150,7 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeVariablesInBlockVariadic(subtype) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = """
         def pred TestPredicate() 
             {dec ~x,y:+pred(u,v,w:func(a,b,c:*obj)->obj); true}
@@ -195,7 +196,7 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeProperties(subtype) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = """
         def pred TestId() 
         {
@@ -245,7 +246,7 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeConstructors(subtype) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = """
         def cl TestId:obj 
         {
@@ -274,7 +275,7 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeBlocks(subtype) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = """
             inf SomeInference1() {pre:true con:true}
             inf SomeInference2() {pre:true con:true}
@@ -338,7 +339,7 @@ type CommonFplValueTestCases =
         result
 
     static member ScopeProofsAndCorollaries(subtype) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let fplCode = """
 
             theorem TestTheorem1() {true} 

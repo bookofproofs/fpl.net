@@ -9,6 +9,7 @@ open System.IO
 open FParsec
 open FplGrammarTypes
 open FplParser
+open ErrDiagnostics
 
 type EvalAlias =
     { StartPos: Position
@@ -45,7 +46,7 @@ type EvalAliasedNamespaceIdentifier =
     /// Creates an EvalAliasedNamespaceIdentifier with a given Uri.
     static member CreateEani(uri:System.Uri) = 
         let pascalCaseId = Path.GetFileNameWithoutExtension(uri.AbsolutePath)
-        let pos = Position(uri.AbsolutePath, 0, 1, 1)
+        let pos = Position("", 0, 1, 1)
         EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseId, "*", pos, pos)
 
     member this.FileNamePattern =
@@ -99,7 +100,7 @@ let computeMD5Checksum (input: string) =
 /// A type that encapsulates the sources found for a uses clause
 /// and provides members to filter those from the file system and those from
 /// the web.
-type FplSources(paths: string list, pathToLocalRegistry:string) =
+type FplSources(paths: PathEquivalentUri list, pathToLocalRegistry:string) =
     let _pathToLocalRegistry = pathToLocalRegistry
     /// All found paths for a uses clause, including those from the web.
     member this.Paths = paths
@@ -112,29 +113,21 @@ type FplSources(paths: string list, pathToLocalRegistry:string) =
         with get () = 
             let fplTheories = 
                 this.Paths
-                |> List.map (fun fp -> (Path.GetFileName fp, fp))
+                |> List.map (fun fp -> (Path.GetFileName fp.AbsolutePath, fp))
             fplTheories
             |> List.groupBy fst
     
-    static member IsUrl(s: string) =
-        let pattern = @"^https?://"
-        Regex.IsMatch(s, pattern)
+    static member IsUrl(uri: PathEquivalentUri) =
+        let pattern = "^https?:\/\/"
+        Regex.IsMatch(uri.AbsoluteUri, pattern)
 
-    static member IsFilePath(s: string) =
+    static member IsFilePath(uri: PathEquivalentUri) =
         try
-            Path.GetFullPath(s) |> ignore
-            let pattern = @"^https?://"
-            not (Regex.IsMatch(s, pattern))
+            Path.GetFullPath(uri.AbsoluteUri) |> ignore
+            let pattern = "^https?:\/\/"
+            not (Regex.IsMatch(uri.AbsoluteUri, pattern))
         with :? ArgumentException ->
             false
-
-    /// Uri of this ParsingProperties
-    static member EscapedUri(path:string):System.Uri = 
-        let pathNew = System.Uri.UnescapeDataString(path.Replace("\\","/"))
-        if FplSources.IsFilePath(pathNew) then  
-            System.Uri($"{pathNew}")
-        else
-            System.Uri($"{pathNew}")
 
     member this.Urls = List.filter FplSources.IsUrl this.Paths
     member this.FilePaths = List.filter FplSources.IsFilePath this.Paths
@@ -152,9 +145,9 @@ type FplSources(paths: string list, pathToLocalRegistry:string) =
                         paths
                         |> List.map snd
                         |> List.tryFind (fun path -> 
-                            if FplSources.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                            if FplSources.IsFilePath(path) && not (path.AbsolutePath.Contains("/lib/") || path.AbsolutePath.Contains(@"\lib\")) then
                                 true // the first source is the current directory
-                            elif FplSources.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
+                            elif FplSources.IsFilePath(path) && (path.AbsolutePath.Contains("/lib/") || path.AbsolutePath.Contains(@"\lib\")) then 
                                 true // the second is the lib subdirectory 
                             else
                                 true // the third is the internet source
@@ -163,7 +156,7 @@ type FplSources(paths: string list, pathToLocalRegistry:string) =
                     let pathTypes =
                         List.map snd paths
                         |> List.map (fun path -> 
-                            if FplSources.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                            if FplSources.IsFilePath(path) && (path.AbsolutePath.Contains("/lib/") || path.AbsolutePath.Contains(@"\lib\")) then
                                 "./lib"
                             elif  FplSources.IsFilePath(path) then 
                                 "./"
@@ -175,9 +168,9 @@ type FplSources(paths: string list, pathToLocalRegistry:string) =
                     match pathType with
                     | Some path -> 
                         let chosenPathType = 
-                            if FplSources.IsFilePath(path) && not (path.Contains("/lib/") || path.Contains(@"\lib\")) then
+                            if FplSources.IsFilePath(path) && not (path.AbsolutePath.Contains("/lib/") || path.AbsolutePath.Contains(@"\lib\")) then
                                 "./"
-                            elif FplSources.IsFilePath(path) && (path.Contains("/lib/") || path.Contains(@"\lib\")) then 
+                            elif FplSources.IsFilePath(path) && (path.AbsolutePath.Contains("/lib/") || path.AbsolutePath.Contains(@"\lib\")) then 
                                 "./lib"
                             else
                                 "https"
@@ -201,23 +194,22 @@ type FplSources(paths: string list, pathToLocalRegistry:string) =
             FplSources.HasPattern(fileName, pattern)
         )
 
-
 type ParsingProperties =
-    { mutable UriPath: string // source of the ast
+    { mutable Uri: PathEquivalentUri // source of the ast
       mutable FplSourceCode: string // source code of the ast
       mutable Ast: Ast // parsed ast
       mutable Checksum: string } // checksum of the parsed ast
 
     /// Reset this ParsingProperties to its new location
-    member this.Reset (fplCode: string) (codeLoc: string) =
+    member this.Reset (fplCode: string) (uri: PathEquivalentUri) =
         let checksum = computeMD5Checksum fplCode
 
         if this.Checksum <> checksum then
             // if there ist a Parsed Ast with the same Name as the eani.Name
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, sourcecode, the
-            this.UriPath <- FplSources.EscapedUri(codeLoc).AbsolutePath
-            FplParser.parserDiagnostics.ResetStream(FplSources.EscapedUri(codeLoc).AbsolutePath)
+            this.Uri <- uri
+            ad.ResetStream(uri)
             this.Ast <- fplParser fplCode
             this.FplSourceCode <- fplCode
             this.Checksum <- checksum
@@ -225,13 +217,13 @@ type ParsingProperties =
         else
             false
 
-    static member Create(fileLoc, fileContent) = 
-        FplParser.parserDiagnostics.ResetStream(FplSources.EscapedUri(fileLoc).AbsolutePath)
+    static member Create (fplCode: string) (uri: PathEquivalentUri) = 
+        ad.ResetStream(uri)
         {
-            ParsingProperties.UriPath = FplParser.parserDiagnostics.StreamName
-            ParsingProperties.FplSourceCode = fileContent
-            ParsingProperties.Ast = FplParser.fplParser fileContent
-            ParsingProperties.Checksum = computeMD5Checksum fileContent
+            ParsingProperties.Uri = uri
+            ParsingProperties.FplSourceCode = fplCode
+            ParsingProperties.Ast = FplParser.fplParser fplCode
+            ParsingProperties.Checksum = computeMD5Checksum fplCode
         }
 
 type FplBlockProperties =
@@ -265,11 +257,11 @@ type ParsedAstList() =
         else
             None
 
-    /// Returns a dictionof <StreamName,SourceCode> of all ParsedAsts in the list
-    member this.DictionaryOfStreamNameFplSourceCode()  = 
-        let ret = System.Collections.Generic.Dictionary<string,string>()
+    /// Returns a dictionof <Uri,SourceCode> of all ParsedAsts in the list
+    member this.DictionaryOfSUri2FplSourceCode()  = 
+        let ret = System.Collections.Generic.Dictionary<PathEquivalentUri,string>()
         this
-        |> Seq.iter (fun pa -> ret.TryAdd(pa.Parsing.UriPath,pa.Parsing.FplSourceCode) |> ignore)
+        |> Seq.iter (fun pa -> ret.TryAdd(pa.Parsing.Uri,pa.Parsing.FplSourceCode) |> ignore)
         ret 
 
 type FplValueType =
@@ -1133,7 +1125,7 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         let sb = StringBuilder()
         this.ParsedAsts
         |> Seq.iter (fun pa -> 
-            let paDiagnostics = FplParser.parserDiagnostics.GetStreamDiagnostics(pa.Parsing.UriPath)
+            let paDiagnostics = ad.GetStreamDiagnostics(pa.Parsing.Uri)
             let statsDiags = 
                 paDiagnostics.Values
                 |> Seq.groupBy (fun d -> $"{d.Emitter}({d.Code.Code})")

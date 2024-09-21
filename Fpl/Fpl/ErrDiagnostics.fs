@@ -21,7 +21,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 (*
-This module provides some general functionality to emit error diagnostics in a language.
+This module provides some general functionality to emit error diagnostics in a custom language.
 
 We call it `ErrDiagnostics` and not `ErrRecovery`, because it does not change the original parser's grammar that would 
 be otherwise the case. Instead, it depends on synchronizing tokens defined in the particular language. In this repository,
@@ -36,6 +36,27 @@ If you decide to reuse this code for your language and other IDEs, please consid
 `type DiagnosticCode`, `replaceFParsecErrMsgForFplParser`, `inputStringManipulator`, `preParsePreProcess`, and `stringMatches`.
 
 *)
+
+type PathEquivalentUri(uriString: string) =
+    inherit Uri(PathEquivalentUri.UnescapeDataString(uriString.Replace("\\","/")))
+
+    interface IEquatable<PathEquivalentUri> with
+        member this.Equals(other: PathEquivalentUri) =
+            this.AbsoluteUri = other.AbsoluteUri
+
+    override this.Equals(obj: obj) =
+        match obj with
+        | :? PathEquivalentUri as other -> (this :> IEquatable<PathEquivalentUri>).Equals(other)
+        | _ -> false
+
+    override this.GetHashCode() =
+        this.AbsoluteUri.GetHashCode()
+
+    /// An auxiliary static method for changing windows-like Uris with "\" into "/" formatted ones.
+    static member EscapedUri(path:string) = 
+        let pathNew = PathEquivalentUri.UnescapeDataString(path.Replace("\\","/"))
+        PathEquivalentUri($"{pathNew}")
+
 
 type DiagnosticCode = 
     // parser error codes
@@ -262,6 +283,7 @@ type DiagnosticSeverity =
 
 type Diagnostic =
     {
+        Uri: PathEquivalentUri
         Code: DiagnosticCode
         Emitter: DiagnosticEmitter
         Severity: DiagnosticSeverity
@@ -301,32 +323,28 @@ type Diagnostic =
 
 
 type Diagnostics() =
-    let mutable _streamName = ""
-    let _diagnosticStorageTotal = new Dictionary<string,Dictionary<string, Diagnostic>>()
+    let mutable _currentUri = new PathEquivalentUri("about:blank")
+    let _diagnosticStorageTotal = new Dictionary<PathEquivalentUri,Dictionary<string, Diagnostic>>()
     member this.Collection = 
         _diagnosticStorageTotal
         |> Seq.map (fun kvp -> (kvp.Key, kvp.Value))
-        |> Seq.sortBy fst
+        |> Seq.sortBy (fun (uri:PathEquivalentUri,_) -> uri.AbsoluteUri)
         |> Seq.map snd
         |> Seq.concat
         |> Seq.map (fun kvp -> kvp.Value)
         |> Seq.toList
 
-    member this.StreamName 
-        with get() = _streamName
-        and set (value:string) = 
-            if value.Trim() = "" then 
-                raise (ArgumentException($"Cannot set empty stream name."))
-            else
-                _streamName <- value
+    member this.CurrentUri 
+        with get() = _currentUri
+        and set (value:PathEquivalentUri) = _currentUri <- value
 
 
     member this.AddDiagnostic (d:Diagnostic) =
         let keyOfd = d.DiagnosticID
-        if not (_diagnosticStorageTotal.ContainsKey(d.StartPos.StreamName)) then
-            _diagnosticStorageTotal.Add(d.StartPos.StreamName, new Dictionary<string, Diagnostic>())
-        if not (_diagnosticStorageTotal[d.StartPos.StreamName].ContainsKey(keyOfd)) then
-            _diagnosticStorageTotal[d.StartPos.StreamName].Add(keyOfd, d) |> ignore
+        if not (_diagnosticStorageTotal.ContainsKey(d.Uri)) then
+            _diagnosticStorageTotal.Add(d.Uri, new Dictionary<string, Diagnostic>())
+        if not (_diagnosticStorageTotal[d.Uri].ContainsKey(keyOfd)) then
+            _diagnosticStorageTotal[d.Uri].Add(keyOfd, d) |> ignore
 
     member this.CountDiagnostics  =
         this.Collection.Length
@@ -334,7 +352,7 @@ type Diagnostics() =
     member this.DiagnosticsToString = 
         _diagnosticStorageTotal
         |> Seq.collect (fun kvpOuter ->
-            let a = kvpOuter.Key
+            let a = kvpOuter.Key.AbsolutePath
             kvpOuter.Value
             |> Seq.map (fun kvpInner ->
                 $"{a}: {kvpInner.Value.ShortForm}{Environment.NewLine}"
@@ -346,29 +364,21 @@ type Diagnostics() =
         printfn "%s" this.DiagnosticsToString
         printfn "%s" "\n^------------------------^\n"
 
-    member this.ResetStream(streamName:string) =
-        this.StreamName <- streamName
-        if (_diagnosticStorageTotal.ContainsKey(streamName)) then
-            _diagnosticStorageTotal[streamName].Clear() |> ignore
+    member this.ResetStream(uri:PathEquivalentUri) =
+        this.CurrentUri <- uri
+        if (_diagnosticStorageTotal.ContainsKey(uri)) then
+            _diagnosticStorageTotal[uri].Clear() |> ignore
 
     member this.Clear() = 
         _diagnosticStorageTotal.Values
         |> Seq.iter (fun dict -> dict.Clear())
         _diagnosticStorageTotal.Clear()
 
-    member this.GetStreamDiagnostics(streamName:string) =
-        if (_diagnosticStorageTotal.ContainsKey(streamName)) then
-            _diagnosticStorageTotal[streamName]
+    member this.GetStreamDiagnostics(uri:PathEquivalentUri) =
+        if (_diagnosticStorageTotal.ContainsKey(uri)) then
+            _diagnosticStorageTotal[uri]
         else
             Dictionary<string, Diagnostic>()
-
-    member this.NamedPosition (p:Position) = 
-        Position(
-                    this.StreamName,
-                    p.Index,
-                    p.Line,
-                    p.Column 
-                )
 
 let ad = Diagnostics()
 
@@ -479,7 +489,7 @@ let extractBacktrackingFreeErrMsgAndPos (input: string) (errMsg: string) (pos:Po
     | Some(line, column) -> 
         let index = column + getLineOffset input line - 1
         let backtrackingFreePos = Position(
-                                    pos.StreamName,
+                                    "",
                                     index,
                                     line,
                                     column 
@@ -535,14 +545,14 @@ let tryParseFirstError someParser input (code:DiagnosticCode) =
         // In the success case, we always return the current parser position in the input
         result, (int userState.Index)
     | Failure(errorMsg, restInput, userState) ->
-        let namedPos = ad.NamedPosition restInput.Position
-        let newErrMsg, _ = mapErrMsgToRecText input errorMsg namedPos
+        let newErrMsg, _ = mapErrMsgToRecText input errorMsg restInput.Position
         let diagnostic =
             { 
+                Diagnostic.Uri = ad.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                 Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = namedPos
-                Diagnostic.EndPos = namedPos
+                Diagnostic.StartPos = restInput.Position
+                Diagnostic.EndPos = restInput.Position
                 Diagnostic.Code = code
                 Diagnostic.Alternatives = Some newErrMsg
             }
@@ -561,8 +571,7 @@ let rec tryParse someParser input startIndexOfInput nextIndex (code:DiagnosticCo
         // In the success case, we always return the current parser position in the input
         result, (int userState.Index + startIndexOfInput), true
     | Failure(errorMsg, restInput, userState) ->
-        let namedPos = ad.NamedPosition restInput.Position
-        let newErrMsg, choices = mapErrMsgToRecText input errorMsg namedPos
+        let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         let previousChoices = String.concat ", " choices
         // calculate the index in the original input because the error index points to the input that might be a 
         // substring of the original input
@@ -578,13 +587,14 @@ let rec tryParse someParser input startIndexOfInput nextIndex (code:DiagnosticCo
         if cond then
             let correctedPosition = 
                 Position(
-                    namedPos.StreamName,
+                    "",
                     correctedIndex,
-                    namedPos.Line,
-                    namedPos.Column 
+                    restInput.Position.Line,
+                    restInput.Position.Column 
                 )
             let diagnostic =
                 { 
+                    Diagnostic.Uri = ad.CurrentUri
                     Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = correctedPosition
@@ -622,8 +632,7 @@ let rec tryParseRemainingChunk someParser (input:string) startIndexOfInput nextI
                     if userState.Index < input.Length then
                         tryParseRemainingChunk someParser newInput startIndexOfInput nextIndex code correctedIndex ""
             | Failure(errorMsg, restInput, userState) ->
-                let namedPos = ad.NamedPosition restInput.Position
-                let newErrMsg, choices = mapErrMsgToRecText input errorMsg namedPos
+                let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
                 let previousChoices = String.concat ", " choices
                 // calculate the index in the original input because the error index points to the input that might be a 
                 // substring of the original input
@@ -631,13 +640,14 @@ let rec tryParseRemainingChunk someParser (input:string) startIndexOfInput nextI
                 if correctedIndex < nextIndex && previousChoices<>lastChoices then 
                     let correctedPosition = 
                         Position(
-                            namedPos.StreamName,
+                            "",
                             correctedIndex,
-                            namedPos.Line,
-                            namedPos.Column 
+                            restInput.Position.Line,
+                            restInput.Position.Column 
                         )
                     let diagnostic =
                         { 
+                            Diagnostic.Uri = ad.CurrentUri
                             Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                             Diagnostic.Severity = DiagnosticSeverity.Error
                             Diagnostic.StartPos = correctedPosition
@@ -676,8 +686,7 @@ let rec tryParseRemainingOnly someParser input (code:DiagnosticCode) (intervals:
             // are still met.
             tryParseRemainingOnly someParser newInput code intervals userState.Index ""
     | Failure(errorMsg, restInput, userState) ->
-        let namedPos = ad.NamedPosition restInput.Position
-        let newErrMsg, choices = mapErrMsgToRecText input errorMsg namedPos
+        let newErrMsg, choices = mapErrMsgToRecText input errorMsg restInput.Position
         let previousChoices = (String.concat ", " choices)
         let stringBetweenRecursiveCalls = 
             if restInput.Position.Index> lastCorrectedIndex && lastCorrectedIndex >= 0  then
@@ -689,10 +698,11 @@ let rec tryParseRemainingOnly someParser input (code:DiagnosticCode) (intervals:
             if cond then
                 let diagnostic =
                     { 
+                        Diagnostic.Uri = ad.CurrentUri
                         Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                         Diagnostic.Severity = DiagnosticSeverity.Error
-                        Diagnostic.StartPos = namedPos
-                        Diagnostic.EndPos = namedPos
+                        Diagnostic.StartPos = restInput.Position
+                        Diagnostic.EndPos = restInput.Position
                         Diagnostic.Code = code 
                         Diagnostic.Alternatives = Some newErrMsg
                     }

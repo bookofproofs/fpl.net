@@ -10,7 +10,7 @@ open CommonTestHelpers
 type TestInterpreterErrors() =
 
     member this.PrepareTestNSP05a (delete:bool) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let input = """;"""
         let currDir = Directory.GetCurrentDirectory()
 
@@ -18,7 +18,7 @@ type TestInterpreterErrors() =
         deleteFiles (Path.Combine(currDir, "lib")) "Fpl.Commons.fpl"
         File.WriteAllText(Path.Combine(currDir, "Fpl.Commons.fpl"), input)
         File.WriteAllText(Path.Combine(currDir, "lib", "Fpl.Commons.fpl"), input)
-        let uri = System.Uri(Path.Combine(currDir, "Fpl.Commons.fpl"))
+        let uri = PathEquivalentUri(Path.Combine(currDir, "Fpl.Commons.fpl"))
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
@@ -32,7 +32,7 @@ type TestInterpreterErrors() =
             Some (st)
 
     member this.PrepareTestNSP04CircularABCA(delete:bool) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let A = """uses Test2_B;"""
         let B = """uses Test2_C;"""
         let C = """uses Test2_A;"""
@@ -41,7 +41,7 @@ type TestInterpreterErrors() =
         File.WriteAllText(Path.Combine(currDir, "Test2_A.fpl"), A)
         File.WriteAllText(Path.Combine(currDir, "Test2_B.fpl"), B)
         File.WriteAllText(Path.Combine(currDir, "Test2_C.fpl"), C)
-        let uri = System.Uri(Path.Combine(currDir, "Test2_A.fpl"))
+        let uri = PathEquivalentUri(Path.Combine(currDir, "Test2_A.fpl"))
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
@@ -54,12 +54,12 @@ type TestInterpreterErrors() =
             Some (st)
 
     member this.PrepareTestNSP04CircularAA(delete:bool) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let A = """uses Test1_A;"""
         let pathToFile =
             Path.Combine(Directory.GetCurrentDirectory(), "Test1_A.fpl")
         File.WriteAllText(pathToFile, A)
-        let uri = System.Uri(pathToFile)
+        let uri = PathEquivalentUri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
@@ -72,7 +72,7 @@ type TestInterpreterErrors() =
             Some (st)
 
     member this.PrepareTestNSP04NonCircular(delete:bool) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let input = """
             uses Fpl.Commons
             uses Fpl.SetTheory
@@ -80,7 +80,7 @@ type TestInterpreterErrors() =
         let pathToFile =
             Path.Combine(Directory.GetCurrentDirectory(), "Test1_A.fpl")
         File.WriteAllText(pathToFile, input)
-        let uri = System.Uri(pathToFile)
+        let uri = PathEquivalentUri(pathToFile)
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
@@ -93,13 +93,13 @@ type TestInterpreterErrors() =
             Some (st)
 
     member this.PrepareTestNSP05 (delete:bool) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let input = """;"""
         let currDir = Directory.GetCurrentDirectory()
 
         deleteFiles currDir "Fpl.Commons.fpl"
         File.WriteAllText(Path.Combine(currDir, "Fpl.Commons.fpl"), input)
-        let uri = System.Uri(Path.Combine(currDir, "Fpl.Commons.fpl"))
+        let uri = PathEquivalentUri(Path.Combine(currDir, "Fpl.Commons.fpl"))
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
@@ -112,12 +112,12 @@ type TestInterpreterErrors() =
             Some (st)
 
     member this.PrepareTestNSP05CrossCheck (delete:bool) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let input = """;"""
         let currDir = Directory.GetCurrentDirectory()
 
         File.WriteAllText(Path.Combine(currDir, "Test.fpl"), input)
-        let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+        let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         if delete then 
@@ -143,11 +143,11 @@ type TestInterpreterErrors() =
         uses Bla 
         ;"""
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
+        let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
         let st = SymbolTable(parsedAsts, true)
         FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
 
     [<TestMethod>]
@@ -159,11 +159,11 @@ type TestInterpreterErrors() =
         uses Fpl2 alias T1
         ;"""
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-        let uri = System.Uri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
+        let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
         let st = SymbolTable(parsedAsts, true)
         FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore 
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
 
     [<TestMethod>]
@@ -171,7 +171,7 @@ type TestInterpreterErrors() =
         let code = NSP04 "Test1_A -> Test1_A"
         printf "Trying %s" code.Message
         this.PrepareTestNSP04CircularAA(false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP04CircularAA(true) |> ignore
 
@@ -180,7 +180,7 @@ type TestInterpreterErrors() =
         let code = NSP04 "Test2_A -> Test2_B -> Test2_C -> Test2_A"
         printf "Trying %s" code.Message
         this.PrepareTestNSP04CircularABCA(false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP04CircularABCA(true) |> ignore
 
@@ -188,7 +188,7 @@ type TestInterpreterErrors() =
     member this.TestNSP04NonCircular() =
         this.PrepareTestNSP04NonCircular(false) |> ignore
         let code = NSP04 ""
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(0, result.Length)
         this.PrepareTestNSP04NonCircular(true) |> ignore
 
@@ -197,7 +197,7 @@ type TestInterpreterErrors() =
         let code = NSP05 ( ["./"; "https"], "Fpl.Commons", "./")
         printf "Trying %s" code.Message
         this.PrepareTestNSP05(false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP05(true) |> ignore
 
@@ -206,7 +206,7 @@ type TestInterpreterErrors() =
         let code = NSP05 (["./"; "./lib"; "https"], "Fpl.Commons", "./")
         printf "Trying %s" code.Message
         this.PrepareTestNSP05a(false) |> ignore
-        let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+        let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
         this.PrepareTestNSP05a(true) |> ignore
 
@@ -216,7 +216,7 @@ type TestInterpreterErrors() =
         let code = NSP05 (["./"], "Test", "./")
         printf "Trying %s" code.Message
         this.PrepareTestNSP05CrossCheck(false) |> ignore
-        Assert.AreEqual<int>(0, FplParser.parserDiagnostics.CountDiagnostics)
+        Assert.AreEqual<int>(0, ad.CountDiagnostics)
         this.PrepareTestNSP05CrossCheck(true) |> ignore
 
 

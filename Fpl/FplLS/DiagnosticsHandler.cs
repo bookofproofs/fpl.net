@@ -3,6 +3,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System;
 using System.Linq;
 using System.Text;
+using static ErrDiagnostics;
 using static FplInterpreterTypes;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
@@ -10,7 +11,7 @@ namespace FplLS
 {
     public class UriDiagnostics
     {
-        private readonly Dictionary<Uri, List<Model.Diagnostic>> _diagnostics;
+        private readonly Dictionary<PathEquivalentUri, List<Model.Diagnostic>> _diagnostics;
 
         public UriDiagnostics()
         {
@@ -18,9 +19,9 @@ namespace FplLS
         }
 
 
-        public void AddDiagnostics(Uri uri, Model.Diagnostic diagnostic)
+        public void AddDiagnostics(PathEquivalentUri uri, Model.Diagnostic diagnostic)
         {
-            var key = FplSources.EscapedUri(uri.AbsoluteUri);
+            var key = PathEquivalentUri.EscapedUri(uri.AbsoluteUri);
             if (!_diagnostics.TryGetValue(key, out List<Model.Diagnostic>? value))
             {
                 value = ([]);
@@ -29,7 +30,7 @@ namespace FplLS
             value.Add(diagnostic);
         }
 
-        public Dictionary<Uri, List<Model.Diagnostic>> Enumerator()
+        public Dictionary<PathEquivalentUri, List<Model.Diagnostic>> Enumerator()
         {
             return _diagnostics;
         }
@@ -41,13 +42,13 @@ namespace FplLS
     {
         private readonly ILanguageServer _languageServer = languageServer;
 
-        public void PublishDiagnostics(SymbolTable st, Uri uri, StringBuilder? buffer)
+        public void PublishDiagnostics(SymbolTable st, PathEquivalentUri uri, StringBuilder? buffer)
         {
             if (buffer != null)
             {
                 try
                 {
-                    var allUris = st.ParsedAsts.Select(pa => pa.Parsing.UriPath).ToHashSet();
+                    var allUris = st.ParsedAsts.Select(pa => pa.Parsing.Uri).ToHashSet();
                     UriDiagnostics diagnostics = RefreshFplDiagnosticsStorage(st, uri, buffer);
                     foreach (var diagnosticsPerUri in diagnostics.Enumerator())
                     {
@@ -57,7 +58,7 @@ namespace FplLS
                             Diagnostics = diagnosticsPerUri.Value
                         });
                         // remove uri path from allUris because we have published them 
-                        allUris.Remove(diagnosticsPerUri.Key.AbsolutePath);
+                        allUris.Remove(diagnosticsPerUri.Key);
                     }
                     if (diagnostics.Enumerator().Count == 0)
                     {
@@ -73,23 +74,12 @@ namespace FplLS
                     // delete the last language server diagnostics by explicitly publishing an empty diagnostics model list
                     foreach (var uriPath in allUris)
                     {
-                        if (uri.AbsolutePath == uriPath) 
+                        _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
                         {
-                            _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
-                            {
-                                Uri = uri, // use the reference of current file
-                                Diagnostics = new List<Model.Diagnostic>()
-                            });
-                        }
-                        else
-                        {
-                            _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
-                            {
-                                Uri = new Uri(uriPath), // otherwise reset other files
-                                Diagnostics = new List<Model.Diagnostic>()
-                            });
-                        }
-                    }
+                            Uri = uriPath, // reset remaining files
+                            Diagnostics = new List<Model.Diagnostic>()
+                        });
+                }
                 }
                 catch (Exception ex)
                 {
@@ -102,9 +92,9 @@ namespace FplLS
             }
         }
 
-        private UriDiagnostics RefreshFplDiagnosticsStorage(SymbolTable st, Uri uri, StringBuilder? buffer)
+        private UriDiagnostics RefreshFplDiagnosticsStorage(SymbolTable st, PathEquivalentUri uri, StringBuilder? buffer)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, uri.AbsolutePath, "Uri in RefreshFplDiagnosticsStorage");
+            FplLsTraceLogger.LogMsg(_languageServer, uri.AbsoluteUri, "Uri in RefreshFplDiagnosticsStorage");
             string sourceCode;
             ArgumentNullException.ThrowIfNull(buffer);
             string bufferSourceCode = buffer.ToString();
@@ -112,31 +102,21 @@ namespace FplLS
             if (pa == null)
             {
                 sourceCode = bufferSourceCode;
-                FplLsTraceLogger.LogMsg(_languageServer, $"buffer initialized with {uri.AbsolutePath}", "RefreshFplDiagnosticsStorage");
+                FplLsTraceLogger.LogMsg(_languageServer, $"buffer initialized with {uri.AbsoluteUri}", "RefreshFplDiagnosticsStorage");
             }
             else
             {
-                FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", st.ParsedAsts.Select(pa => pa.Parsing.UriPath)), "st ids in PublishDiagnostics");
+                FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", st.ParsedAsts.Select(pa => pa.Parsing.Uri.AbsolutePath)), "st ids in PublishDiagnostics");
                 sourceCode = bufferSourceCode;
             }
 
-            var parserDiagnostics = FplParser.parserDiagnostics;
-
             var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
-            FplParser.parserDiagnostics.StreamName = uri.AbsolutePath;
+            ad.CurrentUri = uri;
 
-            var name = Path.GetFileNameWithoutExtension(uri.AbsolutePath);
+            var name = Path.GetFileNameWithoutExtension(uri.AbsoluteUri);
             var idAlreadyFound = st.ParsedAsts.TryFindAstById(name);
-            if (idAlreadyFound != null) 
-            {
-                FplLsTraceLogger.LogMsg(_languageServer, $"{idAlreadyFound.Value.Parsing.Checksum}", "CheckSum Before");
-            }
             FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
-            if (idAlreadyFound != null)
-            {
-                FplLsTraceLogger.LogMsg(_languageServer, $"{idAlreadyFound.Value.Parsing.Checksum}", "CheckSum After");
-            }
-            var diagnostics = CastDiagnostics(st, parserDiagnostics);
+            var diagnostics = CastDiagnostics(st);
             return diagnostics;
         }
 
@@ -147,17 +127,17 @@ namespace FplLS
         /// <param name="listDiagnostics">List of diagnostics</param>
         /// <param name="origSourceCode">source code of the current file</param>
         /// <returns>Casted list</returns>
-        public UriDiagnostics CastDiagnostics(FplInterpreterTypes.SymbolTable st, ErrDiagnostics.Diagnostics listDiagnostics)
+        public UriDiagnostics CastDiagnostics(FplInterpreterTypes.SymbolTable st)
         {
             var castedListDiagnostics = new UriDiagnostics();
             var sourceCodes = GetTextPositionsByUri(st);
-            foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
+            FplLsTraceLogger.LogMsg(_languageServer, ad.DiagnosticsToString, "~~~~~Diagnostics Count Orig");
+            foreach (ErrDiagnostics.Diagnostic diagnostic in ad.Collection)
             {
-                var uri = FplSources.EscapedUri(diagnostic.StartPos.StreamName);
-                var tpByUri = sourceCodes[uri.AbsolutePath];
-                castedListDiagnostics.AddDiagnostics(uri, CastDiagnostic(diagnostic, tpByUri));
+                var tpByUri = sourceCodes[diagnostic.Uri];
+                castedListDiagnostics.AddDiagnostics(diagnostic.Uri, CastDiagnostic(diagnostic, tpByUri));
             }
-            FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.Collection.Length.ToString(), "~~~~~Diagnostics Count Orig");
+            FplLsTraceLogger.LogMsg(_languageServer, ad.Collection.Length.ToString(), "~~~~~Diagnostics Count Orig");
             FplLsTraceLogger.LogMsg(_languageServer, st.TraceStatistics, "~~~~~Statistics");
             foreach (var kvp in castedListDiagnostics.Enumerator())
             {
@@ -167,10 +147,10 @@ namespace FplLS
 
         }
 
-        private static Dictionary<string, TextPositions> GetTextPositionsByUri(SymbolTable st)
+        private static Dictionary<PathEquivalentUri, TextPositions> GetTextPositionsByUri(SymbolTable st)
         {
-            var sourceCodes = st.ParsedAsts.DictionaryOfStreamNameFplSourceCode();
-            return sourceCodes.Select(x => new KeyValuePair<string, TextPositions>(FplSources.EscapedUri(x.Key).AbsolutePath, new TextPositions(x.Value))).ToDictionary<string, TextPositions>();
+            var sourceCodes = st.ParsedAsts.DictionaryOfSUri2FplSourceCode();
+            return sourceCodes.Select(x => new KeyValuePair<PathEquivalentUri, TextPositions>(x.Key, new TextPositions(x.Value))).ToDictionary<PathEquivalentUri, TextPositions>();
         }
 
         /// <summary>

@@ -5,7 +5,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OmniSharp.Extensions.JsonRpc;
 using OmniSharp.Extensions.LanguageServer.Server;
+using System;
 using System.Diagnostics;
+using static ErrDiagnostics;
 using static FplInterpreterTypes;
 
 namespace FplLS
@@ -59,9 +61,12 @@ namespace FplLS
                             var serviceProvider = languageServer.Services;
                             var bufferManager = serviceProvider.GetService<BufferManager>();
                             var diagnosticsHandler = serviceProvider.GetService<DiagnosticsHandler>();
-
+                            
                             // Hook up diagnostics
-                            bufferManager.BufferUpdated += (__, x) => diagnosticsHandler.PublishDiagnostics(st, FplSources.EscapedUri(x.Uri.AbsoluteUri), bufferManager.GetBuffer(x.Uri));
+                            bufferManager.BufferUpdated += (__, x) =>
+                                diagnosticsHandler.PublishDiagnostics(st, 
+                                    x.Uri, 
+                                    bufferManager.GetBuffer(x.Uri));
 
                             return Task.CompletedTask;
                         }

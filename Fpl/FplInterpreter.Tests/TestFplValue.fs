@@ -11,7 +11,7 @@ type TestFplValue() =
 
     [<TestMethod>]
     member this.TestInitialFactory() =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let r = FplValue.CreateRoot()
         Assert.AreEqual<FplValueType>(FplValueType.Root, r.BlockType)
         let testCreateFactory fplBlockType = 

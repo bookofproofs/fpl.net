@@ -7,49 +7,61 @@ open FplDelegates
 open FplParser
 open FplInterpreterTypes
 
-let emitUnexpectedErrorDiagnostics streamName errMsg =
+let emitUnexpectedErrorDiagnostics errMsg =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = Position(streamName, 0, 1, 1)
-          Diagnostic.EndPos = Position(streamName, 0, 1, 1)
-          Diagnostic.Code = GEN00 errMsg
-          Diagnostic.Alternatives = None }
+        {
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = Position("", 0, 1, 1)
+            Diagnostic.EndPos = Position("", 0, 1, 1)
+            Diagnostic.Code = GEN00 errMsg
+            Diagnostic.Alternatives = None 
+        }
 
-    FplParser.parserDiagnostics.AddDiagnostic(diagnostic)
+    ad.AddDiagnostic(diagnostic)
 
 let emitID001diagnostics (fplValue: FplValue) (conflict: FplValue) =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = fplValue.StartPos
-          Diagnostic.EndPos = fplValue.NameEndPos
-          Diagnostic.Code = ID001(fplValue.Name, conflict.QualifiedStartPos)
-          Diagnostic.Alternatives = None }
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID001(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Alternatives = None 
+        }
 
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+    ad.AddDiagnostic diagnostic
 
 let emitVAR01diagnostics name pos1 pos2 =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = pos1
-          Diagnostic.EndPos = pos2
-          Diagnostic.Code = VAR01 name
-          Diagnostic.Alternatives = None }
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR01 name
+            Diagnostic.Alternatives = None 
+        }
 
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+    ad.AddDiagnostic diagnostic
 
 let emitVAR03diagnostics (fplValue: FplValue) (conflict: FplValue) =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = fplValue.StartPos
-          Diagnostic.EndPos = fplValue.NameEndPos
-          Diagnostic.Code = VAR03(fplValue.Name, conflict.QualifiedStartPos)
-          Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." }
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = VAR03(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
+        }
 
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+    ad.AddDiagnostic diagnostic
 
 let emitVAR03diagnosticsForCorollarysSignatureVariable (fplValue: FplValue) =
     if FplValue.IsCorollary(fplValue) then
@@ -60,98 +72,118 @@ let emitVAR03diagnosticsForCorollarysSignatureVariable (fplValue: FplValue) =
             | ScopeSearchResult.Found conflict -> emitVAR03diagnostics kv.Value conflict
             | _ -> ()
 
-let emitID000Diagnostics streamName astType =
+let emitID000Diagnostics astType =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = Position(streamName, 0, 1, 1)
-          Diagnostic.EndPos = Position(streamName, 0, 1, 1)
-          Diagnostic.Code = ID000 astType
-          Diagnostic.Alternatives = None }
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = Position("", 0, 1, 1)
+            Diagnostic.EndPos = Position("", 0, 1, 1)
+            Diagnostic.Code = ID000 astType
+            Diagnostic.Alternatives = None 
+        }
 
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+    ad.AddDiagnostic diagnostic
 
 let emitID002diagnostics (fplValue: FplValue) incorrectBlockType =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = fplValue.StartPos
-          Diagnostic.EndPos = fplValue.NameEndPos
-          Diagnostic.Code = ID002(fplValue.Name, incorrectBlockType)
-          Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." }
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID002(fplValue.Name, incorrectBlockType)
+            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+        }
 
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+    ad.AddDiagnostic diagnostic
 
 let emitID005diagnostics (fplValue: FplValue) incorrectBlockType =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = fplValue.StartPos
-          Diagnostic.EndPos = fplValue.NameEndPos
-          Diagnostic.Code = ID005(fplValue.Name, incorrectBlockType)
-          Diagnostic.Alternatives =
-            Some
-                "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." }
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID005(fplValue.Name, incorrectBlockType)
+            Diagnostic.Alternatives =
+                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
+         }
 
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+    ad.AddDiagnostic diagnostic
 
 let emitID003diagnostics (fplValue: FplValue) =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = fplValue.StartPos
-          Diagnostic.EndPos = fplValue.NameEndPos
-          Diagnostic.Code = ID003 fplValue.Name
-          Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." }
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID003 fplValue.Name
+            Diagnostic.Alternatives = 
+                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+        }
 
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+    ad.AddDiagnostic diagnostic
 
 let emitID006diagnostics (fplValue: FplValue) =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = fplValue.StartPos
-          Diagnostic.EndPos = fplValue.NameEndPos
-          Diagnostic.Code = ID006 fplValue.Name
-          Diagnostic.Alternatives =
-            Some
-                "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." }
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID006 fplValue.Name
+            Diagnostic.Alternatives =
+                Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
+        }
 
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+    ad.AddDiagnostic diagnostic
 
 let emitID004diagnostics (fplValue: FplValue) listOfCandidates =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = fplValue.StartPos
-          Diagnostic.EndPos = fplValue.NameEndPos
-          Diagnostic.Code = ID004(fplValue.Name, listOfCandidates)
-          Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." }
-
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID004(fplValue.Name, listOfCandidates)
+            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
+        }
+    ad.AddDiagnostic diagnostic
 
 let emitID007diagnostics (fplValue: FplValue) listOfCandidates =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = fplValue.StartPos
-          Diagnostic.EndPos = fplValue.NameEndPos
-          Diagnostic.Code = ID007(fplValue.Name, listOfCandidates)
-          Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." }
-
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID007(fplValue.Name, listOfCandidates)
+            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
+        }
+    ad.AddDiagnostic diagnostic
 
 let tryAddVariadicVariables numberOfVariadicVars startPos endPos =
     if numberOfVariadicVars > 1 then
         let diagnostic =
-            { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-              Diagnostic.Severity = DiagnosticSeverity.Error
-              Diagnostic.StartPos = startPos
-              Diagnostic.EndPos = endPos
-              Diagnostic.Code = VAR00
-              Diagnostic.Alternatives = None }
-
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = startPos
+                Diagnostic.EndPos = endPos
+                Diagnostic.Code = VAR00
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
 
 let checkID008Diagnostics (fplValue: FplValue) pos1 pos2 =
     if FplValue.IsConstructor(fplValue) && fplValue.TypeSignature.Length = 1 then
@@ -160,14 +192,16 @@ let checkID008Diagnostics (fplValue: FplValue) pos1 pos2 =
 
         if nameStart <> className then
             let diagnostic =
-                { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                  Diagnostic.Severity = DiagnosticSeverity.Error
-                  Diagnostic.StartPos = pos1
-                  Diagnostic.EndPos = pos2
-                  Diagnostic.Code = ID008(nameStart, className) // misspelled constructor name
-                  Diagnostic.Alternatives = None }
-
-            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = ID008(nameStart, className) // misspelled constructor name
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
 
 let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) name pos1 pos2 =
     let rec findPath (root: FplValue) (candidateName: string) =
@@ -187,26 +221,30 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
     if rightContext.EndsWith("InheritedClassType.PredicateIdentifier") then
         if fplValue.Name = name then
             let diagnostic =
-                { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                  Diagnostic.Severity = DiagnosticSeverity.Error
-                  Diagnostic.StartPos = pos1
-                  Diagnostic.EndPos = pos2
-                  Diagnostic.Code = ID009 name // circular base dependency
-                  Diagnostic.Alternatives = None }
-
-            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = ID009 name // circular base dependency
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
         else
             match classInheritanceChain with
             | Some chain ->
                 let diagnostic =
-                    { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                      Diagnostic.Severity = DiagnosticSeverity.Error
-                      Diagnostic.StartPos = pos1
-                      Diagnostic.EndPos = pos2
-                      Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
-                      Diagnostic.Alternatives = None }
-
-                FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                    { 
+                        Diagnostic.Uri = ad.CurrentUri
+                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                        Diagnostic.Severity = DiagnosticSeverity.Error
+                        Diagnostic.StartPos = pos1
+                        Diagnostic.EndPos = pos2
+                        Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
+                        Diagnostic.Alternatives = None 
+                    }
+                ad.AddDiagnostic diagnostic
             | _ ->
                 match FplValue.InScopeOfParent (fplValue) name with
                 | ScopeSearchResult.Found classCandidate ->
@@ -219,14 +257,16 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                         match classInheritanceChain with
                         | Some chain ->
                             let diagnostic =
-                                { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                                  Diagnostic.Severity = DiagnosticSeverity.Error
-                                  Diagnostic.StartPos = pos1
-                                  Diagnostic.EndPos = pos2
-                                  Diagnostic.Code = ID011(child.Name, chain) // inheritance chain duplicate
-                                  Diagnostic.Alternatives = None }
-
-                            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                                { 
+                                    Diagnostic.Uri = ad.CurrentUri
+                                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                                    Diagnostic.Severity = DiagnosticSeverity.Error
+                                    Diagnostic.StartPos = pos1
+                                    Diagnostic.EndPos = pos2
+                                    Diagnostic.Code = ID011(child.Name, chain) // inheritance chain duplicate
+                                    Diagnostic.Alternatives = None 
+                                }
+                            ad.AddDiagnostic diagnostic
                             duplicateInheritanceChainFound <- true
                         | _ -> ())
 
@@ -234,26 +274,30 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                         fplValue.ValueList.Add classCandidate
                 | _ ->
                     let diagnostic =
-                        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                          Diagnostic.Severity = DiagnosticSeverity.Error
-                          Diagnostic.StartPos = pos1
-                          Diagnostic.EndPos = pos2
-                          Diagnostic.Code = ID010 name // class not found
-                          Diagnostic.Alternatives = None }
-
-                    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                        { 
+                            Diagnostic.Uri = ad.CurrentUri
+                            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                            Diagnostic.Severity = DiagnosticSeverity.Error
+                            Diagnostic.StartPos = pos1
+                            Diagnostic.EndPos = pos2
+                            Diagnostic.Code = ID010 name // class not found
+                            Diagnostic.Alternatives = None 
+                        }
+                    ad.AddDiagnostic diagnostic
     elif rightContext.EndsWith("InheritedClassType.ObjectType") then
         match classInheritanceChain with
         | Some chain ->
             let diagnostic =
-                { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                  Diagnostic.Severity = DiagnosticSeverity.Error
-                  Diagnostic.StartPos = pos1
-                  Diagnostic.EndPos = pos2
-                  Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
-                  Diagnostic.Alternatives = None }
-
-            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
         | _ ->
             let mutable duplicateInheritanceChainFound = false
 
@@ -264,14 +308,16 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 match classInheritanceChain with
                 | Some chain ->
                     let diagnostic =
-                        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                          Diagnostic.Severity = DiagnosticSeverity.Error
-                          Diagnostic.StartPos = pos1
-                          Diagnostic.EndPos = pos2
-                          Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
-                          Diagnostic.Alternatives = None }
-
-                    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                        { 
+                            Diagnostic.Uri = ad.CurrentUri
+                            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                            Diagnostic.Severity = DiagnosticSeverity.Error
+                            Diagnostic.StartPos = pos1
+                            Diagnostic.EndPos = pos2
+                            Diagnostic.Code = ID011(name, chain) // inheritance chain duplicate
+                            Diagnostic.Alternatives = None 
+                        }
+                    ad.AddDiagnostic diagnostic
                     duplicateInheritanceChainFound <- true
                 | _ -> ())
 
@@ -302,14 +348,16 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
 
         if not foundInheritanceClass then
             let diagnostic =
-                { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                  Diagnostic.Severity = DiagnosticSeverity.Error
-                  Diagnostic.StartPos = pos1
-                  Diagnostic.EndPos = pos2
-                  Diagnostic.Code = ID012(identifier, candidates) // call of parent class does not match the class id
-                  Diagnostic.Alternatives = None }
-
-            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = ID012(identifier, candidates) // call of parent class does not match the class id
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
 
 let emitID013Diagnostics (fplValue: FplValue) pos1 pos2 =
     let d = Delegates()
@@ -322,26 +370,30 @@ let emitID013Diagnostics (fplValue: FplValue) pos1 pos2 =
             | _ -> () // todo
         else
             let diagnostic =
-                { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                  Diagnostic.Severity = DiagnosticSeverity.Error
-                  Diagnostic.StartPos = pos1
-                  Diagnostic.EndPos = pos2
-                  Diagnostic.Code = ID013 ex.Message
-                  Diagnostic.Alternatives = None }
-
-            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = ID013 ex.Message
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
 
 let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     let detailed (exprType: FixType) expectedArity actualArity pos1 pos2 =
         let diagnostic =
-            { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-              Diagnostic.Severity = DiagnosticSeverity.Error
-              Diagnostic.StartPos = pos1
-              Diagnostic.EndPos = pos2
-              Diagnostic.Code = SIG00(exprType.Type, actualArity)
-              Diagnostic.Alternatives = Some $"Arity of {expectedArity} expected." }
-
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = SIG00(exprType.Type, actualArity)
+                Diagnostic.Alternatives = Some $"Arity of {expectedArity} expected." 
+            }
+        ad.AddDiagnostic diagnostic
 
     match fplValue.ExpressionType with
     | FixType.Infix _ when fplValue.Arity <> 2 ->
@@ -386,14 +438,16 @@ let emitSIG01Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
 
         if fplValue.Scope.Count = 0 then
             let diagnostic =
-                { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                  Diagnostic.Severity = DiagnosticSeverity.Error
-                  Diagnostic.StartPos = pos1
-                  Diagnostic.EndPos = pos2
-                  Diagnostic.Code = SIG01 expressionId
-                  Diagnostic.Alternatives = Some "Declare a functional term or predicate with this symbol." }
-
-            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = SIG01 expressionId
+                    Diagnostic.Alternatives = Some "Declare a functional term or predicate with this symbol." 
+                }
+            ad.AddDiagnostic diagnostic
 
 let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
     let precedences = Dictionary<int, FplValue>()
@@ -425,14 +479,16 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
                 |> String.concat ", "
 
             let diagnostic =
-                { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                  Diagnostic.Severity = DiagnosticSeverity.Information
-                  Diagnostic.StartPos = pos1
-                  Diagnostic.EndPos = pos2
-                  Diagnostic.Code = SIG02(symbol, precedence, conflictList)
-                  Diagnostic.Alternatives = Some "Consider disambiguating the precedence to avoid unexpected results." }
-
-            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Information
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = SIG02(symbol, precedence, conflictList)
+                    Diagnostic.Alternatives = Some "Consider disambiguating the precedence to avoid unexpected results." 
+                }
+            ad.AddDiagnostic diagnostic
     | _ -> ()
 
 let emitSIG04Diagnostics (fplValue: FplValue) (candidates: FplValue list) firstFailingArgument pos1 pos2 =
@@ -440,14 +496,16 @@ let emitSIG04Diagnostics (fplValue: FplValue) (candidates: FplValue list) firstF
         candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
 
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = pos1
-          Diagnostic.EndPos = pos2
-          Diagnostic.Code = SIG04(fplValue.Name, candidateNames, firstFailingArgument)
-          Diagnostic.Alternatives = None }
-
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG04(fplValue.Name, candidateNames, firstFailingArgument)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
 
 let emitSIG04TypeDiagnostics (st:SymbolTable) name (fplValue:FplValue) pos1 pos2 =
 
@@ -459,14 +517,16 @@ let emitSIG04TypeDiagnostics (st:SymbolTable) name (fplValue:FplValue) pos1 pos2
             let candidateNames =
                 candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
             let diagnostic =
-                { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                  Diagnostic.Severity = DiagnosticSeverity.Error
-                  Diagnostic.StartPos = pos1
-                  Diagnostic.EndPos = pos2
-                  Diagnostic.Code = SIG04(name, candidateNames, firstFailingArgument)
-                  Diagnostic.Alternatives = None }
-
-            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = SIG04(name, candidateNames, firstFailingArgument)
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
 
 let rec blocktIsProof (fplValue: FplValue) =
     if FplValue.IsProof(fplValue) then
@@ -485,37 +545,43 @@ let rec blocktIsProof (fplValue: FplValue) =
 let emitPR000Diagnostics (fplValue: FplValue) identifier pos1 pos2 =
     if not (blocktIsProof fplValue) then
         let diagnostic =
-            { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-              Diagnostic.Severity = DiagnosticSeverity.Error
-              Diagnostic.StartPos = pos1
-              Diagnostic.EndPos = pos2
-              Diagnostic.Code = PR000 identifier
-              Diagnostic.Alternatives = None }
-
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = PR000 identifier
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
 
 let emitPR001Diagnostics (fplValue: FplValue) pos1 pos2 =
     if not (blocktIsProof fplValue) then
         let diagnostic =
-            { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-              Diagnostic.Severity = DiagnosticSeverity.Error
-              Diagnostic.StartPos = pos1
-              Diagnostic.EndPos = pos2
-              Diagnostic.Code = PR001
-              Diagnostic.Alternatives = None }
-
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = PR001
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
 
 let emitPR002Diagnostics pos1 pos2 =
     let diagnostic =
-        { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-          Diagnostic.Severity = DiagnosticSeverity.Error
-          Diagnostic.StartPos = pos1
-          Diagnostic.EndPos = pos2
-          Diagnostic.Code = PR002
-          Diagnostic.Alternatives = None }
-
-    FplParser.parserDiagnostics.AddDiagnostic diagnostic
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR002
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
 
 let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
     let filterByErrorCode (input: Diagnostics) errCode =
@@ -529,25 +595,29 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
         | FplRepresentation.PredRepr FplPredicate.False -> ()
         | FplRepresentation.PredRepr FplPredicate.Undetermined ->
             let diagnostic =
-                { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                  Diagnostic.Severity = DiagnosticSeverity.Error
-                  Diagnostic.StartPos = arg.StartPos
-                  Diagnostic.EndPos = arg.EndPos
-                  Diagnostic.Code = LG000(typeOfPredicate, arg.Name)
-                  Diagnostic.Alternatives = None }
-
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = arg.StartPos
+                    Diagnostic.EndPos = arg.EndPos
+                    Diagnostic.Code = LG000(typeOfPredicate, arg.Name)
+                    Diagnostic.Alternatives = None 
+                }
             diags.AddDiagnostic diagnostic
         | _ -> ()
 
     let emitLG001Diagnostics (arg: FplValue) =
         let diagnostic =
-            { Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-              Diagnostic.Severity = DiagnosticSeverity.Error
-              Diagnostic.StartPos = arg.StartPos
-              Diagnostic.EndPos = arg.EndPos
-              Diagnostic.Code = LG001(typeOfPredicate, arg.Name, arg.FplRepresentation.String())
-              Diagnostic.Alternatives = None }
-
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = arg.StartPos
+                Diagnostic.EndPos = arg.EndPos
+                Diagnostic.Code = LG001(typeOfPredicate, arg.Name, arg.FplRepresentation.String())
+                Diagnostic.Alternatives = None 
+            }
         diags.AddDiagnostic diagnostic
 
     fplValue.ValueList
@@ -567,4 +637,4 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
         () // we have no reason to emit any diagnostics since the are as many undetermined predicates as arguments
     else
         diags.Collection
-        |> List.iter (fun d -> FplParser.parserDiagnostics.AddDiagnostic d)
+        |> List.iter (fun d -> ad.AddDiagnostic d)

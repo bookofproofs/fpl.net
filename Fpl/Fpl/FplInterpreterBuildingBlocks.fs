@@ -277,7 +277,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Error  ->   
         st.EvalPush("Error")
-        let pos = Position(FplParser.parserDiagnostics.StreamName,0,1,1)
+        let pos = Position("",0,1,1)
         eval_units st "" pos pos
         st.EvalPop()
     // strings: | Digits of string
@@ -1577,7 +1577,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | ast1 ->
         let astType = ast1.GetType().Name
-        emitID000Diagnostics FplParser.parserDiagnostics.StreamName astType
+        emitID000Diagnostics astType
 
 
 let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =
@@ -1599,13 +1599,12 @@ let evaluateSymbolTable (uri:System.Uri) (st: SymbolTable) =
         match usesClausesEvaluatedParsedAst with
         | Some pa ->
             // evaluate the ParsedAst
-            let currentUriPath = pa.Parsing.UriPath
-            let theoryValue = FplValue.CreateFplValue((Position(currentUriPath,0,1,1), Position(currentUriPath,0,1,1)), FplValueType.Theory, st.Root)
+            let theoryValue = FplValue.CreateFplValue((Position("",0,1,1), Position("",0,1,1)), FplValueType.Theory, st.Root)
             if not (st.Root.Scope.ContainsKey(pa.Id)) then
                 st.Root.Scope.Add(pa.Id, theoryValue)
             theoryValue.Name <- pa.Id
             st.SetContext(EvalContext.InTheory theoryValue) LogContext.Start
-            FplParser.parserDiagnostics.StreamName <- currentUriPath
+            ad.CurrentUri <- pa.Parsing.Uri
             eval st pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.Evaluated
             theoryValue.NameIsFinal <- true

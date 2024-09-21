@@ -20,8 +20,8 @@ let prepareFplCode(fplCode:string, delete:bool) =
     let currDir = Directory.GetCurrentDirectory()
 
     File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
-    let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
-    FplParser.parserDiagnostics.Clear()
+    let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
+    ad.Clear()
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
     if delete then 
@@ -33,7 +33,7 @@ let prepareFplCode(fplCode:string, delete:bool) =
         Some (FplInterpreter.fplInterpreter st fplCode uri fplLibUrl)
 
 let loadFplFile(path:string) = 
-    let uri = System.Uri(path)
+    let uri = PathEquivalentUri(path)
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
     let parsedAsts = ParsedAstList()

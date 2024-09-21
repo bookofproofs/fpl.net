@@ -1,15 +1,15 @@
 ﻿module FplInterpreter
 open System
+open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterUsesClause
 open FplInterpreterBuildingBlocks
 open FplInterpreterDiagnosticsEmitter
 
-let fplInterpreter (st:SymbolTable) input (uri:Uri) fplLibUrl = 
+let fplInterpreter (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
     try
-        let escapedUri = FplSources.EscapedUri(uri.AbsoluteUri)
-        loadAllUsesClauses st input escapedUri fplLibUrl 
+        loadAllUsesClauses st input uri fplLibUrl 
         evaluateSymbolTable uri st
     with ex -> 
-        emitUnexpectedErrorDiagnostics (uri.AbsolutePath) (ex.Message + Environment.NewLine + ex.StackTrace)
+        emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)
     

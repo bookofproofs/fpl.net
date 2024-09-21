@@ -1,6 +1,7 @@
 ﻿namespace FplInterpreter.Tests
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
 open System.Text
@@ -41,7 +42,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { intr };", "PredRepr Undetermined")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationConstants(fplCode, expected: string) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let filename = "TestExpressionEvaluationConstants.fpl"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
@@ -74,7 +75,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { and(x,true,true) };", "PredRepr Undetermined{Undef, PredRepr True, PredRepr True}")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationConjunction(fplCode, expected: string) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let filename = "TestExpressionEvaluationConjunction.fpl"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
@@ -107,7 +108,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { or(x,false,false) };", "PredRepr Undetermined{Undef, PredRepr False, PredRepr False}")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationDisjunction(fplCode, expected: string) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let filename = "TestExpressionEvaluationDisjunction.fpl"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
@@ -144,7 +145,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { xor(x,false,false) };", "PredRepr Undetermined{Undef, PredRepr False, PredRepr False}")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationExclusiveOr(fplCode, expected: string) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let filename = "TestExpressionEvaluationExclusiveOr.fpl"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
@@ -174,7 +175,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { impl(false,false) };", "PredRepr True{PredRepr False, PredRepr False}")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationImplication(fplCode, expected: string) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let filename = "TestExpressionEvaluationImplication.fpl"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
@@ -204,7 +205,7 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { iif(false,false) };", "PredRepr True{PredRepr False, PredRepr False}")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationEquivalence(fplCode, expected: string) =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let filename = "TestExpressionEvaluationEquivalence.fpl"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore

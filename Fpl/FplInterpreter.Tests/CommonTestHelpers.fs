@@ -46,18 +46,18 @@ let filterByErrorCode (input: Diagnostics) errCode =
 
 
 let prepareFplCode (filename: string, fplCode: string, delete: bool) =
-    FplParser.parserDiagnostics.Clear()
+    ad.Clear()
     let currDir = Directory.GetCurrentDirectory()
 
     printf "\n"
     File.WriteAllText(Path.Combine(currDir, filename), fplCode)
-    let uri = System.Uri(Path.Combine(currDir, filename))
+    let uri = PathEquivalentUri(Path.Combine(currDir, filename))
 
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
     if delete then
-        deleteFiles currDir filename
+        deleteFiles currDir "*.fpl"
         None
     else
         let parsedAsts = ParsedAstList()
@@ -65,13 +65,12 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
         FplInterpreter.fplInterpreter st fplCode uri fplLibUrl |> ignore
 
         let syntaxErrorFound =
-            FplParser.parserDiagnostics.Collection
+            ad.Collection
             |> Seq.exists (fun d -> d.Emitter = DiagnosticEmitter.FplParser)
 
         if syntaxErrorFound then
-            emitUnexpectedErrorDiagnostics (uri.AbsolutePath) ("Syntax error found.")
-        //Console.WriteLine(st.LoggedState)
-        //Console.WriteLine(st.AstsToString)
+            emitUnexpectedErrorDiagnostics "Syntax error found."
+
         Some(st)
 
 let runTestHelper filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expected: int) =
@@ -79,13 +78,13 @@ let runTestHelper filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expect
     prepareFplCode (filename, fplCode, false) |> ignore
 
     let syntaxErrors =
-        FplParser.parserDiagnostics.Collection
+        ad.Collection
         |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplParser || d.Code.Code = "GEN00")
 
     if syntaxErrors.Length > 0 && code.Code <> "GEN00" then
         failwithf $"Syntax or other errors detected. {syntaxErrors.Head}"
 
-    let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+    let result = filterByErrorCode ad code.Code
     Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode (filename, "", true) |> ignore
 
@@ -94,13 +93,13 @@ let runTestHelperWithText filename fplCode (code: ErrDiagnostics.DiagnosticCode)
     prepareFplCode (filename, fplCode, false) |> ignore
 
     let syntaxErrors =
-        FplParser.parserDiagnostics.Collection
+        ad.Collection
         |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplParser)
 
     if syntaxErrors.Length > 0 then
         failwithf "Syntax errors detected."
 
-    let result = filterByErrorCode FplParser.parserDiagnostics code.Code
+    let result = filterByErrorCode ad code.Code
     Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode (filename, "", true) |> ignore
 
@@ -112,7 +111,7 @@ let runTestHelperWithText filename fplCode (code: ErrDiagnostics.DiagnosticCode)
 
 
 let loadFplFile (path: string) =
-    let uri = System.Uri(path)
+    let uri = PathEquivalentUri(path)
 
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
@@ -124,7 +123,7 @@ let loadFplFile (path: string) =
     Some(st)
 
 let loadFplFileWithTheSameSymbolTable (st:SymbolTable) (path: string) =
-    let uri = System.Uri(path)
+    let uri = PathEquivalentUri(path)
 
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"

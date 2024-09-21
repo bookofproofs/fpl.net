@@ -26,7 +26,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -37,7 +37,7 @@ type TestParserErrors() =
         ;
         c"""
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -49,7 +49,7 @@ type TestParserErrors() =
 ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -60,7 +60,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -72,7 +72,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -84,7 +84,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -96,7 +96,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -108,7 +108,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -120,7 +120,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -132,7 +132,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -148,7 +148,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -159,7 +159,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -170,7 +170,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -179,7 +179,7 @@ type TestParserErrors() =
         printf "Trying %s" code.Message
         let input = """inf D(x) {pre:true con:true};"""
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -190,7 +190,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -201,7 +201,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -213,7 +213,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -224,7 +224,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -234,7 +234,7 @@ type TestParserErrors() =
         printf "Trying %s" code.Message
         let input = """def pred T() { 1. |- :: };"""
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -255,7 +255,7 @@ type TestParserErrors() =
              };
             """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -280,7 +280,7 @@ type TestParserErrors() =
              };
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -290,7 +290,7 @@ type TestParserErrors() =
         printf "Trying %s" code.Message
         let input = """proof T$1 { 1. |- assume :: };"""
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -305,7 +305,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -316,7 +316,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -327,7 +327,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
     [<TestMethod>]
@@ -338,7 +338,7 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.AreEqual<int>(2, result.Length)
 
     [<TestMethod>]
@@ -355,6 +355,6 @@ type TestParserErrors() =
         ;
         """
         let ast = fplParser input
-        let result = filterByErrorCode FplParser.parserDiagnostics code
+        let result = filterByErrorCode ad code
         Assert.IsTrue(result.Length>0)
 
