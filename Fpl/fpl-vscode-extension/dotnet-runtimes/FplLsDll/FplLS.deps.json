@@ -130,60 +130,60 @@
       },
       "Microsoft.NETCore.Platforms/1.1.0": {},
       "Microsoft.NETCore.Targets/1.1.0": {},
-      "Microsoft.Testing.Extensions.Telemetry/1.3.2": {
+      "Microsoft.Testing.Extensions.Telemetry/1.4.0": {
         "dependencies": {
           "Microsoft.ApplicationInsights": "2.22.0",
-          "Microsoft.Testing.Platform": "1.3.2"
+          "Microsoft.Testing.Platform": "1.4.0"
         },
         "runtime": {
           "lib/net8.0/Microsoft.Testing.Extensions.Telemetry.dll": {
-            "assemblyVersion": "1.3.2.0",
-            "fileVersion": "1.300.224.40513"
+            "assemblyVersion": "1.4.0.0",
+            "fileVersion": "1.400.24.46008"
           }
         }
       },
-      "Microsoft.Testing.Extensions.TrxReport.Abstractions/1.3.2": {
+      "Microsoft.Testing.Extensions.TrxReport.Abstractions/1.4.0": {
         "dependencies": {
-          "Microsoft.Testing.Platform": "1.3.2"
+          "Microsoft.Testing.Platform": "1.4.0"
         },
         "runtime": {
           "lib/net8.0/Microsoft.Testing.Extensions.TrxReport.Abstractions.dll": {
-            "assemblyVersion": "1.3.2.0",
-            "fileVersion": "1.300.224.40513"
+            "assemblyVersion": "1.4.0.0",
+            "fileVersion": "1.400.24.46008"
           }
         }
       },
-      "Microsoft.Testing.Extensions.VSTestBridge/1.3.2": {
+      "Microsoft.Testing.Extensions.VSTestBridge/1.4.0": {
         "dependencies": {
           "Microsoft.ApplicationInsights": "2.22.0",
           "Microsoft.TestPlatform.ObjectModel": "17.11.1",
-          "Microsoft.Testing.Extensions.Telemetry": "1.3.2",
-          "Microsoft.Testing.Extensions.TrxReport.Abstractions": "1.3.2",
-          "Microsoft.Testing.Platform": "1.3.2"
+          "Microsoft.Testing.Extensions.Telemetry": "1.4.0",
+          "Microsoft.Testing.Extensions.TrxReport.Abstractions": "1.4.0",
+          "Microsoft.Testing.Platform": "1.4.0"
         },
         "runtime": {
           "lib/net8.0/Microsoft.Testing.Extensions.VSTestBridge.dll": {
-            "assemblyVersion": "1.3.2.0",
-            "fileVersion": "1.300.224.40513"
+            "assemblyVersion": "1.4.0.0",
+            "fileVersion": "1.400.24.46008"
           }
         }
       },
-      "Microsoft.Testing.Platform/1.3.2": {
+      "Microsoft.Testing.Platform/1.4.0": {
         "runtime": {
           "lib/net8.0/Microsoft.Testing.Platform.dll": {
-            "assemblyVersion": "1.3.2.0",
-            "fileVersion": "1.300.224.40513"
+            "assemblyVersion": "1.4.0.0",
+            "fileVersion": "1.400.24.46008"
           }
         }
       },
-      "Microsoft.Testing.Platform.MSBuild/1.3.2": {
+      "Microsoft.Testing.Platform.MSBuild/1.4.0": {
         "dependencies": {
-          "Microsoft.Testing.Platform": "1.3.2"
+          "Microsoft.Testing.Platform": "1.4.0"
         },
         "runtime": {
           "lib/net8.0/Microsoft.Testing.Platform.MSBuild.dll": {
-            "assemblyVersion": "1.3.2.0",
-            "fileVersion": "1.300.224.40513"
+            "assemblyVersion": "1.4.0.0",
+            "fileVersion": "1.400.24.46008"
           }
         }
       },
@@ -234,17 +234,17 @@
           }
         }
       },
-      "MSTest.TestAdapter/3.5.2": {
+      "MSTest.TestAdapter/3.6.0": {
         "dependencies": {
-          "Microsoft.Testing.Extensions.VSTestBridge": "1.3.2",
-          "Microsoft.Testing.Platform.MSBuild": "1.3.2"
+          "Microsoft.Testing.Extensions.VSTestBridge": "1.4.0",
+          "Microsoft.Testing.Platform.MSBuild": "1.4.0"
         }
       },
-      "MSTest.TestFramework/3.5.2": {
+      "MSTest.TestFramework/3.6.0": {
         "runtime": {
           "lib/net8.0/Microsoft.VisualStudio.TestPlatform.TestFramework.dll": {
             "assemblyVersion": "14.0.0.0",
-            "fileVersion": "3.500.224.41309"
+            "fileVersion": "3.600.24.46013"
           }
         }
       },
@@ -332,8 +332,8 @@
         "dependencies": {
           "FParsec": "1.1.1",
           "FSharp.Core": "8.0.400",
-          "MSTest.TestAdapter": "3.5.2",
-          "MSTest.TestFramework": "3.5.2",
+          "MSTest.TestAdapter": "3.6.0",
+          "MSTest.TestFramework": "3.6.0",
           "Microsoft.NET.Test.Sdk": "17.11.1",
           "Newtonsoft.Json": "13.0.3"
         },
@@ -450,40 +450,40 @@
       "path": "microsoft.netcore.targets/1.1.0",
       "hashPath": "microsoft.netcore.targets.1.1.0.nupkg.sha512"
     },
-    "Microsoft.Testing.Extensions.Telemetry/1.3.2": {
+    "Microsoft.Testing.Extensions.Telemetry/1.4.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-4LTMPKH6yPv6/3Khdr7rLkzDQZWZdD1om0LKF8KDe/dPYHtS49kmAEcqQCzirWxx2n2ZNNOjm6OwRTRgyWa/Dg==",
-      "path": "microsoft.testing.extensions.telemetry/1.3.2",
-      "hashPath": "microsoft.testing.extensions.telemetry.1.3.2.nupkg.sha512"
+      "sha512": "sha512-UX+T/xUOOh63KqWj6kPS2bw/E0uViIdLWUZmxk/iI+RvCzVklNzEKyaaPNo74T1GOowOSc2Kgp7RGhQK57FdyQ==",
+      "path": "microsoft.testing.extensions.telemetry/1.4.0",
+      "hashPath": "microsoft.testing.extensions.telemetry.1.4.0.nupkg.sha512"
     },
-    "Microsoft.Testing.Extensions.TrxReport.Abstractions/1.3.2": {
+    "Microsoft.Testing.Extensions.TrxReport.Abstractions/1.4.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-E1FFHRIDOOnEuTIQ6eLA+GvJsfqVW2PWpvfa5oxu5fzXtVi7QyOf8IWs5KFfTxOjnuENmJfb08t5quKvc1n6zg==",
-      "path": "microsoft.testing.extensions.trxreport.abstractions/1.3.2",
-      "hashPath": "microsoft.testing.extensions.trxreport.abstractions.1.3.2.nupkg.sha512"
+      "sha512": "sha512-7ulY2yQ+0BH1sjSRvgXNBmhWDTtPDHOirULnnOnuKpf0m9sIETttURmfF2xZaGYsajZ/hECkL1AKFegGB+Kb9g==",
+      "path": "microsoft.testing.extensions.trxreport.abstractions/1.4.0",
+      "hashPath": "microsoft.testing.extensions.trxreport.abstractions.1.4.0.nupkg.sha512"
     },
-    "Microsoft.Testing.Extensions.VSTestBridge/1.3.2": {
+    "Microsoft.Testing.Extensions.VSTestBridge/1.4.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-MZzVIN5mocMHQyL4j8SGr2gnV01awTMi2Z+c001TARgLfBwI97WPONsHjxm9+fA4Fw6+8vJckksEHMe9gcF5tQ==",
-      "path": "microsoft.testing.extensions.vstestbridge/1.3.2",
-      "hashPath": "microsoft.testing.extensions.vstestbridge.1.3.2.nupkg.sha512"
+      "sha512": "sha512-C6XAiFJuxjJsk67VgoVjhkNvCp0WZSEUJRpzaDTe92GatOY7CkWP9cj78qZuw/JD0mv6kktdKwNcU5lF9F8Yew==",
+      "path": "microsoft.testing.extensions.vstestbridge/1.4.0",
+      "hashPath": "microsoft.testing.extensions.vstestbridge.1.4.0.nupkg.sha512"
     },
-    "Microsoft.Testing.Platform/1.3.2": {
+    "Microsoft.Testing.Platform/1.4.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-zCBH5GDrHdZJpOFBEZHG2TBkoDpmcL05kv+rdIPGjQ5Ny+JeqWIjuGNu0IOtvxw9Xl0+lKbH1LSoXPG4hzQMnA==",
-      "path": "microsoft.testing.platform/1.3.2",
-      "hashPath": "microsoft.testing.platform.1.3.2.nupkg.sha512"
+      "sha512": "sha512-6JtCqi0nq43wFDUrDfx3NrmFJYqWpmbEjEv4bVtgP6BTry1aw0Zd3FDQmZbWqnWGbvPgwm39YUXedf1+yzTkmg==",
+      "path": "microsoft.testing.platform/1.4.0",
+      "hashPath": "microsoft.testing.platform.1.4.0.nupkg.sha512"
     },
-    "Microsoft.Testing.Platform.MSBuild/1.3.2": {
+    "Microsoft.Testing.Platform.MSBuild/1.4.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ZIws1LkCsgMkMD9zUa6fy4X8tBuwY25y30rcc/myUipiKL3HfJzEwto1vMtkcguCoVgkQfJTXQDIxEPJy8c+xg==",
-      "path": "microsoft.testing.platform.msbuild/1.3.2",
-      "hashPath": "microsoft.testing.platform.msbuild.1.3.2.nupkg.sha512"
+      "sha512": "sha512-EBarJH6u97ng2DIpNNimUnbMGAMh2mC3uxaXqdnhLNtdLjNq9QNtEfrf+nOr84mTNA4KwDXZZAK1H5ZupoAaWw==",
+      "path": "microsoft.testing.platform.msbuild/1.4.0",
+      "hashPath": "microsoft.testing.platform.msbuild.1.4.0.nupkg.sha512"
     },
     "Microsoft.TestPlatform.ObjectModel/17.11.1": {
       "type": "package",
@@ -499,19 +499,19 @@
       "path": "microsoft.testplatform.testhost/17.11.1",
       "hashPath": "microsoft.testplatform.testhost.17.11.1.nupkg.sha512"
     },
-    "MSTest.TestAdapter/3.5.2": {
+    "MSTest.TestAdapter/3.6.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-jEgtMo1/Ih/h0/s+cp+o1prVPBWp/SIh1jfYQH8pK/kQlHMGbwjhnbj0E7kqx3Bn+tGzB6pgq8Im4rgXoLJETA==",
-      "path": "mstest.testadapter/3.5.2",
-      "hashPath": "mstest.testadapter.3.5.2.nupkg.sha512"
+      "sha512": "sha512-UIoSCVXds8Wxk5yWwoSJ6Q87LD6Hv7WrbggK1Uxwir1FmTrTLYtBTap0qUA6yhms4paZsMfESqq3ufJen17A1Q==",
+      "path": "mstest.testadapter/3.6.0",
+      "hashPath": "mstest.testadapter.3.6.0.nupkg.sha512"
     },
-    "MSTest.TestFramework/3.5.2": {
+    "MSTest.TestFramework/3.6.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-XDPIPvPWcbnyte0Oj0EzxMV38RIE925C0EtZCWXUfsho+QYqIv3LNjIZstG/JpamlhPHOQlfdrzc/FRF9lW5Ag==",
-      "path": "mstest.testframework/3.5.2",
-      "hashPath": "mstest.testframework.3.5.2.nupkg.sha512"
+      "sha512": "sha512-mpIPmxsKPfjc08X9tqh0ec4Pyt/zpFUIfL2GA6CjvLmnX4zTw6llqJGnWpUbXTWEVhQu38jtqfEjeUYjMGT4Gg==",
+      "path": "mstest.testframework/3.6.0",
+      "hashPath": "mstest.testframework.3.6.0.nupkg.sha512"
     },
     "Newtonsoft.Json/13.0.3": {
       "type": "package",

@@ -526,6 +526,8 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
+    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
         FplParser.parserDiagnostics.Clear()
@@ -599,6 +601,8 @@ type TestFplValueScopeTypeSignature() =
             | "base30" -> Assert.AreEqual<string list>(["B"; "("; "In"; "("; "undef"; ")"; ")"], base1.TypeSignature)
             | "base31" -> Assert.AreEqual<string list>(["C"; "("; "Test1"; "("; "undef"; ")"; "Test2"; "("; "undef"; "undef"; "undef"; ")"; ")"], base1.TypeSignature)
             | "base32" -> Assert.AreEqual<string list>(["E"; "("; "pred"; "undef"; "pred"; ")"], base1.TypeSignature)
+            | "base33" -> Assert.AreEqual<string list>(["pred"; "("; "obj"; ")"], base1.TypeSignature)
+            | "base34" -> Assert.AreEqual<string list>(["is"; "("; "undef"; "Set"; ")"], base1.TypeSignature)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

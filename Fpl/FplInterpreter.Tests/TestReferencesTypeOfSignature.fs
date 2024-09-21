@@ -69,6 +69,8 @@ type TestReferencesTypeOfSignature() =
     //[<DataRow("base30", "B(In(x))")>]
     //[<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     //[<DataRow("base32", "E(true, undef, false)")>]
+    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base34", "is(x, Set)")>]
     
     [<TestMethod>]
     member this.TestPredicateReference(var, fplCode) =

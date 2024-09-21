@@ -94,7 +94,6 @@ namespace FplLS
             {
                 FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", st.ParsedAsts.Select(pa => pa.Parsing.UriPath)), "st ids in PublishDiagnostics");
                 sourceCode = bufferSourceCode;
-                FplLsTraceLogger.LogMsg(_languageServer, $"{sourceCode}", "RefreshFplDiagnosticsStorage");
             }
 
             var parserDiagnostics = FplParser.parserDiagnostics;

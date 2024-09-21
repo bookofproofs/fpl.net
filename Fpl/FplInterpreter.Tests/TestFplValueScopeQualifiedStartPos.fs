@@ -524,6 +524,8 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
+    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
         FplParser.parserDiagnostics.Clear()
@@ -598,6 +600,8 @@ type TestFplValueScopeQualifiedStartPos() =
             | "base30" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 17)"))
             | "base31" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 17)"))
             | "base32" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 17)"))
+            | "base33" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 39)"))
+            | "base34" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 17)"))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

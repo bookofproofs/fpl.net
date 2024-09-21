@@ -529,6 +529,8 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
+    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
         FplParser.parserDiagnostics.Clear()
@@ -603,6 +605,8 @@ type TestFplValueScopeNameEndPos() =
             | "base30" -> Assert.AreEqual<int64>((int64)25, base1.NameEndPos.Column)
             | "base31" -> Assert.AreEqual<int64>((int64)41, base1.NameEndPos.Column)
             | "base32" -> Assert.AreEqual<int64>((int64)38, base1.NameEndPos.Column)
+            | "base33" -> Assert.AreEqual<int64>((int64)43, base1.NameEndPos.Column)
+            | "base34" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

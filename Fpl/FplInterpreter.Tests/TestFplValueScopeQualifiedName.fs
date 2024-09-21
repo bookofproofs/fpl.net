@@ -523,6 +523,8 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
+    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
         FplParser.parserDiagnostics.Clear()
@@ -597,6 +599,8 @@ type TestFplValueScopeQualifiedName() =
             | "base30" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, base1.QualifiedName)
             | "base31" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, base1.QualifiedName)
             | "base32" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, base1.QualifiedName)
+            | "base33" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().p", base1.QualifiedName)
+            | "base34" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, base1.QualifiedName)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

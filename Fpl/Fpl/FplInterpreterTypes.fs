@@ -461,6 +461,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     this.Name
             else
                 match this.TypeSignature with
+                | x::xs when x = "is" -> String.concat "" (this.TypeSignature)
                 | x::xs when this.Name.StartsWith("bas.") -> $"bas.{x}"
                 | x::y::xs when this.Name.StartsWith("del.") -> $"del.{y}"
                 | x::y::xs when x="bydef." -> $"bydef.{y}"

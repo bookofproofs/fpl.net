@@ -236,7 +236,7 @@ type TestFplValueScopeFplRepresentation() =
             | "block" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, block.FplRepresentation); 
             | "x" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, x.FplRepresentation)
             | "y" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, y.FplRepresentation)
-            | "s" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.PredRepr FplPredicate.Undetermined, s.FplRepresentation)
+            | "s" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.Undef, s.FplRepresentation)
             | "xu" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", xu.FplRepresentation)
             | "xv" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", xv.FplRepresentation)
             | "xw" -> Assert.AreEqual<FplRepresentation>(FplRepresentation.ObjRepr "obj", xw.FplRepresentation)
@@ -529,6 +529,8 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
+    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
         FplParser.parserDiagnostics.Clear()

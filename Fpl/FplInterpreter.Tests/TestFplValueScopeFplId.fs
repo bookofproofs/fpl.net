@@ -530,6 +530,8 @@ type TestFplValueScopeFplId() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
+    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
         FplParser.parserDiagnostics.Clear()
@@ -597,13 +599,15 @@ type TestFplValueScopeFplId() =
             | "base23" -> Assert.AreEqual<string>("or", base1.FplId)
             | "base24" -> Assert.AreEqual<string>("iif", base1.FplId)
             | "base25" -> Assert.AreEqual<string>("impl", base1.FplId)
-            | "base26" -> Assert.AreEqual<string>("is", base1.FplId)
+            | "base26" -> Assert.AreEqual<string>("is(undefNat)", base1.FplId)
             | "base27" -> Assert.AreEqual<string>("B", base1.FplId)
             | "base28" -> Assert.AreEqual<string>("C", base1.FplId)
             | "base29" -> Assert.AreEqual<string>("D", base1.FplId)
             | "base30" -> Assert.AreEqual<string>("B", base1.FplId)
             | "base31" -> Assert.AreEqual<string>("C", base1.FplId)
             | "base32" -> Assert.AreEqual<string>("E", base1.FplId)
+            | "base33" -> Assert.AreEqual<string>("p", base1.FplId)
+            | "base34" -> Assert.AreEqual<string>("is(undefSet)", base1.FplId)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

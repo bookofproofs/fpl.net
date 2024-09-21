@@ -530,6 +530,8 @@ type TestFplValueScopeNameIsFinal() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
+    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
     member this.TestPredicate(var, varVal) =
         FplParser.parserDiagnostics.Clear()
@@ -604,6 +606,8 @@ type TestFplValueScopeNameIsFinal() =
             | "base30" -> Assert.AreEqual<bool>(true, base1.NameIsFinal)
             | "base31" -> Assert.AreEqual<bool>(true, base1.NameIsFinal)
             | "base32" -> Assert.AreEqual<bool>(true, base1.NameIsFinal)
+            | "base33" -> Assert.AreEqual<bool>(true, base1.NameIsFinal)
+            | "base34" -> Assert.AreEqual<bool>(true, base1.NameIsFinal)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
