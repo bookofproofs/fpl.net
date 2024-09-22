@@ -44,7 +44,7 @@ type EvalAliasedNamespaceIdentifier =
           EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList }
 
     /// Creates an EvalAliasedNamespaceIdentifier with a given Uri.
-    static member CreateEani(uri:System.Uri) = 
+    static member CreateEani(uri:PathEquivalentUri) = 
         let pascalCaseId = Path.GetFileNameWithoutExtension(uri.AbsolutePath)
         let pos = Position("", 0, 1, 1)
         EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseId, "*", pos, pos)
@@ -257,7 +257,7 @@ type ParsedAstList() =
         else
             None
 
-    /// Returns a dictionof <Uri,SourceCode> of all ParsedAsts in the list
+    /// Returns a dictionof <PathEquivalentUri,SourceCode> of all ParsedAsts in the list
     member this.DictionaryOfSUri2FplSourceCode()  = 
         let ret = System.Collections.Generic.Dictionary<PathEquivalentUri,string>()
         this

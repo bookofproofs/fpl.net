@@ -56,7 +56,7 @@ let private downloadFile url (e:EvalAliasedNamespaceIdentifier) =
     let client = new HttpClient()
     try
         async {
-            let! data = client.GetStringAsync(Uri(url)) |> Async.AwaitTask
+            let! data = client.GetStringAsync(PathEquivalentUri(url)) |> Async.AwaitTask
             return data
         } |> Async.RunSynchronously
     with
@@ -92,7 +92,7 @@ let private loadFile fileName (e:EvalAliasedNamespaceIdentifier) =
         ad.AddDiagnostic diagnostic
         ""
 
-let createSubfolder (uri: Uri) subFolder =
+let createSubfolder (uri: PathEquivalentUri) subFolder =
     let unescapedPath = 
         let p = Uri.UnescapeDataString(uri.LocalPath)
         let pattern = @"^[\/\\][a-zA-Z]:"
@@ -112,7 +112,7 @@ let createSubfolder (uri: Uri) subFolder =
         (directoryPath, subDirectoryPath)
 
 
-let downloadLibMap (uri:System.Uri) (currentWebRepo: string) =
+let downloadLibMap (uri:PathEquivalentUri) (currentWebRepo: string) =
     let pos = Position("", 0, 1, 1)
     let libMap = downloadFile (currentWebRepo + "/libmap.txt") (EvalAliasedNamespaceIdentifier.CreateEani("","", pos, pos))
     libMap    
@@ -120,7 +120,7 @@ let downloadLibMap (uri:System.Uri) (currentWebRepo: string) =
 /// Acquires FPL sources that can be found with a single uses clause.
 /// They are searched for in the current directory of the file, in the lib subfolder
 /// as well as in the web resource 
-let acquireSources (uri: Uri) (fplLibUrl: string) =
+let acquireSources (uri: PathEquivalentUri) (fplLibUrl: string) =
     let (_,libDirectoryPath) = createSubfolder uri "lib"
     let (directoryPath,repoDirectoryPath) = createSubfolder uri "repo"
     let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, "*.fpl") |> Seq.map (fun path -> PathEquivalentUri.EscapedUri(path)) |> Seq.toList
@@ -315,7 +315,7 @@ let private rearrangeList element list =
     let beforeElement = list |> List.takeWhile ((<>) element)
     afterElement @ beforeElement
 
-let garbageCollector (st:SymbolTable) (uri:Uri) = 
+let garbageCollector (st:SymbolTable) (uri:PathEquivalentUri) = 
     let currentTheory = Path.GetFileNameWithoutExtension(uri.AbsolutePath)
     let referencedAstsOfCurrentTheory ct = 
         match st.ParsedAsts.TryFindAstById(ct) with

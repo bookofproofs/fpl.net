@@ -58,6 +58,8 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
 
     if delete then
         deleteFiles currDir "*.fpl"
+        deleteDirectory (Path.Combine(currDir,"lib"))
+        deleteDirectory (Path.Combine(currDir,"repo"))
         None
     else
         let parsedAsts = ParsedAstList()

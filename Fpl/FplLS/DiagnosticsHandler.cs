@@ -57,7 +57,7 @@ namespace FplLS
                             Uri = diagnosticsPerUri.Key,
                             Diagnostics = diagnosticsPerUri.Value
                         });
-                        // remove uri path from allUris because we have published them 
+                        // remove Uri path from allUris because we have published them 
                         allUris.Remove(diagnosticsPerUri.Key);
                     }
                     if (diagnostics.Enumerator().Count == 0)
@@ -79,7 +79,8 @@ namespace FplLS
                             Uri = uriPath, // reset remaining files
                             Diagnostics = new List<Model.Diagnostic>()
                         });
-                }
+                        FplLsTraceLogger.LogMsg(_languageServer, uriPath.AbsoluteUri, "Remaining in PublishDiagnostics");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -98,17 +99,7 @@ namespace FplLS
             string sourceCode;
             ArgumentNullException.ThrowIfNull(buffer);
             string bufferSourceCode = buffer.ToString();
-            var pa = st.ParsedAsts.FirstOrDefault<ParsedAst>();
-            if (pa == null)
-            {
-                sourceCode = bufferSourceCode;
-                FplLsTraceLogger.LogMsg(_languageServer, $"buffer initialized with {uri.AbsoluteUri}", "RefreshFplDiagnosticsStorage");
-            }
-            else
-            {
-                FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", st.ParsedAsts.Select(pa => pa.Parsing.Uri.AbsolutePath)), "st ids in PublishDiagnostics");
-                sourceCode = bufferSourceCode;
-            }
+            sourceCode = bufferSourceCode;
 
             var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
             ad.CurrentUri = uri;
@@ -130,11 +121,17 @@ namespace FplLS
         public UriDiagnostics CastDiagnostics(FplInterpreterTypes.SymbolTable st)
         {
             var castedListDiagnostics = new UriDiagnostics();
-            var sourceCodes = GetTextPositionsByUri(st);
+            var uriTotextPositionsDict = GetTextPositionsByUri(st);
             FplLsTraceLogger.LogMsg(_languageServer, ad.DiagnosticsToString, "~~~~~Diagnostics Count Orig");
+            FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", uriTotextPositionsDict.Keys.Select(k => k.AbsoluteUri)), $"~~~~~{uriTotextPositionsDict.Keys.Count} source code keys");
             foreach (ErrDiagnostics.Diagnostic diagnostic in ad.Collection)
             {
-                var tpByUri = sourceCodes[diagnostic.Uri];
+                var key = PathEquivalentUri.EscapedUri(diagnostic.Uri.AbsoluteUri);
+                FplLsTraceLogger.LogMsg(_languageServer, key.AbsoluteUri, "~~~~~new key");
+                FplLsTraceLogger.LogMsg(_languageServer, diagnostic.Uri.AbsoluteUri, "~~~~~old key");
+
+
+                var tpByUri = uriTotextPositionsDict[diagnostic.Uri];
                 castedListDiagnostics.AddDiagnostics(diagnostic.Uri, CastDiagnostic(diagnostic, tpByUri));
             }
             FplLsTraceLogger.LogMsg(_languageServer, ad.Collection.Length.ToString(), "~~~~~Diagnostics Count Orig");
