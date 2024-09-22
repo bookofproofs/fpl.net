@@ -317,18 +317,18 @@ let private rearrangeList element list =
 
 let garbageCollector (st:SymbolTable) (uri:PathEquivalentUri) = 
     let currentTheory = Path.GetFileNameWithoutExtension(uri.AbsolutePath)
-    let referencedAstsOfCurrentTheory ct = 
-        match st.ParsedAsts.TryFindAstById(ct) with
+    let referencedAstsOfCurrentTheory currTheory = 
+        match st.ParsedAsts.TryFindAstById(currTheory) with
         | Some pa -> pa.Sorting.ReferencedAsts
         | _ -> []
     // remove the current theory from the ReferencingAsts list of each parsedAst, if they are not contained 
-    // in the current theory's reference Asts
-    let rec removeNotReferencedAsts ct = 
+    // in the current theory's ReferencedAsts
+    let rec removeNotReferencedAsts currTheory = 
         st.ParsedAsts 
         |> Seq.iter (fun pa ->
             match pa.Sorting.ReferencingAsts |> List.tryFindIndex (fun referencedTheory -> 
-                referencedTheory = ct
-                && not (referencedAstsOfCurrentTheory ct |> List.contains pa.Id)
+                referencedTheory = currTheory
+                && not (referencedAstsOfCurrentTheory currTheory |> List.contains pa.Id)
                 ) with
             | Some indexOfCurrentTheory -> 
                 pa.Sorting.ReferencingAsts <- pa.Sorting.ReferencingAsts |> List.removeAt(indexOfCurrentTheory)
@@ -342,7 +342,7 @@ let garbageCollector (st:SymbolTable) (uri:PathEquivalentUri) =
             |> Seq.toList
         // remove the corresponding parsedAsts 
         st.ParsedAsts.RemoveAll (fun pa -> willBeRemoved |> List.contains pa.Id) |> ignore
-        // remove the removed asts from the Referencing Asts of the remaining 
+        // remove the removed asts from the ReferencingAsts of the remaining 
         willBeRemoved 
         |> List.iter (fun theoryName ->
             if st.Root.Scope.ContainsKey(theoryName) then
