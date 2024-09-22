@@ -15,6 +15,13 @@ type UpdatingSymbolTableNavigation() =
     [<TestMethod>]
     member this.UsesClauseCausesDownloads() =
         ad.Clear()
+        // first delete lib and repo subdirectories (if any)
+        let currentPath = Directory.GetCurrentDirectory()
+        let currentPathLib = Path.Combine(currentPath,"lib")
+        let currentPathRepo = Path.Combine(currentPath,"repo")
+        deleteDirectory currentPathLib
+        deleteDirectory currentPathRepo
+
         let fplCode = """
             uses Fpl.SetTheory;
         """

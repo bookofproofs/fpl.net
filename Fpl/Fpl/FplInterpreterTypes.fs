@@ -45,7 +45,7 @@ type EvalAliasedNamespaceIdentifier =
 
     /// Creates an EvalAliasedNamespaceIdentifier with a given Uri.
     static member CreateEani(uri:PathEquivalentUri) = 
-        let pascalCaseId = Path.GetFileNameWithoutExtension(uri.AbsolutePath)
+        let pascalCaseId = uri.TheoryName
         let pos = Position("", 0, 1, 1)
         EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseId, "*", pos, pos)
 
@@ -990,6 +990,7 @@ type EvalContext =
 
 type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     let _parsedAsts = parsedAsts
+    let mutable _mainTheory = ""
     let mutable _currentContext = EvalContext.ContextNone
     let _evalPath = Stack<string>()
     let _evalLog = List<string>()
@@ -998,6 +999,11 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
 
     /// Returns the current evaluation context.
     member this.CurrentContext = _currentContext
+
+    /// Returns the current main theory.
+    member this.MainTheory  
+        with get () = _mainTheory
+        and set (value) = _mainTheory <- value
 
     /// Returns the evaluation root node of the symbol table.
     member this.Root = _root

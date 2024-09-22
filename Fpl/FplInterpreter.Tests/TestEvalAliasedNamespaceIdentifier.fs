@@ -472,7 +472,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             Assert.AreEqual<int>(3, st.ParsedAsts.Count)
             Assert.AreEqual<int>(3, st.Root.Scope.Count)
             let currDir = Directory.GetCurrentDirectory()
-            let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
+            let uri = PathEquivalentUri(Path.Combine(currDir,filename))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             // reparse the Test.fpl after removing the uses clause
             FplInterpreter.fplInterpreter st ";" uri fplLibUrl
@@ -492,9 +492,9 @@ type TestEvalAliasedNamespaceIdentifier() =
             Assert.AreEqual<int>(3, st.ParsedAsts.Count)
             Assert.AreEqual<int>(3, st.Root.Scope.Count)
             let currDir = Directory.GetCurrentDirectory()
-            let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
+            let uri = PathEquivalentUri(Path.Combine(currDir, filename))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
-            // reparse the Test.fpl after removing the uses clause
+            // reparse the file after replacing the uses clause with uses Fpl.Commons
             FplInterpreter.fplInterpreter st "uses Fpl.Commons ;" uri fplLibUrl
             Assert.AreEqual<int>(2, st.ParsedAsts.Count)
             Assert.AreEqual<int>(2, st.Root.Scope.Count)
@@ -510,7 +510,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             Assert.AreEqual<int>(3, st.ParsedAsts.Count)
             Assert.AreEqual<int>(3, st.Root.Scope.Count)
             let currDir = Directory.GetCurrentDirectory()
-            let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
+            let uri = PathEquivalentUri(Path.Combine(currDir, filename))
             let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
             // reparse the Test.fpl after removing the uses clause
             FplInterpreter.fplInterpreter st "uses BlaTypo ;" uri fplLibUrl

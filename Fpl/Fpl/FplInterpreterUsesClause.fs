@@ -121,8 +121,11 @@ let downloadLibMap (uri:PathEquivalentUri) (currentWebRepo: string) =
 /// They are searched for in the current directory of the file, in the lib subfolder
 /// as well as in the web resource 
 let acquireSources (uri: PathEquivalentUri) (fplLibUrl: string) =
+
     let (_,libDirectoryPath) = createSubfolder uri "lib"
     let (directoryPath,repoDirectoryPath) = createSubfolder uri "repo"
+
+
     let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, "*.fpl") |> Seq.map (fun path -> PathEquivalentUri.EscapedUri(path)) |> Seq.toList
     let fileNamesInLibSubDir = Directory.EnumerateFiles(libDirectoryPath, "*.fpl") |> Seq.map (fun path -> PathEquivalentUri.EscapedUri(path)) |> Seq.toList
     let libMap = downloadLibMap uri fplLibUrl
@@ -133,7 +136,7 @@ let acquireSources (uri: PathEquivalentUri) (fplLibUrl: string) =
     FplSources(fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload, repoDirectoryPath)
     
 let private addOrUpdateParsedAst fileContent (uri:PathEquivalentUri) (parsedAsts:ParsedAstList) = 
-    let name = Path.GetFileNameWithoutExtension (uri.AbsolutePath)
+    let name = uri.TheoryName
     let idAlreadyFound = parsedAsts.TryFindAstById name
     match idAlreadyFound with
     | Some pa -> 
@@ -315,14 +318,14 @@ let private rearrangeList element list =
     let beforeElement = list |> List.takeWhile ((<>) element)
     afterElement @ beforeElement
 
-let garbageCollector (st:SymbolTable) (uri:PathEquivalentUri) = 
-    let currentTheory = Path.GetFileNameWithoutExtension(uri.AbsolutePath)
+let garbageCollector (st:SymbolTable) = 
     let referencedAstsOfCurrentTheory currTheory = 
         match st.ParsedAsts.TryFindAstById(currTheory) with
         | Some pa -> pa.Sorting.ReferencedAsts
         | _ -> []
+
     // remove the current theory from the ReferencingAsts list of each parsedAst, if they are not contained 
-    // in the current theory's ReferencedAsts
+    // in the current theory's reference Asts
     let rec removeNotReferencedAsts currTheory = 
         st.ParsedAsts 
         |> Seq.iter (fun pa ->
@@ -334,32 +337,45 @@ let garbageCollector (st:SymbolTable) (uri:PathEquivalentUri) =
                 pa.Sorting.ReferencingAsts <- pa.Sorting.ReferencingAsts |> List.removeAt(indexOfCurrentTheory)
             | _ -> ()
         )
-        // remember the names of parsedAsts if they have empty referencing asts, except if it is the current theory
+
+    let rec findComponent (parsedAsts: ParsedAstList) (visited: Set<string>) (nodeId: string) =
+        if Set.contains nodeId visited then visited
+        else
+            match parsedAsts.TryFindAstById nodeId with
+            | Some node -> 
+                let newVisited = Set.add nodeId visited
+                List.fold (findComponent parsedAsts) newVisited node.Sorting.ReferencedAsts
+            | None -> visited 
+
+    match st.ParsedAsts.TryFindAstById(st.MainTheory) with
+    | Some mainTheory -> 
+        removeNotReferencedAsts mainTheory.Id
+        let astComponent = findComponent st.ParsedAsts Set.empty mainTheory.Id
+
         let willBeRemoved = 
             st.ParsedAsts
-            |> Seq.filter (fun pa -> pa.Id <> currentTheory && pa.Sorting.ReferencingAsts.Length = 0)
+            |> Seq.filter (fun pa -> not (Set.contains pa.Id astComponent))
             |> Seq.map (fun pa -> pa.Id)
             |> Seq.toList
-        // remove the corresponding parsedAsts 
-        st.ParsedAsts.RemoveAll (fun pa -> willBeRemoved |> List.contains pa.Id) |> ignore
-        // remove the removed asts from the ReferencingAsts of the remaining 
-        willBeRemoved 
-        |> List.iter (fun theoryName ->
-            if st.Root.Scope.ContainsKey(theoryName) then
-                let toBeRemoved = st.Root.Scope[theoryName]
-                toBeRemoved.Reset()
-                st.Root.Scope.Remove theoryName |> ignore
-            else
-                ()
-        )
-        // remove the removed theories 
-        willBeRemoved 
-        |> List.iter (fun removedTheory ->
-            removeNotReferencedAsts removedTheory
-        )
 
-    removeNotReferencedAsts currentTheory
-    st.Root.Scope.Remove currentTheory |> ignore
+        willBeRemoved 
+        |> List.map (fun theoryName ->
+            match st.ParsedAsts.TryFindAstById theoryName with
+            | Some pa ->
+                ad.ResetStream(pa.Parsing.Uri)
+                if st.Root.Scope.ContainsKey(theoryName) then
+                    let toBeRemoved = st.Root.Scope[theoryName]
+                    toBeRemoved.Reset()
+                    st.Root.Scope.Remove theoryName |> ignore
+                else
+                    ()
+                st.ParsedAsts.RemoveAll (fun pAst -> pAst.Id = theoryName) |> ignore
+                st.Root.Scope.Remove theoryName |> ignore
+            | None -> ()
+        ) |> ignore
+    | None -> ()
+
+
 
 
 /// Parses the input at Uri and loads all referenced namespaces until
@@ -387,7 +403,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl 
             ) |> ignore
         | None -> 
             found <- false
-    garbageCollector st uri
+    garbageCollector st 
     if isCircular st.ParsedAsts then
         let cycle = findCycle st.ParsedAsts
         match cycle with

@@ -1,4 +1,4 @@
-uses Fpl.Commons 
+uses Fpl.SetTheory 
 
 inf ModusPonens() {pre:true con:true} 
 

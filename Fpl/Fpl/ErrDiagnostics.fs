@@ -1,5 +1,6 @@
 ﻿module ErrDiagnostics
 open System
+open System.IO
 open System.Text.RegularExpressions
 open System.Collections.Generic
 open FParsec
@@ -57,6 +58,7 @@ type PathEquivalentUri(uriString: string) =
         let pathNew = PathEquivalentUri.UnescapeDataString(path.Replace("\\","/"))
         PathEquivalentUri($"{pathNew}")
 
+    member this.TheoryName = Path.GetFileNameWithoutExtension(this.AbsolutePath)
 
 type DiagnosticCode = 
     // parser error codes

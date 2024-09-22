@@ -104,7 +104,7 @@ namespace FplLS
             var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
             ad.CurrentUri = uri;
 
-            var name = Path.GetFileNameWithoutExtension(uri.AbsoluteUri);
+            var name = uri.TheoryName;
             var idAlreadyFound = st.ParsedAsts.TryFindAstById(name);
             FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
             var diagnostics = CastDiagnostics(st);
