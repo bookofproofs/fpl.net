@@ -663,10 +663,13 @@ let rec eval (st: SymbolTable) ast =
                     |> String.concat ","
                 fplValue.FplRepresentation <- FplRepresentation.ObjRepr repr
             | _ -> ()
-        | EvalContext.InIsOperatorCreation fplValue
-        | EvalContext.InReferenceCreation fplValue -> 
+        | EvalContext.InIsOperatorCreation fplValue ->
             adjustSignature st fplValue identifier
             propagateReference fplValue true
+            checkID012Diagnostics st fplValue identifier pos1 pos2
+            emitSIG04TypeDiagnostics st identifier fplValue pos1 pos2
+        | EvalContext.InReferenceCreation fplValue -> 
+            adjustSignature st fplValue identifier
             checkID012Diagnostics st fplValue identifier pos1 pos2
             emitSIG04TypeDiagnostics st identifier fplValue pos1 pos2
         | _ -> ()
@@ -1238,6 +1241,10 @@ let rec eval (st: SymbolTable) ast =
             optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
             eval st qualificationListAst
             propagateReference refBlock true
+            match (fplValue.BlockType, fplValue.FplRepresentation,refBlock.FplRepresentation,fplValue.ValueList.Count) with
+            | (FplValueType.Reference, FplRepresentation.Undef, FplRepresentation.Pointer _, 1) ->
+                fplValue.FplRepresentation <- refBlock.FplRepresentation
+            | _ -> ()
             refBlock.NameIsFinal <- true
             refBlock.NameEndPos <- pos2
         | _ -> ()

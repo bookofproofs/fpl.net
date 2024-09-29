@@ -1204,8 +1204,20 @@ let tryMatchSignatures (st:SymbolTable) (reference:FplValue) =
 let tryMatchTypes (st:SymbolTable) (typeFplValue:FplValue) name = 
     let candidates = findCandidatesByName st name
 
+    let stripFunctionalTermTypeSignature (typeFplValue:FplValue) = 
+        match typeFplValue.BlockType with
+        | FplValueType.MandatoryFunctionalTerm  
+        | FplValueType.OptionalFunctionalTerm  
+        | FplValueType.FunctionalTerm -> 
+            match List.tryFindIndex ((=) "->") typeFplValue.TypeSignature with
+            | Some index -> List.skip (index + 1) typeFplValue.TypeSignature
+            | None -> typeFplValue.TypeSignature
+        | _ -> 
+            typeFplValue.TypeSignature
+
+    let toBeCheckedSignature = stripFunctionalTermTypeSignature typeFplValue
     if candidates.IsEmpty then 
         ("", candidates, None)
     else
-        let accResult, matchedCandidate = checkCandidates typeFplValue.TypeSignature candidates ""
+        let accResult, matchedCandidate = checkCandidates toBeCheckedSignature candidates ""
         (accResult, candidates, matchedCandidate)
