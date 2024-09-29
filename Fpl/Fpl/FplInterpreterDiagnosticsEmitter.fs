@@ -471,12 +471,8 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
                 | FixType.Infix(_, precedence) -> precedenceWasAlreadyThere precedence block |> ignore
                 | _ -> ()))
 
-        if precedenceWasAlreadyThere precedence fplValue then
-            let conflictList =
-                precedences.Values
-                |> Seq.toList
-                |> List.map (fun fv -> fv.QualifiedStartPos)
-                |> String.concat ", "
+        if precedences.ContainsKey(precedence) then
+            let conflict = precedences[precedence].QualifiedStartPos 
 
             let diagnostic =
                 { 
@@ -485,7 +481,7 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
                     Diagnostic.Severity = DiagnosticSeverity.Information
                     Diagnostic.StartPos = pos1
                     Diagnostic.EndPos = pos2
-                    Diagnostic.Code = SIG02(symbol, precedence, conflictList)
+                    Diagnostic.Code = SIG02(symbol, precedence, conflict)
                     Diagnostic.Alternatives = Some "Consider disambiguating the precedence to avoid unexpected results." 
                 }
             ad.AddDiagnostic diagnostic

@@ -46,13 +46,17 @@ inf ExistsByExample(p: pred(c: obj))
         ex x {p(x)}
 }
 
+def pred Equal infix "=" 50 (x,y: tpl)
+{
+    intrinsic
+}
 
-def pred NotEqual infix "<>" 5 (x,y: tpl)
+def pred NotEqual infix "<>" 60 (x,y: tpl)
 {
     not (x = y) 
 }
 
-def pred Implies infix "=>" 5 (x,y: pred)
+def pred Implies infix "=>" 70 (x,y: pred)
 {
     impl
     (
@@ -62,7 +66,7 @@ def pred Implies infix "=>" 5 (x,y: pred)
     )
 }
 
-def pred IfAndOnlyIf infix "<=>" 5 (x,y: pred)
+def pred IfAndOnlyIf infix "<=>" 80 (x,y: pred)
 {
     iif
     (
@@ -77,12 +81,12 @@ def pred And infix "and" 5 (x:+ pred)
     and (x)
 }
 
-def pred Or infix "or" 5 (x:+ pred)
+def pred Or infix "or" 10 (x:+ pred)
 {
     or (x)
 }
 
-def pred Xor infix "xor" 5 (x:+ pred)
+def pred Xor infix "xor" 20 (x:+ pred)
 {
     xor (x)
 }
