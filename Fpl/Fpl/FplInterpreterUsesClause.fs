@@ -318,7 +318,7 @@ let private rearrangeList element list =
     let beforeElement = list |> List.takeWhile ((<>) element)
     afterElement @ beforeElement
 
-let garbageCollector (st:SymbolTable) = 
+let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) = 
     let referencedAstsOfCurrentTheory currTheory = 
         match st.ParsedAsts.TryFindAstById(currTheory) with
         | Some pa -> pa.Sorting.ReferencedAsts
@@ -367,14 +367,17 @@ let garbageCollector (st:SymbolTable) =
                     let toBeRemoved = st.Root.Scope[theoryName]
                     toBeRemoved.Reset()
                     st.Root.Scope.Remove theoryName |> ignore
-                else
-                    ()
                 st.ParsedAsts.RemoveAll (fun pAst -> pAst.Id = theoryName) |> ignore
-                st.Root.Scope.Remove theoryName |> ignore
             | None -> ()
         ) |> ignore
     | None -> ()
 
+    match st.ParsedAsts.TryFindAstById(uriToBeReset.TheoryName) with
+    | Some theoryToBeReset -> 
+        if st.Root.Scope.ContainsKey(theoryToBeReset.Id) then
+            let toBeRemoved = st.Root.Scope[theoryToBeReset.Id]
+            toBeRemoved.Reset()
+    | None -> ()
 
 
 
@@ -403,7 +406,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl 
             ) |> ignore
         | None -> 
             found <- false
-    garbageCollector st 
+    garbageCollector st uri
     if isCircular st.ParsedAsts then
         let cycle = findCycle st.ParsedAsts
         match cycle with

@@ -179,7 +179,8 @@ let propagateReference (refBlock:FplValue) withAdding =
     let fplValue = refBlock.Parent.Value
     if fplValue.BlockType = FplValueType.Reference then
         if not fplValue.NameIsFinal && refBlock.AuxiliaryInfo = 0 then
-            // propagate references only if refblock has all opened brackets closed and the name of its reference-typed parent is not yet ready
+            // propagate references only if refblock has all opened brackets closed
+            // and the name of its reference-typed parent is not yet ready
             if not (fplValue.ValueList.Contains(refBlock)) then 
                 if withAdding then 
                     fplValue.ValueList.Add(refBlock)
@@ -355,6 +356,7 @@ let rec eval (st: SymbolTable) ast =
             varValue.Name <- name
             varValue.NameEndPos <- pos2
             tryAddBlock varValue 
+        | EvalContext.InIsOperatorCreation fplValue
         | EvalContext.InReferenceCreation fplValue ->
             match FplValue.VariableInBlockScopeByName fplValue name with 
             | ScopeSearchResult.Found variableInScope ->
@@ -661,6 +663,11 @@ let rec eval (st: SymbolTable) ast =
                     |> String.concat ","
                 fplValue.FplRepresentation <- FplRepresentation.ObjRepr repr
             | _ -> ()
+        | EvalContext.InIsOperatorCreation fplValue ->
+            adjustSignature st fplValue identifier
+            propagateReference fplValue true
+            checkID012Diagnostics st fplValue identifier pos1 pos2
+            emitSIG04TypeDiagnostics st identifier fplValue pos1 pos2
         | EvalContext.InReferenceCreation fplValue -> 
             adjustSignature st fplValue identifier
             checkID012Diagnostics st fplValue identifier pos1 pos2
@@ -949,11 +956,14 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
         st.EvalPush("IsOperator")
+        let oldContext = st.CurrentContext 
         match st.CurrentContext with
         | EvalContext.InBlock fplValue
         | EvalContext.InPropertyBlock fplValue 
         | EvalContext.InConstructorBlock fplValue 
         | EvalContext.InReferenceCreation fplValue ->
+            let typeOfBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
+            st.SetContext(EvalContext.InIsOperatorCreation typeOfBlock) LogContext.Replace
             setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
             adjustSignature st fplValue "is"
             adjustSignature st fplValue "("
@@ -962,6 +972,7 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue ")"
 
         | _ -> ()
+        st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
         st.EvalPush("Delegate")
@@ -1230,6 +1241,10 @@ let rec eval (st: SymbolTable) ast =
             optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
             eval st qualificationListAst
             propagateReference refBlock true
+            match (fplValue.BlockType, fplValue.FplRepresentation,refBlock.FplRepresentation,fplValue.ValueList.Count) with
+            | (FplValueType.Reference, FplRepresentation.Undef, FplRepresentation.Pointer _, 1) ->
+                fplValue.FplRepresentation <- refBlock.FplRepresentation
+            | _ -> ()
             refBlock.NameIsFinal <- true
             refBlock.NameEndPos <- pos2
         | _ -> ()

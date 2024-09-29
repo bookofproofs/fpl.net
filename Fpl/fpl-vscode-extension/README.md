@@ -33,7 +33,7 @@ None
 
 ## Release Notes
 
-### 1.6.0
+### 1.6.x
 * First FPL interpreter (alpha)
 
 ### 1.5.x
