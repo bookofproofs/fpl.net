@@ -76,7 +76,7 @@ def pred IfAndOnlyIf infix "<=>" 80 (x,y: pred)
     )
 }
 
-def pred And infix "and" 5 (x:+ pred)
+def pred And infix "and" 7 (x:+ pred)
 {
     and (x)
 }
