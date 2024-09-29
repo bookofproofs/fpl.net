@@ -10,8 +10,12 @@
   <ItemGroup>
     <Compile Include="CommonTestHelpers.fs" />
     <Compile Include="CommonFplValueTestCases.fs" />
+    <Compile Include="UpdatingSymbolTableNavigation.fs" />
     <Compile Include="TestFplValueScopeExpressionType.fs" />
-    <Compile Include="TestFplValueScopeEvaluationType.fs" />
+    <Compile Include="TestExpressionEvaluation.fs" />
+    <Compile Include="TestFplValueScopeFplRepresentation.fs" />
+    <Compile Include="TestFplValueScopeFplId.fs" />
+    <Compile Include="TestReferencesTypeOfSignature.fs" />
     <Compile Include="TestFplValueScopeTypeSignature.fs" />
     <Compile Include="TestFplValueScopeNameEndPos.fs" />
     <Compile Include="TestFplValueScopeQualifiedName.fs" />
@@ -28,9 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.6.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.6.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,7 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="8.0.200" />
+    <PackageReference Update="FSharp.Core" Version="8.0.400" />
   </ItemGroup>
 
 </Project>

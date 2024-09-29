@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FplLS", "FplLS\FplLS.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FplLSTests", "FplLSTests\FplLSTests.csproj", "{B15ADDDD-015A-45CD-8414-49497F54E658}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FplInterpreter.Tests", "FplInterpreter.Tests\FplInterpreter.Tests.fsproj", "{D7B507CD-32E5-4ECD-8E6E-D76F0F0C5318}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FplInterpreter.Tests", "FplInterpreter.Tests\FplInterpreter.Tests.fsproj", "{D7B507CD-32E5-4ECD-8E6E-D76F0F0C5318}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{980CFF4A-DD73-4DA5-A84A-0759F39CB526}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

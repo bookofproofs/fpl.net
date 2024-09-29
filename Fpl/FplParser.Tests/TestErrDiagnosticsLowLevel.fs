@@ -15,13 +15,13 @@ type TestErrRecoveryLowLevel() =
             |> String.concat ""
 
     member this.TestSplitStringByTextAtPosition_Pre(expPre: string, actPre: string) =
-        Assert.AreEqual(expPre, actPre)
+        Assert.AreEqual<string>(expPre, actPre)
 
     member this.TestSplitStringByTextAtPosition_OptTrailingWs(expOptTrailingWs: string, actExptOptTrailingWs: string) =
-        Assert.AreEqual(expOptTrailingWs, actExptOptTrailingWs)
+        Assert.AreEqual<string>(expOptTrailingWs, actExptOptTrailingWs)
 
     member this.TestSplitStringByTextAtPosition_Post(expPost: string, actPost: string) =
-        Assert.AreEqual(expPost, actPost)
+        Assert.AreEqual<string>(expPost, actPost)
 
 
     [<TestMethod>]
@@ -101,7 +101,7 @@ Expecting: <PascalCaseId>, <argument identifier>, <digits>, '<', '@', 'all', 'an
     member this.TestRetrieveExpectedParserChoices(fParsecErrMsg:string, expected:string) = 
         let actual = retrieveExpectedParserChoices fParsecErrMsg
         let actualS = String.concat ", " actual
-        Assert.AreEqual(expected, actualS)
+        Assert.AreEqual<string>(expected, actualS)
 
     [<TestMethod>]
     [<DataRow("""Error in Ln: 3 Col: 14
@@ -131,7 +131,7 @@ The parser backtracked after:
         ) =
         let pos = Position("",0,0,0)
         let actual = replaceFParsecErrMsgForFplParser input inputChoices pos
-        Assert.AreEqual(replaceWhiteSpace expected, replaceWhiteSpace actual)
+        Assert.AreEqual<string>(replaceWhiteSpace expected, replaceWhiteSpace actual)
 
     [<TestMethod>]
     [<DataRow("""// definition of a functional term denoting the successor of a natural number
@@ -189,5 +189,5 @@ The parser backtracked after:
         ) =
         let r = removeFplComments input 
         // printfn "%i, %i, %i, %i" input.Length r.Length (input.Split('\n').Length) (r.Split('\n').Length)
-        Assert.AreEqual(expectedLength, r.Length)
-        Assert.AreEqual(expectedNumbLines, r.Split('\n').Length)
+        Assert.AreEqual<int>(expectedLength, r.Length)
+        Assert.AreEqual<int>(expectedNumbLines, r.Split('\n').Length)

@@ -22,7 +22,7 @@ namespace FplLSTests
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesTheoremLikeStmt(l).GetChoices(detailCi);
 
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual<int>(2, actual.Count);
         }
 
         [DataRow("inf", "Inference")]
@@ -45,7 +45,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Keyword) count++;
             }
-            Assert.AreEqual(1, count);
+            Assert.AreEqual<int>(1, count);
         }
 
         [DataRow("inference", "Inference", CompletionItemKind.Class, "inference01")]
@@ -77,7 +77,7 @@ namespace FplLSTests
             {
                 if (item.Kind == kind)
                 {
-                    Assert.AreEqual(expected, item.SortText);
+                    Assert.AreEqual<string>(expected, item.SortText);
                 }
             }
         }
@@ -175,7 +175,7 @@ namespace FplLSTests
             {
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
             }
-            Assert.AreEqual(actual.Count, counterSnippets);
+            Assert.AreEqual<int>(actual.Count, counterSnippets);
         }
     }
 }

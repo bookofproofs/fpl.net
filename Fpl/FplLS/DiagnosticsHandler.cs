@@ -1,5 +1,9 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+﻿using Microsoft.Testing.Platform.Extensions.TestHostControllers;
+using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+using System;
+using System.Linq;
 using System.Text;
+using static ErrDiagnostics;
 using static FplInterpreterTypes;
 using Model = OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
@@ -7,7 +11,7 @@ namespace FplLS
 {
     public class UriDiagnostics
     {
-        private readonly Dictionary<Uri, List<Model.Diagnostic>> _diagnostics;
+        private readonly Dictionary<PathEquivalentUri, List<Model.Diagnostic>> _diagnostics;
 
         public UriDiagnostics()
         {
@@ -15,19 +19,18 @@ namespace FplLS
         }
 
 
-        public void AddDiagnostics(Uri uri, Model.Diagnostic diagnostic)
+        public void AddDiagnostics(PathEquivalentUri uri, Model.Diagnostic diagnostic)
         {
-            var key = FplSources.EscapedUri(uri.AbsoluteUri);
+            var key = PathEquivalentUri.EscapedUri(uri.AbsoluteUri);
             if (!_diagnostics.TryGetValue(key, out List<Model.Diagnostic>? value))
             {
                 value = ([]);
                 _diagnostics.Add(key, value);
             }
-
             value.Add(diagnostic);
         }
 
-        public Dictionary<Uri, List<Model.Diagnostic>> Enumerator()
+        public Dictionary<PathEquivalentUri, List<Model.Diagnostic>> Enumerator()
         {
             return _diagnostics;
         }
@@ -39,25 +42,23 @@ namespace FplLS
     {
         private readonly ILanguageServer _languageServer = languageServer;
 
-        public void PublishDiagnostics(SymbolTable st, Uri uri, StringBuilder? buffer)
+        public void PublishDiagnostics(SymbolTable st, PathEquivalentUri uri, StringBuilder? buffer)
         {
             if (buffer != null)
             {
                 try
                 {
-                    var sourceCode = buffer.ToString();
-                    var parserDiagnostics = FplParser.parserDiagnostics;
-                    parserDiagnostics.Clear(); // clear last diagnostics before parsing again 
-                    var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
-                    FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
-                    var diagnostics = CastDiagnostics(st, parserDiagnostics, new TextPositions(sourceCode));
-                    foreach (var diagnostic in diagnostics.Enumerator())
+                    var allUris = st.ParsedAsts.Select(pa => pa.Parsing.Uri).ToHashSet();
+                    UriDiagnostics diagnostics = RefreshFplDiagnosticsStorage(st, uri, buffer);
+                    foreach (var diagnosticsPerUri in diagnostics.Enumerator())
                     {
                         _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
                         {
-                            Uri = diagnostic.Key,
-                            Diagnostics = diagnostic.Value
+                            Uri = diagnosticsPerUri.Key,
+                            Diagnostics = diagnosticsPerUri.Value
                         });
+                        // remove Uri path from allUris because we have published them 
+                        allUris.Remove(diagnosticsPerUri.Key);
                     }
                     if (diagnostics.Enumerator().Count == 0)
                     {
@@ -67,7 +68,19 @@ namespace FplLS
                             Diagnostics = new List<Model.Diagnostic>()
                         });
                     }
-
+                    // if they are still remaining allUris then publish empty diagnostics for them
+                    // this might happen if the user corrects the last error in the source code, 
+                    // leaving it not emitting any more diagnostics. In this case we have to 
+                    // delete the last language server diagnostics by explicitly publishing an empty diagnostics model list
+                    foreach (var uriPath in allUris)
+                    {
+                        _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
+                        {
+                            Uri = uriPath, // reset remaining files
+                            Diagnostics = new List<Model.Diagnostic>()
+                        });
+                        FplLsTraceLogger.LogMsg(_languageServer, uriPath.AbsoluteUri, "Remaining in PublishDiagnostics");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -80,23 +93,61 @@ namespace FplLS
             }
         }
 
+        private UriDiagnostics RefreshFplDiagnosticsStorage(SymbolTable st, PathEquivalentUri uri, StringBuilder? buffer)
+        {
+            FplLsTraceLogger.LogMsg(_languageServer, uri.AbsoluteUri, "Uri in RefreshFplDiagnosticsStorage");
+            string sourceCode;
+            ArgumentNullException.ThrowIfNull(buffer);
+            string bufferSourceCode = buffer.ToString();
+            sourceCode = bufferSourceCode;
+
+            var fplLibUri = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib";
+            ad.CurrentUri = uri;
+
+            var name = uri.TheoryName;
+            var idAlreadyFound = st.ParsedAsts.TryFindAstById(name);
+            FplInterpreter.fplInterpreter(st, sourceCode, uri, fplLibUri);
+            var diagnostics = CastDiagnostics(st);
+            return diagnostics;
+        }
+
         /// <summary>
         /// Casts a list of F# ErrReccovery module diagnostics into a list of OmniSharp's Diagnostics
         /// </summary>
-        /// <param name="diagnostics">Input list</param>
-        /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
+        /// <param name="st">Symbol table from the FPL interpreter</param>
+        /// <param name="listDiagnostics">List of diagnostics</param>
+        /// <param name="origSourceCode">source code of the current file</param>
         /// <returns>Casted list</returns>
-        public UriDiagnostics CastDiagnostics(FplInterpreterTypes.SymbolTable st, ErrDiagnostics.Diagnostics listDiagnostics, TextPositions tp)
+        public UriDiagnostics CastDiagnostics(FplInterpreterTypes.SymbolTable st)
         {
-            var sb = new StringBuilder();
             var castedListDiagnostics = new UriDiagnostics();
-            FplLsTraceLogger.LogMsg(_languageServer, st.UsesDependencies(), "");
-            FplLsTraceLogger.LogMsg(_languageServer, listDiagnostics.DiagnosticsToString, "~~~~~Diagnostics");
-            foreach (ErrDiagnostics.Diagnostic diagnostic in listDiagnostics.Collection)
+            var uriTotextPositionsDict = GetTextPositionsByUri(st);
+            FplLsTraceLogger.LogMsg(_languageServer, ad.DiagnosticsToString, "~~~~~Diagnostics Count Orig");
+            FplLsTraceLogger.LogMsg(_languageServer, string.Join(", ", uriTotextPositionsDict.Keys.Select(k => k.AbsoluteUri)), $"~~~~~{uriTotextPositionsDict.Keys.Count} source code keys");
+            foreach (ErrDiagnostics.Diagnostic diagnostic in ad.Collection)
             {
-                castedListDiagnostics.AddDiagnostics(FplSources.EscapedUri(diagnostic.StartPos.StreamName), CastDiagnostic(diagnostic, tp, sb));
+                var key = PathEquivalentUri.EscapedUri(diagnostic.Uri.AbsoluteUri);
+                FplLsTraceLogger.LogMsg(_languageServer, key.AbsoluteUri, "~~~~~new key");
+                FplLsTraceLogger.LogMsg(_languageServer, diagnostic.Uri.AbsoluteUri, "~~~~~old key");
+
+
+                var tpByUri = uriTotextPositionsDict[diagnostic.Uri];
+                castedListDiagnostics.AddDiagnostics(diagnostic.Uri, CastDiagnostic(diagnostic, tpByUri));
+            }
+            FplLsTraceLogger.LogMsg(_languageServer, ad.Collection.Length.ToString(), "~~~~~Diagnostics Count Orig");
+            FplLsTraceLogger.LogMsg(_languageServer, st.TraceStatistics, "~~~~~Statistics");
+            foreach (var kvp in castedListDiagnostics.Enumerator())
+            {
+                FplLsTraceLogger.LogMsg(_languageServer, $"{kvp.Value.Count} diagnostics in {kvp.Key.AbsolutePath}", "~~~~~Diagnostics Count VS Code");
             }
             return castedListDiagnostics;
+
+        }
+
+        private static Dictionary<PathEquivalentUri, TextPositions> GetTextPositionsByUri(SymbolTable st)
+        {
+            var sourceCodes = st.ParsedAsts.DictionaryOfSUri2FplSourceCode();
+            return sourceCodes.Select(x => new KeyValuePair<PathEquivalentUri, TextPositions>(x.Key, new TextPositions(x.Value))).ToDictionary<PathEquivalentUri, TextPositions>();
         }
 
         /// <summary>
@@ -105,13 +156,13 @@ namespace FplLS
         /// <param name="diagnostic">Input diagnostic</param>
         /// <param name="tp">TextPositions object to handle ranges in the input stream</param>
         /// <returns>Casted diagnostic</returns>
-        public static Model.Diagnostic CastDiagnostic(ErrDiagnostics.Diagnostic diagnostic, TextPositions tp, StringBuilder sb)
+        public static Model.Diagnostic CastDiagnostic(ErrDiagnostics.Diagnostic diagnostic, TextPositions tp)
         {
             var castedDiagnostic = new Model.Diagnostic
             {
                 Source = diagnostic.Emitter.ToString(),
                 Severity = CastSeverity(diagnostic.Severity),
-                Message = CastMessage(diagnostic, sb),
+                Message = CastMessage(diagnostic),
                 Range = tp.GetRange(diagnostic.StartPos.Index, diagnostic.EndPos.Index),
                 Code = CastCode(diagnostic.Code.Code)
             };
@@ -122,13 +173,10 @@ namespace FplLS
         /// Casts the error message depending on the emitter and severity
         /// </summary>
         /// <param name="diagnostic">Input diagnostic</param>
-        /// <param name="sb">A reference to a string builder object that we do not want to recreate all the time for performance reasons.</param>
         /// <returns>A custom diagnostic message.</returns>
-        private static string CastMessage(ErrDiagnostics.Diagnostic diagnostic, StringBuilder sb)
+        private static string CastMessage(ErrDiagnostics.Diagnostic diagnostic)
         {
-            sb.Clear();
-            sb.Append(CastDiagnosticCodeMessage(diagnostic));
-            return sb.ToString();
+            return CastDiagnosticCodeMessage(diagnostic);
         }
         /// <summary>
         /// Returns a message depending on the code of the diagnostic.

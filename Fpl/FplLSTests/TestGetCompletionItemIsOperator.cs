@@ -12,7 +12,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual<int>(2, actual.Count);
         }
 
         [DataRow("is")]
@@ -26,7 +26,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Keyword) count++;
             }
-            Assert.AreEqual(1, count);
+            Assert.AreEqual<int>(1, count);
         }
 
         [DataRow("is", CompletionItemKind.Property, "is")]
@@ -40,22 +40,7 @@ namespace FplLSTests
             {
                 if (item.Label.Contains(choice) && item.Kind == kind)
                 {
-                    Assert.AreEqual(expected, item.SortText);
-                }
-            }
-        }
-
-        [DataRow("is")]
-        [TestMethod]
-        public void TestInsertTextEndsWithSpace(string choice)
-        {
-            var detailCi = new FplCompletionItem(choice);
-            var actual = new FplCompletionItemChoicesIsOperator().GetChoices(detailCi);
-            foreach (var item in actual)
-            {
-                if (item.Kind != CompletionItemKind.Keyword && item.InsertText.Contains(choice))
-                {
-                    Assert.IsTrue(item.InsertText.EndsWith(" "));
+                    Assert.AreEqual<string>(expected, item.SortText);
                 }
             }
         }
@@ -95,7 +80,7 @@ namespace FplLSTests
             {
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
             }
-            Assert.AreEqual(actual.Count, counterSnippets);
+            Assert.AreEqual<int>(actual.Count, counterSnippets);
         }
     }
 }

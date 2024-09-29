@@ -13,7 +13,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
-            Assert.AreEqual(1, actual.Count);
+            Assert.AreEqual<int>(1, actual.Count);
         }
 
         [DataRow("whitespace")]
@@ -28,7 +28,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Text) count++;
             }
-            Assert.AreEqual(1, count);
+            Assert.AreEqual<int>(1, count);
         }
 
         [DataRow("whitespace", CompletionItemKind.Text, "zzzzz")]
@@ -42,7 +42,7 @@ namespace FplLSTests
             {
                 if (item.Kind == kind)
                 {
-                    Assert.AreEqual(expected, item.SortText);
+                    Assert.AreEqual<string>(expected, item.SortText);
                 }
             }
         }
@@ -69,7 +69,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.AreEqual(l, item.Detail);
+                Assert.AreEqual<string>(l, item.Detail);
             }
         }
 
@@ -82,7 +82,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesWhitespace().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.AreEqual(" ", item.InsertText);
+                Assert.AreEqual<string>(" ", item.InsertText);
             }
         }
     }

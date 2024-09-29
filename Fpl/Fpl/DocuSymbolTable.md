@@ -77,7 +77,8 @@ Since the ST is constructed during the AST traversal, it depends on the AST type
 	|-ValueList: Contains (a possibly empty) list of reference nodes that
 		represent the calls to some base classes constructors. Due to semantical
 		errors in the code, the latter do not necessarily have to match the
-		actual base classes of this constructor class.
+		signatures of the actual constructors of the base classes of this constructor class.
+		The latter can be retrieved from the parent of the constructor - its class node (see ST.Root.Theory.Class).
 ```
 
 * *Context*: `InConstructorSignature` - the Scope and the Name get constructed 

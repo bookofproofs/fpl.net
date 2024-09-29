@@ -12,7 +12,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesRegex().GetChoices(detailCi);
-            Assert.AreEqual(1, actual.Count);
+            Assert.AreEqual<int>(1, actual.Count);
         }
 
         [DataRow("extension regex")]
@@ -26,7 +26,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Text) count++;
             }
-            Assert.AreEqual(1, count);
+            Assert.AreEqual<int>(1, count);
         }
 
         [DataRow("extension regex", CompletionItemKind.Value, "word")]
@@ -39,7 +39,7 @@ namespace FplLSTests
             {
                 if (item.Kind == kind)
                 {
-                    Assert.AreEqual(expected, item.SortText);
+                    Assert.AreEqual<string>(expected, item.SortText);
                 }
             }
         }
@@ -91,7 +91,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesRegex().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.AreEqual(l, item.InsertText);
+                Assert.AreEqual<string>(l, item.InsertText);
             }
         }
     }

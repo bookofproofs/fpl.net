@@ -28,8 +28,8 @@ let positions (tokenName:string) (p: Parser<_,_>): Parser<Positions * _,_> =
         (_position .>>. p)
         (_position)
         (fun (startPos, result) endPos -> 
-            let pos1 = Position(ad.StreamName, startPos.Index, startPos.Line, startPos.Column)
-            let pos2 = Position(ad.StreamName, endPos.Index, endPos.Line, endPos.Column)
+            let pos1 = Position("", startPos.Index, startPos.Line, startPos.Column)
+            let pos2 = Position("", endPos.Index, endPos.Line, endPos.Column)
             let token = { Token.Name = tokenName; Token.StartPos = pos1; Token.EndPos = pos2}
             tokenizer.Push(token)
             (Positions(pos1, pos2), result)
@@ -41,8 +41,8 @@ let tokenize (tokenName:string) (p: Parser<_,_>): Parser<_,_> =
         (_position .>>. p)
         (_position)
         (fun (startPos, result) endPos -> 
-            let pos1 = Position(ad.StreamName, startPos.Index, startPos.Line, startPos.Column)
-            let pos2 = Position(ad.StreamName, endPos.Index, endPos.Line, endPos.Column)
+            let pos1 = Position("", startPos.Index, startPos.Line, startPos.Column)
+            let pos2 = Position("", endPos.Index, endPos.Line, endPos.Column)
             let token = { Token.Name = tokenName; Token.StartPos = pos1; Token.EndPos = pos2}
             tokenizer.Push(token)
             result
@@ -206,7 +206,7 @@ let extensionBlock = positions "ExtensionBlock" (extensionHeader >>. IW >>. exte
 
 let xId = positions "ExtensionType" (at >>. extensionName) |>> Ast.ExtensionType 
 
-let dollarDigits = positions "DollarDigits" (regex "\$\d+" <?> "<dollarDigits>") |>> Ast.DollarDigits
+let dollarDigits = positions "DollarDigits" (regex "\$" >>. puint32 <?> "<dollarDigits>") |>> Ast.DollarDigits
 
 let atList = many at
 
@@ -339,7 +339,7 @@ predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualif
 
 let dollarDigitList = many1 dollarDigits
 let referencingIdentifier = positions "ReferencingIdentifier" (predicateIdentifier .>>. dollarDigitList) .>> IW |>> Ast.ReferencingIdentifier
-let referenceToProofOrCorollary = positions "ReferenceToProofOrCorollary" (referencingIdentifier .>>. opt paramTuple) .>> IW |>> Ast.ReferenceToProofOrCorollary
+let referenceToProofOrCorollary = positions "ReferenceToProofOrCorollary" (referencingIdentifier .>>. opt argumentTuple) .>> IW |>> Ast.ReferenceToProofOrCorollary
 
 let byDefinition = positions "ByDef" (keywordBydef >>. predicateWithQualification ) |>> Ast.ByDef 
 
@@ -623,7 +623,6 @@ let errInformation = [
     (RET000, ["ret"], returnStatement)
     (PRE000, ["pre"], premise)
     (CON000, ["con"], conclusion)
-    (TRL000, ["!"], translation)
     (TYD000, ["~"], varDecl)
 ]
 /// Finds the error information tuple based on a prefix of a string from the errInformation list. 

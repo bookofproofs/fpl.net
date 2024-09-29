@@ -1,5 +1,6 @@
 ﻿module ErrDiagnostics
 open System
+open System.IO
 open System.Text.RegularExpressions
 open System.Collections.Generic
 open FParsec
@@ -21,7 +22,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 (*
-This module provides some general functionality to emit error diagnostics in a language.
+This module provides some general functionality to emit error diagnostics in a custom language.
 
 We call it `ErrDiagnostics` and not `ErrRecovery`, because it does not change the original parser's grammar that would 
 be otherwise the case. Instead, it depends on synchronizing tokens defined in the particular language. In this repository,
@@ -36,6 +37,28 @@ If you decide to reuse this code for your language and other IDEs, please consid
 `type DiagnosticCode`, `replaceFParsecErrMsgForFplParser`, `inputStringManipulator`, `preParsePreProcess`, and `stringMatches`.
 
 *)
+
+type PathEquivalentUri(uriString: string) =
+    inherit Uri(PathEquivalentUri.UnescapeDataString(uriString.Replace("\\","/")))
+
+    interface IEquatable<PathEquivalentUri> with
+        member this.Equals(other: PathEquivalentUri) =
+            this.AbsoluteUri = other.AbsoluteUri
+
+    override this.Equals(obj: obj) =
+        match obj with
+        | :? PathEquivalentUri as other -> (this :> IEquatable<PathEquivalentUri>).Equals(other)
+        | _ -> false
+
+    override this.GetHashCode() =
+        this.AbsoluteUri.GetHashCode()
+
+    /// An auxiliary static method for changing windows-like Uris with "\" into "/" formatted ones.
+    static member EscapedUri(path:string) = 
+        let pathNew = PathEquivalentUri.UnescapeDataString(path.Replace("\\","/"))
+        PathEquivalentUri($"{pathNew}")
+
+    member this.TheoryName = Path.GetFileNameWithoutExtension(this.AbsolutePath)
 
 type DiagnosticCode = 
     // parser error codes
@@ -65,7 +88,6 @@ type DiagnosticCode =
     | RET000
     | PRE000
     | CON000
-    | TRL000
     | TYD000
     // interpreter error codes
     | GEN00 of string
@@ -89,11 +111,23 @@ type DiagnosticCode =
     | ID010 of string
     | ID011 of string * string
     | ID012 of string * string 
+    | ID013 of string
     // variable-related error codes
     | VAR00 
-    | VAR01 of string * string
-    | VAR02 of string * string
+    | VAR01 of string 
     | VAR03 of string * string
+    // signature-related error codes
+    | SIG00 of string * int
+    | SIG01 of string 
+    | SIG02 of string * int * string
+    | SIG04 of string * string * string
+    // proof-related error codes
+    | PR000 of string 
+    | PR001 
+    | PR002 
+    // logic-related error codes
+    | LG000 of string * string 
+    | LG001 of string * string * string
     member this.Code = 
         match this with
             // parser error messages
@@ -123,35 +157,46 @@ type DiagnosticCode =
             | RET000 -> "RET000"
             | PRE000 -> "PRE000"
             | CON000 -> "CON000"
-            | TRL000 -> "TRL000"
             | TYD000 -> "TYD000"
             // interpreter error messages
             | GEN00 _ -> "GEN00"
             | NSP00 _ -> "NSP00"
             | NSP01 _ -> "NSP01"
-            | NSP02 (_, _) -> "NSP02"
+            | NSP02 _ -> "NSP02"
             | NSP03 _ -> "NSP03"
             | NSP04 _ -> "NSP04"
             | NSP05 _ -> "NSP05"
             // identifier-related error codes 
             | ID000 _ -> "ID000"
-            | ID001 (_, _) -> "ID001"
-            | ID002 (_, _) -> "ID002"
+            | ID001 _ -> "ID001"
+            | ID002 _ -> "ID002"
             | ID003 _ -> "ID003"
-            | ID004 (_, _) -> "ID004"
-            | ID005 (_, _) -> "ID005"
+            | ID004 _ -> "ID004"
+            | ID005 _ -> "ID005"
             | ID006 _ -> "ID006"
-            | ID007 (_, _) -> "ID007"
-            | ID008 (_, _) -> "ID008"
+            | ID007 _ -> "ID007"
+            | ID008 _ -> "ID008"
             | ID009 _ -> "ID009"
             | ID010 _ -> "ID010"
-            | ID011 (_, _) -> "ID011"
-            | ID012 (_, _) -> "ID012"
+            | ID011 _ -> "ID011"
+            | ID012 _ -> "ID012"
+            | ID013 _ -> "ID013"
             // variable-related error codes
             | VAR00 -> "VAR00"
-            | VAR01 (_, _) -> "VAR01"
-            | VAR02 (_, _)  -> "VAR02"
-            | VAR03 (_, _)  -> "VAR03"
+            | VAR01 _  -> "VAR01"
+            | VAR03 _  -> "VAR03"
+            // signature-related error codes
+            | SIG00 _ -> "SIG00"
+            | SIG01 _ -> "SIG01"
+            | SIG02 _ -> "SIG02"
+            | SIG04 _ -> "SIG04"
+            // proof-related error codes
+            | PR000 _ -> "PR000"
+            | PR001 -> "PR001"
+            | PR002 -> "PR002"
+            // logic-related error codes
+            | LG000 _ -> "LG000"
+            | LG001 _ -> "LG001"
     member this.Message = 
         match this with
             // parser error messages
@@ -181,35 +226,52 @@ type DiagnosticCode =
             | RET000 -> "Syntax error in return statement"
             | PRE000 -> "Syntax error in premise"
             | CON000 -> "Syntax error in conclusion"
-            | TRL000 -> "Syntax error in translation"
             | TYD000 -> "Syntax error in type declaration"
             // interpreter error messages
             | GEN00 message -> sprintf "Unexpected error occurred: %s" message
-            | NSP00 fileNamePattern -> sprintf "The theory '%s' could not be found" fileNamePattern
-            | NSP01 (fileName, innerErrMsg) -> sprintf "The theory '%s' was found but could not be loaded: %s" fileName innerErrMsg
-            | NSP02 (url, innerErrMsg) -> sprintf "The theory '%s' was found but could not be downloaded: %s" url innerErrMsg
-            | NSP03 alias -> sprintf "Alias '%s' appeared previously in this namespace" alias
+            | NSP00 fileNamePattern -> sprintf "The theory `%s` could not be found" fileNamePattern
+            | NSP01 (fileName, innerErrMsg) -> sprintf "The theory `%s` was found but could not be loaded: %s" fileName innerErrMsg
+            | NSP02 (url, innerErrMsg) -> sprintf "The theory `%s` was found but could not be downloaded: %s" url innerErrMsg
+            | NSP03 alias -> sprintf "Alias `%s` appeared previously in this namespace" alias
             | NSP04 path -> sprintf "Circular theory reference detected: %s" path
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
             // identifier-related error codes 
-            | ID000 identifier -> sprintf "Handling ast type '%s' not yet implemented." identifier
-            | ID001 (signature, conflict) -> sprintf "Duplicate signature declaration '%s' detected at %s." signature conflict
+            | ID000 identifier -> sprintf "Handling ast type `%s` not yet implemented." identifier
+            | ID001 (signature, conflict) -> sprintf "Duplicate signature declaration `%s` detected at %s." signature conflict
             | ID002 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the proof %s, found only %s." signature incorrectBlockType
-            | ID003 signature -> sprintf "The proof '%s' is missing a block to be associated with." signature 
-            | ID004 (signature, candidates)  -> sprintf "Cannot associate proof '%s' with a single block. Found more candidates: %s." signature candidates
-            | ID005 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the corollary '%s', found only %s." signature incorrectBlockType
-            | ID006 signature -> sprintf "The corollary '%s' is missing a block to be associated with." signature 
-            | ID007 (signature, candidates)  -> sprintf "Cannot associate corollary '%s' with a single block. Found more candidates: %s." signature candidates
-            | ID008 (name, expectedName)  -> sprintf "Misspelled constructor name '%s', expecting %s." name expectedName
-            | ID009 name -> sprintf "Circular base type dependency involving '%s'." name
-            | ID010 name -> sprintf "The type '%s' could not be found (are you missing a uses clause?)" name
-            | ID011 (name, inheritanceChain) -> sprintf "Inheritance from '%s' can be dropped because of the inheritance chain %s." name inheritanceChain
-            | ID012 (name, candidates) -> sprintf "Base class '%s' not found, candidates are %s." name candidates
+            | ID003 signature -> sprintf "The proof `%s` is missing a block to be associated with." signature 
+            | ID004 (signature, candidates)  -> sprintf "Cannot associate proof `%s` with a single block. Found more candidates: %s." signature candidates
+            | ID005 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the corollary `%s`, found only %s." signature incorrectBlockType
+            | ID006 signature -> sprintf "The corollary `%s` is missing a block to be associated with." signature 
+            | ID007 (signature, candidates)  -> sprintf "Cannot associate corollary `%s` with a single block. Found more candidates: %s." signature candidates
+            | ID008 (name, expectedName)  -> sprintf "Misspelled constructor name `%s`, expecting %s." name expectedName
+            | ID009 name -> sprintf "Circular base type dependency involving `%s`." name
+            | ID010 name -> sprintf "The type `%s` could not be found (are you missing a uses clause?)" name
+            | ID011 (name, inheritanceChain) -> sprintf "Inheritance from `%s` can be dropped because of the inheritance chain %s." name inheritanceChain
+            | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are %s." name candidates
+            | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
-            | VAR01 (identifier, conflict) -> sprintf "Duplicate variable declaration '%s' detected at %s" identifier conflict
-            | VAR02 (identifier, conflict) -> sprintf "Variable '%s' was already declared in the outer scope of definition at %s" identifier conflict
-            | VAR03 (identifier, conflict) -> sprintf "Variable '%s' was already declared in the scope of the associated block at %s" identifier conflict
+            | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
+            | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
+            // signature-related error codes
+            | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
+            | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
+            | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
+            | SIG04 (signature,candidates,firstFailingArgument) -> 
+                if candidates.Length = 0 then 
+                    $"No overload matching `{signature}`, no candidates were found (are you missing a uses clause?)" 
+                else
+                    $"No overload matching `{signature}`, failed to match `{firstFailingArgument}`, candidates were: {candidates}" 
+            // proof-related error codes
+            | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
+            | PR001 -> $"Cannot refer to a definition outside a proof."
+            | PR002 -> $"Avoid referencing to proofs directly."
+            // logic-related error codes
+            | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
+            | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
+
+
 type DiagnosticEmitter =
     // replace your language-specific emitters here
     | FplParser
@@ -223,11 +285,12 @@ type DiagnosticSeverity =
 
 type Diagnostic =
     {
+        Uri: PathEquivalentUri
+        Code: DiagnosticCode
         Emitter: DiagnosticEmitter
         Severity: DiagnosticSeverity
         StartPos: Position
         EndPos: Position
-        Code: DiagnosticCode
         Alternatives: string option
     }
     member this.Message = 
@@ -254,42 +317,70 @@ type Diagnostic =
     member this.DiagnosticID = 
         (sprintf "%07d" this.StartPos.Index) + this.Emitter.ToString() + this.Code.Code
 
+    member this.ShortForm = 
+        this.Emitter.ToString() + ":" +
+        this.Code.Code + ":" +
+        this.Message
+
+
+
 type Diagnostics() =
-    let mutable _streamName = ""
-    let myDictionary = new Dictionary<string, Diagnostic>()
+    let mutable _currentUri = new PathEquivalentUri("about:blank")
+    let _diagnosticStorageTotal = new Dictionary<PathEquivalentUri,Dictionary<string, Diagnostic>>()
     member this.Collection = 
-        myDictionary
+        _diagnosticStorageTotal
         |> Seq.map (fun kvp -> (kvp.Key, kvp.Value))
-        |> Seq.sortBy fst
+        |> Seq.sortBy (fun (uri:PathEquivalentUri,_) -> uri.AbsoluteUri)
         |> Seq.map snd
+        |> Seq.concat
+        |> Seq.map (fun kvp -> kvp.Value)
         |> Seq.toList
 
-    member this.StreamName 
-        with get() = _streamName
-        and set (value) = _streamName <- value
+    member this.CurrentUri 
+        with get() = _currentUri
+        and set (value:PathEquivalentUri) = _currentUri <- value
+
 
     member this.AddDiagnostic (d:Diagnostic) =
         let keyOfd = d.DiagnosticID
-        if not (myDictionary.ContainsKey(keyOfd)) then
-            myDictionary.Add(keyOfd, d) |> ignore
+        if not (_diagnosticStorageTotal.ContainsKey(d.Uri)) then
+            _diagnosticStorageTotal.Add(d.Uri, new Dictionary<string, Diagnostic>())
+        if not (_diagnosticStorageTotal[d.Uri].ContainsKey(keyOfd)) then
+            _diagnosticStorageTotal[d.Uri].Add(keyOfd, d) |> ignore
 
     member this.CountDiagnostics  =
-        myDictionary.Count
-
-    member this.PrintDiagnostics =
-        for d in this.Collection do
-            printfn "%s" d.Message
-
-        printfn "%s" "\n^------------------------^\n"
+        this.Collection.Length
 
     member this.DiagnosticsToString = 
-        this.Collection 
-        |> Seq.map (fun d -> 
-            d.Emitter.ToString() + ":" +
-            d.Code.Code + ":" +
-            d.Message) 
-        |> String.concat "\n"
-    member this.Clear() = myDictionary.Clear()
+        _diagnosticStorageTotal
+        |> Seq.collect (fun kvpOuter ->
+            let a = kvpOuter.Key.AbsolutePath
+            kvpOuter.Value
+            |> Seq.map (fun kvpInner ->
+                $"{a}: {kvpInner.Value.ShortForm}{Environment.NewLine}"
+            )
+        )
+        |> String.concat ""
+
+    member this.PrintDiagnostics =
+        printfn "%s" this.DiagnosticsToString
+        printfn "%s" "\n^------------------------^\n"
+
+    member this.ResetStream(uri:PathEquivalentUri) =
+        this.CurrentUri <- uri
+        if (_diagnosticStorageTotal.ContainsKey(uri)) then
+            _diagnosticStorageTotal[uri].Clear() |> ignore
+
+    member this.Clear() = 
+        _diagnosticStorageTotal.Values
+        |> Seq.iter (fun dict -> dict.Clear())
+        _diagnosticStorageTotal.Clear()
+
+    member this.GetStreamDiagnostics(uri:PathEquivalentUri) =
+        if (_diagnosticStorageTotal.ContainsKey(uri)) then
+            _diagnosticStorageTotal[uri]
+        else
+            Dictionary<string, Diagnostic>()
 
 let ad = Diagnostics()
 
@@ -400,7 +491,7 @@ let extractBacktrackingFreeErrMsgAndPos (input: string) (errMsg: string) (pos:Po
     | Some(line, column) -> 
         let index = column + getLineOffset input line - 1
         let backtrackingFreePos = Position(
-                                    pos.StreamName,
+                                    "",
                                     index,
                                     line,
                                     column 
@@ -459,6 +550,7 @@ let tryParseFirstError someParser input (code:DiagnosticCode) =
         let newErrMsg, _ = mapErrMsgToRecText input errorMsg restInput.Position
         let diagnostic =
             { 
+                Diagnostic.Uri = ad.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = restInput.Position
@@ -497,13 +589,14 @@ let rec tryParse someParser input startIndexOfInput nextIndex (code:DiagnosticCo
         if cond then
             let correctedPosition = 
                 Position(
-                    restInput.Position.StreamName,
+                    "",
                     correctedIndex,
                     restInput.Position.Line,
                     restInput.Position.Column 
                 )
             let diagnostic =
                 { 
+                    Diagnostic.Uri = ad.CurrentUri
                     Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = correctedPosition
@@ -549,13 +642,14 @@ let rec tryParseRemainingChunk someParser (input:string) startIndexOfInput nextI
                 if correctedIndex < nextIndex && previousChoices<>lastChoices then 
                     let correctedPosition = 
                         Position(
-                            restInput.Position.StreamName,
+                            "",
                             correctedIndex,
                             restInput.Position.Line,
                             restInput.Position.Column 
                         )
                     let diagnostic =
                         { 
+                            Diagnostic.Uri = ad.CurrentUri
                             Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                             Diagnostic.Severity = DiagnosticSeverity.Error
                             Diagnostic.StartPos = correctedPosition
@@ -606,6 +700,7 @@ let rec tryParseRemainingOnly someParser input (code:DiagnosticCode) (intervals:
             if cond then
                 let diagnostic =
                     { 
+                        Diagnostic.Uri = ad.CurrentUri
                         Diagnostic.Emitter = DiagnosticEmitter.FplParser 
                         Diagnostic.Severity = DiagnosticSeverity.Error
                         Diagnostic.StartPos = restInput.Position

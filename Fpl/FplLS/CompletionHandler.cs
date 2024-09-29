@@ -2,6 +2,7 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+using static ErrDiagnostics;
 using static FplInterpreterTypes;
 
 /*
@@ -64,7 +65,7 @@ class CompletionHandler : ICompletionHandler
     public async Task<CompletionList> Handle(CompletionParams request, CancellationToken cancellationToken)
     {
         FplLsTraceLogger.LogMsg(_languageServer, "Task<CompletionList>", "CompletionHandler.Handle");
-        var uri = FplSources.EscapedUri(request.TextDocument.Uri.AbsoluteUri);
+        var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.AbsoluteUri);
         var buffer = _bufferManager.GetBuffer(uri);
         if (buffer == null)
         {

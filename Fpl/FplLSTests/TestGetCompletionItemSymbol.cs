@@ -29,7 +29,7 @@ namespace FplLSTests
                     counter++;
                 }
             }
-            Assert.AreEqual(counter, actual.Count);
+            Assert.AreEqual<int>(counter, actual.Count);
         }
 
         [DataRow("infix symbol", false)]
@@ -50,7 +50,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Operator) count++;
             }
-            Assert.AreEqual(actual.Count, count);
+            Assert.AreEqual<int>(actual.Count, count);
         }
 
         [DataRow("infix symbol", false)]
@@ -87,7 +87,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesSymbol(choice, declarative).GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(!item.InsertText.EndsWith(" "));
+                Assert.IsTrue(!item.InsertText.EndsWith(' '));
             }
         }
 

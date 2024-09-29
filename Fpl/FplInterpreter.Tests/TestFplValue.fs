@@ -11,46 +11,44 @@ type TestFplValue() =
 
     [<TestMethod>]
     member this.TestInitialFactory() =
-        FplParser.parserDiagnostics.Clear()
+        ad.Clear()
         let r = FplValue.CreateRoot()
-        Assert.AreEqual (FplValueType.Root, r.BlockType)
+        Assert.AreEqual<FplValueType>(FplValueType.Root, r.BlockType)
         let testCreateFactory fplBlockType = 
             if fplBlockType = FplValueType.Object then
                 ("obj", FplValue.CreateObject(Position("",0,1,1),Position("",0,1,1)))
                 
             else
                 ("", FplValue.CreateFplValue((Position("",0,1,1),Position("",0,1,1)), fplBlockType, r))
-        let testFactory fplBlockType fplType =
+        let testFactory fplBlockType (repr:FplRepresentation) =
             let name, fv = testCreateFactory fplBlockType
-            Assert.AreEqual (fplBlockType, fv.BlockType)
-            Assert.AreEqual (name, fv.Name)
-            Assert.AreEqual ("", fv.FplRepresentation)
-            Assert.AreEqual ([], fv.TypeSignature)
-            Assert.AreEqual (fplType, fv.EvaluationType)
-        testFactory FplValueType.VariadicVariableMany FplType.Object
-        testFactory FplValueType.VariadicVariableMany1 FplType.Object
-        testFactory FplValueType.Axiom FplType.Predicate
-        testFactory FplValueType.Theorem FplType.Predicate
-        testFactory FplValueType.Lemma FplType.Predicate
-        testFactory FplValueType.Proposition FplType.Predicate
-        testFactory FplValueType.Corollary FplType.Predicate
-        testFactory FplValueType.Conjecture FplType.Predicate
-        testFactory FplValueType.Premise FplType.Predicate
-        testFactory FplValueType.Conclusion FplType.Predicate
-        testFactory FplValueType.Proof FplType.Predicate
-        testFactory FplValueType.RuleOfInference FplType.Predicate
-        testFactory FplValueType.Expression FplType.Predicate
-        testFactory FplValueType.Theory FplType.Predicate
-        testFactory FplValueType.Predicate FplType.Predicate 
-        testFactory FplValueType.Constructor FplType.Object
-        testFactory FplValueType.FunctionalTerm FplType.Object
-        testFactory FplValueType.Variable FplType.Object
-        testFactory FplValueType.MandatoryFunctionalTerm FplType.Object
-        testFactory FplValueType.OptionalFunctionalTerm FplType.Object
-        testFactory FplValueType.MandatoryPredicate FplType.Predicate
-        testFactory FplValueType.OptionalPredicate FplType.Predicate
-        testFactory FplValueType.Class FplType.Object 
-        testFactory FplValueType.Object FplType.Object 
+            Assert.AreEqual<FplValueType>(fplBlockType, fv.BlockType)
+            Assert.AreEqual<string>(name, fv.Name)
+            Assert.AreEqual<FplRepresentation>(repr, fv.FplRepresentation)
+            Assert.AreEqual<string list>([], fv.TypeSignature)
+        testFactory FplValueType.VariadicVariableMany FplRepresentation.Undef
+        testFactory FplValueType.VariadicVariableMany1 FplRepresentation.Undef 
+        testFactory FplValueType.Axiom (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Theorem (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Lemma (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Proposition (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Corollary (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Conjecture (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Premise (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Conclusion (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Proof (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.RuleOfInference (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Predicate (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Object (FplRepresentation.ObjRepr "obj")
+        testFactory FplValueType.Constructor (FplRepresentation.ObjRepr "obj")
+        testFactory FplValueType.Theory FplRepresentation.Undef
+        testFactory FplValueType.FunctionalTerm FplRepresentation.Undef
+        testFactory FplValueType.Variable FplRepresentation.Undef
+        testFactory FplValueType.MandatoryFunctionalTerm FplRepresentation.Undef
+        testFactory FplValueType.OptionalFunctionalTerm FplRepresentation.Undef
+        testFactory FplValueType.MandatoryPredicate FplRepresentation.Undef
+        testFactory FplValueType.OptionalPredicate FplRepresentation.Undef
+        testFactory FplValueType.Class (FplRepresentation.LangRepr FplLanguageConstruct.Class)
 
 
     [<DataRow("inference TestId() {pre: true con: true};", "TestId()", "TestId ( )")>]
@@ -508,76 +506,76 @@ type TestFplValue() =
     [<DataRow("conjecture TestId(x:*obj[y:*obj,z:+@Nat]) {true};", "TestId(*obj[*obj, +@Nat])", "TestId ( * obj [ * obj + @Nat ] )")>]
     [<DataRow("conjecture TestId(x:*obj[y:+tpl,z:index]) {true};", "TestId(*obj[+tpl, ind])", "TestId ( * obj [ + tpl ind ] )")>]
 
-    [<DataRow("corollary TestId$1() {true};", "TestId$1()", "TestId $1 ( )")>]
-    [<DataRow("corollary TestId$1$2() {true};", "TestId$1$2()", "TestId $1 $2 ( )")>]
-    [<DataRow("corollary TestId$1$2$3() {true};", "TestId$1$2$3()", "TestId $1 $2 $3 ( )")>]
-    [<DataRow("corollary TestId$1(x:ind) {true};", "TestId$1(ind)", "TestId $1 ( ind )")>]
-    [<DataRow("corollary TestId$1(x:pred) {true};", "TestId$1(pred)", "TestId $1 ( pred )")>]
-    [<DataRow("corollary TestId$1(x:func) {true};", "TestId$1(func)", "TestId $1 ( func )")>]
-    [<DataRow("corollary TestId$1(x:obj) {true};", "TestId$1(obj)", "TestId $1 ( obj )")>]
-    [<DataRow("corollary TestId$1(x:index) {true};", "TestId$1(ind)", "TestId $1 ( ind )")>]
-    [<DataRow("corollary TestId$1(x:predicate) {true};", "TestId$1(pred)", "TestId $1 ( pred )")>]
-    [<DataRow("corollary TestId$1(x:function) {true};", "TestId$1(func)", "TestId $1 ( func )")>]
-    [<DataRow("corollary TestId$1(x:object) {true};", "TestId$1(obj)", "TestId $1 ( obj )")>]
-    [<DataRow("corollary TestId$1(x:Nat) {true};", "TestId$1(Nat)", "TestId $1 ( Nat )")>]
-    [<DataRow("corollary TestId$1(x:@Nat) {true};", "TestId$1(@Nat)", "TestId $1 ( @Nat )")>]
-    [<DataRow("corollary TestId$1(x:tpl) {true};", "TestId$1(tpl)", "TestId $1 ( tpl )")>]
-    [<DataRow("corollary TestId$1(x:template) {true};", "TestId$1(template)", "TestId $1 ( template )")>]
-    [<DataRow("corollary TestId$1(x:tplTest) {true};", "TestId$1(tplTest)", "TestId $1 ( tplTest )")>]
-    [<DataRow("corollary TestId$1(x:templateTest) {true};", "TestId$1(templateTest)", "TestId $1 ( templateTest )")>]
-    [<DataRow("corollary TestId$1(x,y,z:obj) {true};", "TestId$1(obj, obj, obj)", "TestId $1 ( obj obj obj )")>]
-    [<DataRow("corollary TestId$1(x,y:pred(z:obj)) {true};", "TestId$1(pred(obj), pred(obj))", "TestId $1 ( pred ( obj ) pred ( obj ) )")>]
-    [<DataRow("corollary TestId$1(x,y:pred(u,v,w:obj)) {true};", "TestId$1(pred(obj, obj, obj), pred(obj, obj, obj))", "TestId $1 ( pred ( obj obj obj ) pred ( obj obj obj ) )")>]
-    [<DataRow("corollary TestId$1(x:func(u:obj)->Nat) {true};", "TestId$1(func(obj) -> Nat)", "TestId $1 ( func ( obj ) -> Nat )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:@Nat]) {true};", "TestId$1(obj[@Nat])", "TestId $1 ( obj [ @Nat ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:Nat]) {true};", "TestId$1(obj[Nat])", "TestId $1 ( obj [ Nat ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:Test.Nat]) {true};", "TestId$1(obj[Test.Nat])", "TestId $1 ( obj [ Test.Nat ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:index]) {true};", "TestId$1(obj[ind])", "TestId $1 ( obj [ ind ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:ind]) {true};", "TestId$1(obj[ind])", "TestId $1 ( obj [ ind ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:tpl]) {true};", "TestId$1(obj[tpl])", "TestId $1 ( obj [ tpl ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:template]) {true};", "TestId$1(obj[template])", "TestId $1 ( obj [ template ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:tplTest]) {true};", "TestId$1(obj[tplTest])", "TestId $1 ( obj [ tplTest ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:templateTest]) {true};", "TestId$1(obj[templateTest])", "TestId $1 ( obj [ templateTest ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:Nat,z:templateTest]) {true};", "TestId$1(obj[Nat, templateTest])", "TestId $1 ( obj [ Nat templateTest ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:index,z:Nat]) {true};", "TestId$1(obj[ind, Nat])", "TestId $1 ( obj [ ind Nat ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:obj,z:@Nat]) {true};", "TestId$1(obj[obj, @Nat])", "TestId $1 ( obj [ obj @Nat ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:tpl,z:index]) {true};", "TestId$1(obj[tpl, ind])", "TestId $1 ( obj [ tpl ind ] )")>]
+    [<DataRow("corollary TestId$1() {true};", "TestId$1()", "TestId ind ( )")>]
+    [<DataRow("corollary TestId$1$2() {true};", "TestId$1$2()", "TestId ind ind ( )")>]
+    [<DataRow("corollary TestId$1$2$3() {true};", "TestId$1$2$3()", "TestId ind ind ind ( )")>]
+    [<DataRow("corollary TestId$1(x:ind) {true};", "TestId$1(ind)", "TestId ind ( ind )")>]
+    [<DataRow("corollary TestId$1(x:pred) {true};", "TestId$1(pred)", "TestId ind ( pred )")>]
+    [<DataRow("corollary TestId$1(x:func) {true};", "TestId$1(func)", "TestId ind ( func )")>]
+    [<DataRow("corollary TestId$1(x:obj) {true};", "TestId$1(obj)", "TestId ind ( obj )")>]
+    [<DataRow("corollary TestId$1(x:index) {true};", "TestId$1(ind)", "TestId ind ( ind )")>]
+    [<DataRow("corollary TestId$1(x:predicate) {true};", "TestId$1(pred)", "TestId ind ( pred )")>]
+    [<DataRow("corollary TestId$1(x:function) {true};", "TestId$1(func)", "TestId ind ( func )")>]
+    [<DataRow("corollary TestId$1(x:object) {true};", "TestId$1(obj)", "TestId ind ( obj )")>]
+    [<DataRow("corollary TestId$1(x:Nat) {true};", "TestId$1(Nat)", "TestId ind ( Nat )")>]
+    [<DataRow("corollary TestId$1(x:@Nat) {true};", "TestId$1(@Nat)", "TestId ind ( @Nat )")>]
+    [<DataRow("corollary TestId$1(x:tpl) {true};", "TestId$1(tpl)", "TestId ind ( tpl )")>]
+    [<DataRow("corollary TestId$1(x:template) {true};", "TestId$1(template)", "TestId ind ( template )")>]
+    [<DataRow("corollary TestId$1(x:tplTest) {true};", "TestId$1(tplTest)", "TestId ind ( tplTest )")>]
+    [<DataRow("corollary TestId$1(x:templateTest) {true};", "TestId$1(templateTest)", "TestId ind ( templateTest )")>]
+    [<DataRow("corollary TestId$1(x,y,z:obj) {true};", "TestId$1(obj, obj, obj)", "TestId ind ( obj obj obj )")>]
+    [<DataRow("corollary TestId$1(x,y:pred(z:obj)) {true};", "TestId$1(pred(obj), pred(obj))", "TestId ind ( pred ( obj ) pred ( obj ) )")>]
+    [<DataRow("corollary TestId$1(x,y:pred(u,v,w:obj)) {true};", "TestId$1(pred(obj, obj, obj), pred(obj, obj, obj))", "TestId ind ( pred ( obj obj obj ) pred ( obj obj obj ) )")>]
+    [<DataRow("corollary TestId$1(x:func(u:obj)->Nat) {true};", "TestId$1(func(obj) -> Nat)", "TestId ind ( func ( obj ) -> Nat )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:@Nat]) {true};", "TestId$1(obj[@Nat])", "TestId ind ( obj [ @Nat ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:Nat]) {true};", "TestId$1(obj[Nat])", "TestId ind ( obj [ Nat ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:Test.Nat]) {true};", "TestId$1(obj[Test.Nat])", "TestId ind ( obj [ Test.Nat ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:index]) {true};", "TestId$1(obj[ind])", "TestId ind ( obj [ ind ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:ind]) {true};", "TestId$1(obj[ind])", "TestId ind ( obj [ ind ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:tpl]) {true};", "TestId$1(obj[tpl])", "TestId ind ( obj [ tpl ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:template]) {true};", "TestId$1(obj[template])", "TestId ind ( obj [ template ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:tplTest]) {true};", "TestId$1(obj[tplTest])", "TestId ind ( obj [ tplTest ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:templateTest]) {true};", "TestId$1(obj[templateTest])", "TestId ind ( obj [ templateTest ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:Nat,z:templateTest]) {true};", "TestId$1(obj[Nat, templateTest])", "TestId ind ( obj [ Nat templateTest ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:index,z:Nat]) {true};", "TestId$1(obj[ind, Nat])", "TestId ind ( obj [ ind Nat ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:obj,z:@Nat]) {true};", "TestId$1(obj[obj, @Nat])", "TestId ind ( obj [ obj @Nat ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:tpl,z:index]) {true};", "TestId$1(obj[tpl, ind])", "TestId ind ( obj [ tpl ind ] )")>]
 
-    [<DataRow("corollary TestId$1(x:*ind) {true};", "TestId$1(*ind)", "TestId $1 ( * ind )")>]
-    [<DataRow("corollary TestId$1(x:+pred) {true};", "TestId$1(+pred)", "TestId $1 ( + pred )")>]
-    [<DataRow("corollary TestId$1(x:*func) {true};", "TestId$1(*func)", "TestId $1 ( * func )")>]
-    [<DataRow("corollary TestId$1(x:+obj) {true};", "TestId$1(+obj)", "TestId $1 ( + obj )")>]
-    [<DataRow("corollary TestId$1(x:+index) {true};", "TestId$1(+ind)", "TestId $1 ( + ind )")>]
-    [<DataRow("corollary TestId$1(x:*predicate) {true};", "TestId$1(*pred)", "TestId $1 ( * pred )")>]
-    [<DataRow("corollary TestId$1(x:+function) {true};", "TestId$1(+func)", "TestId $1 ( + func )")>]
-    [<DataRow("corollary TestId$1(x:*object) {true};", "TestId$1(*obj)", "TestId $1 ( * obj )")>]
-    [<DataRow("corollary TestId$1(x:+Nat) {true};", "TestId$1(+Nat)", "TestId $1 ( + Nat )")>]
-    [<DataRow("corollary TestId$1(x:*@Nat) {true};", "TestId$1(*@Nat)", "TestId $1 ( * @Nat )")>]
-    [<DataRow("corollary TestId$1(x:*tpl) {true};", "TestId$1(*tpl)", "TestId $1 ( * tpl )")>]
-    [<DataRow("corollary TestId$1(x:+template) {true};", "TestId$1(+template)", "TestId $1 ( + template )")>]
-    [<DataRow("corollary TestId$1(x:*tplTest) {true};", "TestId$1(*tplTest)", "TestId $1 ( * tplTest )")>]
-    [<DataRow("corollary TestId$1(x:+templateTest) {true};", "TestId$1(+templateTest)", "TestId $1 ( + templateTest )")>]
-    [<DataRow("corollary TestId$1(x,y,z:+obj) {true};", "TestId$1(+obj, +obj, +obj)", "TestId $1 ( + obj + obj + obj )")>]
-    [<DataRow("corollary TestId$1(x,y:+pred(z:obj)) {true};", "TestId$1(+pred(obj), +pred(obj))", "TestId $1 ( + pred ( obj ) + pred ( obj ) )")>]
-    [<DataRow("corollary TestId$1(x,y:pred(u,v,w:*obj)) {true};", "TestId$1(pred(*obj, *obj, *obj), pred(*obj, *obj, *obj))", "TestId $1 ( pred ( * obj * obj * obj ) pred ( * obj * obj * obj ) )")>]
-    [<DataRow("corollary TestId$1(x:func(u:+obj)->Nat) {true};", "TestId$1(func(+obj) -> Nat)", "TestId $1 ( func ( + obj ) -> Nat )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:*@Nat]) {true};", "TestId$1(obj[*@Nat])", "TestId $1 ( obj [ * @Nat ] )")>]
-    [<DataRow("corollary TestId$1(x:obj[y:+Nat]) {true};", "TestId$1(obj[+Nat])", "TestId $1 ( obj [ + Nat ] )")>]
-    [<DataRow("corollary TestId$1(x:+obj[y:+Test.Nat]) {true};", "TestId$1(+obj[+Test.Nat])", "TestId $1 ( + obj [ + Test.Nat ] )")>]
-    [<DataRow("corollary TestId$1(x:+obj[y:*index]) {true};", "TestId$1(+obj[*ind])", "TestId $1 ( + obj [ * ind ] )")>]
-    [<DataRow("corollary TestId$1(x:*obj[y:+ind]) {true};", "TestId$1(*obj[+ind])", "TestId $1 ( * obj [ + ind ] )")>]
-    [<DataRow("corollary TestId$1(x:+obj[y:*tpl]) {true};", "TestId$1(+obj[*tpl])", "TestId $1 ( + obj [ * tpl ] )")>]
-    [<DataRow("corollary TestId$1(x:+obj[y:*template]) {true};", "TestId$1(+obj[*template])", "TestId $1 ( + obj [ * template ] )")>]
-    [<DataRow("corollary TestId$1(x:*obj[y:+tplTest]) {true};", "TestId$1(*obj[+tplTest])", "TestId $1 ( * obj [ + tplTest ] )")>]
-    [<DataRow("corollary TestId$1(x:*obj[y:*templateTest]) {true};", "TestId$1(*obj[*templateTest])", "TestId $1 ( * obj [ * templateTest ] )")>]
-    [<DataRow("corollary TestId$1(x:+obj[y:Nat,z:+templateTest]) {true};", "TestId$1(+obj[Nat, +templateTest])", "TestId $1 ( + obj [ Nat + templateTest ] )")>]
-    [<DataRow("corollary TestId$1(x:+obj[y:index,z:*Nat]) {true};", "TestId$1(+obj[ind, *Nat])", "TestId $1 ( + obj [ ind * Nat ] )")>]
-    [<DataRow("corollary TestId$1(x:*obj[y:*obj,z:+@Nat]) {true};", "TestId$1(*obj[*obj, +@Nat])", "TestId $1 ( * obj [ * obj + @Nat ] )")>]
-    [<DataRow("corollary TestId$1(x:*obj[y:+tpl,z:index]) {true};", "TestId$1(*obj[+tpl, ind])", "TestId $1 ( * obj [ + tpl ind ] )")>]
+    [<DataRow("corollary TestId$1(x:*ind) {true};", "TestId$1(*ind)", "TestId ind ( * ind )")>]
+    [<DataRow("corollary TestId$1(x:+pred) {true};", "TestId$1(+pred)", "TestId ind ( + pred )")>]
+    [<DataRow("corollary TestId$1(x:*func) {true};", "TestId$1(*func)", "TestId ind ( * func )")>]
+    [<DataRow("corollary TestId$1(x:+obj) {true};", "TestId$1(+obj)", "TestId ind ( + obj )")>]
+    [<DataRow("corollary TestId$1(x:+index) {true};", "TestId$1(+ind)", "TestId ind ( + ind )")>]
+    [<DataRow("corollary TestId$1(x:*predicate) {true};", "TestId$1(*pred)", "TestId ind ( * pred )")>]
+    [<DataRow("corollary TestId$1(x:+function) {true};", "TestId$1(+func)", "TestId ind ( + func )")>]
+    [<DataRow("corollary TestId$1(x:*object) {true};", "TestId$1(*obj)", "TestId ind ( * obj )")>]
+    [<DataRow("corollary TestId$1(x:+Nat) {true};", "TestId$1(+Nat)", "TestId ind ( + Nat )")>]
+    [<DataRow("corollary TestId$1(x:*@Nat) {true};", "TestId$1(*@Nat)", "TestId ind ( * @Nat )")>]
+    [<DataRow("corollary TestId$1(x:*tpl) {true};", "TestId$1(*tpl)", "TestId ind ( * tpl )")>]
+    [<DataRow("corollary TestId$1(x:+template) {true};", "TestId$1(+template)", "TestId ind ( + template )")>]
+    [<DataRow("corollary TestId$1(x:*tplTest) {true};", "TestId$1(*tplTest)", "TestId ind ( * tplTest )")>]
+    [<DataRow("corollary TestId$1(x:+templateTest) {true};", "TestId$1(+templateTest)", "TestId ind ( + templateTest )")>]
+    [<DataRow("corollary TestId$1(x,y,z:+obj) {true};", "TestId$1(+obj, +obj, +obj)", "TestId ind ( + obj + obj + obj )")>]
+    [<DataRow("corollary TestId$1(x,y:+pred(z:obj)) {true};", "TestId$1(+pred(obj), +pred(obj))", "TestId ind ( + pred ( obj ) + pred ( obj ) )")>]
+    [<DataRow("corollary TestId$1(x,y:pred(u,v,w:*obj)) {true};", "TestId$1(pred(*obj, *obj, *obj), pred(*obj, *obj, *obj))", "TestId ind ( pred ( * obj * obj * obj ) pred ( * obj * obj * obj ) )")>]
+    [<DataRow("corollary TestId$1(x:func(u:+obj)->Nat) {true};", "TestId$1(func(+obj) -> Nat)", "TestId ind ( func ( + obj ) -> Nat )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:*@Nat]) {true};", "TestId$1(obj[*@Nat])", "TestId ind ( obj [ * @Nat ] )")>]
+    [<DataRow("corollary TestId$1(x:obj[y:+Nat]) {true};", "TestId$1(obj[+Nat])", "TestId ind ( obj [ + Nat ] )")>]
+    [<DataRow("corollary TestId$1(x:+obj[y:+Test.Nat]) {true};", "TestId$1(+obj[+Test.Nat])", "TestId ind ( + obj [ + Test.Nat ] )")>]
+    [<DataRow("corollary TestId$1(x:+obj[y:*index]) {true};", "TestId$1(+obj[*ind])", "TestId ind ( + obj [ * ind ] )")>]
+    [<DataRow("corollary TestId$1(x:*obj[y:+ind]) {true};", "TestId$1(*obj[+ind])", "TestId ind ( * obj [ + ind ] )")>]
+    [<DataRow("corollary TestId$1(x:+obj[y:*tpl]) {true};", "TestId$1(+obj[*tpl])", "TestId ind ( + obj [ * tpl ] )")>]
+    [<DataRow("corollary TestId$1(x:+obj[y:*template]) {true};", "TestId$1(+obj[*template])", "TestId ind ( + obj [ * template ] )")>]
+    [<DataRow("corollary TestId$1(x:*obj[y:+tplTest]) {true};", "TestId$1(*obj[+tplTest])", "TestId ind ( * obj [ + tplTest ] )")>]
+    [<DataRow("corollary TestId$1(x:*obj[y:*templateTest]) {true};", "TestId$1(*obj[*templateTest])", "TestId ind ( * obj [ * templateTest ] )")>]
+    [<DataRow("corollary TestId$1(x:+obj[y:Nat,z:+templateTest]) {true};", "TestId$1(+obj[Nat, +templateTest])", "TestId ind ( + obj [ Nat + templateTest ] )")>]
+    [<DataRow("corollary TestId$1(x:+obj[y:index,z:*Nat]) {true};", "TestId$1(+obj[ind, *Nat])", "TestId ind ( + obj [ ind * Nat ] )")>]
+    [<DataRow("corollary TestId$1(x:*obj[y:*obj,z:+@Nat]) {true};", "TestId$1(*obj[*obj, +@Nat])", "TestId ind ( * obj [ * obj + @Nat ] )")>]
+    [<DataRow("corollary TestId$1(x:*obj[y:+tpl,z:index]) {true};", "TestId$1(*obj[+tpl, ind])", "TestId ind ( * obj [ + tpl ind ] )")>]
 
-    [<DataRow("proof TestId$1 {1. |- trivial} ;", "TestId$1", "TestId $1")>]
-    [<DataRow("proof TestId$1$2 {1. |- trivial} ;", "TestId$1$2", "TestId $1 $2")>]
-    [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", "TestId$1$2$3", "TestId $1 $2 $3")>]
+    [<DataRow("proof TestId$1 {1. |- trivial} ;", "TestId$1", "TestId ind")>]
+    [<DataRow("proof TestId$1$2 {1. |- trivial} ;", "TestId$1$2", "TestId ind ind")>]
+    [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", "TestId$1$2$3", "TestId ind ind ind")>]
 
     
     [<DataRow("def class Test:obj {intr} proof Test$1 {1. |- trivial};", "Test", "Test")>]
@@ -783,26 +781,27 @@ type TestFplValue() =
     [<TestMethod>]
     member this.TestTypeSignatureOfFplBlocks(fplCode:string, expectedName:string, expectedTypeSignatureStr:string) =
         let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
-        let result = prepareFplCode(fplCode, false) 
-        let fplValue = result.Value.Root.Scope["Test"].Scope[expectedName]
-        Assert.AreEqual(expectedName, fplValue.Name)
+        let filename = "TestTypeSignatureOfFplBlocks"
+        let result = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let fplValue = result.Value.Root.Scope[filename].Scope[expectedName]
+        Assert.AreEqual<string>(expectedName, fplValue.Name)
         let actualTypeSignature = fplValue.TypeSignature
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
-        Assert.AreEqual(expectedTypeSignature, actualTypeSignature)
+        Assert.AreEqual<string list>(expectedTypeSignature, actualTypeSignature)
         let expectedStart =
             if fplCode.StartsWith("def ") then 
                 (int64)4
             else
                 (int64)0
-        Assert.AreEqual(expectedStart, actualSignatureStart)
+        Assert.AreEqual<int64>(expectedStart, actualSignatureStart)
         let expectedEnd =
             if fplCode.StartsWith("def class") then 
                 (int64)(fplCode.IndexOf(":", System.StringComparison.OrdinalIgnoreCase))
             else
                 (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
-        Assert.AreEqual(expectedEnd, actualSignatureEnd)
-        prepareFplCode("", true) |> ignore
+        Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
+        prepareFplCode(filename, "", true) |> ignore
 
     [<DataRow("def cl T:obj {intr prty pred TestId() {intrinsic}};", "TestId()", "TestId ( )")>]
     [<DataRow("def cl T:obj {intr prty pred TestId(x:ind) {intrinsic}};", "TestId(ind)", "TestId ( ind )")>]
@@ -1002,19 +1001,20 @@ type TestFplValue() =
     [<TestMethod>]
     member this.TestTypeSignatureOfFplProperties(fplCode:string, expectedName:string, expectedTypeSignatureStr:string) =
         let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
-        let result = prepareFplCode(fplCode, false) 
-        let fplValue = result.Value.Root.Scope["Test"].Scope["T"].Scope[expectedName]
+        let filename = "TestTypeSignatureOfFplProperties"
+        let result = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let fplValue = result.Value.Root.Scope[filename].Scope["T"].Scope[expectedName]
         let actualTypeSignature = fplValue.TypeSignature
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
-        Assert.AreEqual(expectedTypeSignature, actualTypeSignature)
+        Assert.AreEqual<string list>(expectedTypeSignature, actualTypeSignature)
         let expectedStart =
                 (int64)19
-        Assert.AreEqual(expectedStart, actualSignatureStart)
+        Assert.AreEqual<int64>(expectedStart, actualSignatureStart)
         let expectedEnd =
                 (int64)(fplCode.IndexOf(" {intrinsic", System.StringComparison.OrdinalIgnoreCase))
-        Assert.AreEqual(expectedEnd, actualSignatureEnd)
-        prepareFplCode("", true) |> ignore
+        Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
+        prepareFplCode(filename, "", true) |> ignore
 
 
     [<DataRow("def cl T:obj {ctor T() {self}};", "T()", "T ( )")>]
@@ -1085,16 +1085,17 @@ type TestFplValue() =
     [<TestMethod>]
     member this.TestTypeSignatureOfConstructors(fplCode:string, expectedName:string, expectedTypeSignatureStr:string) =
         let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
-        let result = prepareFplCode(fplCode, false) 
-        let fplValue = result.Value.Root.Scope["Test"].Scope["T"].Scope[expectedName]
+        let filename = "TestTypeSignatureOfConstructors"
+        let result = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let fplValue = result.Value.Root.Scope[filename].Scope["T"].Scope[expectedName]
         let actualTypeSignature = fplValue.TypeSignature
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
-        Assert.AreEqual(expectedTypeSignature, actualTypeSignature)
+        Assert.AreEqual<string list>(expectedTypeSignature, actualTypeSignature)
         let expectedStart =
                 (int64)14
-        Assert.AreEqual(expectedStart, actualSignatureStart)
+        Assert.AreEqual<int64>(expectedStart, actualSignatureStart)
         let expectedEnd =
                 (int64)(fplCode.IndexOf(" {self", System.StringComparison.OrdinalIgnoreCase))
-        Assert.AreEqual(expectedEnd, actualSignatureEnd)
-        prepareFplCode("", true) |> ignore
+        Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
+        prepareFplCode(filename, "", true) |> ignore

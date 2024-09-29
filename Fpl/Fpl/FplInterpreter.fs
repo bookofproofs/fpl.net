@@ -1,17 +1,17 @@
 ﻿module FplInterpreter
 open System
-open FParsec
 open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterUsesClause
 open FplInterpreterBuildingBlocks
 open FplInterpreterDiagnosticsEmitter
 
-let fplInterpreter (st:SymbolTable) input (uri:Uri) fplLibUrl = 
+let fplInterpreter (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
     try
-        let escapedUri = Uri(Uri.UnescapeDataString(uri.AbsoluteUri))
-        loadAllUsesClauses st input escapedUri fplLibUrl 
-        evaluateSymbolTable uri st
+        if st.MainTheory = String.Empty then
+            st.MainTheory <- uri.TheoryName
+        loadAllUsesClauses st input uri fplLibUrl 
+        evaluateSymbolTable st
     with ex -> 
-        emitUnexpectedErrorDiagnostics (uri.AbsolutePath) (ex.Message + Environment.NewLine + ex.StackTrace)
+        emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)
     

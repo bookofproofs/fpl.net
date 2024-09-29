@@ -21,6 +21,16 @@ type TestExpressions () =
                 true
             }
 
+            def pred T1a() 
+            {
+                not x
+            }
+
+            def pred T1b() 
+            {
+                not (x)
+            }
+
             def pred T2() 
             {
                 false
@@ -232,6 +242,16 @@ type TestExpressions () =
                 and (x,y,z)
             }
 
+            def pred T21a()
+            {
+                not x
+            }
+
+            def pred T21b()
+            {
+                not (x)
+            }
+
             def pred T22()
             {
                 xor (x,y,z)
@@ -257,6 +277,7 @@ type TestExpressions () =
                 is (x,Nat)
             }
 
+            def cl T27:obj {ctor T27() {dec base.C(a, b, c, d); self} }
             ; 
         """
         let actual = sprintf "%O" result

@@ -56,13 +56,14 @@ let private downloadFile url (e:EvalAliasedNamespaceIdentifier) =
     let client = new HttpClient()
     try
         async {
-            let! data = client.GetStringAsync(Uri(url)) |> Async.AwaitTask
+            let! data = client.GetStringAsync(PathEquivalentUri(url)) |> Async.AwaitTask
             return data
         } |> Async.RunSynchronously
     with
     | ex -> 
         let diagnostic =
             { 
+                Diagnostic.Uri = ad.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = e.StartPos
@@ -70,7 +71,7 @@ let private downloadFile url (e:EvalAliasedNamespaceIdentifier) =
                 Diagnostic.Code = NSP02 (url, ex.Message)
                 Diagnostic.Alternatives = None 
             }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic 
+        ad.AddDiagnostic diagnostic 
         ""
 
 let private loadFile fileName (e:EvalAliasedNamespaceIdentifier) =
@@ -80,6 +81,7 @@ let private loadFile fileName (e:EvalAliasedNamespaceIdentifier) =
     | ex -> 
         let diagnostic =
             { 
+                Diagnostic.Uri = ad.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = e.StartPos
@@ -87,10 +89,10 @@ let private loadFile fileName (e:EvalAliasedNamespaceIdentifier) =
                 Diagnostic.Code = NSP01 (fileName, ex.Message)
                 Diagnostic.Alternatives = None
             }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+        ad.AddDiagnostic diagnostic
         ""
 
-let createSubfolder (uri: Uri) subFolder =
+let createSubfolder (uri: PathEquivalentUri) subFolder =
     let unescapedPath = 
         let p = Uri.UnescapeDataString(uri.LocalPath)
         let pattern = @"^[\/\\][a-zA-Z]:"
@@ -99,38 +101,46 @@ let createSubfolder (uri: Uri) subFolder =
         else
             p
     let directoryPath = Path.GetDirectoryName(unescapedPath)
-    let subDirectoryPath = Path.Combine(directoryPath, subFolder)
-    if not <| Directory.Exists(subDirectoryPath) then
-        Directory.CreateDirectory(subDirectoryPath) |> ignore
-    (directoryPath, subDirectoryPath)
+    let directoryName = Path.GetFileName(directoryPath)
+    if directoryName = "lib" || directoryName = "repo" then
+        let subDirectoryPath = Path.Combine(Path.GetDirectoryName(directoryPath), subFolder)
+        (Path.GetDirectoryName(directoryPath), subDirectoryPath)
+    else
+        let subDirectoryPath = Path.Combine(directoryPath, subFolder)
+        if not <| Directory.Exists(subDirectoryPath) then
+            Directory.CreateDirectory(subDirectoryPath) |> ignore
+        (directoryPath, subDirectoryPath)
 
 
-let downloadLibMap (uri:System.Uri) (currentWebRepo: string) =
-    let pos = Position(uri.AbsolutePath, 0, 1, 1)
+let downloadLibMap (uri:PathEquivalentUri) (currentWebRepo: string) =
+    let pos = Position("", 0, 1, 1)
     let libMap = downloadFile (currentWebRepo + "/libmap.txt") (EvalAliasedNamespaceIdentifier.CreateEani("","", pos, pos))
     libMap    
 
 /// Acquires FPL sources that can be found with a single uses clause.
 /// They are searched for in the current directory of the file, in the lib subfolder
 /// as well as in the web resource 
-let acquireSources (uri: Uri) (fplLibUrl: string) =
+let acquireSources (uri: PathEquivalentUri) (fplLibUrl: string) =
+
     let (_,libDirectoryPath) = createSubfolder uri "lib"
     let (directoryPath,repoDirectoryPath) = createSubfolder uri "repo"
-    let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, "*.fpl") |> Seq.toList
-    let fileNamesInLibSubDir = Directory.EnumerateFiles(libDirectoryPath, "*.fpl") |> Seq.toList
+
+
+    let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, "*.fpl") |> Seq.map (fun path -> PathEquivalentUri.EscapedUri(path)) |> Seq.toList
+    let fileNamesInLibSubDir = Directory.EnumerateFiles(libDirectoryPath, "*.fpl") |> Seq.map (fun path -> PathEquivalentUri.EscapedUri(path)) |> Seq.toList
     let libMap = downloadLibMap uri fplLibUrl
     let filesToDownload = libMap.Split("\n") 
                            |> Seq.filter(fun s -> s<>"")
-                           |> Seq.map (fun s -> fplLibUrl + "/" + s)
+                           |> Seq.map (fun s -> PathEquivalentUri.EscapedUri(fplLibUrl + "/" + s))
                            |> Seq.toList
     FplSources(fileNamesInCurrDir @ fileNamesInLibSubDir @ filesToDownload, repoDirectoryPath)
     
-let private addOrUpdateParsedAst fileContent (fileLoc:string) (parsedAsts:ParsedAstList) = 
-    let name = Path.GetFileNameWithoutExtension(fileLoc)
-    let idAlreadyFound = parsedAsts.TryFindAstById(name)
+let private addOrUpdateParsedAst fileContent (uri:PathEquivalentUri) (parsedAsts:ParsedAstList) = 
+    let name = uri.TheoryName
+    let idAlreadyFound = parsedAsts.TryFindAstById name
     match idAlreadyFound with
     | Some pa -> 
-        if pa.Parsing.Reset fileContent fileLoc then
+        if pa.Parsing.Reset fileContent uri then
             // if there ist a Parsed Ast with the same Name as the eani.Name 
             // and its checksum differs from the previous checksum 
             // then replace the ast, checksum, location, sourcecode, the 
@@ -143,7 +153,7 @@ let private addOrUpdateParsedAst fileContent (fileLoc:string) (parsedAsts:Parsed
             ()
     | None -> 
         // add a new ParsedAst
-        let parsing = ParsingProperties.Create(fileLoc, fileContent)
+        let parsing = ParsingProperties.Create fileContent uri
         let sorting = SortingProperties.Create()
         let fplBlocks = {
             FplBlockProperties.FplBlockIds = Dictionary<string, int>()
@@ -168,6 +178,7 @@ let private findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list)
         if uniqueAliases.Contains alias.AliasOrStar then
             let diagnostic =
                 { 
+                    Diagnostic.Uri = ad.CurrentUri
                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = alias.StartPos
@@ -184,9 +195,10 @@ let private findDuplicateAliases (eaniList: EvalAliasedNamespaceIdentifier list)
 let private emitDiagnosticsForDuplicateFiles (availableSources:FplSources) (eani:EvalAliasedNamespaceIdentifier) =
     availableSources.GroupedWithPreferedSource
     |> List.iter (fun (fileName, path, chosenPathType, pathTypes, theoryName) ->
-        if FplSources.HasPattern(fileName, eani.FileNamePattern) && pathTypes.Length > 1 then 
+        if pathTypes.Length > 1 then 
             let diagnostic =
                 { 
+                    Diagnostic.Uri = ad.CurrentUri
                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = eani.StartPos
@@ -194,7 +206,7 @@ let private emitDiagnosticsForDuplicateFiles (availableSources:FplSources) (eani
                     Diagnostic.Code = NSP05 (pathTypes, theoryName, chosenPathType)
                     Diagnostic.Alternatives = None
                 }
-            FplParser.parserDiagnostics.AddDiagnostic diagnostic
+            ad.AddDiagnostic diagnostic
     )
     |> ignore
 
@@ -217,6 +229,7 @@ let getParsedAstsMatchingAliasedNamespaceIdentifier (sources:FplSources) (parsed
         // Emits diagnostics if there are no files for the pattern 
         let diagnostic =
             { 
+                Diagnostic.Uri = ad.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = eani.StartPos
@@ -224,23 +237,25 @@ let getParsedAstsMatchingAliasedNamespaceIdentifier (sources:FplSources) (parsed
                 Diagnostic.Code = NSP00 eani.FileNamePattern
                 Diagnostic.Alternatives = None
             }
-        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+        ad.AddDiagnostic diagnostic
     else
         filtered
-        |> Seq.map (fun (_, path, _, _, theoryName) ->
-            if FplSources.IsFilePath(path) then
+        |> Seq.map (fun (_, uri, _, _, theoryName) ->
+            if FplSources.IsFilePath(uri) then
                 // load or download the content of every source
-                let fileContent = loadFile path eani
-                addOrUpdateParsedAst fileContent path parsedAsts |> ignore
+                let fileContent = loadFile uri.AbsolutePath eani
+                addOrUpdateParsedAst fileContent uri parsedAsts |> ignore
             else
-                let fileContent = downloadFile path eani
-                let pathToLocalRegistryCopy = Path.Combine(sources.PathToLocalRegistry,Path.GetFileName(path))
+                let fileContent = downloadFile uri.AbsoluteUri eani
+                let pathToLocalRegistryCopy = Path.Combine(sources.PathToLocalRegistry,Path.GetFileName(uri.AbsolutePath))
                 if File.Exists(pathToLocalRegistryCopy) then
                     File.SetAttributes(pathToLocalRegistryCopy, FileAttributes.Normal)
                     File.Delete(pathToLocalRegistryCopy)
                 File.WriteAllText(pathToLocalRegistryCopy, fileContent)
                 File.SetAttributes(pathToLocalRegistryCopy, File.GetAttributes(pathToLocalRegistryCopy) ||| FileAttributes.ReadOnly)
-                addOrUpdateParsedAst fileContent pathToLocalRegistryCopy parsedAsts |> ignore
+
+                let escapedUri = PathEquivalentUri.EscapedUri(pathToLocalRegistryCopy)
+                addOrUpdateParsedAst fileContent escapedUri parsedAsts |> ignore
           
             theoryName
         ) 
@@ -303,60 +318,74 @@ let private rearrangeList element list =
     let beforeElement = list |> List.takeWhile ((<>) element)
     afterElement @ beforeElement
 
-let garbageCollector (st:SymbolTable) (uri:Uri) = 
-    let currentTheory = Path.GetFileNameWithoutExtension(uri.LocalPath)
-    let referencedAstsOfCurrentTheory ct = 
-        match st.ParsedAsts.TryFindAstById(ct) with
+let garbageCollector (st:SymbolTable) = 
+    let referencedAstsOfCurrentTheory currTheory = 
+        match st.ParsedAsts.TryFindAstById(currTheory) with
         | Some pa -> pa.Sorting.ReferencedAsts
         | _ -> []
+
     // remove the current theory from the ReferencingAsts list of each parsedAst, if they are not contained 
     // in the current theory's reference Asts
-    let rec removeNotReferencedAsts ct = 
+    let rec removeNotReferencedAsts currTheory = 
         st.ParsedAsts 
         |> Seq.iter (fun pa ->
             match pa.Sorting.ReferencingAsts |> List.tryFindIndex (fun referencedTheory -> 
-                referencedTheory = ct
-                && not (referencedAstsOfCurrentTheory ct |> List.contains pa.Id)
+                referencedTheory = currTheory
+                && not (referencedAstsOfCurrentTheory currTheory |> List.contains pa.Id)
                 ) with
             | Some indexOfCurrentTheory -> 
                 pa.Sorting.ReferencingAsts <- pa.Sorting.ReferencingAsts |> List.removeAt(indexOfCurrentTheory)
             | _ -> ()
         )
-        // remember the names of parsedAsts if they have empty referencing asts, except if it is the current theory
+
+    let rec findComponent (parsedAsts: ParsedAstList) (visited: Set<string>) (nodeId: string) =
+        if Set.contains nodeId visited then visited
+        else
+            match parsedAsts.TryFindAstById nodeId with
+            | Some node -> 
+                let newVisited = Set.add nodeId visited
+                List.fold (findComponent parsedAsts) newVisited node.Sorting.ReferencedAsts
+            | None -> visited 
+
+    match st.ParsedAsts.TryFindAstById(st.MainTheory) with
+    | Some mainTheory -> 
+        removeNotReferencedAsts mainTheory.Id
+        let astComponent = findComponent st.ParsedAsts Set.empty mainTheory.Id
+
         let willBeRemoved = 
             st.ParsedAsts
-            |> Seq.filter (fun pa -> pa.Id <> currentTheory && pa.Sorting.ReferencingAsts.Length = 0)
+            |> Seq.filter (fun pa -> not (Set.contains pa.Id astComponent))
             |> Seq.map (fun pa -> pa.Id)
             |> Seq.toList
-        // remove the corresponding parsedAsts 
-        st.ParsedAsts.RemoveAll (fun pa -> willBeRemoved |> List.contains pa.Id) |> ignore
-        // remove the removed asts from the Referncing Asts of the remaining 
-        willBeRemoved 
-        |> List.iter (fun theoryName ->
-            if st.Root.Scope.ContainsKey(theoryName) then
-                let toBeRemoved = st.Root.Scope[theoryName]
-                toBeRemoved.Reset()
-                st.Root.Scope.Remove theoryName |> ignore
-            else
-                ()
-        )
-        // remove the removed theories 
-        willBeRemoved 
-        |> List.iter (fun removedTheory ->
-            removeNotReferencedAsts removedTheory
-        )
 
-    removeNotReferencedAsts currentTheory
-    st.Root.Scope.Remove currentTheory |> ignore
+        willBeRemoved 
+        |> List.map (fun theoryName ->
+            match st.ParsedAsts.TryFindAstById theoryName with
+            | Some pa ->
+                ad.ResetStream(pa.Parsing.Uri)
+                if st.Root.Scope.ContainsKey(theoryName) then
+                    let toBeRemoved = st.Root.Scope[theoryName]
+                    toBeRemoved.Reset()
+                    st.Root.Scope.Remove theoryName |> ignore
+                else
+                    ()
+                st.ParsedAsts.RemoveAll (fun pAst -> pAst.Id = theoryName) |> ignore
+                st.Root.Scope.Remove theoryName |> ignore
+            | None -> ()
+        ) |> ignore
+    | None -> ()
+
+
+
 
 /// Parses the input at Uri and loads all referenced namespaces until
 /// each of them was loaded. If a referenced namespace contains even more uses clauses,
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
-let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl = 
+let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
+    ad.CurrentUri <- uri
     let sources = acquireSources uri fplLibUrl
+    let currentName = addOrUpdateParsedAst input uri st.ParsedAsts
     emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri))
-
-    let currentName = addOrUpdateParsedAst input uri.LocalPath st.ParsedAsts
     let mutable found = true
 
     while found do
@@ -374,7 +403,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl =
             ) |> ignore
         | None -> 
             found <- false
-    garbageCollector st uri
+    garbageCollector st 
     if isCircular st.ParsedAsts then
         let cycle = findCycle st.ParsedAsts
         match cycle with
@@ -391,6 +420,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl =
                         let circularEaniReference = circularEaniReferenceList |> List.head
                         let diagnostic =
                                 { 
+                                    Diagnostic.Uri = ad.CurrentUri
                                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
                                     Diagnostic.Severity = DiagnosticSeverity.Error
                                     Diagnostic.StartPos = circularEaniReference.StartPos
@@ -398,7 +428,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:Uri) fplLibUrl =
                                     Diagnostic.Code = NSP04 path
                                     Diagnostic.Alternatives = None
                                 }
-                        FplParser.parserDiagnostics.AddDiagnostic diagnostic
+                        ad.AddDiagnostic diagnostic
             | None -> ()
         | None -> ()
 

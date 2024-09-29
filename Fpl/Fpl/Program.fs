@@ -17,11 +17,11 @@ let deleteFilesWithExtension dir extension =
 
 
 let prepareFplCode(fplCode:string, delete:bool) =
-    FplParser.parserDiagnostics.Clear()
     let currDir = Directory.GetCurrentDirectory()
 
     File.WriteAllText(Path.Combine(currDir, "Test.fpl"), fplCode)
-    let uri = System.Uri(Path.Combine(currDir, "Test.fpl"))
+    let uri = PathEquivalentUri(Path.Combine(currDir, "Test.fpl"))
+    ad.Clear()
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
     if delete then 
@@ -33,7 +33,7 @@ let prepareFplCode(fplCode:string, delete:bool) =
         Some (FplInterpreter.fplInterpreter st fplCode uri fplLibUrl)
 
 let loadFplFile(path:string) = 
-    let uri = System.Uri(path)
+    let uri = PathEquivalentUri(path)
     let fplLibUrl =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
     let parsedAsts = ParsedAstList()
@@ -41,36 +41,21 @@ let loadFplFile(path:string) =
     let st = SymbolTable(parsedAsts, false)
     FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
 
+let input = """uses Fpl.SetTheory;"""
 
-let input = """
-uses Fpl.SetTheory
-
-def cl SomeFplClass: Set
-{
-    intr
-}
-;"""
-
-(*let result = fplParser input
+(*
+let result = fplParser input
 
 printf "%O" result
 
 ad.PrintDiagnostics
+
+prepareFplCode(input,false) |> ignore
 *)
 
-// let st = prepareFplCode(@"D:\Forschung\fpl.net\theories\lib\Fpl.Commons.Structures.fpl")
-
-(*
-let st = prepareFplCode(input,true) 
-
-
-prepareFplCode("",false) |> ignore
-printf "\n--------------------------------\n"
-*)
-
-loadFplFile(@"D:\Forschung\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.3.Ordering.fpl")
+loadFplFile(@"C:\Users\Peaq\source\repos\bookofproofs\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.1.Axioms.fpl")
+// loadFplFile(@"D:\Forschung\fpl.net\theories\FoundationsOfAnalysisLandau\Landau.1.1.Axioms.fpl")
 
 printf "\n--------------------------------\n"
 ad.PrintDiagnostics
-
 

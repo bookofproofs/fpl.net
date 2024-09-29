@@ -15,7 +15,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDefinition().GetChoices(detailCi);
-            Assert.AreEqual(6, actual.Count);
+            Assert.AreEqual<int>(6, actual.Count);
         }
 
         [DataRow("def")]
@@ -30,7 +30,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Keyword) count++;
             }
-            Assert.AreEqual(3, count);
+            Assert.AreEqual<int>(3, count);
         }
 
         [DataRow("definition", "class", CompletionItemKind.Class, "definition01")]
@@ -54,7 +54,7 @@ namespace FplLSTests
             {
                 if (item.Label.Contains(choice) && item.Label.Contains(subType) && item.Kind == isKeyword)
                 {
-                    Assert.AreEqual(expected, item.SortText);
+                    Assert.AreEqual<string>(expected, item.SortText);
                 }
             }
         }
@@ -100,11 +100,11 @@ namespace FplLSTests
                 }
                 if (item.Label.Contains(subType))
                 {
-                    Assert.AreEqual("_ " + choice + " " + subType + postfix, item.Label);
+                    Assert.AreEqual<string>("_ " + choice + " " + subType + postfix, item.Label);
                     counterRelated++;
                 }
             }
-            Assert.AreEqual(2, counterRelated);
+            Assert.AreEqual<int>(2, counterRelated);
         }
 
         [DataRow("def")]
@@ -136,7 +136,7 @@ namespace FplLSTests
             {
                 if (item.InsertText.Contains(choice) && item.InsertText.Contains(subType)) { counterSnippets++; }
             }
-            Assert.AreEqual(2, counterSnippets);
+            Assert.AreEqual<int>(2, counterSnippets);
         }
 
     }

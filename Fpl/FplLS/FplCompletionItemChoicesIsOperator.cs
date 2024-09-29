@@ -9,7 +9,7 @@ namespace FplLS
             var ret = new List<FplCompletionItem>();
             // snipped
             var ci = defaultCi.Clone();
-            ci.InsertText = $"is (x, SomeFplType) ";
+            ci.InsertText = $"is (x, SomeFplType)";
             ci.Label = TokenPrefix + defaultCi.InsertText + " ...";
             ret.Add(ci);
 

@@ -123,3 +123,11 @@ type TestReferenceRules() =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestVarsInReferenceRule() =
+        let result = run (ruleOfInference .>> eof) """inf ExistsByExample(p: pred(c: obj)) {dec ~c: obj; pre: true con: true}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+        

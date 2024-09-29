@@ -13,7 +13,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesConstructor().GetChoices(detailCi);
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual<int>(2, actual.Count);
         }
 
         [DataRow("ctor")]
@@ -28,7 +28,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Keyword) count++;
             }
-            Assert.AreEqual(1, count);
+            Assert.AreEqual<int>(1, count);
         }
 
         [DataRow("constructor", CompletionItemKind.Property, "constructor01")]
@@ -44,7 +44,7 @@ namespace FplLSTests
             {
                 if (item.Label.Contains(choice) && item.Kind == kind)
                 {
-                    Assert.AreEqual(expected, item.SortText);
+                    Assert.AreEqual<string>(expected, item.SortText);
                 }
             }
         }
@@ -103,7 +103,7 @@ namespace FplLSTests
             {
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
             }
-            Assert.AreEqual(actual.Count, counterSnippets);
+            Assert.AreEqual<int>(actual.Count, counterSnippets);
         }
     }
 }

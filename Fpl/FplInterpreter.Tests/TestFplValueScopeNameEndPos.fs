@@ -1,7 +1,9 @@
-namespace FplInterpreter.Tests
+﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
+open ErrDiagnostics
 open FplInterpreterTypes
+open CommonTestHelpers
 
 [<TestClass>]
 type TestFplValueScopeNameEndPos() =
@@ -34,7 +36,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("prf2")>]
     [<TestMethod>]
     member this.TestBlocks(var) =
-        let res = CommonFplValueTestCases.ScopeBlocks() 
+        let res = CommonFplValueTestCases.ScopeBlocks("NameEndPos") 
         match res with
         | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
             match var with 
@@ -78,7 +80,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("t4")>]
     [<TestMethod>]
     member this.TestConstructors(var) =
-        let res = CommonFplValueTestCases.ScopeConstructors() 
+        let res = CommonFplValueTestCases.ScopeConstructors("NameEndPos") 
         match res with
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
@@ -117,7 +119,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("corAxi1")>]
     [<TestMethod>]
     member this.TestProofsAndCorollaries(var) =
-        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries() 
+        let res = CommonFplValueTestCases.ScopeProofsAndCorollaries("NameEndPos") 
         match res with
         | Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
@@ -165,9 +167,11 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("t10")>]
     [<DataRow("t11")>]
     [<DataRow("t12")>]
+    [<DataRow("t13")>]
+    [<DataRow("t14")>]
     [<TestMethod>]
     member this.TestProperties(var) =
-        let res = CommonFplValueTestCases.ScopeProperties() 
+        let res = CommonFplValueTestCases.ScopeProperties("NameEndPos") 
         match res with
         | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
             t13:FplValue,t14:FplValue) -> 
@@ -187,6 +191,8 @@ type TestFplValueScopeNameEndPos() =
             | "t10" -> Assert.IsTrue(t10.NameEndPos.ToString().Contains("Ln: 14, Col: 37)"))
             | "t11" -> Assert.IsTrue(t11.NameEndPos.ToString().Contains("Ln: 15, Col: 33)"))
             | "t12" -> Assert.IsTrue(t12.NameEndPos.ToString().Contains("Ln: 16, Col: 37)"))
+            | "t13" -> Assert.IsTrue(t13.NameEndPos.ToString().Contains("Ln: 17, Col: 34)"))
+            | "t14" -> Assert.IsTrue(t14.NameEndPos.ToString().Contains("Ln: 18, Col: 38)"))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -196,6 +202,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
+    [<DataRow("s")>]
     [<DataRow("xu")>]
     [<DataRow("xv")>]
     [<DataRow("xw")>]
@@ -222,39 +229,40 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInBlock(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInBlock()
+        let result = CommonFplValueTestCases.ScopeVariablesInBlock("NameEndPos")
         match result with
-        | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
+        | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsTrue(r.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "theory" -> Assert.IsTrue(theory.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.NameEndPos.ToString().Contains("Ln: 2, Col: 33)")); 
-            | "x" -> Assert.IsTrue(x.NameEndPos.ToString().Contains("Ln: 3, Col: 55)"))
-            | "y" -> Assert.IsTrue(y.NameEndPos.ToString().Contains("Ln: 3, Col: 55)"))
-            | "xu" -> Assert.IsTrue(xu.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "xv" -> Assert.IsTrue(xv.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "xw" -> Assert.IsTrue(xw.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "yu" -> Assert.IsTrue(yu.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "yv" -> Assert.IsTrue(yv.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "yw" -> Assert.IsTrue(yw.NameEndPos.ToString().Contains("Ln: 3, Col: 54)"))
-            | "xua" -> Assert.IsTrue(xua.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "xub" -> Assert.IsTrue(xub.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "xuc" -> Assert.IsTrue(xuc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
-            | "xva" -> Assert.IsTrue(xva.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "xvb" -> Assert.IsTrue(xvb.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "xvc" -> Assert.IsTrue(xvc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
-            | "xwa" -> Assert.IsTrue(xwa.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "xwb" -> Assert.IsTrue(xwb.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "xwc" -> Assert.IsTrue(xwc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
-            | "yua" -> Assert.IsTrue(yua.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "yub" -> Assert.IsTrue(yub.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "yuc" -> Assert.IsTrue(yuc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
-            | "yva" -> Assert.IsTrue(yva.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "yvb" -> Assert.IsTrue(yvb.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "yvc" -> Assert.IsTrue(yvc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
-            | "ywa" -> Assert.IsTrue(ywa.NameEndPos.ToString().Contains("Ln: 3, Col: 40)"))
-            | "ywb" -> Assert.IsTrue(ywb.NameEndPos.ToString().Contains("Ln: 3, Col: 42)"))
-            | "ywc" -> Assert.IsTrue(ywc.NameEndPos.ToString().Contains("Ln: 3, Col: 44)"))
+            | "x" -> Assert.IsTrue(x.NameEndPos.ToString().Contains("Ln: 4, Col: 54)"))
+            | "y" -> Assert.IsTrue(y.NameEndPos.ToString().Contains("Ln: 4, Col: 54)"))
+            | "s" -> Assert.IsTrue(s.NameEndPos.ToString().Contains("Ln: 5, Col: 19)"))
+            | "xu" -> Assert.IsTrue(xu.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "xv" -> Assert.IsTrue(xv.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "xw" -> Assert.IsTrue(xw.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "yu" -> Assert.IsTrue(yu.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "yv" -> Assert.IsTrue(yv.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "yw" -> Assert.IsTrue(yw.NameEndPos.ToString().Contains("Ln: 4, Col: 53)"))
+            | "xua" -> Assert.IsTrue(xua.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "xub" -> Assert.IsTrue(xub.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "xuc" -> Assert.IsTrue(xuc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
+            | "xva" -> Assert.IsTrue(xva.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "xvb" -> Assert.IsTrue(xvb.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "xvc" -> Assert.IsTrue(xvc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
+            | "xwa" -> Assert.IsTrue(xwa.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "xwb" -> Assert.IsTrue(xwb.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "xwc" -> Assert.IsTrue(xwc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
+            | "yua" -> Assert.IsTrue(yua.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "yub" -> Assert.IsTrue(yub.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "yuc" -> Assert.IsTrue(yuc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
+            | "yva" -> Assert.IsTrue(yva.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "yvb" -> Assert.IsTrue(yvb.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "yvc" -> Assert.IsTrue(yvc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
+            | "ywa" -> Assert.IsTrue(ywa.NameEndPos.ToString().Contains("Ln: 4, Col: 39)"))
+            | "ywb" -> Assert.IsTrue(ywb.NameEndPos.ToString().Contains("Ln: 4, Col: 41)"))
+            | "ywc" -> Assert.IsTrue(ywc.NameEndPos.ToString().Contains("Ln: 4, Col: 43)"))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -290,7 +298,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInBlockVariadic(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInBlockVariadic()
+        let result = CommonFplValueTestCases.ScopeVariablesInBlockVariadic("NameEndPos")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -358,7 +366,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInSignature(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignature()
+        let result = CommonFplValueTestCases.ScopeVariablesInSignature("NameEndPos")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -427,7 +435,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("ywc")>]
     [<TestMethod>]
     member this.TestVariablesInSignatureVariadic(var) =
-        let result = CommonFplValueTestCases.ScopeVariablesInSignatureVariadic()
+        let result = CommonFplValueTestCases.ScopeVariablesInSignatureVariadic("NameEndPos")
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
@@ -460,6 +468,271 @@ type TestFplValueScopeNameEndPos() =
             | "ywa" -> Assert.IsTrue(ywa.NameEndPos.ToString().Contains("Ln: 2, Col: 54)"))
             | "ywb" -> Assert.IsTrue(ywb.NameEndPos.ToString().Contains("Ln: 2, Col: 56)"))
             | "ywc" -> Assert.IsTrue(ywc.NameEndPos.ToString().Contains("Ln: 2, Col: 58)"))
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "true")>]
+    [<DataRow("base2", "false")>]
+    [<DataRow("base3", "undef")>]
+    [<DataRow("base4", "1.")>]
+    [<DataRow("base5", "del.Test()")>]
+    [<DataRow("base6", "$1")>]
+    [<DataRow("base7", "bydef Test()")>] 
+    [<DataRow("base8", "Test$1")>]
+    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base10", "Test")>]
+    [<DataRow("base11", "v")>]
+    [<DataRow("base12", "self")>]
+    [<DataRow("base13", "1")>]
+    [<DataRow("base11a", "v.x")>]
+    [<DataRow("base12a", "self.x")>]
+    [<DataRow("base10b", "Test()")>]
+    [<DataRow("base11b", "v()")>]
+    [<DataRow("base12b", "self()")>]
+    [<DataRow("base13b", "1()")>]
+    [<DataRow("base10c", "Test(x, y)")>]
+    [<DataRow("base11c", "v(x, y)")>]
+    [<DataRow("base12c", "self(x, y)")>]
+    [<DataRow("base13c", "1(x, y)")>]
+    [<DataRow("base10d", "Test[x, y]")>]
+    [<DataRow("base11d", "v[x, y]")>]
+    [<DataRow("base12d", "self[x, y]")>]
+    [<DataRow("base13d", "1[x.y]")>]
+    [<DataRow("base10e", "Test(x, y).@self[a, b]")>]
+    [<DataRow("base11e", "v(x, y).x[a, b]")>]
+    [<DataRow("base12e", "self(x, y).3[a, b]")>]
+    [<DataRow("base13e", "1(x, y).T[a, b]")>]
+    [<DataRow("base10f", "Test[x, y].x(a, b)")>]
+    [<DataRow("base11f", "v[x, y].x(a, b)")>]
+    [<DataRow("base12f", "self[x, y].self(a, b)")>]
+    [<DataRow("base13f", "1[x.y].T(a, b)")>]
+    [<DataRow("base14", "∅")>]
+    [<DataRow("base15", "-x")>]
+    [<DataRow("base15a", "x'")>]
+    [<DataRow("base15b", "-x'")>]
+    [<DataRow("base16", "-(y + x = 2 * x)")>]
+    [<DataRow("base17", "(y + x' = 2 * x)'")>]
+    [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
+    [<DataRow("base19", "exn$1 x {all y {true}}")>]
+    [<DataRow("base20", "all x {not x}")>]
+    [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base21a", "not x")>]
+    [<DataRow("base21b", "not (x)")>]
+    [<DataRow("base22", "xor (x, y, z)")>]
+    [<DataRow("base23", "or (x, y, z)")>]
+    [<DataRow("base24", "iif (x, y)")>]
+    [<DataRow("base25", "impl (x, y)")>]
+    [<DataRow("base26", "is (x, Nat)")>]
+    [<DataRow("base27", "B()")>]
+    [<DataRow("base28", "C(a,b,c,d)")>]
+    [<DataRow("base29", "D(self,b,c)")>]
+    [<DataRow("base30", "B(In(x))")>]
+    [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
+    [<DataRow("base32", "E(true, undef, false)")>]
+    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base34", "is(x, Set)")>]
+    [<TestMethod>]
+    member this.TestPredicate(var, varVal) =
+        ad.Clear()
+        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let filename = "TestPredicate.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.ValueList[0]
+
+            match var with
+            | "base1" -> Assert.AreEqual<int64>((int64)22, base1.NameEndPos.Column)
+            | "base2" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
+            | "base3" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
+            | "base4" -> Assert.AreEqual<int64>((int64)19, base1.NameEndPos.Column)
+            | "base5" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
+            | "base6" -> Assert.AreEqual<int64>((int64)19, base1.NameEndPos.Column)
+            | "base7" -> Assert.AreEqual<int64>((int64)29, base1.NameEndPos.Column)
+            | "base8" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
+            | "base9" -> Assert.AreEqual<int64>((int64)26, base1.NameEndPos.Column)
+            | "base10" -> Assert.AreEqual<int64>((int64)21, base1.NameEndPos.Column)
+            | "base11" -> Assert.AreEqual<int64>((int64)18, base1.NameEndPos.Column)
+            | "base12" -> Assert.AreEqual<int64>((int64)22, base1.NameEndPos.Column)
+            | "base13" -> Assert.AreEqual<int64>((int64)18, base1.NameEndPos.Column)
+            | "base11a" -> Assert.AreEqual<int64>((int64)20, base1.NameEndPos.Column)
+            | "base12a" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
+            | "base10b" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
+            | "base11b" -> Assert.AreEqual<int64>((int64)20, base1.NameEndPos.Column)
+            | "base12b" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
+            | "base13b" -> Assert.AreEqual<int64>((int64)20, base1.NameEndPos.Column)
+            | "base10c" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
+            | "base11c" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
+            | "base12c" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
+            | "base13c" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
+            | "base10d" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
+            | "base11d" -> Assert.AreEqual<int64>((int64)25, base1.NameEndPos.Column)
+            | "base12d" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
+            | "base13d" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
+            | "base10e" -> Assert.AreEqual<int64>((int64)40, base1.NameEndPos.Column)
+            | "base11e" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
+            | "base12e" -> Assert.AreEqual<int64>((int64)36, base1.NameEndPos.Column)
+            | "base13e" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
+            | "base10f" -> Assert.AreEqual<int64>((int64)35, base1.NameEndPos.Column)
+            | "base11f" -> Assert.AreEqual<int64>((int64)32, base1.NameEndPos.Column)
+            | "base12f" -> Assert.AreEqual<int64>((int64)38, base1.NameEndPos.Column)
+            | "base13f" -> Assert.AreEqual<int64>((int64)31, base1.NameEndPos.Column)
+            | "base14" -> Assert.AreEqual<int64>((int64)19, base1.NameEndPos.Column)
+            | "base15" -> Assert.AreEqual<int64>((int64)19, base1.NameEndPos.Column)
+            | "base15a" -> Assert.AreEqual<int64>((int64)20, base1.NameEndPos.Column)
+            | "base15b" -> Assert.AreEqual<int64>((int64)21, base1.NameEndPos.Column)
+            | "base16" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
+            | "base17" -> Assert.AreEqual<int64>((int64)35, base1.NameEndPos.Column)
+            | "base18" -> Assert.AreEqual<int64>((int64)64, base1.NameEndPos.Column)
+            | "base19" -> Assert.AreEqual<int64>((int64)40, base1.NameEndPos.Column)
+            | "base20" -> Assert.AreEqual<int64>((int64)31, base1.NameEndPos.Column)
+            | "base21" -> Assert.AreEqual<int64>((int64)30, base1.NameEndPos.Column)
+            | "base21a" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
+            | "base21b" -> Assert.AreEqual<int64>((int64)25, base1.NameEndPos.Column)
+            | "base22" -> Assert.AreEqual<int64>((int64)30, base1.NameEndPos.Column)
+            | "base23" -> Assert.AreEqual<int64>((int64)29, base1.NameEndPos.Column)
+            | "base24" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
+            | "base25" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
+            | "base26" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
+            | "base27" -> Assert.AreEqual<int64>((int64)20, base1.NameEndPos.Column)
+            | "base28" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
+            | "base29" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
+            | "base30" -> Assert.AreEqual<int64>((int64)25, base1.NameEndPos.Column)
+            | "base31" -> Assert.AreEqual<int64>((int64)41, base1.NameEndPos.Column)
+            | "base32" -> Assert.AreEqual<int64>((int64)38, base1.NameEndPos.Column)
+            | "base33" -> Assert.AreEqual<int64>((int64)43, base1.NameEndPos.Column)
+            | "base34" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "base.B()")>]
+    [<DataRow("base2", "base.C(a, b, c, d)")>]
+    [<DataRow("base3", "base.D(self, a, b)")>]
+    [<DataRow("base4", "base.B(In(x))")>]
+    [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
+    [<DataRow("base6", "base.E(true, undef, false)")>]
+    [<TestMethod>]
+    member this.TestCallConstructorParentClass(var, varVal) =
+        ad.Clear()
+        let fplCode = sprintf """
+                        def cl B:obj {intr}
+                        def cl C:obj {intr}
+                        def cl D:obj {intr}
+
+                        def cl A:B,C,D,E
+                        {
+                            ctor A(a:T1, b:func, c:ind, d:pred) 
+                            {
+                                dec
+                                    %s
+                                ;
+                                self
+                            }
+                        }
+                        ;""" varVal
+        let filename = "TestCallConstructorParentClassNameEndPos"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let cl = theory.Scope["A"]
+            let ctor = cl.Scope["A(T1, func, ind, pred)"]
+            let base1 = ctor.ValueList[0]
+
+            match var with
+            | "base1" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
+            | "base2" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
+            | "base3" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
+            | "base4" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
+            | "base5" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
+            | "base6" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "del.B()")>]
+    [<DataRow("base2", "del.C(a,b,c,d)")>]
+    [<DataRow("base3", "del.D(self,b,c)")>]
+    [<DataRow("base4", "del.B(In(x))")>]
+    [<DataRow("base5", "del.Test()")>]
+    [<DataRow("base6", "del.C(Test1(a),Test2(b,c,d))")>]
+    [<DataRow("base7", "del.E(true, undef, false)")>] 
+    [<TestMethod>]
+    member this.TestDelegate(var, varVal) =
+        ad.Clear()
+        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let filename = "TestDelegateNameEndPos"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.ValueList[0]
+
+            match var with
+            | "base1" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
+            | "base2" -> Assert.AreEqual<int64>((int64)31, base1.NameEndPos.Column)
+            | "base3" -> Assert.AreEqual<int64>((int64)32, base1.NameEndPos.Column)
+            | "base4" -> Assert.AreEqual<int64>((int64)29, base1.NameEndPos.Column)
+            | "base5" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
+            | "base6" -> Assert.AreEqual<int64>((int64)45, base1.NameEndPos.Column)
+            | "base7" -> Assert.AreEqual<int64>((int64)42, base1.NameEndPos.Column)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", """def pred T1() {intr};""")>]
+    [<DataRow("base2", """def pred infix ">" -1 T1() {intr};""")>]
+    [<DataRow("base3", """def pred postfix "'" T1() {intr};""")>]
+    [<DataRow("base4", """def pred prefix "-" T1() {intr};""")>]
+    [<DataRow("base5", """def cl symbol "∅" T1:obj {intr};""")>]
+    [<DataRow("base5a", """def cl T1:obj {intr};""")>]
+    [<DataRow("base6", """def func T1()->obj {intr};""")>]
+    [<DataRow("base7", """def func infix ">" -1 T1()->obj {intr};""")>]
+    [<DataRow("base8", """def func postfix "'" T1()->obj {intr};""")>]
+    [<DataRow("base9", """def func prefix "-" T1()->obj {intr};""")>]
+    [<TestMethod>]
+    member this.TestFixNotation(var, varVal) =
+        ad.Clear()
+        let fplCode = sprintf "%s;" varVal
+        let filename = "TestFixNotationNameEndPos"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let base1 = 
+                if varVal.Contains "cl" then 
+                    theory.Scope["T1"]
+                elif varVal.Contains "func" then 
+                    theory.Scope["T1() -> obj"]
+                else 
+                    theory.Scope["T1()"]
+
+            match var with
+            | "base1" -> Assert.AreEqual<int64>((int64)14, base1.NameEndPos.Column)
+            | "base2" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
+            | "base3" -> Assert.AreEqual<int64>((int64)26, base1.NameEndPos.Column)
+            | "base4" -> Assert.AreEqual<int64>((int64)25, base1.NameEndPos.Column)
+            | "base5" -> Assert.AreEqual<int64>((int64)21, base1.NameEndPos.Column)
+            | "base5a" -> Assert.AreEqual<int64>((int64)10, base1.NameEndPos.Column)
+            | "base6" -> Assert.AreEqual<int64>((int64)19, base1.NameEndPos.Column)
+            | "base7" -> Assert.AreEqual<int64>((int64)32, base1.NameEndPos.Column)
+            | "base8" -> Assert.AreEqual<int64>((int64)31, base1.NameEndPos.Column)
+            | "base9" -> Assert.AreEqual<int64>((int64)30, base1.NameEndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

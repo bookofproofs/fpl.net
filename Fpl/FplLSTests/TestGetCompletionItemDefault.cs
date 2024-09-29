@@ -34,7 +34,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesDefault().GetChoices(detailCi);
-            Assert.AreEqual(1, actual.Count);
+            Assert.AreEqual<int>(1, actual.Count);
         }
 
         [DataRow("?")]
@@ -71,7 +71,7 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Text) count++;
             }
-            Assert.AreEqual(1, count);
+            Assert.AreEqual<int>(1, count);
         }
 
         [DataRow("?")]
@@ -175,7 +175,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesDefault().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.AreEqual(l, item.Detail);
+                Assert.AreEqual<string>(l, item.Detail);
             }
         }
 
@@ -213,7 +213,7 @@ namespace FplLSTests
             {
                 if (item.InsertText.Contains(choice)) { counterSnippets++; }
             }
-            Assert.AreEqual(actual.Count, counterSnippets);
+            Assert.AreEqual<int>(actual.Count, counterSnippets);
         }
     }
 }
