@@ -418,3 +418,50 @@ type UpdatingSymbolTableNavigation() =
         // remove the test file
         prepareFplCode(filename, "", true) |> ignore
 
+    [<TestMethod>]
+    member this.OpeningFileInRepoAndChangingDoesNotCauseDuplicateSignatureDeclarations() =
+        // prepare test, making sure there is an empty 
+        // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+        ad.Clear()
+        // first delete lib and repo subdirectories (if any)
+        let currentPath = Directory.GetCurrentDirectory()
+        let currentPathLib = Path.Combine(currentPath,"lib")
+        let currentPathRepo = Path.Combine(currentPath,"repo")
+        deleteDirectory currentPathLib
+        deleteDirectory currentPathRepo
+        deleteFiles currentPath "Fpl.Commons.fpl"
+        deleteFiles currentPath "Fpl.SetTheory.fpl"
+
+        let fplCode = """
+            uses Fpl.SetTheory;
+        """
+        let filename = "OpeningFileInRepoDoesNotCreateYetOtherSubdirsLibAndRepo"  
+        // file processing creates the subdirectories
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        match stOption with
+        | Some st -> 
+            // initial counts of parsed ast and theories in root
+            Assert.AreEqual<int>(3, st.ParsedAsts.Count)
+            let pathToTestFile = Path.Combine(currentPathRepo,"Fpl.Commons.fpl")
+            let diagnosticsOfFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            let countID001 = diagnosticsOfFile |> Seq.filter (fun kvp -> kvp.Value.Code.Code = "ID001") |> Seq.toList
+            Assert.AreEqual<int>(0,countID001.Length)
+            // now manipulate the file and reprocess it
+        
+            // now, conserve the symbol table for the test's next step and reprocess the manipulated file
+            let uri = PathEquivalentUri(pathToTestFile)
+            let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+            let fplCodeOriginal = File.ReadAllText(pathToTestFile)
+            let fplCodeManipulated = fplCodeOriginal.Substring(0,fplCodeOriginal.Length-1) + "def pred Bla() { Bla1() };"
+            FplInterpreter.fplInterpreter st fplCodeManipulated uri fplLibUrl
+
+            // do the test - check, if the diagnostics changed
+            let diagnosticsOfManipulatedFile = ad.GetStreamDiagnostics(PathEquivalentUri(pathToTestFile))
+            let countID001 = diagnosticsOfManipulatedFile |> Seq.filter (fun kvp -> kvp.Value.Code.Code = "ID001") |> Seq.toList
+            Assert.AreEqual<int>(0,countID001.Length)
+
+            // remove the test file
+            prepareFplCode(filename, "", true) |> ignore
+        | None -> Assert.IsTrue(false)
+
+
