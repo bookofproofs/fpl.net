@@ -922,7 +922,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 clearAll child.Value
             )
             root.Scope.Clear()
-            
+            root.NameIsFinal <- false
         clearAll this
 
 type LogContext = 

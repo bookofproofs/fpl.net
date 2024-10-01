@@ -465,3 +465,82 @@ type UpdatingSymbolTableNavigation() =
         | None -> Assert.IsTrue(false)
 
 
+    [<TestMethod>]
+    member this.OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesSIG04Errors() =
+        // prepare test, making sure there is an empty 
+        // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+        ad.Clear()
+        // first delete lib and repo subdirectories (if any)
+        let currentPath = Directory.GetCurrentDirectory()
+        let currentPathLib = Path.Combine(currentPath,"lib")
+        let currentPathRepo = Path.Combine(currentPath,"repo")
+        deleteDirectory currentPathLib
+        deleteDirectory currentPathRepo
+        deleteFiles currentPath "*.fpl"
+
+        let fplCode = """
+            def cl Natural: object
+            {
+                intr
+            }
+
+
+            axiom Axiom1()
+            {
+                is(1,Natural)
+            };
+        """
+
+        let filename = "OpeningFileInMainAndUpdatingReferencesCorrectlyRaisesSIG04Errors"  
+        // process the file
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        // test if there is no SIG04 error
+        let result = filterByErrorCode ad (SIG04 ("","","")).Code
+        Assert.AreEqual<int>(0, result.Length)
+
+
+        // do the test - now, modify the file with a typo to provoke SIG04 diagnostics
+        let fplCode = """
+            def cl Natural: object
+            {
+                intr
+            }
+
+
+            axiom Axiom1()
+            {
+                is(1,NaturalTypo)
+            };
+        """
+        let pathToFile = Path.Combine(currentPath,filename)
+        File.WriteAllText(pathToFile,fplCode)
+        // reprocess file with the same symbol table
+        loadFplFileWithTheSameSymbolTable stOption.Value pathToFile |> ignore
+
+        // test if there is a SIG04 error (there should be 1)
+        let result = filterByErrorCode ad (SIG04 ("","","")).Code
+        Assert.AreEqual<int>(1, result.Length)
+
+        // now, correct the typo to make SIG04 diagnostics disappear
+        let fplCode = """
+            def cl Natural: object
+            {
+                intr
+            }
+
+
+            axiom Axiom1()
+            {
+                is(1,Natural)
+            };
+        """
+        File.WriteAllText(pathToFile,fplCode)
+        // reprocess file with the same symbol table
+        loadFplFileWithTheSameSymbolTable stOption.Value pathToFile |> ignore
+
+        // test if there is a SIG04 error (there should be 0)
+        let result = filterByErrorCode ad (SIG04 ("","","")).Code
+        Assert.AreEqual<int>(0, result.Length)
+
+        // remove the test file
+        prepareFplCode(filename, "", true) |> ignore

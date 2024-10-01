@@ -1617,6 +1617,9 @@ let evaluateSymbolTable (st: SymbolTable) =
             let theoryValue = FplValue.CreateFplValue((Position("",0,1,1), Position("",0,1,1)), FplValueType.Theory, st.Root)
             if not (st.Root.Scope.ContainsKey(pa.Id)) then
                 st.Root.Scope.Add(pa.Id, theoryValue)
+            else
+                st.Root.Scope[pa.Id].Reset()
+                st.Root.Scope[pa.Id] <- theoryValue
             theoryValue.Name <- pa.Id
             st.SetContext(EvalContext.InTheory theoryValue) LogContext.Start
             ad.CurrentUri <- pa.Parsing.Uri
