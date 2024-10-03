@@ -248,7 +248,7 @@ class FplTheoriesProvider {
 
     parseScope(scope) {
         // Convert each item in the scope to a MyTreeItem
-        return scope.map(item => new MyTreeItem(item.Name, item.Scope, item.ValueList));
+        return scope.map(item => new MyTreeItem(item.Type + ": " + item.Name, item.Scope, item.ValueList));
     }
 }
 

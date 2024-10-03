@@ -1,15 +1,2 @@
-uses Fpl.SetTheory
-
-def cl Natural1: object
-{
-    intr
-}
-
-
-axiom Axiom()
-{
-    Natural1()
-}
-
 
 ;

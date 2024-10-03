@@ -1077,6 +1077,7 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
                 sb.AppendLine($"{indent}\"Name\": \"Main> {root.Name}\",") |> ignore
             else
                 sb.AppendLine($"{indent}\"Name\": \"{root.Name}\",") |> ignore
+            sb.AppendLine($"{indent}\"Type\": \"{root.BlockType.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"Scope\": [") |> ignore
             let mutable counterScope = 0
             root.Scope
