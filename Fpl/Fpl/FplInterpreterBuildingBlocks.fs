@@ -61,6 +61,10 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
                 if (FplValue.IsVariable(parent)) then 
                     adjustSignature st parent str
             | None -> ()
+        | EvalContext.InReferenceCreation fplValue -> ()
+        | EvalContext.InQuantorCreation fplValue -> ()
+        | EvalContext.InIsOperatorCreation fplValue -> ()
+        | EvalContext.InInfixOperation fplValue -> ()
         | _ -> 
             emitUnevaluatedContextDiagnostics st fplValue.StartPos fplValue.EndPos 
 
@@ -83,7 +87,8 @@ let setRepresentation (st: SymbolTable) representation =
     | EvalContext.InPropertySignature fplValue 
     | EvalContext.InConstructorSignature fplValue
     | EvalContext.InSignature fplValue 
-    | EvalContext.InReferenceCreation fplValue -> 
+    | EvalContext.InReferenceCreation fplValue 
+    | EvalContext.InIsOperatorCreation fplValue -> 
         fplValue.FplRepresentation <- representation
     | _ -> 
         emitUnevaluatedContextDiagnostics st (Position("",0,1,1)) (Position("",0,1,1)) 
@@ -105,6 +110,8 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
                 checkID009_ID010_ID011_Diagnostics st fplValue unitType pos1 pos2
     | EvalContext.InReferenceCreation fplValue -> 
         checkID012Diagnostics st fplValue unitType pos1 pos2
+    | EvalContext.InBlock _ -> ()
+    | EvalContext.InPropertyBlock _ -> ()
     | _ -> 
         emitUnevaluatedContextDiagnostics st pos1 pos2 
 
@@ -371,7 +378,7 @@ let rec eval (st: SymbolTable) ast =
             tryAddBlock varValue 
         | EvalContext.InIsOperatorCreation fplValue
         | EvalContext.InQuantorCreation fplValue
-        | EvalContext.InReferenceCreation fplValue ->
+        | EvalContext.InReferenceCreation fplValue -> 
             match FplValue.VariableInBlockScopeByName fplValue name with 
             | ScopeSearchResult.Found variableInScope ->
                 // replace the reference by a pointer to an existing declared variable
@@ -381,6 +388,8 @@ let rec eval (st: SymbolTable) ast =
                 fplValue.Name <- addWithComma fplValue.Name name
                 fplValue.TypeSignature <- fplValue.TypeSignature @ ["undef"]
                 emitVAR01diagnostics name pos1 pos2
+        | EvalContext.InConstructorBlock fplValue -> ()
+        | EvalContext.InTheory fplValue -> ()
         | _ -> 
             emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
@@ -695,8 +704,7 @@ let rec eval (st: SymbolTable) ast =
                     |> List.append ["obj"]
                     |> String.concat ","
                 fplValue.FplRepresentation <- FplRepresentation.ObjRepr repr
-            | _ -> 
-                emitUnevaluatedContextDiagnostics st pos1 pos2 
+            | _ -> ()
         | EvalContext.InQuantorCreation fplValue
         | EvalContext.InIsOperatorCreation fplValue ->
             adjustSignature st fplValue identifier
@@ -845,10 +853,14 @@ let rec eval (st: SymbolTable) ast =
     | Ast.QualificationList((pos1, pos2), asts) ->
         st.EvalPush("QualificationList")
         match st.CurrentContext with
+        | EvalContext.InQuantorCreation fplValue 
         | EvalContext.InReferenceCreation fplValue -> 
             if asts.Length > 0 then
                 asts |> List.map (eval st) |> ignore
                 propagateReference fplValue true
+        | EvalContext.InPropertyBlock _ -> ()
+        | EvalContext.InConstructorBlock _ -> ()
+        | EvalContext.InBlock _ -> ()
         | _-> 
             emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
@@ -918,6 +930,7 @@ let rec eval (st: SymbolTable) ast =
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
             eval st fplIdentifierAst
             optionalSpecificationAst |> Option.map (eval st) |> ignore
+        | EvalContext.InQuantorCreation fplValue 
         | EvalContext.InReferenceCreation fplValue ->
             match optionalSpecificationAst with
             | Some specificationAst -> 
@@ -1055,6 +1068,7 @@ let rec eval (st: SymbolTable) ast =
         |> ignore
         eval st paramTupleAst
         match st.CurrentContext with
+        | EvalContext.InPropertySignature fplValue 
         | EvalContext.InSignature fplValue ->
             emitSIG00Diagnostics fplValue pos1 pos2
         | _ -> 
@@ -1269,6 +1283,7 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InBlock fplValue 
         | EvalContext.InPropertyBlock fplValue 
         | EvalContext.InConstructorBlock fplValue 
+        | EvalContext.InQuantorCreation fplValue 
         | EvalContext.InReferenceCreation fplValue ->
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fplValue) 
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Start
@@ -1305,6 +1320,7 @@ let rec eval (st: SymbolTable) ast =
             | _ -> ()
             refBlock.NameIsFinal <- true
             refBlock.NameEndPos <- pos2
+        | EvalContext.InTheory _ -> () 
         | _ -> 
             emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
@@ -1515,6 +1531,9 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InConstructorBlock fplValue
         | EvalContext.InPropertyBlock fplValue ->
             st.SetContext(EvalContext.NamedVarDeclarationInBlock (fplValue)) LogContext.Start
+        | EvalContext.InSignature _ -> () 
+        | EvalContext.InPropertySignature _ -> () 
+        | EvalContext.InConstructorSignature _ -> () 
         | _ -> 
             emitUnevaluatedContextDiagnostics st pos1 pos2
         variableListAst |> List.map (eval st) |> ignore 

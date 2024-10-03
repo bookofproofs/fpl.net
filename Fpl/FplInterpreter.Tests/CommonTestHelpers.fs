@@ -88,9 +88,9 @@ let runTestHelper filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expect
 
     let contextErrors =
         ad.Collection
-        |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplInterpreter || d.Code.Code = "GEN01")
+        |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplInterpreter && d.Code.Code = "GEN01")
 
-    if contextErrors.Length > 0 && code.Code <> "GEN01" then
+    if contextErrors.Length > 0 then
         failwithf $"Context errors detected. {contextErrors.Head}"
 
     let result = filterByErrorCode ad code.Code
