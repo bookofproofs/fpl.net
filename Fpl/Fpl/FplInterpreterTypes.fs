@@ -1175,9 +1175,9 @@ let rec checkCandidates (toBeMatchedTypeSignature: string list) (candidates: Fpl
         match findFirstMismatchPosition toBeMatchedTypeSignature x.TypeSignature with
         | ("", "", None) -> (accResult, Some x) // there is a candidate that matches toBeMatchedTypeSignature
         | ("", elem2, Some index) -> 
-            checkCandidates toBeMatchedTypeSignature xs $"missing {elem2} at position {index}" // first reason for mismatch
+            checkCandidates toBeMatchedTypeSignature xs $"missing token `{elem2}` after matching {index}" // first reason for mismatch
         | (elem1, "", Some index) -> 
-            checkCandidates toBeMatchedTypeSignature xs $"superfluous {elem1} at position {index}" // second reason for mismatch
+            checkCandidates toBeMatchedTypeSignature xs $"superfluous token `{elem1}` after matching {index}" // second reason for mismatch
         | (elem1, elem2, Some index) -> 
             checkCandidates toBeMatchedTypeSignature xs $"`{elem1}` with `{elem2}` at position {index}" // third reason for mismatch
         | _ -> checkCandidates toBeMatchedTypeSignature xs accResult // accumulate reasons
