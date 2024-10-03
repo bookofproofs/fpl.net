@@ -128,12 +128,12 @@ namespace FplLS
         }
         private string GetBody()
         {
-            return $" p(x) ";
+            return "{ p(x) }";
         }
 
         private string GetLongBody()
         {
-            return $" and( p(x), q(y), u(z) ) ";
+            return "{ and( p(x), q(y), u(z) ) }";
         }
     }
 }
