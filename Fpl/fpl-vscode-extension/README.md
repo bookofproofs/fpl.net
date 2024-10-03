@@ -12,6 +12,7 @@ This is a Proof of Concept of a private research project to develop such a langu
 * (Syntax-driven) Error diagnostics service (experimental) 
 * (Syntax-driven) Code-completion service with various code snippets 
 * FPL support for user-defined prefix, postfix, and infix notation for mathematical operators in expressions.
+* Initial semantical error diagnostics (mainly related to scope issues and unknown identifier issues)
 
 
 <img src="https://github.com/bookofproofs/fpl.net/blob/main/Fpl/fpl-vscode-extension/images/FplExtension.gif?raw=true" width="550">
