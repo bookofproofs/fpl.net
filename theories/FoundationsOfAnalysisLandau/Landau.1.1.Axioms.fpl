@@ -1,5 +1,15 @@
-uses Fpl.SetTheory 
+uses Fpl.SetTheory
 
-inf ModusPonens() {pre:true con:true} 
+def cl Natural1: object
+{
+    intr
+}
+
+
+axiom Axiom()
+{
+    Natural1()
+}
+
 
 ;

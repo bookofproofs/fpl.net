@@ -212,11 +212,15 @@ class MyTreeItem extends vscode.TreeItem {
     }
 }
 
-// Define your TreeDataProvider
+// Define TreeDataProvider
 class FplTheoriesProvider {
     constructor() {
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+    }
+
+    refresh() {
+        this._onDidChangeTreeData.fire();
     }
 
     getTreeItem(element) {
@@ -230,7 +234,7 @@ class FplTheoriesProvider {
                 let treeData = JSON.parse(json);
                 return this.parseScope(treeData.Scope);
             }).catch(error => {
-                console.error('Failed to get tree data', error);
+                log2Console('Failed to get tree data ' + error, true);
                 return [];  // Return an empty array on error
             });
         } else if (element.scope) {
@@ -300,8 +304,22 @@ function activate(context) {
             // Create an instance of your TreeDataProvider
             const fplTheoriesProvider = new FplTheoriesProvider();
 
-            // Register your TreeDataProvider
+            // Register TreeDataProvider
             vscode.window.registerTreeDataProvider('fplTheories', fplTheoriesProvider);
+
+            // refresh FPL Theories Explorer on document open event  
+            vscode.workspace.onDidOpenTextDocument((document) => {
+                if (document.languageId === 'fpl') {
+                    fplTheoriesProvider.refresh();
+                }
+            });
+
+            // refresh FPL Theories Explorer on document changes  
+            vscode.workspace.onDidChangeTextDocument((event) => {
+                if (event.document.languageId === 'fpl') {
+                    fplTheoriesProvider.refresh();
+                }
+            });
 
             let config = vscode.workspace.getConfiguration('fplExtension');
 

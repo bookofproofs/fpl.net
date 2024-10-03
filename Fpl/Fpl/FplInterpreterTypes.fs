@@ -1073,7 +1073,10 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         let rec createJson (root:FplValue) (sb:StringBuilder) level isLast =
             let indent = String(' ', level)
             sb.AppendLine(String(' ', level - 1) + "{") |> ignore
-            sb.AppendLine($"{indent}\"Name\": \"{root.Name}\",") |> ignore
+            if root.Name = this.MainTheory then
+                sb.AppendLine($"{indent}\"Name\": \"Main> {root.Name}\",") |> ignore
+            else
+                sb.AppendLine($"{indent}\"Name\": \"{root.Name}\",") |> ignore
             sb.AppendLine($"{indent}\"Scope\": [") |> ignore
             let mutable counterScope = 0
             root.Scope
