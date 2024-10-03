@@ -61,7 +61,8 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
                 if (FplValue.IsVariable(parent)) then 
                     adjustSignature st parent str
             | None -> ()
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st fplValue.StartPos fplValue.EndPos 
 
     if str <> "" && not (FplValue.IsVariable(fplValue)) then
         if FplValue.IsDefinition(fplValue) && fplValue.NameIsFinal then 
@@ -84,7 +85,9 @@ let setRepresentation (st: SymbolTable) representation =
     | EvalContext.InSignature fplValue 
     | EvalContext.InReferenceCreation fplValue -> 
         fplValue.FplRepresentation <- representation
-    | _ -> ()
+    | _ -> 
+        emitUnevaluatedContextDiagnostics st (Position("",0,1,1)) (Position("",0,1,1)) 
+
 
 let eval_units (st: SymbolTable) unitType pos1 pos2 = 
     match st.CurrentContext with
@@ -102,7 +105,8 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
                 checkID009_ID010_ID011_Diagnostics st fplValue unitType pos1 pos2
     | EvalContext.InReferenceCreation fplValue -> 
         checkID012Diagnostics st fplValue unitType pos1 pos2
-    | _ -> ()
+    | _ -> 
+        emitUnevaluatedContextDiagnostics st pos1 pos2 
 
 let eval_string (st: SymbolTable) s = ()
 
@@ -220,7 +224,8 @@ let rec eval (st: SymbolTable) ast =
             |> Seq.iter (fun varKeyValue -> 
                 varKeyValue.Value.BlockType <- blockType
             )
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
 
     match ast with
     // units: | Star
@@ -287,7 +292,11 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue s
-        | _ -> ()
+        | _ -> 
+            let pos1 = Position("",0,1,1)
+            let pos2 = Position("",0,1,1)
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
+
         st.EvalPop()
     | Ast.PascalCaseId s -> 
         st.EvalPush("PascalCaseId")
@@ -312,7 +321,9 @@ let rec eval (st: SymbolTable) ast =
             fplValue.NameEndPos <- pos2 // the full name ends where the dollar digits end 
             if fplValue.FplRepresentation = FplRepresentation.Undef then
                 fplValue.FplRepresentation <- FplRepresentation.Index s
-        | _ -> ()
+        | _ ->
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
+
         st.EvalPop() 
     | Ast.Extensionname((pos1, pos2), s) ->
         st.EvalPush("Extensionname")
@@ -327,7 +338,8 @@ let rec eval (st: SymbolTable) ast =
                 adjustSignature st fplValue ("+@" + s)
             else
                 adjustSignature st fplValue ("@" + s)
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
@@ -343,7 +355,8 @@ let rec eval (st: SymbolTable) ast =
                 adjustSignature st fplValue ("+" + s)
             else
                 adjustSignature st fplValue s
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
@@ -357,6 +370,7 @@ let rec eval (st: SymbolTable) ast =
             varValue.NameEndPos <- pos2
             tryAddBlock varValue 
         | EvalContext.InIsOperatorCreation fplValue
+        | EvalContext.InQuantorCreation fplValue
         | EvalContext.InReferenceCreation fplValue ->
             match FplValue.VariableInBlockScopeByName fplValue name with 
             | ScopeSearchResult.Found variableInScope ->
@@ -367,14 +381,16 @@ let rec eval (st: SymbolTable) ast =
                 fplValue.Name <- addWithComma fplValue.Name name
                 fplValue.TypeSignature <- fplValue.TypeSignature @ ["undef"]
                 emitVAR01diagnostics name pos1 pos2
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue s
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.Alias((pos1, pos2), s) -> 
         st.EvalPush("Alias")
@@ -389,7 +405,8 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue s
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
@@ -405,14 +422,16 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InPropertySignature fplValue
         | EvalContext.InSignature fplValue ->
             emitPR000Diagnostics fplValue s pos1 pos2
-        | _ -> () 
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.Prefix((pos1, pos2), symbol) -> 
         st.EvalPush("Prefix")
         match st.CurrentContext with
         | EvalContext.InSignature fplValue ->
             fplValue.ExpressionType <- FixType.Prefix symbol
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.Infix((pos1, pos2), (symbol, precedenceAsts)) -> 
         st.EvalPush("Infix")
@@ -421,14 +440,16 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InSignature fplValue ->
             fplValue.ExpressionType <- FixType.Infix (symbol, fplValue.AuxiliaryInfo)
             emitSIG02Diagnostics st fplValue pos1 pos2 
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.Postfix((pos1, pos2), symbol) -> 
         st.EvalPush("Postfix")
         match st.CurrentContext with
         | EvalContext.InSignature fplValue ->
             fplValue.ExpressionType <- FixType.Postfix symbol
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop() 
     | Ast.Symbol((pos1, pos2), s) -> 
         st.EvalPush("Symbol")
@@ -450,7 +471,8 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue symbol
             emitSIG01Diagnostics st fplValue pos1 pos2 
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.PrefixOperator((pos1, pos2), symbol) -> 
         st.EvalPush("PrefixOperator")
@@ -458,7 +480,8 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue symbol
             emitSIG01Diagnostics st fplValue pos1 pos2 
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     // | Self of Positions * unit
     | Ast.Self((pos1, pos2), _) -> 
@@ -471,7 +494,8 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InReferenceCreation fplValue ->
             fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.True
             adjustSignature st fplValue "true"
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.False((pos1, pos2), _) -> 
         st.EvalPush("False")
@@ -479,14 +503,16 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InReferenceCreation fplValue ->
             fplValue.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.False
             adjustSignature st fplValue "false"
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.Undefined((pos1, pos2), _) -> 
         st.EvalPush("Undefined")
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue "undef"
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop() 
     | Ast.Trivial((pos1, pos2), _) -> 
         st.EvalPush("Trivial")
@@ -508,7 +534,10 @@ let rec eval (st: SymbolTable) ast =
             st.SetContext(EvalContext.InBlock fplValue) LogContext.Replace
             eval st premiseConclusionBlockAst
             tryAddBlock fplValue 
-        | _ -> ()
+        | _ -> 
+            let pos1 = Position("",0,1,1)
+            let pos2 = Position("",0,1,1)
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.SetContext(oldContext) LogContext.End
         st.EvalPop() 
     | Ast.ClassIdentifier((pos1, pos2), ast1) ->
@@ -519,7 +548,8 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InConstructorSignature fplValue
         | EvalContext.InSignature fplValue -> 
             fplValue.NameEndPos <- pos2
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         eval_pos_ast st pos1 pos2
         st.EvalPop()
     | Ast.ExtDigits((pos1, pos2), ast1) ->
@@ -551,7 +581,8 @@ let rec eval (st: SymbolTable) ast =
             fplValue.NameEndPos <- pos2
             evaluateNegation fplValue
             emitLG000orLG001Diagnostics fplValue "negation"
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop()
     | Ast.InEntity((pos1, pos2), ast1) ->
         st.EvalPush("InEntity")
@@ -584,7 +615,8 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InPropertySignature fplValue
         | EvalContext.InSignature fplValue ->
             emitPR001Diagnostics fplValue pos1 pos2
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop()
     | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->
         st.EvalPush("DottedPredicate")
@@ -597,7 +629,8 @@ let rec eval (st: SymbolTable) ast =
             st.SetContext(EvalContext.InReferenceCreation refBlock) LogContext.Replace
             eval st predicateWithOptSpecificationAst
             propagateReference refBlock true
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     | Ast.Return((pos1, pos2), ast1) ->
@@ -662,7 +695,9 @@ let rec eval (st: SymbolTable) ast =
                     |> List.append ["obj"]
                     |> String.concat ","
                 fplValue.FplRepresentation <- FplRepresentation.ObjRepr repr
-            | _ -> ()
+            | _ -> 
+                emitUnevaluatedContextDiagnostics st pos1 pos2 
+        | EvalContext.InQuantorCreation fplValue
         | EvalContext.InIsOperatorCreation fplValue ->
             adjustSignature st fplValue identifier
             propagateReference fplValue true
@@ -672,7 +707,8 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue identifier
             checkID012Diagnostics st fplValue identifier pos1 pos2
             emitSIG04TypeDiagnostics st identifier fplValue pos1 pos2
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
         
@@ -692,7 +728,8 @@ let rec eval (st: SymbolTable) ast =
             ) |> ignore
             adjustSignature st fplValue ")"
             fplValue.NameEndPos <- pos2
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2 
         st.EvalPop()
     | Ast.BracketedCoordsInType((pos1, pos2), asts) ->
         st.EvalPush("BracketedCoordsInType")
@@ -709,7 +746,8 @@ let rec eval (st: SymbolTable) ast =
             ) |> ignore
             adjustSignature st fplValue "]"
             fplValue.NameEndPos <- pos2
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
         st.EvalPush("NamespaceIdentifier")
@@ -730,7 +768,8 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue "["
             asts |> List.map (eval st) |> ignore
             adjustSignature st fplValue "]"
-        | _-> ()
+        | _-> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     | Ast.And((pos1, pos2), predicateAsts) ->
         st.EvalPush("And")
@@ -744,7 +783,8 @@ let rec eval (st: SymbolTable) ast =
             fplValue.NameEndPos <- pos2
             evaluateConjunction fplValue
             emitLG000orLG001Diagnostics fplValue "conjunction"
-        | _-> ()
+        | _-> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     | Ast.Or((pos1, pos2), predicateAsts) ->
         st.EvalPush("Or")
@@ -758,7 +798,8 @@ let rec eval (st: SymbolTable) ast =
             fplValue.NameEndPos <- pos2
             evaluateDisjunction fplValue
             emitLG000orLG001Diagnostics fplValue "disjunction"
-        | _-> ()
+        | _-> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     | Ast.Xor((pos1, pos2), predicateAsts) ->
         st.EvalPush("Xor")
@@ -772,7 +813,8 @@ let rec eval (st: SymbolTable) ast =
             fplValue.NameEndPos <- pos2
             evaluateExclusiveOr fplValue
             emitLG000orLG001Diagnostics fplValue "exclusive-or"
-        | _-> ()
+        | _-> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), asts) ->
         st.EvalPush("VarDeclBlock")
@@ -797,7 +839,8 @@ let rec eval (st: SymbolTable) ast =
             adjustSignature st fplValue "("
             asts |> List.map (eval st) |> ignore
             adjustSignature st fplValue ")"
-        | _-> ()
+        | _-> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
         st.EvalPush("QualificationList")
@@ -806,7 +849,8 @@ let rec eval (st: SymbolTable) ast =
             if asts.Length > 0 then
                 asts |> List.map (eval st) |> ignore
                 propagateReference fplValue true
-        | _-> ()
+        | _-> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     // | Namespace of Ast option * Ast list
     | Ast.Namespace(optAst, asts) ->
@@ -830,7 +874,8 @@ let rec eval (st: SymbolTable) ast =
             | EvalContext.InSignature fplValue ->
                 adjustSignature st fplValue "->"
                 fplValue.NameEndPos <- pos2
-            | _ -> ()
+            | _ -> 
+                emitUnevaluatedContextDiagnostics st pos1 pos2
             eval st ast3 |> ignore
         | _ -> ()
         st.EvalPop()
@@ -890,7 +935,8 @@ let rec eval (st: SymbolTable) ast =
             | None -> 
                 // if no specification was found then simply continue in the same context
                 eval st fplIdentifierAst
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | SelfAts of Positions * char list
@@ -900,7 +946,8 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InReferenceCreation fplValue ->
             adjustSignature st fplValue identifier
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     // | Translation of string * Ast
     | Ast.Translation(s, ast1) ->
@@ -934,7 +981,8 @@ let rec eval (st: SymbolTable) ast =
             fplValue.NameEndPos <- pos2
             evaluateImplication fplValue
             emitLG000orLG001Diagnostics fplValue "implication"
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     | Ast.Iif((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Iif")
@@ -952,7 +1000,8 @@ let rec eval (st: SymbolTable) ast =
             fplValue.NameEndPos <- pos2
             evaluateEquivalence fplValue
             emitLG000orLG001Diagnostics fplValue "equivalence"
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
         st.EvalPush("IsOperator")
@@ -971,7 +1020,8 @@ let rec eval (st: SymbolTable) ast =
             eval st variableTypeAst
             adjustSignature st fplValue ")"
 
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
@@ -990,7 +1040,8 @@ let rec eval (st: SymbolTable) ast =
             // forget refBlock but propagate its name and typesignature into its parent
             emitID013Diagnostics refBlock pos1 pos2 |> ignore
             propagateReference refBlock false 
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
@@ -1006,7 +1057,8 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InSignature fplValue ->
             emitSIG00Diagnostics fplValue pos1 pos2
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     | Ast.PropertyBlock((pos1, pos2), (keywordPropertyAst, definitionPropertyAst)) ->
         st.EvalPush("PropertyBlock")
@@ -1018,7 +1070,8 @@ let rec eval (st: SymbolTable) ast =
             st.SetContext(EvalContext.InPropertySignature fplValue) LogContext.Start
             eval st definitionPropertyAst
             tryAddBlock fplValue 
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
@@ -1047,7 +1100,8 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InPropertySignature fplValue ->
             st.SetContext(EvalContext.InPropertyBlock fplValue) LogContext.Start
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         eval st functionalTermInstanceBlockAst
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
@@ -1070,8 +1124,8 @@ let rec eval (st: SymbolTable) ast =
             |> ignore
             eval st predicateAst
             emitLG000orLG001Diagnostics fplValue "all quantor"
-        | _ -> ()
-
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     | Ast.Exists((pos1, pos2), (variableListInOptDomainListAst, predicateAst)) ->
         st.EvalPush("Exists")
@@ -1091,7 +1145,8 @@ let rec eval (st: SymbolTable) ast =
             |> ignore
             eval st predicateAst
             emitLG000orLG001Diagnostics fplValue "exists quantor"
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
     | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, (variableAst, inOptDomainAst)), predicateAst)) ->
@@ -1109,7 +1164,8 @@ let rec eval (st: SymbolTable) ast =
             inOptDomainAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
             eval st predicateAst
             emitLG000orLG001Diagnostics fplValue "exists n times quantor"
-        | _ -> ()
+        | _ ->
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature((pos1, pos2), ((optAst, signatureWithUserDefinedStringAst), mappingAst)) -> 
@@ -1133,7 +1189,8 @@ let rec eval (st: SymbolTable) ast =
             | None -> ()
             adjustSignature st fplValue "->"
             fplValue.NameEndPos <- pos2
-        | _ -> ()
+        | _ ->
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         eval st mappingAst
         st.EvalPop()
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
@@ -1201,7 +1258,8 @@ let rec eval (st: SymbolTable) ast =
                 | [] -> ()
 
             createReversedPolishNotation sortedSeparatedPredicateListAst fplValue
-        | _-> ()
+        | _-> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
@@ -1247,7 +1305,8 @@ let rec eval (st: SymbolTable) ast =
             | _ -> ()
             refBlock.NameIsFinal <- true
             refBlock.NameEndPos <- pos2
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
@@ -1281,7 +1340,8 @@ let rec eval (st: SymbolTable) ast =
                 fplValue.BlockType <- FplValueType.OptionalPredicate
             | None -> 
                 fplValue.BlockType <- FplValueType.MandatoryPredicate
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         eval st predInstanceBlockAst
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
@@ -1296,7 +1356,8 @@ let rec eval (st: SymbolTable) ast =
             eval st inheritedClassTypeAst
             eval st argumentTupleAst
             refBlock.NameIsFinal <- true
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     | Ast.JustifiedArgument((pos1, pos2), (ast1, ast2)) ->
@@ -1335,7 +1396,8 @@ let rec eval (st: SymbolTable) ast =
             tryAddBlock fplValue 
             st.SetContext(EvalContext.InBlock fplValue) LogContext.Replace
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     | Ast.Lemma((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
@@ -1349,7 +1411,8 @@ let rec eval (st: SymbolTable) ast =
             tryAddBlock fplValue 
             st.SetContext(EvalContext.InBlock fplValue) LogContext.Replace
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     | Ast.Proposition((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
@@ -1363,7 +1426,8 @@ let rec eval (st: SymbolTable) ast =
             tryAddBlock fplValue 
             st.SetContext(EvalContext.InBlock fplValue) LogContext.Replace
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     | Ast.Conjecture((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
@@ -1377,7 +1441,8 @@ let rec eval (st: SymbolTable) ast =
             tryAddBlock fplValue 
             st.SetContext(EvalContext.InBlock fplValue) LogContext.Replace
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     | Ast.Axiom((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
@@ -1391,7 +1456,8 @@ let rec eval (st: SymbolTable) ast =
             tryAddBlock fplValue 
             st.SetContext(EvalContext.InBlock fplValue) LogContext.Replace
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        | _ -> ()
+        | _ ->
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
@@ -1411,7 +1477,8 @@ let rec eval (st: SymbolTable) ast =
             tryAddBlock fplValue 
             st.SetContext(EvalContext.InBlock fplValue) LogContext.Replace
             evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
@@ -1448,7 +1515,8 @@ let rec eval (st: SymbolTable) ast =
         | EvalContext.InConstructorBlock fplValue
         | EvalContext.InPropertyBlock fplValue ->
             st.SetContext(EvalContext.NamedVarDeclarationInBlock (fplValue)) LogContext.Start
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         variableListAst |> List.map (eval st) |> ignore 
 
         match st.CurrentContext with 
@@ -1464,7 +1532,8 @@ let rec eval (st: SymbolTable) ast =
             evalNamedVarDecl fplValue "InConstructorSignature"
         | EvalContext.InSignature fplValue -> 
             evalNamedVarDecl fplValue "InSignature"
-        | _ -> ()
+        | _ ->
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
@@ -1482,7 +1551,8 @@ let rec eval (st: SymbolTable) ast =
             | Some astList -> astList |> List.map (eval st) |> ignore
             | None -> ()
             eval st keywordSelfAst
-        | _ -> ()
+        | _ ->
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | DefPredicateContent of Ast list option * Ast
@@ -1521,7 +1591,8 @@ let rec eval (st: SymbolTable) ast =
             st.SetContext(EvalContext.InBlock fplValue) LogContext.Replace
             eval st predicateContentAst
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
@@ -1537,7 +1608,8 @@ let rec eval (st: SymbolTable) ast =
             st.SetContext(EvalContext.InBlock fplValue) LogContext.Replace
             eval st funcContentAst
             optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option))
@@ -1559,7 +1631,8 @@ let rec eval (st: SymbolTable) ast =
             optPropertyListAsts
             |> Option.map (List.map (eval st) >> ignore)
             |> Option.defaultValue ()
-        | _ -> ()
+        | _ ->
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     // | DerivedPredicate of Ast
@@ -1580,7 +1653,8 @@ let rec eval (st: SymbolTable) ast =
             st.SetContext(EvalContext.InBlock fplValue) LogContext.Replace
             proofArgumentListAst |> List.map (eval st) |> ignore
             optQedAst |> Option.map (eval st) |> Option.defaultValue ()
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.SetContext(oldContext) LogContext.End
         st.EvalPop()
     | Ast.Precedence((pos1, pos2), precedence) ->
@@ -1588,7 +1662,8 @@ let rec eval (st: SymbolTable) ast =
         match st.CurrentContext with
         | EvalContext.InSignature fplValue -> 
             fplValue.AuxiliaryInfo <- precedence
-        | _ -> ()
+        | _ -> 
+            emitUnevaluatedContextDiagnostics st pos1 pos2
         st.EvalPop()
     | ast1 ->
         let astType = ast1.GetType().Name

@@ -86,6 +86,13 @@ let runTestHelper filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expect
     if syntaxErrors.Length > 0 && code.Code <> "GEN00" then
         failwithf $"Syntax or other errors detected. {syntaxErrors.Head}"
 
+    let contextErrors =
+        ad.Collection
+        |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplInterpreter || d.Code.Code = "GEN01")
+
+    if contextErrors.Length > 0 && code.Code <> "GEN01" then
+        failwithf $"Context errors detected. {contextErrors.Head}"
+
     let result = filterByErrorCode ad code.Code
     Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode (filename, "", true) |> ignore

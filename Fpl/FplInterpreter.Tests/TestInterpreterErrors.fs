@@ -298,6 +298,9 @@ type TestInterpreterErrors() =
 
     [<DataRow("def pred Test() {x};", 1)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
+    [<DataRow("axiom A() { all x in Nat {true} };", 0)>]
+    [<DataRow("axiom A() { all x {true} };", 1)>]
+    [<DataRow("axiom A() { dec ~x:obj; all x {true} };", 0)>]
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
         let code = VAR01 ""
@@ -574,6 +577,8 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Set:obj {intr} axiom Test() {dec ~x:Set; true};", 0)>]
     [<DataRow("def cl Set:obj {intr} axiom Test() {dec ~x:SetTypo; true};", 1)>]
     [<DataRow("def pred Test() {dec ~x:Set; true};", 1)>]
+    [<DataRow("axiom A() { all x in Nat {true} };", 1)>]
+    [<DataRow("axiom A() { all x is Nat {true} };", 1)>]
     [<DataRow("def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
     [<DataRow("""def pred T1() {true} def pred Test() { dec ~x:obj; T1(x) };""", 1)>]
@@ -585,6 +590,14 @@ type TestInterpreterErrors() =
     member this.TestSIG04(fplCode:string, expected) =
         let code = SIG04 ("","","")
         runTestHelper "TestSIG04.fpl" fplCode code expected
+
+    [<DataRow("axiom A() { all x in Nat {true} };", 0)>]
+    [<DataRow("axiom A() { all x is Nat {true} };", 0)>]
+    [<TestMethod>]
+    member this.TestGEN01(fplCode:string, expected) =
+        let code = GEN01 ""
+        runTestHelper "TestGEN01.fpl" fplCode code expected
+
 
     [<DataRow("""def pred T() { 1. };;""", 1)>]
     [<DataRow("""proof T$1 {1. |- trivial };""", 0)>]

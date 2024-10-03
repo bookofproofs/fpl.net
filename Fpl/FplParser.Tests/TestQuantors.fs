@@ -246,3 +246,17 @@ type TestQuantors () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestQuantors35 () =
+        let result = run (predicate .>> eof) """ex x in Real {true}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestQuantors36 () =
+        let result = run (predicate .>> eof) """ex x is Real {true}"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
