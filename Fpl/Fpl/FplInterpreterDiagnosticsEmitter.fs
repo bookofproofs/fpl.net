@@ -639,7 +639,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
         | FplRepresentation.Pointer variable ->
             match variable.FplRepresentation with
             | FplRepresentation.PredRepr _ -> emitLG000Diagnostics variable
-            | _ -> emitLG001Diagnostics variable
+            | _ -> emitLG001Diagnostics arg
         | _ -> emitLG001Diagnostics arg)
 
     let code = LG000("", "")

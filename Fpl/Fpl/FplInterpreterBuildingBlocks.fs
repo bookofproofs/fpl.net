@@ -1315,7 +1315,7 @@ let rec eval (st: SymbolTable) ast =
             eval st qualificationListAst
             propagateReference refBlock true
             match (fplValue.BlockType, fplValue.FplRepresentation,refBlock.FplRepresentation,fplValue.ValueList.Count) with
-            | (FplValueType.Reference, FplRepresentation.Undef, FplRepresentation.Pointer _, 1) ->
+            | (FplValueType.Reference, FplRepresentation.Undef, FplRepresentation.Pointer var, 1) ->
                 fplValue.FplRepresentation <- refBlock.FplRepresentation
             | _ -> ()
             refBlock.NameIsFinal <- true

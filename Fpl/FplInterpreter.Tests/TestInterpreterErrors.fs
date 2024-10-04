@@ -676,3 +676,13 @@ type TestInterpreterErrors() =
         let code = LG001 ("","","")
         runTestHelper "TestLG001.fpl" fplCode code expected
 
+    [<DataRow("""axiom A() {dec ~x,y:Nat; impl(x,y)};""", 31)>]
+    [<TestMethod>]
+    member this.TestLG001Position(fplCode:string, (expected:int64)) =
+        let code = LG001 ("","","")
+        prepareFplCode ("TestLG001Position.fpl", fplCode, false) |> ignore
+        checkForUnexpectedErrors code
+        let result = filterByErrorCode ad code.Code
+        Assert.AreEqual<int64>(expected, result.Head.StartPos.Column)
+        
+
