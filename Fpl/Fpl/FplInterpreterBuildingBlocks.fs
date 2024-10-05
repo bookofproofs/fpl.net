@@ -112,6 +112,7 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
         checkID012Diagnostics st fplValue unitType pos1 pos2
     | EvalContext.InBlock _ -> ()
     | EvalContext.InPropertyBlock _ -> ()
+    | EvalContext.ContextNone -> ()
     | _ -> 
         emitUnevaluatedContextDiagnostics st pos1 pos2 
 
