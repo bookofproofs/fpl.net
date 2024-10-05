@@ -432,6 +432,13 @@ type TestPredicates () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
 
+    [<TestMethod>]
+    member this.TestPredicate58 () =
+        let result = run (predicate .>> eof) """impl(T,true)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+        
 
 
            

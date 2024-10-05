@@ -685,4 +685,18 @@ type TestInterpreterErrors() =
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int64>(expected, result.Head.StartPos.Column)
         
+    [<DataRow("""axiom A() {dec ~x,y:obj; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `object`.")>]
+    [<DataRow("""axiom A() {dec ~x,y:ind; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `index`.")>]
+    [<DataRow("""axiom A() {dec ~x,y:func; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `function type`.")>]
+    [<DataRow("""axiom A() {impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `undefined`.")>]
+    [<DataRow("""axiom A() {impl(T(),true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T()`, got `undefined`.")>]
+    [<DataRow("""axiom A() {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `undefined`.")>]
+    [<DataRow("""def cl T:obj {intr} axiom A() {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `class`.")>]
+    [<TestMethod>]
+    member this.TestLG001MsgSpecificity(fplCode:string, (expected:string)) =
+        let code = LG001 ("","","")
+        prepareFplCode ("TestLG001MsgSpecificity.fpl", fplCode, false) |> ignore
+        checkForUnexpectedErrors code
+        let result = filterByErrorCode ad code.Code
+        Assert.AreEqual<string>(expected, result.Head.Message)
 

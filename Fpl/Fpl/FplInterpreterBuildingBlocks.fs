@@ -681,7 +681,7 @@ let rec eval (st: SymbolTable) ast =
                 adjustSignature st fplValue ("+" + identifier)
             else
                 adjustSignature st fplValue identifier
-            emitSIG04TypeDiagnostics st identifier fplValue pos1 pos2
+            emitSIG04TypeDiagnostics st identifier fplValue pos1 pos2 
         | EvalContext.InTheory fplValue
         | EvalContext.InPropertySignature fplValue 
         | EvalContext.InConstructorSignature fplValue 

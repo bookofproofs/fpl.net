@@ -519,12 +519,15 @@ let emitSIG04Diagnostics (fplValue: FplValue) (candidates: FplValue list) firstF
         }
     ad.AddDiagnostic diagnostic
 
+/// Emits SIG04 diagnostics. If a single candidate was found, sets the fplValue's pointer representation to this candidate.
 let emitSIG04TypeDiagnostics (st:SymbolTable) name (fplValue:FplValue) pos1 pos2 =
 
     let rightContext = st.EvalPath()
-    if rightContext.EndsWith(".VariableType.ClassType.PredicateIdentifier") then
+    if rightContext.EndsWith(".VariableType.ClassType.PredicateIdentifier") 
+        || rightContext.EndsWith(".Expression.PredicateWithQualification.PredicateWithOptSpecification.PredicateIdentifier") then
         match tryMatchTypes st fplValue name with
-        | (_, _, Some matchedFplValue) -> ()
+        | (_, candidates, Some matchedFplValue) -> 
+            fplValue.FplRepresentation <- FplRepresentation.Pointer matchedFplValue
         | (firstFailingArgument, candidates, None) -> 
             let candidateNames =
                 candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
@@ -619,14 +622,14 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
             diags.AddDiagnostic diagnostic
         | _ -> ()
 
-    let emitLG001Diagnostics (arg: FplValue) =
+    let emitLG001Diagnostics pos1 pos2 (arg: FplValue) =
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
                 Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = arg.StartPos
-                Diagnostic.EndPos = arg.EndPos
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
                 Diagnostic.Code = LG001(typeOfPredicate, arg.Name, arg.FplRepresentation.String())
                 Diagnostic.Alternatives = None 
             }
@@ -639,8 +642,8 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
         | FplRepresentation.Pointer variable ->
             match variable.FplRepresentation with
             | FplRepresentation.PredRepr _ -> emitLG000Diagnostics variable
-            | _ -> emitLG001Diagnostics arg
-        | _ -> emitLG001Diagnostics arg)
+            | _ -> emitLG001Diagnostics arg.StartPos arg.EndPos variable
+        | _ -> emitLG001Diagnostics arg.StartPos arg.EndPos arg)
 
     let code = LG000("", "")
     let numbLG000 = filterByErrorCode diags code.Code
