@@ -426,6 +426,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
     let _valueList = System.Collections.Generic.List<FplValue>()
 
+
     /// Identifier of this FplValue that is unique in its scope.
     member this.Name
         with get () = _name
@@ -932,7 +933,6 @@ type LogContext =
 
 type EvalContext =
     | ContextNone
-    | InTheory of FplValue
     | InSignature of FplValue
     | InBlock of FplValue
     | InPropertySignature of FplValue
@@ -956,7 +956,6 @@ type EvalContext =
             $"{fplValue.BlockTypeShortName} {fplValue.QualifiedName}[{aggr fplValue.Scope.Values},{aggr fplValue.ValueList}]^{p.BlockTypeShortName} {p.QualifiedName}[{aggr p.Scope.Values},{aggr p.ValueList}]"
         match this with
         | ContextNone -> "ContextNone"
-        | InTheory fplValue -> $"InTheory({short fplValue})"
         | InSignature fplValue -> $"InSignature({short fplValue})"
         | InBlock fplValue -> $"InBlock({short fplValue})"
         | InPropertySignature fplValue -> $"InPropertySignature({short fplValue})"
@@ -975,7 +974,6 @@ type EvalContext =
             | None -> 0
         match this with
         | ContextNone -> 0
-        | InTheory fv
         | InSignature fv
         | InBlock fv
         | InPropertySignature fv
@@ -993,6 +991,7 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     let mutable _mainTheory = ""
     let mutable _currentContext = EvalContext.ContextNone
     let _evalPath = Stack<string>()
+    let _valueStack = Stack<FplValue>()
     let _evalLog = List<string>()
     let _root = FplValue.CreateRoot()
     let _debug = debug
@@ -1019,6 +1018,9 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         |> Seq.toList 
         |> List.rev 
         |> String.concat "."
+
+    /// An auxiliary stack of FplValues that are created during the evaluation process
+    member this.ValueStack = _valueStack
 
     /// Logs the current state transformation of the SymbolTable for debugging purposes.
     member this.Log(message) = 
