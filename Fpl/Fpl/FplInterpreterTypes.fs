@@ -265,6 +265,7 @@ type ParsedAstList() =
         ret 
 
 type FplValueType =
+    | VarDeclaration
     | Variable
     | VariadicVariableMany
     | VariadicVariableMany1
@@ -294,6 +295,7 @@ type FplValueType =
     member private this.UnqualifiedName = 
         match this with
             // parser error messages
+            | VarDeclaration -> "variable declaration"
             | Variable -> "variable"
             | VariadicVariableMany -> "zero-or-more variable"
             | VariadicVariableMany1 -> "one-or-more variable"
@@ -333,6 +335,7 @@ type FplValueType =
     member this.ShortName = 
         match this with
             // parser error messages
+            | VarDeclaration -> "decl"
             | Variable -> "var"
             | VariadicVariableMany -> "*var"
             | VariadicVariableMany1 -> "+var"
@@ -420,6 +423,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
     let mutable _arity = 0
+    
 
     let mutable _parent = parent
     let _auxiliaryUniqueChilds = HashSet<string>()
@@ -481,7 +485,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         with get () = _nameFinal
         and set (value) = 
             if _nameFinal then 
-                () // raise (ArgumentException($"Cannot change the readonly NameIsFinal property since it has been finally evaluated."))
+                () 
             else
                 _nameFinal <- value
 
@@ -563,6 +567,10 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.Localization -> true
         | _ -> false
 
+    /// Indicates if this FplValue is a named variable declaration
+    static member IsDeclaration(fplValue:FplValue) = 
+        fplValue.BlockType = FplValueType.VarDeclaration
+
     /// Indicates if this FplValue is a definition
     static member IsDefinition(fplValue:FplValue) = 
         match fplValue.BlockType with 
@@ -642,6 +650,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     static member IsTheory (fplValue:FplValue) = 
         fplValue.BlockType = FplValueType.Theory
 
+
+    /// Indicates if this FplValue has a signature.
+    static member HasSignature(fplValue:FplValue) = 
+        FplValue.IsFplBlock(fplValue) || FplValue.IsProperty(fplValue) || FplValue.IsConstructor(fplValue)
+
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos = 
         let rec getFullName (fplValue:FplValue) (first:bool) =
@@ -667,6 +680,10 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         fplValue.BlockType = FplValueType.Variable
         || fplValue.BlockType = FplValueType.VariadicVariableMany
         || fplValue.BlockType = FplValueType.VariadicVariableMany1
+
+    /// Indicates if this FplValue is a reference
+    static member IsReference(fplValue:FplValue) = 
+        fplValue.BlockType = FplValueType.Reference
 
     /// Indicates if this FplValue is a variadic *variable.
     static member IsVariadicVariableMany(fplValue:FplValue) = 
@@ -861,13 +878,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
         let root = new FplValue("", FplValueType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
-        root.NameIsFinal <- true
         root
 
     /// A factory method for the FPL primitive Object
     static member CreateObject(pos1,pos2) =
         let obj = new FplValue("obj", FplValueType.Object, (pos1, pos2), None)
-        obj.NameIsFinal <- true
         obj.FplRepresentation <- FplRepresentation.ObjRepr "obj"
         obj
 
@@ -898,6 +913,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.Reference -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.FunctionalTerm
         | FplValueType.Variable
+        | FplValueType.VarDeclaration
         | FplValueType.VariadicVariableMany
         | FplValueType.VariadicVariableMany1
         | FplValueType.MandatoryFunctionalTerm
@@ -923,7 +939,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 clearAll child.Value
             )
             root.Scope.Clear()
-            root.NameIsFinal <- false
         clearAll this
 
 type LogContext = 
@@ -931,73 +946,15 @@ type LogContext =
     | Replace
     | End
 
-type EvalContext =
-    | ContextNone
-    | InSignature of FplValue
-    | InBlock of FplValue
-    | InPropertySignature of FplValue
-    | InPropertyBlock of FplValue
-    | InConstructorSignature of FplValue
-    | InConstructorBlock of FplValue
-    | NamedVarDeclarationInBlock of FplValue
-    | InReferenceCreation of FplValue
-    | InInfixOperation of FplValue
-    | InQuantorCreation of FplValue
-    | InIsOperatorCreation of FplValue
-    member this.Name = 
-        let short (fplValue:FplValue) = 
-            let aggr (lst:seq<FplValue>) = 
-                lst
-                |> Seq.countBy (fun fv -> fv.BlockTypeShortName)
-                |> Seq.map (fun (g,i) -> g + sprintf ":%i" i)
-                |> String.concat " "
-
-            let p = fplValue.Parent.Value
-            $"{fplValue.BlockTypeShortName} {fplValue.QualifiedName}[{aggr fplValue.Scope.Values},{aggr fplValue.ValueList}]^{p.BlockTypeShortName} {p.QualifiedName}[{aggr p.Scope.Values},{aggr p.ValueList}]"
-        match this with
-        | ContextNone -> "ContextNone"
-        | InSignature fplValue -> $"InSignature({short fplValue})"
-        | InBlock fplValue -> $"InBlock({short fplValue})"
-        | InPropertySignature fplValue -> $"InPropertySignature({short fplValue})"
-        | InPropertyBlock fplValue -> $"InPropertyBlock({short fplValue})"
-        | InConstructorSignature fplValue -> $"InConstructorSignature({short fplValue})"
-        | InConstructorBlock fplValue -> $"InConstructorBlock({short fplValue})"
-        | NamedVarDeclarationInBlock fplValue -> $"NamedVarDeclarationInBlock({short fplValue})"
-        | InReferenceCreation fplValue -> $"InReferenceCreation({short fplValue})"
-        | InInfixOperation fplValue -> $"InInfixOperation({short fplValue})"
-        | InQuantorCreation fplValue -> $"InAllQuantorCreation({short fplValue})"
-        | InIsOperatorCreation fplValue -> $"InIsOperatorCreation({short fplValue})"
-    member this.Depth = 
-        let rec depth (fv:FplValue) = 
-            match fv.Parent with 
-            | Some parent -> depth parent + 2
-            | None -> 0
-        match this with
-        | ContextNone -> 0
-        | InSignature fv
-        | InBlock fv
-        | InPropertySignature fv
-        | InPropertyBlock fv
-        | InConstructorSignature fv
-        | InConstructorBlock fv
-        | NamedVarDeclarationInBlock fv
-        | InReferenceCreation fv
-        | InInfixOperation fv
-        | InQuantorCreation fv
-        | InIsOperatorCreation fv -> depth fv
 
 type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     let _parsedAsts = parsedAsts
     let mutable _mainTheory = ""
-    let mutable _currentContext = EvalContext.ContextNone
     let _evalPath = Stack<string>()
     let _valueStack = Stack<FplValue>()
     let _evalLog = List<string>()
     let _root = FplValue.CreateRoot()
     let _debug = debug
-
-    /// Returns the current evaluation context.
-    member this.CurrentContext = _currentContext
 
     /// Returns the current main theory.
     member this.MainTheory  
@@ -1025,22 +982,8 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     /// Logs the current state transformation of the SymbolTable for debugging purposes.
     member this.Log(message) = 
         if _debug then 
-            let depth = this.CurrentContext.Depth
-            let enrichedMsg = sprintf "%s%s at %s: %s" (String(' ',depth)) message (this.CurrentContext.Name) (this.EvalPath()) 
+            let enrichedMsg = sprintf "%s at %s" message (this.EvalPath()) 
             _evalLog.Add(enrichedMsg)
-
-    member this.SetContext (context:EvalContext) (logContext:LogContext) = 
-        match logContext with
-        | LogContext.Start ->
-            _currentContext <- context
-            this.Log("Begin")
-        | LogContext.Replace ->
-            this.Log("End")
-            _currentContext <- context
-            this.Log("Start")
-        | LogContext.End -> 
-            this.Log("End")
-            _currentContext <- context 
 
     /// Returns the logged state transformation of the SymbolTable (only non-empty of debug = true).
     member this.LoggedState = 

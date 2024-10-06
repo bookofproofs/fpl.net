@@ -1016,7 +1016,6 @@ type TestFplValue() =
         Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
         prepareFplCode(filename, "", true) |> ignore
 
-
     [<DataRow("def cl T:obj {ctor T() {self}};", "T()", "T ( )")>]
     [<DataRow("def cl T:obj {ctor T(x:ind) {self}};", "T(ind)", "T ( ind )")>]
     [<DataRow("def cl T:obj {ctor T(x:pred) {self}};", "T(pred)", "T ( pred )")>]

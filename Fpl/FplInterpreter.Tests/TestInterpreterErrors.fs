@@ -591,14 +591,6 @@ type TestInterpreterErrors() =
         let code = SIG04 ("","","")
         runTestHelper "TestSIG04.fpl" fplCode code expected
 
-    [<DataRow("axiom A() { all x in Nat {true} };", 0)>]
-    [<DataRow("axiom A() { all x is Nat {true} };", 0)>]
-    [<TestMethod>]
-    member this.TestGEN01(fplCode:string, expected) =
-        let code = GEN01 ""
-        runTestHelper "TestGEN01.fpl" fplCode code expected
-
-
     [<DataRow("""def pred T() { 1. };;""", 1)>]
     [<DataRow("""proof T$1 {1. |- trivial };""", 0)>]
     [<TestMethod>]

@@ -91,7 +91,6 @@ type DiagnosticCode =
     | TYD000
     // interpreter error codes
     | GEN00 of string
-    | GEN01 of string
     | NSP00 of string
     | NSP01 of string * string
     | NSP02 of string * string
@@ -161,7 +160,6 @@ type DiagnosticCode =
             | TYD000 -> "TYD000"
             // interpreter error messages
             | GEN00 _ -> "GEN00"
-            | GEN01 _ -> "GEN01"
             | NSP00 _ -> "NSP00"
             | NSP01 _ -> "NSP01"
             | NSP02 _ -> "NSP02"
@@ -231,7 +229,6 @@ type DiagnosticCode =
             | TYD000 -> "Syntax error in type declaration"
             // interpreter error messages
             | GEN00 message -> sprintf "Unexpected error occurred: %s" message
-            | GEN01 message -> sprintf "Unevaluated context `%s`" message
             | NSP00 fileNamePattern -> sprintf "The theory `%s` could not be found" fileNamePattern
             | NSP01 (fileName, innerErrMsg) -> sprintf "The theory `%s` was found but could not be loaded: %s" fileName innerErrMsg
             | NSP02 (url, innerErrMsg) -> sprintf "The theory `%s` was found but could not be downloaded: %s" url innerErrMsg

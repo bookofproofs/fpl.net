@@ -21,22 +21,6 @@ let emitUnexpectedErrorDiagnostics errMsg =
 
     ad.AddDiagnostic(diagnostic)
 
-let emitUnevaluatedContextDiagnostics (st:SymbolTable) pos1 pos2 =
-    let context = st.CurrentContext.Name + " at " + st.EvalPath()
-    let diagnostic =
-        {
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = GEN01 context
-            Diagnostic.Alternatives = None 
-        }
-
-    ad.AddDiagnostic(diagnostic)
-
-
 let emitID001diagnostics (fplValue: FplValue) (conflict: FplValue) =
     let diagnostic =
         { 
