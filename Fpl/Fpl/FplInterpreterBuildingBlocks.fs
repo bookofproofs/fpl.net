@@ -327,6 +327,7 @@ let rec eval (st: SymbolTable) ast =
                 st.ValueStack.Push(varValue)
                 varValue.Name <- name
                 varValue.NameEndPos <- pos2
+                varValue.NameIsFinal <- true
                 fv.Scope.Add(varValue.Name,varValue)
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
@@ -1027,6 +1028,8 @@ let rec eval (st: SymbolTable) ast =
             fv.FplRepresentation <- refBlock.FplRepresentation
         | _ -> ()
         refBlock.NameEndPos <- pos2
+        refBlock.NameIsFinal <- true
+        fv.NameIsFinal <- true
         st.ValueStack.Pop() |> ignore
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
@@ -1301,6 +1304,7 @@ let evaluateSymbolTable (st: SymbolTable) =
                 st.Root.Scope[pa.Id].Reset()
                 st.Root.Scope[pa.Id] <- theoryValue
             theoryValue.Name <- pa.Id
+            theoryValue.NameIsFinal <- true
             st.ValueStack.Push(theoryValue)
             ad.CurrentUri <- pa.Parsing.Uri
             eval st pa.Parsing.Ast

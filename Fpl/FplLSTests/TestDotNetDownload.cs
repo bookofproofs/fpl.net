@@ -38,10 +38,10 @@ namespace FplLSTests
                         Assert.Fail("File could not be downloaded. Status code: " + response.StatusCode);
                     }
                 }
-                catch (HttpRequestException)
+                catch (HttpRequestException ex)
                 {
                     // If a HttpRequestException is thrown, the file could not be downloaded
-                    Assert.Fail("File could not be downloaded.");
+                    Assert.Fail($"File could not be downloaded. {ex.Message}");
                 }
             }
         }
