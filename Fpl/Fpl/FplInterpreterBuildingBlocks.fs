@@ -830,9 +830,6 @@ let rec eval (st: SymbolTable) ast =
         eval st paramTupleAst
         let fv = st.ValueStack.Peek()
         emitSIG00Diagnostics fv pos1 pos2
-        match fv.BlockType with
-        | FplValueType.FunctionalTerm -> () // postpone setting NameIsFinal for Functional Terms since the parsed mapping is still missing at this stage of evaluation
-        | _ -> fv.NameIsFinal <- true // in all other cases, the signature is final
         st.EvalPop()
     | Ast.PropertyBlock((pos1, pos2), (keywordPropertyAst, definitionPropertyAst)) ->
         st.EvalPush("PropertyBlock")
@@ -1148,6 +1145,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("CorollarySignature")
         eval st referencingIdentifierAst
         eval st paramTupleAst
+        let fv = st.ValueStack.Peek()
+        fv.NameIsFinal <- true
         st.EvalPop()
     | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Corollary")
@@ -1214,6 +1213,7 @@ let rec eval (st: SymbolTable) ast =
         st.ValueStack.Push(fplValue)
         eval st signatureWithUserDefinedStringAst
         tryAddBlock fplValue 
+        fplValue.NameIsFinal <- true
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         st.ValueStack.Pop() |> ignore
@@ -1240,6 +1240,7 @@ let rec eval (st: SymbolTable) ast =
         tryAddBlock fplValue 
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         classTypeListAsts |> List.map (eval st) |> ignore
+        fplValue.NameIsFinal <- true
         eval st classContentAst
         optPropertyListAsts
         |> Option.map (List.map (eval st) >> ignore)
@@ -1258,6 +1259,7 @@ let rec eval (st: SymbolTable) ast =
         st.ValueStack.Push(fplValue)
         eval st referencingIdentifierAst
         tryAddBlock fplValue 
+        fplValue.NameIsFinal <- true
         proofArgumentListAst |> List.map (eval st) |> ignore
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         st.ValueStack.Pop() |> ignore
