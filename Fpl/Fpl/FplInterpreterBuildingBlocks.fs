@@ -49,7 +49,8 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
 
         match fplValue.Parent with
         | Some parent -> 
-                adjustSignature st parent str
+                if parent.BlockType <> FplValueType.Theory then 
+                    adjustSignature st parent str
         | None -> ()
 
     if str <> "" && not (FplValue.IsVariable(fplValue)) then
