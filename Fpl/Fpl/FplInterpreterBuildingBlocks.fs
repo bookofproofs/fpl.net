@@ -134,17 +134,24 @@ let tryAddBlock (fplValue:FplValue) =
         emitID007diagnostics fplValue listOfKandidates  
     | _ -> ()
 
-    match FplValue.VariableInBlockScopeByName(fplValue) fplValue.Name with
-    | ScopeSearchResult.Found other ->
-        emitVAR03diagnostics fplValue other 
+    match FplValue.InScopeOfParent(fplValue) fplValue.Name with
+    | ScopeSearchResult.Found conflict -> 
+        emitID001diagnostics fplValue conflict 
     | _ -> 
-        match FplValue.InScopeOfParent(fplValue) fplValue.Name with
-        | ScopeSearchResult.Found conflict -> 
-            emitID001diagnostics fplValue conflict 
-        | _ -> 
-            fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
+        fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
+            (* let rec addAlsoToTheScopeUpToNextBlock (p:FplValue) =
+                match p.Parent with
+                | Some nextParent when FplValue.IsDeclaration(nextParent) || FplValue.IsVariable(nextParent) ->
+                    nextParent.Scope.Add(fplValue.QualifiedName,fplValue)
+                    addAlsoToTheScopeUpToNextBlock (nextParent) 
+                | Some nextParent when FplValue.IsFplBlock(nextParent) || FplValue.IsConstructorOrProperty(nextParent) -> 
+                    nextParent.Scope.Add(fplValue.QualifiedName,fplValue)
+                | _ -> ()
+            addAlsoToTheScopeUpToNextBlock(fplValue) 
+            *)
             (* This code will fix a single VAR03 test but break ~1400 other unit tests!!!
                we leave the code for future inspiration of correctly fixing VAR03 
+            fplValue.Parent.Value.Scope.Add(fplValue.Name,fplValue)
             match fplValue.Parent with
             | Some parent when FplValue.IsVariable(parent) -> 
                 parent.Scope.Add(fplValue.Name,fplValue)
@@ -193,14 +200,8 @@ let rec eval (st: SymbolTable) ast =
 
     let evalMany (st:SymbolTable) blockType pos1 pos2 = 
         let fv = st.ValueStack.Peek()
-        if FplValue.HasSignature(fv) then
-            tryAddVariadicVariables fv.AuxiliaryInfo pos1 pos2
-            // adjust type of variables to variadic variables, if their type has not yet been established
-            fv.Scope
-            |> Seq.filter (fun varKeyValue -> FplValue.IsVariable(varKeyValue.Value) && varKeyValue.Value.TypeSignature = [])
-            |> Seq.iter (fun varKeyValue -> 
-                varKeyValue.Value.BlockType <- blockType
-            )
+        checkVAR00Diagnostics fv.AuxiliaryInfo pos1 pos2
+        fv.BlockType <- blockType
 
     match ast with
     // units: | Star
@@ -316,10 +317,16 @@ let rec eval (st: SymbolTable) ast =
                 fv.TypeSignature <- fv.TypeSignature @ ["undef"]
                 emitVAR01diagnostics name pos1 pos2
         else
-            let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
-            varValue.Name <- name
-            varValue.NameEndPos <- pos2
-            tryAddBlock varValue 
+            match FplValue.VariableInBlockScopeByName(fv) name with
+            | ScopeSearchResult.Found other ->
+                // if found, the emit error that the variable was already declared.
+                emitVAR03diagnostics fv other 
+            | _ -> 
+                let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
+                st.ValueStack.Push(varValue)
+                varValue.Name <- name
+                varValue.NameEndPos <- pos2
+                fv.Scope.Add(varValue.Name,varValue)
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")
@@ -536,7 +543,7 @@ let rec eval (st: SymbolTable) ast =
             checkID008Diagnostics fv pos1 pos2
             checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
             emitSIG04TypeDiagnostics st identifier fv pos1 pos2
-        elif FplValue.IsDeclaration(fv) then
+        elif FplValue.IsVariable(fv) then
             if (FplValue.IsVariadicVariableMany(fv)) then 
                 adjustSignature st fv ("*" + identifier)
             elif (FplValue.IsVariadicVariableMany1(fv)) then 
@@ -1154,22 +1161,15 @@ let rec eval (st: SymbolTable) ast =
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
     | Ast.NamedVarDecl((pos1, pos2), ((variableListAst, varDeclModifierAst), variableTypeAst)) ->
         st.EvalPush("NamedVarDecl")
-        let fplValue = FplValue.CreateFplValue((pos1,pos2),FplValueType.VarDeclaration, st.ValueStack.Peek())
-        st.ValueStack.Push(fplValue)
-        // create all variables of the named variable declaration in the current scope
-        variableListAst |> List.map (eval st) |> ignore 
-
+        let fplValue = st.ValueStack.Peek()
         fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
-        eval st varDeclModifierAst
-        fplValue.Scope 
-        |> Seq.toList // Make this collection immutable since it might be changed in the below iteration
-        |> List.filter (fun varKeyValue -> FplValue.IsVariable(varKeyValue.Value))
-        |> List.iter (fun childKeyValue -> 
-            if not (childKeyValue.Value.Parent.Value.AuxiliaryUniqueChilds.Contains(childKeyValue.Value.Name)) then 
-                eval st variableTypeAst
-                childKeyValue.Value.Parent.Value.AuxiliaryUniqueChilds.Add(childKeyValue.Value.Name) |> ignore
-        )
-        st.ValueStack.Pop() |> ignore
+        // create all variables of the named variable declaration in the current scope
+        variableListAst |> List.iter (fun varAst ->
+            eval st varAst // here, each new variable is put on the ValueStack
+            eval st varDeclModifierAst
+            eval st variableTypeAst
+            st.ValueStack.Pop() |> ignore // after evaluating the created var, remove it from ValueStack
+        ) |> ignore 
         st.EvalPop()
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
     | Ast.Constructor((pos1, pos2), (signatureAst, (optVarDeclOrSpecListAst, keywordSelfAst))) ->

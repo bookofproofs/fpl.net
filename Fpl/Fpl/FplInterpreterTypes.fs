@@ -265,7 +265,6 @@ type ParsedAstList() =
         ret 
 
 type FplValueType =
-    | VarDeclaration
     | Variable
     | VariadicVariableMany
     | VariadicVariableMany1
@@ -295,7 +294,6 @@ type FplValueType =
     member private this.UnqualifiedName = 
         match this with
             // parser error messages
-            | VarDeclaration -> "variable declaration"
             | Variable -> "variable"
             | VariadicVariableMany -> "zero-or-more variable"
             | VariadicVariableMany1 -> "one-or-more variable"
@@ -335,7 +333,6 @@ type FplValueType =
     member this.ShortName = 
         match this with
             // parser error messages
-            | VarDeclaration -> "decl"
             | Variable -> "var"
             | VariadicVariableMany -> "*var"
             | VariadicVariableMany1 -> "+var"
@@ -527,10 +524,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         with get () = _arity
         and set (value) = _arity <- value
 
-    /// Am auxiliary storage that is used e.g. for remembering the names of already processed variables 
-    /// when traversing the Ast recursively.
-    member this.AuxiliaryUniqueChilds = _auxiliaryUniqueChilds
-
     /// Starting position of this FplValue
     member this.StartPos = fst positions
 
@@ -566,10 +559,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.Class 
         | FplValueType.Localization -> true
         | _ -> false
-
-    /// Indicates if this FplValue is a named variable declaration
-    static member IsDeclaration(fplValue:FplValue) = 
-        fplValue.BlockType = FplValueType.VarDeclaration
 
     /// Indicates if this FplValue is a definition
     static member IsDefinition(fplValue:FplValue) = 
@@ -913,7 +902,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.Reference -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.FunctionalTerm
         | FplValueType.Variable
-        | FplValueType.VarDeclaration
         | FplValueType.VariadicVariableMany
         | FplValueType.VariadicVariableMany1
         | FplValueType.MandatoryFunctionalTerm

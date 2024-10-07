@@ -171,7 +171,7 @@ let emitID007diagnostics (fplValue: FplValue) listOfCandidates =
         }
     ad.AddDiagnostic diagnostic
 
-let tryAddVariadicVariables numberOfVariadicVars startPos endPos =
+let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
     if numberOfVariadicVars > 1 then
         let diagnostic =
             { 
