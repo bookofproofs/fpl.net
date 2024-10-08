@@ -577,14 +577,13 @@ let rec eval (st: SymbolTable) ast =
     | Ast.BracketedCoordsInType((pos1, pos2), asts) ->
         st.EvalPush("BracketedCoordsInType")
         let fv = st.ValueStack.Peek()
-        if not fv.NameIsFinal then
-            adjustSignature st fv "["
-            asts 
-            |> List.map (fun ast1 ->
-                eval st ast1
-            ) |> ignore
-            adjustSignature st fv "]"
-            fv.NameEndPos <- pos2
+        adjustSignature st fv "["
+        asts 
+        |> List.map (fun ast1 ->
+            eval st ast1
+        ) |> ignore
+        adjustSignature st fv "]"
+        fv.NameEndPos <- pos2
         st.EvalPop()
     | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
         st.EvalPush("NamespaceIdentifier")
@@ -1029,7 +1028,8 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         refBlock.NameEndPos <- pos2
         refBlock.NameIsFinal <- true
-        fv.NameIsFinal <- true
+        if FplValue.IsFplBlock(fv) || FplValue.IsConstructorOrProperty(fv) then
+            fv.ValueList.Add(refBlock)
         st.ValueStack.Pop() |> ignore
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
@@ -1213,7 +1213,8 @@ let rec eval (st: SymbolTable) ast =
     // | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | Ast.DefinitionPredicate((pos1, pos2), (signatureWithUserDefinedStringAst, (predicateContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionPredicate")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Predicate, st.ValueStack.Peek())
+        let fplTheory = st.ValueStack.Peek()
+        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Predicate, fplTheory)
         st.ValueStack.Push(fplValue)
         eval st signatureWithUserDefinedStringAst
         tryAddBlock fplValue 

@@ -297,8 +297,8 @@ type TestInterpreterErrors() =
 
 
     [<DataRow("def pred Test() {x};", 1)>]
-    //todo[<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
-    //todo[<DataRow("axiom A() { all x in Nat {true} };", 0)>]
+    [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
+    [<DataRow("axiom A() { all x in Nat {true} };", 0)>]
     [<DataRow("axiom A() { all x {true} };", 1)>]
     [<DataRow("axiom A() { dec ~x:obj; all x {true} };", 0)>]
     [<TestMethod>]
@@ -361,7 +361,7 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test() {dec ~x: pred; self} prty func X()->obj {intr} };", 1)>]
     [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test() {self} prty func X()->obj {dec ~x: pred; return x} };", 1)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
-    //todo[<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~c: obj; pre: true con: true};", 1)>]
+    [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~c: obj; pre: true con: true};", 1)>]
     [<TestMethod>]
     member this.TestVAR03(fplCode:string, expected) =
         let code = VAR03 ("", "")
@@ -577,15 +577,15 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Set:obj {intr} axiom Test() {dec ~x:Set; true};", 0)>]
     [<DataRow("def cl Set:obj {intr} axiom Test() {dec ~x:SetTypo; true};", 1)>]
     [<DataRow("def pred Test() {dec ~x:Set; true};", 1)>]
-    //todo[<DataRow("axiom A() { all x in Nat {true} };", 1)>]
+    [<DataRow("axiom A() { all x in Nat {true} };", 1)>]
     [<DataRow("axiom A() { all x is Nat {true} };", 1)>]
     [<DataRow("def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
     [<DataRow("""def pred T1() {true} def pred Test() { dec ~x:obj; T1(x) };""", 1)>]
-    //todo[<DataRow("""def pred T1() {true} def pred Test() { OtherTest(X) };""", 1)>]
-    //todo[<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]
+    [<DataRow("""def pred T1() {true} def pred Test() { OtherTest(X) };""", 1)>]
+    [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 1)>]
-    //todo[<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
+    [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =
         let code = SIG04 ("","","")
@@ -683,7 +683,7 @@ type TestInterpreterErrors() =
     [<DataRow("""axiom A() {impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `undefined`.")>]
     [<DataRow("""axiom A() {impl(T(),true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T()`, got `undefined`.")>]
     [<DataRow("""axiom A() {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `undefined`.")>]
-    //todo[<DataRow("""def cl T:obj {intr} axiom A() {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `class`.")>]
+    [<DataRow("""def cl T:obj {intr} axiom A() {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `class`.")>]
     [<TestMethod>]
     member this.TestLG001MsgSpecificity(fplCode:string, (expected:string)) =
         let code = LG001 ("","","")
