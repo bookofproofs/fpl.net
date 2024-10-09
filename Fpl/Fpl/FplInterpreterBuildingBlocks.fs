@@ -325,12 +325,17 @@ let rec eval (st: SymbolTable) ast =
                 // if found, the emit error that the variable was already declared.
                 emitVAR03diagnostics fv other 
             | _ -> 
-                let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
-                st.ValueStack.Push(varValue)
-                varValue.Name <- name
-                varValue.NameEndPos <- pos2
-                varValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
-                fv.Scope.Add(varValue.Name,varValue)
+                let evalPath = st.EvalPath()
+                if not (evalPath.Contains("NamedVarDecl")) then 
+                    () // todo: handle other cases correctly (still causing "valuestack was not empty after evaluation" errors)
+                else
+                    let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
+                    Console.WriteLine(evalPath)
+                    st.ValueStack.Push(varValue)
+                    varValue.Name <- name
+                    varValue.NameEndPos <- pos2
+                    varValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+                    fv.Scope.Add(varValue.Name,varValue)
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")
@@ -593,13 +598,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.LocalizationTerm((pos1, pos2), asts) ->
         st.EvalPush("LocalizationTerm")
-        asts |> List.map (fun term ->
-            eval st term
-            let fv = st.ValueStack.Peek()
-            // remove any variable created on the stack for this term
-            if FplValue.IsVariable(fv) then
-                st.ValueStack.Pop() |> ignore
-        ) |> ignore
+        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.LocalizationTermList((pos1, pos2), asts) ->
         st.EvalPush("LocalizationTermList")
