@@ -31,10 +31,12 @@ let private addWithComma (name:string) str =
     else name
 
 let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str = 
+    let readyCheck = (FplValue.HasSignature(fplValue), fplValue.NameIsFinal) 
+    
     if str <> "" then
-        if FplValue.HasSignature(fplValue) && fplValue.NameIsFinal then  
-            () //  for definitions with final name stop changing the TypeSignature
-        else
+        match readyCheck with
+        | (true, SignatureIsFinal.Yes _) -> () //  for definitions with final name stop changing the TypeSignature
+        | _ ->
             // note: the manipulation of the TypeSignature is necessary for all kinds of fplValue
             if str.StartsWith("*") && str <> "*" then
                 fplValue.TypeSignature <- fplValue.TypeSignature @ ["*"; str.Substring(1)]
@@ -54,9 +56,9 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
         | None -> ()
 
     if str <> "" && not (FplValue.IsVariable(fplValue)) then
-        if FplValue.HasSignature(fplValue) && fplValue.NameIsFinal then  
-            () //  for definitions with final name stop changing the TypeSignature
-        else
+        match readyCheck with
+        | (true, SignatureIsFinal.Yes _) ->  () //  for definitions with final name stop changing the TypeSignature
+        | _ ->
             // note: the Name attribute of variables are set in Ast.Var directly
             // and we do not want to append the type to the names of variables.
             fplValue.Name <- addWithComma fplValue.Name str 
@@ -327,7 +329,7 @@ let rec eval (st: SymbolTable) ast =
                 st.ValueStack.Push(varValue)
                 varValue.Name <- name
                 varValue.NameEndPos <- pos2
-                varValue.NameIsFinal <- true
+                varValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
                 fv.Scope.Add(varValue.Name,varValue)
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
@@ -923,7 +925,7 @@ let rec eval (st: SymbolTable) ast =
         adjustSignature st fv "->"
         fv.NameEndPos <- pos2
         eval st mappingAst
-        fv.NameIsFinal <- true
+        fv.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
         st.EvalPop()
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         st.EvalPush("PredicateWithQualification")
@@ -1027,7 +1029,7 @@ let rec eval (st: SymbolTable) ast =
             fv.FplRepresentation <- refBlock.FplRepresentation
         | _ -> ()
         refBlock.NameEndPos <- pos2
-        refBlock.NameIsFinal <- true
+        refBlock.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
         if FplValue.IsFplBlock(fv) || FplValue.IsConstructorOrProperty(fv) then
             fv.ValueList.Add(refBlock)
         st.ValueStack.Pop() |> ignore
@@ -1044,7 +1046,7 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateIdentifierAst
         eval st paramTupleAst
         let fv = st.ValueStack.Peek()
-        fv.NameIsFinal <- true
+        fv.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
         st.EvalPop()
     | Ast.Assignment((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("Assignment")
@@ -1150,7 +1152,7 @@ let rec eval (st: SymbolTable) ast =
         eval st referencingIdentifierAst
         eval st paramTupleAst
         let fv = st.ValueStack.Peek()
-        fv.NameIsFinal <- true
+        fv.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
         st.EvalPop()
     | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Corollary")
@@ -1218,7 +1220,7 @@ let rec eval (st: SymbolTable) ast =
         st.ValueStack.Push(fplValue)
         eval st signatureWithUserDefinedStringAst
         tryAddBlock fplValue 
-        fplValue.NameIsFinal <- true
+        fplValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         st.ValueStack.Pop() |> ignore
@@ -1243,9 +1245,9 @@ let rec eval (st: SymbolTable) ast =
         st.ValueStack.Push(fplValue)
         eval st predicateIdentifierAst
         tryAddBlock fplValue 
+        fplValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         classTypeListAsts |> List.map (eval st) |> ignore
-        fplValue.NameIsFinal <- true
         eval st classContentAst
         optPropertyListAsts
         |> Option.map (List.map (eval st) >> ignore)
@@ -1264,7 +1266,7 @@ let rec eval (st: SymbolTable) ast =
         st.ValueStack.Push(fplValue)
         eval st referencingIdentifierAst
         tryAddBlock fplValue 
-        fplValue.NameIsFinal <- true
+        fplValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
         proofArgumentListAst |> List.map (eval st) |> ignore
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         st.ValueStack.Pop() |> ignore
@@ -1305,7 +1307,7 @@ let evaluateSymbolTable (st: SymbolTable) =
                 st.Root.Scope[pa.Id].Reset()
                 st.Root.Scope[pa.Id] <- theoryValue
             theoryValue.Name <- pa.Id
-            theoryValue.NameIsFinal <- true
+            theoryValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
             st.ValueStack.Push(theoryValue)
             ad.CurrentUri <- pa.Parsing.Uri
             eval st pa.Parsing.Ast

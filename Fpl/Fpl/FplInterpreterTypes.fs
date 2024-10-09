@@ -382,7 +382,10 @@ type FixType =
         | Prefix symbol -> sprintf "prefix `%s` " symbol
         | NoFix -> "no fix"
 
-type FplRepresentation = 
+type SignatureIsFinal =
+    | Yes of string
+    | No
+and FplRepresentation = 
     | PredRepr of FplPredicate 
     | ObjRepr of string
     | Localization of FplValue * string
@@ -413,7 +416,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _name = name
     let mutable _expressionType = FixType.NoFix
     let mutable _exprTypeAlreadySet = false 
-    let mutable _nameFinal = false
+    let mutable _nameFinal = SignatureIsFinal.No
     let mutable _nameEndPos = Position("", 0, 1, 1)
     let mutable _typeSignature = []
     let mutable _representation = FplRepresentation.Undef
@@ -432,10 +435,10 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     member this.Name
         with get () = _name
         and set (value) = 
-            if _nameFinal then 
-                raise (ArgumentException($"Cannot set readonly Name {_name} again since it has been finally evaluated."))
-            else
-                _name <- value
+            match _nameFinal with
+            | SignatureIsFinal.Yes where -> 
+                raise (ArgumentException($"Cannot set readonly Name {_name} again since it has been already set at {where}."))
+            | SignatureIsFinal.No -> _name <- value
 
     /// First element of the type signature.
     member this.FplId = 
@@ -481,10 +484,10 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     member this.NameIsFinal
         with get () = _nameFinal
         and set (value) = 
-            if _nameFinal then 
-                () 
-            else
-                _nameFinal <- value
+            match _nameFinal with
+            | SignatureIsFinal.Yes where -> 
+                raise (ArgumentException($"Cannot reset NameIsFinal since it has been already set at {where}."))
+            | SignatureIsFinal.No -> _nameFinal <- value
 
     /// Type of the FPL block within this FplValue
     member this.BlockType
@@ -867,7 +870,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
         let root = new FplValue("", FplValueType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
-        root.NameIsFinal <- true
+        root.NameIsFinal <- SignatureIsFinal.Yes "at CreateRoot"
         root
 
     /// A factory method for the FPL primitive Object
