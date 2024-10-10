@@ -36,6 +36,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
     if str <> "" then
         match readyCheck with
         | (true, SignatureIsFinal.Yes _) -> () //  for definitions with final name stop changing the TypeSignature
+        | (false, SignatureIsFinal.Yes _) -> () //  for definitions with final name stop changing the TypeSignature
         | _ ->
             // note: the manipulation of the TypeSignature is necessary for all kinds of fplValue
             if str.StartsWith("*") && str <> "*" then
@@ -58,6 +59,7 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
     if str <> "" && not (FplValue.IsVariable(fplValue)) then
         match readyCheck with
         | (true, SignatureIsFinal.Yes _) ->  () //  for definitions with final name stop changing the TypeSignature
+        | (false, SignatureIsFinal.Yes _) ->  () //  for definitions with final name stop changing the TypeSignature
         | _ ->
             // note: the Name attribute of variables are set in Ast.Var directly
             // and we do not want to append the type to the names of variables.
@@ -320,22 +322,19 @@ let rec eval (st: SymbolTable) ast =
                 fv.TypeSignature <- fv.TypeSignature @ ["undef"]
                 emitVAR01diagnostics name pos1 pos2
         else
+            let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
+            st.ValueStack.Push(varValue)
             match FplValue.VariableInBlockScopeByName(fv) name with
             | ScopeSearchResult.Found other ->
                 // if found, the emit error that the variable was already declared.
                 emitVAR03diagnostics fv other 
+                st.ValueStack.Pop() |> ignore
+                st.ValueStack.Push(other)
             | _ -> 
-                let evalPath = st.EvalPath()
-                if not (evalPath.Contains("NamedVarDecl")) then 
-                    () // todo: handle other cases correctly (still causing "valuestack was not empty after evaluation" errors)
-                else
-                    let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
-                    Console.WriteLine(evalPath)
-                    st.ValueStack.Push(varValue)
-                    varValue.Name <- name
-                    varValue.NameEndPos <- pos2
-                    varValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
-                    fv.Scope.Add(varValue.Name,varValue)
+                varValue.Name <- name
+                varValue.NameEndPos <- pos2
+                varValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+                fv.Scope.Add(varValue.Name,varValue)
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")
@@ -1178,7 +1177,8 @@ let rec eval (st: SymbolTable) ast =
             eval st varAst // here, each new variable is put on the ValueStack
             eval st varDeclModifierAst
             eval st variableTypeAst
-            st.ValueStack.Pop() |> ignore // after evaluating the created var, remove it from ValueStack
+            // after evaluating the created var, remove it from ValueStack
+            st.ValueStack.Pop() |> ignore 
         ) |> ignore 
         st.EvalPop()
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
@@ -1317,7 +1317,7 @@ let evaluateSymbolTable (st: SymbolTable) =
             ad.CurrentUri <- pa.Parsing.Uri
             eval st pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.Evaluated
+            if st.ValueStack.Count <> 1 then 
+                raise (NotSupportedException($"The valuestack was out of sync after evaluation ({st.ValueStack.Count} elements)."))
             st.ValueStack.Pop() |> ignore
-            if st.ValueStack.Count > 0 then 
-                raise (NotSupportedException("The valuestack was not empty after evaluation."))
         | None -> found <- false

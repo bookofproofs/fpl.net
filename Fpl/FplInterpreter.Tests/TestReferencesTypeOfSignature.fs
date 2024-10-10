@@ -68,14 +68,14 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
-    [<DataRow("base33", "def pred T() { dec ~p: pred(c: obj); p(c) };")>]
-    [<DataRow("base34", "def pred T() { is(x, Set) };")>]
+    [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
+    [<DataRow("base34", "is(x, Set)")>]
     
     [<TestMethod>]
     member this.TestPredicateReference(var, fplCode) =
         ad.Clear()
         let filename = "TestPredicateReference"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let stOption = prepareFplCode(filename + ".fpl", "def pred T() { " + fplCode + " };", false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
         | Some st -> 

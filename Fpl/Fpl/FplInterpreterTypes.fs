@@ -437,7 +437,8 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         and set (value) = 
             match _nameFinal with
             | SignatureIsFinal.Yes where -> 
-                raise (ArgumentException($"Cannot set readonly Name {_name} again since it has been already set at {where}."))
+                Console.WriteLine()
+                //raise (ArgumentException($"Cannot set readonly Name `{_name}` again since it has been already set at {where}."))
             | SignatureIsFinal.No -> _name <- value
 
     /// First element of the type signature.
@@ -477,7 +478,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     _expressionType <- value
                     _exprTypeAlreadySet <- true
             else
-                raise (ArgumentException($"Type was already initialized with {_expressionType.Type}, cannot set it again with {value.Type}."))
+                raise (ArgumentException($"Type was already initialized with `{_expressionType.Type}`, cannot set it again with {value.Type}."))
 
     /// Indicates, if the Name has been finally determined during the evaluation process.
     /// If true, the Name property becomes immutable.
@@ -749,12 +750,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 else
                     ScopeSearchResult.NotFound
 
-        if FplValue.IsVariable(fplValue) then
-            firstBlockParent fplValue
-        elif fplValue.BlockType = FplValueType.Reference then 
-            firstBlockParent fplValue
-        else
-            ScopeSearchResult.NotApplicable
+        firstBlockParent fplValue
 
     /// Checks if an fplValue is provable. This will only be true if 
     /// it is a theorem, a lemma, a proposition, or a corollary
