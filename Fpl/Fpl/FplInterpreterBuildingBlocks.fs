@@ -1188,6 +1188,7 @@ let rec eval (st: SymbolTable) ast =
         st.ValueStack.Push(fplValue)
         eval st signatureAst
         tryAddBlock fplValue
+        fplValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
         match optVarDeclOrSpecListAst with
         | Some astList -> astList |> List.map (eval st) |> ignore
         | None -> ()
