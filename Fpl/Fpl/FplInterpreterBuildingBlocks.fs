@@ -1191,7 +1191,6 @@ let rec eval (st: SymbolTable) ast =
         st.ValueStack.Push(fplValue)
         eval st signatureAst
         tryAddBlock fplValue
-        fplValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
         match optVarDeclOrSpecListAst with
         | Some astList -> astList |> List.map (eval st) |> ignore
         | None -> ()
@@ -1216,10 +1215,10 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         st.EvalPop()
     // | DefClassCompleteContent of Ast list option * Ast list
-    | Ast.DefClassCompleteContent(optAsts, asts) ->
+    | Ast.DefClassCompleteContent(optVarDeclOrSpecListAsts, constructorListAsts) ->
         st.EvalPush("DefClassCompleteContent")
-        optAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        asts |> List.map (eval st) |> ignore
+        optVarDeclOrSpecListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+        constructorListAsts |> List.map (eval st) |> ignore
         st.EvalPop()
     // | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | Ast.DefinitionPredicate((pos1, pos2), (signatureWithUserDefinedStringAst, (predicateContentAst, optPropertyListAsts))) ->
