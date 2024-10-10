@@ -923,9 +923,12 @@ let rec eval (st: SymbolTable) ast =
             if FplValue.IsFplBlock(fv) then
                 fv.BlockType <- FplValueType.FunctionalTerm
             else
-                fv.BlockType <- FplValueType.OptionalFunctionalTerm
-        | None -> 
                 fv.BlockType <- FplValueType.MandatoryFunctionalTerm
+        | None -> 
+            if FplValue.IsFplBlock(fv) then
+                fv.BlockType <- FplValueType.FunctionalTerm
+            else
+                fv.BlockType <- FplValueType.OptionalFunctionalTerm
         adjustSignature st fv "->"
         fv.NameEndPos <- pos2
         eval st mappingAst
