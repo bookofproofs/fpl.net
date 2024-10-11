@@ -39,8 +39,8 @@ type TestFplValueScopeNameIsFinal() =
         match res with
         | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.Var"), r.NameIsFinal)
-            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "at CreateRoot"), theory.NameIsFinal)
+            | "r" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "at CreateRoot"), r.NameIsFinal)
+            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace"), theory.NameIsFinal)
             | "inf1" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.RuleOfInference.Signature"), inf1.NameIsFinal)
             | "inf2" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.RuleOfInference.Signature"), inf2.NameIsFinal)
             | "axi1" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.Axiom.Signature"), axi1.NameIsFinal)
@@ -84,7 +84,7 @@ type TestFplValueScopeNameIsFinal() =
         | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "at CreateRoot"), r.NameIsFinal)
-            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes ""), theory.NameIsFinal)
+            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace"), theory.NameIsFinal)
             | "block" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionClass"), block.NameIsFinal)
             | "t1" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionClass.DefClassCompleteContent.Constructor.Signature"), t1.NameIsFinal)
             | "t2" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionClass.DefClassCompleteContent.Constructor.Signature"), t2.NameIsFinal)
@@ -125,7 +125,7 @@ type TestFplValueScopeNameIsFinal() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "at CreateRoot"), r.NameIsFinal)
-                | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes ""), theory.NameIsFinal)
+                | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace"), theory.NameIsFinal)
                 | "thm1" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.Theorem.Signature"), thm1.NameIsFinal)
                 | "proofThm1" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.Proof"), proofThm1.NameIsFinal)
                 | "lem1" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.Lemma.Signature"), lem1.NameIsFinal)
@@ -176,7 +176,7 @@ type TestFplValueScopeNameIsFinal() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "at CreateRoot"), r.NameIsFinal)
-            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes ""), theory.NameIsFinal)
+            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace"), theory.NameIsFinal)
             | "block" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate"), block.NameIsFinal)
             | "t1" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.PropertyBlock.PredicateInstance.Signature"), t1.NameIsFinal)
             | "t2" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.PropertyBlock.PredicateInstance.Signature"), t2.NameIsFinal)
@@ -233,7 +233,7 @@ type TestFplValueScopeNameIsFinal() =
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "at CreateRoot"), r.NameIsFinal)
-            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes ""), theory.NameIsFinal)
+            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace"), theory.NameIsFinal)
             | "block" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate"), block.NameIsFinal)
             | "x" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.VarDeclBlock.NamedVarDecl.Var"), x.NameIsFinal)
             | "y" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.VarDeclBlock.NamedVarDecl.Var"), y.NameIsFinal)
@@ -303,7 +303,7 @@ type TestFplValueScopeNameIsFinal() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "at CreateRoot"), r.NameIsFinal)
-            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes ""), theory.NameIsFinal)
+            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace"), theory.NameIsFinal)
             | "block" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate"), block.NameIsFinal)
             | "x" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.VarDeclBlock.NamedVarDecl.Var"), x.NameIsFinal)
             | "y" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.VarDeclBlock.NamedVarDecl.Var"), y.NameIsFinal)
@@ -372,16 +372,16 @@ type TestFplValueScopeNameIsFinal() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "at CreateRoot"), r.NameIsFinal)
-            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes ""), theory.NameIsFinal)
+            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace"), theory.NameIsFinal)
             | "block" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate"), block.NameIsFinal)
             | "x" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.Var"), x.NameIsFinal)
             | "y" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.Var"), y.NameIsFinal)
-            | "xu" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.VarDeclBlock.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), xu.NameIsFinal)
-            | "xv" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.VarDeclBlock.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), xv.NameIsFinal)
-            | "xw" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.VarDeclBlock.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), xw.NameIsFinal)
-            | "yu" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.VarDeclBlock.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), yu.NameIsFinal)
-            | "yv" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.VarDeclBlock.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), yv.NameIsFinal)
-            | "yw" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.VarDeclBlock.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), yw.NameIsFinal)
+            | "xu" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), xu.NameIsFinal)
+            | "xv" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), xv.NameIsFinal)
+            | "xw" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), xw.NameIsFinal)
+            | "yu" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), yu.NameIsFinal)
+            | "yv" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), yv.NameIsFinal)
+            | "yw" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.Var"), yw.NameIsFinal)
             | "xua" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.VariableType.CompoundFunctionalTermType.ParamTuple.NamedVarDecl.Var"), xua.NameIsFinal)
             | "xub" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.VariableType.CompoundFunctionalTermType.ParamTuple.NamedVarDecl.Var"), xub.NameIsFinal)
             | "xuc" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.VariableType.CompoundPredicateType.ParamTuple.NamedVarDecl.VariableType.CompoundFunctionalTermType.ParamTuple.NamedVarDecl.Var"), xuc.NameIsFinal)
@@ -441,7 +441,7 @@ type TestFplValueScopeNameIsFinal() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "at CreateRoot"), r.NameIsFinal)
-            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes ""), theory.NameIsFinal)
+            | "theory" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace"), theory.NameIsFinal)
             | "block" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate"), block.NameIsFinal)
             | "x" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.Var"), x.NameIsFinal)
             | "y" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.SignatureWithUserDefinedString.ParamTuple.NamedVarDecl.Var"), y.NameIsFinal)
@@ -553,7 +553,7 @@ type TestFplValueScopeNameIsFinal() =
             | "base2" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
             | "base3" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
             | "base4" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
-            | "base5" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
+            | "base5" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression.Delegate"), base1.NameIsFinal)
             | "base6" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
             | "base7" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
             | "base8" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
@@ -683,13 +683,13 @@ type TestFplValueScopeNameIsFinal() =
             let base1 = pr1.ValueList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
-            | "base2" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
-            | "base3" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
-            | "base4" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
-            | "base5" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
-            | "base6" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
-            | "base7" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression"), base1.NameIsFinal)
+            | "base1" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression.Delegate"), base1.NameIsFinal)
+            | "base2" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression.Delegate"), base1.NameIsFinal)
+            | "base3" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression.Delegate"), base1.NameIsFinal)
+            | "base4" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression.Delegate"), base1.NameIsFinal)
+            | "base5" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression.Delegate"), base1.NameIsFinal)
+            | "base6" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression.Delegate"), base1.NameIsFinal)
+            | "base7" -> Assert.AreEqual<SignatureIsFinal>((SignatureIsFinal.Yes "AST.Namespace.DefinitionPredicate.DefPredicateContent.Expression.Delegate"), base1.NameIsFinal)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

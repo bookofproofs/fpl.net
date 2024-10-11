@@ -171,6 +171,12 @@ let tryAddBlock (fplValue:FplValue) =
             | _ -> ()
             *)
 
+let simplifyEvalTree (st:SymbolTable) = 
+    let top = st.ValueStack.Pop()
+    let next = st.ValueStack.Pop()
+    top.Parent <- next.Parent
+    st.ValueStack.Push(top)
+
 let propagateReference (refBlock:FplValue) withAdding = 
     let fplValue = refBlock.Parent.Value
     if fplValue.BlockType = FplValueType.Reference then
@@ -681,6 +687,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Namespace")
         optAst |> Option.map (eval st) |> ignore
         asts |> List.map (eval st) |> ignore
+        let fv = st.ValueStack.Peek()
+        fv.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
         st.EvalPop()
     // CompoundFunctionalTermType of Positions * ((Ast * Ast) option)
     | Ast.CompoundFunctionalTermType((pos1, pos2), (ast1, astTupleOption)) ->
@@ -822,8 +830,8 @@ let rec eval (st: SymbolTable) ast =
         eval st fplDelegateIdentifierAst
         eval st argumentTupleAst
         emitID013Diagnostics refBlock pos1 pos2 |> ignore
-        propagateReference refBlock false 
-        st.ValueStack.Pop() |> ignore
+        simplifyEvalTree st
+        refBlock.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | Ast.SignatureWithUserDefinedString((pos1, pos2),
@@ -1030,6 +1038,7 @@ let rec eval (st: SymbolTable) ast =
         ensureReversedPolishNotation
         optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
         eval st qualificationListAst
+        let refBlock = st.ValueStack.Peek() // if the reference was replaced, take this one
         propagateReference refBlock true
         match (fv.BlockType, fv.FplRepresentation,refBlock.FplRepresentation,fv.ValueList.Count) with
         | (FplValueType.Reference, FplRepresentation.Undef, FplRepresentation.Pointer var, 1) ->
@@ -1315,7 +1324,6 @@ let evaluateSymbolTable (st: SymbolTable) =
                 st.Root.Scope[pa.Id].Reset()
                 st.Root.Scope[pa.Id] <- theoryValue
             theoryValue.Name <- pa.Id
-            theoryValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
             st.ValueStack.Push(theoryValue)
             ad.CurrentUri <- pa.Parsing.Uri
             eval st pa.Parsing.Ast
