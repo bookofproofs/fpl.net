@@ -52,7 +52,10 @@ let rec adjustSignature (st:SymbolTable) (fplValue:FplValue) str =
 
         match fplValue.Parent with
         | Some parent -> 
-                if parent.BlockType <> FplValueType.Theory then 
+                if FplValue.IsReference(parent) then
+                    () // do not adjust signatures of nested references 
+                    // (those are handled through propagation using the propagateReference function)
+                elif parent.BlockType <> FplValueType.Theory then 
                     adjustSignature st parent str
         | None -> ()
 
