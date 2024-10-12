@@ -15,9 +15,12 @@ type EvalStack() =
     let _valueStack = Stack<FplValue>()
 
     /// Adjusts the signature and name of an FplValue.
-    static member adjustNameAndSignature (fplValue:FplValue) name (typeSignature:string list) = 
-            fplValue.Name <- addWithComma fplValue.Name name
-            fplValue.TypeSignature <- fplValue.TypeSignature @ typeSignature
+    static member adjustNameAndSignature (fv:FplValue) name (typeSignature:string list) = 
+        if FplValue.IsVariable(fv) && fv.Name <> "" then
+            fv.TypeSignature <- typeSignature
+        else
+            fv.Name <- addWithComma fv.Name name
+            fv.TypeSignature <- fv.TypeSignature @ typeSignature
 
     /// Adds the FplValue to it's parent's Scope.
     static member tryAddToScope fv = 
@@ -100,13 +103,32 @@ type EvalStack() =
                         EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
         | FplValueType.Variable
         | FplValueType.VariadicVariableMany
-        | FplValueType.VariadicVariableMany1
+        | FplValueType.VariadicVariableMany1 ->
+            EvalStack.tryAddToValueList fv
+            match next.BlockType with 
+            | FplValueType.Theorem
+            | FplValueType.Localization
+            | FplValueType.Lemma
+            | FplValueType.Proposition
+            | FplValueType.Conjecture
+            | FplValueType.RuleOfInference
+            | FplValueType.Constructor
+            | FplValueType.MandatoryPredicate
+            | FplValueType.OptionalPredicate
+            | FplValueType.MandatoryFunctionalTerm
+            | FplValueType.OptionalFunctionalTerm
+            | FplValueType.Axiom
+            | FplValueType.Predicate
+            | FplValueType.FunctionalTerm ->
+                EvalStack.adjustNameAndSignature next (fv.TypeSignature |> String.concat "") fv.TypeSignature
+            | _ -> ()
         | FplValueType.Object
         | FplValueType.Premise
         | FplValueType.Conclusion
         | FplValueType.Theory
         | FplValueType.Root -> 
             EvalStack.tryAddToValueList fv
+
 
     // Pushes an FplValue to the stack.
     member this.PushEvalStack fv = _valueStack.Push fv
@@ -1139,8 +1161,8 @@ let rec eval (st: SymbolTable) ast =
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
     | Ast.Constructor((pos1, pos2), (signatureAst, (optVarDeclOrSpecListAst, keywordSelfAst))) ->
         st.EvalPush("Constructor")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Constructor, es.PeekEvalStack())
-        es.PushEvalStack(fplValue)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Constructor, es.PeekEvalStack())
+        es.PushEvalStack(fv)
         eval st signatureAst
         match optVarDeclOrSpecListAst with
         | Some astList -> astList |> List.map (eval st) |> ignore
