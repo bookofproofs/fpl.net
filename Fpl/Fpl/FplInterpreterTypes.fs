@@ -648,8 +648,8 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         fplValue.BlockType = FplValueType.Theory
 
 
-    /// Indicates if this FplValue has a signature.
-    static member HasSignature(fplValue:FplValue) = 
+    /// Indicates if this FplValue is a block, a property, or a constructor.
+    static member IsBlock(fplValue:FplValue) = 
         FplValue.IsFplBlock(fplValue) 
         || FplValue.IsProperty(fplValue) 
         || FplValue.IsConstructor(fplValue)

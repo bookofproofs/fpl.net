@@ -522,13 +522,11 @@ let rec eval (st: SymbolTable) ast =
 
         let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
         let identifier = String.concat "." pascalCaseIdList
-        
+        let evalPath = st.EvalPath()
         let fv = es.PeekEvalStack()
-        if FplValue.HasSignature(fv) then
-            if (FplValue.IsVariadicVariableMany(fv)) then 
-                EvalStack.adjustNameAndSignature fv $"*{identifier}" [$"*{identifier}"]
-            elif (FplValue.IsVariadicVariableMany1(fv)) then 
-                EvalStack.adjustNameAndSignature fv $"+{identifier}" [$"+{identifier}"]
+        if FplValue.IsBlock(fv) then
+            if evalPath.EndsWith("InheritedClassType.PredicateIdentifier") then 
+                ()
             else
                 EvalStack.adjustNameAndSignature fv identifier [identifier]
             checkID008Diagnostics fv pos1 pos2
