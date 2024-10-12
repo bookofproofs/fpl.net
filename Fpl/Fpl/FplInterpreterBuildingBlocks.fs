@@ -252,7 +252,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DollarDigits((pos1, pos2), s) -> 
         st.EvalPush("DollarDigits")
         let fv = es.PeekEvalStack()
-        EvalStack.adjustNameAndSignature fv ("$"+s.ToString()) ["$"+s.ToString()]
+        EvalStack.adjustNameAndSignature fv ("$"+s.ToString()) ["ind"]
         fv.NameEndPos <- pos2
         st.EvalPop() 
     | Ast.Extensionname((pos1, pos2), s) ->
@@ -1112,8 +1112,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Corollary")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Corollary, es.PeekEvalStack())
-        es.PushEvalStack(fplValue)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Corollary, es.PeekEvalStack())
+        es.PushEvalStack(fv)
         eval st corollarySignatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         es.PopEvalStack()
