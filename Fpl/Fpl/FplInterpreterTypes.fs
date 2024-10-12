@@ -404,10 +404,7 @@ type FixType =
         | Prefix symbol -> sprintf "prefix `%s` " symbol
         | NoFix -> "no fix"
 
-type SignatureIsFinal =
-    | Yes of string
-    | No
-and FplRepresentation = 
+type FplRepresentation = 
     | PredRepr of FplPredicate 
     | ObjRepr of string
     | Localization of FplValue * string
@@ -438,7 +435,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _name = name
     let mutable _expressionType = FixType.NoFix
     let mutable _exprTypeAlreadySet = false 
-    let mutable _nameFinal = SignatureIsFinal.No
     let mutable _nameEndPos = Position("", 0, 1, 1)
     let mutable _typeSignature = []
     let mutable _representation = FplRepresentation.Undef
@@ -451,15 +447,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let _auxiliaryUniqueChilds = HashSet<string>()
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
     let _valueList = System.Collections.Generic.List<FplValue>()
-
-
-    /// Resets the name of this FplValue and returns true if successful, otherwise false
-    member this.TryResetNameFinal where = 
-        match _nameFinal with
-        | SignatureIsFinal.Yes _ -> false
-        | SignatureIsFinal.No -> 
-            _nameFinal <- SignatureIsFinal.Yes where
-            true
 
 
     /// Identifier of this FplValue that is unique in its scope.
@@ -505,11 +492,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     _exprTypeAlreadySet <- true
             else
                 raise (ArgumentException($"Type was already initialized with `{_expressionType.Type}`, cannot set it again with {value.Type}."))
-
-    /// Indicates, if the Name has been finally determined during the evaluation process.
-    /// If SignatureFinal.Yes _, the Name property becomes immutable.
-    member this.NameIsFinal 
-        with get () = _nameFinal
 
     /// Type of the FPL block within this FplValue
     member this.BlockType
@@ -890,18 +872,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
         let root = new FplValue("", FplValueType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
-        if not (root.TryResetNameFinal "at CreateRoot") then 
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = Position("",(int64)1,(int64)1,(int64)0)
-                    Diagnostic.EndPos = Position("",(int64)1,(int64)1,(int64)0)
-                    Diagnostic.Code = ID014 ""
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic
         root
 
     /// A factory method for the FPL primitive Object

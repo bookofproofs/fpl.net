@@ -119,25 +119,20 @@ type EvalStack() =
 let es = EvalStack()
 
 let adjustSignature (fplValue:FplValue) name = 
-    let readyCheck = (FplValue.HasSignature(fplValue), fplValue.NameIsFinal) 
     
     if name <> "" then
-        match readyCheck with
-        | (true, SignatureIsFinal.Yes _) -> () //  for definitions with final name stop changing the TypeSignature
-        | (false, SignatureIsFinal.Yes _) -> () //  for definitions with final name stop changing the TypeSignature
-        | _ ->
-            fplValue.Name <- addWithComma fplValue.Name name
-            // note: the manipulation of the TypeSignature is necessary for all kinds of fplValue
-            if name.StartsWith("*") && name <> "*" then
-                fplValue.TypeSignature <- fplValue.TypeSignature @ ["*"; name.Substring(1)]
-            elif name.StartsWith("+") && name <> "+" then
-                fplValue.TypeSignature <- fplValue.TypeSignature @ ["+"; name.Substring(1)]
-            elif name.StartsWith("$") && name <> "$" then
-                fplValue.TypeSignature <- fplValue.TypeSignature @ ["ind"]
-            elif name = "true" || name = "false" then
-                fplValue.TypeSignature <- fplValue.TypeSignature @ ["pred"]
-            else
-                fplValue.TypeSignature <- fplValue.TypeSignature @ [name]
+        fplValue.Name <- addWithComma fplValue.Name name
+        // note: the manipulation of the TypeSignature is necessary for all kinds of fplValue
+        if name.StartsWith("*") && name <> "*" then
+            fplValue.TypeSignature <- fplValue.TypeSignature @ ["*"; name.Substring(1)]
+        elif name.StartsWith("+") && name <> "+" then
+            fplValue.TypeSignature <- fplValue.TypeSignature @ ["+"; name.Substring(1)]
+        elif name.StartsWith("$") && name <> "$" then
+            fplValue.TypeSignature <- fplValue.TypeSignature @ ["ind"]
+        elif name = "true" || name = "false" then
+            fplValue.TypeSignature <- fplValue.TypeSignature @ ["pred"]
+        else
+            fplValue.TypeSignature <- fplValue.TypeSignature @ [name]
 
     if name ="(" || name = "[" then 
         fplValue.AuxiliaryInfo <- fplValue.AuxiliaryInfo + 1
@@ -317,9 +312,7 @@ let rec eval (st: SymbolTable) ast =
             | ScopeSearchResult.Found other ->
                 // if found, the emit error that the variable was already declared.
                 emitVAR03diagnostics fv other 
-            | _ -> 
-                if not (varValue.TryResetNameFinal (st.EvalPath())) then 
-                    emitID014Diagnostics varValue.Name varValue.StartPos varValue.EndPos
+            | _ -> ()
         let evalPath = st.EvalPath()
         if not (evalPath.Contains("NamedVarDecl.")) then 
             es.PopEvalStack() // postpone popping all variables from stack that are being declared (they will be removed in Ast.NamedVarDecl(..))
@@ -667,8 +660,6 @@ let rec eval (st: SymbolTable) ast =
         optAst |> Option.map (eval st) |> ignore
         asts |> List.map (eval st) |> ignore
         let fv = es.PeekEvalStack()
-        if not (fv.TryResetNameFinal (st.EvalPath())) then 
-            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         st.EvalPop()
     // CompoundFunctionalTermType of Positions * ((Ast * Ast) option)
     | Ast.CompoundFunctionalTermType((pos1, pos2), (ast1, astTupleOption)) ->
@@ -808,8 +799,6 @@ let rec eval (st: SymbolTable) ast =
         eval st fplDelegateIdentifierAst
         eval st argumentTupleAst
         emitID013Diagnostics refBlock pos1 pos2 |> ignore
-        if not (refBlock.TryResetNameFinal (st.EvalPath())) then 
-            emitID014Diagnostics refBlock.Name refBlock.StartPos refBlock.EndPos
         es.PopEvalStack()
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
@@ -853,8 +842,6 @@ let rec eval (st: SymbolTable) ast =
         let loc = FplValue.CreateFplValue((pos1, pos2),FplValueType.Localization,theory)
         es.PushEvalStack(loc)
         eval st predicateAst
-        if not (loc.TryResetNameFinal (st.EvalPath())) then 
-            emitID014Diagnostics loc.Name loc.StartPos loc.EndPos
         translationListAsts |> List.map (eval st) |> ignore
         es.PopEvalStack()
         st.EvalPop()
@@ -924,8 +911,6 @@ let rec eval (st: SymbolTable) ast =
         adjustSignature fv "->"
         fv.NameEndPos <- pos2
         eval st mappingAst
-        if not (fv.TryResetNameFinal (st.EvalPath())) then 
-            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         st.EvalPop()
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         st.EvalPush("PredicateWithQualification")
@@ -1027,8 +1012,6 @@ let rec eval (st: SymbolTable) ast =
             fv.FplRepresentation <- refBlock.FplRepresentation
         | _ -> ()
         refBlock.NameEndPos <- pos2
-        if not (refBlock.TryResetNameFinal (st.EvalPath())) then 
-            emitID014Diagnostics refBlock.Name refBlock.StartPos refBlock.EndPos
         if FplValue.IsFplBlock(fv) || FplValue.IsConstructorOrProperty(fv) then
             fv.ValueList.Add(refBlock)
         es.PopEvalStack()
@@ -1045,8 +1028,6 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateIdentifierAst
         eval st paramTupleAst
         let fv = es.PeekEvalStack()
-        if not (fv.TryResetNameFinal (st.EvalPath())) then 
-            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         st.EvalPop()
     | Ast.Assignment((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("Assignment")
@@ -1147,8 +1128,6 @@ let rec eval (st: SymbolTable) ast =
         eval st referencingIdentifierAst
         eval st paramTupleAst
         let fv = es.PeekEvalStack()
-        if not (fv.TryResetNameFinal (st.EvalPath())) then 
-            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         st.EvalPop()
     | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Corollary")
@@ -1213,8 +1192,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Predicate, fplTheory)
         es.PushEvalStack(fv)
         eval st signatureWithUserDefinedStringAst
-        if not (fv.TryResetNameFinal (st.EvalPath())) then 
-            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         es.PopEvalStack()
@@ -1237,8 +1214,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Class, es.PeekEvalStack())
         es.PushEvalStack(fv)
         eval st predicateIdentifierAst
-        if not (fv.TryResetNameFinal (st.EvalPath())) then 
-            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         classTypeListAsts |> List.map (eval st) |> ignore
         eval st classContentAst
@@ -1258,8 +1233,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Proof, es.PeekEvalStack())
         es.PushEvalStack(fv)
         eval st referencingIdentifierAst
-        if not (fv.TryResetNameFinal (st.EvalPath())) then 
-            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         proofArgumentListAst |> List.map (eval st) |> ignore
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         es.PopEvalStack()
