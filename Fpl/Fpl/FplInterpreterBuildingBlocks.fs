@@ -303,7 +303,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Var")
         let fv = es.PeekEvalStack()
         let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
-        EvalStack.adjustSignatureAndName fv name ["undef"] 
+        EvalStack.adjustSignatureAndName varValue name ["undef"] 
         es.PushEvalStack(varValue)
         if FplValue.IsReference(fv) then
             match FplValue.VariableInBlockScopeByName fv name with 
