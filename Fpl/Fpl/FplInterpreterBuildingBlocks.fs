@@ -146,7 +146,9 @@ let setRepresentation (st: SymbolTable) representation =
 let eval_units (st: SymbolTable) unitType pos1 pos2 = 
     if unitType <> "" then 
         let fv = es.PeekEvalStack()
-        if FplValue.HasSignature(fv) then
+        if FplValue.IsClass(fv) then
+            ()
+        elif FplValue.HasSignature(fv) then
             if (FplValue.IsVariadicVariableMany(fv)) then 
                 adjustSignature fv $"*{unitType}"
             elif (FplValue.IsVariadicVariableMany1(fv)) then 
