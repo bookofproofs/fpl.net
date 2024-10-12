@@ -9,6 +9,9 @@ type CommonFplValueTestCases =
     static member getScopedElement (fv:FplInterpreterTypes.FplValue) name =
         if fv.Scope.ContainsKey(name) then 
             fv.Scope[name]
+        elif fv.Scope.Count>0 then
+            let kv = fv.Scope |> Seq.head
+            kv.Value
         else
             let pos = Position("",(int64)1,(int64)1,(int64)0)
             FplInterpreterTypes.FplValue.CreateRoot()
