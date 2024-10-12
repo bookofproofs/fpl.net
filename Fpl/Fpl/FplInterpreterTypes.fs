@@ -309,7 +309,7 @@ type FplValueType =
     | FunctionalTerm
     | Reference
     | Theory
-    | Translation
+    | Argument
     | Root
     member private this.UnqualifiedName = 
         match this with
@@ -339,13 +339,14 @@ type FplValueType =
             | FunctionalTerm -> "functional term definition"
             | Reference -> "reference"
             | Theory -> "theory"
-            | Translation -> "translation"
+            | Argument -> "argument"
             | Root -> "root"
     member private this.Article = 
         match this with
         | OptionalPredicate
         | OptionalFunctionalTerm
         | Object 
+        | Argument 
         | Axiom -> "an"
         | _ -> "a"
 
@@ -379,7 +380,7 @@ type FplValueType =
             | FunctionalTerm -> "func"
             | Reference -> "ref"
             | Theory -> "th"
-            | Translation -> "trln"
+            | Argument -> "arg"
             | Root -> "root"
 
 type FplPredicate =
@@ -911,7 +912,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.VariadicVariableMany1
         | FplValueType.MandatoryFunctionalTerm
         | FplValueType.Localization
-        | FplValueType.Translation
+        | FplValueType.Argument
         | FplValueType.OptionalFunctionalTerm -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Class -> 
             let ret = new FplValue("", fplBlockType, positions, Some parent)

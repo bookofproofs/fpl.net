@@ -85,6 +85,8 @@ type EvalStack() =
         | FplValueType.Predicate
         | FplValueType.FunctionalTerm ->
             EvalStack.tryAddToScope fv
+        | FplValueType.Argument ->
+            EvalStack.tryAddToScope fv
         | FplValueType.Reference ->
             if fv.AuxiliaryInfo = 0 then
                 // propagate references only if refblock has all opened brackets closed
@@ -103,7 +105,6 @@ type EvalStack() =
         | FplValueType.Premise
         | FplValueType.Conclusion
         | FplValueType.Theory
-        | FplValueType.Translation
         | FplValueType.Root -> 
             EvalStack.tryAddToValueList fv
 
@@ -1043,10 +1044,14 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         eval st ast2
         st.EvalPop()
-    | Ast.Argument((pos1, pos2), (ast1, ast2)) ->
+    | Ast.Argument((pos1, pos2), (argIdAst, argAst)) ->
         st.EvalPush("Argument")
-        eval st ast1
-        eval st ast2
+        let fv = es.PeekEvalStack()
+        let arg = FplValue.CreateFplValue((pos1, pos2), FplValueType.Argument, fv) 
+        es.PushEvalStack(arg)
+        eval st argIdAst
+        eval st argAst
+        es.PopEvalStack()
         st.EvalPop()
     // | ForIn of Positions * ((Ast * Ast) * Ast list)
     | Ast.ForIn((pos1, pos2), ((ast1, ast2), asts)) ->
