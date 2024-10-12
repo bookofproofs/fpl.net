@@ -121,6 +121,8 @@ type EvalStack() =
             | FplValueType.Predicate
             | FplValueType.FunctionalTerm ->
                 EvalStack.adjustNameAndSignature next (fv.TypeSignature |> String.concat "") fv.TypeSignature
+            | FplValueType.Reference -> 
+                EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
             | _ -> ()
         | FplValueType.Object
         | FplValueType.Premise
