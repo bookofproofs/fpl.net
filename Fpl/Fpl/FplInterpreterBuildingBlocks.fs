@@ -41,71 +41,39 @@ type EvalStack() =
     // Pops an FplValue from stack and propagates it's name and signature to the next FplValue on the stack.
     member this.PopEvalStack() = 
         let fv = _valueStack.Pop()
-        let next = _valueStack.Peek()
+        if _valueStack.Count > 0 then
+            let next = _valueStack.Peek()
 
-        match fv.BlockType with
-        | FplValueType.Proof -> 
-            match FplValue.TryFindAssociatedBlockForProof fv with
-            | ScopeSearchResult.FoundAssociate parentsName -> 
-                // everything is ok, change the parent of the provable from theory to the found parent 
-                fv.Parent <- Some fv.Parent.Value.Scope[parentsName]
-            | ScopeSearchResult.FoundIncorrectBlock block ->
-                emitID002diagnostics fv block  
-            | ScopeSearchResult.NotFound ->
-                emitID003diagnostics fv  
-            | ScopeSearchResult.FoundMultiple listOfKandidates ->
-                emitID004diagnostics fv listOfKandidates  
-            | _ -> ()
-            EvalStack.tryAddToScope fv
-        | FplValueType.Corollary ->
-            match FplValue.TryFindAssociatedBlockForCorollary fv with
-            | ScopeSearchResult.FoundAssociate parentsName -> 
-                // everything is ok, change the parent of the provable from theory to the found parent 
-                fv.Parent <- Some fv.Parent.Value.Scope[parentsName]
-                // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
-                emitVAR03diagnosticsForCorollarysSignatureVariable fv  
-            | ScopeSearchResult.FoundIncorrectBlock block ->
-                emitID005diagnostics fv block  
-            | ScopeSearchResult.NotFound ->
-                emitID006diagnostics fv  
-            | ScopeSearchResult.FoundMultiple listOfKandidates ->
-                emitID007diagnostics fv listOfKandidates  
-            | _ -> ()
-            EvalStack.tryAddToScope fv
-        | FplValueType.Class 
-        | FplValueType.Theorem
-        | FplValueType.Localization
-        | FplValueType.Lemma
-        | FplValueType.Proposition
-        | FplValueType.Conjecture
-        | FplValueType.RuleOfInference
-        | FplValueType.Constructor
-        | FplValueType.MandatoryPredicate
-        | FplValueType.OptionalPredicate
-        | FplValueType.MandatoryFunctionalTerm
-        | FplValueType.OptionalFunctionalTerm
-        | FplValueType.Axiom
-        | FplValueType.Predicate
-        | FplValueType.FunctionalTerm ->
-            EvalStack.tryAddToScope fv
-        | FplValueType.Argument ->
-            EvalStack.tryAddToScope fv
-        | FplValueType.Reference ->
-            if fv.AuxiliaryInfo = 0 then
-                // propagate references only if refblock has all opened brackets closed
-                // and the name of its reference-typed parent is not yet ready
-                if not (next.ValueList.Contains(fv)) then 
-                    next.ValueList.Add(fv)
-                    match fv.FplRepresentation with
-                    | FplRepresentation.Pointer variable ->
-                        EvalStack.adjustNameAndSignature next variable.Name variable.TypeSignature
-                    | _ -> 
-                        EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
-        | FplValueType.Variable
-        | FplValueType.VariadicVariableMany
-        | FplValueType.VariadicVariableMany1 ->
-            EvalStack.tryAddToValueList fv
-            match next.BlockType with 
+            match fv.BlockType with
+            | FplValueType.Proof -> 
+                match FplValue.TryFindAssociatedBlockForProof fv with
+                | ScopeSearchResult.FoundAssociate parentsName -> 
+                    // everything is ok, change the parent of the provable from theory to the found parent 
+                    fv.Parent <- Some fv.Parent.Value.Scope[parentsName]
+                | ScopeSearchResult.FoundIncorrectBlock block ->
+                    emitID002diagnostics fv block  
+                | ScopeSearchResult.NotFound ->
+                    emitID003diagnostics fv  
+                | ScopeSearchResult.FoundMultiple listOfKandidates ->
+                    emitID004diagnostics fv listOfKandidates  
+                | _ -> ()
+                EvalStack.tryAddToScope fv
+            | FplValueType.Corollary ->
+                match FplValue.TryFindAssociatedBlockForCorollary fv with
+                | ScopeSearchResult.FoundAssociate parentsName -> 
+                    // everything is ok, change the parent of the provable from theory to the found parent 
+                    fv.Parent <- Some fv.Parent.Value.Scope[parentsName]
+                    // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
+                    emitVAR03diagnosticsForCorollarysSignatureVariable fv  
+                | ScopeSearchResult.FoundIncorrectBlock block ->
+                    emitID005diagnostics fv block  
+                | ScopeSearchResult.NotFound ->
+                    emitID006diagnostics fv  
+                | ScopeSearchResult.FoundMultiple listOfKandidates ->
+                    emitID007diagnostics fv listOfKandidates  
+                | _ -> ()
+                EvalStack.tryAddToScope fv
+            | FplValueType.Class 
             | FplValueType.Theorem
             | FplValueType.Localization
             | FplValueType.Lemma
@@ -120,16 +88,49 @@ type EvalStack() =
             | FplValueType.Axiom
             | FplValueType.Predicate
             | FplValueType.FunctionalTerm ->
-                EvalStack.adjustNameAndSignature next (fv.TypeSignature |> String.concat "") fv.TypeSignature
-            | FplValueType.Reference -> 
-                EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
-            | _ -> ()
-        | FplValueType.Object
-        | FplValueType.Premise
-        | FplValueType.Conclusion
-        | FplValueType.Theory
-        | FplValueType.Root -> 
-            EvalStack.tryAddToValueList fv
+                EvalStack.tryAddToScope fv
+            | FplValueType.Argument ->
+                EvalStack.tryAddToScope fv
+            | FplValueType.Reference ->
+                if fv.AuxiliaryInfo = 0 then
+                    // propagate references only if refblock has all opened brackets closed
+                    // and the name of its reference-typed parent is not yet ready
+                    if not (next.ValueList.Contains(fv)) then 
+                        next.ValueList.Add(fv)
+                        match fv.FplRepresentation with
+                        | FplRepresentation.Pointer variable ->
+                            EvalStack.adjustNameAndSignature next variable.Name variable.TypeSignature
+                        | _ -> 
+                            EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
+            | FplValueType.Variable
+            | FplValueType.VariadicVariableMany
+            | FplValueType.VariadicVariableMany1 ->
+                EvalStack.tryAddToValueList fv
+                match next.BlockType with 
+                | FplValueType.Theorem
+                | FplValueType.Localization
+                | FplValueType.Lemma
+                | FplValueType.Proposition
+                | FplValueType.Conjecture
+                | FplValueType.RuleOfInference
+                | FplValueType.Constructor
+                | FplValueType.MandatoryPredicate
+                | FplValueType.OptionalPredicate
+                | FplValueType.MandatoryFunctionalTerm
+                | FplValueType.OptionalFunctionalTerm
+                | FplValueType.Axiom
+                | FplValueType.Predicate
+                | FplValueType.FunctionalTerm ->
+                    EvalStack.adjustNameAndSignature next (fv.TypeSignature |> String.concat "") fv.TypeSignature
+                | FplValueType.Reference -> 
+                    EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
+                | _ -> ()
+            | FplValueType.Object
+            | FplValueType.Premise
+            | FplValueType.Conclusion
+            | FplValueType.Theory
+            | FplValueType.Root -> 
+                EvalStack.tryAddToValueList fv
 
 
     // Pushes an FplValue to the stack.
