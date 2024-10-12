@@ -290,6 +290,7 @@ type FplValueType =
     | FunctionalTerm
     | Reference
     | Theory
+    | Translation
     | Root
     member private this.UnqualifiedName = 
         match this with
@@ -319,6 +320,7 @@ type FplValueType =
             | FunctionalTerm -> "functional term definition"
             | Reference -> "reference"
             | Theory -> "theory"
+            | Translation -> "translation"
             | Root -> "root"
     member private this.Article = 
         match this with
@@ -358,6 +360,7 @@ type FplValueType =
             | FunctionalTerm -> "func"
             | Reference -> "ref"
             | Theory -> "th"
+            | Translation -> "trln"
             | Root -> "root"
 
 type FplPredicate =
@@ -431,15 +434,19 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let _valueList = System.Collections.Generic.List<FplValue>()
 
 
+    /// Resets the name of this FplValue and returns true if successful, otherwise false
+    member this.TryResetNameFinal where = 
+        match _nameFinal with
+        | SignatureIsFinal.Yes _ -> false
+        | SignatureIsFinal.No -> 
+            _nameFinal <- SignatureIsFinal.Yes where
+            true
+
+
     /// Identifier of this FplValue that is unique in its scope.
     member this.Name
         with get () = _name
-        and set (value) = 
-            match _nameFinal with
-            | SignatureIsFinal.Yes where -> 
-                Console.WriteLine()
-                //raise (ArgumentException($"Cannot set readonly Name `{_name}` again since it has been already set at {where}."))
-            | SignatureIsFinal.No -> _name <- value
+        and set (value) = _name <- value
 
     /// First element of the type signature.
     member this.FplId = 
@@ -481,14 +488,9 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 raise (ArgumentException($"Type was already initialized with `{_expressionType.Type}`, cannot set it again with {value.Type}."))
 
     /// Indicates, if the Name has been finally determined during the evaluation process.
-    /// If true, the Name property becomes immutable.
-    member this.NameIsFinal
+    /// If SignatureFinal.Yes _, the Name property becomes immutable.
+    member this.NameIsFinal 
         with get () = _nameFinal
-        and set (value) = 
-            match _nameFinal with
-            | SignatureIsFinal.Yes where -> 
-                raise (ArgumentException($"Cannot reset NameIsFinal since it has been already set at {where}."))
-            | SignatureIsFinal.No -> _nameFinal <- value
 
     /// Type of the FPL block within this FplValue
     member this.BlockType
@@ -646,7 +648,10 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
 
     /// Indicates if this FplValue has a signature.
     static member HasSignature(fplValue:FplValue) = 
-        FplValue.IsFplBlock(fplValue) || FplValue.IsProperty(fplValue) || FplValue.IsConstructor(fplValue)
+        FplValue.IsFplBlock(fplValue) 
+        || FplValue.IsProperty(fplValue) 
+        || FplValue.IsConstructor(fplValue)
+
 
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos = 
@@ -866,7 +871,18 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
         let root = new FplValue("", FplValueType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
-        root.NameIsFinal <- SignatureIsFinal.Yes "at CreateRoot"
+        if not (root.TryResetNameFinal "at CreateRoot") then 
+            let diagnostic =
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = Position("",(int64)1,(int64)1,(int64)0)
+                    Diagnostic.EndPos = Position("",(int64)1,(int64)1,(int64)0)
+                    Diagnostic.Code = ID014 ""
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
         root
 
     /// A factory method for the FPL primitive Object
@@ -899,12 +915,13 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.Theory
         | FplValueType.MandatoryPredicate
         | FplValueType.OptionalPredicate
-        | FplValueType.Reference -> new FplValue("", fplBlockType, positions, Some parent)
+        | FplValueType.Reference 
         | FplValueType.FunctionalTerm
         | FplValueType.Variable
         | FplValueType.VariadicVariableMany
         | FplValueType.VariadicVariableMany1
         | FplValueType.MandatoryFunctionalTerm
+        | FplValueType.Localization
         | FplValueType.OptionalFunctionalTerm -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Class -> 
             let ret = new FplValue("", fplBlockType, positions, Some parent)

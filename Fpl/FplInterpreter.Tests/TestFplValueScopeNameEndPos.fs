@@ -34,11 +34,13 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("fun2")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
+    [<DataRow("loc1")>]
+    [<DataRow("loc2")>]
     [<TestMethod>]
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("NameEndPos") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.IsTrue(r.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "theory" -> Assert.IsTrue(theory.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
@@ -66,6 +68,8 @@ type TestFplValueScopeNameEndPos() =
             | "fun2" -> Assert.IsTrue(fun2.NameEndPos.ToString().Contains("Ln: 23, Col: 48)"))
             | "prf1" -> Assert.IsTrue(prf1.NameEndPos.ToString().Contains("Ln: 24, Col: 33)"))
             | "prf2" -> Assert.IsTrue(prf2.NameEndPos.ToString().Contains("Ln: 25, Col: 33)"))
+            | "loc1" -> Assert.IsTrue(loc1.NameEndPos.ToString().Contains("Ln: 26, Col: 33)"))
+            | "loc2" -> Assert.IsTrue(loc2.NameEndPos.ToString().Contains("Ln: 27, Col: 33)"))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

@@ -381,6 +381,19 @@ let emitID013Diagnostics (fplValue: FplValue) pos1 pos2 =
                 }
             ad.AddDiagnostic diagnostic
 
+let emitID014Diagnostics name pos1 pos2 =
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = ID014 name
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+
 let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     let detailed (exprType: FixType) expectedArity actualArity pos1 pos2 =
         let diagnostic =

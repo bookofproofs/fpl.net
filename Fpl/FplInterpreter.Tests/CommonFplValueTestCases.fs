@@ -301,6 +301,8 @@ type CommonFplValueTestCases =
             def func SomeFunctionalTerm2()->obj {intr}
             proof SomeTheorem1$1 {1. |- trivial}
             proof SomeTheorem2$1 {1. |- trivial}
+            loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;
+            loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;
         ;
         """
         let filename = "TestScopeBlocks" + subtype
@@ -333,7 +335,9 @@ type CommonFplValueTestCases =
                             let fun2 = theory.Scope["SomeFunctionalTerm2() -> obj"]
                             let prf1 = thm1.Scope["SomeTheorem1$1"]
                             let prf2 = thm2.Scope["SomeTheorem2$1"]
-                            Some (r,theory,inf1,inf2,axi1,axi2,pst1,pst2,thm1,thm2,pro1,pro2,lem1,lem2,cor1,cor2,con1,con2,cla1,cla2,pre1,pre2,fun1,fun2,prf1,prf2)
+                            let loc1 = theory.Scope["not(x)"]
+                            let loc2 = theory.Scope["Equal(x, y)"]
+                            Some (r,theory,inf1,inf2,axi1,axi2,pst1,pst2,thm1,thm2,pro1,pro2,lem1,lem2,cor1,cor2,con1,con2,cla1,cla2,pre1,pre2,fun1,fun2,prf1,prf2,loc1,loc2)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
         result

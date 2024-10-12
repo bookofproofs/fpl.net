@@ -112,6 +112,7 @@ type DiagnosticCode =
     | ID011 of string * string
     | ID012 of string * string 
     | ID013 of string
+    | ID014 of string
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -181,6 +182,7 @@ type DiagnosticCode =
             | ID011 _ -> "ID011"
             | ID012 _ -> "ID012"
             | ID013 _ -> "ID013"
+            | ID014 _ -> "ID014"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -250,6 +252,7 @@ type DiagnosticCode =
             | ID011 (name, inheritanceChain) -> sprintf "Inheritance from `%s` can be dropped because of the inheritance chain %s." name inheritanceChain
             | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are %s." name candidates
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
+            | ID014 name -> sprintf "Cannot reset name since it has been already set at `%s`." name
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."

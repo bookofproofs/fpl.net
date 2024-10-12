@@ -342,7 +342,8 @@ let rec eval (st: SymbolTable) ast =
             | _ -> 
                 varValue.Name <- name
                 varValue.NameEndPos <- pos2
-                varValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+                if not (varValue.TryResetNameFinal (st.EvalPath())) then 
+                    emitID014Diagnostics varValue.Name varValue.StartPos varValue.EndPos
                 fv.Scope.Add(varValue.Name,varValue)
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
@@ -691,7 +692,8 @@ let rec eval (st: SymbolTable) ast =
         optAst |> Option.map (eval st) |> ignore
         asts |> List.map (eval st) |> ignore
         let fv = st.ValueStack.Peek()
-        fv.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+        if not (fv.TryResetNameFinal (st.EvalPath())) then 
+            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         st.EvalPop()
     // CompoundFunctionalTermType of Positions * ((Ast * Ast) option)
     | Ast.CompoundFunctionalTermType((pos1, pos2), (ast1, astTupleOption)) ->
@@ -834,7 +836,8 @@ let rec eval (st: SymbolTable) ast =
         eval st argumentTupleAst
         emitID013Diagnostics refBlock pos1 pos2 |> ignore
         simplifyEvalTree st
-        refBlock.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+        if not (refBlock.TryResetNameFinal (st.EvalPath())) then 
+            emitID014Diagnostics refBlock.Name refBlock.StartPos refBlock.EndPos
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | Ast.SignatureWithUserDefinedString((pos1, pos2),
@@ -872,10 +875,17 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         asts |> List.map (eval st) |> ignore
         st.EvalPop()
-    | Ast.Localization((pos1, pos2), (ast1, asts)) ->
+    | Ast.Localization((pos1, pos2), (predicateAst, translationListAsts)) ->
         st.EvalPush("Localization")
-        eval st ast1
-        asts |> List.map (eval st) |> ignore
+        let theory = st.ValueStack.Peek()
+        let loc = FplValue.CreateFplValue((pos1, pos2),FplValueType.Localization,theory)
+        st.ValueStack.Push(loc)
+        eval st predicateAst
+        tryAddBlock loc
+        if not (loc.TryResetNameFinal (st.EvalPath())) then 
+            emitID014Diagnostics loc.Name loc.StartPos loc.EndPos
+        translationListAsts |> List.map (eval st) |> ignore
+        st.ValueStack.Pop() |> ignore
         st.EvalPop()
     | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermSignatureAst, functionalTermInstanceBlockAst)) ->
         st.EvalPush("FunctionalTermInstance")
@@ -943,7 +953,8 @@ let rec eval (st: SymbolTable) ast =
         adjustSignature st fv "->"
         fv.NameEndPos <- pos2
         eval st mappingAst
-        fv.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+        if not (fv.TryResetNameFinal (st.EvalPath())) then 
+            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         st.EvalPop()
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         st.EvalPush("PredicateWithQualification")
@@ -1048,7 +1059,8 @@ let rec eval (st: SymbolTable) ast =
             fv.FplRepresentation <- refBlock.FplRepresentation
         | _ -> ()
         refBlock.NameEndPos <- pos2
-        refBlock.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+        if not (refBlock.TryResetNameFinal (st.EvalPath())) then 
+            emitID014Diagnostics refBlock.Name refBlock.StartPos refBlock.EndPos
         if FplValue.IsFplBlock(fv) || FplValue.IsConstructorOrProperty(fv) then
             fv.ValueList.Add(refBlock)
         st.ValueStack.Pop() |> ignore
@@ -1065,7 +1077,8 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateIdentifierAst
         eval st paramTupleAst
         let fv = st.ValueStack.Peek()
-        fv.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+        if not (fv.TryResetNameFinal (st.EvalPath())) then 
+            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         st.EvalPop()
     | Ast.Assignment((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("Assignment")
@@ -1171,7 +1184,8 @@ let rec eval (st: SymbolTable) ast =
         eval st referencingIdentifierAst
         eval st paramTupleAst
         let fv = st.ValueStack.Peek()
-        fv.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+        if not (fv.TryResetNameFinal (st.EvalPath())) then 
+            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         st.EvalPop()
     | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Corollary")
@@ -1236,11 +1250,12 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DefinitionPredicate((pos1, pos2), (signatureWithUserDefinedStringAst, (predicateContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionPredicate")
         let fplTheory = st.ValueStack.Peek()
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Predicate, fplTheory)
-        st.ValueStack.Push(fplValue)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Predicate, fplTheory)
+        st.ValueStack.Push(fv)
         eval st signatureWithUserDefinedStringAst
-        tryAddBlock fplValue 
-        fplValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+        tryAddBlock fv 
+        if not (fv.TryResetNameFinal (st.EvalPath())) then 
+            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         st.ValueStack.Pop() |> ignore
@@ -1261,11 +1276,12 @@ let rec eval (st: SymbolTable) ast =
                           (((predicateIdentifierAst, optUserDefinedObjSymAst), classTypeListAsts),
                            (classContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionClass")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Class, st.ValueStack.Peek())
-        st.ValueStack.Push(fplValue)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Class, st.ValueStack.Peek())
+        st.ValueStack.Push(fv)
         eval st predicateIdentifierAst
-        tryAddBlock fplValue 
-        fplValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+        tryAddBlock fv 
+        if not (fv.TryResetNameFinal (st.EvalPath())) then 
+            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         classTypeListAsts |> List.map (eval st) |> ignore
         eval st classContentAst
@@ -1282,11 +1298,12 @@ let rec eval (st: SymbolTable) ast =
     // | Proof of Positions * (Ast * (Ast list * Ast option))
     | Ast.Proof((pos1, pos2), (referencingIdentifierAst, (proofArgumentListAst, optQedAst))) ->
         st.EvalPush("Proof")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Proof, st.ValueStack.Peek())
-        st.ValueStack.Push(fplValue)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Proof, st.ValueStack.Peek())
+        st.ValueStack.Push(fv)
         eval st referencingIdentifierAst
-        tryAddBlock fplValue 
-        fplValue.NameIsFinal <- SignatureIsFinal.Yes (st.EvalPath())
+        tryAddBlock fv 
+        if not (fv.TryResetNameFinal (st.EvalPath())) then 
+            emitID014Diagnostics fv.Name fv.StartPos fv.EndPos
         proofArgumentListAst |> List.map (eval st) |> ignore
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         st.ValueStack.Pop() |> ignore

@@ -33,11 +33,13 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow("fun2")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
+    [<DataRow("loc1")>]
+    [<DataRow("loc2")>]
     [<TestMethod>]
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("TypeSignature") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string list>([], r.TypeSignature)
             | "theory" -> Assert.AreEqual<string list>([], theory.TypeSignature)
@@ -65,6 +67,8 @@ type TestFplValueScopeTypeSignature() =
             | "fun2" -> Assert.AreEqual<string list>(["SomeFunctionalTerm2"; "("; ")"; "->"; "obj"], fun2.TypeSignature)
             | "prf1" -> Assert.AreEqual<string list>(["SomeTheorem1"; "ind"], prf1.TypeSignature)
             | "prf2" -> Assert.AreEqual<string list>(["SomeTheorem2"; "ind"], prf2.TypeSignature)
+            | "loc1" -> Assert.AreEqual<string list>(["not"; "("; "undef"; ")"], loc1.TypeSignature)
+            | "loc2" -> Assert.AreEqual<string list>(["Equal"; "("; "undef"; "undef"; ")"], loc2.TypeSignature)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
