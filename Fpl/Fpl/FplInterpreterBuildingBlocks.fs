@@ -152,18 +152,10 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
         let fv = es.PeekEvalStack()
         if FplValue.IsClass(fv) then
             ()
-        elif FplValue.HasSignature(fv) then
-            if (FplValue.IsVariadicVariableMany(fv)) then 
-                EvalStack.adjustNameAndSignature fv $"*{unitType}" [$"*{unitType}"]
-            elif (FplValue.IsVariadicVariableMany1(fv)) then 
-                EvalStack.adjustNameAndSignature fv $"+{unitType}" [$"+{unitType}"]
-            else
-                EvalStack.adjustNameAndSignature fv unitType [unitType]
-                checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
         elif (FplValue.IsVariadicVariableMany(fv)) then 
             EvalStack.adjustNameAndSignature fv $"*{unitType}" [$"*{unitType}"]
         elif (FplValue.IsVariadicVariableMany1(fv)) then 
-            EvalStack.adjustNameAndSignature fv $"+{unitType}" [$"*{unitType}"]
+            EvalStack.adjustNameAndSignature fv $"+{unitType}" [$"+{unitType}"]
         elif (FplValue.IsReference(fv)) then 
             checkID012Diagnostics st fv unitType pos1 pos2
         else
