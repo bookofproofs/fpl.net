@@ -976,7 +976,6 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     let _parsedAsts = parsedAsts
     let mutable _mainTheory = ""
     let _evalPath = Stack<string>()
-    let _valueStack = Stack<FplValue>()
     let _evalLog = List<string>()
     let _root = FplValue.CreateRoot()
     let _debug = debug
@@ -991,47 +990,6 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
 
     /// Returns the list of parsed asts
     member this.ParsedAsts = _parsedAsts
-
-    // Pops an FplValue from stack and propagates it's name and signature to the next FplValue on the stack.
-    member this.PopEvalStack() = 
-        let fv = _valueStack.Pop()
-        let next = _valueStack.Peek()
-        next.Name <- addWithComma next.Name fv.Name 
-        next.TypeSignature <- fv.TypeSignature @ fv.TypeSignature
-
-        if next.BlockType = FplValueType.Reference then
-            if fv.AuxiliaryInfo = 0 then
-                // propagate references only if refblock has all opened brackets closed
-                // and the name of its reference-typed parent is not yet ready
-                if not (next.ValueList.Contains(fv)) then 
-                    next.ValueList.Add(fv)
-                    match fv.FplRepresentation with
-                    | FplRepresentation.Pointer variable ->
-                        next.Name <- addWithComma next.Name variable.Name 
-                        next.TypeSignature <- next.TypeSignature @ variable.TypeSignature
-                    | _ -> 
-                        next.Name <- addWithComma next.Name fv.Name 
-                        next.TypeSignature <- next.TypeSignature @ fv.TypeSignature
-        else
-            if not (next.ValueList.Contains(fv)) then 
-                next.ValueList.Add(fv)
-
-
-    // Pushes an FplValue to the stack.
-    member this.PushEvalStack fv = _valueStack.Push fv
-
-    // Peeks an FplValue from the stack.
-    member this.PeekEvalStack() = _valueStack.Peek()
-
-    // Clears stack.
-    member this.ClearEvalStack() = _valueStack.Clear()
-
-    // Simplifies the evaluation stack
-    member this.SimplifyEvalStack() = 
-        let top = _valueStack.Pop()
-        let next = _valueStack.Pop()
-        top.Parent <- next.Parent
-        _valueStack.Push(top)
 
     /// Returns the path of the current recursive evaluation. The path is reversed, i.e. starting with the root ast name.
     /// This path can be used to avoid false positives of interpreter diagnostics by further narrowing the parsing context
