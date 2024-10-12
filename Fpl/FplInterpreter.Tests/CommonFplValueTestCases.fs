@@ -2,8 +2,16 @@
 
 open CommonTestHelpers
 open ErrDiagnostics
+open FParsec
 
 type CommonFplValueTestCases =
+
+    static member getScopedElement (fv:FplInterpreterTypes.FplValue) name =
+        if fv.Scope.ContainsKey(name) then 
+            fv.Scope[name]
+        else
+            let pos = Position("",(int64)1,(int64)1,(int64)0)
+            FplInterpreterTypes.FplValue.CreateRoot()
 
     static member ScopeVariablesInSignature(subtype) =
         ad.Clear()
@@ -18,34 +26,34 @@ type CommonFplValueTestCases =
                         | Some st -> 
                             let name = "TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj))"
                             let r = st.Root
-                            let theory = r.Scope[filename]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
+                            let theory = CommonFplValueTestCases.getScopedElement r filename
+                            let block = CommonFplValueTestCases.getScopedElement theory name
+                            let x = CommonFplValueTestCases.getScopedElement block "x"
+                            let y = CommonFplValueTestCases.getScopedElement block "y"
+                            let xw = CommonFplValueTestCases.getScopedElement x "w"
+                            let xu = CommonFplValueTestCases.getScopedElement x "u"
+                            let xv = CommonFplValueTestCases.getScopedElement x "v"
+                            let yw = CommonFplValueTestCases.getScopedElement y "w"
+                            let yu = CommonFplValueTestCases.getScopedElement y "u"
+                            let yv = CommonFplValueTestCases.getScopedElement y "v"
+                            let xwa = CommonFplValueTestCases.getScopedElement xw "a"
+                            let xwb = CommonFplValueTestCases.getScopedElement xw "b"
+                            let xwc = CommonFplValueTestCases.getScopedElement xw "c"
+                            let xua = CommonFplValueTestCases.getScopedElement xu "a"
+                            let xub = CommonFplValueTestCases.getScopedElement xu "b"
+                            let xuc = CommonFplValueTestCases.getScopedElement xu "c"
+                            let xva = CommonFplValueTestCases.getScopedElement xv "a"
+                            let xvb = CommonFplValueTestCases.getScopedElement xv "b"
+                            let xvc = CommonFplValueTestCases.getScopedElement xv "c"
+                            let ywa = CommonFplValueTestCases.getScopedElement yw "a"
+                            let ywb = CommonFplValueTestCases.getScopedElement yw "b"
+                            let ywc = CommonFplValueTestCases.getScopedElement yw "c"
+                            let yua = CommonFplValueTestCases.getScopedElement yu "a"
+                            let yub = CommonFplValueTestCases.getScopedElement yu "b"
+                            let yuc = CommonFplValueTestCases.getScopedElement yu "c"
+                            let yva = CommonFplValueTestCases.getScopedElement yv "a"
+                            let yvb = CommonFplValueTestCases.getScopedElement yv "b"
+                            let yvc = CommonFplValueTestCases.getScopedElement yv "c"
                             Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
@@ -64,34 +72,34 @@ type CommonFplValueTestCases =
                         | Some st -> 
                             let name = "TestPredicate(+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj), +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj))"
                             let r = st.Root
-                            let theory = r.Scope[filename]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
+                            let theory = CommonFplValueTestCases.getScopedElement r filename
+                            let block = CommonFplValueTestCases.getScopedElement theory name
+                            let x = CommonFplValueTestCases.getScopedElement block "x"
+                            let y = CommonFplValueTestCases.getScopedElement block "y"
+                            let xw = CommonFplValueTestCases.getScopedElement x "w"
+                            let xu = CommonFplValueTestCases.getScopedElement x "u"
+                            let xv = CommonFplValueTestCases.getScopedElement x "v"
+                            let yw = CommonFplValueTestCases.getScopedElement y "w"
+                            let yu = CommonFplValueTestCases.getScopedElement y "u"
+                            let yv = CommonFplValueTestCases.getScopedElement y "v"
+                            let xwa = CommonFplValueTestCases.getScopedElement xw "a"
+                            let xwb = CommonFplValueTestCases.getScopedElement xw "b"
+                            let xwc = CommonFplValueTestCases.getScopedElement xw "c"
+                            let xua = CommonFplValueTestCases.getScopedElement xu "a"
+                            let xub = CommonFplValueTestCases.getScopedElement xu "b"
+                            let xuc = CommonFplValueTestCases.getScopedElement xu "c"
+                            let xva = CommonFplValueTestCases.getScopedElement xv "a"
+                            let xvb = CommonFplValueTestCases.getScopedElement xv "b"
+                            let xvc = CommonFplValueTestCases.getScopedElement xv "c"
+                            let ywa = CommonFplValueTestCases.getScopedElement yw "a"
+                            let ywb = CommonFplValueTestCases.getScopedElement yw "b"
+                            let ywc = CommonFplValueTestCases.getScopedElement yw "c"
+                            let yua = CommonFplValueTestCases.getScopedElement yu "a"
+                            let yub = CommonFplValueTestCases.getScopedElement yu "b"
+                            let yuc = CommonFplValueTestCases.getScopedElement yu "c"
+                            let yva = CommonFplValueTestCases.getScopedElement yv "a"
+                            let yvb = CommonFplValueTestCases.getScopedElement yv "b"
+                            let yvc = CommonFplValueTestCases.getScopedElement yv "c"
                             Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
@@ -115,35 +123,35 @@ type CommonFplValueTestCases =
                         | Some st -> 
                             let name = "TestPredicate()"
                             let r = st.Root
-                            let theory = r.Scope[filename]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let s = block.Scope["s"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
+                            let theory = CommonFplValueTestCases.getScopedElement r filename
+                            let block = CommonFplValueTestCases.getScopedElement theory name
+                            let x = CommonFplValueTestCases.getScopedElement block "x"
+                            let y = CommonFplValueTestCases.getScopedElement block "y"
+                            let s = CommonFplValueTestCases.getScopedElement block "s"
+                            let xw = CommonFplValueTestCases.getScopedElement x "w"
+                            let xu = CommonFplValueTestCases.getScopedElement x "u"
+                            let xv = CommonFplValueTestCases.getScopedElement x "v"
+                            let yw = CommonFplValueTestCases.getScopedElement y "w"
+                            let yu = CommonFplValueTestCases.getScopedElement y "u"
+                            let yv = CommonFplValueTestCases.getScopedElement y "v"
+                            let xwa = CommonFplValueTestCases.getScopedElement xw "a"
+                            let xwb = CommonFplValueTestCases.getScopedElement xw "b"
+                            let xwc = CommonFplValueTestCases.getScopedElement xw "c"
+                            let xua = CommonFplValueTestCases.getScopedElement xu "a"
+                            let xub = CommonFplValueTestCases.getScopedElement xu "b"
+                            let xuc = CommonFplValueTestCases.getScopedElement xu "c"
+                            let xva = CommonFplValueTestCases.getScopedElement xv "a"
+                            let xvb = CommonFplValueTestCases.getScopedElement xv "b"
+                            let xvc = CommonFplValueTestCases.getScopedElement xv "c"
+                            let ywa = CommonFplValueTestCases.getScopedElement yw "a"
+                            let ywb = CommonFplValueTestCases.getScopedElement yw "b"
+                            let ywc = CommonFplValueTestCases.getScopedElement yw "c"
+                            let yua = CommonFplValueTestCases.getScopedElement yu "a"
+                            let yub = CommonFplValueTestCases.getScopedElement yu "b"
+                            let yuc = CommonFplValueTestCases.getScopedElement yu "c"
+                            let yva = CommonFplValueTestCases.getScopedElement yv "a"
+                            let yvb = CommonFplValueTestCases.getScopedElement yv "b"
+                            let yvc = CommonFplValueTestCases.getScopedElement yv "c"
                             Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
@@ -162,34 +170,34 @@ type CommonFplValueTestCases =
                         | Some st -> 
                             let name = "TestPredicate()"
                             let r = st.Root
-                            let theory = r.Scope[filename]
-                            let block = theory.Scope[name]
-                            let x = block.Scope["x"]
-                            let y = block.Scope["y"]
-                            let xw = x.Scope["w"]
-                            let xu = x.Scope["u"]
-                            let xv = x.Scope["v"]
-                            let yw = y.Scope["w"]
-                            let yu = y.Scope["u"]
-                            let yv = y.Scope["v"]
-                            let xwa = xw.Scope["a"]
-                            let xwb = xw.Scope["b"]
-                            let xwc = xw.Scope["c"]
-                            let xua = xu.Scope["a"]
-                            let xub = xu.Scope["b"]
-                            let xuc = xu.Scope["c"]
-                            let xva = xv.Scope["a"]
-                            let xvb = xv.Scope["b"]
-                            let xvc = xv.Scope["c"]
-                            let ywa = yw.Scope["a"]
-                            let ywb = yw.Scope["b"]
-                            let ywc = yw.Scope["c"]
-                            let yua = yu.Scope["a"]
-                            let yub = yu.Scope["b"]
-                            let yuc = yu.Scope["c"]
-                            let yva = yv.Scope["a"]
-                            let yvb = yv.Scope["b"]
-                            let yvc = yv.Scope["c"]
+                            let theory = CommonFplValueTestCases.getScopedElement r filename
+                            let block = CommonFplValueTestCases.getScopedElement theory name
+                            let x = CommonFplValueTestCases.getScopedElement block "x"
+                            let y = CommonFplValueTestCases.getScopedElement block "y"
+                            let xw = CommonFplValueTestCases.getScopedElement x "w"
+                            let xu = CommonFplValueTestCases.getScopedElement x "u"
+                            let xv = CommonFplValueTestCases.getScopedElement x "v"
+                            let yw = CommonFplValueTestCases.getScopedElement y "w"
+                            let yu = CommonFplValueTestCases.getScopedElement y "u"
+                            let yv = CommonFplValueTestCases.getScopedElement y "v"
+                            let xwa = CommonFplValueTestCases.getScopedElement xw "a"
+                            let xwb = CommonFplValueTestCases.getScopedElement xw "b"
+                            let xwc = CommonFplValueTestCases.getScopedElement xw "c"
+                            let xua = CommonFplValueTestCases.getScopedElement xu "a"
+                            let xub = CommonFplValueTestCases.getScopedElement xu "b"
+                            let xuc = CommonFplValueTestCases.getScopedElement xu "c"
+                            let xva = CommonFplValueTestCases.getScopedElement xv "a"
+                            let xvb = CommonFplValueTestCases.getScopedElement xv "b"
+                            let xvc = CommonFplValueTestCases.getScopedElement xv "c"
+                            let ywa = CommonFplValueTestCases.getScopedElement yw "a"
+                            let ywb = CommonFplValueTestCases.getScopedElement yw "b"
+                            let ywc = CommonFplValueTestCases.getScopedElement yw "c"
+                            let yua = CommonFplValueTestCases.getScopedElement yu "a"
+                            let yub = CommonFplValueTestCases.getScopedElement yu "b"
+                            let yuc = CommonFplValueTestCases.getScopedElement yu "c"
+                            let yva = CommonFplValueTestCases.getScopedElement yv "a"
+                            let yvb = CommonFplValueTestCases.getScopedElement yv "b"
+                            let yvc = CommonFplValueTestCases.getScopedElement yv "c"
                             Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
@@ -224,22 +232,22 @@ type CommonFplValueTestCases =
                         | Some st -> 
                             let name = "TestId()"
                             let r = st.Root
-                            let theory = r.Scope[filename]
-                            let block = theory.Scope[name]
-                            let t1 = block.Scope["T1()"]
-                            let t2 = block.Scope["T2()"]
-                            let t3 = block.Scope["T3() -> obj"]
-                            let t4 = block.Scope["T4() -> obj"]
-                            let t5 = block.Scope["T5() -> ind"]
-                            let t6 = block.Scope["T6() -> ind"]
-                            let t7 = block.Scope["T7() -> pred"]
-                            let t8 = block.Scope["T8() -> pred"]
-                            let t9 = block.Scope["T9() -> tpl"]
-                            let t10 = block.Scope["T10() -> tpl"]
-                            let t11 = block.Scope["T11() -> Nat"]
-                            let t12 = block.Scope["T12() -> Nat"]
-                            let t13 = block.Scope["T13() -> func"]
-                            let t14 = block.Scope["T14() -> func"]
+                            let theory = CommonFplValueTestCases.getScopedElement r filename
+                            let block = CommonFplValueTestCases.getScopedElement theory name
+                            let t1 = CommonFplValueTestCases.getScopedElement block "T1()"
+                            let t2 = CommonFplValueTestCases.getScopedElement block "T2()"
+                            let t3 = CommonFplValueTestCases.getScopedElement block "T3() -> obj"
+                            let t4 = CommonFplValueTestCases.getScopedElement block "T4() -> obj"
+                            let t5 = CommonFplValueTestCases.getScopedElement block "T5() -> ind"
+                            let t6 = CommonFplValueTestCases.getScopedElement block "T6() -> ind"
+                            let t7 = CommonFplValueTestCases.getScopedElement block "T7() -> pred"
+                            let t8 = CommonFplValueTestCases.getScopedElement block "T8() -> pred"
+                            let t9 = CommonFplValueTestCases.getScopedElement block "T9() -> tpl"
+                            let t10 = CommonFplValueTestCases.getScopedElement block "T10() -> tpl"
+                            let t11 = CommonFplValueTestCases.getScopedElement block "T11() -> Nat"
+                            let t12 = CommonFplValueTestCases.getScopedElement block "T12() -> Nat"
+                            let t13 = CommonFplValueTestCases.getScopedElement block "T13() -> func"
+                            let t14 = CommonFplValueTestCases.getScopedElement block "T14() -> func"
                             Some (r,theory,block,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
@@ -263,12 +271,12 @@ type CommonFplValueTestCases =
                         | Some st -> 
                             let name = "TestId"
                             let r = st.Root
-                            let theory = r.Scope[filename]
-                            let block = theory.Scope[name]
-                            let t1 = block.Scope["TestId()"]
-                            let t2 = block.Scope["TestId(obj)"]
-                            let t3 = block.Scope["TestId(pred)"]
-                            let t4 = block.Scope["TestId(ind)"]
+                            let theory = CommonFplValueTestCases.getScopedElement r filename
+                            let block = CommonFplValueTestCases.getScopedElement theory name
+                            let t1 = CommonFplValueTestCases.getScopedElement block "TestId()"
+                            let t2 = CommonFplValueTestCases.getScopedElement block "TestId(obj)"
+                            let t3 = CommonFplValueTestCases.getScopedElement block "TestId(pred)"
+                            let t4 = CommonFplValueTestCases.getScopedElement block "TestId(ind)"
                             Some (r,theory,block,t1,t2,t3,t4)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
@@ -307,36 +315,37 @@ type CommonFplValueTestCases =
         """
         let filename = "TestScopeBlocks" + subtype
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+
         let result = match stOption with
                         | Some st -> 
                             let r = st.Root
-                            let theory = r.Scope[filename]
-                            let inf1 = theory.Scope["SomeInference1()"]
-                            let inf2 = theory.Scope["SomeInference2()"]
-                            let axi1 = theory.Scope["SomeAxiom1()"]
-                            let axi2 = theory.Scope["SomeAxiom2()"]
-                            let pst1 = theory.Scope["SomePostulate1()"]
-                            let pst2 = theory.Scope["SomePostulate2()"]
-                            let thm1 = theory.Scope["SomeTheorem1()"]
-                            let thm2 = theory.Scope["SomeTheorem2()"]
-                            let pro1 = theory.Scope["SomeProposition1()"]
-                            let pro2 = theory.Scope["SomeProposition2()"]
-                            let lem1 = theory.Scope["SomeLemma1()"]
-                            let lem2 = theory.Scope["SomeLemma2()"]
-                            let cor1 = lem1.Scope["SomeLemma1$1()"]
-                            let cor2 = lem2.Scope["SomeLemma2$1()"]
-                            let con1 = theory.Scope["SomeConjecture1()"]
-                            let con2 = theory.Scope["SomeConjecture2()"]
-                            let cla1 = theory.Scope["SomeClass1"]
-                            let cla2 = theory.Scope["SomeClass2"]
-                            let pre1 = theory.Scope["SomePredicate1()"]
-                            let pre2 = theory.Scope["SomePredicate2()"]
-                            let fun1 = theory.Scope["SomeFunctionalTerm1() -> obj"]
-                            let fun2 = theory.Scope["SomeFunctionalTerm2() -> obj"]
-                            let prf1 = thm1.Scope["SomeTheorem1$1"]
-                            let prf2 = thm2.Scope["SomeTheorem2$1"]
-                            let loc1 = theory.Scope["not(x)"]
-                            let loc2 = theory.Scope["Equal(x, y)"]
+                            let theory = CommonFplValueTestCases.getScopedElement r filename
+                            let inf1 = CommonFplValueTestCases.getScopedElement theory "SomeInference1()"
+                            let inf2 = CommonFplValueTestCases.getScopedElement theory "SomeInference2()"
+                            let axi1 = CommonFplValueTestCases.getScopedElement theory "SomeAxiom1()"
+                            let axi2 = CommonFplValueTestCases.getScopedElement theory "SomeAxiom2()"
+                            let pst1 = CommonFplValueTestCases.getScopedElement theory "SomePostulate1()"
+                            let pst2 = CommonFplValueTestCases.getScopedElement theory "SomePostulate2()"
+                            let thm1 = CommonFplValueTestCases.getScopedElement theory "SomeTheorem1()"
+                            let thm2 = CommonFplValueTestCases.getScopedElement theory "SomeTheorem2()"
+                            let pro1 = CommonFplValueTestCases.getScopedElement theory "SomeProposition1()"
+                            let pro2 = CommonFplValueTestCases.getScopedElement theory "SomeProposition2()"
+                            let lem1 = CommonFplValueTestCases.getScopedElement theory "SomeLemma1()"
+                            let lem2 = CommonFplValueTestCases.getScopedElement theory "SomeLemma2()"
+                            let cor1 = CommonFplValueTestCases.getScopedElement lem1 "SomeLemma1$1()"
+                            let cor2 = CommonFplValueTestCases.getScopedElement lem2 "SomeLemma2$1()"
+                            let con1 = CommonFplValueTestCases.getScopedElement theory "SomeConjecture1()"
+                            let con2 = CommonFplValueTestCases.getScopedElement theory "SomeConjecture2()"
+                            let cla1 = CommonFplValueTestCases.getScopedElement theory "SomeClass1"
+                            let cla2 = CommonFplValueTestCases.getScopedElement theory "SomeClass2"
+                            let pre1 = CommonFplValueTestCases.getScopedElement theory "SomePredicate1()"
+                            let pre2 = CommonFplValueTestCases.getScopedElement theory "SomePredicate2()"
+                            let fun1 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm1() -> obj"
+                            let fun2 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm2() -> obj"
+                            let prf1 = CommonFplValueTestCases.getScopedElement thm1 "SomeTheorem1$1"
+                            let prf2 = CommonFplValueTestCases.getScopedElement thm2 "SomeTheorem2$1"
+                            let loc1 = CommonFplValueTestCases.getScopedElement theory "not(x)"
+                            let loc2 = CommonFplValueTestCases.getScopedElement theory "Equal(x, y)"
                             Some (r,theory,inf1,inf2,axi1,axi2,pst1,pst2,thm1,thm2,pro1,pro2,lem1,lem2,cor1,cor2,con1,con2,cla1,cla2,pre1,pre2,fun1,fun2,prf1,prf2,loc1,loc2)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
@@ -383,27 +392,27 @@ type CommonFplValueTestCases =
         let result = match stOption with
                         | Some st -> 
                             let r = st.Root
-                            let theory = r.Scope[filename]
-                            let thm1 = theory.Scope["TestTheorem1()"]
-                            let proofThm1 = thm1.Scope["TestTheorem1$1"]
-                            let lem1 = theory.Scope["TestLemma1()"]
-                            let proofLem1 = lem1.Scope["TestLemma1$1"]
-                            let prp1 = theory.Scope["TestProposition1()"]
-                            let proofPrp1 = prp1.Scope["TestProposition1$1"]
-                            let cor1 = theory.Scope["TestCorollary1$2()"]
-                            let proofCor1 = cor1.Scope["TestCorollary1$2$1"]
-                            let thm2 = theory.Scope["TestTheorem2()"]
-                            let corThm2 = thm2.Scope["TestTheorem2$1()"]
-                            let lem2 = theory.Scope["TestLemma2()"]
-                            let corLem2 = lem2.Scope["TestLemma2$1()"]
-                            let prp2 = theory.Scope["TestProposition2()"]
-                            let corPrp2 = prp2.Scope["TestProposition2$1()"]
-                            let cor2 = theory.Scope["TestCorollary2$2()"]
-                            let corCor2 = cor2.Scope["TestCorollary2$2$1()"]
-                            let con1 = theory.Scope["TestConjecture()"]
-                            let corCon1 = con1.Scope["TestConjecture$1()"]
-                            let axi1 = theory.Scope["TestAxiom()"]
-                            let corAxi1 = axi1.Scope["TestAxiom$1()"]
+                            let theory = CommonFplValueTestCases.getScopedElement r filename
+                            let thm1 = CommonFplValueTestCases.getScopedElement theory "TestTheorem1()"
+                            let proofThm1 = CommonFplValueTestCases.getScopedElement thm1 "TestTheorem1$1"
+                            let lem1 = CommonFplValueTestCases.getScopedElement theory "TestLemma1()"
+                            let proofLem1 = CommonFplValueTestCases.getScopedElement lem1 "TestLemma1$1"
+                            let prp1 = CommonFplValueTestCases.getScopedElement theory "TestProposition1()"
+                            let proofPrp1 = CommonFplValueTestCases.getScopedElement prp1 "TestProposition1$1"
+                            let cor1 = CommonFplValueTestCases.getScopedElement theory "TestCorollary1$2()"
+                            let proofCor1 = CommonFplValueTestCases.getScopedElement cor1 "TestCorollary1$2$1"
+                            let thm2 = CommonFplValueTestCases.getScopedElement theory "TestTheorem2()"
+                            let corThm2 = CommonFplValueTestCases.getScopedElement thm2 "TestTheorem2$1()"
+                            let lem2 = CommonFplValueTestCases.getScopedElement theory "TestLemma2()"
+                            let corLem2 = CommonFplValueTestCases.getScopedElement lem2 "TestLemma2$1()"
+                            let prp2 = CommonFplValueTestCases.getScopedElement theory "TestProposition2()"
+                            let corPrp2 = CommonFplValueTestCases.getScopedElement prp2 "TestProposition2$1()"
+                            let cor2 = CommonFplValueTestCases.getScopedElement theory "TestCorollary2$2()"
+                            let corCor2 = CommonFplValueTestCases.getScopedElement cor2 "TestCorollary2$2$1()"
+                            let con1 = CommonFplValueTestCases.getScopedElement theory "TestConjecture()"
+                            let corCon1 = CommonFplValueTestCases.getScopedElement con1 "TestConjecture$1()"
+                            let axi1 = CommonFplValueTestCases.getScopedElement theory "TestAxiom()"
+                            let corAxi1 = CommonFplValueTestCases.getScopedElement axi1 "TestAxiom$1()"
                             Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
                                 axi1,corAxi1)

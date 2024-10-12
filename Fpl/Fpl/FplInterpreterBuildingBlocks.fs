@@ -320,7 +320,9 @@ let rec eval (st: SymbolTable) ast =
             | _ -> 
                 if not (varValue.TryResetNameFinal (st.EvalPath())) then 
                     emitID014Diagnostics varValue.Name varValue.StartPos varValue.EndPos
-        es.PopEvalStack()
+        let evalPath = st.EvalPath()
+        if not (evalPath.Contains("NamedVarDecl.")) then 
+            es.PopEvalStack() // postpone popping all variables from stack that are being declared (they will be removed in Ast.NamedVarDecl(..))
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")
@@ -1163,9 +1165,10 @@ let rec eval (st: SymbolTable) ast =
         fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
         // create all variables of the named variable declaration in the current scope
         variableListAst |> List.iter (fun varAst ->
-            eval st varAst // here, each new variable is put on the ValueStack
+            eval st varAst // here, the var is created and put on stack, but not popped
             eval st varDeclModifierAst
             eval st variableTypeAst
+            es.PopEvalStack() // take the var from stack 
         ) |> ignore 
         st.EvalPop()
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
