@@ -16,9 +16,10 @@ type EvalStack() =
 
     /// Adjusts the signature and name of an FplValue.
     static member adjustNameAndSignature (fv:FplValue) name (typeSignature:string list) = 
-        if FplValue.IsVariable(fv) && fv.Name <> "" then
+        match (FplValue.IsVariable(fv), fv.Name<>"", fv.TypeSignature) with
+        | (true, true, ["undef"]) ->
             fv.TypeSignature <- typeSignature
-        else
+        | _ -> 
             fv.Name <- addWithComma fv.Name name
             fv.TypeSignature <- fv.TypeSignature @ typeSignature
 
@@ -124,6 +125,10 @@ type EvalStack() =
                     EvalStack.adjustNameAndSignature next (fv.TypeSignature |> String.concat "") fv.TypeSignature
                 | FplValueType.Reference -> 
                     EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
+                | FplValueType.Variable 
+                    | FplValueType.VariadicVariableMany
+                    | FplValueType.VariadicVariableMany1 -> 
+                        EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
                 | _ -> ()
             | FplValueType.Object
             | FplValueType.Premise
@@ -1143,8 +1148,8 @@ let rec eval (st: SymbolTable) ast =
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
     | Ast.NamedVarDecl((pos1, pos2), ((variableListAst, varDeclModifierAst), variableTypeAst)) ->
         st.EvalPush("NamedVarDecl")
-        let fplValue = es.PeekEvalStack()
-        fplValue.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
+        let fv = es.PeekEvalStack()
+        fv.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
         // create all variables of the named variable declaration in the current scope
         variableListAst |> List.iter (fun varAst ->
             eval st varAst // here, the var is created and put on stack, but not popped

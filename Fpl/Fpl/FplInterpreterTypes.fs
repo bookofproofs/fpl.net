@@ -919,7 +919,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             ret.FplRepresentation <- FplRepresentation.LangRepr FplLanguageConstruct.Class
             ret
         | FplValueType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
-        | FplValueType.Localization -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Object -> raise (ArgumentException("Please use CreateObject for creating a primitive object instead"))
 
     /// Clears this FplValue
@@ -936,6 +935,10 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             )
             root.Scope.Clear()
         clearAll this
+
+    /// Clears this FplValue
+    override this.ToString() = 
+        $"{this.BlockTypeShortName} {this.Name}"
 
 type LogContext = 
     | Start
