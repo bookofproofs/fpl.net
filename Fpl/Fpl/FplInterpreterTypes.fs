@@ -11,6 +11,25 @@ open FplGrammarTypes
 open FplParser
 open ErrDiagnostics
 
+let addWithComma (name:string) str = 
+    if str <> "" then
+        if str = "(" || str = ")" 
+            || str = "[" || str = "]" 
+            || str = "->"
+            || name.EndsWith "(" 
+            || name.EndsWith "[" 
+            || name.Length = 0 
+            || name.EndsWith " " 
+            || name.EndsWith "." 
+            || str.StartsWith "$" then
+                if str = "->" then 
+                    name + " " + str + " "
+                else
+                    name + str
+        else
+            name + ", " + str
+    else name
+
 type EvalAlias =
     { StartPos: Position
       EndPos: Position
@@ -922,6 +941,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.VariadicVariableMany1
         | FplValueType.MandatoryFunctionalTerm
         | FplValueType.Localization
+        | FplValueType.Translation
         | FplValueType.OptionalFunctionalTerm -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Class -> 
             let ret = new FplValue("", fplBlockType, positions, Some parent)
@@ -972,6 +992,29 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     /// Returns the list of parsed asts
     member this.ParsedAsts = _parsedAsts
 
+    // Pops an FplValue from stack and propagates it's name and signature to the next FplValue on the stack.
+    member this.PopEvalStack() = 
+        let fv = _valueStack.Pop()
+        let next = _valueStack.Peek()
+        next.Name <- addWithComma next.Name fv.Name 
+        next.TypeSignature <- fv.TypeSignature @ fv.TypeSignature
+
+    // Pushes an FplValue to the stack.
+    member this.PushEvalStack fv = _valueStack.Push fv
+
+    // Peeks an FplValue from the stack.
+    member this.PeekEvalStack() = _valueStack.Peek()
+
+    // Clears stack.
+    member this.ClearEvalStack() = _valueStack.Clear()
+
+    // Simplifies the evaluation stack
+    member this.SimplifyEvalStack() = 
+        let top = _valueStack.Pop()
+        let next = _valueStack.Pop()
+        top.Parent <- next.Parent
+        _valueStack.Push(top)
+
     /// Returns the path of the current recursive evaluation. The path is reversed, i.e. starting with the root ast name.
     /// This path can be used to avoid false positives of interpreter diagnostics by further narrowing the parsing context
     /// in which they occur.
@@ -980,9 +1023,6 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         |> Seq.toList 
         |> List.rev 
         |> String.concat "."
-
-    /// An auxiliary stack of FplValues that are created during the evaluation process
-    member this.ValueStack = _valueStack
 
     /// Logs the current state transformation of the SymbolTable for debugging purposes.
     member this.Log(message) = 
