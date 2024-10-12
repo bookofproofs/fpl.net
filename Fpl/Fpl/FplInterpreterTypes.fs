@@ -999,6 +999,24 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         next.Name <- addWithComma next.Name fv.Name 
         next.TypeSignature <- fv.TypeSignature @ fv.TypeSignature
 
+        if next.BlockType = FplValueType.Reference then
+            if fv.AuxiliaryInfo = 0 then
+                // propagate references only if refblock has all opened brackets closed
+                // and the name of its reference-typed parent is not yet ready
+                if not (next.ValueList.Contains(fv)) then 
+                    next.ValueList.Add(fv)
+                    match fv.FplRepresentation with
+                    | FplRepresentation.Pointer variable ->
+                        next.Name <- addWithComma next.Name variable.Name 
+                        next.TypeSignature <- next.TypeSignature @ variable.TypeSignature
+                    | _ -> 
+                        next.Name <- addWithComma next.Name fv.Name 
+                        next.TypeSignature <- next.TypeSignature @ fv.TypeSignature
+        else
+            if not (next.ValueList.Contains(fv)) then 
+                next.ValueList.Add(fv)
+
+
     // Pushes an FplValue to the stack.
     member this.PushEvalStack fv = _valueStack.Push fv
 
