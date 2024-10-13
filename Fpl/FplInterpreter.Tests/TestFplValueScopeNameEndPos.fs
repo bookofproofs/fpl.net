@@ -68,8 +68,8 @@ type TestFplValueScopeNameEndPos() =
             | "fun2" -> Assert.IsTrue(fun2.NameEndPos.ToString().Contains("Ln: 23, Col: 48)"))
             | "prf1" -> Assert.IsTrue(prf1.NameEndPos.ToString().Contains("Ln: 24, Col: 33)"))
             | "prf2" -> Assert.IsTrue(prf2.NameEndPos.ToString().Contains("Ln: 25, Col: 33)"))
-            | "loc1" -> Assert.IsTrue(loc1.NameEndPos.ToString().Contains("Ln: 26, Col: 33)"))
-            | "loc2" -> Assert.IsTrue(loc2.NameEndPos.ToString().Contains("Ln: 27, Col: 33)"))
+            | "loc1" -> Assert.IsTrue(loc1.NameEndPos.ToString().Contains("Ln: 26, Col: 24)"))
+            | "loc2" -> Assert.IsTrue(loc2.NameEndPos.ToString().Contains("Ln: 27, Col: 27)"))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -653,8 +653,8 @@ type TestFplValueScopeNameEndPos() =
             let base1 = ctor.ValueList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
-            | "base2" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
+            | "base1" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
+            | "base2" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
             | "base3" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
             | "base4" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
             | "base5" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)

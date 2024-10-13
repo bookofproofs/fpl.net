@@ -436,7 +436,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _name = name
     let mutable _expressionType = FixType.NoFix
     let mutable _exprTypeAlreadySet = false 
-    let mutable _nameEndPos = Position("", 0, 1, 1)
+    let mutable _nameEndPos = snd positions
     let mutable _typeSignature = []
     let mutable _representation = FplRepresentation.Undef
     let mutable _blockType = blockType
@@ -520,6 +520,12 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     member this.BlockTypeShortName
         with get () = _blockType.ShortName
 
+    /// Starting position of this FplValue
+    member this.StartPos = fst positions
+
+    /// Ending position of this FplValue
+    member this.EndPos = snd positions
+    
     /// This FplValue's name's end position that can be different from its endig position
     member this.NameEndPos
         with get () = _nameEndPos
@@ -545,11 +551,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         with get () = _arity
         and set (value) = _arity <- value
 
-    /// Starting position of this FplValue
-    member this.StartPos = fst positions
-
-    /// Ending position of this FplValue
-    member this.EndPos = snd positions
     /// Parent FplValue of this FplValue
     member this.Parent 
         with get () = _parent

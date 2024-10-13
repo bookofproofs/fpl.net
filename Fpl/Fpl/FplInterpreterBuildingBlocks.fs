@@ -104,6 +104,7 @@ type EvalStack() =
                 match next.BlockType with
                 | FplValueType.Localization -> 
                     EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
+                    next.NameEndPos <- fv.NameEndPos
                     EvalStack.tryAddToScope fv
                 | _ -> 
                     if EvalStack.tryAddToValueList fv then
@@ -112,6 +113,7 @@ type EvalStack() =
                             EvalStack.adjustNameAndSignature next variable.Name variable.TypeSignature variable.TypeSignatureName
                         | _ -> 
                             EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
+                            next.NameEndPos <- fv.NameEndPos
             | FplValueType.Variable
             | FplValueType.VariadicVariableMany
             | FplValueType.VariadicVariableMany1 ->
