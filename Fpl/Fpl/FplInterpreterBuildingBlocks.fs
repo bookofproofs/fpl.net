@@ -123,6 +123,7 @@ type EvalStack() =
                 | FplValueType.Conjecture
                 | FplValueType.RuleOfInference
                 | FplValueType.Constructor
+                | FplValueType.Corollary
                 | FplValueType.MandatoryPredicate
                 | FplValueType.OptionalPredicate
                 | FplValueType.MandatoryFunctionalTerm
@@ -284,7 +285,15 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DollarDigits((pos1, pos2), s) -> 
         st.EvalPush("DollarDigits")
         let fv = es.PeekEvalStack()
-        EvalStack.adjustNameAndSignature fv ("$"+s.ToString()) ["ind"] "ind"
+        let evalPath = st.EvalPath()
+        let sid = $"${s.ToString()}"
+        if evalPath.Contains(".ReferencingIdentifier.") then 
+            // In ReferencingIdentifier context, treat DollarDigits like names, not like types.
+            fv.Name <- fv.Name + sid
+            fv.TypeSignatureName <- fv.Name + sid
+            fv.TypeSignature <- [fv.TypeSignature.Head + sid]
+        else
+            EvalStack.adjustNameAndSignature fv ($"{sid}") ["ind"] "ind"
         fv.NameEndPos <- pos2
         st.EvalPop() 
     | Ast.Extensionname((pos1, pos2), s) ->
