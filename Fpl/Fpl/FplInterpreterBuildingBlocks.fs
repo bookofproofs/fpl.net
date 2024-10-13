@@ -124,7 +124,8 @@ type EvalStack() =
                 | FplValueType.Axiom
                 | FplValueType.Predicate
                 | FplValueType.FunctionalTerm ->
-                    EvalStack.adjustNameAndSignature next (fv.TypeSignature |> String.concat "") fv.TypeSignature
+                    if not next.BlockEvaluationStarted then
+                        EvalStack.adjustNameAndSignature next (fv.TypeSignature |> String.concat "") fv.TypeSignature
                 | FplValueType.Reference -> 
                     EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
                 | FplValueType.Variable 
@@ -631,6 +632,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), asts) ->
         st.EvalPush("VarDeclBlock")
+        let fv = es.PeekEvalStack()
+        fv.BlockEvaluationStarted <- true
         asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.StatementList((pos1, pos2), asts) ->
