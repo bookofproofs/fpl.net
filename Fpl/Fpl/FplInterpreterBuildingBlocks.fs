@@ -95,19 +95,23 @@ type EvalStack() =
             | FplValueType.Argument ->
                 EvalStack.tryAddToScope fv
             | FplValueType.Reference ->
-                if EvalStack.tryAddToValueList fv then
-                    match fv.FplRepresentation with
-                    | FplRepresentation.Pointer variable ->
-                        EvalStack.adjustNameAndSignature next variable.Name variable.TypeSignature
-                    | _ -> 
-                        EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
+                match next.BlockType with
+                | FplValueType.Localization -> 
+                    EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
+                    EvalStack.tryAddToScope fv
+                | _ -> 
+                    if EvalStack.tryAddToValueList fv then
+                        match fv.FplRepresentation with
+                        | FplRepresentation.Pointer variable ->
+                            EvalStack.adjustNameAndSignature next variable.Name variable.TypeSignature
+                        | _ -> 
+                            EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
             | FplValueType.Variable
             | FplValueType.VariadicVariableMany
             | FplValueType.VariadicVariableMany1 ->
                 EvalStack.tryAddToScope fv
                 match next.BlockType with 
                 | FplValueType.Theorem
-                | FplValueType.Localization
                 | FplValueType.Lemma
                 | FplValueType.Proposition
                 | FplValueType.Conjecture
