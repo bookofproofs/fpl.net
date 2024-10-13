@@ -443,6 +443,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _auxiliaryInfo = 0
     let mutable _arity = 0
     let mutable _blockEvaluationStarted = false
+    let mutable _typeSignatureName = ""
     
 
     let mutable _parent = parent
@@ -455,6 +456,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     member this.Name
         with get () = _name
         and set (value) = _name <- value
+
+    /// TypeSignatureName of this FplValue that is unique in its scope.
+    member this.TypeSignatureName
+        with get () = _typeSignatureName
+        and set (value) = _typeSignatureName <- value
 
     /// Indicates if this FplValue has a {} block and its evaluation already started.
     /// This flag is important to handle signature and block-declared variables differently.
