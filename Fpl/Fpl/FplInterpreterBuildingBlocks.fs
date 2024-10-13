@@ -24,20 +24,19 @@ type EvalStack() =
             fv.TypeSignature <- fv.TypeSignature @ typeSignature
 
     /// Adds the FplValue to it's parent's Scope.
-    static member tryAddToScope fv = 
-            match FplValue.InScopeOfParent(fv) fv.Name with
-            | ScopeSearchResult.Found conflict -> 
-                emitID001diagnostics fv conflict 
-            | _ -> 
-                fv.Parent.Value.Scope.Add(fv.Name,fv)
+    static member tryAddToScope (fv:FplValue) = 
+        let next = fv.Parent.Value
+        match FplValue.InScopeOfParent(fv) fv.Name with
+        | ScopeSearchResult.Found conflict -> 
+            emitID001diagnostics fv conflict 
+        | _ -> 
+            next.Scope.Add(fv.Name,fv)
 
     /// adds the FplValue to it's parent's ValueList
-    static member tryAddToValueList fv = 
-            match FplValue.InScopeOfParent(fv) fv.Name with
-            | ScopeSearchResult.Found conflict -> 
-                emitID001diagnostics fv conflict 
-            | _ -> 
-                fv.Parent.Value.Scope.Add(fv.Name,fv)
+    static member tryAddToValueList (fv:FplValue) = 
+        let next = fv.Parent.Value
+        if not (next.ValueList.Contains(fv)) then 
+            next.ValueList.Add(fv)
 
     // Pops an FplValue from stack and propagates it's name and signature to the next FplValue on the stack.
     member this.PopEvalStack() = 
@@ -106,7 +105,7 @@ type EvalStack() =
             | FplValueType.Variable
             | FplValueType.VariadicVariableMany
             | FplValueType.VariadicVariableMany1 ->
-                EvalStack.tryAddToValueList fv
+                EvalStack.tryAddToScope fv
                 match next.BlockType with 
                 | FplValueType.Theorem
                 | FplValueType.Localization

@@ -68,8 +68,8 @@ type TestFplValueScopeFplId() =
             | "fun2" -> Assert.AreEqual<string>("SomeFunctionalTerm2", fun2.FplId)
             | "prf1" -> Assert.AreEqual<string>("SomeTheorem1$1", prf1.FplId)
             | "prf2" -> Assert.AreEqual<string>("SomeTheorem2$1", prf2.FplId)
-            | "loc1" -> Assert.AreEqual<string>("not(x)", loc1.FplId)
-            | "loc2" -> Assert.AreEqual<string>("Equal(x, y)", loc2.FplId)
+            | "loc1" -> Assert.AreEqual<string>("not", loc1.FplId)
+            | "loc2" -> Assert.AreEqual<string>("Equal", loc2.FplId)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
