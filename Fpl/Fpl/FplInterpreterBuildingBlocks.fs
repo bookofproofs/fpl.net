@@ -37,6 +37,9 @@ type EvalStack() =
         let next = fv.Parent.Value
         if not (next.ValueList.Contains(fv)) then 
             next.ValueList.Add(fv)
+            true
+        else
+            false
 
     // Pops an FplValue from stack and propagates it's name and signature to the next FplValue on the stack.
     member this.PopEvalStack() = 
@@ -92,16 +95,12 @@ type EvalStack() =
             | FplValueType.Argument ->
                 EvalStack.tryAddToScope fv
             | FplValueType.Reference ->
-                if fv.AuxiliaryInfo = 0 then
-                    // propagate references only if refblock has all opened brackets closed
-                    // and the name of its reference-typed parent is not yet ready
-                    if not (next.ValueList.Contains(fv)) then 
-                        next.ValueList.Add(fv)
-                        match fv.FplRepresentation with
-                        | FplRepresentation.Pointer variable ->
-                            EvalStack.adjustNameAndSignature next variable.Name variable.TypeSignature
-                        | _ -> 
-                            EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
+                if EvalStack.tryAddToValueList fv then
+                    match fv.FplRepresentation with
+                    | FplRepresentation.Pointer variable ->
+                        EvalStack.adjustNameAndSignature next variable.Name variable.TypeSignature
+                    | _ -> 
+                        EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature
             | FplValueType.Variable
             | FplValueType.VariadicVariableMany
             | FplValueType.VariadicVariableMany1 ->
@@ -134,7 +133,7 @@ type EvalStack() =
             | FplValueType.Conclusion
             | FplValueType.Theory
             | FplValueType.Root -> 
-                EvalStack.tryAddToValueList fv
+                EvalStack.tryAddToValueList fv |> ignore
 
 
     // Pushes an FplValue to the stack.
