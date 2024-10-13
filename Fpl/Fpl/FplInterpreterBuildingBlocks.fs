@@ -16,9 +16,12 @@ type EvalStack() =
 
     /// Adjusts the signature and name of an FplValue.
     static member adjustNameAndSignature (fv:FplValue) name (typeSignature:string list) = 
-        match (FplValue.IsVariable(fv), fv.Name<>"", fv.TypeSignature) with
+        let isVariable = FplValue.IsVariable(fv)
+        match (isVariable, fv.Name<>"", fv.TypeSignature) with
         | (true, true, ["undef"]) ->
             fv.TypeSignature <- typeSignature
+        | (true, true, _) ->
+            fv.TypeSignature <- fv.TypeSignature @ typeSignature
         | _ -> 
             fv.Name <- addWithComma fv.Name name
             fv.TypeSignature <- fv.TypeSignature @ typeSignature
