@@ -355,7 +355,9 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.LanguageCode((pos1, pos2), s) -> 
         st.EvalPush("LanguageCode")
-        eval_pos_string st pos1 pos2 s
+        let fv = es.PeekEvalStack()
+        fv.Name <- s
+        fv.NameEndPos <- pos2
         st.EvalPop() 
     | Ast.LocalizationString((pos1, pos2), s) -> 
         st.EvalPush("LocalizationString")
