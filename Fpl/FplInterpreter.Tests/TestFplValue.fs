@@ -786,7 +786,7 @@ type TestFplValue() =
         let fplValue = result.Value.Root.Scope[filename].Scope[expectedName]
         Assert.AreEqual<string>(expectedName, fplValue.Name)
         let actualTypeSignature = fplValue.TypeSignature
-        let actualSignatureStart = fplValue.StartPos.Index
+        let actualSignatureStart = fplValue.NameStartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
         Assert.AreEqual<string list>(expectedTypeSignature, actualTypeSignature)
         let expectedStart =
@@ -1005,7 +1005,7 @@ type TestFplValue() =
         let result = prepareFplCode(filename + ".fpl", fplCode, false) 
         let fplValue = result.Value.Root.Scope[filename].Scope["T"].Scope[expectedName]
         let actualTypeSignature = fplValue.TypeSignature
-        let actualSignatureStart = fplValue.StartPos.Index
+        let actualSignatureStart = fplValue.NameStartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
         Assert.AreEqual<string list>(expectedTypeSignature, actualTypeSignature)
         let expectedStart =
@@ -1088,7 +1088,7 @@ type TestFplValue() =
         let result = prepareFplCode(filename + ".fpl", fplCode, false) 
         let fplValue = result.Value.Root.Scope[filename].Scope["T"].Scope[expectedName]
         let actualTypeSignature = fplValue.TypeSignature
-        let actualSignatureStart = fplValue.StartPos.Index
+        let actualSignatureStart = fplValue.NameStartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
         Assert.AreEqual<string list>(expectedTypeSignature, actualTypeSignature)
         let expectedStart =

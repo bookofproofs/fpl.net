@@ -439,6 +439,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _name = name
     let mutable _expressionType = FixType.NoFix
     let mutable _exprTypeAlreadySet = false 
+    let mutable _nameStartPos = fst positions
     let mutable _nameEndPos = snd positions
     let mutable _typeSignature = []
     let mutable _representation = FplRepresentation.Undef
@@ -524,11 +525,10 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         with get () = _blockType.ShortName
 
     /// Starting position of this FplValue
-    member this.StartPos = fst positions
+    member this.NameStartPos 
+        with get () = _nameStartPos
+        and set (value) = _nameStartPos <- value
 
-    /// Ending position of this FplValue
-    member this.EndPos = snd positions
-    
     /// This FplValue's name's end position that can be different from its endig position
     member this.NameEndPos
         with get () = _nameEndPos
@@ -678,7 +678,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             if fplValue.BlockType = FplValueType.Root then
                 ""
             elif first then 
-                let starPosWithoutFileName = $"(Ln: {fplValue.StartPos.Line}, Col: {fplValue.StartPos.Column})"
+                let starPosWithoutFileName = $"(Ln: {fplValue.NameStartPos.Line}, Col: {fplValue.NameStartPos.Column})"
                 if FplValue.IsTheory(fplValue) then 
                     getFullName fplValue.Parent.Value false + fplValue.Name + starPosWithoutFileName
                 else
