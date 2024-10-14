@@ -324,19 +324,22 @@ let rec eval (st: SymbolTable) ast =
         let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
         EvalStack.adjustNameAndSignature varValue name ["undef"] "undef"
         es.PushEvalStack(varValue)
-        if FplValue.IsReference(fv) then
-            match FplValue.VariableInBlockScopeByName fv name with 
-            | ScopeSearchResult.Found variableInScope ->
+        match FplValue.VariableInBlockScopeByName fv name with 
+        | ScopeSearchResult.Found other ->
+            match fv.BlockType with 
+            | FplValueType.Reference -> 
                 // replace the reference by a pointer to an existing declared variable
-                fv.FplRepresentation <- FplRepresentation.Pointer variableInScope
-            | _ -> 
-                emitVAR01diagnostics name pos1 pos2
-        else
-            match FplValue.VariableInBlockScopeByName(fv) name with
-            | ScopeSearchResult.Found other ->
+                fv.FplRepresentation <- FplRepresentation.Pointer other
+            |_ -> 
                 // if found, the emit error that the variable was already declared.
-                emitVAR03diagnostics fv other 
-            | _ -> ()
+                emitVAR03diagnostics varValue other 
+        | _ -> 
+            match fv.BlockType with 
+            | FplValueType.Localization -> () 
+                // if var name does not exist, it's oke in localization context only
+            | _ -> 
+                // otherwise emit variable not declared
+                emitVAR01diagnostics name pos1 pos2
         let evalPath = st.EvalPath()
         if not (evalPath.Contains("NamedVarDecl.")) then 
             es.PopEvalStack() // postpone popping all variables from stack that are being declared (they will be removed in Ast.NamedVarDecl(..))

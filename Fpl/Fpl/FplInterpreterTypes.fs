@@ -707,7 +707,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     static member IsVariadicVariableMany1(fplValue:FplValue) = 
         fplValue.BlockType = FplValueType.VariadicVariableMany1
 
-    /// Checks if a block is in the scope of its parent 
+    /// Checks if a block is in the scope of its parent, by the name of the block. 
     static member InScopeOfParent(fplValue:FplValue) name = 
         let conflictInSiblingTheory (parent:FplValue) = 
             // if the parent is a theory, look also for its sibling theories
