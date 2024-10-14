@@ -930,6 +930,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.MandatoryFunctionalTerm
         | FplValueType.Localization
         | FplValueType.Argument
+        | FplValueType.Translation
         | FplValueType.OptionalFunctionalTerm -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Class -> 
             let ret = new FplValue("", fplBlockType, positions, Some parent)
