@@ -96,9 +96,9 @@ type EvalStack() =
             | FplValueType.OptionalFunctionalTerm
             | FplValueType.Axiom
             | FplValueType.Predicate
+            | FplValueType.Argument 
+            | FplValueType.Translation 
             | FplValueType.FunctionalTerm ->
-                EvalStack.tryAddToScope fv
-            | FplValueType.Argument ->
                 EvalStack.tryAddToScope fv
             | FplValueType.Reference ->
                 match next.BlockType with
@@ -351,6 +351,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.Alias((pos1, pos2), s) -> 
         st.EvalPush("Alias")
+        eval_pos_string st pos1 pos2 s
+        st.EvalPop() 
+    | Ast.LanguageCode((pos1, pos2), s) -> 
+        st.EvalPush("LanguageCode")
         eval_pos_string st pos1 pos2 s
         st.EvalPop() 
     | Ast.LocalizationString((pos1, pos2), s) -> 
@@ -757,10 +761,14 @@ let rec eval (st: SymbolTable) ast =
         EvalStack.adjustNameAndSignature fv identifier [identifier] identifier
         st.EvalPop()
     // | Translation of string * Ast
-    | Ast.Translation(s, ast1) ->
+    | Ast.Translation((pos1, pos2),(langCode, ebnfAst)) ->
         st.EvalPush("Translation")
-        eval st ast1
-        eval_pos_string_ast st s
+        let fv = es.PeekEvalStack()
+        let trls = FplValue.CreateFplValue((pos1, pos2), FplValueType.Translation, fv) 
+        es.PushEvalStack(trls)
+        eval st langCode
+        eval st ebnfAst
+        es.PopEvalStack()
         st.EvalPop()
     // | ExtensionBlock of Positions * (Ast * Ast)
     | Ast.InheritedClassType((pos1, pos2), ast1) -> 

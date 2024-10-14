@@ -13,12 +13,12 @@ open ErrDiagnostics
 
 let addWithComma (name:string) str = 
     if str <> "" then
-        if str = "(" || str = ")" 
+        if name.Length = 0 
+            || str = "(" || str = ")" 
             || str = "[" || str = "]" 
             || str = "->"
             || name.EndsWith "(" 
             || name.EndsWith "[" 
-            || name.Length = 0 
             || name.EndsWith " " 
             || name.EndsWith "." 
             || str.StartsWith "$" then
@@ -310,6 +310,7 @@ type FplValueType =
     | Reference
     | Theory
     | Argument
+    | Translation
     | Root
     member private this.UnqualifiedName = 
         match this with
@@ -340,6 +341,7 @@ type FplValueType =
             | Reference -> "reference"
             | Theory -> "theory"
             | Argument -> "argument"
+            | Translation -> "translation"
             | Root -> "root"
     member private this.Article = 
         match this with
@@ -381,6 +383,7 @@ type FplValueType =
             | Reference -> "ref"
             | Theory -> "th"
             | Argument -> "arg"
+            | Translation -> "trsl"
             | Root -> "root"
 
 type FplPredicate =
