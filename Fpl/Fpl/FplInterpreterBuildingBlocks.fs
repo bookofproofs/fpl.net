@@ -34,7 +34,13 @@ type EvalStack() =
         let next = fv.Parent.Value
         match FplValue.InScopeOfParent(fv) fv.Name with
         | ScopeSearchResult.Found conflict -> 
-            emitID001diagnostics fv conflict 
+            match fv.BlockType with
+            | FplValueType.Translation -> 
+                emitID014diagnostics fv conflict 
+            | FplValueType.Argument -> 
+                emitID015diagnostics fv conflict 
+            | _ ->
+                emitID001diagnostics fv conflict 
         | _ -> 
             next.Scope.Add(fv.Name,fv)
 
@@ -372,7 +378,9 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
         let fv = es.PeekEvalStack()
-        EvalStack.adjustNameAndSignature fv s [s] s
+        fv.Name <- s
+        fv.NameStartPos <- pos1
+        fv.NameEndPos <- pos2
         emitPR000Diagnostics fv s pos1 pos2
         st.EvalPop() 
     | Ast.Prefix((pos1, pos2), symbol) -> 

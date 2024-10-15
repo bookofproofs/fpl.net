@@ -35,6 +35,34 @@ let emitID001diagnostics (fplValue: FplValue) (conflict: FplValue) =
 
     ad.AddDiagnostic diagnostic
 
+let emitID014diagnostics (fplValue: FplValue) (conflict: FplValue) =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.NameStartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID014(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Alternatives = None 
+        }
+
+    ad.AddDiagnostic diagnostic
+
+let emitID015diagnostics (fplValue: FplValue) (conflict: FplValue) =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.NameStartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID015(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Alternatives = None 
+        }
+
+    ad.AddDiagnostic diagnostic
+
 let emitVAR01diagnostics name pos1 pos2 =
     let diagnostic =
         { 

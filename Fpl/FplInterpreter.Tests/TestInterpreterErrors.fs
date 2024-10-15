@@ -276,6 +276,21 @@ type TestInterpreterErrors() =
         let code = ID001 ("", "")
         runTestHelper "TestID001.fpl" fplCode code expected
 
+    [<DataRow("""loc iif(x, y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;;""", 0)>]
+    [<DataRow("""loc iif(x, y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !tex: x " dann und nur dann wenn " y;;""", 1)>]
+    [<TestMethod>]
+    member this.TestID014(fplCode:string, expected:int) =
+        let code = ID014 ("", "")
+        runTestHelper "TestID014.fpl" fplCode code expected
+
+    [<DataRow("""proof T$1 { 100. |- assume somePremise 300. |- trivial 100. |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 1. |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 2. |- trivial qed};""", 0)>]
+    [<TestMethod>]
+    member this.TestID015(fplCode:string, expected:int) =
+        let code = ID015 ("", "")
+        runTestHelper "TestID015.fpl" fplCode code expected
+
     [<DataRow("uses Fpl.Commons inf ModusPonens() {pre:true con:true} ;", 1)>]
     [<DataRow("uses Fpl.Commons theorem ModusTollens() {true} ;", 1)>]
     [<DataRow("uses Fpl.Commons def pred HypotheticalSyllogism() {true} ;", 1)>]

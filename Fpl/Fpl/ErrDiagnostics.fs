@@ -112,6 +112,8 @@ type DiagnosticCode =
     | ID011 of string * string
     | ID012 of string * string 
     | ID013 of string
+    | ID014 of string * string
+    | ID015 of string * string
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -181,6 +183,8 @@ type DiagnosticCode =
             | ID011 _ -> "ID011"
             | ID012 _ -> "ID012"
             | ID013 _ -> "ID013"
+            | ID014 _ -> "ID014"
+            | ID015 _ -> "ID015"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -237,7 +241,7 @@ type DiagnosticCode =
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type `%s` not yet implemented." identifier
-            | ID001 (signature, conflict) -> sprintf "Duplicate signature declaration `%s` detected at %s." signature conflict
+            | ID001 (signature, conflict) -> sprintf "Signature `%s` was already declared at %s." signature conflict
             | ID002 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the proof %s, found only %s." signature incorrectBlockType
             | ID003 signature -> sprintf "The proof `%s` is missing a block to be associated with." signature 
             | ID004 (signature, candidates)  -> sprintf "Cannot associate proof `%s` with a single block. Found more candidates: %s." signature candidates
@@ -250,6 +254,8 @@ type DiagnosticCode =
             | ID011 (name, inheritanceChain) -> sprintf "Inheritance from `%s` can be dropped because of the inheritance chain %s." name inheritanceChain
             | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are %s." name candidates
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
+            | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
+            | ID015 (signature, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." signature conflict
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
