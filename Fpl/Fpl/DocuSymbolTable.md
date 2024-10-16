@@ -6,81 +6,45 @@ The symbol table (ST) is a pivotal data structure that the FPL interpreter const
 This document focuses on the ST's dynamic aspects and state changes that are not apparent from the code.
 
 ## Global Structure of the ST 
-The F# type `SymbolTable` is defined in the `FplInterpreterTypes` module. It is a recursive tree structure of the F# type `FplValue` defined in the same module. Each node of the ST is of the `FplValue` type but can have different purposes and attributions. One such key attribution is the `FplValueType` of each node. For instance, the ST starts with a `FplValueType.Root` node. Each of the `FplValue` nodes of the ST tree has two sequences - `Scope` and `ValueList`, which may contain further `FplValue` nodes with a different `FplValuType`. This structure is essential to understand the organization and functionality of the ST.
+The F# type `SymbolTable` is defined in the `FplInterpreterTypes` module. It is a recursive tree structure of the F# type `FplValue` defined in the same module. Each node of the ST is of the `FplValue` type. 
 
-## How to read this Description of the ST
-Since the ST is constructed during the AST traversal, it depends on the AST types being traversed. The titles of the following sections will be titled by concatenating the `FplValueType`s of the nodes of the ST, that are constructed 
+Each FplValue object has different properties, the most important of which are:
+* BlockType - implemented as FplValueType that is a discriminated union type
+* Scope - implemented as a < key,value >  dictionary, using the Name attribute as key, and the corresponding FplValue as value.
+* Name - a unique string used in the scope to identify the element. 
+* ValueList - implemented as a list of FplValues. 
+* Parent - A parent node in this FplValue, usually, the A's Parent references a B whose Scope contains the <A.Name, A> pair.
 
-### ST.Root
-**Description**: The root of the ST
 
-**Created in**: In `FplInterpreterTypes.SymbolTable` constructor
+The following table documents how the FplValues are related to each other using their Scope and their ValueList.
 
-**Output**: 
-```
-	Root
-	|-Name: ""
-	|-Parent: None
-	|-Scope: <empty>
-	|-ValueList: <empty>
-```
-
-### ST.Root.Theory
-**Created in**: In `FplInterpreterBuildingBlocks.evaluateSymbolTable` loop over all theories 
-
-**Output (parent)**: 
-```
-	Root
-	|-Name: ""
-	|-Parent: None
-	|-Scope: Contains a non-empty <string,FplValue> dictionary of all here created Theory nodes
-	|-ValueList: <empty>
-```
-
-**Output**: 
-```
-	Theory
-	|-Name: <Name>
-	|-Parent: Some Root
-	|-Scope: Contains a (possibly) empty <string,FplValue> dictionary of all FPL blocks inside this theory
-	|-ValueList: <empty>
-```
-
-### ST.Root.Theory.Class
-**Created in**: In `AST.Namespace.DefinitionClass`
-
-**Output (parent)**: 
-```
-	Class
-	|-Name: "<Name>"
-	|-Parent: Theory
-	|-Scope: Contains a non-empty <string,FplValue> dictionary of nodes of 
-		all variables, constructors and properties of the class 
-	|-ValueList: Contains (a possibly empty) list of nodes, from which the class
-		inherits. These can be class nodes or primitive objects. The values are
-		only added if they were previously declared in the code.
-```
-
-* *Context*: `InSignature` - the ValueList and the Name get constructed 
-* *Context*: `InBlock` - the Scope gets constructed 
-
-### ST.Root.Theory.Class.Constructor
-**Created in**: In `AST.Namespace.DefinitionClass.DefClassCompleteContent.Constructor`
-
-**Output (parent)**: 
-```
-	Constructor
-	|-Name: "<Name>"
-	|-Parent: Class
-	|-Scope: Contains a non-empty <string,FplValue> dictionary of all scope 
-		nodes (like variables) declared in the constructor.
-	|-ValueList: Contains (a possibly empty) list of reference nodes that
-		represent the calls to some base classes constructors. Due to semantical
-		errors in the code, the latter do not necessarily have to match the
-		signatures of the actual constructors of the base classes of this constructor class.
-		The latter can be retrieved from the parent of the constructor - its class node (see ST.Root.Theory.Class).
-```
-
-* *Context*: `InConstructorSignature` - the Scope and the Name get constructed 
-* *Context*: `InConstructorBlock` - the ValueList gets constructed 
-
+| BlockType | Description | Created in (match in FplInterpreterBuildingBlocks.eval function if not stated otherwise)| Parent's BlockType | Possible Scope Elements | Possible ValueList Elements |
+|----------|----------|----------|:----------:|:-------------:|:------:|
+| Root | The root of the ST | `FplInterpreterTypes.SymbolTable` constructor | none | Theory | none |
+| Theory  | A theory node corresponds to each evaluated FPL file. | `FplInterpreterBuildingBlocks.evaluateSymbolTable` function | Root | RuleOfInference, Class, FunctionaTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization | none |
+|RuleOfInference|An inference rule that is valid in the theory in which it was declared or theories using this theory.|`Ast.RuleOfInference`|Theory|Variable, VariadicVariableMany, VariadicVariableMany1||
+|Class|A class defined in the theory or the theories using this theory.|`Ast.DefinitionClass`|Theory|Constructor, OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1|Class (list of nodes, from which this class inherits) These can be class nodes or primitive objects. The values are only added if they were previously declared in the code.|
+|FunctionalTerm|A functional term defined in the theory or the theories using this theory.|`Ast.DefinitionFunctionalTerm`|Theory|OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1||
+|Predicate|A predicate defined in the theory or the theories using this theory.|`Ast.DefinitionPredicate`|Theory|OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1||
+|Axiom|||Theory|Variable, VariadicVariableMany, VariadicVariableMany1||
+|Theorem|||Theory|Variable, VariadicVariableMany, VariadicVariableMany1||
+|Lemma|||Theory|Variable, VariadicVariableMany, VariadicVariableMany1||
+|Proposition|||Theory|Variable, VariadicVariableMany, VariadicVariableMany1||
+|Conjecture|||Theory|Variable, VariadicVariableMany, VariadicVariableMany1||
+|Localization|||Theory||Translation|
+|Corollary|||Axiom, Theorem, Lemma, Proposition, Conjecture, or Corollary|||
+|Proof|||Theorem, Lemma, Proposition, or Corollary|||
+|Argument|||Proof|||
+|Translation|||Localization|||
+|Constructor|||Class|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class)|(Possibly empty) Nodes that represent the calls to some base classes constructors. Due to semantical errors in the code, the latter do not necessarily have to match the signatures of the actual constructors of the base classes of this constructor class.	The latter can be retrieved from the parent Class.|
+|Reference||||||
+|OptionalFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
+|OptionalPredicate|||Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
+|MandatoryFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
+|MandatoryPredicate|||Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
+|Variable|A variable declared in the scope of its Parent. Variables might be nested and have other Variables as parents.|`Ast.Var`|RuleOfInference, Class, FunctionalTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization, Corollary, Proof, Constructor, OptionalPredicate, MandatoryPredicate, OptionalFunctionalTerm, MandatoryFunctionalTerm, Variable|||
+|VariadicVariableMany||||||
+|VariadicVariableMany1||||||
+|Object||||||
+|Premise||||||
+|Conclusion||||||

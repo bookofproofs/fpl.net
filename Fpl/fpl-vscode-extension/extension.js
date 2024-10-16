@@ -204,10 +204,11 @@ const vscode = require('vscode');
 
 // A custom TreeItem
 class MyTreeItem extends vscode.TreeItem {
-    constructor(label, scope, valueList) {
+    constructor(label, scope, valueList, isVirtual = false) {
         super(label);
         this.scope = scope;
         this.valueList = valueList;
+        this.isVirtual = isVirtual;
         this.collapsibleState = scope.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
     }
 }
@@ -237,12 +238,21 @@ class FplTheoriesProvider {
                 log2Console('Failed to get tree data ' + error, true);
                 return [];  // Return an empty array on error
             });
-        } else if (element.scope) {
-            // If the element has a 'Scope' property, return its children
-            return this.parseScope(element.scope);
+        } else if (element.isVirtual) {
+            // Handle virtual nodes
+            if (element.label === "Scope") {
+                return Promise.resolve(this.parseScope(element.scope));
+            }
         } else {
-            // If the element has no children, return an empty array
-            return Promise.resolve([]);
+            // Create virtual child elements for Scope and ValueList if they are not empty
+            let children = [];
+            if (element.scope) {
+                children.push(new MyTreeItem("Scope", element.scope, [], true));
+            }
+            if (element.valueList) {
+                children.push.apply(children,this.parseValueList(element.valueList));
+            }
+            return Promise.resolve(children);
         }
     }
 
@@ -250,6 +260,12 @@ class FplTheoriesProvider {
         // Convert each item in the scope to a MyTreeItem
         return scope.map(item => new MyTreeItem(item.Type + ": " + item.Name, item.Scope, item.ValueList));
     }
+    
+    parseValueList(valueList) {
+        // Convert each item in the valueList to a MyTreeItem
+        return valueList.map(item => new MyTreeItem(item.Type + ": " + item.Name, item.Scope, item.ValueList));
+    }
+
 }
 
 
@@ -278,7 +294,7 @@ function activate(context) {
 
 
         const path = require('path');
-        let relPathToserverDll = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'FplLS.dll');
+        let relPathToServerDll = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'FplLS.dll');
         let relPathToDotnetRuntime = path.join(__dirname, 'dotnet-runtimes', runtimeName);
         let relPathToDotnet = path.join(relPathToDotnetRuntime, 'dotnet');
 
@@ -286,8 +302,8 @@ function activate(context) {
 
         acquireDotNetRuntimePromise.then(() => {
             let serverOptions = {
-                run: { command: relPathToDotnet, args: [relPathToserverDll] },
-                debug: { command: relPathToDotnet, args: [relPathToserverDll] }
+                run: { command: relPathToDotnet, args: [relPathToServerDll] },
+                debug: { command: relPathToDotnet, args: [relPathToServerDll] }
             };
     
             let clientOptions = {
