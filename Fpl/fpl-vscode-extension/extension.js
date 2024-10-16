@@ -240,9 +240,7 @@ class FplTheoriesProvider {
             });
         } else if (element.isVirtual) {
             // Handle virtual nodes
-            if (element.label === "Scope") {
-                return Promise.resolve(this.parseScope(element.scope));
-            }
+            return Promise.resolve(this.parseScope(element.scope));
         } else {
             // Create virtual child elements for Scope and ValueList if they are not empty
             let children = [];
