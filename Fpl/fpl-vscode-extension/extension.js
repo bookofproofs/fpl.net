@@ -204,14 +204,15 @@ const vscode = require('vscode');
 
 // A custom TreeItem
 class MyTreeItem extends vscode.TreeItem {
-    constructor(label, scope, valueList, isVirtual = false) {
-        super(label);
+    constructor(label, scope = [], valueList = [], isVirtual = false) {
+        super(label, scope.length > 0 || valueList.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
+        this.label = label;
         this.scope = scope;
         this.valueList = valueList;
         this.isVirtual = isVirtual;
-        this.collapsibleState = scope.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
     }
 }
+
 
 // Define TreeDataProvider
 class FplTheoriesProvider {
@@ -230,7 +231,7 @@ class FplTheoriesProvider {
 
     getChildren(element) {
         if (!element) {
-            // If no element is passed, return the root nodes of your tree
+            // If no element is passed, return the root nodes of the tree
             return client.sendRequest('getTreeData').then(json => {
                 let treeData = JSON.parse(json);
                 return this.parseScope(treeData.Scope);
@@ -244,11 +245,11 @@ class FplTheoriesProvider {
         } else {
             // Create virtual child elements for Scope and ValueList if they are not empty
             let children = [];
-            if (element.scope) {
+            if (element.scope && element.scope.length > 0) {
                 children.push(new MyTreeItem("Scope", element.scope, [], true));
             }
-            if (element.valueList) {
-                children.push.apply(children,this.parseValueList(element.valueList));
+            if (element.valueList && element.valueList.length > 0) {
+                children.push(...this.parseValueList(element.valueList));
             }
             return Promise.resolve(children);
         }

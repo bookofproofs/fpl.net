@@ -1,0 +1,19 @@
+axiom A1()
+{
+    true
+}
+
+axiom A2(x:obj) 
+{
+    false
+}
+
+axiom A3(x:obj) 
+{
+    declaration
+        ~y: obj
+    ;
+    
+    false
+}
+;
