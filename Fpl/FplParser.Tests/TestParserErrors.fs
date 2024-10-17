@@ -221,6 +221,7 @@ type TestParserErrors() =
         let code = SMT000
         printf "Trying %s" code.Message
         let input = """
+        def pred T() { del.x }
         ;
         """
         let ast = fplParser input

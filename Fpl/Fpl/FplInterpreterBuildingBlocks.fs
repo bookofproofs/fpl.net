@@ -326,6 +326,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
+        let evalPath = st.EvalPath()
+        let isDeclaration = evalPath.Contains("NamedVarDecl.")
         let fv = es.PeekEvalStack()
         let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
         EvalStack.adjustNameAndSignature varValue name ["undef"] "undef"
@@ -342,13 +344,13 @@ let rec eval (st: SymbolTable) ast =
         | _ -> 
             match fv.BlockType with 
             | FplValueType.Localization -> () 
-                // if var name does not exist, it's oke in localization context only
+                // if var name does not exist, it's ok in localization context only
             | _ -> 
-                // otherwise emit variable not declared
-                emitVAR01diagnostics name pos1 pos2
-        let evalPath = st.EvalPath()
-        if not (evalPath.Contains("NamedVarDecl.")) then 
-            es.PopEvalStack() // postpone popping all variables from stack that are being declared (they will be removed in Ast.NamedVarDecl(..))
+                if not isDeclaration then
+                    // otherwise emit variable not declared if this is not a declaration
+                    emitVAR01diagnostics name pos1 pos2
+        if not isDeclaration then 
+            es.PopEvalStack() // postpone popping all variables from stack that are being declared (they will be popped in Ast.NamedVarDecl(..))
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")

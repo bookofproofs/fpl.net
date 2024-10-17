@@ -315,7 +315,7 @@ type TestInterpreterErrors() =
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
     [<DataRow("axiom A() { all x in Nat {true} };", 0)>]
     [<DataRow("axiom A() { all x {true} };", 1)>]
-    [<DataRow("axiom A() { dec ~x:obj; all x {true} };", 0)>]
+    [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
         let code = VAR01 ""

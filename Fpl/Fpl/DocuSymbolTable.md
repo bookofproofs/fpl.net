@@ -26,7 +26,7 @@ The following table documents how the FplValues are related to each other using 
 |Class|A class defined in the theory or the theories using this theory.|`Ast.DefinitionClass`|Theory|Constructor, OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1|Class (list of nodes, from which this class inherits) These can be class nodes or primitive objects. The values are only added if they were previously declared in the code.|
 |FunctionalTerm|A functional term defined in the theory or the theories using this theory.|`Ast.DefinitionFunctionalTerm`|Theory|OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1||
 |Predicate|A predicate defined in the theory or the theories using this theory.|`Ast.DefinitionPredicate`|Theory|OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1||
-|Axiom|||Theory|Variable, VariadicVariableMany, VariadicVariableMany1||
+|Axiom|||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the axiom's predicate)|
 |Theorem|||Theory|Variable, VariadicVariableMany, VariadicVariableMany1||
 |Lemma|||Theory|Variable, VariadicVariableMany, VariadicVariableMany1||
 |Proposition|||Theory|Variable, VariadicVariableMany, VariadicVariableMany1||
