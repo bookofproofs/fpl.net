@@ -826,7 +826,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     ScopeSearchResult.FoundAssociate potentialTheorem.Value.Name
                 elif notPotentialBlockList.Length > 0 then 
                     let potentialOther = notPotentialBlockList.Head
-                    ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
+                    ScopeSearchResult.FoundIncorrectBlock (sprintf "%s %s" potentialOther.Value.BlockTypeName potentialOther.Value.QualifiedName)
                 else
                     ScopeSearchResult.NotFound
             | None -> ScopeSearchResult.NotApplicable
