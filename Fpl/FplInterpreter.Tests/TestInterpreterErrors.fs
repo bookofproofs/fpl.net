@@ -417,6 +417,8 @@ type TestInterpreterErrors() =
 
     [<DataRow("theorem Test() {true} proof Test$1 {1. |- trivial};", 0)>]
     [<DataRow("theorem TestTypo() {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("corollary Test$1() {true} proof Test$1$1 {1. |- trivial};", 0)>]
+    [<DataRow("theorem Test() {true} corollary Test$1() {true} proof Test$1$1 {1. |- trivial};", 0)>]
     [<TestMethod>]
     member this.TestID003(fplCode:string, expected) =
         let code = ID003 ""
