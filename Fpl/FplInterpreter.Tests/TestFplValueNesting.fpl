@@ -1,16 +1,133 @@
-axiom A1()
+axiom Ax1()
 {
     true
 }
 
-axiom A2(x:obj) 
+axiom Ax2(x:obj) 
 {
     false
 }
 
-axiom A3(x:obj) 
+axiom Ax3(x:obj) 
 {
-    declaration
+    dec
+        ~y: obj
+    ;
+    
+    false
+}
+
+cor Ax3$1()
+{
+    true
+}
+
+proof Ax3$1$1
+{
+    100. |- trivial
+    qed
+}
+
+theorem Th1()
+{
+    true
+}
+
+theorem Th2(x:obj) 
+{
+    false
+}
+
+proof Th2$1
+{
+    100. |- trivial
+    qed
+}
+
+theorem Th3(x:obj) 
+{
+    dec
+        ~y: obj
+    ;
+    
+    false
+}
+
+cor Th3$1()
+{
+    true
+}
+
+proof Th3$1$1
+{
+    100. |- trivial
+    qed
+}
+
+
+prop Pr1()
+{
+    true
+}
+
+prop Pr2(x:obj) 
+{
+    false
+}
+
+proof Pr2$1
+{
+    100. |- trivial
+    qed
+}
+
+prop Pr3(x:obj) 
+{
+    dec
+        ~y: obj
+    ;
+    
+    false
+}
+
+lem Le1()
+{
+    true
+}
+
+lem Le2(x:obj) 
+{
+    false
+}
+
+proof Le2$1
+{
+    100. |- trivial
+    qed
+}
+
+lem Le3(x:obj) 
+{
+    dec
+        ~y: obj
+    ;
+    
+    false
+}
+
+conj Conj1()
+{
+    true
+}
+
+conj Conj2(x:obj) 
+{
+    false
+}
+
+conj Conj3(x:obj) 
+{
+    dec
         ~y: obj
     ;
     
