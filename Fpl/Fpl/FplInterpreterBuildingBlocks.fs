@@ -61,10 +61,10 @@ type EvalStack() =
 
             match fv.BlockType with
             | FplValueType.Proof -> 
-                match FplValue.TryFindAssociatedBlockForProof fv with
-                | ScopeSearchResult.FoundAssociate parentsName -> 
+                match tryFindAssociatedBlockForProof fv with
+                | ScopeSearchResult.FoundAssociate potentialParent -> 
                     // everything is ok, change the parent of the provable from theory to the found parent 
-                    fv.Parent <- Some fv.Parent.Value.Scope[parentsName]
+                    fv.Parent <- Some potentialParent
                 | ScopeSearchResult.FoundIncorrectBlock block ->
                     emitID002diagnostics fv block  
                 | ScopeSearchResult.NotFound ->
@@ -75,9 +75,9 @@ type EvalStack() =
                 EvalStack.tryAddToScope fv
             | FplValueType.Corollary ->
                 match FplValue.TryFindAssociatedBlockForCorollary fv with
-                | ScopeSearchResult.FoundAssociate parentsName -> 
+                | ScopeSearchResult.FoundAssociate potentialParent -> 
                     // everything is ok, change the parent of the provable from theory to the found parent 
-                    fv.Parent <- Some fv.Parent.Value.Scope[parentsName]
+                    fv.Parent <- Some potentialParent
                     // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
                     emitVAR03diagnosticsForCorollarysSignatureVariable fv  
                 | ScopeSearchResult.FoundIncorrectBlock block ->

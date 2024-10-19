@@ -17,7 +17,7 @@ axiom Ax3(x:obj)
     false
 }
 
-cor Ax3$1()
+cor Ax3$1() 
 {
     true
 }
@@ -64,6 +64,10 @@ proof Th3$1$1
     qed
 }
 
+cor Th3$1$2()
+{
+    true
+}
 
 prop Pr1()
 {

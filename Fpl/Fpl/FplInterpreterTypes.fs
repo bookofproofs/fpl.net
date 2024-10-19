@@ -428,7 +428,7 @@ type FplRepresentation =
         | LangRepr FplLanguageConstruct.Function -> "function type"
         | Undef -> "undefined"
 and ScopeSearchResult = 
-    | FoundAssociate of string 
+    | FoundAssociate of FplValue 
     | FoundMultiple of string
     | FoundIncorrectBlock of string
     | Found of FplValue
@@ -784,55 +784,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         || fplValue.BlockType = FplValueType.Lemma
         || fplValue.BlockType = FplValueType.Proposition
 
-    /// Tries to find a theorem-like statement for a proof 
-    /// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
-    static member TryFindAssociatedBlockForProof(fplValue:FplValue) = 
-        if fplValue.BlockType = FplValueType.Proof then
-            match fplValue.Parent with
-            | Some theory ->
-                // The parent node of the proof is the theory. In its scope 
-                // we should find the theorem we are looking for.
-                let buildingBlocksMatchingDollarDigitNameList = 
-                    // the potential block name of the proof is the 
-                    // concatenated type signature of the name of the proof 
-                    // without the last dollar digit
-                    let stripLastDollarDigit (s: string) =
-                        let lastIndex = s.LastIndexOf('$')
-                        if lastIndex <> -1 then
-                            s.Substring(0, lastIndex)
-                        else
-                            s
-                    let potentialBlockName = 
-                        stripLastDollarDigit fplValue.Name
-                    theory.Scope
-                    |> Seq.filter (fun keyValuePair -> 
-                        keyValuePair.Key.StartsWith(potentialBlockName + "(") || keyValuePair.Key = potentialBlockName
-                    )
-                    |> Seq.toList
-                let potentialBlockList = 
-                    buildingBlocksMatchingDollarDigitNameList
-                    |> List.filter (fun keyValuePair ->
-                        FplValue.IsProvable(keyValuePair.Value)
-                    )
-                let notPotentialBlockList = 
-                    buildingBlocksMatchingDollarDigitNameList
-                    |> List.filter (fun keyValuePair ->
-                        not (FplValue.IsProvable(keyValuePair.Value))
-                    )
-                if potentialBlockList.Length > 1 then
-                    ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
-                elif potentialBlockList.Length > 0 then 
-                    let potentialTheorem = potentialBlockList.Head
-                    ScopeSearchResult.FoundAssociate potentialTheorem.Value.Name
-                elif notPotentialBlockList.Length > 0 then 
-                    let potentialOther = notPotentialBlockList.Head
-                    ScopeSearchResult.FoundIncorrectBlock (sprintf "%s %s" potentialOther.Value.BlockTypeName potentialOther.Value.QualifiedName)
-                else
-                    ScopeSearchResult.NotFound
-            | None -> ScopeSearchResult.NotApplicable
-        else
-            ScopeSearchResult.NotApplicable
-
     /// Tries to find a therem-like statement, a conjecture, or an axiom for a corollary 
     /// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
     static member TryFindAssociatedBlockForCorollary(fplValue:FplValue) = 
@@ -877,7 +828,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
                 elif potentialBlockList.Length > 0 then 
                     let potentialTheorem = potentialBlockList.Head
-                    ScopeSearchResult.FoundAssociate potentialTheorem.Value.Name
+                    ScopeSearchResult.FoundAssociate potentialTheorem.Value
                 elif notPotentialBlockList.Length > 0 then 
                     let potentialOther = notPotentialBlockList.Head
                     ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
@@ -957,6 +908,66 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     /// Clears this FplValue
     override this.ToString() = 
         $"{this.BlockTypeShortName} {this.Name}"
+
+/// Tries to find a theorem-like statement for a proof 
+/// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
+let tryFindAssociatedBlockForProof (fplValue:FplValue) = 
+    if fplValue.BlockType = FplValueType.Proof then
+        match fplValue.Parent with
+        | Some theory ->       
+            // create an FplValue list containing all Scopes of the theory
+            let rec flattenScopes (root: FplValue) =
+                let rec helper (node: FplValue) (acc: FplValue list) =
+                    let newAcc = node :: acc
+                    node.Scope
+                    |> Seq.fold (fun acc kvp -> helper kvp.Value acc) newAcc
+                helper root []
+
+            let flattenedScopes = flattenScopes theory.Parent.Value
+
+            let stripLastDollarDigit (s: string) =
+                let lastIndex = s.LastIndexOf('$')
+                if lastIndex <> -1 then
+                    s.Substring(0, lastIndex)
+                else
+                    s
+            let potentialProvableName = stripLastDollarDigit fplValue.Name
+
+            // The parent node of the proof is the theory. In its scope 
+            // we should find the theorem we are looking for.
+            let buildingBlocksMatchingDollarDigitNameList = 
+                // the potential block name of the proof is the 
+                // concatenated type signature of the name of the proof 
+                // without the last dollar digit
+                flattenedScopes
+                |> List.filter (fun fv ->
+                    fv.Name.StartsWith(potentialProvableName + "(") 
+                )
+
+            let provableBlocklist = 
+                buildingBlocksMatchingDollarDigitNameList
+                |> List.filter (fun fv ->
+                    FplValue.IsProvable(fv)
+                )
+            let notProvableBlocklist = 
+                buildingBlocksMatchingDollarDigitNameList
+                |> List.filter (fun fv ->
+                    not (FplValue.IsProvable(fv))
+                )
+            if provableBlocklist.Length > 1 then
+                ScopeSearchResult.FoundMultiple (provableBlocklist |> List.map (fun fv -> sprintf "%s %s" fv.BlockType.Name fv.Name) |> String.concat ", ")
+            elif provableBlocklist.Length > 0 then 
+                let potentialTheorem = provableBlocklist.Head
+                ScopeSearchResult.FoundAssociate potentialTheorem
+            elif notProvableBlocklist.Length > 0 then 
+                let potentialOther = notProvableBlocklist.Head
+                ScopeSearchResult.FoundIncorrectBlock (sprintf "%s %s" potentialOther.BlockTypeName potentialOther.QualifiedName)
+            else
+                ScopeSearchResult.NotFound
+        | None -> ScopeSearchResult.NotApplicable
+    else
+        ScopeSearchResult.NotApplicable
+
 
 type LogContext = 
     | Start
