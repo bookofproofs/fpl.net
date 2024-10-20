@@ -28,7 +28,7 @@ type TestFplValueNesting() =
             Assert.AreEqual<string>("true", base1.Name)
         | _ -> Assert.IsTrue(false)
 
-    [<DataRow("lem Le2() { true } proof Le2$1 {  1. |- trivial  2. 1., 2., 3.|- trivial 3. |- trivial qed };")>]
+    [<DataRow("lem Le2() { true } proof Le2$1 {  1. |- trivial  2. 1., 2., 3. |- trivial 3. |- trivial qed };")>]
     [<TestMethod>]
     member this.TestProofArgumentsInScope(varVal) =
         ad.Clear()
@@ -40,10 +40,10 @@ type TestFplValueNesting() =
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-
-            let pr1 = theory.Scope["Le2()"] 
-            let base1 = pr1.Scope["1"]
-            let base2 = pr1.Scope["2"]
-            let base3 = pr1.Scope["3"]
-            Assert.AreEqual<string>("true", base1.Name)
+            let lem = theory.Scope["Le2()"] 
+            let prf = lem.Scope["Le2$1"]
+            let arg1 = prf.Scope["1"]
+            let arg2 = prf.Scope["2"]
+            let arg3 = prf.Scope["3"]
+            Assert.IsTrue(false)
         | _ -> Assert.IsTrue(false)

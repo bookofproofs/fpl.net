@@ -34,13 +34,17 @@ type EvalStack() =
         let next = fv.Parent.Value
         match FplValue.InScopeOfParent(fv) fv.Name with
         | ScopeSearchResult.Found conflict -> 
-            match fv.BlockType with
-            | FplValueType.Translation -> 
-                emitID014diagnostics fv conflict 
-            | FplValueType.Argument -> 
-                emitID015diagnostics fv conflict 
-            | _ ->
-                emitID001diagnostics fv conflict 
+            match next.BlockType with
+            | FplValueType.Justification -> 
+                emitPR004Diagnostics fv conflict 
+            | _ -> 
+                match fv.BlockType with
+                | FplValueType.Translation -> 
+                    emitID014diagnostics fv conflict 
+                | FplValueType.Argument -> 
+                    emitPR003diagnostics fv conflict 
+                | _ ->
+                    emitID001diagnostics fv conflict 
         | _ -> 
             next.Scope.Add(fv.Name,fv)
 
@@ -112,6 +116,8 @@ type EvalStack() =
                     EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
                     next.NameEndPos <- fv.NameEndPos
                     EvalStack.tryAddToScope fv
+                | FplValueType.Justification -> 
+                    EvalStack.tryAddToScope fv
                 | _ -> 
                     if EvalStack.tryAddToValueList fv then
                         match fv.FplRepresentation with
@@ -151,8 +157,9 @@ type EvalStack() =
             | FplValueType.Object
             | FplValueType.Premise
             | FplValueType.Conclusion
-            | FplValueType.JustArgInf
             | FplValueType.Theory
+            | FplValueType.Justification 
+            | FplValueType.ArgInference 
             | FplValueType.Root -> 
                 EvalStack.tryAddToValueList fv |> ignore
 
@@ -380,11 +387,19 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
+        let setId (fValue:FplValue) = 
+            fValue.Name <- s.Substring(0,s.Length-1)
+            fValue.NameStartPos <- pos1
+            fValue.NameEndPos <- Position( ad.CurrentUri.AbsolutePath,pos2.Index-(int64)1,pos2.Line,pos2.Column-(int64)1)
         let fv = es.PeekEvalStack()
-        fv.Name <- s.Substring(0,s.Length-1)
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- Position( ad.CurrentUri.AbsolutePath,pos2.Index-(int64)1,pos2.Line,pos2.Column-(int64)1)
-        emitPR000Diagnostics fv s pos1 pos2
+        setId fv
+        match fv.Parent.Value.BlockType with
+        | FplValueType.ArgInference 
+        | FplValueType.Justification  
+        | FplValueType.Argument -> ()
+        | _ -> 
+            emitPR000Diagnostics fv 
+
         st.EvalPop() 
     | Ast.Prefix((pos1, pos2), symbol) -> 
         st.EvalPush("Prefix")
@@ -540,15 +555,23 @@ let rec eval (st: SymbolTable) ast =
         eval st ast1
         eval_pos_ast st pos1 pos2
         st.EvalPop()
-    | Ast.AssumeArgument((pos1, pos2), ast1) ->
+    | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
         st.EvalPush("AssumeArgument")
-        eval st ast1
-        eval_pos_ast st pos1 pos2
+        let fv = es.PeekEvalStack()
+        let argInf = FplValue.CreateFplValue((pos1, pos2), FplValueType.ArgInference, fv) 
+        argInf.Name <- "assume"
+        es.PushEvalStack(argInf)
+        eval st predicateAst
+        es.PopEvalStack()
         st.EvalPop()
-    | Ast.RevokeArgument((pos1, pos2), ast1) ->
+    | Ast.RevokeArgument((pos1, pos2), predicateAst) ->
         st.EvalPush("RevokeArgument")
-        eval st ast1
-        eval_pos_ast st pos1 pos2
+        let fv = es.PeekEvalStack()
+        let argInf = FplValue.CreateFplValue((pos1, pos2), FplValueType.ArgInference, fv) 
+        argInf.Name <- "revoke"
+        es.PushEvalStack(argInf)
+        eval st predicateAst
+        es.PopEvalStack()
         st.EvalPop()
     | Ast.VariableType((pos1, pos2), compoundVariableTypeAst) ->
         st.EvalPush("VariableType")
@@ -685,9 +708,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("DefaultResult")
         asts |> List.map (eval st) |> ignore
         st.EvalPop()
-    | Ast.Justification((pos1, pos2), asts) ->
+    | Ast.Justification((pos1, pos2), predicateList) ->
         st.EvalPush("Justification")
-        asts |> List.map (eval st) |> ignore
+        let fv = es.PeekEvalStack()
+        let just = FplValue.CreateFplValue((pos1, pos2), FplValueType.Justification, fv) 
+        es.PushEvalStack(just)
+        predicateList |> List.map (eval st) |> ignore
+        es.PopEvalStack()
         st.EvalPop()
     | Ast.ArgumentTuple((pos1, pos2), asts) ->
         st.EvalPush("ArgumentTuple")
@@ -1117,12 +1144,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
         st.EvalPush("JustArgInf")
-        let fv = es.PeekEvalStack()
-        let just = FplValue.CreateFplValue((pos1, pos2), FplValueType.JustArgInf, fv) 
-        es.PushEvalStack(just)
         eval st justificationAst
         eval st argumentInferenceAst
-        es.PopEvalStack()
         st.EvalPop()
     | Ast.Argument((pos1, pos2), (argIdAst, argAst)) ->
         st.EvalPush("Argument")
@@ -1289,9 +1312,14 @@ let rec eval (st: SymbolTable) ast =
         es.PopEvalStack()
         st.EvalPop()
     // | DerivedPredicate of Ast
-    | Ast.DerivedPredicate ast1 -> 
-        st.EvalPush("DefinitionClass")
-        eval st ast1
+    | Ast.DerivedPredicate ((pos1, pos2),predicateAst) -> 
+        st.EvalPush("DerivedPredicate")
+        let fv = es.PeekEvalStack()
+        let argInf = FplValue.CreateFplValue((pos1, pos2), FplValueType.ArgInference, fv) 
+        argInf.Name <- "derive"
+        es.PushEvalStack(argInf)
+        eval st predicateAst
+        es.PopEvalStack()
         st.EvalPop()
     // | Proof of Positions * (Ast * (Ast list * Ast option))
     | Ast.Proof((pos1, pos2), (referencingIdentifierAst, (proofArgumentListAst, optQedAst))) ->

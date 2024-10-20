@@ -720,6 +720,38 @@ type TestFplValueScopeName() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("base1", """100. |- trivial""", 0)>]
+    [<DataRow("base2", """100. ExistsByExample(c), 1. |- false""", 2)>]
+    [<DataRow("base3", """100. T1() |- assume not somePremise """, 1)>]
+    [<DataRow("base4", """100. 2., 3., 5. |- iif (a,b)""", 3)>]
+    [<DataRow("base5", """100. |- revoke 3.""", 0)>]
+    [<TestMethod>]
+    member this.TestArgument(var, argExpression, expNumber:int) =
+        ad.Clear()
+        let fplCode = sprintf """proof T$1 { %s };""" argExpression
+        let filename = "TestCallConstructorParentClassName"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let proof = theory.Scope["T$1"]
+            let arg = proof.Scope["100"]
+            let numbOfJustifications = arg.Scope.Count
+            let result = arg.ValueList[0]
+            Assert.AreEqual<int>(expNumber, numbOfJustifications)
+
+            match var with
+            | "base1" -> Assert.AreEqual<string>("100", arg.Name)
+            | "base2" -> Assert.AreEqual<string>("100", arg.Name)
+            | "base3" -> Assert.AreEqual<string>("100", arg.Name)
+            | "base4" -> Assert.AreEqual<string>("100", arg.Name)
+            | "base5" -> Assert.AreEqual<string>("100", arg.Name)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
     [<DataRow("base1", "del.B()")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
     [<DataRow("base3", "del.D(self,b,c)")>]

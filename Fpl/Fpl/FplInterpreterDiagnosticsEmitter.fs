@@ -49,7 +49,7 @@ let emitID014diagnostics (fplValue: FplValue) (conflict: FplValue) =
 
     ad.AddDiagnostic diagnostic
 
-let emitID015diagnostics (fplValue: FplValue) (conflict: FplValue) =
+let emitPR003diagnostics (fplValue: FplValue) (conflict: FplValue) =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -57,7 +57,7 @@ let emitID015diagnostics (fplValue: FplValue) (conflict: FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID015(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Code = PR003(fplValue.Name, conflict.QualifiedStartPos)
             Diagnostic.Alternatives = None 
         }
 
@@ -409,6 +409,34 @@ let emitID013Diagnostics (fplValue: FplValue) pos1 pos2 =
                 }
             ad.AddDiagnostic diagnostic
 
+
+let emitPR004Diagnostics (fplValue: FplValue) (conflict: FplValue) =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.NameStartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = PR004(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Alternatives = None 
+        }
+
+    ad.AddDiagnostic diagnostic
+
+let emitPR005Diagnostics (fv:FplValue) =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fv.NameStartPos
+            Diagnostic.EndPos = fv.NameEndPos
+            Diagnostic.Code = PR005 fv.Name // argument reference outside proof
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     let detailed (exprType: FixType) expectedArity actualArity pos1 pos2 =
         let diagnostic =
@@ -569,16 +597,16 @@ let rec blocktIsProof (fplValue: FplValue) =
                 blocktIsProof parent
         | None -> false
 
-let emitPR000Diagnostics (fplValue: FplValue) identifier pos1 pos2 =
+let emitPR000Diagnostics (fplValue: FplValue) =
     if not (blocktIsProof fplValue) then
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
                 Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = PR000 identifier
+                Diagnostic.StartPos = fplValue.NameStartPos
+                Diagnostic.EndPos = fplValue.NameEndPos
+                Diagnostic.Code = PR000 fplValue.Name
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic

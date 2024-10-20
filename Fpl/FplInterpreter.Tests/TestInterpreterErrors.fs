@@ -287,9 +287,18 @@ type TestInterpreterErrors() =
     [<DataRow("""proof T$1 { 1. |- trivial 1. |- trivial qed};""", 1)>]
     [<DataRow("""proof T$1 { 1. |- trivial 2. |- trivial qed};""", 0)>]
     [<TestMethod>]
-    member this.TestID015(fplCode:string, expected:int) =
-        let code = ID015 ("", "")
-        runTestHelper "TestID015.fpl" fplCode code expected
+    member this.TestPR003(fplCode:string, expected:int) =
+        let code = PR003 ("", "")
+        runTestHelper "TestPR003.fpl" fplCode code expected
+
+    [<DataRow("""proof T$1 { 1. |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. 2., 3. |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. 1., 1. |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. 1., 1., 1. |- trivial qed};""", 2)>]
+    [<TestMethod>]
+    member this.TestPR004(fplCode:string, expected:int) =
+        let code = PR004 ("", "")
+        runTestHelper "TestPR004.fpl" fplCode code expected
 
     [<DataRow("uses Fpl.Commons inf ModusPonens() {pre:true con:true} ;", 1)>]
     [<DataRow("uses Fpl.Commons theorem ModusTollens() {true} ;", 1)>]

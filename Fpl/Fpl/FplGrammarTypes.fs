@@ -153,7 +153,7 @@ type Ast =
     // Proofs
     | Trivial of Positions * unit
     | Qed of Positions * unit
-    | DerivedPredicate of Ast
+    | DerivedPredicate of Positions * Ast
     | AssumeArgument of Positions * Ast
     | RevokeArgument of Positions * Ast
     | JustArgInf of Positions * (Ast * Ast)

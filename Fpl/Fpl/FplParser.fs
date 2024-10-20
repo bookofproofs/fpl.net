@@ -499,7 +499,7 @@ let keywordAssume = skipString "assume" <|> skipString "ass" .>> SW
 let assumeArgument = positions "AssumeArgument" (keywordAssume >>. predicate) |>> Ast.AssumeArgument
 let keywordTrivial  = positions "Trivial" (skipString "trivial") .>> IW |>> Ast.Trivial
 let keywordQed  = positions "Qed" (skipString "qed") .>> IW |>> Ast.Qed
-let derivedPredicate = predicate |>> Ast.DerivedPredicate
+let derivedPredicate = positions "DerivedPredicate" predicate |>> Ast.DerivedPredicate
 let derivedArgument = choice [
     keywordTrivial 
     derivedPredicate

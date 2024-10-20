@@ -113,7 +113,7 @@ type DiagnosticCode =
     | ID012 of string * string 
     | ID013 of string
     | ID014 of string * string
-    | ID015 of string * string
+     
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -127,6 +127,9 @@ type DiagnosticCode =
     | PR000 of string 
     | PR001 
     | PR002 
+    | PR003 of string * string
+    | PR004 of string * string
+    | PR005 of string
     // logic-related error codes
     | LG000 of string * string 
     | LG001 of string * string * string
@@ -184,7 +187,6 @@ type DiagnosticCode =
             | ID012 _ -> "ID012"
             | ID013 _ -> "ID013"
             | ID014 _ -> "ID014"
-            | ID015 _ -> "ID015"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -198,6 +200,9 @@ type DiagnosticCode =
             | PR000 _ -> "PR000"
             | PR001 -> "PR001"
             | PR002 -> "PR002"
+            | PR003 _ -> "PR003"
+            | PR004 _ -> "PR004"
+            | PR005 _ -> "PR005"
             // logic-related error codes
             | LG000 _ -> "LG000"
             | LG001 _ -> "LG001"
@@ -250,12 +255,11 @@ type DiagnosticCode =
             | ID007 (signature, candidates)  -> sprintf "Cannot associate corollary `%s` with a single block. Found more candidates: %s." signature candidates
             | ID008 (name, expectedName)  -> sprintf "Misspelled constructor name `%s`, expecting %s." name expectedName
             | ID009 name -> sprintf "Circular base type dependency involving `%s`." name
-            | ID010 name -> sprintf "The type `%s` could not be found (are you missing a uses clause?)" name
+            | ID010 name -> sprintf "The type `%s` could not be found. Are you missing a uses clause?" name
             | ID011 (name, inheritanceChain) -> sprintf "Inheritance from `%s` can be dropped because of the inheritance chain %s." name inheritanceChain
             | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are %s." name candidates
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
-            | ID015 (signature, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." signature conflict
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
@@ -273,6 +277,9 @@ type DiagnosticCode =
             | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
             | PR001 -> $"Cannot refer to a definition outside a proof."
             | PR002 -> $"Avoid referencing to proofs directly."
+            | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
+            | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
+            | PR005 name -> sprintf "Cannot refer to identifier `%s` outside a proof." name
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
