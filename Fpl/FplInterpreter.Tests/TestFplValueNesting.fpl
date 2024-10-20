@@ -107,6 +107,8 @@ lem Le2(x:obj)
 proof Le2$1
 {
     100. |- trivial
+    200. 1., 2., 3.|- trivial
+    300. |- trivial
     qed
 }
 

@@ -383,7 +383,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.Name <- s.Substring(0,s.Length-1)
         fv.NameStartPos <- pos1
-        fv.NameEndPos <- Position(pos2.StreamName,pos2.Line,pos2.Column-(int64)1,pos2.Index-(int64)1)
+        fv.NameEndPos <- Position( ad.CurrentUri.AbsolutePath,pos2.Index-(int64)1,pos2.Line,pos2.Column-(int64)1)
         emitPR000Diagnostics fv s pos1 pos2
         st.EvalPop() 
     | Ast.Prefix((pos1, pos2), symbol) -> 
@@ -451,7 +451,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.Trivial((pos1, pos2), _) -> 
         st.EvalPush("Trivial")
-        eval_pos_unit st pos1 pos2
+        let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, es.PeekEvalStack()) 
+        es.PushEvalStack(refBlock)
+        EvalStack.adjustNameAndSignature refBlock "trivial" ["trivial"] "trivial"
+        es.PopEvalStack()
         st.EvalPop() 
     | Ast.Qed((pos1, pos2), _) -> 
         st.EvalPush("Qed")
