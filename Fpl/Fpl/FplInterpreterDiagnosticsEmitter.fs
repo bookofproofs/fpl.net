@@ -432,7 +432,7 @@ let emitPR005Diagnostics (fv:FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fv.NameStartPos
             Diagnostic.EndPos = fv.NameEndPos
-            Diagnostic.Code = PR005 fv.Name // argument reference outside proof
+            Diagnostic.Code = PR005 fv.Name // argument reference not defined
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

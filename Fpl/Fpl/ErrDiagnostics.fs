@@ -279,7 +279,7 @@ type DiagnosticCode =
             | PR002 -> $"Avoid referencing to proofs directly."
             | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
             | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
-            | PR005 name -> sprintf "Cannot refer to identifier `%s` outside a proof." name
+            | PR005 name ->  sprintf $"Argument identifier `{name}` not declared in this scope."
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."

@@ -118,6 +118,8 @@ type EvalStack() =
                     EvalStack.tryAddToScope fv
                 | FplValueType.Justification -> 
                     EvalStack.tryAddToScope fv
+                | FplValueType.Argument ->
+                    EvalStack.tryAddToValueList fv |> ignore
                 | _ -> 
                     if EvalStack.tryAddToValueList fv then
                         match fv.FplRepresentation with
@@ -390,12 +392,17 @@ let rec eval (st: SymbolTable) ast =
         let setId (fValue:FplValue) = 
             fValue.Name <- s.Substring(0,s.Length-1)
             fValue.NameStartPos <- pos1
-            fValue.NameEndPos <- Position( ad.CurrentUri.AbsolutePath,pos2.Index-(int64)1,pos2.Line,pos2.Column-(int64)1)
+            fValue.NameEndPos <- Position("",pos2.Index-(int64)1,pos2.Line,pos2.Column-(int64)1)
         let fv = es.PeekEvalStack()
         setId fv
-        match fv.Parent.Value.BlockType with
+        let parent = fv.Parent.Value
+        match parent.BlockType with
         | FplValueType.ArgInference 
-        | FplValueType.Justification  
+        | FplValueType.Justification ->
+            let arg = parent.Parent.Value
+            let proof = arg.Parent.Value
+            if not (proof.Scope.ContainsKey(fv.Name)) then 
+                emitPR005Diagnostics fv 
         | FplValueType.Argument -> ()
         | _ -> 
             emitPR000Diagnostics fv 
@@ -1096,7 +1103,6 @@ let rec eval (st: SymbolTable) ast =
         | (FplValueType.Reference, FplRepresentation.Undef, FplRepresentation.Pointer var, 1) ->
             fv.FplRepresentation <- refBlock.FplRepresentation
         | _ -> ()
-        refBlock.NameEndPos <- pos2
         if FplValue.IsFplBlock(fv) || FplValue.IsConstructorOrProperty(fv) then
             fv.ValueList.Add(refBlock)
         es.PopEvalStack()
