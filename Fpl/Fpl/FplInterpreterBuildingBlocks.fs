@@ -74,7 +74,7 @@ type EvalStack() =
                 | _ -> ()
                 EvalStack.tryAddToScope fv
             | FplValueType.Corollary ->
-                match FplValue.TryFindAssociatedBlockForCorollary fv with
+                match tryFindAssociatedBlockForCorollary fv with
                 | ScopeSearchResult.FoundAssociate potentialParent -> 
                     // everything is ok, change the parent of the provable from theory to the found parent 
                     fv.Parent <- Some potentialParent

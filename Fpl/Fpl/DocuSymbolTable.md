@@ -33,7 +33,7 @@ The following table documents how the FplValues are related to each other using 
 |Conjecture|A conjecture defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the conjectures's predicate)|
 |Localization|||Theory||Translation|
 |Corollary|||Axiom, Theorem, Lemma, Proposition, Conjecture, or Corollary|||
-|Proof|||Theorem, Lemma, Proposition, or Corollary|||
+|Proof|A proof of a provable statement (see Parent).||Theorem, Lemma, Proposition, or Corollary|||
 |Argument|||Proof|||
 |Translation|||Localization|||
 |Constructor|||Class|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class)|(Possibly empty) Nodes that represent the calls to some base classes constructors. Due to semantical errors in the code, the latter do not necessarily have to match the signatures of the actual constructors of the base classes of this constructor class.	The latter can be retrieved from the parent Class.|
