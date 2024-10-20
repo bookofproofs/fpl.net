@@ -151,6 +151,7 @@ type EvalStack() =
             | FplValueType.Object
             | FplValueType.Premise
             | FplValueType.Conclusion
+            | FplValueType.JustArgInf
             | FplValueType.Theory
             | FplValueType.Root -> 
                 EvalStack.tryAddToValueList fv |> ignore
@@ -380,9 +381,9 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
         let fv = es.PeekEvalStack()
-        fv.Name <- s
+        fv.Name <- s.Substring(0,s.Length-1)
         fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.NameEndPos <- Position(pos2.StreamName,pos2.Line,pos2.Column-(int64)1,pos2.Index-(int64)1)
         emitPR000Diagnostics fv s pos1 pos2
         st.EvalPop() 
     | Ast.Prefix((pos1, pos2), symbol) -> 
@@ -1111,10 +1112,14 @@ let rec eval (st: SymbolTable) ast =
         eval st argumentTupleAst
         es.PopEvalStack()
         st.EvalPop()
-    | Ast.JustifiedArgument((pos1, pos2), (ast1, ast2)) ->
-        st.EvalPush("JustifiedArgument")
-        eval st ast1
-        eval st ast2
+    | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
+        st.EvalPush("JustArgInf")
+        let fv = es.PeekEvalStack()
+        let just = FplValue.CreateFplValue((pos1, pos2), FplValueType.JustArgInf, fv) 
+        es.PushEvalStack(just)
+        eval st justificationAst
+        eval st argumentInferenceAst
+        es.PopEvalStack()
         st.EvalPop()
     | Ast.Argument((pos1, pos2), (argIdAst, argAst)) ->
         st.EvalPush("Argument")

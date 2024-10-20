@@ -310,6 +310,7 @@ type FplValueType =
     | Reference
     | Theory
     | Argument
+    | JustArgInf
     | Translation
     | Root
     member private this.UnqualifiedName = 
@@ -341,6 +342,7 @@ type FplValueType =
             | Reference -> "reference"
             | Theory -> "theory"
             | Argument -> "argument"
+            | JustArgInf -> "justified argument inference"
             | Translation -> "translation"
             | Root -> "root"
     member private this.Article = 
@@ -383,6 +385,7 @@ type FplValueType =
             | Reference -> "ref"
             | Theory -> "th"
             | Argument -> "arg"
+            | JustArgInf -> "jai"
             | Translation -> "trsl"
             | Root -> "root"
 
@@ -827,6 +830,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.MandatoryFunctionalTerm
         | FplValueType.Localization
         | FplValueType.Argument
+        | FplValueType.JustArgInf
         | FplValueType.Translation
         | FplValueType.OptionalFunctionalTerm -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Class -> 

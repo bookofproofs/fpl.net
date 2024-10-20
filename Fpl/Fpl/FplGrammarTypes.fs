@@ -156,7 +156,7 @@ type Ast =
     | DerivedPredicate of Ast
     | AssumeArgument of Positions * Ast
     | RevokeArgument of Positions * Ast
-    | JustifiedArgument of Positions * (Ast * Ast)
+    | JustArgInf of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
     | Proof of Positions * (Ast * (Ast list * Ast option))
     | Namespace of Ast option * Ast list

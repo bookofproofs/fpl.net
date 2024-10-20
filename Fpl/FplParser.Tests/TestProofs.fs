@@ -190,63 +190,63 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestJustifiedArgument01 () =
-        let result = run (argument .>> eof) """|-and(a,b)"""
+        let result = run (justifiedArgument .>> eof) """|-and(a,b)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustifiedArgument02 () =
-        let result = run (argument .>> eof) """|- revoke 2."""
+        let result = run (justifiedArgument .>> eof) """|- revoke 2."""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustifiedArgument03 () =
-        let result = run (argument .>> eof) """and(a,b) |- revoke 2."""
+        let result = run (justifiedArgument .>> eof) """and(a,b) |- revoke 2."""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgument01 () =
-        let result = run (argument .>> eof) """|- assume and(a,b)"""
+        let result = run (justifiedArgument .>> eof) """|- assume and(a,b)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgument02 () =
-        let result = run (argument .>> eof) """and(a,b) |- revoke 2."""
+        let result = run (justifiedArgument .>> eof) """and(a,b) |- revoke 2."""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgument03 () =
-        let result = run (argument .>> eof) """|- revoke 2."""
+        let result = run (justifiedArgument .>> eof) """|- revoke 2."""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgument04 () =
-        let result = run (argument .>> eof) """|- qed"""
+        let result = run (justifiedArgument .>> eof) """|- qed"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestArgument05 () =
-        let result = run (argument .>> eof) """|- trivial"""
+        let result = run (justifiedArgument .>> eof) """|- trivial"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestArgument06 () =
-        let result = run (argument .>> eof) """2., 3. |- trivial"""
+        let result = run (justifiedArgument .>> eof) """2., 3. |- trivial"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
