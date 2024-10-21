@@ -336,6 +336,8 @@ type TestInterpreterErrors() =
     [<DataRow("axiom A() { all x in Nat {true} };", 0)>]
     [<DataRow("axiom A() { all x {true} };", 1)>]
     [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
+    [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
+    [<DataRow("""loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
         let code = VAR01 ""
@@ -398,6 +400,7 @@ type TestInterpreterErrors() =
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~c: obj; pre: true con: true};", 1)>]
     [<DataRow("uses Fpl.Commons;", 0)>]
+    [<DataRow("""loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
     [<TestMethod>]
     member this.TestVAR03(fplCode:string, expected) =
         let code = VAR03 ("", "")
@@ -591,6 +594,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {(x - y)};""", 1)>]
     [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {-x};""", 1)>]
     [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {x-};""", 1)>]
+    [<DataRow("""loc (x + y) := !tex: x "+" y; ;""", 0)>]
     [<TestMethod>]
     member this.TestSIG01(fplCode:string, expected) =
         let code = SIG01 ""
@@ -626,6 +630,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 1)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
+    [<DataRow("""loc NotEqual(x,y) := !tex: x "\neq" y; ;""", 0)>]
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =
         let code = SIG04 ("","","")
@@ -703,6 +708,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T() { iif(true,x) };""", 1)>]
     [<DataRow("""def pred T() { xor(true,true,true) };""", 0)>]
     [<DataRow("""def pred T() { dec ~x,y:pred; xor(y,x,z) };""", 1)>]
+    [<DataRow("""loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
     [<TestMethod>]
     member this.TestLG001(fplCode:string, expected) =
         let code = LG001 ("","","")

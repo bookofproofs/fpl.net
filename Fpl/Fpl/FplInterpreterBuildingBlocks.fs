@@ -142,6 +142,7 @@ type EvalStack() =
                 | FplValueType.OptionalFunctionalTerm
                 | FplValueType.Axiom
                 | FplValueType.Predicate
+                | FplValueType.Class
                 | FplValueType.FunctionalTerm ->
                     EvalStack.tryAddToScope fv
                     if not next.BlockEvaluationStarted then
@@ -336,7 +337,10 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
         let evalPath = st.EvalPath()
-        let isDeclaration = evalPath.Contains("NamedVarDecl.")
+        let isDeclaration = evalPath.Contains("NamedVarDecl.") 
+        let isLocationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
+        let diagnosticsStopFlag = ad.DiagnosticsStopped
+        ad.DiagnosticsStopped <- false // enable var-related diagnostics in AST.Var, even if it was stopped (e.g. in Ast.Localization)
         let fv = es.PeekEvalStack()
         let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
         EvalStack.adjustNameAndSignature varValue name ["undef"] "undef"
@@ -344,22 +348,31 @@ let rec eval (st: SymbolTable) ast =
         match FplValue.VariableInBlockScopeByName fv name with 
         | ScopeSearchResult.Found other ->
             match fv.BlockType with 
+            | FplValueType.Translation 
             | FplValueType.Reference -> 
                 // replace the reference by a pointer to an existing declared variable
                 fv.FplRepresentation <- FplRepresentation.Pointer other
             |_ -> 
-                // if found, the emit error that the variable was already declared.
+                // if found, the emit error that the variable was already declared
                 emitVAR03diagnostics varValue other 
         | _ -> 
-            match fv.BlockType with 
-            | FplValueType.Localization -> () 
-                // if var name does not exist, it's ok in localization context only
-            | _ -> 
-                if not isDeclaration then
-                    // otherwise emit variable not declared if this is not a declaration
-                    emitVAR01diagnostics name pos1 pos2
+            if isLocationDeclaration then
+                let rec getLocation (fValue:FplValue) = 
+                    if fValue.BlockType = FplValueType.Localization then
+                        fValue
+                    else
+                        match fValue.Parent with
+                        | Some parent -> getLocation parent
+                        | None -> fValue
+                let loc = getLocation fv
+                loc.Scope.Add(varValue.Name, varValue)
+            elif not (isDeclaration || isLocationDeclaration) then 
+                // otherwise emit variable not declared if this is not a declaration or
+                // we are in a localization declaration
+                emitVAR01diagnostics name pos1 pos2
         if not isDeclaration then 
             es.PopEvalStack() // postpone popping all variables from stack that are being declared (they will be popped in Ast.NamedVarDecl(..))
+        ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")
@@ -925,10 +938,12 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Localization")
         let theory = es.PeekEvalStack()
         let loc = FplValue.CreateFplValue((pos1, pos2),FplValueType.Localization,theory)
+        ad.DiagnosticsStopped <- true // stop all diagnostics during localization
         es.PushEvalStack(loc)
         eval st predicateAst
         translationListAsts |> List.map (eval st) |> ignore
         es.PopEvalStack()
+        ad.DiagnosticsStopped <- false // enable all diagnostics during localization
         st.EvalPop()
     | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermSignatureAst, functionalTermInstanceBlockAst)) ->
         st.EvalPush("FunctionalTermInstance")
