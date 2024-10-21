@@ -610,7 +610,7 @@ type TestFplValueScopeName() =
             | "base30" -> Assert.AreEqual<string>(varVal, base1.Name)
             | "base31" -> Assert.AreEqual<string>(varVal, base1.Name)
             | "base32" -> Assert.AreEqual<string>(varVal, base1.Name)
-            | "base33" -> Assert.AreEqual<string>("p", base1.Name)
+            | "base33" -> Assert.AreEqual<string>("p(c)", base1.Name)
             | "base34" -> Assert.AreEqual<string>(varVal, base1.Name)
             | _ -> Assert.IsTrue(false)
         | None -> 
@@ -737,7 +737,7 @@ type TestFplValueScopeName() =
             let r = st.Root
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
-            let arg = proof.Scope["100"]
+            let arg = proof.Scope["100."]
             let just = arg.ValueList[0]
             let ainf = arg.ValueList[1]
             let numbOfJustifications = just.Scope.Count
@@ -745,11 +745,11 @@ type TestFplValueScopeName() =
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("100", arg.Name)
-            | "base2" -> Assert.AreEqual<string>("100", arg.Name)
-            | "base3" -> Assert.AreEqual<string>("100", arg.Name)
-            | "base4" -> Assert.AreEqual<string>("100", arg.Name)
-            | "base5" -> Assert.AreEqual<string>("100", arg.Name)
+            | "base1" -> Assert.AreEqual<string>("100.", arg.Name)
+            | "base2" -> Assert.AreEqual<string>("100.", arg.Name)
+            | "base3" -> Assert.AreEqual<string>("100.", arg.Name)
+            | "base4" -> Assert.AreEqual<string>("100.", arg.Name)
+            | "base5" -> Assert.AreEqual<string>("100.", arg.Name)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

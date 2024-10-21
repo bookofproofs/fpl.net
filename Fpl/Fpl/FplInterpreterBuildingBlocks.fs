@@ -389,9 +389,9 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
         let setId (fValue:FplValue) = 
-            fValue.Name <- s.Substring(0,s.Length-1)
+            fValue.Name <- s
             fValue.NameStartPos <- pos1
-            fValue.NameEndPos <- Position("",pos2.Index-(int64)1,pos2.Line,pos2.Column-(int64)1)
+            fValue.NameEndPos <- pos2
         let fv = es.PeekEvalStack()
         setId fv
         let parent = fv.Parent.Value

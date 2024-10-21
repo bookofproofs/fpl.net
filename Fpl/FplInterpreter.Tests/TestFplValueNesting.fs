@@ -42,10 +42,10 @@ type TestFplValueNesting() =
             let theory = r.Scope[filename]
             let lem = theory.Scope["Le2()"] 
             let prf = lem.Scope["Le2$1"]
-            let arg1 = prf.Scope["1"]
-            let arg2 = prf.Scope["2"]
-            let arg3 = prf.Scope["3"]
-            Assert.AreEqual<string>("1",arg1.Name)
-            Assert.AreEqual<string>("2",arg2.Name)
-            Assert.AreEqual<string>("3",arg3.Name)
+            let arg1 = prf.Scope["1."]
+            let arg2 = prf.Scope["2."]
+            let arg3 = prf.Scope["3."]
+            Assert.AreEqual<string>("1.",arg1.Name)
+            Assert.AreEqual<string>("2.",arg2.Name)
+            Assert.AreEqual<string>("3.",arg3.Name)
         | _ -> Assert.IsTrue(false)
