@@ -204,12 +204,11 @@ const vscode = require('vscode');
 
 // A custom TreeItem
 class MyTreeItem extends vscode.TreeItem {
-    constructor(label, scope = [], valueList = [], isVirtual = false) {
+    constructor(label, scope = [], valueList = []) {
         super(label, scope.length > 0 || valueList.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
         this.label = label;
         this.scope = scope;
         this.valueList = valueList;
-        this.isVirtual = isVirtual;
     }
 }
 
@@ -246,7 +245,7 @@ class FplTheoriesProvider {
             // Create virtual child elements for Scope and ValueList if they are not empty
             let children = [];
             if (element.scope && element.scope.length > 0) {
-                children.push(new MyTreeItem("Scope", element.scope, [], true));
+                children.push(...this.parseScope(element.scope));
             }
             if (element.valueList && element.valueList.length > 0) {
                 children.push(...this.parseValueList(element.valueList));
@@ -257,7 +256,7 @@ class FplTheoriesProvider {
 
     parseScope(scope) {
         // Convert each item in the scope to a MyTreeItem
-        return scope.map(item => new MyTreeItem(item.Type + ": " + item.Name, item.Scope, item.ValueList));
+        return scope.map(item => new MyTreeItem("#" + item.Type + ": " + item.Name, item.Scope, item.ValueList));
     }
     
     parseValueList(valueList) {
