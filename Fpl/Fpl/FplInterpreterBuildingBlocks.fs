@@ -122,16 +122,12 @@ type EvalStack() =
                     EvalStack.tryAddToValueList fv |> ignore
                 | _ -> 
                     if EvalStack.tryAddToValueList fv then
-                        match fv.FplRepresentation with
-                        | FplRepresentation.Pointer variable ->
-                            EvalStack.adjustNameAndSignature next variable.Name variable.TypeSignature variable.TypeSignatureName
-                        | _ -> 
+
                             EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
                             next.NameEndPos <- fv.NameEndPos
             | FplValueType.Variable
             | FplValueType.VariadicVariableMany
             | FplValueType.VariadicVariableMany1 ->
-                EvalStack.tryAddToScope fv
                 match next.BlockType with 
                 | FplValueType.Theorem
                 | FplValueType.Lemma
@@ -147,14 +143,17 @@ type EvalStack() =
                 | FplValueType.Axiom
                 | FplValueType.Predicate
                 | FplValueType.FunctionalTerm ->
+                    EvalStack.tryAddToScope fv
                     if not next.BlockEvaluationStarted then
                         EvalStack.adjustNameAndSignature next fv.TypeSignatureName fv.TypeSignature fv.TypeSignatureName
                 | FplValueType.Reference -> 
+                    EvalStack.tryAddToScope fv
                     EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
                 | FplValueType.Variable 
-                    | FplValueType.VariadicVariableMany
-                    | FplValueType.VariadicVariableMany1 -> 
-                        EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
+                | FplValueType.VariadicVariableMany
+                | FplValueType.VariadicVariableMany1 -> 
+                    EvalStack.tryAddToScope fv
+                    EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
                 | _ -> ()
             | FplValueType.Object
             | FplValueType.Premise
@@ -1099,10 +1098,11 @@ let rec eval (st: SymbolTable) ast =
         optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
         eval st qualificationListAst
         let refBlock = es.PeekEvalStack() // if the reference was replaced, take this one
-        match (fv.BlockType, fv.FplRepresentation,refBlock.FplRepresentation,fv.ValueList.Count) with
+        match (fv.BlockType, fv.FplRepresentation, refBlock.FplRepresentation,fv.ValueList.Count) with
         | (FplValueType.Reference, FplRepresentation.Undef, FplRepresentation.Pointer var, 1) ->
             fv.FplRepresentation <- refBlock.FplRepresentation
         | _ -> ()
+        refBlock.NameEndPos <- pos2
         if FplValue.IsFplBlock(fv) || FplValue.IsConstructorOrProperty(fv) then
             fv.ValueList.Add(refBlock)
         es.PopEvalStack()
