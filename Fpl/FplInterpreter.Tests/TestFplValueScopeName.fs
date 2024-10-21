@@ -738,8 +738,10 @@ type TestFplValueScopeName() =
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100"]
-            let numbOfJustifications = arg.Scope.Count
-            let result = arg.ValueList[0]
+            let just = arg.ValueList[0]
+            let ainf = arg.ValueList[1]
+            let numbOfJustifications = just.Scope.Count
+ 
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
 
             match var with
