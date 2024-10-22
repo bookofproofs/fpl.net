@@ -898,7 +898,7 @@ let tryFindAssociatedBlockForProof (fplValue:FplValue) =
                 // without the last dollar digit
                 flattenedScopes
                 |> List.filter (fun fv ->
-                    fv.Name.StartsWith(potentialProvableName + "(") 
+                    fv.Name.StartsWith(potentialProvableName + "(") || fv.Name = potentialProvableName
                 )
 
             let provableBlocklist = 
