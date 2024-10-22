@@ -40,7 +40,10 @@ type EvalStack() =
             | _ -> 
                 match fv.BlockType with
                 | FplValueType.Translation -> 
+                    let oldDiagnosticsStopped = ad.DiagnosticsStopped
+                    ad.DiagnosticsStopped <- false
                     emitID014diagnostics fv conflict 
+                    ad.DiagnosticsStopped <- oldDiagnosticsStopped
                 | FplValueType.Argument -> 
                     emitPR003diagnostics fv conflict 
                 | _ ->

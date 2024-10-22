@@ -7,20 +7,20 @@ open CommonTestHelpers
 type TestReferencesTypeOfSignature() =
 
 
-    [<DataRow("base1", "def pred T() { true };")>]
-    [<DataRow("base2", "def pred T() { false };")>]
-    [<DataRow("base3", "def pred T() { undef };")>]
-    [<DataRow("base4", "def pred T() { 1. };")>]
+    [<DataRow("base1", "true")>]
+    [<DataRow("base2", "false")>]
+    [<DataRow("base3", "undef")>]
+    [<DataRow("base4", "1.")>]
     [<DataRow("base5", "del.Test()")>]
-    [<DataRow("base6", "def pred T() { $1 };")>]
+    [<DataRow("base6", "$1")>]
     [<DataRow("base7", "bydef Test()")>] 
     [<DataRow("base8", "Test$1")>]
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
-    [<DataRow("base11", "def pred T() { v };")>]
-    [<DataRow("base11v1", "def pred T() { dec ~v:obj; v };")>]
-    [<DataRow("base11v2", "def pred T() { dec ~v:ind; v };")>]
-    [<DataRow("base11v3", "def pred T() { dec ~v:Nat; v };")>]
+    [<DataRow("base11", "v")>]
+    [<DataRow("base11v1", "dec ~v:obj; v")>]
+    [<DataRow("base11v2", "dec ~v:ind; v")>]
+    [<DataRow("base11v3", "dec ~v:Nat; v")>]
     [<DataRow("base12", "self")>]
     [<DataRow("base13", "1")>]
     [<DataRow("base11a", "v.x")>]
@@ -29,7 +29,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base11b", "v()")>]
     [<DataRow("base12b", "self()")>]
     [<DataRow("base13b", "1()")>]
-    [<DataRow("base10c", "def pred Test(x,y:Nat) {true} def pred T() { dec ~x,y:Nat; Test(x, y) };")>]
+    [<DataRow("base10c", "dec ~x,y:Nat; Test(x, y)")>]
     [<DataRow("base11c", "v(x, y)")>]
     [<DataRow("base12c", "self(x, y)")>]
     [<DataRow("base13c", "1(x, y)")>]
@@ -92,8 +92,8 @@ type TestReferencesTypeOfSignature() =
             | "base5" -> Assert.AreEqual<string list>(["del."; "Test"; "("; ")"], base1.TypeSignature)
             | "base6" -> Assert.AreEqual<string list>(["ind"], base1.TypeSignature)
             | "base7" -> Assert.AreEqual<string list>(["bydef."; "Test"; "("; ")"], base1.TypeSignature)
-            | "base8" -> Assert.AreEqual<string list>(["Test"; "ind"], base1.TypeSignature)
-            | "base9" -> Assert.AreEqual<string list>(["Test"; "ind"; "("; ")"], base1.TypeSignature)
+            | "base8" -> Assert.AreEqual<string list>(["Test$1"], base1.TypeSignature)
+            | "base9" -> Assert.AreEqual<string list>(["Test$1"; "("; ")"], base1.TypeSignature)
             | "base10" -> Assert.AreEqual<string list>(["Test"], base1.TypeSignature)
             | "base11" -> Assert.AreEqual<string list>(["undef"], base1.TypeSignature)
             | "base11v1" -> Assert.AreEqual<string list>(["obj"], base1.TypeSignature)
@@ -152,7 +152,7 @@ type TestReferencesTypeOfSignature() =
         | None -> 
             Assert.IsTrue(false)
 
-    (*
+
     [<DataRow("base1", "base.B()")>]
     [<DataRow("base2", "base.C(a, b, c, d)")>]
     [<DataRow("base3", "base.D(self, a, b)")>]
@@ -277,4 +277,3 @@ type TestReferencesTypeOfSignature() =
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
-    *)
