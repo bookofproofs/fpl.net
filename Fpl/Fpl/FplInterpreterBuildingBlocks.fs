@@ -59,6 +59,9 @@ type EvalStack() =
         else
             false
 
+    // Pops an FplValue from stack without propagating it's name and signature to the next FplValue on the stack.
+    member this.Pop() = _valueStack.Pop()
+
     // Pops an FplValue from stack and propagates it's name and signature to the next FplValue on the stack.
     member this.PopEvalStack() = 
         let fv = _valueStack.Pop()
@@ -122,10 +125,11 @@ type EvalStack() =
                 | FplValueType.Argument ->
                     EvalStack.tryAddToValueList fv |> ignore
                 | _ -> 
-                    if EvalStack.tryAddToValueList fv then
-
-                            EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
-                            next.NameEndPos <- fv.NameEndPos
+                    if FplValue.IsFplBlock(next) || FplValue.IsConstructorOrProperty(next) then
+                        next.ValueList.Add(fv)
+                    elif EvalStack.tryAddToValueList fv then
+                        EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
+                        next.NameEndPos <- fv.NameEndPos
             | FplValueType.Variable
             | FplValueType.VariadicVariableMany
             | FplValueType.VariadicVariableMany1 ->
@@ -1122,8 +1126,6 @@ let rec eval (st: SymbolTable) ast =
             fv.FplRepresentation <- refBlock.FplRepresentation
         | _ -> ()
         refBlock.NameEndPos <- pos2
-        if FplValue.IsFplBlock(fv) || FplValue.IsConstructorOrProperty(fv) then
-            fv.ValueList.Add(refBlock)
         es.PopEvalStack()
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
