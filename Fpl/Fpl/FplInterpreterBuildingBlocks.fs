@@ -1,7 +1,6 @@
 ﻿module FplInterpreterBuildingBlocks
 
 open System
-open System.Linq
 open System.Collections.Generic
 open FParsec
 open ErrDiagnostics
@@ -238,7 +237,9 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         eval_units st "obj" pos1 pos2 
-        setRepresentation st (FplRepresentation.ObjRepr "obj")
+        let evalPath = st.EvalPath()
+        if not (evalPath.EndsWith("InheritedClassType.ObjectType")) then 
+            setRepresentation st (FplRepresentation.ObjRepr "obj")
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")

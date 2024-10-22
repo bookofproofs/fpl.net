@@ -430,9 +430,9 @@ type FplRepresentation =
         | Localization _ -> "localization"
         | Index _ -> "index"
         | Pointer _ -> "pointer"
-        | LangRepr FplLanguageConstruct.Class -> "class type"
-        | LangRepr FplLanguageConstruct.Extension -> "extension type"
-        | LangRepr FplLanguageConstruct.Function -> "function type"
+        | LangRepr FplLanguageConstruct.Class -> "class"
+        | LangRepr FplLanguageConstruct.Extension -> "extension"
+        | LangRepr FplLanguageConstruct.Function -> "function"
         | Undef -> "undefined"
 and ScopeSearchResult = 
     | FoundAssociate of FplValue 
