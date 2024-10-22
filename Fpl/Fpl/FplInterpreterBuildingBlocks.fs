@@ -53,11 +53,7 @@ type EvalStack() =
     /// adds the FplValue to it's parent's ValueList
     static member tryAddToValueList (fv:FplValue) = 
         let next = fv.Parent.Value
-        if not (next.ValueList.Contains(fv)) then 
-            next.ValueList.Add(fv)
-            true
-        else
-            false
+        next.ValueList.Add(fv)
 
     // Pops an FplValue from stack without propagating it's name and signature to the next FplValue on the stack.
     member this.Pop() = _valueStack.Pop()
@@ -123,7 +119,7 @@ type EvalStack() =
                 | FplValueType.Justification -> 
                     EvalStack.tryAddToScope fv
                 | FplValueType.Argument ->
-                    EvalStack.tryAddToValueList fv |> ignore
+                    EvalStack.tryAddToValueList fv 
                 | FplValueType.Axiom
                 | FplValueType.Theorem 
                 | FplValueType.Lemma 
@@ -140,11 +136,11 @@ type EvalStack() =
                 | FplValueType.OptionalFunctionalTerm
                 | FplValueType.MandatoryPredicate
                 | FplValueType.OptionalPredicate ->
-                    EvalStack.tryAddToValueList fv |> ignore
+                    EvalStack.tryAddToValueList fv 
                 | _ -> 
-                    if EvalStack.tryAddToValueList fv then
-                        EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
-                        next.NameEndPos <- fv.NameEndPos
+                    EvalStack.tryAddToValueList fv
+                    EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
+                    next.NameEndPos <- fv.NameEndPos
             | FplValueType.Variable
             | FplValueType.VariadicVariableMany
             | FplValueType.VariadicVariableMany1 ->
@@ -183,7 +179,7 @@ type EvalStack() =
             | FplValueType.Justification 
             | FplValueType.ArgInference 
             | FplValueType.Root -> 
-                EvalStack.tryAddToValueList fv |> ignore
+                EvalStack.tryAddToValueList fv 
 
 
     // Pushes an FplValue to the stack.
