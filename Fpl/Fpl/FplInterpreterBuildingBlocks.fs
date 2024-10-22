@@ -115,7 +115,6 @@ type EvalStack() =
                 | FplValueType.Localization -> 
                     EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
                     next.NameEndPos <- fv.NameEndPos
-                    EvalStack.tryAddToScope fv
                 | FplValueType.Justification -> 
                     EvalStack.tryAddToScope fv
                 | FplValueType.Argument ->
@@ -353,8 +352,9 @@ let rec eval (st: SymbolTable) ast =
                 // replace the reference by a pointer to an existing declared variable
                 fv.FplRepresentation <- FplRepresentation.Pointer other
             |_ -> 
-                // if found, the emit error that the variable was already declared
-                emitVAR03diagnostics varValue other 
+                if (isDeclaration || isLocationDeclaration) then
+                    // if var not found in scope, the emit error that the variable was already declared
+                    emitVAR03diagnostics varValue other 
         | _ -> 
             if isLocationDeclaration then
                 let rec getLocation (fValue:FplValue) = 

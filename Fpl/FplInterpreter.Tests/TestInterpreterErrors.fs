@@ -338,6 +338,8 @@ type TestInterpreterErrors() =
     [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
     [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
     [<DataRow("""loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
+    [<DataRow("""loc and(p,q) := !tex: x "\wedge" q;;""", 1)>]
+    [<DataRow("""loc and(p,q) := !tex: x "\wedge" y;;""", 2)>]
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
         let code = VAR01 ""
@@ -401,6 +403,7 @@ type TestInterpreterErrors() =
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~c: obj; pre: true con: true};", 1)>]
     [<DataRow("uses Fpl.Commons;", 0)>]
     [<DataRow("""loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
+
     [<TestMethod>]
     member this.TestVAR03(fplCode:string, expected) =
         let code = VAR03 ("", "")

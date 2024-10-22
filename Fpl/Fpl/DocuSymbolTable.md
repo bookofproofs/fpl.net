@@ -31,13 +31,13 @@ The following table documents how the FplValues are related to each other using 
 |Lemma|A lemma defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the lemmas's predicate)|
 |Proposition|A proposition defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the proposition's predicate)|
 |Conjecture|A conjecture defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the conjectures's predicate)|
-|Localization|||Theory||Translation|
+|Localization|A localization defined in the theory or the theories using this theory.|`Ast.Localization`|Theory|Variable, VariadicVariableMany, VariadicVariableMany1, Translation|Reference to the expression for which this localization was declared.|
 |Corollary|A corollary of Parent.|`Ast.Corollary`|Axiom, Theorem, Lemma, Proposition, Conjecture, or Corollary|Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent|Reference (only one, representing the corollary's predicate)|
 |Proof|A proof of a provable statement (see Parent).|`Ast.Proof`|Theorem, Lemma, Proposition, or Corollary|Argument, Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent|none|
 |Argument|An argument of a proof|`Ast.Argument`|Proof|none|1st Justification, snd ArgInference|
 |Justification|One or more justifications to a proof argument.|`Ast.Justification`|Argument|Reference|none|
 |ArgInference|An argument inference of a proof argument.|`Ast.AssumeArgument`, `Ast.RevokeArgument`, `Ast.DerivedPredicate`|Argument|none|Reference|
-|Translation|||Localization|||
+|Translation|A translation of an expression inside a Localization in a particular language.|`Ast.Translation`|Localization|||
 |Constructor|||Class|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class)|(Possibly empty) Nodes that represent the calls to some base classes constructors. Due to semantical errors in the code, the latter do not necessarily have to match the signatures of the actual constructors of the base classes of this constructor class.	The latter can be retrieved from the parent Class.|
 |Reference|A reference to another FplValue in the symbol table.|`Ast.Trivial`, `Ast.DottedPredicate`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Expression`, `Ast.Trivial`, `Ast.ParentConstructorCall`||||
 |OptionalFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
