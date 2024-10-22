@@ -124,10 +124,25 @@ type EvalStack() =
                     EvalStack.tryAddToScope fv
                 | FplValueType.Argument ->
                     EvalStack.tryAddToValueList fv |> ignore
+                | FplValueType.Axiom
+                | FplValueType.Theorem 
+                | FplValueType.Lemma 
+                | FplValueType.Proposition 
+                | FplValueType.Corollary 
+                | FplValueType.Conjecture 
+                | FplValueType.Proof 
+                | FplValueType.RuleOfInference 
+                | FplValueType.Predicate 
+                | FplValueType.FunctionalTerm 
+                | FplValueType.Class 
+                | FplValueType.Constructor
+                | FplValueType.MandatoryFunctionalTerm
+                | FplValueType.OptionalFunctionalTerm
+                | FplValueType.MandatoryPredicate
+                | FplValueType.OptionalPredicate ->
+                    EvalStack.tryAddToValueList fv |> ignore
                 | _ -> 
-                    if FplValue.IsFplBlock(next) || FplValue.IsConstructorOrProperty(next) then
-                        next.ValueList.Add(fv)
-                    elif EvalStack.tryAddToValueList fv then
+                    if EvalStack.tryAddToValueList fv then
                         EvalStack.adjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
                         next.NameEndPos <- fv.NameEndPos
             | FplValueType.Variable
