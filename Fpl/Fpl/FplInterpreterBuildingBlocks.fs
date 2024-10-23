@@ -692,7 +692,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.BrackedCoordList((pos1, pos2), asts) ->
         st.EvalPush("BrackedCoordList")
         let fv = es.PeekEvalStack()
-        EvalStack.adjustNameAndSignature fv "[" ["["] "]"
+        EvalStack.adjustNameAndSignature fv "[" ["["] "["
         asts |> List.map (eval st) |> ignore
         EvalStack.adjustNameAndSignature fv "]" ["]"] "]"
         st.EvalPop()
@@ -1137,6 +1137,18 @@ let rec eval (st: SymbolTable) ast =
             fv.FplRepresentation <- refBlock.FplRepresentation
         | _ -> ()
         refBlock.NameEndPos <- pos2
+        /// simplify trivially nested expressions 
+        let simplifyTriviallyNestedExpressions (rb:FplValue) = 
+            if rb.ValueList.Count = 1 then
+                let subNode = rb.ValueList[0]
+                if subNode.BlockType = FplValueType.Reference && 
+                    subNode.Name = rb.Name && 
+                    subNode.TypeSignatureName = rb.TypeSignatureName then 
+                    es.Pop() |> ignore
+                    es.PushEvalStack(subNode)
+                    subNode.Parent <- rb.Parent
+                    rb.Reset()
+        simplifyTriviallyNestedExpressions refBlock
         es.PopEvalStack()
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)

@@ -229,4 +229,6 @@ loc (x + y) :=
     !ger: x "plus" y 
     ;
 
+def pred T (x:obj) {true} 
+def pred Caller() {dec ~x:obj; T(x)} 
 ;
