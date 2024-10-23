@@ -500,7 +500,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Undefined((pos1, pos2), _) -> 
         st.EvalPush("Undefined")
         let fv = es.PeekEvalStack()
-        es.AdjustNameAndSignature fv "undef" ["pred"] "pred"
+        es.AdjustNameAndSignature fv "undef" ["undef"] "undef"
         st.EvalPop() 
     | Ast.Trivial((pos1, pos2), _) -> 
         st.EvalPush("Trivial")
