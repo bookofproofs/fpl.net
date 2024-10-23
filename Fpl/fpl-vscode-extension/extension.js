@@ -142,13 +142,13 @@ function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
  */
 function dispatchRuntime(runtimeName) {
     if (runtimeName == 'win32-x64') {
-        return ['https://download.visualstudio.microsoft.com/download/pr/d9d43c59-b9f4-47b7-a520-da3a7fa255dc/95b26e342a1ecfa29c527faebdc272e4', 'dotnet-runtime-8.0.8-win-x64.zip'];
+        return ['https://github.com/bookofproofs/fpl.netlib/raw/refs/heads/main', 'dotnet-runtime-8.0.8-win-x64.zip'];
     }
     else if (runtimeName == "linux-x64") {
-        return ['https://download.visualstudio.microsoft.com/download/pr/68c87f8a-862c-4870-a792-9c89b3c8aa2d/2319ebfb46d3a903341966586e8b0898', 'dotnet-runtime-8.0.8-linux-x64.tar.gz'];
+        return ['https://github.com/bookofproofs/fpl.netlib/raw/refs/heads/main', 'dotnet-runtime-8.0.8-linux-x64.tar.gz'];
     }
     else if (runtimeName == "darwin-x64") {
-        return ['https://download.visualstudio.microsoft.com/download/pr/0159972b-a4d6-4683-b32a-9da824d5689e/ffb0784119abf49015be375b5a016413', 'dotnet-runtime-8.0.8-osx-x64.tar.gz'];
+        return ['https://github.com/bookofproofs/fpl.netlib/raw/refs/heads/main', 'dotnet-runtime-8.0.8-osx-x64.tar.gz'];
     }
     else {
         let errorMsg = "Unfortunately, no runtime found for your system " + runtimeName;
