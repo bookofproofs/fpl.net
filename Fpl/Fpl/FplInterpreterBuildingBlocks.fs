@@ -654,8 +654,10 @@ let rec eval (st: SymbolTable) ast =
             es.AdjustNameAndSignature fv identifier [identifier] identifier
             checkID012Diagnostics st fv identifier pos1 pos2
             checkID012Diagnostics st fv identifier pos1 pos2
-            emitSIG04TypeDiagnostics st identifier fv pos1 pos2
-
+            if evalPath.EndsWith("PredicateWithOptSpecification.PredicateIdentifier") then 
+                ()
+            else
+                emitSIG04TypeDiagnostics st identifier fv pos1 pos2
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
         st.EvalPush("ParamTuple")
@@ -801,10 +803,10 @@ let rec eval (st: SymbolTable) ast =
         optAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
-    | Ast.ClassType((pos1, pos2), (ast1, optAst)) ->
+    | Ast.ClassType((pos1, pos2), (specificClassTypeAst, optbracketModifierAst)) ->
         st.EvalPush("ClassType")
-        eval st ast1
-        optAst |> Option.map (eval st) |> ignore
+        eval st specificClassTypeAst
+        optbracketModifierAst |> Option.map (eval st) |> ignore
         eval_pos_ast_ast_opt st pos1 pos2
         st.EvalPop()
     | Ast.CompoundPredicateType((pos1, pos2), (ast1, optAst)) ->
@@ -839,6 +841,7 @@ let rec eval (st: SymbolTable) ast =
         | None -> 
             // if no specification was found then simply continue in the same context
             eval st fplIdentifierAst
+
         st.EvalPop()
     // | SelfAts of Positions * char list
     | Ast.SelfAts((pos1, pos2), chars) -> 

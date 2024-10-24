@@ -151,3 +151,10 @@ type TestAxioms () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<TestMethod>]
+    member this.TestAxiom09 () =
+        let result = run (axiom .>> eof) """axiom A() { all x is Nat {true} }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+        
