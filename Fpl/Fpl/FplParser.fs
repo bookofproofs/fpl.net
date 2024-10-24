@@ -300,12 +300,11 @@ let casesStatement = positions "Cases" (((keywordCases >>. leftParen >>. IW >>. 
 
 let ofType = keywordIs >>. positions "IsType" (variableType) .>> IW |>> Ast.IsType
 let inEntity = keywordIn >>. positions "InEntity" (predicateWithQualification) .>> IW |>> Ast.InEntity
-let inDomain = choice [ofType; inEntity]
-let variableInOptDomain = ( (variable .>> IW) .>>. opt inDomain) .>> IW
-let variableListInOptDomain = ( variableList .>>. opt inDomain) .>> IW
+let variableInOptDomain = ( (variable .>> IW) .>>. opt ofType) .>> IW
+let variableListInOptDomain = ( variableList .>>. opt ofType) .>> IW
 let variableListInOptDomainList = (sepBy1 variableListInOptDomain comma) .>> IW
-
-let entityInDomain = ( entity .>> IW .>>. inDomain ) .>> IW
+0
+let entityInDomain = ( entity .>> IW .>>. inEntity ) .>> IW
 let forInBody = (entityInDomain .>> IW) .>>. (leftBrace >>. IW >>. statementList) .>> (IW >>. rightBrace)
 let forStatement = positions "ForIn" (keywordFor >>. forInBody) |>> Ast.ForIn
 

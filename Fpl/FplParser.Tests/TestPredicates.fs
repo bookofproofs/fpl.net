@@ -331,7 +331,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate44 () =
-        let result = run (predicate .>> eof) """exn$1 x in Nat {not (iif ( true, not (false)))}"""
+        let result = run (predicate .>> eof) """exn$1 x is Nat {not (iif ( true, not (false)))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -359,7 +359,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate48 () =
-        let result = run (predicate .>> eof) """all arg in args 
+        let result = run (predicate .>> eof) """all arg is Args 
 				{
 					is(arg,Set)
 				}"""
@@ -398,7 +398,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate53 () =
-        let result = run (predicate .>> eof) """all x in Range(a,b), y in c, z {and (a,b,c)}"""
+        let result = run (predicate .>> eof) """all x is Range(a:B), y is C, z {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -412,7 +412,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate55 () =
-        let result = run (predicate .>> eof) """ex x in Range(a,b), y in c, z {and (a,b,c)}"""
+        let result = run (predicate .>> eof) """ex x is Range(a:B), y is C, z {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

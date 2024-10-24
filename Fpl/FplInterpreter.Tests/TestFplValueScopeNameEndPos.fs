@@ -517,7 +517,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
+    [<DataRow("base18", "ex x is Range(a:T), y is C, z {and (a,b,c)}")>]
     [<DataRow("base19", "exn$1 x {all y {true}}")>]
     [<DataRow("base20", "all x {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]

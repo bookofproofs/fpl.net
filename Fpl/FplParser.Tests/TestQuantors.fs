@@ -45,7 +45,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors06 () =
-        let result = run (predicate .>> eof) """all x in TestClass {true}"""
+        let result = run (predicate .>> eof) """all x is TestClass {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -73,31 +73,31 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors10 () =
-        let result = run (predicate .>> eof) """all x in someVar {true}"""
+        let result = run (predicate .>> eof) """all x is SomeVar {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestQuantors11 () =
-        let result = run (predicate .>> eof) """all x in self {true}"""
+        let result = run (predicate .>> eof) """all x is self {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestQuantors12 () =
-        let result = run (predicate .>> eof) """all x in ClosedRange(from,to) {true}"""
+        let result = run (predicate .>> eof) """all x is ClosedRange(from,to) {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestQuantors13 () =
         let result = run (predicate .>> eof) """all x in T[x] {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestQuantors14 () =
@@ -108,7 +108,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors15 () =
-        let result = run (predicate .>> eof) """all x in Range(a,b), y in c, z {true}"""
+        let result = run (predicate .>> eof) """all x is Range(a:B), y is C, z {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -122,7 +122,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors17 () =
-        let result = run (predicate .>> eof) """ex x in Range(a,b), y in c, z {and (a,b,c)}"""
+        let result = run (predicate .>> eof) """ex x is Range(a:B), y is C, z {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -200,7 +200,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors28 () =
-        let result = run (predicate .>> eof) """exn$1 x in Nat {not (iif ( true, not (false)))}"""
+        let result = run (predicate .>> eof) """exn$1 x is Nat {not (iif ( true, not (false)))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -221,7 +221,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors31 () =
-        let result = run (predicate .>> eof) """all x in Range(a,b), y in c, z {and (a,b,c)}"""
+        let result = run (predicate .>> eof) """all x is Range(a:B), y is C, z {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -235,7 +235,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors33 () =
-        let result = run (predicate .>> eof) """ex x in Range(a,b), y in c, z {and (a,b,c)}"""
+        let result = run (predicate .>> eof) """ex x is Range(a:B), y is C, z {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -249,7 +249,7 @@ type TestQuantors () =
 
     [<TestMethod>]
     member this.TestQuantors35 () =
-        let result = run (predicate .>> eof) """ex x in Real {true}"""
+        let result = run (predicate .>> eof) """ex x is Real {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
