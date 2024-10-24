@@ -70,6 +70,8 @@ type EvalStack() =
                 | ScopeSearchResult.FoundAssociate potentialParent -> 
                     // everything is ok, change the parent of the provable from theory to the found parent 
                     fv.Parent <- Some potentialParent
+                    // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the proof.
+                    emitVAR03diagnosticsForCorollaryOrProofVariable fv  
                 | ScopeSearchResult.FoundIncorrectBlock block ->
                     emitID002diagnostics fv block  
                 | ScopeSearchResult.NotFound ->
@@ -84,7 +86,7 @@ type EvalStack() =
                     // everything is ok, change the parent of the provable from theory to the found parent 
                     fv.Parent <- Some potentialParent
                     // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
-                    emitVAR03diagnosticsForCorollarysSignatureVariable fv  
+                    emitVAR03diagnosticsForCorollaryOrProofVariable fv  
                 | ScopeSearchResult.FoundIncorrectBlock block ->
                     emitID005diagnostics fv block  
                 | ScopeSearchResult.NotFound ->
@@ -152,6 +154,7 @@ type EvalStack() =
                 | FplValueType.RuleOfInference
                 | FplValueType.Constructor
                 | FplValueType.Corollary
+                | FplValueType.Proof
                 | FplValueType.MandatoryPredicate
                 | FplValueType.OptionalPredicate
                 | FplValueType.MandatoryFunctionalTerm
