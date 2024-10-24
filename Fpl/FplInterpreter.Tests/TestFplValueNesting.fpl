@@ -125,7 +125,7 @@ def class CartesianProduct: Set
                         all i 
                         {
                             and (
-                                In(i,Rang(1,myLength)),    
+                                In(i,Rang(1,myLength)),
                                 In(tupleElem[i],@self[i]) 
                             )
                             
@@ -191,7 +191,7 @@ def class BinaryRelation: Relation
 
     property pred RightUnique()
     {
-        all v,w1,w2 is Set
+        all v,w1,w2 in Set
         {
             impl
             (
@@ -210,7 +210,7 @@ def class BinaryRelation: Relation
 
     property pred LeftUnique()
     {
-        all v1,v2,w is Set
+        all v1,v2,w in Set
         {
             impl
             (
@@ -239,9 +239,9 @@ def class BinaryRelation: Relation
 
     property pred RightTotal()
     {
-        all w is Set
+        all w in Set
         {
-            ex v is Set
+            ex v in Set
             {
                 and
                 (
@@ -260,9 +260,9 @@ def class BinaryRelation: Relation
 
     property pred LeftTotal()
     {
-        all v is Set
+        all v in Set
         {
-            ex w is Set
+            ex w in Set
             {
                 and
                 (

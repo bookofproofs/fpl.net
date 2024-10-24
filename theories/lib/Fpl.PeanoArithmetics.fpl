@@ -23,9 +23,9 @@ axiom ZeroIsNat()
 
 axiom SuccessorExistsAndIsUnique()
 {
-    all n in Nat
+    all n is Nat
     {
-        exn$1 successor in Nat
+        exn$1 successor is Nat
         {
             and
             (
@@ -38,7 +38,7 @@ axiom SuccessorExistsAndIsUnique()
 
 axiom ZeroIsNotSuccessor()
 {
-    all n in Nat
+    all n is Nat
     {
         NotEqual(Zero(), Succ(n))
     }
@@ -46,7 +46,7 @@ axiom ZeroIsNotSuccessor()
 
 axiom SuccessorIsInjective()
 {
-    all n,m in Nat
+    all n,m is Nat
     {
         impl
         (
@@ -83,7 +83,7 @@ def class Nat: obj
                 | (x = 0) : self := Zero() 
                 | (x = 1) : self := Succ(Zero()) 
                 | (x = 2) : self := Succ(Succ(Zero())) 
-                ? self := Succ(delegate.decrement(x))  
+                ? self := Succ(delegate.Decrement(x))  
             )
         ;
         self
@@ -105,7 +105,7 @@ def class Nat: obj
 
 def pred IsGreaterOrEqual(n,m: Nat)
 {
-    ex k in Nat { (n = Add(m,k)) }
+    ex k is Nat { (n = Add(m,k)) }
 }
 
 // besides the class "Nat", we can formulate definition of the set of all natural numbers
@@ -277,9 +277,13 @@ proposition SumOfConsecutiveNumbers()
     ;
     impl
     (
-        all n in Range(1,limit)
+        all n 
         {
-            (f(n) = n)
+            and (
+                In(n, Range(1,limit))
+                , (f(n) = n)
+            )
+            
         }
         ,
         all n
@@ -307,7 +311,7 @@ def pred IsBounded(x: Real)
 
 def pred IsBounded(f: RealValuedFunction)
 {
-    all x in Real
+    all x is Real
     {
         IsBounded(f(x))
     }

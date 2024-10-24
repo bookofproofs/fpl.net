@@ -1,5 +1,3 @@
-uses Fpl.SetTheory 
-
-inf ModusPonens() {pre:true con:true} 
+uses Fpl.SetTheory
 
 ;

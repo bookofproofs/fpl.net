@@ -13,7 +13,7 @@ def pred In infix "in" 5 (x,y: Set)
 
 def pred IsEmpty(x: Set)
 {
-    all y in Set
+    all y is Set
     {
         not In(y, x) 
     }
@@ -22,7 +22,7 @@ def pred IsEmpty(x: Set)
 // existence of an empty set
 axiom EmptySetExists()
 {
-    ex x in Set
+    ex x is Set
     {
         IsEmpty(x)
     }
@@ -44,7 +44,7 @@ def class EmptySet: Set
 // relation between a subset and a superset
 def pred IsSubset(subset,superset: Set)
 {
-    all u in Set
+    all u is Set
     {
         impl (In(u, subset), In(u, superset))
     }
@@ -66,7 +66,7 @@ def class Subset: Set
 // extensionality
 axiom Extensionality()
 {
-    all x,y in Set
+    all x,y is Set
     {
         impl
         (
@@ -141,11 +141,11 @@ def class SetBuilder: Set
 // For any two sets $x,y$ there exists a set $z$ containing them as elements.
 axiom Pairing()
 {
-    all x,y in Set
+    all x,y is Set
     {
-        ex z in Set
+        ex z is Set
         {
-            all w in Set
+            all w is Set
             {
                 iif
                 (
@@ -164,11 +164,11 @@ axiom Pairing()
 // for every set x there is a set containing all elements of the elements of x
 axiom Union()
 {
-    all x in Set
+    all x is Set
     {
-        ex y in Set
+        ex y is Set
         {
-            all z,w in Set
+            all z,w is Set
             {
                 impl
                 (
@@ -182,7 +182,7 @@ axiom Union()
 
 def pred IsPowerSet(ofSet, potentialPowerSet: Set)
 {
-    all z in Set
+    all z is Set
     {
         impl (Subset(z,ofSet), In(z, potentialPowerSet))
     }
@@ -201,9 +201,9 @@ def func PowerSet(x: Set) -> Set
 // for every set x there is a set y containing all subsets of x as its elements
 axiom PowerSetExistsForAllSets()
 {
-    all x in Set
+    all x is Set
     {
-        ex y in Set
+        ex y is Set
         {
             IsPowerSet(x, y)
         }
@@ -216,7 +216,7 @@ def func SetUnion(x,y: Set) -> Set
     dec 
         ~union: Set
         assert
-            all z in Set
+            all z is Set
             {
                 iif
                 (
@@ -237,7 +237,7 @@ def func Singleton(x: Set) -> Set
 // alternative 2: adds SetUnion notation capability to this theory (as predicate)
 def pred Union(x,superSet: Set)
 {
-    all u in Set
+    all u is Set
     {
         impl (In(u, x), In(u, superSet))
     }

@@ -34,11 +34,13 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("fun2")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
+    [<DataRow("loc1")>]
+    [<DataRow("loc2")>]
     [<TestMethod>]
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("NameEndPos") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.IsTrue(r.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "theory" -> Assert.IsTrue(theory.NameEndPos.ToString().Contains("Ln: 1, Col: 1)"))
@@ -66,6 +68,8 @@ type TestFplValueScopeNameEndPos() =
             | "fun2" -> Assert.IsTrue(fun2.NameEndPos.ToString().Contains("Ln: 23, Col: 48)"))
             | "prf1" -> Assert.IsTrue(prf1.NameEndPos.ToString().Contains("Ln: 24, Col: 33)"))
             | "prf2" -> Assert.IsTrue(prf2.NameEndPos.ToString().Contains("Ln: 25, Col: 33)"))
+            | "loc1" -> Assert.IsTrue(loc1.NameEndPos.ToString().Contains("Ln: 26, Col: 24)"))
+            | "loc2" -> Assert.IsTrue(loc2.NameEndPos.ToString().Contains("Ln: 27, Col: 26)"))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -513,7 +517,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
+    [<DataRow("base18", "ex x is Range(a:T), y is C, z {and (a,b,c)}")>]
     [<DataRow("base19", "exn$1 x {all y {true}}")>]
     [<DataRow("base20", "all x {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]
@@ -567,14 +571,14 @@ type TestFplValueScopeNameEndPos() =
             | "base11b" -> Assert.AreEqual<int64>((int64)20, base1.NameEndPos.Column)
             | "base12b" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
             | "base13b" -> Assert.AreEqual<int64>((int64)20, base1.NameEndPos.Column)
-            | "base10c" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
-            | "base11c" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
-            | "base12c" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
-            | "base13c" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
+            | "base10c" -> Assert.AreEqual<int64>((int64)26, base1.NameEndPos.Column)
+            | "base11c" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
+            | "base12c" -> Assert.AreEqual<int64>((int64)26, base1.NameEndPos.Column)
+            | "base13c" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
             | "base10d" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
             | "base11d" -> Assert.AreEqual<int64>((int64)25, base1.NameEndPos.Column)
             | "base12d" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
-            | "base13d" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
+            | "base13d" -> Assert.AreEqual<int64>((int64)22, base1.NameEndPos.Column)
             | "base10e" -> Assert.AreEqual<int64>((int64)40, base1.NameEndPos.Column)
             | "base11e" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
             | "base12e" -> Assert.AreEqual<int64>((int64)36, base1.NameEndPos.Column)
@@ -601,12 +605,12 @@ type TestFplValueScopeNameEndPos() =
             | "base25" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
             | "base26" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
             | "base27" -> Assert.AreEqual<int64>((int64)20, base1.NameEndPos.Column)
-            | "base28" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
-            | "base29" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
-            | "base30" -> Assert.AreEqual<int64>((int64)25, base1.NameEndPos.Column)
-            | "base31" -> Assert.AreEqual<int64>((int64)41, base1.NameEndPos.Column)
-            | "base32" -> Assert.AreEqual<int64>((int64)38, base1.NameEndPos.Column)
-            | "base33" -> Assert.AreEqual<int64>((int64)43, base1.NameEndPos.Column)
+            | "base28" -> Assert.AreEqual<int64>((int64)26, base1.NameEndPos.Column)
+            | "base29" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
+            | "base30" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
+            | "base31" -> Assert.AreEqual<int64>((int64)39, base1.NameEndPos.Column)
+            | "base32" -> Assert.AreEqual<int64>((int64)37, base1.NameEndPos.Column)
+            | "base33" -> Assert.AreEqual<int64>((int64)42, base1.NameEndPos.Column)
             | "base34" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
@@ -649,12 +653,12 @@ type TestFplValueScopeNameEndPos() =
             let base1 = ctor.ValueList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
-            | "base2" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
-            | "base3" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
-            | "base4" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
-            | "base5" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
-            | "base6" -> Assert.AreEqual<int64>((int64)1, base1.NameEndPos.Column)
+            | "base1" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
+            | "base2" -> Assert.AreEqual<int64>((int64)54, base1.NameEndPos.Column)
+            | "base3" -> Assert.AreEqual<int64>((int64)54, base1.NameEndPos.Column)
+            | "base4" -> Assert.AreEqual<int64>((int64)48, base1.NameEndPos.Column)
+            | "base5" -> Assert.AreEqual<int64>((int64)67, base1.NameEndPos.Column)
+            | "base6" -> Assert.AreEqual<int64>((int64)62, base1.NameEndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -683,12 +687,12 @@ type TestFplValueScopeNameEndPos() =
 
             match var with
             | "base1" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
-            | "base2" -> Assert.AreEqual<int64>((int64)31, base1.NameEndPos.Column)
-            | "base3" -> Assert.AreEqual<int64>((int64)32, base1.NameEndPos.Column)
-            | "base4" -> Assert.AreEqual<int64>((int64)29, base1.NameEndPos.Column)
+            | "base2" -> Assert.AreEqual<int64>((int64)30, base1.NameEndPos.Column)
+            | "base3" -> Assert.AreEqual<int64>((int64)31, base1.NameEndPos.Column)
+            | "base4" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
             | "base5" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
-            | "base6" -> Assert.AreEqual<int64>((int64)45, base1.NameEndPos.Column)
-            | "base7" -> Assert.AreEqual<int64>((int64)42, base1.NameEndPos.Column)
+            | "base6" -> Assert.AreEqual<int64>((int64)43, base1.NameEndPos.Column)
+            | "base7" -> Assert.AreEqual<int64>((int64)41, base1.NameEndPos.Column)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

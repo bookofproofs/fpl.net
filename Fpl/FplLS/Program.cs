@@ -64,8 +64,8 @@ namespace FplLS
                             
                             // Hook up diagnostics
                             bufferManager.BufferUpdated += (__, x) =>
-                                diagnosticsHandler.PublishDiagnostics(st, 
-                                    x.Uri, 
+                                diagnosticsHandler.PublishDiagnostics(st,
+                                    new PathEquivalentUri(x.Uri.AbsoluteUri),
                                     bufferManager.GetBuffer(x.Uri));
 
                             return Task.CompletedTask;

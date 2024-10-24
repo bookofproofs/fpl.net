@@ -276,6 +276,41 @@ type TestInterpreterErrors() =
         let code = ID001 ("", "")
         runTestHelper "TestID001.fpl" fplCode code expected
 
+    [<DataRow("""loc iif(x, y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;;""", 0)>]
+    [<DataRow("""loc iif(x, y) := !tex: x "\Leftrightarrow" y !eng: x " if and only if " y !tex: x " dann und nur dann wenn " y;;""", 1)>]
+    [<TestMethod>]
+    member this.TestID014(fplCode:string, expected:int) =
+        let code = ID014 ("", "")
+        runTestHelper "TestID014.fpl" fplCode code expected
+
+    [<DataRow("""proof T$1 { 100. |- assume somePremise 300. |- trivial 100. |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 1. |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 2. |- trivial qed};""", 0)>]
+    [<TestMethod>]
+    member this.TestPR003(fplCode:string, expected:int) =
+        let code = PR003 ("", "")
+        runTestHelper "TestPR003.fpl" fplCode code expected
+
+    [<DataRow("""proof T$1 { 1. |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. 2., 3. |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. 1., 1. |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. 1., 1., 1. |- trivial qed};""", 2)>]
+    [<DataRow("""proof T$1 { 1. 1., 2., 1. |- trivial qed};""", 1)>]
+    [<TestMethod>]
+    member this.TestPR004(fplCode:string, expected:int) =
+        let code = PR004 ("", "")
+        runTestHelper "TestPR004.fpl" fplCode code expected
+
+
+    [<DataRow("""proof T$1 { 1. |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. 2., 3. |- trivial qed};""", 2)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 2. 1. |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. 1., 1., 1. |- trivial qed};""", 3)>]
+    [<TestMethod>]
+    member this.TestPR005(fplCode:string, expected:int) =
+        let code = PR005 ""
+        runTestHelper "TestPR005.fpl" fplCode code expected
+
     [<DataRow("uses Fpl.Commons inf ModusPonens() {pre:true con:true} ;", 1)>]
     [<DataRow("uses Fpl.Commons theorem ModusTollens() {true} ;", 1)>]
     [<DataRow("uses Fpl.Commons def pred HypotheticalSyllogism() {true} ;", 1)>]
@@ -298,6 +333,13 @@ type TestInterpreterErrors() =
 
     [<DataRow("def pred Test() {x};", 1)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
+    [<DataRow("axiom A() { all x in Nat {true} };", 0)>]
+    [<DataRow("axiom A() { all x {true} };", 1)>]
+    [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
+    [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
+    [<DataRow("""loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
+    [<DataRow("""loc and(p,q) := !tex: x "\wedge" q;;""", 1)>]
+    [<DataRow("""loc and(p,q) := !tex: x "\wedge" y;;""", 2)>]
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =
         let code = VAR01 ""
@@ -332,6 +374,9 @@ type TestInterpreterErrors() =
     [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { true };", 0)>]
     [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1() { true };", 0)>]
     [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1(x:obj) { true };", 1)>]
+    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { true }       proof TestId$1$1   { dec ~x:obj; 1. |- trivial } ;", 1)>]
+    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { true }   corollary TestId$1$1() { dec ~x:obj; true } ;", 1)>]
+    [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { true }   corollary TestId$1$1(x:obj) { true } ;", 1)>]
     [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1(x:obj) { true };", 1)>]
     [<DataRow("theorem TestId(x: ind) {true}       corollary TestId$1() { true };", 0)>]
     [<DataRow("theorem TestId() {dec ~x:ind; true} corollary TestId$1() { true };", 0)>]
@@ -359,6 +404,9 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Test:obj {dec ~x:obj; constructor Test() {self} prty func X()->obj {dec ~x: pred; return x} };", 1)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~c: obj; pre: true con: true};", 1)>]
+    [<DataRow("uses Fpl.Commons;", 0)>]
+    [<DataRow("""loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
+
     [<TestMethod>]
     member this.TestVAR03(fplCode:string, expected) =
         let code = VAR03 ("", "")
@@ -398,6 +446,8 @@ type TestInterpreterErrors() =
 
     [<DataRow("theorem Test() {true} proof Test$1 {1. |- trivial};", 0)>]
     [<DataRow("theorem TestTypo() {true} proof Test$1 {1. |- trivial};", 1)>]
+    [<DataRow("corollary Test$1() {true} proof Test$1$1 {1. |- trivial};", 0)>]
+    [<DataRow("theorem Test() {true} corollary Test$1() {true} proof Test$1$1 {1. |- trivial};", 0)>]
     [<TestMethod>]
     member this.TestID003(fplCode:string, expected) =
         let code = ID003 ""
@@ -405,6 +455,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("theorem Test() {true} corollary Test$1() {true};", 0)>]
     [<DataRow("theorem TestTypo() {true} corollary Test$1() {true};", 1)>]
+    [<DataRow("theorem Test() {true} corollary Test$1() {true} corollary Test$1$1() {true};", 0)>]
     [<TestMethod>]
     member this.TestID006(fplCode:string, expected) =
         let code = ID006 ""
@@ -523,6 +574,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def func T postfix "+" ()->obj {intr};""", 1)>]
     [<DataRow("""def func T postfix "+" (x:obj)->obj {intr};""", 0)>]
     [<DataRow("""def func T postfix "+" (x,y:obj)->obj {intr};""", 1)>]
+    [<DataRow("uses Fpl.Commons;", 0)>]
     [<TestMethod>]
     member this.TestSIG00(fplCode:string, expected) =
         let code = SIG00 ("",0)
@@ -548,6 +600,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {(x - y)};""", 1)>]
     [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {-x};""", 1)>]
     [<DataRow("""def pred T postfix "+" (x,y:obj) {true} def pred Test() {x-};""", 1)>]
+    [<DataRow("""loc (x + y) := !tex: x "+" y; ;""", 0)>]
     [<TestMethod>]
     member this.TestSIG01(fplCode:string, expected) =
         let code = SIG01 ""
@@ -574,6 +627,8 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Set:obj {intr} axiom Test() {dec ~x:Set; true};", 0)>]
     [<DataRow("def cl Set:obj {intr} axiom Test() {dec ~x:SetTypo; true};", 1)>]
     [<DataRow("def pred Test() {dec ~x:Set; true};", 1)>]
+    [<DataRow("axiom A() { all x in Nat {true} };", 1)>]
+    [<DataRow("axiom A() { all x is Nat {true} };", 1)>]
     [<DataRow("def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
     [<DataRow("""def pred T1() {true} def pred Test() { dec ~x:obj; T1(x) };""", 1)>]
@@ -581,6 +636,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 1)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
+    [<DataRow("""loc NotEqual(x,y) := !tex: x "\neq" y; ;""", 0)>]
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =
         let code = SIG04 ("","","")
@@ -658,8 +714,33 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T() { iif(true,x) };""", 1)>]
     [<DataRow("""def pred T() { xor(true,true,true) };""", 0)>]
     [<DataRow("""def pred T() { dec ~x,y:pred; xor(y,x,z) };""", 1)>]
+    [<DataRow("""loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
     [<TestMethod>]
     member this.TestLG001(fplCode:string, expected) =
         let code = LG001 ("","","")
         runTestHelper "TestLG001.fpl" fplCode code expected
+
+    [<DataRow("""axiom A() {dec ~x,y:Nat; impl(x,y)};""", 31)>]
+    [<TestMethod>]
+    member this.TestLG001Position(fplCode:string, (expected:int64)) =
+        let code = LG001 ("","","")
+        prepareFplCode ("TestLG001Position.fpl", fplCode, false) |> ignore
+        checkForUnexpectedErrors code
+        let result = filterByErrorCode ad code.Code
+        Assert.AreEqual<int64>(expected, result.Head.StartPos.Column)
+        
+    [<DataRow("""axiom A() {dec ~x,y:obj; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `object`.")>]
+    [<DataRow("""axiom A() {dec ~x,y:ind; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `index`.")>]
+    [<DataRow("""axiom A() {dec ~x,y:func; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `function`.")>]
+    [<DataRow("""axiom A() {impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `undefined`.")>]
+    [<DataRow("""axiom A() {impl(T(),true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T()`, got `undefined`.")>]
+    [<DataRow("""axiom A() {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `undefined`.")>]
+    [<DataRow("""def cl T:obj {intr} axiom A() {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `class`.")>]
+    [<TestMethod>]
+    member this.TestLG001MsgSpecificity(fplCode:string, (expected:string)) =
+        let code = LG001 ("","","")
+        prepareFplCode ("TestLG001MsgSpecificity.fpl", fplCode, false) |> ignore
+        checkForUnexpectedErrors code
+        let result = filterByErrorCode ad code.Code
+        Assert.AreEqual<string>(expected, result.Head.Message)
 

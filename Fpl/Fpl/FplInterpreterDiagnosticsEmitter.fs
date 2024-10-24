@@ -27,9 +27,37 @@ let emitID001diagnostics (fplValue: FplValue) (conflict: FplValue) =
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = ID001(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Alternatives = None 
+        }
+
+    ad.AddDiagnostic diagnostic
+
+let emitID014diagnostics (fplValue: FplValue) (conflict: FplValue) =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.NameStartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = ID014(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Alternatives = None 
+        }
+
+    ad.AddDiagnostic diagnostic
+
+let emitPR003diagnostics (fplValue: FplValue) (conflict: FplValue) =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.NameStartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = PR003(fplValue.Name, conflict.QualifiedStartPos)
             Diagnostic.Alternatives = None 
         }
 
@@ -55,7 +83,7 @@ let emitVAR03diagnostics (fplValue: FplValue) (conflict: FplValue) =
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = VAR03(fplValue.Name, conflict.QualifiedStartPos)
             Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
@@ -63,14 +91,20 @@ let emitVAR03diagnostics (fplValue: FplValue) (conflict: FplValue) =
 
     ad.AddDiagnostic diagnostic
 
-let emitVAR03diagnosticsForCorollarysSignatureVariable (fplValue: FplValue) =
-    if FplValue.IsCorollary(fplValue) then
-        for kv in fplValue.Scope do
+let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
+    match fplValue.BlockType with 
+    | FplValueType.Proof 
+    | FplValueType.Corollary ->
+        fplValue.Scope
+        |> Seq.filter (fun kv -> FplValue.IsVariable(kv.Value))
+        |> Seq.iter (fun kv -> 
             let res = FplValue.VariableInBlockScopeByName (kv.Value) kv.Value.Name
 
             match res with
             | ScopeSearchResult.Found conflict -> emitVAR03diagnostics kv.Value conflict
             | _ -> ()
+        )
+    | _ -> ()
 
 let emitID000Diagnostics astType =
     let diagnostic =
@@ -92,7 +126,7 @@ let emitID002diagnostics (fplValue: FplValue) incorrectBlockType =
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = ID002(fplValue.Name, incorrectBlockType)
             Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
@@ -106,7 +140,7 @@ let emitID005diagnostics (fplValue: FplValue) incorrectBlockType =
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = ID005(fplValue.Name, incorrectBlockType)
             Diagnostic.Alternatives =
@@ -121,7 +155,7 @@ let emitID003diagnostics (fplValue: FplValue) =
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = ID003 fplValue.Name
             Diagnostic.Alternatives = 
@@ -136,7 +170,7 @@ let emitID006diagnostics (fplValue: FplValue) =
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = ID006 fplValue.Name
             Diagnostic.Alternatives =
@@ -151,7 +185,7 @@ let emitID004diagnostics (fplValue: FplValue) listOfCandidates =
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = ID004(fplValue.Name, listOfCandidates)
             Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
@@ -164,14 +198,14 @@ let emitID007diagnostics (fplValue: FplValue) listOfCandidates =
             Diagnostic.Uri = ad.CurrentUri
             Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
             Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
+            Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
             Diagnostic.Code = ID007(fplValue.Name, listOfCandidates)
             Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
         }
     ad.AddDiagnostic diagnostic
 
-let tryAddVariadicVariables numberOfVariadicVars startPos endPos =
+let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
     if numberOfVariadicVars > 1 then
         let diagnostic =
             { 
@@ -381,6 +415,34 @@ let emitID013Diagnostics (fplValue: FplValue) pos1 pos2 =
                 }
             ad.AddDiagnostic diagnostic
 
+
+let emitPR004Diagnostics (fplValue: FplValue) (conflict: FplValue) =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fplValue.NameStartPos
+            Diagnostic.EndPos = fplValue.NameEndPos
+            Diagnostic.Code = PR004(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Alternatives = None 
+        }
+
+    ad.AddDiagnostic diagnostic
+
+let emitPR005Diagnostics (fv:FplValue) =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = fv.NameStartPos
+            Diagnostic.EndPos = fv.NameEndPos
+            Diagnostic.Code = PR005 fv.Name // argument reference not defined
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     let detailed (exprType: FixType) expectedArity actualArity pos1 pos2 =
         let diagnostic =
@@ -399,7 +461,7 @@ let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     | FixType.Infix _ when fplValue.Arity <> 2 ->
         if
             fplValue.TypeSignature.Length > 2
-            && (fplValue.TypeSignature[2] = "+" || fplValue.TypeSignature[2] = "*")
+            && (fplValue.TypeSignature[2].StartsWith("+") || fplValue.TypeSignature[2].StartsWith("*"))
         then
             () // avoid false positives for variadic variables
         else
@@ -503,12 +565,15 @@ let emitSIG04Diagnostics (fplValue: FplValue) (candidates: FplValue list) firstF
         }
     ad.AddDiagnostic diagnostic
 
+/// Emits SIG04 diagnostics. If a single candidate was found, sets the fplValue's pointer representation to this candidate.
 let emitSIG04TypeDiagnostics (st:SymbolTable) name (fplValue:FplValue) pos1 pos2 =
 
     let rightContext = st.EvalPath()
-    if rightContext.EndsWith(".VariableType.ClassType.PredicateIdentifier") then
+    if rightContext.EndsWith(".VariableType.ClassType.PredicateIdentifier") 
+        || rightContext.EndsWith(".Expression.PredicateWithQualification.PredicateWithOptSpecification.PredicateIdentifier") then
         match tryMatchTypes st fplValue name with
-        | (_, _, Some matchedFplValue) -> ()
+        | (_, candidates, Some matchedFplValue) -> 
+            fplValue.FplRepresentation <- FplRepresentation.Pointer matchedFplValue
         | (firstFailingArgument, candidates, None) -> 
             let candidateNames =
                 candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
@@ -538,16 +603,16 @@ let rec blocktIsProof (fplValue: FplValue) =
                 blocktIsProof parent
         | None -> false
 
-let emitPR000Diagnostics (fplValue: FplValue) identifier pos1 pos2 =
+let emitPR000Diagnostics (fplValue: FplValue) =
     if not (blocktIsProof fplValue) then
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
                 Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = PR000 identifier
+                Diagnostic.StartPos = fplValue.NameStartPos
+                Diagnostic.EndPos = fplValue.NameEndPos
+                Diagnostic.Code = PR000 fplValue.Name
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
@@ -595,22 +660,22 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
                     Diagnostic.Uri = ad.CurrentUri
                     Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
                     Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = arg.StartPos
-                    Diagnostic.EndPos = arg.EndPos
+                    Diagnostic.StartPos = arg.NameStartPos
+                    Diagnostic.EndPos = arg.NameEndPos
                     Diagnostic.Code = LG000(typeOfPredicate, arg.Name)
                     Diagnostic.Alternatives = None 
                 }
             diags.AddDiagnostic diagnostic
         | _ -> ()
 
-    let emitLG001Diagnostics (arg: FplValue) =
+    let emitLG001Diagnostics pos1 pos2 (arg: FplValue) =
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
                 Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = arg.StartPos
-                Diagnostic.EndPos = arg.EndPos
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
                 Diagnostic.Code = LG001(typeOfPredicate, arg.Name, arg.FplRepresentation.String())
                 Diagnostic.Alternatives = None 
             }
@@ -623,8 +688,8 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
         | FplRepresentation.Pointer variable ->
             match variable.FplRepresentation with
             | FplRepresentation.PredRepr _ -> emitLG000Diagnostics variable
-            | _ -> emitLG001Diagnostics variable
-        | _ -> emitLG001Diagnostics arg)
+            | _ -> emitLG001Diagnostics arg.NameStartPos arg.NameEndPos variable
+        | _ -> emitLG001Diagnostics arg.NameStartPos arg.NameEndPos arg)
 
     let code = LG000("", "")
     let numbLG000 = filterByErrorCode diags code.Code

@@ -142,13 +142,13 @@ function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
  */
 function dispatchRuntime(runtimeName) {
     if (runtimeName == 'win32-x64') {
-        return ['https://download.visualstudio.microsoft.com/download/pr/d9d43c59-b9f4-47b7-a520-da3a7fa255dc/95b26e342a1ecfa29c527faebdc272e4', 'dotnet-runtime-8.0.8-win-x64.zip'];
+        return ['https://github.com/bookofproofs/fpl.netlib/raw/refs/heads/main', 'dotnet-runtime-8.0.8-win-x64.zip'];
     }
     else if (runtimeName == "linux-x64") {
-        return ['https://download.visualstudio.microsoft.com/download/pr/68c87f8a-862c-4870-a792-9c89b3c8aa2d/2319ebfb46d3a903341966586e8b0898', 'dotnet-runtime-8.0.8-linux-x64.tar.gz'];
+        return ['https://github.com/bookofproofs/fpl.netlib/raw/refs/heads/main', 'dotnet-runtime-8.0.8-linux-x64.tar.gz'];
     }
     else if (runtimeName == "darwin-x64") {
-        return ['https://download.visualstudio.microsoft.com/download/pr/0159972b-a4d6-4683-b32a-9da824d5689e/ffb0784119abf49015be375b5a016413', 'dotnet-runtime-8.0.8-osx-x64.tar.gz'];
+        return ['https://github.com/bookofproofs/fpl.netlib/raw/refs/heads/main', 'dotnet-runtime-8.0.8-osx-x64.tar.gz'];
     }
     else {
         let errorMsg = "Unfortunately, no runtime found for your system " + runtimeName;
@@ -204,19 +204,24 @@ const vscode = require('vscode');
 
 // A custom TreeItem
 class MyTreeItem extends vscode.TreeItem {
-    constructor(label, scope, valueList) {
-        super(label);
+    constructor(label, scope = [], valueList = []) {
+        super(label, scope.length > 0 || valueList.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
+        this.label = label;
         this.scope = scope;
         this.valueList = valueList;
-        this.collapsibleState = scope.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
     }
 }
 
-// Define your TreeDataProvider
+
+// Define TreeDataProvider
 class FplTheoriesProvider {
     constructor() {
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+    }
+
+    refresh() {
+        this._onDidChangeTreeData.fire();
     }
 
     getTreeItem(element) {
@@ -225,27 +230,40 @@ class FplTheoriesProvider {
 
     getChildren(element) {
         if (!element) {
-            // If no element is passed, return the root nodes of your tree
+            // If no element is passed, return the root nodes of the tree
             return client.sendRequest('getTreeData').then(json => {
                 let treeData = JSON.parse(json);
                 return this.parseScope(treeData.Scope);
             }).catch(error => {
-                console.error('Failed to get tree data', error);
+                log2Console('Failed to get tree data ' + error, true);
                 return [];  // Return an empty array on error
             });
-        } else if (element.scope) {
-            // If the element has a 'Scope' property, return its children
-            return this.parseScope(element.scope);
+        } else if (element.isVirtual) {
+            // Handle virtual nodes
+            return Promise.resolve(this.parseScope(element.scope));
         } else {
-            // If the element has no children, return an empty array
-            return Promise.resolve([]);
+            // Create virtual child elements for Scope and ValueList if they are not empty
+            let children = [];
+            if (element.scope && element.scope.length > 0) {
+                children.push(...this.parseScope(element.scope));
+            }
+            if (element.valueList && element.valueList.length > 0) {
+                children.push(...this.parseValueList(element.valueList));
+            }
+            return Promise.resolve(children);
         }
     }
 
     parseScope(scope) {
         // Convert each item in the scope to a MyTreeItem
-        return scope.map(item => new MyTreeItem(item.Name, item.Scope, item.ValueList));
+        return scope.map(item => new MyTreeItem("#" + item.Type + ": " + item.Name, item.Scope, item.ValueList));
     }
+    
+    parseValueList(valueList) {
+        // Convert each item in the valueList to a MyTreeItem
+        return valueList.map(item => new MyTreeItem(item.Type + ": " + item.Name, item.Scope, item.ValueList));
+    }
+
 }
 
 
@@ -274,7 +292,7 @@ function activate(context) {
 
 
         const path = require('path');
-        let relPathToserverDll = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'FplLS.dll');
+        let relPathToServerDll = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'FplLS.dll');
         let relPathToDotnetRuntime = path.join(__dirname, 'dotnet-runtimes', runtimeName);
         let relPathToDotnet = path.join(relPathToDotnetRuntime, 'dotnet');
 
@@ -282,8 +300,8 @@ function activate(context) {
 
         acquireDotNetRuntimePromise.then(() => {
             let serverOptions = {
-                run: { command: relPathToDotnet, args: [relPathToserverDll] },
-                debug: { command: relPathToDotnet, args: [relPathToserverDll] }
+                run: { command: relPathToDotnet, args: [relPathToServerDll] },
+                debug: { command: relPathToDotnet, args: [relPathToServerDll] }
             };
     
             let clientOptions = {
@@ -300,8 +318,22 @@ function activate(context) {
             // Create an instance of your TreeDataProvider
             const fplTheoriesProvider = new FplTheoriesProvider();
 
-            // Register your TreeDataProvider
+            // Register TreeDataProvider
             vscode.window.registerTreeDataProvider('fplTheories', fplTheoriesProvider);
+
+            // refresh FPL Theories Explorer on document open event  
+            vscode.workspace.onDidOpenTextDocument((document) => {
+                if (document.languageId === 'fpl') {
+                    fplTheoriesProvider.refresh();
+                }
+            });
+
+            // refresh FPL Theories Explorer on document changes  
+            vscode.workspace.onDidChangeTextDocument((event) => {
+                if (event.document.languageId === 'fpl') {
+                    fplTheoriesProvider.refresh();
+                }
+            });
 
             let config = vscode.workspace.getConfiguration('fplExtension');
 

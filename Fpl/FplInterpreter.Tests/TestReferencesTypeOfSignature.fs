@@ -7,68 +7,67 @@ open CommonTestHelpers
 type TestReferencesTypeOfSignature() =
 
 
-    [<DataRow("base1", "def pred T() { true };")>]
-    [<DataRow("base2", "def pred T() { false };")>]
-    [<DataRow("base3", "def pred T() { undef };")>]
-    [<DataRow("base4", "def pred T() { 1. };")>]
-    // [<DataRow("base5", "del.Test()")>]
-    [<DataRow("base6", "def pred T() { $1 };")>]
-   
-    //[<DataRow("base7", "bydef Test()")>] 
-    //[<DataRow("base8", "Test$1")>]
-    //[<DataRow("base9", "Test$1()")>]
-    //[<DataRow("base10", "Test")>]
-    [<DataRow("base11", "def pred T() { v };")>]
-    [<DataRow("base11v1", "def pred T() { dec ~v:obj; v };")>]
-    [<DataRow("base11v2", "def pred T() { dec ~v:ind; v };")>]
-    [<DataRow("base11v3", "def pred T() { dec ~v:Nat; v };")>]
-    //[<DataRow("base12", "self")>]
-    //[<DataRow("base13", "1")>]
-    //[<DataRow("base11a", "v.x")>]
-    //[<DataRow("base12a", "self.x")>]
-    //[<DataRow("base10b", "Test()")>]
-    //[<DataRow("base11b", "v()")>]
-    //[<DataRow("base12b", "self()")>]
-    //[<DataRow("base13b", "1()")>]
-    [<DataRow("base10c", "def pred Test(x,y:Nat) {true} def pred T() { dec ~x,y:Nat; Test(x, y) };")>]
-    //[<DataRow("base11c", "v(x, y)")>]
-    //[<DataRow("base12c", "self(x, y)")>]
-    //[<DataRow("base13c", "1(x, y)")>]
-    //[<DataRow("base10d", "Test[x, y]")>]
-    //[<DataRow("base11d", "v[x, y]")>]
-    //[<DataRow("base12d", "self[x, y]")>]
-    //[<DataRow("base13d", "1[x.y]")>]
-    //[<DataRow("base10e", "Test(x, y).@self[a, b]")>]
-    //[<DataRow("base11e", "v(x, y).x[a, b]")>]
-    //[<DataRow("base12e", "self(x, y).3[a, b]")>]
-    //[<DataRow("base13e", "1(x, y).T[a, b]")>]
-    //[<DataRow("base10f", "Test[x, y].x(a, b)")>]
-    //[<DataRow("base11f", "v[x, y].x(a, b)")>]
-    //[<DataRow("base12f", "self[x, y].self(a, b)")>]
-    //[<DataRow("base13f", "1[x.y].T(a, b)")>]
-    //[<DataRow("base14", "∅")>]
-    //[<DataRow("base15", "-x")>]
-    //[<DataRow("base15a", "x'")>]
-    //[<DataRow("base15b", "-x'")>]
-    //[<DataRow("base16", "-(y + x = 2 * x)")>]
-    //[<DataRow("base17", "(y + x' = 2 * x)'")>]
-    //[<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
-    //[<DataRow("base19", "exn$1 x {all y {true}}")>]
-    //[<DataRow("base20", "all x {not x}")>]
-    //[<DataRow("base21", "and (x, y, z)")>]
-    //[<DataRow("base21a", "not x")>]
-    //[<DataRow("base21b", "not (x)")>]
-    //[<DataRow("base22", "xor (x, y, z)")>]
-    //[<DataRow("base23", "or (x, y, z)")>]
-    //[<DataRow("base24", "iif (x, y)")>]
-    //[<DataRow("base25", "impl (x, y)")>]
-    //[<DataRow("base26", "is (x, Nat)")>]
-    //[<DataRow("base27", "B()")>]
-    //[<DataRow("base28", "C(a,b,c,d)")>]
-    //[<DataRow("base29", "D(self,b,c)")>]
-    //[<DataRow("base30", "B(In(x))")>]
-    //[<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
-    //[<DataRow("base32", "E(true, undef, false)")>]
+    [<DataRow("base1", "true")>]
+    [<DataRow("base2", "false")>]
+    [<DataRow("base3", "undef")>]
+    [<DataRow("base4", "1.")>]
+    [<DataRow("base5", "del.Test()")>]
+    [<DataRow("base6", "$1")>]
+    [<DataRow("base7", "bydef Test()")>] 
+    [<DataRow("base8", "Test$1")>]
+    [<DataRow("base9", "Test$1()")>]
+    [<DataRow("base10", "Test")>]
+    [<DataRow("base11", "v")>]
+    [<DataRow("base11v1", "dec ~v:obj; v")>]
+    [<DataRow("base11v2", "dec ~v:ind; v")>]
+    [<DataRow("base11v3", "dec ~v:Nat; v")>]
+    [<DataRow("base12", "self")>]
+    [<DataRow("base13", "1")>]
+    [<DataRow("base11a", "v.x")>]
+    [<DataRow("base12a", "self.x")>]
+    [<DataRow("base10b", "Test()")>]
+    [<DataRow("base11b", "v()")>]
+    [<DataRow("base12b", "self()")>]
+    [<DataRow("base13b", "1()")>]
+    [<DataRow("base10c", "dec ~x,y:Nat; Test(x, y)")>]
+    [<DataRow("base11c", "v(x, y)")>]
+    [<DataRow("base12c", "self(x, y)")>]
+    [<DataRow("base13c", "1(x, y)")>]
+    [<DataRow("base10d", "Test[x, y]")>]
+    [<DataRow("base11d", "v[x, y]")>]
+    [<DataRow("base12d", "self[x, y]")>]
+    [<DataRow("base13d", "1[x.y]")>]
+    [<DataRow("base10e", "Test(x, y).@self[a, b]")>]
+    [<DataRow("base11e", "v(x, y).x[a, b]")>]
+    [<DataRow("base12e", "self(x, y).3[a, b]")>]
+    [<DataRow("base13e", "1(x, y).T[a, b]")>]
+    [<DataRow("base10f", "Test[x, y].x(a, b)")>]
+    [<DataRow("base11f", "v[x, y].x(a, b)")>]
+    [<DataRow("base12f", "self[x, y].self(a, b)")>]
+    [<DataRow("base13f", "1[x.y].T(a, b)")>]
+    [<DataRow("base14", "∅")>]
+    [<DataRow("base15", "-x")>]
+    [<DataRow("base15a", "x'")>]
+    [<DataRow("base15b", "-x'")>]
+    [<DataRow("base16", "-(y + x = 2 * x)")>]
+    [<DataRow("base17", "(y + x' = 2 * x)'")>]
+    [<DataRow("base18", "ex x is Range(a:T), y is C, z {and (a,b,c)}")>]
+    [<DataRow("base19", "exn$1 x {all y {true}}")>]
+    [<DataRow("base20", "all x {not x}")>]
+    [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base21a", "not x")>]
+    [<DataRow("base21b", "not (x)")>]
+    [<DataRow("base22", "xor (x, y, z)")>]
+    [<DataRow("base23", "or (x, y, z)")>]
+    [<DataRow("base24", "iif (x, y)")>]
+    [<DataRow("base25", "impl (x, y)")>]
+    [<DataRow("base26", "is (x, Nat)")>]
+    [<DataRow("base27", "B()")>]
+    [<DataRow("base28", "C(a,b,c,d)")>]
+    [<DataRow("base29", "D(self,b,c)")>]
+    [<DataRow("base30", "B(In(x))")>]
+    [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
+    [<DataRow("base32", "E(true, undef, false)")>]
     [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     
@@ -76,7 +75,7 @@ type TestReferencesTypeOfSignature() =
     member this.TestPredicateReference(var, fplCode) =
         ad.Clear()
         let filename = "TestPredicateReference"
-        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let stOption = prepareFplCode(filename + ".fpl", "def pred T() { " + fplCode + " };", false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
         | Some st -> 
@@ -93,8 +92,8 @@ type TestReferencesTypeOfSignature() =
             | "base5" -> Assert.AreEqual<string list>(["del."; "Test"; "("; ")"], base1.TypeSignature)
             | "base6" -> Assert.AreEqual<string list>(["ind"], base1.TypeSignature)
             | "base7" -> Assert.AreEqual<string list>(["bydef."; "Test"; "("; ")"], base1.TypeSignature)
-            | "base8" -> Assert.AreEqual<string list>(["Test"; "ind"], base1.TypeSignature)
-            | "base9" -> Assert.AreEqual<string list>(["Test"; "ind"; "("; ")"], base1.TypeSignature)
+            | "base8" -> Assert.AreEqual<string list>(["Test$1"], base1.TypeSignature)
+            | "base9" -> Assert.AreEqual<string list>(["Test$1"; "("; ")"], base1.TypeSignature)
             | "base10" -> Assert.AreEqual<string list>(["Test"], base1.TypeSignature)
             | "base11" -> Assert.AreEqual<string list>(["undef"], base1.TypeSignature)
             | "base11v1" -> Assert.AreEqual<string list>(["obj"], base1.TypeSignature)
@@ -147,11 +146,13 @@ type TestReferencesTypeOfSignature() =
             | "base30" -> Assert.AreEqual<string list>(["B"; "("; "In"; "("; "undef"; ")"; ")"], base1.TypeSignature)
             | "base31" -> Assert.AreEqual<string list>(["C"; "("; "Test1"; "("; "undef"; ")"; "Test2"; "("; "undef"; "undef"; "undef"; ")"; ")"], base1.TypeSignature)
             | "base32" -> Assert.AreEqual<string list>(["E"; "("; "pred"; "undef"; "pred"; ")"], base1.TypeSignature)
+            | "base33" -> Assert.AreEqual<string list>(["pred"; "("; "obj"; ")"], base1.TypeSignature)
+            | "base34" -> Assert.AreEqual<string list>(["is"; "("; "undef"; "Set"; ")"], base1.TypeSignature)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
-    (*
+
     [<DataRow("base1", "base.B()")>]
     [<DataRow("base2", "base.C(a, b, c, d)")>]
     [<DataRow("base3", "base.D(self, a, b)")>]
@@ -276,4 +277,3 @@ type TestReferencesTypeOfSignature() =
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
-    *)

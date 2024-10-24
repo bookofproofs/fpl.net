@@ -75,16 +75,26 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
 
         Some(st)
 
-let runTestHelper filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expected: int) =
-    printf "Trying %s" code.Message
-    prepareFplCode (filename, fplCode, false) |> ignore
-
+let checkForUnexpectedErrors (code: ErrDiagnostics.DiagnosticCode) =
     let syntaxErrors =
         ad.Collection
         |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplParser || d.Code.Code = "GEN00")
 
     if syntaxErrors.Length > 0 && code.Code <> "GEN00" then
         failwithf $"Syntax or other errors detected. {syntaxErrors.Head}"
+
+    let contextErrors =
+        ad.Collection
+        |> List.filter (fun d -> d.Emitter = DiagnosticEmitter.FplInterpreter && d.Code.Code = "GEN01")
+
+    if contextErrors.Length > 0 then
+        failwithf $"Context errors detected. {contextErrors.Head}"
+
+let runTestHelper filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expected: int) =
+    printf "Trying %s" code.Message
+    prepareFplCode (filename, fplCode, false) |> ignore
+
+    checkForUnexpectedErrors code
 
     let result = filterByErrorCode ad code.Code
     Assert.AreEqual<int>(expected, result.Length)

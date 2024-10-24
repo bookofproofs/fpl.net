@@ -4,6 +4,9 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.6.3
+* Bugfix missing updating current theory diagnostics and vscode object explorer
+
 ## 1.6.2
 * Bugfixes related to VSCode navigation and error diagnostics
 

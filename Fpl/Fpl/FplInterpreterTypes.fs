@@ -11,6 +11,25 @@ open FplGrammarTypes
 open FplParser
 open ErrDiagnostics
 
+let addWithComma (name:string) str = 
+    if str <> "" then
+        if name.Length = 0 
+            || str = "(" || str = ")" 
+            || str = "[" || str = "]" 
+            || str = "->"
+            || name.EndsWith "(" 
+            || name.EndsWith "[" 
+            || name.EndsWith " " 
+            || name.EndsWith "." 
+            || str.StartsWith "$" then
+                if str = "->" then 
+                    name + " " + str + " "
+                else
+                    name + str
+        else
+            name + ", " + str
+    else name
+
 type EvalAlias =
     { StartPos: Position
       EndPos: Position
@@ -290,6 +309,10 @@ type FplValueType =
     | FunctionalTerm
     | Reference
     | Theory
+    | Argument
+    | Justification
+    | ArgInference
+    | Translation
     | Root
     member private this.UnqualifiedName = 
         match this with
@@ -319,12 +342,18 @@ type FplValueType =
             | FunctionalTerm -> "functional term definition"
             | Reference -> "reference"
             | Theory -> "theory"
+            | Argument -> "argument"
+            | Justification -> "justification"
+            | ArgInference -> "argument inference"
+            | Translation -> "translation"
             | Root -> "root"
     member private this.Article = 
         match this with
         | OptionalPredicate
         | OptionalFunctionalTerm
         | Object 
+        | Argument 
+        | ArgInference 
         | Axiom -> "an"
         | _ -> "a"
 
@@ -358,6 +387,10 @@ type FplValueType =
             | FunctionalTerm -> "func"
             | Reference -> "ref"
             | Theory -> "th"
+            | Argument -> "arg"
+            | Justification -> "just"
+            | ArgInference -> "ainf"
+            | Translation -> "trsl"
             | Root -> "root"
 
 type FplPredicate =
@@ -397,12 +430,12 @@ type FplRepresentation =
         | Localization _ -> "localization"
         | Index _ -> "index"
         | Pointer _ -> "pointer"
-        | LangRepr FplLanguageConstruct.Class -> "class type"
-        | LangRepr FplLanguageConstruct.Extension -> "extension type"
-        | LangRepr FplLanguageConstruct.Function -> "function type"
+        | LangRepr FplLanguageConstruct.Class -> "class"
+        | LangRepr FplLanguageConstruct.Extension -> "extension"
+        | LangRepr FplLanguageConstruct.Function -> "function"
         | Undef -> "undefined"
 and ScopeSearchResult = 
-    | FoundAssociate of string 
+    | FoundAssociate of FplValue 
     | FoundMultiple of string
     | FoundIncorrectBlock of string
     | Found of FplValue
@@ -413,27 +446,38 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _name = name
     let mutable _expressionType = FixType.NoFix
     let mutable _exprTypeAlreadySet = false 
-    let mutable _nameFinal = false
-    let mutable _nameEndPos = Position("", 0, 1, 1)
+    let mutable _nameStartPos = fst positions
+    let mutable _nameEndPos = snd positions
     let mutable _typeSignature = []
     let mutable _representation = FplRepresentation.Undef
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
     let mutable _arity = 0
+    let mutable _blockEvaluationStarted = false
+    let mutable _typeSignatureName = ""
+    
 
     let mutable _parent = parent
     let _auxiliaryUniqueChilds = HashSet<string>()
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
     let _valueList = System.Collections.Generic.List<FplValue>()
 
+
     /// Identifier of this FplValue that is unique in its scope.
     member this.Name
         with get () = _name
-        and set (value) = 
-            if _nameFinal then 
-                raise (ArgumentException($"Cannot set readonly Name {_name} again since it has been finally evaluated."))
-            else
-                _name <- value
+        and set (value) = _name <- value
+
+    /// TypeSignatureName of this FplValue that is unique in its scope.
+    member this.TypeSignatureName
+        with get () = _typeSignatureName
+        and set (value) = _typeSignatureName <- value
+
+    /// Indicates if this FplValue has a {} block and its evaluation already started.
+    /// This flag is important to handle signature and block-declared variables differently.
+    member this.BlockEvaluationStarted
+        with get () = _blockEvaluationStarted
+        and set (value) = _blockEvaluationStarted <- value
 
     /// First element of the type signature.
     member this.FplId = 
@@ -472,17 +516,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     _expressionType <- value
                     _exprTypeAlreadySet <- true
             else
-                raise (ArgumentException($"Type was already initialized with {_expressionType.Type}, cannot set it again with {value.Type}."))
-
-    /// Indicates, if the Name has been finally determined during the evaluation process.
-    /// If true, the Name property becomes immutable.
-    member this.NameIsFinal
-        with get () = _nameFinal
-        and set (value) = 
-            if _nameFinal then 
-                () // raise (ArgumentException($"Cannot change the readonly NameIsFinal property since it has been finally evaluated."))
-            else
-                _nameFinal <- value
+                raise (ArgumentException($"Type was already initialized with `{_expressionType.Type}`, cannot set it again with {value.Type}."))
 
     /// Type of the FPL block within this FplValue
     member this.BlockType
@@ -496,6 +530,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     /// Short name of the FPL block type within this FplValue
     member this.BlockTypeShortName
         with get () = _blockType.ShortName
+
+    /// Starting position of this FplValue
+    member this.NameStartPos 
+        with get () = _nameStartPos
+        and set (value) = _nameStartPos <- value
 
     /// This FplValue's name's end position that can be different from its endig position
     member this.NameEndPos
@@ -522,15 +561,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         with get () = _arity
         and set (value) = _arity <- value
 
-    /// Am auxiliary storage that is used e.g. for remembering the names of already processed variables 
-    /// when traversing the Ast recursively.
-    member this.AuxiliaryUniqueChilds = _auxiliaryUniqueChilds
-
-    /// Starting position of this FplValue
-    member this.StartPos = fst positions
-
-    /// Ending position of this FplValue
-    member this.EndPos = snd positions
     /// Parent FplValue of this FplValue
     member this.Parent 
         with get () = _parent
@@ -641,13 +671,21 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     static member IsTheory (fplValue:FplValue) = 
         fplValue.BlockType = FplValueType.Theory
 
+
+    /// Indicates if this FplValue is a block, a property, or a constructor.
+    static member IsBlock(fplValue:FplValue) = 
+        FplValue.IsFplBlock(fplValue) 
+        || FplValue.IsProperty(fplValue) 
+        || FplValue.IsConstructor(fplValue)
+
+
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos = 
         let rec getFullName (fplValue:FplValue) (first:bool) =
             if fplValue.BlockType = FplValueType.Root then
                 ""
             elif first then 
-                let starPosWithoutFileName = $"(Ln: {fplValue.StartPos.Line}, Col: {fplValue.StartPos.Column})"
+                let starPosWithoutFileName = $"(Ln: {fplValue.NameStartPos.Line}, Col: {fplValue.NameStartPos.Column})"
                 if FplValue.IsTheory(fplValue) then 
                     getFullName fplValue.Parent.Value false + fplValue.Name + starPosWithoutFileName
                 else
@@ -667,6 +705,10 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         || fplValue.BlockType = FplValueType.VariadicVariableMany
         || fplValue.BlockType = FplValueType.VariadicVariableMany1
 
+    /// Indicates if this FplValue is a reference
+    static member IsReference(fplValue:FplValue) = 
+        fplValue.BlockType = FplValueType.Reference
+
     /// Indicates if this FplValue is a variadic *variable.
     static member IsVariadicVariableMany(fplValue:FplValue) = 
         fplValue.BlockType = FplValueType.VariadicVariableMany
@@ -675,7 +717,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     static member IsVariadicVariableMany1(fplValue:FplValue) = 
         fplValue.BlockType = FplValueType.VariadicVariableMany1
 
-    /// Checks if a block is in the scope of its parent 
+    /// Checks if a block is in the scope of its parent, by the name of the block. 
     static member InScopeOfParent(fplValue:FplValue) name = 
         let conflictInSiblingTheory (parent:FplValue) = 
             // if the parent is a theory, look also for its sibling theories
@@ -739,12 +781,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 else
                     ScopeSearchResult.NotFound
 
-        if FplValue.IsVariable(fplValue) then
-            firstBlockParent fplValue
-        elif fplValue.BlockType = FplValueType.Reference then 
-            firstBlockParent fplValue
-        else
-            ScopeSearchResult.NotApplicable
+        firstBlockParent fplValue
 
     /// Checks if an fplValue is provable. This will only be true if 
     /// it is a theorem, a lemma, a proposition, or a corollary
@@ -754,119 +791,14 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         || fplValue.BlockType = FplValueType.Lemma
         || fplValue.BlockType = FplValueType.Proposition
 
-    /// Tries to find a theorem-like statement for a proof 
-    /// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
-    static member TryFindAssociatedBlockForProof(fplValue:FplValue) = 
-        if fplValue.BlockType = FplValueType.Proof then
-            match fplValue.Parent with
-            | Some theory ->
-                // The parent node of the proof is the theory. In its scope 
-                // we should find the theorem we are looking for.
-                let buildingBlocksMatchingDollarDigitNameList = 
-                    // the potential block name of the proof is the 
-                    // concatenated type signature of the name of the proof 
-                    // without the last dollar digit
-                    let stripLastDollarDigit (s: string) =
-                        let lastIndex = s.LastIndexOf('$')
-                        if lastIndex <> -1 then
-                            s.Substring(0, lastIndex)
-                        else
-                            s
-                    let potentialBlockName = 
-                        stripLastDollarDigit fplValue.Name
-                    theory.Scope
-                    |> Seq.filter (fun keyValuePair -> 
-                        keyValuePair.Key.StartsWith(potentialBlockName + "(") || keyValuePair.Key = potentialBlockName
-                    )
-                    |> Seq.toList
-                let potentialBlockList = 
-                    buildingBlocksMatchingDollarDigitNameList
-                    |> List.filter (fun keyValuePair ->
-                        FplValue.IsProvable(keyValuePair.Value)
-                    )
-                let notPotentialBlockList = 
-                    buildingBlocksMatchingDollarDigitNameList
-                    |> List.filter (fun keyValuePair ->
-                        not (FplValue.IsProvable(keyValuePair.Value))
-                    )
-                if potentialBlockList.Length > 1 then
-                    ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
-                elif potentialBlockList.Length > 0 then 
-                    let potentialTheorem = potentialBlockList.Head
-                    ScopeSearchResult.FoundAssociate potentialTheorem.Value.Name
-                elif notPotentialBlockList.Length > 0 then 
-                    let potentialOther = notPotentialBlockList.Head
-                    ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
-                else
-                    ScopeSearchResult.NotFound
-            | None -> ScopeSearchResult.NotApplicable
-        else
-            ScopeSearchResult.NotApplicable
-
-    /// Tries to find a therem-like statement, a conjecture, or an axiom for a corollary 
-    /// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
-    static member TryFindAssociatedBlockForCorollary(fplValue:FplValue) = 
-
-        if fplValue.BlockType = FplValueType.Corollary then
-            match fplValue.Parent with
-            | Some theory ->
-                // The parent node of the proof is the theory. In its scope 
-                // we should find the theorem we are looking for.
-                let buildingBlocksMatchingDollarDigitNameList = 
-                    // the potential theorem name of the corollary is the 
-                    // concatenated type signature of the name of the corollary 
-                    // without the last dollar digit
-                    let stripLastDollarDigit (s: string) =
-                        let lastIndex = s.LastIndexOf('$')
-                        if lastIndex <> -1 then
-                            s.Substring(0, lastIndex)
-                        else
-                            s
-                    let potentialBlockName = 
-                        stripLastDollarDigit fplValue.Name
-                    theory.Scope
-                    |> Seq.filter (fun keyValuePair -> 
-                        keyValuePair.Key.StartsWith(potentialBlockName + "(") || keyValuePair.Key = potentialBlockName 
-                    )
-                    |> Seq.toList
-                let potentialBlockList = 
-                    buildingBlocksMatchingDollarDigitNameList
-                    |> List.filter (fun keyValuePair ->
-                        FplValue.IsProvable(keyValuePair.Value) 
-                        || keyValuePair.Value.BlockType = FplValueType.Conjecture
-                        || keyValuePair.Value.BlockType = FplValueType.Axiom
-                    )
-                let notPotentialBlockList = 
-                    buildingBlocksMatchingDollarDigitNameList
-                    |> List.filter (fun keyValuePair ->
-                        not (FplValue.IsProvable(keyValuePair.Value) 
-                        || keyValuePair.Value.BlockType = FplValueType.Conjecture
-                        || keyValuePair.Value.BlockType = FplValueType.Axiom)
-                    )
-                if potentialBlockList.Length > 1 then
-                    ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun kv -> kv.Value.BlockType.Name + " " + kv.Value.Name) |> String.concat ", ")
-                elif potentialBlockList.Length > 0 then 
-                    let potentialTheorem = potentialBlockList.Head
-                    ScopeSearchResult.FoundAssociate potentialTheorem.Value.Name
-                elif notPotentialBlockList.Length > 0 then 
-                    let potentialOther = notPotentialBlockList.Head
-                    ScopeSearchResult.FoundIncorrectBlock potentialOther.Value.QualifiedName
-                else
-                    ScopeSearchResult.NotFound
-            | None -> ScopeSearchResult.NotApplicable
-        else
-            ScopeSearchResult.NotApplicable
-
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
         let root = new FplValue("", FplValueType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
-        root.NameIsFinal <- true
         root
 
     /// A factory method for the FPL primitive Object
     static member CreateObject(pos1,pos2) =
         let obj = new FplValue("obj", FplValueType.Object, (pos1, pos2), None)
-        obj.NameIsFinal <- true
         obj.FplRepresentation <- FplRepresentation.ObjRepr "obj"
         obj
 
@@ -894,19 +826,23 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.Theory
         | FplValueType.MandatoryPredicate
         | FplValueType.OptionalPredicate
-        | FplValueType.Reference -> new FplValue("", fplBlockType, positions, Some parent)
+        | FplValueType.Reference 
         | FplValueType.FunctionalTerm
         | FplValueType.Variable
         | FplValueType.VariadicVariableMany
         | FplValueType.VariadicVariableMany1
         | FplValueType.MandatoryFunctionalTerm
+        | FplValueType.Localization
+        | FplValueType.Argument
+        | FplValueType.Justification
+        | FplValueType.ArgInference
+        | FplValueType.Translation
         | FplValueType.OptionalFunctionalTerm -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Class -> 
             let ret = new FplValue("", fplBlockType, positions, Some parent)
             ret.FplRepresentation <- FplRepresentation.LangRepr FplLanguageConstruct.Class
             ret
         | FplValueType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
-        | FplValueType.Localization -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Object -> raise (ArgumentException("Please use CreateObject for creating a primitive object instead"))
 
     /// Clears this FplValue
@@ -922,83 +858,133 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 clearAll child.Value
             )
             root.Scope.Clear()
-            
         clearAll this
 
-type LogContext = 
-    | Start
-    | Replace
-    | End
+    /// Clears this FplValue
+    override this.ToString() = 
+        $"{this.BlockTypeShortName} {this.Name}"
 
-type EvalContext =
-    | ContextNone
-    | InTheory of FplValue
-    | InSignature of FplValue
-    | InBlock of FplValue
-    | InPropertySignature of FplValue
-    | InPropertyBlock of FplValue
-    | InConstructorSignature of FplValue
-    | InConstructorBlock of FplValue
-    | NamedVarDeclarationInBlock of FplValue
-    | InReferenceCreation of FplValue
-    | InInfixOperation of FplValue
-    | InQuantorCreation of FplValue
-    | InIsOperatorCreation of FplValue
-    member this.Name = 
-        let short (fplValue:FplValue) = 
-            let aggr (lst:seq<FplValue>) = 
-                lst
-                |> Seq.countBy (fun fv -> fv.BlockTypeShortName)
-                |> Seq.map (fun (g,i) -> g + sprintf ":%i" i)
-                |> String.concat " "
+// create an FplValue list containing all Scopes of the theory
+let rec flattenScopes (root: FplValue) =
+    let rec helper (node: FplValue) (acc: FplValue list) =
+        let newAcc = node :: acc
+        node.Scope
+        |> Seq.fold (fun acc kvp -> helper kvp.Value acc) newAcc
+    helper root []
 
-            let p = fplValue.Parent.Value
-            $"{fplValue.BlockTypeShortName} {fplValue.QualifiedName}[{aggr fplValue.Scope.Values},{aggr fplValue.ValueList}]^{p.BlockTypeShortName} {p.QualifiedName}[{aggr p.Scope.Values},{aggr p.ValueList}]"
-        match this with
-        | ContextNone -> "ContextNone"
-        | InTheory fplValue -> $"InTheory({short fplValue})"
-        | InSignature fplValue -> $"InSignature({short fplValue})"
-        | InBlock fplValue -> $"InBlock({short fplValue})"
-        | InPropertySignature fplValue -> $"InPropertySignature({short fplValue})"
-        | InPropertyBlock fplValue -> $"InPropertyBlock({short fplValue})"
-        | InConstructorSignature fplValue -> $"InConstructorSignature({short fplValue})"
-        | InConstructorBlock fplValue -> $"InConstructorBlock({short fplValue})"
-        | NamedVarDeclarationInBlock fplValue -> $"NamedVarDeclarationInBlock({short fplValue})"
-        | InReferenceCreation fplValue -> $"InReferenceCreation({short fplValue})"
-        | InInfixOperation fplValue -> $"InInfixOperation({short fplValue})"
-        | InQuantorCreation fplValue -> $"InAllQuantorCreation({short fplValue})"
-        | InIsOperatorCreation fplValue -> $"InIsOperatorCreation({short fplValue})"
-    member this.Depth = 
-        let rec depth (fv:FplValue) = 
-            match fv.Parent with 
-            | Some parent -> depth parent + 2
-            | None -> 0
-        match this with
-        | ContextNone -> 0
-        | InTheory fv
-        | InSignature fv
-        | InBlock fv
-        | InPropertySignature fv
-        | InPropertyBlock fv
-        | InConstructorSignature fv
-        | InConstructorBlock fv
-        | NamedVarDeclarationInBlock fv
-        | InReferenceCreation fv
-        | InInfixOperation fv
-        | InQuantorCreation fv
-        | InIsOperatorCreation fv -> depth fv
+let stripLastDollarDigit (s: string) =
+    let lastIndex = s.LastIndexOf('$')
+    if lastIndex <> -1 then
+        s.Substring(0, lastIndex)
+    else
+        s
+
+/// Tries to find a theorem-like statement for a proof 
+/// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
+let tryFindAssociatedBlockForProof (fplValue:FplValue) = 
+    if fplValue.BlockType = FplValueType.Proof then
+        match fplValue.Parent with
+        | Some theory ->       
+
+            let flattenedScopes = flattenScopes theory.Parent.Value
+
+            let potentialProvableName = stripLastDollarDigit fplValue.Name
+
+            // The parent node of the proof is the theory. In its scope 
+            // we should find the theorem we are looking for.
+            let buildingBlocksMatchingDollarDigitNameList = 
+                // the potential block name of the proof is the 
+                // concatenated type signature of the name of the proof 
+                // without the last dollar digit
+                flattenedScopes
+                |> List.filter (fun fv ->
+                    fv.Name.StartsWith(potentialProvableName + "(") || fv.Name = potentialProvableName
+                )
+
+            let provableBlocklist = 
+                buildingBlocksMatchingDollarDigitNameList
+                |> List.filter (fun fv ->
+                    FplValue.IsProvable(fv)
+                )
+            let notProvableBlocklist = 
+                buildingBlocksMatchingDollarDigitNameList
+                |> List.filter (fun fv ->
+                    not (FplValue.IsProvable(fv))
+                )
+            if provableBlocklist.Length > 1 then
+                ScopeSearchResult.FoundMultiple (provableBlocklist |> List.map (fun fv -> sprintf "%s %s" fv.BlockType.Name fv.Name) |> String.concat ", ")
+            elif provableBlocklist.Length > 0 then 
+                let potentialTheorem = provableBlocklist.Head
+                ScopeSearchResult.FoundAssociate potentialTheorem
+            elif notProvableBlocklist.Length > 0 then 
+                let potentialOther = notProvableBlocklist.Head
+                ScopeSearchResult.FoundIncorrectBlock (sprintf "%s %s" potentialOther.BlockTypeName potentialOther.QualifiedName)
+            else
+                ScopeSearchResult.NotFound
+        | None -> ScopeSearchResult.NotApplicable
+    else
+        ScopeSearchResult.NotApplicable
+
+/// Tries to find a therem-like statement, a conjecture, or an axiom for a corollary 
+/// and returns different cases of ScopeSearchResult, depending on different semantical error situations. 
+let tryFindAssociatedBlockForCorollary(fplValue:FplValue) = 
+
+    if fplValue.BlockType = FplValueType.Corollary then
+        match fplValue.Parent with
+        | Some theory ->
+            
+            let flattenedScopes = flattenScopes theory.Parent.Value
+
+            // The parent node of the proof is the theory. In its scope 
+            // we should find the theorem we are looking for.
+            let buildingBlocksMatchingDollarDigitNameList = 
+                // the potential theorem name of the corollary is the 
+                // concatenated type signature of the name of the corollary 
+                // without the last dollar digit
+                let potentialBlockName = 
+                    stripLastDollarDigit fplValue.Name
+                flattenedScopes
+                |> Seq.filter (fun fv -> 
+                    fv.Name.StartsWith(potentialBlockName + "(") || fv.Name = potentialBlockName 
+                )
+                |> Seq.toList
+            let potentialBlockList = 
+                buildingBlocksMatchingDollarDigitNameList
+                |> List.filter (fun fv ->
+                    FplValue.IsProvable(fv) 
+                    || fv.BlockType = FplValueType.Conjecture
+                    || fv.BlockType = FplValueType.Axiom
+                )
+            let notPotentialBlockList = 
+                buildingBlocksMatchingDollarDigitNameList
+                |> List.filter (fun fv ->
+                    not (FplValue.IsProvable(fv) 
+                    || fv.BlockType = FplValueType.Conjecture
+                    || fv.BlockType = FplValueType.Axiom)
+                )
+            if potentialBlockList.Length > 1 then
+                ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun fv -> sprintf "%s %s" fv.BlockType.Name fv.Name) |> String.concat ", ")
+            elif potentialBlockList.Length > 0 then 
+                let potentialTheorem = potentialBlockList.Head
+                ScopeSearchResult.FoundAssociate potentialTheorem
+            elif notPotentialBlockList.Length > 0 then 
+                let potentialOther = notPotentialBlockList.Head
+                ScopeSearchResult.FoundIncorrectBlock potentialOther.QualifiedName
+            else
+                ScopeSearchResult.NotFound
+        | None -> ScopeSearchResult.NotApplicable
+    else
+        ScopeSearchResult.NotApplicable
+
+
 
 type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     let _parsedAsts = parsedAsts
     let mutable _mainTheory = ""
-    let mutable _currentContext = EvalContext.ContextNone
     let _evalPath = Stack<string>()
     let _evalLog = List<string>()
     let _root = FplValue.CreateRoot()
     let _debug = debug
-
-    /// Returns the current evaluation context.
-    member this.CurrentContext = _currentContext
 
     /// Returns the current main theory.
     member this.MainTheory  
@@ -1023,22 +1009,8 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     /// Logs the current state transformation of the SymbolTable for debugging purposes.
     member this.Log(message) = 
         if _debug then 
-            let depth = this.CurrentContext.Depth
-            let enrichedMsg = sprintf "%s%s at %s: %s" (String(' ',depth)) message (this.CurrentContext.Name) (this.EvalPath()) 
+            let enrichedMsg = sprintf "%s at %s" message (this.EvalPath()) 
             _evalLog.Add(enrichedMsg)
-
-    member this.SetContext (context:EvalContext) (logContext:LogContext) = 
-        match logContext with
-        | LogContext.Start ->
-            _currentContext <- context
-            this.Log("Begin")
-        | LogContext.Replace ->
-            this.Log("End")
-            _currentContext <- context
-            this.Log("Start")
-        | LogContext.End -> 
-            this.Log("End")
-            _currentContext <- context 
 
     /// Returns the logged state transformation of the SymbolTable (only non-empty of debug = true).
     member this.LoggedState = 
@@ -1073,7 +1045,11 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         let rec createJson (root:FplValue) (sb:StringBuilder) level isLast =
             let indent = String(' ', level)
             sb.AppendLine(String(' ', level - 1) + "{") |> ignore
-            sb.AppendLine($"{indent}\"Name\": \"{root.Name}\",") |> ignore
+            if root.Name = this.MainTheory then
+                sb.AppendLine($"{indent}\"Name\": \"Main> {root.Name}\",") |> ignore
+            else
+                sb.AppendLine($"{indent}\"Name\": \"{root.Name}\",") |> ignore
+            sb.AppendLine($"{indent}\"Type\": \"{root.BlockType.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"Scope\": [") |> ignore
             let mutable counterScope = 0
             root.Scope
@@ -1175,9 +1151,9 @@ let rec checkCandidates (toBeMatchedTypeSignature: string list) (candidates: Fpl
         match findFirstMismatchPosition toBeMatchedTypeSignature x.TypeSignature with
         | ("", "", None) -> (accResult, Some x) // there is a candidate that matches toBeMatchedTypeSignature
         | ("", elem2, Some index) -> 
-            checkCandidates toBeMatchedTypeSignature xs $"missing {elem2} at position {index}" // first reason for mismatch
+            checkCandidates toBeMatchedTypeSignature xs $"missing token `{elem2}` after matching {index}" // first reason for mismatch
         | (elem1, "", Some index) -> 
-            checkCandidates toBeMatchedTypeSignature xs $"superfluous {elem1} at position {index}" // second reason for mismatch
+            checkCandidates toBeMatchedTypeSignature xs $"superfluous token `{elem1}` after matching {index}" // second reason for mismatch
         | (elem1, elem2, Some index) -> 
             checkCandidates toBeMatchedTypeSignature xs $"`{elem1}` with `{elem2}` at position {index}" // third reason for mismatch
         | _ -> checkCandidates toBeMatchedTypeSignature xs accResult // accumulate reasons

@@ -447,7 +447,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestAll5 () =
-        let result = run (all .>> eof) """all x in Range(a,b), y in c, z {and (a,b,c)}"""
+        let result = run (all .>> eof) """all x is Range(a:B), y is C, z {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -489,7 +489,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestEx5 () =
-        let result = run (exists .>> eof) """ex x in Range(a,b), y in c, z {and (a,b,c)}"""
+        let result = run (exists .>> eof) """ex x is Range(a:B), y is C, z {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

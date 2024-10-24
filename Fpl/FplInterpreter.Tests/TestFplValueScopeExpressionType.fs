@@ -33,11 +33,13 @@ type TestFplValueScopeExpressionType() =
     [<DataRow("fun2")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
+    [<DataRow("loc1")>]
+    [<DataRow("loc2")>]
     [<TestMethod>]
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("ExpressionType") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FixType>(FixType.NoFix, r.ExpressionType)
             | "theory" -> Assert.AreEqual<FixType>(FixType.NoFix, theory.ExpressionType)
@@ -65,6 +67,8 @@ type TestFplValueScopeExpressionType() =
             | "fun2" -> Assert.AreEqual<FixType>(FixType.NoFix, fun2.ExpressionType)
             | "prf1" -> Assert.AreEqual<FixType>(FixType.NoFix, prf1.ExpressionType)
             | "prf2" -> Assert.AreEqual<FixType>(FixType.NoFix, prf2.ExpressionType)
+            | "loc1" -> Assert.AreEqual<FixType>(FixType.NoFix, loc1.ExpressionType)
+            | "loc2" -> Assert.AreEqual<FixType>(FixType.NoFix, loc2.ExpressionType)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -512,7 +516,7 @@ type TestFplValueScopeExpressionType() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
+    [<DataRow("base18", "ex x is Range(a:T), y is C, z {and (a,b,c)}")>]
     [<DataRow("base19", "exn$1 x {all y {true}}")>]
     [<DataRow("base20", "all x {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]

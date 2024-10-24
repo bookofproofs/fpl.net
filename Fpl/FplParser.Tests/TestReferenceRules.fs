@@ -91,8 +91,8 @@ type TestReferenceRules() =
     member this.TestReferenceRule05a () =
         let result = run (ruleOfInference .>> eof) """inference ProceedingResults(p:+ pred)
         {
-            dec ~a:obj ~  proceedingResult: pred;
-            premise: all proceedingResult in p { proceedingResult }
+            dec ~a:obj ~res,proceedingResult: pred res:=true for proceedingResult in p { res:=and(res, proceedingResult) } ;
+            premise: res
             conclusion: and (p)
         }"""
         let actual = sprintf "%O" result

@@ -33,11 +33,13 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("fun2")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
+    [<DataRow("loc1")>]
+    [<DataRow("loc2")>]
     [<TestMethod>]
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("QualifiedStartPos") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | "theory" -> Assert.IsTrue(theory.QualifiedStartPos.Contains("Ln: 1, Col: 1)"))
@@ -65,6 +67,8 @@ type TestFplValueScopeQualifiedStartPos() =
             | "fun2" -> Assert.IsTrue(fun2.QualifiedStartPos.Contains("Ln: 23, Col: 17)"))
             | "prf1" -> Assert.IsTrue(prf1.QualifiedStartPos.Contains("Ln: 24, Col: 13)"))
             | "prf2" -> Assert.IsTrue(prf2.QualifiedStartPos.Contains("Ln: 25, Col: 13)"))
+            | "loc1" -> Assert.IsTrue(loc1.QualifiedStartPos.Contains("Ln: 26, Col: 13)"))
+            | "loc2" -> Assert.IsTrue(loc2.QualifiedStartPos.Contains("Ln: 27, Col: 13)"))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -508,7 +512,7 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
+    [<DataRow("base18", "ex x is Range(a:T), y is C, z {and (a,b,c)}")>]
     [<DataRow("base19", "exn$1 x {all y {true}}")>]
     [<DataRow("base20", "all x {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]

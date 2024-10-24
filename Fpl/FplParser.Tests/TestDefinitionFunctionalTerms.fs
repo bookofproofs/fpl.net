@@ -128,7 +128,7 @@ type TestDefinitionFunctionalTerms01 () =
                 addend, result: Nat
             
                 result:=Zero()
-                for addend is Nat
+                for addend in Nat
                 {
                     result:=Add(result,addend)
                 }
@@ -166,7 +166,7 @@ type TestDefinitionFunctionalTerms01 () =
                 addend, result: Nat
             
                 result:=Zero()
-                for addend is Nat()
+                for addend in Nat()
                 {
                     result:=Add(result,addend)
                 }

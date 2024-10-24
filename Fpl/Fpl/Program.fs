@@ -7,6 +7,7 @@ open System.IO
 open FParsec
 open System.Text.RegularExpressions
 open System.Collections.Generic
+open System.Runtime.CompilerServices
 
 let deleteFilesWithExtension dir extension =
     if Directory.Exists(dir) then
@@ -59,3 +60,13 @@ loadFplFile(@"C:\Users\Peaq\source\repos\bookofproofs\fpl.net\theories\Foundatio
 printf "\n--------------------------------\n"
 ad.PrintDiagnostics
 
+let createFormattableString name age =
+    FormattableStringFactory.Create(sprintf "Hello, my name is %s and I am %d years old." name age)
+
+// Initial parameters
+let name = "John"
+let age = 30
+
+// Create and print the FormattableString
+let formattableString = createFormattableString name age
+printfn "%s" (formattableString.ToString())

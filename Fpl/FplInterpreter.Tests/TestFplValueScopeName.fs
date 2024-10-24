@@ -34,11 +34,13 @@ type TestFplValueScopeName() =
     [<DataRow("fun2")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
+    [<DataRow("loc1")>]
+    [<DataRow("loc2")>]
     [<TestMethod>]
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("Name") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Name)
             | "theory" -> Assert.AreEqual<string>("TestScopeBlocksName", theory.Name)
@@ -66,6 +68,8 @@ type TestFplValueScopeName() =
             | "fun2" -> Assert.AreEqual<string>("SomeFunctionalTerm2() -> obj", fun2.Name)
             | "prf1" -> Assert.AreEqual<string>("SomeTheorem1$1", prf1.Name)
             | "prf2" -> Assert.AreEqual<string>("SomeTheorem2$1", prf2.Name)
+            | "loc1" -> Assert.AreEqual<string>("not(x)", loc1.Name)
+            | "loc2" -> Assert.AreEqual<string>("Equal(x, y)", loc2.Name)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -513,7 +517,7 @@ type TestFplValueScopeName() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x in Range(a, b), y in c, z {and (a, b, c)}")>]
+    [<DataRow("base18", "ex x is Range(a:T), y is C, z {and (a,b,c)}")>]
     [<DataRow("base19", "exn$1 x {all y {true}}")>]
     [<DataRow("base20", "all x {not x}")>]
     [<DataRow("base21", "and(x, y, z)")>]
@@ -606,7 +610,7 @@ type TestFplValueScopeName() =
             | "base30" -> Assert.AreEqual<string>(varVal, base1.Name)
             | "base31" -> Assert.AreEqual<string>(varVal, base1.Name)
             | "base32" -> Assert.AreEqual<string>(varVal, base1.Name)
-            | "base33" -> Assert.AreEqual<string>("p", base1.Name)
+            | "base33" -> Assert.AreEqual<string>("p(c)", base1.Name)
             | "base34" -> Assert.AreEqual<string>(varVal, base1.Name)
             | _ -> Assert.IsTrue(false)
         | None -> 
@@ -655,6 +659,97 @@ type TestFplValueScopeName() =
             | "base4" -> Assert.AreEqual<string>("bas.B(In(x))", base1.Name)
             | "base5" -> Assert.AreEqual<string>("bas.C(Test1(a), Test2(b, c, d))", base1.Name)
             | "base6" -> Assert.AreEqual<string>("bas.E(true, undef, false)", base1.Name)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<TestMethod>]
+    member this.TestLocalization(var, predName, trslCode) =
+        ad.Clear()
+        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let filename = "TestCallConstructorParentClassName"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope[predName]
+
+            match var with
+            | "base1" -> Assert.AreEqual<string>(predName, pred.Name)
+            | "base2" -> Assert.AreEqual<string>(predName, pred.Name)
+            | "base3" -> Assert.AreEqual<string>(predName, pred.Name)
+            | "base4" -> Assert.AreEqual<string>(predName, pred.Name)
+            | "base5" -> Assert.AreEqual<string>(predName, pred.Name)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<TestMethod>]
+    member this.TestTranslation(var, predName, trslCode) =
+        ad.Clear()
+        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let filename = "TestCallConstructorParentClassName"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope[predName]
+            let trsl = pred.Scope["tex"]
+
+            match var with
+            | "base1" -> Assert.AreEqual<string>("tex", trsl.Name)
+            | "base2" -> Assert.AreEqual<string>("tex", trsl.Name)
+            | "base3" -> Assert.AreEqual<string>("tex", trsl.Name)
+            | "base4" -> Assert.AreEqual<string>("tex", trsl.Name)
+            | "base5" -> Assert.AreEqual<string>("tex", trsl.Name)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", """100. |- trivial""", 0)>]
+    [<DataRow("base2", """100. ExistsByExample(c), 1. |- false""", 2)>]
+    [<DataRow("base3", """100. T1() |- assume not somePremise """, 1)>]
+    [<DataRow("base4", """100. 2., 3., 5. |- iif (a,b)""", 3)>]
+    [<DataRow("base5", """100. |- revoke 3.""", 0)>]
+    [<TestMethod>]
+    member this.TestArgument(var, argExpression, expNumber:int) =
+        ad.Clear()
+        let fplCode = sprintf """proof T$1 { %s };""" argExpression
+        let filename = "TestCallConstructorParentClassName"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let proof = theory.Scope["T$1"]
+            let arg = proof.Scope["100."]
+            let just = arg.ValueList[0]
+            let ainf = arg.ValueList[1]
+            let numbOfJustifications = just.Scope.Count
+ 
+            Assert.AreEqual<int>(expNumber, numbOfJustifications)
+
+            match var with
+            | "base1" -> Assert.AreEqual<string>("100.", arg.Name)
+            | "base2" -> Assert.AreEqual<string>("100.", arg.Name)
+            | "base3" -> Assert.AreEqual<string>("100.", arg.Name)
+            | "base4" -> Assert.AreEqual<string>("100.", arg.Name)
+            | "base5" -> Assert.AreEqual<string>("100.", arg.Name)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

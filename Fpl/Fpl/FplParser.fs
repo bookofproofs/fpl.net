@@ -300,12 +300,11 @@ let casesStatement = positions "Cases" (((keywordCases >>. leftParen >>. IW >>. 
 
 let ofType = keywordIs >>. positions "IsType" (variableType) .>> IW |>> Ast.IsType
 let inEntity = keywordIn >>. positions "InEntity" (predicateWithQualification) .>> IW |>> Ast.InEntity
-let inDomain = choice [ofType; inEntity]
-let variableInOptDomain = ( (variable .>> IW) .>>. opt inDomain) .>> IW
-let variableListInOptDomain = ( variableList .>>. opt inDomain) .>> IW
+let variableInOptDomain = ( (variable .>> IW) .>>. opt ofType) .>> IW
+let variableListInOptDomain = ( variableList .>>. opt ofType) .>> IW
 let variableListInOptDomainList = (sepBy1 variableListInOptDomain comma) .>> IW
-
-let entityInDomain = ( entity .>> IW .>>. inDomain ) .>> IW
+0
+let entityInDomain = ( entity .>> IW .>>. inEntity ) .>> IW
 let forInBody = (entityInDomain .>> IW) .>>. (leftBrace >>. IW >>. statementList) .>> (IW >>. rightBrace)
 let forStatement = positions "ForIn" (keywordFor >>. forInBody) |>> Ast.ForIn
 
@@ -499,7 +498,7 @@ let keywordAssume = skipString "assume" <|> skipString "ass" .>> SW
 let assumeArgument = positions "AssumeArgument" (keywordAssume >>. predicate) |>> Ast.AssumeArgument
 let keywordTrivial  = positions "Trivial" (skipString "trivial") .>> IW |>> Ast.Trivial
 let keywordQed  = positions "Qed" (skipString "qed") .>> IW |>> Ast.Qed
-let derivedPredicate = predicate |>> Ast.DerivedPredicate
+let derivedPredicate = positions "DerivedPredicate" predicate |>> Ast.DerivedPredicate
 let derivedArgument = choice [
     keywordTrivial 
     derivedPredicate
@@ -507,8 +506,8 @@ let derivedArgument = choice [
 
 let argumentInference = vDash >>. IW >>. (assumeArgument <|> revokeArgument <|> derivedArgument)
 let justification = positions "Justification" (predicateList .>> IW) |>> Ast.Justification
-let argument = positions "JustifiedArgument" (justification .>>. argumentInference) |>> Ast.JustifiedArgument
-let proofArgument = positions "Argument" ((argumentIdentifier .>> IW) .>>. argument) .>> IW |>> Ast.Argument
+let justifiedArgument = positions "JustArgInf" (justification .>>. argumentInference) |>> Ast.JustArgInf
+let proofArgument = positions "Argument" ((argumentIdentifier .>> IW) .>>. justifiedArgument) .>> IW |>> Ast.Argument
 let proofArgumentList = many1 (IW >>. (proofArgument <|> varDeclBlock))
 let keywordProof = (skipString "proof" <|> skipString "prf") .>> SW 
 let proofBlock = leftBrace >>. proofArgumentList .>>. opt keywordQed .>> spacesRightBrace
@@ -547,7 +546,7 @@ let definition = keywordDefinition >>. choice [
 (* Localizations *)
 // Localizations provide a possibility to automatically translate FPL expressions into natural languages
 let keywordLocalization = (skipString "localization" <|> skipString "loc") >>. SW
-let localizationLanguageCode: Parser<string,unit> = regex @"[a-z]{3}" <?> "<ISO 639 language code>"
+let localizationLanguageCode = positions "LanguageCode" (regex @"[a-z]{3}" <?> "<ISO 639 language code>") |>> Ast.LanguageCode
 
 let ebnfTransl, ebnfTranslRef = createParserForwardedToRef()
 let ebnfTranslTuple = (leftParen >>. IW >>. ebnfTransl) .>> (IW .>> rightParen) 
@@ -558,7 +557,7 @@ let ebnfFactor = choice [
 ] 
 let ebnfTerm = positions "LocalizationTerm" (sepEndBy1 ebnfFactor SW) |>> Ast.LocalizationTerm
 ebnfTranslRef.Value <-  positions "LocalizationTermList" (sepBy1 ebnfTerm (IW >>. case >>. IW)) |>> Ast.LocalizationTermList
-let translation = (exclamationMark >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl |>> Ast.Translation
+let translation = positions "Translation" ((exclamationMark >>. localizationLanguageCode .>> IW .>> colon) .>>. ebnfTransl) |>> Ast.Translation
 let translationList = many1 (IW >>. translation .>> IW)
 let localization = positions "Localization" (keywordLocalization >>. (predicate .>> IW .>> colonEqual) .>>. (translationList .>> IW .>> semiColon)) .>> IW |>> Ast.Localization
 

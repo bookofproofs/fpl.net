@@ -38,13 +38,14 @@ type Ast =
     | AliasedNamespaceIdentifier of Positions * (Ast * Ast option)
     | PredicateIdentifier of Positions * Ast list 
     | DelegateId of Positions * string 
+    | LanguageCode of Positions * string
     | Alias of Positions * string
     | SelfAts of Positions * char list 
     | Self of Positions * unit
     | LocalizationString of Positions * string
     | LocalizationTerm of Positions * Ast list
     | LocalizationTermList of Positions * Ast list
-    | Translation of string * Ast
+    | Translation of Positions * (Ast * Ast)
     | Extensionname of Positions * string
     | ExtensionRegex of string
     | ExtensionType of Positions * Ast 
@@ -152,10 +153,10 @@ type Ast =
     // Proofs
     | Trivial of Positions * unit
     | Qed of Positions * unit
-    | DerivedPredicate of Ast
+    | DerivedPredicate of Positions * Ast
     | AssumeArgument of Positions * Ast
     | RevokeArgument of Positions * Ast
-    | JustifiedArgument of Positions * (Ast * Ast)
+    | JustArgInf of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
     | Proof of Positions * (Ast * (Ast list * Ast option))
     | Namespace of Ast option * Ast list
