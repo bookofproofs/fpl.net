@@ -166,9 +166,11 @@ type EvalStack() =
                     EvalStack.tryAddToScope fv
                     if not next.BlockEvaluationStarted then
                         this.AdjustNameAndSignature next fv.TypeSignatureName fv.TypeSignature fv.TypeSignatureName
-                | FplValueType.Reference -> 
+                | FplValueType.Reference  
+                | FplValueType.Localization -> 
                     EvalStack.tryAddToScope fv
                     this.AdjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
+                    next.FplRepresentation <- fv.FplRepresentation
                 | FplValueType.Variable 
                 | FplValueType.VariadicVariableMany
                 | FplValueType.VariadicVariableMany1 -> 
@@ -359,7 +361,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Var")
         let evalPath = st.EvalPath()
         let isDeclaration = evalPath.Contains("NamedVarDecl.") 
-        let isLocationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
+        let isLocalizationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
         let diagnosticsStopFlag = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false // enable var-related diagnostics in AST.Var, even if it was stopped (e.g. in Ast.Localization)
         let fv = es.PeekEvalStack()
@@ -371,27 +373,21 @@ let rec eval (st: SymbolTable) ast =
             varValue.FplRepresentation <- FplRepresentation.Pointer other
             varValue.TypeSignature <- other.TypeSignature
             varValue.TypeSignatureName <- other.TypeSignatureName
-            match fv.BlockType with 
-            | FplValueType.Translation 
-            | FplValueType.Reference -> 
-                // replace the reference by a pointer to an existing declared variable
-                fv.FplRepresentation <- FplRepresentation.Pointer other
-            |_ -> 
-                if (isDeclaration || isLocationDeclaration) then
-                    // if var not found in scope, the emit error that the variable was already declared
-                    emitVAR03diagnostics varValue other 
+            if (isDeclaration || isLocalizationDeclaration) then
+                // if var not found in scope, the emit error that the variable was already declared
+                emitVAR03diagnostics varValue other 
         | _ -> 
-            if isLocationDeclaration then
-                let rec getLocation (fValue:FplValue) = 
+            if isLocalizationDeclaration then
+                let rec getLocalization (fValue:FplValue) = 
                     if fValue.BlockType = FplValueType.Localization then
                         fValue
                     else
                         match fValue.Parent with
-                        | Some parent -> getLocation parent
+                        | Some parent -> getLocalization parent
                         | None -> fValue
-                let loc = getLocation fv
+                let loc = getLocalization fv
                 loc.Scope.Add(varValue.Name, varValue)
-            elif not (isDeclaration || isLocationDeclaration) then 
+            elif not (isDeclaration || isLocalizationDeclaration) then 
                 // otherwise emit variable not declared if this is not a declaration or
                 // we are in a localization declaration
                 emitVAR01diagnostics name pos1 pos2
