@@ -242,9 +242,12 @@ let rec eval (st: SymbolTable) ast =
         | None -> ()
         eval st predicateAst
 
-    let evalMany (st:SymbolTable) blockType pos1 pos2 = 
+    let evalMany blockType pos1 pos2 = 
         let fv = es.PeekEvalStack()
-        checkVAR00Diagnostics fv.AuxiliaryInfo pos1 pos2
+        match fv.Parent with 
+        | Some parent -> 
+            checkVAR00Diagnostics parent.AuxiliaryInfo pos1 pos2
+        | _ -> ()
         fv.BlockType <- blockType
 
     match ast with
@@ -273,11 +276,11 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
-        evalMany st FplValueType.VariadicVariableMany pos1 pos2
+        evalMany FplValueType.VariadicVariableMany pos1 pos2
         st.EvalPop()
     | Ast.Many1((pos1, pos2),()) ->
         st.EvalPush("Many1")
-        evalMany st FplValueType.VariadicVariableMany1 pos1 pos2
+        evalMany FplValueType.VariadicVariableMany1 pos1 pos2
         st.EvalPop()
     | Ast.One((pos1, pos2),()) ->
         st.EvalPush("One")
