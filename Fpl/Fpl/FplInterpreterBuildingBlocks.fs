@@ -368,6 +368,9 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(varValue)
         match FplValue.VariableInBlockScopeByName fv name with 
         | ScopeSearchResult.Found other ->
+            varValue.FplRepresentation <- FplRepresentation.Pointer other
+            varValue.TypeSignature <- other.TypeSignature
+            varValue.TypeSignatureName <- other.TypeSignatureName
             match fv.BlockType with 
             | FplValueType.Translation 
             | FplValueType.Reference -> 
