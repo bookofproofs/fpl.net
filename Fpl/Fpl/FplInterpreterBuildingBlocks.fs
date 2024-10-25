@@ -178,7 +178,7 @@ type EvalStack() =
                     this.AdjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
                 | _ -> ()
             | FplValueType.Object
-            | FplValueType.Premise
+            | FplValueType.Quantor
             | FplValueType.Conclusion
             | FplValueType.Theory
             | FplValueType.Justification 

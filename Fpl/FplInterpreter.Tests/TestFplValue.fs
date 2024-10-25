@@ -34,7 +34,7 @@ type TestFplValue() =
         testFactory FplValueType.Proposition (FplRepresentation.PredRepr FplPredicate.Undetermined)
         testFactory FplValueType.Corollary (FplRepresentation.PredRepr FplPredicate.Undetermined)
         testFactory FplValueType.Conjecture (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        testFactory FplValueType.Premise (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        testFactory FplValueType.Quantor (FplRepresentation.PredRepr FplPredicate.Undetermined)
         testFactory FplValueType.Conclusion (FplRepresentation.PredRepr FplPredicate.Undetermined)
         testFactory FplValueType.Proof (FplRepresentation.PredRepr FplPredicate.Undetermined)
         testFactory FplValueType.RuleOfInference (FplRepresentation.PredRepr FplPredicate.Undetermined)

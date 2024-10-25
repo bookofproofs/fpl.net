@@ -303,7 +303,7 @@ type FplValueType =
     | Conjecture
     | Axiom
     | RuleOfInference
-    | Premise
+    | Quantor
     | Conclusion
     | Predicate
     | FunctionalTerm
@@ -336,7 +336,7 @@ type FplValueType =
             | Conjecture -> "conjecture"
             | Axiom -> "axiom"
             | RuleOfInference -> "rule of inference"
-            | Premise -> "premise"
+            | Quantor -> "quantor"
             | Conclusion -> "conclusion"
             | Predicate -> "predicate definition"
             | FunctionalTerm -> "functional term definition"
@@ -381,7 +381,7 @@ type FplValueType =
             | Conjecture -> "conj"
             | Axiom -> "ax"
             | RuleOfInference -> "inf"
-            | Premise -> "pre"
+            | Quantor -> "qtr"
             | Conclusion -> "con"
             | Predicate -> "pred"
             | FunctionalTerm -> "func"
@@ -813,7 +813,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.Proof
         | FplValueType.Predicate 
         | FplValueType.RuleOfInference
-        | FplValueType.Premise
+        | FplValueType.Quantor
         | FplValueType.Conclusion
         | FplValueType.Conjecture -> 
             let ret = new FplValue("", fplBlockType, positions, Some parent)

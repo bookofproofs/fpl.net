@@ -333,7 +333,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("def pred Test() {x};", 1)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x {p(x)}};", 0)>]
-    [<DataRow("axiom A() { all x in Nat {true} };", 0)>]
+    [<DataRow("axiom A() { all x is Nat {true} };", 0)>]
     [<DataRow("axiom A() { all x {true} };", 1)>]
     [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
     [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
@@ -627,7 +627,6 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Set:obj {intr} axiom Test() {dec ~x:Set; true};", 0)>]
     [<DataRow("def cl Set:obj {intr} axiom Test() {dec ~x:SetTypo; true};", 1)>]
     [<DataRow("def pred Test() {dec ~x:Set; true};", 1)>]
-    [<DataRow("axiom A() { all x in Nat {true} };", 1)>]
     [<DataRow("axiom A() { all x is Nat {true} };", 1)>]
     [<DataRow("def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
