@@ -978,51 +978,57 @@ let rec eval (st: SymbolTable) ast =
         eval st functionalTermInstanceBlockAst
         st.EvalPop()
     // | All of Positions * ((Ast list * Ast option) list * Ast)
-    | Ast.All((pos1, pos2), (variableListInOptDomainListAst, predicateAst)) ->
+    | Ast.All((pos1, pos2), (variableListIsOfTypeListAst, predicateAst)) ->
         st.EvalPush("All")
         let fv = es.PeekEvalStack()
-        fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
-        es.AdjustNameAndSignature fv "all" ["all"] "all"
-        variableListInOptDomainListAst
+        let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
+        es.AdjustNameAndSignature qtr "all" ["all"] "all"
+        es.PushEvalStack(qtr)
+        variableListIsOfTypeListAst
         |> List.map (fun (asts, optAst) ->
             asts |> List.map (eval st) |> ignore
             optAst |> Option.map (eval st) |> Option.defaultValue ()
             ())
         |> ignore
-        es.AdjustNameAndSignature fv "(" ["("] "("
+        es.AdjustNameAndSignature qtr "(" ["("] "("
         eval st predicateAst
-        es.AdjustNameAndSignature fv ")" [")"] ")"
-        emitLG000orLG001Diagnostics fv "all quantor"
+        es.AdjustNameAndSignature qtr ")" [")"] ")"
+        emitLG000orLG001Diagnostics qtr "all quantor"
+        es.PopEvalStack()
         st.EvalPop()
-    | Ast.Exists((pos1, pos2), (variableListInOptDomainListAst, predicateAst)) ->
+    | Ast.Exists((pos1, pos2), (variableListIsOfTypeListAst, predicateAst)) ->
         st.EvalPush("Exists")
         let fv = es.PeekEvalStack()
-        fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
-        es.AdjustNameAndSignature fv "ex" ["ex"] "ex"
-        variableListInOptDomainListAst
+        let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
+        es.AdjustNameAndSignature qtr "ex" ["ex"] "ex"
+        es.PushEvalStack(qtr)
+        variableListIsOfTypeListAst
         |> List.map (fun (asts, optAst) ->
             asts |> List.map (eval st) |> ignore
             optAst |> Option.map (eval st) |> Option.defaultValue ()
             ())
         |> ignore
-        es.AdjustNameAndSignature fv "(" ["("] "("
+        es.AdjustNameAndSignature qtr "(" ["("] "("
         eval st predicateAst
-        es.AdjustNameAndSignature fv ")" [")"] ")"
-        emitLG000orLG001Diagnostics fv "exists quantor"
+        es.AdjustNameAndSignature qtr ")" [")"] ")"
+        emitLG000orLG001Diagnostics qtr "exists quantor"
+        es.PopEvalStack()
         st.EvalPop()
     // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
-    | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, (variableAst, inOptDomainAst)), predicateAst)) ->
+    | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, (variableAst, variableIsOfTypeAst)), predicateAst)) ->
         st.EvalPush("ExistsN")
         let fv = es.PeekEvalStack()
-        fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
-        es.AdjustNameAndSignature fv "exn" ["exn"] "exn"
+        let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
+        es.AdjustNameAndSignature qtr "exn" ["exn"] "exn"
+        es.PushEvalStack(qtr)
         eval st dollarDigitsAst
         eval st variableAst
-        inOptDomainAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
-        es.AdjustNameAndSignature fv "(" ["("] "("
+        variableIsOfTypeAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
+        es.AdjustNameAndSignature qtr "(" ["("] "("
         eval st predicateAst
-        es.AdjustNameAndSignature fv ")" [")"] ")"
-        emitLG000orLG001Diagnostics fv "exists n times quantor"
+        es.AdjustNameAndSignature qtr ")" [")"] ")"
+        emitLG000orLG001Diagnostics qtr "exists n times quantor"
+        es.PopEvalStack()
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature((pos1, pos2), ((optAst, signatureWithUserDefinedStringAst), mappingAst)) -> 
