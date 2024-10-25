@@ -139,6 +139,9 @@ type EvalStack() =
                 | FplValueType.MandatoryPredicate
                 | FplValueType.OptionalPredicate ->
                     EvalStack.tryAddToValueList fv 
+                | FplValueType.Quantor ->
+                    EvalStack.tryAddToValueList fv 
+                    next.NameEndPos <- fv.NameEndPos
                 | _ -> 
                     EvalStack.tryAddToValueList fv
                     this.AdjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
@@ -167,6 +170,7 @@ type EvalStack() =
                     if not next.BlockEvaluationStarted then
                         this.AdjustNameAndSignature next fv.TypeSignatureName fv.TypeSignature fv.TypeSignatureName
                 | FplValueType.Reference  
+                | FplValueType.Quantor  
                 | FplValueType.Localization -> 
                     EvalStack.tryAddToScope fv
                     this.AdjustNameAndSignature next fv.Name fv.TypeSignature fv.TypeSignatureName
@@ -331,8 +335,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let evalPath = st.EvalPath()
         let sid = $"${s.ToString()}"
-        if evalPath.Contains(".ReferencingIdentifier.") then 
-            // In ReferencingIdentifier context, treat DollarDigits like names, not like types.
+        if evalPath.Contains(".ReferencingIdentifier.") || evalPath.EndsWith("ExistsN.DollarDigits") then 
+            // In ReferencingIdentifier or exists$n context, treat DollarDigits like names, not like types.
             fv.Name <- fv.Name + sid
             fv.TypeSignatureName <- fv.Name + sid
             fv.TypeSignature <- [fv.TypeSignature.Head + sid]
@@ -365,6 +369,7 @@ let rec eval (st: SymbolTable) ast =
         let evalPath = st.EvalPath()
         let isDeclaration = evalPath.Contains("NamedVarDecl.") 
         let isLocalizationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
+        let isQuantorVariableDeclaration = evalPath.EndsWith("ExistsN.Var") || evalPath.EndsWith("Exists.Var") || evalPath.EndsWith("All.Var") 
         let diagnosticsStopFlag = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false // enable var-related diagnostics in AST.Var, even if it was stopped (e.g. in Ast.Localization)
         let fv = es.PeekEvalStack()
@@ -390,9 +395,8 @@ let rec eval (st: SymbolTable) ast =
                         | None -> fValue
                 let loc = getLocalization fv
                 loc.Scope.Add(varValue.Name, varValue)
-            elif not (isDeclaration || isLocalizationDeclaration) then 
-                // otherwise emit variable not declared if this is not a declaration or
-                // we are in a localization declaration
+            elif not (isDeclaration || isLocalizationDeclaration || isQuantorVariableDeclaration) then 
+                // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
         if not isDeclaration then 
             es.PopEvalStack() // postpone popping all variables from stack that are being declared (they will be popped in Ast.NamedVarDecl(..))
@@ -984,15 +988,19 @@ let rec eval (st: SymbolTable) ast =
         let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
         es.AdjustNameAndSignature qtr "all" ["all"] "all"
         es.PushEvalStack(qtr)
+        es.AdjustNameAndSignature qtr "(" ["("] "("
         variableListIsOfTypeListAst
-        |> List.map (fun (asts, optAst) ->
-            asts |> List.map (eval st) |> ignore
-            optAst |> Option.map (eval st) |> Option.defaultValue ()
+        |> List.map (fun (varListAst, optOfTypeAst) ->
+            qtr.Arity <- qtr.Arity + (varListAst |> List.length)
+            varListAst |> List.map (eval st) |> ignore
+            optOfTypeAst |> Option.map (eval st) |> Option.defaultValue ()
             ())
         |> ignore
-        es.AdjustNameAndSignature qtr "(" ["("] "("
-        eval st predicateAst
         es.AdjustNameAndSignature qtr ")" [")"] ")"
+        let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
+        es.PushEvalStack(pred)
+        eval st predicateAst
+        es.PopEvalStack()
         emitLG000orLG001Diagnostics qtr "all quantor"
         es.PopEvalStack()
         st.EvalPop()
@@ -1002,15 +1010,19 @@ let rec eval (st: SymbolTable) ast =
         let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
         es.AdjustNameAndSignature qtr "ex" ["ex"] "ex"
         es.PushEvalStack(qtr)
+        es.AdjustNameAndSignature qtr "(" ["("] "("
         variableListIsOfTypeListAst
-        |> List.map (fun (asts, optAst) ->
-            asts |> List.map (eval st) |> ignore
-            optAst |> Option.map (eval st) |> Option.defaultValue ()
+        |> List.map (fun (varListAst, optOfTypeAst) ->
+            qtr.Arity <- qtr.Arity + (varListAst |> List.length)
+            varListAst |> List.map (eval st) |> ignore
+            optOfTypeAst |> Option.map (eval st) |> Option.defaultValue ()
             ())
         |> ignore
-        es.AdjustNameAndSignature qtr "(" ["("] "("
-        eval st predicateAst
         es.AdjustNameAndSignature qtr ")" [")"] ")"
+        let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
+        es.PushEvalStack(pred)
+        eval st predicateAst
+        es.PopEvalStack()
         emitLG000orLG001Diagnostics qtr "exists quantor"
         es.PopEvalStack()
         st.EvalPop()
@@ -1020,13 +1032,17 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
         es.AdjustNameAndSignature qtr "exn" ["exn"] "exn"
+        qtr.Arity <- 1
         es.PushEvalStack(qtr)
         eval st dollarDigitsAst
+        es.AdjustNameAndSignature qtr "(" ["("] "("
         eval st variableAst
         variableIsOfTypeAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
-        es.AdjustNameAndSignature qtr "(" ["("] "("
-        eval st predicateAst
         es.AdjustNameAndSignature qtr ")" [")"] ")"
+        let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
+        es.PushEvalStack(pred)
+        eval st predicateAst
+        es.PopEvalStack()
         emitLG000orLG001Diagnostics qtr "exists n times quantor"
         es.PopEvalStack()
         st.EvalPop()
@@ -1157,7 +1173,9 @@ let rec eval (st: SymbolTable) ast =
                 let subNode = rb.ValueList[0]
                 if subNode.BlockType = FplValueType.Reference && 
                     subNode.Name = rb.Name && 
-                    subNode.TypeSignatureName = rb.TypeSignatureName then 
+                    subNode.TypeSignatureName = rb.TypeSignatureName 
+                || subNode.BlockType = FplValueType.Quantor
+                then 
                     es.Pop() |> ignore
                     es.PushEvalStack(subNode)
                     subNode.Parent <- rb.Parent

@@ -191,7 +191,7 @@ def class BinaryRelation: Relation
 
     property pred RightUnique()
     {
-        all v,w1,w2 in Set
+        all v,w1,w2 is Set
         {
             impl
             (
@@ -210,7 +210,7 @@ def class BinaryRelation: Relation
 
     property pred LeftUnique()
     {
-        all v1,v2,w in Set
+        all v1,v2,w is Set
         {
             impl
             (
@@ -239,9 +239,9 @@ def class BinaryRelation: Relation
 
     property pred RightTotal()
     {
-        all w in Set
+        all w is Set
         {
-            ex v in Set
+            ex v is Set
             {
                 and
                 (
@@ -260,9 +260,9 @@ def class BinaryRelation: Relation
 
     property pred LeftTotal()
     {
-        all v in Set
+        all v is Set
         {
-            ex w in Set
+            ex w is Set
             {
                 and
                 (
