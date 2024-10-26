@@ -569,7 +569,7 @@ type TestFplValueScopeFplId() =
             | "base11a" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base12a" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base10b" -> Assert.AreEqual<string>("Test", base1.FplId)
-            | "base11b" -> Assert.AreEqual<string>(varVal, base1.FplId)
+            | "base11b" -> Assert.AreEqual<string>("v", base1.FplId)
             | "base12b" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base13b" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10c" -> Assert.AreEqual<string>("Test", base1.FplId)

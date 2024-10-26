@@ -455,7 +455,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _arity = 0
     let mutable _blockEvaluationStarted = false
     let mutable _typeSignatureName = ""
-    
+    let mutable _fplId = ""
 
     let mutable _parent = parent
     let _auxiliaryUniqueChilds = HashSet<string>()
@@ -479,8 +479,12 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         with get () = _blockEvaluationStarted
         and set (value) = _blockEvaluationStarted <- value
 
+
     /// First element of the type signature.
-    member this.FplId = 
+    member this.FplId 
+        with get () = _fplId
+        and set (value) = _fplId <- value
+        (*
         match this.BlockType with 
         | FplValueType.Variable 
         | FplValueType.VariadicVariableMany 
@@ -507,6 +511,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             match this.TypeSignature with
             | x::xs -> x
             | _ -> this.Name
+        *)
 
     /// Type of the Expr
     member this.ExpressionType
@@ -545,6 +550,22 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     member this.TypeSignature
         with get () = _typeSignature
         and set (value:string list) = _typeSignature <- value
+
+    member this.TypeSignatureNew() =
+        let rec typeSignatureNewRec() =
+            match this.BlockType with
+            | FplValueType.Class ->
+                this.FplId
+            | FplValueType.Axiom ->
+                let paramTuple = 
+                    this.Scope
+                    |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
+                        kvp.Value.TypeSignatureNew()) 
+                    |> String.concat ", "
+                sprintf "%s(%s)" this.FplId paramTuple
+            | _ -> ""
+        typeSignatureNewRec()
+
 
     /// A representation of the constructed object (if any)
     member this.FplRepresentation
