@@ -23,7 +23,6 @@ type TestFplBlockType() =
     [<DataRow("Axiom")>]
     [<DataRow("RuleOfInference")>]
     [<DataRow("Quantor")>]
-    [<DataRow("Conclusion")>]
     [<DataRow("Predicate")>]
     [<DataRow("FunctionalTerm")>]
     [<DataRow("Theory")>]
@@ -49,7 +48,6 @@ type TestFplBlockType() =
         | "Axiom" -> Assert.AreEqual<string>("an axiom",FplValueType.Axiom.Name)
         | "RuleOfInference" -> Assert.AreEqual<string>("a rule of inference",FplValueType.RuleOfInference.Name)
         | "Quantor" -> Assert.AreEqual<string>("a quantor",FplValueType.Quantor.Name)
-        | "Conclusion" -> Assert.AreEqual<string>("a conclusion",FplValueType.Conclusion.Name)
         | "Predicate" -> Assert.AreEqual<string>("a predicate definition",FplValueType.Predicate.Name)
         | "FunctionalTerm" -> Assert.AreEqual<string>("a functional term definition",FplValueType.FunctionalTerm.Name)
         | "Theory" -> Assert.AreEqual<string>("a theory",FplValueType.Theory.Name)
@@ -75,7 +73,6 @@ type TestFplBlockType() =
     [<DataRow("Axiom")>]
     [<DataRow("RuleOfInference")>]
     [<DataRow("Quantor")>]
-    [<DataRow("Conclusion")>]
     [<DataRow("Predicate")>]
     [<DataRow("FunctionalTerm")>]
     [<DataRow("Theory")>]
@@ -101,7 +98,6 @@ type TestFplBlockType() =
         | "Axiom" -> Assert.AreEqual<string>("ax",FplValueType.Axiom.ShortName)
         | "RuleOfInference" -> Assert.AreEqual<string>("inf",FplValueType.RuleOfInference.ShortName)
         | "Quantor" -> Assert.AreEqual<string>("qtr",FplValueType.Quantor.ShortName)
-        | "Conclusion" -> Assert.AreEqual<string>("con",FplValueType.Conclusion.ShortName)
         | "Predicate" -> Assert.AreEqual<string>("pred",FplValueType.Predicate.ShortName)
         | "FunctionalTerm" -> Assert.AreEqual<string>("func",FplValueType.FunctionalTerm.ShortName)
         | "Theory" -> Assert.AreEqual<string>("th",FplValueType.Theory.ShortName)

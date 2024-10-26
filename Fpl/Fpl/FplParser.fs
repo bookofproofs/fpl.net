@@ -303,7 +303,7 @@ let inEntity = keywordIn >>. positions "InEntity" (predicateWithQualification) .
 let variableIsOfType = ( (variable .>> IW) .>>. opt ofType) .>> IW
 let variableListIsOfType = ( variableList .>>. opt ofType) .>> IW
 let variableListIsOfTypeList = (sepBy1 variableListIsOfType comma) .>> IW
-0
+
 let entityInDomain = ( entity .>> IW .>>. inEntity ) .>> IW
 let forInBody = (entityInDomain .>> IW) .>>. (leftBrace >>. IW >>. statementList) .>> (IW >>. rightBrace)
 let forStatement = positions "ForIn" (keywordFor >>. forInBody) |>> Ast.ForIn
@@ -466,7 +466,7 @@ let keywordProperty = positions "Property" (skipString "property" <|> skipString
 let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
 let predicateInstance = positions "PredicateInstance" ((keywordPredicate >>. SW >>. opt keywordOptional) .>>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
 
-mappingRef.Value <- toArrow >>. IW >>. variableType
+mappingRef.Value <- toArrow >>. IW >>. positions "Mapping" (variableType) |>> Ast.Mapping
 let functionalTermSignature = positions "FunctionalTermSignature" ((keywordFunction >>. SW >>. opt keywordOptional) .>>. signatureWithUserDefinedString .>>. (IW >>. mapping)) .>> IW |>> Ast.FunctionalTermSignature
 
 let returnStatement = positions "Return" (keywordReturn >>. (fplDelegate <|> predicateWithQualification)) .>> IW |>> Ast.Return

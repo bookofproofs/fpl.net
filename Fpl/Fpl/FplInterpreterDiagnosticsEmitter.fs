@@ -29,7 +29,7 @@ let emitID001diagnostics (fplValue: FplValue) (conflict: FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID001(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Code = ID001(fplValue.Type(true), conflict.QualifiedStartPos)
             Diagnostic.Alternatives = None 
         }
 
@@ -43,7 +43,7 @@ let emitID014diagnostics (fplValue: FplValue) (conflict: FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID014(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Code = ID014(fplValue.Type(false), conflict.QualifiedStartPos)
             Diagnostic.Alternatives = None 
         }
 
@@ -57,7 +57,7 @@ let emitPR003diagnostics (fplValue: FplValue) (conflict: FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = PR003(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Code = PR003(fplValue.Type(false), conflict.QualifiedStartPos)
             Diagnostic.Alternatives = None 
         }
 
@@ -85,7 +85,7 @@ let emitVAR03diagnostics (fplValue: FplValue) (conflict: FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = VAR03(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Code = VAR03(fplValue.Type(false), conflict.QualifiedStartPos)
             Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
         }
 
@@ -98,7 +98,7 @@ let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
         fplValue.Scope
         |> Seq.filter (fun kv -> FplValue.IsVariable(kv.Value))
         |> Seq.iter (fun kv -> 
-            let res = FplValue.VariableInBlockScopeByName (kv.Value) kv.Value.Name
+            let res = FplValue.VariableInBlockScopeByName (kv.Value) (kv.Value.Type(false))
 
             match res with
             | ScopeSearchResult.Found conflict -> emitVAR03diagnostics kv.Value conflict
@@ -128,7 +128,7 @@ let emitID002diagnostics (fplValue: FplValue) incorrectBlockType =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID002(fplValue.Name, incorrectBlockType)
+            Diagnostic.Code = ID002(fplValue.Type(true), incorrectBlockType)
             Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
         }
 
@@ -142,7 +142,7 @@ let emitID005diagnostics (fplValue: FplValue) incorrectBlockType =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID005(fplValue.Name, incorrectBlockType)
+            Diagnostic.Code = ID005(fplValue.Type(true), incorrectBlockType)
             Diagnostic.Alternatives =
                 Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
          }
@@ -157,7 +157,7 @@ let emitID003diagnostics (fplValue: FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID003 fplValue.Name
+            Diagnostic.Code = ID003 (fplValue.Type(true))
             Diagnostic.Alternatives = 
                 Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
         }
@@ -172,7 +172,7 @@ let emitID006diagnostics (fplValue: FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID006 fplValue.Name
+            Diagnostic.Code = ID006 (fplValue.Type(true))
             Diagnostic.Alternatives =
                 Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary), a conjecture, or an axiom." 
         }
@@ -187,7 +187,7 @@ let emitID004diagnostics (fplValue: FplValue) listOfCandidates =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID004(fplValue.Name, listOfCandidates)
+            Diagnostic.Code = ID004(fplValue.Type(true), listOfCandidates)
             Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
         }
     ad.AddDiagnostic diagnostic
@@ -200,7 +200,7 @@ let emitID007diagnostics (fplValue: FplValue) listOfCandidates =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = ID007(fplValue.Name, listOfCandidates)
+            Diagnostic.Code = ID007(fplValue.Type(true), listOfCandidates)
             Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
         }
     ad.AddDiagnostic diagnostic
@@ -222,7 +222,7 @@ let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
 let checkID008Diagnostics (fplValue: FplValue) pos1 pos2 =
     if FplValue.IsConstructor(fplValue) && fplValue.TypeSignature.Length = 1 then
         let nameStart = fplValue.TypeSignature.Head
-        let className = fplValue.Parent.Value.Name
+        let className = fplValue.Parent.Value.Type(true)
 
         if nameStart <> className then
             let diagnostic =
@@ -239,13 +239,13 @@ let checkID008Diagnostics (fplValue: FplValue) pos1 pos2 =
 
 let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) name pos1 pos2 =
     let rec findPath (root: FplValue) (candidateName: string) =
-        if root.Name = candidateName then
-            Some(root.Name)
+        if root.Type(true) = candidateName then
+            Some(root.Type(true))
         else
             root.ValueList
             |> Seq.collect (fun child ->
                 match findPath child candidateName with
-                | Some path -> [ root.Name + ":" + path ]
+                | Some path -> [ root.Type(true) + ":" + path ]
                 | None -> [])
             |> Seq.tryLast
 
@@ -253,7 +253,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
     let classInheritanceChain = findPath fplValue name
 
     if rightContext.EndsWith("InheritedClassType.PredicateIdentifier") then
-        if fplValue.Name = name then
+        if fplValue.Type(true) = name then
             let diagnostic =
                 { 
                     Diagnostic.Uri = ad.CurrentUri
@@ -286,7 +286,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
 
                     fplValue.ValueList
                     |> Seq.iter (fun child ->
-                        let classInheritanceChain = findPath classCandidate child.Name
+                        let classInheritanceChain = findPath classCandidate (child.Type(true))
 
                         match classInheritanceChain with
                         | Some chain ->
@@ -297,7 +297,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                                     Diagnostic.Severity = DiagnosticSeverity.Error
                                     Diagnostic.StartPos = pos1
                                     Diagnostic.EndPos = pos2
-                                    Diagnostic.Code = ID011(child.Name, chain) // inheritance chain duplicate
+                                    Diagnostic.Code = ID011(child.Type(true), chain) // inheritance chain duplicate
                                     Diagnostic.Alternatives = None 
                                 }
                             ad.AddDiagnostic diagnostic
@@ -374,10 +374,10 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
         let candidates =
             classOfConstructor.ValueList
             |> Seq.map (fun inheritanceClass ->
-                if inheritanceClass.Name = identifier then
+                if inheritanceClass.Type(true) = identifier then
                     foundInheritanceClass <- true
 
-                inheritanceClass.Name)
+                inheritanceClass.Type(true))
             |> String.concat ", "
 
         if not foundInheritanceClass then
@@ -424,7 +424,7 @@ let emitPR004Diagnostics (fplValue: FplValue) (conflict: FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.NameStartPos
             Diagnostic.EndPos = fplValue.NameEndPos
-            Diagnostic.Code = PR004(fplValue.Name, conflict.QualifiedStartPos)
+            Diagnostic.Code = PR004(fplValue.Type(true), conflict.QualifiedStartPos)
             Diagnostic.Alternatives = None 
         }
 
@@ -438,7 +438,7 @@ let emitPR005Diagnostics (fv:FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fv.NameStartPos
             Diagnostic.EndPos = fv.NameEndPos
-            Diagnostic.Code = PR005 fv.Name // argument reference not defined
+            Diagnostic.Code = PR005 (fv.Type(false)) // argument reference not defined
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -485,16 +485,16 @@ let emitSIG01Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
             |> Seq.map (fun kv -> kv.Value)
             |> Seq.iter (fun block ->
                 if expressionId = block.FplId then
-                    fplValue.Scope.Add(block.Name, block)
+                    fplValue.Scope.Add(block.Type(true), block)
                 else
                     match block.ExpressionType with
                     | FixType.Prefix symbol
                     | FixType.Postfix symbol ->
                         if expressionId = symbol then
-                            fplValue.Scope.Add(block.Name, block)
+                            fplValue.Scope.Add(block.Type(true), block)
                     | FixType.Infix(symbol, precedence) ->
                         if expressionId = symbol then
-                            fplValue.Scope.Add(block.Name, block)
+                            fplValue.Scope.Add(block.Type(true), block)
                             fplValue.AuxiliaryInfo <- precedence
                     | _ -> ()))
 
@@ -560,7 +560,7 @@ let emitSIG04Diagnostics (fplValue: FplValue) (candidates: FplValue list) firstF
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG04(fplValue.Name, candidateNames, firstFailingArgument)
+            Diagnostic.Code = SIG04(fplValue.Type(true), candidateNames, firstFailingArgument)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -612,7 +612,7 @@ let emitPR000Diagnostics (fplValue: FplValue) =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = fplValue.NameStartPos
                 Diagnostic.EndPos = fplValue.NameEndPos
-                Diagnostic.Code = PR000 fplValue.Name
+                Diagnostic.Code = PR000 (fplValue.Type(true))
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
@@ -662,7 +662,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
                     Diagnostic.Severity = DiagnosticSeverity.Error
                     Diagnostic.StartPos = arg.NameStartPos
                     Diagnostic.EndPos = arg.NameEndPos
-                    Diagnostic.Code = LG000(typeOfPredicate, arg.Name)
+                    Diagnostic.Code = LG000(typeOfPredicate, arg.Type(true))
                     Diagnostic.Alternatives = None 
                 }
             diags.AddDiagnostic diagnostic
@@ -676,7 +676,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
-                Diagnostic.Code = LG001(typeOfPredicate, arg.Name, arg.FplRepresentation.String())
+                Diagnostic.Code = LG001(typeOfPredicate, arg.Type(true), arg.FplRepresentation.String())
                 Diagnostic.Alternatives = None 
             }
         diags.AddDiagnostic diagnostic

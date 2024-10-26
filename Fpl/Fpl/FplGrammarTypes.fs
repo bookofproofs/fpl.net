@@ -133,6 +133,7 @@ type Ast =
     | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
     | ParamTuple of Positions * Ast list
     | Signature of Positions * (Ast * Ast)
+    | Mapping of Positions * Ast
     | SignatureWithUserDefinedString of Positions * ((Ast * Ast option) * Ast)
     | Axiom of Positions * (Ast * (Ast list option * Ast))
     | ParentConstructorCall of Positions * (Ast * Ast)
