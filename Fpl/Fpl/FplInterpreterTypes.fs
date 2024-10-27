@@ -523,7 +523,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             this.Scope
             |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> kvp.Value.IsSignatureVariable)
             |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
-                kvp.Value.Type(isSignature))
+                kvp.Value.Type(true))
             |> String.concat ", "
         let mapping =
             if this.ValueList.Count>0 && this.ValueList[0].BlockType = FplValueType.Mapping then
@@ -557,7 +557,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             | FplValueType.FunctionalTerm ->
                 match mapping with 
                 | Some map -> 
-                    sprintf "%s(%s) -> %s" this.FplId (paramTuple()) (map.Type(isSignature))
+                    sprintf "%s(%s) -> %s" this.FplId (paramTuple()) (map.Type(true))
                 | _ -> ""
             | FplValueType.Mapping 
             | FplValueType.Variable 

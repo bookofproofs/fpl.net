@@ -2,7 +2,6 @@
 
 open CommonTestHelpers
 open ErrDiagnostics
-open FParsec
 
 type CommonFplValueTestCases =
 
@@ -14,7 +13,6 @@ type CommonFplValueTestCases =
                 let kv = fv.Scope |> Seq.head
                 kv.Value
             else
-                let pos = Position("",(int64)1,(int64)1,(int64)0)
                 FplInterpreterTypes.FplValue.CreateRoot()
         else
             fv.Scope[name]

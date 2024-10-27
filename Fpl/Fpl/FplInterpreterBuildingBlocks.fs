@@ -22,7 +22,8 @@ type EvalStack() =
     /// Adds the FplValue to it's parent's Scope.
     static member tryAddToScope (fv:FplValue) = 
         let next = fv.Parent.Value
-        let typeId = fv.Type(FplValue.IsBlock(fv))
+        let isBlock = FplValue.IsBlock(fv)
+        let typeId = fv.Type(isBlock)
         match FplValue.InScopeOfParent(fv) typeId with
         | ScopeSearchResult.Found conflict -> 
             match next.BlockType with
@@ -387,8 +388,6 @@ let rec eval (st: SymbolTable) ast =
                 emitVAR01diagnostics name pos1 pos2
         if not isDeclaration then 
             es.PopEvalStack() // pop only variables from stack that are NOT being declared (those will be popped in Ast.NamedVarDecl(..))
-        else
-            varValue.IsSignatureVariable <- true
         ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
@@ -538,7 +537,9 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let map = FplValue.CreateFplValue((pos1, pos2),FplValueType.Mapping,fv)
         es.PushEvalStack(map)
+        es.InSignatureEvaluation <- true
         eval st variableTypeAst
+        es.InSignatureEvaluation <- false
         es.PopEvalStack()
         st.EvalPop()
     | Ast.ClassIdentifier((pos1, pos2), ast1) ->
@@ -1282,9 +1283,10 @@ let rec eval (st: SymbolTable) ast =
     // | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
     | Ast.CorollarySignature(referencingIdentifierAst, paramTupleAst) ->
         st.EvalPush("CorollarySignature")
+        es.InSignatureEvaluation <- true
         eval st referencingIdentifierAst
         eval st paramTupleAst
-        let fv = es.PeekEvalStack()
+        es.InSignatureEvaluation <- false
         st.EvalPop()
     | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Corollary")
