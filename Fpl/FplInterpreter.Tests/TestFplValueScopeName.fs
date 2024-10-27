@@ -238,7 +238,7 @@ type TestFplValueScopeName() =
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Type(false))
             | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockName", theory.Type(false))
-            | "block" -> Assert.AreEqual<string>("TestPredicate()", block.Type(false)); 
+            | "block" -> Assert.AreEqual<string>("TestPredicate()", block.Type(true)); 
             | "x" -> Assert.AreEqual<string>("x", x.Type(false))
             | "y" -> Assert.AreEqual<string>("y", y.Type(false))
             | "s" -> Assert.AreEqual<string>("s", s.Type(false))

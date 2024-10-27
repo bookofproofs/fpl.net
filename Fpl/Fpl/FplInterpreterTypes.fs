@@ -430,22 +430,15 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
     let mutable _arity = 0
-    let mutable _blockEvaluationStarted = false
     let mutable _fplId = ""
     let mutable _typeId = ""
     let mutable _hasBrackets = false
+    let mutable _isSignatureVariable = false
 
     let mutable _parent = parent
     let _auxiliaryUniqueChilds = HashSet<string>()
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
     let _valueList = System.Collections.Generic.List<FplValue>()
-
-
-    /// Indicates if this FplValue has a {} block and its evaluation already started.
-    /// This flag is important to handle signature and block-declared variables differently.
-    member this.BlockEvaluationStarted
-        with get () = _blockEvaluationStarted
-        and set (value) = _blockEvaluationStarted <- value
 
     /// Indicates if this FplValue's Scope or ValueList can be treated as bracketed coordinates or as parenthesized parameters.
     member this.HasBrackets 
@@ -528,7 +521,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     member this.Type (isSignature:bool) =
         let paramTuple() = 
             this.Scope
-            |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> FplValue.IsVariable(kvp.Value))
+            |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> kvp.Value.IsSignatureVariable)
             |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
                 kvp.Value.Type(isSignature))
             |> String.concat ", "
@@ -568,34 +561,26 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 | _ -> ""
             | FplValueType.Mapping 
             | FplValueType.Variable 
+            | FplValueType.Argument 
             | FplValueType.VariadicVariableMany 
             | FplValueType.VariadicVariableMany1 ->
                 let subType = paramTuple()
-                match (isSignature, subType, mapping) with
-                | (true, "",_) -> 
-                    this.TypeId 
-                | (true, _,None) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[%s]" this.TypeId subType
-                    else
-                        sprintf "%s(%s)" this.TypeId subType
-                | (true, _,Some map) ->
-                    if this.HasBrackets then 
-                        sprintf "%s[%s] -> %s" this.TypeId subType (map.Type(isSignature))
-                    else
-                        sprintf "%s(%s) -> %s" this.TypeId subType (map.Type(isSignature))
-                | (false, "",_) -> 
+                if isSignature then 
+                    match (subType, mapping) with
+                    | ("",_) -> 
+                        this.TypeId 
+                    | (_,None) -> 
+                        if this.HasBrackets then 
+                            sprintf "%s[%s]" this.TypeId subType
+                        else
+                            sprintf "%s(%s)" this.TypeId subType
+                    | (_,Some map) ->
+                        if this.HasBrackets then 
+                            sprintf "%s[%s] -> %s" this.TypeId subType (map.Type(isSignature))
+                        else
+                            sprintf "%s(%s) -> %s" this.TypeId subType (map.Type(isSignature))
+                else
                     this.FplId 
-                | (false, _,None) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[%s]" this.FplId subType
-                    else
-                        sprintf "%s(%s)" this.FplId subType
-                | (false, _,Some map) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[%s] -> %s" this.FplId subType (map.Type(isSignature))
-                    else
-                        sprintf "%s(%s) -> %s" this.FplId subType (map.Type(isSignature))
             | FplValueType.Reference ->
                 let args = argumentTuple()
                 match (args, this.FplId) with
@@ -744,6 +729,19 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         fplValue.BlockType = FplValueType.Variable
         || fplValue.BlockType = FplValueType.VariadicVariableMany
         || fplValue.BlockType = FplValueType.VariadicVariableMany1
+
+    /// Indicates if this FplValue is a variable declared in the signature (true) or in the block (false).
+    member this.IsSignatureVariable
+        with get () = 
+            if FplValue.IsVariable(this) then
+                _isSignatureVariable
+            else 
+                false
+        and set (value) = 
+            if FplValue.IsVariable(this) then
+                _isSignatureVariable <- value
+            else 
+                raise (ArgumentException(sprintf "Cannot set IsSignatureVariable for non-variable %s" this.BlockType.ShortName))
 
     /// Indicates if this FplValue is a reference
     static member IsReference(fplValue:FplValue) = 

@@ -12,6 +12,12 @@ open FplInterpreterPredicateEvaluator
 
 type EvalStack() = 
     let _valueStack = Stack<FplValue>()
+    let mutable _inSignatureEvaluation = false
+
+    /// Indicates if this EvalStack is evaluating a signature on a FPL building block
+    member this.InSignatureEvaluation
+        with get () = _inSignatureEvaluation
+        and set (value) = _inSignatureEvaluation <- value
 
     /// Adds the FplValue to it's parent's Scope.
     static member tryAddToScope (fv:FplValue) = 
@@ -357,6 +363,7 @@ let rec eval (st: SymbolTable) ast =
         let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
         varValue.FplId <- name
         varValue.TypeId <- "undef"
+        varValue.IsSignatureVariable <- es.InSignatureEvaluation 
         es.PushEvalStack(varValue)
         match FplValue.VariableInBlockScopeByName fv name with 
         | ScopeSearchResult.Found other ->
@@ -380,6 +387,8 @@ let rec eval (st: SymbolTable) ast =
                 emitVAR01diagnostics name pos1 pos2
         if not isDeclaration then 
             es.PopEvalStack() // pop only variables from stack that are NOT being declared (those will be popped in Ast.NamedVarDecl(..))
+        else
+            varValue.IsSignatureVariable <- true
         ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
@@ -736,7 +745,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.VarDeclBlock((pos1, pos2), asts) ->
         st.EvalPush("VarDeclBlock")
         let fv = es.PeekEvalStack()
-        fv.BlockEvaluationStarted <- true
         asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.StatementList((pos1, pos2), asts) ->
@@ -920,6 +928,7 @@ let rec eval (st: SymbolTable) ast =
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | Ast.SignatureWithUserDefinedString((pos1, pos2),
                                          ((predicateIdentifierAst, optUserDefinedSymbolAst), paramTupleAst)) ->
+        es.InSignatureEvaluation <- true
         st.EvalPush("SignatureWithUserDefinedString")
         eval st predicateIdentifierAst
         optUserDefinedSymbolAst
@@ -930,6 +939,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         emitSIG00Diagnostics fv pos1 pos2
         st.EvalPop()
+        es.InSignatureEvaluation <- false
     | Ast.PropertyBlock((pos1, pos2), (keywordPropertyAst, definitionPropertyAst)) ->
         st.EvalPush("PropertyBlock")
         eval st keywordPropertyAst
@@ -1032,6 +1042,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature((pos1, pos2), ((optAst, signatureWithUserDefinedStringAst), mappingAst)) -> 
+        es.InSignatureEvaluation <- true
         st.EvalPush("FunctionalTermSignature")
         eval st signatureWithUserDefinedStringAst
         let fv = es.PeekEvalStack()
@@ -1050,6 +1061,7 @@ let rec eval (st: SymbolTable) ast =
         fv.NameEndPos <- pos2
         eval st mappingAst
         st.EvalPop()
+        es.InSignatureEvaluation <- false
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         st.EvalPush("PredicateWithQualification")
         eval st predicateWithOptSpecificationAst
@@ -1163,11 +1175,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     // | Assignment of Positions * (Ast * Ast)
     | Ast.Signature((pos1, pos2), (predicateIdentifierAst, paramTupleAst)) ->
+        es.InSignatureEvaluation <- true
         st.EvalPush("Signature")
         eval st predicateIdentifierAst
         eval st paramTupleAst
         let fv = es.PeekEvalStack()
         st.EvalPop()
+        es.InSignatureEvaluation <- false
     | Ast.Assignment((pos1, pos2), (ast1, ast2)) ->
         st.EvalPush("Assignment")
         eval st ast1
@@ -1356,7 +1370,9 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("DefinitionClass")
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Class, es.PeekEvalStack())
         es.PushEvalStack(fv)
+        es.InSignatureEvaluation <- true
         eval st predicateIdentifierAst
+        es.InSignatureEvaluation <- false
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
         classTypeListAsts |> List.map (eval st) |> ignore
         eval st classContentAst
