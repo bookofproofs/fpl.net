@@ -553,8 +553,12 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             | FplValueType.Predicate
             | FplValueType.Corollary 
             | FplValueType.Constructor 
+            | FplValueType.OptionalPredicate 
+            | FplValueType.MandatoryPredicate 
             | FplValueType.Axiom ->
                 sprintf "%s(%s)" this.FplId (paramTuple())
+            | FplValueType.OptionalFunctionalTerm 
+            | FplValueType.MandatoryFunctionalTerm
             | FplValueType.FunctionalTerm ->
                 match mapping with 
                 | Some map -> 
