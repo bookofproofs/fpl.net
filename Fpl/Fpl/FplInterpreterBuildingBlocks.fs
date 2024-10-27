@@ -676,6 +676,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.BracketedCoordsInType((pos1, pos2), asts) ->
         st.EvalPush("BracketedCoordsInType")
         let fv = es.PeekEvalStack()
+        fv.HasBrackets <- true
         asts 
         |> List.map (fun ast1 ->
             eval st ast1
@@ -697,6 +698,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.BrackedCoordList((pos1, pos2), asts) ->
         st.EvalPush("BrackedCoordList")
         let fv = es.PeekEvalStack()
+        fv.HasBrackets <- true
         asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.And((pos1, pos2), predicateAsts) ->

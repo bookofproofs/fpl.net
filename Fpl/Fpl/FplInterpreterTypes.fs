@@ -435,6 +435,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _blockEvaluationStarted = false
     let mutable _fplId = ""
     let mutable _typeId = ""
+    let mutable _hasBrackets = false
 
     let mutable _parent = parent
     let _auxiliaryUniqueChilds = HashSet<string>()
@@ -448,6 +449,10 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         with get () = _blockEvaluationStarted
         and set (value) = _blockEvaluationStarted <- value
 
+    /// Indicates if this FplValue's Scope or ValueList can be treated as bracketed coordinates or as parenthesized parameters.
+    member this.HasBrackets 
+        with get () = _hasBrackets
+        and set (value) = _hasBrackets <- value
 
     /// TypeId of the FplValue.
     member this.TypeId 
@@ -568,15 +573,27 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 | (true, "",_) -> 
                     this.TypeId 
                 | (true, _,None) -> 
-                    sprintf "%s(%s)" this.TypeId subType
-                | (true, _,Some map) -> 
-                    sprintf "%s(%s) -> %s" this.TypeId subType (map.Type(isSignature))
+                    if this.HasBrackets then 
+                        sprintf "%s[%s]" this.TypeId subType
+                    else
+                        sprintf "%s(%s)" this.TypeId subType
+                | (true, _,Some map) ->
+                    if this.HasBrackets then 
+                        sprintf "%s[%s] -> %s" this.TypeId subType (map.Type(isSignature))
+                    else
+                        sprintf "%s(%s) -> %s" this.TypeId subType (map.Type(isSignature))
                 | (false, "",_) -> 
                     this.FplId 
                 | (false, _,None) -> 
-                    sprintf "%s(%s)" this.FplId subType
+                    if this.HasBrackets then 
+                        sprintf "%s[%s]" this.FplId subType
+                    else
+                        sprintf "%s(%s)" this.FplId subType
                 | (false, _,Some map) -> 
-                    sprintf "%s(%s) -> %s" this.FplId subType (map.Type(isSignature))
+                    if this.HasBrackets then 
+                        sprintf "%s[%s] -> %s" this.FplId subType (map.Type(isSignature))
+                    else
+                        sprintf "%s(%s) -> %s" this.FplId subType (map.Type(isSignature))
             | _ -> ""
         idRec()
 
