@@ -129,7 +129,6 @@ type EvalStack() =
                     EvalStack.tryAddToValueList fv 
                     next.NameEndPos <- fv.NameEndPos
                 | _ -> 
-                    next.FplId <- next.FplId + fv.FplId
                     EvalStack.tryAddToValueList fv
                     next.NameEndPos <- fv.NameEndPos
             | FplValueType.Variable
@@ -157,12 +156,13 @@ type EvalStack() =
                 | FplValueType.VariadicVariableMany1 
                 | FplValueType.FunctionalTerm ->
                     EvalStack.tryAddToScope fv
-                | FplValueType.Reference  
                 | FplValueType.Quantor  
                 | FplValueType.Localization -> 
                     EvalStack.tryAddToScope fv
                     next.FplRepresentation <- fv.FplRepresentation
                     EvalStack.tryAddToScope fv
+                | FplValueType.Reference ->
+                    EvalStack.tryAddToValueList fv
                 | _ -> ()
             | FplValueType.Object
             | FplValueType.Quantor
@@ -380,7 +380,7 @@ let rec eval (st: SymbolTable) ast =
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
         if not isDeclaration then 
-            es.PopEvalStack() // postpone popping all variables from stack that are being declared (they will be popped in Ast.NamedVarDecl(..))
+            es.PopEvalStack() // pop only variables from stack that are NOT being declared (those will be popped in Ast.NamedVarDecl(..))
         ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
@@ -1146,14 +1146,16 @@ let rec eval (st: SymbolTable) ast =
         let simplifyTriviallyNestedExpressions (rb:FplValue) = 
             if rb.ValueList.Count = 1 then
                 let subNode = rb.ValueList[0]
-                if subNode.BlockType = FplValueType.Reference && 
-                    subNode.Type(false) = rb.Type(false) && 
-                    subNode.Type(true) = rb.Type(true)
+                if subNode.BlockType = FplValueType.Reference 
                 || subNode.BlockType = FplValueType.Quantor
                 then 
                     es.Pop() |> ignore
                     es.PushEvalStack(subNode)
                     subNode.Parent <- rb.Parent
+                    // prevent recursive clearing of the subNode
+                    rb.ValueList.Clear() 
+                    rb.Scope.Clear()
+                    // dispose the rb node
                     rb.Reset()
         simplifyTriviallyNestedExpressions refBlock
         es.PopEvalStack()

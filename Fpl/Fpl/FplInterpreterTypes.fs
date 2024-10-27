@@ -539,7 +539,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 Some (this.ValueList[0])
             else   
                 None
-        let rec idRec() =
+        let argumentTuple() = 
+            this.ValueList
+            |> Seq.map (fun fv -> fv.Type(false))
+            |> String.concat ", "
+        let idRec() =
             match this.BlockType with
             | FplValueType.Theory 
             | FplValueType.Proof 
@@ -569,10 +573,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             | FplValueType.VariadicVariableMany 
             | FplValueType.VariadicVariableMany1 ->
                 let subType = paramTuple()
-                if this.FplId = "x" then
-                    Console.Write("")
-                if this.FplId = "y" then
-                    Console.Write("")
                 match (isSignature, subType, mapping) with
                 | (true, "",_) -> 
                     this.TypeId 
@@ -598,6 +598,20 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                         sprintf "%s[%s] -> %s" this.FplId subType (map.Type(isSignature))
                     else
                         sprintf "%s(%s) -> %s" this.FplId subType (map.Type(isSignature))
+            | FplValueType.Reference ->
+                let args = argumentTuple()
+                match (args, this.FplId) with
+                | ("","") -> "???" // this case should never occur
+                | ("",_) -> this.FplId
+                | (_,"") -> sprintf "%s()" args
+                | (_,_) -> 
+                    if args<>"" then
+                        if this.HasBrackets then 
+                            sprintf "%s[%s]" this.FplId args
+                        else
+                            sprintf "%s(%s)" this.FplId args
+                    else
+                        this.FplId
             | _ -> ""
         idRec()
 
