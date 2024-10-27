@@ -537,9 +537,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let map = FplValue.CreateFplValue((pos1, pos2),FplValueType.Mapping,fv)
         es.PushEvalStack(map)
-        es.InSignatureEvaluation <- true
         eval st variableTypeAst
-        es.InSignatureEvaluation <- false
         es.PopEvalStack()
         st.EvalPop()
     | Ast.ClassIdentifier((pos1, pos2), ast1) ->
@@ -929,7 +927,6 @@ let rec eval (st: SymbolTable) ast =
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
     | Ast.SignatureWithUserDefinedString((pos1, pos2),
                                          ((predicateIdentifierAst, optUserDefinedSymbolAst), paramTupleAst)) ->
-        es.InSignatureEvaluation <- true
         st.EvalPush("SignatureWithUserDefinedString")
         eval st predicateIdentifierAst
         optUserDefinedSymbolAst
@@ -940,7 +937,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         emitSIG00Diagnostics fv pos1 pos2
         st.EvalPop()
-        es.InSignatureEvaluation <- false
     | Ast.PropertyBlock((pos1, pos2), (keywordPropertyAst, definitionPropertyAst)) ->
         st.EvalPush("PropertyBlock")
         eval st keywordPropertyAst
@@ -1350,7 +1346,9 @@ let rec eval (st: SymbolTable) ast =
         let fplTheory = es.PeekEvalStack()
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Predicate, fplTheory)
         es.PushEvalStack(fv)
+        es.InSignatureEvaluation <- true
         eval st signatureWithUserDefinedStringAst
+        es.InSignatureEvaluation <- false
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         es.PopEvalStack()

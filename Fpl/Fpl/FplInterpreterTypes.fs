@@ -551,13 +551,15 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             | FplValueType.OptionalPredicate 
             | FplValueType.MandatoryPredicate 
             | FplValueType.Axiom ->
-                sprintf "%s(%s)" this.FplId (paramTuple())
+                let paramT = paramTuple()
+                sprintf "%s(%s)" this.FplId (paramT)
             | FplValueType.OptionalFunctionalTerm 
             | FplValueType.MandatoryFunctionalTerm
             | FplValueType.FunctionalTerm ->
                 match mapping with 
                 | Some map -> 
-                    sprintf "%s(%s) -> %s" this.FplId (paramTuple()) (map.Type(true))
+                    let paramT = paramTuple()
+                    sprintf "%s(%s) -> %s" this.FplId paramT (map.Type(true))
                 | _ -> ""
             | FplValueType.Mapping 
             | FplValueType.Variable 
