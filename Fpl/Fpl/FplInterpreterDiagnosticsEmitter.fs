@@ -578,7 +578,7 @@ let emitSIG04TypeDiagnostics (st:SymbolTable) name (fplValue:FplValue) pos1 pos2
         || rightContext.EndsWith(".Expression.PredicateWithQualification.PredicateWithOptSpecification.PredicateIdentifier") then
         match tryMatchTypes st fplValue name with
         | (_, candidates, Some matchedFplValue) -> 
-            fplValue.FplRepresentation <- FplRepresentation.Pointer matchedFplValue
+            fplValue.ValueList.Add(matchedFplValue)
         | (firstFailingArgument, candidates, None) -> 
             let candidateNames =
                 candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
@@ -688,13 +688,14 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
 
     fplValue.ValueList
     |> Seq.iter (fun arg ->
-        match arg.FplRepresentation with
-        | FplRepresentation.PredRepr _ -> emitLG000Diagnostics arg
-        | FplRepresentation.Pointer variable ->
-            match variable.FplRepresentation with
-            | FplRepresentation.PredRepr _ -> emitLG000Diagnostics variable
-            | _ -> emitLG001Diagnostics arg.NameStartPos arg.NameEndPos variable
-        | _ -> emitLG001Diagnostics arg.NameStartPos arg.NameEndPos arg)
+        let v = 
+            if arg.ValueList.Count>0 then
+                arg.ValueList[0]
+            else
+                arg
+        match v.FplRepresentation with
+        | FplRepresentation.PredRepr _ -> emitLG000Diagnostics v
+        | _ -> emitLG001Diagnostics v.NameStartPos v.NameEndPos v)
 
     let code = LG000("", "")
     let numbLG000 = filterByErrorCode diags code.Code

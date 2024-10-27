@@ -400,7 +400,6 @@ type FplRepresentation =
     | PredRepr of FplPredicate 
     | ObjRepr of string
     | Localization of FplValue * string
-    | Pointer of FplValue
     | LangRepr of FplLanguageConstruct
     | Index of uint
     | Undef
@@ -410,7 +409,6 @@ type FplRepresentation =
         | ObjRepr _ -> "object"
         | Localization _ -> "localization"
         | Index _ -> "index"
-        | Pointer _ -> "pointer"
         | LangRepr FplLanguageConstruct.Class -> "class"
         | LangRepr FplLanguageConstruct.Extension -> "extension"
         | LangRepr FplLanguageConstruct.Function -> "function"
@@ -601,7 +599,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             | FplValueType.Reference ->
                 let args = argumentTuple()
                 match (args, this.FplId) with
-                | ("","") -> "???" // this case should never occur
+                | ("","") -> "???" // this case should never occur after full evaluation
                 | ("",_) -> this.FplId
                 | (_,"") -> sprintf "%s()" args
                 | (_,_) -> 

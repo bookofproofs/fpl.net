@@ -360,7 +360,6 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(varValue)
         match FplValue.VariableInBlockScopeByName fv name with 
         | ScopeSearchResult.Found other ->
-            varValue.FplRepresentation <- FplRepresentation.Pointer other
             varValue.ValueList.Add(other)
             if (isDeclaration || isLocalizationDeclaration) then
                 // if var not found in scope, the emit error that the variable was already declared
@@ -1137,10 +1136,6 @@ let rec eval (st: SymbolTable) ast =
         optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
         eval st qualificationListAst
         let refBlock = es.PeekEvalStack() // if the reference was replaced, take this one
-        match (fv.BlockType, fv.FplRepresentation, refBlock.FplRepresentation,fv.ValueList.Count) with
-        | (FplValueType.Reference, FplRepresentation.Undef, FplRepresentation.Pointer var, 1) ->
-            fv.FplRepresentation <- refBlock.FplRepresentation
-        | _ -> ()
         refBlock.NameEndPos <- pos2
         /// simplify trivially nested expressions 
         let simplifyTriviallyNestedExpressions (rb:FplValue) = 
