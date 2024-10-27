@@ -314,8 +314,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("DollarDigits")
         let fv = es.PeekEvalStack()
         let sid = $"${s.ToString()}"
-        fv.FplId <- sid
-        fv.TypeId <- sid
+        fv.FplId <- fv.FplId + sid
+        fv.TypeId <- fv.FplId + sid
         fv.NameEndPos <- pos2
         st.EvalPop() 
     | Ast.Extensionname((pos1, pos2), s) ->
@@ -374,7 +374,7 @@ let rec eval (st: SymbolTable) ast =
                         | Some parent -> getLocalization parent
                         | None -> fValue
                 let loc = getLocalization fv
-                loc.Scope.Add(varValue.Type(false), varValue)
+                loc.Scope.Add(name, varValue)
             elif not (isDeclaration || isLocalizationDeclaration || isQuantorVariableDeclaration) then 
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
@@ -424,7 +424,7 @@ let rec eval (st: SymbolTable) ast =
         | FplValueType.Justification ->
             let arg = parent.Parent.Value
             let proof = arg.Parent.Value
-            if not (proof.Scope.ContainsKey(fv.Type(false))) then 
+            if not (proof.Scope.ContainsKey(s)) then 
                 emitPR005Diagnostics fv 
         | FplValueType.Argument -> ()
         | _ -> 

@@ -220,9 +220,9 @@ let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
         ad.AddDiagnostic diagnostic
 
 let checkID008Diagnostics (fplValue: FplValue) pos1 pos2 =
-    if FplValue.IsConstructor(fplValue) && fplValue.Type(true).Length = 1 then
+    if FplValue.IsConstructor(fplValue) then
         let nameStart = fplValue.FplId
-        let className = fplValue.Parent.Value.Type(true)
+        let className = fplValue.Parent.Value.FplId
 
         if nameStart <> className then
             let diagnostic =
@@ -239,13 +239,14 @@ let checkID008Diagnostics (fplValue: FplValue) pos1 pos2 =
 
 let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) name pos1 pos2 =
     let rec findPath (root: FplValue) (candidateName: string) =
-        if root.Type(true) = candidateName then
-            Some(root.Type(true))
+        let rootType = root.Type(true)
+        if rootType = candidateName then
+            Some(rootType)
         else
             root.ValueList
             |> Seq.collect (fun child ->
                 match findPath child candidateName with
-                | Some path -> [ root.Type(true) + ":" + path ]
+                | Some path -> [ rootType + ":" + path ]
                 | None -> [])
             |> Seq.tryLast
 
@@ -286,7 +287,8 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
 
                     fplValue.ValueList
                     |> Seq.iter (fun child ->
-                        let classInheritanceChain = findPath classCandidate (child.Type(true))
+                        let childType = child.Type(true)
+                        let classInheritanceChain = findPath classCandidate childType
 
                         match classInheritanceChain with
                         | Some chain ->
@@ -297,7 +299,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                                     Diagnostic.Severity = DiagnosticSeverity.Error
                                     Diagnostic.StartPos = pos1
                                     Diagnostic.EndPos = pos2
-                                    Diagnostic.Code = ID011(child.Type(true), chain) // inheritance chain duplicate
+                                    Diagnostic.Code = ID011(childType, chain) // inheritance chain duplicate
                                     Diagnostic.Alternatives = None 
                                 }
                             ad.AddDiagnostic diagnostic
@@ -374,10 +376,10 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
         let candidates =
             classOfConstructor.ValueList
             |> Seq.map (fun inheritanceClass ->
-                if inheritanceClass.Type(true) = identifier then
+                let inheritanceClassType = inheritanceClass.Type(true)
+                if inheritanceClassType = identifier then
                     foundInheritanceClass <- true
-
-                inheritanceClass.Type(true))
+                inheritanceClassType)
             |> String.concat ", "
 
         if not foundInheritanceClass then
@@ -459,9 +461,11 @@ let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
 
     match fplValue.ExpressionType with
     | FixType.Infix _ when fplValue.Arity <> 2 ->
-        if
-            fplValue.Type(true).Length > 2
-            && (fplValue.Type(true).Substring(2).StartsWith("+") || fplValue.Type(true).Substring(2).StartsWith("*"))
+        let fplValueType = fplValue.Type(true)
+        if fplValueType.Length > 2
+            && (fplValueType.Substring(2).StartsWith("+") 
+                || fplValueType.Substring(2).StartsWith("*")
+            )
         then
             () // avoid false positives for variadic variables
         else
@@ -484,17 +488,18 @@ let emitSIG01Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
             theory.Scope
             |> Seq.map (fun kv -> kv.Value)
             |> Seq.iter (fun block ->
+                let blockType = block.Type(true)
                 if expressionId = block.FplId then
-                    fplValue.Scope.Add(block.Type(true), block)
+                    fplValue.Scope.Add(blockType, block)
                 else
                     match block.ExpressionType with
                     | FixType.Prefix symbol
                     | FixType.Postfix symbol ->
                         if expressionId = symbol then
-                            fplValue.Scope.Add(block.Type(true), block)
+                            fplValue.Scope.Add(blockType, block)
                     | FixType.Infix(symbol, precedence) ->
                         if expressionId = symbol then
-                            fplValue.Scope.Add(block.Type(true), block)
+                            fplValue.Scope.Add(blockType, block)
                             fplValue.AuxiliaryInfo <- precedence
                     | _ -> ()))
 

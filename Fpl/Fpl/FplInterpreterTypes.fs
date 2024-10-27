@@ -458,34 +458,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     member this.FplId 
         with get () = _fplId
         and set (value) = _fplId <- value
-        (*
-        match this.BlockType with 
-        | FplValueType.Variable 
-        | FplValueType.VariadicVariableMany 
-        | FplValueType.VariadicVariableMany1 ->
-            this.Name
-        | FplValueType.Proof 
-        | FplValueType.Corollary 
-        | FplValueType.Reference -> 
-            if this.Name.IndexOf("$") > 0 then 
-                let posParen = this.Name.IndexOf('(')
-                if posParen > 0 then 
-                    this.Name.Substring(0,posParen)
-                else
-                    this.Name
-            else
-                match this.Type(true) with
-                | x::xs when x = "is" -> String.concat "" (this.Type(true))
-                | x::xs when this.Name.StartsWith("bas.") -> $"bas.{x}"
-                | x::y::xs when this.Name.StartsWith("del.") -> $"del.{y}"
-                | x::y::xs when x="bydef." -> $"bydef.{y}"
-                | x::xs -> if x = "*" || x = "+" || x = "obj" || x = "ind" || x = "undef" || x = "pred" || x = "func" then this.Name else x
-                | _ -> this.Name
-        | _ -> 
-            match this.Type(true) with
-            | x::xs -> x
-            | _ -> this.Name
-        *)
 
     /// Type of the Expr
     member this.ExpressionType
@@ -592,7 +564,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 | (true, "",_) -> 
                     this.TypeId + subType
                 | (_, _,Some map) -> 
-                    sprintf "%s(%s) -> %s" this.TypeId subType (map.Type(true))
+                    sprintf "%s(%s) -> %s" this.TypeId subType (map.Type(isSignature))
                 | (true, _,None) -> 
                     sprintf "%s(%s)" this.TypeId subType
                 | _ -> 
@@ -633,24 +605,25 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     member this.QualifiedName
         with get () = 
             let rec getFullName (fplValue:FplValue) (first:bool) =
+                let fplValueType = fplValue.Type(false)
                 if fplValue.BlockType = FplValueType.Root then
                     ""
                 elif first then 
                     if FplValue.IsRoot(fplValue.Parent.Value) then 
-                        getFullName fplValue.Parent.Value false + fplValue.Type(false) 
+                        getFullName fplValue.Parent.Value false + fplValueType 
                     else
                         if FplValue.IsVariable(fplValue) && not (FplValue.IsVariable(fplValue.Parent.Value)) then
-                            fplValue.Type(false)
+                            fplValueType
                         else
-                            getFullName fplValue.Parent.Value false + "." + fplValue.Type(false) 
+                            getFullName fplValue.Parent.Value false + "." + fplValueType 
                 else
                     if FplValue.IsRoot(fplValue.Parent.Value) then 
-                        getFullName fplValue.Parent.Value false + fplValue.Type(false) 
+                        getFullName fplValue.Parent.Value false + fplValueType
                     else
                         if FplValue.IsVariable(fplValue) && not (FplValue.IsVariable(fplValue.Parent.Value)) then
-                            fplValue.Type(false)
+                            fplValueType
                         else
-                            getFullName fplValue.Parent.Value false + "." + fplValue.Type(false)
+                            getFullName fplValue.Parent.Value false + "." + fplValueType
             getFullName this true 
 
     /// Indicates if this FplValue is a constructor.
@@ -707,17 +680,18 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     /// Qualified starting position of this FplValue
     member this.QualifiedStartPos = 
         let rec getFullName (fplValue:FplValue) (first:bool) =
+            let fplValueType = fplValue.Type(false)
             if fplValue.BlockType = FplValueType.Root then
                 ""
             elif first then 
                 let starPosWithoutFileName = $"(Ln: {fplValue.NameStartPos.Line}, Col: {fplValue.NameStartPos.Column})"
                 if FplValue.IsTheory(fplValue) then 
-                    getFullName fplValue.Parent.Value false + fplValue.Type(false) + starPosWithoutFileName
+                    getFullName fplValue.Parent.Value false + fplValueType + starPosWithoutFileName
                 else
                     getFullName fplValue.Parent.Value false + starPosWithoutFileName
             else
                 if FplValue.IsTheory(fplValue) then 
-                    getFullName fplValue.Parent.Value false + fplValue.Type(false) 
+                    getFullName fplValue.Parent.Value false + fplValueType 
                 else
                     getFullName fplValue.Parent.Value false 
 
@@ -885,7 +859,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             root.Scope.Clear()
         clearAll this
 
-    /// Clears this FplValue
+    /// A string representation of this FplValue
     override this.ToString() = 
         $"{this.BlockTypeShortName} {this.Type(false)}"
 
@@ -913,7 +887,7 @@ let tryFindAssociatedBlockForProof (fplValue:FplValue) =
 
             let flattenedScopes = flattenScopes theory.Parent.Value
 
-            let potentialProvableName = stripLastDollarDigit (fplValue.Type(true))
+            let potentialProvableName = stripLastDollarDigit (fplValue.FplId)
 
             // The parent node of the proof is the theory. In its scope 
             // we should find the theorem we are looking for.
@@ -970,7 +944,8 @@ let tryFindAssociatedBlockForCorollary(fplValue:FplValue) =
                     stripLastDollarDigit (fplValue.Type(true))
                 flattenedScopes
                 |> Seq.filter (fun fv -> 
-                    fv.Type(true).StartsWith(potentialBlockName + "(") || fv.Type(true) = potentialBlockName 
+                    let fvType = fv.Type(true)
+                    fvType.StartsWith(potentialBlockName + "(") || fvType = potentialBlockName 
                 )
                 |> Seq.toList
             let potentialBlockList = 
