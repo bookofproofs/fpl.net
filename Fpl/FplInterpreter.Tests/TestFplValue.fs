@@ -996,11 +996,11 @@ type TestFplValue() =
     [<DataRow("def cl T:obj {intr prty func TestId() -> obj(x:*obj(y:+tpl,z:index)) {intrinsic}};", "TestId() -> obj(*obj(+tpl, ind))")>]
 
     [<TestMethod>]
-    member this.TestTypeSignatureOfFplProperties(fplCode:string, expectedName:string, expectedTypeSignatureStr:string) =
-        let expectedTypeSignature = expectedTypeSignatureStr.Split(' ') |> List.ofArray
+    member this.TestTypeSignatureOfFplProperties(fplCode:string, expectedName:string) =
         let filename = "TestTypeSignatureOfFplProperties"
         let result = prepareFplCode(filename + ".fpl", fplCode, false) 
-        let fplValue = result.Value.Root.Scope[filename].Scope["T"].Scope[expectedName]
+        let block = result.Value.Root.Scope[filename].Scope["T"]
+        let fplValue = block.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(true)
         let actualSignatureStart = fplValue.NameStartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
