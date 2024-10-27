@@ -151,6 +151,10 @@ type EvalStack() =
                 | FplValueType.Axiom
                 | FplValueType.Predicate
                 | FplValueType.Class
+                | FplValueType.Mapping 
+                | FplValueType.Variable 
+                | FplValueType.VariadicVariableMany
+                | FplValueType.VariadicVariableMany1 
                 | FplValueType.FunctionalTerm ->
                     EvalStack.tryAddToScope fv
                 | FplValueType.Reference  
@@ -158,9 +162,6 @@ type EvalStack() =
                 | FplValueType.Localization -> 
                     EvalStack.tryAddToScope fv
                     next.FplRepresentation <- fv.FplRepresentation
-                | FplValueType.Variable 
-                | FplValueType.VariadicVariableMany
-                | FplValueType.VariadicVariableMany1 -> 
                     EvalStack.tryAddToScope fv
                 | _ -> ()
             | FplValueType.Object

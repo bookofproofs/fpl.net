@@ -560,15 +560,23 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             | FplValueType.VariadicVariableMany 
             | FplValueType.VariadicVariableMany1 ->
                 let subType = paramTuple()
+                if this.FplId = "x" then
+                    Console.Write("")
+                if this.FplId = "y" then
+                    Console.Write("")
                 match (isSignature, subType, mapping) with
                 | (true, "",_) -> 
-                    this.TypeId + subType
-                | (_, _,Some map) -> 
-                    sprintf "%s(%s) -> %s" this.TypeId subType (map.Type(isSignature))
+                    this.TypeId 
                 | (true, _,None) -> 
                     sprintf "%s(%s)" this.TypeId subType
-                | _ -> 
-                    this.FplId + subType
+                | (true, _,Some map) -> 
+                    sprintf "%s(%s) -> %s" this.TypeId subType (map.Type(isSignature))
+                | (false, "",_) -> 
+                    this.FplId 
+                | (false, _,None) -> 
+                    sprintf "%s(%s)" this.FplId subType
+                | (false, _,Some map) -> 
+                    sprintf "%s(%s) -> %s" this.FplId subType (map.Type(isSignature))
             | _ -> ""
         idRec()
 
