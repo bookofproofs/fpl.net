@@ -702,11 +702,22 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("LocalizationTermList")
         asts |> List.map (eval st) |> ignore
         st.EvalPop()
-    | Ast.BrackedCoordList((pos1, pos2), asts) ->
+    | Ast.BrackedCoordList((pos1, pos2), coordListAst) ->
         st.EvalPush("BrackedCoordList")
         let fv = es.PeekEvalStack()
         fv.HasBrackets <- true
-        asts |> List.map (eval st) |> ignore
+        if coordListAst.Length > 0 then 
+            coordListAst 
+            |> List.iter (fun pred -> 
+                let ref = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
+                es.PushEvalStack(ref)
+                eval st pred
+                es.PopEvalStack()
+            ) 
+        else
+            let ref = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
+            es.PushEvalStack(ref)
+            es.PopEvalStack()
         st.EvalPop()
     | Ast.And((pos1, pos2), predicateAsts) ->
         st.EvalPush("And")
@@ -762,10 +773,21 @@ let rec eval (st: SymbolTable) ast =
         predicateList |> List.map (eval st) |> ignore
         es.PopEvalStack()
         st.EvalPop()
-    | Ast.ArgumentTuple((pos1, pos2), asts) ->
+    | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->
         st.EvalPush("ArgumentTuple")
         let fv = es.PeekEvalStack()
-        asts |> List.map (eval st) |> ignore
+        if predicateListAst.Length > 0 then 
+            predicateListAst 
+            |> List.iter (fun pred -> 
+                let ref = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
+                es.PushEvalStack(ref)
+                eval st pred
+                es.PopEvalStack()
+            ) 
+        else
+            let ref = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
+            es.PushEvalStack(ref)
+            es.PopEvalStack()
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
         st.EvalPush("QualificationList")

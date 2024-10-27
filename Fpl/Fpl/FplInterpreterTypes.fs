@@ -588,7 +588,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 match (args, this.FplId) with
                 | ("","") -> "???" // this case should never occur after full evaluation
                 | ("",_) -> this.FplId
-                | (_,"") -> sprintf "%s()" args
+                | (_,"") -> args
                 | (_,_) -> 
                     if args<>"" then
                         if this.HasBrackets then 
