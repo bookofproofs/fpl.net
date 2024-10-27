@@ -11,25 +11,6 @@ open FplGrammarTypes
 open FplParser
 open ErrDiagnostics
 
-let addWithComma (name:string) str = 
-    if str <> "" then
-        if name.Length = 0 
-            || str = "(" || str = ")" 
-            || str = "[" || str = "]" 
-            || str = "->"
-            || name.EndsWith "(" 
-            || name.EndsWith "[" 
-            || name.EndsWith " " 
-            || name.EndsWith "." 
-            || str.StartsWith "$" then
-                if str = "->" then 
-                    name + " " + str + " "
-                else
-                    name + str
-        else
-            name + ", " + str
-    else name
-
 type EvalAlias =
     { StartPos: Position
       EndPos: Position
@@ -447,13 +428,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let mutable _exprTypeAlreadySet = false 
     let mutable _nameStartPos = fst positions
     let mutable _nameEndPos = snd positions
-    let mutable _typeSignature = []
     let mutable _representation = FplRepresentation.Undef
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
     let mutable _arity = 0
     let mutable _blockEvaluationStarted = false
-    let mutable _typeSignatureName = ""
     let mutable _fplId = ""
     let mutable _typeId = ""
 
@@ -462,11 +441,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
     let _valueList = System.Collections.Generic.List<FplValue>()
 
-
-    /// TypeSignatureName of this FplValue that is unique in its scope.
-    member this.TypeSignatureName
-        with get () = _typeSignatureName
-        and set (value) = _typeSignatureName <- value
 
     /// Indicates if this FplValue has a {} block and its evaluation already started.
     /// This flag is important to handle signature and block-declared variables differently.
@@ -500,15 +474,15 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 else
                     this.Name
             else
-                match this.TypeSignature with
-                | x::xs when x = "is" -> String.concat "" (this.TypeSignature)
+                match this.Type(true) with
+                | x::xs when x = "is" -> String.concat "" (this.Type(true))
                 | x::xs when this.Name.StartsWith("bas.") -> $"bas.{x}"
                 | x::y::xs when this.Name.StartsWith("del.") -> $"del.{y}"
                 | x::y::xs when x="bydef." -> $"bydef.{y}"
                 | x::xs -> if x = "*" || x = "+" || x = "obj" || x = "ind" || x = "undef" || x = "pred" || x = "func" then this.Name else x
                 | _ -> this.Name
         | _ -> 
-            match this.TypeSignature with
+            match this.Type(true) with
             | x::xs -> x
             | _ -> this.Name
         *)
@@ -545,11 +519,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     member this.NameEndPos
         with get () = _nameEndPos
         and set (value) = _nameEndPos <- value
-
-    /// Signature of this FplValue, for instance "predicate(object)"
-    member this.TypeSignature
-        with get () = _typeSignature
-        and set (value:string list) = _typeSignature <- value
 
     /// A representation of the constructed object (if any)
     member this.FplRepresentation
@@ -1187,24 +1156,32 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
     pm |> Seq.toList
 
 
-let rec checkCandidates (toBeMatchedTypeSignature: string list) (candidates: FplValue list) accResult =
-    /// Compares two string lists and returns a tuple of (a,b,i) where i is None, 
-    /// if a both lists are identical. If i = Some index, then a and b contain strings that are not equal at that index.
-    let findFirstMismatchPosition list1 list2 =
-        let rec compareLists index l1 l2 =
-            match l1, l2 with
-            | [], [] -> ("","", None)
-            | hd1 :: tl1, hd2 :: tl2 ->
-                if hd1 <> hd2 then (hd1, hd2, Some index)
-                else compareLists (index + 1) tl1 tl2
-            | hd1 :: _, [] -> (hd1, "", Some index)
-            | [], hd2 :: _ -> ("", hd2, Some index)
-        compareLists 0 list1 list2
+let rec checkCandidates (toBeMatchedTypeSignature: string) (candidates: FplValue list) accResult =
+    /// Compares two strings and returns a tuple of (a,b,i) where i is None, 
+    /// if both lists are identical. If i = Some index, then a and b contain strings that are not equal at that index.
+    let findFirstMismatchPosition (str1:string) (str2:string) =
+        if str1.Length > str2.Length then
+            (str1[str1.Length-1].ToString(),"",Some(str1.Length-1))
+        elif str1.Length < str2.Length then 
+            ("", str2[str2.Length-1].ToString(),Some(str2.Length-1))
+        else
+            let rec loop i =
+                if i >= str1.Length || i >= str2.Length then
+                    None
+                elif str1.[i] <> str2.[i] then
+                    Some i
+                else
+                    loop (i + 1)
+            match loop 0 with
+            | Some ind -> 
+                (str1[ind].ToString(),str2[ind].ToString(),Some(ind))
+            | None -> ("","",None)
+
     // matches the TypeSignature of every candidate with a toBeMatchedTypeSignature
     match candidates with
     | [] -> (accResult, None) // all candidates mismatch toBeMatchedTypeSignature
     | x :: xs ->
-        match findFirstMismatchPosition toBeMatchedTypeSignature x.TypeSignature with
+        match findFirstMismatchPosition toBeMatchedTypeSignature (x.Type(true)) with
         | ("", "", None) -> (accResult, Some x) // there is a candidate that matches toBeMatchedTypeSignature
         | ("", elem2, Some index) -> 
             checkCandidates toBeMatchedTypeSignature xs $"missing token `{elem2}` after matching {index}" // first reason for mismatch
@@ -1225,7 +1202,7 @@ let tryMatchSignatures (st:SymbolTable) (reference:FplValue) =
     if candidates.IsEmpty then 
         ("", candidates, None)
     else
-        let accResult, matchedCandidate = checkCandidates reference.TypeSignature candidates ""
+        let accResult, matchedCandidate = checkCandidates (reference.Type(true)) candidates ""
         (accResult, candidates, matchedCandidate)
 
 /// Tries to match the signatures of two types.
@@ -1241,11 +1218,16 @@ let tryMatchTypes (st:SymbolTable) (typeFplValue:FplValue) name =
         | FplValueType.MandatoryFunctionalTerm  
         | FplValueType.OptionalFunctionalTerm  
         | FplValueType.FunctionalTerm -> 
-            match List.tryFindIndex ((=) "->") typeFplValue.TypeSignature with
-            | Some index -> List.skip (index + 1) typeFplValue.TypeSignature
-            | None -> typeFplValue.TypeSignature
+            let mapping = 
+                if typeFplValue.ValueList.Count>0 then
+                    Some(typeFplValue.ValueList[0])
+                else
+                    None
+            match mapping with
+            | Some map -> map.Type(true)
+            | None -> typeFplValue.Type(true)
         | _ -> 
-            typeFplValue.TypeSignature
+            typeFplValue.Type(true)
 
     let toBeCheckedSignature = stripFunctionalTermTypeSignature typeFplValue
     if candidates.IsEmpty then 

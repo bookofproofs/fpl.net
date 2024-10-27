@@ -17,7 +17,6 @@ type TestFplValue() =
         let testCreateFactory fplBlockType = 
             if fplBlockType = FplValueType.Object then
                 ("obj", FplValue.CreateObject(Position("",0,1,1),Position("",0,1,1)))
-                
             else
                 ("", FplValue.CreateFplValue((Position("",0,1,1),Position("",0,1,1)), fplBlockType, r))
         let testFactory fplBlockType (repr:FplRepresentation) =
@@ -25,7 +24,7 @@ type TestFplValue() =
             Assert.AreEqual<FplValueType>(fplBlockType, fv.BlockType)
             Assert.AreEqual<string>(name, fv.Type(false))
             Assert.AreEqual<FplRepresentation>(repr, fv.FplRepresentation)
-            Assert.AreEqual<string list>([], fv.TypeSignature)
+            Assert.AreEqual<string>("", fv.Type(true))
         testFactory FplValueType.VariadicVariableMany FplRepresentation.Undef
         testFactory FplValueType.VariadicVariableMany1 FplRepresentation.Undef 
         testFactory FplValueType.Axiom (FplRepresentation.PredRepr FplPredicate.Undetermined)

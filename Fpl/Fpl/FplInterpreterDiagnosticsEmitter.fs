@@ -220,8 +220,8 @@ let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
         ad.AddDiagnostic diagnostic
 
 let checkID008Diagnostics (fplValue: FplValue) pos1 pos2 =
-    if FplValue.IsConstructor(fplValue) && fplValue.TypeSignature.Length = 1 then
-        let nameStart = fplValue.TypeSignature.Head
+    if FplValue.IsConstructor(fplValue) && fplValue.Type(true).Length = 1 then
+        let nameStart = fplValue.FplId
         let className = fplValue.Parent.Value.Type(true)
 
         if nameStart <> className then
@@ -460,8 +460,8 @@ let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     match fplValue.ExpressionType with
     | FixType.Infix _ when fplValue.Arity <> 2 ->
         if
-            fplValue.TypeSignature.Length > 2
-            && (fplValue.TypeSignature[2].StartsWith("+") || fplValue.TypeSignature[2].StartsWith("*"))
+            fplValue.Type(true).Length > 2
+            && (fplValue.Type(true).Substring(2).StartsWith("+") || fplValue.Type(true).Substring(2).StartsWith("*"))
         then
             () // avoid false positives for variadic variables
         else

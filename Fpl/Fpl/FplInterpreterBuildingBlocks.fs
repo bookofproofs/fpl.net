@@ -13,20 +13,6 @@ open FplInterpreterPredicateEvaluator
 type EvalStack() = 
     let _valueStack = Stack<FplValue>()
 
-    /// Adjusts the signature and name of an FplValue.
-    member this.AdjustNameAndSignature (fv:FplValue) (typeSignature:string list) typeSignatureName = 
-        let isVariable = FplValue.IsVariable(fv)
-        match (isVariable, fv.Type(true)<>"", fv.TypeSignature) with
-        | (true, true, ["undef"]) ->
-            fv.TypeSignature <- typeSignature
-            fv.TypeSignatureName <- typeSignatureName
-        | (true, true, _) ->
-            fv.TypeSignature <- fv.TypeSignature @ typeSignature
-            fv.TypeSignatureName <- addWithComma fv.TypeSignatureName typeSignatureName
-        | _ -> 
-            fv.TypeSignature <- fv.TypeSignature @ typeSignature
-            fv.TypeSignatureName <- addWithComma fv.TypeSignatureName typeSignatureName
-
     /// Adds the FplValue to it's parent's Scope.
     static member tryAddToScope (fv:FplValue) = 
         let next = fv.Parent.Value
@@ -117,7 +103,6 @@ type EvalStack() =
                 match next.BlockType with
                 | FplValueType.Localization -> 
                     next.FplId <- fv.FplId
-                    this.AdjustNameAndSignature next fv.TypeSignature fv.TypeSignatureName
                     next.NameEndPos <- fv.NameEndPos
                 | FplValueType.Justification -> 
                     EvalStack.tryAddToScope fv
@@ -146,7 +131,6 @@ type EvalStack() =
                 | _ -> 
                     next.FplId <- next.FplId + fv.FplId
                     EvalStack.tryAddToValueList fv
-                    this.AdjustNameAndSignature next fv.TypeSignature fv.TypeSignatureName
                     next.NameEndPos <- fv.NameEndPos
             | FplValueType.Variable
             | FplValueType.VariadicVariableMany
@@ -169,19 +153,15 @@ type EvalStack() =
                 | FplValueType.Class
                 | FplValueType.FunctionalTerm ->
                     EvalStack.tryAddToScope fv
-                    if not next.BlockEvaluationStarted then
-                        this.AdjustNameAndSignature next fv.TypeSignature fv.TypeSignatureName
                 | FplValueType.Reference  
                 | FplValueType.Quantor  
                 | FplValueType.Localization -> 
                     EvalStack.tryAddToScope fv
-                    this.AdjustNameAndSignature next fv.TypeSignature fv.TypeSignatureName
                     next.FplRepresentation <- fv.FplRepresentation
                 | FplValueType.Variable 
                 | FplValueType.VariadicVariableMany
                 | FplValueType.VariadicVariableMany1 -> 
                     EvalStack.tryAddToScope fv
-                    this.AdjustNameAndSignature next fv.TypeSignature fv.TypeSignatureName
                 | _ -> ()
             | FplValueType.Object
             | FplValueType.Quantor
@@ -215,15 +195,12 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
             checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
         elif (FplValue.IsVariadicVariableMany(fv)) then 
             fv.TypeId <- $"*{unitType}"
-            es.AdjustNameAndSignature fv [$"*{unitType}"] $"*{unitType}"
         elif (FplValue.IsVariadicVariableMany1(fv)) then 
             fv.TypeId <- $"+{unitType}"
-            es.AdjustNameAndSignature fv [$"+{unitType}"] $"+{unitType}"
         elif (FplValue.IsReference(fv)) then 
             checkID012Diagnostics st fv unitType pos1 pos2
         else
             fv.TypeId <- unitType
-            es.AdjustNameAndSignature fv [unitType] unitType
             checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
 
 
@@ -322,7 +299,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Digits s -> 
         st.EvalPush("Digits")
         let fv = es.PeekEvalStack()
-        es.AdjustNameAndSignature fv [s] s
+        fv.TypeId <- s
         st.EvalPop()
     | Ast.PascalCaseId s -> 
         st.EvalPush("PascalCaseId")
@@ -336,16 +313,9 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DollarDigits((pos1, pos2), s) -> 
         st.EvalPush("DollarDigits")
         let fv = es.PeekEvalStack()
-        let evalPath = st.EvalPath()
         let sid = $"${s.ToString()}"
-        if evalPath.Contains(".ReferencingIdentifier.") || evalPath.EndsWith("ExistsN.DollarDigits") then 
-            // In ReferencingIdentifier or exists$n context, treat DollarDigits like names, not like types.
-            fv.FplId <- fv.FplId + sid
-            fv.TypeSignatureName <- fv.Type(true) + sid
-            fv.TypeSignature <- [fv.TypeSignature.Head + sid]
-        else
-            fv.FplId <- sid
-            es.AdjustNameAndSignature fv ["ind"] "ind"
+        fv.FplId <- sid
+        fv.TypeId <- sid
         fv.NameEndPos <- pos2
         st.EvalPop() 
     | Ast.Extensionname((pos1, pos2), s) ->
@@ -359,7 +329,7 @@ let rec eval (st: SymbolTable) ast =
             else
                 $"@{s}"
         fv.TypeId <- sid
-        es.AdjustNameAndSignature fv [sid] sid
+        fv.FplId <- sid
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
@@ -372,7 +342,7 @@ let rec eval (st: SymbolTable) ast =
             else
                 $"{s}"
         fv.TypeId <- sid
-        es.AdjustNameAndSignature fv [sid] sid
+        fv.FplId <- sid
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
@@ -385,13 +355,12 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
         varValue.FplId <- name
-        es.AdjustNameAndSignature varValue ["undef"] "undef"
+        varValue.TypeId <- "undef"
         es.PushEvalStack(varValue)
         match FplValue.VariableInBlockScopeByName fv name with 
         | ScopeSearchResult.Found other ->
             varValue.FplRepresentation <- FplRepresentation.Pointer other
-            varValue.TypeSignature <- other.TypeSignature
-            varValue.TypeSignatureName <- other.TypeSignatureName
+            varValue.ValueList.Add(other)
             if (isDeclaration || isLocalizationDeclaration) then
                 // if var not found in scope, the emit error that the variable was already declared
                 emitVAR03diagnostics varValue other 
@@ -416,8 +385,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")
         let fv = es.PeekEvalStack()
-        fv.FplId <- fv.FplId + s
-        es.AdjustNameAndSignature fv [s] s
+        fv.FplId <- s
+        fv.TypeId <- s
         st.EvalPop() 
     | Ast.Alias((pos1, pos2), s) -> 
         st.EvalPush("Alias")
@@ -438,12 +407,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ObjectSymbol")
         let fv = es.PeekEvalStack()
         fv.FplId <- s
-        es.AdjustNameAndSignature fv [s] s
+        fv.TypeId <- s
         st.EvalPop()
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
         let setId (fValue:FplValue) = 
             fValue.FplId <- s
+            fValue.TypeId <- "pred"
             fValue.NameStartPos <- pos1
             fValue.NameEndPos <- pos2
         let fv = es.PeekEvalStack()
@@ -489,21 +459,21 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("InfixOperator")
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
-        es.AdjustNameAndSignature fv [symbol] symbol
+        fv.TypeId <- symbol
         emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop() 
     | Ast.PostfixOperator((pos1, pos2), symbol) -> 
         st.EvalPush("PostfixOperator")
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
-        es.AdjustNameAndSignature fv [symbol] symbol
+        fv.TypeId <- symbol
         emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop() 
     | Ast.PrefixOperator((pos1, pos2), symbol) -> 
         st.EvalPush("PrefixOperator")
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
-        es.AdjustNameAndSignature fv [symbol] symbol
+        fv.TypeId <- symbol
         emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop() 
     // | Self of Positions * unit
@@ -517,7 +487,7 @@ let rec eval (st: SymbolTable) ast =
         fv.FplId <- "true"
         if FplValue.IsReference(fv) then
             fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.True
-        es.AdjustNameAndSignature fv ["pred"] "pred"
+        fv.TypeId <- "pred"
         st.EvalPop() 
     | Ast.False((pos1, pos2), _) -> 
         st.EvalPush("False")
@@ -525,19 +495,20 @@ let rec eval (st: SymbolTable) ast =
         fv.FplId <- "false"
         if FplValue.IsReference(fv) then
             fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.False
-        es.AdjustNameAndSignature fv ["pred"] "pred"
+        fv.TypeId <- "pred"
         st.EvalPop() 
     | Ast.Undefined((pos1, pos2), _) -> 
         st.EvalPush("Undefined")
         let fv = es.PeekEvalStack()
         fv.FplId <- "undef"
-        es.AdjustNameAndSignature fv ["undef"] "undef"
+        fv.TypeId <- "pred"
         st.EvalPop() 
     | Ast.Trivial((pos1, pos2), _) -> 
         st.EvalPush("Trivial")
         let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, es.PeekEvalStack()) 
         es.PushEvalStack(refBlock)
-        es.AdjustNameAndSignature refBlock ["trivial"] "trivial"
+        refBlock.FplId <- "trivial"
+        refBlock.TypeId <- "trivial"
         es.PopEvalStack()
         st.EvalPop() 
     | Ast.Qed((pos1, pos2), _) -> 
@@ -583,10 +554,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Not")
         let fv = es.PeekEvalStack()
         fv.FplId <- "not"
-        es.AdjustNameAndSignature fv ["not"] "not"
-        es.AdjustNameAndSignature fv ["("] "("
+        fv.TypeId <- "pred"
         eval st predicateAst
-        es.AdjustNameAndSignature fv [")"] ")"
         fv.NameEndPos <- pos2
         evaluateNegation fv
         emitLG000orLG001Diagnostics fv "negation"
@@ -608,15 +577,13 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- "bydef."
         fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
-        es.AdjustNameAndSignature fv ["bydef."] "bydef."
+        fv.TypeId <- "bydef."
         eval st predicateWithQualificationAst
         emitPR001Diagnostics fv pos1 pos2
         st.EvalPop()
     | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->
         st.EvalPush("DottedPredicate")
         let fv = es.PeekEvalStack()
-        fv.FplId <- fv.FplId + "."
-        fv.TypeSignature <- fv.TypeSignature @ ["."]
         let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv) 
         es.PushEvalStack(refBlock)
         eval st predicateWithOptSpecificationAst
@@ -665,24 +632,27 @@ let rec eval (st: SymbolTable) ast =
                 ()
             else
                 fv.FplId <- fv.FplId + identifier
-                es.AdjustNameAndSignature fv [identifier] identifier
+                fv.TypeId <- fv.TypeId + identifier
             checkID008Diagnostics fv pos1 pos2
             checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
             emitSIG04TypeDiagnostics st identifier fv pos1 pos2
-        elif FplValue.IsVariable(fv) || fv.BlockType = FplValueType.Mapping then
-            let sid = 
-                if (FplValue.IsVariadicVariableMany(fv)) then 
-                    $"*{identifier}"
-                elif (FplValue.IsVariadicVariableMany1(fv)) then 
-                    $"+{identifier}"
-                else
-                    identifier
+        elif FplValue.IsVariadicVariableMany(fv) then
+            let sid = $"*{identifier}"
             fv.TypeId <- sid
-            es.AdjustNameAndSignature fv [sid] sid
+            emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
+        elif FplValue.IsVariadicVariableMany1(fv) then
+            let sid = $"+{identifier}"
+            fv.TypeId <- sid
+            emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
+        elif fv.BlockType = FplValueType.Variable then
+            fv.TypeId <- identifier
+            emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
+        elif fv.BlockType = FplValueType.Mapping then
+            fv.TypeId <- identifier
             emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
         elif FplValue.IsReference(fv) then
             fv.FplId <- fv.FplId + identifier
-            es.AdjustNameAndSignature fv [identifier] identifier
+            fv.TypeId <- fv.TypeId + identifier
             checkID012Diagnostics st fv identifier pos1 pos2
             checkID012Diagnostics st fv identifier pos1 pos2
             if evalPath.EndsWith("PredicateWithOptSpecification.PredicateIdentifier") then 
@@ -693,7 +663,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
         st.EvalPush("ParamTuple")
         let fv = es.PeekEvalStack()
-        es.AdjustNameAndSignature fv ["("] "("
         namedVariableDeclarationListAsts |> List.map (
             fun child ->
             match child with 
@@ -701,18 +670,15 @@ let rec eval (st: SymbolTable) ast =
             | _ -> ()
             eval st child
         ) |> ignore
-        es.AdjustNameAndSignature fv [")"] ")"
         fv.NameEndPos <- pos2
         st.EvalPop()
     | Ast.BracketedCoordsInType((pos1, pos2), asts) ->
         st.EvalPush("BracketedCoordsInType")
         let fv = es.PeekEvalStack()
-        es.AdjustNameAndSignature fv ["["] "["
         asts 
         |> List.map (fun ast1 ->
             eval st ast1
         ) |> ignore
-        es.AdjustNameAndSignature fv ["]"] "]"
         fv.NameEndPos <- pos2
         st.EvalPop()
     | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
@@ -730,19 +696,15 @@ let rec eval (st: SymbolTable) ast =
     | Ast.BrackedCoordList((pos1, pos2), asts) ->
         st.EvalPush("BrackedCoordList")
         let fv = es.PeekEvalStack()
-        es.AdjustNameAndSignature fv ["["] "["
         asts |> List.map (eval st) |> ignore
-        es.AdjustNameAndSignature fv ["]"] "]"
         st.EvalPop()
     | Ast.And((pos1, pos2), predicateAsts) ->
         st.EvalPush("And")
         let fv = es.PeekEvalStack()
         fv.FplId <- "and"
         fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
-        es.AdjustNameAndSignature fv ["and"] "and"
-        es.AdjustNameAndSignature fv ["("] "("
+        fv.TypeId <- "pred"
         predicateAsts |> List.map (eval st) |> ignore
-        es.AdjustNameAndSignature fv [")"] ")"
         fv.NameEndPos <- pos2
         evaluateConjunction fv
         emitLG000orLG001Diagnostics fv "conjunction"
@@ -752,10 +714,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- "or"
         fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
-        es.AdjustNameAndSignature fv ["or"] "or"
-        es.AdjustNameAndSignature fv ["("] "("
+        fv.TypeId <- "pred"
         predicateAsts |> List.map (eval st) |> ignore
-        es.AdjustNameAndSignature fv [")"] ")"
         fv.NameEndPos <- pos2
         evaluateDisjunction fv
         emitLG000orLG001Diagnostics fv "disjunction"
@@ -765,10 +725,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- "xor"
         setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        es.AdjustNameAndSignature fv ["xor"] "xor"
-        es.AdjustNameAndSignature fv ["("] "("
+        fv.TypeId <- "pred"
         predicateAsts |> List.map (eval st) |> ignore
-        es.AdjustNameAndSignature fv [")"] ")"
         fv.NameEndPos <- pos2
         evaluateExclusiveOr fv
         emitLG000orLG001Diagnostics fv "exclusive-or"
@@ -798,9 +756,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ArgumentTuple((pos1, pos2), asts) ->
         st.EvalPush("ArgumentTuple")
         let fv = es.PeekEvalStack()
-        es.AdjustNameAndSignature fv ["("] "("
         asts |> List.map (eval st) |> ignore
-        es.AdjustNameAndSignature fv [")"] ")"
         st.EvalPop()
     | Ast.QualificationList((pos1, pos2), asts) ->
         st.EvalPush("QualificationList")
@@ -825,7 +781,6 @@ let rec eval (st: SymbolTable) ast =
         match astTupleOption with 
         | Some (_, ast3) -> 
             let fv = es.PeekEvalStack()
-            es.AdjustNameAndSignature fv ["->"] "->"
             fv.NameEndPos <- pos2
             eval st ast3 |> ignore
         | _ -> ()
@@ -883,7 +838,7 @@ let rec eval (st: SymbolTable) ast =
         let identifier = (chars |> List.map (fun c -> c.ToString()) |>  String.concat "") + "self"
         let fv = es.PeekEvalStack()
         fv.FplId <- identifier
-        es.AdjustNameAndSignature fv [identifier] identifier
+        fv.TypeId <- identifier
         st.EvalPop()
     // | Translation of string * Ast
     | Ast.Translation((pos1, pos2),(langCode, ebnfAst)) ->
@@ -910,11 +865,9 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- "impl"
         setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        es.AdjustNameAndSignature fv ["impl"] "impl"
-        es.AdjustNameAndSignature fv ["("] "("
+        fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
-        es.AdjustNameAndSignature fv [")"] ")"
         fv.NameEndPos <- pos2
         evaluateImplication fv
         emitLG000orLG001Diagnostics fv "implication"
@@ -924,11 +877,9 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- "iif"
         setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        es.AdjustNameAndSignature fv ["iif"] "iif"
-        es.AdjustNameAndSignature fv ["("] "("
+        fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
-        es.AdjustNameAndSignature fv [")"] ")"
         fv.NameEndPos <- pos2
         evaluateEquivalence fv
         emitLG000orLG001Diagnostics fv "equivalence"
@@ -938,8 +889,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- "is"
         setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        es.AdjustNameAndSignature fv ["is"] "is"
-        es.AdjustNameAndSignature fv ["("] "("
+        fv.TypeId <- "pred"
 
         let operand = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv) 
         es.PushEvalStack(operand)
@@ -951,14 +901,14 @@ let rec eval (st: SymbolTable) ast =
         eval st variableTypeAst
         es.PopEvalStack()
 
-        es.AdjustNameAndSignature fv [")"] ")"
+        fv.TypeId <- "pred"
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
         st.EvalPush("Delegate")
         let fv = es.PeekEvalStack()
         let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv) 
         refBlock.FplId <- "del."
-        es.AdjustNameAndSignature refBlock ["del."] "del."
+        refBlock.TypeId <- "del."
         es.PushEvalStack(refBlock)
         eval st fplDelegateIdentifierAst
         eval st argumentTupleAst
@@ -1022,9 +972,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
         qtr.FplId <- "all"
-        es.AdjustNameAndSignature qtr ["all"] "all"
+        qtr.TypeId <- "pred"
         es.PushEvalStack(qtr)
-        es.AdjustNameAndSignature qtr ["("] "("
         variableListIsOfTypeListAst
         |> List.map (fun (varListAst, optOfTypeAst) ->
             qtr.Arity <- qtr.Arity + (varListAst |> List.length)
@@ -1032,7 +981,6 @@ let rec eval (st: SymbolTable) ast =
             optOfTypeAst |> Option.map (eval st) |> Option.defaultValue ()
             ())
         |> ignore
-        es.AdjustNameAndSignature qtr [")"] ")"
         let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
         es.PushEvalStack(pred)
         eval st predicateAst
@@ -1045,9 +993,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
         qtr.FplId <- "ex"
-        es.AdjustNameAndSignature qtr ["ex"] "ex"
+        qtr.TypeId <- "pred"
         es.PushEvalStack(qtr)
-        es.AdjustNameAndSignature qtr ["("] "("
         variableListIsOfTypeListAst
         |> List.map (fun (varListAst, optOfTypeAst) ->
             qtr.Arity <- qtr.Arity + (varListAst |> List.length)
@@ -1055,7 +1002,6 @@ let rec eval (st: SymbolTable) ast =
             optOfTypeAst |> Option.map (eval st) |> Option.defaultValue ()
             ())
         |> ignore
-        es.AdjustNameAndSignature qtr [")"] ")"
         let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
         es.PushEvalStack(pred)
         eval st predicateAst
@@ -1069,14 +1015,12 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
         qtr.FplId <- "exn"
-        es.AdjustNameAndSignature qtr ["exn"] "exn"
+        qtr.TypeId <- "pred"
         qtr.Arity <- 1
         es.PushEvalStack(qtr)
         eval st dollarDigitsAst
-        es.AdjustNameAndSignature qtr ["("] "("
         eval st variableAst
         variableIsOfTypeAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
-        es.AdjustNameAndSignature qtr [")"] ")"
         let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
         es.PushEvalStack(pred)
         eval st predicateAst
@@ -1101,7 +1045,6 @@ let rec eval (st: SymbolTable) ast =
                 fv.BlockType <- FplValueType.FunctionalTerm
             else
                 fv.BlockType <- FplValueType.MandatoryFunctionalTerm
-        es.AdjustNameAndSignature fv ["->"] "->"
         fv.NameEndPos <- pos2
         eval st mappingAst
         st.EvalPop()
@@ -1152,15 +1095,13 @@ let rec eval (st: SymbolTable) ast =
                         |> Seq.iter (fun kv -> fv.Scope.Add(kv.Key,kv.Value))
                         if dictOfOperators.ContainsKey(symbol) then 
                             fv.FplId <- symbol
-                            es.AdjustNameAndSignature fv [symbol] symbol
-                            es.AdjustNameAndSignature fv ["("] "("
+                            fv.TypeId <- symbol
                             eval st predicateAst 
                             if xs.Length > 0 then
                                 let nextInfixOperation = FplValue.CreateFplValue((p1,p2),FplValueType.Reference,fv)
                                 es.PushEvalStack(nextInfixOperation)
                                 createReversedPolishNotation xs nextInfixOperation
                                 es.PopEvalStack()                                
-                            es.AdjustNameAndSignature fv [")"] ")"
                     | _ -> ()
                 else
                     eval st predicateAst 
@@ -1178,23 +1119,15 @@ let rec eval (st: SymbolTable) ast =
             if prefixOpAst.IsSome && postfixOpAst.IsSome then 
                 // for heuristic reasons, we choose a precedence of postfix ...
                 postfixOpAst |> Option.map (eval st) |> Option.defaultValue () 
-                es.AdjustNameAndSignature refBlock ["("] "("
                 // ... over prefix notation in mathematics
                 prefixOpAst |> Option.map (eval st) |> Option.defaultValue ()
-                es.AdjustNameAndSignature refBlock ["("] "("
                 eval st predicateAst
-                es.AdjustNameAndSignature refBlock [")"] ")"
-                es.AdjustNameAndSignature refBlock [")"] ")"
             elif prefixOpAst.IsSome then 
                 prefixOpAst |> Option.map (eval st) |> Option.defaultValue ()
-                es.AdjustNameAndSignature refBlock ["("] "("
                 eval st predicateAst
-                es.AdjustNameAndSignature refBlock [")"] ")"
             elif postfixOpAst.IsSome then 
                 postfixOpAst |> Option.map (eval st) |> Option.defaultValue ()
-                es.AdjustNameAndSignature refBlock ["("] "("
                 eval st predicateAst
-                es.AdjustNameAndSignature refBlock [")"] ")"
             else
                 eval st predicateAst
         ensureReversedPolishNotation
@@ -1212,7 +1145,7 @@ let rec eval (st: SymbolTable) ast =
                 let subNode = rb.ValueList[0]
                 if subNode.BlockType = FplValueType.Reference && 
                     subNode.Type(false) = rb.Type(false) && 
-                    subNode.TypeSignatureName = rb.TypeSignatureName 
+                    subNode.Type(true) = rb.Type(true)
                 || subNode.BlockType = FplValueType.Quantor
                 then 
                     es.Pop() |> ignore
