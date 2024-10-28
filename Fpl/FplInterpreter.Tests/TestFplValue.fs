@@ -22,9 +22,9 @@ type TestFplValue() =
         let testFactory fplBlockType (repr:FplRepresentation) =
             let name, fv = testCreateFactory fplBlockType
             Assert.AreEqual<FplValueType>(fplBlockType, fv.BlockType)
-            Assert.AreEqual<string>(name, fv.Type(false))
+            Assert.AreEqual<string>(name, fv.Type(SignatureType.Mixed))
             Assert.AreEqual<FplRepresentation>(repr, fv.FplRepresentation)
-            Assert.AreEqual<string>("", fv.Type(true))
+            Assert.AreEqual<string>("", fv.Type(SignatureType.Type))
         testFactory FplValueType.VariadicVariableMany FplRepresentation.Undef
         testFactory FplValueType.VariadicVariableMany1 FplRepresentation.Undef 
         testFactory FplValueType.Axiom (FplRepresentation.PredRepr FplPredicate.Undetermined)
@@ -782,7 +782,7 @@ type TestFplValue() =
         let result = prepareFplCode(filename + ".fpl", fplCode, false) 
         let block = result.Value.Root.Scope[filename]
         let fplValue = block.Scope[expectedName]
-        let actualTypeSignature = fplValue.Type(true)
+        let actualTypeSignature = fplValue.Type(SignatureType.Type)
         let actualSignatureStart = fplValue.NameStartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
         Assert.AreEqual<string>(expectedName, actualTypeSignature)
@@ -1001,7 +1001,7 @@ type TestFplValue() =
         let result = prepareFplCode(filename + ".fpl", fplCode, false) 
         let block = result.Value.Root.Scope[filename].Scope["T"]
         let fplValue = block.Scope[expectedName]
-        let actualTypeSignature = fplValue.Type(true)
+        let actualTypeSignature = fplValue.Type(SignatureType.Type)
         let actualSignatureStart = fplValue.NameStartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
         Assert.AreEqual<string>(expectedName, actualTypeSignature)
@@ -1084,7 +1084,7 @@ type TestFplValue() =
         let result = prepareFplCode(filename + ".fpl", fplCode, false) 
         let cl = result.Value.Root.Scope[filename].Scope["T"]
         let fplValue = cl.Scope[expectedName]
-        let actualTypeSignature = fplValue.Type(true)
+        let actualTypeSignature = fplValue.Type(SignatureType.Type)
         let actualSignatureStart = fplValue.NameStartPos.Index
         let actualSignatureEnd = fplValue.NameEndPos.Index
         Assert.AreEqual<string>(expectedName, actualTypeSignature)

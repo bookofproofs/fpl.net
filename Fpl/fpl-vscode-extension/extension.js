@@ -31,15 +31,13 @@ function directoryOrFileExists(path) {
 function removeDirectorySync(path) {
     return new Promise((resolve, reject) => {
         try {
-            if (directoryOrFileExists(path)) 
-            {
+            if (directoryOrFileExists(path)) {
                 const fs = require('fs');
                 fs.rmSync(path, { recursive: true });
             }
             resolve("directory removed");
         }
-        catch (err)
-        {
+        catch (err) {
             reject(err);
         }
     });
@@ -86,23 +84,23 @@ function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
             const fs = require('fs');
             const path = require('path');
             const tar = require('tar');
-    
+
             // URL of the file to download
             let fileUrl = fileUrlDir + '/' + fileUrlName;
-    
+
             // Path to save the downloaded file
             let pathToDownloadedFile = downloadPath + '/' + fileUrlName;
-    
+
             // Download and extract the runtime
             let file = fs.createWriteStream(pathToDownloadedFile);
             https.get(fileUrl, function (response) {
                 response.pipe(file);
-    
+
                 file.on('finish', function () {
                     file.close(() => {
                         log2Console('Runtime ' + runtimeName + ' downloaded successfully', false);
-                        
-                        if (path.extname(pathToDownloadedFile)=='.gz') {
+
+                        if (path.extname(pathToDownloadedFile) == '.gz') {
                             tar.x({
                                 file: pathToDownloadedFile,
                                 cwd: downloadPath
@@ -112,7 +110,7 @@ function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
                             log2Console('runtime ' + runtimeName + ' installed successfully', false);
                             resolve('runtime ' + runtimeName + ' installed successfully');
                         }
-                        else if (path.extname(pathToDownloadedFile)=='.zip') {
+                        else if (path.extname(pathToDownloadedFile) == '.zip') {
                             const AdmZip = require('adm-zip');
                             var zip = new AdmZip(pathToDownloadedFile);
                             zip.extractAllTo(downloadPath, true)
@@ -120,9 +118,8 @@ function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
                             log2Console('runtime ' + runtimeName + ' installed successfully', false);
                             resolve('runtime ' + runtimeName + ' installed successfully');
                         }
-                        else
-                        {
-                            reject("no decompression algorithm found for downloaded file "+pathToDownloadedFile);
+                        else {
+                            reject("no decompression algorithm found for downloaded file " + pathToDownloadedFile);
                         }
                         return;
                     });
@@ -167,7 +164,7 @@ function acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime) {
         let condition;
         const path = require('path');
         var pathToDotNetExe = path.join(relPathToDotnetRuntime, 'dotnet.exe');
-        if (directoryOrFileExists(pathToDotNetExe) ) {
+        if (directoryOrFileExists(pathToDotNetExe)) {
             // We have a dotnet.exe runtime for this platform / architecture already in the directory relPathToDotnetRuntime
             resolve('dotnet runtime acquired successfully');
         }
@@ -183,7 +180,7 @@ function acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime) {
                     // and install the runtime there
                     const installRuntimePromice = installRuntime(runtimeName, relPathToDotnetRuntime, fileUrlDir, fileUrlName);
                     installRuntimePromice.then((message) => {
-        
+
                         resolve('dotnet runtime acquired properly');
                     }).catch((message) => {
                         reject(message);
@@ -191,7 +188,7 @@ function acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime) {
                 }).catch((message) => {
                     reject(message);
                 });
-            }).catch((message) => {     
+            }).catch((message) => {
                 reject(message);
             });
         }
@@ -258,7 +255,7 @@ class FplTheoriesProvider {
         // Convert each item in the scope to a MyTreeItem
         return scope.map(item => new MyTreeItem("#" + item.Type + ": " + item.Name, item.Scope, item.ValueList));
     }
-    
+
     parseValueList(valueList) {
         // Convert each item in the valueList to a MyTreeItem
         return valueList.map(item => new MyTreeItem(item.Type + ": " + item.Name, item.Scope, item.ValueList));
@@ -280,7 +277,7 @@ let client;
 function activate(context) {
     outputChannel = vscode.window.createOutputChannel('FPL Log');
     try {
- 
+
         // Use the console to output diagnostic information (console.log) and errors (console.error)
         // This line of code will only be executed once when your extension is activated
 
@@ -303,18 +300,18 @@ function activate(context) {
                 run: { command: relPathToDotnet, args: [relPathToServerDll] },
                 debug: { command: relPathToDotnet, args: [relPathToServerDll] }
             };
-    
+
             let clientOptions = {
                 documentSelector: [{ scheme: 'file', language: 'fpl' }]
             };
-    
+
             client = new LanguageClient(
                 'fpl-vscode-extension',
                 'FPL Language Server',
                 serverOptions,
                 clientOptions
             );
-           
+
             // Create an instance of your TreeDataProvider
             const fplTheoriesProvider = new FplTheoriesProvider();
 
@@ -348,22 +345,22 @@ function activate(context) {
                     console.error('Error writing file:', err);
                 }
             });
-            
+
             let disposableClient = client.start();
- 
+
             // The command has been defined in the package.json file
             // Now provide the implementation of the command with  registerCommand
             // The commandId parameter must match the command field in package.json
             let disposableCommand = vscode.commands.registerCommand('fpl-vscode-extension.helloWorld', function () {
-                
+
                 // The code you place here will be executed every time your command is executed
                 // Display a message box to the user
                 vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
             });
-    
+
             context.subscriptions.push(disposableClient);
             context.subscriptions.push(disposableCommand);
-    
+
             log2Console('Launching "Formal Proving Language", enjoy!', false);
         });
 

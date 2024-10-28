@@ -23,7 +23,11 @@ type EvalStack() =
     static member tryAddToScope (fv:FplValue) = 
         let next = fv.Parent.Value
         let isBlock = FplValue.IsBlock(fv)
-        let typeId = fv.Type(isBlock)
+        let typeId = 
+            if isBlock then 
+                fv.Type(SignatureType.Mixed)
+            else
+                fv.Type(SignatureType.Name)
         match FplValue.InScopeOfParent(fv) typeId with
         | ScopeSearchResult.Found conflict -> 
             match next.BlockType with
@@ -323,7 +327,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let sid = $"${s.ToString()}"
         fv.FplId <- fv.FplId + sid
-        fv.TypeId <- fv.FplId + sid
+        fv.TypeId <- fv.TypeId + sid
         fv.NameEndPos <- pos2
         st.EvalPop() 
     | Ast.Extensionname((pos1, pos2), s) ->
@@ -711,13 +715,12 @@ let rec eval (st: SymbolTable) ast =
         if coordListAst.Length > 0 then 
             coordListAst 
             |> List.iter (fun pred -> 
-                let ref = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
-                es.PushEvalStack(ref)
                 eval st pred
-                es.PopEvalStack()
             ) 
         else
             let ref = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
+            ref.FplId <- "???"
+            ref.TypeId <- "???"
             es.PushEvalStack(ref)
             es.PopEvalStack()
         st.EvalPop()
@@ -781,13 +784,12 @@ let rec eval (st: SymbolTable) ast =
         if predicateListAst.Length > 0 then 
             predicateListAst 
             |> List.iter (fun pred -> 
-                let ref = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
-                es.PushEvalStack(ref)
                 eval st pred
-                es.PopEvalStack()
             ) 
         else
             let ref = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
+            ref.FplId <- "???"
+            ref.TypeId <- "???"
             es.PushEvalStack(ref)
             es.PopEvalStack()
         st.EvalPop()
@@ -1099,7 +1101,7 @@ let rec eval (st: SymbolTable) ast =
             es.PushEvalStack(infixOperator)
             optSeparatorAst |> Option.map (eval st) |> Option.defaultValue ()
             es.Pop() |> ignore // pop operator without changing the parent node's name
-            dictOfOperators.Add(infixOperator.Type(false), infixOperator)
+            dictOfOperators.Add(infixOperator.Type(SignatureType.Mixed), infixOperator)
         )
         |> ignore
 
@@ -1461,6 +1463,7 @@ let evaluateSymbolTable (st: SymbolTable) =
                 st.Root.Scope[pa.Id].Reset()
                 st.Root.Scope[pa.Id] <- theoryValue
             theoryValue.FplId <- pa.Id
+            theoryValue.TypeId <- pa.Id
             es.PushEvalStack(theoryValue)
             ad.CurrentUri <- pa.Parsing.Uri
             eval st pa.Parsing.Ast
