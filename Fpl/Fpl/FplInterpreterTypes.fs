@@ -525,6 +525,12 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
                 kvp.Value.Type(true))
             |> String.concat ", "
+        let scopeTuple() = 
+            this.Scope
+            |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> FplValue.IsVariable(kvp.Value))
+            |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
+                kvp.Value.Type(false))
+            |> String.concat ", "
         let mapping =
             if this.ValueList.Count>0 && this.ValueList[0].BlockType = FplValueType.Mapping then
                 Some (this.ValueList[0])
@@ -585,6 +591,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     this.FplId 
             | FplValueType.Reference ->
                 let args = argumentTuple()
+                let scope = scopeTuple()
                 match (args, this.FplId) with
                 | ("","") -> "???" // this case should never occur after full evaluation
                 | ("",_) -> this.FplId

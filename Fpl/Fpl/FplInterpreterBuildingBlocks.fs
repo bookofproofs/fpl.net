@@ -169,7 +169,7 @@ type EvalStack() =
                     next.FplRepresentation <- fv.FplRepresentation
                     EvalStack.tryAddToScope fv
                 | FplValueType.Reference ->
-                    EvalStack.tryAddToValueList fv
+                    EvalStack.tryAddToScope fv
                 | _ -> ()
             | FplValueType.Object
             | FplValueType.Quantor
@@ -368,9 +368,11 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(varValue)
         match FplValue.VariableInBlockScopeByName fv name with 
         | ScopeSearchResult.Found other ->
-            varValue.ValueList.Add(other)
+            // replace the variable by other on stack
+            es.Pop() |> ignore
+            es.PushEvalStack(other)
             if (isDeclaration || isLocalizationDeclaration) then
-                // if var not found in scope, the emit error that the variable was already declared
+                // if var not found in scope, emit error that the variable was already declared
                 emitVAR03diagnostics varValue other 
         | _ -> 
             if isLocalizationDeclaration then
@@ -387,7 +389,7 @@ let rec eval (st: SymbolTable) ast =
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
         if not isDeclaration then 
-            es.PopEvalStack() // pop only variables from stack that are NOT being declared (those will be popped in Ast.NamedVarDecl(..))
+            es.PopEvalStack()  // pop only variables from stack that are NOT being declared (those will be popped in Ast.NamedVarDecl(..))
         ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 

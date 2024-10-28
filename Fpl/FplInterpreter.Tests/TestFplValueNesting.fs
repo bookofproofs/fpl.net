@@ -3,6 +3,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
+open System
 
 
 [<TestClass>]
@@ -25,7 +26,9 @@ type TestFplValueNesting() =
 
             let pr1 = theory.Scope["X()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>("true", base1.Type(false))
+            let resS = base1.Type(false)
+
+            Assert.AreEqual<string>("true", resS)
         | _ -> Assert.IsTrue(false)
 
     [<DataRow("lem Le2() { true } proof Le2$1 {  1. |- trivial  2. 1., 2., 3. |- trivial 3. |- trivial qed };")>]
