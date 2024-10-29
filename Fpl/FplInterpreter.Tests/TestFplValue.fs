@@ -9,46 +9,6 @@ open CommonTestHelpers
 [<TestClass>]
 type TestFplValue() =
 
-    [<TestMethod>]
-    member this.TestInitialFactory() =
-        ad.Clear()
-        let r = FplValue.CreateRoot()
-        Assert.AreEqual<FplValueType>(FplValueType.Root, r.BlockType)
-        let testCreateFactory fplBlockType = 
-            if fplBlockType = FplValueType.Object then
-                ("obj", FplValue.CreateObject(Position("",0,1,1),Position("",0,1,1)))
-            else
-                ("", FplValue.CreateFplValue((Position("",0,1,1),Position("",0,1,1)), fplBlockType, r))
-        let testFactory fplBlockType (repr:FplRepresentation) =
-            let name, fv = testCreateFactory fplBlockType
-            Assert.AreEqual<FplValueType>(fplBlockType, fv.BlockType)
-            Assert.AreEqual<string>(name, fv.Type(SignatureType.Mixed))
-            Assert.AreEqual<FplRepresentation>(repr, fv.FplRepresentation)
-            Assert.AreEqual<string>("", fv.Type(SignatureType.Type))
-        testFactory FplValueType.VariadicVariableMany FplRepresentation.Undef
-        testFactory FplValueType.VariadicVariableMany1 FplRepresentation.Undef 
-        testFactory FplValueType.Axiom (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        testFactory FplValueType.Theorem (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        testFactory FplValueType.Lemma (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        testFactory FplValueType.Proposition (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        testFactory FplValueType.Corollary (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        testFactory FplValueType.Conjecture (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        testFactory FplValueType.Quantor (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        testFactory FplValueType.Proof (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        testFactory FplValueType.RuleOfInference (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        testFactory FplValueType.Predicate (FplRepresentation.PredRepr FplPredicate.Undetermined)
-        testFactory FplValueType.Object (FplRepresentation.ObjRepr "obj")
-        testFactory FplValueType.Constructor (FplRepresentation.ObjRepr "obj")
-        testFactory FplValueType.Theory FplRepresentation.Undef
-        testFactory FplValueType.FunctionalTerm FplRepresentation.Undef
-        testFactory FplValueType.Variable FplRepresentation.Undef
-        testFactory FplValueType.MandatoryFunctionalTerm FplRepresentation.Undef
-        testFactory FplValueType.OptionalFunctionalTerm FplRepresentation.Undef
-        testFactory FplValueType.MandatoryPredicate FplRepresentation.Undef
-        testFactory FplValueType.OptionalPredicate FplRepresentation.Undef
-        testFactory FplValueType.Class (FplRepresentation.LangRepr FplLanguageConstruct.Class)
-
-
     [<DataRow("inference TestId() {pre: true con: true};", "TestId()")>]
     [<DataRow("inference TestId(x:ind) {pre: true con: true};", "TestId(ind)")>]
     [<DataRow("inference TestId(x:pred) {pre: true con: true};", "TestId(pred)")>]

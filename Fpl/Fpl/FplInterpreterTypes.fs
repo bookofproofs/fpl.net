@@ -630,7 +630,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     if this.HasBrackets then 
                         sprintf "%s[%s].%s" (var.Type(propagate)) args (qual.Type(propagate))
                     else
-                        sprintf "%s[%s].%s" (var.Type(propagate)) args (qual.Type(propagate))
+                        sprintf "%s(%s).%s" (var.Type(propagate)) args (qual.Type(propagate))
                 | ("", Some var, None) -> 
                     sprintf "%s" (var.Type(propagate)) 
                 | ("???", Some var, None) -> 
