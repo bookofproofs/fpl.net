@@ -22,13 +22,14 @@ type EvalStack() =
     /// Adds the FplValue to it's parent's Scope.
     static member tryAddToScope (fv:FplValue) = 
         let next = fv.Parent.Value
-        let isBlock = FplValue.IsBlock(fv)
-        let typeId = 
-            if isBlock then 
+        let identifier = 
+            if FplValue.IsBlock(fv) then 
                 fv.Type(SignatureType.Mixed)
+            elif FplValue.IsVariable(fv) then 
+                fv.FplId
             else
                 fv.Type(SignatureType.Name)
-        match FplValue.InScopeOfParent(fv) typeId with
+        match FplValue.InScopeOfParent(fv) identifier with
         | ScopeSearchResult.Found conflict -> 
             match next.BlockType with
             | FplValueType.Justification -> 
@@ -45,7 +46,7 @@ type EvalStack() =
                 | _ ->
                     emitID001diagnostics fv conflict 
         | _ -> 
-            next.Scope.Add(typeId,fv)
+            next.Scope.Add(identifier,fv)
 
     /// adds the FplValue to it's parent's ValueList
     static member tryAddToValueList (fv:FplValue) = 
