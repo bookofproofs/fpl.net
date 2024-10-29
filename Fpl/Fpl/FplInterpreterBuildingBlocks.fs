@@ -114,6 +114,7 @@ type EvalStack() =
                 match next.BlockType with
                 | FplValueType.Localization -> 
                     next.FplId <- fv.FplId
+                    next.TypeId <- fv.TypeId
                     next.NameEndPos <- fv.NameEndPos
                 | FplValueType.Justification -> 
                     EvalStack.tryAddToScope fv
@@ -393,6 +394,9 @@ let rec eval (st: SymbolTable) ast =
                         | None -> fValue
                 let loc = getLocalization fv
                 loc.Scope.Add(name, varValue)
+                // Add the variable to the reference in the localization
+                es.PushEvalStack(varValue)
+                es.PopEvalStack()
         else
             match FplValue.VariableInBlockScopeByName fv name with 
             | ScopeSearchResult.Found other -> ()
@@ -1181,10 +1185,11 @@ let rec eval (st: SymbolTable) ast =
         refBlock.NameEndPos <- pos2
         /// simplify trivially nested expressions 
         let simplifyTriviallyNestedExpressions (rb:FplValue) = 
-            if rb.ValueList.Count = 1 then
+            if rb.ValueList.Count = 1 && rb.FplId = "" then
                 let subNode = rb.ValueList[0]
                 if subNode.BlockType = FplValueType.Reference 
                 || subNode.BlockType = FplValueType.Quantor
+
                 then 
                     es.Pop() |> ignore
                     es.PushEvalStack(subNode)

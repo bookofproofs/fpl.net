@@ -566,6 +566,16 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             | FplValueType.Axiom ->
                 let paramT = paramTuple()
                 sprintf "%s(%s)" head paramT
+            | FplValueType.Localization -> 
+                let paramT = 
+                    this.Scope
+                    |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> FplValue.IsVariable(kvp.Value))
+                    |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
+                        kvp.Value.Type(SignatureType.Name))
+                    |> String.concat ", "
+                match paramT with
+                | "" -> head
+                | _ -> sprintf "%s(%s)" head paramT
             | FplValueType.OptionalFunctionalTerm 
             | FplValueType.MandatoryFunctionalTerm
             | FplValueType.FunctionalTerm ->
@@ -652,8 +662,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.RuleOfInference 
         | FplValueType.Predicate 
         | FplValueType.FunctionalTerm 
-        | FplValueType.Class 
-        | FplValueType.Localization -> true
+        | FplValueType.Class -> true
         | _ -> false
 
     /// Indicates if this FplValue is a definition

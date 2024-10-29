@@ -760,6 +760,19 @@ type TestFplValue() =
         Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
         prepareFplCode(filename, "", true) |> ignore
 
+    [<DataRow("""loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "not(x)")>]
+    [<DataRow("""loc Equal(x,y) := !tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y;;""","Equal(x, y)")>]
+
+    [<TestMethod>]
+    member this.TestTypeSignatureOfFplLocalizations(fplCode:string, expectedName:string) =
+        let filename = "TestTypeSignatureOfFplBlocks"
+        let result = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let block = result.Value.Root.Scope[filename]
+        let fplValue = block.Scope[expectedName]
+        let actualTypeSignature = fplValue.Type(SignatureType.Name)
+        Assert.AreEqual<string>(expectedName, actualTypeSignature)
+        prepareFplCode(filename, "", true) |> ignore
+
     [<DataRow("def cl T:obj {intr prty pred TestId() {intrinsic}};", "TestId()")>]
     [<DataRow("def cl T:obj {intr prty pred TestId(x:ind) {intrinsic}};", "TestId(ind)")>]
     [<DataRow("def cl T:obj {intr prty pred TestId(x:pred) {intrinsic}};", "TestId(pred)")>]
