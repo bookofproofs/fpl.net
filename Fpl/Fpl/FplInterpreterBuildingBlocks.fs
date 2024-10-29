@@ -173,7 +173,7 @@ type EvalStack() =
                     next.FplRepresentation <- fv.FplRepresentation
                     EvalStack.tryAddToScope fv
                 | FplValueType.Reference ->
-                    EvalStack.tryAddToScope fv
+                    EvalStack.tryAddToValueList fv
                 | _ -> ()
             | FplValueType.Object
             | FplValueType.Quantor
@@ -366,20 +366,24 @@ let rec eval (st: SymbolTable) ast =
         ad.DiagnosticsStopped <- false // enable var-related diagnostics in AST.Var, even if it was stopped (e.g. in Ast.Localization)
         let fv = es.PeekEvalStack()
         let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
-        varValue.FplId <- name
-        varValue.TypeId <- "undef"
-        varValue.IsSignatureVariable <- es.InSignatureEvaluation 
-        es.PushEvalStack(varValue)
-        match FplValue.VariableInBlockScopeByName fv name with 
-        | ScopeSearchResult.Found other ->
-            // replace the variable by other on stack
-            es.Pop() |> ignore
-            es.PushEvalStack(other)
-            if (isDeclaration || isLocalizationDeclaration) then
-                // if var not found in scope, emit error that the variable was already declared
+        if isDeclaration then 
+            match FplValue.VariableInBlockScopeByName fv name with 
+            | ScopeSearchResult.Found other ->
+                // replace the variable by other on stack
+                es.PushEvalStack(other)
                 emitVAR03diagnostics varValue other 
-        | _ -> 
-            if isLocalizationDeclaration then
+            | _ -> 
+                varValue.FplId <- name
+                varValue.TypeId <- "undef"
+                varValue.IsSignatureVariable <- es.InSignatureEvaluation 
+                es.PushEvalStack(varValue)
+        elif isLocalizationDeclaration then 
+            match FplValue.VariableInBlockScopeByName fv name with 
+            | ScopeSearchResult.Found other ->
+                emitVAR03diagnostics varValue other 
+            | _ -> 
+                varValue.FplId <- name
+                varValue.TypeId <- "undef"
                 let rec getLocalization (fValue:FplValue) = 
                     if fValue.BlockType = FplValueType.Localization then
                         fValue
@@ -389,11 +393,14 @@ let rec eval (st: SymbolTable) ast =
                         | None -> fValue
                 let loc = getLocalization fv
                 loc.Scope.Add(name, varValue)
-            elif not (isDeclaration || isLocalizationDeclaration || isQuantorVariableDeclaration) then 
+        else
+            match FplValue.VariableInBlockScopeByName fv name with 
+            | ScopeSearchResult.Found other -> ()
+            | _ -> 
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
-        if not isDeclaration then 
-            es.PopEvalStack()  // pop only variables from stack that are NOT being declared (those will be popped in Ast.NamedVarDecl(..))
+            fv.FplId <- name
+            fv.TypeId <- "undef"
         ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 

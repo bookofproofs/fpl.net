@@ -594,17 +594,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     else
                         sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
             | FplValueType.Reference ->
-                // by convention of the symbol table
-                // references can have (if any) only two elements in their scopes: variables and qualifications
-                let referenceVar = 
-                    if this.Scope.Count > 0 then 
-                        Some(
-                            this.Scope.Values
-                            |> Seq.toList
-                            |> List.head
-                        )
-                    else 
-                        None
                 let qualification = 
                     if this.Scope.ContainsKey(".") then 
                         Some(this.Scope["."])
@@ -618,59 +607,35 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                         |> Seq.map (fun fv -> fv.Type(propagate))
                         |> String.concat ", "
                     a
-                match (args, referenceVar, qualification) with
-                | ("", Some var, Some qual) ->
-                    sprintf "%s.%s" (var.Type(propagate)) (qual.Type(propagate))
-                | ("???", Some var, Some qual) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[].%s" (var.Type(propagate)) (qual.Type(propagate))
-                    else
-                        sprintf "%s().%s" (var.Type(propagate)) (qual.Type(propagate))
-                | (_, Some var, Some qual) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[%s].%s" (var.Type(propagate)) args (qual.Type(propagate))
-                    else
-                        sprintf "%s(%s).%s" (var.Type(propagate)) args (qual.Type(propagate))
-                | ("", Some var, None) -> 
-                    sprintf "%s" (var.Type(propagate)) 
-                | ("???", Some var, None) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[]" (var.Type(propagate)) 
-                    else
-                        sprintf "%s()" (var.Type(propagate)) 
-                    
-                | (_, Some var, None) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[%s]" (var.Type(propagate)) args 
-                    else
-                        sprintf "%s(%s)" (var.Type(propagate)) args 
-                    
-                | ("", None, Some qual) -> 
+                match (head, args, qualification) with
+                | (_, "", Some qual) ->
                     sprintf "%s.%s" head (qual.Type(propagate))
-                | ("???", None, Some qual) -> 
+                | (_, "???", Some qual) -> 
                     if this.HasBrackets then 
                         sprintf "%s[].%s" head (qual.Type(propagate))
                     else
                         sprintf "%s().%s" head (qual.Type(propagate))
-                | (_, None, Some qual) -> 
+                | (_, _, Some qual) -> 
                     if this.HasBrackets then 
                         sprintf "%s[%s].%s" head args (qual.Type(propagate))
                     else
                         sprintf "%s(%s).%s" head args (qual.Type(propagate))
-                | ("", None, None) -> 
-                    sprintf "%s" head 
-                | ("???", None, None) -> 
+                | ("???", _, None) -> 
+                    sprintf "%s" head
+                | ("", _, None) -> 
+                    sprintf "%s" args
+                | (_, "", None) -> 
+                     sprintf "%s" head 
+                | (_, "???", None) -> 
                     if this.HasBrackets then 
                         sprintf "%s[]" head 
                     else
                         sprintf "%s()" head 
-                | (_, None, None) -> 
+                | (_, _, None) -> 
                     if this.HasBrackets then 
                         sprintf "%s[%s]" head args 
                     else
                         sprintf "%s(%s)" head args 
-                    
-
             | _ -> ""
         idRec()
 
@@ -707,7 +672,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     member this.QualifiedName
         with get () = 
             let rec getFullName (fplValue:FplValue) (first:bool) =
-                let fplValueType = fplValue.Type(SignatureType.Mixed)
+                let fplValueType = 
+                    if FplValue.IsBlock(fplValue) then 
+                        fplValue.Type(SignatureType.Mixed)
+                    else
+                        fplValue.Type(SignatureType.Name)
                 if fplValue.BlockType = FplValueType.Root then
                     ""
                 elif first then 
@@ -976,7 +945,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
 
     /// A string representation of this FplValue
     override this.ToString() = 
-        $"{this.BlockTypeShortName} {this.Type(SignatureType.Mixed)}"
+        $"{this.BlockTypeShortName} {this.Type(SignatureType.Name)}"
 
 // create an FplValue list containing all Scopes of the theory
 let rec flattenScopes (root: FplValue) =
@@ -1160,12 +1129,13 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         let rec createJson (root:FplValue) (sb:StringBuilder) level isLast =
             let indent = String(' ', level)
             sb.AppendLine(String(' ', level - 1) + "{") |> ignore
-            let name = root.Type(SignatureType.Mixed)
+            let name = root.Type(SignatureType.Name)
             let typeName = root.Type(SignatureType.Type)
+            let mixedName = root.Type(SignatureType.Mixed)
             if name = this.MainTheory then
                 sb.AppendLine($"{indent}\"Name\": \"Main> {name}\",") |> ignore
             else
-                sb.AppendLine($"{indent}\"Name\": \"{name} | {typeName}\",") |> ignore
+                sb.AppendLine($"{indent}\"Name\": \"{name} | {mixedName} | {typeName}\",") |> ignore
             sb.AppendLine($"{indent}\"Type\": \"{root.BlockType.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"Scope\": [") |> ignore
             let mutable counterScope = 0

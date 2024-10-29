@@ -1,4 +1,4 @@
-def pred T1() { Test(x, y) }
+def pred T1() { x, y } 
 inf ModusPonens()
 {
     dec ~p,q: pred;
