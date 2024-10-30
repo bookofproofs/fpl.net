@@ -192,11 +192,11 @@ type TestReferencesTypeOfSignature() =
 
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Type))
-            | "base2" -> Assert.AreEqual<string>("C(T1funcindpred)", base1.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>("D(selfT1func)", base1.Type(SignatureType.Type))
+            | "base2" -> Assert.AreEqual<string>("C(T1, func, ind, pred)", base1.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>("D(self, T1, func)", base1.Type(SignatureType.Type))
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Type))
-            | "base5" -> Assert.AreEqual<string>("C(Test1(T1)Test2(funcindpred))", base1.Type(SignatureType.Type))
-            | "base6" -> Assert.AreEqual<string>("E(pred, undef, undef)", base1.Type(SignatureType.Type))
+            | "base5" -> Assert.AreEqual<string>("C(Test1(T1), Test2(func, ind, pred))", base1.Type(SignatureType.Type))
+            | "base6" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Type))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

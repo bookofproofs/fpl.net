@@ -549,7 +549,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
 
             let paramTuple() = 
                 this.Scope
-                |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> kvp.Value.IsSignatureVariable)
+                |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> kvp.Value.IsSignatureVariable || FplValue.IsVariable(this))
                 |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
                     kvp.Value.Type(propagate))
                 |> String.concat ", "

@@ -653,7 +653,7 @@ type TestFplValueScopeNameEndPos() =
             let base1 = ctor.ValueList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
+            | "base1" -> Assert.AreEqual<int64>((int64)45, base1.NameEndPos.Column)
             | "base2" -> Assert.AreEqual<int64>((int64)54, base1.NameEndPos.Column)
             | "base3" -> Assert.AreEqual<int64>((int64)54, base1.NameEndPos.Column)
             | "base4" -> Assert.AreEqual<int64>((int64)48, base1.NameEndPos.Column)
