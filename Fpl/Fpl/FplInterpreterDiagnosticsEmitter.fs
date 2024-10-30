@@ -219,10 +219,11 @@ let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
             }
         ad.AddDiagnostic diagnostic
 
-let checkID008Diagnostics (fplValue: FplValue) pos1 pos2 =
-    if FplValue.IsConstructor(fplValue) then
-        let nameStart = fplValue.FplId
-        let className = fplValue.Parent.Value.FplId
+let checkID008Diagnostics (fv: FplValue) pos1 pos2 =
+    match fv.BlockType with
+    | FplValueType.Constructor -> 
+        let nameStart = fv.FplId
+        let className = fv.Parent.Value.FplId
 
         if nameStart <> className then
             let diagnostic =
@@ -236,6 +237,7 @@ let checkID008Diagnostics (fplValue: FplValue) pos1 pos2 =
                     Diagnostic.Alternatives = None 
                 }
             ad.AddDiagnostic diagnostic
+    | _ -> ()
 
 let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) name pos1 pos2 =
     let rec findPath (root: FplValue) (candidateName: string) =

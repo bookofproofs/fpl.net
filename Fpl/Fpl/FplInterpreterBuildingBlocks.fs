@@ -23,12 +23,16 @@ type EvalStack() =
     static member tryAddToScope (fv:FplValue) = 
         let next = fv.Parent.Value
         let identifier = 
-            if FplValue.IsBlock(fv) then 
+            match fv.BlockType with
+            |  FplValueType.Constructor -> 
                 fv.Type(SignatureType.Mixed)
-            elif FplValue.IsVariable(fv) then 
-                fv.FplId
-            else
-                fv.Type(SignatureType.Name)
+            | _ -> 
+                if FplValue.IsBlock(fv) then 
+                    fv.Type(SignatureType.Mixed)
+                elif FplValue.IsVariable(fv) then 
+                    fv.FplId
+                else
+                    fv.Type(SignatureType.Name)
         match FplValue.InScopeOfParent(fv) identifier with
         | ScopeSearchResult.Found conflict -> 
             match next.BlockType with
@@ -368,6 +372,9 @@ let rec eval (st: SymbolTable) ast =
         ad.DiagnosticsStopped <- false // enable var-related diagnostics in AST.Var, even if it was stopped (e.g. in Ast.Localization)
         let fv = es.PeekEvalStack()
         let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
+        varValue.FplId <- name
+        varValue.TypeId <- "undef"
+        varValue.IsSignatureVariable <- es.InSignatureEvaluation 
         if isDeclaration then 
             match FplValue.VariableInBlockScopeByName fv name with 
             | ScopeSearchResult.Found other ->
@@ -375,17 +382,12 @@ let rec eval (st: SymbolTable) ast =
                 es.PushEvalStack(other)
                 emitVAR03diagnostics varValue other 
             | _ -> 
-                varValue.FplId <- name
-                varValue.TypeId <- "undef"
-                varValue.IsSignatureVariable <- es.InSignatureEvaluation 
                 es.PushEvalStack(varValue)
         elif isLocalizationDeclaration then 
             match FplValue.VariableInBlockScopeByName fv name with 
             | ScopeSearchResult.Found other ->
                 emitVAR03diagnostics varValue other 
             | _ -> 
-                varValue.FplId <- name
-                varValue.TypeId <- "undef"
                 let rec getLocalization (fValue:FplValue) = 
                     if fValue.BlockType = FplValueType.Localization then
                         fValue
@@ -400,7 +402,12 @@ let rec eval (st: SymbolTable) ast =
                 es.PopEvalStack()
         else
             match FplValue.VariableInBlockScopeByName fv name with 
-            | ScopeSearchResult.Found other -> ()
+            | ScopeSearchResult.Found other -> 
+                match fv.BlockType with
+                | FplValueType.Reference ->
+                    if not (fv.Scope.ContainsKey(name)) then
+                        fv.Scope.Add(name, other)
+                | _ -> ()
             | _ -> 
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
@@ -527,7 +534,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Undefined")
         let fv = es.PeekEvalStack()
         fv.FplId <- "undef"
-        fv.TypeId <- "pred"
+        fv.TypeId <- "undef"
         st.EvalPop() 
     | Ast.Trivial((pos1, pos2), _) -> 
         st.EvalPush("Trivial")

@@ -524,130 +524,141 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
 
     /// Type Identifier of this FplValue 
     member this.Type (isSignature:SignatureType) =
-        let head = 
-            match isSignature with
-            | SignatureType.Name -> _fplId
-            | SignatureType.Type -> _typeId
-            | SignatureType.Mixed -> _fplId
+        match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with 
+        | (FplValueType.Reference, true) -> 
+            this.Scope[this.FplId].Type(isSignature)
+        | _ -> 
+            let head = 
+                match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with 
+                | (FplValueType.Reference, true) -> 
+                    match isSignature with
+                    | SignatureType.Name -> this.Scope[this.FplId].Type(SignatureType.Name)
+                    | SignatureType.Type -> _typeId
+                    | SignatureType.Mixed -> _fplId
+                | _ -> 
+                    match isSignature with
+                    | SignatureType.Name -> _fplId
+                    | SignatureType.Type -> _typeId
+                    | SignatureType.Mixed -> _fplId
 
-        let propagate = 
-            match isSignature with
-            | SignatureType.Name -> SignatureType.Name
-            | SignatureType.Type -> SignatureType.Type
-            | SignatureType.Mixed -> SignatureType.Type
+            let propagate = 
+                match isSignature with
+                | SignatureType.Name -> SignatureType.Name
+                | SignatureType.Type -> SignatureType.Type
+                | SignatureType.Mixed -> SignatureType.Type
 
-        let paramTuple() = 
-            this.Scope
-            |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> kvp.Value.IsSignatureVariable)
-            |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
-                kvp.Value.Type(propagate))
-            |> String.concat ", "
-        let mapping =
-            if this.ValueList.Count>0 && this.ValueList[0].BlockType = FplValueType.Mapping then
-                Some (this.ValueList[0])
-            else   
-                None
-        let idRec() =
-            match this.BlockType with
-            | FplValueType.Theory 
-            | FplValueType.Proof 
-            | FplValueType.Class ->
-                head
-            | FplValueType.Theorem 
-            | FplValueType.Lemma 
-            | FplValueType.Proposition
-            | FplValueType.Conjecture 
-            | FplValueType.RuleOfInference
-            | FplValueType.Predicate
-            | FplValueType.Corollary 
-            | FplValueType.Constructor 
-            | FplValueType.OptionalPredicate 
-            | FplValueType.MandatoryPredicate 
-            | FplValueType.Axiom ->
-                let paramT = paramTuple()
-                sprintf "%s(%s)" head paramT
-            | FplValueType.Localization -> 
-                let paramT = 
-                    this.Scope
-                    |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> FplValue.IsVariable(kvp.Value))
-                    |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
-                        kvp.Value.Type(SignatureType.Name))
-                    |> String.concat ", "
-                match paramT with
-                | "" -> head
-                | _ -> sprintf "%s(%s)" head paramT
-            | FplValueType.OptionalFunctionalTerm 
-            | FplValueType.MandatoryFunctionalTerm
-            | FplValueType.FunctionalTerm ->
-                match mapping with 
-                | Some map -> 
+            let paramTuple() = 
+                this.Scope
+                |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> kvp.Value.IsSignatureVariable)
+                |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
+                    kvp.Value.Type(propagate))
+                |> String.concat ", "
+            let mapping =
+                if this.ValueList.Count>0 && this.ValueList[0].BlockType = FplValueType.Mapping then
+                    Some (this.ValueList[0])
+                else   
+                    None
+            let idRec() =
+                match this.BlockType with
+                | FplValueType.Theory 
+                | FplValueType.Proof 
+                | FplValueType.Class ->
+                    head
+                | FplValueType.Theorem 
+                | FplValueType.Lemma 
+                | FplValueType.Proposition
+                | FplValueType.Conjecture 
+                | FplValueType.RuleOfInference
+                | FplValueType.Predicate
+                | FplValueType.Corollary 
+                | FplValueType.Constructor 
+                | FplValueType.OptionalPredicate 
+                | FplValueType.MandatoryPredicate 
+                | FplValueType.Axiom ->
                     let paramT = paramTuple()
-                    sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
-                | _ -> ""
-            | FplValueType.Mapping 
-            | FplValueType.Variable 
-            | FplValueType.Argument 
-            | FplValueType.VariadicVariableMany 
-            | FplValueType.VariadicVariableMany1 ->
-                let pars = paramTuple()
-                match (pars, mapping) with
-                | ("",_) -> 
-                    head 
-                | (_,None) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[%s]" head pars
-                    else
-                        sprintf "%s(%s)" head pars
-                | (_,Some map) ->
-                    if this.HasBrackets then 
-                        sprintf "%s[%s] -> %s" head pars (map.Type(propagate))
-                    else
-                        sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
-            | FplValueType.Reference ->
-                let qualification = 
-                    if this.Scope.ContainsKey(".") then 
-                        Some(this.Scope["."])
-                    else 
-                        None
-                // The arguments are reserved for the arguments or the coordinates of the reference
-                // If the argument tuple equals "???", an empty argument or coordinates list has occurred
-                let args =
-                    let a = 
-                        this.ValueList
-                        |> Seq.map (fun fv -> fv.Type(propagate))
+                    sprintf "%s(%s)" head paramT
+                | FplValueType.Localization -> 
+                    let paramT = 
+                        this.Scope
+                        |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> FplValue.IsVariable(kvp.Value))
+                        |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
+                            kvp.Value.Type(SignatureType.Name))
                         |> String.concat ", "
-                    a
-                match (head, args, qualification) with
-                | (_, "", Some qual) ->
-                    sprintf "%s.%s" head (qual.Type(propagate))
-                | (_, "???", Some qual) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[].%s" head (qual.Type(propagate))
-                    else
-                        sprintf "%s().%s" head (qual.Type(propagate))
-                | (_, _, Some qual) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[%s].%s" head args (qual.Type(propagate))
-                    else
-                        sprintf "%s(%s).%s" head args (qual.Type(propagate))
-                | ("???", _, None) -> 
-                    sprintf "%s" head
-                | ("", _, None) -> 
-                    sprintf "%s" args
-                | (_, "", None) -> 
-                     sprintf "%s" head 
-                | (_, "???", None) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[]" head 
-                    else
-                        sprintf "%s()" head 
-                | (_, _, None) -> 
-                    if this.HasBrackets then 
-                        sprintf "%s[%s]" head args 
-                    else
-                        sprintf "%s(%s)" head args 
-            | _ -> ""
-        idRec()
+                    match paramT with
+                    | "" -> head
+                    | _ -> sprintf "%s(%s)" head paramT
+                | FplValueType.OptionalFunctionalTerm 
+                | FplValueType.MandatoryFunctionalTerm
+                | FplValueType.FunctionalTerm ->
+                    match mapping with 
+                    | Some map -> 
+                        let paramT = paramTuple()
+                        sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
+                    | _ -> ""
+                | FplValueType.Mapping 
+                | FplValueType.Variable 
+                | FplValueType.Argument 
+                | FplValueType.VariadicVariableMany 
+                | FplValueType.VariadicVariableMany1 ->
+                    let pars = paramTuple()
+                    match (pars, mapping) with
+                    | ("",_) -> 
+                        head 
+                    | (_,None) -> 
+                        if this.HasBrackets then 
+                            sprintf "%s[%s]" head pars
+                        else
+                            sprintf "%s(%s)" head pars
+                    | (_,Some map) ->
+                        if this.HasBrackets then 
+                            sprintf "%s[%s] -> %s" head pars (map.Type(propagate))
+                        else
+                            sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
+                | FplValueType.Reference ->
+                    let qualification = 
+                        if this.Scope.ContainsKey(".") then 
+                            Some(this.Scope["."])
+                        else 
+                            None
+                    // The arguments are reserved for the arguments or the coordinates of the reference
+                    // If the argument tuple equals "???", an empty argument or coordinates list has occurred
+                    let args =
+                        let a = 
+                            this.ValueList
+                            |> Seq.map (fun fv -> fv.Type(propagate))
+                            |> String.concat ", "
+                        a
+                    match (head, args, qualification) with
+                    | (_, "", Some qual) ->
+                        sprintf "%s.%s" head (qual.Type(propagate))
+                    | (_, "???", Some qual) -> 
+                        if this.HasBrackets then 
+                            sprintf "%s[].%s" head (qual.Type(propagate))
+                        else
+                            sprintf "%s().%s" head (qual.Type(propagate))
+                    | (_, _, Some qual) -> 
+                        if this.HasBrackets then 
+                            sprintf "%s[%s].%s" head args (qual.Type(propagate))
+                        else
+                            sprintf "%s(%s).%s" head args (qual.Type(propagate))
+                    | ("???", _, None) -> 
+                        sprintf "%s" head
+                    | ("", _, None) -> 
+                        sprintf "%s" args
+                    | (_, "", None) -> 
+                         sprintf "%s" head 
+                    | (_, "???", None) -> 
+                        if this.HasBrackets then 
+                            sprintf "%s[]" head 
+                        else
+                            sprintf "%s()" head 
+                    | (_, _, None) -> 
+                        if this.HasBrackets then 
+                            sprintf "%s[%s]" head args 
+                        else
+                            sprintf "%s(%s)" head args 
+                | _ -> ""
+            idRec()
 
     /// Indicates if this FplValue is an FPL building block.
     static member IsFplBlock(fplValue:FplValue) = 
@@ -706,10 +717,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                             getFullName fplValue.Parent.Value false + "." + fplValueType
             getFullName this true 
 
-    /// Indicates if this FplValue is a constructor.
-    static member IsConstructor(fplValue:FplValue) = 
-        fplValue.BlockType = FplValueType.Constructor
-
     /// Indicates if this FplValue is a class.
     static member IsClass(fplValue:FplValue) = 
         match fplValue.BlockType with
@@ -739,7 +746,9 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
 
     /// Indicates if this FplValue is a constructor or a property
     static member IsConstructorOrProperty(fplValue:FplValue)  = 
-        FplValue.IsConstructor(fplValue) || FplValue.IsProperty(fplValue)
+        match fplValue.BlockType with 
+        | FplValueType.Constructor -> true
+        | _ -> FplValue.IsProperty(fplValue)
 
     /// Indicates if this FplValue is a constructor or a property
     static member IsProofOrCorollary(fplValue:FplValue) = 
@@ -752,9 +761,10 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
 
     /// Indicates if this FplValue is a block, a property, or a constructor.
     static member IsBlock(fplValue:FplValue) = 
-        FplValue.IsFplBlock(fplValue) 
-        || FplValue.IsProperty(fplValue) 
-        || FplValue.IsConstructor(fplValue)
+        match fplValue.BlockType with
+        | FplValueType.Constructor -> true
+        | _ -> 
+            FplValue.IsFplBlock(fplValue) || FplValue.IsProperty(fplValue) 
 
 
     /// Qualified starting position of this FplValue
@@ -851,22 +861,24 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     static member VariableInBlockScopeByName(fplValue:FplValue) name = 
         let rec firstBlockParent (fv:FplValue) =
             if fv.Scope.ContainsKey name then
-                if FplValue.IsProperty(fv) then
+                match fv.BlockType with
+                | FplValueType.Constructor -> 
                     ScopeSearchResult.Found (fv.Scope[name])
-                elif FplValue.IsConstructor(fv) then 
-                    ScopeSearchResult.Found (fv.Scope[name])
-                elif FplValue.IsProof(fv) then 
-                    ScopeSearchResult.Found (fv.Scope[name])
-                elif FplValue.IsCorollary(fv) then 
-                    ScopeSearchResult.Found (fv.Scope[name])
-                elif FplValue.IsFplBlock(fv) then 
-                    ScopeSearchResult.Found (fv.Scope[name])
-                elif FplValue.IsTheory(fv) then
-                    ScopeSearchResult.NotFound
-                elif fv.Parent.IsSome then 
-                    firstBlockParent fv.Parent.Value
-                else
-                    ScopeSearchResult.NotFound
+                | _ -> 
+                    if FplValue.IsProperty(fv) then
+                        ScopeSearchResult.Found (fv.Scope[name])
+                    elif FplValue.IsProof(fv) then 
+                        ScopeSearchResult.Found (fv.Scope[name])
+                    elif FplValue.IsCorollary(fv) then 
+                        ScopeSearchResult.Found (fv.Scope[name])
+                    elif FplValue.IsFplBlock(fv) then 
+                        ScopeSearchResult.Found (fv.Scope[name])
+                    elif FplValue.IsTheory(fv) then
+                        ScopeSearchResult.NotFound
+                    elif fv.Parent.IsSome then 
+                        firstBlockParent fv.Parent.Value
+                    else
+                        ScopeSearchResult.NotFound
             else
                 if fv.Parent.IsSome then 
                     firstBlockParent fv.Parent.Value
