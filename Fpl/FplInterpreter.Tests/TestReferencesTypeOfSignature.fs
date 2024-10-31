@@ -226,11 +226,11 @@ type TestReferencesTypeOfSignature() =
             match var with
             | "base1" -> Assert.AreEqual<string>("del.B()", base1.Type(SignatureType.Type))
             | "base2" -> Assert.AreEqual<string>("del.C(undef, undef, undef, undef)", base1.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>("del.D(selfundef, undef)", base1.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>("del.D(self, undef, undef)", base1.Type(SignatureType.Type))
             | "base4" -> Assert.AreEqual<string>("del.B(In(undef))", base1.Type(SignatureType.Type))
             | "base5" -> Assert.AreEqual<string>("del.Test()", base1.Type(SignatureType.Type))
             | "base6" -> Assert.AreEqual<string>("del.C(Test1(undef), Test2(undef, undef, undef))", base1.Type(SignatureType.Type))
-            | "base7" -> Assert.AreEqual<string>("del.E(pred, undef, undef)", base1.Type(SignatureType.Type))
+            | "base7" -> Assert.AreEqual<string>("del.E(pred, undef, pred)", base1.Type(SignatureType.Type))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

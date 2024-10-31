@@ -418,7 +418,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("DelegateId")
         let fv = es.PeekEvalStack()
         fv.FplId <- fv.FplId + s
-        fv.TypeId <- fv.FplId + s
+        fv.TypeId <- fv.TypeId + s
         st.EvalPop() 
     | Ast.Alias((pos1, pos2), s) -> 
         st.EvalPush("Alias")
