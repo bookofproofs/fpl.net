@@ -733,7 +733,10 @@ let rec eval (st: SymbolTable) ast =
         if coordListAst.Length > 0 then 
             coordListAst 
             |> List.iter (fun pred -> 
+                let ref = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
+                es.PushEvalStack(ref)
                 eval st pred
+                es.PopEvalStack()
             ) 
         else
             let ref = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
