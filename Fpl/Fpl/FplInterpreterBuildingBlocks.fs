@@ -347,7 +347,6 @@ let rec eval (st: SymbolTable) ast =
             else
                 $"@{s}"
         fv.TypeId <- sid
-        fv.FplId <- sid
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")

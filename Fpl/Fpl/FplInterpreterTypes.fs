@@ -691,30 +691,37 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
     /// Qualified name of this FplValue 
     member this.QualifiedName
         with get () = 
-            let rec getFullName (fplValue:FplValue) (first:bool) =
+            let rec getFullName (fv:FplValue) (first:bool) =
                 let fplValueType = 
-                    if FplValue.IsBlock(fplValue) then 
-                        fplValue.Type(SignatureType.Mixed)
-                    else
-                        fplValue.Type(SignatureType.Name)
-                if fplValue.BlockType = FplValueType.Root then
+                    match fv.BlockType with
+                    | FplValueType.Localization -> 
+                        fv.Type(SignatureType.Name)
+                    | FplValueType.Reference -> 
+                        fv.Type(SignatureType.Mixed)
+                    | FplValueType.Localization 
+                    | FplValueType.Constructor
+                    | _ when FplValue.IsBlock(fv) -> 
+                        fv.Type(SignatureType.Mixed)
+                    | _ -> 
+                        fv.FplId
+                if fv.BlockType = FplValueType.Root then
                     ""
                 elif first then 
-                    if FplValue.IsRoot(fplValue.Parent.Value) then 
-                        getFullName fplValue.Parent.Value false + fplValueType 
+                    if FplValue.IsRoot(fv.Parent.Value) then 
+                        getFullName fv.Parent.Value false + fplValueType 
                     else
-                        if FplValue.IsVariable(fplValue) && not (FplValue.IsVariable(fplValue.Parent.Value)) then
+                        if FplValue.IsVariable(fv) && not (FplValue.IsVariable(fv.Parent.Value)) then
                             fplValueType
                         else
-                            getFullName fplValue.Parent.Value false + "." + fplValueType 
+                            getFullName fv.Parent.Value false + "." + fplValueType 
                 else
-                    if FplValue.IsRoot(fplValue.Parent.Value) then 
-                        getFullName fplValue.Parent.Value false + fplValueType
+                    if FplValue.IsRoot(fv.Parent.Value) then 
+                        getFullName fv.Parent.Value false + fplValueType
                     else
-                        if FplValue.IsVariable(fplValue) && not (FplValue.IsVariable(fplValue.Parent.Value)) then
+                        if FplValue.IsVariable(fv) && not (FplValue.IsVariable(fv.Parent.Value)) then
                             fplValueType
                         else
-                            getFullName fplValue.Parent.Value false + "." + fplValueType
+                            getFullName fv.Parent.Value false + "." + fplValueType
             getFullName this true 
 
     /// Indicates if this FplValue is a class.
