@@ -764,7 +764,7 @@ type TestFplValueScopeName() =
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
         ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let fplCode = sprintf "def pred T1() { dec ~a:T1 ~b:ind ~c:ind;  %s };" varVal
         let filename = "TestDelegateName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -778,12 +778,12 @@ type TestFplValueScopeName() =
 
             match var with
             | "base1" -> Assert.AreEqual<string>("del.B()", base1.Type(SignatureType.Mixed))
-            | "base2" -> Assert.AreEqual<string>("del.C(a, b, c, d)", base1.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>("del.D(self, b, c)", base1.Type(SignatureType.Mixed))
-            | "base4" -> Assert.AreEqual<string>("del.B(In(x))", base1.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>("del.C(T1, ind, ind, undef)", base1.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("del.D(self, ind, ind)", base1.Type(SignatureType.Mixed))
+            | "base4" -> Assert.AreEqual<string>("del.B(In(undef))", base1.Type(SignatureType.Mixed))
             | "base5" -> Assert.AreEqual<string>("del.Test()", base1.Type(SignatureType.Mixed))
-            | "base6" -> Assert.AreEqual<string>("del.C(Test1(a), Test2(b, c, d))", base1.Type(SignatureType.Mixed))
-            | "base7" -> Assert.AreEqual<string>("del.E(true, undef, false)", base1.Type(SignatureType.Mixed))
+            | "base6" -> Assert.AreEqual<string>("del.C(Test1(T1), Test2(ind, ind, undef))", base1.Type(SignatureType.Mixed))
+            | "base7" -> Assert.AreEqual<string>("del.E(pred, undef, pred)", base1.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
