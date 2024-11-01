@@ -146,7 +146,10 @@ type EvalStack() =
                     EvalStack.tryAddToValueList fv 
                     next.NameEndPos <- fv.NameEndPos
                 | _ -> 
-                    EvalStack.tryAddToValueList fv
+                    if next.Scope.ContainsKey(".") then 
+                        ()
+                    else
+                        EvalStack.tryAddToValueList fv
                     next.NameEndPos <- fv.NameEndPos
             | FplValueType.Variable
             | FplValueType.VariadicVariableMany
@@ -617,6 +620,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("DottedPredicate")
         let fv = es.PeekEvalStack()
         let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv) 
+        fv.Scope.Add(".",refBlock)
         es.PushEvalStack(refBlock)
         eval st predicateWithOptSpecificationAst
         es.PopEvalStack()
@@ -1204,6 +1208,8 @@ let rec eval (st: SymbolTable) ast =
                     es.Pop() |> ignore
                     es.PushEvalStack(subNode)
                     subNode.Parent <- rb.Parent
+                    if refBlock.Scope.ContainsKey(".") then 
+                        subNode.Scope.Add(".",refBlock.Scope["."])
                     // prevent recursive clearing of the subNode
                     rb.ValueList.Clear() 
                     rb.Scope.Clear()

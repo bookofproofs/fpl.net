@@ -132,9 +132,6 @@ type FplSources(paths: PathEquivalentUri list, pathToLocalRegistry:string) =
     member this.Urls = List.filter FplSources.IsUrl this.Paths
     member this.FilePaths = List.filter FplSources.IsFilePath this.Paths
     member this.Length = this.Paths.Length
-
-
-
     member this.GroupedWithPreferedSource 
         with get () = 
             let result = 
