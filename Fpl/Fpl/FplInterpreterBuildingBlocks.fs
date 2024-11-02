@@ -40,7 +40,7 @@ type EvalStack() =
                 emitPR004Diagnostics fv conflict 
             | _ -> 
                 match fv.BlockType with
-                | FplValueType.Translation -> 
+                | FplValueType.Language -> 
                     let oldDiagnosticsStopped = ad.DiagnosticsStopped
                     ad.DiagnosticsStopped <- false
                     emitID014diagnostics fv conflict 
@@ -112,7 +112,7 @@ type EvalStack() =
             | FplValueType.Axiom
             | FplValueType.Predicate
             | FplValueType.Argument 
-            | FplValueType.Translation 
+            | FplValueType.Language 
             | FplValueType.FunctionalTerm ->
                 EvalStack.tryAddToScope fv
             | FplValueType.Reference ->
@@ -189,6 +189,7 @@ type EvalStack() =
             | FplValueType.Justification 
             | FplValueType.ArgInference 
             | FplValueType.Mapping 
+            | FplValueType.Translation 
             | FplValueType.Root -> 
                 EvalStack.tryAddToValueList fv 
 
@@ -434,12 +435,15 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("LanguageCode")
         let fv = es.PeekEvalStack()
         fv.FplId <- s
+        fv.TypeId <- s
         fv.NameStartPos <- pos1
         fv.NameEndPos <- pos2
         st.EvalPop() 
     | Ast.LocalizationString((pos1, pos2), s) -> 
         st.EvalPush("LocalizationString")
-        eval_pos_string st pos1 pos2 s
+        let fv = es.PeekEvalStack()
+        fv.FplId <- s
+        fv.TypeId <- s
         st.EvalPop() 
     | Ast.ObjectSymbol((pos1, pos2), s) -> 
         st.EvalPush("ObjectSymbol")
@@ -722,11 +726,20 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.LocalizationTerm((pos1, pos2), asts) ->
         st.EvalPush("LocalizationTerm")
-        asts |> List.map (eval st) |> ignore
+        asts |> List.map (fun ebnfTerm ->
+            let trsl = FplValue.CreateFplValue((pos1, pos2), FplValueType.Translation, es.PeekEvalStack())
+            es.PushEvalStack(trsl)
+            eval st ebnfTerm
+            es.PopEvalStack()
+        ) |> ignore
         st.EvalPop()
-    | Ast.LocalizationTermList((pos1, pos2), asts) ->
+    | Ast.LocalizationTermList((pos1, pos2), ebnfTermAsts) ->
         st.EvalPush("LocalizationTermList")
-        asts |> List.map (eval st) |> ignore
+        let chooseRandomMember (lst: Ast list) =
+            let rnd = Random()
+            let index = rnd.Next(lst.Length)
+            lst.[index]
+        eval st (chooseRandomMember ebnfTermAsts)
         st.EvalPop()
     | Ast.BrackedCoordList((pos1, pos2), coordListAst) ->
         st.EvalPush("BrackedCoordList")
@@ -902,10 +915,13 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Translation((pos1, pos2),(langCode, ebnfAst)) ->
         st.EvalPush("Translation")
         let fv = es.PeekEvalStack()
-        let trls = FplValue.CreateFplValue((pos1, pos2), FplValueType.Translation, fv) 
-        es.PushEvalStack(trls)
+        let lang = FplValue.CreateFplValue((pos1, pos2), FplValueType.Language, fv) 
+        es.PushEvalStack(lang)
         eval st langCode
+        let trsl = FplValue.CreateFplValue((pos1, pos2), FplValueType.Translation, lang) 
+        es.PushEvalStack(trsl)
         eval st ebnfAst
+        es.PopEvalStack()
         es.PopEvalStack()
         st.EvalPop()
     // | ExtensionBlock of Positions * (Ast * Ast)

@@ -289,6 +289,7 @@ type FplValueType =
     | Argument
     | Justification
     | ArgInference
+    | Language
     | Translation
     | Mapping
     | Root
@@ -322,6 +323,7 @@ type FplValueType =
             | Argument -> "argument"
             | Justification -> "justification"
             | ArgInference -> "argument inference"
+            | Language -> "language"
             | Translation -> "translation"
             | Mapping -> "mapping"
             | Root -> "root"
@@ -367,6 +369,7 @@ type FplValueType =
             | Argument -> "arg"
             | Justification -> "just"
             | ArgInference -> "ainf"
+            | Language -> "lang"
             | Translation -> "trsl"
             | Mapping -> "map"
             | Root -> "root"
@@ -602,6 +605,14 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                         let paramT = paramTuple()
                         sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
                     | _ -> ""
+                | FplValueType.Language ->
+                    head
+                | FplValueType.Translation ->
+                    let args =
+                        this.ValueList
+                        |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
+                        |> String.concat ""
+                    sprintf "%s%s" head args
                 | FplValueType.Mapping 
                 | FplValueType.Variable 
                 | FplValueType.VariadicVariableMany 
@@ -956,6 +967,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.Argument
         | FplValueType.Justification
         | FplValueType.ArgInference
+        | FplValueType.Language
         | FplValueType.Translation
         | FplValueType.OptionalFunctionalTerm -> new FplValue("", fplBlockType, positions, Some parent)
         | FplValueType.Class -> 

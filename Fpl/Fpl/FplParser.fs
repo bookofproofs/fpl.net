@@ -70,6 +70,7 @@ let semiColon = skipChar ';' >>. spaces
 let exclamationMark = skipChar '!' 
 let toArrow = skipString "->"
 let vDash = skipString "|-"
+let quote = skipChar '"' 
 
 (* Whitespaces and Comments *)
 
@@ -260,7 +261,7 @@ namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma
 
 paramTupleRef.Value <- positions "ParamTuple" ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) |>> Ast.ParamTuple
 let signature = positions "Signature" ((predicateIdentifier .>> IW) .>>. paramTuple) .>> IW |>> Ast.Signature
-let localizationString = positions "LocalizationString" (regex "\"[^\"\n]*\"") <?> "<language-specific string>" |>> Ast.LocalizationString
+let localizationString = positions "LocalizationString" (regex "[^\"\n]*") <?> "<language-specific string>" |>> Ast.LocalizationString
 
 let keywordSymbol = pstring "symbol" .>> IW
 let objectSymbolString = pchar '"' >>. objectMathSymbols .>> pchar '"'
@@ -548,7 +549,7 @@ let ebnfTransl, ebnfTranslRef = createParserForwardedToRef()
 let ebnfTranslTuple = (leftParen >>. IW >>. ebnfTransl) .>> (IW .>> rightParen) 
 let ebnfFactor = choice [
     variable
-    localizationString
+    quote >>. localizationString .>> quote
     ebnfTranslTuple
 ] 
 let ebnfTerm = positions "LocalizationTerm" (sepEndBy1 ebnfFactor SW) |>> Ast.LocalizationTerm
