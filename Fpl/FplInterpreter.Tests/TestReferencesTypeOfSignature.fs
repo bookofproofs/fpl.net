@@ -132,7 +132,7 @@ type TestReferencesTypeOfSignature() =
             | "base17" -> Assert.AreEqual<string>("'(+(undef, =('(undef), *(2, undef))))", base1.Type(SignatureType.Type))
             | "base18" -> Assert.AreEqual<string>("", base1.Type(SignatureType.Type))
             | "base19" -> Assert.AreEqual<string>("", base1.Type(SignatureType.Type))
-            | "base20" -> Assert.AreEqual<string>("", base1.Type(SignatureType.Type))
+            | "base20" -> Assert.AreEqual<string>("pred(undef)", base1.Type(SignatureType.Type))
             | "base21" -> Assert.AreEqual<string>("pred(undef, undef, undef)", base1.Type(SignatureType.Type))
             | "base21a" -> Assert.AreEqual<string>("pred(undef)", base1.Type(SignatureType.Type))
             | "base21b" -> Assert.AreEqual<string>("pred(undef)", base1.Type(SignatureType.Type))

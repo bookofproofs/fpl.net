@@ -407,6 +407,15 @@ let rec eval (st: SymbolTable) ast =
                 // Add the variable to the reference in the localization
                 es.PushEvalStack(varValue)
                 es.PopEvalStack()
+        elif isQuantorVariableDeclaration then
+            match FplValue.VariableInBlockScopeByName fv name with 
+            | ScopeSearchResult.Found other ->
+                emitVAR03diagnostics varValue other 
+            | _ -> 
+                fv.Scope.Add(name, varValue)
+                // Add the variable to the reference in the localization
+                es.PushEvalStack(varValue)
+                es.PopEvalStack()
         else
             match FplValue.VariableInBlockScopeByName fv name with 
             | ScopeSearchResult.Found other -> 

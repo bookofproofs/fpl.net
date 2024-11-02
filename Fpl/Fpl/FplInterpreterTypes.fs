@@ -574,6 +574,16 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 | FplValueType.Axiom ->
                     let paramT = paramTuple()
                     sprintf "%s(%s)" head paramT
+                | FplValueType.Quantor ->
+                    let paramT = 
+                        this.Scope
+                        |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> FplValue.IsVariable(kvp.Value))
+                        |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
+                            kvp.Value.Type(isSignature))
+                        |> String.concat ", "
+                    match paramT with
+                    | "" -> head
+                    | _ -> sprintf "%s(%s)" head paramT
                 | FplValueType.Localization -> 
                     let paramT = 
                         this.Scope
@@ -594,7 +604,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     | _ -> ""
                 | FplValueType.Mapping 
                 | FplValueType.Variable 
-                | FplValueType.Argument 
                 | FplValueType.VariadicVariableMany 
                 | FplValueType.VariadicVariableMany1 ->
                     let pars = paramTuple()
