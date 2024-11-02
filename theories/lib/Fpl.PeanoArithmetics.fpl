@@ -303,7 +303,7 @@ def func RealValuedFunction(x:Real) -> Real
 
 def pred IsBounded(x: Real)
 {
-    ex upperBound, lowerBound is Real
+    ex upperBound, lowerBound : Real
     {
         and (LowerEqual(x,upperBound), LowerEqual(lowerBound,x))
     }
@@ -311,7 +311,7 @@ def pred IsBounded(x: Real)
 
 def pred IsBounded(f: RealValuedFunction)
 {
-    all x is Real
+    all x : Real
     {
         IsBounded(f(x))
     }

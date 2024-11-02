@@ -612,10 +612,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("InEntity")
         eval st ast1
         st.EvalPop()
-    | Ast.IsType((pos1, pos2), ast1) ->
-        st.EvalPush("IsType")
-        eval st ast1
-        st.EvalPop()
     | Ast.Assertion((pos1, pos2), ast1) ->
         st.EvalPush("Assertion")
         eval st ast1
@@ -1040,19 +1036,18 @@ let rec eval (st: SymbolTable) ast =
         eval st functionalTermInstanceBlockAst
         st.EvalPop()
     // | All of Positions * ((Ast list * Ast option) list * Ast)
-    | Ast.All((pos1, pos2), (variableListIsOfTypeListAst, predicateAst)) ->
+    | Ast.All((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         st.EvalPush("All")
         let fv = es.PeekEvalStack()
         let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
         qtr.FplId <- "all"
         qtr.TypeId <- "pred"
         es.PushEvalStack(qtr)
-        variableListIsOfTypeListAst
-        |> List.map (fun (varListAst, optOfTypeAst) ->
-            qtr.Arity <- qtr.Arity + (varListAst |> List.length)
-            varListAst |> List.map (eval st) |> ignore
-            optOfTypeAst |> Option.map (eval st) |> Option.defaultValue ()
-            ())
+        qtr.Arity <- qtr.Arity + (namedVarDeclAstList |> List.length)
+        namedVarDeclAstList
+        |> List.map (fun namedVarDeclAst ->
+            eval st namedVarDeclAst
+        )
         |> ignore
         let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
         es.PushEvalStack(pred)
@@ -1061,19 +1056,18 @@ let rec eval (st: SymbolTable) ast =
         emitLG000orLG001Diagnostics qtr "all quantor"
         es.PopEvalStack()
         st.EvalPop()
-    | Ast.Exists((pos1, pos2), (variableListIsOfTypeListAst, predicateAst)) ->
+    | Ast.Exists((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         st.EvalPush("Exists")
         let fv = es.PeekEvalStack()
         let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
         qtr.FplId <- "ex"
         qtr.TypeId <- "pred"
         es.PushEvalStack(qtr)
-        variableListIsOfTypeListAst
-        |> List.map (fun (varListAst, optOfTypeAst) ->
-            qtr.Arity <- qtr.Arity + (varListAst |> List.length)
-            varListAst |> List.map (eval st) |> ignore
-            optOfTypeAst |> Option.map (eval st) |> Option.defaultValue ()
-            ())
+        qtr.Arity <- qtr.Arity + (namedVarDeclAstList |> List.length)
+        namedVarDeclAstList
+        |> List.map (fun namedVarDeclAst ->
+            eval st namedVarDeclAst
+        )
         |> ignore
         let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
         es.PushEvalStack(pred)
@@ -1083,7 +1077,7 @@ let rec eval (st: SymbolTable) ast =
         es.PopEvalStack()
         st.EvalPop()
     // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
-    | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, (variableAst, variableIsOfTypeAst)), predicateAst)) ->
+    | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclAst), predicateAst)) ->
         st.EvalPush("ExistsN")
         let fv = es.PeekEvalStack()
         let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
@@ -1092,8 +1086,7 @@ let rec eval (st: SymbolTable) ast =
         qtr.Arity <- 1
         es.PushEvalStack(qtr)
         eval st dollarDigitsAst
-        eval st variableAst
-        variableIsOfTypeAst |> Option.map (eval st) |> Option.defaultValue () |> ignore
+        eval st namedVarDeclAst
         let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
         es.PushEvalStack(pred)
         eval st predicateAst

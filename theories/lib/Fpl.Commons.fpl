@@ -39,11 +39,10 @@ inf DisjunctiveSyllogism()
 
 inf ExistsByExample(p: pred(c: obj))
 {
-    dec ~x: obj;
     premise:  
         p(c)
     conclusion: 
-        ex x {p(x)}
+        ex x:obj {p(x)}
 }
 
 def pred Equal infix "=" 50 (x,y: tpl)

@@ -28,12 +28,9 @@ type TestAxioms () =
     member this.TestAxiom02 () =
         let result = run (axiom .>> eof) """axiom SuccessorExistsAndIsUnique()
         {
-            dec
-                ~ n, successor: Nat
-            ;
-            all n
+            all n:Nat
             {
-                exn$1 successor
+                exn$1 successor:Nat
                 {
                     and
                     (
@@ -51,8 +48,7 @@ type TestAxioms () =
     member this.TestAxiom03 () =
         let result = run (axiom .>> eof) """axiom ZeroIsNotSuccessor()
         {
-            dec ~n: Nat;
-            all n
+            all n: Nat
             {
                 NotEqual(Zero(), Succ(n))
             }
@@ -67,8 +63,7 @@ type TestAxioms () =
     member this.TestAxiom04 () =
         let result = run (axiom .>> eof) """axiom SuccessorIsInjective()
         {
-            dec ~n,m: Nat;
-            all n,m
+            all n,m: Nat
             {
                 impl
                 (
@@ -86,16 +81,12 @@ type TestAxioms () =
     member this.TestAxiom05 () =
         let result = run (axiom .>> eof) """axiom CompleteInduction()
         {
-            dec 
-                ~n: Nat
-                ~p: pred
-            ;
-            all p
+            all p:pred
             {
                 impl
                 (
-                    and ( p(0), all n { impl ( p(n), p(Succ(n)) ) } ),
-                    all n { p(n) }
+                    and ( p(0), all n:Nat { impl ( p(n), p(Succ(n)) ) } ),
+                    all n:Nat { p(n) }
                 )
             }
         }"""
@@ -108,8 +99,7 @@ type TestAxioms () =
     member this.TestAxiom06 () =
         let result = run (axiom .>> eof) """axiom EmptySetExists()
         {
-            dec ~x: Set;
-            ex x
+            ex x:Set
             {
                 IsEmpty(x)
             }
@@ -123,8 +113,7 @@ type TestAxioms () =
     member this.TestAxiom07 () =
         let result = run (axiom .>> eof) """axiom Extensionality()
         {
-            dec ~x,y: Set ;
-            all x,y
+            all x,y: Set
             {
                 impl
                 (
@@ -153,7 +142,7 @@ type TestAxioms () =
 
     [<TestMethod>]
     member this.TestAxiom09 () =
-        let result = run (axiom .>> eof) """axiom A() { all x is Nat {true} }"""
+        let result = run (axiom .>> eof) """axiom A() { all x:Nat {true} }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

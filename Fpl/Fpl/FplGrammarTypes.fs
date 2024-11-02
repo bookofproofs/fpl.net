@@ -83,10 +83,9 @@ type Ast =
     | Iif of Positions * (Ast * Ast)
     | Not of Positions * Ast
     | InEntity of Positions * Ast
-    | IsType of Positions * Ast
-    | All of Positions * ((Ast list * Ast option) list * Ast)
-    | Exists of Positions * ((Ast list * Ast option) list * Ast)
-    | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
+    | All of Positions * (Ast list * Ast)
+    | Exists of Positions * (Ast list * Ast) 
+    | ExistsN of Positions * ((Ast * Ast) * Ast)
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Positions * (Ast * Ast)
     | ArgumentIdentifier of Positions * string

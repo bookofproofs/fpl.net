@@ -298,11 +298,7 @@ let conditionFollowedByResultList = many1 (IW >>. conditionFollowedByResult)
 let elseStatement = elseCase >>. IW >>. defaultResult .>> IW
 let casesStatement = positions "Cases" (((keywordCases >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
 
-let ofType = keywordIs >>. positions "IsType" (variableType) .>> IW |>> Ast.IsType
 let inEntity = keywordIn >>. positions "InEntity" (predicateWithQualification) .>> IW |>> Ast.InEntity
-let variableIsOfType = ( (variable .>> IW) .>>. opt ofType) .>> IW
-let variableListIsOfType = ( variableList .>>. opt ofType) .>> IW
-let variableListIsOfTypeList = (sepBy1 variableListIsOfType comma) .>> IW
 
 let entityInDomain = ( entity .>> IW .>>. inEntity ) .>> IW
 let forInBody = (entityInDomain .>> IW) .>>. (leftBrace >>. IW >>. statementList) .>> (IW >>. rightBrace)
@@ -366,10 +362,10 @@ let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate)
 let implication = positions "Impl" (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
 let equivalence = positions "Iif" (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
 let negation = positions "Not" (keywordNot >>. predicate) |>> Ast.Not
-let all = positions "All" ((keywordAll >>. variableListIsOfTypeList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.All
-let exists = positions "Exists" ((keywordEx >>. variableListIsOfTypeList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
+let all = positions "All" ((keywordAll >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.All
+let exists = positions "Exists" ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
-let existsTimesN = positions "ExistsN" (((keywordExN >>. dollarDigits .>> SW) .>>. variableIsOfType) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
+let existsTimesN = positions "ExistsN" (((keywordExN >>. dollarDigits .>> SW) .>>. namedVariableDeclaration) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
 let isOpArg = choice [ objectSymbol; predicateIdentifier; variable; self ] .>> IW
 let isOperator = positions "IsOperator" ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 

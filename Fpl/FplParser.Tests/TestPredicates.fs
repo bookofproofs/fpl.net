@@ -268,84 +268,84 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate35 () =
-        let result = run (predicate .>> eof) """all x,y,z{true}"""
+        let result = run (predicate .>> eof) """all x,y,z:obj{true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate36 () =
-        let result = run (predicate .>> eof) """all x,y,z {not (iif ( true, not false))}"""
+        let result = run (predicate .>> eof) """all x,y,z:obj {not (iif ( true, not false))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate37 () =
-        let result = run (predicate .>> eof) """all x,y,z {not (iif ( iif( true, false), true))}"""
+        let result = run (predicate .>> eof) """all x,y,z:obj {not (iif ( iif( true, false), true))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate38 () =
-        let result = run (predicate .>> eof) """all x {not (iif ( iif ( true, iif( true, false)), not true ))}"""
+        let result = run (predicate .>> eof) """all x:obj {not (iif ( iif ( true, iif( true, false)), not true ))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate39 () =
-        let result = run (predicate .>> eof) """ex x,y,z {true }"""
+        let result = run (predicate .>> eof) """ex x,y,z:obj {true }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate40 () =
-        let result = run (predicate .>> eof) """ex x,y,z { not (iif ( true, not false))}"""
+        let result = run (predicate .>> eof) """ex x,y,z:obj { not (iif ( true, not false))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate41 () =
-        let result = run (predicate .>> eof) """ex x,y,z {not (iif ( iif( true, false), true))}"""
+        let result = run (predicate .>> eof) """ex x,y,z:N {not (iif ( iif( true, false), true))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate42 () =
-        let result = run (predicate .>> eof) """ex x {not (iif ( iif ( true, iif( true, false)), not true ))}"""
+        let result = run (predicate .>> eof) """ex x:G {not (iif ( iif ( true, iif( true, false)), not true ))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate43 () =
-        let result = run (predicate .>> eof) """exn$0 x,y,z(true)"""
+        let result = run (predicate .>> eof) """exn$0 x,y,z:obj(true)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestPredicate44 () =
-        let result = run (predicate .>> eof) """exn$1 x is Nat {not (iif ( true, not (false)))}"""
+        let result = run (predicate .>> eof) """exn$1 x:Nat {not (iif ( true, not (false)))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate45 () =
-        let result = run (predicate .>> eof) """exn$2 x in Nat,y {not (iif ( iif( true, false), true))}"""
+        let result = run (predicate .>> eof) """exn$2 x: Nat,y:B {not (iif ( iif( true, false), true))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestPredicate46 () =
-        let result = run (predicate .>> eof) """exn$3 x {not (iif ( iif ( true, iif( true, false)), not true ))}"""
+        let result = run (predicate .>> eof) """exn$3 x:Is {not (iif ( iif ( true, iif( true, false)), not true ))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -359,7 +359,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate48 () =
-        let result = run (predicate .>> eof) """all arg is Args 
+        let result = run (predicate .>> eof) """all arg:Args 
 				{
 					is(arg,Set)
 				}"""
@@ -398,28 +398,28 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate53 () =
-        let result = run (predicate .>> eof) """all x is Range(a:B), y is C, z {and (a,b,c)}"""
+        let result = run (predicate .>> eof) """all x:Range(a:B), y:C, z:obj {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate54 () =
-        let result = run (predicate .>> eof) """all x is Real, y is pred, z is func {and (a,b,c)}"""
+        let result = run (predicate .>> eof) """all x:Real, y:pred, z:func {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate55 () =
-        let result = run (predicate .>> eof) """ex x is Range(a:B), y is C, z {and (a,b,c)}"""
+        let result = run (predicate .>> eof) """ex x:Range(a:B), y:C, z:obj {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate56 () =
-        let result = run (predicate .>> eof) """ex x is Real, y is pred, z is func {and (a,b,c)}"""
+        let result = run (predicate .>> eof) """ex x:Real, y:pred, z:func {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

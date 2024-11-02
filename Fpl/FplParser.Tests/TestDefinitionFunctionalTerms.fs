@@ -11,14 +11,18 @@ type TestDefinitionFunctionalTerms01 () =
     member this.TestDefinitionFunctionalTerm01 () =
         let result = run (definitionFunctionalTerm .>> eof) """func LeftNeutralElement() -> tplSetElem
         {
-            dec ~a:obj ~ e: tplSetElem
+            dec ~e1:obj 
 
             assert 
-                ex e
+                ex e: tplSetElem
                 {
-                    IsLeftNeutralElement(e)
+                    and (
+                        IsLeftNeutralElement(e)
+                        ,(e = e1)
+                    )
+
                 };
-            return e
+            return e1
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual

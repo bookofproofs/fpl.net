@@ -103,11 +103,11 @@ type TestReferenceRules() =
     member this.TestReferenceRule06 () =
         let result = run (ruleOfInference .>> eof) """inf ExistsByExample(p: pred(c: obj))
         {
-            dec ~a:obj ~ x: obj ;
+            dec ~p:pred(c:obj);
             premise:
                 p(c)
             conclusion:
-                ex x{p(x)}
+                ex x:obj {p(x)}
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
