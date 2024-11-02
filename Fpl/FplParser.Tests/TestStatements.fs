@@ -86,13 +86,9 @@ type TestStatements () =
     [<TestMethod>]
     member this.TestAssertion01 () =
         let result = run (assertionStatement .>> eof) """assert
-                    all n
+                    all n:Set
                     {
-                        and
-                        (
-                            is(n, Set),
-                            In(n, self)
-                        )
+                        In(n, self)
                     }"""
         let actual = sprintf "%O" result
         printf "%O" actual

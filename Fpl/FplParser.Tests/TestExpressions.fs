@@ -224,17 +224,17 @@ type TestExpressions () =
 
             def pred T18()
             {
-                ex x is Range(a:T), y is C, z {and (a,b,c)}
+                ex x:Range(a:T), y:C, z:obj {and (a,b,c)}
             }
 
             def pred T19()
             {
-                exn$1 x {all y {true}}
+                exn$1 x:obj {all y:N {true}}
             }
 
             def pred T20()
             {
-                all x {not x}
+                all x:obj {not x}
             }
 
             def pred T21()

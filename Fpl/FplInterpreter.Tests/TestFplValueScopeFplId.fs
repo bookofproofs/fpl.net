@@ -518,9 +518,9 @@ type TestFplValueScopeFplId() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x is Range(a:T), y is C, z {and (a,b,c)}")>]
-    [<DataRow("base19", "exn$1 x {all y {true}}")>]
-    [<DataRow("base20", "all x {not x}")>]
+    [<DataRow("base18", "ex x:Range(a:T), y:C, z {and (a,b,c)}")>]
+    [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
+    [<DataRow("base20", "all x:obj {not x}")>]
     [<DataRow("base21", "and(x, y, z)")>]
     [<DataRow("base21a", "not x")>]
     [<DataRow("base21b", "not (x)")>]
@@ -566,26 +566,26 @@ type TestFplValueScopeFplId() =
             | "base11" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base12" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base13" -> Assert.AreEqual<string>(varVal, base1.FplId)
-            | "base11a" -> Assert.AreEqual<string>(varVal, base1.FplId)
+            | "base11a" -> Assert.AreEqual<string>("v", base1.FplId)
             | "base12a" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base10b" -> Assert.AreEqual<string>("Test", base1.FplId)
-            | "base11b" -> Assert.AreEqual<string>(varVal, base1.FplId)
+            | "base11b" -> Assert.AreEqual<string>("v", base1.FplId)
             | "base12b" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base13b" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10c" -> Assert.AreEqual<string>("Test", base1.FplId)
-            | "base11c" -> Assert.AreEqual<string>(varVal, base1.FplId)
+            | "base11c" -> Assert.AreEqual<string>("v", base1.FplId)
             | "base12c" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base13c" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10d" -> Assert.AreEqual<string>("Test", base1.FplId)
-            | "base11d" -> Assert.AreEqual<string>(varVal, base1.FplId)
+            | "base11d" -> Assert.AreEqual<string>("v", base1.FplId)
             | "base12d" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base13d" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10e" -> Assert.AreEqual<string>("Test", base1.FplId)
-            | "base11e" -> Assert.AreEqual<string>(varVal, base1.FplId)
+            | "base11e" -> Assert.AreEqual<string>("v", base1.FplId)
             | "base12e" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base13e" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10f" -> Assert.AreEqual<string>("Test", base1.FplId)
-            | "base11f" -> Assert.AreEqual<string>(varVal, base1.FplId)
+            | "base11f" -> Assert.AreEqual<string>("v", base1.FplId)
             | "base12f" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base13f" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base14" -> Assert.AreEqual<string>(varVal, base1.FplId)
@@ -604,7 +604,7 @@ type TestFplValueScopeFplId() =
             | "base23" -> Assert.AreEqual<string>("or", base1.FplId)
             | "base24" -> Assert.AreEqual<string>("iif", base1.FplId)
             | "base25" -> Assert.AreEqual<string>("impl", base1.FplId)
-            | "base26" -> Assert.AreEqual<string>("is(undefNat)", base1.FplId)
+            | "base26" -> Assert.AreEqual<string>("is", base1.FplId)
             | "base27" -> Assert.AreEqual<string>("B", base1.FplId)
             | "base28" -> Assert.AreEqual<string>("C", base1.FplId)
             | "base29" -> Assert.AreEqual<string>("D", base1.FplId)
@@ -612,7 +612,7 @@ type TestFplValueScopeFplId() =
             | "base31" -> Assert.AreEqual<string>("C", base1.FplId)
             | "base32" -> Assert.AreEqual<string>("E", base1.FplId)
             | "base33" -> Assert.AreEqual<string>("p", base1.FplId)
-            | "base34" -> Assert.AreEqual<string>("is(undefSet)", base1.FplId)
+            | "base34" -> Assert.AreEqual<string>("is", base1.FplId)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

@@ -26,9 +26,10 @@ type Delegates() =
 
     let _equal (a:FplValue) (b:FplValue) =
         let getActual (x:FplValue) = 
-            match x.FplRepresentation with
-            | FplRepresentation.Pointer variable -> variable
-            | _ -> x
+            if x.ValueList.Count > 0 then
+                x.ValueList[0]
+            else 
+                x
 
         let a1 = getActual(a)
         let b1 = getActual(b)

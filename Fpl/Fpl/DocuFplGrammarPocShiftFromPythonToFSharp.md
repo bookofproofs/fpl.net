@@ -214,7 +214,7 @@ The existence quantor accepting several allowed occurrences gets its own keyword
 ``` 
 *Now*
 ``` 
-    exn$1 x ( p (x) ) // there exists exactly one x ...
+    exn$1 x:obj ( p (x) ) // there exists exactly one x ...
 ``` 
 
 This disambiguation helps formulate the FPL grammar without `attempt` parsers, which would otherwise distort error positions shown during error recovery inside the predicate.
@@ -259,7 +259,7 @@ The equality comparison supports multiple equalities at once; for instance `( x 
 
 See also 24) to see how to extend FPL with other symbols.
 
-#### 10) Domains are now allowed in the quantors `all`, `ex`, and `exn`.
+#### 10) Named variable declarations are now allowed and even required in the quantors `all`, `ex`, and `exn`.
 
 In the original version of FPL grammar, free variables used in quantors had to be first declared with a specific type and could then be only listed after the quantor and before the predicate of the quantor. In the new version of the FPL grammar, type declarations can be implicit by allowing the `in` keyword. 
 
@@ -273,7 +273,7 @@ In the original version of FPL grammar, free variables used in quantors had to b
 ``` 
 *Now*
 ``` 
-    all x is Nat ( p (x) ) 
+    all x:Nat ( p (x) ) 
 ``` 
 
 The syntax is similar to the `for` statement, i.e., it also allows the two flavors 
@@ -283,7 +283,7 @@ The syntax is similar to the `for` statement, i.e., it also allows the two flavo
 Still, the syntax is s more flexible since it not only allows types but also can be enumerated, for instance, this the free variables `x` and `n` do not have to be declared. Their type will be inferred from how they are used in the `all` quantor:
 
 ``` 
-    all x is Nat, n is func(obj)->obj
+    all x:Nat, n:func(obj)->obj
     ( 
         p (x,n) 
     ) 
@@ -295,9 +295,9 @@ Also, expressions in second-order logic predicates are allowed:
 ``` 
     axiom SchemaSeparation()
     {
-        all p is pred, x,y is Set
+        all p:pred, x,y:Set
         (
-            ex y in Set
+            ex y:Set
             (
                 (y = SetBuilder(x,p))
             )
@@ -444,7 +444,7 @@ The following changes have been made:
             ~a:A
             ~b:B
             ~c:C
-            ~x,y,z: obj
+            ~y,z: obj
         ;
         1. GreaterAB |- (a > b) 
         2. GreaterBC |- (b > c) 
@@ -453,7 +453,7 @@ The following changes have been made:
         5. 4., ModusPonens |- (a > c)
         6. 5., 1. |- and ((a > c), (a > b)) 
         7. 6., ExistsByExample(and((a > c), (a > b))) |- 
-            ex x  
+            ex x:obj  
                 and ((x > y), (x > z)) 
         qed
     }
@@ -617,7 +617,7 @@ In previous versions of FPL, the syntax of theorem-like statements, conjectures,
     {
         premise: undefined
         conclusion: 
-            all x,y in N
+            all x,y : N
             (
                 impl
                 (
@@ -632,7 +632,7 @@ In previous versions of FPL, the syntax of theorem-like statements, conjectures,
 ```        
     theorem SomeTheorem() 
     {
-        all x,y in N
+        all x,y : N
         (
             impl
             (

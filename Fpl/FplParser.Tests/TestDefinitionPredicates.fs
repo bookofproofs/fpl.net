@@ -15,8 +15,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate01 () =
         let result = run (definitionPredicate .>> eof) """pred IsGreaterOrEqual(n,m: Nat)
         {
-            dec ~a:obj ~  k: Nat;
-            ex k { Equal(n,Add(m,k)) }
+            ex k:Nat { Equal(n,Add(m,k)) }
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -26,8 +25,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate02 () =
         let result = run (definitionPredicate .>> eof) """pred IsBounded(x: Real)
         {
-            dec ~a:obj ~  upperBound, lowerBound: Real;
-            ex upperBound, lowerBound
+            ex upperBound, lowerBound:Real
             {
                 and (LowerEqual(x,upperBound), LowerEqual(lowerBound,x))
             }
@@ -40,8 +38,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate03 () =
         let result = run (definitionPredicate .>> eof) """pred IsBounded(f: RealValuedFunction)
         {
-            dec ~a:obj ~  x: Real;
-            all x
+            all x:Real
             {
                 IsBounded(f(x))
             }
@@ -55,9 +52,8 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate04 () =
         let result = run (definitionPredicate .>> eof) """pred Equal(a,b: tpl)
         {
-            dec ~a:obj ~  p: pred ;
 
-			all p
+			all p:pred
 			{
 				iif
 				(
@@ -118,8 +114,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate08 () =
         let result = run (definitionPredicate .>> eof) """pred IsPowerSet(ofSet, potentialPowerSet: Set)
         {
-            dec ~a:obj ~  z: Set;
-            all z
+            all z:Set
             {
                 impl (Subset(z,ofSet), In(z, potentialPowerSet))
             }
@@ -132,8 +127,7 @@ type TestDefinitionPredicates () =
     member this.TestDefinitionPredicate09 () =
         let result = run (definitionPredicate .>> eof) """pred Union(x,superSet: Set)
         {
-            dec ~a:obj ~  u: Set;
-            all u
+            all u:Set
             {
                 impl (In(u, x), In(u, superSet))
             }

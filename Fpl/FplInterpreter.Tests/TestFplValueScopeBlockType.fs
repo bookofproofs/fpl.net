@@ -517,9 +517,9 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x is Range(a:T), y is C, z {and (a,b,c)}")>]
-    [<DataRow("base19", "exn$1 x {all y {true}}")>]
-    [<DataRow("base20", "all x {not x}")>]
+    [<DataRow("base18", "ex x:Range(a:T), y:C, z {and (a,b,c)}")>]
+    [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
+    [<DataRow("base20", "all x:obj {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]
     [<DataRow("base21a", "not x")>]
     [<DataRow("base21b", "not (x)")>]
@@ -593,9 +593,9 @@ type TestFplValueScopeBlockType() =
             | "base15b" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
             | "base16" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
             | "base17" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
-            | "base18" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
-            | "base19" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
-            | "base20" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
+            | "base18" -> Assert.AreEqual<FplValueType>(FplValueType.Quantor, base1.BlockType)
+            | "base19" -> Assert.AreEqual<FplValueType>(FplValueType.Quantor, base1.BlockType)
+            | "base20" -> Assert.AreEqual<FplValueType>(FplValueType.Quantor, base1.BlockType)
             | "base21" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
             | "base21a" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
             | "base21b" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)

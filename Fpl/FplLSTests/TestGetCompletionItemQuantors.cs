@@ -6,9 +6,9 @@ namespace FplLSTests
     public class TestGetCompletionItemQuantors
     {
 
-        [DataRow("all", 6)]
-        [DataRow("ex", 6)]
-        [DataRow("exn", 5)]
+        [DataRow("all", 2)]
+        [DataRow("ex", 2)]
+        [DataRow("exn", 2)]
         [TestMethod]
         public void TestAddQuantorChoicesNumber(string choice, int number)
         {

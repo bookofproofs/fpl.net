@@ -370,7 +370,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestNot5 () =
-        let result = run (negation .>> eof) """not all x,y is N { (x >< y) }"""
+        let result = run (negation .>> eof) """not all x,y:N { (x >< y) }"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -419,112 +419,112 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestAll1 () =
-        let result = run (all .>> eof) """all x,y,z{true}"""
+        let result = run (all .>> eof) """all x,y,z:obj {true}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestAll2 () =
-        let result = run (all .>> eof) """all x,y,z {not (iif ( true, not false))}"""
+        let result = run (all .>> eof) """all x,y,z:obj {not (iif ( true, not false))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestAll3 () =
-        let result = run (all .>> eof) """all x,y,z {not (iif ( iif( true, false), true))}"""
+        let result = run (all .>> eof) """all x,y,z:obj {not (iif ( iif( true, false), true))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestAll4 () =
-        let result = run (all .>> eof) """all x {not (iif ( iif ( true, iif( true, false)), not (true) ))}"""
+        let result = run (all .>> eof) """all x:obj {not (iif ( iif ( true, iif( true, false)), not (true) ))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestAll5 () =
-        let result = run (all .>> eof) """all x is Range(a:B), y is C, z {and (a,b,c)}"""
+        let result = run (all .>> eof) """all x:Range(a:B), y:C, z:obj {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestAll6 () =
-        let result = run (all .>> eof) """all x is Real, y is pred, z is func {and (a,b,c)}"""
+        let result = run (all .>> eof) """all x:Real, y:pred, z:func {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEx1 () =
-        let result = run (exists .>> eof) """ex x,y,z{true} """
+        let result = run (exists .>> eof) """ex x,y,z:func {true} """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEx2 () =
-        let result = run (exists .>> eof) """ex x,y,z {not (iif ( true, not (false)))}"""
+        let result = run (exists .>> eof) """ex x,y,z:ind {not (iif ( true, not (false)))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEx3 () =
-        let result = run (exists .>> eof) """ex x,y,z {not (iif ( iif( true, false), true))}"""
+        let result = run (exists .>> eof) """ex x,y,z:pred {not (iif ( iif( true, false), true))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEx4 () =
-        let result = run (exists .>> eof) """ex x {not (iif ( iif ( true, iif( true, false)), not (true) ))}"""
+        let result = run (exists .>> eof) """ex x:obj {not (iif ( iif ( true, iif( true, false)), not (true) ))}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEx5 () =
-        let result = run (exists .>> eof) """ex x is Range(a:B), y is C, z {and (a,b,c)}"""
+        let result = run (exists .>> eof) """ex x:Range(a:B), y:C, z:obj {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEx6 () =
-        let result = run (exists .>> eof) """ex x is Real, y is pred, z is func {and (a,b,c)}"""
+        let result = run (exists .>> eof) """ex x:Real, y:pred, z:func {and (a,b,c)}"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExN1 () =
-        let result = run (existsTimesN .>> eof) """exn$0 x { true}"""
+        let result = run (existsTimesN .>> eof) """exn$0 x:obj { true}"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExN2 () =
-        let result = run (existsTimesN .>> eof) """exn$1 x is Nat {not (iif ( true, not (false)))}"""
+        let result = run (existsTimesN .>> eof) """exn$1 x:Nat {not (iif ( true, not (false)))}"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExN3 () =
-        let result = run (existsTimesN .>> eof) """exn$2 x,y,z {not (iif ( iif( true, false), true))}"""
+        let result = run (existsTimesN .>> eof) """exn$2 x,y,z:obj {not (iif ( iif( true, false), true))}"""
         let actual = replaceWhiteSpace (sprintf "%O" result)
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestExN4 () =
-        let result = run (existsTimesN .>> eof) """exn$3 x { not (iif ( iif ( true, iif( true, false)), not (true) )) } """
+        let result = run (existsTimesN .>> eof) """exn$3 x:obj { not (iif ( iif ( true, iif( true, false)), not (true) )) } """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

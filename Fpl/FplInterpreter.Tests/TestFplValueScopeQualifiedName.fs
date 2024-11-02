@@ -511,9 +511,9 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x is Range(a:T), y is C, z {and (a,b,c)}")>]
-    [<DataRow("base19", "exn$1 x {all y {true}}")>]
-    [<DataRow("base20", "all x {not x}")>]
+    [<DataRow("base18", "ex x:Range(a:T), y:C, z {and (a,b,c)}")>]
+    [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
+    [<DataRow("base20", "all x:obj {not x}")>]
     [<DataRow("base21", "and(x, y, z)")>]
     [<DataRow("base21a", "not x")>]
     [<DataRow("base21b", "not(x)")>]
@@ -587,9 +587,9 @@ type TestFplValueScopeQualifiedName() =
             | "base15b" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().'(-(x))", base1.QualifiedName)
             | "base16" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().-(+(y, =(x, *(2, x))))", base1.QualifiedName)
             | "base17" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().'(+(y, =('(x), *(2, x))))", base1.QualifiedName)
-            | "base18" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().ex", base1.QualifiedName)
-            | "base19" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().exn" , base1.QualifiedName)
-            | "base20" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().all", base1.QualifiedName)
+            | "base18" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().ex(x(a), y, z)", base1.QualifiedName)
+            | "base19" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().exn$1(x)" , base1.QualifiedName)
+            | "base20" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().all(x)", base1.QualifiedName)
             | "base21" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, base1.QualifiedName)
             | "base21a" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().not(x)", base1.QualifiedName)
             | "base21b" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().not(x)", base1.QualifiedName)
@@ -667,7 +667,7 @@ type TestFplValueScopeQualifiedName() =
     [<TestMethod>]
     member this.TestDelegate(var, varVal) =
         ad.Clear()
-        let fplCode = sprintf "def pred T1() { %s };" varVal
+        let fplCode = sprintf "def pred T1() { dec ~a:T1 ~b:pred ~c:@Nat ~d:ind; %s };" varVal
         let filename = "TestDelegateQualifiedName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore

@@ -108,21 +108,17 @@ def class CartesianProduct: Set
 
     property pred AllTuplesIn()
     {
-        dec 
-            ~tupleElem: Set
-            ~i: Nat
-        ;
         and 
         (
             is(@self,Set),
-            all tupleElem
+            all tupleElem: Set
             {
                 impl 
                 (
                     In(tupleElem,@self),
                     and (
                         is(tupleElem,Tuple[myFrom,myLength:Nat]),
-                        all i 
+                        all i:Nat 
                         {
                             and (
                                 In(i,Rang(1,myLength)),    
@@ -191,7 +187,7 @@ def class BinaryRelation: Relation
 
     property pred RightUnique()
     {
-        all v,w1,w2 is Set
+        all v,w1,w2 : Set
         {
             impl
             (
@@ -210,7 +206,7 @@ def class BinaryRelation: Relation
 
     property pred LeftUnique()
     {
-        all v1,v2,w is Set
+        all v1,v2,w : Set
         {
             impl
             (
@@ -239,9 +235,9 @@ def class BinaryRelation: Relation
 
     property pred RightTotal()
     {
-        all w is Set
+        all w : Set
         {
-            ex v is Set
+            ex v : Set
             {
                 and
                 (
@@ -260,9 +256,9 @@ def class BinaryRelation: Relation
 
     property pred LeftTotal()
     {
-        all v is Set
+        all v : Set
         {
-            ex w is Set
+            ex w : Set
             {
                 and
                 (
