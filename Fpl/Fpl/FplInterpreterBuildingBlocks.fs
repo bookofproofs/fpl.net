@@ -320,6 +320,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Digits s -> 
         st.EvalPush("Digits")
         let fv = es.PeekEvalStack()
+        fv.FplId <- s
         fv.TypeId <- s
         st.EvalPop()
     | Ast.PascalCaseId s -> 
@@ -550,7 +551,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Qed")
         eval_pos_unit st pos1 pos2
         st.EvalPop() 
-    // | ExtDigits of Positions * Ast
     | Ast.RuleOfInference((pos1, pos2), (signatureAst, premiseConclusionBlockAst)) ->
         st.EvalPush("RuleOfInference")
         let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.RuleOfInference, es.PeekEvalStack())
@@ -573,9 +573,9 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.NameEndPos <- pos2
         st.EvalPop()
-    | Ast.ExtDigits((pos1, pos2), ast1) ->
+    | Ast.ExtDigits((pos1, pos2), digitsAst) ->
         st.EvalPush("ExtDigits")
-        eval st ast1
+        eval st digitsAst
         st.EvalPop()
     | Ast.ExtensionType((pos1, pos2), ast1) ->
         st.EvalPush("ExtensionType")
