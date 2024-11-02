@@ -1181,15 +1181,27 @@ let rec eval (st: SymbolTable) ast =
             if prefixOpAst.IsSome && postfixOpAst.IsSome then 
                 // for heuristic reasons, we choose a precedence of postfix ...
                 postfixOpAst |> Option.map (eval st) |> Option.defaultValue () 
+                let postfixedInnerPred = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,es.PeekEvalStack())
+                es.PushEvalStack(postfixedInnerPred)
                 // ... over prefix notation in mathematics
                 prefixOpAst |> Option.map (eval st) |> Option.defaultValue ()
+                let prefixedInnerPred = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,es.PeekEvalStack())
+                es.PushEvalStack(prefixedInnerPred)
                 eval st predicateAst
+                es.PopEvalStack()
+                es.PopEvalStack()
             elif prefixOpAst.IsSome then 
                 prefixOpAst |> Option.map (eval st) |> Option.defaultValue ()
+                let innerPred = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,es.PeekEvalStack())
+                es.PushEvalStack(innerPred)
                 eval st predicateAst
+                es.PopEvalStack()
             elif postfixOpAst.IsSome then 
                 postfixOpAst |> Option.map (eval st) |> Option.defaultValue ()
+                let innerPred = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,es.PeekEvalStack())
+                es.PushEvalStack(innerPred)
                 eval st predicateAst
+                es.PopEvalStack()
             else
                 eval st predicateAst
         ensureReversedPolishNotation
