@@ -337,7 +337,11 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let sid = $"${s.ToString()}"
         fv.FplId <- fv.FplId + sid
-        fv.TypeId <- fv.TypeId + sid
+        fv.TypeId <- 
+            if fv.TypeId<>"" then 
+                fv.TypeId + sid
+            else
+                "ind"
         fv.NameEndPos <- pos2
         st.EvalPop() 
     | Ast.Extensionname((pos1, pos2), s) ->
