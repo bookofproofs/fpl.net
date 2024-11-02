@@ -562,6 +562,8 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 match this.BlockType with
                 | FplValueType.Theory 
                 | FplValueType.Proof 
+                | FplValueType.Argument 
+                | FplValueType.Language 
                 | FplValueType.Class ->
                     head
                 | FplValueType.Theorem 
@@ -592,7 +594,7 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                         this.Scope
                         |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> FplValue.IsVariable(kvp.Value))
                         |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
-                            kvp.Value.Type(SignatureType.Name))
+                            kvp.Value.Type(isSignature))
                         |> String.concat ", "
                     match paramT with
                     | "" -> head
@@ -605,8 +607,6 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                         let paramT = paramTuple()
                         sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
                     | _ -> ""
-                | FplValueType.Language ->
-                    head
                 | FplValueType.Translation ->
                     let args =
                         this.ValueList

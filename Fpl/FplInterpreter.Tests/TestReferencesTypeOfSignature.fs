@@ -235,6 +235,27 @@ type TestReferencesTypeOfSignature() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("base1", """loc and(p,q) := !tex: x "=" y;;""", "and(p, q)")>]
+    [<TestMethod>]
+    member this.TestLocalization(var, varVal, name) =
+        ad.Clear()
+        let fplCode = sprintf "%s" varVal
+        let filename = "TestLocalizationTypeSignature"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+
+            let loc = theory.Scope[name] 
+
+            match var with
+            | "base1" -> Assert.AreEqual<string>("pred(undef, undef)", loc.Type(SignatureType.Type))
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
     [<DataRow("base1", """def pred T1() {intr};""")>]
     [<DataRow("base2", """def pred infix ">" -1 T1() {intr};""")>]
     [<DataRow("base3", """def pred postfix "'" T1() {intr};""")>]
