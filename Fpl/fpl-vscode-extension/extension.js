@@ -10,12 +10,12 @@ function log2Console(message, isError) {
     if (isError) {
         outputChannel.appendLine("Error: " + newMessage);
         // log in red
-        console.log('\u001b[' + 31 + 'm' + newMessage + '\u001b[0m');
+        console.error(newMessage);
     }
     else {
         outputChannel.appendLine("Info: " + newMessage);
         // log in green
-        console.log('\u001b[' + 32 + 'm' + newMessage + '\u001b[0m');
+        console.info(newMessage);
     }
 }
 
