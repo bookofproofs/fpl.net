@@ -511,7 +511,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x:Range(a:T), y:C, z {and (a,b,c)}")>]
+    [<DataRow("base18", "ex x:Range(a:T), y:C, z:obj {and (a,b,c)}")>]
     [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
     [<DataRow("base20", "all x:obj {not x}")>]
     [<DataRow("base21", "and(x, y, z)")>]
@@ -587,7 +587,7 @@ type TestFplValueScopeQualifiedName() =
             | "base15b" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().'(-(x))", base1.QualifiedName)
             | "base16" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().-(+(y, =(x, *(2, x))))", base1.QualifiedName)
             | "base17" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().'(+(y, =('(x), *(2, x))))", base1.QualifiedName)
-            | "base18" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().ex(x(a), y, z)", base1.QualifiedName)
+            | "base18" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().ex(x(T), y, z)", base1.QualifiedName)
             | "base19" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().exn$1(x)" , base1.QualifiedName)
             | "base20" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().all(x)", base1.QualifiedName)
             | "base21" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, base1.QualifiedName)

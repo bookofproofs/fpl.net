@@ -661,6 +661,8 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     | (_, _, None) -> 
                         if this.HasBrackets then 
                             sprintf "%s[%s]" head args 
+                        elif head = "bydef." then
+                            sprintf "%s%s" head args
                         else
                             sprintf "%s(%s)" head args 
                 | _ -> ""
@@ -706,6 +708,8 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     | FplValueType.Localization 
                     | FplValueType.Constructor
                     | _ when FplValue.IsBlock(fv) -> 
+                        fv.Type(SignatureType.Mixed)
+                    | FplValueType.Quantor -> 
                         fv.Type(SignatureType.Mixed)
                     | _ -> 
                         fv.FplId

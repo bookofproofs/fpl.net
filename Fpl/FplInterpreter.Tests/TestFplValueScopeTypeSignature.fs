@@ -514,7 +514,7 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x:Range(a:T), y:C, z {and (a,b,c)}")>]
+    [<DataRow("base18", "ex x:Range(a:T), y:C, z:obj {and (a,b,c)}")>]
     [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
     [<DataRow("base20", "all x:obj {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]
@@ -589,9 +589,9 @@ type TestFplValueScopeTypeSignature() =
             | "base15b" -> Assert.AreEqual<string>("'(-(undef))", base1.Type(SignatureType.Type))
             | "base16" -> Assert.AreEqual<string>("-(+(undef, =(undef, *(2, undef))))", base1.Type(SignatureType.Type))
             | "base17" -> Assert.AreEqual<string>("'(+(undef, =('(undef), *(2, undef))))", base1.Type(SignatureType.Type))
-            | "base18" -> Assert.AreEqual<string>("ex", base1.Type(SignatureType.Type))
-            | "base19" -> Assert.AreEqual<string>("exn", base1.Type(SignatureType.Type))
-            | "base20" -> Assert.AreEqual<string>("all", base1.Type(SignatureType.Type))
+            | "base18" -> Assert.AreEqual<string>("pred(Range(T), C, obj)", base1.Type(SignatureType.Type))
+            | "base19" -> Assert.AreEqual<string>("pred$1(obj)", base1.Type(SignatureType.Type))
+            | "base20" -> Assert.AreEqual<string>("pred(obj)", base1.Type(SignatureType.Type))
             | "base21" -> Assert.AreEqual<string>("pred(undef, undef, undef)", base1.Type(SignatureType.Type))
             | "base21a" -> Assert.AreEqual<string>("pred(undef)", base1.Type(SignatureType.Type))
             | "base21b" -> Assert.AreEqual<string>("pred(undef)", base1.Type(SignatureType.Type))

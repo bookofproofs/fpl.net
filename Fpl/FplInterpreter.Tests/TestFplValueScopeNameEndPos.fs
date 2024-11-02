@@ -517,7 +517,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x:Range(a:T), y:C, z {and (a,b,c)}")>]
+    [<DataRow("base18", "ex x:Range(a:T), y:C, z:obj {and (a,b,c)}")>]
     [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
     [<DataRow("base20", "all x:obj {not x}")>]
     [<DataRow("base21", "and (x, y, z)")>]
@@ -579,23 +579,23 @@ type TestFplValueScopeNameEndPos() =
             | "base11d" -> Assert.AreEqual<int64>((int64)25, base1.NameEndPos.Column)
             | "base12d" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
             | "base13d" -> Assert.AreEqual<int64>((int64)22, base1.NameEndPos.Column)
-            | "base10e" -> Assert.AreEqual<int64>((int64)40, base1.NameEndPos.Column)
-            | "base11e" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
-            | "base12e" -> Assert.AreEqual<int64>((int64)36, base1.NameEndPos.Column)
-            | "base13e" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
-            | "base10f" -> Assert.AreEqual<int64>((int64)35, base1.NameEndPos.Column)
-            | "base11f" -> Assert.AreEqual<int64>((int64)32, base1.NameEndPos.Column)
-            | "base12f" -> Assert.AreEqual<int64>((int64)38, base1.NameEndPos.Column)
-            | "base13f" -> Assert.AreEqual<int64>((int64)31, base1.NameEndPos.Column)
+            | "base10e" -> Assert.AreEqual<int64>((int64)26, base1.NameEndPos.Column)
+            | "base11e" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
+            | "base12e" -> Assert.AreEqual<int64>((int64)26, base1.NameEndPos.Column)
+            | "base13e" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
+            | "base10f" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
+            | "base11f" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
+            | "base12f" -> Assert.AreEqual<int64>((int64)27, base1.NameEndPos.Column)
+            | "base13f" -> Assert.AreEqual<int64>((int64)22, base1.NameEndPos.Column)
             | "base14" -> Assert.AreEqual<int64>((int64)19, base1.NameEndPos.Column)
             | "base15" -> Assert.AreEqual<int64>((int64)19, base1.NameEndPos.Column)
             | "base15a" -> Assert.AreEqual<int64>((int64)20, base1.NameEndPos.Column)
             | "base15b" -> Assert.AreEqual<int64>((int64)21, base1.NameEndPos.Column)
             | "base16" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
             | "base17" -> Assert.AreEqual<int64>((int64)35, base1.NameEndPos.Column)
-            | "base18" -> Assert.AreEqual<int64>((int64)59, base1.NameEndPos.Column)
-            | "base19" -> Assert.AreEqual<int64>((int64)40, base1.NameEndPos.Column)
-            | "base20" -> Assert.AreEqual<int64>((int64)29, base1.NameEndPos.Column)
+            | "base18" -> Assert.AreEqual<int64>((int64)57, base1.NameEndPos.Column)
+            | "base19" -> Assert.AreEqual<int64>((int64)46, base1.NameEndPos.Column)
+            | "base20" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
             | "base21" -> Assert.AreEqual<int64>((int64)30, base1.NameEndPos.Column)
             | "base21a" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
             | "base21b" -> Assert.AreEqual<int64>((int64)25, base1.NameEndPos.Column)

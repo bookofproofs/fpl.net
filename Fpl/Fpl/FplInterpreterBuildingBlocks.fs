@@ -180,7 +180,6 @@ type EvalStack() =
                 | FplValueType.Localization -> 
                     EvalStack.tryAddToScope fv
                     next.FplRepresentation <- fv.FplRepresentation
-                    EvalStack.tryAddToScope fv
                 | FplValueType.Reference ->
                     EvalStack.tryAddToValueList fv
                 | _ -> ()
@@ -374,7 +373,6 @@ let rec eval (st: SymbolTable) ast =
         let evalPath = st.EvalPath()
         let isDeclaration = evalPath.Contains("NamedVarDecl.") 
         let isLocalizationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
-        let isQuantorVariableDeclaration = evalPath.EndsWith("ExistsN.Var") || evalPath.EndsWith("Exists.Var") || evalPath.EndsWith("All.Var") 
         let diagnosticsStopFlag = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false // enable var-related diagnostics in AST.Var, even if it was stopped (e.g. in Ast.Localization)
         let fv = es.PeekEvalStack()
@@ -404,15 +402,6 @@ let rec eval (st: SymbolTable) ast =
                         | None -> fValue
                 let loc = getLocalization fv
                 loc.Scope.Add(name, varValue)
-                // Add the variable to the reference in the localization
-                es.PushEvalStack(varValue)
-                es.PopEvalStack()
-        elif isQuantorVariableDeclaration then
-            match FplValue.VariableInBlockScopeByName fv name with 
-            | ScopeSearchResult.Found other ->
-                emitVAR03diagnostics varValue other 
-            | _ -> 
-                fv.Scope.Add(name, varValue)
                 // Add the variable to the reference in the localization
                 es.PushEvalStack(varValue)
                 es.PopEvalStack()

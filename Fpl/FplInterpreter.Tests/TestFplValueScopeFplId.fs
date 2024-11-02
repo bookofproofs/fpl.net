@@ -518,7 +518,7 @@ type TestFplValueScopeFplId() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = 2 * x)")>]
     [<DataRow("base17", "(y + x' = 2 * x)'")>]
-    [<DataRow("base18", "ex x:Range(a:T), y:C, z {and (a,b,c)}")>]
+    [<DataRow("base18", "ex x:Range(a:T), y:C, z:obj {and (a,b,c)}")>]
     [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
     [<DataRow("base20", "all x:obj {not x}")>]
     [<DataRow("base21", "and(x, y, z)")>]
@@ -559,7 +559,7 @@ type TestFplValueScopeFplId() =
             | "base4" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base5" -> Assert.AreEqual<string>("del.Test", base1.FplId)
             | "base6" -> Assert.AreEqual<string>(varVal, base1.FplId)
-            | "base7" -> Assert.AreEqual<string>("bydef.Test", base1.FplId)
+            | "base7" -> Assert.AreEqual<string>("bydef", base1.FplId)
             | "base8" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base9" -> Assert.AreEqual<string>("Test$1", base1.FplId)
             | "base10" -> Assert.AreEqual<string>(varVal, base1.FplId)
