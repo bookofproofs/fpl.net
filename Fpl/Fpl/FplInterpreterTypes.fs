@@ -691,10 +691,9 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
             let rec getFullName (fv:FplValue) (first:bool) =
                 let fplValueType = 
                     match fv.BlockType with
-                    | FplValueType.Localization -> 
-                        fv.Type(SignatureType.Name)
+                    | FplValueType.Localization
                     | FplValueType.Reference -> 
-                        fv.Type(SignatureType.Mixed)
+                        fv.Type(SignatureType.Name)
                     | FplValueType.Localization 
                     | FplValueType.Constructor
                     | _ when FplValue.IsBlock(fv) -> 

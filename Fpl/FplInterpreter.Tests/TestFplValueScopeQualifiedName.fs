@@ -648,11 +648,11 @@ type TestFplValueScopeQualifiedName() =
 
             match var with
             | "base1" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.B()", base1.QualifiedName)
-            | "base2" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.C(T1, func, ind, pred)", base1.QualifiedName)
-            | "base3" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.D(self, T1, func)", base1.QualifiedName)
-            | "base4" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.B(In(undef))", base1.QualifiedName)
-            | "base5" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.C(Test1(T1), Test2(func, ind, pred))", base1.QualifiedName)
-            | "base6" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.E(pred, undef, pred)", base1.QualifiedName)
+            | "base2" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.C(a, b, c, d)", base1.QualifiedName)
+            | "base3" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.D(self, a, b)", base1.QualifiedName)
+            | "base4" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.B(In(x))", base1.QualifiedName)
+            | "base5" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.C(Test1(a), Test2(b, c, d))", base1.QualifiedName)
+            | "base6" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.E(true, undef, false)", base1.QualifiedName)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -681,12 +681,12 @@ type TestFplValueScopeQualifiedName() =
 
             match var with
             | "base1" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.B()", base1.QualifiedName)
-            | "base2" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.C(T1, pred, @Nat, ind)", base1.QualifiedName)
-            | "base3" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.D(self, pred, @Nat)", base1.QualifiedName)
-            | "base4" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.B(In(undef))", base1.QualifiedName)
+            | "base2" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.C(a, b, c, d)", base1.QualifiedName)
+            | "base3" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.D(self, b, c)", base1.QualifiedName)
+            | "base4" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.B(In(x))", base1.QualifiedName)
             | "base5" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.Test()", base1.QualifiedName)
-            | "base6" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.C(Test1(T1), Test2(pred, @Nat, ind))", base1.QualifiedName)
-            | "base7" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.E(pred, undef, pred)", base1.QualifiedName)
+            | "base6" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.C(Test1(a), Test2(b, c, d))", base1.QualifiedName)
+            | "base7" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.E(true, undef, false)", base1.QualifiedName)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
