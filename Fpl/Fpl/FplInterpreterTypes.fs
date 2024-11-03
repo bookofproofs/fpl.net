@@ -400,6 +400,7 @@ type SignatureType =
     | Name
     | Type
     | Mixed
+    | Repr
 
 type FplRepresentation = 
     | PredRepr of FplPredicate 
@@ -437,6 +438,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     let mutable _arity = 0
     let mutable _fplId = ""
     let mutable _typeId = ""
+    let mutable _reprId = ""
     let mutable _hasBrackets = false
     let mutable _isSignatureVariable = false
 
@@ -454,6 +456,11 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     member this.TypeId 
         with get () = _typeId
         and set (value) = _typeId <- value
+
+    /// ReprId of the FplValue.
+    member this.ReprId 
+        with get () = _reprId
+        and set (value) = _reprId <- value
 
     /// NameId of the FplValue.
     member this.FplId 
@@ -535,17 +542,22 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     | SignatureType.Name -> this.Scope[this.FplId].Type(SignatureType.Name)
                     | SignatureType.Type -> _typeId
                     | SignatureType.Mixed -> _fplId
+                    | SignatureType.Repr -> _reprId
                 | _ -> 
                     match isSignature with
                     | SignatureType.Name -> _fplId
                     | SignatureType.Type -> _typeId
                     | SignatureType.Mixed -> _fplId
+                    | SignatureType.Repr -> _reprId
 
             let propagate = 
                 match isSignature with
-                | SignatureType.Name -> SignatureType.Name
-                | SignatureType.Type -> SignatureType.Type
-                | SignatureType.Mixed -> SignatureType.Type
+                | SignatureType.Name 
+                | SignatureType.Type 
+                | SignatureType.Repr -> 
+                    isSignature
+                | SignatureType.Mixed 
+                    -> SignatureType.Type
 
             let paramTuple() = 
                 this.Scope
