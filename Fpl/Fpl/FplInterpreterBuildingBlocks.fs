@@ -551,10 +551,12 @@ let rec eval (st: SymbolTable) ast =
     | Ast.RuleOfInference((pos1, pos2), (signatureAst, premiseConclusionBlockAst)) ->
         st.EvalPush("RuleOfInference")
         let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.RuleOfInference, es.PeekEvalStack())
+        ad.DiagnosticsStopped <- true // stop all diagnostics during rule of inference
         es.PushEvalStack(fplValue)
         eval st signatureAst
         eval st premiseConclusionBlockAst
         es.PopEvalStack() 
+        ad.DiagnosticsStopped <- false // enable all diagnostics after rule of inference
         st.EvalPop() 
     | Ast.Mapping((pos1, pos2), variableTypeAst) ->
         st.EvalPush("Mapping")
@@ -683,11 +685,7 @@ let rec eval (st: SymbolTable) ast =
             fv.FplId <- fv.FplId + identifier
             fv.TypeId <- fv.TypeId + identifier
             checkID012Diagnostics st fv identifier pos1 pos2
-            checkID012Diagnostics st fv identifier pos1 pos2
-            if evalPath.EndsWith("PredicateWithOptSpecification.PredicateIdentifier") then 
-                ()
-            else
-                emitSIG04TypeDiagnostics st identifier fv pos1 pos2
+            emitSIG04TypeDiagnostics st identifier fv pos1 pos2
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
         st.EvalPush("ParamTuple")
