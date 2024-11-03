@@ -426,7 +426,7 @@ and ScopeSearchResult =
     | NotFound
     | NotApplicable
 
-and FplValue(name:string, blockType: FplValueType, positions: Positions, parent: FplValue option) =
+and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue option) =
     let mutable _expressionType = FixType.NoFix
     let mutable _exprTypeAlreadySet = false 
     let mutable _nameStartPos = fst positions
@@ -948,12 +948,12 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
 
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
-        let root = new FplValue("", FplValueType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+        let root = new FplValue(FplValueType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
         root
 
     /// A factory method for the FPL primitive Object
     static member CreateObject(pos1,pos2) =
-        let obj = new FplValue("obj", FplValueType.Object, (pos1, pos2), None)
+        let obj = new FplValue(FplValueType.Object, (pos1, pos2), None)
         obj.FplRepresentation <- FplRepresentation.ObjRepr "obj"
         obj
 
@@ -971,11 +971,11 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.Quantor
         | FplValueType.Mapping
         | FplValueType.Conjecture -> 
-            let ret = new FplValue("", fplBlockType, positions, Some parent)
+            let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
             ret
         | FplValueType.Constructor -> 
-            let ret = new FplValue("", fplBlockType, positions, Some parent)
+            let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.FplRepresentation <- FplRepresentation.ObjRepr "obj"
             ret
         | FplValueType.Theory
@@ -993,9 +993,9 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
         | FplValueType.ArgInference
         | FplValueType.Language
         | FplValueType.Translation
-        | FplValueType.OptionalFunctionalTerm -> new FplValue("", fplBlockType, positions, Some parent)
+        | FplValueType.OptionalFunctionalTerm -> new FplValue(fplBlockType, positions, Some parent)
         | FplValueType.Class -> 
-            let ret = new FplValue("", fplBlockType, positions, Some parent)
+            let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.FplRepresentation <- FplRepresentation.LangRepr FplLanguageConstruct.Class
             ret
         | FplValueType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
