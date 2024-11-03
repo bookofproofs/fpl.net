@@ -891,6 +891,8 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                 match fv.BlockType with
                 | FplValueType.Constructor -> 
                     ScopeSearchResult.Found (fv.Scope[name])
+                | FplValueType.Localization -> 
+                    ScopeSearchResult.Found (fv.Scope[name])
                 | _ -> 
                     if FplValue.IsProperty(fv) then
                         ScopeSearchResult.Found (fv.Scope[name])
@@ -907,10 +909,32 @@ and FplValue(name:string, blockType: FplValueType, positions: Positions, parent:
                     else
                         ScopeSearchResult.NotFound
             else
-                if fv.Parent.IsSome then 
-                    firstBlockParent fv.Parent.Value
-                else
-                    ScopeSearchResult.NotFound
+                match fv.BlockType with
+                | FplValueType.Reference ->
+                    let rec qualifiedVar (fv1:FplValue) = 
+                        if fv1.Scope.ContainsKey name then
+                            Some(fv1.Scope[name])
+                        elif fv1.Scope.Count = 0 then 
+                            None
+                        else
+                            let testList = 
+                                fv1.Scope.Values
+                                |> Seq.map (fun child ->
+                                    qualifiedVar child                                
+                                )
+                                |> Seq.toList
+                            if testList.Length > 0 then
+                                testList.Head
+                            else
+                                None
+                    match qualifiedVar fv with
+                    | Some fv3 -> ScopeSearchResult.Found (fv3)
+                    | _ -> firstBlockParent fv.Parent.Value
+                | _ ->                         
+                    if fv.Parent.IsSome then 
+                        firstBlockParent fv.Parent.Value
+                    else
+                        ScopeSearchResult.NotFound
 
         firstBlockParent fplValue
 

@@ -334,7 +334,7 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test() {x};", 1)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x:obj {p(x)}};", 0)>]
     [<DataRow("axiom A() { all x:Nat {true} };", 0)>]
-    [<DataRow("axiom A() { all x:obj {true} };", 1)>]
+    [<DataRow("axiom A() { all x:obj {y} };", 1)>]
     [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
     [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
     [<DataRow("""loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
