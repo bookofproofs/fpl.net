@@ -358,16 +358,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
-        let fv = es.PeekEvalStack()
-        let sid = 
-            if (FplValue.IsVariadicVariableMany(fv)) then 
-                $"*{s}"
-            elif (FplValue.IsVariadicVariableMany1(fv)) then 
-                $"+{s}"
-            else
-                $"{s}"
-        fv.TypeId <- sid
-        fv.FplId <- sid
+        eval_units st s pos1 pos2 
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")

@@ -311,6 +311,7 @@ type TestInterpreterErrors() =
         let code = PR005 ""
         runTestHelper "TestPR005.fpl" fplCode code expected
 
+    [<DataRow("""def pred Equal infix "=" 50 (x,y: tpl) {intr} ;""", 0)>]
     [<DataRow("uses Fpl.Commons inf ModusPonens() {pre:true con:true} ;", 1)>]
     [<DataRow("uses Fpl.Commons theorem ModusTollens() {true} ;", 1)>]
     [<DataRow("uses Fpl.Commons def pred HypotheticalSyllogism() {true} ;", 1)>]
