@@ -179,7 +179,6 @@ type EvalStack() =
                 | FplValueType.Quantor  
                 | FplValueType.Localization -> 
                     EvalStack.tryAddToScope fv
-                    next.FplRepresentation <- fv.FplRepresentation
                 | FplValueType.Reference ->
                     EvalStack.tryAddToValueList fv
                 | _ -> ()
@@ -204,10 +203,6 @@ type EvalStack() =
     member this.ClearEvalStack() = _valueStack.Clear()
 
 let es = EvalStack()
-
-let setRepresentation (st: SymbolTable) representation = 
-    let fv = es.PeekEvalStack()
-    fv.FplRepresentation <- representation
 
 let eval_units (st: SymbolTable) unitType pos1 pos2 = 
     if unitType <> "" then 
@@ -260,24 +255,23 @@ let rec eval (st: SymbolTable) ast =
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
         eval_units st "ind" pos1 pos2 
-        setRepresentation st (FplRepresentation.Index ((uint)0))
+        es.PeekEvalStack().ReprId <- "0"
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         eval_units st "obj" pos1 pos2 
         let evalPath = st.EvalPath()
-        if not (evalPath.EndsWith("InheritedClassType.ObjectType")) then 
-            setRepresentation st (FplRepresentation.ObjRepr "obj")
+        es.PeekEvalStack().ReprId <- "obj"
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
         eval_units st "pred" pos1 pos2 
-        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        es.PeekEvalStack().ReprId <- "undetermined"
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
         eval_units st "func" pos1 pos2  
-        setRepresentation st (FplRepresentation.LangRepr FplLanguageConstruct.Function)
+        es.PeekEvalStack().ReprId <- "func"
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
@@ -371,6 +365,7 @@ let rec eval (st: SymbolTable) ast =
         let varValue = FplValue.CreateFplValue((pos1,pos2), FplValueType.Variable, fv)
         varValue.FplId <- name
         varValue.TypeId <- "undef"
+        varValue.ReprId <- "undef"
         varValue.IsSignatureVariable <- es.InSignatureEvaluation 
         if isDeclaration then 
             match FplValue.VariableInBlockScopeByName fv name with 
@@ -410,6 +405,7 @@ let rec eval (st: SymbolTable) ast =
                 emitVAR01diagnostics name pos1 pos2
             fv.FplId <- name
             fv.TypeId <- "undef"
+            fv.ReprId <- "undef"
         ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
@@ -518,16 +514,14 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("True")
         let fv = es.PeekEvalStack()
         fv.FplId <- "true"
-        if FplValue.IsReference(fv) then
-            fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.True
+        fv.ReprId <- "true"
         fv.TypeId <- "pred"
         st.EvalPop() 
     | Ast.False((pos1, pos2), _) -> 
         st.EvalPush("False")
         let fv = es.PeekEvalStack()
         fv.FplId <- "false"
-        if FplValue.IsReference(fv) then
-            fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.False
+        fv.ReprId <- "false"
         fv.TypeId <- "pred"
         st.EvalPop() 
     | Ast.Undefined((pos1, pos2), _) -> 
@@ -606,7 +600,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ByDef")
         let fv = es.PeekEvalStack()
         fv.FplId <- "bydef."
-        fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+        fv.ReprId <- "undetermined"
         fv.TypeId <- "bydef."
         eval st predicateWithQualificationAst
         emitPR001Diagnostics fv pos1 pos2
@@ -753,7 +747,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("And")
         let fv = es.PeekEvalStack()
         fv.FplId <- "and"
-        fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         predicateAsts |> List.map (eval st) |> ignore
         fv.NameEndPos <- pos2
@@ -764,7 +758,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Or")
         let fv = es.PeekEvalStack()
         fv.FplId <- "or"
-        fv.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         predicateAsts |> List.map (eval st) |> ignore
         fv.NameEndPos <- pos2
@@ -775,7 +769,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Xor")
         let fv = es.PeekEvalStack()
         fv.FplId <- "xor"
-        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
         predicateAsts |> List.map (eval st) |> ignore
         fv.NameEndPos <- pos2
@@ -927,7 +921,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Impl")
         let fv = es.PeekEvalStack()
         fv.FplId <- "impl"
-        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -939,7 +933,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Iif")
         let fv = es.PeekEvalStack()
         fv.FplId <- "iif"
-        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -951,7 +945,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("IsOperator")
         let fv = es.PeekEvalStack()
         fv.FplId <- "is"
-        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
 
         let operand = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv) 
@@ -1254,7 +1248,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("PredicateInstance")
         eval st signatureAst
         let fv = es.PeekEvalStack()
-        setRepresentation st (FplRepresentation.PredRepr FplPredicate.Undetermined)
+        es.PeekEvalStack().ReprId <- "undetermined"
         match optAst with
         | Some ast1 -> 
             eval st ast1

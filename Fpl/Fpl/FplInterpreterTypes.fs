@@ -374,16 +374,6 @@ type FplValueType =
             | Mapping -> "map"
             | Root -> "root"
 
-type FplPredicate =
-    | True
-    | False
-    | Undetermined
-    
-type FplLanguageConstruct =
-    | Function
-    | Class
-    | Extension
-
 type FixType = 
     | Infix of string * int
     | Postfix of string 
@@ -402,24 +392,7 @@ type SignatureType =
     | Mixed
     | Repr
 
-type FplRepresentation = 
-    | PredRepr of FplPredicate 
-    | ObjRepr of string
-    | Localization of FplValue * string
-    | LangRepr of FplLanguageConstruct
-    | Index of uint
-    | Undef
-    member this.String() = 
-        match this with
-        | PredRepr _ -> "predicate"
-        | ObjRepr _ -> "object"
-        | Localization _ -> "localization"
-        | Index _ -> "index"
-        | LangRepr FplLanguageConstruct.Class -> "class"
-        | LangRepr FplLanguageConstruct.Extension -> "extension"
-        | LangRepr FplLanguageConstruct.Function -> "function"
-        | Undef -> "undefined"
-and ScopeSearchResult = 
+type ScopeSearchResult = 
     | FoundAssociate of FplValue 
     | FoundMultiple of string
     | FoundIncorrectBlock of string
@@ -432,13 +405,12 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     let mutable _exprTypeAlreadySet = false 
     let mutable _nameStartPos = fst positions
     let mutable _nameEndPos = snd positions
-    let mutable _representation = FplRepresentation.Undef
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
     let mutable _arity = 0
     let mutable _fplId = ""
     let mutable _typeId = ""
-    let mutable _reprId = ""
+    let mutable _reprId = "undef"
     let mutable _hasBrackets = false
     let mutable _isSignatureVariable = false
 
@@ -499,11 +471,6 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     member this.NameEndPos
         with get () = _nameEndPos
         and set (value) = _nameEndPos <- value
-
-    /// A representation of the constructed object (if any)
-    member this.FplRepresentation
-        with get () = _representation
-        and set (value) = _representation <- value
 
     /// An auxiliary storage that is used e.g. for remembering how many variables were declared when traversing the Ast recursively.
     member this.AuxiliaryInfo
@@ -966,7 +933,6 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// A factory method for the FPL primitive Object
     static member CreateObject(pos1,pos2) =
         let obj = new FplValue(FplValueType.Object, (pos1, pos2), None)
-        obj.FplRepresentation <- FplRepresentation.ObjRepr "obj"
         obj
 
     /// A factory method for the evaluation of Fpl class definitions
@@ -984,11 +950,11 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | FplValueType.Mapping
         | FplValueType.Conjecture -> 
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.FplRepresentation <- FplRepresentation.PredRepr FplPredicate.Undetermined
+            ret.ReprId <- "undetermined"
             ret
         | FplValueType.Constructor -> 
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.FplRepresentation <- FplRepresentation.ObjRepr "obj"
+            ret.ReprId <- "obj"
             ret
         | FplValueType.Theory
         | FplValueType.MandatoryPredicate
@@ -1008,7 +974,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | FplValueType.OptionalFunctionalTerm -> new FplValue(fplBlockType, positions, Some parent)
         | FplValueType.Class -> 
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.FplRepresentation <- FplRepresentation.LangRepr FplLanguageConstruct.Class
+            ret.ReprId <- "class"
             ret
         | FplValueType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
         | FplValueType.Object -> raise (ArgumentException("Please use CreateObject for creating a primitive object instead"))

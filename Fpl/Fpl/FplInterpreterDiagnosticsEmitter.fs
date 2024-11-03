@@ -658,10 +658,10 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
     let diags = Diagnostics()
 
     let emitLG000Diagnostics (arg: FplValue) =
-        match arg.FplRepresentation with
-        | FplRepresentation.PredRepr FplPredicate.True
-        | FplRepresentation.PredRepr FplPredicate.False -> ()
-        | FplRepresentation.PredRepr FplPredicate.Undetermined ->
+        match arg.ReprId with
+        | "true"
+        | "false" -> ()
+        | "undetermined" ->
             let diagnostic =
                 { 
                     Diagnostic.Uri = ad.CurrentUri
@@ -683,7 +683,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
-                Diagnostic.Code = LG001(typeOfPredicate, arg.Type(SignatureType.Type), arg.FplRepresentation.String())
+                Diagnostic.Code = LG001(typeOfPredicate, arg.Type(SignatureType.Type), arg.Type(SignatureType.Repr))
                 Diagnostic.Alternatives = None 
             }
         diags.AddDiagnostic diagnostic
@@ -695,8 +695,10 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
                 arg.ValueList[0]
             else
                 arg
-        match v.FplRepresentation with
-        | FplRepresentation.PredRepr _ -> emitLG000Diagnostics v
+        match v.ReprId with
+        | "true"
+        | "false"
+        | "undetermined" -> emitLG000Diagnostics v
         | _ -> emitLG001Diagnostics v.NameStartPos v.NameEndPos v)
 
     let code = LG000("", "")
