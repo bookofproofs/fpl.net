@@ -1,10 +1,50 @@
-def pred T1() { x, y } 
+def cl T:obj {intr} axiom A() {impl(T,true)}
+
+localization iif(x,y) :=
+    !tex: x "\Leftrightarrow" y
+    !eng: x " if and only if " y
+    !ger: x " dann und nur dann wenn " y
+    ;
+
+loc not(x) :=
+    !tex: "\neg(" x ")"
+    !eng: "not " x
+    !ger: "nicht " x
+    ;
+
+loc and(p,q) :=
+    !tex: p "\wedge" q
+    !eng: p " and " q
+    !ger: p " und " q
+    ;
+
+loc Equal(x,y) :=
+    !tex: x "=" y
+    !eng: x " equals " y
+    !ger: x " ist gleich " y
+    !ita: x " è uguale a " y
+    !pol: x " równa się " y
+    ;
+
+loc NotEqual(x,y) :=
+    !tex: x "\neq " y 
+    !eng: x " is unequal " y
+    !ger: x " ist ungleich " y 
+    !pol: x ( " nie równa się " | " nie równe " ) y 
+    ;
+
+loc (x + y) :=
+    !tex: x "+" y 
+    !eng: x "plus" y
+    !ger: x "plus" y 
+    ;
+
 inf ModusPonens()
 {
     dec ~p,q: pred;
 
     premise:
-        and (p, impl (p,q) )
+        and (p, impl (p,q) ) 
     conclusion:
         q
 }
@@ -43,7 +83,7 @@ inf ExistsByExample(p: pred(c: obj))
     premise:  
         p(c)
     conclusion: 
-        ex x {p(x)}
+        ex x:obj {p(x)}
 }
 
 axiom Ax1()
@@ -190,44 +230,7 @@ conj Conj3(x:obj)
     false
 }
 
-localization iif(x,y) :=
-    !tex: x "\Leftrightarrow" y
-    !eng: x " if and only if " y
-    !ger: x " dann und nur dann wenn " y
-    ;
 
-loc not(x) :=
-    !tex: "\neg(" x ")"
-    !eng: "not " x
-    !ger: "nicht " x
-    ;
-
-loc and(p,q) :=
-    !tex: p "\wedge" q
-    !eng: p " and " q
-    !ger: p " und " q
-    ;
-
-loc Equal(x,y) :=
-    !tex: x "=" y
-    !eng: x " equals " y
-    !ger: x " ist gleich " y
-    !ita: x " è uguale a " y
-    !pol: x " równa się " y
-    ;
-
-loc NotEqual(x,y) :=
-    !tex: x "\neq" y 
-    !eng: x "is unequal" y
-    !ger: x "ist ungleich" y 
-    !pol: x ( "nie równa się" | "nie równe" ) y 
-    ;
-
-loc (x + y) :=
-    !tex: x "+" y 
-    !eng: x "plus" y
-    !ger: x "plus" y 
-    ;
 
 def pred T (x:obj) {true} 
 def pred Caller() {dec ~x:obj; T(x)} 

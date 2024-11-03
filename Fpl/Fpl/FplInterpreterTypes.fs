@@ -1202,9 +1202,9 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         let rec createJson (root:FplValue) (sb:StringBuilder) level isLast =
             let indent = String(' ', level)
             sb.AppendLine(String(' ', level - 1) + "{") |> ignore
-            let name = root.Type(SignatureType.Name)
-            let typeName = root.Type(SignatureType.Type)
-            let mixedName = root.Type(SignatureType.Mixed)
+            let name = root.Type(SignatureType.Name).Replace(@"\",@"\\")
+            let typeName = root.Type(SignatureType.Type).Replace(@"\",@"\\")
+            let mixedName = root.Type(SignatureType.Mixed).Replace(@"\",@"\\")
             if name = this.MainTheory then
                 sb.AppendLine($"{indent}\"Name\": \"Main> {name}\",") |> ignore
             else
