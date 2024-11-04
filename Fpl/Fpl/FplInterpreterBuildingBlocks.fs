@@ -260,8 +260,12 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         eval_units st "obj" pos1 pos2 
-        let evalPath = st.EvalPath()
-        es.PeekEvalStack().ReprId <- "obj"
+        let fv = es.PeekEvalStack()
+        fv.ReprId <- 
+            if fv.ReprId<>"" && fv.ReprId<>"undef" then 
+                $"obj:{fv.ReprId}" 
+            else
+                $"obj" 
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
@@ -556,8 +560,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Mapping")
         let fv = es.PeekEvalStack()
         let map = FplValue.CreateFplValue((pos1, pos2),FplValueType.Mapping,fv)
+        map.ReprId <- ""
         es.PushEvalStack(map)
         eval st variableTypeAst
+        fv.ReprId <- map.ReprId
         es.PopEvalStack()
         st.EvalPop()
     | Ast.ClassIdentifier((pos1, pos2), ast1) ->
@@ -659,7 +665,7 @@ let rec eval (st: SymbolTable) ast =
             else
                 fv.FplId <- identifier
                 fv.TypeId <- identifier
-                fv.ReprId <- "class"
+                fv.ReprId <- $"class {identifier}"
                 checkID008Diagnostics fv pos1 pos2
                 checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
                 emitSIG04TypeDiagnostics st identifier fv pos1 pos2
