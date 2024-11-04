@@ -238,7 +238,7 @@ type TestFplValueScopeName() =
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
             | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockName", theory.Type(SignatureType.Mixed))
-            | "block" -> Assert.AreEqual<string>("TestPredicate()", block.Type(SignatureType.Type)); 
+            | "block" -> Assert.AreEqual<string>("pred()", block.Type(SignatureType.Type)); 
             | "x" -> Assert.AreEqual<string>("x(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Type(SignatureType.Mixed))
             | "y" -> Assert.AreEqual<string>("y(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Type(SignatureType.Mixed))
             | "s" -> Assert.AreEqual<string>("s", s.Type(SignatureType.Mixed))

@@ -235,12 +235,29 @@ type TestReferencesTypeOfSignature() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", """loc and(p,q) := !tex: x "=" y;;""", "and(p, q)")>]
+    [<DataRow("""loc and(p,q) := !tex: x "=" y;;""", "pred(undef, undef)")>]
+    [<DataRow("""thm T(p:obj) {true};""","pred(obj)")>]
+    [<DataRow("""thm T() {true};""", "pred()")>]
+    [<DataRow("""ax T(p:obj) {true};""","pred(obj)")>]
+    [<DataRow("""ax T() {true};""", "pred()")>]
+    [<DataRow("""lem T(p:obj) {true};""","pred(obj)")>]
+    [<DataRow("""lem T() {true};""", "pred()")>]
+    [<DataRow("""prop T(p:obj) {true};""","pred(obj)")>]
+    [<DataRow("""prop T() {true};""", "pred()")>]
+    [<DataRow("""conj T(p:obj) {true};""","pred(obj)")>]
+    [<DataRow("""conj T() {true};""", "pred()")>]
+    [<DataRow("""cor T$1(p:obj) {true};""","pred$1(obj)")>]
+    [<DataRow("""cor T$1() {true};""", "pred$1()")>]
+    [<DataRow("""proof T$1 {1. |- trivial};""","pred$1")>]
+    [<DataRow("""def pred T(p:obj) {true};""","pred(obj)")>]
+    [<DataRow("""def pred T() {true};""", "pred()")>]
+    [<DataRow("""inf T(p:obj) {pre: true: con:true};""","pred(obj)")>]
+    [<DataRow("""inf T() {pre: true: con:true};""", "pred()")>]
     [<TestMethod>]
-    member this.TestLocalization(var, varVal, name) =
+    member this.TestBlock(varVal, name:string) =
         ad.Clear()
         let fplCode = sprintf "%s" varVal
-        let filename = "TestLocalizationTypeSignature"
+        let filename = "TestBlockTypeSignature"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -248,13 +265,11 @@ type TestReferencesTypeOfSignature() =
             let r = st.Root
             let theory = r.Scope[filename]
 
-            let loc = theory.Scope[name] 
-
-            match var with
-            | "base1" -> Assert.AreEqual<string>("pred(undef, undef)", loc.Type(SignatureType.Type))
-            | _ -> Assert.IsTrue(false)
+            let loc = theory.Scope.Values |> Seq.toList |> List.head 
+            Assert.AreEqual<string>(name, loc.Type(SignatureType.Type))
         | None -> 
             Assert.IsTrue(false)
+
 
     [<DataRow("base1", """def pred T1() {intr};""")>]
     [<DataRow("base2", """def pred infix ">" -1 T1() {intr};""")>]
@@ -286,16 +301,16 @@ type TestReferencesTypeOfSignature() =
                     theory.Scope["T1()"]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("T1()", base1.Type(SignatureType.Type))
-            | "base2" -> Assert.AreEqual<string>("T1()", base1.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>("T1()", base1.Type(SignatureType.Type))
-            | "base4" -> Assert.AreEqual<string>("T1()", base1.Type(SignatureType.Type))
+            | "base1" -> Assert.AreEqual<string>("pred()", base1.Type(SignatureType.Type))
+            | "base2" -> Assert.AreEqual<string>("pred()", base1.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>("pred()", base1.Type(SignatureType.Type))
+            | "base4" -> Assert.AreEqual<string>("pred()", base1.Type(SignatureType.Type))
             | "base5" -> Assert.AreEqual<string>("T1", base1.Type(SignatureType.Type))
             | "base5a" -> Assert.AreEqual<string>("T1", base1.Type(SignatureType.Type))
-            | "base6" -> Assert.AreEqual<string>("T1() -> obj", base1.Type(SignatureType.Type))
-            | "base7" -> Assert.AreEqual<string>("T1() -> obj", base1.Type(SignatureType.Type))
-            | "base8" -> Assert.AreEqual<string>("T1() -> obj", base1.Type(SignatureType.Type))
-            | "base9" -> Assert.AreEqual<string>("T1() -> obj", base1.Type(SignatureType.Type))
+            | "base6" -> Assert.AreEqual<string>("func() -> obj", base1.Type(SignatureType.Type))
+            | "base7" -> Assert.AreEqual<string>("func() -> obj", base1.Type(SignatureType.Type))
+            | "base8" -> Assert.AreEqual<string>("func() -> obj", base1.Type(SignatureType.Type))
+            | "base9" -> Assert.AreEqual<string>("func() -> obj", base1.Type(SignatureType.Type))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

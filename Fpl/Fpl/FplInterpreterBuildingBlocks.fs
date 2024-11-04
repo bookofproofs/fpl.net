@@ -652,34 +652,69 @@ let rec eval (st: SymbolTable) ast =
         let identifier = String.concat "." pascalCaseIdList
         let evalPath = st.EvalPath()
         let fv = es.PeekEvalStack()
-        if FplValue.IsBlock(fv) then
+        match fv.BlockType with 
+        | FplValueType.Class -> 
             if evalPath.EndsWith("InheritedClassType.PredicateIdentifier") then 
                 ()
             else
-                fv.FplId <- fv.FplId + identifier
-                fv.TypeId <- fv.TypeId + identifier
-            checkID008Diagnostics fv pos1 pos2
-            checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
-            emitSIG04TypeDiagnostics st identifier fv pos1 pos2
-        elif FplValue.IsVariadicVariableMany(fv) then
+                fv.FplId <- identifier
+                fv.TypeId <- identifier
+                fv.ReprId <- "class"
+                checkID008Diagnostics fv pos1 pos2
+                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+                emitSIG04TypeDiagnostics st identifier fv pos1 pos2
+        | FplValueType.Axiom
+        | FplValueType.Theorem 
+        | FplValueType.Lemma 
+        | FplValueType.Proposition 
+        | FplValueType.Corollary 
+        | FplValueType.Conjecture 
+        | FplValueType.Proof 
+        | FplValueType.RuleOfInference 
+        | FplValueType.MandatoryPredicate
+        | FplValueType.OptionalPredicate
+        | FplValueType.Predicate ->
+                fv.FplId <- identifier
+                fv.TypeId <- "pred"
+                fv.ReprId <- "undetermined"
+                checkID008Diagnostics fv pos1 pos2
+                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+                emitSIG04TypeDiagnostics st identifier fv pos1 pos2
+        | FplValueType.MandatoryFunctionalTerm
+        | FplValueType.OptionalFunctionalTerm
+        | FplValueType.FunctionalTerm ->
+                fv.FplId <- identifier
+                fv.TypeId <- "func"
+                checkID008Diagnostics fv pos1 pos2
+                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+                emitSIG04TypeDiagnostics st identifier fv pos1 pos2
+        | FplValueType.Constructor -> 
+                fv.FplId <- identifier
+                fv.TypeId <- identifier
+                fv.ReprId <- "obj"
+                checkID008Diagnostics fv pos1 pos2
+                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+                emitSIG04TypeDiagnostics st identifier fv pos1 pos2
+        | FplValueType.VariadicVariableMany -> 
             let sid = $"*{identifier}"
             fv.TypeId <- sid
             emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
-        elif FplValue.IsVariadicVariableMany1(fv) then
+        | FplValueType.VariadicVariableMany1 -> 
             let sid = $"+{identifier}"
             fv.TypeId <- sid
             emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
-        elif fv.BlockType = FplValueType.Variable then
+        | FplValueType.Variable -> 
             fv.TypeId <- identifier
             emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
-        elif fv.BlockType = FplValueType.Mapping then
-            fv.TypeId <- identifier
+        | FplValueType.Mapping -> 
+            fv.TypeId <- fv.TypeId + identifier
             emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
-        elif FplValue.IsReference(fv) then
+        | FplValueType.Reference -> 
             fv.FplId <- fv.FplId + identifier
             fv.TypeId <- fv.TypeId + identifier
             checkID012Diagnostics st fv identifier pos1 pos2
             emitSIG04TypeDiagnostics st identifier fv pos1 pos2
+        | _ -> ()
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
         st.EvalPush("ParamTuple")
@@ -1095,11 +1130,13 @@ let rec eval (st: SymbolTable) ast =
                 fv.BlockType <- FplValueType.FunctionalTerm
             else
                 fv.BlockType <- FplValueType.OptionalFunctionalTerm
+                fv.TypeId <- "func"
         | None -> 
             if FplValue.IsFplBlock(fv) then
                 fv.BlockType <- FplValueType.FunctionalTerm
             else
                 fv.BlockType <- FplValueType.MandatoryFunctionalTerm
+                fv.TypeId <- "func"
         fv.NameEndPos <- pos2
         eval st mappingAst
         st.EvalPop()

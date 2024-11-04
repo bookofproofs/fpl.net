@@ -947,14 +947,18 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | FplValueType.Predicate 
         | FplValueType.RuleOfInference
         | FplValueType.Quantor
-        | FplValueType.Mapping
         | FplValueType.Conjecture -> 
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "undetermined"
+            ret.TypeId <- "pred"
+            ret
+        | FplValueType.Mapping -> 
+            let ret = new FplValue(fplBlockType, positions, Some parent)
             ret
         | FplValueType.Constructor -> 
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "obj"
+            ret.TypeId <- "pred"
             ret
         | FplValueType.Theory
         | FplValueType.MandatoryPredicate
@@ -1031,9 +1035,7 @@ let tryFindAssociatedBlockForProof (fplValue:FplValue) =
                 // concatenated type signature of the name of the proof 
                 // without the last dollar digit
                 flattenedScopes
-                |> List.filter (fun fv ->
-                    fv.Type(SignatureType.Type).StartsWith(potentialProvableName + "(") || fv.Type(SignatureType.Type) = potentialProvableName
-                )
+                |> List.filter (fun fv -> fv.FplId = potentialProvableName)
 
             let provableBlocklist = 
                 buildingBlocksMatchingDollarDigitNameList
@@ -1046,7 +1048,7 @@ let tryFindAssociatedBlockForProof (fplValue:FplValue) =
                     not (FplValue.IsProvable(fv))
                 )
             if provableBlocklist.Length > 1 then
-                ScopeSearchResult.FoundMultiple (provableBlocklist |> List.map (fun fv -> sprintf "%s %s" fv.BlockType.Name (fv.Type(SignatureType.Type))) |> String.concat ", ")
+                ScopeSearchResult.FoundMultiple (provableBlocklist |> List.map (fun fv -> sprintf "%s %s" fv.BlockType.Name (fv.Type(SignatureType.Mixed))) |> String.concat ", ")
             elif provableBlocklist.Length > 0 then 
                 let potentialTheorem = provableBlocklist.Head
                 ScopeSearchResult.FoundAssociate potentialTheorem
@@ -1076,12 +1078,9 @@ let tryFindAssociatedBlockForCorollary(fplValue:FplValue) =
                 // concatenated type signature of the name of the corollary 
                 // without the last dollar digit
                 let potentialBlockName = 
-                    stripLastDollarDigit (fplValue.Type(SignatureType.Type))
+                    stripLastDollarDigit (fplValue.Type(SignatureType.Mixed))
                 flattenedScopes
-                |> Seq.filter (fun fv -> 
-                    let fvType = fv.Type(SignatureType.Type)
-                    fvType.StartsWith(potentialBlockName + "(") || fvType = potentialBlockName 
-                )
+                |> Seq.filter (fun fv -> fv.FplId = potentialBlockName)
                 |> Seq.toList
             let potentialBlockList = 
                 buildingBlocksMatchingDollarDigitNameList
@@ -1098,7 +1097,7 @@ let tryFindAssociatedBlockForCorollary(fplValue:FplValue) =
                     || fv.BlockType = FplValueType.Axiom)
                 )
             if potentialBlockList.Length > 1 then
-                ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun fv -> sprintf "%s %s" fv.BlockType.Name (fv.Type(SignatureType.Type))) |> String.concat ", ")
+                ScopeSearchResult.FoundMultiple (potentialBlockList |> List.map (fun fv -> sprintf "%s %s" fv.BlockType.Name (fv.Type(SignatureType.Mixed))) |> String.concat ", ")
             elif potentialBlockList.Length > 0 then 
                 let potentialTheorem = potentialBlockList.Head
                 ScopeSearchResult.FoundAssociate potentialTheorem
