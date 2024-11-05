@@ -657,25 +657,28 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
 
     let diags = Diagnostics()
 
-    let emitLG000Diagnostics (arg: FplValue) =
-        match arg.ReprId with
-        | "true"
-        | "false" -> ()
-        | "undetermined" ->
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = arg.NameStartPos
-                    Diagnostic.EndPos = arg.NameEndPos
-                    Diagnostic.Code = LG000(typeOfPredicate, arg.Type(SignatureType.Type))
-                    Diagnostic.Alternatives = None 
-                }
-            diags.AddDiagnostic diagnostic
-        | _ -> ()
+    let emitLG000Diagnostics (arg: FplValue) repr =
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = arg.NameStartPos
+                Diagnostic.EndPos = arg.NameEndPos
+                Diagnostic.Code = LG000(typeOfPredicate, repr)
+                Diagnostic.Alternatives = None 
+            }
+        diags.AddDiagnostic diagnostic
 
     let emitLG001Diagnostics pos1 pos2 (arg: FplValue) =
+        let argType = arg.Type(SignatureType.Type)
+        let argName = arg.Type(SignatureType.Name)
+        let whatWeGot = 
+            if argType = argName then
+                "undef"
+            else
+                argType
+
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
@@ -683,23 +686,20 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
-                Diagnostic.Code = LG001(typeOfPredicate, arg.Type(SignatureType.Type), arg.Type(SignatureType.Repr))
+                Diagnostic.Code = LG001(typeOfPredicate, argName, whatWeGot)
                 Diagnostic.Alternatives = None 
             }
         diags.AddDiagnostic diagnostic
 
     fplValue.ValueList
-    |> Seq.iter (fun arg ->
-        let v = 
-            if arg.ValueList.Count>0 then
-                arg.ValueList[0]
-            else
-                arg
-        match v.ReprId with
+    |> Seq.iter (fun argument ->
+        let repr = argument.Type(SignatureType.Repr)
+        match repr with
         | "true"
-        | "false"
-        | "undetermined" -> emitLG000Diagnostics v
-        | _ -> emitLG001Diagnostics v.NameStartPos v.NameEndPos v)
+        | "false" -> ()
+        | "undetermined" -> emitLG000Diagnostics argument repr
+        | _ -> emitLG001Diagnostics argument.NameStartPos argument.NameEndPos argument
+    )
 
     let code = LG000("", "")
     let numbLG000 = filterByErrorCode diags code.Code

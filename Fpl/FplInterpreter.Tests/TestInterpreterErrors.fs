@@ -729,13 +729,13 @@ type TestInterpreterErrors() =
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int64>(expected, result.Head.StartPos.Column)
         
-    [<DataRow("""axiom A() {dec ~x,y:obj; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `object`.")>]
-    [<DataRow("""axiom A() {dec ~x,y:ind; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `index`.")>]
-    [<DataRow("""axiom A() {dec ~x,y:func; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `function`.")>]
-    [<DataRow("""axiom A() {impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `undefined`.")>]
-    [<DataRow("""axiom A() {impl(T(),true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T()`, got `undefined`.")>]
-    [<DataRow("""axiom A() {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `undefined`.")>]
-    [<DataRow("""def cl T:obj {intr} axiom A() {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `class`.")>]
+    [<DataRow("""axiom A() {dec ~x,y:obj; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `obj`.")>]
+    [<DataRow("""axiom A() {dec ~x,y:ind; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `ind`.")>]
+    [<DataRow("""axiom A() {dec ~x,y:func; impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `func`.")>]
+    [<DataRow("""axiom A() {impl(x,y)};""", "Cannot evaluate `implication`; expecting a predicate argument `x`, got `undef`.")>]
+    [<DataRow("""axiom A() {impl(T(),true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T()`, got `undef`.")>]
+    [<DataRow("""axiom A() {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `undef`.")>]
+    [<DataRow("""def cl T:obj {intr} axiom A() {impl(T,true)};""", "Cannot evaluate `implication`; expecting a predicate argument `T`, got `undef`.")>]
     [<TestMethod>]
     member this.TestLG001MsgSpecificity(fplCode:string, (expected:string)) =
         let code = LG001 ("","","")

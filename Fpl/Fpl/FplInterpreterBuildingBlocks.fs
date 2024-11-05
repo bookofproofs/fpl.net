@@ -1263,6 +1263,7 @@ let rec eval (st: SymbolTable) ast =
                     // dispose the rb node
                     rb.Reset()
         simplifyTriviallyNestedExpressions refBlock
+
         es.PopEvalStack()
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
