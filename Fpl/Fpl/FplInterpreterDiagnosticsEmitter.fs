@@ -465,8 +465,8 @@ let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     | FixType.Infix _ when fplValue.Arity <> 2 ->
         let fplValueType = fplValue.Type(SignatureType.Type)
         if fplValueType.Length > 2
-            && (fplValueType.Substring(2).StartsWith("+") 
-                || fplValueType.Substring(2).StartsWith("*")
+            && (fplValueType.Substring(5).StartsWith("+") 
+                || fplValueType.Substring(5).StartsWith("*")
             )
         then
             () // avoid false positives for variadic variables
