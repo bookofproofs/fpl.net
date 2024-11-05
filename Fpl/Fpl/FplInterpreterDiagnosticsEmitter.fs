@@ -360,8 +360,8 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 | _ -> ())
 
             if not duplicateInheritanceChainFound then
-                let obj = FplValue.CreateObject((pos1, pos2))
-                fplValue.ValueList.Add obj
+                let obJ = FplValue.CreateFplValue((pos1, pos2),FplValueType.Object,fplValue)
+                fplValue.ValueList.Add obJ
 
 let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) identifier (pos1: Position) pos2 =
     let context = st.EvalPath()

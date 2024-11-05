@@ -261,11 +261,9 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ObjectType")
         eval_units st "obj" pos1 pos2 
         let fv = es.PeekEvalStack()
-        fv.ReprId <- 
-            if fv.ReprId<>"" && fv.ReprId<>"undef" then 
-                $"obj:{fv.ReprId}" 
-            else
-                $"obj" 
+        let obJ = FplValue.CreateFplValue((pos1,pos2),FplValueType.Object,fv)
+        es.PushEvalStack(obJ)
+        es.PopEvalStack()
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
@@ -553,8 +551,8 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(fplValue)
         eval st signatureAst
         eval st premiseConclusionBlockAst
-        es.PopEvalStack() 
         ad.DiagnosticsStopped <- false // enable all diagnostics after rule of inference
+        es.PopEvalStack() 
         st.EvalPop() 
     | Ast.Mapping((pos1, pos2), variableTypeAst) ->
         st.EvalPush("Mapping")
@@ -661,7 +659,7 @@ let rec eval (st: SymbolTable) ast =
         match fv.BlockType with 
         | FplValueType.Class -> 
             if evalPath.EndsWith("InheritedClassType.PredicateIdentifier") then 
-                ()
+                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
             else
                 fv.FplId <- identifier
                 fv.TypeId <- identifier

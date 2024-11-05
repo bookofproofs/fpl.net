@@ -45,8 +45,8 @@ type PathEquivalentUri(uriString: string) =
         member this.Equals(other: PathEquivalentUri) =
             this.AbsoluteUri = other.AbsoluteUri
 
-    override this.Equals(obj: obj) =
-        match obj with
+    override this.Equals(obJ: obj) =
+        match obJ with
         | :? PathEquivalentUri as other -> (this :> IEquatable<PathEquivalentUri>).Equals(other)
         | _ -> false
 

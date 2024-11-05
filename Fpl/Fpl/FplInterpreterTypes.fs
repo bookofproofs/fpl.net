@@ -557,6 +557,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     | FplValueType.Proof 
                     | FplValueType.Argument 
                     | FplValueType.Language 
+                    | FplValueType.Object 
                     | FplValueType.Class ->
                         head
                     | FplValueType.Theorem 
@@ -942,12 +943,10 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
         let root = new FplValue(FplValueType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+        root.ReprId <- ""
+        root.TypeId <- ""
+        root.FplId <- ""
         root
-
-    /// A factory method for the FPL primitive Object
-    static member CreateObject(pos1,pos2) =
-        let obj = new FplValue(FplValueType.Object, (pos1, pos2), None)
-        obj
 
     /// A factory method for the evaluation of Fpl class definitions
     static member CreateFplValue(positions: Positions, fplBlockType: FplValueType, parent: FplValue) =
@@ -994,8 +993,13 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "class"
             ret
+        | FplValueType.Object -> 
+            let ret = new FplValue(fplBlockType, positions, Some parent)
+            ret.ReprId <- "obj"
+            ret.TypeId <- "obj"
+            ret.FplId <- "obj"
+            ret
         | FplValueType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
-        | FplValueType.Object -> raise (ArgumentException("Please use CreateObject for creating a primitive object instead"))
 
     /// Clears this FplValue
     member this.Reset() = 
