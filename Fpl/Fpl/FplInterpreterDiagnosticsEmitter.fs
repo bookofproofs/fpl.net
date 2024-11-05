@@ -580,7 +580,9 @@ let emitSIG04TypeDiagnostics (st:SymbolTable) name (fplValue:FplValue) pos1 pos2
         || rightContext.EndsWith(".Expression.PredicateWithQualification.PredicateWithOptSpecification.PredicateIdentifier") then
         match tryMatchTypes st fplValue name with
         | (_, candidates, Some matchedFplValue) -> 
-            fplValue.ValueList.Add(matchedFplValue)
+            match fplValue.BlockType with
+            | FplValueType.Reference -> fplValue.Scope.Add(name, matchedFplValue)
+            | _ -> fplValue.ValueList.Add(matchedFplValue)
         | (firstFailingArgument, candidates, None) -> 
             let candidateNames =
                 candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "

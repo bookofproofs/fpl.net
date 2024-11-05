@@ -515,6 +515,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 _reprId
             | (SignatureType.Repr, typeId) when typeId = "undef" || typeId = "ind" -> 
                 _reprId
+            | (SignatureType.Repr, typeId) when this.BlockType = FplValueType.Class -> 
+                _reprId
             | _ -> 
                 let head = 
                     match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with 
