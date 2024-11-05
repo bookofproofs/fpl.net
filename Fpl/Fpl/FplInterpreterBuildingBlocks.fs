@@ -1255,6 +1255,7 @@ let rec eval (st: SymbolTable) ast =
                     es.Pop() |> ignore
                     es.PushEvalStack(subNode)
                     subNode.Parent <- rb.Parent
+                    subNode.NameEndPos <- rb.NameEndPos
                     if refBlock.Scope.ContainsKey(".") then 
                         subNode.Scope.Add(".",refBlock.Scope["."])
                     // prevent recursive clearing of the subNode
@@ -1263,8 +1264,8 @@ let rec eval (st: SymbolTable) ast =
                     // dispose the rb node
                     rb.Reset()
         simplifyTriviallyNestedExpressions refBlock
-
         es.PopEvalStack()
+        simplifyTriviallyNestedExpressions fv
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
     | Ast.Cases((pos1, pos2), (asts, ast1)) ->
