@@ -498,23 +498,23 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// Type Identifier of this FplValue 
     member this.Type (isSignature:SignatureType) =
-        match (isSignature, this.TypeId) with
-        | (SignatureType.Repr, typeId) when typeId.StartsWith("*") || typeId.StartsWith("+") -> 
-            let variadicContent = 
-                this.ValueList
-                |> Seq.map (fun fv -> fv.Type(isSignature))
-                |> String.concat ", "
-            $"{this.Type(SignatureType.Type)}" + "{" + variadicContent + "}"
-        | (SignatureType.Repr, typeId) when typeId = "pred" || typeId.StartsWith "pred(" || typeId.StartsWith "pred$" -> 
-            _reprId
-        | (SignatureType.Repr, typeId) when typeId = "func" || typeId.StartsWith "func(" -> 
-            _reprId
-        | (SignatureType.Repr, typeId) when typeId = "undef" || typeId = "ind" -> 
-            _reprId
+        match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with 
+        | (FplValueType.Reference, true) -> 
+            this.Scope[this.FplId].Type(isSignature)
         | _ -> 
-            match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with 
-            | (FplValueType.Reference, true) -> 
-                this.Scope[this.FplId].Type(isSignature)
+            match (isSignature, this.TypeId) with
+            | (SignatureType.Repr, typeId) when typeId.StartsWith("*") || typeId.StartsWith("+") -> 
+                let variadicContent = 
+                    this.ValueList
+                    |> Seq.map (fun fv -> fv.Type(isSignature))
+                    |> String.concat ", "
+                $"{this.Type(SignatureType.Type)}" + "{" + variadicContent + "}"
+            | (SignatureType.Repr, typeId) when typeId = "pred" || typeId.StartsWith "pred(" || typeId.StartsWith "pred$" -> 
+                _reprId
+            | (SignatureType.Repr, typeId) when typeId = "func" || typeId.StartsWith "func(" -> 
+                _reprId
+            | (SignatureType.Repr, typeId) when typeId = "undef" || typeId = "ind" -> 
+                _reprId
             | _ -> 
                 let head = 
                     match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with 
