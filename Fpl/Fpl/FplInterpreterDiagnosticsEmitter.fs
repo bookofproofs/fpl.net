@@ -556,7 +556,7 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
             ad.AddDiagnostic diagnostic
     | _ -> ()
 
-let emitSIG04Diagnostics (fplValue: FplValue) (candidates: FplValue list) firstFailingArgument pos1 pos2 =
+let emitSIG04DiagnosticsForReferences (fplValue: FplValue) (candidates: FplValue list) firstFailingArgument pos1 pos2 =
     let candidateNames =
         candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
 
@@ -573,30 +573,26 @@ let emitSIG04Diagnostics (fplValue: FplValue) (candidates: FplValue list) firstF
     ad.AddDiagnostic diagnostic
 
 /// Emits SIG04 diagnostics. If a single candidate was found, sets the fplValue's pointer representation to this candidate.
-let emitSIG04TypeDiagnostics (st:SymbolTable) name (fplValue:FplValue) pos1 pos2 =
-
-    let rightContext = st.EvalPath()
-    if rightContext.EndsWith(".VariableType.ClassType.PredicateIdentifier") 
-        || rightContext.EndsWith(".Expression.PredicateWithQualification.PredicateWithOptSpecification.PredicateIdentifier") then
-        match tryMatchTypes st fplValue name with
-        | (_, candidates, Some matchedFplValue) -> 
-            match fplValue.BlockType with
-            | FplValueType.Reference -> fplValue.Scope.Add(name, matchedFplValue)
-            | _ -> fplValue.ValueList.Add(matchedFplValue)
-        | (firstFailingArgument, candidates, None) -> 
-            let candidateNames =
-                candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = pos1
-                    Diagnostic.EndPos = pos2
-                    Diagnostic.Code = SIG04(name, candidateNames, firstFailingArgument)
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic
+let emitSIG04DiagnosticsForTypes (st:SymbolTable) name (fplValue:FplValue) pos1 pos2 =
+    match tryMatchTypes st fplValue name with
+    | (_, candidates, Some matchedFplValue) -> 
+        match fplValue.BlockType with
+        | FplValueType.Reference -> fplValue.Scope.Add(name, matchedFplValue)
+        | _ -> fplValue.ValueList.Add(matchedFplValue)
+    | (firstFailingArgument, candidates, None) -> 
+        let candidateNames =
+            candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = SIG04(name, candidateNames, firstFailingArgument)
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
 
 let rec blocktIsProof (fplValue: FplValue) =
     if FplValue.IsProof(fplValue) then

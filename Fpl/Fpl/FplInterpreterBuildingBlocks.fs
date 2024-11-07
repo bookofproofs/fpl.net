@@ -666,7 +666,6 @@ let rec eval (st: SymbolTable) ast =
                 fv.ReprId <- $"class {identifier}"
                 checkID008Diagnostics fv pos1 pos2
                 checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
-                emitSIG04TypeDiagnostics st identifier fv pos1 pos2
         | FplValueType.Axiom
         | FplValueType.Theorem 
         | FplValueType.Lemma 
@@ -683,7 +682,6 @@ let rec eval (st: SymbolTable) ast =
                 fv.ReprId <- "undetermined"
                 checkID008Diagnostics fv pos1 pos2
                 checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
-                emitSIG04TypeDiagnostics st identifier fv pos1 pos2
         | FplValueType.MandatoryFunctionalTerm
         | FplValueType.OptionalFunctionalTerm
         | FplValueType.FunctionalTerm ->
@@ -691,34 +689,31 @@ let rec eval (st: SymbolTable) ast =
                 fv.TypeId <- "func"
                 checkID008Diagnostics fv pos1 pos2
                 checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
-                emitSIG04TypeDiagnostics st identifier fv pos1 pos2
         | FplValueType.Constructor -> 
                 fv.FplId <- identifier
                 fv.TypeId <- identifier
                 fv.ReprId <- "obj"
                 checkID008Diagnostics fv pos1 pos2
                 checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
-                emitSIG04TypeDiagnostics st identifier fv pos1 pos2
         | FplValueType.VariadicVariableMany -> 
             let sid = $"*{identifier}"
             fv.TypeId <- sid
-            emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
         | FplValueType.VariadicVariableMany1 -> 
             let sid = $"+{identifier}"
             fv.TypeId <- sid
-            emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
         | FplValueType.Variable -> 
             fv.TypeId <- identifier
-            emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
         | FplValueType.Mapping -> 
             fv.TypeId <- fv.TypeId + identifier
-            emitSIG04TypeDiagnostics st identifier fv pos1 pos2 
         | FplValueType.Reference -> 
             fv.FplId <- fv.FplId + identifier
             fv.TypeId <- fv.TypeId + identifier
             checkID012Diagnostics st fv identifier pos1 pos2
-            emitSIG04TypeDiagnostics st identifier fv pos1 pos2
+            
         | _ -> ()
+        if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
+            emitSIG04DiagnosticsForTypes st identifier fv pos1 pos2
+        
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
         st.EvalPush("ParamTuple")
@@ -862,7 +857,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Namespace")
         optAst |> Option.map (eval st) |> ignore
         asts |> List.map (eval st) |> ignore
-        let fv = es.PeekEvalStack()
         st.EvalPop()
     // CompoundFunctionalTermType of Positions * ((Ast * Ast) option)
     | Ast.CompoundFunctionalTermType((pos1, pos2), (ast1, astTupleOption)) ->
@@ -916,9 +910,10 @@ let rec eval (st: SymbolTable) ast =
             eval st fplIdentifierAst
             eval st specificationAst |> ignore
             match tryMatchSignatures st refBlock with
-            | (_, _, Some matchedFplValue) -> ()
+            | (_, _, Some matchedFplValue) -> 
+                refBlock.Scope.Add(refBlock.Type(Mixed),matchedFplValue)
             | (firstFailingArgument, candidates, None) -> 
-                emitSIG04Diagnostics refBlock candidates firstFailingArgument pos1 pos2 
+                emitSIG04DiagnosticsForReferences refBlock candidates firstFailingArgument pos1 pos2 
             es.PopEvalStack()
         | None -> 
             // if no specification was found then simply continue in the same context

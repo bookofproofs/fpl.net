@@ -1282,7 +1282,7 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
     |> Seq.iter (fun theory -> 
         theory.Value.Scope
         // filter only blocks starting with the same FplId as the reference
-        |> Seq.filter (fun fv -> fv.Value.FplId = name) 
+        |> Seq.filter (fun fv -> fv.Value.Type(Mixed) = name) 
         |> Seq.iter (fun block -> pm.Add(block.Value)) 
     ) |> ignore
     pm |> Seq.toList
@@ -1313,7 +1313,7 @@ let rec checkCandidates (toBeMatchedTypeSignature: string) (candidates: FplValue
     match candidates with
     | [] -> (accResult, None) // all candidates mismatch toBeMatchedTypeSignature
     | x :: xs ->
-        match findFirstMismatchPosition toBeMatchedTypeSignature (x.Type(SignatureType.Type)) with
+        match findFirstMismatchPosition toBeMatchedTypeSignature (x.Type(SignatureType.Mixed)) with
         | ("", "", None) -> (accResult, Some x) // there is a candidate that matches toBeMatchedTypeSignature
         | ("", elem2, Some index) -> 
             checkCandidates toBeMatchedTypeSignature xs $"missing token `{elem2}` after matching {index}" // first reason for mismatch
@@ -1329,12 +1329,12 @@ let rec checkCandidates (toBeMatchedTypeSignature: string) (candidates: FplValue
 /// b = a list of candidates that were identified to match the reference,
 /// c = Some or None candidate that was matched.
 let tryMatchSignatures (st:SymbolTable) (reference:FplValue) = 
-    let candidates = findCandidatesByName st (reference.FplId)
+    let candidates = findCandidatesByName st (reference.Type(Mixed))
 
     if candidates.IsEmpty then 
         ("", candidates, None)
     else
-        let accResult, matchedCandidate = checkCandidates (reference.Type(SignatureType.Type)) candidates ""
+        let accResult, matchedCandidate = checkCandidates (reference.Type(SignatureType.Mixed)) candidates ""
         (accResult, candidates, matchedCandidate)
 
 /// Tries to match the signatures of two types.

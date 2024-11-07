@@ -632,7 +632,7 @@ type TestInterpreterErrors() =
     [<DataRow("def pred Test() {dec ~x:object; is(x,Set)};", 1)>]
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
     [<DataRow("""def pred T1() {true} def pred Test() { dec ~x:obj; T1(x) };""", 1)>]
-    [<DataRow("""def pred T1() {true} def pred Test() { OtherTest(X) };""", 1)>]
+    [<DataRow("""def pred T1() {true} def pred Test() { OtherTest() };""", 1)>]
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 0)>]
     [<DataRow("""def pred T (x:obj) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 1)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x:obj {p(x)}};", 0)>]
@@ -640,6 +640,7 @@ type TestInterpreterErrors() =
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =
         let code = SIG04 ("","","")
+        ad.Clear()
         runTestHelper "TestSIG04.fpl" fplCode code expected
 
     [<DataRow("""def pred T() { 1. };;""", 1)>]
