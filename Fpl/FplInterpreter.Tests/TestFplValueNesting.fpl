@@ -1,7 +1,10 @@
-def pred Add infix "+" 2 (x,y: obj) {intr} 
-def pred Mul infix "*" 1 (x,y: obj) {intr}
-            
-axiom A() {(x + y * z = 1)}
+     
+loc (x + y) :=
+    !tex: x "+" y 
+    !eng: x "plus" y
+    !ger: x "plus" y 
+    ;            
+
 
 localization iif(x,y) :=
     !tex: x "\Leftrightarrow" y
@@ -36,11 +39,7 @@ loc NotEqual(x,y) :=
     !pol: x ( " nie równa się " | " nie równe " ) y 
     ;
 
-loc (x + y) :=
-    !tex: x "+" y 
-    !eng: x "plus" y
-    !ger: x "plus" y 
-    ;
+
 
 inf ModusPonens()
 {

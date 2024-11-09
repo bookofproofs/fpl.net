@@ -2,6 +2,7 @@
 
 open System
 open System.Collections.Generic
+open System.Linq
 open FParsec
 open ErrDiagnostics
 open FplGrammarTypes
@@ -1149,60 +1150,49 @@ let rec eval (st: SymbolTable) ast =
     | Ast.InfixOperation((pos1, pos2), separatedPredicateListAst) ->
         st.EvalPush("InfixOperation")
         let fv = es.PeekEvalStack()
-        let dictOfOperators = Dictionary<string,FplValue>()
         separatedPredicateListAst
-        |> List.map (fun (_, optSeparatorAst) -> 
-            let infixOperator = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,fv)
-            es.PushEvalStack(infixOperator)
-            optSeparatorAst |> Option.map (eval st) |> Option.defaultValue ()
-            es.Pop() |> ignore // pop operator without changing the parent node's name
-            dictOfOperators.Add(infixOperator.Type(SignatureType.Mixed), infixOperator)
+        |> List.map (fun (predAst, optOperandAst) -> 
+            // evaluate the operand
+            let pred = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,fv)
+            es.PushEvalStack(pred)
+            eval st predAst
+            fv.ValueList.Add(es.Pop()) // pop the stack element (same reference as pred) and store it in a list
+            // followed by the operator
+            match optOperandAst with
+            | Some opAst -> 
+                let infixOperator = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,fv)
+                es.PushEvalStack(infixOperator)
+                // evaluate the operand by trying to find a definition for the operand
+                eval st opAst
+                // store the index of the infix operator, so we still know it after sorting the list by precedence later
+                fv.ValueList.Add(es.Pop()) // pop the stack element (same reference as infixOperator) and store it in a list
+            | None -> () // in this case, we consumed and evaluated all operators in the infix operation (due to FPL parser Ast structure)
         )
         |> ignore
+        
+        let getPrecedence (fv1:FplValue) =
+            let precNodeList = fv1.Scope.Values |> Seq.toList 
+            match precNodeList with
+            | [] -> Int32.MaxValue
+            | x::xs -> 
+                match x.ExpressionType with
+                |  FixType.Infix (symb, prec) -> prec
+                | _ -> Int32.MaxValue
 
-        let sortedSeparatedPredicateListAst = 
-            List.sortBy (fun (_,opOpt) -> 
-                match opOpt with
-                | Some operand -> 
-                    match operand with
-                    | Ast.InfixOperator ((p1,p2),symbol) -> 
-                        if dictOfOperators.ContainsKey(symbol) then 
-                            let ref = dictOfOperators[symbol]
-                            if ref.Scope.Count>0 then
-                                let precedenceDefNode = ref.Scope.Values |> Seq.toList |> List.head
-                                precedenceDefNode.AuxiliaryInfo
-                            else
-                                Int32.MaxValue
-                        else
-                            Int32.MaxValue
-                    | _ -> Int32.MaxValue
-                | _ ->
-                    Int32.MaxValue
-            ) separatedPredicateListAst
-        /// Transforms a precedence-sorted list infix-operations into a nested binary infix operations in reversed Polish notation
-        let rec createReversedPolishNotation (sortedSeparatedPredicateList:(Ast * Ast option) list) (fv:FplValue) =
-            match sortedSeparatedPredicateList with
-            | (predicateAst,optOp) :: xs -> 
-                if optOp.IsSome then
-                    match optOp.Value with 
-                    | Ast.InfixOperator ((p1,p2),symbol) ->
-                        // add any found candidate FPL blocks matching this symbol to the newly created nested infix operation
-                        dictOfOperators[symbol].Scope 
-                        |> Seq.iter (fun kv -> fv.Scope.Add(kv.Key,kv.Value))
-                        if dictOfOperators.ContainsKey(symbol) then 
-                            fv.FplId <- symbol
-                            fv.TypeId <- symbol
-                            eval st predicateAst 
-                            if xs.Length > 0 then
-                                let nextInfixOperation = FplValue.CreateFplValue((p1,p2),FplValueType.Reference,fv)
-                                es.PushEvalStack(nextInfixOperation)
-                                createReversedPolishNotation xs nextInfixOperation
-                                es.PopEvalStack()                                
-                    | _ -> ()
-                else
-                    eval st predicateAst 
-            | [] -> ()
-        createReversedPolishNotation sortedSeparatedPredicateListAst fv
+        while fv.ValueList.Count > 1 do
+            let mutable currentMinimalPrecedence = Int32.MaxValue
+            let mutable currMinIndex = 1
+            for i in 1 .. 2 .. fv.ValueList.Count - 1 do
+                let currPrecedence = getPrecedence fv.ValueList[i]
+                if currentMinimalPrecedence > currPrecedence then
+                    currentMinimalPrecedence <- currPrecedence
+                    currMinIndex <- i
+            let currentOp = fv.ValueList[currMinIndex]
+            currentOp.ValueList.Add(fv.ValueList[currMinIndex-1])
+            currentOp.ValueList.Add(fv.ValueList[currMinIndex+1])
+            fv.ValueList.RemoveAt(currMinIndex+1) 
+            fv.ValueList.RemoveAt(currMinIndex-1) 
+
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
