@@ -11,7 +11,7 @@ type TestEquality() =
     [<TestMethod>]
     member this.TestEqualityPredicate(varVal) =
         ad.Clear()
-        let fplCode = sprintf "uses Fpl.Commons def pred T1() { %s };" varVal
+        let fplCode = sprintf """def pred Equal infix "=" 0 (x,y: tpl) { del.Equal(x,y) } def pred T1() { %s };""" varVal
         let filename = "TestEqualityPredicate.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore

@@ -285,3 +285,9 @@ type TestExpressions () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
            
+    [<TestMethod>]
+    member this.TestPredecence () =
+        let result = run (ast .>> eof) """def pred T1() { (x = y * z + 1) };"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))

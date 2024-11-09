@@ -476,13 +476,11 @@ let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     | FixType.Postfix _ when fplValue.Arity <> 1 -> detailed fplValue.ExpressionType 1 fplValue.Arity pos1 pos2
     | _ -> ()
 
-let emitSIG01Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
-    if
-        (fplValue.BlockType = FplValueType.Reference)
-    then
+let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
+    if fv.BlockType = FplValueType.Reference then
         // collect candidates to match this reference from all theories and
         // add them to fplValues's scope
-        let expressionId = fplValue.FplId
+        let expressionId = fv.FplId
 
         st.Root.Scope
         |> Seq.map (fun kv -> kv.Value)
@@ -490,22 +488,22 @@ let emitSIG01Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
             theory.Scope
             |> Seq.map (fun kv -> kv.Value)
             |> Seq.iter (fun block ->
-                let blockType = block.Type(SignatureType.Type)
+                let blockType = block.Type(SignatureType.Mixed)
                 if expressionId = block.FplId then
-                    fplValue.Scope.Add(blockType, block)
+                    fv.Scope.Add(blockType, block)
                 else
                     match block.ExpressionType with
                     | FixType.Prefix symbol
                     | FixType.Postfix symbol ->
                         if expressionId = symbol then
-                            fplValue.Scope.Add(blockType, block)
+                            fv.Scope.Add(blockType, block)
                     | FixType.Infix(symbol, precedence) ->
                         if expressionId = symbol then
-                            fplValue.Scope.Add(blockType, block)
-                            fplValue.AuxiliaryInfo <- precedence
+                            fv.Scope.Add(blockType, block)
+                            fv.AuxiliaryInfo <- precedence
                     | _ -> ()))
 
-        if fplValue.Scope.Count = 0 then
+        if fv.Scope.Count = 0 then
             let diagnostic =
                 { 
                     Diagnostic.Uri = ad.CurrentUri

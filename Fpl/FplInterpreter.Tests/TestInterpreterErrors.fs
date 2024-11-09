@@ -611,6 +611,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("""def pred T infix "+" 1 (x,y:obj) {true};""", 0)>]
     [<DataRow("""def pred T1 infix "+" 1 (x,y:obj) {true} def pred T2 infix "+" 1 (x,y:obj) {true};""", 1)>]
+    [<DataRow("""def pred T1 infix "+" 2 (x,y: obj) {intr} def pred T2 infix "*" 1 (x,y: obj) {intr};""", 0)>]
     [<TestMethod>]
     member this.TestSIG02(fplCode:string, expected) =
         let code = SIG02 ("",0, "")

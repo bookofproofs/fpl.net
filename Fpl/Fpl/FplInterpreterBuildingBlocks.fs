@@ -471,10 +471,10 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Infix((pos1, pos2), (symbol, precedenceAsts)) -> 
         st.EvalPush("Infix")
         let fv = es.PeekEvalStack()
+        eval st precedenceAsts
         fv.FplId <- symbol
         fv.ExpressionType <- FixType.Infix (symbol, fv.AuxiliaryInfo)
         emitSIG02Diagnostics st fv pos1 pos2 
-        eval st precedenceAsts
         st.EvalPop() 
     | Ast.Postfix((pos1, pos2), symbol) -> 
         st.EvalPush("Postfix")
@@ -1161,20 +1161,24 @@ let rec eval (st: SymbolTable) ast =
         |> ignore
 
         let sortedSeparatedPredicateListAst = 
-            separatedPredicateListAst 
-            |> List.sortBy (fun (_,opOpt) -> 
-                if opOpt.IsSome then 
-                    match opOpt.Value with
+            List.sortBy (fun (_,opOpt) -> 
+                match opOpt with
+                | Some operand -> 
+                    match operand with
                     | Ast.InfixOperator ((p1,p2),symbol) -> 
                         if dictOfOperators.ContainsKey(symbol) then 
-                            dictOfOperators[symbol].AuxiliaryInfo
+                            let ref = dictOfOperators[symbol]
+                            if ref.Scope.Count>0 then
+                                let precedenceDefNode = ref.Scope.Values |> Seq.toList |> List.head
+                                precedenceDefNode.AuxiliaryInfo
+                            else
+                                Int32.MaxValue
                         else
                             Int32.MaxValue
                     | _ -> Int32.MaxValue
-                else
+                | _ ->
                     Int32.MaxValue
-            )
-
+            ) separatedPredicateListAst
         /// Transforms a precedence-sorted list infix-operations into a nested binary infix operations in reversed Polish notation
         let rec createReversedPolishNotation (sortedSeparatedPredicateList:(Ast * Ast option) list) (fv:FplValue) =
             match sortedSeparatedPredicateList with
@@ -1198,7 +1202,6 @@ let rec eval (st: SymbolTable) ast =
                 else
                     eval st predicateAst 
             | [] -> ()
-
         createReversedPolishNotation sortedSeparatedPredicateListAst fv
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
@@ -1233,6 +1236,7 @@ let rec eval (st: SymbolTable) ast =
                 eval st predicateAst
                 es.PopEvalStack()
             else
+                
                 eval st predicateAst
         ensureReversedPolishNotation
         optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()

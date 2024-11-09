@@ -1,4 +1,7 @@
-def cl T:obj {intr} axiom A() {impl(T,true)}
+def pred Add infix "+" 2 (x,y: obj) {intr} 
+def pred Mul infix "*" 1 (x,y: obj) {intr}
+            
+axiom A() {(x + y * z = 1)}
 
 localization iif(x,y) :=
     !tex: x "\Leftrightarrow" y
@@ -79,7 +82,6 @@ inf DisjunctiveSyllogism()
 
 inf ExistsByExample(p: pred(c: obj))
 {
-    dec ~x: obj;
     premise:  
         p(c)
     conclusion: 
