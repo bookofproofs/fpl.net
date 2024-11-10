@@ -648,13 +648,14 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 1)>]
     [<DataRow("""def pred Eq infix "=" 1000 (x,y: Nat) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 2)>]
     [<DataRow("""def pred Eq infix "=" 1000 (x,y: ind) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 1)>]
+    [<DataRow("""def pred Mul infix "*" 1 (x,y: pred) {intr} def pred Add infix "+" 2 (x,y: ind) {intr} def pred Eq infix "=" 1000 (x,y: obj) {intr} def pred T1() { (x = y * z + 1) };""", 3)>]
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =
         let code = SIG04 ("","","")
         ad.Clear()
         runTestHelper "TestSIG04.fpl" fplCode code expected
 
-    [<DataRow("""def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A(x:ind,y:obj) { (x = y) };""", "No overload matching `ind, =, obj`, failed to match `ind`, candidates were: TestSIG04MsgSpecificity.=(obj, obj)")>]
+    [<DataRow("""def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A(x:ind,y:obj) { (x = y) };""", "No overload matching `=(ind, obj)`, failed to match `ind`, candidates were: TestSIG04MsgSpecificity.Eq(obj, obj)")>]
     [<TestMethod>]
     member this.TestSIG04MsgSpecificity(fplCode:string, (expected:string)) =
         let code = SIG04 ("","","")

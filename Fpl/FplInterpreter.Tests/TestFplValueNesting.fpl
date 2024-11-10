@@ -1,4 +1,8 @@
-     
+ def pred Mul infix "*" 1 (x,y: obj) {intr}
+ def pred Add infix "+" 2 (x,y: obj) {intr} 
+ def pred Eq infix "=" 1000 (x,y: obj) {intr} 
+ def pred T1() { (x = y * z + 1) }
+
 loc (x + y) :=
     !tex: x "+" y 
     !eng: x "plus" y

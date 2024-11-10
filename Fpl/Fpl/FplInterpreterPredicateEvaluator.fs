@@ -64,10 +64,10 @@ let evaluateImplication (fplValue:FplValue) =
     let arg1 = fplValue.ValueList[0]
     let arg2 = fplValue.ValueList[1]
     match (arg1.ReprId, arg2.ReprId) with
-    | ("true", "false") -> 
-        fplValue.ReprId <- "false"
-    | (_, _) -> 
-        fplValue.ReprId <- "true"
+    | ("true", "false") -> fplValue.ReprId <- "false"
+    | ("false", "true") 
+    | ("false", "false") 
+    | ("true", "true") -> fplValue.ReprId <- "true"
     | _ -> fplValue.ReprId <- "undetermined"
 
 let evaluateEquivalence (fplValue:FplValue) = 
@@ -75,9 +75,8 @@ let evaluateEquivalence (fplValue:FplValue) =
     let arg2 = fplValue.ValueList[1]
     match (arg1.ReprId, arg2.ReprId) with
     | ("true", "true") 
-    | ("false", "false") -> 
-        fplValue.ReprId <- "true"
-    | (_, _) -> 
-        fplValue.ReprId <- "false"
+    | ("false", "false") -> fplValue.ReprId <- "true"
+    | ("false", "true") 
+    | ("true", "false") -> fplValue.ReprId <- "false"
     | _ -> fplValue.ReprId <- "undetermined"
     

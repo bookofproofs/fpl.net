@@ -434,7 +434,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         with get () = _reprId
         and set (value) = _reprId <- value
 
-    /// NameId of the FplValue.
+    /// FplId of the FplValue.
     member this.FplId 
         with get () = _fplId
         and set (value) = _fplId <- value
@@ -500,6 +500,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     member this.Type (isSignature:SignatureType) =
         match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with 
         | (FplValueType.Reference, true) -> 
+            // delegate the type identifier to the referenced entitity
             this.Scope[this.FplId].Type(isSignature)
         | _ -> 
             match (isSignature, this.TypeId) with
@@ -537,10 +538,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     match isSignature with
                     | SignatureType.Name 
                     | SignatureType.Type 
-                    | SignatureType.Repr -> 
-                        isSignature
-                    | SignatureType.Mixed 
-                        -> SignatureType.Type
+                    | SignatureType.Repr -> isSignature
+                    | SignatureType.Mixed -> SignatureType.Type
 
                 let paramTuple() = 
                     this.Scope

@@ -466,21 +466,18 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Prefix((pos1, pos2), symbol) -> 
         st.EvalPush("Prefix")
         let fv = es.PeekEvalStack()
-        fv.FplId <- symbol
         fv.ExpressionType <- FixType.Prefix symbol
         st.EvalPop() 
     | Ast.Infix((pos1, pos2), (symbol, precedenceAsts)) -> 
         st.EvalPush("Infix")
         let fv = es.PeekEvalStack()
         eval st precedenceAsts
-        fv.FplId <- symbol
         fv.ExpressionType <- FixType.Infix (symbol, fv.AuxiliaryInfo)
         emitSIG02Diagnostics st fv pos1 pos2 
         st.EvalPop() 
     | Ast.Postfix((pos1, pos2), symbol) -> 
         st.EvalPush("Postfix")
         let fv = es.PeekEvalStack()
-        fv.FplId <- symbol
         fv.ExpressionType <- FixType.Postfix symbol
         st.EvalPop() 
     | Ast.Symbol((pos1, pos2), s) -> 
@@ -492,6 +489,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
+        fv.NameStartPos <- pos1
+        fv.NameEndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop() 
     | Ast.PostfixOperator((pos1, pos2), symbol) -> 
@@ -499,6 +498,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
+        fv.NameStartPos <- pos1
+        fv.NameEndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop() 
     | Ast.PrefixOperator((pos1, pos2), symbol) -> 
@@ -506,6 +507,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
+        fv.NameStartPos <- pos1
+        fv.NameEndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop() 
     // | Self of Positions * unit
@@ -1193,10 +1196,9 @@ let rec eval (st: SymbolTable) ast =
             let secondOp = fv.ValueList[currMinIndex+1]
             currentOp.ValueList.Add(firstOp)
             currentOp.ValueList.Add(secondOp)
+            emitSIG04DiagnosticsForInfixOperation currentOp firstOp secondOp (precNodeList currentOp) currentOp.NameStartPos currentOp.NameEndPos
             fv.ValueList.RemoveAt(currMinIndex+1) 
             fv.ValueList.RemoveAt(currMinIndex-1) 
-            if fv.ValueList.Count = 1 then 
-                emitSIG04DiagnosticsForInfixOperation currentOp firstOp secondOp (precNodeList currentOp) pos1 pos2 
 
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
