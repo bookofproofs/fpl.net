@@ -569,6 +569,41 @@ let emitSIG04DiagnosticsForReferences (fplValue: FplValue) (candidates: FplValue
         }
     ad.AddDiagnostic diagnostic
 
+let emitSIG04DiagnosticsForInfixOperation (infixOp: FplValue) (firstOp: FplValue) (secondOp: FplValue) (candidates: FplValue list) pos1 pos2 =
+    let candidateNames =
+        candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
+
+    let optFirstFailingArgument = 
+        if candidates.IsEmpty then 
+            None
+        else
+            let firstActual = firstOp.Type(SignatureType.Type)
+            let paramsOfOperand = candidates.Head.Scope.Values |> Seq.toList
+            let firstExpected = paramsOfOperand[0].Type(SignatureType.Type)
+            if firstActual <> firstExpected then
+                Some(firstActual)
+            else
+                let secondActual = secondOp.Type(SignatureType.Type)
+                let secondExpected = paramsOfOperand[1].Type(SignatureType.Type)
+                if secondActual <> secondExpected then
+                    Some(secondActual)
+                else    
+                    None
+    match optFirstFailingArgument with 
+    | Some firstFailingArgument -> 
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = SIG04(infixOp.Type(SignatureType.Type), candidateNames, firstFailingArgument)
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+    | _ -> ()
+
 /// Emits SIG04 diagnostics. If a single candidate was found, sets the fplValue's pointer representation to this candidate.
 let emitSIG04DiagnosticsForTypes (st:SymbolTable) name (fplValue:FplValue) pos1 pos2 =
     match tryMatchTypes st fplValue name with

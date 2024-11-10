@@ -1170,9 +1170,10 @@ let rec eval (st: SymbolTable) ast =
         )
         |> ignore
         
+        let precNodeList (fv1:FplValue) = fv1.Scope.Values |> Seq.toList 
+
         let getPrecedence (fv1:FplValue) =
-            let precNodeList = fv1.Scope.Values |> Seq.toList 
-            match precNodeList with
+            match precNodeList fv1 with
             | [] -> Int32.MaxValue
             | x::xs -> 
                 match x.ExpressionType with
@@ -1188,10 +1189,14 @@ let rec eval (st: SymbolTable) ast =
                     currentMinimalPrecedence <- currPrecedence
                     currMinIndex <- i
             let currentOp = fv.ValueList[currMinIndex]
-            currentOp.ValueList.Add(fv.ValueList[currMinIndex-1])
-            currentOp.ValueList.Add(fv.ValueList[currMinIndex+1])
+            let firstOp = fv.ValueList[currMinIndex-1]
+            let secondOp = fv.ValueList[currMinIndex+1]
+            currentOp.ValueList.Add(firstOp)
+            currentOp.ValueList.Add(secondOp)
             fv.ValueList.RemoveAt(currMinIndex+1) 
             fv.ValueList.RemoveAt(currMinIndex-1) 
+            if fv.ValueList.Count = 1 then 
+                emitSIG04DiagnosticsForInfixOperation currentOp firstOp secondOp (precNodeList currentOp) pos1 pos2 
 
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
@@ -1233,7 +1238,7 @@ let rec eval (st: SymbolTable) ast =
         eval st qualificationListAst
         let refBlock = es.PeekEvalStack() // if the reference was replaced, take this one
         refBlock.NameEndPos <- pos2
-        /// simplify trivially nested expressions 
+        /// Simplify trivially nested expressions 
         let simplifyTriviallyNestedExpressions (rb:FplValue) = 
             if rb.ValueList.Count = 1 && rb.FplId = "" then
                 let subNode = rb.ValueList[0]
