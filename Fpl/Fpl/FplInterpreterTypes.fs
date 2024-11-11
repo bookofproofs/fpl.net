@@ -1129,7 +1129,19 @@ let tryFindAssociatedBlockForCorollary(fplValue:FplValue) =
     else
         ScopeSearchResult.NotApplicable
 
-
+/// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
+/// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
+let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) =
+    let rootType = classRoot.Type(SignatureType.Type)
+    if rootType = baseClassName then
+        Some(rootType)
+    else
+        classRoot.ValueList
+        |> Seq.collect (fun child ->
+            match findClassInheritanceChain child baseClassName with
+            | Some path -> [ rootType + ":" + path ]
+            | None -> [])
+        |> Seq.tryLast
 
 type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     let _parsedAsts = parsedAsts
@@ -1286,6 +1298,42 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
     ) |> ignore
     pm |> Seq.toList
 
+
+let matchParamsWithArguments (fvArgs:FplValue) (fvParams:FplValue) =
+    let parameters = fvParams.Scope.Values |> Seq.toList
+    let arguments = fvArgs.ValueList |> Seq.toList
+    let stdMsg = $"{fvArgs.Type(SignatureType.Mixed)} does not match {fvParams.Type(SignatureType.Mixed)}"
+    let rec mpwa (args:FplValue list) (pars:FplValue list) = 
+        match (args, pars) with
+        | (a::ars, p::prs) -> 
+            let aType = a.Type(SignatureType.Type)
+            let pType = p.Type(SignatureType.Type)
+            if aType = pType then
+                mpwa ars prs
+            elif pType.StartsWith("tpl") || pType.StartsWith("template") then
+                mpwa ars prs
+            elif Char.IsUpper(aType[0]) && a.BlockType = FplValueType.Reference && a.Scope.Count = 1 then
+                let var = a.Scope.Values |> Seq.toList |> List.head
+                if var.ValueList.Count = 1 then 
+                    let cl = var.ValueList[0]
+                    let inheritanceList = cl.ValueList |> Seq.filter(fun fv -> fv.Type(SignatureType.Type)=pType) |> Seq.toList
+                    if inheritanceList.IsEmpty then
+                        let inheritanceListString = cl.ValueList |> Seq.map (fun fv -> fv.TypeId) |> String.concat ", "
+                        $"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} does not match {p.Type(SignatureType.Name)}:{pType} and its parent classes {inheritanceListString}."
+                    else
+                        ""
+                else
+                    $"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} is undefined and does not match {p.Type(SignatureType.Name)}:{pType}."
+            else
+                $"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} does not match {p.Type(SignatureType.Name)}:{pType}."
+        | ([], p::prs) -> 
+                let pType = p.Type(SignatureType.Type)
+                $"{stdMsg}; missing argument for {p.Type(SignatureType.Name)}:{pType}."
+        | (a::ars, []) -> 
+                let aType = a.Type(SignatureType.Type)
+                $"{stdMsg}; no matching paramater for {a.Type(SignatureType.Name)}:{aType}."
+        | ([],[]) -> ""
+    mpwa arguments parameters
 
 let rec checkCandidates (toBeMatchedTypeSignature: string) (candidates: FplValue list) accResult =
     /// Compares two strings and returns a tuple of (a,b,i) where i is None, 

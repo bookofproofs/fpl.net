@@ -240,20 +240,8 @@ let checkID008Diagnostics (fv: FplValue) pos1 pos2 =
     | _ -> ()
 
 let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) name pos1 pos2 =
-    let rec findPath (root: FplValue) (candidateName: string) =
-        let rootType = root.Type(SignatureType.Type)
-        if rootType = candidateName then
-            Some(rootType)
-        else
-            root.ValueList
-            |> Seq.collect (fun child ->
-                match findPath child candidateName with
-                | Some path -> [ rootType + ":" + path ]
-                | None -> [])
-            |> Seq.tryLast
-
     let rightContext = st.EvalPath()
-    let classInheritanceChain = findPath fplValue name
+    let classInheritanceChain = findClassInheritanceChain fplValue name
 
     if rightContext.EndsWith("InheritedClassType.PredicateIdentifier") then
         if fplValue.Type(SignatureType.Type) = name then
@@ -290,7 +278,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                     fplValue.ValueList
                     |> Seq.iter (fun child ->
                         let childType = child.Type(SignatureType.Type)
-                        let classInheritanceChain = findPath classCandidate childType
+                        let classInheritanceChain = findClassInheritanceChain classCandidate childType
 
                         match classInheritanceChain with
                         | Some chain ->
@@ -341,7 +329,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
 
             fplValue.ValueList
             |> Seq.iter (fun child ->
-                let classInheritanceChain = findPath child name
+                let classInheritanceChain = findClassInheritanceChain child name
 
                 match classInheritanceChain with
                 | Some chain ->

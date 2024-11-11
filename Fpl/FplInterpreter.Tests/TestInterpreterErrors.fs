@@ -649,6 +649,14 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred Eq infix "=" 1000 (x,y: Nat) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 2)>]
     [<DataRow("""def pred Eq infix "=" 1000 (x,y: ind) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 1)>]
     [<DataRow("""def pred Mul infix "*" 1 (x,y: pred) {intr} def pred Add infix "+" 2 (x,y: ind) {intr} def pred Eq infix "=" 1000 (x,y: obj) {intr} def pred T1() { (x = y * z + 1) };""", 3)>]
+    [<DataRow("""def pred T (x:tpl) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 0)>]
+    [<DataRow("""def pred T (x:tplTest) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 0)>]
+    [<DataRow("""def pred T (x,y,z:obj) {true} def pred Caller() {dec ~x:obj; T(x)} ;""", 1)>]
+    [<DataRow("""def pred T (x,y,z:obj) {true} def pred Caller() {dec ~x:obj; T(x,x)} ;""", 1)>]
+    [<DataRow("""def pred T (x,y,z:obj) {true} def pred Caller() {dec ~x:obj; T(x,x,x)} ;""", 0)>]
+    [<DataRow("""def pred T (x,y,z:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
+    [<DataRow("""def pred T (x,y:obj,z:ind) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 0)>]
+    [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =
         let code = SIG04 ("","","")
