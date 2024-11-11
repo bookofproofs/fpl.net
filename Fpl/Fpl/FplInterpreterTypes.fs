@@ -1298,11 +1298,12 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
     ) |> ignore
     pm |> Seq.toList
 
-
-let matchParamsWithArguments (fvArgs:FplValue) (fvParams:FplValue) =
-    let parameters = fvParams.Scope.Values |> Seq.toList
-    let arguments = fvArgs.ValueList |> Seq.toList
-    let stdMsg = $"{fvArgs.Type(SignatureType.Mixed)} does not match {fvParams.Type(SignatureType.Mixed)}"
+/// Tries to match the arguments of `a` FplValue with the parameters of the `p` FplValue and returns 
+/// Some specific error message or None, if the match succeeded
+let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
+    let parameters = fvp.Scope.Values |> Seq.toList
+    let arguments = fva.ValueList |> Seq.toList
+    let stdMsg = $"{fva.Type(SignatureType.Mixed)} does not match {fvp.Type(SignatureType.Mixed)}"
     let rec mpwa (args:FplValue list) (pars:FplValue list) = 
         match (args, pars) with
         | (a::ars, p::prs) -> 
@@ -1312,6 +1313,18 @@ let matchParamsWithArguments (fvArgs:FplValue) (fvParams:FplValue) =
                 mpwa ars prs
             elif pType.StartsWith("tpl") || pType.StartsWith("template") then
                 mpwa ars prs
+            elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "???" then 
+                if ars.Length > 0 then 
+                    mpwa ars pars
+                else
+                    None
+            elif pType.StartsWith("+") && aType = "???" then 
+                Some($"{stdMsg}; () does not match {p.Type(SignatureType.Name)}:{pType}.")
+            elif pType = $"+{aType}" then 
+                if ars.Length > 0 then 
+                    mpwa ars pars
+                else
+                    None
             elif Char.IsUpper(aType[0]) && a.BlockType = FplValueType.Reference && a.Scope.Count = 1 then
                 let var = a.Scope.Values |> Seq.toList |> List.head
                 if var.ValueList.Count = 1 then 
@@ -1323,21 +1336,21 @@ let matchParamsWithArguments (fvArgs:FplValue) (fvParams:FplValue) =
                         | Some str -> 
                             mpwa ars prs
                         | None -> 
-                            $"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} neither matches {p.Type(SignatureType.Name)}:{pType} nor its base classes."
+                            Some($"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} neither matches {p.Type(SignatureType.Name)}:{pType} nor its base classes.")
                     | _ -> 
                         // this case does not occur but for we cover it for completeness reasons
-                        $"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} is undefined and does'nt match {p.Type(SignatureType.Name)}:{pType}."
+                        Some($"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} is undefined and does'nt match {p.Type(SignatureType.Name)}:{pType}.")
                 else
-                    $"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} is undefined and does not match {p.Type(SignatureType.Name)}:{pType}."
+                    Some($"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} is undefined and does not match {p.Type(SignatureType.Name)}:{pType}.")
             else
-                $"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} does not match {p.Type(SignatureType.Name)}:{pType}."
+                Some($"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} does not match {p.Type(SignatureType.Name)}:{pType}.")
         | ([], p::prs) -> 
                 let pType = p.Type(SignatureType.Type)
-                $"{stdMsg}; missing argument for {p.Type(SignatureType.Name)}:{pType}."
+                Some($"{stdMsg}; missing argument for {p.Type(SignatureType.Name)}:{pType}.")
         | (a::ars, []) -> 
                 let aType = a.Type(SignatureType.Type)
-                $"{stdMsg}; no matching paramater for {a.Type(SignatureType.Name)}:{aType}."
-        | ([],[]) -> ""
+                Some($"{stdMsg}; no matching paramater for {a.Type(SignatureType.Name)}:{aType}.")
+        | ([],[]) -> None
     mpwa arguments parameters
 
 let rec checkCandidates (toBeMatchedTypeSignature: string) (candidates: FplValue list) accResult =

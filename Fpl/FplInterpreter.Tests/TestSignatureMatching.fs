@@ -15,17 +15,11 @@ type TestSignatureMatching() =
         "T(obj, obj) does not match T(Nat, Nat); a:obj does not match x:Nat.")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
         "T(Nat, Nat) does not match T(obj, obj); a:Nat is undefined and does not match x:obj.")>]
-    [<DataRow("""def cl Nat:obj {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
-        "")>]
-    [<DataRow("""def pred T (x,y:tpl) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
-        "")>]
-    [<DataRow("""def cl A:B {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:NatTypo; T(a,b)} ;""",
-        "T(NatTypo, NatTypo) does not match T(obj, obj); a:NatTypo is undefined and does not match x:obj.")>]
     [<TestMethod>]
-    member this.TestSignatureMatchingReferences(varVal, var:string) =
+    member this.TestSignatureMatchingReferencesPlain(varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
-        let filename = "TestTestSignatureMatchingReferences.fpl"
+        let filename = "TestSignatureMatchingReferencesPlain.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -36,7 +30,229 @@ type TestSignatureMatching() =
             let fvPars = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
             let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("Caller(")) |> List.head
             let fvArgs = pred.ValueList[0]
-            Assert.AreEqual<string>(var, matchParamsWithArguments fvArgs fvPars)
+            match matchArgumentsWithParameters fvArgs fvPars with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj ~c:ind; T(a,b,c)} ;""",
+        "T(obj, obj, ind) does not match T(obj, obj); no matching paramater for c:ind.")>]
+    [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
+        "T(obj, obj) does not match T(Nat, Nat); a:obj does not match x:Nat.")>]
+    [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
+        "T(Nat, Nat) does not match T(obj, obj); a:Nat is undefined and does not match x:obj.")>]
+    [<DataRow("""def cl Nat:obj {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x,y:tpl) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def cl A:B {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:NatTypo; T(a,b)} ;""",
+        "T(NatTypo, NatTypo) does not match T(obj, obj); a:NatTypo is undefined and does not match x:obj.")>]
+    [<TestMethod>]
+    member this.TestSignatureMatchingReferencesClasses(varVal, var:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestSignatureMatchingReferencesClasses.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let fvPars = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("Caller(")) |> List.head
+            let fvArgs = pred.ValueList[0]
+            match matchArgumentsWithParameters fvArgs fvPars with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a:obj; T(a)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {T()} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+obj) {true} def pred Caller() {dec ~a:obj; T(a)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+obj) {true} def pred Caller() {T()} ;""",
+        "T() does not match T(+obj); () does not match x:+obj.")>]
+    [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a,b:*obj; T(a,b)} ;""",
+        "T(*obj, *obj) does not match T(*obj); no matching paramater for b:*obj.")>]
+    [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a:*obj; T(a)} ;""",
+        "")>]
+    [<TestMethod>]
+    member this.TestSignatureMatchingReferencesVariadicObj(varVal, var:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestSignatureMatchingReferencesVariadic00.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let fvPars = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("Caller(")) |> List.head
+            let fvArgs = pred.ValueList[0]
+            match matchArgumentsWithParameters fvArgs fvPars with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
+            
+    [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a,b:ind; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a:ind; T(a)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {T()} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+ind) {true} def pred Caller() {dec ~a,b:ind; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+ind) {true} def pred Caller() {dec ~a:ind; T(a)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+ind) {true} def pred Caller() {T()} ;""",
+        "T() does not match T(+ind); () does not match x:+ind.")>]
+    [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a,b:*ind; T(a,b)} ;""",
+        "T(*ind, *ind) does not match T(*ind); no matching paramater for b:*ind.")>]
+    [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a:*ind; T(a)} ;""",
+        "")>]
+    [<TestMethod>]
+    member this.TestSignatureMatchingReferencesVariadicInd(varVal, var:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestSignatureMatchingReferencesVariadic00.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let fvPars = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("Caller(")) |> List.head
+            let fvArgs = pred.ValueList[0]
+            match matchArgumentsWithParameters fvArgs fvPars with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a:pred; T(a)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {T()} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+pred) {true} def pred Caller() {dec ~a:pred; T(a)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+pred) {true} def pred Caller() {T()} ;""",
+        "T() does not match T(+pred); () does not match x:+pred.")>]
+    [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a,b:*pred; T(a,b)} ;""",
+        "T(*pred, *pred) does not match T(*pred); no matching paramater for b:*pred.")>]
+    [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a:*pred; T(a)} ;""",
+        "")>]
+    [<TestMethod>]
+    member this.TestSignatureMatchingReferencesVariadicPred(varVal, var:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestSignatureMatchingReferencesVariadic00.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let fvPars = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("Caller(")) |> List.head
+            let fvArgs = pred.ValueList[0]
+            match matchArgumentsWithParameters fvArgs fvPars with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a,b:func; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a:func; T(a)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:*func) {true} def pred Caller() {T()} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+func) {true} def pred Caller() {dec ~a,b:func; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+func) {true} def pred Caller() {dec ~a:func; T(a)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+func) {true} def pred Caller() {T()} ;""",
+        "T() does not match T(+func); () does not match x:+func.")>]
+    [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a,b:*func; T(a,b)} ;""",
+        "T(*func, *func) does not match T(*func); no matching paramater for b:*func.")>]
+    [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a:*func; T(a)} ;""",
+        "")>]
+    [<TestMethod>]
+    member this.TestSignatureMatchingReferencesVariadicFunc(varVal, var:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestSignatureMatchingReferencesVariadic00.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let fvPars = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("Caller(")) |> List.head
+            let fvArgs = pred.ValueList[0]
+            match matchArgumentsWithParameters fvArgs fvPars with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
+            
+    [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a:Nat; T(a)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {T()} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+Nat) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+Nat) {true} def pred Caller() {dec ~a:Nat; T(a)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x:+Nat) {true} def pred Caller() {T()} ;""",
+        "T() does not match T(+Nat); () does not match x:+Nat.")>]
+    [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a,b:*Nat; T(a,b)} ;""",
+        "T(*Nat, *Nat) does not match T(*Nat); no matching paramater for b:*Nat.")>]
+    [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a:*Nat; T(a)} ;""",
+        "")>]
+    [<TestMethod>]
+    member this.TestSignatureMatchingReferencesVariadicNat(varVal, var:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestSignatureMatchingReferencesVariadic00.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let fvPars = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("Caller(")) |> List.head
+            let fvArgs = pred.ValueList[0]
+            match matchArgumentsWithParameters fvArgs fvPars with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
         | None -> 
             Assert.IsTrue(false)
 
