@@ -20,7 +20,7 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x,y:tpl) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("""def cl A:B {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:NatTypo; T(a,b)} ;""",
-        "")>]
+        "T(NatTypo, NatTypo) does not match T(obj, obj); a:NatTypo is undefined and does not match x:obj.")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferences(varVal, var:string) =
         ad.Clear()

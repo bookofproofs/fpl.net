@@ -1316,12 +1316,17 @@ let matchParamsWithArguments (fvArgs:FplValue) (fvParams:FplValue) =
                 let var = a.Scope.Values |> Seq.toList |> List.head
                 if var.ValueList.Count = 1 then 
                     let cl = var.ValueList[0]
-                    let inheritanceList = cl.ValueList |> Seq.filter(fun fv -> fv.Type(SignatureType.Type)=pType) |> Seq.toList
-                    if inheritanceList.IsEmpty then
-                        let inheritanceListString = cl.ValueList |> Seq.map (fun fv -> fv.TypeId) |> String.concat ", "
-                        $"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} does not match {p.Type(SignatureType.Name)}:{pType} and its parent classes {inheritanceListString}."
-                    else
-                        ""
+                    match cl.BlockType with 
+                    | FplValueType.Class ->
+                        let inheritanceList = findClassInheritanceChain cl pType
+                        match inheritanceList with 
+                        | Some str -> 
+                            mpwa ars prs
+                        | None -> 
+                            $"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} neither matches {p.Type(SignatureType.Name)}:{pType} nor its base classes."
+                    | _ -> 
+                        // this case does not occur but for we cover it for completeness reasons
+                        $"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} is undefined and does'nt match {p.Type(SignatureType.Name)}:{pType}."
                 else
                     $"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} is undefined and does not match {p.Type(SignatureType.Name)}:{pType}."
             else
