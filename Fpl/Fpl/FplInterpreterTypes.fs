@@ -1293,7 +1293,7 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
     |> Seq.iter (fun theory -> 
         theory.Value.Scope
         // filter only blocks starting with the same FplId as the reference
-        |> Seq.filter (fun fv -> fv.Value.Type(Mixed) = name) 
+        |> Seq.filter (fun fv -> fv.Value.FplId = name) 
         |> Seq.iter (fun block -> pm.Add(block.Value)) 
     ) |> ignore
     pm |> Seq.toList
@@ -1303,7 +1303,8 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
 let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
     let parameters = fvp.Scope.Values |> Seq.toList
     let arguments = fva.ValueList |> Seq.toList
-    let stdMsg = $"{fva.Type(SignatureType.Mixed)} does not match {fvp.Type(SignatureType.Mixed)}"
+
+    let stdMsg = $"{fvp.QualifiedName}"
     let rec mpwa (args:FplValue list) (pars:FplValue list) = 
         match (args, pars) with
         | (a::ars, p::prs) -> 
@@ -1319,7 +1320,7 @@ let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
                 else
                     None
             elif pType.StartsWith("+") && aType = "???" then 
-                Some($"{stdMsg}; () does not match {p.Type(SignatureType.Name)}:{pType}.")
+                Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
             elif pType = $"+{aType}" then 
                 if ars.Length > 0 then 
                     mpwa ars pars
@@ -1336,22 +1337,31 @@ let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
                         | Some str -> 
                             mpwa ars prs
                         | None -> 
-                            Some($"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} neither matches {p.Type(SignatureType.Name)}:{pType} nor its base classes.")
+                            Some($"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes of {stdMsg}")
                     | _ -> 
                         // this case does not occur but for we cover it for completeness reasons
-                        Some($"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} is undefined and does'nt match {p.Type(SignatureType.Name)}:{pType}.")
+                        Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does'nt match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
                 else
-                    Some($"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} is undefined and does not match {p.Type(SignatureType.Name)}:{pType}.")
+                    Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
             else
-                Some($"{stdMsg}; {a.Type(SignatureType.Name)}:{aType} does not match {p.Type(SignatureType.Name)}:{pType}.")
+                Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
         | ([], p::prs) -> 
                 let pType = p.Type(SignatureType.Type)
-                Some($"{stdMsg}; missing argument for {p.Type(SignatureType.Name)}:{pType}.")
+                Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
         | (a::ars, []) -> 
                 let aType = a.Type(SignatureType.Type)
-                Some($"{stdMsg}; no matching paramater for {a.Type(SignatureType.Name)}:{aType}.")
+                Some($"no matching paramater for `{a.Type(SignatureType.Name)}:{aType}` in {stdMsg}")
         | ([],[]) -> None
     mpwa arguments parameters
+
+let rec checkCandidatesNew (toBeMatched: FplValue) (candidates: FplValue list) (accResult:string list) = 
+    match candidates with 
+    | [] -> (None, accResult)
+    | candidate::candidates -> 
+        match matchArgumentsWithParameters toBeMatched candidate with
+        | None -> (Some candidate, [])
+        | Some errMsg -> 
+            checkCandidatesNew toBeMatched candidates (accResult @ [errMsg])
 
 let rec checkCandidates (toBeMatchedTypeSignature: string) (candidates: FplValue list) accResult =
     /// Compares two strings and returns a tuple of (a,b,i) where i is None, 
@@ -1387,20 +1397,6 @@ let rec checkCandidates (toBeMatchedTypeSignature: string) (candidates: FplValue
         | (elem1, elem2, Some index) -> 
             checkCandidates toBeMatchedTypeSignature xs $"`{elem1}` with `{elem2}` at position {index}" // third reason for mismatch
         | _ -> checkCandidates toBeMatchedTypeSignature xs accResult // accumulate reasons
-
-/// Tries to match the signature of a reference FplValue with some overload. 
-/// Returns a tuple (a,b,c) where 
-/// a = a string indicating the first mismatching argument that couldn't be matched,
-/// b = a list of candidates that were identified to match the reference,
-/// c = Some or None candidate that was matched.
-let tryMatchSignatures (st:SymbolTable) (reference:FplValue) = 
-    let candidates = findCandidatesByName st (reference.Type(Mixed))
-
-    if candidates.IsEmpty then 
-        ("", candidates, None)
-    else
-        let accResult, matchedCandidate = checkCandidates (reference.Type(SignatureType.Mixed)) candidates ""
-        (accResult, candidates, matchedCandidate)
 
 /// Tries to match the signatures of two types.
 /// Returns a tuple (a,b,c) where 

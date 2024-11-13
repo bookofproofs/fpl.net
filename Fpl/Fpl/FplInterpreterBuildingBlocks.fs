@@ -913,11 +913,11 @@ let rec eval (st: SymbolTable) ast =
             es.PushEvalStack(refBlock)
             eval st fplIdentifierAst
             eval st specificationAst |> ignore
-            match tryMatchSignatures st refBlock with
-            | (_, _, Some matchedFplValue) -> 
-                refBlock.Scope.Add(refBlock.Type(Mixed),matchedFplValue)
-            | (firstFailingArgument, candidates, None) -> 
-                emitSIG04DiagnosticsForReferences refBlock candidates firstFailingArgument pos1 pos2 
+            let candidates = findCandidatesByName st refBlock.FplId
+            match emitSIG04Diagnostics refBlock candidates with
+            | Some matchedCandidate -> 
+                refBlock.Scope.Add(refBlock.Type(Mixed),matchedCandidate)
+            | _ -> ()
             es.PopEvalStack()
         | None -> 
             // if no specification was found then simply continue in the same context
@@ -1196,7 +1196,10 @@ let rec eval (st: SymbolTable) ast =
             let secondOp = fv.ValueList[currMinIndex+1]
             currentOp.ValueList.Add(firstOp)
             currentOp.ValueList.Add(secondOp)
-            emitSIG04DiagnosticsForInfixOperation currentOp firstOp secondOp (precNodeList currentOp) currentOp.NameStartPos currentOp.NameEndPos
+            match precNodeList currentOp with
+            | x::xs -> 
+                emitSIG04Diagnostics currentOp [x] |> ignore
+            | _ -> ()
             fv.ValueList.RemoveAt(currMinIndex+1) 
             fv.ValueList.RemoveAt(currMinIndex-1) 
 

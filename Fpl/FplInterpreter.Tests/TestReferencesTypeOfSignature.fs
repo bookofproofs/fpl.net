@@ -75,7 +75,7 @@ type TestReferencesTypeOfSignature() =
     [<TestMethod>]
     member this.TestPredicateReference(var, fplCode) =
         ad.Clear()
-        let filename = "TestPredicateReference"
+        let filename = "TestPredicateReferenceTypeSignature"
         let stOption = prepareFplCode(filename + ".fpl", "def pred T() { " + fplCode + " };", false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with

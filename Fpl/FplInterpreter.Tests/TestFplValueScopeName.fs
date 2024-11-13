@@ -672,7 +672,7 @@ type TestFplValueScopeName() =
     member this.TestLocalization(var, predName, trslCode) =
         ad.Clear()
         let fplCode = sprintf """loc %s := %s;""" predName trslCode
-        let filename = "TestCallConstructorParentClassName"
+        let filename = "TestLocalizationName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -701,7 +701,7 @@ type TestFplValueScopeName() =
     member this.TestTranslation(var, predName, trslCode) =
         ad.Clear()
         let fplCode = sprintf """loc %s := %s;""" predName trslCode
-        let filename = "TestCallConstructorParentClassName"
+        let filename = "TestTranslationName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -734,7 +734,7 @@ type TestFplValueScopeName() =
     member this.TestLanguage(var, predName, trslCode) =
         ad.Clear()
         let fplCode = sprintf """loc %s := %s;""" predName trslCode
-        let filename = "TestCallConstructorParentClassName"
+        let filename = "TestLanguageName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -764,7 +764,7 @@ type TestFplValueScopeName() =
     member this.TestArgument(var, argExpression, expNumber:int) =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
-        let filename = "TestCallConstructorParentClassName"
+        let filename = "TestArgumentName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with

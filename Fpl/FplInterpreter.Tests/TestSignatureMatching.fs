@@ -8,18 +8,18 @@ open CommonTestHelpers
 type TestSignatureMatching() =
 
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj ~c:ind; T(a,b,c)} ;""",
-        "T(obj, obj, ind) does not match T(obj, obj); no matching paramater for c:ind.")>]
+        "no matching paramater for `c:ind` in TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
-        "T(obj, obj) does not match T(Nat, Nat); a:obj does not match x:Nat.")>]
+        "`a:obj` does not match `x:Nat` in TestSignatureMatchingReferencesPlain.T(Nat, Nat)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
-        "T(Nat, Nat) does not match T(obj, obj); a:Nat is undefined and does not match x:obj.")>]
+        "`a:Nat` is undefined and does not match `x:obj` in TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesPlain(varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
-        let filename = "TestSignatureMatchingReferencesPlain.fpl"
+        let filename = "TestSignatureMatchingReferencesPlain"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -37,24 +37,24 @@ type TestSignatureMatching() =
             Assert.IsTrue(false)
 
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj ~c:ind; T(a,b,c)} ;""",
-        "T(obj, obj, ind) does not match T(obj, obj); no matching paramater for c:ind.")>]
+        "no matching paramater for `c:ind` in TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
-        "T(obj, obj) does not match T(Nat, Nat); a:obj does not match x:Nat.")>]
+        "`a:obj` does not match `x:Nat` in TestSignatureMatchingReferencesClasses.T(Nat, Nat)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
-        "T(Nat, Nat) does not match T(obj, obj); a:Nat is undefined and does not match x:obj.")>]
+        "`a:Nat` is undefined and does not match `x:obj` in TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
     [<DataRow("""def cl Nat:obj {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:tpl) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("""def cl A:B {intr} def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:NatTypo; T(a,b)} ;""",
-        "T(NatTypo, NatTypo) does not match T(obj, obj); a:NatTypo is undefined and does not match x:obj.")>]
+        "`a:NatTypo` is undefined and does not match `x:obj` in TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesClasses(varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
-        let filename = "TestSignatureMatchingReferencesClasses.fpl"
+        let filename = "TestSignatureMatchingReferencesClasses"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -82,16 +82,16 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x:+obj) {true} def pred Caller() {dec ~a:obj; T(a)} ;""",
         "")>]
     [<DataRow("""def pred T (x:+obj) {true} def pred Caller() {T()} ;""",
-        "T() does not match T(+obj); () does not match x:+obj.")>]
+        "() does not match `x:+obj` in TestSignatureMatchingReferencesVariadicObj.T(+obj)")>]
     [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a,b:*obj; T(a,b)} ;""",
-        "T(*obj, *obj) does not match T(*obj); no matching paramater for b:*obj.")>]
+        "no matching paramater for `b:*obj` in TestSignatureMatchingReferencesVariadicObj.T(*obj)")>]
     [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a:*obj; T(a)} ;""",
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicObj(varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
-        let filename = "TestSignatureMatchingReferencesVariadic00.fpl"
+        let filename = "TestSignatureMatchingReferencesVariadicObj"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -119,16 +119,16 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x:+ind) {true} def pred Caller() {dec ~a:ind; T(a)} ;""",
         "")>]
     [<DataRow("""def pred T (x:+ind) {true} def pred Caller() {T()} ;""",
-        "T() does not match T(+ind); () does not match x:+ind.")>]
+        "() does not match `x:+ind` in TestSignatureMatchingReferencesVariadicInd.T(+ind)")>]
     [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a,b:*ind; T(a,b)} ;""",
-        "T(*ind, *ind) does not match T(*ind); no matching paramater for b:*ind.")>]
+        "no matching paramater for `b:*ind` in TestSignatureMatchingReferencesVariadicInd.T(*ind)")>]
     [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a:*ind; T(a)} ;""",
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicInd(varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
-        let filename = "TestSignatureMatchingReferencesVariadic00.fpl"
+        let filename = "TestSignatureMatchingReferencesVariadicInd"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -156,16 +156,16 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x:+pred) {true} def pred Caller() {dec ~a:pred; T(a)} ;""",
         "")>]
     [<DataRow("""def pred T (x:+pred) {true} def pred Caller() {T()} ;""",
-        "T() does not match T(+pred); () does not match x:+pred.")>]
+        "() does not match `x:+pred` in TestSignatureMatchingReferencesVariadicPred.T(+pred)")>]
     [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a,b:*pred; T(a,b)} ;""",
-        "T(*pred, *pred) does not match T(*pred); no matching paramater for b:*pred.")>]
+        "no matching paramater for `b:*pred` in TestSignatureMatchingReferencesVariadicPred.T(*pred)")>]
     [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a:*pred; T(a)} ;""",
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicPred(varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
-        let filename = "TestSignatureMatchingReferencesVariadic00.fpl"
+        let filename = "TestSignatureMatchingReferencesVariadicPred"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -193,16 +193,16 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x:+func) {true} def pred Caller() {dec ~a:func; T(a)} ;""",
         "")>]
     [<DataRow("""def pred T (x:+func) {true} def pred Caller() {T()} ;""",
-        "T() does not match T(+func); () does not match x:+func.")>]
+        "() does not match `x:+func` in TestSignatureMatchingReferencesVariadicFunc.T(+func)")>]
     [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a,b:*func; T(a,b)} ;""",
-        "T(*func, *func) does not match T(*func); no matching paramater for b:*func.")>]
+        "no matching paramater for `b:*func` in TestSignatureMatchingReferencesVariadicFunc.T(*func)")>]
     [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a:*func; T(a)} ;""",
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicFunc(varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
-        let filename = "TestSignatureMatchingReferencesVariadic00.fpl"
+        let filename = "TestSignatureMatchingReferencesVariadicFunc"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -230,16 +230,16 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x:+Nat) {true} def pred Caller() {dec ~a:Nat; T(a)} ;""",
         "")>]
     [<DataRow("""def pred T (x:+Nat) {true} def pred Caller() {T()} ;""",
-        "T() does not match T(+Nat); () does not match x:+Nat.")>]
+        "() does not match `x:+Nat` in TestSignatureMatchingReferencesVariadicNat.T(+Nat)")>]
     [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a,b:*Nat; T(a,b)} ;""",
-        "T(*Nat, *Nat) does not match T(*Nat); no matching paramater for b:*Nat.")>]
+        "no matching paramater for `b:*Nat` in TestSignatureMatchingReferencesVariadicNat.T(*Nat)")>]
     [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a:*Nat; T(a)} ;""",
         "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesVariadicNat(varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
-        let filename = "TestSignatureMatchingReferencesVariadic00.fpl"
+        let filename = "TestSignatureMatchingReferencesVariadicNat"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -288,7 +288,7 @@ type TestSignatureMatching() =
     member this.TestBaseClassPath(varVal:string, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
-        let filename = "TestBaseClassPath.fpl"
+        let filename = "TestBaseClassPath"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with

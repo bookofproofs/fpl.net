@@ -541,56 +541,22 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
             ad.AddDiagnostic diagnostic
     | _ -> ()
 
-let emitSIG04DiagnosticsForReferences (fplValue: FplValue) (candidates: FplValue list) firstFailingArgument pos1 pos2 =
-    let candidateNames =
-        candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
-
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = SIG04(fplValue.Type(SignatureType.Type), candidateNames, firstFailingArgument)
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-
-let emitSIG04DiagnosticsForInfixOperation (infixOp: FplValue) (firstOp: FplValue) (secondOp: FplValue) (candidates: FplValue list) pos1 pos2 =
-    let candidateNames =
-        candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
-
-    let optFirstFailingArgument = 
-        if candidates.IsEmpty then 
-            None
-        else
-            let firstActual = firstOp.Type(SignatureType.Type)
-            let paramsOfOperand = candidates.Head.Scope.Values |> Seq.toList
-            let firstExpected = paramsOfOperand[0].Type(SignatureType.Type)
-            if firstActual <> firstExpected then
-                Some(firstActual)
-            else
-                let secondActual = secondOp.Type(SignatureType.Type)
-                let secondExpected = paramsOfOperand[1].Type(SignatureType.Type)
-                if secondActual <> secondExpected then
-                    Some(secondActual)
-                else    
-                    None
-    match optFirstFailingArgument with 
-    | Some firstFailingArgument -> 
+let emitSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
+    match checkCandidatesNew calling candidates [] with
+    | (Some candidate,_) -> Some candidate // no error occured
+    | (None, errList) -> 
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
                 Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
                 Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = SIG04(infixOp.Type(SignatureType.Type), candidateNames, firstFailingArgument)
+                Diagnostic.StartPos = calling.NameStartPos
+                Diagnostic.EndPos = calling.NameEndPos
+                Diagnostic.Code = SIG04(calling.Type(SignatureType.Mixed), candidates.Length, errList)
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic
-    | _ -> ()
+        None
 
 /// Emits SIG04 diagnostics. If a single candidate was found, sets the fplValue's pointer representation to this candidate.
 let emitSIG04DiagnosticsForTypes (st:SymbolTable) name (fplValue:FplValue) pos1 pos2 =
@@ -599,9 +565,7 @@ let emitSIG04DiagnosticsForTypes (st:SymbolTable) name (fplValue:FplValue) pos1 
         match fplValue.BlockType with
         | FplValueType.Reference -> fplValue.Scope.Add(name, matchedFplValue)
         | _ -> fplValue.ValueList.Add(matchedFplValue)
-    | (firstFailingArgument, candidates, None) -> 
-        let candidateNames =
-            candidates |> List.map (fun fv -> fv.QualifiedName) |> String.concat ", "
+    | (errList, candidates, None) -> 
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
@@ -609,7 +573,7 @@ let emitSIG04DiagnosticsForTypes (st:SymbolTable) name (fplValue:FplValue) pos1 
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = pos1
                 Diagnostic.EndPos = pos2
-                Diagnostic.Code = SIG04(name, candidateNames, firstFailingArgument)
+                Diagnostic.Code = SIG04(name, candidates.Length, [errList])
                 Diagnostic.Alternatives = None 
             }
         ad.AddDiagnostic diagnostic

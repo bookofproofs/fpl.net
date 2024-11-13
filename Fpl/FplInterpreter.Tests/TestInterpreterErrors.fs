@@ -659,14 +659,15 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =
-        let code = SIG04 ("","","")
+        let code = SIG04 ("",0,[""])
         ad.Clear()
         runTestHelper "TestSIG04.fpl" fplCode code expected
 
-    [<DataRow("""def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A(x:ind,y:obj) { (x = y) };""", "No overload matching `=(ind, obj)`, failed to match `ind`, candidates were: TestSIG04MsgSpecificity.Eq(obj, obj)")>]
+    [<DataRow("""def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 
+        "No overload matching `=(ind, obj)`. `x:ind` does not match `x:obj` in TestSIG04MsgSpecificity.Eq(obj, obj).")>]
     [<TestMethod>]
     member this.TestSIG04MsgSpecificity(fplCode:string, (expected:string)) =
-        let code = SIG04 ("","","")
+        let code = SIG04 ("",0,[""])
         prepareFplCode ("TestSIG04MsgSpecificity.fpl", fplCode, false) |> ignore
         checkForUnexpectedErrors code
         let result = filterByErrorCode ad code.Code

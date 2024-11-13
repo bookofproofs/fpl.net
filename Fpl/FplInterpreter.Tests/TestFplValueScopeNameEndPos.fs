@@ -540,7 +540,7 @@ type TestFplValueScopeNameEndPos() =
     member this.TestPredicate(var, varVal) =
         ad.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
-        let filename = "TestPredicate.fpl"
+        let filename = "TestPredicateNameEndPos.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with

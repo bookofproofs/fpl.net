@@ -43,7 +43,7 @@ type TestExpressionEvaluation() =
     [<TestMethod>]
     member this.TestExpressionEvaluationConstants(fplCode, expected: string) =
         ad.Clear()
-        let filename = "TestExpressionEvaluationConstants.fpl"
+        let filename = "TestExpressionEvaluationConstants"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
 
@@ -76,7 +76,7 @@ type TestExpressionEvaluation() =
     [<TestMethod>]
     member this.TestExpressionEvaluationConjunction(fplCode, expected: string) =
         ad.Clear()
-        let filename = "TestExpressionEvaluationConjunction.fpl"
+        let filename = "TestExpressionEvaluationConjunction"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
 
@@ -109,7 +109,7 @@ type TestExpressionEvaluation() =
     [<TestMethod>]
     member this.TestExpressionEvaluationDisjunction(fplCode, expected: string) =
         ad.Clear()
-        let filename = "TestExpressionEvaluationDisjunction.fpl"
+        let filename = "TestExpressionEvaluationDisjunction"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
 
@@ -146,7 +146,7 @@ type TestExpressionEvaluation() =
     [<TestMethod>]
     member this.TestExpressionEvaluationExclusiveOr(fplCode, expected: string) =
         ad.Clear()
-        let filename = "TestExpressionEvaluationExclusiveOr.fpl"
+        let filename = "TestExpressionEvaluationExclusiveOr"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
 
@@ -176,7 +176,7 @@ type TestExpressionEvaluation() =
     [<TestMethod>]
     member this.TestExpressionEvaluationImplication(fplCode, expected: string) =
         ad.Clear()
-        let filename = "TestExpressionEvaluationImplication.fpl"
+        let filename = "TestExpressionEvaluationImplication"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
 
@@ -206,7 +206,7 @@ type TestExpressionEvaluation() =
     [<TestMethod>]
     member this.TestExpressionEvaluationEquivalence(fplCode, expected: string) =
         ad.Clear()
-        let filename = "TestExpressionEvaluationEquivalence.fpl"
+        let filename = "TestExpressionEvaluationEquivalence"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
 
