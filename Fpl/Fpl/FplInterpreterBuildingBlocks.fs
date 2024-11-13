@@ -716,7 +716,13 @@ let rec eval (st: SymbolTable) ast =
             
         | _ -> ()
         if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
-            emitSIG04DiagnosticsForTypes st identifier fv pos1 pos2
+            let candidates = findCandidatesByName st identifier
+            match emitSIG04Diagnostics fv candidates with
+            | Some candidate -> 
+                match fv.BlockType with
+                | FplValueType.Reference -> fv.Scope.Add(identifier, candidate)
+                | _ -> fv.ValueList.Add(candidate)
+            | _ -> ()
         
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->

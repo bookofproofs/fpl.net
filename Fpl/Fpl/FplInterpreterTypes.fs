@@ -1354,77 +1354,16 @@ let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
         | ([],[]) -> None
     mpwa arguments parameters
 
-let rec checkCandidatesNew (toBeMatched: FplValue) (candidates: FplValue list) (accResult:string list) = 
+/// Tries to match the signatures of toBeMatched with the signatures of all candidates and accoumulates any 
+/// error messages in accResultList.
+let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (accResultList:string list) = 
     match candidates with 
-    | [] -> (None, accResult)
+    | [] -> (None, accResultList)
     | candidate::candidates -> 
         match matchArgumentsWithParameters toBeMatched candidate with
         | None -> (Some candidate, [])
         | Some errMsg -> 
-            checkCandidatesNew toBeMatched candidates (accResult @ [errMsg])
+            checkCandidates toBeMatched candidates (accResultList @ [errMsg])
 
-let rec checkCandidates (toBeMatchedTypeSignature: string) (candidates: FplValue list) accResult =
-    /// Compares two strings and returns a tuple of (a,b,i) where i is None, 
-    /// if both lists are identical. If i = Some index, then a and b contain strings that are not equal at that index.
-    let findFirstMismatchPosition (str1:string) (str2:string) =
-        if str1.Length > str2.Length then
-            (str1[str1.Length-1].ToString(),"",Some(str1.Length-1))
-        elif str1.Length < str2.Length then 
-            ("", str2[str2.Length-1].ToString(),Some(str2.Length-1))
-        else
-            let rec loop i =
-                if i >= str1.Length || i >= str2.Length then
-                    None
-                elif str1.[i] <> str2.[i] then
-                    Some i
-                else
-                    loop (i + 1)
-            match loop 0 with
-            | Some ind -> 
-                (str1[ind].ToString(),str2[ind].ToString(),Some(ind))
-            | None -> ("","",None)
 
-    // matches the TypeSignature of every candidate with a toBeMatchedTypeSignature
-    match candidates with
-    | [] -> (accResult, None) // all candidates mismatch toBeMatchedTypeSignature
-    | x :: xs ->
-        match findFirstMismatchPosition toBeMatchedTypeSignature (x.Type(SignatureType.Mixed)) with
-        | ("", "", None) -> (accResult, Some x) // there is a candidate that matches toBeMatchedTypeSignature
-        | ("", elem2, Some index) -> 
-            checkCandidates toBeMatchedTypeSignature xs $"missing token `{elem2}` after matching {index}" // first reason for mismatch
-        | (elem1, "", Some index) -> 
-            checkCandidates toBeMatchedTypeSignature xs $"superfluous token `{elem1}` after matching {index}" // second reason for mismatch
-        | (elem1, elem2, Some index) -> 
-            checkCandidates toBeMatchedTypeSignature xs $"`{elem1}` with `{elem2}` at position {index}" // third reason for mismatch
-        | _ -> checkCandidates toBeMatchedTypeSignature xs accResult // accumulate reasons
 
-/// Tries to match the signatures of two types.
-/// Returns a tuple (a,b,c) where 
-/// a = a string indicating the first mismatching argument that couldn't be matched,
-/// b = a list of candidates that were identified to match the reference,
-/// c = Some or None candidate that was matched.
-let tryMatchTypes (st:SymbolTable) (typeFplValue:FplValue) name = 
-    let candidates = findCandidatesByName st name
-
-    let stripFunctionalTermTypeSignature (typeFplValue:FplValue) = 
-        match typeFplValue.BlockType with
-        | FplValueType.MandatoryFunctionalTerm  
-        | FplValueType.OptionalFunctionalTerm  
-        | FplValueType.FunctionalTerm -> 
-            let mapping = 
-                if typeFplValue.ValueList.Count>0 then
-                    Some(typeFplValue.ValueList[0])
-                else
-                    None
-            match mapping with
-            | Some map -> map.Type(SignatureType.Type)
-            | None -> typeFplValue.Type(SignatureType.Type)
-        | _ -> 
-            typeFplValue.Type(SignatureType.Type)
-
-    let toBeCheckedSignature = stripFunctionalTermTypeSignature typeFplValue
-    if candidates.IsEmpty then 
-        ("", candidates, None)
-    else
-        let accResult, matchedCandidate = checkCandidates toBeCheckedSignature candidates ""
-        (accResult, candidates, matchedCandidate)

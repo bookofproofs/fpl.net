@@ -542,7 +542,7 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
     | _ -> ()
 
 let emitSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
-    match checkCandidatesNew calling candidates [] with
+    match checkCandidates calling candidates [] with
     | (Some candidate,_) -> Some candidate // no error occured
     | (None, errList) -> 
         let diagnostic =
@@ -557,26 +557,6 @@ let emitSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
             }
         ad.AddDiagnostic diagnostic
         None
-
-/// Emits SIG04 diagnostics. If a single candidate was found, sets the fplValue's pointer representation to this candidate.
-let emitSIG04DiagnosticsForTypes (st:SymbolTable) name (fplValue:FplValue) pos1 pos2 =
-    match tryMatchTypes st fplValue name with
-    | (_, candidates, Some matchedFplValue) -> 
-        match fplValue.BlockType with
-        | FplValueType.Reference -> fplValue.Scope.Add(name, matchedFplValue)
-        | _ -> fplValue.ValueList.Add(matchedFplValue)
-    | (errList, candidates, None) -> 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = SIG04(name, candidates.Length, [errList])
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
 
 let rec blocktIsProof (fplValue: FplValue) =
     if FplValue.IsProof(fplValue) then
