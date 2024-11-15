@@ -922,7 +922,7 @@ let rec eval (st: SymbolTable) ast =
             let candidates = findCandidatesByName st refBlock.FplId
             match emitSIG04Diagnostics refBlock candidates with
             | Some matchedCandidate -> 
-                refBlock.Scope.Add(refBlock.Type(Mixed),matchedCandidate)
+                refBlock.Scope.Add(refBlock.FplId,matchedCandidate)
             | _ -> ()
             es.PopEvalStack()
         | None -> 

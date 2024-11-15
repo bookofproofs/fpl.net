@@ -15,11 +15,67 @@ type TestSignatureMatching() =
         "`a:obj` does not match `x:Nat` in TestSignatureMatchingReferencesPlain.T(Nat, Nat)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
         "`a:Nat` is undefined and does not match `x:obj` in TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
+    [<DataRow("""def pred T () {true} def pred Caller() {T()} ;""",
+        "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesPlain(varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesPlain"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let fvPars = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("Caller(")) |> List.head
+            let fvArgs = pred.ValueList[0]
+            match matchArgumentsWithParameters fvArgs fvPars with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("""def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:pred ~c:ind; T(a,b,c)} ;""",
+        "no matching paramater for `c:ind` in TestSignatureMatchingReferencesPred.T(pred, pred)")>]
+    [<DataRow("""def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
+        "")>]
+    [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
+        "`a:pred` does not match `x:Nat` in TestSignatureMatchingReferencesPred.T(Nat, Nat)")>]
+    [<DataRow("""def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:Nat; T(a,b)} ;""",
+        "`a:Nat` is undefined and does not match `x:pred` in TestSignatureMatchingReferencesPred.T(pred, pred)")>]
+    [<TestMethod>]
+    member this.TestSignatureMatchingReferencesPred(varVal, var:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestSignatureMatchingReferencesPred"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let fvPars = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("Caller(")) |> List.head
+            let fvArgs = pred.ValueList[0]
+            match matchArgumentsWithParameters fvArgs fvPars with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("""def pred T (x,y:pred) {true} def pred T3() {true} def pred Caller() {T(T3(),T3())} ;""",
+        "")>]
+    [<DataRow("""def pred T (x,y:pred) {true} def pred T1() {true} def pred T2(x:obj) {true} def pred Caller() {dec ~a:obj; T(T1(),T2(a))} ;""",
+        "")>]
+    [<TestMethod>]
+    member this.TestSignatureMatchingReferencesPredNested(varVal, var:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestSignatureMatchingReferencesPredNested"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with

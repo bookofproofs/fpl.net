@@ -1348,6 +1348,12 @@ let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
         | ([], p::prs) -> 
                 let pType = p.Type(SignatureType.Type)
                 Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
+        | (a::[], []) -> 
+            if a.FplId = "???" then 
+                None
+            else
+                let aType = a.Type(SignatureType.Type)
+                Some($"no matching paramater for `{a.Type(SignatureType.Name)}:{aType}` in {stdMsg}")
         | (a::ars, []) -> 
                 let aType = a.Type(SignatureType.Type)
                 Some($"no matching paramater for `{a.Type(SignatureType.Name)}:{aType}` in {stdMsg}")
