@@ -622,9 +622,13 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateWithOptSpecificationAst
         es.PopEvalStack()
         st.EvalPop()
-    | Ast.Return((pos1, pos2), ast1) ->
+    | Ast.Return((pos1, pos2), returneeAst) ->
         st.EvalPush("Return")
-        eval st ast1
+        let fv = es.PeekEvalStack()
+        let returnee = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv) 
+        es.PushEvalStack(returnee)
+        eval st returneeAst
+        es.PopEvalStack() // todo check type of function and find an appropriate way to embed the result in the symbol table.
         st.EvalPop()
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
         st.EvalPush("AssumeArgument")

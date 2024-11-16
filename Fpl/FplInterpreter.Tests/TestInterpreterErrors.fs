@@ -271,7 +271,7 @@ type TestInterpreterErrors() =
     [<DataRow("proof TestId$1 {1. |- trivial} ;", 0)>]
     [<DataRow("proof TestId$1$2 {1. |- trivial} ;", 0)>]
     [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", 0)>]
-    [<DataRow("def func Sum(list:* Nat)->Nat {intr} def func Sum2(list:* Nat)->Nat {intr};", 0)>]
+    [<DataRow("def func Sum(list:* Nat)->Nat {dec ~result: Nat; return result} def func Sum2(list:* Nat)->Nat {dec ~result: Nat; return result};", 0)>]
     [<DataRow("uses Fpl.PeanoArithmetics ;", 0)>]
     [<TestMethod>]
     member this.TestID001(fplCode:string, expected:int) =
