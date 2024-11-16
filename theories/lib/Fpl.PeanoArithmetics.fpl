@@ -10,9 +10,35 @@ def class Zero: obj
     intr
 }
 
+// definition of a new mathematical object (natural number)
 def class Nat: obj
 {
-    intr
+    ctor Nat(x: @Digits)
+    {
+        dec
+            cases
+            (
+                | (x = 0) : self := Zero() 
+                | (x = 1) : self := Succ(Zero()) 
+                | (x = 2) : self := Succ(Succ(Zero())) 
+                ? self := Succ(delegate.Decrement(x))  
+            )
+        ;
+        self
+    }
+
+    ctor Nat(x: Int)
+    {
+        dec
+            cases
+            (
+                | IsGreaterOrEqual(x.RightMember(), x.LeftMember()): self:=x.RightMember()
+                ? self:=undefined
+            )
+            base.obj()
+        ;
+        self
+    }
 }
 // definition of a functional term denoting the successor of a natural number
 def func Succ(n: Nat) -> Nat
@@ -73,36 +99,7 @@ axiom CompleteInduction()
 }
 
 
-// definition of a new mathematical object (natural number)
-def class Nat: obj
-{
-    ctor Nat(x: @Digits)
-    {
-        dec
-            cases
-            (
-                | (x = 0) : self := Zero() 
-                | (x = 1) : self := Succ(Zero()) 
-                | (x = 2) : self := Succ(Succ(Zero())) 
-                ? self := Succ(delegate.Decrement(x))  
-            )
-        ;
-        self
-    }
 
-    ctor Nat(x: Int)
-    {
-        dec
-            cases
-            (
-                | IsGreaterOrEqual(x.RightMember(), x.LeftMember()): self:=x.RightMember()
-                ? self:=undefined
-            )
-            base.obj()
-        ;
-        self
-    }
-}
 
 def pred IsGreaterOrEqual(n,m: Nat)
 {
