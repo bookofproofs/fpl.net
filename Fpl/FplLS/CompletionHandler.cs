@@ -1,4 +1,5 @@
 ﻿using FplLS;
+using OmniSharp.Extensions.JsonRpc;
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
@@ -29,15 +30,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.  
 */
 
-class CompletionHandler : ICompletionHandler
+class CompletionHandler: IJsonRpcHandler 
 {
 
     private readonly ILanguageServer _languageServer;
     private readonly BufferManager _bufferManager;
     private readonly FplAutoCompleteService _fplAutoComplService;
 
-    private readonly DocumentSelector _documentSelector = new DocumentSelector(
-        new DocumentFilter()
+    private readonly TextDocumentSelector _documentSelector = new TextDocumentSelector(
+        new TextDocumentFilter()
         {
             Pattern = "**/*.fpl"
         }
@@ -65,7 +66,7 @@ class CompletionHandler : ICompletionHandler
     public async Task<CompletionList> Handle(CompletionParams request, CancellationToken cancellationToken)
     {
         FplLsTraceLogger.LogMsg(_languageServer, "Task<CompletionList>", "CompletionHandler.Handle");
-        var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.AbsoluteUri);
+        var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.GetFileSystemPath());
         var buffer = _bufferManager.GetBuffer(uri);
         if (buffer == null)
         {

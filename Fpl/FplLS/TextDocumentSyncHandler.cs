@@ -1,13 +1,14 @@
 ﻿using System.Text;
-using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
+using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol;
-using OmniSharp.Extensions.Embedded.MediatR;
+using MediatR;
 using System;
 using static ErrDiagnostics;
 using static FplInterpreterTypes;
+using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 
 
 namespace FplLS
@@ -41,13 +42,13 @@ namespace FplLS
         private readonly ILanguageServer _languageServer = router;
         private readonly BufferManager _bufferManager = bufferManager;
 
-        private readonly DocumentSelector _documentSelector = new(
-            new DocumentFilter()
+        private readonly TextDocumentSelector _documentSelector = new(
+            new TextDocumentFilter()
             {
                 Pattern = "**/*.fpl"
             }
         );
-        private SynchronizationCapability? _capability;
+        private TextSynchronizationCapability? _capability;
 
         public TextDocumentSyncKind Change { get; } = TextDocumentSyncKind.Full;
 
@@ -60,9 +61,9 @@ namespace FplLS
             };
         }
 
-        public TextDocumentAttributes GetTextDocumentAttributes(Uri uri)
+        public TextDocumentAttributes GetTextDocumentAttributes(DocumentUri uri)
         {
-            FplLsTraceLogger.LogMsg(_languageServer, $"{uri.AbsolutePath}", "TextDocumentSyncHandler.GetTextDocumentAttributes");
+            FplLsTraceLogger.LogMsg(_languageServer, $"{uri.GetFileSystemPath()}", "TextDocumentSyncHandler.GetTextDocumentAttributes");
             return new TextDocumentAttributes(uri, "fpl");
         }
 
@@ -72,7 +73,7 @@ namespace FplLS
             FplLsTraceLogger.LogMsg(_languageServer, $"{cancellationToken}", "TextDocumentSyncHandler.Handle");
             try
             {
-                var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.AbsoluteUri);
+                var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.GetFileSystemPath());
                 var text = request.ContentChanges.FirstOrDefault()?.Text;
 
                 FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer", $"TextDocumentSyncHandler.Handle {uri}");
@@ -93,7 +94,7 @@ namespace FplLS
             FplLsTraceLogger.LogMsg(_languageServer, "x(DidOpenTextDocumentParams)", "TextDocumentSyncHandler.Handle");
             try
             {
-                var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.AbsoluteUri);
+                var uri = PathEquivalentUri.EscapedUri(request.TextDocument.Uri.GetFileSystemPath());
                 FplLsTraceLogger.LogMsg(_languageServer, $"updating buffer (DidOpenTextDocumentParams)", $"TextDocumentSyncHandler.Handle {uri}");
                 _bufferManager.UpdateBuffer(uri, new StringBuilder(request.TextDocument.Text));
                 FplLsTraceLogger.LogMsg(_languageServer, $"buffer updated (DidOpenTextDocumentParams)", "TextDocumentSyncHandler.Handle");
@@ -117,13 +118,13 @@ namespace FplLS
             return Unit.Task;
         }
 
-        public void SetCapability(SynchronizationCapability capability)
+        public void SetCapability(TextSynchronizationCapability capability)
         {
             FplLsTraceLogger.LogMsg(_languageServer, $"", "TextDocumentSyncHandler.SetCapability");
             _capability = capability;
         }
 
-        TextDocumentRegistrationOptions IRegistration<TextDocumentRegistrationOptions>.GetRegistrationOptions()
+        TextDocumentChangeRegistrationOptions IRegistration<TextDocumentChangeRegistrationOptions,TextSynchronizationCapability>.GetRegistrationOptions(TextSynchronizationCapability capability, ClientCapabilities clientCapabilities)
         {
             return new TextDocumentChangeRegistrationOptions()
             {
@@ -132,9 +133,25 @@ namespace FplLS
             };
         }
 
-        TextDocumentSaveRegistrationOptions IRegistration<TextDocumentSaveRegistrationOptions>.GetRegistrationOptions()
+        TextDocumentSaveRegistrationOptions IRegistration<TextDocumentSaveRegistrationOptions, TextSynchronizationCapability>.GetRegistrationOptions(TextSynchronizationCapability capability, ClientCapabilities clientCapabilities)
         {
             return new TextDocumentSaveRegistrationOptions()
+            {
+                DocumentSelector = _documentSelector
+            };
+        }
+
+        TextDocumentOpenRegistrationOptions IRegistration<TextDocumentOpenRegistrationOptions, TextSynchronizationCapability>.GetRegistrationOptions(TextSynchronizationCapability capability, ClientCapabilities clientCapabilities)
+        {
+            return new TextDocumentOpenRegistrationOptions()
+            {
+                DocumentSelector = _documentSelector
+            };
+        }
+
+        TextDocumentCloseRegistrationOptions IRegistration<TextDocumentCloseRegistrationOptions, TextSynchronizationCapability>.GetRegistrationOptions(TextSynchronizationCapability capability, ClientCapabilities clientCapabilities)
+        {
+            return new TextDocumentCloseRegistrationOptions()
             {
                 DocumentSelector = _documentSelector
             };

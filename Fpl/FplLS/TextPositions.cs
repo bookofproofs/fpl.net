@@ -41,7 +41,7 @@ namespace FplLS
         /// <summary>
         ///     The absolution starting position, within the text, of each line.
         /// </summary>
-        readonly long[] _lineStartPositions;
+        readonly int[] _lineStartPositions;
 
         /// <summary>
         ///     Create a new <see cref="TextPositions"/> for the specified text.
@@ -65,7 +65,7 @@ namespace FplLS
         /// <summary>
         ///     The absolution starting position, within the text, of each line.
         /// </summary>
-        public IReadOnlyList<long> LineStartPositions => _lineStartPositions;
+        public IReadOnlyList<int> LineStartPositions => _lineStartPositions;
 
         /// <summary>
         ///     Convert a <see cref="Position"/> to an absolute position within the text.
@@ -119,7 +119,7 @@ namespace FplLS
         /// <returns>
         ///     The equivalent <see cref="Position"/> within the text.
         /// </returns>
-        public UsingOmExtLSPM.Position GetPosition(long absolutePosition)
+        public UsingOmExtLSPM.Position GetPosition(int absolutePosition)
         {
             int targetLine = Array.BinarySearch(_lineStartPositions, absolutePosition);
             if (targetLine < 0)
@@ -144,7 +144,7 @@ namespace FplLS
         /// <returns>
         ///     The <see cref="Range"/>.
         /// </returns>
-        public UsingOmExtLSPM.Range GetRange(long absoluteStartPosition, long absoluteEndPosition)
+        public UsingOmExtLSPM.Range GetRange(int absoluteStartPosition, int absoluteEndPosition)
         {
             return new UsingOmExtLSPM.Range(
                 start: GetPosition(absoluteStartPosition),
@@ -201,12 +201,12 @@ namespace FplLS
         /// <returns>
         ///     An array of line starting positions.
         /// </returns>
-        long[] CalculateLineStartPositions(string text)
+        int[] CalculateLineStartPositions(string text)
         {
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
 
-            List<long> lineStarts = new List<long>();
+            List<int> lineStarts = new List<int>();
 
             int currentPosition = 0;
             int currentLineStart = 0;
