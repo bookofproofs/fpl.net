@@ -1261,8 +1261,8 @@ let rec eval (st: SymbolTable) ast =
                     es.PushEvalStack(subNode)
                     subNode.Parent <- rb.Parent
                     subNode.NameEndPos <- rb.NameEndPos
-                    if refBlock.Scope.ContainsKey(".") then 
-                        subNode.Scope.Add(".",refBlock.Scope["."])
+                    if rb.Scope.ContainsKey(".") then 
+                        subNode.Scope.Add(".",rb.Scope["."])
                     // prevent recursive clearing of the subNode
                     rb.ValueList.Clear() 
                     rb.Scope.Clear()

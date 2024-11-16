@@ -679,6 +679,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T (x,y,z:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
     [<DataRow("""def pred T (x,y:obj,z:ind) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 0)>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
+    [<DataRow("""def class Nat: obj {ctor Nat(){dec self:=x.R(); self}};""", 1)>]
     [<DataRow("uses Fpl.PeanoArithmetics ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =

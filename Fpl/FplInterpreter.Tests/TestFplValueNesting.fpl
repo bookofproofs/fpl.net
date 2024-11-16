@@ -1,4 +1,13 @@
-uses Fpl.PeanoArithmetics
+def class Nat: obj
+{
+    ctor Nat()
+    {
+        dec
+            self:=x.RightMember()
+        ;
+        self
+    }
+}
 
 loc (x + y) :=
     !tex: x "+" y 
