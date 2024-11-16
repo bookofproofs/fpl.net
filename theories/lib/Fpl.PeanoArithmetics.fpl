@@ -10,6 +10,10 @@ def class Zero: obj
     intr
 }
 
+def class Nat: obj
+{
+    intr
+}
 // definition of a functional term denoting the successor of a natural number
 def func Succ(n: Nat) -> Nat
 {

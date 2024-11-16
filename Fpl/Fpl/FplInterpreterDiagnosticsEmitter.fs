@@ -541,6 +541,19 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
             ad.AddDiagnostic diagnostic
     | _ -> ()
 
+let emitSIG04DiagnosticsForTypes identifier pos1 pos2 =
+    let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = SIG04(identifier, 0, [""])
+                Diagnostic.Alternatives = None 
+            }
+    ad.AddDiagnostic diagnostic
+
 let emitSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
     match checkCandidates calling candidates [] with
     | (Some candidate,_) -> Some candidate // no error occured

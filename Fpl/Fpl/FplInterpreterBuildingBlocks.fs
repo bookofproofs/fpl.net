@@ -700,11 +700,9 @@ let rec eval (st: SymbolTable) ast =
                 checkID008Diagnostics fv pos1 pos2
                 checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
         | FplValueType.VariadicVariableMany -> 
-            let sid = $"*{identifier}"
-            fv.TypeId <- sid
+            fv.TypeId <- $"*{identifier}"
         | FplValueType.VariadicVariableMany1 -> 
-            let sid = $"+{identifier}"
-            fv.TypeId <- sid
+            fv.TypeId <- $"+{identifier}"
         | FplValueType.Variable -> 
             fv.TypeId <- identifier
         | FplValueType.Mapping -> 
@@ -717,12 +715,18 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
             let candidates = findCandidatesByName st identifier
-            match emitSIG04Diagnostics fv candidates with
-            | Some candidate -> 
-                match fv.BlockType with
-                | FplValueType.Reference -> fv.Scope.Add(identifier, candidate)
-                | _ -> fv.ValueList.Add(candidate)
-            | _ -> ()
+            match (fv.BlockType, candidates.Length) with
+            | (FplValueType.Variable, 0)
+            | (FplValueType.VariadicVariableMany, 0)
+            | (FplValueType.VariadicVariableMany1, 0) -> 
+                emitSIG04DiagnosticsForTypes identifier pos1 pos2
+            | _ -> 
+                match emitSIG04Diagnostics fv candidates with
+                | Some candidate -> 
+                    match fv.BlockType with
+                    | FplValueType.Reference -> fv.Scope.Add(identifier, candidate)
+                    | _ -> fv.ValueList.Add(candidate)
+                | _ -> ()
         
         st.EvalPop()
     | Ast.ParamTuple((pos1, pos2), namedVariableDeclarationListAsts) ->
