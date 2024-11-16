@@ -1,4 +1,4 @@
-
+uses Fpl.PeanoArithmetics
 
 loc (x + y) :=
     !tex: x "+" y 
