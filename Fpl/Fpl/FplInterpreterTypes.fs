@@ -888,6 +888,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     ScopeSearchResult.Found (fv.Scope[name])
                 | FplValueType.Localization -> 
                     ScopeSearchResult.Found (fv.Scope[name])
+                | FplValueType.Quantor -> 
+                    ScopeSearchResult.Found (fv.Scope[name])
                 | _ -> 
                     if FplValue.IsProperty(fv) then
                         ScopeSearchResult.Found (fv.Scope[name])
