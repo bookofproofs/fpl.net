@@ -1287,10 +1287,17 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         st.EvalPop()
         es.InSignatureEvaluation <- false
-    | Ast.Assignment((pos1, pos2), (ast1, ast2)) ->
+    | Ast.Assignment((pos1, pos2), (predicateWithQualificationAst, predicateAst)) ->
         st.EvalPush("Assignment")
-        eval st ast1
-        eval st ast2
+        let assignee = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,es.PeekEvalStack())
+        es.PushEvalStack(assignee)
+        eval st predicateWithQualificationAst
+        es.Pop() |> ignore
+        let assignedValue = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,es.PeekEvalStack())
+        es.PushEvalStack(assignedValue)
+        eval st predicateAst
+        es.Pop() |> ignore
+        // todo assign value to the assignee by checking the type consistency first and finding an appropriate way to embed the result in the symbol table.
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")

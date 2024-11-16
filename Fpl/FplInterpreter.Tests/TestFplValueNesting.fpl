@@ -1,7 +1,4 @@
- def pred Mul infix "*" 1 (x,y: obj) {intr}
- def pred Add infix "+" 2 (x,y: obj) {intr} 
- def pred Eq infix "=" 1000 (x,y: obj) {intr} 
- def pred T1() { (x = y * z + 1) }
+
 
 loc (x + y) :=
     !tex: x "+" y 
@@ -235,8 +232,23 @@ conj Conj3(x:obj)
     false
 }
 
+def cl SomeFplClass: obj
+{
+    declaration
+        ~x: object
+        ~y: object
+        x := 0
+        y := 1
+    ;
+    ctor SomeFplClass()
+    {
+        dec
+            base.obj()
+        ;
+        self
+    }
+    
+    
+}
 
-
-def pred T (x:obj) {true} 
-def pred Caller() {dec ~x:obj; T(x)} 
 ;

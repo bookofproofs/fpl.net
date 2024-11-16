@@ -333,7 +333,7 @@ type TestInterpreterErrors() =
 
 
     [<DataRow("def pred Test() {x};", 1)>]
-    [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~x: obj; pre: p(c) con: ex x:obj {p(x)}};", 0)>]
+    [<DataRow("inf ExistsByExample(p: pred(c: obj)) {pre: p(c) con: ex x:obj {p(x)}};", 0)>]
     [<DataRow("axiom A() { all x:Nat {true} };", 0)>]
     [<DataRow("axiom A() { all x:obj {y} };", 1)>]
     [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
@@ -483,6 +483,7 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Test:obj {ctor TestTypo(x:Nat) {self}};", 1)>]
     [<DataRow("def cl Test:obj {ctor TestTypo1() {self}};", 1)>]
     [<DataRow("def cl Test:obj {ctor Test() {self}};", 0)>]
+    [<DataRow("def cl Test:obj {dec ~x:obj x := 0; ctor Test() {dec base.obj(); self}};", 0)>]
     [<TestMethod>]
     member this.TestID008(fplCode:string, expected) =
         let code = ID008 ("", "") 
