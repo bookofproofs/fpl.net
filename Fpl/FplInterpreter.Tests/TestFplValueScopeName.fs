@@ -238,7 +238,7 @@ type TestFplValueScopeName() =
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
             | "theory" -> Assert.AreEqual<string>("TestScopeVariablesInBlockName", theory.Type(SignatureType.Mixed))
-            | "block" -> Assert.AreEqual<string>("TestPredicate()", block.Type(SignatureType.Type)); 
+            | "block" -> Assert.AreEqual<string>("pred()", block.Type(SignatureType.Type)); 
             | "x" -> Assert.AreEqual<string>("x(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Type(SignatureType.Mixed))
             | "y" -> Assert.AreEqual<string>("y(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Type(SignatureType.Mixed))
             | "s" -> Assert.AreEqual<string>("s", s.Type(SignatureType.Mixed))
@@ -591,8 +591,8 @@ type TestFplValueScopeName() =
             | "base15" -> Assert.AreEqual<string>("-(x)", base1.Type(SignatureType.Name))
             | "base15a" -> Assert.AreEqual<string>("'(x)", base1.Type(SignatureType.Name))
             | "base15b" -> Assert.AreEqual<string>("'(-(x))", base1.Type(SignatureType.Name))
-            | "base16" -> Assert.AreEqual<string>("-(+(y, =(x, *(2, x))))", base1.Type(SignatureType.Name))
-            | "base17" -> Assert.AreEqual<string>("'(+(y, =('(x), *(2, x))))", base1.Type(SignatureType.Name))
+            | "base16" -> Assert.AreEqual<string>("-(*(=(+(y, x), 2), x))", base1.Type(SignatureType.Name))
+            | "base17" -> Assert.AreEqual<string>("'(*(=(+(y, '(x)), 2), x))", base1.Type(SignatureType.Name))
             | "base18" -> Assert.AreEqual<string>("ex(x(a), y, z)", base1.Type(SignatureType.Name))
             | "base19" -> Assert.AreEqual<string>("exn$1(x)", base1.Type(SignatureType.Name))
             | "base20" -> Assert.AreEqual<string>("all(x)", base1.Type(SignatureType.Name))
@@ -672,7 +672,7 @@ type TestFplValueScopeName() =
     member this.TestLocalization(var, predName, trslCode) =
         ad.Clear()
         let fplCode = sprintf """loc %s := %s;""" predName trslCode
-        let filename = "TestCallConstructorParentClassName"
+        let filename = "TestLocalizationName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -691,16 +691,17 @@ type TestFplValueScopeName() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base0", "true", """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base1", "iif(x, y)", """!tex: x " \Leftrightarrow " y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
     [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
-    [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base3", "and(p, q)", """!tex: p " \wedge " q !eng: p " and " q !ger: p " und " q;""")>]
     [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
-    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq " y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
     [<TestMethod>]
     member this.TestTranslation(var, predName, trslCode) =
         ad.Clear()
         let fplCode = sprintf """loc %s := %s;""" predName trslCode
-        let filename = "TestCallConstructorParentClassName"
+        let filename = "TestTranslationName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -708,14 +709,48 @@ type TestFplValueScopeName() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pred = theory.Scope[predName]
-            let trsl = pred.Scope["tex"]
+            let lang = pred.Scope["tex"]
+            let trsl = lang.ValueList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("tex", trsl.Type(SignatureType.Mixed))
-            | "base2" -> Assert.AreEqual<string>("tex", trsl.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>("tex", trsl.Type(SignatureType.Mixed))
-            | "base4" -> Assert.AreEqual<string>("tex", trsl.Type(SignatureType.Mixed))
-            | "base5" -> Assert.AreEqual<string>("tex", trsl.Type(SignatureType.Mixed))
+            | "base0" -> Assert.AreEqual<string>(@"1", trsl.Type(SignatureType.Mixed))
+            | "base1" -> Assert.AreEqual<string>(@"x \Leftrightarrow y", trsl.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>(@"\neg(x)", trsl.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>(@"p \wedge q", trsl.Type(SignatureType.Mixed))
+            | "base4" -> Assert.AreEqual<string>(@"x=y", trsl.Type(SignatureType.Mixed))
+            | "base5" -> Assert.AreEqual<string>(@"x\neq y", trsl.Type(SignatureType.Mixed))
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+
+    [<DataRow("base0", "true", """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
+    [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
+    [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
+    [<DataRow("base4", "Equal(x, y)", """!tex: x "=" y !eng: x " equals " y !ger: x " ist gleich " y !ita: x " è uguale a " y !pol: x " równa się " y;""")>]
+    [<DataRow("base5", "NotEqual(x, y)", """!tex: x "\neq" y !eng: x "is unequal" y !ger: x "ist ungleich" y !pol: x ( "nie równa się" | "nie równe" ) y;""")>]
+    [<TestMethod>]
+    member this.TestLanguage(var, predName, trslCode) =
+        ad.Clear()
+        let fplCode = sprintf """loc %s := %s;""" predName trslCode
+        let filename = "TestLanguageName"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope[predName]
+            let lang = pred.Scope["tex"]
+
+            match var with
+            | "base0" -> Assert.AreEqual<string>("tex", lang.Type(SignatureType.Mixed))
+            | "base1" -> Assert.AreEqual<string>("tex", lang.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>("tex", lang.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("tex", lang.Type(SignatureType.Mixed))
+            | "base4" -> Assert.AreEqual<string>("tex", lang.Type(SignatureType.Mixed))
+            | "base5" -> Assert.AreEqual<string>("tex", lang.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -729,7 +764,7 @@ type TestFplValueScopeName() =
     member this.TestArgument(var, argExpression, expNumber:int) =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
-        let filename = "TestCallConstructorParentClassName"
+        let filename = "TestArgumentName"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with

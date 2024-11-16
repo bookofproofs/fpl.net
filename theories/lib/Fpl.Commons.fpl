@@ -47,7 +47,7 @@ inf ExistsByExample(p: pred(c: obj))
 
 def pred Equal infix "=" 50 (x,y: tpl)
 {
-    intrinsic
+    del.Equal(x,y)
 }
 
 def pred NotEqual infix "<>" 60 (x,y: tpl)

@@ -33,26 +33,28 @@ type Delegates() =
 
         let a1 = getActual(a)
         let b1 = getActual(b)
+        let a1Repr = a1.Type(SignatureType.Repr)
+        let b1Repr = b1.Type(SignatureType.Repr)
 
-        match a1.FplRepresentation with
-        | FplRepresentation.Undef -> 
+        match a1Repr with
+        | "undef" -> 
             failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." a1.FplId
         | _ -> ()
 
-        match b1.FplRepresentation with
-        | FplRepresentation.Undef -> 
+        match b1Repr with
+        | "undef" -> 
             failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." b1.FplId
         | _ -> ()
 
-        match a1.FplRepresentation with
-        | FplRepresentation.PredRepr FplPredicate.Undetermined -> 
+        match a1Repr with
+        | "undetermined" -> 
             failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undetermined." a1.FplId
         | _ -> 
-            match b1.FplRepresentation with
-            | FplRepresentation.PredRepr FplPredicate.Undetermined -> 
+            match b1Repr with
+            | "undetermined" -> 
                 failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undetermined." b1.FplId
             | _ -> 
-                failwithf "OK:%b" (a1.FplRepresentation = b1.FplRepresentation)
+                failwithf "OK:%b" (a1Repr = b1Repr)
 
     let _externalDelegates = 
         Map.ofList [

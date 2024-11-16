@@ -23,9 +23,9 @@ axiom ZeroIsNat()
 
 axiom SuccessorExistsAndIsUnique()
 {
-    all n is Nat
+    all n:Nat
     {
-        exn$1 successor is Nat
+        exn$1 successor:Nat
         {
             and
             (
@@ -38,7 +38,7 @@ axiom SuccessorExistsAndIsUnique()
 
 axiom ZeroIsNotSuccessor()
 {
-    all n is Nat
+    all n:Nat
     {
         NotEqual(Zero(), Succ(n))
     }
@@ -46,7 +46,7 @@ axiom ZeroIsNotSuccessor()
 
 axiom SuccessorIsInjective()
 {
-    all n,m is Nat
+    all n,m:Nat
     {
         impl
         (
@@ -58,15 +58,12 @@ axiom SuccessorIsInjective()
 
 axiom CompleteInduction()
 {
-    dec 
-        ~n: Nat
-    ;
-    all p is pred
+    all p:pred
     {
         impl
         (
-            and ( p(0), all n { impl ( p(n), p(Succ(n)) ) } ),
-            all n { p(n) }
+            and ( p(0), all n:Nat { impl ( p(n), p(Succ(n)) ) } ),
+            all n:Nat { p(n) }
         )
     }
 }
@@ -105,7 +102,7 @@ def class Nat: obj
 
 def pred IsGreaterOrEqual(n,m: Nat)
 {
-    ex k is Nat { (n = Add(m,k)) }
+    ex k: Nat { (n = Add(m,k)) }
 }
 
 // besides the class "Nat", we can formulate definition of the set of all natural numbers
@@ -114,14 +111,13 @@ def class SetNat: Set
     ctor SetNat()
     {
         dec 
-            ~n: Nat
             // Assert that elements of class "Nat" can be collected to a bigger object of class "SetNat"
             // This requires that we can apply the "In" predicate defined in Fpl.Set.ZermeloFraenkel
             // to object of the class "Nat". This becomes possible when we assert that every variable of the class
             // "Nat" is a also Set.
             // This is comparable to implementing an interface (or comparable to multiple inheritance).
             assert
-                all n
+                all n:Nat
                 {
                     and
                     (
@@ -159,7 +155,6 @@ def func Add(n,m: @Decimal)->Nat
 prop AddIsUnique(op: Add)
 {
     dec
-        ~n,m: Nat
         ~anotherAdd: Add
     ;
     impl
@@ -172,7 +167,7 @@ prop AddIsUnique(op: Add)
             ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
         )
         ,
-        all n, m
+        all n, m:Nat
         {
             ( op(n,m) = anotherAdd(n,m) )
         }
@@ -191,7 +186,7 @@ proof AddIsUnique$1
             ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
         )
     2. |- trivial
-    3. |- all n, m
+    3. |- all n, m:Nat
             {
                 ( op(n,m) = anotherAdd(n,m) )
             }
@@ -272,12 +267,12 @@ def func Sum(from,to:Nat, addend: Addend) -> Nat
 proposition SumOfConsecutiveNumbers()
 {
     dec
-        ~n, limit: Nat
+        ~limit: Nat
         ~f: Addend
     ;
     impl
     (
-        all n 
+        all n:Nat 
         {
             and (
                 In(n, Range(1,limit))
@@ -286,7 +281,7 @@ proposition SumOfConsecutiveNumbers()
             
         }
         ,
-        all n
+        all n:Nat
         {
             (Sum(1,n,f) = Div(Mul(n,Succ(n)),2))
         }
