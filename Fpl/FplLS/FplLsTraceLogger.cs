@@ -1,5 +1,4 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Server;
-using OmniSharp.Extensions.LanguageServer.Protocol.Window;
 
 namespace FplLS
 {

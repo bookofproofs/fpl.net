@@ -50,6 +50,7 @@ namespace FplLS
                     .WithOutput(Console.OpenStandardOutput())
                     .WithLoggerFactory(new LoggerFactory())
                     .AddDefaultLoggingProvider()
+                    .WithMinimumLogLevel(LogLevel.Warning)
                     .WithServices(ConfigureServices)
                     .WithHandler<TextDocumentSyncHandler>()
                     .WithHandler<CompletionHandler>()
@@ -62,10 +63,10 @@ namespace FplLS
                             var diagnosticsHandler = serviceProvider.GetService<DiagnosticsHandler>();
                             
                             // Hook up diagnostics
-                            bufferManager?.BufferUpdated += (__, x) =>
-                                diagnosticsHandler?.PublishDiagnostics(st,
+                            bufferManager.BufferUpdated += (__, x) =>
+                                diagnosticsHandler.PublishDiagnostics(st,
                                     new PathEquivalentUri(x.Uri.AbsoluteUri),
-                                    bufferManager?.GetBuffer(x.Uri));
+                                    bufferManager.GetBuffer(x.Uri));
 
                             return Task.CompletedTask;
                         }

@@ -1,5 +1,4 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Document;
-using OmniSharp.Extensions.LanguageServer.Protocol.Server;
+﻿using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using System.Text;
 using static ErrDiagnostics;
 using static FplInterpreterTypes;
@@ -50,7 +49,7 @@ namespace FplLS
                     UriDiagnostics diagnostics = RefreshFplDiagnosticsStorage(st, uri, buffer);
                     foreach (var diagnosticsPerUri in diagnostics.Enumerator())
                     {
-                        _languageServer.TextDocument.PublishDiagnostics(new Model.PublishDiagnosticsParams
+                        _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
                         {
                             Uri = diagnosticsPerUri.Key,
                             Diagnostics = diagnosticsPerUri.Value
@@ -60,7 +59,7 @@ namespace FplLS
                     }
                     if (diagnostics.Enumerator().Count == 0)
                     {
-                        _languageServer.TextDocument.PublishDiagnostics(new Model.PublishDiagnosticsParams
+                        _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
                         {
                             Uri = uri,
                             Diagnostics = new List<Model.Diagnostic>()
@@ -72,7 +71,7 @@ namespace FplLS
                     // delete the last language server diagnostics by explicitly publishing an empty diagnostics model list
                     foreach (var uriPath in allUris)
                     {
-                        _languageServer.TextDocument.PublishDiagnostics(new Model.PublishDiagnosticsParams
+                        _languageServer.Document.PublishDiagnostics(new Model.PublishDiagnosticsParams
                         {
                             Uri = uriPath, // reset remaining files
                             Diagnostics = new List<Model.Diagnostic>()
@@ -161,7 +160,7 @@ namespace FplLS
                 Source = diagnostic.Emitter.ToString(),
                 Severity = CastSeverity(diagnostic.Severity),
                 Message = CastMessage(diagnostic),
-                Range = tp.GetRange((int)diagnostic.StartPos.Index, (int)diagnostic.EndPos.Index),
+                Range = tp.GetRange(diagnostic.StartPos.Index, diagnostic.EndPos.Index),
                 Code = CastCode(diagnostic.Code.Code)
             };
             return castedDiagnostic;
