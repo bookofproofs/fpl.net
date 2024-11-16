@@ -292,6 +292,7 @@ type FplValueType =
     | Language
     | Translation
     | Mapping
+    | Stmt
     | Root
     member private this.UnqualifiedName = 
         match this with
@@ -326,6 +327,7 @@ type FplValueType =
             | Language -> "language"
             | Translation -> "translation"
             | Mapping -> "mapping"
+            | Stmt -> "statement"
             | Root -> "root"
     member private this.Article = 
         match this with
@@ -372,6 +374,7 @@ type FplValueType =
             | Language -> "lang"
             | Translation -> "trsl"
             | Mapping -> "map"
+            | Stmt -> "stmt"
             | Root -> "root"
 
 type FixType = 
@@ -991,6 +994,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | FplValueType.ArgInference
         | FplValueType.Language
         | FplValueType.Translation
+        | FplValueType.Stmt
         | FplValueType.OptionalFunctionalTerm -> new FplValue(fplBlockType, positions, Some parent)
         | FplValueType.Class -> 
             let ret = new FplValue(fplBlockType, positions, Some parent)
