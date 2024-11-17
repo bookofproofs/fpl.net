@@ -650,15 +650,16 @@ type TestFplValueScopeName() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ValueList[0]
+            let stmt = ctor.ValueList[0]
+            let base1 = stmt.ValueList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("bas.B()", base1.Type(SignatureType.Mixed))
-            | "base2" -> Assert.AreEqual<string>("bas.C(T1, func, ind, pred)", base1.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>("bas.D(self, T1, func)", base1.Type(SignatureType.Mixed))
-            | "base4" -> Assert.AreEqual<string>("bas.B(In(undef))", base1.Type(SignatureType.Mixed))
-            | "base5" -> Assert.AreEqual<string>("bas.C(Test1(T1), Test2(func, ind, pred))", base1.Type(SignatureType.Mixed))
-            | "base6" -> Assert.AreEqual<string>("bas.E(pred, undef, pred)", base1.Type(SignatureType.Mixed))
+            | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>("C(T1, func, ind, pred)", base1.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("D(self, T1, func)", base1.Type(SignatureType.Mixed))
+            | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Mixed))
+            | "base5" -> Assert.AreEqual<string>("C(Test1(T1), Test2(func, ind, pred))", base1.Type(SignatureType.Mixed))
+            | "base6" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

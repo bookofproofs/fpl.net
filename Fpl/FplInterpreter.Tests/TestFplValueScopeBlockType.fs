@@ -650,7 +650,8 @@ type TestFplValueScopeBlockType() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ValueList[0]
+            let stmt = ctor.ValueList[0]
+            let base1 = stmt.ValueList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)

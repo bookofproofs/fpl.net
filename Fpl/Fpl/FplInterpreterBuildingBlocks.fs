@@ -1366,10 +1366,9 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.NameStartPos <- pos1
         fv.NameEndPos <- pos2
-        fv.FplId <- "baseccall"
+        fv.FplId <- "bas"
         let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv) 
         es.PushEvalStack(refBlock)
-        refBlock.FplId <- "bas."
         eval st inheritedClassTypeAst
         eval st argumentTupleAst
         es.PopEvalStack()

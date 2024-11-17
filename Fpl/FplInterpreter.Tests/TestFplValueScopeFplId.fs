@@ -651,15 +651,16 @@ type TestFplValueScopeFplId() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ValueList[0]
+            let stmt = ctor.ValueList[0]
+            let base1 = stmt.ValueList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("bas.B", base1.FplId)
-            | "base2" -> Assert.AreEqual<string>("bas.C", base1.FplId)
-            | "base3" -> Assert.AreEqual<string>("bas.D", base1.FplId)
-            | "base4" -> Assert.AreEqual<string>("bas.B", base1.FplId)
-            | "base5" -> Assert.AreEqual<string>("bas.C", base1.FplId)
-            | "base6" -> Assert.AreEqual<string>("bas.E", base1.FplId)
+            | "base1" -> Assert.AreEqual<string>("B", base1.FplId)
+            | "base2" -> Assert.AreEqual<string>("C", base1.FplId)
+            | "base3" -> Assert.AreEqual<string>("D", base1.FplId)
+            | "base4" -> Assert.AreEqual<string>("B", base1.FplId)
+            | "base5" -> Assert.AreEqual<string>("C", base1.FplId)
+            | "base6" -> Assert.AreEqual<string>("E", base1.FplId)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

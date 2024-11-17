@@ -127,13 +127,13 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("""def pred T (x,y:Nat) {true} def cl Nat:obj {}def pred Caller() {dec ~a,b:obj ~c:ind; T(a,b,c)} ;""",
+    [<DataRow("""def pred T (x,y:Nat) {true} def cl Nat:obj {} def pred Caller() {dec ~a,b:obj ~c:ind; T(a,b,c)} ;""",
         "no matching paramater for `c:ind` in TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesConstructors(varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
-        let filename = "TestSignatureMatchingReferencesClasses"
+        let filename = "TestSignatureMatchingReferencesConstructors"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
