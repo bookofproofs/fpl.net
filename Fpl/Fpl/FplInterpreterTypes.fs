@@ -350,10 +350,10 @@ type FplValueType =
             | Variable -> "var"
             | VariadicVariableMany -> "*var"
             | VariadicVariableMany1 -> "+var"
-            | MandatoryPredicate 
-            | OptionalPredicate 
-            | MandatoryFunctionalTerm 
-            | OptionalFunctionalTerm -> "prop"
+            | MandatoryPredicate -> "mpred"
+            | OptionalPredicate  -> "opred"
+            | MandatoryFunctionalTerm -> "mfunc"
+            | OptionalFunctionalTerm -> "ofunc"
             | Constructor -> "ctor"
             | Class -> "cl"
             | Object -> "obj"

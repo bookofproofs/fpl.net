@@ -199,19 +199,65 @@ function acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime) {
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 
+
+// a map of the types
+const typeToIconMap = new Map();
+typeToIconMap.set('th','library');
+typeToIconMap.set('var','variable');
+typeToIconMap.set('*var','bracket-error');
+typeToIconMap.set('+var','bracket-dot');
+typeToIconMap.set('mpred','compass-dot');
+typeToIconMap.set('opred','compass');
+typeToIconMap.set('mfunc','layers-dot');
+typeToIconMap.set('ofunc','layers');
+typeToIconMap.set('ctor','symbol-constructor');
+typeToIconMap.set('cl','symbol-class');
+typeToIconMap.set('obj','primitive-square');
+typeToIconMap.set('loc','location');
+typeToIconMap.set('thm','layout-panel-justify');
+typeToIconMap.set('lem','layout-panel-center');
+typeToIconMap.set('prop','layout-panel-right');
+typeToIconMap.set('cor','ayout-sidebar-right');
+typeToIconMap.set('prf','testing-passed-icon');
+typeToIconMap.set('conj','testing-error-icon');
+typeToIconMap.set('ax','alert');
+typeToIconMap.set('inf','chip');
+typeToIconMap.set('qtr','circuit-board');
+typeToIconMap.set('pred','law');
+typeToIconMap.set('func','graph-line');
+typeToIconMap.set('ref','link-external');
+typeToIconMap.set('arg','indent');
+typeToIconMap.set('just','kebab-horizontal');
+typeToIconMap.set('ainf','kebab-vertical');
+typeToIconMap.set('lang','gripper');
+typeToIconMap.set('trsl','globe');
+typeToIconMap.set('map','preview');
+typeToIconMap.set('stmt','list-unordered');
+typeToIconMap.set('ass','link');
+
+
 // A custom TreeItem
 class MyTreeItem extends vscode.TreeItem {
-    constructor(label, scope = [], valueList = []) {
+    constructor(typ, inScope, label, scope = [], valueList = []) {
         super(label, scope.length > 0 || valueList.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
-        this.label = label;
+        this.typ = typ;
+        this.label = typ + ' ' + label;
         this.scope = scope;
         this.valueList = valueList;
 
-        this.iconPath = this.getIconPath(label);
+        if (inScope) {
+            this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textPreformat.foreground');
+        }
+        else {
+            this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'focusBorder');
+        }
+        
+
     }
 
-    getIconPath(label) {
-        return new vscode.ThemeIcon('file');
+    // Method to get the colorized icon
+    getIconPathWithColor(iconId, color) {
+        return new vscode.ThemeIcon(iconId, new vscode.ThemeColor(color));
     }
 
 }
@@ -260,12 +306,12 @@ class FplTheoriesProvider {
 
     parseScope(scope) {
         // Convert each item in the scope to a MyTreeItem
-        return scope.map(item => new MyTreeItem("#" + item.Type + ": " + item.Name, item.Scope, item.ValueList));
+        return scope.map(item => new MyTreeItem(item.Type, true, item.Name, item.Scope, item.ValueList));
     }
 
     parseValueList(valueList) {
         // Convert each item in the valueList to a MyTreeItem
-        return valueList.map(item => new MyTreeItem(item.Type + ": " + item.Name, item.Scope, item.ValueList));
+        return valueList.map(item => new MyTreeItem(item.Type, false, item.Name, item.Scope, item.ValueList));
     }
 
 }
