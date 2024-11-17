@@ -358,8 +358,8 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
         context.EndsWith("ParentConstructorCall.InheritedClassType.PredicateIdentifier")
         || context.EndsWith("ParentConstructorCall.InheritedClassType.ObjectType")
     then
-        let constructor = parentConstructorCall.Parent.Value
-        constructor.ValueList.Add(parentConstructorCall)
+        let stmt = parentConstructorCall.Parent.Value
+        let constructor = stmt.Parent.Value
         let classOfConstructor = constructor.Parent.Value
         let mutable foundInheritanceClass = false
 
@@ -385,15 +385,16 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
                 }
             ad.AddDiagnostic diagnostic
 
-let emitID013Diagnostics (fplValue: FplValue) pos1 pos2 =
+let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
     let d = Delegates()
 
     try
-        d.CallExternalDelegate(fplValue.FplId.Substring(4), fplValue.ValueList |> Seq.toList)
+        d.CallExternalDelegate(fv.FplId.Substring(4), fv.ValueList |> Seq.toList)
     with ex ->
         if ex.Message.StartsWith("OK:") then
-            match ex.Message.Substring(3) with
-            | _ -> () // todo
+            let result = ex.Message.Substring(3)
+            fv.ReprId <- result
+            ""
         else
             let diagnostic =
                 { 
@@ -406,6 +407,7 @@ let emitID013Diagnostics (fplValue: FplValue) pos1 pos2 =
                     Diagnostic.Alternatives = None 
                 }
             ad.AddDiagnostic diagnostic
+            ""
 
 
 let emitPR004Diagnostics (fplValue: FplValue) (conflict: FplValue) =
@@ -540,6 +542,19 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
                 }
             ad.AddDiagnostic diagnostic
     | _ -> ()
+
+let emitSIG04DiagnosticsForTypes identifier pos1 pos2 =
+    let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = SIG04(identifier, 0, [""])
+                Diagnostic.Alternatives = None 
+            }
+    ad.AddDiagnostic diagnostic
 
 let emitSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
     match checkCandidates calling candidates [] with

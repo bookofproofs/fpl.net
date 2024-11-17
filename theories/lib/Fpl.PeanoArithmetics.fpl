@@ -5,16 +5,41 @@
 uses Fpl.Commons
 uses Fpl.SetTheory
 
-def class Zero: obj
+// definition of a new mathematical object (natural number)
+def cl Nat: obj
+{
+    intrinsic
+}
+
+def cl Zero: Nat
 {
     intr
 }
+
+
 
 // definition of a functional term denoting the successor of a natural number
 def func Succ(n: Nat) -> Nat
 {
     intr
 }
+
+def func NatRepr(x: @Digits) -> Nat
+{
+    
+    dec
+        ~n:Nat
+        cases
+        (
+            | (x = 0) : n := Zero() 
+            | (x = 1) : n := Succ(Zero()) 
+            | (x = 2) : n := Succ(Succ(Zero())) 
+            ? n := Succ(delegate.Decrement(x))  
+        )
+    ;
+    return n
+}
+
 
 axiom ZeroIsNat()
 {
@@ -69,36 +94,7 @@ axiom CompleteInduction()
 }
 
 
-// definition of a new mathematical object (natural number)
-def class Nat: obj
-{
-    ctor Nat(x: @Digits)
-    {
-        dec
-            cases
-            (
-                | (x = 0) : self := Zero() 
-                | (x = 1) : self := Succ(Zero()) 
-                | (x = 2) : self := Succ(Succ(Zero())) 
-                ? self := Succ(delegate.Decrement(x))  
-            )
-        ;
-        self
-    }
 
-    ctor Nat(x: Int)
-    {
-        dec
-            cases
-            (
-                | IsGreaterOrEqual(x.RightMember(), x.LeftMember()): self:=x.RightMember()
-                ? self:=undefined
-            )
-            base.obj()
-        ;
-        self
-    }
-}
 
 def pred IsGreaterOrEqual(n,m: Nat)
 {
@@ -145,12 +141,6 @@ def func Add(n,m: Nat)->Nat
     ;
     return result
 }
-
-def func Add(n,m: @Decimal)->Nat
-{
-    return delegate.add(n,m)
-}
-
 
 prop AddIsUnique(op: Add)
 {

@@ -292,6 +292,8 @@ type FplValueType =
     | Language
     | Translation
     | Mapping
+    | Stmt
+    | Assertion
     | Root
     member private this.UnqualifiedName = 
         match this with
@@ -326,6 +328,8 @@ type FplValueType =
             | Language -> "language"
             | Translation -> "translation"
             | Mapping -> "mapping"
+            | Stmt -> "statement"
+            | Assertion -> "assertion"
             | Root -> "root"
     member private this.Article = 
         match this with
@@ -333,6 +337,7 @@ type FplValueType =
         | OptionalFunctionalTerm
         | Object 
         | Argument 
+        | Assertion 
         | ArgInference 
         | Axiom -> "an"
         | _ -> "a"
@@ -372,6 +377,8 @@ type FplValueType =
             | Language -> "lang"
             | Translation -> "trsl"
             | Mapping -> "map"
+            | Stmt -> "stmt"
+            | Assertion -> "ass"
             | Root -> "root"
 
 type FixType = 
@@ -502,6 +509,9 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | (FplValueType.Reference, true) -> 
             // delegate the type identifier to the referenced entitity
             this.Scope[this.FplId].Type(isSignature)
+        | (FplValueType.Stmt, _) -> 
+            // statement 
+            this.FplId
         | _ -> 
             match (isSignature, this.TypeId) with
             | (SignatureType.Repr, typeId) when typeId.StartsWith("*") || typeId.StartsWith("+") -> 
@@ -605,6 +615,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     | FplValueType.Translation ->
                         let args =
                             this.ValueList
+                            |> Seq.filter(fun fv -> fv.BlockType <> FplValueType.Stmt && fv.BlockType <> FplValueType.Assertion)
                             |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
                             |> String.concat ""
                         sprintf "%s%s" head args
@@ -637,6 +648,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                         let args =
                             let a = 
                                 this.ValueList
+                                |> Seq.filter(fun fv -> fv.BlockType <> FplValueType.Stmt && fv.BlockType <> FplValueType.Assertion)
                                 |> Seq.map (fun fv -> fv.Type(propagate))
                                 |> String.concat ", "
                             a
@@ -991,6 +1003,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | FplValueType.ArgInference
         | FplValueType.Language
         | FplValueType.Translation
+        | FplValueType.Stmt
+        | FplValueType.Assertion
         | FplValueType.OptionalFunctionalTerm -> new FplValue(fplBlockType, positions, Some parent)
         | FplValueType.Class -> 
             let ret = new FplValue(fplBlockType, positions, Some parent)

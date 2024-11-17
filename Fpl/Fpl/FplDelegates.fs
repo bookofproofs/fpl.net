@@ -56,6 +56,9 @@ type Delegates() =
             | _ -> 
                 failwithf "OK:%b" (a1Repr = b1Repr)
 
+    let _decrement (a:FplValue) =
+        $"todo {a.Type(SignatureType.Repr)}" 
+
     let _externalDelegates = 
         Map.ofList [
             (
@@ -63,6 +66,12 @@ type Delegates() =
                     match values with
                     | x::y::[] -> _equal x y
                     | _ -> failwithf "Predicate `=` takes 2 arguments, got %i." values.Length
+            )
+            (
+                "Decrement", fun values -> 
+                    match values with
+                    | x::[] -> _decrement x
+                    | _ -> failwithf "decrement takes 1 argument, got %i." values.Length
             )
         ]
 

@@ -271,6 +271,7 @@ type TestInterpreterErrors() =
     [<DataRow("proof TestId$1 {1. |- trivial} ;", 0)>]
     [<DataRow("proof TestId$1$2 {1. |- trivial} ;", 0)>]
     [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", 0)>]
+    [<DataRow("def func Sum(list:* Nat)->Nat {dec ~result: Nat; return result} def func Sum2(list:* Nat)->Nat {dec ~result: Nat; return result};", 0)>]
     [<DataRow("uses Fpl.PeanoArithmetics ;", 0)>]
     [<TestMethod>]
     member this.TestID001(fplCode:string, expected:int) =
@@ -569,8 +570,9 @@ type TestInterpreterErrors() =
     [<DataRow("def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
     [<DataRow("def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `x` is undefined.")>]
     [<DataRow("def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `y` is undefined.")>]
+    [<DataRow("""def pred Equal infix "=" 50 (x,y: tpl) {del.Equal(x,y)};""", 0, "missing error message")>]
     [<DataRow("def pred T(x,y:pred) {del.Equal(true,y)};", 1, "Predicate `=` cannot be evaluated because the argument `y` is undetermined.")>]
-    [<DataRow("uses Fpl.PeanoArithmetics ;", 0)>]
+    [<DataRow("uses Fpl.PeanoArithmetics ;", 0, "")>]
     [<TestMethod>]
     member this.TestID013(fplCode:string, expected, expectedErrMsg:string) =
         let code = ID013 ""
@@ -668,7 +670,7 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A(x,y:obj) { Eq(x,y) };""", 0)>]
     [<DataRow("""def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 1)>]
     [<DataRow("""def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 1)>]
-    [<DataRow("""def pred Eq infix "=" 1000 (x,y: Nat) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 3)>]
+    [<DataRow("""def pred Eq infix "=" 1000 (x,y: Nat) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 2)>]
     [<DataRow("""def pred Eq infix "=" 1000 (x,y: ind) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 1)>]
     [<DataRow("""def pred Mul infix "*" 1 (x,y: pred) {intr} def pred Add infix "+" 2 (x,y: ind) {intr} def pred Eq infix "=" 1000 (x,y: obj) {intr} def pred T1() { (x = y * z + 1) };""", 3)>]
     [<DataRow("""def pred T (x:tpl) {true} def pred Caller() {dec ~x:ind; T(x)} ;""", 0)>]
@@ -679,6 +681,8 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T (x,y,z:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
     [<DataRow("""def pred T (x,y:obj,z:ind) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 0)>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~x,y:obj ~z:ind; T(x,y,z)} ;""", 1)>]
+    [<DataRow("""def class Nat: obj {ctor Nat(){dec self:=x.R(); self}};""", 1)>]
+    [<DataRow("""def func Succ(n:Nat) -> obj {intr};""", 1)>]
     [<DataRow("uses Fpl.PeanoArithmetics ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =
@@ -688,6 +692,8 @@ type TestInterpreterErrors() =
 
     [<DataRow("""def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 
         "No overload matching `=(ind, obj)`. `x:ind` does not match `x:obj` in TestSIG04MsgSpecificity.Eq(obj, obj).")>]
+    [<DataRow("""def func Succ(n:Nat) -> obj {intr};""", 
+        "No overload matching `Nat`, no candidates were found. Are you missing a uses clause?")>]
     [<TestMethod>]
     member this.TestSIG04MsgSpecificity(fplCode:string, (expected:string)) =
         let code = SIG04 ("",0,[""])
