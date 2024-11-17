@@ -53,6 +53,10 @@ namespace FplLS
                     .WithServices(ConfigureServices)
                     .WithHandler<TextDocumentSyncHandler>()
                     .WithHandler<CompletionHandler>()
+                    .OnRequest<JToken, string>("getTreeData", (request, cancellationToken) =>
+                    {
+                        return Task.FromResult(st.ToJson());
+                    })
                     .OnInitialize((s, _, _) =>
                     {
                         if (s is LanguageServer languageServer)
@@ -60,7 +64,7 @@ namespace FplLS
                             var serviceProvider = languageServer.Services;
                             var bufferManager = serviceProvider.GetService<BufferManager>();
                             var diagnosticsHandler = serviceProvider.GetService<DiagnosticsHandler>();
-                            
+
                             // Hook up diagnostics
                             bufferManager.BufferUpdated += (__, x) =>
                                 diagnosticsHandler.PublishDiagnostics(st,
@@ -74,10 +78,7 @@ namespace FplLS
                             throw new Exception("Failed to cast s to LanguageServer");
                         }
                     })
-                    .OnRequest<JToken, string>("getTreeData", (request) =>
-                    {
-                        return Task.FromResult(st.ToJson());
-                    }));
+                    );
 
             await server.WaitForExit;
         }

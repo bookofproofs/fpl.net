@@ -572,7 +572,7 @@ type TestInterpreterErrors() =
     [<DataRow("def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `y` is undefined.")>]
     [<DataRow("""def pred Equal infix "=" 50 (x,y: tpl) {del.Equal(x,y)};""", 0, "missing error message")>]
     [<DataRow("def pred T(x,y:pred) {del.Equal(true,y)};", 1, "Predicate `=` cannot be evaluated because the argument `y` is undetermined.")>]
-    [<DataRow("uses Fpl.PeanoArithmetics ;", 0, "")>]
+    [<DataRow("uses Fpl.PeanoArithmetics ;", 0, "missing error message")>]
     [<TestMethod>]
     member this.TestID013(fplCode:string, expected, expectedErrMsg:string) =
         let code = ID013 ""

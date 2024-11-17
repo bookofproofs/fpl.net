@@ -206,7 +206,14 @@ class MyTreeItem extends vscode.TreeItem {
         this.label = label;
         this.scope = scope;
         this.valueList = valueList;
+
+        this.iconPath = this.getIconPath(label);
     }
+
+    getIconPath(label) {
+        return new vscode.ThemeIcon('file');
+    }
+
 }
 
 
@@ -228,7 +235,7 @@ class FplTheoriesProvider {
     getChildren(element) {
         if (!element) {
             // If no element is passed, return the root nodes of the tree
-            return client.sendRequest('getTreeData').then(json => {
+            return client.sendRequest('getTreeData', {}).then(json => {
                 let treeData = JSON.parse(json);
                 return this.parseScope(treeData.Scope);
             }).catch(error => {
