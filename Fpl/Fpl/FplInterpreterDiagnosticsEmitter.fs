@@ -393,12 +393,8 @@ let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
     with ex ->
         if ex.Message.StartsWith("OK:") then
             let result = ex.Message.Substring(3)
-            match result with
-            | "true" 
-            | "false" -> 
-                fv.ReprId <- result
-                ()
-            | _ -> () // todo
+            fv.ReprId <- result
+            ""
         else
             let diagnostic =
                 { 
@@ -411,6 +407,7 @@ let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
                     Diagnostic.Alternatives = None 
                 }
             ad.AddDiagnostic diagnostic
+            ""
 
 
 let emitPR004Diagnostics (fplValue: FplValue) (conflict: FplValue) =
