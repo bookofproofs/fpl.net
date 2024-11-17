@@ -213,13 +213,18 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
         if FplValue.IsClass(fv) then
             checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
         elif (FplValue.IsVariadicVariableMany(fv)) then 
-            fv.TypeId <- $"*{unitType}"
+            let sid = $"*{unitType}"
+            fv.TypeId <- sid
+            fv.ReprId <- $"intr {sid}"
         elif (FplValue.IsVariadicVariableMany1(fv)) then 
-            fv.TypeId <- $"+{unitType}"
+            let sid = $"+{unitType}"
+            fv.TypeId <- sid
+            fv.ReprId <- $"intr {sid}"
         elif (FplValue.IsReference(fv)) then 
             checkID012Diagnostics st fv unitType pos1 pos2
         else
             fv.TypeId <- unitType
+            fv.ReprId <- $"intr {unitType}"
             checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
 
 
@@ -288,27 +293,21 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.One((pos1, pos2),()) ->
         st.EvalPush("One")
-        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Star((pos1, pos2),()) ->
         st.EvalPush("Star")
-        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Dot((pos1, pos2),()) ->
         st.EvalPush("Dot")
-        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Intrinsic((pos1, pos2),()) -> 
         st.EvalPush("Intrinsic")
-        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Property((pos1, pos2),()) -> 
         st.EvalPush("Property")
-        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Optional((pos1, pos2),()) -> 
         st.EvalPush("Optional")
-        eval_units st "" pos1 pos2  
         st.EvalPop()
     | Ast.Error  ->   
         st.EvalPush("Error")

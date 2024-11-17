@@ -385,14 +385,19 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
                 }
             ad.AddDiagnostic diagnostic
 
-let emitID013Diagnostics (fplValue: FplValue) pos1 pos2 =
+let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
     let d = Delegates()
 
     try
-        d.CallExternalDelegate(fplValue.FplId.Substring(4), fplValue.ValueList |> Seq.toList)
+        d.CallExternalDelegate(fv.FplId.Substring(4), fv.ValueList |> Seq.toList)
     with ex ->
         if ex.Message.StartsWith("OK:") then
-            match ex.Message.Substring(3) with
+            let result = ex.Message.Substring(3)
+            match result with
+            | "true" 
+            | "false" -> 
+                fv.ReprId <- result
+                ()
             | _ -> () // todo
         else
             let diagnostic =
