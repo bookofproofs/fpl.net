@@ -505,6 +505,9 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | (FplValueType.Reference, true) -> 
             // delegate the type identifier to the referenced entitity
             this.Scope[this.FplId].Type(isSignature)
+        | (FplValueType.Stmt, _) -> 
+            // statement 
+            this.FplId
         | _ -> 
             match (isSignature, this.TypeId) with
             | (SignatureType.Repr, typeId) when typeId.StartsWith("*") || typeId.StartsWith("+") -> 

@@ -358,8 +358,8 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
         context.EndsWith("ParentConstructorCall.InheritedClassType.PredicateIdentifier")
         || context.EndsWith("ParentConstructorCall.InheritedClassType.ObjectType")
     then
-        let constructor = parentConstructorCall.Parent.Value
-        constructor.ValueList.Add(parentConstructorCall)
+        let stmt = parentConstructorCall.Parent.Value
+        let constructor = stmt.Parent.Value
         let classOfConstructor = constructor.Parent.Value
         let mutable foundInheritanceClass = false
 

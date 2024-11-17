@@ -853,6 +853,7 @@ let rec eval (st: SymbolTable) ast =
                 eval st ast
                 stmtList.Add(es.Pop())
         ) |> ignore
+        fv.ValueList.AddRange(stmtList)
         st.EvalPop()
     | Ast.StatementList((pos1, pos2), asts) ->
         st.EvalPush("StatementList")
