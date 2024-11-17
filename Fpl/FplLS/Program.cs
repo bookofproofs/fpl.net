@@ -50,11 +50,10 @@ namespace FplLS
                     .WithOutput(Console.OpenStandardOutput())
                     .WithLoggerFactory(new LoggerFactory())
                     .AddDefaultLoggingProvider()
-                    .WithMinimumLogLevel(LogLevel.Warning)
                     .WithServices(ConfigureServices)
                     .WithHandler<TextDocumentSyncHandler>()
                     .WithHandler<CompletionHandler>()
-                    .OnInitialize((s, _) =>
+                    .OnInitialize((s, _, _) =>
                     {
                         if (s is LanguageServer languageServer)
                         {

@@ -41,7 +41,7 @@ namespace FplLS
         /// <summary>
         ///     The absolution starting position, within the text, of each line.
         /// </summary>
-        readonly long[] _lineStartPositions;
+        readonly int[] _lineStartPositions;
 
         /// <summary>
         ///     Create a new <see cref="TextPositions"/> for the specified text.
@@ -65,7 +65,7 @@ namespace FplLS
         /// <summary>
         ///     The absolution starting position, within the text, of each line.
         /// </summary>
-        public IReadOnlyList<long> LineStartPositions => _lineStartPositions;
+        public IReadOnlyList<int> LineStartPositions => _lineStartPositions;
 
         /// <summary>
         ///     Convert a <see cref="Position"/> to an absolute position within the text.
@@ -76,7 +76,7 @@ namespace FplLS
         /// <returns>
         ///     The equivalent absolute position (0-based) within the text.
         /// </returns>
-        public long GetAbsolutePosition(UsingOmExtLSPM.Position position)
+        public int GetAbsolutePosition(UsingOmExtLSPM.Position position)
         {
             if (position == null)
                 throw new ArgumentNullException(nameof(position));
@@ -96,7 +96,7 @@ namespace FplLS
         /// <returns>
         ///     The equivalent absolute position within the text.
         /// </returns>
-        public long GetAbsolutePosition(long line, long column)
+        public int GetAbsolutePosition(int line, int column)
         {
             if (line < 0)
                 throw new ArgumentOutOfRangeException(nameof(line), line, "Line cannot be less than 0.");
@@ -119,7 +119,7 @@ namespace FplLS
         /// <returns>
         ///     The equivalent <see cref="Position"/> within the text.
         /// </returns>
-        public UsingOmExtLSPM.Position GetPosition(long absolutePosition)
+        public UsingOmExtLSPM.Position GetPosition(int absolutePosition)
         {
             int targetLine = Array.BinarySearch(_lineStartPositions, absolutePosition);
             if (targetLine < 0)
@@ -128,7 +128,7 @@ namespace FplLS
             // Internally, we're 0-based, but lines and columns are (by convention) 1-based.
             return new UsingOmExtLSPM.Position(
                 targetLine,
-                absolutePosition - _lineStartPositions[targetLine]
+                ((int)absolutePosition) - _lineStartPositions[targetLine]
             );
         }
 
@@ -144,7 +144,7 @@ namespace FplLS
         /// <returns>
         ///     The <see cref="Range"/>.
         /// </returns>
-        public UsingOmExtLSPM.Range GetRange(long absoluteStartPosition, long absoluteEndPosition)
+        public UsingOmExtLSPM.Range GetRange(int absoluteStartPosition, int absoluteEndPosition)
         {
             return new UsingOmExtLSPM.Range(
                 start: GetPosition(absoluteStartPosition),
@@ -161,7 +161,7 @@ namespace FplLS
         /// <returns>
         ///     The range length.
         /// </returns>
-        public long GetLength(UsingOmExtLSPM.Range range)
+        public int GetLength(UsingOmExtLSPM.Range range)
         {
             if (range == null)
                 throw new ArgumentNullException(nameof(range));
@@ -181,7 +181,7 @@ namespace FplLS
         /// <returns>
         ///     The difference in offset between <paramref name="position2"/> and <paramref name="position1"/> (can be negative).
         /// </returns>
-        public long GetDistance(UsingOmExtLSPM.Position position1, UsingOmExtLSPM.Position position2)
+        public int GetDistance(UsingOmExtLSPM.Position position1, UsingOmExtLSPM.Position position2)
         {
             if (position1 == null)
                 throw new ArgumentNullException(nameof(position1));
@@ -201,12 +201,12 @@ namespace FplLS
         /// <returns>
         ///     An array of line starting positions.
         /// </returns>
-        long[] CalculateLineStartPositions(string text)
+        int[] CalculateLineStartPositions(string text)
         {
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
 
-            List<long> lineStarts = new List<long>();
+            List<int> lineStarts = new List<int>();
 
             int currentPosition = 0;
             int currentLineStart = 0;
