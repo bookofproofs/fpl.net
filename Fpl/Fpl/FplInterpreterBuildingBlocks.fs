@@ -191,6 +191,7 @@ type EvalStack() =
             | FplValueType.Mapping 
             | FplValueType.Translation 
             | FplValueType.Stmt
+            | FplValueType.Assertion
             | FplValueType.Root -> 
                 EvalStack.tryAddToValueList fv 
 
@@ -633,13 +634,14 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Return((pos1, pos2), returneeAst) ->
         st.EvalPush("Return")
         let fv = es.PeekEvalStack()
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
-        fv.FplId <- "return"
+        let stmt = FplValue.CreateFplValue((pos1,pos2), FplValueType.Stmt, fv)
+        stmt.FplId <- "return"
+        es.PushEvalStack(stmt)
         let refBlock = FplValue.CreateFplValue((pos1,pos2), FplValueType.Reference, fv)
         es.PushEvalStack(refBlock)
         eval st returneeAst
         es.PopEvalStack() // todo check type of function and find an appropriate way to embed the result in the symbol table.
+        es.PopEvalStack() 
         st.EvalPop()
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
         st.EvalPush("AssumeArgument")
