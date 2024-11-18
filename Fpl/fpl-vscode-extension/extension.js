@@ -238,9 +238,12 @@ typeToIconMap.set('ass','target');
 
 // A custom TreeItem
 class MyTreeItem extends vscode.TreeItem {
-    constructor(typ, inScope, label, scope = [], valueList = []) {
+    constructor(typ, inScope, label, lineNumber, columnNumber, filePath, scope = [], valueList = []) {
         super(label, scope.length > 0 || valueList.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
         this.typ = typ;
+        this.lineNumber = lineNumber;
+        this.columnNumber = columnNumber;
+        this.filePath = filePath;
         if (typ == "cl" || typ == "pred" || typ == "func") 
         {
             this.label = "def " + typ + ' ' + label;
@@ -274,7 +277,13 @@ class MyTreeItem extends vscode.TreeItem {
         else {
             this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'focusBorder');
         }
-        
+
+        // Set the command to open the file and navigate to the line number
+        this.command = {
+            command: 'extension.openFileAtPosition',
+            title: 'Open File',
+            arguments: [this.filePath, this.lineNumber, this.columnNumber]
+        };
 
     }
 
@@ -283,6 +292,7 @@ class MyTreeItem extends vscode.TreeItem {
         return new vscode.ThemeIcon(iconId, new vscode.ThemeColor(color));
     }
 
+    
 }
 
 
@@ -329,12 +339,13 @@ class FplTheoriesProvider {
 
     parseScope(scope) {
         // Convert each item in the scope to a MyTreeItem
-        return scope.map(item => new MyTreeItem(item.Type, true, item.Name, item.Scope, item.ValueList));
+
+        return scope.map(item => new MyTreeItem(item.Type, true, item.Name, item.Line, item.Column, item.FilePath, item.Scope, item.ValueList));
     }
 
     parseValueList(valueList) {
         // Convert each item in the valueList to a MyTreeItem
-        return valueList.map(item => new MyTreeItem(item.Type, false, item.Name, item.Scope, item.ValueList));
+        return valueList.map(item => new MyTreeItem(item.Type, false, item.Name, item.Line, item.Column, item.FilePath, item.Scope, item.ValueList));
     }
 
 }
@@ -434,8 +445,22 @@ function activate(context) {
                 vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
             });
 
+            // Register the command
+            let disposableCommand2 = vscode.commands.registerCommand('extension.openFileAtPosition', (filePath, lineNumber, columnNumber) => {
+                const openPath = vscode.Uri.file(filePath);
+                vscode.workspace.openTextDocument(openPath).then(doc => {
+                    vscode.window.showTextDocument(doc).then(editor => {
+                        const position = new vscode.Position(lineNumber-1, columnNumber-1);
+                        const range = new vscode.Range(position, position);
+                        editor.selection = new vscode.Selection(position, position);
+                        editor.revealRange(range);
+                    });
+                });
+            });
+
             context.subscriptions.push(disposableClient);
             context.subscriptions.push(disposableCommand);
+            context.subscriptions.push(disposableCommand2);
 
             log2Console('Launching "Formal Proving Language", enjoy!', false);
         });

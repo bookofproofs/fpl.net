@@ -417,6 +417,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     let mutable _arity = 0
     let mutable _fplId = ""
     let mutable _typeId = ""
+    let mutable (_filePath:string option) = None
     let mutable _reprId = "undef"
     let mutable _hasBrackets = false
     let mutable _isSignatureVariable = false
@@ -445,6 +446,11 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     member this.FplId 
         with get () = _fplId
         and set (value) = _fplId <- value
+
+    /// FilePath of the FplValue.
+    member this.FilePath 
+        with get () = _filePath 
+        and set (value) = _filePath <- value
 
     /// Type of the Expr
     member this.ExpressionType
@@ -963,6 +969,12 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         root.FplId <- ""
         root
 
+    /// A factory method for the evaluation of FPL theories
+    static member CreateTheory(positions: Positions, parent: FplValue, filePath:string) =
+        let th = new FplValue(FplValueType.Theory, positions, Some parent)
+        th.FilePath <- Some filePath
+        th
+
     /// A factory method for the evaluation of Fpl class definitions
     static member CreateFplValue(positions: Positions, fplBlockType: FplValueType, parent: FplValue) =
         match fplBlockType with
@@ -988,7 +1000,6 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             ret.ReprId <- "obj"
             ret.TypeId <- "pred"
             ret
-        | FplValueType.Theory
         | FplValueType.MandatoryPredicate
         | FplValueType.OptionalPredicate
         | FplValueType.Reference 
@@ -1016,7 +1027,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             ret.TypeId <- "obj"
             ret.FplId <- "obj"
             ret
-        | FplValueType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead"))
+        | FplValueType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead."))
+        | FplValueType.Theory -> raise (ArgumentException("Please use CreateTheory for creating the theories instead."))
 
     /// Clears this FplValue
     member this.Reset() = 
@@ -1223,7 +1235,11 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     /// Serializes the symbol table as json
     member this.ToJson() = 
         let sb = StringBuilder()
+        let mutable currentPath = ""
         let rec createJson (root:FplValue) (sb:StringBuilder) level isLast =
+            match root.FilePath with
+            | Some path -> currentPath <- path
+            | _ -> ()
             let indent = String(' ', level)
             sb.AppendLine(String(' ', level - 1) + "{") |> ignore
             let mixedName = root.Type(SignatureType.Mixed).Replace(@"\",@"\\")
@@ -1231,6 +1247,10 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
                 sb.AppendLine($"{indent}\"Name\": \"(Main) {mixedName}\",") |> ignore
             else
                 sb.AppendLine($"{indent}\"Name\": \"{mixedName}\",") |> ignore
+            sb.AppendLine($"{indent}\"Type\": \"{root.BlockType.ShortName}\",") |> ignore
+            sb.AppendLine($"{indent}\"Line\": \"{root.NameStartPos.Line}\",") |> ignore
+            sb.AppendLine($"{indent}\"Column\": \"{root.NameStartPos.Column}\",") |> ignore
+            sb.AppendLine($"{indent}\"FilePath\": \"{currentPath}\",") |> ignore
             sb.AppendLine($"{indent}\"Type\": \"{root.BlockType.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"Scope\": [") |> ignore
             let mutable counterScope = 0

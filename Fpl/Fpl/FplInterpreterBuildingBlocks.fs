@@ -1613,7 +1613,7 @@ let evaluateSymbolTable (st: SymbolTable) =
         | Some pa ->
             es.ClearEvalStack()
             // evaluate the ParsedAst of a theory
-            let theoryValue = FplValue.CreateFplValue((Position("",0,1,1), Position("",0,1,1)), FplValueType.Theory, st.Root)
+            let theoryValue = FplValue.CreateTheory((Position("",0,1,1), Position("",0,1,1)), st.Root, pa.Parsing.Uri.AbsolutePath);
             if not (st.Root.Scope.ContainsKey(pa.Id)) then
                 st.Root.Scope.Add(pa.Id, theoryValue)
             else
