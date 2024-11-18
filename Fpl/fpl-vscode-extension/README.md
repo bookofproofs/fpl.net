@@ -9,10 +9,11 @@ This is a Proof of Concept of a private research project to develop such a langu
 ## Features
 
 * Syntax highlighting for `.fpl` files.
-* (Syntax-driven) Error diagnostics service (experimental) 
-* (Syntax-driven) Code-completion service with various code snippets 
+* (Syntax-driven) error diagnostics service (experimental) 
+* (Syntax-driven) code-completion service with various code snippets 
 * FPL support for user-defined prefix, postfix, and infix notation for mathematical operators in expressions.
-* Initial semantical error diagnostics (mainly related to scope issues and unknown identifier issues)
+* (Semantical) error diagnostics (as of now, mainly related to scope issues and unknown identifier issues)
+* Symbol table navigation tree view
 
 
 <img src="https://github.com/bookofproofs/fpl.net/blob/main/Fpl/fpl-vscode-extension/images/FplExtension.gif?raw=true" width="550">
@@ -33,6 +34,10 @@ None
 * None
 
 ## Release Notes
+
+### 1.7.0
+* Some Improvements FPL interpreter (alpha)
+* Navigation tree view showing the symbol table added
 
 ### 1.6.x
 * First FPL interpreter (alpha)

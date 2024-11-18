@@ -199,14 +199,100 @@ function acquireDotnetRuntime(runtimeName, relPathToDotnetRuntime) {
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 
+
+// a map of the types
+const typeToIconMap = new Map();
+typeToIconMap.set('th','library');
+typeToIconMap.set('var','variable');
+typeToIconMap.set('*var','bracket-error');
+typeToIconMap.set('+var','bracket-dot');
+typeToIconMap.set('mpred','symbol-boolean');
+typeToIconMap.set('opred','symbol-boolean');
+typeToIconMap.set('mfunc','symbol-interface');
+typeToIconMap.set('ofunc','symbol-interface');
+typeToIconMap.set('ctor','symbol-constructor');
+typeToIconMap.set('cl','symbol-class');
+typeToIconMap.set('obj','primitive-square');
+typeToIconMap.set('loc','location');
+typeToIconMap.set('thm','layout-panel-justify');
+typeToIconMap.set('lem','layout-panel-center');
+typeToIconMap.set('prop','layout-panel-right');
+typeToIconMap.set('cor','layout-sidebar-right');
+typeToIconMap.set('prf','testing-passed-icon');
+typeToIconMap.set('conj','question');
+typeToIconMap.set('ax','key');
+typeToIconMap.set('inf','symbol-structure');
+typeToIconMap.set('qtr','circuit-board');
+typeToIconMap.set('pred','symbol-boolean');
+typeToIconMap.set('func','symbol-interface');
+typeToIconMap.set('ref','link');
+typeToIconMap.set('arg','indent');
+typeToIconMap.set('just','kebab-horizontal');
+typeToIconMap.set('ainf','kebab-vertical');
+typeToIconMap.set('lang','globe');
+typeToIconMap.set('trsl','symbol-text');
+typeToIconMap.set('map','preview');
+typeToIconMap.set('stmt','symbol-event');
+typeToIconMap.set('ass','target');
+
+
 // A custom TreeItem
 class MyTreeItem extends vscode.TreeItem {
-    constructor(label, scope = [], valueList = []) {
+    constructor(typ, inScope, label, lineNumber, columnNumber, filePath, scope = [], valueList = []) {
         super(label, scope.length > 0 || valueList.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
-        this.label = label;
+        this.typ = typ;
+        this.lineNumber = lineNumber;
+        this.columnNumber = columnNumber;
+        this.filePath = filePath;
+        if (typ == "cl" || typ == "pred" || typ == "func") 
+        {
+            this.label = "def " + typ + ' ' + label;
+        }
+        else if (typ == "mpred") 
+        {
+            this.label = "pred prop " + label;
+        }
+        else if (typ == "opred") 
+        {
+            this.label = "opt pred prop " + label;
+        }
+        else if (typ == "mfunc") 
+        {
+            this.label = "func prop " + label;
+        }
+        else if (typ == "ofunc") 
+        {
+            this.label = "opt func prop " + label;
+        }
+        else 
+        {
+            this.label = typ + " " + label;
+        }
         this.scope = scope;
         this.valueList = valueList;
+
+        if (inScope) {
+            this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textPreformat.foreground');
+        }
+        else {
+            this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'focusBorder');
+        }
+
+        // Set the command to open the file and navigate to the line number
+        this.command = {
+            command: 'extension.openFileAtPosition',
+            title: 'Open File',
+            arguments: [this.filePath, this.lineNumber, this.columnNumber]
+        };
+
     }
+
+    // Method to get the colorized icon
+    getIconPathWithColor(iconId, color) {
+        return new vscode.ThemeIcon(iconId, new vscode.ThemeColor(color));
+    }
+
+    
 }
 
 
@@ -228,7 +314,7 @@ class FplTheoriesProvider {
     getChildren(element) {
         if (!element) {
             // If no element is passed, return the root nodes of the tree
-            return client.sendRequest('getTreeData').then(json => {
+            return client.sendRequest('getTreeData', {}).then(json => {
                 let treeData = JSON.parse(json);
                 return this.parseScope(treeData.Scope);
             }).catch(error => {
@@ -253,12 +339,13 @@ class FplTheoriesProvider {
 
     parseScope(scope) {
         // Convert each item in the scope to a MyTreeItem
-        return scope.map(item => new MyTreeItem("#" + item.Type + ": " + item.Name, item.Scope, item.ValueList));
+
+        return scope.map(item => new MyTreeItem(item.Type, true, item.Name, item.Line, item.Column, item.FilePath, item.Scope, item.ValueList));
     }
 
     parseValueList(valueList) {
         // Convert each item in the valueList to a MyTreeItem
-        return valueList.map(item => new MyTreeItem(item.Type + ": " + item.Name, item.Scope, item.ValueList));
+        return valueList.map(item => new MyTreeItem(item.Type, false, item.Name, item.Line, item.Column, item.FilePath, item.Scope, item.ValueList));
     }
 
 }
@@ -358,8 +445,22 @@ function activate(context) {
                 vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
             });
 
+            // Register the command
+            let disposableCommand2 = vscode.commands.registerCommand('extension.openFileAtPosition', (filePath, lineNumber, columnNumber) => {
+                const openPath = vscode.Uri.file(filePath);
+                vscode.workspace.openTextDocument(openPath).then(doc => {
+                    vscode.window.showTextDocument(doc).then(editor => {
+                        const position = new vscode.Position(lineNumber-1, columnNumber-1);
+                        const range = new vscode.Range(position, position);
+                        editor.selection = new vscode.Selection(position, position);
+                        editor.revealRange(range);
+                    });
+                });
+            });
+
             context.subscriptions.push(disposableClient);
             context.subscriptions.push(disposableCommand);
+            context.subscriptions.push(disposableCommand2);
 
             log2Console('Launching "Formal Proving Language", enjoy!', false);
         });

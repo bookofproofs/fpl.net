@@ -4,6 +4,10 @@ All notable changes to the "fpl-vscode-extension" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.7.0
+* Navigation tree view with symbol table added
+* Some improvements in type signature recognition 
+
 ## 1.6.3
 * Bugfix missing updating current theory diagnostics and vscode object explorer
 
