@@ -1226,13 +1226,11 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
         let rec createJson (root:FplValue) (sb:StringBuilder) level isLast =
             let indent = String(' ', level)
             sb.AppendLine(String(' ', level - 1) + "{") |> ignore
-            let name = root.Type(SignatureType.Name).Replace(@"\",@"\\")
-            let typeName = root.Type(SignatureType.Type).Replace(@"\",@"\\")
             let mixedName = root.Type(SignatureType.Mixed).Replace(@"\",@"\\")
-            if name = this.MainTheory then
-                sb.AppendLine($"{indent}\"Name\": \"Main> {name}\",") |> ignore
+            if mixedName = this.MainTheory then
+                sb.AppendLine($"{indent}\"Name\": \"(Main) {mixedName}\",") |> ignore
             else
-                sb.AppendLine($"{indent}\"Name\": \"{name} | {mixedName} | {typeName}\",") |> ignore
+                sb.AppendLine($"{indent}\"Name\": \"{mixedName}\",") |> ignore
             sb.AppendLine($"{indent}\"Type\": \"{root.BlockType.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"Scope\": [") |> ignore
             let mutable counterScope = 0

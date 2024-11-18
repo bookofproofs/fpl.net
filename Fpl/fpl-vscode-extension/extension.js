@@ -206,10 +206,10 @@ typeToIconMap.set('th','library');
 typeToIconMap.set('var','variable');
 typeToIconMap.set('*var','bracket-error');
 typeToIconMap.set('+var','bracket-dot');
-typeToIconMap.set('mpred','compass-dot');
-typeToIconMap.set('opred','compass');
-typeToIconMap.set('mfunc','layers-dot');
-typeToIconMap.set('ofunc','layers');
+typeToIconMap.set('mpred','symbol-boolean');
+typeToIconMap.set('opred','symbol-boolean');
+typeToIconMap.set('mfunc','symbol-interface');
+typeToIconMap.set('ofunc','symbol-interface');
 typeToIconMap.set('ctor','symbol-constructor');
 typeToIconMap.set('cl','symbol-class');
 typeToIconMap.set('obj','primitive-square');
@@ -217,23 +217,23 @@ typeToIconMap.set('loc','location');
 typeToIconMap.set('thm','layout-panel-justify');
 typeToIconMap.set('lem','layout-panel-center');
 typeToIconMap.set('prop','layout-panel-right');
-typeToIconMap.set('cor','ayout-sidebar-right');
+typeToIconMap.set('cor','layout-sidebar-right');
 typeToIconMap.set('prf','testing-passed-icon');
-typeToIconMap.set('conj','testing-error-icon');
-typeToIconMap.set('ax','alert');
-typeToIconMap.set('inf','chip');
+typeToIconMap.set('conj','question');
+typeToIconMap.set('ax','key');
+typeToIconMap.set('inf','symbol-structure');
 typeToIconMap.set('qtr','circuit-board');
-typeToIconMap.set('pred','law');
-typeToIconMap.set('func','graph-line');
-typeToIconMap.set('ref','link-external');
+typeToIconMap.set('pred','symbol-boolean');
+typeToIconMap.set('func','symbol-interface');
+typeToIconMap.set('ref','link');
 typeToIconMap.set('arg','indent');
 typeToIconMap.set('just','kebab-horizontal');
 typeToIconMap.set('ainf','kebab-vertical');
-typeToIconMap.set('lang','gripper');
-typeToIconMap.set('trsl','globe');
+typeToIconMap.set('lang','globe');
+typeToIconMap.set('trsl','symbol-text');
 typeToIconMap.set('map','preview');
-typeToIconMap.set('stmt','list-unordered');
-typeToIconMap.set('ass','link');
+typeToIconMap.set('stmt','symbol-event');
+typeToIconMap.set('ass','target');
 
 
 // A custom TreeItem
@@ -241,7 +241,30 @@ class MyTreeItem extends vscode.TreeItem {
     constructor(typ, inScope, label, scope = [], valueList = []) {
         super(label, scope.length > 0 || valueList.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
         this.typ = typ;
-        this.label = typ + ' ' + label;
+        if (typ == "cl" || typ == "pred" || typ == "func") 
+        {
+            this.label = "def " + typ + ' ' + label;
+        }
+        else if (typ == "mpred") 
+        {
+            this.label = "pred prop " + label;
+        }
+        else if (typ == "opred") 
+        {
+            this.label = "opt pred prop " + label;
+        }
+        else if (typ == "mfunc") 
+        {
+            this.label = "func prop " + label;
+        }
+        else if (typ == "ofunc") 
+        {
+            this.label = "opt func prop " + label;
+        }
+        else 
+        {
+            this.label = typ + " " + label;
+        }
         this.scope = scope;
         this.valueList = valueList;
 
