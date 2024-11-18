@@ -15,7 +15,7 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
-            Assert.AreEqual<int>(12, actual.Count);
+            Assert.AreEqual<int>(8, actual.Count);
         }
 
         [DataRow("prty")]
@@ -30,32 +30,24 @@ namespace FplLSTests
             {
                 if (item.Kind == CompletionItemKind.Keyword) count++;
             }
-            Assert.AreEqual<int>(6, count);
+            Assert.AreEqual<int>(4, count);
         }
 
-        [DataRow("property", "object", CompletionItemKind.Value, false, "property01")]
         [DataRow("property", "predicate", CompletionItemKind.Value, false, "property02")]
         [DataRow("property", "function", CompletionItemKind.Value, false, "property03")]
-        [DataRow("property", "object", CompletionItemKind.Value, true, "property04")]
         [DataRow("property", "predicate", CompletionItemKind.Value, true, "property05")]
         [DataRow("property", "function", CompletionItemKind.Value, true, "property06")]
-        [DataRow("prty", "obj", CompletionItemKind.Value, false, "zproperty01")]
         [DataRow("prty", "pred", CompletionItemKind.Value, false, "zproperty02")]
         [DataRow("prty", "func", CompletionItemKind.Value, false, "zproperty03")]
-        [DataRow("prty", "obj", CompletionItemKind.Value, true, "zproperty04")]
         [DataRow("prty", "pred", CompletionItemKind.Value, true, "zproperty05")]
         [DataRow("prty", "func", CompletionItemKind.Value, true, "zproperty06")]
 
-        [DataRow("property", "object", CompletionItemKind.Keyword, false, "zzzproperty01")]
         [DataRow("property", "predicate", CompletionItemKind.Keyword, false, "zzzproperty02")]
         [DataRow("property", "function", CompletionItemKind.Keyword, false, "zzzproperty03")]
-        [DataRow("property", "object", CompletionItemKind.Keyword, true, "zzzproperty04")]
         [DataRow("property", "predicate", CompletionItemKind.Keyword, true, "zzzproperty05")]
         [DataRow("property", "function", CompletionItemKind.Keyword, true, "zzzproperty06")]
-        [DataRow("prty", "obj", CompletionItemKind.Keyword, false, "zzzzproperty01")]
         [DataRow("prty", "pred", CompletionItemKind.Keyword, false, "zzzzproperty02")]
         [DataRow("prty", "func", CompletionItemKind.Keyword, false, "zzzzproperty03")]
-        [DataRow("prty", "obj", CompletionItemKind.Keyword, true, "zzzzproperty04")]
         [DataRow("prty", "pred", CompletionItemKind.Keyword, true, "zzzzproperty05")]
         [DataRow("prty", "func", CompletionItemKind.Keyword, true, "zzzzproperty06")]
         [TestMethod]
@@ -72,8 +64,6 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("prty", "obj ")]
-        [DataRow("property", "object")]
         [DataRow("prty", "pred ")]
         [DataRow("property", "predicate")]
         [DataRow("prty", "func ")]
@@ -93,8 +83,6 @@ namespace FplLSTests
         }
 
 
-        [DataRow("prty", "obj")]
-        [DataRow("property", "object")]
         [DataRow("prty", "pred")]
         [DataRow("property", "predicate")]
         [DataRow("prty", "func")]
@@ -118,11 +106,11 @@ namespace FplLSTests
                 {
                     if (choice == "prty")
                     {
-                        Assert.AreEqual<string>("_ " + choice + " opt " + subType + postfix, item.Label);
+                        Assert.AreEqual<string>("_ " + choice + " " + subType + " opt" + postfix, item.Label);
                     }
                     else
                     {
-                        Assert.AreEqual<string>("_ " + choice + " optional " + subType + postfix, item.Label);
+                        Assert.AreEqual<string>("_ " + choice + " " + subType + " optional" + postfix, item.Label);
                     }
                     counterRelatedOpt++;
                 }
@@ -143,8 +131,6 @@ namespace FplLSTests
         {
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
-            var countOptional = 0;
-            var countObject = 0;
             var countPredicative = 0;
             var countFunctional = 0;
             foreach (var item in actual)
@@ -152,14 +138,10 @@ namespace FplLSTests
                 if (item.Kind == CompletionItemKind.Keyword)
                 {
                     Assert.IsTrue(item.Detail.Contains(l));
-                    if (item.Detail.Contains("opt")) countOptional++;
-                    if (item.Detail.Contains("obj")) countObject++;
                     if (item.Detail.Contains("pred")) countPredicative++;
                     if (item.Detail.Contains("func")) countFunctional++;
                 }
             }
-            Assert.AreEqual<int>(3, countOptional);
-            Assert.AreEqual<int>(2, countObject);
             Assert.AreEqual<int>(2, countPredicative);
             Assert.AreEqual<int>(2, countFunctional);
 
@@ -173,7 +155,6 @@ namespace FplLSTests
             var detailCi = new FplCompletionItem(choice);
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             var countOptional = 0;
-            var countObject = 0;
             var countPredicative = 0;
             var countFunctional = 0;
             foreach (var item in actual)
@@ -182,20 +163,16 @@ namespace FplLSTests
                 {
                     Assert.IsTrue(item.Detail.Contains(l));
                     if (item.Detail.Contains("opt")) countOptional++;
-                    if (item.Detail.Contains("cl")) countObject++;
                     if (item.Detail.Contains("pred")) countPredicative++;
                     if (item.Detail.Contains("func")) countFunctional++;
                 }
             }
-            Assert.AreEqual<int>(3, countOptional);
-            Assert.AreEqual<int>(2, countObject);
+            Assert.AreEqual<int>(2, countOptional);
             Assert.AreEqual<int>(2, countPredicative);
             Assert.AreEqual<int>(2, countFunctional);
 
         }
 
-        [DataRow("prty", "obj")]
-        [DataRow("property", "object")]
         [DataRow("prty", "pred")]
         [DataRow("property", "predicate")]
         [DataRow("prty", "func")]
@@ -210,7 +187,7 @@ namespace FplLSTests
             {
                 if (item.InsertText.Contains(choice) && item.InsertText.Contains(subType+" ")) { counterSnippets++; }
             }
-            Assert.AreEqual<int>(2, counterSnippets);
+            Assert.AreEqual<int>(3, counterSnippets);
         }
 
     }
