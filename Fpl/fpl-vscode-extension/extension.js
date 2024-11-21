@@ -238,7 +238,7 @@ typeToIconMap.set('ass','target');
 
 // A custom TreeItem
 class MyTreeItem extends vscode.TreeItem {
-    constructor(typ, inScope, label, lineNumber, columnNumber, filePath, scope = [], valueList = []) {
+    constructor(typ, inScope, label, lineNumber, columnNumber, filePath, fplValueType, fplValueRepr, scope = [], valueList = []) {
         super(label, scope.length > 0 || valueList.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
         this.typ = typ;
         this.lineNumber = lineNumber;
@@ -268,8 +268,9 @@ class MyTreeItem extends vscode.TreeItem {
         {
             this.label = typ + " " + label;
         }
+        this.tooltip = "n: " + label + "\nt: "+ fplValueType + "\nv: " + fplValueRepr;
         this.scope = scope;
-        log2Console(this.label + " " + scope.length,false);
+        if (this.typ == "th") log2Console(this.label + " " + scope.length, false);
         this.valueList = valueList;
 
         if (inScope) {
@@ -341,12 +342,12 @@ class FplTheoriesProvider {
     parseScope(scope) {
         // Convert each item in the scope to a MyTreeItem
 
-        return scope.map(item => new MyTreeItem(item.Type, true, item.Name, item.Line, item.Column, item.FilePath, item.Scope, item.ValueList));
+        return scope.map(item => new MyTreeItem(item.Type, true, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.Scope, item.ValueList));
     }
 
     parseValueList(valueList) {
         // Convert each item in the valueList to a MyTreeItem
-        return valueList.map(item => new MyTreeItem(item.Type, false, item.Name, item.Line, item.Column, item.FilePath, item.Scope, item.ValueList));
+        return valueList.map(item => new MyTreeItem(item.Type, false, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.Scope, item.ValueList));
     }
 
 }

@@ -64,8 +64,12 @@ type TestFplValueScopeName() =
             | "cla2" -> Assert.AreEqual<string>("SomeClass2", cla2.Type(SignatureType.Mixed))
             | "pre1" -> Assert.AreEqual<string>("SomePredicate1()", pre1.Type(SignatureType.Mixed))
             | "pre2" -> Assert.AreEqual<string>("SomePredicate2()", pre2.Type(SignatureType.Mixed))
-            | "fun1" -> Assert.AreEqual<string>("SomeFunctionalTerm1() -> obj", fun1.Type(SignatureType.Mixed))
-            | "fun2" -> Assert.AreEqual<string>("SomeFunctionalTerm2() -> obj", fun2.Type(SignatureType.Mixed))
+            | "fun1" -> 
+                Assert.AreEqual<string>("SomeFunctionalTerm1() -> obj", fun1.Type(SignatureType.Mixed))
+                Assert.AreEqual<string>("SomeFunctionalTerm1() -> obj", fun1.Type(SignatureType.Name))
+            | "fun2" -> 
+                Assert.AreEqual<string>("SomeFunctionalTerm2() -> obj", fun2.Type(SignatureType.Mixed))
+                Assert.AreEqual<string>("SomeFunctionalTerm2() -> obj", fun2.Type(SignatureType.Name))
             | "prf1" -> Assert.AreEqual<string>("SomeTheorem1$1", prf1.Type(SignatureType.Mixed))
             | "prf2" -> Assert.AreEqual<string>("SomeTheorem2$1", prf2.Type(SignatureType.Mixed))
             | "loc1" -> Assert.AreEqual<string>("not(x)", loc1.Type(SignatureType.Mixed))

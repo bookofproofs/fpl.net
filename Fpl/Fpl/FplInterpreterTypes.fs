@@ -543,6 +543,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                         | SignatureType.Type -> _typeId
                         | SignatureType.Mixed -> _fplId
                         | SignatureType.Repr -> _reprId
+                    | (FplValueType.Mapping, _) -> 
+                        _typeId
                     | _ -> 
                         match isSignature with
                         | SignatureType.Name -> _fplId
@@ -1242,16 +1244,19 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
             | _ -> ()
             let indent = String(' ', level)
             sb.AppendLine(String(' ', level - 1) + "{") |> ignore
-            let mixedName = root.Type(SignatureType.Mixed).Replace(@"\",@"\\")
-            if mixedName = this.MainTheory then
-                sb.AppendLine($"{indent}\"Name\": \"(Main) {mixedName}\",") |> ignore
+            let name = root.Type(SignatureType.Name).Replace(@"\",@"\\")
+            let fplTypeName = root.Type(SignatureType.Type).Replace(@"\",@"\\")
+            let fplValueRepr = root.Type(SignatureType.Repr).Replace(@"\",@"\\")
+            if name = this.MainTheory then
+                sb.AppendLine($"{indent}\"Name\": \"(Main) {name}\",") |> ignore
             else
-                sb.AppendLine($"{indent}\"Name\": \"{mixedName}\",") |> ignore
+                sb.AppendLine($"{indent}\"Name\": \"{name}\",") |> ignore
             sb.AppendLine($"{indent}\"Type\": \"{root.BlockType.ShortName}\",") |> ignore
+            sb.AppendLine($"{indent}\"FplValueType\": \"{fplTypeName}\",") |> ignore
+            sb.AppendLine($"{indent}\"FplValueRepr\": \"{fplValueRepr}\",") |> ignore
             sb.AppendLine($"{indent}\"Line\": \"{root.NameStartPos.Line}\",") |> ignore
             sb.AppendLine($"{indent}\"Column\": \"{root.NameStartPos.Column}\",") |> ignore
             sb.AppendLine($"{indent}\"FilePath\": \"{currentPath}\",") |> ignore
-            sb.AppendLine($"{indent}\"Type\": \"{root.BlockType.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"Scope\": [") |> ignore
             let mutable counterScope = 0
             root.Scope
