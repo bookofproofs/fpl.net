@@ -214,6 +214,42 @@ type UpdatingSymbolTableNavigation() =
         prepareFplCode(filename, "", true) |> ignore
 
     [<TestMethod>]
+    member this.OpeningGrandParentFileTheoryEnhancesSymbolTableDeeply() =
+        // prepare test, making sure there is an empty 
+        // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.
+        ad.Clear()
+        // first delete lib and repo subdirectories (if any)
+        let currentPath = Directory.GetCurrentDirectory()
+        let currentPathLib = Path.Combine(currentPath,"lib")
+        let currentPathRepo = Path.Combine(currentPath,"repo")
+        deleteDirectory currentPathLib
+        deleteDirectory currentPathRepo
+
+        let fplCode = """
+            uses Fpl.SetTheory;
+        """
+        let filename = "OpeningGrandParentFileTheoryEnhancesSymbolTableDeeply"  
+        // file processing creates the subdirectories
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+
+        // now, conserve the symbol table for the test's next step and open the grand parent file
+        let st = stOption.Value
+
+        let pre = st.ToJson()
+        // open a grand parent
+        let uri = PathEquivalentUri(Path.Combine(currentPathRepo,"Fpl.Commons.fpl"))
+        let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
+        let fplCode = File.ReadAllText(uri.AbsolutePath)
+        FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
+
+        let post = st.ToJson()
+        // and test if the corrent number of asts in symbol table
+        Assert.AreEqual<string>(pre, post)
+        
+        // remove the test file
+        prepareFplCode(filename, "", true) |> ignore
+
+    [<TestMethod>]
     member this.OpeningFileInLibAsCopyOfFileInRepoDoesRaiseNSP05Error() =
         // prepare test, making sure there is an empty 
         // lib subfolder and a repo subfolder containing the files Fpl.Commons.fpl and Fpl.SetTheory.fpl.

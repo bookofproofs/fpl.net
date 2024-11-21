@@ -377,6 +377,7 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
         if st.Root.Scope.ContainsKey(theoryToBeReset.Id) then
             let toBeRemoved = st.Root.Scope[theoryToBeReset.Id]
             toBeRemoved.Reset()
+            theoryToBeReset.Status <- ParsedAstStatus.UsesClausesEvaluated
     | None -> ()
 
 
