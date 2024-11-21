@@ -127,8 +127,26 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("""def pred T (x,y:Nat) {true} def cl Nat:obj {} def pred Caller() {dec ~a,b:obj ~c:ind; T(a,b,c)} ;""",
-        "no matching paramater for `c:ind` in TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
+    [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); self}} 
+                 def cl B:A {ctor B(x:obj){dec base.A(); self}} 
+                 def cl C:B {ctor C(){dec base.B(); self}};;""",
+        "")>]
+    [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); self}} 
+                 def cl B:A {ctor B(x:obj){dec base.A(); self}} 
+                 def cl C:B {ctor C(){dec ~x:ind base.B(x); self}};;""",
+        "`x:ind` does not match `x:obj` in TestSignatureMatchingReferencesConstructors.B.B(obj)")>]
+    [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); self}} 
+                 def cl B:A {ctor B(x:obj){dec base.A(); self}} 
+                 def cl C:B {ctor C(){dec ~x:obj base.B(x); self}};;""",
+        "")>]
+    [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); self}} 
+                 def cl B:A {ctor B(x:A){dec base.A(); self}} 
+                 def cl C:B {ctor C(){dec ~x:obj base.B(x); self}};;""",
+        "`x:obj` does not match `x:A` in TestSignatureMatchingReferencesConstructors.B.B(A)")>]
+    [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); self}} 
+                 def cl B:A {ctor B(x:A){dec base.A(); self}} 
+                 def cl C:B {ctor C(){dec ~x:A base.B(x); self}};;""",
+        "")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesConstructors(varVal, var:string) =
         ad.Clear()
@@ -141,10 +159,13 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("Caller(")) |> List.head
-            let fvArgs = pred.ValueList[0]
-            match matchArgumentsWithParameters fvArgs fvPars with
+            let testClass = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("C")) |> List.head
+            let parentClass = testClass.ValueList[0]
+            let constructorParentClass = parentClass.Scope.Values |> Seq.toList |> List.head
+            let constructor = testClass.Scope.Values |> Seq.toList |> List.head
+            let baseConstructorCall = constructor.ValueList |> Seq.filter (fun fv -> fv.BlockType = FplValueType.Stmt && fv.FplId = "bas") |> Seq.toList |> List.head
+            let fvArgs = baseConstructorCall.ValueList[0]
+            match matchArgumentsWithParameters fvArgs constructorParentClass with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
             | None -> Assert.AreEqual<string>("no error","no error")
         | None -> 
