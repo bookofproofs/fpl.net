@@ -220,7 +220,7 @@ typeToIconMap.set('prop','layout-panel-right');
 typeToIconMap.set('cor','layout-sidebar-right');
 typeToIconMap.set('prf','testing-passed-icon');
 typeToIconMap.set('conj','question');
-typeToIconMap.set('ax','key');
+typeToIconMap.set('ax','layout');
 typeToIconMap.set('inf','symbol-structure');
 typeToIconMap.set('qtr','circuit-board');
 typeToIconMap.set('pred','symbol-boolean');
@@ -269,6 +269,7 @@ class MyTreeItem extends vscode.TreeItem {
             this.label = typ + " " + label;
         }
         this.scope = scope;
+        log2Console(this.label + " " + scope.length,false);
         this.valueList = valueList;
 
         if (inScope) {
@@ -407,7 +408,16 @@ function activate(context) {
 
             // refresh FPL Theories Explorer on document open event  
             vscode.workspace.onDidOpenTextDocument((document) => {
+                log2Console("onDidOpenTextDocument", false);
                 if (document.languageId === 'fpl') {
+                    fplTheoriesProvider.refresh();
+                }
+            });
+
+            // refresh FPL Theories Explorer on active text editor changes   
+            vscode.window.onDidChangeActiveTextEditor((editor) => {
+                log2Console("onDidChangeActiveTextEditor", false);
+                if (editor && editor.document.languageId === 'fpl') {
                     fplTheoriesProvider.refresh();
                 }
             });
@@ -429,7 +439,7 @@ function activate(context) {
             let relPathToConfig = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'vsfplconfig.json');
             fs.writeFile(relPathToConfig, configJson, (err) => {
                 if (err) {
-                    console.error('Error writing file:', err);
+                    log2Console('Error writing file:' + err.message, true);
                 }
             });
 
@@ -444,6 +454,12 @@ function activate(context) {
                 // Display a message box to the user
                 vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
             });
+
+            // initial tree view refresh if there is already an active text editor
+            if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === 'fpl') {
+                log2Console("initial treeview refresh", false);
+                fplTheoriesProvider.refresh();
+            }
 
             // Register the command
             let disposableCommand2 = vscode.commands.registerCommand('extension.openFileAtPosition', (filePath, lineNumber, columnNumber) => {
