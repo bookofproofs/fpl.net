@@ -1116,8 +1116,8 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(pred)
         eval st predicateAst
         es.PopEvalStack()
-        emitLG000orLG001Diagnostics qtr "all quantor"
         es.PopEvalStack()
+        emitLG000orLG001Diagnostics qtr "all quantor"
         st.EvalPop()
     | Ast.Exists((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         st.EvalPush("Exists")
@@ -1136,8 +1136,8 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(pred)
         eval st predicateAst
         es.PopEvalStack()
-        emitLG000orLG001Diagnostics qtr "exists quantor"
         es.PopEvalStack()
+        emitLG000orLG001Diagnostics qtr "exists quantor"
         st.EvalPop()
     // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
     | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclAst), predicateAst)) ->
