@@ -83,7 +83,7 @@ axiom SuccessorIsInjective()
 
 axiom CompleteInduction()
 {
-    all p:pred
+    all p:pred(x:Nat)
     {
         impl
         (
@@ -96,10 +96,7 @@ axiom CompleteInduction()
 
 
 
-def pred IsGreaterOrEqual(n,m: Nat)
-{
-    ex k: Nat { (n = Add(m,k)) }
-}
+
 
 // besides the class "Nat", we can formulate definition of the set of all natural numbers
 def class SetNat: Set
@@ -140,6 +137,11 @@ def func Add(n,m: Nat)->Nat
         )
     ;
     return result
+}
+
+def pred IsGreaterOrEqual(n,m: Nat)
+{
+    ex k: Nat { (n = Add(m,k)) }
 }
 
 prop AddIsUnique(op: Add)
@@ -200,6 +202,7 @@ def func Sum2(list:* Nat)->Nat
 {
     dec
         ~i: index
+        ~result: Nat
         result:=Zero()
         for i in list
         {
@@ -276,6 +279,21 @@ proposition SumOfConsecutiveNumbers()
             (Sum(1,n,f) = Div(Mul(n,Succ(n)),2))
         }
     )
+}
+
+def cl Real: obj
+{
+    intr
+}
+
+def pred LowerEqual (x,y:tpl) 
+{
+    intr
+}
+
+def cl Function: obj
+{
+    intr
 }
 
 def func RealValuedFunction(x:Real) -> Real
