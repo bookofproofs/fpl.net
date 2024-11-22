@@ -1032,21 +1032,6 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | FplValueType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead."))
         | FplValueType.Theory -> raise (ArgumentException("Please use CreateTheory for creating the theories instead."))
 
-    /// Clears this FplValue
-    member this.Reset() = 
-        let rec clearAll (root:FplValue) =
-            root.ValueList
-            |> Seq.iter (fun child ->
-                clearAll child
-            )
-            root.ValueList.Clear()
-            root.Scope
-            |> Seq.iter (fun child ->
-                clearAll child.Value
-            )
-            root.Scope.Clear()
-        clearAll this
-
     /// A string representation of this FplValue
     override this.ToString() = 
         $"{this.BlockTypeShortName} {this.Type(SignatureType.Name)}"

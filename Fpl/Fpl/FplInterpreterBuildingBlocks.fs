@@ -1297,8 +1297,6 @@ let rec eval (st: SymbolTable) ast =
                     // prevent recursive clearing of the subNode
                     rb.ValueList.Clear() 
                     rb.Scope.Clear()
-                    // dispose the rb node
-                    rb.Reset()
         simplifyTriviallyNestedExpressions refBlock
         es.PopEvalStack()
         simplifyTriviallyNestedExpressions fv
@@ -1617,7 +1615,6 @@ let evaluateSymbolTable (st: SymbolTable) =
             if not (st.Root.Scope.ContainsKey(pa.Id)) then
                 st.Root.Scope.Add(pa.Id, theoryValue)
             else
-                st.Root.Scope[pa.Id].Reset()
                 st.Root.Scope[pa.Id] <- theoryValue
             theoryValue.FplId <- pa.Id
             theoryValue.TypeId <- pa.Id

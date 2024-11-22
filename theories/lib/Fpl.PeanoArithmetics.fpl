@@ -1,3 +1,7 @@
+/*
+This theory is experimental and for test purposes only.
+*/
+
 :ext
     Digits: /\d+/
 :end
