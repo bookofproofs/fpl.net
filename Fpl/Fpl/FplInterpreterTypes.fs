@@ -1369,6 +1369,8 @@ let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
                     Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
             elif aType.StartsWith(pType + "(") then
                 None
+            elif aType = "???" && pType <> "???" then
+                Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
             else
                 Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
         | ([], p::prs) -> 

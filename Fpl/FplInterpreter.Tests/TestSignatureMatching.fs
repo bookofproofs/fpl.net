@@ -130,7 +130,7 @@ type TestSignatureMatching() =
     [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); self}} 
                  def cl B:A {ctor B(x:obj){dec base.A(); self}} 
                  def cl C:B {ctor C(){dec base.B(); self}};;""",
-        "")>]
+        "`()` does not match `x:obj` in TestSignatureMatchingReferencesConstructors.B.B(obj)")>]
     [<DataRow("""def cl A:obj {ctor A(){dec base.obj(); self}} 
                  def cl B:A {ctor B(x:obj){dec base.A(); self}} 
                  def cl C:B {ctor C(){dec ~x:ind base.B(x); self}};;""",
