@@ -950,11 +950,17 @@ let rec eval (st: SymbolTable) ast =
             es.PushEvalStack(refBlock)
             eval st fplIdentifierAst
             eval st specificationAst |> ignore
-            let candidates = findCandidatesByName st refBlock.FplId
-            match emitSIG04Diagnostics refBlock candidates with
-            | Some matchedCandidate -> 
-                refBlock.Scope.Add(refBlock.FplId,matchedCandidate)
-            | _ -> ()
+            if System.Char.IsLower(refBlock.FplId[0]) then
+                // match the signatures of referenced variables with the signatures of their declared types 
+                let candidates = refBlock.Scope.Values |> Seq.toList
+                emitSIG04Diagnostics refBlock candidates |> ignore
+                ()
+            else
+                let candidates = findCandidatesByName st refBlock.FplId
+                match emitSIG04Diagnostics refBlock candidates with
+                | Some matchedCandidate -> 
+                    refBlock.Scope.Add(refBlock.FplId,matchedCandidate)
+                | _ -> ()
             es.PopEvalStack()
         | None -> 
             // if no specification was found then simply continue in the same context
