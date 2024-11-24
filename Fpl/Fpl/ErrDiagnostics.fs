@@ -122,6 +122,7 @@ type DiagnosticCode =
     | SIG00 of string * int
     | SIG01 of string 
     | SIG02 of string * int * string
+    | SIG03 of string * string 
     | SIG04 of string * int * string list
     // proof-related error codes
     | PR000 of string 
@@ -195,6 +196,7 @@ type DiagnosticCode =
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
             | SIG02 _ -> "SIG02"
+            | SIG03 _ -> "SIG03"
             | SIG04 _ -> "SIG04"
             // proof-related error codes
             | PR000 _ -> "PR000"
@@ -268,6 +270,7 @@ type DiagnosticCode =
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
+            | SIG03 (retType, mapType) -> $"The return type `{retType}` does not match the expected functional type `{mapType}`."
             | SIG04 (signature, numbOfcandidates, errorList) -> 
                 if numbOfcandidates = 0 then 
                     $"No overload matching `{signature}`, no candidates were found. Are you missing a uses clause?" 
