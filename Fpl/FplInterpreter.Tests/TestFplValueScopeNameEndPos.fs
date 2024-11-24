@@ -823,7 +823,7 @@ type TestFplValueScopeNameEndPos() =
     member this.TestLanguage(var, predName, trslCode) =
         ad.Clear()
         let fplCode = sprintf """loc %s := %s;""" predName trslCode
-        let filename = "TestLanguageNameEndPos.Column"
+        let filename = "TestLanguageNameEndPos"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -853,7 +853,7 @@ type TestFplValueScopeNameEndPos() =
     member this.TestLocalization(var, predName, trslCode) =
         ad.Clear()
         let fplCode = sprintf """loc %s := %s;""" predName trslCode
-        let filename = "TestLocalizationNameEndPos.Column"
+        let filename = "TestLocalizationNameEndPos"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -882,7 +882,7 @@ type TestFplValueScopeNameEndPos() =
     member this.TestTranslation(var, predName, trslCode) =
         ad.Clear()
         let fplCode = sprintf """loc %s := %s;""" predName trslCode
-        let filename = "TestTranslationNameEndPos.Column"
+        let filename = "TestTranslationNameEndPos"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
