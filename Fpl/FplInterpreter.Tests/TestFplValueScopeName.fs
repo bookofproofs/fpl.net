@@ -210,6 +210,7 @@ type TestFplValueScopeName() =
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
+    [<DataRow("s")>]
     [<DataRow("xu")>]
     [<DataRow("xv")>]
     [<DataRow("xw")>]
@@ -868,6 +869,45 @@ type TestFplValueScopeName() =
             | "base7" -> Assert.AreEqual<string>("T1() -> obj", base1.Type(SignatureType.Mixed))
             | "base8" -> Assert.AreEqual<string>("T1() -> obj", base1.Type(SignatureType.Mixed))
             | "base9" -> Assert.AreEqual<string>("T1() -> obj", base1.Type(SignatureType.Mixed))
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+
+    [<DataRow("base1", """def func T()->obj {intr};""")>]
+    [<DataRow("base2", """def func T()->ind {intr};""")>]
+    [<DataRow("base3", """def func T()->func {intr};""")>]
+    [<DataRow("base4", """def func T()->pred {intr};""")>]
+    [<DataRow("base5", """def cl A:obj {intr} def func T()->A {intr};""")>]
+    [<DataRow("base6", """def func T()->obj(z:ind) {intr};""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
+    [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
+    [<DataRow("base10", """def cl A:obj {intr} def func T()->A(f:func(x:A)->A) {intr};""")>]
+    [<TestMethod>]
+    member this.TestMapping(var, varVal) =
+        ad.Clear()
+        let fplCode = sprintf "%s;" varVal
+        let filename = "TestMappingName"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+            let mapping = base1.ValueList[0]
+            match var with
+            | "base1" -> Assert.AreEqual<string>("obj", mapping.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>("ind", mapping.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("func", mapping.Type(SignatureType.Mixed))
+            | "base4" -> Assert.AreEqual<string>("pred", mapping.Type(SignatureType.Mixed))
+            | "base5" -> Assert.AreEqual<string>("A", mapping.Type(SignatureType.Mixed))
+            | "base6" -> Assert.AreEqual<string>("obj(ind)", mapping.Type(SignatureType.Mixed))
+            | "base7" -> Assert.AreEqual<string>("pred(*obj)", mapping.Type(SignatureType.Mixed))
+            | "base8" -> Assert.AreEqual<string>("func(*pred(obj)) -> pred(ind)", mapping.Type(SignatureType.Mixed))
+            | "base9" -> Assert.AreEqual<string>("pred(+func(A) -> A)", mapping.Type(SignatureType.Mixed))
+            | "base10" -> Assert.AreEqual<string>("A(func(A) -> A)", mapping.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

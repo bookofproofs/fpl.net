@@ -242,6 +242,13 @@ type TestExpressionEvaluation() =
     [<DataRow("def pred T() { dec ~x:func(y:obj)->obj; is(x,func) };", "true")>]
     [<DataRow("def pred T() { dec ~x:func(y:obj)->ind; is(x,func(y:obj)->ind) };", "true")>]
     [<DataRow("def pred T() { dec ~x:pred(y:obj); is(self,pred) };", "true")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred) };", "true")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func()->obj)) };", "true")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func()->ind)) };", "false")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func(z:obj)->obj)) };", "false")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func(z:obj)->obj); is(x,pred(y:func(z:obj)->Nat)) };", "false")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func(z:obj)->Nat); is(x,pred(y:func(z:obj)->Nat)) };", "true")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func(z:obj)->Nat); is(x,pred(a:func(b:obj)->Nat)) };", "true")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationIsOperand(fplCode, expected: string) =
         ad.Clear()
