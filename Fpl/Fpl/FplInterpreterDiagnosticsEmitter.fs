@@ -556,6 +556,22 @@ let emitSIG04DiagnosticsForTypes identifier pos1 pos2 =
             }
     ad.AddDiagnostic diagnostic
 
+let emitSIG03Diagnostics (retType:FplValue) (mapType:FplValue) = 
+    match matchWithMapping retType mapType with
+    | Some errMsg -> 
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = retType.NameStartPos
+                Diagnostic.EndPos = retType.NameEndPos
+                Diagnostic.Code = SIG03(errMsg, mapType.Type(SignatureType.Type))
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+    | _ -> ()
+
 let emitSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
     match checkCandidates calling candidates [] with
     | (Some candidate,_) -> Some candidate // no error occured
