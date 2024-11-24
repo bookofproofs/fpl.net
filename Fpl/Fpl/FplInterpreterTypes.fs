@@ -399,6 +399,7 @@ type SignatureType =
     | Mixed
     | Repr
 
+
 type ScopeSearchResult = 
     | FoundAssociate of FplValue 
     | FoundMultiple of string
@@ -509,6 +510,13 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// A value list inside this FplValue
     member this.ValueList = _valueList
 
+    /// Tries to find a mapping of this FplValue
+    member this.Mapping =
+        if this.ValueList.Count>0 && this.ValueList[0].BlockType = FplValueType.Mapping then
+            Some (this.ValueList[0])
+        else   
+            None
+
     /// Type Identifier of this FplValue 
     member this.Type (isSignature:SignatureType) =
         match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with 
@@ -565,11 +573,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
                         kvp.Value.Type(propagate))
                     |> String.concat ", "
-                let mapping =
-                    if this.ValueList.Count>0 && this.ValueList[0].BlockType = FplValueType.Mapping then
-                        Some (this.ValueList[0])
-                    else   
-                        None
+
                 let idRec() =
                     match this.BlockType with
                     | FplValueType.Theory 
@@ -615,7 +619,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     | FplValueType.OptionalFunctionalTerm 
                     | FplValueType.MandatoryFunctionalTerm
                     | FplValueType.FunctionalTerm ->
-                        match mapping with 
+                        match this.Mapping with 
                         | Some map -> 
                             let paramT = paramTuple()
                             sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
@@ -632,7 +636,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     | FplValueType.VariadicVariableMany 
                     | FplValueType.VariadicVariableMany1 ->
                         let pars = paramTuple()
-                        match (pars, mapping) with
+                        match (pars, this.Mapping) with
                         | ("",_) -> 
                             head 
                         | (_,None) -> 
@@ -1322,71 +1326,101 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
     ) |> ignore
     pm |> Seq.toList
 
-/// Tries to match the arguments of `a` FplValue with the parameters of the `p` FplValue and returns 
-/// Some specific error message or None, if the match succeeded
+let rec mpwa (args:FplValue list) (pars:FplValue list) = 
+    match (args, pars) with
+    | (a::ars, p::prs) -> 
+        let aType = a.Type(SignatureType.Type)
+        let pType = p.Type(SignatureType.Type)
+        if aType = pType then
+            mpwa ars prs
+        elif pType.StartsWith("tpl") || pType.StartsWith("template") then
+            mpwa ars prs
+        elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "???" then 
+            if ars.Length > 0 then 
+                mpwa ars pars
+            else
+                None
+        elif pType.StartsWith("+") && aType = "???" then 
+            Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        elif pType = $"+{aType}" then 
+            if ars.Length > 0 then 
+                mpwa ars pars
+            else
+                None
+        elif Char.IsUpper(aType[0]) && a.BlockType = FplValueType.Reference && a.Scope.Count = 1 then
+            let var = a.Scope.Values |> Seq.toList |> List.head
+            if var.ValueList.Count = 1 then 
+                let cl = var.ValueList[0]
+                match cl.BlockType with 
+                | FplValueType.Class ->
+                    let inheritanceList = findClassInheritanceChain cl pType
+                    match inheritanceList with 
+                    | Some str -> 
+                        mpwa ars prs
+                    | None -> 
+                        Some($"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes")
+                | _ -> 
+                    // this case does not occur but for we cover it for completeness reasons
+                    Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does'nt match `{p.Type(SignatureType.Name)}:{pType}`")
+            else
+                Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        elif aType.StartsWith(pType + "(") then
+            None
+        elif aType = "???" && pType <> "???" then
+            Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        else
+            Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+    | ([], p::prs) -> 
+            let pType = p.Type(SignatureType.Type)
+            Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
+    | (a::[], []) -> 
+        if a.FplId = "???" then 
+            None
+        else
+            let aType = a.Type(SignatureType.Type)
+            Some($"no matching paramater for `{a.Type(SignatureType.Name)}:{aType}`")
+    | (a::ars, []) -> 
+            let aType = a.Type(SignatureType.Type)
+            Some($"no matching paramater for `{a.Type(SignatureType.Name)}:{aType}`")
+    | ([],[]) -> None
+
+/// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns 
+/// Some(specific error message) or None, if the match succeeded.
 let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
     let parameters = fvp.Scope.Values |> Seq.toList
     let arguments = fva.ValueList |> Seq.toList
-
+    
     let stdMsg = $"{fvp.QualifiedName}"
-    let rec mpwa (args:FplValue list) (pars:FplValue list) = 
-        match (args, pars) with
-        | (a::ars, p::prs) -> 
-            let aType = a.Type(SignatureType.Type)
-            let pType = p.Type(SignatureType.Type)
-            if aType = pType then
-                mpwa ars prs
-            elif pType.StartsWith("tpl") || pType.StartsWith("template") then
-                mpwa ars prs
-            elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "???" then 
-                if ars.Length > 0 then 
-                    mpwa ars pars
-                else
-                    None
-            elif pType.StartsWith("+") && aType = "???" then 
-                Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
-            elif pType = $"+{aType}" then 
-                if ars.Length > 0 then 
-                    mpwa ars pars
-                else
-                    None
-            elif Char.IsUpper(aType[0]) && a.BlockType = FplValueType.Reference && a.Scope.Count = 1 then
-                let var = a.Scope.Values |> Seq.toList |> List.head
-                if var.ValueList.Count = 1 then 
-                    let cl = var.ValueList[0]
-                    match cl.BlockType with 
-                    | FplValueType.Class ->
-                        let inheritanceList = findClassInheritanceChain cl pType
-                        match inheritanceList with 
-                        | Some str -> 
-                            mpwa ars prs
-                        | None -> 
-                            Some($"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes of {stdMsg}")
-                    | _ -> 
-                        // this case does not occur but for we cover it for completeness reasons
-                        Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does'nt match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
-                else
-                    Some($"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
-            elif aType.StartsWith(pType + "(") then
-                None
-            elif aType = "???" && pType <> "???" then
-                Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
+    let argResult = mpwa arguments parameters
+    let mapResult = 
+        match (fva.Mapping, fvp.Mapping) with
+        | (Some ma, Some mp) -> 
+            let aType = ma.Type(SignatureType.Type)
+            let pType = mp.Type(SignatureType.Type)
+            if aType <> pType then
+                Some($"The mapping `{aType}` does not match the mapping `{pType}`")
             else
-                Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
-        | ([], p::prs) -> 
-                let pType = p.Type(SignatureType.Type)
-                Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}` in {stdMsg}")
-        | (a::[], []) -> 
-            if a.FplId = "???" then 
                 None
-            else
-                let aType = a.Type(SignatureType.Type)
-                Some($"no matching paramater for `{a.Type(SignatureType.Name)}:{aType}` in {stdMsg}")
-        | (a::ars, []) -> 
-                let aType = a.Type(SignatureType.Type)
-                Some($"no matching paramater for `{a.Type(SignatureType.Name)}:{aType}` in {stdMsg}")
-        | ([],[]) -> None
-    mpwa arguments parameters
+        | (None, Some mp) -> 
+            let pType = mp.Type(SignatureType.Type)
+            Some($"Missing mapping `{pType}`")
+        | (Some ma, None) -> 
+            let aType = ma.Type(SignatureType.Type)
+            Some($"Unexpected mapping `{aType}`")
+        | (None, None) -> None
+
+    match (argResult, mapResult) with
+    | (Some aErr, Some mErr) -> Some($"{aErr}; {mErr} in {stdMsg}")
+    | (Some aErr, None) -> Some($"{aErr} in {stdMsg}")
+    | (None, Some mErr) -> Some($"{mErr} in {stdMsg}")
+    | (None, None) -> None
+
+
+let matchWithMapping (fva:FplValue) (fvp:FplValue) =
+    let targetMapping = fvp.Mapping
+    match targetMapping with
+    | Some tm -> matchArgumentsWithParameters fva tm
+    | None -> Some($"Btest")
 
 /// Tries to match the signatures of toBeMatched with the signatures of all candidates and accoumulates any 
 /// error messages in accResultList.
