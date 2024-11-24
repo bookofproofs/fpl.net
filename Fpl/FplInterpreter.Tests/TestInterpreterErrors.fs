@@ -286,6 +286,60 @@ type TestInterpreterErrors() =
         let code = ID014 ("", "")
         runTestHelper "TestID014.fpl" fplCode code expected
 
+    [<DataRow("""def cl A:obj {ctor A() {self}};""", 0)>]
+    [<DataRow("""def cl A:obj {ctor A() {@self}};""", 1)>]
+    [<DataRow("""def cl A:obj {ctor A() {@@self}};""", 1)>]
+    [<DataRow("""def cl A:obj {intr property pred T() { is(@self,A) } };""", 0)>]
+    [<DataRow("""def cl A:obj {intr property pred T() { is(@@self,A) } };""", 1)>]
+    [<DataRow("""def cl A:obj {intr property pred T() { is(@@@self,A) } };""", 1)>]
+    [<DataRow("""def cl A:obj {intr property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("uses Fpl.PeanoArithmetics ;", 0)>]
+    [<TestMethod>]
+    member this.TestID015(fplCode:string, expected:int) =
+        let code = ID015 ""
+        runTestHelper "TestID015.fpl" fplCode code expected
+
+    [<DataRow("""def cl A:obj {ctor A() {self}};""", 0)>]
+    [<DataRow("""def cl A:obj {ctor A() {@self}};""", 0)>]
+    [<DataRow("""def cl A:obj {ctor A() {@@self}};""", 0)>]
+    [<DataRow("""def cl A:obj {intr property pred T() { is(@self,A) } };""", 0)>]
+    [<DataRow("""def cl A:obj {intr property pred T() { is(@@self,A) } };""", 0)>]
+    [<DataRow("""def cl A:obj {intr property pred T() { is(@@@self,A) } };""", 0)>]
+    [<DataRow("""def cl A:obj {intr property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("""def pred A() {intr property pred T() { is(@self,A) } };""", 0)>]
+    [<DataRow("""def pred A() {intr property pred T() { is(@@self,A) } };""", 0)>]
+    [<DataRow("""def pred A() {intr property pred T() { is(@@@self,A) } };""", 0)>]
+    [<DataRow("""def pred A() {intr property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("""def func A()->obj {intr property pred T() { is(@self,A) } };""", 0)>]
+    [<DataRow("""def func A()->obj {intr property pred T() { is(@@self,A) } };""", 0)>]
+    [<DataRow("""def func A()->obj {intr property pred T() { is(@@@self,A) } };""", 0)>]
+    [<DataRow("""def func A()->obj {intr property pred T() { is(self,A) } };""", 0)>]
+    [<DataRow("""axiom A() {self};""", 1)>]
+    [<DataRow("""axiom A() {@self};""", 1)>]
+    [<DataRow("""theorem A() {self};""", 1)>]
+    [<DataRow("""theorem A() {@self};""", 1)>]
+    [<DataRow("""lemma A() {self};""", 1)>]
+    [<DataRow("""lemma A() {@self};""", 1)>]
+    [<DataRow("""prop A() {self};""", 1)>]
+    [<DataRow("""prop A() {@self};""", 1)>]
+    [<DataRow("""conj A() {self};""", 1)>]
+    [<DataRow("""conj A() {@self};""", 1)>]
+    [<DataRow("""cor A$1() {self};""", 1)>]
+    [<DataRow("""cor A$1() {@self};""", 1)>]
+    [<DataRow("""prf A$1 {1. |- self qed};""", 1)>]
+    [<DataRow("""prf A$1 {1. |- @self qed};""", 1)>]
+    [<DataRow("""inf A() {pre: true con: @self};""", 1)>]
+    [<DataRow("""inf A() {pre: true con: self};""", 1)>]
+    [<DataRow("""inf A() {pre: self con: true};""", 1)>]
+    [<DataRow("""inf A() {pre: @self con: true};""", 1)>]
+    [<DataRow("""loc not(self) := !tex: "\neg(" x ")";;""", 1)>]
+    [<DataRow("""loc not(@self) := !tex: "\neg(" x ")";;""", 1)>]
+    [<DataRow("uses Fpl.PeanoArithmetics ;", 0)>]
+    [<TestMethod>]
+    member this.TestID016(fplCode:string, expected:int) =
+        let code = ID016 ""
+        runTestHelper "TestID016.fpl" fplCode code expected
+
     [<DataRow("""proof T$1 { 100. |- assume somePremise 300. |- trivial 100. |- trivial qed};""", 1)>]
     [<DataRow("""proof T$1 { 1. |- trivial 1. |- trivial qed};""", 1)>]
     [<DataRow("""proof T$1 { 1. |- trivial 2. |- trivial qed};""", 0)>]

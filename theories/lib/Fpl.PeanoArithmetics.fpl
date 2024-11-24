@@ -1,7 +1,7 @@
 /*
 This theory is experimental and for test purposes only.
 */
-
+inf A() {pre: true con: @self}
 :ext
     Digits: /\d+/
 :end

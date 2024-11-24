@@ -232,8 +232,6 @@ let eval_string (st: SymbolTable) s = ()
 
 let eval_pos_string (st: SymbolTable) (startpos: Position) (endpos: Position) ast = ()
 
-let eval_pos_unit (st: SymbolTable) (startpos: Position) (endpos: Position) = ()
-
 let eval_pos_ast_ast_opt (st: SymbolTable) (startpos: Position) (endpos: Position) = ()
 
 let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position) charlist =
@@ -515,11 +513,12 @@ let rec eval (st: SymbolTable) ast =
     // | Self of Positions * unit
     | Ast.Self((pos1, pos2), _) -> 
         st.EvalPush("Self")
-        eval_pos_unit st pos1 pos2
         st.EvalPop() 
     | Ast.True((pos1, pos2), _) -> 
         st.EvalPush("True")
         let fv = es.PeekEvalStack()
+        fv.NameStartPos <- pos1
+        fv.NameEndPos <- pos2
         fv.FplId <- "true"
         fv.ReprId <- "true"
         fv.TypeId <- "pred"
@@ -527,6 +526,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.False((pos1, pos2), _) -> 
         st.EvalPush("False")
         let fv = es.PeekEvalStack()
+        fv.NameStartPos <- pos1
+        fv.NameEndPos <- pos2
         fv.FplId <- "false"
         fv.ReprId <- "false"
         fv.TypeId <- "pred"
@@ -534,6 +535,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Undefined((pos1, pos2), _) -> 
         st.EvalPush("Undefined")
         let fv = es.PeekEvalStack()
+        fv.NameStartPos <- pos1
+        fv.NameEndPos <- pos2
         fv.FplId <- "undef"
         fv.TypeId <- "undef"
         st.EvalPop() 
@@ -547,7 +550,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.Qed((pos1, pos2), _) -> 
         st.EvalPush("Qed")
-        eval_pos_unit st pos1 pos2
         st.EvalPop() 
     | Ast.RuleOfInference((pos1, pos2), (signatureAst, premiseConclusionBlockAst)) ->
         st.EvalPush("RuleOfInference")
@@ -971,10 +973,61 @@ let rec eval (st: SymbolTable) ast =
     // | SelfAts of Positions * char list
     | Ast.SelfAts((pos1, pos2), chars) -> 
         st.EvalPush("SelfAts")
-        let identifier = (chars |> List.map (fun c -> c.ToString()) |>  String.concat "") + "self"
-        let fv = es.PeekEvalStack()
-        fv.FplId <- identifier
-        fv.TypeId <- identifier
+        let rb = es.PeekEvalStack()
+        rb.NameStartPos <- pos1
+        rb.NameEndPos <- pos2
+        let rec nextBlock (fv:FplValue) counter = 
+            match fv.BlockType with 
+            | FplValueType.Axiom
+            | FplValueType.Theorem 
+            | FplValueType.Lemma 
+            | FplValueType.Proposition 
+            | FplValueType.Corollary 
+            | FplValueType.Conjecture 
+            | FplValueType.Proof 
+            | FplValueType.Localization 
+            | FplValueType.RuleOfInference -> 
+                emitID016diagnostics fv rb
+                None
+            | FplValueType.Theory -> 
+                emitID015diagnostics fv rb
+                None
+            | FplValueType.MandatoryPredicate  
+            | FplValueType.OptionalPredicate
+            | FplValueType.MandatoryFunctionalTerm  
+            | FplValueType.OptionalFunctionalTerm 
+            | FplValueType.Predicate  
+            | FplValueType.FunctionalTerm 
+            | FplValueType.Class -> 
+                if counter <= 0 then 
+                    Some (fv)
+                else
+                    let next = fv.Parent
+                    match next with
+                    | Some parent ->
+                        nextBlock parent (counter - 1)
+                    | None -> None
+            | _ -> 
+                let next = fv.Parent
+                match next with
+                | Some parent -> nextBlock parent counter
+                | None -> None
+
+
+        rb.FplId <- "self"
+        rb.TypeId <- "self"
+        let oldDiagnosticsStopped = ad.DiagnosticsStopped
+        ad.DiagnosticsStopped <- false
+        let referencedBlock = nextBlock rb chars.Length 
+        ad.DiagnosticsStopped <- oldDiagnosticsStopped
+        let identifier = 
+            chars 
+            |> List.map (fun c -> c.ToString()) 
+            |>  String.concat "" 
+        rb.FplId <- $"{identifier}{rb.FplId}"
+        rb.TypeId <- $"{identifier}{rb.TypeId}"
+        //if not withError then 
+        //    rb.Scope.Add(identifier, lastBlock)
         st.EvalPop()
     // | Translation of string * Ast
     | Ast.Translation((pos1, pos2),(langCode, ebnfAst)) ->
@@ -1513,7 +1566,10 @@ let rec eval (st: SymbolTable) ast =
         match optVarDeclOrSpecListAst with
         | Some astList -> astList |> List.map (eval st) |> ignore
         | None -> ()
+        let rb = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv)
+        es.PushEvalStack(rb)
         eval st keywordSelfAst
+        es.PopEvalStack()
         es.PopEvalStack()
         st.EvalPop()
     // | DefPredicateContent of Ast list option * Ast

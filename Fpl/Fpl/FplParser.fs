@@ -453,7 +453,7 @@ let keywordIntrinsic = positions "Intrinsic" (skipString "intrinsic" <|> skipStr
 let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateContent
 
 let keywordConstructor = (skipString "constructor" <|> skipString "ctor") .>> SW
-let constructorBlock = leftBrace >>. varDeclOrSpecList .>>. keywordSelf .>> spacesRightBrace 
+let constructorBlock = leftBrace >>. varDeclOrSpecList .>>. self .>> spacesRightBrace 
 let constructor = positions "Constructor" (keywordConstructor >>. signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)

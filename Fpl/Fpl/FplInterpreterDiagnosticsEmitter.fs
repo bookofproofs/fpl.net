@@ -49,6 +49,33 @@ let emitID014diagnostics (fplValue: FplValue) (conflict: FplValue) =
 
     ad.AddDiagnostic diagnostic
 
+let emitID015diagnostics (fv: FplValue) (self:FplValue) =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = self.NameStartPos
+            Diagnostic.EndPos = self.NameEndPos
+            Diagnostic.Code = ID015 ($"{fv.BlockType.Name} {fv.Type(SignatureType.Name)}")
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitID016diagnostics (fv: FplValue) (self:FplValue) =
+    let c = ID016 ($"{fv.BlockType.Name} {fv.Type(SignatureType.Name)}")
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = self.NameStartPos
+            Diagnostic.EndPos = self.NameEndPos
+            Diagnostic.Code = c
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitPR003diagnostics (fplValue: FplValue) (conflict: FplValue) =
     let diagnostic =
         { 
