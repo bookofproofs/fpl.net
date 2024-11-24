@@ -1036,6 +1036,7 @@ let rec eval (st: SymbolTable) ast =
         let typeOfOperand = FplValue.CreateFplValue((pos1, pos2), FplValueType.Mapping, fv) 
         es.PushEvalStack(typeOfOperand)
         eval st variableTypeAst
+        let t = typeOfOperand.Type(SignatureType.Type)
         es.PopEvalStack()
         evaluateIsOperator fv operand typeOfOperand
         st.EvalPop()

@@ -569,7 +569,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
                 let paramTuple() = 
                     this.Scope
-                    |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> kvp.Value.IsSignatureVariable || FplValue.IsVariable(this))
+                    |> Seq.filter (fun (kvp: KeyValuePair<string,FplValue>) -> kvp.Value.IsSignatureVariable || FplValue.IsVariable(this) || this.BlockType = FplValueType.Mapping)
                     |> Seq.map (fun (kvp: KeyValuePair<string,FplValue>) -> 
                         kvp.Value.Type(propagate))
                     |> String.concat ", "
@@ -637,8 +637,10 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     | FplValueType.VariadicVariableMany1 ->
                         let pars = paramTuple()
                         match (pars, this.Mapping) with
-                        | ("",_) -> 
+                        | ("",None) -> 
                             head 
+                        | ("",Some map) ->
+                            sprintf "%s() -> %s" head (map.Type(propagate))
                         | (_,None) -> 
                             if this.HasBrackets then 
                                 sprintf "%s[%s]" head pars

@@ -263,3 +263,24 @@ type TestExpressionEvaluation() =
             let pr1 = theory.Scope["T()"]
             Assert.AreEqual<string>(expected, pr1.ReprId)
         | None -> Assert.IsTrue(false)
+
+    [<DataRow("def pred T() { dec ~x:pred(y:obj); is(self,pred) };", "pred")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func(z:obj)->obj); is(x,pred(y:func(z:obj)->Nat)) };", "pred(func(obj) -> Nat)")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func(z:obj)->obj)) };", "pred(func(obj) -> obj)")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func()->ind)) };", "pred(func() -> ind)")>]
+    [<TestMethod>]
+    member this.TestExpressionEvaluationIsOperandRepr(fplCode, expected: string) =
+        ad.Clear()
+        let filename = "TestExpressionEvaluationIsOperand"
+        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename, "", false) |> ignore
+
+        match stOption with
+        | Some st ->
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr1 = theory.Scope["T()"]
+            let isOperand = pr1.ValueList[0]
+            let mapping = isOperand.ValueList[1]
+            Assert.AreEqual<string>(expected, mapping.Type(SignatureType.Type))
+        | None -> Assert.IsTrue(false)
