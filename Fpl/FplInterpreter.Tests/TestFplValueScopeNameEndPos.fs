@@ -755,7 +755,7 @@ type TestFplValueScopeNameEndPos() =
     member this.TestMapping(var, varVal) =
         ad.Clear()
         let fplCode = sprintf "%s;" varVal
-        let filename = "TestMappingNameEndPos.Column"
+        let filename = "TestMappingNameEndPos"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -788,7 +788,7 @@ type TestFplValueScopeNameEndPos() =
     member this.TestArgument(var, argExpression, expNumber:int) =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
-        let filename = "TestArgumentNameEndPos.Column"
+        let filename = "TestArgumentNameEndPos"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
