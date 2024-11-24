@@ -643,6 +643,17 @@ type TestInterpreterErrors() =
         let code = SIG02 ("",0, "")
         runTestHelper "TestSIG02.fpl" fplCode code expected
 
+    [<DataRow("def func Test()->obj {dec ~x:obj; return x};", 0)>]
+    [<DataRow("def func Test()->obj {dec ~x:Nat; return x};", 1)>]
+    [<DataRow("def cl Nat:obj {intr} def func Test()->obj {dec ~x:Nat; return x};", 1)>]
+    [<DataRow("def cl Nat:obj {intr} def func Test()->Nat {dec ~x:Nat; return x};", 0)>]
+    [<DataRow("def cl Nat:obj {intr} def func Test()->obj {dec ~x:obj; return x};", 1)>]
+    [<TestMethod>]
+    member this.TestSIG03(fplCode:string, expected) =
+        let code = SIG03 ("","")
+        ad.Clear()
+        runTestHelper "TestSIG03.fpl" fplCode code expected
+
     [<DataRow("def cl Test:obj {intr};", 0)>]
     [<DataRow("def cl Test:Set {intr};", 0)>] // this should cause the ID010 error only and not SIG04
     [<DataRow("def class Set: obj {intr} def cl Test:Set {intr};", 0)>]
