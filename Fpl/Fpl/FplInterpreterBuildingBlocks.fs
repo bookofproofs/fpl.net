@@ -636,10 +636,11 @@ let rec eval (st: SymbolTable) ast =
         let stmt = FplValue.CreateFplValue((pos1,pos2), FplValueType.Stmt, fv)
         stmt.FplId <- "return"
         es.PushEvalStack(stmt)
-        let refBlock = FplValue.CreateFplValue((pos1,pos2), FplValueType.Reference, fv)
+        let refBlock = FplValue.CreateFplValue((pos1,pos2), FplValueType.Reference, stmt)
         es.PushEvalStack(refBlock)
         eval st returneeAst
-        es.PopEvalStack() // todo check type of function and find an appropriate way to embed the result in the symbol table.
+        es.PopEvalStack() 
+        emitSIG03Diagnostics refBlock fv
         es.PopEvalStack() 
         st.EvalPop()
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
@@ -1026,20 +1027,17 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("IsOperator")
         let fv = es.PeekEvalStack()
         fv.FplId <- "is"
-        es.PeekEvalStack().ReprId <- "undetermined"
+        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
-
         let operand = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv) 
         es.PushEvalStack(operand)
         eval st isOpArgAst
         es.PopEvalStack()
-
-        let typeOfoperand = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv) 
-        es.PushEvalStack(typeOfoperand)
+        let typeOfOperand = FplValue.CreateFplValue((pos1, pos2), FplValueType.Mapping, fv) 
+        es.PushEvalStack(typeOfOperand)
         eval st variableTypeAst
         es.PopEvalStack()
-
-        fv.TypeId <- "pred"
+        evaluateIsOperator fv operand typeOfOperand
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
         st.EvalPush("Delegate")
@@ -1306,6 +1304,18 @@ let rec eval (st: SymbolTable) ast =
         simplifyTriviallyNestedExpressions refBlock
         es.PopEvalStack()
         simplifyTriviallyNestedExpressions fv
+        match fv.BlockType with
+        | FplValueType.Axiom 
+        | FplValueType.Corollary 
+        | FplValueType.Proposition 
+        | FplValueType.Theorem 
+        | FplValueType.Lemma
+        | FplValueType.Conjecture 
+        | FplValueType.Predicate 
+        | FplValueType.MandatoryPredicate 
+        | FplValueType.OptionalPredicate ->
+            fv.ReprId <- refBlock.ReprId
+        | _ -> ()
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
     | Ast.Cases((pos1, pos2), (conditionFollowedByResultListAsts, elseStatementAst)) ->
@@ -1457,8 +1467,9 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Axiom((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Axiom")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Axiom, es.PeekEvalStack())
-        es.PushEvalStack(fplValue)
+        let fv = es.PeekEvalStack()
+        let axiom = FplValue.CreateFplValue((pos1, pos2), FplValueType.Axiom, fv)
+        es.PushEvalStack(axiom)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         es.PopEvalStack()
