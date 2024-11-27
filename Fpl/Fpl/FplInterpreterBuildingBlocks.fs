@@ -739,6 +739,14 @@ let rec eval (st: SymbolTable) ast =
             | (FplValueType.VariadicVariableMany, 0)
             | (FplValueType.VariadicVariableMany1, 0) -> 
                 emitSIG04DiagnosticsForTypes identifier pos1 pos2
+            | (FplValueType.Variable, 1)
+            | (FplValueType.VariadicVariableMany, 1)
+            | (FplValueType.VariadicVariableMany1, 1) -> 
+                fv.ValueList.Add(candidates.Head)
+            | (FplValueType.Variable, _)
+            | (FplValueType.VariadicVariableMany, _)
+            | (FplValueType.VariadicVariableMany1, _) -> 
+                emitID017Diagnostics identifier candidates pos1 pos2
             | _ -> 
                 match emitSIG04Diagnostics fv candidates with
                 | Some candidate -> 

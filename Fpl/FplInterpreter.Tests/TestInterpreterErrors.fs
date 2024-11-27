@@ -620,6 +620,18 @@ type TestInterpreterErrors() =
         let code = ID012 ("","")
         runTestHelper "TestID012.fpl" fplCode code expected
 
+    [<DataRow("def pred A() {true} def pred A(x:obj) {true} def pred T(x:A) {intr};", 1)>]
+    [<DataRow("def pred A() {true} def func A(x:obj)->obj {intr} def pred T(x:A) {intr};", 1)>]
+    [<DataRow("def pred A() {true} def func A()->obj {intr} def pred T(x:A) {intr};", 1)>]
+    [<DataRow("def pred A() {true} def pred T(x:A) {intr};", 0)>]
+    [<DataRow("def func A(x:obj)->obj {intr} def pred T(x:A) {intr};", 0)>]
+    [<DataRow("def pred B() {true} def func A()->obj {intr} def pred T(x:A) {intr};", 0)>]
+    [<DataRow("uses Fpl.PeanoArithmetics ;", 0)>]
+    [<TestMethod>]
+    member this.TestID017(fplCode:string, expected) =
+        let code = ID017 ("","")
+        runTestHelper "TestID017.fpl" fplCode code expected
+
     [<DataRow("def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
     [<DataRow("def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
     [<DataRow("def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `x` is undefined.")>]

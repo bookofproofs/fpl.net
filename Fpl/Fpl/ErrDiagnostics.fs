@@ -115,6 +115,7 @@ type DiagnosticCode =
     | ID014 of string * string
     | ID015 of string 
     | ID016 of string 
+    | ID017 of string * string 
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -191,6 +192,7 @@ type DiagnosticCode =
             | ID014 _ -> "ID014"
             | ID015 _ -> "ID015"
             | ID016 _ -> "ID016"
+            | ID017 _ -> "ID017"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -262,11 +264,12 @@ type DiagnosticCode =
             | ID009 name -> sprintf "Circular base type dependency involving `%s`." name
             | ID010 name -> sprintf "The type `%s` could not be found. Are you missing a uses clause?" name
             | ID011 (name, inheritanceChain) -> sprintf "Inheritance from `%s` can be dropped because of the inheritance chain %s." name inheritanceChain
-            | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are `%s`." name candidates
+            | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are %s." name candidates
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
             | ID015 signature -> sprintf "Referencing self impossible outside the outer block which is %s." signature
             | ID016 signature -> sprintf "Referencing self impossible outside definitions, the outer block is %s." signature
+            | ID017 (name, candidates) -> sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."

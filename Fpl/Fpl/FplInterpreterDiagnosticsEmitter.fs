@@ -436,6 +436,23 @@ let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
             ad.AddDiagnostic diagnostic
             ""
 
+let emitID017Diagnostics name (candidates:FplValue list) pos1 pos2 =
+    let candidatesName =
+        candidates
+        |> Seq.map (fun fv -> fv.QualifiedName)
+        |> String.concat ", "
+
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID017(name, candidatesName) 
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
 
 let emitPR004Diagnostics (fplValue: FplValue) (conflict: FplValue) =
     let diagnostic =
