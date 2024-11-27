@@ -751,6 +751,9 @@ type TestInterpreterErrors() =
     [<DataRow("""def func S(n:obj) -> obj {intr} def func T()->obj { dec ~x:obj; return S(S(x))} ;""", 0)>]
     [<DataRow("""def func T(y:obj)->obj { return T(y)} ;""", 0)>]
     [<DataRow("""axiom T() { dec ~x:obj; all p:pred(y:obj) {p(x)}};""", 0)>]
+    [<DataRow("""def cl A:obj {intr} def func Add(n,m:A)->A {dec ~x,y:A; return self(x,y)};""", 0)>]
+    [<DataRow("""def cl A:obj {intr} def func Add(n,m:A)->A {dec ~x:A; return x};""", 0)>]
+    [<DataRow("""def cl A:obj {intr} def func Add(n,m:A)->A {dec ~x:A; return x} prop P(op:Add) {true};""", 0)>]
     [<DataRow("uses Fpl.PeanoArithmetics ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(fplCode:string, expected) =

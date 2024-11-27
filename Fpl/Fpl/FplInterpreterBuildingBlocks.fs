@@ -974,6 +974,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.SelfAts((pos1, pos2), chars) -> 
         st.EvalPush("SelfAts")
         let rb = es.PeekEvalStack()
+        let blocks = Stack<FplValue>()
         rb.NameStartPos <- pos1
         rb.NameEndPos <- pos2
         let rec nextBlock (fv:FplValue) counter = 
@@ -990,7 +991,7 @@ let rec eval (st: SymbolTable) ast =
                 emitID016diagnostics fv rb
                 None
             | FplValueType.Theory -> 
-                emitID015diagnostics fv rb
+                emitID015diagnostics (blocks.Peek()) rb
                 None
             | FplValueType.MandatoryPredicate  
             | FplValueType.OptionalPredicate
@@ -999,6 +1000,7 @@ let rec eval (st: SymbolTable) ast =
             | FplValueType.Predicate  
             | FplValueType.FunctionalTerm 
             | FplValueType.Class -> 
+                blocks.Push(fv)
                 if counter <= 0 then 
                     Some (fv)
                 else
@@ -1026,8 +1028,9 @@ let rec eval (st: SymbolTable) ast =
             |>  String.concat "" 
         rb.FplId <- $"{identifier}{rb.FplId}"
         rb.TypeId <- $"{identifier}{rb.TypeId}"
-        //if not withError then 
-        //    rb.Scope.Add(identifier, lastBlock)
+        match referencedBlock with
+        | Some block -> rb.Scope.Add(rb.FplId, block)
+        | None -> ()
         st.EvalPop()
     // | Translation of string * Ast
     | Ast.Translation((pos1, pos2),(langCode, ebnfAst)) ->

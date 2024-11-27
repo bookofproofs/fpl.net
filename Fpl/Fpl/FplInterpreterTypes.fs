@@ -1229,12 +1229,17 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
     member this.ToJson() = 
         let sb = StringBuilder()
         let mutable currentPath = ""
-        let rec createJson (root:FplValue) (sb:StringBuilder) level isLast =
+        let rec createJson (root:FplValue) (sb:StringBuilder) level isLast preventInfinite =
             match root.FilePath with
             | Some path -> currentPath <- path
             | _ -> ()
-            let indent = String(' ', level)
-            sb.AppendLine(String(' ', level - 1) + "{") |> ignore
+            let indent, indentMinusOne = 
+                if _debug then 
+                    String(' ', level), String(' ', level - 1)
+                else
+                    String.Empty, String.Empty
+
+            sb.AppendLine(indentMinusOne + "{") |> ignore
             let name = root.Type(SignatureType.Name).Replace(@"\",@"\\")
             let fplTypeName = root.Type(SignatureType.Type).Replace(@"\",@"\\")
             let fplValueRepr = root.Type(SignatureType.Repr).Replace(@"\",@"\\")
@@ -1248,28 +1253,33 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
             sb.AppendLine($"{indent}\"Line\": \"{root.NameStartPos.Line}\",") |> ignore
             sb.AppendLine($"{indent}\"Column\": \"{root.NameStartPos.Column}\",") |> ignore
             sb.AppendLine($"{indent}\"FilePath\": \"{currentPath}\",") |> ignore
-            sb.AppendLine($"{indent}\"Scope\": [") |> ignore
-            let mutable counterScope = 0
-            root.Scope
-            |> Seq.iter (fun child ->
-                counterScope <- counterScope + 1
-                createJson child.Value sb (level + 1) (counterScope = root.Scope.Count)
-            )
-            sb.AppendLine($"{indent}],") |> ignore
-            sb.AppendLine($"{indent}\"ValueList\": [") |> ignore
-
-            let mutable valueList = 0
-            root.ValueList
-            |> Seq.iter (fun child ->
-                valueList <- valueList + 1
-                createJson child sb (level + 1) (valueList = root.ValueList.Count)
-            )
-            sb.AppendLine($"{indent}]") |> ignore
-            if isLast then
-                sb.AppendLine(String(' ', level - 1) + "}") |> ignore
+            if preventInfinite then 
+                sb.AppendLine($"{indent}\"Scope\": [],") |> ignore
+                sb.AppendLine($"{indent}\"ValueList\": []") |> ignore
             else
-                sb.AppendLine(String(' ', level - 1) + "},") |> ignore
-        createJson this.Root sb 1 false
+                sb.AppendLine($"{indent}\"Scope\": [") |> ignore
+
+                let mutable counterScope = 0
+                root.Scope
+                |> Seq.iter (fun child ->
+                    counterScope <- counterScope + 1
+                    createJson child.Value sb (level + 1) (counterScope = root.Scope.Count) (root.FplId.EndsWith("self"))
+                )
+                sb.AppendLine($"{indent}],") |> ignore
+                sb.AppendLine($"{indent}\"ValueList\": [") |> ignore
+
+                let mutable valueList = 0
+                root.ValueList
+                |> Seq.iter (fun child ->
+                    valueList <- valueList + 1
+                    createJson child sb (level + 1) (valueList = root.ValueList.Count) false
+                )
+                sb.AppendLine($"{indent}]") |> ignore
+            if isLast then
+                sb.AppendLine(indentMinusOne + "}") |> ignore
+            else
+                sb.AppendLine(indentMinusOne + "},") |> ignore
+        createJson this.Root sb 1 false false
         let res = sb.ToString().TrimEnd()
         if res.EndsWith(',') then 
             res.Substring(0,res.Length - 1)
