@@ -239,6 +239,29 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
+/// Simplify trivially nested expressions 
+let simplifyTriviallyNestedExpressions (rb:FplValue) = 
+    if rb.ValueList.Count = 1 && rb.FplId = "" then
+        let subNode = rb.ValueList[0]
+        if subNode.BlockType = FplValueType.Reference 
+        || subNode.BlockType = FplValueType.Quantor
+
+        then 
+            es.Pop() |> ignore
+            es.PushEvalStack(subNode)
+            subNode.Parent <- rb.Parent
+            subNode.NameEndPos <- rb.NameEndPos
+            if rb.Scope.ContainsKey(".") then 
+                subNode.Scope.Add(".",rb.Scope["."])
+            match rb.Parent with 
+            | Some parent -> 
+                if parent.Scope.ContainsKey(".") then
+                   parent.Scope["."] <- subNode
+            | _ -> ()
+            // prevent recursive clearing of the subNode
+            rb.ValueList.Clear() 
+            rb.Scope.Clear()
+
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
 let rec eval (st: SymbolTable) ast =
@@ -977,6 +1000,7 @@ let rec eval (st: SymbolTable) ast =
             // if no specification was found then simply continue in the same context
             eval st fplIdentifierAst
 
+        simplifyTriviallyNestedExpressions fv
         st.EvalPop()
     // | SelfAts of Positions * char list
     | Ast.SelfAts((pos1, pos2), chars) -> 
@@ -1349,23 +1373,6 @@ let rec eval (st: SymbolTable) ast =
         eval st qualificationListAst
         let refBlock = es.PeekEvalStack() // if the reference was replaced, take this one
         refBlock.NameEndPos <- pos2
-        /// Simplify trivially nested expressions 
-        let simplifyTriviallyNestedExpressions (rb:FplValue) = 
-            if rb.ValueList.Count = 1 && rb.FplId = "" then
-                let subNode = rb.ValueList[0]
-                if subNode.BlockType = FplValueType.Reference 
-                || subNode.BlockType = FplValueType.Quantor
-
-                then 
-                    es.Pop() |> ignore
-                    es.PushEvalStack(subNode)
-                    subNode.Parent <- rb.Parent
-                    subNode.NameEndPos <- rb.NameEndPos
-                    if rb.Scope.ContainsKey(".") then 
-                        subNode.Scope.Add(".",rb.Scope["."])
-                    // prevent recursive clearing of the subNode
-                    rb.ValueList.Clear() 
-                    rb.Scope.Clear()
         simplifyTriviallyNestedExpressions refBlock
         es.PopEvalStack()
         simplifyTriviallyNestedExpressions fv

@@ -92,6 +92,36 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
+
+    [<DataRow("""def func T(y:obj)->obj { intr } def func Caller()->obj {dec ~x:obj; return T(x)} ;""",
+        "")>]
+    [<DataRow("""def func T(y:obj)->obj { return y } def func Caller()->obj {dec ~x:obj; return T(x)} ;""",
+        "")>]
+    [<DataRow("""def func T(y:obj)->obj { intr } def func Caller()->obj {return T(x)} ;""",
+        "")>]
+    [<DataRow("""def func T(y:obj)->obj { return y } def func Caller()->obj {return T(x)} ;""",
+        "")>]
+    [<TestMethod>]
+    member this.TestSignatureMatchingReferencesFuncReturn(varVal, var:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestSignatureMatchingReferencesFuncReturn"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let fvPars = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("Caller(")) |> List.head
+            let retStmt = pred.ValueList[pred.ValueList.Count - 1]
+            let fvArgs = retStmt.ValueList[0]
+            match matchArgumentsWithParameters fvArgs fvPars with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
     [<DataRow("""def pred T (x,y:pred) {true} def pred T3() {true} def pred Caller() {T(T3(),T3())} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:pred) {true} def pred T1() {true} def pred T2(x:obj) {true} def pred Caller() {dec ~a:obj; T(T1(),T2(a))} ;""",
