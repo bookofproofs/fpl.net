@@ -1359,7 +1359,7 @@ let rec mpwa (args:FplValue list) (pars:FplValue list) =
                 mpwa ars pars
             else
                 None
-        elif Char.IsUpper(aType[0]) && a.BlockType = FplValueType.Reference && a.Scope.Count = 1 then
+        elif aType.Length > 0 && Char.IsUpper(aType[0]) && a.BlockType = FplValueType.Reference && a.Scope.Count = 1 then
             let var = a.Scope.Values |> Seq.toList |> List.head
             if var.ValueList.Count = 1 then 
                 let cl = var.ValueList[0]
@@ -1404,29 +1404,6 @@ let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
     
     let stdMsg = $"{fvp.QualifiedName}"
     let argResult = mpwa arguments parameters
-    (*
-    let mapResult = 
-        match (fva.Mapping, fvp.Mapping) with
-        | (Some ma, Some mp) -> 
-            let aType = ma.Type(SignatureType.Type)
-            let pType = mp.Type(SignatureType.Type)
-            if aType <> pType then
-                Some($"The mapping `{aType}` does not match the mapping `{pType}`")
-            else
-                None
-        | (None, Some mp) -> 
-            let pType = mp.Type(SignatureType.Type)
-            Some($"Missing mapping `{pType}`")
-        | (Some ma, None) -> 
-            let aType = ma.Type(SignatureType.Type)
-            Some($"Unexpected mapping `{aType}`")
-        | (None, None) -> None
-    match (argResult, mapResult) with
-    | (Some aErr, Some mErr) -> Some($"{aErr}; {mErr} in {stdMsg}")
-    | (Some aErr, None) -> Some($"{aErr} in {stdMsg}")
-    | (None, Some mErr) -> Some($"{mErr} in {stdMsg}")
-    | (None, None) -> None
-    *)
     match argResult with 
     | Some aErr -> Some($"{aErr} in {stdMsg}")
     | None -> None
@@ -1434,7 +1411,7 @@ let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
 let matchWithMapping (fva:FplValue) (fvp:FplValue) =
     let targetMapping = fvp.Mapping
     match targetMapping with
-    | Some tm -> matchArgumentsWithParameters fva tm
+    | Some tm -> mpwa [fva] [tm]
     | None -> Some($"Btest")
 
 /// Tries to match the signatures of toBeMatched with the signatures of all candidates and accoumulates any 
