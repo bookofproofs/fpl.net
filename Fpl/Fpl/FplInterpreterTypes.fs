@@ -1399,7 +1399,25 @@ let rec mpwa (args:FplValue list) (pars:FplValue list) =
 /// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns 
 /// Some(specific error message) or None, if the match succeeded.
 let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
-    let parameters = fvp.Scope.Values |> Seq.toList
+    let parameters = 
+        match fvp.BlockType with
+        | FplValueType.Axiom
+        | FplValueType.Theorem
+        | FplValueType.Lemma
+        | FplValueType.Proposition
+        | FplValueType.Corollary
+        | FplValueType.Predicate 
+        | FplValueType.FunctionalTerm 
+        | FplValueType.RuleOfInference
+        | FplValueType.Conjecture
+        | FplValueType.Constructor
+        | FplValueType.MandatoryPredicate
+        | FplValueType.MandatoryFunctionalTerm
+        | FplValueType.OptionalPredicate
+        | FplValueType.OptionalFunctionalTerm -> 
+            fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
+        | _ -> 
+            fvp.Scope.Values |> Seq.toList
     let arguments = fva.ValueList |> Seq.toList
     
     let stdMsg = $"{fvp.QualifiedName}"
