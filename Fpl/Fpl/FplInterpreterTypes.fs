@@ -512,10 +512,17 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// Tries to find a mapping of this FplValue
     member this.Mapping =
-        if this.ValueList.Count>0 && this.ValueList[0].BlockType = FplValueType.Mapping then
-            Some (this.ValueList[0])
-        else   
-            None
+        match this.BlockType with
+        | FplValueType.Reference ->
+            if this.Scope.ContainsKey(this.FplId) then
+                this.Scope[this.FplId].Mapping
+            else
+                None
+        | _ -> 
+            if this.ValueList.Count>0 && this.ValueList[0].BlockType = FplValueType.Mapping then
+                Some (this.ValueList[0])
+            else   
+                None
 
     /// Type Identifier of this FplValue 
     member this.Type (isSignature:SignatureType) =
@@ -1380,6 +1387,11 @@ let rec mpwa (args:FplValue list) (pars:FplValue list) =
             None
         elif aType = "???" && pType <> "???" then
             Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        elif aType.StartsWith("func") then 
+            let someMap = a.Mapping
+            match someMap with 
+            | Some map -> mpwa [map] [p]
+            | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         else
             Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
     | ([], p::prs) -> 

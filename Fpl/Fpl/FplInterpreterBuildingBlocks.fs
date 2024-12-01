@@ -1374,8 +1374,8 @@ let rec eval (st: SymbolTable) ast =
         let refBlock = es.PeekEvalStack() // if the reference was replaced, take this one
         refBlock.NameEndPos <- pos2
         simplifyTriviallyNestedExpressions refBlock
-        es.PopEvalStack()
         simplifyTriviallyNestedExpressions fv
+        es.PopEvalStack()
         match fv.BlockType with
         | FplValueType.Axiom 
         | FplValueType.Corollary 
