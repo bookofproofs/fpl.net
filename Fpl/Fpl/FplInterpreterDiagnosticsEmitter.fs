@@ -49,6 +49,33 @@ let emitID014diagnostics (fplValue: FplValue) (conflict: FplValue) =
 
     ad.AddDiagnostic diagnostic
 
+let emitID015diagnostics (fv: FplValue) (self:FplValue) =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = self.NameStartPos
+            Diagnostic.EndPos = self.NameEndPos
+            Diagnostic.Code = ID015 ($"{fv.BlockType.Name} {fv.Type(SignatureType.Name)}")
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitID016diagnostics (fv: FplValue) (self:FplValue) =
+    let c = ID016 ($"{fv.BlockType.Name} {fv.Type(SignatureType.Name)}")
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = self.NameStartPos
+            Diagnostic.EndPos = self.NameEndPos
+            Diagnostic.Code = c
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitPR003diagnostics (fplValue: FplValue) (conflict: FplValue) =
     let diagnostic =
         { 
@@ -409,6 +436,23 @@ let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
             ad.AddDiagnostic diagnostic
             ""
 
+let emitID017Diagnostics name (candidates:FplValue list) pos1 pos2 =
+    let candidatesName =
+        candidates
+        |> Seq.map (fun fv -> fv.QualifiedName)
+        |> String.concat ", "
+
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID017(name, candidatesName) 
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
 
 let emitPR004Diagnostics (fplValue: FplValue) (conflict: FplValue) =
     let diagnostic =
@@ -556,6 +600,22 @@ let emitSIG04DiagnosticsForTypes identifier pos1 pos2 =
             }
     ad.AddDiagnostic diagnostic
 
+let emitSIG03Diagnostics (retType:FplValue) (mapType:FplValue) = 
+    match matchWithMapping retType mapType with
+    | Some errMsg -> 
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = retType.NameStartPos
+                Diagnostic.EndPos = retType.NameEndPos
+                Diagnostic.Code = SIG03(errMsg, mapType.Type(SignatureType.Type))
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+    | _ -> ()
+
 let emitSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
     match checkCandidates calling candidates [] with
     | (Some candidate,_) -> Some candidate // no error occured
@@ -634,7 +694,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
 
     let diags = Diagnostics()
 
-    let emitLG000Diagnostics (arg: FplValue) repr =
+    let emitLG000Diagnostics (arg: FplValue) =
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
@@ -642,7 +702,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
                 Diagnostic.Severity = DiagnosticSeverity.Error
                 Diagnostic.StartPos = arg.NameStartPos
                 Diagnostic.EndPos = arg.NameEndPos
-                Diagnostic.Code = LG000(typeOfPredicate, repr)
+                Diagnostic.Code = LG000(typeOfPredicate, arg.Type(SignatureType.Name))
                 Diagnostic.Alternatives = None 
             }
         diags.AddDiagnostic diagnostic
@@ -674,7 +734,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
         match repr with
         | "true"
         | "false" -> ()
-        | "undetermined" -> emitLG000Diagnostics argument repr
+        | "undetermined" -> emitLG000Diagnostics argument 
         | _ -> emitLG001Diagnostics argument.NameStartPos argument.NameEndPos argument
     )
 

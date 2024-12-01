@@ -213,8 +213,8 @@ type CommonFplValueTestCases =
         def pred TestId() 
         {
             intr 
-            prty pred T1() {intr}
-            prty pred opt T2() {intr}
+            prty pred T1() {true}
+            prty pred opt T2() {true}
             prty func T3()->obj {intr}
             prty func opt T4()->obj {intr}
             prty func T5()->ind {intr}
@@ -307,8 +307,8 @@ type CommonFplValueTestCases =
             conjecture SomeConjecture2() {true}
             def cl SomeClass1:obj {intr}
             def cl SomeClass2:obj {intr}
-            def pred SomePredicate1() {intr}
-            def pred SomePredicate2() {intr}
+            def pred SomePredicate1() {true}
+            def pred SomePredicate2() {true}
             def func SomeFunctionalTerm1()->obj {intr}
             def func SomeFunctionalTerm2()->obj {intr}
             proof SomeTheorem1$1 {1. |- trivial}

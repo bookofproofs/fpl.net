@@ -113,7 +113,9 @@ type DiagnosticCode =
     | ID012 of string * string 
     | ID013 of string
     | ID014 of string * string
-     
+    | ID015 of string 
+    | ID016 of string 
+    | ID017 of string * string 
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -122,6 +124,7 @@ type DiagnosticCode =
     | SIG00 of string * int
     | SIG01 of string 
     | SIG02 of string * int * string
+    | SIG03 of string * string 
     | SIG04 of string * int * string list
     // proof-related error codes
     | PR000 of string 
@@ -187,6 +190,9 @@ type DiagnosticCode =
             | ID012 _ -> "ID012"
             | ID013 _ -> "ID013"
             | ID014 _ -> "ID014"
+            | ID015 _ -> "ID015"
+            | ID016 _ -> "ID016"
+            | ID017 _ -> "ID017"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -195,6 +201,7 @@ type DiagnosticCode =
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
             | SIG02 _ -> "SIG02"
+            | SIG03 _ -> "SIG03"
             | SIG04 _ -> "SIG04"
             // proof-related error codes
             | PR000 _ -> "PR000"
@@ -242,7 +249,7 @@ type DiagnosticCode =
             | NSP01 (fileName, innerErrMsg) -> sprintf "The theory `%s` was found but could not be loaded: %s" fileName innerErrMsg
             | NSP02 (url, innerErrMsg) -> sprintf "The theory `%s` was found but could not be downloaded: %s" url innerErrMsg
             | NSP03 alias -> sprintf "Alias `%s` appeared previously in this namespace" alias
-            | NSP04 path -> sprintf "Circular theory reference detected: %s" path
+            | NSP04 path -> sprintf "Circular theory reference detected: `%s`" path
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
             // identifier-related error codes 
             | ID000 identifier -> sprintf "Handling ast type `%s` not yet implemented." identifier
@@ -253,13 +260,16 @@ type DiagnosticCode =
             | ID005 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the corollary `%s`, found only %s." signature incorrectBlockType
             | ID006 signature -> sprintf "The corollary `%s` is missing a block to be associated with." signature 
             | ID007 (signature, candidates)  -> sprintf "Cannot associate corollary `%s` with a single block. Found more candidates: %s." signature candidates
-            | ID008 (name, expectedName)  -> sprintf "Misspelled constructor name `%s`, expecting %s." name expectedName
+            | ID008 (name, expectedName)  -> sprintf "Misspelled constructor name `%s`, expecting `%s`." name expectedName
             | ID009 name -> sprintf "Circular base type dependency involving `%s`." name
             | ID010 name -> sprintf "The type `%s` could not be found. Are you missing a uses clause?" name
             | ID011 (name, inheritanceChain) -> sprintf "Inheritance from `%s` can be dropped because of the inheritance chain %s." name inheritanceChain
             | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are %s." name candidates
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
+            | ID015 signature -> sprintf "Referencing self impossible outside the outer block which is %s." signature
+            | ID016 signature -> sprintf "Referencing self impossible outside definitions, the outer block is %s." signature
+            | ID017 (name, candidates) -> sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
@@ -268,6 +278,7 @@ type DiagnosticCode =
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
             | SIG02 (symbol, precedence, conflict) -> $"The symbol `{symbol}` was declared with the same precedence of `{precedence}` in {conflict}." 
+            | SIG03 (retType, mapType) -> $"The return type `{retType}` does not match the expected functional type `{mapType}`."
             | SIG04 (signature, numbOfcandidates, errorList) -> 
                 if numbOfcandidates = 0 then 
                     $"No overload matching `{signature}`, no candidates were found. Are you missing a uses clause?" 

@@ -220,7 +220,7 @@ typeToIconMap.set('prop','layout-panel-right');
 typeToIconMap.set('cor','layout-sidebar-right');
 typeToIconMap.set('prf','testing-passed-icon');
 typeToIconMap.set('conj','question');
-typeToIconMap.set('ax','key');
+typeToIconMap.set('ax','layout');
 typeToIconMap.set('inf','symbol-structure');
 typeToIconMap.set('qtr','circuit-board');
 typeToIconMap.set('pred','symbol-boolean');
@@ -238,7 +238,7 @@ typeToIconMap.set('ass','target');
 
 // A custom TreeItem
 class MyTreeItem extends vscode.TreeItem {
-    constructor(typ, inScope, label, lineNumber, columnNumber, filePath, scope = [], valueList = []) {
+    constructor(typ, inScope, label, lineNumber, columnNumber, filePath, fplValueType, fplValueRepr, scope = [], valueList = []) {
         super(label, scope.length > 0 || valueList.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
         this.typ = typ;
         this.lineNumber = lineNumber;
@@ -268,7 +268,9 @@ class MyTreeItem extends vscode.TreeItem {
         {
             this.label = typ + " " + label;
         }
+        this.tooltip = "n: " + label + "\nt: "+ fplValueType + "\nv: " + fplValueRepr;
         this.scope = scope;
+        if (this.typ == "th") log2Console(this.label + " " + scope.length, false);
         this.valueList = valueList;
 
         if (inScope) {
@@ -340,12 +342,12 @@ class FplTheoriesProvider {
     parseScope(scope) {
         // Convert each item in the scope to a MyTreeItem
 
-        return scope.map(item => new MyTreeItem(item.Type, true, item.Name, item.Line, item.Column, item.FilePath, item.Scope, item.ValueList));
+        return scope.map(item => new MyTreeItem(item.Type, true, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.Scope, item.ValueList));
     }
 
     parseValueList(valueList) {
         // Convert each item in the valueList to a MyTreeItem
-        return valueList.map(item => new MyTreeItem(item.Type, false, item.Name, item.Line, item.Column, item.FilePath, item.Scope, item.ValueList));
+        return valueList.map(item => new MyTreeItem(item.Type, false, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.Scope, item.ValueList));
     }
 
 }
@@ -407,7 +409,16 @@ function activate(context) {
 
             // refresh FPL Theories Explorer on document open event  
             vscode.workspace.onDidOpenTextDocument((document) => {
+                log2Console("onDidOpenTextDocument", false);
                 if (document.languageId === 'fpl') {
+                    fplTheoriesProvider.refresh();
+                }
+            });
+
+            // refresh FPL Theories Explorer on active text editor changes   
+            vscode.window.onDidChangeActiveTextEditor((editor) => {
+                log2Console("onDidChangeActiveTextEditor", false);
+                if (editor && editor.document.languageId === 'fpl') {
                     fplTheoriesProvider.refresh();
                 }
             });
@@ -429,7 +440,7 @@ function activate(context) {
             let relPathToConfig = path.join(__dirname, 'dotnet-runtimes', 'FplLsDll', 'vsfplconfig.json');
             fs.writeFile(relPathToConfig, configJson, (err) => {
                 if (err) {
-                    console.error('Error writing file:', err);
+                    log2Console('Error writing file:' + err.message, true);
                 }
             });
 
@@ -444,6 +455,12 @@ function activate(context) {
                 // Display a message box to the user
                 vscode.window.showInformationMessage('Hello World from "Formal Proving Language"!');
             });
+
+            // initial tree view refresh if there is already an active text editor
+            if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === 'fpl') {
+                log2Console("initial treeview refresh", false);
+                fplTheoriesProvider.refresh();
+            }
 
             // Register the command
             let disposableCommand2 = vscode.commands.registerCommand('extension.openFileAtPosition', (filePath, lineNumber, columnNumber) => {

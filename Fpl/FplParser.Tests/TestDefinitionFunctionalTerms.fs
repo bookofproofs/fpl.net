@@ -491,3 +491,11 @@ type TestDefinitionFunctionalTerms01 () =
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm22 () =
+        let result = run (definitionFunctionalTerm .>> eof) """func T()->obj { dec ~x:obj; return (S(x)) }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+

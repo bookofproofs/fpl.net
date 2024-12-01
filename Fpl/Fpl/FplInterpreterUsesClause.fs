@@ -364,8 +364,6 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
             | Some pa ->
                 ad.ResetStream(pa.Parsing.Uri)
                 if st.Root.Scope.ContainsKey(theoryName) then
-                    let toBeRemoved = st.Root.Scope[theoryName]
-                    toBeRemoved.Reset()
                     st.Root.Scope.Remove theoryName |> ignore
                 st.ParsedAsts.RemoveAll (fun pAst -> pAst.Id = theoryName) |> ignore
             | None -> ()
@@ -375,8 +373,7 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
     match st.ParsedAsts.TryFindAstById(uriToBeReset.TheoryName) with
     | Some theoryToBeReset -> 
         if st.Root.Scope.ContainsKey(theoryToBeReset.Id) then
-            let toBeRemoved = st.Root.Scope[theoryToBeReset.Id]
-            toBeRemoved.Reset()
+            theoryToBeReset.Status <- ParsedAstStatus.UsesClausesEvaluated
     | None -> ()
 
 

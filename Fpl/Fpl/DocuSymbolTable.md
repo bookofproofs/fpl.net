@@ -20,33 +20,33 @@ The following table documents how the FplValues are related to each other using 
 
 | BlockType | Description | Created in (match in FplInterpreterBuildingBlocks.eval function if not stated otherwise)| Parent's BlockType | Possible Scope Elements | Possible ValueList Elements |
 |----------|----------|----------|:----------:|:-------------:|:------:|
-| Root | The root of the ST | `FplInterpreterTypes.SymbolTable` constructor | none | Theory | none |
-| Theory  | A theory node corresponds to each evaluated FPL file. | `FplInterpreterBuildingBlocks.evaluateSymbolTable` function | Root | RuleOfInference, Class, FunctionaTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization | none |
-|RuleOfInference|An inference rule that is valid in the theory in which it was declared or theories using this theory.|`Ast.RuleOfInference`|Theory|Variable, VariadicVariableMany, VariadicVariableMany1|1st Reference: Premise pradicate, 2nd Reference: Conclusion predicate|
-|Class|A class defined in the theory or the theories using this theory.|`Ast.DefinitionClass`|Theory|Constructor, OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1|Class (list of nodes, from which this class inherits) These can be class nodes or primitive objects. The values are only added if they were previously declared in the code.|
-|FunctionalTerm|A functional term defined in the theory or the theories using this theory.|`Ast.DefinitionFunctionalTerm`|Theory|OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1||
-|Predicate|A predicate defined in the theory or the theories using this theory.|`Ast.DefinitionPredicate`|Theory|OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1||
-|Axiom|An axiom defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the axiom's predicate)|
-|Theorem|A theorem defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the theorems's predicate)|
-|Lemma|A lemma defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the lemmas's predicate)|
-|Proposition|A proposition defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the proposition's predicate)|
-|Conjecture|A conjecture defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the conjectures's predicate)|
-|Localization|A localization defined in the theory or the theories using this theory.|`Ast.Localization`|Theory|Variable, VariadicVariableMany, VariadicVariableMany1, Translation|Reference to the expression for which this localization was declared.|
-|Corollary|A corollary of Parent.|`Ast.Corollary`|Axiom, Theorem, Lemma, Proposition, Conjecture, or Corollary|Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent|Reference (only one, representing the corollary's predicate)|
-|Proof|A proof of a provable statement (see Parent).|`Ast.Proof`|Theorem, Lemma, Proposition, or Corollary|Argument, Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent|none|
-|Argument|An argument of a proof|`Ast.Argument`|Proof|none|1st Justification, snd ArgInference|
-|Justification|One or more justifications to a proof argument.|`Ast.Justification`|Argument|Reference|none|
-|ArgInference|An argument inference of a proof argument.|`Ast.AssumeArgument`, `Ast.RevokeArgument`, `Ast.DerivedPredicate`|Argument|none|Reference|
-|Translation|A translation of an expression inside a Localization in a particular language.|`Ast.Translation`|Localization|||
-|Constructor|||Class|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class)|(Possibly empty) Nodes that represent the calls to some base classes constructors. Due to semantical errors in the code, the latter do not necessarily have to match the signatures of the actual constructors of the base classes of this constructor class.	The latter can be retrieved from the parent Class.|
-|Reference|A reference to another FplValue in the symbol table.|`Ast.Trivial`, `Ast.DottedPredicate`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Expression`, `Ast.Trivial`, `Ast.ParentConstructorCall`||||
-|OptionalFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
-|OptionalPredicate|||Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
-|MandatoryFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
-|MandatoryPredicate|||Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
-|Variable|A variable declared in the scope of its Parent. Variables might be nested and have other Variables as parents.|`Ast.Var`|RuleOfInference, Class, FunctionalTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization, Corollary, Proof, Constructor, OptionalPredicate, MandatoryPredicate, OptionalFunctionalTerm, MandatoryFunctionalTerm, Variable|||
-|VariadicVariableMany||||||
-|VariadicVariableMany1||||||
+|#Root | The root of the ST | `FplInterpreterTypes.SymbolTable` constructor | none | Theory | none |
+|#Theory  | A theory node corresponds to each evaluated FPL file. | `FplInterpreterBuildingBlocks.evaluateSymbolTable` function | Root | RuleOfInference, Class, FunctionaTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization | none |
+|#RuleOfInference|An inference rule that is valid in the theory in which it was declared or theories using this theory.|`Ast.RuleOfInference`|Theory|Variable, VariadicVariableMany, VariadicVariableMany1|1st Reference: Premise pradicate, 2nd Reference: Conclusion predicate|
+|#Class|A class defined in the theory or the theories using this theory.|`Ast.DefinitionClass`|Theory|Constructor, OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1|Class (list of nodes, from which this class inherits) These can be class nodes or primitive objects. The values are only added if they were previously declared in the code.|
+|#FunctionalTerm|A functional term defined in the theory or the theories using this theory.|`Ast.DefinitionFunctionalTerm`|Theory|OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1||
+|#Predicate|A predicate defined in the theory or the theories using this theory.|`Ast.DefinitionPredicate`|Theory|OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1||
+|#Axiom|An axiom defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the axiom's predicate)|
+|#Theorem|A theorem defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the theorems's predicate)|
+|#Lemma|A lemma defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the lemmas's predicate)|
+|#Proposition|A proposition defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the proposition's predicate)|
+|#Conjecture|A conjecture defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the conjectures's predicate)|
+|#Localization|A localization defined in the theory or the theories using this theory.|`Ast.Localization`|Theory|Variable, VariadicVariableMany, VariadicVariableMany1, Translation|Reference to the expression for which this localization was declared.|
+|#Corollary|A corollary of Parent.|`Ast.Corollary`|Axiom, Theorem, Lemma, Proposition, Conjecture, or Corollary|Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent|Reference (only one, representing the corollary's predicate)|
+|#Proof|A proof of a provable statement (see Parent).|`Ast.Proof`|Theorem, Lemma, Proposition, or Corollary|Argument, Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent|none|
+|#Argument|An argument of a proof|`Ast.Argument`|Proof|none|1st Justification, snd ArgInference|
+|#Justification|One or more justifications to a proof argument.|`Ast.Justification`|Argument|Reference|none|
+|#ArgInference|An argument inference of a proof argument.|`Ast.AssumeArgument`, `Ast.RevokeArgument`, `Ast.DerivedPredicate`|Argument|none|Reference|
+|#Translation|A translation of an expression inside a Localization in a particular language.|`Ast.Translation`|Localization|||
+|#Constructor|||Class|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class)|(Possibly empty) Nodes that represent the calls to some base classes constructors. Due to semantical errors in the code, the latter do not necessarily have to match the signatures of the actual constructors of the base classes of this constructor class.	The latter can be retrieved from the parent Class.|
+|#Reference|A reference to another FplValue in the symbol table.|`Ast.Trivial`, `Ast.DottedPredicate`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Expression`, `Ast.Trivial`, `Ast.ParentConstructorCall`||By convention, if the scope contains an element with the same key as the node's FplId, then the value is the reference node.||
+|#OptionalFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
+|#OptionalPredicate|||Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
+|#MandatoryFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
+|#MandatoryPredicate|||Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
+|#Variable|A variable declared in the scope of its Parent. Variables might be nested and have other Variables as parents.|`Ast.Var`|RuleOfInference, Class, FunctionalTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization, Corollary, Proof, Constructor, OptionalPredicate, MandatoryPredicate, OptionalFunctionalTerm, MandatoryFunctionalTerm, Variable|||
+|#VariadicVariableMany||||||
+|#VariadicVariableMany1||||||
 |Object||||||
 |Premise||||||
 |Conclusion||||||

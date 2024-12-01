@@ -80,3 +80,7 @@ let evaluateEquivalence (fplValue:FplValue) =
     | ("true", "false") -> fplValue.ReprId <- "false"
     | _ -> fplValue.ReprId <- "undetermined"
     
+let evaluateIsOperator (fv:FplValue) (operand:FplValue) (typeOfOperand:FplValue) = 
+    match mpwa [operand] [typeOfOperand] with
+    | Some errMsg -> fv.ReprId <- "false"
+    | None -> fv.ReprId <- "true"
