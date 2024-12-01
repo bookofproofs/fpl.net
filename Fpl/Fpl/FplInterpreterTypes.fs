@@ -1404,6 +1404,7 @@ let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
     
     let stdMsg = $"{fvp.QualifiedName}"
     let argResult = mpwa arguments parameters
+    (*
     let mapResult = 
         match (fva.Mapping, fvp.Mapping) with
         | (Some ma, Some mp) -> 
@@ -1420,13 +1421,15 @@ let matchArgumentsWithParameters (fva:FplValue) (fvp:FplValue) =
             let aType = ma.Type(SignatureType.Type)
             Some($"Unexpected mapping `{aType}`")
         | (None, None) -> None
-
     match (argResult, mapResult) with
     | (Some aErr, Some mErr) -> Some($"{aErr}; {mErr} in {stdMsg}")
     | (Some aErr, None) -> Some($"{aErr} in {stdMsg}")
     | (None, Some mErr) -> Some($"{mErr} in {stdMsg}")
     | (None, None) -> None
-
+    *)
+    match argResult with 
+    | Some aErr -> Some($"{aErr} in {stdMsg}")
+    | None -> None
 
 let matchWithMapping (fva:FplValue) (fvp:FplValue) =
     let targetMapping = fvp.Mapping
