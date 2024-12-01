@@ -99,20 +99,8 @@ def class SetRoster: Set
 
 }
 
-// Schema of separation axioms
-axiom SchemaSeparation()
-{
-    all p:pred, x:Set
-    {
-        ex y:Set
-        {
-            ( y = SetBuilder(x,p) )
-        }
-    }
-}
-
 // adds set-builder notation capability to this theory
-// pred p indicates that p is a predicate, in which the variable u is bound and the type of u is Set
+// p is a predicate, in which the variable u is bound and the type of u is a Set
 // moreover, p can accept even more bound variables of any type.
 def class SetBuilder: Set
 {
@@ -126,13 +114,27 @@ def class SetBuilder: Set
                 iif
                 (
                     In(u1,self),
-                    and ( In(u1,x), p(u1,o) )
+                    and ( In(u1,u), p(u1,o) )
                 )
             }
         ;
         self
     }
 }
+
+// Schema of separation axioms
+axiom SchemaSeparation()
+{
+    all p:pred, x:Set
+    {
+        ex y:Set
+        {
+            ( y = SetBuilder(x,p) )
+        }
+    }
+}
+
+
 
 // For any two sets $x,y$ there exists a set $z$ containing them as elements.
 axiom Pairing()

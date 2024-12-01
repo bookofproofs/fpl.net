@@ -136,7 +136,7 @@ def func Add(n,m: Nat)->Nat
         cases
         (
             | (m = 0): result:= n
-            | (Succ(m) = k): result:= Succ(Add(n,k))
+            | (Succ(m) = k): result:= Succ(self(n,k))
             ? result:= undef
         )
     ;
@@ -205,12 +205,11 @@ def func Sum(list:* Nat)->Nat
 def func Sum2(list:* Nat)->Nat
 {
     dec
-        ~i: index
-        ~result: Nat
+        ~elem,result: Nat
         result:=Zero()
-        for i in list
+        for elem in list
         {
-            result:=Add(result,list[i])
+            result:=Add(result,elem)
         }
     ; 
     return result
