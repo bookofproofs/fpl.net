@@ -272,6 +272,7 @@ type TestInterpreterErrors() =
     [<DataRow("proof TestId$1$2 {1. |- trivial} ;", 0)>]
     [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", 0)>]
     [<DataRow("def func Sum(list:* Nat)->Nat {dec ~result: Nat; return result} def func Sum2(list:* Nat)->Nat {dec ~result: Nat; return result};", 0)>]
+    [<DataRow("""def cl B:obj {intr} def cl A:obj {dec ~x:obj; ctor A(y:B[x:obj]) {self} };""", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID001(fplCode:string, expected:int) =
@@ -473,6 +474,7 @@ type TestInterpreterErrors() =
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {pre: p(c) con: ex x:obj {p(x)}};", 0)>]
     [<DataRow("inf ExistsByExample(p: pred(c: obj)) {dec ~c: obj; pre: true con: true};", 0)>]
     [<DataRow("""loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
+    [<DataRow("""def cl B:obj {intr} def cl A:obj {dec ~x:obj; ctor A(y:B[x:obj]) {self} };""", 1)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR03(fplCode:string, expected) =
