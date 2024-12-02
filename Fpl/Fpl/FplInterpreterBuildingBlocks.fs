@@ -240,7 +240,7 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
 /// Simplify trivially nested expressions 
-let simplifyTriviallyNestedExpressions (rb:FplValue) = 
+let rec simplifyTriviallyNestedExpressions (rb:FplValue) = 
     if rb.ValueList.Count = 1 && rb.FplId = "" then
         let subNode = rb.ValueList[0]
         if subNode.BlockType = FplValueType.Reference 
@@ -661,10 +661,8 @@ let rec eval (st: SymbolTable) ast =
         let stmt = FplValue.CreateFplValue((pos1,pos2), FplValueType.Stmt, fv)
         stmt.FplId <- "return"
         es.PushEvalStack(stmt)
-        let refBlock = FplValue.CreateFplValue((pos1,pos2), FplValueType.Reference, stmt)
-        es.PushEvalStack(refBlock)
         eval st returneeAst
-        es.PopEvalStack() 
+        let refBlock = stmt.ValueList[0]
         emitSIG03Diagnostics refBlock fv
         es.PopEvalStack() 
         st.EvalPop()
