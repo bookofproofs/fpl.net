@@ -48,6 +48,8 @@ type EvalStack() =
                     ad.DiagnosticsStopped <- oldDiagnosticsStopped
                 | FplValueType.Argument -> 
                     emitPR003diagnostics fv conflict 
+                | FplValueType.Variable -> 
+                    ()
                 | _ ->
                     emitID001diagnostics fv conflict 
         | _ -> 
@@ -245,7 +247,6 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
         let subNode = rb.ValueList[0]
         if subNode.BlockType = FplValueType.Reference 
         || subNode.BlockType = FplValueType.Quantor
-
         then 
             es.Pop() |> ignore
             es.PushEvalStack(subNode)
@@ -261,6 +262,8 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
             // prevent recursive clearing of the subNode
             rb.ValueList.Clear() 
             rb.Scope.Clear()
+
+    
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -1385,6 +1388,19 @@ let rec eval (st: SymbolTable) ast =
         | FplValueType.MandatoryPredicate 
         | FplValueType.OptionalPredicate ->
             fv.ReprId <- refBlock.ReprId
+        | FplValueType.Reference ->
+            // simplify references created due to superfluous parantheses of expressions
+            // by replacing them with their only value
+            if prefixOpAst.IsNone && 
+                postfixOpAst.IsNone &&
+                fv.FplId = "" && 
+                fv.ValueList.Count = 1 then
+                    let subNode = fv.ValueList[0]
+                    if subNode.BlockType = FplValueType.Reference then 
+                        es.Pop() |> ignore
+                        es.PushEvalStack(subNode)
+                        subNode.Parent <- fv.Parent
+                        fv.ValueList.Clear()
         | _ -> ()
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
