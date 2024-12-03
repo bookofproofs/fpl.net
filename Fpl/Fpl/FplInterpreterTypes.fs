@@ -956,20 +956,9 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     ScopeSearchResult.Found (fv.Scope[name])
                 elif fv.Parent.IsSome then 
                     if withNestedVariableSearch then 
-                        let dict = Dictionary<string,FplValue>()
-                        let rec getVariables (fvp:FplValue) = 
-                            fvp.Scope
-                            |> Seq.filter (fun kvp -> FplValue.IsVariable(kvp.Value))
-                            |> Seq.iter (fun kvp -> 
-                                if not (dict.ContainsKey kvp.Key) then
-                                    dict.Add(kvp.Key, kvp.Value)
-                                    getVariables kvp.Value
-                            )
-                        getVariables fv
-                        if dict.ContainsKey name then 
-                            ScopeSearchResult.Found (dict[name])
-                        else
-                            firstBlockParent fv.Parent.Value
+                        match qualifiedVar fv with
+                        | Some fv3 -> ScopeSearchResult.Found (fv3)
+                        | _ -> firstBlockParent fv.Parent.Value
                     else
                         firstBlockParent fv.Parent.Value
                 else
