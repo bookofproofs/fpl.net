@@ -396,7 +396,7 @@ let rec eval (st: SymbolTable) ast =
         varValue.ReprId <- "undef"
         varValue.IsSignatureVariable <- es.InSignatureEvaluation 
         if isDeclaration then 
-            match FplValue.VariableInBlockScopeByName fv name with 
+            match FplValue.VariableInBlockScopeByName fv name false with 
             | ScopeSearchResult.Found other ->
                 // replace the variable by other on stack
                 es.PushEvalStack(other)
@@ -404,7 +404,7 @@ let rec eval (st: SymbolTable) ast =
             | _ -> 
                 es.PushEvalStack(varValue)
         elif isLocalizationDeclaration then 
-            match FplValue.VariableInBlockScopeByName fv name with 
+            match FplValue.VariableInBlockScopeByName fv name false with 
             | ScopeSearchResult.Found other ->
                 emitVAR03diagnostics varValue other 
             | _ -> 
@@ -421,7 +421,7 @@ let rec eval (st: SymbolTable) ast =
                 es.PushEvalStack(varValue)
                 es.PopEvalStack()
         else
-            match FplValue.VariableInBlockScopeByName fv name with 
+            match FplValue.VariableInBlockScopeByName fv name true with 
             | ScopeSearchResult.Found other -> 
                 match fv.BlockType with
                 | FplValueType.Reference ->

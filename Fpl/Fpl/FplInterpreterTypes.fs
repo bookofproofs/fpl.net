@@ -913,7 +913,23 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// Checks if a variable is defined in the scope of block, if any
     /// looking for it recursively, up the symbol tree.
-    static member VariableInBlockScopeByName(fplValue:FplValue) name = 
+    static member VariableInBlockScopeByName(fplValue:FplValue) name withNestedVariableSearch = 
+        let rec qualifiedVar (fv1:FplValue) = 
+            if fv1.Scope.ContainsKey name then
+                Some(fv1.Scope[name])
+            elif fv1.Scope.Count = 0 then 
+                None
+            else
+                let testList = 
+                    fv1.Scope.Values
+                    |> Seq.map (fun child ->
+                        qualifiedVar child                                
+                    )
+                    |> Seq.toList
+                if testList.Length > 0 then
+                    testList.Head
+                else
+                    None
         let rec firstBlockParent (fv:FplValue) =
             match fv.BlockType with
             | FplValueType.Constructor  
@@ -939,28 +955,29 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 if fv.Scope.ContainsKey name then
                     ScopeSearchResult.Found (fv.Scope[name])
                 elif fv.Parent.IsSome then 
+                    if withNestedVariableSearch then 
+                        let dict = Dictionary<string,FplValue>()
+                        let rec getVariables (fvp:FplValue) = 
+                            fvp.Scope
+                            |> Seq.filter (fun kvp -> FplValue.IsVariable(kvp.Value))
+                            |> Seq.iter (fun kvp -> 
+                                if not (dict.ContainsKey kvp.Key) then
+                                    dict.Add(kvp.Key, kvp.Value)
+                                    getVariables kvp.Value
+                            )
+                        getVariables fv
+                        if dict.ContainsKey name then 
+                            ScopeSearchResult.Found (dict[name])
+                        else
+                            firstBlockParent fv.Parent.Value
+                    else
                         firstBlockParent fv.Parent.Value
                 else
                     ScopeSearchResult.NotFound
             | FplValueType.Theory ->
                 ScopeSearchResult.NotFound
             | FplValueType.Reference ->
-                let rec qualifiedVar (fv1:FplValue) = 
-                    if fv1.Scope.ContainsKey name then
-                        Some(fv1.Scope[name])
-                    elif fv1.Scope.Count = 0 then 
-                        None
-                    else
-                        let testList = 
-                            fv1.Scope.Values
-                            |> Seq.map (fun child ->
-                                qualifiedVar child                                
-                            )
-                            |> Seq.toList
-                        if testList.Length > 0 then
-                            testList.Head
-                        else
-                            None
+
                 match qualifiedVar fv with
                 | Some fv3 -> ScopeSearchResult.Found (fv3)
                 | _ -> firstBlockParent fv.Parent.Value

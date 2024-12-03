@@ -125,8 +125,7 @@ let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
         fplValue.Scope
         |> Seq.filter (fun kv -> FplValue.IsVariable(kv.Value))
         |> Seq.iter (fun kv -> 
-            let res = FplValue.VariableInBlockScopeByName (kv.Value) (kv.Value.Type(SignatureType.Mixed))
-
+            let res = FplValue.VariableInBlockScopeByName (kv.Value) (kv.Value.Type(SignatureType.Mixed)) false
             match res with
             | ScopeSearchResult.Found conflict -> emitVAR03diagnostics kv.Value conflict
             | _ -> ()
