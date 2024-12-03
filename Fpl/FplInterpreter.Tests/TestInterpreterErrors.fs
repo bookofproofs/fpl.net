@@ -406,6 +406,7 @@ type TestInterpreterErrors() =
     [<DataRow("""loc and(p,q) := !tex: x "\wedge" y;;""", 2)>]
     [<DataRow("""def pred Add infix "+" 2 (x,y: obj) {intr} loc (x + y) := !tex: x "+" y !eng: x "plus" y !ger: x "plus" y;;""", 0)>]
     [<DataRow("""def pred Add infix "+" 2 (x,y: obj) {intr} axiom A() {(x + y * z = 1)};""", 3)>]
+    [<DataRow("axiom A(arr: tpl[x:pred]) { x };", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =

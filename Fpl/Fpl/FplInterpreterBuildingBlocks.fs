@@ -1389,7 +1389,7 @@ let rec eval (st: SymbolTable) ast =
         | FplValueType.OptionalPredicate ->
             fv.ReprId <- refBlock.ReprId
         | FplValueType.Reference ->
-            // simplify references created due to superfluous parantheses of expressions
+            // simplify references created due to superfluous parentheses of expressions
             // by replacing them with their only value
             if prefixOpAst.IsNone && 
                 postfixOpAst.IsNone &&

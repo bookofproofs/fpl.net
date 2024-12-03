@@ -915,6 +915,61 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// looking for it recursively, up the symbol tree.
     static member VariableInBlockScopeByName(fplValue:FplValue) name = 
         let rec firstBlockParent (fv:FplValue) =
+            match fv.BlockType with
+            | FplValueType.Constructor  
+            | FplValueType.Localization  
+            | FplValueType.Quantor 
+            | FplValueType.MandatoryFunctionalTerm
+            | FplValueType.OptionalFunctionalTerm
+            | FplValueType.MandatoryPredicate
+            | FplValueType.OptionalPredicate
+            | FplValueType.Proof
+            | FplValueType.Corollary
+            | FplValueType.Axiom
+            | FplValueType.Theorem 
+            | FplValueType.Lemma 
+            | FplValueType.Proposition 
+            | FplValueType.Corollary 
+            | FplValueType.Conjecture 
+            | FplValueType.Proof 
+            | FplValueType.RuleOfInference 
+            | FplValueType.Predicate 
+            | FplValueType.FunctionalTerm 
+            | FplValueType.Class -> 
+                if fv.Scope.ContainsKey name then
+                    ScopeSearchResult.Found (fv.Scope[name])
+                elif fv.Parent.IsSome then 
+                        firstBlockParent fv.Parent.Value
+                else
+                    ScopeSearchResult.NotFound
+            | FplValueType.Theory ->
+                ScopeSearchResult.NotFound
+            | FplValueType.Reference ->
+                let rec qualifiedVar (fv1:FplValue) = 
+                    if fv1.Scope.ContainsKey name then
+                        Some(fv1.Scope[name])
+                    elif fv1.Scope.Count = 0 then 
+                        None
+                    else
+                        let testList = 
+                            fv1.Scope.Values
+                            |> Seq.map (fun child ->
+                                qualifiedVar child                                
+                            )
+                            |> Seq.toList
+                        if testList.Length > 0 then
+                            testList.Head
+                        else
+                            None
+                match qualifiedVar fv with
+                | Some fv3 -> ScopeSearchResult.Found (fv3)
+                | _ -> firstBlockParent fv.Parent.Value
+            | _ ->                         
+                if fv.Parent.IsSome then 
+                    firstBlockParent fv.Parent.Value
+                else
+                    ScopeSearchResult.NotFound
+            (*
             if fv.Scope.ContainsKey name then
                 match fv.BlockType with
                 | FplValueType.Constructor -> 
@@ -965,7 +1020,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                         firstBlockParent fv.Parent.Value
                     else
                         ScopeSearchResult.NotFound
-
+            *)
         firstBlockParent fplValue
 
     /// Checks if an fplValue is provable. This will only be true if 
