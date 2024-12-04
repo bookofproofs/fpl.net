@@ -61,7 +61,7 @@ definition class UnlimitedTupleFrom: obj
 
     property func Coord(i: Nat) -> tpl
     {
-        return x[i]
+        return myX[i]
     }
 }
 

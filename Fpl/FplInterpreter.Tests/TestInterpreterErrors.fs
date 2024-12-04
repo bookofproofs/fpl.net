@@ -407,6 +407,8 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred Add infix "+" 2 (x,y: obj) {intr} loc (x + y) := !tex: x "+" y !eng: x "plus" y !ger: x "plus" y;;""", 0)>]
     [<DataRow("""def pred Add infix "+" 2 (x,y: obj) {intr} axiom A() {(x + y * z = 1)};""", 3)>]
     [<DataRow("axiom A(arr: tpl[x:pred]) { x };", 0)>]
+    [<DataRow("prop A(d:pred) {true} proof A$1 {1. |- d qed};", 0)>]
+    [<DataRow("def class A: obj {ctor A(x: obj, p:obj(u: pred)) {dec assert u; self }};", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR01(fplCode:string, expected) =

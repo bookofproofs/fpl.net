@@ -155,13 +155,16 @@ prop AddIsUnique(op: Add)
     ;
     impl
     (
-        and
-        (
-            ( op(n,0) = n ),
-            ( anotherAdd(n,0) = n ),
-            ( op(n,Succ(m)) = Succ(op(n,m)) ),
-            ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
-        )
+        all n, m:Nat
+        {
+            and
+            (
+                ( op(n,0) = n ),
+                ( anotherAdd(n,0) = n ),
+                ( op(n,Succ(m)) = Succ(op(n,m)) ),
+                ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
+            )
+        }
         ,
         all n, m:Nat
         {
@@ -174,13 +177,16 @@ prop AddIsUnique(op: Add)
 proof AddIsUnique$1
 {
     1. |- assume 
-        and
-        (
-            ( op(n,0) = n ),
-            ( anotherAdd(n,0) = n ),
-            ( op(n,Succ(m)) = Succ(op(n,m)) ),
-            ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
-        )
+        all n, m:Nat
+        {
+            and
+            (
+                ( op(n,0) = n ),
+                ( anotherAdd(n,0) = n ),
+                ( op(n,Succ(m)) = Succ(op(n,m)) ),
+                ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
+            )
+        }
     2. |- trivial
     3. |- all n, m:Nat
             {
