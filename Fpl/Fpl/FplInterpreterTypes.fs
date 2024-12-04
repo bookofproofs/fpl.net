@@ -914,23 +914,27 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// Checks if a variable is defined in the scope of block, if any
     /// looking for it recursively, up the symbol tree.
     static member VariableInBlockScopeByName(fplValue:FplValue) name withNestedVariableSearch = 
-        let rec qualifiedVar (fv1:FplValue) = 
-            if fv1.Scope.ContainsKey name then
-                Some(fv1.Scope[name])
-            elif fv1.Scope.Count = 0 then 
-                None
-            else
-                let testList = 
-                    fv1.Scope.Values
-                    |> Seq.map (fun child ->
-                        qualifiedVar child                                
-                    )
-                    |> Seq.toList
-                if testList.Length > 0 then
-                    testList.Head
-                else
-                    None
         let rec firstBlockParent (fv:FplValue) =
+            let qualifiedVar (fv1:FplValue) =
+                // try out all variables in scope
+                let foundList = 
+                    fv1.Scope
+                    |> Seq.filter (fun kvp -> FplValue.IsVariable(kvp.Value))
+                    |> Seq.map (fun kvp -> kvp.Value)
+                    |> Seq.map (fun var -> 
+                        if var.Scope.ContainsKey name then 
+                            ScopeSearchResult.Found (var.Scope[name])
+                        else
+                            ScopeSearchResult.NotFound
+                    )
+                    |> Seq.filter (fun ssr -> ssr <> ScopeSearchResult.NotFound)
+                    |> Seq.toList
+
+                if foundList.IsEmpty then 
+                    firstBlockParent fv1.Parent.Value 
+                else 
+                    foundList.Head 
+
             match fv.BlockType with
             | FplValueType.Constructor  
             | FplValueType.Localization  
@@ -956,77 +960,20 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     ScopeSearchResult.Found (fv.Scope[name])
                 elif fv.Parent.IsSome then 
                     if withNestedVariableSearch then 
-                        match qualifiedVar fv with
-                        | Some fv3 -> ScopeSearchResult.Found (fv3)
-                        | _ -> firstBlockParent fv.Parent.Value
+                        qualifiedVar fv
                     else
-                        firstBlockParent fv.Parent.Value
+                        firstBlockParent fv.Parent.Value 
                 else
                     ScopeSearchResult.NotFound
             | FplValueType.Theory ->
                 ScopeSearchResult.NotFound
             | FplValueType.Reference ->
-
-                match qualifiedVar fv with
-                | Some fv3 -> ScopeSearchResult.Found (fv3)
-                | _ -> firstBlockParent fv.Parent.Value
+                qualifiedVar fv 
             | _ ->                         
                 if fv.Parent.IsSome then 
                     firstBlockParent fv.Parent.Value
                 else
                     ScopeSearchResult.NotFound
-            (*
-            if fv.Scope.ContainsKey name then
-                match fv.BlockType with
-                | FplValueType.Constructor -> 
-                    ScopeSearchResult.Found (fv.Scope[name])
-                | FplValueType.Localization -> 
-                    ScopeSearchResult.Found (fv.Scope[name])
-                | FplValueType.Quantor -> 
-                    ScopeSearchResult.Found (fv.Scope[name])
-                | _ -> 
-                    if FplValue.IsProperty(fv) then
-                        ScopeSearchResult.Found (fv.Scope[name])
-                    elif FplValue.IsProof(fv) then 
-                        ScopeSearchResult.Found (fv.Scope[name])
-                    elif FplValue.IsCorollary(fv) then 
-                        ScopeSearchResult.Found (fv.Scope[name])
-                    elif FplValue.IsFplBlock(fv) then 
-                        ScopeSearchResult.Found (fv.Scope[name])
-                    elif FplValue.IsTheory(fv) then
-                        ScopeSearchResult.NotFound
-                    elif fv.Parent.IsSome then 
-                        firstBlockParent fv.Parent.Value
-                    else
-                        ScopeSearchResult.NotFound
-            else
-                match fv.BlockType with
-                | FplValueType.Reference ->
-                    let rec qualifiedVar (fv1:FplValue) = 
-                        if fv1.Scope.ContainsKey name then
-                            Some(fv1.Scope[name])
-                        elif fv1.Scope.Count = 0 then 
-                            None
-                        else
-                            let testList = 
-                                fv1.Scope.Values
-                                |> Seq.map (fun child ->
-                                    qualifiedVar child                                
-                                )
-                                |> Seq.toList
-                            if testList.Length > 0 then
-                                testList.Head
-                            else
-                                None
-                    match qualifiedVar fv with
-                    | Some fv3 -> ScopeSearchResult.Found (fv3)
-                    | _ -> firstBlockParent fv.Parent.Value
-                | _ ->                         
-                    if fv.Parent.IsSome then 
-                        firstBlockParent fv.Parent.Value
-                    else
-                        ScopeSearchResult.NotFound
-            *)
         firstBlockParent fplValue
 
     /// Checks if an fplValue is provable. This will only be true if 
