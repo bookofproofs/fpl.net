@@ -48,6 +48,8 @@ type EvalStack() =
                     ad.DiagnosticsStopped <- oldDiagnosticsStopped
                 | FplValueType.Argument -> 
                     emitPR003diagnostics fv conflict 
+                | FplValueType.Variable -> 
+                    ()
                 | _ ->
                     emitID001diagnostics fv conflict 
         | _ -> 
@@ -68,35 +70,8 @@ type EvalStack() =
             let next = _valueStack.Peek()
 
             match fv.BlockType with
-            | FplValueType.Proof -> 
-                match tryFindAssociatedBlockForProof fv with
-                | ScopeSearchResult.FoundAssociate potentialParent -> 
-                    // everything is ok, change the parent of the provable from theory to the found parent 
-                    fv.Parent <- Some potentialParent
-                    // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the proof.
-                    emitVAR03diagnosticsForCorollaryOrProofVariable fv  
-                | ScopeSearchResult.FoundIncorrectBlock block ->
-                    emitID002diagnostics fv block  
-                | ScopeSearchResult.NotFound ->
-                    emitID003diagnostics fv  
-                | ScopeSearchResult.FoundMultiple listOfKandidates ->
-                    emitID004diagnostics fv listOfKandidates  
-                | _ -> ()
-                EvalStack.tryAddToScope fv
+            | FplValueType.Proof 
             | FplValueType.Corollary ->
-                match tryFindAssociatedBlockForCorollary fv with
-                | ScopeSearchResult.FoundAssociate potentialParent -> 
-                    // everything is ok, change the parent of the provable from theory to the found parent 
-                    fv.Parent <- Some potentialParent
-                    // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
-                    emitVAR03diagnosticsForCorollaryOrProofVariable fv  
-                | ScopeSearchResult.FoundIncorrectBlock block ->
-                    emitID005diagnostics fv block  
-                | ScopeSearchResult.NotFound ->
-                    emitID006diagnostics fv  
-                | ScopeSearchResult.FoundMultiple listOfKandidates ->
-                    emitID007diagnostics fv listOfKandidates  
-                | _ -> ()
                 EvalStack.tryAddToScope fv
             | FplValueType.Class 
             | FplValueType.Theorem
@@ -240,12 +215,11 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
 /// Simplify trivially nested expressions 
-let simplifyTriviallyNestedExpressions (rb:FplValue) = 
+let rec simplifyTriviallyNestedExpressions (rb:FplValue) = 
     if rb.ValueList.Count = 1 && rb.FplId = "" then
         let subNode = rb.ValueList[0]
         if subNode.BlockType = FplValueType.Reference 
         || subNode.BlockType = FplValueType.Quantor
-
         then 
             es.Pop() |> ignore
             es.PushEvalStack(subNode)
@@ -261,6 +235,8 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
             // prevent recursive clearing of the subNode
             rb.ValueList.Clear() 
             rb.Scope.Clear()
+
+    
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -393,7 +369,7 @@ let rec eval (st: SymbolTable) ast =
         varValue.ReprId <- "undef"
         varValue.IsSignatureVariable <- es.InSignatureEvaluation 
         if isDeclaration then 
-            match FplValue.VariableInBlockScopeByName fv name with 
+            match FplValue.VariableInBlockScopeByName fv name false with 
             | ScopeSearchResult.Found other ->
                 // replace the variable by other on stack
                 es.PushEvalStack(other)
@@ -401,7 +377,7 @@ let rec eval (st: SymbolTable) ast =
             | _ -> 
                 es.PushEvalStack(varValue)
         elif isLocalizationDeclaration then 
-            match FplValue.VariableInBlockScopeByName fv name with 
+            match FplValue.VariableInBlockScopeByName fv name false with 
             | ScopeSearchResult.Found other ->
                 emitVAR03diagnostics varValue other 
             | _ -> 
@@ -418,7 +394,7 @@ let rec eval (st: SymbolTable) ast =
                 es.PushEvalStack(varValue)
                 es.PopEvalStack()
         else
-            match FplValue.VariableInBlockScopeByName fv name with 
+            match FplValue.VariableInBlockScopeByName fv name true with 
             | ScopeSearchResult.Found other -> 
                 match fv.BlockType with
                 | FplValueType.Reference ->
@@ -661,10 +637,8 @@ let rec eval (st: SymbolTable) ast =
         let stmt = FplValue.CreateFplValue((pos1,pos2), FplValueType.Stmt, fv)
         stmt.FplId <- "return"
         es.PushEvalStack(stmt)
-        let refBlock = FplValue.CreateFplValue((pos1,pos2), FplValueType.Reference, stmt)
-        es.PushEvalStack(refBlock)
         eval st returneeAst
-        es.PopEvalStack() 
+        let refBlock = stmt.ValueList[0]
         emitSIG03Diagnostics refBlock fv
         es.PopEvalStack() 
         st.EvalPop()
@@ -1387,6 +1361,19 @@ let rec eval (st: SymbolTable) ast =
         | FplValueType.MandatoryPredicate 
         | FplValueType.OptionalPredicate ->
             fv.ReprId <- refBlock.ReprId
+        | FplValueType.Reference ->
+            // simplify references created due to superfluous parentheses of expressions
+            // by replacing them with their only value
+            if prefixOpAst.IsNone && 
+                postfixOpAst.IsNone &&
+                fv.FplId = "" && 
+                fv.ValueList.Count = 1 then
+                    let subNode = fv.ValueList[0]
+                    if subNode.BlockType = FplValueType.Reference then 
+                        es.Pop() |> ignore
+                        es.PushEvalStack(subNode)
+                        subNode.Parent <- fv.Parent
+                        fv.ValueList.Clear()
         | _ -> ()
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
@@ -1559,7 +1546,20 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Corollary, es.PeekEvalStack())
         es.PushEvalStack(fv)
         eval st corollarySignatureAst
+        match tryFindAssociatedBlockForCorollary fv with
+        | ScopeSearchResult.FoundAssociate potentialParent -> 
+            // everything is ok, change the parent of the provable from theory to the found parent 
+            fv.Parent <- Some potentialParent
+        | ScopeSearchResult.FoundIncorrectBlock block ->
+            emitID005diagnostics fv block  
+        | ScopeSearchResult.NotFound ->
+            emitID006diagnostics fv  
+        | ScopeSearchResult.FoundMultiple listOfKandidates ->
+            emitID007diagnostics fv listOfKandidates  
+        | _ -> ()
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
+        // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
+        emitVAR03diagnosticsForCorollaryOrProofVariable fv  
         es.PopEvalStack()
         st.EvalPop()
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
@@ -1670,7 +1670,20 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Proof, es.PeekEvalStack())
         es.PushEvalStack(fv)
         eval st referencingIdentifierAst
+        match tryFindAssociatedBlockForProof fv with
+        | ScopeSearchResult.FoundAssociate potentialParent -> 
+            // everything is ok, change the parent of the provable from theory to the found parent 
+            fv.Parent <- Some potentialParent
+        | ScopeSearchResult.FoundIncorrectBlock block ->
+            emitID002diagnostics fv block  
+        | ScopeSearchResult.NotFound ->
+            emitID003diagnostics fv  
+        | ScopeSearchResult.FoundMultiple listOfKandidates ->
+            emitID004diagnostics fv listOfKandidates  
+        | _ -> ()
         proofArgumentListAst |> List.map (eval st) |> ignore
+        // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the proof.
+        emitVAR03diagnosticsForCorollaryOrProofVariable fv  
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         es.PopEvalStack()
         st.EvalPop()

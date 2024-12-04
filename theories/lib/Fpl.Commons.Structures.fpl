@@ -61,7 +61,7 @@ definition class UnlimitedTupleFrom: obj
 
     property func Coord(i: Nat) -> tpl
     {
-        return x[i]
+        return myX[i]
     }
 }
 
@@ -117,7 +117,7 @@ def class CartesianProduct: Set
                 (
                     In(tupleElem,@self),
                     and (
-                        is(tupleElem,Tuple[myFrom,myLength:Nat]),
+                        is(tupleElem,Tuple[x,y:Nat]),
                         all i:Nat 
                         {
                             and (
