@@ -70,35 +70,8 @@ type EvalStack() =
             let next = _valueStack.Peek()
 
             match fv.BlockType with
-            | FplValueType.Proof -> 
-                match tryFindAssociatedBlockForProof fv with
-                | ScopeSearchResult.FoundAssociate potentialParent -> 
-                    // everything is ok, change the parent of the provable from theory to the found parent 
-                    fv.Parent <- Some potentialParent
-                    // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the proof.
-                    emitVAR03diagnosticsForCorollaryOrProofVariable fv  
-                | ScopeSearchResult.FoundIncorrectBlock block ->
-                    emitID002diagnostics fv block  
-                | ScopeSearchResult.NotFound ->
-                    emitID003diagnostics fv  
-                | ScopeSearchResult.FoundMultiple listOfKandidates ->
-                    emitID004diagnostics fv listOfKandidates  
-                | _ -> ()
-                EvalStack.tryAddToScope fv
+            | FplValueType.Proof 
             | FplValueType.Corollary ->
-                match tryFindAssociatedBlockForCorollary fv with
-                | ScopeSearchResult.FoundAssociate potentialParent -> 
-                    // everything is ok, change the parent of the provable from theory to the found parent 
-                    fv.Parent <- Some potentialParent
-                    // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
-                    emitVAR03diagnosticsForCorollaryOrProofVariable fv  
-                | ScopeSearchResult.FoundIncorrectBlock block ->
-                    emitID005diagnostics fv block  
-                | ScopeSearchResult.NotFound ->
-                    emitID006diagnostics fv  
-                | ScopeSearchResult.FoundMultiple listOfKandidates ->
-                    emitID007diagnostics fv listOfKandidates  
-                | _ -> ()
                 EvalStack.tryAddToScope fv
             | FplValueType.Class 
             | FplValueType.Theorem
@@ -1573,7 +1546,20 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Corollary, es.PeekEvalStack())
         es.PushEvalStack(fv)
         eval st corollarySignatureAst
+        match tryFindAssociatedBlockForCorollary fv with
+        | ScopeSearchResult.FoundAssociate potentialParent -> 
+            // everything is ok, change the parent of the provable from theory to the found parent 
+            fv.Parent <- Some potentialParent
+        | ScopeSearchResult.FoundIncorrectBlock block ->
+            emitID005diagnostics fv block  
+        | ScopeSearchResult.NotFound ->
+            emitID006diagnostics fv  
+        | ScopeSearchResult.FoundMultiple listOfKandidates ->
+            emitID007diagnostics fv listOfKandidates  
+        | _ -> ()
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
+        // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
+        emitVAR03diagnosticsForCorollaryOrProofVariable fv  
         es.PopEvalStack()
         st.EvalPop()
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
@@ -1684,7 +1670,20 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Proof, es.PeekEvalStack())
         es.PushEvalStack(fv)
         eval st referencingIdentifierAst
+        match tryFindAssociatedBlockForProof fv with
+        | ScopeSearchResult.FoundAssociate potentialParent -> 
+            // everything is ok, change the parent of the provable from theory to the found parent 
+            fv.Parent <- Some potentialParent
+        | ScopeSearchResult.FoundIncorrectBlock block ->
+            emitID002diagnostics fv block  
+        | ScopeSearchResult.NotFound ->
+            emitID003diagnostics fv  
+        | ScopeSearchResult.FoundMultiple listOfKandidates ->
+            emitID004diagnostics fv listOfKandidates  
+        | _ -> ()
         proofArgumentListAst |> List.map (eval st) |> ignore
+        // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the proof.
+        emitVAR03diagnosticsForCorollaryOrProofVariable fv  
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         es.PopEvalStack()
         st.EvalPop()

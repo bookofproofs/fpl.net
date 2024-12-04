@@ -915,12 +915,20 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// looking for it recursively, up the symbol tree.
     static member VariableInBlockScopeByName(fplValue:FplValue) name withNestedVariableSearch = 
         let rec firstBlockParent (fv:FplValue) =
+            
             let qualifiedVar (fv1:FplValue) =
+                let rec collectVariables (fv4: FplValue) =
+                    let mutable result = []
+                    if FplValue.IsVariable(fv4) then
+                        result <- fv4 :: result
+                    for kvp in fv4.Scope do
+                        result <- result @ collectVariables kvp.Value
+                    result
+                let allVarsInScope = collectVariables fv1
+                
                 // try out all variables in scope
                 let foundList = 
-                    fv1.Scope
-                    |> Seq.filter (fun kvp -> FplValue.IsVariable(kvp.Value))
-                    |> Seq.map (fun kvp -> kvp.Value)
+                    allVarsInScope
                     |> Seq.map (fun var -> 
                         if var.Scope.ContainsKey name then 
                             ScopeSearchResult.Found (var.Scope[name])
@@ -960,15 +968,16 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     ScopeSearchResult.Found (fv.Scope[name])
                 elif fv.Parent.IsSome then 
                     if withNestedVariableSearch then 
-                        qualifiedVar fv
+                        match qualifiedVar fv with 
+                        | ScopeSearchResult.NotFound ->
+                            firstBlockParent fv.Parent.Value 
+                        | s -> s
                     else
                         firstBlockParent fv.Parent.Value 
                 else
                     ScopeSearchResult.NotFound
             | FplValueType.Theory ->
                 ScopeSearchResult.NotFound
-            | FplValueType.Reference ->
-                qualifiedVar fv 
             | _ ->                         
                 if fv.Parent.IsSome then 
                     firstBlockParent fv.Parent.Value
@@ -1057,7 +1066,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     override this.ToString() = 
         $"{this.BlockTypeShortName} {this.Type(SignatureType.Name)}"
 
-// create an FplValue list containing all Scopes of the theory
+// Create an FplValue list containing all Scopes of an FplNode
 let rec flattenScopes (root: FplValue) =
     let rec helper (node: FplValue) (acc: FplValue list) =
         let newAcc = node :: acc
