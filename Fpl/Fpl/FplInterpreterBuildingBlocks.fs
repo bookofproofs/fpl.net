@@ -401,8 +401,8 @@ let rec eval (st: SymbolTable) ast =
                     if not (fv.Scope.ContainsKey(name)) then
                         fv.Scope.Add(name, other)
                 | _ -> ()
-                // count usages of the varialbe in scope
-                fv.AuxiliaryInfo <- fv.AuxiliaryInfo + 1
+                // count usages of the variable in scope
+                other.AuxiliaryInfo <- other.AuxiliaryInfo + 1
             | _ -> 
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
@@ -554,12 +554,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.RuleOfInference((pos1, pos2), (signatureAst, premiseConclusionBlockAst)) ->
         st.EvalPush("RuleOfInference")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.RuleOfInference, es.PeekEvalStack())
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.RuleOfInference, es.PeekEvalStack())
         ad.DiagnosticsStopped <- true // stop all diagnostics during rule of inference
-        es.PushEvalStack(fplValue)
+        es.PushEvalStack(fv)
         eval st signatureAst
         eval st premiseConclusionBlockAst
         ad.DiagnosticsStopped <- false // enable all diagnostics after rule of inference
+        emitVAR04diagnostics fv
         es.PopEvalStack() 
         st.EvalPop() 
     | Ast.Mapping((pos1, pos2), variableTypeAst) ->
@@ -1132,9 +1133,10 @@ let rec eval (st: SymbolTable) ast =
     | Ast.PropertyBlock((pos1, pos2), (keywordPropertyAst, definitionPropertyAst)) ->
         st.EvalPush("PropertyBlock")
         eval st keywordPropertyAst
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.MandatoryPredicate, es.PeekEvalStack())
-        es.PushEvalStack(fplValue)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.MandatoryPredicate, es.PeekEvalStack())
+        es.PushEvalStack(fv)
         eval st definitionPropertyAst
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
@@ -1170,61 +1172,61 @@ let rec eval (st: SymbolTable) ast =
     // | All of Positions * ((Ast list * Ast option) list * Ast)
     | Ast.All((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         st.EvalPush("All")
-        let fv = es.PeekEvalStack()
-        let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
-        qtr.FplId <- "all"
-        qtr.TypeId <- "pred"
-        es.PushEvalStack(qtr)
-        qtr.Arity <- qtr.Arity + (namedVarDeclAstList |> List.length)
+        let fv = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,es.PeekEvalStack())
+        fv.FplId <- "all"
+        fv.TypeId <- "pred"
+        es.PushEvalStack(fv)
+        fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
         namedVarDeclAstList
         |> List.map (fun namedVarDeclAst ->
             eval st namedVarDeclAst
         )
         |> ignore
-        let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
+        let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
         es.PushEvalStack(pred)
         eval st predicateAst
         es.PopEvalStack()
+        emitVAR05diagnostics fv
         es.PopEvalStack()
-        emitLG000orLG001Diagnostics qtr "all quantor"
+        emitLG000orLG001Diagnostics fv "all quantor"
         st.EvalPop()
     | Ast.Exists((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         st.EvalPush("Exists")
-        let fv = es.PeekEvalStack()
-        let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
-        qtr.FplId <- "ex"
-        qtr.TypeId <- "pred"
-        es.PushEvalStack(qtr)
-        qtr.Arity <- qtr.Arity + (namedVarDeclAstList |> List.length)
+        let fv = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,es.PeekEvalStack())
+        fv.FplId <- "ex"
+        fv.TypeId <- "pred"
+        es.PushEvalStack(fv)
+        fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
         namedVarDeclAstList
         |> List.map (fun namedVarDeclAst ->
             eval st namedVarDeclAst
         )
         |> ignore
-        let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
+        let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
         es.PushEvalStack(pred)
         eval st predicateAst
         es.PopEvalStack()
+        emitVAR05diagnostics fv
         es.PopEvalStack()
-        emitLG000orLG001Diagnostics qtr "exists quantor"
+        emitLG000orLG001Diagnostics fv "exists quantor"
         st.EvalPop()
     // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
     | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclAst), predicateAst)) ->
         st.EvalPush("ExistsN")
-        let fv = es.PeekEvalStack()
-        let qtr = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor,fv)
-        qtr.FplId <- "exn"
-        qtr.TypeId <- "pred"
-        qtr.Arity <- 1
-        es.PushEvalStack(qtr)
+        let fv = FplValue.CreateFplValue((pos1, pos2),FplValueType.Quantor, es.PeekEvalStack())
+        fv.FplId <- "exn"
+        fv.TypeId <- "pred"
+        fv.Arity <- 1
+        es.PushEvalStack(fv)
         eval st dollarDigitsAst
         eval st namedVarDeclAst
-        let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,qtr)
+        let pred = FplValue.CreateFplValue((pos1, pos2),FplValueType.Reference,fv)
         es.PushEvalStack(pred)
         eval st predicateAst
         es.PopEvalStack()
-        emitLG000orLG001Diagnostics qtr "exists n times quantor"
+        emitVAR05diagnostics fv
         es.PopEvalStack()
+        emitLG000orLG001Diagnostics fv "exists n times quantor"
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature((pos1, pos2), ((optAst, signatureWithUserDefinedStringAst), mappingAst)) -> 
@@ -1496,43 +1498,47 @@ let rec eval (st: SymbolTable) ast =
     // | Theorem of Positions * (Ast * (Ast list option * Ast))
     | Ast.Theorem((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Theorem")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Theorem, es.PeekEvalStack())
-        es.PushEvalStack(fplValue)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Theorem, es.PeekEvalStack())
+        es.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     | Ast.Lemma((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Lemma")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Lemma, es.PeekEvalStack())
-        es.PushEvalStack(fplValue)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Lemma, es.PeekEvalStack())
+        es.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     | Ast.Proposition((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Proposition")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Proposition, es.PeekEvalStack())
-        es.PushEvalStack(fplValue)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Proposition, es.PeekEvalStack())
+        es.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     | Ast.Conjecture((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Conjecture")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.Conjecture, es.PeekEvalStack())
-        es.PushEvalStack(fplValue)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Conjecture, es.PeekEvalStack())
+        es.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     | Ast.Axiom((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Axiom")
-        let fv = es.PeekEvalStack()
-        let axiom = FplValue.CreateFplValue((pos1, pos2), FplValueType.Axiom, fv)
-        es.PushEvalStack(axiom)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Axiom, es.PeekEvalStack())
+        es.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     // | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
@@ -1562,6 +1568,7 @@ let rec eval (st: SymbolTable) ast =
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
         emitVAR03diagnosticsForCorollaryOrProofVariable fv  
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     // | NamedVarDecl of Positions * ((Ast list * Ast) * Ast)
@@ -1590,6 +1597,7 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(rb)
         eval st keywordSelfAst
         es.PopEvalStack()
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     // | DefPredicateContent of Ast list option * Ast
@@ -1626,16 +1634,18 @@ let rec eval (st: SymbolTable) ast =
         es.InSignatureEvaluation <- false
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
     | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, (funcContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionFunctionalTerm")
-        let fplValue = FplValue.CreateFplValue((pos1, pos2), FplValueType.FunctionalTerm, es.PeekEvalStack())
-        es.PushEvalStack(fplValue)
+        let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.FunctionalTerm, es.PeekEvalStack())
+        es.PushEvalStack(fv)
         eval st functionalTermSignatureAst
         eval st funcContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     // | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option))
@@ -1654,6 +1664,7 @@ let rec eval (st: SymbolTable) ast =
         optPropertyListAsts
         |> Option.map (List.map (eval st) >> ignore)
         |> Option.defaultValue ()
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     // | DerivedPredicate of Ast
@@ -1687,6 +1698,7 @@ let rec eval (st: SymbolTable) ast =
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the proof.
         emitVAR03diagnosticsForCorollaryOrProofVariable fv  
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
+        emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     | Ast.Precedence((pos1, pos2), precedence) ->

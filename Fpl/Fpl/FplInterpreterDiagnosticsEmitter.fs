@@ -132,18 +132,41 @@ let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
         )
     | _ -> ()
 
-let emitVAR04diagnostics name pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = VAR04 name
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
+let emitVAR04diagnostics (fv:FplValue) =
+    fv.GetVariables()
+    |> List.filter(fun var -> var.AuxiliaryInfo = 0)
+    |> List.map (fun var -> 
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = var.NameStartPos
+                Diagnostic.EndPos = var.NameEndPos
+                Diagnostic.Code = VAR04 var.FplId
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+    )
+    |> ignore
+
+let emitVAR05diagnostics (fv:FplValue) =
+    fv.GetVariables()
+    |> List.filter(fun var -> var.AuxiliaryInfo = 0)
+    |> List.map (fun var -> 
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = var.NameStartPos
+                Diagnostic.EndPos = var.NameEndPos
+                Diagnostic.Code = VAR05 var.FplId
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+    )
+    |> ignore
 
 let emitID000Diagnostics astType =
     let diagnostic =

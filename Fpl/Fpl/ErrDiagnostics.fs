@@ -121,6 +121,7 @@ type DiagnosticCode =
     | VAR01 of string 
     | VAR03 of string * string
     | VAR04 of string 
+    | VAR05 of string 
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -199,6 +200,7 @@ type DiagnosticCode =
             | VAR01 _  -> "VAR01"
             | VAR03 _  -> "VAR03"
             | VAR04 _  -> "VAR04"
+            | VAR05 _  -> "VAR05"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -277,6 +279,7 @@ type DiagnosticCode =
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
             | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
             | VAR04 name ->  sprintf $"Declared variable `{name}` not used in this scope."
+            | VAR05 name ->  sprintf $"Bound variable `{name}` not used in this quantor."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 

@@ -416,6 +416,30 @@ type TestInterpreterErrors() =
         let code = VAR01 ""
         runTestHelper "TestVAR01.fpl" fplCode code expected
 
+    [<DataRow("def pred T(x:obj) {true};", 1)>]
+    [<DataRow("def pred T(x:obj) {x};", 0)>]
+    [<DataRow("def pred T() {dec ~x:obj; x};", 0)>]
+    [<DataRow("def pred T() {dec ~x:obj; true};", 1)>]
+    [<DataRow("thm T() {dec ~x:obj; true};", 1)>]
+    [<DataRow("thm T() {dec ~x:obj; true} prf T$1 {1. |- x qed};", 1)>]
+    [<DataRow("thm T() {dec ~x:obj; true} prf T$1 {1. |- trivial qed};", 1)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestVAR04(fplCode:string, expected) =
+        let code = VAR04 ""
+        runTestHelper "TestVAR04.fpl" fplCode code expected
+
+    [<DataRow("def pred T() { all x:obj {true}};", 1)>]
+    [<DataRow("def pred T() { all x:obj {x}};", 0)>]
+    [<DataRow("def pred T() { ex x:obj {true}};", 1)>]
+    [<DataRow("def pred T() { ex x:obj {x}};", 0)>]
+    [<DataRow("def pred T() { exn$1 x:obj {true}};", 1)>]
+    [<DataRow("def pred T() { exn$1 x:obj {x}};", 0)>]
+    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestVAR05(fplCode:string, expected) =
+        let code = VAR05 ""
+        runTestHelper "TestVAR05.fpl" fplCode code expected
 
     [<DataRow("def pred Test(x,x:* pred) {true};", 1)>]
     [<DataRow("def pred Test(x,x:+ pred) {true};", 1)>]
