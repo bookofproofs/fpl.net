@@ -299,6 +299,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Intrinsic((pos1, pos2),()) -> 
         st.EvalPush("Intrinsic")
+        let fv = es.PeekEvalStack()
+        fv.AuxiliaryInfo <- fv.AuxiliaryInfo + 1 // flag that this block is intrinsic
         st.EvalPop()
     | Ast.Property((pos1, pos2),()) -> 
         st.EvalPush("Property")
@@ -1136,7 +1138,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.MandatoryPredicate, es.PeekEvalStack())
         es.PushEvalStack(fv)
         eval st definitionPropertyAst
-        emitVAR04diagnostics fv
+        if fv.AuxiliaryInfo = 0 then // if not intrinsic, check variable usage
+            emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
@@ -1575,7 +1578,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.NamedVarDecl((pos1, pos2), ((variableListAst, varDeclModifierAst), variableTypeAst)) ->
         st.EvalPush("NamedVarDecl")
         let fv = es.PeekEvalStack()
-        fv.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
         // create all variables of the named variable declaration in the current scope
         variableListAst |> List.iter (fun varAst ->
             eval st varAst // here, the var is created and put on stack, but not popped
@@ -1634,7 +1636,8 @@ let rec eval (st: SymbolTable) ast =
         es.InSignatureEvaluation <- false
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        emitVAR04diagnostics fv
+        if fv.AuxiliaryInfo = 0 then // if not intrinsic, check variable usage
+            emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
@@ -1645,7 +1648,8 @@ let rec eval (st: SymbolTable) ast =
         eval st functionalTermSignatureAst
         eval st funcContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        emitVAR04diagnostics fv
+        if fv.AuxiliaryInfo = 0 then // if not intrinsic, check variable usage
+            emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
     // | DefinitionClass of Positions * (((Ast * Ast option) * Ast list) * (Ast * Ast list option))
