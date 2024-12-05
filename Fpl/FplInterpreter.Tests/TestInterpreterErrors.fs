@@ -417,6 +417,10 @@ type TestInterpreterErrors() =
         runTestHelper "TestVAR01.fpl" fplCode code expected
 
     [<DataRow("def pred T(x:obj) {true};", 1)>]
+    [<DataRow("def pred T(x:obj) {intr};", 0)>]
+    [<DataRow("def func T(x:obj)->obj {return xy};", 1)>]
+    [<DataRow("def func T(x:obj)->obj {intr};", 1)>]
+    [<DataRow("def pred T(x:obj) {intr};", 1)>]
     [<DataRow("def pred T(x:obj) {x};", 0)>]
     [<DataRow("def pred T() {dec ~x:obj; x};", 0)>]
     [<DataRow("def pred T() {dec ~x:obj; true};", 1)>]
