@@ -917,19 +917,12 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         let rec firstBlockParent (fv:FplValue) =
             
             let qualifiedVar (fv1:FplValue) =
-                let rec collectVariables (fv4: FplValue) =
-                    let mutable result = []
-                    if FplValue.IsVariable(fv4) then
-                        result <- fv4 :: result
-                    for kvp in fv4.Scope do
-                        result <- result @ collectVariables kvp.Value
-                    result
-                let allVarsInScope = collectVariables fv1
+                let allVarsInScope = fv1.GetVariables()
                 
                 // try out all variables in scope
                 let foundList = 
                     allVarsInScope
-                    |> Seq.map (fun var -> 
+                    |> Seq.map (fun (var:FplValue) -> 
                         if var.Scope.ContainsKey name then 
                             ScopeSearchResult.Found (var.Scope[name])
                         else
@@ -1065,6 +1058,18 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// A string representation of this FplValue
     override this.ToString() = 
         $"{this.BlockTypeShortName} {this.Type(SignatureType.Name)}"
+
+    /// Create a (possibly empty) list of all variables in the scope of this FplValue.
+    /// If the FplValue is itself a variable, it will be included in the list.
+    member this.GetVariables() = 
+        let rec collectVariables (fv: FplValue) =
+            let mutable result = []
+            if FplValue.IsVariable(fv) then
+                result <- fv :: result
+            for kvp in fv.Scope do
+                result <- result @ collectVariables kvp.Value
+            result
+        collectVariables this
 
 // Create an FplValue list containing all Scopes of an FplNode
 let rec flattenScopes (root: FplValue) =

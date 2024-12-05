@@ -132,6 +132,19 @@ let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
         )
     | _ -> ()
 
+let emitVAR04diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = VAR04 name
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitID000Diagnostics astType =
     let diagnostic =
         { 

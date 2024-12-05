@@ -401,6 +401,8 @@ let rec eval (st: SymbolTable) ast =
                     if not (fv.Scope.ContainsKey(name)) then
                         fv.Scope.Add(name, other)
                 | _ -> ()
+                // count usages of the varialbe in scope
+                fv.AuxiliaryInfo <- fv.AuxiliaryInfo + 1
             | _ -> 
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
