@@ -7,7 +7,6 @@ open System
 open FParsec
 open FplGrammarTypes
 open FplInterpreterTypes
-open FplParser
 open ErrDiagnostics
 
 

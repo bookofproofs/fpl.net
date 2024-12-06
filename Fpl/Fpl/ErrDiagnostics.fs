@@ -3,6 +3,8 @@ open System
 open System.IO
 open System.Text.RegularExpressions
 open System.Collections.Generic
+open System.Security.Cryptography
+open System.Text
 open FParsec
 open FplGrammarCommons
 open FplGrammarTypes
@@ -120,6 +122,8 @@ type DiagnosticCode =
     | VAR00 
     | VAR01 of string 
     | VAR03 of string * string
+    | VAR04 of string 
+    | VAR05 of string 
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -197,6 +201,8 @@ type DiagnosticCode =
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
             | VAR03 _  -> "VAR03"
+            | VAR04 _  -> "VAR04"
+            | VAR05 _  -> "VAR05"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -274,6 +280,8 @@ type DiagnosticCode =
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
             | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
+            | VAR04 name ->  sprintf $"Declared variable `{name}` not used in this scope."
+            | VAR05 name ->  sprintf $"Bound variable `{name}` not used in this quantor."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
@@ -299,6 +307,12 @@ type DiagnosticCode =
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
 
+/// Computes an MD5 checksum of a string
+let computeMD5Checksum (input: string) =
+    let md5 = MD5.Create()
+    let inputBytes = Encoding.ASCII.GetBytes(input)
+    let hash = md5.ComputeHash(inputBytes)
+    hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
 
 type DiagnosticEmitter =
     // replace your language-specific emitters here
@@ -343,7 +357,7 @@ type Diagnostic =
             tranlatedMsg + " " + alternatives 
 
     member this.DiagnosticID = 
-        (sprintf "%07d" this.StartPos.Index) + this.Emitter.ToString() + this.Code.Code
+        computeMD5Checksum (sprintf "%07d" this.StartPos.Index + this.Emitter.ToString() + this.Code.Code + this.Message)
 
     member this.ShortForm = 
         this.Emitter.ToString() + ":" +

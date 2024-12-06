@@ -6,7 +6,8 @@ uses Fpl.PeanoArithmetics
 definition class Tuple : obj
 {
     dec 
-        ~myLength: Nat
+        ~myFrom:index
+        ~myLength: index
     ;
     ctor Tuple(listOfTpl:+ tpl)
     {
@@ -25,18 +26,19 @@ definition class Tuple : obj
         self
     }
 
-    ctor Tuple(arr: tpl[from, length:Nat])
+    ctor Tuple(arr: tpl[from, length:index])
     {
         
         dec 
             self:=arr
             myLength:=length
+            myFrom:=from
             base.obj()
         ;
         self
     }
 
-    property func Length() -> Nat
+    property func Length() -> index
     {
         return myLength
     }
@@ -48,18 +50,20 @@ definition class UnlimitedTupleFrom: obj
 {
     dec 
         ~myX:+ tpl
-    ;
+        ~myFrom:index
+    ; 
 
     constructor UnlimitedTupleFrom(from:index, x:+ tpl)
     {
         dec
             base.obj()
             myX:=x
+            myFrom:=from
         ;
         self
     }
 
-    property func Coord(i: Nat) -> tpl
+    property func Coord(i: index) -> tpl
     {
         return myX[i]
     }
@@ -95,6 +99,7 @@ def class CartesianProduct: Set
     {
         dec
             self:=setArray
+            myFrom:=from
             myLength:=to
             base.Set()
         ;

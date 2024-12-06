@@ -2,7 +2,6 @@
 
 open System
 open System.Text.RegularExpressions
-open System.Security.Cryptography
 open System.Collections.Generic
 open System.Text
 open System.IO
@@ -89,13 +88,6 @@ type SortingProperties =
             SortingProperties.ReferencedAsts = []
             SortingProperties.EANIList = [] 
         }
-
-let computeMD5Checksum (input: string) =
-    let md5 = MD5.Create()
-    let inputBytes = Encoding.ASCII.GetBytes(input)
-    let hash = md5.ComputeHash(inputBytes)
-    hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
-
 
 /// A type that encapsulates the sources found for a uses clause
 /// and provides members to filter those from the file system and those from
@@ -421,6 +413,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     let mutable (_filePath:string option) = None
     let mutable _reprId = "undef"
     let mutable _hasBrackets = false
+    let mutable _isIntrinsic = false
     let mutable _isSignatureVariable = false
 
     let mutable _parent = parent
@@ -862,6 +855,11 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             else 
                 raise (ArgumentException(sprintf "Cannot set IsSignatureVariable for non-variable %s" this.BlockType.ShortName))
 
+    /// Indicates if this FplValue is an intrinsically defined block
+    member this.IsIntrinsic
+        with get () = _isIntrinsic
+        and set (value) = _isIntrinsic <- value
+
     /// Indicates if this FplValue is a reference
     static member IsReference(fplValue:FplValue) = 
         fplValue.BlockType = FplValueType.Reference
@@ -917,19 +915,12 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         let rec firstBlockParent (fv:FplValue) =
             
             let qualifiedVar (fv1:FplValue) =
-                let rec collectVariables (fv4: FplValue) =
-                    let mutable result = []
-                    if FplValue.IsVariable(fv4) then
-                        result <- fv4 :: result
-                    for kvp in fv4.Scope do
-                        result <- result @ collectVariables kvp.Value
-                    result
-                let allVarsInScope = collectVariables fv1
+                let allVarsInScope = fv1.GetVariables()
                 
                 // try out all variables in scope
                 let foundList = 
                     allVarsInScope
-                    |> Seq.map (fun var -> 
+                    |> Seq.map (fun (var:FplValue) -> 
                         if var.Scope.ContainsKey name then 
                             ScopeSearchResult.Found (var.Scope[name])
                         else
@@ -1065,6 +1056,18 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// A string representation of this FplValue
     override this.ToString() = 
         $"{this.BlockTypeShortName} {this.Type(SignatureType.Name)}"
+
+    /// Create a (possibly empty) list of all variables in the scope of this FplValue.
+    /// If the FplValue is itself a variable, it will be included in the list.
+    member this.GetVariables() = 
+        let rec collectVariables (fv: FplValue) =
+            let mutable result = []
+            if FplValue.IsVariable(fv) then
+                result <- fv :: result
+            for kvp in fv.Scope do
+                result <- result @ collectVariables kvp.Value
+            result
+        collectVariables this
 
 // Create an FplValue list containing all Scopes of an FplNode
 let rec flattenScopes (root: FplValue) =
