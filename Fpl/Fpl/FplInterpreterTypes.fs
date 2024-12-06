@@ -2,7 +2,6 @@
 
 open System
 open System.Text.RegularExpressions
-open System.Security.Cryptography
 open System.Collections.Generic
 open System.Text
 open System.IO
@@ -89,13 +88,6 @@ type SortingProperties =
             SortingProperties.ReferencedAsts = []
             SortingProperties.EANIList = [] 
         }
-
-let computeMD5Checksum (input: string) =
-    let md5 = MD5.Create()
-    let inputBytes = Encoding.ASCII.GetBytes(input)
-    let hash = md5.ComputeHash(inputBytes)
-    hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
-
 
 /// A type that encapsulates the sources found for a uses clause
 /// and provides members to filter those from the file system and those from
@@ -421,6 +413,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     let mutable (_filePath:string option) = None
     let mutable _reprId = "undef"
     let mutable _hasBrackets = false
+    let mutable _isIntrinsic = false
     let mutable _isSignatureVariable = false
 
     let mutable _parent = parent
@@ -861,6 +854,11 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 _isSignatureVariable <- value
             else 
                 raise (ArgumentException(sprintf "Cannot set IsSignatureVariable for non-variable %s" this.BlockType.ShortName))
+
+    /// Indicates if this FplValue is an intrinsically defined block
+    member this.IsIntrinsic
+        with get () = _isIntrinsic
+        and set (value) = _isIntrinsic <- value
 
     /// Indicates if this FplValue is a reference
     static member IsReference(fplValue:FplValue) = 

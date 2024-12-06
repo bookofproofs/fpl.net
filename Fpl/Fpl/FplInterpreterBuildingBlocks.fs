@@ -300,7 +300,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Intrinsic((pos1, pos2),()) -> 
         st.EvalPush("Intrinsic")
         let fv = es.PeekEvalStack()
-        fv.AuxiliaryInfo <- fv.AuxiliaryInfo + 1 // flag that this block is intrinsic
+        fv.IsIntrinsic <- true // flag that this block is intrinsic
         st.EvalPop()
     | Ast.Property((pos1, pos2),()) -> 
         st.EvalPush("Property")
@@ -1138,7 +1138,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.MandatoryPredicate, es.PeekEvalStack())
         es.PushEvalStack(fv)
         eval st definitionPropertyAst
-        if fv.AuxiliaryInfo = 0 then // if not intrinsic, check variable usage
+        if not fv.IsIntrinsic then // if not intrinsic, check variable usage
             emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
@@ -1158,14 +1158,33 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Localization((pos1, pos2), (predicateAst, translationListAsts)) ->
         st.EvalPush("Localization")
-        let theory = es.PeekEvalStack()
-        let loc = FplValue.CreateFplValue((pos1, pos2),FplValueType.Localization,theory)
+        let fv = FplValue.CreateFplValue((pos1, pos2),FplValueType.Localization,es.PeekEvalStack())
+        let diagList = List<Diagnostic>()
         ad.DiagnosticsStopped <- true // stop all diagnostics during localization
-        es.PushEvalStack(loc)
+        es.PushEvalStack(fv)
         eval st predicateAst
-        translationListAsts |> List.map (eval st) |> ignore
+        translationListAsts |> List.map (fun ast -> 
+            eval st ast
+            let vars = fv.GetVariables()
+            vars
+            |> List.filter (fun (var:FplValue) -> var.AuxiliaryInfo = 0)
+            |> List.map (fun var ->
+                let loc = es.PeekEvalStack()
+                let lanList = 
+                    loc.Scope 
+                    |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Language) 
+                    |> Seq.map (fun kvp -> kvp.Value) 
+                    |> Seq.toList 
+                    |> List.rev
+                if not lanList.IsEmpty then
+                    let lan = lanList.Head
+                    diagList.Add(getVAR04diagnostic lan var.FplId)
+            )
+        ) |> ignore
         es.PopEvalStack()
         ad.DiagnosticsStopped <- false // enable all diagnostics during localization
+        diagList
+        |> Seq.iter (fun diag -> ad.AddDiagnostic diag)
         st.EvalPop()
     | Ast.FunctionalTermInstance((pos1, pos2), (functionalTermSignatureAst, functionalTermInstanceBlockAst)) ->
         st.EvalPush("FunctionalTermInstance")
@@ -1578,6 +1597,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.NamedVarDecl((pos1, pos2), ((variableListAst, varDeclModifierAst), variableTypeAst)) ->
         st.EvalPush("NamedVarDecl")
         let fv = es.PeekEvalStack()
+        fv.AuxiliaryInfo <- variableListAst |> List.length // remember how many variables to create
         // create all variables of the named variable declaration in the current scope
         variableListAst |> List.iter (fun varAst ->
             eval st varAst // here, the var is created and put on stack, but not popped
@@ -1636,7 +1656,7 @@ let rec eval (st: SymbolTable) ast =
         es.InSignatureEvaluation <- false
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        if fv.AuxiliaryInfo = 0 then // if not intrinsic, check variable usage
+        if not fv.IsIntrinsic then // if not intrinsic, check variable usage
             emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()
@@ -1648,7 +1668,7 @@ let rec eval (st: SymbolTable) ast =
         eval st functionalTermSignatureAst
         eval st funcContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
-        if fv.AuxiliaryInfo = 0 then // if not intrinsic, check variable usage
+        if not fv.IsIntrinsic then // if not intrinsic, check variable usage
             emitVAR04diagnostics fv
         es.PopEvalStack()
         st.EvalPop()

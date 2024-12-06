@@ -132,21 +132,22 @@ let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
         )
     | _ -> ()
 
+let getVAR04diagnostic (fv:FplValue) name = 
+    { 
+        Diagnostic.Uri = ad.CurrentUri
+        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+        Diagnostic.Severity = DiagnosticSeverity.Error
+        Diagnostic.StartPos = fv.NameStartPos
+        Diagnostic.EndPos = fv.NameEndPos
+        Diagnostic.Code = VAR04 name
+        Diagnostic.Alternatives = None 
+    }
+
 let emitVAR04diagnostics (fv:FplValue) =
     fv.GetVariables()
     |> List.filter(fun var -> var.AuxiliaryInfo = 0)
     |> List.map (fun var -> 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = var.NameStartPos
-                Diagnostic.EndPos = var.NameEndPos
-                Diagnostic.Code = VAR04 var.FplId
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
+        ad.AddDiagnostic (getVAR04diagnostic var var.FplId)
     )
     |> ignore
 

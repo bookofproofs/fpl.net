@@ -3,6 +3,8 @@ open System
 open System.IO
 open System.Text.RegularExpressions
 open System.Collections.Generic
+open System.Security.Cryptography
+open System.Text
 open FParsec
 open FplGrammarCommons
 open FplGrammarTypes
@@ -305,6 +307,12 @@ type DiagnosticCode =
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
 
+/// Computes an MD5 checksum of a string
+let computeMD5Checksum (input: string) =
+    let md5 = MD5.Create()
+    let inputBytes = Encoding.ASCII.GetBytes(input)
+    let hash = md5.ComputeHash(inputBytes)
+    hash |> Array.map (fun b -> b.ToString("x2")) |> String.concat ""
 
 type DiagnosticEmitter =
     // replace your language-specific emitters here
@@ -349,7 +357,7 @@ type Diagnostic =
             tranlatedMsg + " " + alternatives 
 
     member this.DiagnosticID = 
-        (sprintf "%07d" this.StartPos.Index) + this.Emitter.ToString() + this.Code.Code
+        computeMD5Checksum (sprintf "%07d" this.StartPos.Index + this.Emitter.ToString() + this.Code.Code + this.Message)
 
     member this.ShortForm = 
         this.Emitter.ToString() + ":" +

@@ -85,16 +85,15 @@ axiom SuccessorIsInjective()
     }
 }
 
-axiom CompleteInduction()
+axiom CompleteInduction(p:pred(n:Nat))
 {
-    all p:pred(x:Nat)
-    {
-        impl
-        (
-            and ( p(0), all n:Nat { impl ( p(n), p(Succ(n)) ) } ),
-            all n:Nat { p(n) }
-        )
-    }
+
+    impl
+    (
+        and ( p(0), all n:Nat { impl ( p(n), p(Succ(n)) ) } ),
+        all n:Nat { p(n) }
+    )
+
 }
 
 
@@ -300,17 +299,10 @@ def pred LowerEqual (x,y:tpl)
     intr
 }
 
-def cl Function: obj
-{
-    intr
-}
 
 def func RealValuedFunction(x:Real) -> Real
 {
-    dec
-        assert is(self,Function)
-    ;
-    return self
+    intr
 }
 
 def pred IsBounded(x: Real)
