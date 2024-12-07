@@ -880,7 +880,8 @@ type TestInterpreterErrors() =
     [<DataRow("44", """def cl A:obj {intr} def func Add(n,m:A)->A {dec ~x,y:A; return self(x,y)};""", 0)>]
     [<DataRow("45", """def cl A:obj {intr} def func Add(n,m:A)->A {dec ~x:A; return x};""", 0)>]
     [<DataRow("46", """def cl A:obj {intr} def func Add(n,m:A)->A {dec ~x:A; return x} prop P(op:Add) {true};""", 0)>]
-    [<DataRow("47", "uses Fpl.Commons.Structures ;", 0)>]
+    [<DataRow("47", """def cl A:obj {intr property pred T() {true} property pred S() {T()}};""", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
         let code = SIG04 ("",0,[""])

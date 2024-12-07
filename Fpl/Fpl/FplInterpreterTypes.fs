@@ -1365,6 +1365,29 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
     ) |> ignore
     pm |> Seq.toList
 
+/// Looks for all declared properties or constructors (if any) that start with 
+/// the specific name within the building block, whose syntax tree the FplValue `fv` is part of. 
+let findCandidatesByNameInBlock (fv:FplValue) (name:string) = 
+    let rec findDefinition (fv1:FplValue) =
+        match fv1.BlockType with
+        | FplValueType.Theory ->
+            ScopeSearchResult.NotFound
+        | FplValueType.Class
+        | FplValueType.Predicate
+        | FplValueType.FunctionalTerm ->
+            ScopeSearchResult.Found (fv1)
+        | _ -> 
+            match fv1.Parent with 
+            | Some parent -> findDefinition parent
+            | None -> ScopeSearchResult.NotFound
+    match findDefinition fv with
+    | ScopeSearchResult.Found candidate -> 
+        candidate.Scope
+        |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
+        |> Seq.map (fun kvp -> kvp.Value)
+        |> Seq.toList
+    | _ -> []
+
 let rec mpwa (args:FplValue list) (pars:FplValue list) = 
     match (args, pars) with
     | (a::ars, p::prs) -> 

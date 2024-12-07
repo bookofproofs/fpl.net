@@ -969,7 +969,9 @@ let rec eval (st: SymbolTable) ast =
                 emitSIG04Diagnostics refBlock candidates |> ignore
                 ()
             else
-                let candidates = findCandidatesByName st refBlock.FplId
+                let candidatesTheory = findCandidatesByName st refBlock.FplId
+                let candidatesFromPropertyScope = findCandidatesByNameInBlock refBlock refBlock.FplId
+                let candidates = candidatesTheory @ candidatesFromPropertyScope
                 match emitSIG04Diagnostics refBlock candidates with
                 | Some matchedCandidate -> 
                     refBlock.Scope.Add(refBlock.FplId,matchedCandidate)

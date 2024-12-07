@@ -122,7 +122,7 @@ def class CartesianProduct: Set
                 (
                     In(tupleElem,@self),
                     and (
-                        is(tupleElem,Tuple[x,y:Nat]),
+                        is(tupleElem,Tuple(a:Nat[x,y:ind])),
                         all i:Nat 
                         {
                             and (
@@ -284,7 +284,8 @@ def class BinaryRelation: Relation
 def pred AreRelated(u,v: Set, r: BinaryRelation)
 {
     dec
-        ~tuple: Tuple[i,j:ind]
+        ~tuple: Tuple
+
         tuple:=Tuple($1,$2)
     ;
     and
