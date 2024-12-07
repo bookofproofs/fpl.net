@@ -1360,10 +1360,20 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
     |> Seq.iter (fun theory -> 
         theory.Value.Scope
         // filter only blocks starting with the same FplId as the reference
-        |> Seq.filter (fun fv -> fv.Value.FplId = name) 
-        |> Seq.iter (fun block -> pm.Add(block.Value)) 
+        |> Seq.map (fun kvp -> kvp.Value) 
+        |> Seq.filter (fun fv -> fv.FplId = name) 
+        |> Seq.iter (fun (block:FplValue) -> 
+            pm.Add(block)
+            // add also class constructors for matched classes
+            if block.BlockType = FplValueType.Class then 
+                block.Scope
+                |> Seq.map (fun kvp -> kvp.Value) 
+                |> Seq.filter (fun (fv:FplValue) -> fv.BlockType = FplValueType.Constructor)
+                |> Seq.iter (fun (fv:FplValue) -> pm.Add(fv))
+        ) 
     ) |> ignore
     pm |> Seq.toList
+
 
 /// Looks for all declared properties or constructors (if any) that start with 
 /// the specific name within the building block, whose syntax tree the FplValue `fv` is part of. 
@@ -1386,6 +1396,38 @@ let findCandidatesByNameInBlock (fv:FplValue) (name:string) =
         |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
         |> Seq.map (fun kvp -> kvp.Value)
         |> Seq.toList
+    | _ -> []
+
+let findCandidatesByNameInDotted (fv:FplValue) (name:string) = 
+    let rec findQualifiedEntity (fv1:FplValue) =
+        match fv1.BlockType with
+        | FplValueType.Reference ->
+            if fv1.Scope.ContainsKey(".") && fv1.Scope.Count>1 then 
+                let result = 
+                    fv1.Scope
+                    |> Seq.filter (fun kvp -> kvp.Key <> ".")
+                    |> Seq.map (fun kvp -> kvp.Value)
+                    |> Seq.toList
+                    |> List.head
+                ScopeSearchResult.Found (result)
+            else
+                match fv1.Parent with 
+                | Some parent -> findQualifiedEntity parent
+                | None -> ScopeSearchResult.NotFound
+        | _ -> ScopeSearchResult.NotFound
+    match findQualifiedEntity fv with
+    | ScopeSearchResult.Found candidate -> 
+        match candidate.BlockType with
+        | FplValueType.Variable -> 
+            if candidate.ValueList.Count>0 then 
+                let (varType:FplValue) = candidate.ValueList[0]
+                varType.Scope
+                |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
+                |> Seq.map (fun kvp -> kvp.Value)
+                |> Seq.toList
+            else    
+                []
+        | _ -> []    
     | _ -> []
 
 let rec mpwa (args:FplValue list) (pars:FplValue list) = 

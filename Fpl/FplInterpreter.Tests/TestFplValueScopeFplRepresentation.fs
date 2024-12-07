@@ -568,7 +568,7 @@ type TestFplValueScopeFplRepresentation() =
             | "base11a" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
             | "base12a" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
             | "base10b" -> Assert.AreEqual<string>("undef(undef)", base1.Type(SignatureType.Repr))
-            | "base11b" -> Assert.AreEqual<string>("undef(undef)", base1.Type(SignatureType.Repr))
+            | "base11b" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
             | "base12b" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
             | "base13b" -> Assert.AreEqual<string>("undef(undef)", base1.Type(SignatureType.Repr))
             | "base10c" -> Assert.AreEqual<string>("undef(undef, undef)", base1.Type(SignatureType.Repr))
