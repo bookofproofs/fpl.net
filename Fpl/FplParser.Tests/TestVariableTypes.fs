@@ -586,4 +586,8 @@ type TestVariableTypes () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+module TestModule1 =
+    let main () = printfn "This is a Testmodule"
+    main ()
+
         

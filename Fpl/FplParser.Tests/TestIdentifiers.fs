@@ -71,7 +71,7 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestIndexVariable1 () =
-        let result = run (predicateWithQualification .>> eof) "x[123]"
+        let result = run (predicateWithQualification .>> eof) "x[@123]"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -134,16 +134,35 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestExtensionBlock1 () =
-        let result = run (extensionBlock .>> eof) """:ext
-        Digits: /\d+/
-    :end """
+        let result = run (extensionBlock .>> eof) """ext Digits: /\d+/"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestExtensionBlock1a () =
+        let result = run (extensionBlock .>> eof) """extension Digits:/\d+/"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestExtensionBlock1b () =
+        let result = run (extensionBlock .>> eof) """extension Digits : /\d+/"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestExtensionBlock1c () =
+        let result = run (extensionBlock .>> eof) """ext Digits : /\d+/"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestEntityWithCoord1 () =
-        let result = run (predicateWithQualification .>> eof) """myField[1 , n]"""
+        let result = run (predicateWithQualification .>> eof) """myField[@1 , n]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

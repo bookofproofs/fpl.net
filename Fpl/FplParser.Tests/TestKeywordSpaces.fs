@@ -197,32 +197,32 @@ type TestKeywordSpaces() =
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
-    member this.TestSpacesEnd () =
-        let result = run (extensionTail .>> eof) """:end"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Failure:"))
-
-    [<TestMethod>]
-    member this.TestSpacesEndA () =
-        let result = run (extensionTail .>> eof) """:end """
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
     member this.TestSpacesExt () =
-        let result = run (extensionHeader .>> eof) """:ext"""
+        let result = run (keywordExtension .>> eof) """ext"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpacesExtA () =
-        let result = run (extensionHeader .>> eof) """:ext """
+        let result = run (keywordExtension .>> eof) """ext """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSpacesExtB () =
+        let result = run (keywordExtension .>> eof) """extension """
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestSpacesExtC () =
+        let result = run (keywordExtension .>> eof) """extension"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSpacesExistsTimesN () =

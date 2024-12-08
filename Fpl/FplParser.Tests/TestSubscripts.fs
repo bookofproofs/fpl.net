@@ -46,28 +46,28 @@ type TestSubscripts () =
 
     [<TestMethod>]
     member this.TestCorrect03 () =
-        let result = run (predicate .>> eof) """x[1]"""
+        let result = run (predicate .>> eof) """x[@1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCorrect04 () =
-        let result = run (predicate .>> eof) """x[$1,1]"""
+        let result = run (predicate .>> eof) """x[$1,@1]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCorrect05 () =
-        let result = run (predicate .>> eof) """x[y,2]"""
+        let result = run (predicate .>> eof) """x[y,@2]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCorrect06 () =
-        let result = run (predicate .>> eof) """x[1,3]"""
+        let result = run (predicate .>> eof) """x[@1,@3]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

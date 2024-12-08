@@ -67,13 +67,13 @@ namespace FplLS
                 case "whitespace":
                 case "significant whitespace":
                     return new FplCompletionItemChoicesWhitespace().GetChoices(this);
-                case "digits":
                 case "dollarDigits":
                     return new FplCompletionItemChoicesDigits().GetChoices(this);
                 case "argument identifier":
                     return new FplCompletionItemChoicesArgumentIdentifier().GetChoices(this);
                 case "language-specific string":
                     return new FplCompletionItemChoicesString().GetChoices(this);
+                case "extensionString":
                 case "extension regex":
                     return new FplCompletionItemChoicesRegex().GetChoices(this);
                 case "word":
@@ -98,8 +98,8 @@ namespace FplLS
                 case "class":
                 case "con":
                 case "conclusion":
-                case "end":
                 case "ext":
+                case "extension":
                 case "func":
                 case "function":
                 case "ind":
@@ -393,12 +393,6 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case "end":
-                    this.Detail = "extension (end of)";
-                    this.SortText = "end";
-                    this.Kind = CompletionItemKind.Struct;
-                    this.IsShort = false;
-                    break;
                 case "ex":
                     this.Detail = "predicate (exists quantor)";
                     this.SortText = "ex";
@@ -418,9 +412,15 @@ namespace FplLS
                     this.IsShort = false;
                     break;
                 case "ext":
-                    this.Detail = "extension (beginning of)";
-                    this.SortText = "ext";
-                    this.Kind = CompletionItemKind.Struct;
+                    this.Detail = "extension (short form)";
+                    this.SortText = "extension02";
+                    this.Kind = CompletionItemKind.Class;
+                    this.IsShort = true;
+                    break;
+                case "extension":
+                    this.Detail = "extension";
+                    this.SortText = "extension01";
+                    this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
                 case "false":

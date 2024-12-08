@@ -119,7 +119,7 @@ type TestExpressions () =
 
             def pred T13b() 
             {
-                1()  
+                @1()  
             }
 
             def pred T10c() 
@@ -139,7 +139,7 @@ type TestExpressions () =
 
             def pred T13c() 
             {
-                1(x,y)  
+                @1(x,y)  
             }
 
             def pred T10d() 
@@ -159,7 +159,7 @@ type TestExpressions () =
 
             def pred T13d() 
             {
-                1[x.y]  
+                @1[x.y]  
             }
 
             def pred T10e() 
@@ -174,12 +174,12 @@ type TestExpressions () =
 
             def pred T12e() 
             {
-                self(x,y).3[a,b]
+                self(x,y).@3[a,b]
             }
 
             def pred T13e() 
             {
-                1(x,y).T[a,b]
+                @1(x,y).T[a,b]
             }
 
             def pred T10f() 
@@ -199,7 +199,7 @@ type TestExpressions () =
 
             def pred T13f() 
             {
-                1[x.y].T(a,b)  
+                @1[x.y].T(a,b)  
             }
 
             def pred T14()
@@ -214,12 +214,12 @@ type TestExpressions () =
 
             def pred T16()
             {
-                -(y + x = 2 * x)
+                -(y + x = @2 * x)
             }
 
             def pred T17()
             {
-                (y + x' = 2 * x)'
+                (y + x' = @2 * x)'
             }
 
             def pred T18()

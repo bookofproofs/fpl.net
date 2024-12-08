@@ -286,6 +286,7 @@ type FplValueType =
     | Mapping
     | Stmt
     | Assertion
+    | Extension
     | Root
     member private this.UnqualifiedName = 
         match this with
@@ -322,6 +323,7 @@ type FplValueType =
             | Mapping -> "mapping"
             | Stmt -> "statement"
             | Assertion -> "assertion"
+            | Extension -> "extension"
             | Root -> "root"
     member private this.Article = 
         match this with
@@ -331,6 +333,7 @@ type FplValueType =
         | Argument 
         | Assertion 
         | ArgInference 
+        | Extension 
         | Axiom -> "an"
         | _ -> "a"
 
@@ -371,6 +374,7 @@ type FplValueType =
             | Mapping -> "map"
             | Stmt -> "stmt"
             | Assertion -> "ass"
+            | Extension -> "ext"
             | Root -> "root"
 
 type FixType = 
@@ -1039,6 +1043,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | FplValueType.Translation
         | FplValueType.Stmt
         | FplValueType.Assertion
+        | FplValueType.Extension
         | FplValueType.OptionalFunctionalTerm -> new FplValue(fplBlockType, positions, Some parent)
         | FplValueType.Class -> 
             let ret = new FplValue(fplBlockType, positions, Some parent)

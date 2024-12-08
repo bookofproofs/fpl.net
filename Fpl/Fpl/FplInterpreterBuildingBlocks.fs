@@ -167,6 +167,7 @@ type EvalStack() =
             | FplValueType.Translation 
             | FplValueType.Stmt
             | FplValueType.Assertion
+            | FplValueType.Extension
             | FplValueType.Root -> 
                 EvalStack.tryAddToValueList fv 
 
@@ -622,9 +623,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.NameEndPos <- pos2
         st.EvalPop()
-    | Ast.ExtDigits((pos1, pos2), digitsAst) ->
-        st.EvalPush("ExtDigits")
-        eval st digitsAst
+    | Ast.Extension((pos1, pos2), extensionString) ->
+        st.EvalPush("Extension")
         st.EvalPop()
     | Ast.ExtensionType((pos1, pos2), ast1) ->
         st.EvalPush("ExtensionType")
