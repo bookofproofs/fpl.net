@@ -66,6 +66,7 @@ let keyWordSet =
            "opt"
            "optional"
            "or"
+           "parent"
            "post"
            "postfix"
            "postulate"

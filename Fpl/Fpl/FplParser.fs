@@ -128,6 +128,7 @@ let variable = positions "Var" variableX |>> Ast.Var
 let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
 let keywordSelf = positions "Self" (skipString "self") .>> IW |>> Ast.Self
+let keywordParent = positions "Parent" (skipString "parent") .>> IW |>> Ast.Parent
 let keywordBaseClassReference = skipString "base" .>> IW
 let keywordIndex = positions "IndexType" (skipString "index" <|> skipString "ind") |>> Ast.IndexType
 
@@ -209,11 +210,9 @@ let xId = positions "ExtensionType" (at >>. extensionName) |>> Ast.ExtensionType
 
 let dollarDigits = positions "DollarDigits" (regex "\$" >>. puint32 <?> "<dollarDigits>") |>> Ast.DollarDigits
 
-let atList = many at
+let selfOrParent = positions "SelfOrParent" (choice [keywordSelf ; keywordParent]) |>> Ast.SelfOrParent
 
-let self = positions "SelfAts" (atList .>> keywordSelf) |>> Ast.SelfAts
-
-let entity = choice [ self ; variable ] 
+let entity = choice [ selfOrParent ; variable ] 
 
 ////// resolving recursive parsers
 let statementList, statementListRef = createParserForwardedToRef()
@@ -367,7 +366,7 @@ let all = positions "All" ((keywordAll >>. namedVariableDeclarationList) .>>. (l
 let exists = positions "Exists" ((keywordEx >>. namedVariableDeclarationList) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.Exists
 
 let existsTimesN = positions "ExistsN" (((keywordExN >>. dollarDigits .>> SW) .>>. namedVariableDeclaration) .>>. (leftBrace >>. predicate .>> rightBrace)) |>> Ast.ExistsN
-let isOpArg = choice [ objectSymbol; predicateIdentifier; variable; self ] .>> IW
+let isOpArg = choice [ objectSymbol; predicateIdentifier; variable; selfOrParent ] .>> IW
 let isOperator = positions "IsOperator" ((keywordIs >>. leftParen >>. isOpArg) .>>. (comma >>. variableType) .>> rightParen) |>> Ast.IsOperator
 
 // infix operators like the equality operator 
@@ -453,7 +452,7 @@ let keywordIntrinsic = positions "Intrinsic" (skipString "intrinsic" <|> skipStr
 let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateContent
 
 let keywordConstructor = (skipString "constructor" <|> skipString "ctor") .>> SW
-let constructorBlock = leftBrace >>. varDeclOrSpecList .>>. self .>> spacesRightBrace 
+let constructorBlock = leftBrace >>. varDeclOrSpecList .>>. selfOrParent .>> spacesRightBrace 
 let constructor = positions "Constructor" (keywordConstructor >>. signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)

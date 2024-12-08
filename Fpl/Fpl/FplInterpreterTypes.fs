@@ -1290,7 +1290,7 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
                 root.Scope
                 |> Seq.iter (fun child ->
                     counterScope <- counterScope + 1
-                    createJson child.Value sb (level + 1) (counterScope = root.Scope.Count) (root.FplId.EndsWith("self"))
+                    createJson child.Value sb (level + 1) (counterScope = root.Scope.Count) (root.FplId = "self" || root.FplId = "parent")
                 )
                 sb.AppendLine($"{indent}],") |> ignore
                 sb.AppendLine($"{indent}\"ValueList\": [") |> ignore
@@ -1354,16 +1354,126 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
 
 
 /// Looks for all declared building blocks with a specific name.
-let findCandidatesByName (st:SymbolTable) (name:string) =
+let findCandidatesByName (st:SymbolTable) (name:string) withClassConstructors =
     let pm = List<FplValue>()
     st.Root.Scope // iterate all theories
     |> Seq.iter (fun theory -> 
         theory.Value.Scope
         // filter only blocks starting with the same FplId as the reference
-        |> Seq.filter (fun fv -> fv.Value.FplId = name) 
-        |> Seq.iter (fun block -> pm.Add(block.Value)) 
+        |> Seq.map (fun kvp -> kvp.Value) 
+        |> Seq.filter (fun fv -> fv.FplId = name) 
+        |> Seq.iter (fun (block:FplValue) -> 
+            pm.Add(block)
+            if withClassConstructors 
+                && block.BlockType = FplValueType.Class then 
+                block.Scope
+                |> Seq.map (fun kvp -> kvp.Value) 
+                |> Seq.filter (fun (fv:FplValue) -> fv.BlockType = FplValueType.Constructor)
+                |> Seq.iter (fun (fv:FplValue) -> pm.Add(fv))
+        ) 
     ) |> ignore
     pm |> Seq.toList
+
+
+/// Looks for all declared properties or constructors (if any) that start with 
+/// the specific name within the building block, whose syntax tree the FplValue `fv` is part of. 
+let findCandidatesByNameInBlock (fv:FplValue) (name:string) = 
+    let rec findDefinition (fv1:FplValue) =
+        match fv1.BlockType with
+        | FplValueType.Theory ->
+            ScopeSearchResult.NotFound
+        | FplValueType.Class
+        | FplValueType.Predicate
+        | FplValueType.FunctionalTerm ->
+            ScopeSearchResult.Found (fv1)
+        | _ -> 
+            match fv1.Parent with 
+            | Some parent -> findDefinition parent
+            | None -> ScopeSearchResult.NotFound
+    match findDefinition fv with
+    | ScopeSearchResult.Found candidate -> 
+        candidate.Scope
+        |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
+        |> Seq.map (fun kvp -> kvp.Value)
+        |> Seq.toList
+    | _ -> []
+
+let findCandidatesByNameInDotted (fv:FplValue) (name:string) = 
+    let rec findQualifiedEntity (fv1:FplValue) =
+        match fv1.BlockType with
+        | FplValueType.Reference ->
+            if fv1.Scope.ContainsKey(".") && fv1.Scope.Count>1 then 
+                let result = 
+                    fv1.Scope
+                    |> Seq.filter (fun kvp -> kvp.Key <> ".")
+                    |> Seq.map (fun kvp -> kvp.Value)
+                    |> Seq.toList
+                    |> List.head
+                ScopeSearchResult.Found (result)
+            else
+                match fv1.Parent with 
+                | Some parent -> findQualifiedEntity parent
+                | None -> ScopeSearchResult.NotFound
+        | _ -> ScopeSearchResult.NotFound
+    match findQualifiedEntity fv with
+    | ScopeSearchResult.Found candidate -> 
+        match candidate.BlockType with
+        | FplValueType.Variable -> 
+            if candidate.ValueList.Count>0 then 
+                let (varType:FplValue) = candidate.ValueList[0]
+                varType.Scope
+                |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
+                |> Seq.map (fun kvp -> kvp.Value)
+                |> Seq.toList
+            else    
+                []
+        | _ -> []    
+    | _ -> []
+
+/// Searches in the counter-th parent predecessor of fv and checks if it is a definition block.
+/// Returns ScopeSearchResult.NotFound if no such block was reached.
+/// Returns ScopeSearchResult.FoundIncorrectBlock if the reached block is not a definition block.
+/// Returns ScopeSearchResult.Found if a definition block was reached.
+let rec nextDefinition (fv:FplValue) counter = 
+    let blocks = Stack<FplValue>()
+    match fv.BlockType with 
+    | FplValueType.Axiom
+    | FplValueType.Theorem 
+    | FplValueType.Lemma 
+    | FplValueType.Proposition 
+    | FplValueType.Corollary 
+    | FplValueType.Conjecture 
+    | FplValueType.Proof 
+    | FplValueType.Localization 
+    | FplValueType.RuleOfInference -> 
+        let name = $"{fv.BlockType.Name} {fv.Type(SignatureType.Name)}"
+        ScopeSearchResult.FoundIncorrectBlock name
+    | FplValueType.Theory -> 
+        let fv1 = blocks.Peek()
+        let name = $"{fv1.BlockType.Name} {fv1.Type(SignatureType.Name)}"
+        ScopeSearchResult.FoundIncorrectBlock name
+    | FplValueType.MandatoryPredicate  
+    | FplValueType.OptionalPredicate
+    | FplValueType.MandatoryFunctionalTerm  
+    | FplValueType.OptionalFunctionalTerm 
+    | FplValueType.Predicate  
+    | FplValueType.FunctionalTerm 
+    | FplValueType.Class -> 
+        blocks.Push(fv)
+        if counter <= 0 then 
+            ScopeSearchResult.Found fv
+        else
+            let next = fv.Parent
+            match next with
+            | Some parent ->
+                nextDefinition parent (counter - 1)
+            | None -> ScopeSearchResult.NotFound
+    | _ -> 
+        let next = fv.Parent
+        match next with
+        | Some parent -> nextDefinition parent counter
+        | None -> ScopeSearchResult.NotFound
+
 
 let rec mpwa (args:FplValue list) (pars:FplValue list) = 
     match (args, pars) with

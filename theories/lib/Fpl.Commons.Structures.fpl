@@ -115,19 +115,19 @@ def class CartesianProduct: Set
     {
         and 
         (
-            is(@self,Set),
+            is(parent,Set),
             all tupleElem: Set
             {
                 impl 
                 (
-                    In(tupleElem,@self),
+                    In(tupleElem,parent),
                     and (
-                        is(tupleElem,Tuple[x,y:Nat]),
+                        is(tupleElem,Tuple(a:Nat[x,y:ind])),
                         all i:Nat 
                         {
                             and (
                                 In(i,Rang(1,myLength)),    
-                                In(tupleElem[i],@self[i]) 
+                                In(tupleElem[i],parent[i]) 
                             )
                             
                         }
@@ -201,8 +201,8 @@ def class BinaryRelation: Relation
                     In(v,Domain()),
                     In(w1,CoDomain()),
                     In(w2,CoDomain()),
-                    AreRelated(v,w1,@self),
-                    AreRelated(v,w2,@self)
+                    AreRelated(v,w1,parent),
+                    AreRelated(v,w2,parent)
                 ),
                 ( w1 = w2 )
             )
@@ -220,8 +220,8 @@ def class BinaryRelation: Relation
                     In(v1,Domain()),
                     In(v2,Domain()),
                     In(w,CoDomain()),
-                    AreRelated(v1,w,@self),
-                    AreRelated(v2,w,@self)
+                    AreRelated(v1,w,parent),
+                    AreRelated(v2,w,parent)
                 ),
                 ( v1 = v2 )
             )
@@ -248,7 +248,7 @@ def class BinaryRelation: Relation
                 (
                     In(v,Domain()),
                     In(w,CoDomain()),
-                    AreRelated(v,w,@self)
+                    AreRelated(v,w,parent)
                 )
             }
         }
@@ -269,7 +269,7 @@ def class BinaryRelation: Relation
                 (
                     In(v,Domain()),
                     In(w,CoDomain()),
-                    AreRelated(v,w,@self)
+                    AreRelated(v,w,parent)
                 )
             }
         }
@@ -284,7 +284,8 @@ def class BinaryRelation: Relation
 def pred AreRelated(u,v: Set, r: BinaryRelation)
 {
     dec
-        ~tuple: Tuple[i,j:ind]
+        ~tuple: Tuple
+
         tuple:=Tuple($1,$2)
     ;
     and

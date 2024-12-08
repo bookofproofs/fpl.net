@@ -44,7 +44,7 @@ The following table documents how the FplValues are related to each other using 
 |#OptionalPredicate|||Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
 |#MandatoryFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
 |#MandatoryPredicate|||Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
-|#Variable|A variable declared in the scope of its Parent. Variables might be nested and have other Variables as parents.|`Ast.Var`|RuleOfInference, Class, FunctionalTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization, Corollary, Proof, Constructor, OptionalPredicate, MandatoryPredicate, OptionalFunctionalTerm, MandatoryFunctionalTerm, Variable|||
+|#Variable|A variable declared in the scope of its Parent. Variables might be nested and have other Variables as parents.|`Ast.Var`|RuleOfInference, Class, FunctionalTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization, Corollary, Proof, Constructor, OptionalPredicate, MandatoryPredicate, OptionalFunctionalTerm, MandatoryFunctionalTerm, Variable|Empty or any nested variables|Empty or any declared type of the variable. This can be a Class|
 |#VariadicVariableMany||||||
 |#VariadicVariableMany1||||||
 |Object||||||

@@ -487,7 +487,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base12", "self")>]
+    [<DataRow("base12", "parent")>]
     [<DataRow("base13", "1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "self.x")>]
@@ -568,7 +568,7 @@ type TestFplValueScopeFplRepresentation() =
             | "base11a" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
             | "base12a" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
             | "base10b" -> Assert.AreEqual<string>("undef(undef)", base1.Type(SignatureType.Repr))
-            | "base11b" -> Assert.AreEqual<string>("undef(undef)", base1.Type(SignatureType.Repr))
+            | "base11b" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
             | "base12b" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
             | "base13b" -> Assert.AreEqual<string>("undef(undef)", base1.Type(SignatureType.Repr))
             | "base10c" -> Assert.AreEqual<string>("undef(undef, undef)", base1.Type(SignatureType.Repr))

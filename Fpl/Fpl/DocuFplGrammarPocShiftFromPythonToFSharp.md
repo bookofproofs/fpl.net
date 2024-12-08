@@ -790,7 +790,18 @@ It is not an amendment to the FPL parser. However, we want to significantly simp
 * Nevertheless, we stick to the 'must' requirements (see [INTRO.md](https://github.com/bookofproofs/fpl.net/blob/main/INTRO.md)) 28 (support of overrides), 38 (support recursive linguistic constructs), and 40 (support of self-reference in definitions) that could still potentially negatively impact how complicated it is to implement the new FPL interpreter.
 
 
-## Amendments to the FPL interpreter 
-### Amendments resulting from the FPL parser
-* See Self-Containment
-### More to come...
+#### 26) `self` vs. `parent` reference
+* The keyword `self` had in previous version be proceeded with the at sign `@` like in `@self` in order to refer to the parent definition when used in a property of this definition.
+* Now, we use the new keyword `parent` instead of `@self`.
+* Rationale: 
+    * The literal `@` is now free for syntax extensions (see 13).
+    * Syntactically, previous versions of FPL allowed using multiple ats like in `@@self`. However, only one `@` is sufficient.
+
+*Before*
+```
+    @self
+```
+*Now*
+```         
+parent
+```

@@ -84,43 +84,22 @@ type TestIdentifiers () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestAtList0 () =
-        let result = run (atList .>> eof) ""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestAtList1 () =
-        let result = run (atList .>> eof) "@"
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestAtList2 () =
-        let result = run (atList .>> eof) "@@"
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
     member this.TestSelf0 () =
-        let result = run (self .>> eof) "self"
+        let result = run (selfOrParent .>> eof) "self"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSelf1 () =
-        let result = run (self .>> eof) "@self"
+        let result = run (selfOrParent .>> eof) "@self"
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestSelf2 () =
-        let result = run (self .>> eof) "@@self"
+        let result = run (selfOrParent .>> eof) "parent"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -134,7 +113,7 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestEntityAtSelf () =
-        let result = run (entity .>> eof) "@self"
+        let result = run (entity .>> eof) "self"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

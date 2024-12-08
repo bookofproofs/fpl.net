@@ -8,7 +8,7 @@ namespace FplLSTests
 
         [DataRow("self")]
         [DataRow("base")]
-        [DataRow("@")]
+        [DataRow("parent")]
         [TestMethod]
         public void TestAddSelfChoicesNumber(string choice)
         {
@@ -19,7 +19,7 @@ namespace FplLSTests
 
         [DataRow("self")]
         [DataRow("base")]
-        [DataRow("@")]
+        [DataRow("parent")]
         [TestMethod]
         public void TestAddSelfReferenceCounts(string choice)
         {
@@ -34,7 +34,7 @@ namespace FplLSTests
         }
 
         [DataRow("self", CompletionItemKind.Reference, "self01")]
-        [DataRow("@", CompletionItemKind.Reference, "self02")]
+        [DataRow("parent", CompletionItemKind.Reference, "parent02")]
         [DataRow("base", CompletionItemKind.Reference, "self03")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
@@ -52,7 +52,7 @@ namespace FplLSTests
 
         [DataRow("self")]
         [DataRow("base")]
-        [DataRow("@")]
+        [DataRow("parent")]
         [TestMethod]
         public void TestInsertTextEndsWithSpace(string choice)
         {
@@ -69,7 +69,7 @@ namespace FplLSTests
 
         [DataRow("self")]
         [DataRow("base")]
-        [DataRow("@")]
+        [DataRow("parent")]
         [TestMethod]
         public void TestAddSelfChoicesLabel(string choice)
         {
@@ -83,7 +83,7 @@ namespace FplLSTests
 
         [DataRow("self", "self reference")]
         [DataRow("base", "ctor call (parent class)")]
-        [DataRow("@", "parent self reference")]
+        [DataRow("parent", "parent self reference")]
         [TestMethod]
         public void TestAddSelfChoicesDetail(string choice, string l)
         {
@@ -97,7 +97,7 @@ namespace FplLSTests
 
         [DataRow("self")]
         [DataRow("base")]
-        [DataRow("@")]
+        [DataRow("parent")]
         [TestMethod]
         public void TestAddSelfChoicesInsertText(string choice)
         {
