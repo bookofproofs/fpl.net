@@ -67,12 +67,12 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("""def pred T(f:func()->obj) {intr} def pred Caller() {dec ~x:func()->obj; T(x)} ;""",
+    [<DataRow("00", """def pred T(f:func()->obj) {intr} def pred Caller() {dec ~x:func()->obj; T(x)} ;""",
         "")>]
-    [<DataRow("""def pred T(f:func()->Nat) {intr} def pred Caller() {dec ~x:func()->obj; T(x)} ;""",
+    [<DataRow("01", """def pred T(f:func()->Nat) {intr} def pred Caller() {dec ~x:func()->obj; T(x)} ;""",
         "")>]
     [<TestMethod>]
-    member this.TestSignatureMatchingReferencesFunc(varVal, var:string) =
+    member this.TestSignatureMatchingReferencesFunc(no:string, varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesFunc"
@@ -93,16 +93,18 @@ type TestSignatureMatching() =
             Assert.IsTrue(false)
 
 
-    [<DataRow("""def func T(y:obj)->obj { intr } def func Caller()->obj {dec ~x:obj; return T(x)} ;""",
+    [<DataRow("00", """def func T(y:obj)->obj { intr } def func Caller()->obj {dec ~x:obj; return T(x)} ;""",
         "")>]
-    [<DataRow("""def func T(y:obj)->obj { return y } def func Caller()->obj {dec ~x:obj; return T(x)} ;""",
+    [<DataRow("01", """def func T(y:obj)->obj { return y } def func Caller()->obj {dec ~x:obj; return T(x)} ;""",
         "")>]
-    [<DataRow("""def func T(y:obj)->obj { intr } def func Caller()->obj {return T(x)} ;""",
-        "")>]
-    [<DataRow("""def func T(y:obj)->obj { return y } def func Caller()->obj {return T(x)} ;""",
+    [<DataRow("02", """def func T(y:obj)->obj { intr } def func Caller()->obj {return T(x)} ;""",
+        "`x:undef` does not match `y:obj` in TestSignatureMatchingReferencesFuncReturn.T(obj) -> obj")>]
+    [<DataRow("03", """def func T(y:obj)->obj { return y } def func Caller()->obj {return T(x)} ;""",
+        "`x:undef` does not match `y:obj` in TestSignatureMatchingReferencesFuncReturn.T(obj) -> obj")>]
+    [<DataRow("04", """def func T(y:obj)->obj { return y } def func Caller(x:obj)->obj {return T(x)};""",
         "")>]
     [<TestMethod>]
-    member this.TestSignatureMatchingReferencesFuncReturn(varVal, var:string) =
+    member this.TestSignatureMatchingReferencesFuncReturn(no:string, varVal, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestSignatureMatchingReferencesFuncReturn"

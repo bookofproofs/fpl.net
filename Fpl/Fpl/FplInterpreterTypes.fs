@@ -1354,7 +1354,7 @@ type SymbolTable(parsedAsts:ParsedAstList, debug:bool) =
 
 
 /// Looks for all declared building blocks with a specific name.
-let findCandidatesByName (st:SymbolTable) (name:string) =
+let findCandidatesByName (st:SymbolTable) (name:string) withClassConstructors =
     let pm = List<FplValue>()
     st.Root.Scope // iterate all theories
     |> Seq.iter (fun theory -> 
@@ -1364,8 +1364,8 @@ let findCandidatesByName (st:SymbolTable) (name:string) =
         |> Seq.filter (fun fv -> fv.FplId = name) 
         |> Seq.iter (fun (block:FplValue) -> 
             pm.Add(block)
-            // add also class constructors for matched classes
-            if block.BlockType = FplValueType.Class then 
+            if withClassConstructors 
+                && block.BlockType = FplValueType.Class then 
                 block.Scope
                 |> Seq.map (fun kvp -> kvp.Value) 
                 |> Seq.filter (fun (fv:FplValue) -> fv.BlockType = FplValueType.Constructor)
