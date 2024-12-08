@@ -59,7 +59,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPrimePredicate7 () =
-        let result = run (primePredicate .>> eof) """@@self"""
+        let result = run (primePredicate .>> eof) """parent"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -412,7 +412,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestIsOperator6 () =
-        let result = run (isOperator .>> eof) """is(@self, Set)"""
+        let result = run (isOperator .>> eof) """is(parent, Set)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

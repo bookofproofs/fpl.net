@@ -518,14 +518,14 @@ type TestKeywordSpaces() =
 
     [<TestMethod>]
     member this.TestSpacesSelf () =
-        let result = run (self .>> eof) "self"
+        let result = run (selfOrParent .>> eof) "self"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSpacesSelfA () =
-        let result = run (self .>> eof) "selfx}"
+        let result = run (selfOrParent .>> eof) "selfx}"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))

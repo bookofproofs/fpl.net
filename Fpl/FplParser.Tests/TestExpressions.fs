@@ -164,7 +164,7 @@ type TestExpressions () =
 
             def pred T10e() 
             {
-                Test(x,y).@self[a,b]
+                Test(x,y).parent[a,b]
             }
 
             def pred T11e() 

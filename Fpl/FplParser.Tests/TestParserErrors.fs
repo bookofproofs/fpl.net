@@ -340,7 +340,7 @@ type TestParserErrors() =
         """
         let ast = fplParser input
         let result = filterByErrorCode ad code
-        Assert.AreEqual<int>(2, result.Length)
+        Assert.AreEqual<int>(3, result.Length)
 
     [<TestMethod>]
     member this.TestTYD000() =

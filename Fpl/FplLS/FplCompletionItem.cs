@@ -124,7 +124,7 @@ namespace FplLS
                     return new FplCompletionItemChoicesKeyword().GetChoices(this);
                 case "self":
                 case "base":
-                case "@":
+                case "parent":
                     return new FplCompletionItemChoicesSelf().GetChoices(this);
                 case "all":
                 case "ex":
@@ -571,6 +571,12 @@ namespace FplLS
                     this.Detail = "predicate (disjunction)";
                     this.SortText = "or";
                     this.Kind = CompletionItemKind.Operator;
+                    this.IsShort = false;
+                    break;
+                case "parent":
+                    this.Detail = "reference (to parent)";
+                    this.SortText = "parent";
+                    this.Kind = CompletionItemKind.Reference;
                     this.IsShort = false;
                     break;
                 case "post":

@@ -49,7 +49,8 @@ let emitID014diagnostics (fplValue: FplValue) (conflict: FplValue) =
 
     ad.AddDiagnostic diagnostic
 
-let emitID015diagnostics (fv: FplValue) (self:FplValue) =
+let emitID015diagnostics name (self:FplValue) =
+    let c = ID015 name
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -57,13 +58,13 @@ let emitID015diagnostics (fv: FplValue) (self:FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = self.NameStartPos
             Diagnostic.EndPos = self.NameEndPos
-            Diagnostic.Code = ID015 ($"{fv.BlockType.Name} {fv.Type(SignatureType.Name)}")
+            Diagnostic.Code = c
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
 
-let emitID016diagnostics (fv: FplValue) (self:FplValue) =
-    let c = ID016 ($"{fv.BlockType.Name} {fv.Type(SignatureType.Name)}")
+let emitID016diagnostics name (self:FplValue) =
+    let c = ID016 name
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri

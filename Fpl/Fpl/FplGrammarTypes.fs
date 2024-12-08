@@ -40,8 +40,9 @@ type Ast =
     | DelegateId of Positions * string 
     | LanguageCode of Positions * string
     | Alias of Positions * string
-    | SelfAts of Positions * char list 
+    | SelfOrParent of Positions * Ast
     | Self of Positions * unit
+    | Parent of Positions * unit
     | LocalizationString of Positions * string
     | LocalizationTerm of Positions * Ast list
     | LocalizationTermList of Positions * Ast list

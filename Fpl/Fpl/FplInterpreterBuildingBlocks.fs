@@ -516,6 +516,26 @@ let rec eval (st: SymbolTable) ast =
     // | Self of Positions * unit
     | Ast.Self((pos1, pos2), _) -> 
         st.EvalPush("Self")
+        let rb = es.PeekEvalStack()
+        rb.NameStartPos <- pos1
+        rb.NameEndPos <- pos2
+        rb.FplId <- "self"
+        rb.TypeId <- "self"
+        let oldDiagnosticsStopped = ad.DiagnosticsStopped
+        ad.DiagnosticsStopped <- false
+        let referencedBlock = nextDefinition rb 0
+        ad.DiagnosticsStopped <- oldDiagnosticsStopped
+        match referencedBlock with
+        | ScopeSearchResult.FoundIncorrectBlock name -> 
+            emitID016diagnostics name rb
+        | ScopeSearchResult.Found block -> 
+            rb.Scope.Add(rb.FplId, block)
+        | ScopeSearchResult.NotFound -> 
+            emitID015diagnostics "" rb
+        | _ -> ()
+        st.EvalPop() 
+    | Ast.Parent((pos1, pos2), _) -> 
+        st.EvalPush("Parent")
         st.EvalPop() 
     | Ast.True((pos1, pos2), _) -> 
         st.EvalPush("True")
@@ -993,66 +1013,9 @@ let rec eval (st: SymbolTable) ast =
         simplifyTriviallyNestedExpressions fv
         st.EvalPop()
     // | SelfAts of Positions * char list
-    | Ast.SelfAts((pos1, pos2), chars) -> 
+    | Ast.SelfOrParent((pos1, pos2), selforParentAst) -> 
         st.EvalPush("SelfAts")
-        let rb = es.PeekEvalStack()
-        let blocks = Stack<FplValue>()
-        rb.NameStartPos <- pos1
-        rb.NameEndPos <- pos2
-        let rec nextBlock (fv:FplValue) counter = 
-            match fv.BlockType with 
-            | FplValueType.Axiom
-            | FplValueType.Theorem 
-            | FplValueType.Lemma 
-            | FplValueType.Proposition 
-            | FplValueType.Corollary 
-            | FplValueType.Conjecture 
-            | FplValueType.Proof 
-            | FplValueType.Localization 
-            | FplValueType.RuleOfInference -> 
-                emitID016diagnostics fv rb
-                None
-            | FplValueType.Theory -> 
-                emitID015diagnostics (blocks.Peek()) rb
-                None
-            | FplValueType.MandatoryPredicate  
-            | FplValueType.OptionalPredicate
-            | FplValueType.MandatoryFunctionalTerm  
-            | FplValueType.OptionalFunctionalTerm 
-            | FplValueType.Predicate  
-            | FplValueType.FunctionalTerm 
-            | FplValueType.Class -> 
-                blocks.Push(fv)
-                if counter <= 0 then 
-                    Some (fv)
-                else
-                    let next = fv.Parent
-                    match next with
-                    | Some parent ->
-                        nextBlock parent (counter - 1)
-                    | None -> None
-            | _ -> 
-                let next = fv.Parent
-                match next with
-                | Some parent -> nextBlock parent counter
-                | None -> None
-
-
-        rb.FplId <- "self"
-        rb.TypeId <- "self"
-        let oldDiagnosticsStopped = ad.DiagnosticsStopped
-        ad.DiagnosticsStopped <- false
-        let referencedBlock = nextBlock rb chars.Length 
-        ad.DiagnosticsStopped <- oldDiagnosticsStopped
-        let identifier = 
-            chars 
-            |> List.map (fun c -> c.ToString()) 
-            |>  String.concat "" 
-        rb.FplId <- $"{identifier}{rb.FplId}"
-        rb.TypeId <- $"{identifier}{rb.TypeId}"
-        match referencedBlock with
-        | Some block -> rb.Scope.Add(rb.FplId, block)
-        | None -> ()
+        eval st selforParentAst
         st.EvalPop()
     // | Translation of string * Ast
     | Ast.Translation((pos1, pos2),(langCode, ebnfAst)) ->

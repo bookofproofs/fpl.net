@@ -493,7 +493,7 @@ type TestFplValueScopeParent() =
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base12", "self")>]
+    [<DataRow("base12", "parent")>]
     [<DataRow("base13", "1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "self.x")>]

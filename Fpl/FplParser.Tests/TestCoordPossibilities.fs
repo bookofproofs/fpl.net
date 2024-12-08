@@ -46,7 +46,7 @@ type TestCoordPossibilities () =
 
     [<TestMethod>]
     member this.TestSelf1 () =
-        let result = run (coord .>> eof) """@self"""
+        let result = run (coord .>> eof) """parent"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
