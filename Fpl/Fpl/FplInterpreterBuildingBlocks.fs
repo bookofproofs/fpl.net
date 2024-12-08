@@ -524,18 +524,39 @@ let rec eval (st: SymbolTable) ast =
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false
         let referencedBlock = nextDefinition rb 0
-        ad.DiagnosticsStopped <- oldDiagnosticsStopped
         match referencedBlock with
         | ScopeSearchResult.FoundIncorrectBlock name -> 
-            emitID016diagnostics name rb
+            emitID015diagnostics name rb
         | ScopeSearchResult.Found block -> 
             rb.Scope.Add(rb.FplId, block)
+        | ScopeSearchResult.FoundMultiple name -> 
+            emitID016diagnostics name rb
         | ScopeSearchResult.NotFound -> 
-            emitID015diagnostics "" rb
+            emitID016diagnostics "(no block found)" rb
         | _ -> ()
+        ad.DiagnosticsStopped <- oldDiagnosticsStopped
         st.EvalPop() 
     | Ast.Parent((pos1, pos2), _) -> 
         st.EvalPush("Parent")
+        let rb = es.PeekEvalStack()
+        rb.NameStartPos <- pos1
+        rb.NameEndPos <- pos2
+        rb.FplId <- "parent"
+        rb.TypeId <- "parent"
+        let oldDiagnosticsStopped = ad.DiagnosticsStopped
+        ad.DiagnosticsStopped <- false
+        let referencedBlock = nextDefinition rb 1
+        match referencedBlock with
+        | ScopeSearchResult.FoundIncorrectBlock name -> 
+            emitID015diagnostics name rb
+        | ScopeSearchResult.Found block -> 
+            rb.Scope.Add(rb.FplId, block)
+        | ScopeSearchResult.FoundMultiple name -> 
+            emitID016diagnostics name rb
+        | ScopeSearchResult.NotFound -> 
+            emitID016diagnostics "(no block found)" rb
+        | _ -> ()
+        ad.DiagnosticsStopped <- oldDiagnosticsStopped
         st.EvalPop() 
     | Ast.True((pos1, pos2), _) -> 
         st.EvalPush("True")

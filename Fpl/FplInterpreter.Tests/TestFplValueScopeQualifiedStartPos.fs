@@ -498,7 +498,7 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base11d", "v[x, y]")>]
     [<DataRow("base12d", "self[x, y]")>]
     [<DataRow("base13d", "1[x.y]")>]
-    [<DataRow("base10e", "Test(x, y).@self[a, b]")>]
+    [<DataRow("base10e", "Test(x, y).parent[a, b]")>]
     [<DataRow("base11e", "v(x, y).x[a, b]")>]
     [<DataRow("base12e", "self(x, y).3[a, b]")>]
     [<DataRow("base13e", "1(x, y).T[a, b]")>]

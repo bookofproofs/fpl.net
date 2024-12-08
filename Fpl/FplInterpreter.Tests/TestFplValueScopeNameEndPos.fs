@@ -503,7 +503,7 @@ type TestFplValueScopeNameEndPos() =
     [<DataRow("base11d", "v[x, y]")>]
     [<DataRow("base12d", "self[x, y]")>]
     [<DataRow("base13d", "1[x.y]")>]
-    [<DataRow("base10e", "Test(x, y).@self[a, b]")>]
+    [<DataRow("base10e", "Test(x, y).parent[a, b]")>]
     [<DataRow("base11e", "v(x, y).x[a, b]")>]
     [<DataRow("base12e", "self(x, y).3[a, b]")>]
     [<DataRow("base13e", "1(x, y).T[a, b]")>]
@@ -563,7 +563,7 @@ type TestFplValueScopeNameEndPos() =
             | "base9" -> Assert.AreEqual<int64>((int64)26, base1.NameEndPos.Column)
             | "base10" -> Assert.AreEqual<int64>((int64)21, base1.NameEndPos.Column)
             | "base11" -> Assert.AreEqual<int64>((int64)18, base1.NameEndPos.Column)
-            | "base12" -> Assert.AreEqual<int64>((int64)22, base1.NameEndPos.Column)
+            | "base12" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
             | "base13" -> Assert.AreEqual<int64>((int64)18, base1.NameEndPos.Column)
             | "base11a" -> Assert.AreEqual<int64>((int64)20, base1.NameEndPos.Column)
             | "base12a" -> Assert.AreEqual<int64>((int64)23, base1.NameEndPos.Column)
@@ -579,7 +579,7 @@ type TestFplValueScopeNameEndPos() =
             | "base11d" -> Assert.AreEqual<int64>((int64)25, base1.NameEndPos.Column)
             | "base12d" -> Assert.AreEqual<int64>((int64)28, base1.NameEndPos.Column)
             | "base13d" -> Assert.AreEqual<int64>((int64)24, base1.NameEndPos.Column)
-            | "base10e" -> Assert.AreEqual<int64>((int64)40, base1.NameEndPos.Column)
+            | "base10e" -> Assert.AreEqual<int64>((int64)41, base1.NameEndPos.Column)
             | "base11e" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)
             | "base12e" -> Assert.AreEqual<int64>((int64)36, base1.NameEndPos.Column)
             | "base13e" -> Assert.AreEqual<int64>((int64)33, base1.NameEndPos.Column)

@@ -273,7 +273,7 @@ type DiagnosticCode =
             | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are %s." name candidates
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
-            | ID015 signature -> sprintf "Referencing self impossible outside the outer block which is %s." signature
+            | ID015 signature -> sprintf "Referencing self impossible inside non-definitions; the outer block is %s." signature
             | ID016 signature -> sprintf "Referencing self impossible outside definitions, the outer block is %s." signature
             | ID017 (name, candidates) -> sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
             // variable-related error codes

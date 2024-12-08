@@ -1449,8 +1449,12 @@ let rec nextDefinition (fv:FplValue) counter =
         let name = $"{fv.BlockType.Name} {fv.Type(SignatureType.Name)}"
         ScopeSearchResult.FoundIncorrectBlock name
     | FplValueType.Theory -> 
-        let fv1 = blocks.Peek()
-        let name = $"{fv1.BlockType.Name} {fv1.Type(SignatureType.Name)}"
+        let name = 
+            if blocks.Count > 0 then 
+                let fv1 = blocks.Peek()
+                $"{fv1.BlockType.Name} {fv1.Type(SignatureType.Name)}"
+            else
+                "(no block found)"
         ScopeSearchResult.FoundIncorrectBlock name
     | FplValueType.MandatoryPredicate  
     | FplValueType.OptionalPredicate
@@ -1467,7 +1471,14 @@ let rec nextDefinition (fv:FplValue) counter =
             match next with
             | Some parent ->
                 nextDefinition parent (counter - 1)
-            | None -> ScopeSearchResult.NotFound
+            | None -> 
+                let name = 
+                    if blocks.Count > 0 then 
+                        let fv1 = blocks.Peek()
+                        $"{fv1.BlockType.Name} {fv1.Type(SignatureType.Name)}"
+                    else
+                        "(no block found)"
+                ScopeSearchResult.FoundMultiple name
     | _ -> 
         let next = fv.Parent
         match next with

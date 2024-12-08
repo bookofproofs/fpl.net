@@ -22,29 +22,29 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base11v1", "dec ~v:obj; v")>]
     [<DataRow("base11v2", "dec ~v:ind; v")>]
     [<DataRow("base11v3", "dec ~v:Nat; v")>]
-    [<DataRow("base12", "@self")>]
+    [<DataRow("base12", "parent")>]
     [<DataRow("base13", "1")>]
     [<DataRow("base11a", "v.x")>]
-    [<DataRow("base12a", "@self.x")>]
+    [<DataRow("base12a", "parent.x")>]
     [<DataRow("base10b", "Test()")>]
     [<DataRow("base11b", "v()")>]
-    [<DataRow("base12b", "@self()")>]
+    [<DataRow("base12b", "parent()")>]
     [<DataRow("base13b", "1()")>]
     [<DataRow("base10c", "dec ~x,y:Nat; Test(x, y)")>]
     [<DataRow("base11c", "v(x, y)")>]
-    [<DataRow("base12c", "@self(x, y)")>]
+    [<DataRow("base12c", "parent(x, y)")>]
     [<DataRow("base13c", "1(x, y)")>]
     [<DataRow("base10d", "Test[x, y]")>]
     [<DataRow("base11d", "v[x, y]")>]
-    [<DataRow("base12d", "@self[x, y]")>]
+    [<DataRow("base12d", "parent[x, y]")>]
     [<DataRow("base13d", "1[x.y]")>]
-    [<DataRow("base10e", "Test(x, y).@self[a, b]")>]
+    [<DataRow("base10e", "Test(x, y).parent[a, b]")>]
     [<DataRow("base11e", "v(x, y).x[a, b]")>]
-    [<DataRow("base12e", "@self(x, y).3[a, b]")>]
+    [<DataRow("base12e", "parent(x, y).3[a, b]")>]
     [<DataRow("base13e", "1(x, y).T[a, b]")>]
     [<DataRow("base10f", "Test[x, y].x(a, b)")>]
     [<DataRow("base11f", "v[x, y].x(a, b)")>]
-    [<DataRow("base12f", "@self[x, y].@self(a, b)")>]
+    [<DataRow("base12f", "parent[x, y].parent(a, b)")>]
     [<DataRow("base13f", "1[x.y].T(a, b)")>]
     [<DataRow("base14", "∅")>]
     [<DataRow("base15", "-x")>]
@@ -65,7 +65,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base26", "is (x, Nat)")>]
     [<DataRow("base27", "B()")>]
     [<DataRow("base28", "C(a,b,c,d)")>]
-    [<DataRow("base29", "D(@self,b,c)")>]
+    [<DataRow("base29", "D(parent,b,c)")>]
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a),Test2(b,c,d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
@@ -100,29 +100,29 @@ type TestReferencesTypeOfSignature() =
             | "base11v1" -> Assert.AreEqual<string>("obj", base1.Type(SignatureType.Type))
             | "base11v2" -> Assert.AreEqual<string>("ind", base1.Type(SignatureType.Type))
             | "base11v3" -> Assert.AreEqual<string>("Nat", base1.Type(SignatureType.Type))
-            | "base12" -> Assert.AreEqual<string>("@self", base1.Type(SignatureType.Type))
+            | "base12" -> Assert.AreEqual<string>("parent", base1.Type(SignatureType.Type))
             | "base13" -> Assert.AreEqual<string>("1", base1.Type(SignatureType.Type))
             | "base11a" -> Assert.AreEqual<string>("undef.undef", base1.Type(SignatureType.Type))
-            | "base12a" -> Assert.AreEqual<string>("@self.undef", base1.Type(SignatureType.Type))
+            | "base12a" -> Assert.AreEqual<string>("parent.undef", base1.Type(SignatureType.Type))
             | "base10b" -> Assert.AreEqual<string>("Test()", base1.Type(SignatureType.Type))
             | "base11b" -> Assert.AreEqual<string>("undef()", base1.Type(SignatureType.Type))
-            | "base12b" -> Assert.AreEqual<string>("@self()", base1.Type(SignatureType.Type))
+            | "base12b" -> Assert.AreEqual<string>("parent()", base1.Type(SignatureType.Type))
             | "base13b" -> Assert.AreEqual<string>("1()", base1.Type(SignatureType.Type))
             | "base10c" -> Assert.AreEqual<string>("Test(Nat, Nat)", base1.Type(SignatureType.Type))
             | "base11c" -> Assert.AreEqual<string>("undef(undef, undef)", base1.Type(SignatureType.Type))
-            | "base12c" -> Assert.AreEqual<string>("@self(undef, undef)", base1.Type(SignatureType.Type))
+            | "base12c" -> Assert.AreEqual<string>("parent(undef, undef)", base1.Type(SignatureType.Type))
             | "base13c" -> Assert.AreEqual<string>("1(undef, undef)", base1.Type(SignatureType.Type))
             | "base10d" -> Assert.AreEqual<string>("Test[undef, undef]", base1.Type(SignatureType.Type))
             | "base11d" -> Assert.AreEqual<string>("undef[undef, undef]", base1.Type(SignatureType.Type))
-            | "base12d" -> Assert.AreEqual<string>("@self[undef, undef]", base1.Type(SignatureType.Type))
+            | "base12d" -> Assert.AreEqual<string>("parent[undef, undef]", base1.Type(SignatureType.Type))
             | "base13d" -> Assert.AreEqual<string>("1[undef.undef]", base1.Type(SignatureType.Type))
-            | "base10e" -> Assert.AreEqual<string>("Test(undef, undef).@self[undef, undef]", base1.Type(SignatureType.Type))
+            | "base10e" -> Assert.AreEqual<string>("Test(undef, undef).parent[undef, undef]", base1.Type(SignatureType.Type))
             | "base11e" -> Assert.AreEqual<string>("undef(undef, undef).undef[undef, undef]", base1.Type(SignatureType.Type))
-            | "base12e" -> Assert.AreEqual<string>("@self(undef, undef).3[undef, undef]", base1.Type(SignatureType.Type))
+            | "base12e" -> Assert.AreEqual<string>("parent(undef, undef).3[undef, undef]", base1.Type(SignatureType.Type))
             | "base13e" -> Assert.AreEqual<string>("1(undef, undef).T[undef, undef]", base1.Type(SignatureType.Type))
             | "base10f" -> Assert.AreEqual<string>("Test[undef, undef].undef(undef, undef)", base1.Type(SignatureType.Type))
             | "base11f" -> Assert.AreEqual<string>("undef[undef, undef].undef(undef, undef)", base1.Type(SignatureType.Type))
-            | "base12f" -> Assert.AreEqual<string>("@self[undef, undef].@self(undef, undef)", base1.Type(SignatureType.Type))
+            | "base12f" -> Assert.AreEqual<string>("parent[undef, undef].parent(undef, undef)", base1.Type(SignatureType.Type))
             | "base13f" -> Assert.AreEqual<string>("1[undef.undef].T(undef, undef)", base1.Type(SignatureType.Type))
             | "base14" -> Assert.AreEqual<string>("∅", base1.Type(SignatureType.Type))
             | "base15" -> Assert.AreEqual<string>("-(undef)", base1.Type(SignatureType.Type))
@@ -143,7 +143,7 @@ type TestReferencesTypeOfSignature() =
             | "base26" -> Assert.AreEqual<string>("pred(undef, Nat)", base1.Type(SignatureType.Type))
             | "base27" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Type))
             | "base28" -> Assert.AreEqual<string>("C(undef, undef, undef, undef)", base1.Type(SignatureType.Type))
-            | "base29" -> Assert.AreEqual<string>("D(@self, undef, undef)", base1.Type(SignatureType.Type))
+            | "base29" -> Assert.AreEqual<string>("D(parent, undef, undef)", base1.Type(SignatureType.Type))
             | "base30" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Type))
             | "base31" -> Assert.AreEqual<string>("C(Test1(undef), Test2(undef, undef, undef))", base1.Type(SignatureType.Type))
             | "base32" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Type))
@@ -156,7 +156,7 @@ type TestReferencesTypeOfSignature() =
 
     [<DataRow("base1", "base.B()")>]
     [<DataRow("base2", "base.C(a, b, c, d)")>]
-    [<DataRow("base3", "base.D(@self, a, b)")>]
+    [<DataRow("base3", "base.D(parent, a, b)")>]
     [<DataRow("base4", "base.B(In(x))")>]
     [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base6", "base.E(true, undef, false)")>]
@@ -194,7 +194,7 @@ type TestReferencesTypeOfSignature() =
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Type))
             | "base2" -> Assert.AreEqual<string>("C(T1, func, ind, pred)", base1.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>("D(@self, T1, func)", base1.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>("D(parent, T1, func)", base1.Type(SignatureType.Type))
             | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Type))
             | "base5" -> Assert.AreEqual<string>("C(Test1(T1), Test2(func, ind, pred))", base1.Type(SignatureType.Type))
             | "base6" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Type))
@@ -204,7 +204,7 @@ type TestReferencesTypeOfSignature() =
 
     [<DataRow("base1", "del.B()")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
-    [<DataRow("base3", "del.D(@self,b,c)")>]
+    [<DataRow("base3", "del.D(parent,b,c)")>]
     [<DataRow("base4", "del.B(In(x))")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "del.C(Test1(a),Test2(b,c,d))")>]
@@ -227,7 +227,7 @@ type TestReferencesTypeOfSignature() =
             match var with
             | "base1" -> Assert.AreEqual<string>("del.B()", base1.Type(SignatureType.Type))
             | "base2" -> Assert.AreEqual<string>("del.C(undef, undef, undef, undef)", base1.Type(SignatureType.Type))
-            | "base3" -> Assert.AreEqual<string>("del.D(@self, undef, undef)", base1.Type(SignatureType.Type))
+            | "base3" -> Assert.AreEqual<string>("del.D(parent, undef, undef)", base1.Type(SignatureType.Type))
             | "base4" -> Assert.AreEqual<string>("del.B(In(undef))", base1.Type(SignatureType.Type))
             | "base5" -> Assert.AreEqual<string>("del.Test()", base1.Type(SignatureType.Type))
             | "base6" -> Assert.AreEqual<string>("del.C(Test1(undef), Test2(undef, undef, undef))", base1.Type(SignatureType.Type))
