@@ -489,35 +489,35 @@ type TestFplValueScopeFplId() =
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
     [<DataRow("base12", "self")>]
-    [<DataRow("base13", "1")>]
+    [<DataRow("base13", "@1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "self.x")>]
     [<DataRow("base10b", "Test()")>]
     [<DataRow("base11b", "v()")>]
     [<DataRow("base12b", "self()")>]
-    [<DataRow("base13b", "1()")>]
+    [<DataRow("base13b", "@1()")>]
     [<DataRow("base10c", "Test(x, y)")>]
     [<DataRow("base11c", "v(x, y)")>]
     [<DataRow("base12c", "self(x, y)")>]
-    [<DataRow("base13c", "1(x, y)")>]
+    [<DataRow("base13c", "@1(x, y)")>]
     [<DataRow("base10d", "Test[x, y]")>]
     [<DataRow("base11d", "v[x, y]")>]
     [<DataRow("base12d", "self[x, y]")>]
-    [<DataRow("base13d", "1[x.y]")>]
-    [<DataRow("base10e", "Test(x, y).@self[a, b]")>]
+    [<DataRow("base13d", "@1[x.y]")>]
+    [<DataRow("base10e", "Test(x, y).parent[a, b]")>]
     [<DataRow("base11e", "v(x, y).x[a, b]")>]
-    [<DataRow("base12e", "self(x, y).3[a, b]")>]
-    [<DataRow("base13e", "1(x, y).T[a, b]")>]
+    [<DataRow("base12e", "self(x, y).@3[a, b]")>]
+    [<DataRow("base13e", "@1(x, y).T[a, b]")>]
     [<DataRow("base10f", "Test[x, y].x(a, b)")>]
     [<DataRow("base11f", "v[x, y].x(a, b)")>]
     [<DataRow("base12f", "self[x, y].self(a, b)")>]
-    [<DataRow("base13f", "1[x.y].T(a, b)")>]
+    [<DataRow("base13f", "@1[x.y].T(a, b)")>]
     [<DataRow("base14", "∅")>]
     [<DataRow("base15", "-x")>]
     [<DataRow("base15a", "x'")>]
     [<DataRow("base15b", "-x'")>]
-    [<DataRow("base16", "-(y + x = 2 * x)")>]
-    [<DataRow("base17", "(y + x' = 2 * x)'")>]
+    [<DataRow("base16", "-(y + x = @2 * x)")>]
+    [<DataRow("base17", "(y + x' = @2 * x)'")>]
     [<DataRow("base18", "ex x:Range(a:T), y:C, z:obj {and (a,b,c)}")>]
     [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
     [<DataRow("base20", "all x:obj {not x}")>]
@@ -567,26 +567,26 @@ type TestFplValueScopeFplId() =
             | "base12" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base13" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base11a" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12a" -> Assert.AreEqual<string>("parent", base1.FplId)
+            | "base12a" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base10b" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base11b" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12b" -> Assert.AreEqual<string>("parent", base1.FplId)
+            | "base12b" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base13b" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10c" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base11c" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12c" -> Assert.AreEqual<string>("parent", base1.FplId)
+            | "base12c" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base13c" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10d" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base11d" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12d" -> Assert.AreEqual<string>("parent", base1.FplId)
+            | "base12d" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base13d" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10e" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base11e" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12e" -> Assert.AreEqual<string>("parent", base1.FplId)
+            | "base12e" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base13e" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base10f" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base11f" -> Assert.AreEqual<string>("v", base1.FplId)
-            | "base12f" -> Assert.AreEqual<string>("parent", base1.FplId)
+            | "base12f" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base13f" -> Assert.AreEqual<string>("1", base1.FplId)
             | "base14" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base15" -> Assert.AreEqual<string>("-", base1.FplId)

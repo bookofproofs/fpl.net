@@ -286,6 +286,7 @@ type FplValueType =
     | Mapping
     | Stmt
     | Assertion
+    | Extension
     | Root
     member private this.UnqualifiedName = 
         match this with
@@ -322,6 +323,7 @@ type FplValueType =
             | Mapping -> "mapping"
             | Stmt -> "statement"
             | Assertion -> "assertion"
+            | Extension -> "extension"
             | Root -> "root"
     member private this.Article = 
         match this with
@@ -331,6 +333,7 @@ type FplValueType =
         | Argument 
         | Assertion 
         | ArgInference 
+        | Extension 
         | Axiom -> "an"
         | _ -> "a"
 
@@ -371,18 +374,21 @@ type FplValueType =
             | Mapping -> "map"
             | Stmt -> "stmt"
             | Assertion -> "ass"
+            | Extension -> "ext"
             | Root -> "root"
 
 type FixType = 
     | Infix of string * int
     | Postfix of string 
     | Prefix of string 
+    | Symbol of string
     | NoFix
     member this.Type = 
         match this with 
         | Infix (symbol,precedence) -> sprintf "infix `%s` (with precedence `%i`)" symbol precedence
         | Postfix symbol -> sprintf "postfix `%s` " symbol
         | Prefix symbol -> sprintf "prefix `%s` " symbol
+        | Symbol symbol -> sprintf "symbol `%s`" symbol
         | NoFix -> "no fix"
 
 type SignatureType = 
@@ -1039,6 +1045,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | FplValueType.Translation
         | FplValueType.Stmt
         | FplValueType.Assertion
+        | FplValueType.Extension
         | FplValueType.OptionalFunctionalTerm -> new FplValue(fplBlockType, positions, Some parent)
         | FplValueType.Class -> 
             let ret = new FplValue(fplBlockType, positions, Some parent)
@@ -1449,8 +1456,12 @@ let rec nextDefinition (fv:FplValue) counter =
         let name = $"{fv.BlockType.Name} {fv.Type(SignatureType.Name)}"
         ScopeSearchResult.FoundIncorrectBlock name
     | FplValueType.Theory -> 
-        let fv1 = blocks.Peek()
-        let name = $"{fv1.BlockType.Name} {fv1.Type(SignatureType.Name)}"
+        let name = 
+            if blocks.Count > 0 then 
+                let fv1 = blocks.Peek()
+                $"{fv1.BlockType.Name} {fv1.Type(SignatureType.Name)}"
+            else
+                "(no block found)"
         ScopeSearchResult.FoundIncorrectBlock name
     | FplValueType.MandatoryPredicate  
     | FplValueType.OptionalPredicate
@@ -1467,7 +1478,14 @@ let rec nextDefinition (fv:FplValue) counter =
             match next with
             | Some parent ->
                 nextDefinition parent (counter - 1)
-            | None -> ScopeSearchResult.NotFound
+            | None -> 
+                let name = 
+                    if blocks.Count > 0 then 
+                        let fv1 = blocks.Peek()
+                        $"{fv1.BlockType.Name} {fv1.Type(SignatureType.Name)}"
+                    else
+                        "(no block found)"
+                ScopeSearchResult.FoundMultiple name
     | _ -> 
         let next = fv.Parent
         match next with

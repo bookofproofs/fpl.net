@@ -194,7 +194,7 @@ type TestConstructors () =
                     mulInField := myField.MulOp()
                     assert NotEqual(n, Zero())
     				base.obj()
-                    self:=SetBuilder( myField[1 , n], true)
+                    self:=SetBuilder( myField[@1 , n], true)
                 ;
                 self
             }"""

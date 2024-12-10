@@ -2,9 +2,7 @@
 This theory is experimental and for test purposes only.
 */
 
-:ext
-    Digits: /\d+/
-:end
+ext Digits: /\d+/
 
 uses Fpl.Commons
 uses Fpl.SetTheory

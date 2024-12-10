@@ -311,14 +311,14 @@ type TestPredicatesSpecific () =
         
     [<TestMethod>]
     member this.TestPredicateWithArgs7a () =
-        let result = run (predicateWithQualification .>> eof) """x[3,2]"""
+        let result = run (predicateWithQualification .>> eof) """x[@3,@3]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicateWithArgs71a () =
-        let result = run (predicateWithQualification .>> eof) """x[3()]"""
+        let result = run (predicateWithQualification .>> eof) """x[@3()]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -11,7 +11,7 @@ type TestCoordPossibilities () =
 
     [<TestMethod>]
     member this.TestExtensionDigit () =
-        let result = run (coord .>> eof) """1"""
+        let result = run (coord .>> eof) """@1"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -167,6 +167,7 @@ type EvalStack() =
             | FplValueType.Translation 
             | FplValueType.Stmt
             | FplValueType.Assertion
+            | FplValueType.Extension
             | FplValueType.Root -> 
                 EvalStack.tryAddToValueList fv 
 
@@ -437,11 +438,14 @@ let rec eval (st: SymbolTable) ast =
         fv.FplId <- s
         fv.TypeId <- s
         st.EvalPop() 
-    | Ast.ObjectSymbol((pos1, pos2), s) -> 
+    | Ast.ObjectSymbol((pos1, pos2), symbol) -> 
         st.EvalPush("ObjectSymbol")
         let fv = es.PeekEvalStack()
-        fv.FplId <- s
-        fv.TypeId <- s
+        fv.FplId <- symbol
+        fv.TypeId <- symbol
+        fv.NameStartPos <- pos1
+        fv.NameEndPos <- pos2
+        emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop()
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
@@ -482,9 +486,10 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.ExpressionType <- FixType.Postfix symbol
         st.EvalPop() 
-    | Ast.Symbol((pos1, pos2), s) -> 
+    | Ast.Symbol((pos1, pos2), symbol) -> 
         st.EvalPush("Symbol")
-        eval_pos_string st pos1 pos2 s
+        let fv = es.PeekEvalStack()
+        fv.ExpressionType <- FixType.Symbol symbol
         st.EvalPop() 
     | Ast.InfixOperator((pos1, pos2), symbol) -> 
         st.EvalPush("InfixOperator")
@@ -524,18 +529,39 @@ let rec eval (st: SymbolTable) ast =
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false
         let referencedBlock = nextDefinition rb 0
-        ad.DiagnosticsStopped <- oldDiagnosticsStopped
         match referencedBlock with
         | ScopeSearchResult.FoundIncorrectBlock name -> 
-            emitID016diagnostics name rb
+            emitID015diagnostics name rb
         | ScopeSearchResult.Found block -> 
             rb.Scope.Add(rb.FplId, block)
+        | ScopeSearchResult.FoundMultiple name -> 
+            emitID016diagnostics name rb
         | ScopeSearchResult.NotFound -> 
-            emitID015diagnostics "" rb
+            emitID016diagnostics "(no block found)" rb
         | _ -> ()
+        ad.DiagnosticsStopped <- oldDiagnosticsStopped
         st.EvalPop() 
     | Ast.Parent((pos1, pos2), _) -> 
         st.EvalPush("Parent")
+        let rb = es.PeekEvalStack()
+        rb.NameStartPos <- pos1
+        rb.NameEndPos <- pos2
+        rb.FplId <- "parent"
+        rb.TypeId <- "parent"
+        let oldDiagnosticsStopped = ad.DiagnosticsStopped
+        ad.DiagnosticsStopped <- false
+        let referencedBlock = nextDefinition rb 1
+        match referencedBlock with
+        | ScopeSearchResult.FoundIncorrectBlock name -> 
+            emitID015diagnostics name rb
+        | ScopeSearchResult.Found block -> 
+            rb.Scope.Add(rb.FplId, block)
+        | ScopeSearchResult.FoundMultiple name -> 
+            emitID016diagnostics name rb
+        | ScopeSearchResult.NotFound -> 
+            emitID016diagnostics "(no block found)" rb
+        | _ -> ()
+        ad.DiagnosticsStopped <- oldDiagnosticsStopped
         st.EvalPop() 
     | Ast.True((pos1, pos2), _) -> 
         st.EvalPush("True")
@@ -601,9 +627,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.NameEndPos <- pos2
         st.EvalPop()
-    | Ast.ExtDigits((pos1, pos2), digitsAst) ->
-        st.EvalPush("ExtDigits")
-        eval st digitsAst
+    | Ast.Extension((pos1, pos2), extensionString) ->
+        st.EvalPush("Extension")
         st.EvalPop()
     | Ast.ExtensionType((pos1, pos2), ast1) ->
         st.EvalPush("ExtensionType")

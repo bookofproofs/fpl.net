@@ -566,3 +566,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             Assert.AreEqual<int>(errorCountfirstTime, ad.CountDiagnostics)
 
         | None -> Assert.IsTrue(false)
+
+module TestModule2 =
+    let main () = printfn "This is a Testmodule"
+    main ()

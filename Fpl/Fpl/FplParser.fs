@@ -81,13 +81,12 @@ let SW = spaces1 <?> "<significant whitespace>"
 let attemptSW = SW <|> (IW .>> attempt (lookAhead (choice [skipChar '('; skipChar ')'; skipChar '{'; skipChar ','; skipChar ';'; skipChar '[' ])))
 
 // -----------------------------------------------------
-// Extensions of the FPL language (have to be dynamic)! Lacking a pre-processor, we put the rules
-// from the Proof of Concept of FPL code manually into the EBNF of the core FPL grammar.
-// note that this has to be inserted into:
-// the IsOperand choice
-// the PredicateOrFunctionalTerm choice
-let digits = regex @"\d+" <?> "<digits>" |>> Ast.Digits
-let extDigits = positions "ExtDigits" (digits) |>> Ast.ExtDigits
+// Extensions of the FPL language allow syntax injections as long as they match the following regex expression.
+// The FPL interpreter will try to match extensionString after the @ literal
+// by tryoing out the regex expressions of all user-declared ExtensionBlocks (in their declaration order)
+// until none or the first of then matches this string. Then, the matched string will get the named type of the ExtensionBlock.
+let extensionString = regex @"[^,\s()\[\]{}]+" <?> "<extensionString>" 
+let extension = positions "Extension" (at >>. extensionString) |>> Ast.Extension
 
 (* Identifiers *)
 
@@ -188,16 +187,13 @@ let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
 let keywordUses = (skipString "uses") .>> SW
 let usesClause = positions "UsesClause" (keywordUses >>. theoryNamespace) |>> Ast.UsesClause
 
-let extensionTail: Parser<unit,unit> = skipString ":end" >>. SW
-
-let extensionHeader: Parser<unit,unit> = skipString ":ext" >>. SW
+let keywordExtension = (skipString "extension" <|> skipString "ext") .>> SW
 
 let extensionName = positions "Extensionname" (idStartsWithCap) |>> Ast.Extensionname
 
-let extReg = regex "\/.*\/\s" <?> "<extension regex>"
-let extensionRegex: Parser<_, unit>  = skipChar ':' >>. IW >>. extReg .>> IW |>> Ast.ExtensionRegex
+let extensionRegex = regex "\/.*\/" <?> "<extension regex>" |>> Ast.ExtensionRegex
 
-let extensionBlock = positions "ExtensionBlock" (extensionHeader >>. IW >>. extensionName .>>. extensionRegex .>> extensionTail) |>> Ast.ExtensionBlock
+let extensionBlock = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> IW .>> colon .>> IW) .>>. extensionRegex) |>> Ast.ExtensionBlock
 
 
 (* Signatures, Variable Declarations, and Types, and Coordinates *)
@@ -225,7 +221,7 @@ let classType, classTypeRef = createParserForwardedToRef()
 
 let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
-let fplIdentifier = choice [ entity; predicateIdentifier; extDigits ] 
+let fplIdentifier = choice [ entity; predicateIdentifier; extension ] 
 
 let coordList = (sepBy1 coord comma) .>> IW
 

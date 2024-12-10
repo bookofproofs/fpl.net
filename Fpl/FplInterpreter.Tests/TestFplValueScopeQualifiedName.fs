@@ -481,36 +481,36 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base12", "@self")>]
-    [<DataRow("base13", "1")>]
+    [<DataRow("base12", "parent")>]
+    [<DataRow("base13", "@1")>]
     [<DataRow("base11a", "v.x")>]
-    [<DataRow("base12a", "@self.x")>]
+    [<DataRow("base12a", "parent.x")>]
     [<DataRow("base10b", "Test()")>]
     [<DataRow("base11b", "v()")>]
-    [<DataRow("base12b", "@self()")>]
-    [<DataRow("base13b", "1()")>]
+    [<DataRow("base12b", "parent()")>]
+    [<DataRow("base13b", "@1()")>]
     [<DataRow("base10c", "Test(x, y)")>]
     [<DataRow("base11c", "v(x, y)")>]
-    [<DataRow("base12c", "@self(x, y)")>]
-    [<DataRow("base13c", "1(x, y)")>]
+    [<DataRow("base12c", "parent(x, y)")>]
+    [<DataRow("base13c", "@1(x, y)")>]
     [<DataRow("base10d", "Test[x, y]")>]
     [<DataRow("base11d", "v[x, y]")>]
-    [<DataRow("base12d", "@self[x, y]")>]
-    [<DataRow("base13d", "1[x.y]")>]
-    [<DataRow("base10e", "Test(x, y).@self[a, b]")>]
+    [<DataRow("base12d", "parent[x, y]")>]
+    [<DataRow("base13d", "@1[x.y]")>]
+    [<DataRow("base10e", "Test(x, y).parent[a, b]")>]
     [<DataRow("base11e", "v(x, y).x[a, b]")>]
-    [<DataRow("base12e", "@self(x, y).3[a, b]")>]
-    [<DataRow("base13e", "1(x, y).T[a, b]")>]
+    [<DataRow("base12e", "parent(x, y).3[a, b]")>]
+    [<DataRow("base13e", "@1(x, y).T[a, b]")>]
     [<DataRow("base10f", "Test[x, y].x(a, b)")>]
     [<DataRow("base11f", "v[x, y].x(a, b)")>]
-    [<DataRow("base12f", "@self[x, y].@self(a, b)")>]
-    [<DataRow("base13f", "1[x.y].T(a, b)")>]
+    [<DataRow("base12f", "parent[x, y].parent(a, b)")>]
+    [<DataRow("base13f", "@1[x.y].T(a, b)")>]
     [<DataRow("base14", "∅")>]
     [<DataRow("base15", "-x")>]
     [<DataRow("base15a", "x'")>]
     [<DataRow("base15b", "-x'")>]
-    [<DataRow("base16", "-(y + x = 2 * x)")>]
-    [<DataRow("base17", "(y + x' = 2 * x)'")>]
+    [<DataRow("base16", "-(y + x = @2 * x)")>]
+    [<DataRow("base17", "(y + x' = @2 * x)'")>]
     [<DataRow("base18", "ex x:Range(a:T), y:C, z:obj {and (a,b,c)}")>]
     [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
     [<DataRow("base20", "all x:obj {not x}")>]
@@ -524,7 +524,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base26", "is(x, Nat)")>]
     [<DataRow("base27", "B()")>]
     [<DataRow("base28", "C(a, b, c, d)")>]
-    [<DataRow("base29", "D(@self, b, c)")>]
+    [<DataRow("base29", "D(parent, b, c)")>]
     [<DataRow("base30", "B(In(x))")>]
     [<DataRow("base31", "C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base32", "E(true, undef, false)")>]
@@ -612,7 +612,7 @@ type TestFplValueScopeQualifiedName() =
 
     [<DataRow("base1", "base.B()")>]
     [<DataRow("base2", "base.C(a, b, c, d)")>]
-    [<DataRow("base3", "base.D(@self, a, b)")>]
+    [<DataRow("base3", "base.D(self, a, b)")>]
     [<DataRow("base4", "base.B(In(x))")>]
     [<DataRow("base5", "base.C(Test1(a), Test2(b, c, d))")>]
     [<DataRow("base6", "base.E(true, undef, false)")>]
@@ -650,7 +650,7 @@ type TestFplValueScopeQualifiedName() =
             match var with
             | "base1" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.B()", base1.QualifiedName)
             | "base2" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.C(a, b, c, d)", base1.QualifiedName)
-            | "base3" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.D(@self, a, b)", base1.QualifiedName)
+            | "base3" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.D(A, a, b)", base1.QualifiedName)
             | "base4" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.B(In(x))", base1.QualifiedName)
             | "base5" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.C(Test1(a), Test2(b, c, d))", base1.QualifiedName)
             | "base6" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.E(true, undef, false)", base1.QualifiedName)
@@ -660,7 +660,7 @@ type TestFplValueScopeQualifiedName() =
 
     [<DataRow("base1", "del.B()")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
-    [<DataRow("base3", "del.D(@self,b,c)")>]
+    [<DataRow("base3", "del.D(self,b,c)")>]
     [<DataRow("base4", "del.B(In(x))")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "del.C(Test1(a),Test2(b,c,d))")>]
@@ -683,7 +683,7 @@ type TestFplValueScopeQualifiedName() =
             match var with
             | "base1" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.B()", base1.QualifiedName)
             | "base2" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.C(a, b, c, d)", base1.QualifiedName)
-            | "base3" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.D(@self, b, c)", base1.QualifiedName)
+            | "base3" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.D(T1(), b, c)", base1.QualifiedName)
             | "base4" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.B(In(x))", base1.QualifiedName)
             | "base5" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.Test()", base1.QualifiedName)
             | "base6" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.C(Test1(a), Test2(b, c, d))", base1.QualifiedName)

@@ -328,11 +328,14 @@ In the new version, ranges have been abandoned from the parser since dealing wit
 #### 13) Syntax of extensions vs. syntax of indexed variables
 
 Extensions can be used in FPL (among other things) to introduce infinitely many symbols, such as "0,1,2", etc., to identify them with concrete mathematical objects like natural numbers. 
-FPL has no in-built type of "natural number." Instead, we can define natural numbers, for instance, using the Peano axioms and then identifying the class of objects "Natural number" with the (otherwise meaningless) symbols "0,1,2,..." Nevertheless, FPL has an in-built index type using the same symbols. 
+Such literals can be injected into FPL using the at @ literal. For instance, we can write `@1`, and the parser will except it, while `1` is a syntax error.
+The @ at the beginning is used to change the parsing mode into a regex-based mode. All characters that follow after the @
+Except whitespace, the brackets `[]`, the parentheses `()`, the braces `{}`, and the comma `,` will be consumed by the parser.
+The FPL interpreter will then try to apply the user-defined, named extension blocks. The latter can define their own regex expression.
+If the FPL interpreter finds a match, it will assign the matched literal the user-defined name which will became the type of the literal.
+The clue is that these named types can be used in signatures of FPL blocks to match signatures that except only the user defined literals as parameters.
 
-To disambiguate the two usages, we conducted the following changes in the FPL syntax:
-
-* Simplification of the extension syntax:
+* * Simplification of the extension syntax:
 *Before*
 ``` 
     :ext
@@ -351,14 +354,15 @@ To disambiguate the two usages, we conducted the following changes in the FPL sy
 
 *Now*
 ``` 
-    :ext
-        Digits : /\d+/
-    :end
+    ext Digits : /\d+/
 
     Nat(x: @Digits)
     {
         ...
     }
+
+    // calling can be then done by
+    Nat(@42)
 ``` 
 
 * Indexing is done via brackets `[`, `]` instead of `$`
@@ -370,7 +374,7 @@ To disambiguate the two usages, we conducted the following changes in the FPL sy
 
 *Now*
 ``` 
-    n[1]
+    n[@1]
     n[m,k]
 ``` 
 * The symbols `m`, `k`, can be of any type. If n is variadic, only indexes $1, $2 are allowed. But this is something the FPL interpreter (and not the FPL parser) can ensure.
