@@ -439,6 +439,31 @@ type TestPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
         
+    [<TestMethod>]
+    member this.TestPredicate59 () =
+        let result = run (predicate .>> eof) """(x = 0)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<TestMethod>]
+    member this.TestPredicate59a () =
+        let result = run (predicate .>> eof) """(x = 12)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<TestMethod>]
+    member this.TestPredicate60 () =
+        let result = run (predicate .>> eof) """(x = @0)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestPredicate60a () =
+        let result = run (predicate .>> eof) """(x = @12)"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
            

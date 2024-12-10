@@ -381,12 +381,14 @@ type FixType =
     | Infix of string * int
     | Postfix of string 
     | Prefix of string 
+    | Symbol of string
     | NoFix
     member this.Type = 
         match this with 
         | Infix (symbol,precedence) -> sprintf "infix `%s` (with precedence `%i`)" symbol precedence
         | Postfix symbol -> sprintf "postfix `%s` " symbol
         | Prefix symbol -> sprintf "prefix `%s` " symbol
+        | Symbol symbol -> sprintf "symbol `%s`" symbol
         | NoFix -> "no fix"
 
 type SignatureType = 

@@ -559,12 +559,14 @@ let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
             theory.Scope
             |> Seq.map (fun kv -> kv.Value)
             |> Seq.iter (fun block ->
-                let blockType = block.Type(SignatureType.Mixed)
                 if expressionId = block.FplId then
+                    let blockType = block.Type(SignatureType.Mixed)
                     fv.Scope.Add(blockType, block)
                 else
+                    let blockType = block.Type(SignatureType.Mixed)
                     match block.ExpressionType with
                     | FixType.Prefix symbol
+                    | FixType.Symbol symbol
                     | FixType.Postfix symbol ->
                         if expressionId = symbol then
                             fv.Scope.Add(blockType, block)
@@ -582,7 +584,7 @@ let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
                     Diagnostic.StartPos = pos1
                     Diagnostic.EndPos = pos2
                     Diagnostic.Code = SIG01 expressionId
-                    Diagnostic.Alternatives = Some "Declare a functional term or predicate with this symbol." 
+                    Diagnostic.Alternatives = Some "Declare a functional term, predicate, or class with this symbol." 
                 }
             ad.AddDiagnostic diagnostic
 

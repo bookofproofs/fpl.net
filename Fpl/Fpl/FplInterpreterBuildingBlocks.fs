@@ -438,11 +438,14 @@ let rec eval (st: SymbolTable) ast =
         fv.FplId <- s
         fv.TypeId <- s
         st.EvalPop() 
-    | Ast.ObjectSymbol((pos1, pos2), s) -> 
+    | Ast.ObjectSymbol((pos1, pos2), symbol) -> 
         st.EvalPush("ObjectSymbol")
         let fv = es.PeekEvalStack()
-        fv.FplId <- s
-        fv.TypeId <- s
+        fv.FplId <- symbol
+        fv.TypeId <- symbol
+        fv.NameStartPos <- pos1
+        fv.NameEndPos <- pos2
+        emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop()
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
@@ -483,9 +486,10 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.ExpressionType <- FixType.Postfix symbol
         st.EvalPop() 
-    | Ast.Symbol((pos1, pos2), s) -> 
+    | Ast.Symbol((pos1, pos2), symbol) -> 
         st.EvalPush("Symbol")
-        eval_pos_string st pos1 pos2 s
+        let fv = es.PeekEvalStack()
+        fv.ExpressionType <- FixType.Symbol symbol
         st.EvalPop() 
     | Ast.InfixOperator((pos1, pos2), symbol) -> 
         st.EvalPush("InfixOperator")
