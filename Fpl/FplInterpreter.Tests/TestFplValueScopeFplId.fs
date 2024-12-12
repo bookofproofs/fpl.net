@@ -490,6 +490,7 @@ type TestFplValueScopeFplId() =
     [<DataRow("base11", "v")>]
     [<DataRow("base12", "self")>]
     [<DataRow("base13", "@1")>]
+    [<DataRow("base13a", "1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "self.x")>]
     [<DataRow("base10b", "Test()")>]
@@ -565,7 +566,8 @@ type TestFplValueScopeFplId() =
             | "base10" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base11" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base12" -> Assert.AreEqual<string>(varVal, base1.FplId)
-            | "base13" -> Assert.AreEqual<string>(varVal, base1.FplId)
+            | "base13" -> Assert.AreEqual<string>("1", base1.FplId)
+            | "base13a" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base11a" -> Assert.AreEqual<string>("v", base1.FplId)
             | "base12a" -> Assert.AreEqual<string>("self", base1.FplId)
             | "base10b" -> Assert.AreEqual<string>("Test", base1.FplId)

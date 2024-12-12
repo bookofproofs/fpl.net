@@ -118,6 +118,7 @@ type DiagnosticCode =
     | ID015 of string 
     | ID016 of string 
     | ID017 of string * string 
+    | ID018 of string 
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -197,6 +198,7 @@ type DiagnosticCode =
             | ID015 _ -> "ID015"
             | ID016 _ -> "ID016"
             | ID017 _ -> "ID017"
+            | ID018 _ -> "ID018"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -276,6 +278,7 @@ type DiagnosticCode =
             | ID015 signature -> sprintf "Referencing self impossible inside non-definitions; the outer block is %s." signature
             | ID016 signature -> sprintf "Referencing self impossible outside definitions, the outer block is %s." signature
             | ID017 (name, candidates) -> sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
+            | ID018 name -> sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."

@@ -160,7 +160,7 @@ type Ast =
     | JustArgInf of Positions * (Ast * Ast)
     | Argument of Positions * (Ast * Ast)
     | Proof of Positions * (Ast * (Ast list * Ast option))
-    | Namespace of Ast option * Ast list
+    | Namespace of Ast list
     | AST of Positions * Ast
     | Error // used to replace the whole AST (at the root level) for severe errors the parser cannot recover from
 

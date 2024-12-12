@@ -2,7 +2,6 @@
 
 open System
 open System.Collections.Generic
-open System.Linq
 open FParsec
 open ErrDiagnostics
 open FplGrammarTypes
@@ -87,6 +86,7 @@ type EvalStack() =
             | FplValueType.OptionalFunctionalTerm
             | FplValueType.Axiom
             | FplValueType.Predicate
+            | FplValueType.Extension
             | FplValueType.Argument 
             | FplValueType.Language 
             | FplValueType.FunctionalTerm ->
@@ -167,7 +167,6 @@ type EvalStack() =
             | FplValueType.Translation 
             | FplValueType.Stmt
             | FplValueType.Assertion
-            | FplValueType.Extension
             | FplValueType.Root -> 
                 EvalStack.tryAddToValueList fv 
 
@@ -327,7 +326,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.ExtensionRegex s -> 
         st.EvalPush("ExtensionRegex")
-        eval_string st s
+        let fv = es.PeekEvalStack()
+        fv.ReprId <- s
         st.EvalPop() 
     // | DollarDigits of Positions * int
     | Ast.DollarDigits((pos1, pos2), s) -> 
@@ -352,6 +352,7 @@ let rec eval (st: SymbolTable) ast =
                 $"+@{s}"
             else
                 $"@{s}"
+        fv.FplId <- sid
         fv.TypeId <- sid
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
@@ -629,6 +630,11 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Extension((pos1, pos2), extensionString) ->
         st.EvalPush("Extension")
+        let fv = es.PeekEvalStack()
+        fv.FplId <- extensionString
+        fv.TypeId <- extensionString
+        fv.ReprId <- extensionString
+        checkID018Diagnostics st fv extensionString pos1 pos2
         st.EvalPop()
     | Ast.ExtensionType((pos1, pos2), ast1) ->
         st.EvalPush("ExtensionType")
@@ -952,9 +958,8 @@ let rec eval (st: SymbolTable) ast =
             asts |> List.map (eval st) |> ignore
         st.EvalPop()
     // | Namespace of Ast option * Ast list
-    | Ast.Namespace(optAst, asts) ->
+    | Ast.Namespace(asts) ->
         st.EvalPush("Namespace")
-        optAst |> Option.map (eval st) |> ignore
         asts |> List.map (eval st) |> ignore
         st.EvalPop()
     // CompoundFunctionalTermType of Positions * ((Ast * Ast) option)
@@ -1060,10 +1065,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("InheritedClassType")
         eval st ast1
         st.EvalPop()
-    | Ast.ExtensionBlock((pos1, pos2), (ast1, ast2)) ->
+    | Ast.ExtensionBlock((pos1, pos2), (extensionNameAst, extensionRegexAst)) ->
         st.EvalPush("ExtensionBlock")
-        eval st ast1
-        eval st ast2
+        let fv = FplValue.CreateFplValue((pos1,pos2),FplValueType.Extension, es.PeekEvalStack())
+        es.PushEvalStack(fv)
+        eval st extensionNameAst
+        eval st extensionRegexAst
+        es.PopEvalStack()
         st.EvalPop()
     | Ast.Impl((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Impl")

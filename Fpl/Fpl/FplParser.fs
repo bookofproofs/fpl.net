@@ -71,6 +71,7 @@ let exclamationMark = skipChar '!'
 let toArrow = skipString "->"
 let vDash = skipString "|-"
 let quote = skipChar '"' 
+let slash = skipChar '/' 
 
 (* Whitespaces and Comments *)
 
@@ -191,9 +192,9 @@ let keywordExtension = (skipString "extension" <|> skipString "ext") .>> SW
 
 let extensionName = positions "Extensionname" (idStartsWithCap) |>> Ast.Extensionname
 
-let extensionRegex = regex "\/.*\/" <?> "<extension regex>" |>> Ast.ExtensionRegex
+let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionRegex
 
-let extensionBlock = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> IW .>> colon .>> IW) .>>. extensionRegex) |>> Ast.ExtensionBlock
+let extensionBlock = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> IW .>> colon .>> IW) .>>. (slash >>. extensionRegex .>> slash)) |>> Ast.ExtensionBlock
 
 
 (* Signatures, Variable Declarations, and Types, and Coordinates *)
@@ -566,12 +567,13 @@ let buildingBlock = choice [
     ruleOfInference
     localization
     usesClause
+    extensionBlock
 ]
 
 let buildingBlockList = many (buildingBlock .>> IW)
 
 (* Namespaces *)
-let fplNamespace = ((opt extensionBlock .>> IW) .>>. buildingBlockList) .>> IW .>> semiColon |>> Ast.Namespace
+let fplNamespace = buildingBlockList .>> IW .>> semiColon |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions "AST" (IW >>. fplNamespace) |>> Ast.AST
 let stdParser = ast

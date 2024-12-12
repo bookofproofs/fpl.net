@@ -16,10 +16,9 @@ open ErrDiagnostics
 let rec eval_uses_clause = function 
     | Ast.AST ((pos1, pos2), ast) -> 
         eval_uses_clause ast
-    | Ast.Namespace (optAst, asts) -> 
+    | Ast.Namespace (asts) -> 
         let results = asts |> List.collect eval_uses_clause
-        let optAstResults = optAst |> Option.map eval_uses_clause |> Option.defaultValue []
-        optAstResults @ results
+        results
     | Ast.UsesClause ((pos1, pos2), ast) -> 
         eval_uses_clause ast
     | Ast.AliasedNamespaceIdentifier ((pos1, pos2), (ast, optAst)) -> 
