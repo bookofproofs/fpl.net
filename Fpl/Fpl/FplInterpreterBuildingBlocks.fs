@@ -202,11 +202,12 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
             fv.FplId <- unitType
             fv.TypeId <- unitType
             fv.ReprId <- $"intr {unitType}"
+            checkID020Diagnostics st unitType pos1 pos2
         | _ -> 
             fv.TypeId <- unitType
             fv.ReprId <- $"intr {unitType}"
             checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
-            checkID019Diagnostics st fv unitType pos1 pos2
+            checkID019Diagnostics st unitType pos1 pos2
 
 
 let eval_string (st: SymbolTable) s = ()

@@ -1601,5 +1601,21 @@ let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (acc
         | Some errMsg -> 
             checkCandidates toBeMatched candidates (accResultList @ [errMsg])
 
+let searchExtensionByName (root:FplValue) identifier = 
+    let candidates =
+        root.Scope
+        |> Seq.map (fun theory ->
+            theory.Value.Scope
+            |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Extension)
+            |> Seq.map (fun kvp -> 
+            kvp.Value)
+            |> Seq.filter (fun ext -> ext.FplId = identifier)
+        )
+        |> Seq.concat
+        |> Seq.toList
+    if candidates.Length = 0 then
+        ScopeSearchResult.NotFound
+    else 
+        ScopeSearchResult.Found candidates.Head
 
 
