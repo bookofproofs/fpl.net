@@ -185,22 +185,28 @@ let es = EvalStack()
 let eval_units (st: SymbolTable) unitType pos1 pos2 = 
     if unitType <> "" then 
         let fv = es.PeekEvalStack()
-        if FplValue.IsClass(fv) then
+        match fv.BlockType with 
+        | FplValueType.Class -> 
             checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
-        elif (FplValue.IsVariadicVariableMany(fv)) then 
+        | FplValueType.VariadicVariableMany -> 
             let sid = $"*{unitType}"
             fv.TypeId <- sid
             fv.ReprId <- $"intr {sid}"
-        elif (FplValue.IsVariadicVariableMany1(fv)) then 
+        | FplValueType.VariadicVariableMany1 -> 
             let sid = $"+{unitType}"
             fv.TypeId <- sid
             fv.ReprId <- $"intr {sid}"
-        elif (FplValue.IsReference(fv)) then 
+        | FplValueType.Reference -> 
             checkID012Diagnostics st fv unitType pos1 pos2
-        else
+        | FplValueType.Extension ->
+            fv.FplId <- unitType
+            fv.TypeId <- unitType
+            fv.ReprId <- $"intr {unitType}"
+        | _ -> 
             fv.TypeId <- unitType
             fv.ReprId <- $"intr {unitType}"
             checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
+            checkID019Diagnostics st fv unitType pos1 pos2
 
 
 let eval_string (st: SymbolTable) s = ()
@@ -265,9 +271,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         eval_units st "obj" pos1 pos2 
-        let fv = es.PeekEvalStack()
-        let obJ = FplValue.CreateFplValue((pos1,pos2),FplValueType.Object,fv)
-        es.PushEvalStack(obJ)
+        let fv = FplValue.CreateFplValue((pos1,pos2),FplValueType.Object, es.PeekEvalStack())
+        es.PushEvalStack(fv)
         es.PopEvalStack()
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
@@ -344,16 +349,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.Extensionname((pos1, pos2), s) ->
         st.EvalPush("Extensionname")
-        let fv = es.PeekEvalStack()
-        let sid = 
-            if (FplValue.IsVariadicVariableMany(fv)) then 
-                $"*@{s}"
-            elif (FplValue.IsVariadicVariableMany1(fv)) then 
-                $"+@{s}"
-            else
-                $"@{s}"
-        fv.FplId <- sid
-        fv.TypeId <- sid
+        eval_units st $"@{s}" pos1 pos2 
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
@@ -636,9 +632,9 @@ let rec eval (st: SymbolTable) ast =
         fv.ReprId <- extensionString
         checkID018Diagnostics st fv extensionString pos1 pos2
         st.EvalPop()
-    | Ast.ExtensionType((pos1, pos2), ast1) ->
+    | Ast.ExtensionType((pos1, pos2), extensionNameAst) ->
         st.EvalPush("ExtensionType")
-        eval st ast1
+        eval st extensionNameAst
         st.EvalPop()
     | Ast.UsesClause((pos1, pos2), ast1) ->
         st.EvalPush("UsesClause")

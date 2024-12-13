@@ -773,9 +773,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// Indicates if this FplValue is a class.
     static member IsClass(fplValue:FplValue) = 
-        match fplValue.BlockType with
-        | FplValueType.Class (_) -> true
-        | _ -> false
+        fplValue.BlockType = FplValueType.Class
 
     /// Indicates if this FplValue is a proof.
     static member IsProof(fplValue:FplValue) = 

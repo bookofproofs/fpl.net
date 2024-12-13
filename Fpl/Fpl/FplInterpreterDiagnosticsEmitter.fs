@@ -481,7 +481,39 @@ let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) po
             }
         ad.AddDiagnostic diagnostic
      
-    
+let checkID019Diagnostics (st: SymbolTable) (fplValue: FplValue) name pos1 pos2 =
+    let searchExtensionByName identifier = 
+        let candidates =
+            st.Root.Scope
+            |> Seq.map (fun theory ->
+                theory.Value.Scope
+                |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Extension)
+                |> Seq.map (fun kvp -> 
+                kvp.Value)
+                |> Seq.filter (fun ext -> ext.FplId = identifier)
+            )
+            |> Seq.concat
+            |> Seq.toList
+        if candidates.Length = 0 then
+            ScopeSearchResult.NotFound
+        else 
+            ScopeSearchResult.Found candidates.Head
+    match searchExtensionByName name with
+    | ScopeSearchResult.Found candidate ->
+        ()
+    | _ ->          
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = ID019 name
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+       
 
 
 let emitID013Diagnostics (fv: FplValue) pos1 pos2 =

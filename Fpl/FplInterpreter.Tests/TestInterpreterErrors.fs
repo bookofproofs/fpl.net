@@ -769,6 +769,14 @@ type TestInterpreterErrors() =
         let code = ID018 ""
         runTestHelper "TestID018.fpl" fplCode code expected
 
+    [<DataRow("00", @"ext Digits: /\d+/ def pred T(x:@Digits) {true};", 0)>]
+    [<DataRow("01", @"ext Digits: /\d+/ def pred T(x:@Typo) {true};", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID019(no:string, fplCode:string, expected) =
+        let code = ID019 ""
+        runTestHelper "TestID019.fpl" fplCode code expected
+
     [<DataRow("def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
     [<DataRow("def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
     [<DataRow("def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `x` is undefined.")>]
