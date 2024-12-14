@@ -256,12 +256,28 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         fv.BlockType <- blockType
 
+    let setUnitType (fv:FplValue) typeName typeRepr =
+        match fv.BlockType with 
+        | FplValueType.VariadicVariableMany -> 
+            fv.TypeId <- $"*{typeName}"
+            fv.ReprId <- $"intr *{typeRepr}"
+        | FplValueType.VariadicVariableMany1 -> 
+            fv.TypeId <- $"+{typeName}"
+            fv.ReprId <- $"intr +{typeRepr}"
+        | FplValueType.Variable -> 
+            fv.TypeId <- typeName
+            fv.ReprId <- typeRepr
+        | FplValueType.Mapping -> 
+            fv.TypeId <- typeName
+            fv.ReprId <- typeRepr
+        | _ -> ()
+
     match ast with
     // units: | Star
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
-        eval_units st "ind" pos1 pos2 
-        es.PeekEvalStack().ReprId <- "0"
+        let fv = es.PeekEvalStack()
+        setUnitType fv "ind" "0"
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
