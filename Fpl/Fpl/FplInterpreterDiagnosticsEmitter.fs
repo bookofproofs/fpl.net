@@ -456,12 +456,14 @@ let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) po
         |> Seq.map (fun theory ->
             theory.Value.Scope
             |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Extension)
-            |> Seq.map (fun kvp -> 
-            kvp.Value)
+            |> Seq.map (fun kvp -> kvp.Value)
             |> Seq.filter (fun ext -> 
                         let regex = Regex(ext.ReprId)
                         let isMatch = regex.IsMatch(identifier)
-                        if isMatch then 
+                        if isMatch && not (fv.Scope.ContainsKey(fv.FplId)) then 
+                            // assign the reference FplValue fv only the first found match 
+                            // even, if there are multiple extensions that would match it 
+                            // (thus, the additional check for Scope.ContainsKey...)
                             fv.Scope.Add(fv.FplId, ext)
                         isMatch
             )
@@ -483,39 +485,23 @@ let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) po
      
 
 
-let checkID019Diagnostics (st: SymbolTable) name pos1 pos2 =
-    match searchExtensionByName st.Root name with
-    | ScopeSearchResult.NotFound ->          
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = ID019 name
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-    | _ -> ()
-       
-let checkID020Diagnostics (st: SymbolTable) name pos1 pos2 =
-    match searchExtensionByName st.Root name with
-    | ScopeSearchResult.Found candidate ->
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = ID020 (name,candidate.QualifiedName)
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-    | _ ->
-        ()
-
+let checkID019Diagnostics (st: SymbolTable) (name:string) pos1 pos2 =
+    if name.StartsWith("@") then 
+        match searchExtensionByName st.Root name with
+        | ScopeSearchResult.NotFound ->          
+            let diagnostic =
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = ID019 name
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
+        | _ -> ()
+    
 let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
     let d = Delegates()
 

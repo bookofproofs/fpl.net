@@ -271,6 +271,14 @@ type TestInterpreterErrors() =
     [<DataRow("proof TestId$1 {1. |- trivial} ;", 0)>]
     [<DataRow("proof TestId$1$2 {1. |- trivial} ;", 0)>]
     [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", 0)>]
+
+    [<DataRow(@"ext Digits: /\d+/ def pred T() {true} ext Digits: /\d+/;", 1)>]
+    [<DataRow(@"ext Digits: /\d+/ def pred T() {true} ext Digits1: /\d+/;", 0)>]
+    [<DataRow(@"ext Digits: /\d+/ def pred T() {true} ext Digits1: /\d+/ def pred S() {true} ;", 0)>]
+    [<DataRow(@"ext Digits: /\d+/ def pred T() {true} ext Digits1: /\d+/ def pred T() {@1} ;", 1)>]
+    [<DataRow(@"ext Digits: /\d+/ def pred T(x:@Digits) {true};", 0)>]
+    [<DataRow(@"ext Digits: /\d+/ def pred T(x:@Typo) {true};", 0)>]
+
     [<DataRow("def func Sum(list:* Nat)->Nat {dec ~result: Nat; return result} def func Sum2(list:* Nat)->Nat {dec ~result: Nat; return result};", 0)>]
     [<DataRow("""def cl B:obj {intr} def cl A:obj {dec ~x:obj; ctor A(y:B[x:obj]) {self} };""", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
@@ -771,19 +779,12 @@ type TestInterpreterErrors() =
 
     [<DataRow("00", @"ext Digits: /\d+/ def pred T(x:@Digits) {true};", 0)>]
     [<DataRow("01", @"ext Digits: /\d+/ def pred T(x:@Typo) {true};", 1)>]
+    [<DataRow("01", @"ext Digits: /\d+/ def pred T(x:tpl) {true};", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID019(no:string, fplCode:string, expected) =
         let code = ID019 ""
         runTestHelper "TestID019.fpl" fplCode code expected
-
-    [<DataRow("00", @"ext Digits: /\d+/ def pred T() {true} ext Digits: /\d+/;", 1)>]
-    [<DataRow("01", @"ext Digits: /\d+/ def pred T(x:@Typo) {true};", 0)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestID020(no:string, fplCode:string, expected) =
-        let code = ID020 ("", "")
-        runTestHelper "TestID020.fpl" fplCode code expected
 
     [<DataRow("def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
     [<DataRow("def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
