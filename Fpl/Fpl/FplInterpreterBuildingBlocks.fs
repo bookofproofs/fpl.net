@@ -281,9 +281,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
-        eval_units st "obj" pos1 pos2 
-        let fv = FplValue.CreateFplValue((pos1,pos2),FplValueType.Object, es.PeekEvalStack())
-        es.PushEvalStack(fv)
+        let fv = es.PeekEvalStack()
+        setUnitType fv "obj" "intr obj"
+        checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2
+        checkID012Diagnostics st fv "obj" pos1 pos2 
+        // we need an extra FplValue for objects to enable class inheritance from them
+        let fv1 = FplValue.CreateFplValue((pos1,pos2),FplValueType.Object, es.PeekEvalStack())
+        es.PushEvalStack(fv1)
         es.PopEvalStack()
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
