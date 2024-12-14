@@ -47,7 +47,7 @@ type Ast =
     | LocalizationTerm of Positions * Ast list
     | LocalizationTermList of Positions * Ast list
     | Translation of Positions * (Ast * Ast)
-    | Extensionname of Positions * string
+    | ExtensionName of Positions * string
     | ExtensionRegex of string
     | ExtensionType of Positions * Ast 
     | ExtensionBlock of Positions * (Ast * Ast)

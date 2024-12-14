@@ -190,7 +190,7 @@ let usesClause = positions "UsesClause" (keywordUses >>. theoryNamespace) |>> As
 
 let keywordExtension = (skipString "extension" <|> skipString "ext") .>> SW
 
-let extensionName = positions "Extensionname" (idStartsWithCap) |>> Ast.Extensionname
+let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.ExtensionName
 
 let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionRegex
 
@@ -589,7 +589,7 @@ let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i =
     else
         index, index
 
-let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:|(~|\!)[a-z]"
+let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|extension|ext|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:|(~|\!)[a-z]"
 
 let errInformation = [
     (DEF000, ["def"], definition)

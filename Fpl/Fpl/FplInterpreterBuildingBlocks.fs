@@ -198,16 +198,10 @@ let eval_units (st: SymbolTable) unitType pos1 pos2 =
             fv.ReprId <- $"intr {sid}"
         | FplValueType.Reference -> 
             checkID012Diagnostics st fv unitType pos1 pos2
-        | FplValueType.Extension ->
-            fv.FplId <- unitType
-            fv.TypeId <- unitType
-            fv.ReprId <- $"intr {unitType}"
-            checkID020Diagnostics st unitType pos1 pos2
         | _ -> 
             fv.TypeId <- unitType
             fv.ReprId <- $"intr {unitType}"
             checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
-            checkID019Diagnostics st unitType pos1 pos2
 
 
 let eval_string (st: SymbolTable) s = ()
@@ -348,9 +342,28 @@ let rec eval (st: SymbolTable) ast =
                 "ind"
         fv.NameEndPos <- pos2
         st.EvalPop() 
-    | Ast.Extensionname((pos1, pos2), s) ->
-        st.EvalPush("Extensionname")
-        eval_units st $"@{s}" pos1 pos2 
+    | Ast.ExtensionName((pos1, pos2), s) ->
+        st.EvalPush("ExtensionName")
+        let fv = es.PeekEvalStack()
+        let extensionName = $"@{s}"
+        match fv.BlockType with 
+        | FplValueType.Extension ->
+            fv.FplId <- extensionName
+            fv.TypeId <- extensionName
+            fv.NameStartPos <- pos1
+            fv.NameEndPos <- pos2
+        | FplValueType.VariadicVariableMany -> 
+            let sid = $"*{extensionName}"
+            fv.TypeId <- sid
+            fv.ReprId <- $"intr {sid}"
+        | FplValueType.VariadicVariableMany1 -> 
+            let sid = $"+{extensionName}"
+            fv.TypeId <- sid
+            fv.ReprId <- $"intr {sid}"
+        | _ -> 
+            fv.TypeId <- extensionName
+            fv.ReprId <- $"intr {extensionName}"
+            checkID019Diagnostics st extensionName pos1 pos2
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
