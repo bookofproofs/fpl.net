@@ -222,7 +222,10 @@ let classType, classTypeRef = createParserForwardedToRef()
 
 let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
-let fplIdentifier = choice [ entity; predicateIdentifier; extension ] 
+// infix operators like the equality operator 
+let objectSymbol = positions "ObjectSymbol" ( objectMathSymbols ) .>> IW |>> Ast.ObjectSymbol
+
+let fplIdentifier = choice [ entity; predicateIdentifier; extension; objectSymbol ] 
 
 let coordList = (sepBy1 coord comma) .>> IW
 
@@ -334,9 +337,6 @@ let referencingIdentifier = positions "ReferencingIdentifier" (predicateIdentifi
 let referenceToProofOrCorollary = positions "ReferenceToProofOrCorollary" (referencingIdentifier .>>. opt argumentTuple) .>> IW |>> Ast.ReferenceToProofOrCorollary
 
 let byDefinition = positions "ByDef" (keywordBydef >>. predicateWithQualification ) |>> Ast.ByDef 
-
-// infix operators like the equality operator 
-let objectSymbol = positions "ObjectSymbol" ( objectMathSymbols ) .>> IW |>> Ast.ObjectSymbol
 
 primePredicateRef.Value <- choice [
     keywordTrue

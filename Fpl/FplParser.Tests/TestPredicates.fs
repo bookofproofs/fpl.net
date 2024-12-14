@@ -467,3 +467,11 @@ type TestPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
            
+    [<TestMethod>]
+    member this.TestPredicate61 () =
+        let result = run (predicate .>> eof) """parent(x, y).3[a, b]"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+           
