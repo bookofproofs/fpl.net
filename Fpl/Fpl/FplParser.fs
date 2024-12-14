@@ -71,6 +71,7 @@ let exclamationMark = skipChar '!'
 let toArrow = skipString "->"
 let vDash = skipString "|-"
 let quote = skipChar '"' 
+let slash = skipChar '/' 
 
 (* Whitespaces and Comments *)
 
@@ -189,11 +190,11 @@ let usesClause = positions "UsesClause" (keywordUses >>. theoryNamespace) |>> As
 
 let keywordExtension = (skipString "extension" <|> skipString "ext") .>> SW
 
-let extensionName = positions "Extensionname" (idStartsWithCap) |>> Ast.Extensionname
+let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.ExtensionName
 
-let extensionRegex = regex "\/.*\/" <?> "<extension regex>" |>> Ast.ExtensionRegex
+let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionRegex
 
-let extensionBlock = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> IW .>> colon .>> IW) .>>. extensionRegex) |>> Ast.ExtensionBlock
+let extensionBlock = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> IW .>> colon .>> IW) .>>. (slash >>. extensionRegex .>> slash)) |>> Ast.ExtensionBlock
 
 
 (* Signatures, Variable Declarations, and Types, and Coordinates *)
@@ -221,7 +222,10 @@ let classType, classTypeRef = createParserForwardedToRef()
 
 let coord = choice [ predicateWithQualification; dollarDigits ] .>> IW 
 
-let fplIdentifier = choice [ entity; predicateIdentifier; extension ] 
+// infix operators like the equality operator 
+let objectSymbol = positions "ObjectSymbol" ( objectMathSymbols ) .>> IW |>> Ast.ObjectSymbol
+
+let fplIdentifier = choice [ entity; predicateIdentifier; extension; objectSymbol ] 
 
 let coordList = (sepBy1 coord comma) .>> IW
 
@@ -333,9 +337,6 @@ let referencingIdentifier = positions "ReferencingIdentifier" (predicateIdentifi
 let referenceToProofOrCorollary = positions "ReferenceToProofOrCorollary" (referencingIdentifier .>>. opt argumentTuple) .>> IW |>> Ast.ReferenceToProofOrCorollary
 
 let byDefinition = positions "ByDef" (keywordBydef >>. predicateWithQualification ) |>> Ast.ByDef 
-
-// infix operators like the equality operator 
-let objectSymbol = positions "ObjectSymbol" ( objectMathSymbols ) .>> IW |>> Ast.ObjectSymbol
 
 primePredicateRef.Value <- choice [
     keywordTrue
@@ -566,12 +567,13 @@ let buildingBlock = choice [
     ruleOfInference
     localization
     usesClause
+    extensionBlock
 ]
 
 let buildingBlockList = many (buildingBlock .>> IW)
 
 (* Namespaces *)
-let fplNamespace = ((opt extensionBlock .>> IW) .>>. buildingBlockList) .>> IW .>> semiColon |>> Ast.Namespace
+let fplNamespace = buildingBlockList .>> IW .>> semiColon |>> Ast.Namespace
 (* Final Parser *)
 let ast =  positions "AST" (IW >>. fplNamespace) |>> Ast.AST
 let stdParser = ast
@@ -587,7 +589,7 @@ let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i =
     else
         index, index
 
-let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:|(~|\!)[a-z]"
+let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|extension|ext|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:|(~|\!)[a-z]"
 
 let errInformation = [
     (DEF000, ["def"], definition)

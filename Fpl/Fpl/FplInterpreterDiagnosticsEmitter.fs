@@ -1,6 +1,7 @@
 ﻿module FplInterpreterDiagnosticsEmitter
 
 open System.Collections.Generic
+open System.Text.RegularExpressions
 open FParsec
 open ErrDiagnostics
 open FplDelegates
@@ -449,6 +450,58 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
                 }
             ad.AddDiagnostic diagnostic
 
+let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) pos1 pos2 =
+    let candidates =
+        st.Root.Scope
+        |> Seq.map (fun theory ->
+            theory.Value.Scope
+            |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Extension)
+            |> Seq.map (fun kvp -> kvp.Value)
+            |> Seq.filter (fun ext -> 
+                        let regex = Regex(ext.ReprId)
+                        let isMatch = regex.IsMatch(identifier)
+                        if isMatch && not (fv.Scope.ContainsKey(fv.FplId)) then 
+                            // assign the reference FplValue fv only the first found match 
+                            // even, if there are multiple extensions that would match it 
+                            // (thus, the additional check for Scope.ContainsKey...)
+                            fv.Scope.Add(fv.FplId, ext)
+                        isMatch
+            )
+        )
+        |> Seq.concat
+        |> Seq.toList
+    if candidates.Length = 0 then 
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = ID018 identifier
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+     
+
+
+let checkID019Diagnostics (st: SymbolTable) (name:string) pos1 pos2 =
+    if name.StartsWith("@") then 
+        match searchExtensionByName st.Root name with
+        | ScopeSearchResult.NotFound ->          
+            let diagnostic =
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = pos1
+                    Diagnostic.EndPos = pos2
+                    Diagnostic.Code = ID019 name
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
+        | _ -> ()
+    
 let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
     let d = Delegates()
 

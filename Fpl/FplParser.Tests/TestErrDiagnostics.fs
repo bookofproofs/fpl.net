@@ -42,7 +42,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseExtension002Diag () =
         ad.Clear()
         let result = fplParser """
-    :ext
+    ext
         y
 ;"""
         let actual = sprintf "%O" result
@@ -55,13 +55,12 @@ type TestErrDiagnostics() =
     member this.TestTryParseExtension003Diag () =
         ad.Clear()
         let result = fplParser """
-    :ext T
-        y
+    ext T
 ;"""
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual<int>(1, ad.CountDiagnostics)
+        Assert.AreEqual<int>(4, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
 
     [<TestMethod>]
@@ -94,13 +93,13 @@ type TestErrDiagnostics() =
     member this.TestTryParseExtension006Diag () =
         ad.Clear()
         let result = fplParser """
-    :ext T: /d/ :end
-        y
+    ext T: // 
+
 ;"""
         let actual = sprintf "%O" result
         let actualDiag = ad.DiagnosticsToString
         printf "%s" actualDiag
-        Assert.AreEqual<int>(1, ad.CountDiagnostics)
+        Assert.AreEqual<int>(4, ad.CountDiagnostics)
         Assert.IsTrue(actualDiag.Contains("SYN000"))
         
     [<TestMethod>]

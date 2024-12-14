@@ -529,8 +529,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | (FplValueType.Reference, true) -> 
             // delegate the type identifier to the referenced entitity
             this.Scope[this.FplId].Type(isSignature)
-        | (FplValueType.Stmt, _) -> 
-            // statement 
+        | (FplValueType.Stmt, _) 
+        | (FplValueType.Extension, _) -> 
             this.FplId
         | _ -> 
             match (isSignature, this.TypeId) with
@@ -773,9 +773,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// Indicates if this FplValue is a class.
     static member IsClass(fplValue:FplValue) = 
-        match fplValue.BlockType with
-        | FplValueType.Class (_) -> true
-        | _ -> false
+        fplValue.BlockType = FplValueType.Class
 
     /// Indicates if this FplValue is a proof.
     static member IsProof(fplValue:FplValue) = 
@@ -1603,5 +1601,21 @@ let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (acc
         | Some errMsg -> 
             checkCandidates toBeMatched candidates (accResultList @ [errMsg])
 
+let searchExtensionByName (root:FplValue) identifier = 
+    let candidates =
+        root.Scope
+        |> Seq.map (fun theory ->
+            theory.Value.Scope
+            |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Extension)
+            |> Seq.map (fun kvp -> 
+            kvp.Value)
+            |> Seq.filter (fun ext -> ext.FplId = identifier)
+        )
+        |> Seq.concat
+        |> Seq.toList
+    if candidates.Length = 0 then
+        ScopeSearchResult.NotFound
+    else 
+        ScopeSearchResult.Found candidates.Head
 
 

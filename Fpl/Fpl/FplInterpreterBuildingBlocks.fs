@@ -2,7 +2,6 @@
 
 open System
 open System.Collections.Generic
-open System.Linq
 open FParsec
 open ErrDiagnostics
 open FplGrammarTypes
@@ -87,6 +86,7 @@ type EvalStack() =
             | FplValueType.OptionalFunctionalTerm
             | FplValueType.Axiom
             | FplValueType.Predicate
+            | FplValueType.Extension
             | FplValueType.Argument 
             | FplValueType.Language 
             | FplValueType.FunctionalTerm ->
@@ -167,7 +167,6 @@ type EvalStack() =
             | FplValueType.Translation 
             | FplValueType.Stmt
             | FplValueType.Assertion
-            | FplValueType.Extension
             | FplValueType.Root -> 
                 EvalStack.tryAddToValueList fv 
 
@@ -182,27 +181,6 @@ type EvalStack() =
     member this.ClearEvalStack() = _valueStack.Clear()
 
 let es = EvalStack()
-
-let eval_units (st: SymbolTable) unitType pos1 pos2 = 
-    if unitType <> "" then 
-        let fv = es.PeekEvalStack()
-        if FplValue.IsClass(fv) then
-            checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
-        elif (FplValue.IsVariadicVariableMany(fv)) then 
-            let sid = $"*{unitType}"
-            fv.TypeId <- sid
-            fv.ReprId <- $"intr {sid}"
-        elif (FplValue.IsVariadicVariableMany1(fv)) then 
-            let sid = $"+{unitType}"
-            fv.TypeId <- sid
-            fv.ReprId <- $"intr {sid}"
-        elif (FplValue.IsReference(fv)) then 
-            checkID012Diagnostics st fv unitType pos1 pos2
-        else
-            fv.TypeId <- unitType
-            fv.ReprId <- $"intr {unitType}"
-            checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
-
 
 let eval_string (st: SymbolTable) s = ()
 
@@ -256,30 +234,49 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         fv.BlockType <- blockType
 
+    let setUnitType (fv:FplValue) typeName typeRepr =
+        match fv.BlockType with 
+        | FplValueType.VariadicVariableMany -> 
+            fv.TypeId <- $"*{typeName}"
+            fv.ReprId <- $"intr *{typeRepr}"
+        | FplValueType.VariadicVariableMany1 -> 
+            fv.TypeId <- $"+{typeName}"
+            fv.ReprId <- $"intr +{typeRepr}"
+        | FplValueType.Variable -> 
+            fv.TypeId <- typeName
+            fv.ReprId <- typeRepr
+        | FplValueType.Mapping -> 
+            fv.TypeId <- typeName
+            fv.ReprId <- typeRepr
+        | _ -> ()
+
     match ast with
     // units: | Star
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
-        eval_units st "ind" pos1 pos2 
-        es.PeekEvalStack().ReprId <- "0"
+        let fv = es.PeekEvalStack()
+        setUnitType fv "ind" "0"
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
-        eval_units st "obj" pos1 pos2 
         let fv = es.PeekEvalStack()
-        let obJ = FplValue.CreateFplValue((pos1,pos2),FplValueType.Object,fv)
-        es.PushEvalStack(obJ)
+        setUnitType fv "obj" "intr obj"
+        checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2
+        checkID012Diagnostics st fv "obj" pos1 pos2 
+        // we need an extra FplValue for objects to enable class inheritance from them
+        let fv1 = FplValue.CreateFplValue((pos1,pos2),FplValueType.Object, es.PeekEvalStack())
+        es.PushEvalStack(fv1)
         es.PopEvalStack()
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
-        eval_units st "pred" pos1 pos2 
-        es.PeekEvalStack().ReprId <- "undetermined"
+        let fv = es.PeekEvalStack()
+        setUnitType fv "pred" "undetermined"
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
-        eval_units st "func" pos1 pos2  
-        es.PeekEvalStack().ReprId <- "func"
+        let fv = es.PeekEvalStack()
+        setUnitType fv "func" "func"
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
@@ -311,8 +308,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Error  ->   
         st.EvalPush("Error")
-        let pos = Position("",0,1,1)
-        eval_units st "" pos pos
         st.EvalPop()
     // strings: | Digits of string
     | Ast.Digits s -> 
@@ -327,7 +322,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.ExtensionRegex s -> 
         st.EvalPush("ExtensionRegex")
-        eval_string st s
+        let fv = es.PeekEvalStack()
+        fv.ReprId <- s
         st.EvalPop() 
     // | DollarDigits of Positions * int
     | Ast.DollarDigits((pos1, pos2), s) -> 
@@ -342,21 +338,33 @@ let rec eval (st: SymbolTable) ast =
                 "ind"
         fv.NameEndPos <- pos2
         st.EvalPop() 
-    | Ast.Extensionname((pos1, pos2), s) ->
-        st.EvalPush("Extensionname")
+    | Ast.ExtensionName((pos1, pos2), s) ->
+        st.EvalPush("ExtensionName")
         let fv = es.PeekEvalStack()
-        let sid = 
-            if (FplValue.IsVariadicVariableMany(fv)) then 
-                $"*@{s}"
-            elif (FplValue.IsVariadicVariableMany1(fv)) then 
-                $"+@{s}"
-            else
-                $"@{s}"
-        fv.TypeId <- sid
+        let extensionName = $"@{s}"
+        match fv.BlockType with 
+        | FplValueType.Extension ->
+            fv.FplId <- extensionName
+            fv.TypeId <- extensionName
+            fv.NameStartPos <- pos1
+            fv.NameEndPos <- pos2
+        | FplValueType.VariadicVariableMany -> 
+            let sid = $"*{extensionName}"
+            fv.TypeId <- sid
+            fv.ReprId <- $"intr {sid}"
+        | FplValueType.VariadicVariableMany1 -> 
+            let sid = $"+{extensionName}"
+            fv.TypeId <- sid
+            fv.ReprId <- $"intr {sid}"
+        | _ -> 
+            fv.TypeId <- extensionName
+            fv.ReprId <- $"intr {extensionName}"
+            checkID019Diagnostics st extensionName pos1 pos2
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
-        eval_units st s pos1 pos2 
+        let fv = es.PeekEvalStack()
+        setUnitType fv s s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
@@ -629,10 +637,15 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Extension((pos1, pos2), extensionString) ->
         st.EvalPush("Extension")
+        let fv = es.PeekEvalStack()
+        fv.FplId <- extensionString
+        fv.TypeId <- extensionString
+        fv.ReprId <- extensionString
+        checkID018Diagnostics st fv extensionString pos1 pos2
         st.EvalPop()
-    | Ast.ExtensionType((pos1, pos2), ast1) ->
+    | Ast.ExtensionType((pos1, pos2), extensionNameAst) ->
         st.EvalPush("ExtensionType")
-        eval st ast1
+        eval st extensionNameAst
         st.EvalPop()
     | Ast.UsesClause((pos1, pos2), ast1) ->
         st.EvalPush("UsesClause")
@@ -952,9 +965,8 @@ let rec eval (st: SymbolTable) ast =
             asts |> List.map (eval st) |> ignore
         st.EvalPop()
     // | Namespace of Ast option * Ast list
-    | Ast.Namespace(optAst, asts) ->
+    | Ast.Namespace(asts) ->
         st.EvalPush("Namespace")
-        optAst |> Option.map (eval st) |> ignore
         asts |> List.map (eval st) |> ignore
         st.EvalPop()
     // CompoundFunctionalTermType of Positions * ((Ast * Ast) option)
@@ -1060,10 +1072,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("InheritedClassType")
         eval st ast1
         st.EvalPop()
-    | Ast.ExtensionBlock((pos1, pos2), (ast1, ast2)) ->
+    | Ast.ExtensionBlock((pos1, pos2), (extensionNameAst, extensionRegexAst)) ->
         st.EvalPush("ExtensionBlock")
-        eval st ast1
-        eval st ast2
+        let fv = FplValue.CreateFplValue((pos1,pos2),FplValueType.Extension, es.PeekEvalStack())
+        es.PushEvalStack(fv)
+        eval st extensionNameAst
+        eval st extensionRegexAst
+        es.PopEvalStack()
         st.EvalPop()
     | Ast.Impl((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Impl")
