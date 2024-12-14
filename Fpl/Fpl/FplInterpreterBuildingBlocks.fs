@@ -288,8 +288,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
-        eval_units st "pred" pos1 pos2 
-        es.PeekEvalStack().ReprId <- "undetermined"
+        let fv = es.PeekEvalStack()
+        setUnitType fv "pred" "undetermined"
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
