@@ -88,7 +88,7 @@ axiom CompleteInduction(p:pred(n:Nat))
 
     impl
     (
-        and ( p(0), all n:Nat { impl ( p(n), p(Succ(n)) ) } ),
+        and ( p(@0), all n:Nat { impl ( p(n), p(Succ(n)) ) } ),
         all n:Nat { p(n) }
     )
 
@@ -132,7 +132,7 @@ def func Add(n,m: Nat)->Nat
         ~result, k: Nat
         cases
         (
-            | (m = 0): result:= n
+            | (m = @0): result:= n
             | (Succ(m) = k): result:= Succ(self(n,k))
             ? result:= undef
         )
@@ -156,8 +156,8 @@ prop AddIsUnique(op: Add)
         {
             and
             (
-                ( op(n,0) = n ),
-                ( anotherAdd(n,0) = n ),
+                ( op(n,@0) = n ),
+                ( anotherAdd(n,@0) = n ),
                 ( op(n,Succ(m)) = Succ(op(n,m)) ),
                 ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
             )
@@ -178,8 +178,8 @@ proof AddIsUnique$1
         {
             and
             (
-                ( op(n,0) = n ),
-                ( anotherAdd(n,0) = n ),
+                ( op(n,@0) = n ),
+                ( anotherAdd(n,@0) = n ),
                 ( op(n,Succ(m)) = Succ(op(n,m)) ),
                 ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
             )
@@ -274,7 +274,7 @@ proposition SumOfConsecutiveNumbers()
         all n:Nat 
         {
             and (
-                In(n, Range(1,limit))
+                In(n, Range(@1,limit))
                 , (f(n) = n)
             )
             
@@ -282,7 +282,7 @@ proposition SumOfConsecutiveNumbers()
         ,
         all n:Nat
         {
-            (Sum(1,n,f) = Div(Mul(n,Succ(n)),2))
+            (Sum(@1,n,f) = Div(Mul(n,Succ(n)),@2))
         }
     )
 }
@@ -355,10 +355,10 @@ def function ContinuedFraction(arr: RightOpenRangeInt[k:Nat]) -> Real
         cf:=Real(arr[k])
         i:=Succ(k)
     ;
-    return Add( cf, Div(1 , ContinuedFraction(i, RightOpenRange[arr[i]])))
+    return Add( cf, Div(@1 , ContinuedFraction(i, RightOpenRange[arr[i]])))
 }
 
 // Example of defining a constant for the natural number 100 using the
-def class N100:Set{ctor N100(){dec ~n:Nat  base.Set() self:=SetBuilder(SetNat(),IsGreater(n,100)); self }}
+def class N100:Set{ctor N100(){dec ~n:Nat  base.Set() self:=SetBuilder(SetNat(),IsGreater(n,@100)); self }}
 
 ;

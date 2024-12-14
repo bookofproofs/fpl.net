@@ -89,7 +89,7 @@ def class CartesianProduct: Set
                 i:=Succ(i)
                 self[i]:=setItem
             }
-            myFrom := Nat(1)
+            myFrom := Nat(@1)
             myLength:=i
         ;
         self
@@ -126,7 +126,7 @@ def class CartesianProduct: Set
                         all i:Nat 
                         {
                             and (
-                                In(i,Rang(1,myLength)),    
+                                In(i,Rang(@1,myLength)),    
                                 In(tupleElem[i],parent[i]) 
                             )
                             
@@ -173,7 +173,7 @@ def class BinaryRelation: Relation
     ctor BinaryRelation(x,y: Set)
     {
         dec
-            base.Relation(2,x,y)
+            base.Relation(@2,x,y)
             myDomain:=x
             myCodomain:=y
         ;
