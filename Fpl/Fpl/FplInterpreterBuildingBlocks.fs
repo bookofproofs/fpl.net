@@ -182,28 +182,6 @@ type EvalStack() =
 
 let es = EvalStack()
 
-let eval_units (st: SymbolTable) unitType pos1 pos2 = 
-    if unitType <> "" then 
-        let fv = es.PeekEvalStack()
-        match fv.BlockType with 
-        | FplValueType.Class -> 
-            checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
-        | FplValueType.VariadicVariableMany -> 
-            let sid = $"*{unitType}"
-            fv.TypeId <- sid
-            fv.ReprId <- $"intr {sid}"
-        | FplValueType.VariadicVariableMany1 -> 
-            let sid = $"+{unitType}"
-            fv.TypeId <- sid
-            fv.ReprId <- $"intr {sid}"
-        | FplValueType.Reference -> 
-            checkID012Diagnostics st fv unitType pos1 pos2
-        | _ -> 
-            fv.TypeId <- unitType
-            fv.ReprId <- $"intr {unitType}"
-            checkID009_ID010_ID011_Diagnostics st fv unitType pos1 pos2
-
-
 let eval_string (st: SymbolTable) s = ()
 
 let eval_pos_string (st: SymbolTable) (startpos: Position) (endpos: Position) ast = ()
@@ -297,8 +275,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
-        eval_units st "func" pos1 pos2  
-        es.PeekEvalStack().ReprId <- "func"
+        let fv = es.PeekEvalStack()
+        setUnitType fv "func" "func"
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
@@ -330,8 +308,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Error  ->   
         st.EvalPush("Error")
-        let pos = Position("",0,1,1)
-        eval_units st "" pos pos
         st.EvalPop()
     // strings: | Digits of string
     | Ast.Digits s -> 
@@ -387,7 +363,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
-        eval_units st s pos1 pos2 
+        let fv = es.PeekEvalStack()
+        setUnitType fv s s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
