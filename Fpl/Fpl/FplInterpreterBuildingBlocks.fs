@@ -8,6 +8,7 @@ open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterPredicateEvaluator
+open FplInterpreterInterpreterRunner
 
 
 type EvalStack() = 
@@ -181,6 +182,7 @@ type EvalStack() =
     member this.ClearEvalStack() = _valueStack.Clear()
 
 let es = EvalStack()
+let run = FplRunner()
 
 let eval_string (st: SymbolTable) s = ()
 
@@ -212,11 +214,6 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
             // prevent recursive clearing of the subNode
             rb.ValueList.Clear() 
             rb.Scope.Clear()
-            Some subNode
-        else
-            None
-    else
-        None
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -1328,6 +1325,8 @@ let rec eval (st: SymbolTable) ast =
                 |  FixType.Infix (symb, prec) -> prec
                 | _ -> Int32.MaxValue
 
+        // This while loop will evaluate multiple unparenthesized infix operations
+        // according to their precedence by grouping them into binary operations and leave fv with only one binary operation
         while fv.ValueList.Count > 1 do
             let mutable currentMinimalPrecedence = Int32.MaxValue
             let mutable currMinIndex = 1
@@ -1343,11 +1342,15 @@ let rec eval (st: SymbolTable) ast =
             currentOp.ValueList.Add(secondOp)
             match precNodeList currentOp with
             | x::xs -> 
-                emitSIG04Diagnostics currentOp [x] |> ignore
+                match emitSIG04Diagnostics currentOp [x] with 
+                | Some candidate -> ()
+                | _ -> ()
             | _ -> ()
             fv.ValueList.RemoveAt(currMinIndex+1) 
             fv.ValueList.RemoveAt(currMinIndex-1) 
-
+        simplifyTriviallyNestedExpressions fv
+        let last = es.PeekEvalStack()
+        run.Run last
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
@@ -1387,9 +1390,9 @@ let rec eval (st: SymbolTable) ast =
         eval st qualificationListAst
         let refBlock = es.PeekEvalStack() // if the reference was replaced, take this one
         refBlock.NameEndPos <- pos2
-        let subNodeOption = simplifyTriviallyNestedExpressions refBlock
+        simplifyTriviallyNestedExpressions refBlock
+        let last = es.PeekEvalStack()
         es.PopEvalStack()
-        simplifyTriviallyNestedExpressions fv |> ignore 
         match fv.BlockType with
         | FplValueType.Axiom 
         | FplValueType.Corollary 
@@ -1400,10 +1403,7 @@ let rec eval (st: SymbolTable) ast =
         | FplValueType.Predicate 
         | FplValueType.MandatoryPredicate 
         | FplValueType.OptionalPredicate ->
-            match subNodeOption with 
-            | Some subNode -> 
-                fv.ReprId <- subNode.ReprId
-            | _ -> ()
+            fv.ReprId <- last.ReprId
         | FplValueType.Reference ->
             // simplify references created due to superfluous parentheses of expressions
             // by replacing them with their only value
