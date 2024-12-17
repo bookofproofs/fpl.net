@@ -423,9 +423,9 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     let mutable _isSignatureVariable = false
 
     let mutable _parent = parent
-    let _auxiliaryUniqueChilds = HashSet<string>()
-    let _scope = System.Collections.Generic.Dictionary<string, FplValue>()
-    let _valueList = System.Collections.Generic.List<FplValue>()
+    let _scope = Dictionary<string, FplValue>()
+    let _valueList = List<FplValue>()
+    let _assertedPredicates = List<FplValue>()
 
     /// Indicates if this FplValue's Scope or ValueList can be treated as bracketed coordinates or as parenthesized parameters.
     member this.HasBrackets 
@@ -501,7 +501,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         and set (value) = _parent <- value
 
     /// A list of asserted predicates for this FplValue
-    member this.AssertedPredicates = System.Collections.Generic.List<Ast>()
+    member this.AssertedPredicates = _assertedPredicates
 
     /// A scope inside this FplValue
     member this.Scope = _scope
@@ -1073,6 +1073,44 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 result <- result @ collectVariables kvp.Value
             result
         collectVariables this
+
+    /// Clones this FplValue.
+    member this.Clone() = 
+        let rec recClone (fv:FplValue) =
+            let ret = 
+                match fv.BlockType with
+                | FplValueType.Root -> 
+                    FplValue.CreateRoot()
+                | FplValueType.Theory ->
+                    FplValue.CreateTheory((fv.NameStartPos, fv.NameEndPos),fv.Parent.Value, fv.FilePath.Value)
+                | _ ->
+                    FplValue.CreateFplValue((fv.NameStartPos, fv.NameEndPos),fv.BlockType, fv.Parent.Value)
+            ret.ReprId <- fv.ReprId
+            ret.FplId <- fv.FplId
+            ret.IsSignatureVariable <- fv.IsSignatureVariable
+            ret.TypeId <- fv.TypeId
+            ret.Arity <- fv.Arity
+            ret.AuxiliaryInfo <- fv.AuxiliaryInfo
+            ret.HasBrackets <- fv.HasBrackets
+            ret.IsIntrinsic <- fv.IsIntrinsic
+            ret.ExpressionType <- fv.ExpressionType
+            fv.ValueList 
+            |> Seq.iter (fun fv1 -> 
+                let value = recClone fv1
+                ret.ValueList.Add(value)
+            )
+            fv.Scope 
+            |> Seq.iter (fun kvp -> 
+                let value = recClone kvp.Value
+                ret.Scope.Add(kvp.Key, value)
+            )
+            fv.AssertedPredicates
+            |> Seq.iter (fun fv1 -> 
+                // asserted predicates do not have to be cloned
+                ret.ValueList.Add(fv1) 
+            )
+            ret
+        recClone this
 
 // Create an FplValue list containing all Scopes of an FplNode
 let rec flattenScopes (root: FplValue) =
