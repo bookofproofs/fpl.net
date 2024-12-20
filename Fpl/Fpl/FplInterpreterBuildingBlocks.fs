@@ -8,6 +8,7 @@ open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterPredicateEvaluator
+open FplInterpreterRunner
 
 
 type EvalStack() = 
@@ -181,6 +182,7 @@ type EvalStack() =
     member this.ClearEvalStack() = _valueStack.Clear()
 
 let es = EvalStack()
+let run = FplRunner()
 
 let eval_string (st: SymbolTable) s = ()
 
@@ -194,12 +196,10 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
 /// Simplify trivially nested expressions 
-let rec simplifyTriviallyNestedExpressions (rb:FplValue) = 
+let simplifyTriviallyNestedExpressions (rb:FplValue) = 
     if rb.ValueList.Count = 1 && rb.FplId = "" then
         let subNode = rb.ValueList[0]
-        if subNode.BlockType = FplValueType.Reference 
-        || subNode.BlockType = FplValueType.Quantor
-        then 
+        if subNode.BlockType = FplValueType.Reference || subNode.BlockType = FplValueType.Quantor then 
             es.Pop() |> ignore
             es.PushEvalStack(subNode)
             subNode.Parent <- rb.Parent
@@ -214,8 +214,6 @@ let rec simplifyTriviallyNestedExpressions (rb:FplValue) =
             // prevent recursive clearing of the subNode
             rb.ValueList.Clear() 
             rb.Scope.Clear()
-
-    
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -1047,7 +1045,7 @@ let rec eval (st: SymbolTable) ast =
             // if no specification was found then simply continue in the same context
             eval st fplIdentifierAst
 
-        simplifyTriviallyNestedExpressions fv
+        simplifyTriviallyNestedExpressions fv |> ignore
         st.EvalPop()
     // | SelfAts of Positions * char list
     | Ast.SelfOrParent((pos1, pos2), selforParentAst) -> 
@@ -1327,6 +1325,8 @@ let rec eval (st: SymbolTable) ast =
                 |  FixType.Infix (symb, prec) -> prec
                 | _ -> Int32.MaxValue
 
+        // This while loop will evaluate multiple unparenthesized infix operations
+        // according to their precedence by grouping them into binary operations and leave fv with only one binary operation
         while fv.ValueList.Count > 1 do
             let mutable currentMinimalPrecedence = Int32.MaxValue
             let mutable currMinIndex = 1
@@ -1342,11 +1342,15 @@ let rec eval (st: SymbolTable) ast =
             currentOp.ValueList.Add(secondOp)
             match precNodeList currentOp with
             | x::xs -> 
-                emitSIG04Diagnostics currentOp [x] |> ignore
+                match emitSIG04Diagnostics currentOp [x] with 
+                | Some candidate -> ()
+                | _ -> ()
             | _ -> ()
             fv.ValueList.RemoveAt(currMinIndex+1) 
             fv.ValueList.RemoveAt(currMinIndex-1) 
-
+        simplifyTriviallyNestedExpressions fv
+        let last = es.PeekEvalStack()
+        run.Run last
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
@@ -1380,7 +1384,6 @@ let rec eval (st: SymbolTable) ast =
                 eval st predicateAst
                 es.PopEvalStack()
             else
-                
                 eval st predicateAst
         ensureReversedPolishNotation
         optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
@@ -1388,7 +1391,7 @@ let rec eval (st: SymbolTable) ast =
         let refBlock = es.PeekEvalStack() // if the reference was replaced, take this one
         refBlock.NameEndPos <- pos2
         simplifyTriviallyNestedExpressions refBlock
-        simplifyTriviallyNestedExpressions fv
+        let last = es.PeekEvalStack()
         es.PopEvalStack()
         match fv.BlockType with
         | FplValueType.Axiom 
@@ -1400,7 +1403,7 @@ let rec eval (st: SymbolTable) ast =
         | FplValueType.Predicate 
         | FplValueType.MandatoryPredicate 
         | FplValueType.OptionalPredicate ->
-            fv.ReprId <- refBlock.ReprId
+            fv.ReprId <- last.ReprId
         | FplValueType.Reference ->
             // simplify references created due to superfluous parentheses of expressions
             // by replacing them with their only value
