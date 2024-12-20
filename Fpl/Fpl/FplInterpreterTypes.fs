@@ -1087,7 +1087,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     FplValue.CreateFplValue((fv.NameStartPos, fv.NameEndPos),fv.BlockType, fv.Parent.Value)
             ret.ReprId <- fv.ReprId
             ret.FplId <- fv.FplId
-            ret.IsSignatureVariable <- fv.IsSignatureVariable
+            if fv.IsSignatureVariable then 
+                ret.IsSignatureVariable <- fv.IsSignatureVariable
             ret.TypeId <- fv.TypeId
             ret.Arity <- fv.Arity
             ret.AuxiliaryInfo <- fv.AuxiliaryInfo

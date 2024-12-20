@@ -8,7 +8,7 @@ open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterPredicateEvaluator
-open FplInterpreterInterpreterRunner
+open FplInterpreterRunner
 
 
 type EvalStack() = 

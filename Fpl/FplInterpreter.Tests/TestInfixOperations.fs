@@ -40,8 +40,9 @@ type TestInfixOperations() =
     member this.TestInfixPrecedenceFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.Commons %s""" varVal
-        let filename = "TestEqualityPredicate"
+        let filename = "TestInfixPrecedenceFplCommons"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        checkForUnexpectedErrors VAR00
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
         | Some st -> 
