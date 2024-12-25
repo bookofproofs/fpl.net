@@ -51,6 +51,6 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
+            Assert.AreEqual<string>(expected, base1.ReprId)
         | None -> 
             Assert.IsTrue(false)

@@ -2,6 +2,7 @@
 open System.Collections.Generic
 open FplInterpreterTypes
 open FplInterpreterPredicateEvaluator
+open System
 
 type FplRunner() =
     let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
@@ -9,39 +10,34 @@ type FplRunner() =
     // The stack memory of the runner collecting the variables of the current Runner
     member this.Stack = _stack
 
-    // Saves the original scope variables of an FplValue block as a KeyValuePair to a stack memory.
+    // Saves the clones (!) of the original scope variables of an FplValue block as a KeyValuePair to a stack memory.
     // where the key is the block's FplId and the value is a dictionary of all scope variables.
-    // At the same time, the original scope variables are being replaced by their clones.
-    member private this.SaveVariables(fvPar:FplValue, fvArgs:FplValue) = 
+    // At the same time, the original scope variables are being assigned to the values of .
+    member private this.SaveVariables(called:FplValue, caller:FplValue) = 
         // now process all scope variables and push by replacing them with their clones
         // and pushing the originals on the stack
         let toBeSavedScopeVariables = Dictionary<string, FplValue>()
         let mutable argIndex = 0
-        fvPar.Scope
+        called.Scope
         |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Variable || 
                                   kvp.Value.BlockType = FplValueType.VariadicVariableMany || 
                                   kvp.Value.BlockType = FplValueType.VariadicVariableMany1) 
-        |> Seq.iter (fun kvp -> 
-            toBeSavedScopeVariables.Add(kvp.Key, kvp.Value)
-            let clone = 
-                if fvArgs.Scope.ContainsKey(kvp.Key) then
-                    fvArgs.Scope[kvp.Key].Clone()
-                elif kvp.Value.IsSignatureVariable then 
-                    let candidateList = fvArgs.ValueList |> Seq.filter (fun fv -> fv.FplId = kvp.Key) |> Seq.toList 
-                    if candidateList.IsEmpty then 
-                        let candidate = kvp.Value.Clone()
-                        if fvArgs.ValueList.Count>argIndex then 
-                            candidate.ReprId <- fvArgs.ValueList[argIndex].Type(SignatureType.Repr)
-                            argIndex <- argIndex + 1
-                        candidate
-                    else
-                        candidateList.Head.Clone()
-                else
-                    kvp.Value.Clone()
-            fvPar.Scope[kvp.Key] <- clone
-
+        |> Seq.iter (fun paramKvp -> 
+            // save the clone of the original parameter variable
+            let original = paramKvp.Value
+            let clone = original.Clone()
+            toBeSavedScopeVariables.Add(paramKvp.Key, clone)
+            if paramKvp.Value.IsSignatureVariable then 
+                // if the parameter is a signature variable
+                if caller.ValueList.Count>argIndex then 
+                    // replace the representation of the original parameter with the
+                    // representation of the argument
+                    let arg = caller.ValueList[argIndex]
+                    original.ReprId <- arg.Type(SignatureType.Repr)
+                    // increase the counter of pairs of arguments and singature variables 
+                    argIndex <- argIndex + 1
         )
-        let kvp = KeyValuePair(fvPar.FplId,toBeSavedScopeVariables)
+        let kvp = KeyValuePair(called.FplId,toBeSavedScopeVariables)
         _stack.Push(kvp)
        
     // Restores the scope variables of an FplValue block from the stack.
@@ -52,24 +48,28 @@ type FplRunner() =
             fvPar.Scope[kvp.Key] <- kvp.Value
         )
 
-    member this.Run(fvArgs:FplValue) = 
-        match fvArgs.BlockType with 
+    member this.Run(caller:FplValue) = 
+        match caller.BlockType with 
         | FplValueType.Reference ->
-            if fvArgs.Scope.Count > 0 then 
-                let called = fvArgs.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+            if caller.Scope.Count > 0 then 
+                let called = caller.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
                 match called.BlockType with 
                 | FplValueType.Predicate -> 
-                    this.SaveVariables(called, fvArgs)
+                    this.SaveVariables(called, caller)
+                    let mutable lastRepr = ""
                     called.ValueList
                     |> Seq.iter (fun fv -> 
                         this.Run(fv)
+                        lastRepr <- fv.ReprId
                     )
                     |> ignore
+                    caller.ReprId <- lastRepr
                     this.RestoreVariables(called)
                 | _ -> ()
             else
-                match fvArgs.FplId with 
-                | "iif" -> evaluateEquivalence fvArgs
+                match caller.FplId with 
+                | "iif" -> evaluateEquivalence caller
+                | "impl" ->  evaluateImplication caller
                 | _ -> ()
         | _ -> ()
         
