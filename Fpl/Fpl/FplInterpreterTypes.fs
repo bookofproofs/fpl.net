@@ -783,6 +783,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 Some var.ValueList[0]
             else
                 Some var
+        | FplValueType.Reference when this.ValueList.Count = 0 ->
+            Some this
         | _ when this.ValueList.Count>0 ->
             Some this.ValueList[0]
         | _ -> 

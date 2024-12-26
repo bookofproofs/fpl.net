@@ -75,14 +75,18 @@ let evaluateImplication (fplValue:FplValue) =
         fplValue.ReprId <- "undetermined"
 
 let evaluateEquivalence (fplValue:FplValue) = 
-    let arg1 = fplValue.ValueList[0]
-    let arg2 = fplValue.ValueList[1]
-    match (arg1.ReprId, arg2.ReprId) with
-    | ("true", "true") 
-    | ("false", "false") -> fplValue.ReprId <- "true"
-    | ("false", "true") 
-    | ("true", "false") -> fplValue.ReprId <- "false"
-    | _ -> fplValue.ReprId <- "undetermined"
+    let arg1Opt = fplValue.ValueList[0].GetValue
+    let arg2Opt = fplValue.ValueList[1].GetValue
+    match (arg1Opt,arg2Opt) with
+    | (Some arg1, Some arg2) -> 
+        match (arg1.ReprId, arg2.ReprId) with
+        | ("true", "true") 
+        | ("false", "false") -> fplValue.ReprId <- "true"
+        | ("false", "true") 
+        | ("true", "false") -> fplValue.ReprId <- "false"
+        | _ -> fplValue.ReprId <- "undetermined"
+    | _ ->
+        fplValue.ReprId <- "undetermined"
     
 let evaluateIsOperator (fv:FplValue) (operand:FplValue) (typeOfOperand:FplValue) = 
     match mpwa [operand] [typeOfOperand] with
