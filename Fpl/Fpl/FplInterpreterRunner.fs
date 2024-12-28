@@ -71,6 +71,7 @@ type FplRunner() =
                 | "iif" -> evaluateEquivalence caller
                 | "impl" ->  evaluateImplication caller
                 | "not" ->  evaluateNegation caller
+                | "and" ->  evaluateConjunction caller
                 | _ -> ()
         | _ -> ()
         
