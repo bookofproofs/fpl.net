@@ -1343,14 +1343,15 @@ let rec eval (st: SymbolTable) ast =
             match precNodeList currentOp with
             | x::xs -> 
                 match emitSIG04Diagnostics currentOp [x] with 
-                | Some candidate -> ()
+                | Some candidate -> 
+                    run.Run currentOp // execute the matched binary operator
                 | _ -> ()
             | _ -> ()
             fv.ValueList.RemoveAt(currMinIndex+1) 
             fv.ValueList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv
         let last = es.PeekEvalStack()
-        run.Run last
+        run.Run last // execute the last matched binary operator
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
