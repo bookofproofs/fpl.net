@@ -4,12 +4,15 @@ open FplInterpreterTypes
 open ErrDiagnostics
 
 let evaluateNegation (fplValue:FplValue) = 
-    let arg = fplValue.ValueList[0]
-    match arg.ReprId with
-    | "false" -> 
-        fplValue.ReprId <- "true"
-    | "true" -> 
-        fplValue.ReprId <- "false"
+    let argOpt = fplValue.ValueList[0].GetValue
+    match argOpt with
+    | Some arg ->
+        match arg.ReprId with
+        | "false" -> 
+            fplValue.ReprId <- "true"
+        | "true" -> 
+            fplValue.ReprId <- "false"
+        | _ -> fplValue.ReprId <- "undetermined"
     | _ -> fplValue.ReprId <- "undetermined"
     
 let evaluateConjunction (fplValue:FplValue) = 

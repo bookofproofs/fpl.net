@@ -54,3 +54,26 @@ type TestInfixOperations() =
             Assert.AreEqual<string>(expected, base1.ReprId)
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("00", """def pred Neg(x:pred) {not x} def pred T1() { ( Neg(true) ) };""", "false")>]
+    [<DataRow("00a", """def pred Neg(x:tpl) {not x} def pred T1() { ( Neg(true) ) };""", "false")>]
+    [<DataRow("01", """def pred Neg(x:pred) {not x} def pred T1() { ( Neg(false) ) };""", "true")>]
+    [<DataRow("01a", """def pred Neg(x:tpl) {not x} def pred T1() { ( Neg(false) ) };""", "true")>]
+    [<TestMethod>]
+    member this.TestNegationCalls(no:string, varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestNegationCalls"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        checkForUnexpectedErrors VAR00
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.ValueList[0]
+            Assert.AreEqual<string>(expected, base1.ReprId)
+        | None -> 
+            Assert.IsTrue(false)

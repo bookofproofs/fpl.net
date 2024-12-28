@@ -70,6 +70,7 @@ type FplRunner() =
                 match caller.FplId with 
                 | "iif" -> evaluateEquivalence caller
                 | "impl" ->  evaluateImplication caller
+                | "not" ->  evaluateNegation caller
                 | _ -> ()
         | _ -> ()
         
