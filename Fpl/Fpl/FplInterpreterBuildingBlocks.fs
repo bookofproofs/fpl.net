@@ -1307,7 +1307,7 @@ let rec eval (st: SymbolTable) ast =
             | Some opAst -> 
                 let infixOperator = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,fv)
                 es.PushEvalStack(infixOperator)
-                // evaluate the operand by trying to find a definition for the operand
+                // evaluate the operator by trying to find a definition for the operator
                 eval st opAst
                 // store the index of the infix operator, so we still know it after sorting the list by precedence later
                 fv.ValueList.Add(es.Pop()) // pop the stack element (same reference as infixOperator) and store it in a list
@@ -1315,8 +1315,12 @@ let rec eval (st: SymbolTable) ast =
         )
         |> ignore
         
-        let precNodeList (fv1:FplValue) = fv1.Scope.Values |> Seq.toList 
+        let precNodeList (fv1:FplValue) = 
+            fv1.Scope.Values 
+            |> Seq.toList 
 
+        /// Returns the precedence of fv1 if its ExpressionType is Infix
+        /// or Int32.MaxValue otherwise
         let getPrecedence (fv1:FplValue) =
             match precNodeList fv1 with
             | [] -> Int32.MaxValue
