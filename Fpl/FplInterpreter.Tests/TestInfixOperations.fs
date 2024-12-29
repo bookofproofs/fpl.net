@@ -36,7 +36,7 @@ type TestInfixOperations() =
     member this.TestImplicationCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.Commons %s""" varVal
-        let filename = "TestInfixPrecedenceFplCommons"
+        let filename = "TestImplicationCallsFplCommons"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         checkForUnexpectedErrors VAR00
         prepareFplCode(filename, "", false) |> ignore
@@ -59,7 +59,7 @@ type TestInfixOperations() =
     member this.TestEquivalenceCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.Commons %s""" varVal
-        let filename = "TestInfixPrecedenceFplCommons"
+        let filename = "TestEquivalenceCallsFplCommons"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         checkForUnexpectedErrors VAR00
         prepareFplCode(filename, "", false) |> ignore
@@ -109,7 +109,34 @@ type TestInfixOperations() =
     member this.TestConjunctionCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.Commons %s""" varVal
-        let filename = "TestInfixPrecedenceFplCommons"
+        let filename = "TestConjunctionCallsFplCommons"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        checkForUnexpectedErrors VAR00
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.ValueList[0]
+            Assert.AreEqual<string>(expected, base1.ReprId)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("00", """def pred T1() { (false and false and false) };""", "false")>]
+    [<DataRow("01", """def pred T1() { (true and false and false) };""", "false")>]
+    [<DataRow("02", """def pred T1() { (false and true and false) };""", "false")>]
+    [<DataRow("03", """def pred T1() { (true and true and false) };""", "false")>]
+    [<DataRow("04", """def pred T1() { (false and false and true) };""", "false")>]
+    [<DataRow("05", """def pred T1() { (true and false and true) };""", "false")>]
+    [<DataRow("06", """def pred T1() { (false and true and true) };""", "false")>]
+    [<DataRow("07", """def pred T1() { (true and true and true) };""", "true")>]
+    [<TestMethod>]
+    member this.TestConjunctionCalls(no:string, varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """def pred And infix "and" 7 (x:+ pred) { and (x) } %s""" varVal
+        let filename = "TestConjunctionCalls"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         checkForUnexpectedErrors VAR00
         prepareFplCode(filename, "", false) |> ignore

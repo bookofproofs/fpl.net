@@ -1113,15 +1113,15 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             ret.HasBrackets <- fv.HasBrackets
             ret.IsIntrinsic <- fv.IsIntrinsic
             ret.ExpressionType <- fv.ExpressionType
-            fv.ValueList 
-            |> Seq.iter (fun fv1 -> 
-                let value = recClone fv1
-                ret.ValueList.Add(value)
-            )
             fv.Scope 
             |> Seq.iter (fun kvp -> 
                 let value = recClone kvp.Value
                 ret.Scope.Add(kvp.Key, value)
+            )
+            fv.ValueList 
+            |> Seq.iter (fun fv1 -> 
+                let value = recClone fv1
+                ret.ValueList.Add(value)
             )
             fv.AssertedPredicates
             |> Seq.iter (fun fv1 -> 

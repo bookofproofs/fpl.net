@@ -15,8 +15,22 @@ let evaluateNegation (fplValue:FplValue) =
         | _ -> fplValue.ReprId <- "undetermined"
     | _ -> fplValue.ReprId <- "undetermined"
     
-let evaluateConjunction (fplValue:FplValue) = 
-    let vlist = fplValue.ValueList |> Seq.toList 
+let evaluateConjunction (fplValue:FplValue) =
+    let vlist = 
+        if fplValue.ValueList.Count = 1 && 
+            fplValue.ValueList[0].BlockType = FplValueType.Reference then 
+            let ref = fplValue.ValueList[0].GetValue
+            match ref with
+            | Some var -> 
+                match var.BlockType with 
+                | FplValueType.VariadicVariableMany
+                | FplValueType.VariadicVariableMany1 -> 
+                    var.ValueList |> Seq.toList
+                | _ -> [var]
+            | _ -> []
+        else
+            fplValue.ValueList |> Seq.toList 
+
     let rec aggr (fv: FplValue list) =
         match fv with
         | x::xs -> 

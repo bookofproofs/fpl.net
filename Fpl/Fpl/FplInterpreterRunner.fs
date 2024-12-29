@@ -10,35 +10,66 @@ type FplRunner() =
     // The stack memory of the runner collecting the variables of the current Runner
     member this.Stack = _stack
 
+
+    member private this.ReplaceVariables(parameters:FplValue list) (arguments:FplValue list) =
+        let rec replace (pars:FplValue list) (args:FplValue list) = 
+            match (pars, args) with
+            | (p::ps, ar::ars) -> 
+                match (p.BlockType, ar.BlockType) with
+                // p is variadic, ar is variadic 
+                | (FplValueType.VariadicVariableMany,FplValueType.VariadicVariableMany)
+                | (FplValueType.VariadicVariableMany,FplValueType.VariadicVariableMany1)
+                | (FplValueType.VariadicVariableMany1,FplValueType.VariadicVariableMany)
+                | (FplValueType.VariadicVariableMany1,FplValueType.VariadicVariableMany1) ->
+                    // copy the value list of the variadic ar to the value list of the variadic p
+                    // by inserting the clones of the elements
+                    ar.ValueList 
+                    |> Seq.iter (fun fv -> 
+                        let fvClone = fv.Clone() 
+                        p.ValueList.Add(fvClone)
+                    )
+                    // continue replacling variables with the remaining lists
+                    replace ps ars
+                // p is variadic, ar is not variadic 
+                | (FplValueType.VariadicVariableMany,_)
+                | (FplValueType.VariadicVariableMany1,_) -> 
+                    let arClone = ar.Clone()
+                    p.ValueList.Add(arClone)
+                    // continue replacling variables with the original pars and the remaining ars list
+                    replace pars ars
+                | _ -> 
+                    // otherwise, simply assign the argument's representation to the parameter's representation
+                    p.ReprId <- ar.Type(SignatureType.Repr)
+                    // continue replacling variables with the remaining lists
+                    replace ps ars
+            | (p::ps, []) -> ()
+            | ([], ar::ars) -> ()
+            | ([], []) -> ()
+        replace parameters arguments
+
     // Saves the clones (!) of the original scope variables of an FplValue block as a KeyValuePair to a stack memory.
     // where the key is the block's FplId and the value is a dictionary of all scope variables.
-    // At the same time, the original scope variables are being assigned to the values of .
-    member private this.SaveVariables(called:FplValue, caller:FplValue) = 
+    // Returns a list of parameters of the called FplValue, i.e. its Signature Variables
+    member private this.SaveVariables(called:FplValue) = 
         // now process all scope variables and push by replacing them with their clones
         // and pushing the originals on the stack
         let toBeSavedScopeVariables = Dictionary<string, FplValue>()
-        let mutable argIndex = 0
+        let pars = List<FplValue>()
         called.Scope
         |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Variable || 
                                   kvp.Value.BlockType = FplValueType.VariadicVariableMany || 
                                   kvp.Value.BlockType = FplValueType.VariadicVariableMany1) 
         |> Seq.iter (fun paramKvp -> 
             // save the clone of the original parameter variable
-            let original = paramKvp.Value
-            let clone = original.Clone()
-            toBeSavedScopeVariables.Add(paramKvp.Key, clone)
+            let parOriginal = paramKvp.Value
+            let parClone = parOriginal.Clone()
+            toBeSavedScopeVariables.Add(paramKvp.Key, parClone)
             if paramKvp.Value.IsSignatureVariable then 
-                // if the parameter is a signature variable
-                if caller.ValueList.Count>argIndex then 
-                    // replace the representation of the original parameter with the
-                    // representation of the argument
-                    let arg = caller.ValueList[argIndex]
-                    original.ReprId <- arg.Type(SignatureType.Repr)
-                    // increase the counter of pairs of arguments and singature variables 
-                    argIndex <- argIndex + 1
+                pars.Add(parOriginal)
         )
         let kvp = KeyValuePair(called.FplId,toBeSavedScopeVariables)
         _stack.Push(kvp)
+        pars |> Seq.toList
        
     // Restores the scope variables of an FplValue block from the stack.
     member private this.RestoreVariables(fvPar:FplValue) = 
@@ -52,10 +83,16 @@ type FplRunner() =
         match caller.BlockType with 
         | FplValueType.Reference ->
             if caller.Scope.Count > 0 then 
-                let called = caller.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+                let called = 
+                    caller.Scope 
+                    |> Seq.map (fun kvp -> kvp.Value) 
+                    |> Seq.toList 
+                    |> List.head
                 match called.BlockType with 
                 | FplValueType.Predicate -> 
-                    this.SaveVariables(called, caller)
+                    let pars = this.SaveVariables(called)
+                    let args = caller.ValueList |> Seq.toList
+                    this.ReplaceVariables pars args
                     let mutable lastRepr = ""
                     called.ValueList
                     |> Seq.iter (fun fv -> 
