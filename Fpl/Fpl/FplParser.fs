@@ -351,11 +351,11 @@ primePredicateRef.Value <- choice [
     objectSymbol
 ]
 
-let conjunction = positions "And" ((keywordAnd >>. leftParen >>. predicateList) .>> rightParen) |>> Ast.And
 let disjunction = positions "Or" ((keywordOr >>. leftParen >>. predicateList) .>> rightParen) |>> Ast.Or
 let exclusiveOr = positions "Xor" ((keywordXor >>. leftParen >>. predicateList) .>> rightParen) |>> Ast.Xor
 
 let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParen 
+let conjunction = positions "And" (keywordAnd >>. twoPredicatesInParens)  |>> Ast.And
 let implication = positions "Impl" (keywordImpl >>. twoPredicatesInParens) |>> Ast.Impl
 let equivalence = positions "Iif" (keywordIif >>. twoPredicatesInParens) |>> Ast.Iif
 let negation = positions "Not" (keywordNot >>. predicate) |>> Ast.Not

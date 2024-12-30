@@ -91,8 +91,7 @@ type TestDefinitionPredicates () =
             
             and
             (
-                In(tuple,r),
-                In(u,r.Domain()),
+                and (In(tuple,r), In(u,r.Domain())),
                 In(v,r.Codomain())
             )
         }"""

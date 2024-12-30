@@ -77,7 +77,7 @@ type Ast =
     | True of Positions * unit
     | False of Positions * unit 
     | Undefined of Positions * unit
-    | And of Positions * Ast list
+    | And of Positions * (Ast * Ast)
     | Or of Positions * Ast list
     | Xor of Positions * Ast list
     | Impl of Positions * (Ast * Ast)

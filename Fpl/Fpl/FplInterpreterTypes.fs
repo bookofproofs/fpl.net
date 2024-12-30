@@ -770,7 +770,25 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                         else
                             getFullName fv.Parent.Value false + "." + fplValueType
             getFullName this true 
-
+   
+    /// Returns Some value of the FplValue taking into account if this 
+    /// the value can be accessed directly or if the 
+    /// FplValue is a Reference to a variable. In the latter case, 
+    /// the value of the referenced variable is returned instead.
+    member this.GetValue =
+        match this.BlockType with
+        | FplValueType.Reference when this.Scope.ContainsKey(this.FplId) ->
+            let var = this.Scope[this.FplId]
+            if var.ValueList.Count>0 then 
+                Some var.ValueList[0]
+            else
+                Some var
+        | FplValueType.Reference when this.ValueList.Count = 0 ->
+            Some this
+        | _ when this.ValueList.Count>0 ->
+            Some this.ValueList[0]
+        | _ -> 
+            None
     /// Indicates if this FplValue is a class.
     static member IsClass(fplValue:FplValue) = 
         fplValue.BlockType = FplValueType.Class
@@ -1095,15 +1113,15 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             ret.HasBrackets <- fv.HasBrackets
             ret.IsIntrinsic <- fv.IsIntrinsic
             ret.ExpressionType <- fv.ExpressionType
-            fv.ValueList 
-            |> Seq.iter (fun fv1 -> 
-                let value = recClone fv1
-                ret.ValueList.Add(value)
-            )
             fv.Scope 
             |> Seq.iter (fun kvp -> 
                 let value = recClone kvp.Value
                 ret.Scope.Add(kvp.Key, value)
+            )
+            fv.ValueList 
+            |> Seq.iter (fun fv1 -> 
+                let value = recClone fv1
+                ret.ValueList.Add(value)
             )
             fv.AssertedPredicates
             |> Seq.iter (fun fv1 -> 

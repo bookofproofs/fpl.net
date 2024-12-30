@@ -196,12 +196,11 @@ def class BinaryRelation: Relation
         {
             impl
             (
-                and
                 (
-                    In(v,Domain()),
-                    In(w1,CoDomain()),
-                    In(w2,CoDomain()),
-                    AreRelated(v,w1,parent),
+                    In(v,Domain()) and
+                    In(w1,CoDomain()) and
+                    In(w2,CoDomain()) and
+                    AreRelated(v,w1,parent) and
                     AreRelated(v,w2,parent)
                 ),
                 ( w1 = w2 )
@@ -215,12 +214,11 @@ def class BinaryRelation: Relation
         {
             impl
             (
-                and
                 (
-                    In(v1,Domain()),
-                    In(v2,Domain()),
-                    In(w,CoDomain()),
-                    AreRelated(v1,w,parent),
+                    In(v1,Domain()) and
+                    In(v2,Domain()) and
+                    In(w,CoDomain()) and
+                    AreRelated(v1,w,parent) and
                     AreRelated(v2,w,parent)
                 ),
                 ( v1 = v2 )
@@ -244,10 +242,9 @@ def class BinaryRelation: Relation
         {
             ex v : Set
             {
-                and
                 (
-                    In(v,Domain()),
-                    In(w,CoDomain()),
+                    In(v,Domain()) and
+                    In(w,CoDomain()) and
                     AreRelated(v,w,parent)
                 )
             }
@@ -265,10 +262,9 @@ def class BinaryRelation: Relation
         {
             ex w : Set
             {
-                and
                 (
-                    In(v,Domain()),
-                    In(w,CoDomain()),
+                    In(v,Domain()) and
+                    In(w,CoDomain()) and
                     AreRelated(v,w,parent)
                 )
             }
@@ -288,10 +284,9 @@ def pred AreRelated(u,v: Set, r: BinaryRelation)
 
         tuple:=Tuple($1,$2)
     ;
-    and
     (
-        In(tuple,r),
-        In(u,r.Domain()),
+        In(tuple,r) and
+        In(u,r.Domain()) and
         In(v,r.Codomain())
     )
 }

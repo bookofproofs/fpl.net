@@ -244,7 +244,7 @@ type TestKeywordSpaces() =
     [<DataRow("undef")>]
     [<TestMethod>]
     member this.TestSpacesFalseTrueUndef (word:string) =
-        let result = run (predicate .>> eof) $"""and({word})"""
+        let result = run (predicate .>> eof) $"""and({word},true)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -255,7 +255,7 @@ type TestKeywordSpaces() =
     [<DataRow("undef")>]
     [<TestMethod>]
     member this.TestSpacesFalseTrueUndefA (word:string) =
-        let result = run (predicate .>> eof) $"""and({word} )"""
+        let result = run (predicate .>> eof) $"""and({word}, true )"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

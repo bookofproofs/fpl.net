@@ -809,3 +809,21 @@ It is not an amendment to the FPL parser. However, we want to significantly simp
 ```         
 parent
 ```
+
+#### 26) Changing `and`, `or`, `xor` from n-ary to binary 
+* The predicates `and`, `or`, `xor` could in previous versions be written as n-ary operations.
+* Now, they require the standard binary syntax. More than two arguments have to be nested
+* Rationale: 
+    * It was unclear how to interpret only one argument.
+    * As a remedy, FPL allows introducing infix operations to get rid of nesting.
+
+*Before* (example for `and`, analogouly for `xor` and `or`)
+```
+    and (true, false, false)
+    and (true) // allowed 
+```
+*Now*
+```         
+    and (and(true, false), false)
+    // and (true) causes now a syntax error
+```

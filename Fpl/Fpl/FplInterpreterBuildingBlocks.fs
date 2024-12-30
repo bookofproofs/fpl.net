@@ -876,13 +876,14 @@ let rec eval (st: SymbolTable) ast =
             es.PushEvalStack(ref)
             es.PopEvalStack()
         st.EvalPop()
-    | Ast.And((pos1, pos2), predicateAsts) ->
+    | Ast.And((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("And")
         let fv = es.PeekEvalStack()
         fv.FplId <- "and"
-        fv.ReprId <- "undetermined"
+        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
-        predicateAsts |> List.map (eval st) |> ignore
+        eval st predicateAst1
+        eval st predicateAst2
         fv.NameEndPos <- pos2
         evaluateConjunction fv
         emitLG000orLG001Diagnostics fv "conjunction"
@@ -1307,7 +1308,7 @@ let rec eval (st: SymbolTable) ast =
             | Some opAst -> 
                 let infixOperator = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,fv)
                 es.PushEvalStack(infixOperator)
-                // evaluate the operand by trying to find a definition for the operand
+                // evaluate the operator by trying to find a definition for the operator
                 eval st opAst
                 // store the index of the infix operator, so we still know it after sorting the list by precedence later
                 fv.ValueList.Add(es.Pop()) // pop the stack element (same reference as infixOperator) and store it in a list
@@ -1315,8 +1316,12 @@ let rec eval (st: SymbolTable) ast =
         )
         |> ignore
         
-        let precNodeList (fv1:FplValue) = fv1.Scope.Values |> Seq.toList 
+        let precNodeList (fv1:FplValue) = 
+            fv1.Scope.Values 
+            |> Seq.toList 
 
+        /// Returns the precedence of fv1 if its ExpressionType is Infix
+        /// or Int32.MaxValue otherwise
         let getPrecedence (fv1:FplValue) =
             match precNodeList fv1 with
             | [] -> Int32.MaxValue
@@ -1343,14 +1348,15 @@ let rec eval (st: SymbolTable) ast =
             match precNodeList currentOp with
             | x::xs -> 
                 match emitSIG04Diagnostics currentOp [x] with 
-                | Some candidate -> ()
+                | Some candidate -> 
+                    run.Run currentOp // execute the matched binary operator
                 | _ -> ()
             | _ -> ()
             fv.ValueList.RemoveAt(currMinIndex+1) 
             fv.ValueList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv
         let last = es.PeekEvalStack()
-        run.Run last
+        run.Run last // execute the last matched binary operator
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
