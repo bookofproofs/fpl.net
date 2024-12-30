@@ -195,7 +195,7 @@ type TestPredicatesSpecific () =
         let result = run (exclusiveOr .>> eof) """xor ( true, true )"""
         let actual = sprintf "%O" result
         printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
+        Assert.IsTrue(actual.StartsWith("Success:")) 
 
     [<TestMethod>]
     member this.TestXor2a () =
