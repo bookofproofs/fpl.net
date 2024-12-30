@@ -80,14 +80,14 @@ def pred And infix "and" 7 (x,y: pred)
     and (x,y)
 }
 
-def pred Or infix "or" 10 (x:+ pred)
+def pred Or infix "or" 10 (x,y: pred)
 {
-    or (x)
+    or (x,y)
 }
 
-def pred Xor infix "xor" 20 (x:+ pred)
+def pred Xor infix "xor" 20 (x,y: pred)
 {
-    xor (x)
+    xor (x,y)
 }
 
 localization iif(x,y) :=

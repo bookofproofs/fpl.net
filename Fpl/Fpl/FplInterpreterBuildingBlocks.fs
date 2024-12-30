@@ -880,7 +880,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("And")
         let fv = es.PeekEvalStack()
         fv.FplId <- "and"
-        es.PeekEvalStack().ReprId <- "undetermined"
+        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -888,24 +888,26 @@ let rec eval (st: SymbolTable) ast =
         evaluateConjunction fv
         emitLG000orLG001Diagnostics fv "conjunction"
         st.EvalPop()
-    | Ast.Or((pos1, pos2), predicateAsts) ->
+    | Ast.Or((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Or")
         let fv = es.PeekEvalStack()
         fv.FplId <- "or"
         fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
-        predicateAsts |> List.map (eval st) |> ignore
+        eval st predicateAst1
+        eval st predicateAst2
         fv.NameEndPos <- pos2
         evaluateDisjunction fv
         emitLG000orLG001Diagnostics fv "disjunction"
         st.EvalPop()
-    | Ast.Xor((pos1, pos2), predicateAsts) ->
+    | Ast.Xor((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Xor")
         let fv = es.PeekEvalStack()
         fv.FplId <- "xor"
-        es.PeekEvalStack().ReprId <- "undetermined"
+        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
-        predicateAsts |> List.map (eval st) |> ignore
+        eval st predicateAst1
+        eval st predicateAst2
         fv.NameEndPos <- pos2
         evaluateExclusiveOr fv
         emitLG000orLG001Diagnostics fv "exclusive-or"
