@@ -16,33 +16,18 @@ let evaluateNegation (fplValue:FplValue) =
     | _ -> fplValue.ReprId <- "undetermined"
     
 let evaluateConjunction (fplValue:FplValue) =
-    let vlist = 
-        if fplValue.ValueList.Count = 1 && 
-            fplValue.ValueList[0].BlockType = FplValueType.Reference then 
-            let ref = fplValue.ValueList[0].GetValue
-            match ref with
-            | Some var -> 
-                match var.BlockType with 
-                | FplValueType.VariadicVariableMany
-                | FplValueType.VariadicVariableMany1 -> 
-                    var.ValueList |> Seq.toList
-                | _ -> [var]
-            | _ -> []
-        else
-            fplValue.ValueList |> Seq.toList 
-
-    let rec aggr (fv: FplValue list) =
-        match fv with
-        | x::xs -> 
-            match x.ReprId with
-            | "false" -> Some false
-            | "true" -> aggr xs 
-            | _ -> None
-        | [] -> Some true
-    match aggr vlist with 
-    | Some true -> fplValue.ReprId <- "true"
-    | Some false -> fplValue.ReprId <- "false"
-    | _ -> fplValue.ReprId <- "undetermined"
+    let arg1Opt = fplValue.ValueList[0].GetValue
+    let arg2Opt = fplValue.ValueList[1].GetValue
+    match (arg1Opt,arg2Opt) with
+    | (Some arg1, Some arg2) -> 
+        match (arg1.ReprId, arg2.ReprId) with
+        | ("true", "false") 
+        | ("false", "true") 
+        | ("false", "false") -> fplValue.ReprId <- "false" 
+        | ("true", "true") -> fplValue.ReprId <- "true"
+        | _ -> fplValue.ReprId <- "undetermined"
+    | _ ->
+        fplValue.ReprId <- "undetermined"
 
 let evaluateDisjunction (fplValue:FplValue) = 
     let vlist = fplValue.ValueList |> Seq.toList 
