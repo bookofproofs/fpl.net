@@ -78,8 +78,8 @@ type Ast =
     | False of Positions * unit 
     | Undefined of Positions * unit
     | And of Positions * (Ast * Ast)
-    | Or of Positions * Ast list
-    | Xor of Positions * Ast list
+    | Or of Positions * (Ast * Ast)
+    | Xor of Positions * (Ast * Ast)
     | Impl of Positions * (Ast * Ast)
     | Iif of Positions * (Ast * Ast)
     | Not of Positions * Ast

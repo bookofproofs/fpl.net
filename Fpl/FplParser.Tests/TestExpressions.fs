@@ -254,12 +254,12 @@ type TestExpressions () =
 
             def pred T22()
             {
-                xor (x,y,z)
+                xor (xor(x,y),z)
             }
 
             def pred T23()
             {
-                or (x,y,z)
+                or (or(x,y),z)
             }
 
             def pred T24()
