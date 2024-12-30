@@ -30,36 +30,31 @@ let evaluateConjunction (fplValue:FplValue) =
         fplValue.ReprId <- "undetermined"
 
 let evaluateDisjunction (fplValue:FplValue) = 
-    let vlist = fplValue.ValueList |> Seq.toList 
-    let rec aggr (fv: FplValue list) =
-        match fv with
-        | x::xs -> 
-            match x.ReprId with
-            | "false" -> aggr xs 
-            | "true" -> Some true
-            | _ -> None
-        | [] -> Some false
-    match aggr vlist with 
-    | Some true -> fplValue.ReprId <- "true"
-    | Some false -> fplValue.ReprId <- "false"
-    | _ -> fplValue.ReprId <- "undetermined"
+    let arg1Opt = fplValue.ValueList[0].GetValue
+    let arg2Opt = fplValue.ValueList[1].GetValue
+    match (arg1Opt,arg2Opt) with
+    | (Some arg1, Some arg2) -> 
+        match (arg1.ReprId, arg2.ReprId) with
+        | ("true", "false") 
+        | ("false", "true") 
+        | ("true", "true") -> fplValue.ReprId <- "true"
+        | ("false", "false") -> fplValue.ReprId <- "false" 
+        | _ -> fplValue.ReprId <- "undetermined"
+    | _ ->
+        fplValue.ReprId <- "undetermined"
 
 let evaluateExclusiveOr (fplValue:FplValue) = 
-    let vlist = fplValue.ValueList |> Seq.toList 
-    let rec aggr (fv: FplValue list) oddCounterOfTrue counterNonBoolean =
-        match fv with
-        | x::xs -> 
-            match x.ReprId with
-            | "false" -> aggr xs oddCounterOfTrue counterNonBoolean
-            | "true" -> aggr xs (oddCounterOfTrue + 1) counterNonBoolean
-            | _ -> (oddCounterOfTrue, counterNonBoolean + 1) 
-        | [] -> (oddCounterOfTrue, counterNonBoolean)
-    let (oddCounterOfTrue, counterNonBoolean) = aggr vlist 0 0 
-    if counterNonBoolean=0 && (oddCounterOfTrue % 2) = 1 then 
-        fplValue.ReprId <- "true"
-    elif counterNonBoolean=0 && (oddCounterOfTrue % 2) <> 1 then 
-        fplValue.ReprId <- "false"
-    else
+    let arg1Opt = fplValue.ValueList[0].GetValue
+    let arg2Opt = fplValue.ValueList[1].GetValue
+    match (arg1Opt,arg2Opt) with
+    | (Some arg1, Some arg2) -> 
+        match (arg1.ReprId, arg2.ReprId) with
+        | ("true", "false") 
+        | ("false", "true") -> fplValue.ReprId <- "true" 
+        | ("true", "true") 
+        | ("false", "false") -> fplValue.ReprId <- "false" 
+        | _ -> fplValue.ReprId <- "undetermined"
+    | _ ->
         fplValue.ReprId <- "undetermined"
 
 let evaluateImplication (fplValue:FplValue) = 
