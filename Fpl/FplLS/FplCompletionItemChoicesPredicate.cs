@@ -60,7 +60,7 @@ namespace FplLS
                     ci.InsertText = $"{ci.Word} ( false, true ) ";
                     break;
                 default:
-                    ci.InsertText = $"{ci.Word} ( true, true, false ) ";
+                    ci.InsertText = $"{ci.Word} ( true, false ) ";
                     break;
             }
             ci.Label += " ...";

@@ -81,7 +81,7 @@ type TestReferenceRules() =
                 }
             ;
             premise: undefined
-            conclusion: and (p)
+            conclusion: and (p,true)
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual
@@ -93,7 +93,7 @@ type TestReferenceRules() =
         {
             dec ~a:obj ~res,proceedingResult: pred res:=true for proceedingResult in p { res:=and(res, proceedingResult) } ;
             premise: res
-            conclusion: and (p)
+            conclusion: and (false,p)
         }"""
         let actual = sprintf "%O" result
         printf "%O" actual

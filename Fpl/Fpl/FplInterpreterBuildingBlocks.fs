@@ -876,13 +876,14 @@ let rec eval (st: SymbolTable) ast =
             es.PushEvalStack(ref)
             es.PopEvalStack()
         st.EvalPop()
-    | Ast.And((pos1, pos2), predicateAsts) ->
+    | Ast.And((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("And")
         let fv = es.PeekEvalStack()
         fv.FplId <- "and"
-        fv.ReprId <- "undetermined"
+        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
-        predicateAsts |> List.map (eval st) |> ignore
+        eval st predicateAst1
+        eval st predicateAst2
         fv.NameEndPos <- pos2
         evaluateConjunction fv
         emitLG000orLG001Diagnostics fv "conjunction"

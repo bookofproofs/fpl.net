@@ -154,11 +154,10 @@ prop AddIsUnique(op: Add)
     (
         all n, m:Nat
         {
-            and
             (
-                ( op(n,@0) = n ),
-                ( anotherAdd(n,@0) = n ),
-                ( op(n,Succ(m)) = Succ(op(n,m)) ),
+                ( op(n,@0) = n ) and
+                ( anotherAdd(n,@0) = n ) and
+                ( op(n,Succ(m)) = Succ(op(n,m)) ) and
                 ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
             )
         }
@@ -176,11 +175,10 @@ proof AddIsUnique$1
     1. |- assume 
         all n, m:Nat
         {
-            and
             (
-                ( op(n,@0) = n ),
-                ( anotherAdd(n,@0) = n ),
-                ( op(n,Succ(m)) = Succ(op(n,m)) ),
+                ( op(n,@0) = n ) and
+                ( anotherAdd(n,@0) = n ) and
+                ( op(n,Succ(m)) = Succ(op(n,m)) ) and
                 ( anotherAdd(n,Succ(m)) = Succ(anotherAdd(n,m)) )
             )
         }

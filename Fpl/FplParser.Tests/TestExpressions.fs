@@ -224,7 +224,7 @@ type TestExpressions () =
 
             def pred T18()
             {
-                ex x:Range(a:T), y:C, z:obj {and (a,b,c)}
+                ex x:Range(a:T), y:C, z:obj {and (and(a,b),c)}
             }
 
             def pred T19()
@@ -239,7 +239,7 @@ type TestExpressions () =
 
             def pred T21()
             {
-                and (x,y,z)
+                and (and(x,y),z)
             }
 
             def pred T21a()
