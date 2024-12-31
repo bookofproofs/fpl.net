@@ -107,9 +107,9 @@ type TestExpressionEvaluation() =
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
-    [<DataRow("def pred T() { xor(false,false,false) };", "false")>]
-    [<DataRow("def pred T() { xor(false,false,true) };", "true")>]
-    [<DataRow("def pred T() { xor(false,true,false) };", "true")>]
+    [<DataRow("def pred T() { xor(false,xor(false,false)) };", "false")>]
+    [<DataRow("def pred T() { xor(xor(false,false),true) };", "true")>]
+    [<DataRow("def pred T() { xor(xor(false,true),false) };", "true")>]
     [<DataRow("def pred T() { xor(xor(true,false),false) };", "true")>]
     [<DataRow("def pred T() { xor(false,xor(true,true)) };", "false")>]
     [<DataRow("def pred T() { xor(xor(true,false),true) };", "false")>]
