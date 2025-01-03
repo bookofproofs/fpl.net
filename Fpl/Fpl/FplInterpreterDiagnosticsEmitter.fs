@@ -615,6 +615,7 @@ let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
                 if expressionId = block.FplId then
                     let blockType = block.Type(SignatureType.Mixed)
                     fv.Scope.Add(blockType, block)
+                    fv.TypeId <- block.TypeId
                 else
                     let blockType = block.Type(SignatureType.Mixed)
                     match block.ExpressionType with
@@ -623,9 +624,11 @@ let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
                     | FixType.Postfix symbol ->
                         if expressionId = symbol then
                             fv.Scope.Add(blockType, block)
+                            fv.TypeId <- block.TypeId
                     | FixType.Infix(symbol, precedence) ->
                         if expressionId = symbol then
                             fv.Scope.Add(blockType, block)
+                            fv.TypeId <- block.TypeId
                     | _ -> ()))
 
         if fv.Scope.Count = 0 then

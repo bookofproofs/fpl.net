@@ -76,7 +76,8 @@ type FplRunner() =
         let blockVars = _stack.Pop()
         blockVars.Value
         |> Seq.iter (fun kvp -> 
-            fvPar.Scope[kvp.Key] <- kvp.Value
+            let orig = fvPar.Scope[kvp.Key] 
+            orig.Copy(kvp.Value)
         )
 
     member this.Run(caller:FplValue) = 
@@ -94,6 +95,7 @@ type FplRunner() =
                     let args = caller.ValueList |> Seq.toList
                     this.ReplaceVariables pars args
                     let mutable lastRepr = ""
+                    // run all statements of the called node
                     called.ValueList
                     |> Seq.iter (fun fv -> 
                         this.Run(fv)
