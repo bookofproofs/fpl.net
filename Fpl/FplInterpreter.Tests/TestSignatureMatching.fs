@@ -70,7 +70,7 @@ type TestSignatureMatching() =
     [<DataRow("00", """def pred T(f:func()->obj) {intr} def pred Caller() {dec ~x:func()->obj; T(x)} ;""",
         "")>]
     [<DataRow("01", """def pred T(f:func()->Nat) {intr} def pred Caller() {dec ~x:func()->obj; T(x)} ;""",
-        "")>]
+        "`obj:obj` does not match `f() -> Nat:func() -> Nat` in TestSignatureMatchingReferencesFunc.T(func() -> Nat)")>]
     [<TestMethod>]
     member this.TestSignatureMatchingReferencesFunc(no:string, varVal, var:string) =
         ad.Clear()
@@ -92,6 +92,29 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
+
+    [<DataRow("00", """def func T(n,m:obj)->obj {return self(n,m)};""",
+        "")>]
+    [<TestMethod>]
+    member this.TestSignatureMatchingReferencesFuncReturnSelf(no:string, varVal, var:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestSignatureMatchingReferencesFuncReturnSelf"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let pred = blocks |> List.head
+            let retStmt = pred.ValueList[pred.ValueList.Count - 1]
+            let fvArgs = retStmt.ValueList[0]
+            match matchArgumentsWithParameters fvArgs pred with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
 
     [<DataRow("00", """def func T(y:obj)->obj { intr } def func Caller()->obj {dec ~x:obj; return T(x)} ;""",
         "")>]
@@ -124,6 +147,7 @@ type TestSignatureMatching() =
             | None -> Assert.AreEqual<string>("no error","no error")
         | None -> 
             Assert.IsTrue(false)
+
     [<DataRow("""def pred T (x,y:pred) {true} def pred T3() {true} def pred Caller() {T(T3(),T3())} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:pred) {true} def pred T1() {true} def pred T2(x:obj) {true} def pred Caller() {dec ~a:obj; T(T1(),T2(a))} ;""",

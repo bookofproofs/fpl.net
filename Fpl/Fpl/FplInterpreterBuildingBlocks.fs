@@ -1022,16 +1022,14 @@ let rec eval (st: SymbolTable) ast =
             eval st fplIdentifierAst
             eval st specificationAst |> ignore
             if System.Char.IsLower(refBlock.FplId[0]) then
-                // match the signatures of referenced variables with the signatures of their declared types 
+                // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
+                // with their declared types 
                 let candidates = 
                     refBlock.Scope
                     |> Seq.filter (fun kvp -> kvp.Key = refBlock.FplId)
                     |> Seq.map (fun kvp -> kvp.Value)
-                    |> Seq.filter (fun fv1 -> fv1.ValueList.Count = 1)
-                    |> Seq.map (fun fv1 -> fv1.ValueList[0])
                     |> Seq.toList
                 emitSIG04Diagnostics refBlock candidates |> ignore
-                ()
             else
                 let candidatesFromTheory = findCandidatesByName st refBlock.FplId true
                 let candidatesFromPropertyScope = findCandidatesByNameInBlock refBlock refBlock.FplId
