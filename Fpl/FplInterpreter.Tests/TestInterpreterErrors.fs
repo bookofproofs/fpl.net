@@ -1010,8 +1010,8 @@ type TestInterpreterErrors() =
     [<DataRow("""def pred T() { dec ~x:pred; iif(true,x) };""", 1)>]
     [<DataRow("""def pred T() { dec ~x,y:pred; iif(x,y) };""", 0)>]
     [<DataRow("""def pred T() { iif(true,true) };""", 0)>]
-    [<DataRow("""def pred T() { xor(true,true,true) };""", 0)>]
-    [<DataRow("""def pred T() { dec ~x,y:pred; xor(y,x,true) };""", 2)>]
+    [<DataRow("""def pred T() { xor(xor(true,true),true) };""", 0)>]
+    [<DataRow("""def pred T() { dec ~x,y:pred; xor(xor(y,x),true) };""", 2)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestLG000(fplCode:string, expected) =

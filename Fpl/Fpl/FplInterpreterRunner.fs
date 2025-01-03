@@ -2,6 +2,7 @@
 open System.Collections.Generic
 open FplInterpreterTypes
 open FplInterpreterPredicateEvaluator
+open FplInterpreterDiagnosticsEmitter
 open System
 
 type FplRunner() =
@@ -113,6 +114,8 @@ type FplRunner() =
                 | "and" ->  evaluateConjunction caller
                 | "xor" ->  evaluateExclusiveOr caller
                 | "or" ->  evaluateDisjunction caller
+                | _ when caller.FplId.StartsWith("del.") ->
+                    emitID013Diagnostics caller (caller.NameStartPos) (caller.NameEndPos) |> ignore
                 | _ -> ()
         | _ -> ()
         
