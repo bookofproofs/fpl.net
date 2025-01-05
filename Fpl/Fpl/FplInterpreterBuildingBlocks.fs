@@ -92,6 +92,8 @@ let rec eval (st: SymbolTable) ast =
         match checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2 with
         | Some classNode -> 
             fv.ValueList.Add classNode
+            // add parent class counter
+            es.ParentClassCounters.Add(classNode, 0)
         | None -> ()
         checkID012Diagnostics st fv "obj" pos1 pos2 
         // we need an extra FplValue for objects to enable class inheritance from them
@@ -576,12 +578,13 @@ let rec eval (st: SymbolTable) ast =
                 match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
                 | Some classNode -> 
                     fv.ValueList.Add classNode
+                    // add parent class counter
+                    es.ParentClassCounters.Add(classNode,0)
                 | None -> ()
             else
                 fv.FplId <- identifier
                 fv.TypeId <- identifier
                 fv.ReprId <- $"class {identifier}"
-                checkID008Diagnostics fv pos1 pos2
                 match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
                 | Some classNode -> 
                     fv.ValueList.Add classNode
@@ -601,18 +604,16 @@ let rec eval (st: SymbolTable) ast =
             fv.FplId <- identifier
             fv.TypeId <- "pred"
             fv.ReprId <- "undetermined"
-            checkID008Diagnostics fv pos1 pos2
         | FplValueType.MandatoryFunctionalTerm
         | FplValueType.OptionalFunctionalTerm
         | FplValueType.FunctionalTerm ->
             fv.FplId <- identifier
             fv.TypeId <- "func"
-            checkID008Diagnostics fv pos1 pos2
         | FplValueType.Constructor -> 
             fv.FplId <- identifier
             fv.TypeId <- identifier
-            fv.ReprId <- "obj"
             checkID008Diagnostics fv pos1 pos2
+            fv.ReprId <- "obj"
         | FplValueType.VariadicVariableMany -> 
             fv.TypeId <- $"*{identifier}"
         | FplValueType.VariadicVariableMany1 -> 
@@ -1490,9 +1491,11 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(fv)
         eval st signatureAst
         
-        // Reset the counters of parent classes before evaluating the declaration block
-        // in which the calls to parent classes will be called (and counted)
-        es.ParentClassCountersReset()  
+        // Initialize the counters of parent classes before evaluating the declaration block
+        // of the constructor in which we want to count the calls to parent classes.
+        // (we need to reset the counters for every constructor of the same class to avoid 
+        // ID020 false positives for the wrong constructors)
+        es.ParentClassCountersInitialize()  
 
         // evaluate the declaration block
         match optVarDeclOrSpecListAst with

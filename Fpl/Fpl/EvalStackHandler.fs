@@ -23,7 +23,7 @@ type EvalStack() =
 
       
     /// Resets the counters of th ID020 diagnostics evaluation.
-    member this.ParentClassCountersReset() = 
+    member this.ParentClassCountersInitialize() = 
         _classCounters |> Seq.iter (fun kvp -> _classCounters[kvp.Key] <- 0)
 
     /// Adds the FplValue to it's parent's Scope.
