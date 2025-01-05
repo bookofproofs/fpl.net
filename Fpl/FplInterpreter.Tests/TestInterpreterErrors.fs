@@ -943,6 +943,7 @@ type TestInterpreterErrors() =
     [<DataRow("49", """def cl A:obj {ctor A(y:+obj) {self}} def class B:obj {ctor B(z:+obj) {dec ~a:A base.obj() a := A(z); self}};""", 0)>]
     [<DataRow("50", """def cl A:obj {intr property pred T() {true}} def cl B:A {ctor B() {dec base.A() assert self.T(); self}};""", 0)>]
     [<DataRow("51", """def func A(n,m:obj)->obj {intr} prop T(op:A) {dec ~x,y:obj; (op(x,y) = x)};""", 0)>]
+    [<DataRow("52", """def cl T:obj { dec ~x:+tpl; ctor T(y:+tpl) {dec base.obj() x:=y; self} property func C(i:ind) -> tpl {return x[i]}};""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =

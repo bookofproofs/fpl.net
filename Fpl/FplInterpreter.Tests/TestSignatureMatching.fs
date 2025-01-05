@@ -326,6 +326,29 @@ type TestSignatureMatching() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("""def pred T (x:*obj) {dec ~i:ind; x[i]} ;""",
+        "")>]
+    [<TestMethod>]
+    member this.TestSignatureMatchingReferencesVariadicCoord(varVal, var:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestSignatureMatchingReferencesVariadicCoord"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let block = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
+            let fvPars = block.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+            let fvArgs = block.ValueList[0] 
+            match matchArgumentsWithParameters fvArgs fvPars with
+            | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
+            | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
+
     [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a:pred; T(a)} ;""",
