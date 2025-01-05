@@ -1024,11 +1024,28 @@ let rec eval (st: SymbolTable) ast =
             if System.Char.IsLower(refBlock.FplId[0]) then
                 // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
                 // with their declared types 
-                let candidates = 
+                let candidatesOfSelfOrParentEntity = 
+                    refBlock.Scope
+                    |> Seq.filter (fun kvp -> kvp.Key = "self" || kvp.Key = "parent")
+                    |> Seq.map (fun kvp -> kvp.Value)
+                    |> Seq.toList
+
+
+                let candidatesOfVariables = 
                     refBlock.Scope
                     |> Seq.filter (fun kvp -> kvp.Key = refBlock.FplId)
                     |> Seq.map (fun kvp -> kvp.Value)
                     |> Seq.toList
+
+                let candidatesOfVariableTypes = 
+                    candidatesOfVariables
+                    |> Seq.filter (fun fv1 -> fv1.ValueList.Count = 1)
+                    |> Seq.map (fun fv1 -> fv1.ValueList[0])
+                    |> Seq.toList
+
+                let candidates = candidatesOfSelfOrParentEntity 
+                                 @ candidatesOfVariables 
+                                 @ candidatesOfVariableTypes 
                 emitSIG04Diagnostics refBlock candidates |> ignore
             else
                 let candidatesFromTheory = findCandidatesByName st refBlock.FplId true
