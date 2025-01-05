@@ -9,177 +9,7 @@ open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterPredicateEvaluator
 open FplInterpreterRunner
-
-
-type EvalStack() = 
-    let _valueStack = Stack<FplValue>()
-    let mutable _inSignatureEvaluation = false
-
-    /// Indicates if this EvalStack is evaluating a signature on a FPL building block
-    member this.InSignatureEvaluation
-        with get () = _inSignatureEvaluation
-        and set (value) = _inSignatureEvaluation <- value
-
-    /// Adds the FplValue to it's parent's Scope.
-    static member tryAddToScope (fv:FplValue) = 
-        let next = fv.Parent.Value
-        let identifier = 
-            match fv.BlockType with
-            |  FplValueType.Constructor -> 
-                fv.Type(SignatureType.Mixed)
-            | _ -> 
-                if FplValue.IsBlock(fv) then 
-                    fv.Type(SignatureType.Mixed)
-                elif FplValue.IsVariable(fv) then 
-                    fv.FplId
-                else
-                    fv.Type(SignatureType.Name)
-        match FplValue.InScopeOfParent(fv) identifier with
-        | ScopeSearchResult.Found conflict -> 
-            match next.BlockType with
-            | FplValueType.Justification -> 
-                emitPR004Diagnostics fv conflict 
-            | _ -> 
-                match fv.BlockType with
-                | FplValueType.Language -> 
-                    let oldDiagnosticsStopped = ad.DiagnosticsStopped
-                    ad.DiagnosticsStopped <- false
-                    emitID014diagnostics fv conflict 
-                    ad.DiagnosticsStopped <- oldDiagnosticsStopped
-                | FplValueType.Argument -> 
-                    emitPR003diagnostics fv conflict 
-                | FplValueType.Variable -> 
-                    ()
-                | _ ->
-                    emitID001diagnostics fv conflict 
-        | _ -> 
-            next.Scope.Add(identifier,fv)
-
-    /// adds the FplValue to it's parent's ValueList
-    static member tryAddToValueList (fv:FplValue) = 
-        let next = fv.Parent.Value
-        next.ValueList.Add(fv)
-
-    // Pops an FplValue from stack without propagating it's name and signature to the next FplValue on the stack.
-    member this.Pop() = _valueStack.Pop()
-
-    // Pops an FplValue from stack and propagates it's name and signature to the next FplValue on the stack.
-    member this.PopEvalStack() = 
-        let fv = _valueStack.Pop()
-        if _valueStack.Count > 0 then
-            let next = _valueStack.Peek()
-
-            match fv.BlockType with
-            | FplValueType.Proof 
-            | FplValueType.Corollary ->
-                EvalStack.tryAddToScope fv
-            | FplValueType.Class 
-            | FplValueType.Theorem
-            | FplValueType.Localization
-            | FplValueType.Lemma
-            | FplValueType.Proposition
-            | FplValueType.Conjecture
-            | FplValueType.RuleOfInference
-            | FplValueType.Constructor
-            | FplValueType.MandatoryPredicate
-            | FplValueType.OptionalPredicate
-            | FplValueType.MandatoryFunctionalTerm
-            | FplValueType.OptionalFunctionalTerm
-            | FplValueType.Axiom
-            | FplValueType.Predicate
-            | FplValueType.Extension
-            | FplValueType.Argument 
-            | FplValueType.Language 
-            | FplValueType.FunctionalTerm ->
-                EvalStack.tryAddToScope fv
-            | FplValueType.Reference ->
-                match next.BlockType with
-                | FplValueType.Localization -> 
-                    next.FplId <- fv.FplId
-                    next.TypeId <- fv.TypeId
-                    next.NameEndPos <- fv.NameEndPos
-                | FplValueType.Justification -> 
-                    EvalStack.tryAddToScope fv
-                | FplValueType.Argument ->
-                    EvalStack.tryAddToValueList fv 
-                | FplValueType.Axiom
-                | FplValueType.Theorem 
-                | FplValueType.Lemma 
-                | FplValueType.Proposition 
-                | FplValueType.Corollary 
-                | FplValueType.Conjecture 
-                | FplValueType.Proof 
-                | FplValueType.RuleOfInference 
-                | FplValueType.Predicate 
-                | FplValueType.FunctionalTerm 
-                | FplValueType.Class 
-                | FplValueType.Constructor
-                | FplValueType.MandatoryFunctionalTerm
-                | FplValueType.OptionalFunctionalTerm
-                | FplValueType.MandatoryPredicate
-                | FplValueType.OptionalPredicate ->
-                    EvalStack.tryAddToValueList fv 
-                | FplValueType.Quantor ->
-                    EvalStack.tryAddToValueList fv 
-                    next.NameEndPos <- fv.NameEndPos
-                | _ -> 
-                    if next.Scope.ContainsKey(".") then 
-                        ()
-                    else
-                        EvalStack.tryAddToValueList fv
-                    next.NameEndPos <- fv.NameEndPos
-            | FplValueType.Variable
-            | FplValueType.VariadicVariableMany
-            | FplValueType.VariadicVariableMany1 ->
-                match next.BlockType with 
-                | FplValueType.Theorem
-                | FplValueType.Lemma
-                | FplValueType.Proposition
-                | FplValueType.Conjecture
-                | FplValueType.RuleOfInference
-                | FplValueType.Constructor
-                | FplValueType.Corollary
-                | FplValueType.Proof
-                | FplValueType.MandatoryPredicate
-                | FplValueType.OptionalPredicate
-                | FplValueType.MandatoryFunctionalTerm
-                | FplValueType.OptionalFunctionalTerm
-                | FplValueType.Axiom
-                | FplValueType.Predicate
-                | FplValueType.Class
-                | FplValueType.Mapping 
-                | FplValueType.Variable 
-                | FplValueType.VariadicVariableMany
-                | FplValueType.VariadicVariableMany1 
-                | FplValueType.FunctionalTerm ->
-                    EvalStack.tryAddToScope fv
-                | FplValueType.Quantor  
-                | FplValueType.Localization -> 
-                    EvalStack.tryAddToScope fv
-                | FplValueType.Reference ->
-                    EvalStack.tryAddToValueList fv
-                | _ -> ()
-            | FplValueType.Object
-            | FplValueType.Quantor
-            | FplValueType.Theory
-            | FplValueType.Justification 
-            | FplValueType.ArgInference 
-            | FplValueType.Mapping 
-            | FplValueType.Translation 
-            | FplValueType.Stmt
-            | FplValueType.Assertion
-            | FplValueType.Root -> 
-                EvalStack.tryAddToValueList fv 
-
-
-    // Pushes an FplValue to the stack.
-    member this.PushEvalStack fv = _valueStack.Push fv
-
-    // Peeks an FplValue from the stack.
-    member this.PeekEvalStack() = _valueStack.Peek()
-
-    // Clears stack.
-    member this.ClearEvalStack() = _valueStack.Clear()
+open EvalStackHandler
 
 let es = EvalStack()
 let run = FplRunner()
@@ -259,7 +89,12 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ObjectType")
         let fv = es.PeekEvalStack()
         setUnitType fv "obj" "intr obj"
-        checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2
+        match checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2 with
+        | Some classNode -> 
+            fv.ValueList.Add classNode
+            // add parent class call for the "obj" identifier
+            es.ParentClassCalls.TryAdd("obj", None) |> ignore
+        | None -> ()
         checkID012Diagnostics st fv "obj" pos1 pos2 
         // we need an extra FplValue for objects to enable class inheritance from them
         let fv1 = FplValue.CreateFplValue((pos1,pos2),FplValueType.Object, es.PeekEvalStack())
@@ -740,13 +575,21 @@ let rec eval (st: SymbolTable) ast =
         match fv.BlockType with 
         | FplValueType.Class -> 
             if evalPath.EndsWith("InheritedClassType.PredicateIdentifier") then 
-                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+                match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
+                | Some classNode -> 
+                    fv.ValueList.Add classNode
+                    // add parent class call for this identifier
+                    es.ParentClassCalls.Add(identifier, None)
+                | None -> ()
             else
                 fv.FplId <- identifier
                 fv.TypeId <- identifier
                 fv.ReprId <- $"class {identifier}"
-                checkID008Diagnostics fv pos1 pos2
-                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+                match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
+                | Some classNode -> 
+                    fv.ValueList.Add classNode
+                | None -> ()
+
         | FplValueType.Axiom
         | FplValueType.Theorem 
         | FplValueType.Lemma 
@@ -758,24 +601,19 @@ let rec eval (st: SymbolTable) ast =
         | FplValueType.MandatoryPredicate
         | FplValueType.OptionalPredicate
         | FplValueType.Predicate ->
-                fv.FplId <- identifier
-                fv.TypeId <- "pred"
-                fv.ReprId <- "undetermined"
-                checkID008Diagnostics fv pos1 pos2
-                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+            fv.FplId <- identifier
+            fv.TypeId <- "pred"
+            fv.ReprId <- "undetermined"
         | FplValueType.MandatoryFunctionalTerm
         | FplValueType.OptionalFunctionalTerm
         | FplValueType.FunctionalTerm ->
-                fv.FplId <- identifier
-                fv.TypeId <- "func"
-                checkID008Diagnostics fv pos1 pos2
-                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+            fv.FplId <- identifier
+            fv.TypeId <- "func"
         | FplValueType.Constructor -> 
-                fv.FplId <- identifier
-                fv.TypeId <- identifier
-                fv.ReprId <- "obj"
-                checkID008Diagnostics fv pos1 pos2
-                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+            fv.FplId <- identifier
+            fv.TypeId <- identifier
+            checkID008Diagnostics fv pos1 pos2
+            fv.ReprId <- "obj"
         | FplValueType.VariadicVariableMany -> 
             fv.TypeId <- $"*{identifier}"
         | FplValueType.VariadicVariableMany1 -> 
@@ -1022,16 +860,31 @@ let rec eval (st: SymbolTable) ast =
             eval st fplIdentifierAst
             eval st specificationAst |> ignore
             if System.Char.IsLower(refBlock.FplId[0]) then
-                // match the signatures of referenced variables with the signatures of their declared types 
-                let candidates = 
+                // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
+                // with their declared types 
+                let candidatesOfSelfOrParentEntity = 
+                    refBlock.Scope
+                    |> Seq.filter (fun kvp -> kvp.Key = "self" || kvp.Key = "parent")
+                    |> Seq.map (fun kvp -> kvp.Value)
+                    |> Seq.toList
+
+
+                let candidatesOfVariables = 
                     refBlock.Scope
                     |> Seq.filter (fun kvp -> kvp.Key = refBlock.FplId)
                     |> Seq.map (fun kvp -> kvp.Value)
+                    |> Seq.toList
+
+                let candidatesOfVariableTypes = 
+                    candidatesOfVariables
                     |> Seq.filter (fun fv1 -> fv1.ValueList.Count = 1)
                     |> Seq.map (fun fv1 -> fv1.ValueList[0])
                     |> Seq.toList
+
+                let candidates = candidatesOfSelfOrParentEntity 
+                                 @ candidatesOfVariables 
+                                 @ candidatesOfVariableTypes 
                 emitSIG04Diagnostics refBlock candidates |> ignore
-                ()
             else
                 let candidatesFromTheory = findCandidatesByName st refBlock.FplId true
                 let candidatesFromPropertyScope = findCandidatesByNameInBlock refBlock refBlock.FplId
@@ -1497,6 +1350,14 @@ let rec eval (st: SymbolTable) ast =
         eval st inheritedClassTypeAst
         eval st argumentTupleAst
         es.PopEvalStack()
+        if fv.ValueList.Count>0 then
+            let parentConstructorCallReference = fv.ValueList[0]
+            let parentClassOpt = parentConstructorCallReference.GetValue
+            match parentClassOpt with
+            | Some parentClass when es.ParentClassCalls.ContainsKey(parentClass.FplId) ->
+                // add the found parent class to the parentClassCalls 
+                es.ParentClassCalls[parentClass.FplId] <- Some parentClass
+            | _ -> () 
         st.EvalPop()
     | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
         st.EvalPush("JustArgInf")
@@ -1637,9 +1498,28 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Constructor, es.PeekEvalStack())
         es.PushEvalStack(fv)
         eval st signatureAst
+        
+        // Initialize the counters of parent classes before evaluating the declaration block
+        // of the constructor in which we want to count the calls to parent classes.
+        // (we need to reset the counters for every constructor of the same class to avoid 
+        // ID020 false positives for the wrong constructors)
+        es.ParentClassCountersInitialize()  
+
+        // evaluate the declaration block
         match optVarDeclOrSpecListAst with
         | Some astList -> astList |> List.map (eval st) |> ignore
         | None -> ()
+
+        // check if the constructor calls all necessary parent classes
+        es.ParentClassCalls 
+        |> Seq.iter (fun kvp -> 
+            match kvp.Value with
+            | Some calledClassNode -> ()
+            | None ->
+                // for this class no parent class was called 
+                emitID020Diagnostics kvp.Key pos1
+        )
+
         let rb = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv)
         es.PushEvalStack(rb)
         eval st keywordSelfAst
@@ -1705,10 +1585,16 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Class, es.PeekEvalStack())
         es.PushEvalStack(fv)
         es.InSignatureEvaluation <- true
+
         eval st predicateIdentifierAst
         es.InSignatureEvaluation <- false
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
+
+        // clear the storage of parent class counters before evaluting the list of parent classes
+        es.ParentClassCalls.Clear() 
+        // now evalute the list of parent classes while adding the identified classes to the storage
         classTypeListAsts |> List.map (eval st) |> ignore
+
         eval st classContentAst
         optPropertyListAsts
         |> Option.map (List.map (eval st) >> ignore)

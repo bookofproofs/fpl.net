@@ -1094,6 +1094,18 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             result
         collectVariables this
 
+    /// Copies other FplValue to this one without changing its reference pointer.
+    member this.Copy(other:FplValue) = 
+        this.ReprId <- other.ReprId
+        this.FplId <- other.FplId
+        if other.IsSignatureVariable then 
+            this.IsSignatureVariable <- other.IsSignatureVariable
+        this.TypeId <- other.TypeId
+        this.Arity <- other.Arity
+        this.AuxiliaryInfo <- other.AuxiliaryInfo
+        this.HasBrackets <- other.HasBrackets
+        this.IsIntrinsic <- other.IsIntrinsic
+
     /// Clones this FplValue.
     member this.Clone() = 
         let rec recClone (fv:FplValue) =

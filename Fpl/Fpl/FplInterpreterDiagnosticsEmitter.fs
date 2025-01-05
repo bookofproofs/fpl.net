@@ -285,25 +285,25 @@ let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
         ad.AddDiagnostic diagnostic
 
 let checkID008Diagnostics (fv: FplValue) pos1 pos2 =
-    match fv.BlockType with
-    | FplValueType.Constructor -> 
-        let nameStart = fv.FplId
-        let className = fv.Parent.Value.FplId
+    let nameStart = fv.FplId
+    let className = fv.Parent.Value.FplId
 
-        if nameStart <> className then
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = pos1
-                    Diagnostic.EndPos = pos2
-                    Diagnostic.Code = ID008(nameStart, className) // misspelled constructor name
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic
-    | _ -> ()
+    if nameStart <> className then
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = ID008(nameStart, className) // misspelled constructor name
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
 
+/// Given the class node fplValue and the identifier `name`, this function checks the 
+/// semantical consistency of a parent class with this name, covering ID009, ID010 and ID011 diagnostics.
+/// It will return None or Some reference to the parent class node with this name, if it could be found.
 let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) name pos1 pos2 =
     let rightContext = st.EvalPath()
     let classInheritanceChain = findClassInheritanceChain fplValue name
@@ -321,6 +321,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                     Diagnostic.Alternatives = None 
                 }
             ad.AddDiagnostic diagnostic
+            None
         else
             match classInheritanceChain with
             | Some chain ->
@@ -335,6 +336,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                         Diagnostic.Alternatives = None 
                     }
                 ad.AddDiagnostic diagnostic
+                None
             | _ ->
                 match FplValue.InScopeOfParent (fplValue) name with
                 | ScopeSearchResult.Found classCandidate ->
@@ -362,7 +364,9 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                         | _ -> ())
 
                     if not duplicateInheritanceChainFound then
-                        fplValue.ValueList.Add classCandidate
+                        Some classCandidate
+                    else
+                        None
                 | _ ->
                     let diagnostic =
                         { 
@@ -375,6 +379,8 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                             Diagnostic.Alternatives = None 
                         }
                     ad.AddDiagnostic diagnostic
+                    None
+
     elif rightContext.EndsWith("InheritedClassType.ObjectType") then
         match classInheritanceChain with
         | Some chain ->
@@ -389,6 +395,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                     Diagnostic.Alternatives = None 
                 }
             ad.AddDiagnostic diagnostic
+            None
         | _ ->
             let mutable duplicateInheritanceChainFound = false
 
@@ -415,6 +422,25 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
             if not duplicateInheritanceChainFound then
                 let obJ = FplValue.CreateFplValue((pos1, pos2),FplValueType.Object,fplValue)
                 fplValue.ValueList.Add obJ
+                Some obJ
+            else
+                None
+    else    
+        None
+
+let emitID020Diagnostics identifier pos1 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos1
+            Diagnostic.Code = ID020 identifier
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 
 let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) identifier (pos1: Position) pos2 =
     let context = st.EvalPath()
@@ -615,6 +641,7 @@ let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
                 if expressionId = block.FplId then
                     let blockType = block.Type(SignatureType.Mixed)
                     fv.Scope.Add(blockType, block)
+                    fv.TypeId <- block.TypeId
                 else
                     let blockType = block.Type(SignatureType.Mixed)
                     match block.ExpressionType with
@@ -623,9 +650,11 @@ let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
                     | FixType.Postfix symbol ->
                         if expressionId = symbol then
                             fv.Scope.Add(blockType, block)
+                            fv.TypeId <- block.TypeId
                     | FixType.Infix(symbol, precedence) ->
                         if expressionId = symbol then
                             fv.Scope.Add(blockType, block)
+                            fv.TypeId <- block.TypeId
                     | _ -> ()))
 
         if fv.Scope.Count = 0 then

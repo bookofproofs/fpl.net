@@ -474,4 +474,10 @@ type TestPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<TestMethod>]
+    member this.TestPredicate62 () =
+        let result = run (predicate .>> eof) """not x"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
            
