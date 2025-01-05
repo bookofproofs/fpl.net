@@ -14,11 +14,24 @@ open FplInterpreterRunner
 type EvalStack() = 
     let _valueStack = Stack<FplValue>()
     let mutable _inSignatureEvaluation = false
+    let mutable _classCounters = Dictionary<FplValue,int>()
 
     /// Indicates if this EvalStack is evaluating a signature on a FPL building block
     member this.InSignatureEvaluation
         with get () = _inSignatureEvaluation
         and set (value) = _inSignatureEvaluation <- value
+
+    /// In the context of a class being evaluated, this dictionary provides a dictionary
+    /// of its parent classes (=Key) and integer values (=Value). The dictionary is used to 
+    /// count if for all of these classes a base constructor call is contained in the body 
+    /// of a specific class constructor. If it is not the case for alll of the parent classes,
+    /// ID020 diagnostics will be emitted.
+    member this.ParentClassCounters = _classCounters
+
+      
+    /// Resets the counters of th ID020 diagnostics evaluation.
+    member this.ParentClassCountersReset() = 
+        _classCounters |> Seq.iter (fun kvp -> _classCounters[kvp.Key] <- 0)
 
     /// Adds the FplValue to it's parent's Scope.
     static member tryAddToScope (fv:FplValue) = 
@@ -1652,9 +1665,16 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Constructor, es.PeekEvalStack())
         es.PushEvalStack(fv)
         eval st signatureAst
+        
+        // Reset the counters of parent classes before evaluating the declaration block
+        // in which the calls to parent classes will be called (and counted)
+        es.ParentClassCountersReset()  
+
+        // evaluate the declaration block
         match optVarDeclOrSpecListAst with
         | Some astList -> astList |> List.map (eval st) |> ignore
         | None -> ()
+
         let rb = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv)
         es.PushEvalStack(rb)
         eval st keywordSelfAst
@@ -1720,10 +1740,16 @@ let rec eval (st: SymbolTable) ast =
         let fv = FplValue.CreateFplValue((pos1, pos2), FplValueType.Class, es.PeekEvalStack())
         es.PushEvalStack(fv)
         es.InSignatureEvaluation <- true
+
         eval st predicateIdentifierAst
         es.InSignatureEvaluation <- false
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
+
+        // clear the storage of parent class counters before evaluting the list of parent classes
+        es.ParentClassCounters.Clear() 
+        // now evalute the list of parent classes while adding the identified classes to the storage
         classTypeListAsts |> List.map (eval st) |> ignore
+
         eval st classContentAst
         optPropertyListAsts
         |> Option.map (List.map (eval st) >> ignore)

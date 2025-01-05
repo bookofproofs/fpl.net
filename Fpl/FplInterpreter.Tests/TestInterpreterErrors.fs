@@ -786,6 +786,28 @@ type TestInterpreterErrors() =
         let code = ID019 ""
         runTestHelper "TestID019.fpl" fplCode code expected
 
+
+    [<DataRow("00", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A(); self} };", 2)>]
+    [<DataRow("00a", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.B(); self} };", 2)>]
+    [<DataRow("00b", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.C(); self} };", 2)>]
+    [<DataRow("00c", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.B(); self} };", 1)>]
+    [<DataRow("00d", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.C(); self} };", 1)>]
+    [<DataRow("00e", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.B() base.C(); self} };", 1)>]
+    [<DataRow("00f", "def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {ctor D() {dec base.A() base.B() base.C(); self} };", 0)>]
+    [<DataRow("01", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); self} };", 0)>]
+    [<DataRow("01a", "def cl A:obj {intr} def cl B:A {ctor B() {self} };", 1)>]
+    [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
+    [<DataRow("02a", "def cl A:obj { ctor A() {self} };", 1)>]
+    [<DataRow("03", "def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
+    [<DataRow("03a", "def cl A:C { ctor A() {dec base.obj(); self} };", 1)>]
+    [<DataRow("04", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); self} };", 1)>]
+    [<DataRow("04a", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); self} };", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID020(no:string, fplCode:string, expected) =
+        let code = ID020 ""
+        runTestHelper "TestID020.fpl" fplCode code expected
+
     [<DataRow("def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
     [<DataRow("def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
     [<DataRow("def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `x` is undefined.")>]
