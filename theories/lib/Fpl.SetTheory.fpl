@@ -108,6 +108,7 @@ def class SetBuilder: Set
     ctor SetBuilder(x: Set, p: pred(u1: Set, o:* obj))
     {
         dec
+        base.Set()
         assert
             all u1:Set
             {

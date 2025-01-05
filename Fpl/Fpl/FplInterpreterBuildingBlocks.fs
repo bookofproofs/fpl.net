@@ -92,8 +92,8 @@ let rec eval (st: SymbolTable) ast =
         match checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2 with
         | Some classNode -> 
             fv.ValueList.Add classNode
-            // add parent class counter
-            es.ParentClassCounters.Add(classNode, 0)
+            // add parent class call for the "obj" identifier
+            es.ParentClassCalls.TryAdd("obj", None) |> ignore
         | None -> ()
         checkID012Diagnostics st fv "obj" pos1 pos2 
         // we need an extra FplValue for objects to enable class inheritance from them
@@ -578,8 +578,8 @@ let rec eval (st: SymbolTable) ast =
                 match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
                 | Some classNode -> 
                     fv.ValueList.Add classNode
-                    // add parent class counter
-                    es.ParentClassCounters.Add(classNode,0)
+                    // add parent class call for this identifier
+                    es.ParentClassCalls.Add(identifier, None)
                 | None -> ()
             else
                 fv.FplId <- identifier
@@ -1350,6 +1350,14 @@ let rec eval (st: SymbolTable) ast =
         eval st inheritedClassTypeAst
         eval st argumentTupleAst
         es.PopEvalStack()
+        if fv.ValueList.Count>0 then
+            let parentConstructorCallReference = fv.ValueList[0]
+            let parentClassOpt = parentConstructorCallReference.GetValue
+            match parentClassOpt with
+            | Some parentClass when es.ParentClassCalls.ContainsKey(parentClass.FplId) ->
+                // add the found parent class to the parentClassCalls 
+                es.ParentClassCalls[parentClass.FplId] <- Some parentClass
+            | _ -> () 
         st.EvalPop()
     | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
         st.EvalPush("JustArgInf")
@@ -1502,6 +1510,16 @@ let rec eval (st: SymbolTable) ast =
         | Some astList -> astList |> List.map (eval st) |> ignore
         | None -> ()
 
+        // check if the constructor calls all necessary parent classes
+        es.ParentClassCalls 
+        |> Seq.iter (fun kvp -> 
+            match kvp.Value with
+            | Some calledClassNode -> ()
+            | None ->
+                // for this class no parent class was called 
+                emitID020Diagnostics kvp.Key pos1
+        )
+
         let rb = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv)
         es.PushEvalStack(rb)
         eval st keywordSelfAst
@@ -1573,7 +1591,7 @@ let rec eval (st: SymbolTable) ast =
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
 
         // clear the storage of parent class counters before evaluting the list of parent classes
-        es.ParentClassCounters.Clear() 
+        es.ParentClassCalls.Clear() 
         // now evalute the list of parent classes while adding the identified classes to the storage
         classTypeListAsts |> List.map (eval st) |> ignore
 

@@ -310,7 +310,7 @@ definition class EquivalenceRelation: BinaryRelation
     ctor EquivalenceRelation(x,y: Set)
     {
         dec
-            self:=BinaryRelation(x,y)
+            base.BinaryRelation(x,y)
             assert self.Reflexive()
             assert self.Symmetric()
             assert self.Transitive()

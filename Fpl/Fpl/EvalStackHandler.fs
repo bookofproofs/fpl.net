@@ -7,7 +7,7 @@ open FplInterpreterDiagnosticsEmitter
 type EvalStack() = 
     let _valueStack = Stack<FplValue>()
     let mutable _inSignatureEvaluation = false
-    let mutable _classCounters = Dictionary<FplValue,int>()
+    let mutable _classCounters = Dictionary<string,FplValue option>()
 
     /// Indicates if this EvalStack is evaluating a signature on a FPL building block
     member this.InSignatureEvaluation
@@ -19,12 +19,12 @@ type EvalStack() =
     /// count if for all of these classes a base constructor call is contained in the body 
     /// of a specific class constructor. If it is not the case for alll of the parent classes,
     /// ID020 diagnostics will be emitted.
-    member this.ParentClassCounters = _classCounters
+    member this.ParentClassCalls = _classCounters
 
       
     /// Resets the counters of th ID020 diagnostics evaluation.
     member this.ParentClassCountersInitialize() = 
-        _classCounters |> Seq.iter (fun kvp -> _classCounters[kvp.Key] <- 0)
+        _classCounters |> Seq.iter (fun kvp -> _classCounters[kvp.Key] <- None)
 
     /// Adds the FplValue to it's parent's Scope.
     static member tryAddToScope (fv:FplValue) = 
@@ -42,6 +42,7 @@ type EvalStack() =
                     fv.Type(SignatureType.Name)
         match FplValue.InScopeOfParent(fv) identifier with
         | ScopeSearchResult.Found conflict -> 
+            Some conflict 
             match next.BlockType with
             | FplValueType.Justification -> 
                 emitPR004Diagnostics fv conflict 

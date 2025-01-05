@@ -799,7 +799,7 @@ type TestInterpreterErrors() =
     [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
     [<DataRow("02a", "def cl A:obj { ctor A() {self} };", 1)>]
     [<DataRow("03", "def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
-    [<DataRow("03a", "def cl A:C { ctor A() {dec base.obj(); self} };", 1)>]
+    [<DataRow("03a", "def cl A:C { ctor A() {dec base.obj(); self} };", 0)>]
     [<DataRow("04", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); self} };", 1)>]
     [<DataRow("04a", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); self} };", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
