@@ -150,3 +150,57 @@ type TestInfixOperations() =
             Assert.AreEqual<string>(expected, base1.ReprId)
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("00", """def pred T1() { (false or false or false) };""", "false")>]
+    [<DataRow("01", """def pred T1() { (true or false or false) };""", "true")>]
+    [<DataRow("02", """def pred T1() { (false or true or false) };""", "true")>]
+    [<DataRow("03", """def pred T1() { (true or true or false) };""", "true")>]
+    [<DataRow("04", """def pred T1() { (false or false or true) };""", "true")>]
+    [<DataRow("05", """def pred T1() { (true or false or true) };""", "true")>]
+    [<DataRow("06", """def pred T1() { (false or true or true) };""", "true")>]
+    [<DataRow("07", """def pred T1() { (true or true or true) };""", "true")>]
+    [<TestMethod>]
+    member this.TestDisjunctionCallsFplCommons(no:string, varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """uses Fpl.Commons %s""" varVal
+        let filename = "TestDisjunctionCallsFplCommons"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        checkForUnexpectedErrors VAR00
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.ValueList[0]
+            Assert.AreEqual<string>(expected, base1.ReprId)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("00", """def pred T1() { (false xor false xor false) };""", "false")>]
+    [<DataRow("01", """def pred T1() { (true xor false xor false) };""", "true")>]
+    [<DataRow("02", """def pred T1() { (false xor true xor false) };""", "true")>]
+    [<DataRow("03", """def pred T1() { (true xor true xor false) };""", "false")>]
+    [<DataRow("04", """def pred T1() { (false xor false xor true) };""", "true")>]
+    [<DataRow("05", """def pred T1() { (true xor false xor true) };""", "false")>]
+    [<DataRow("06", """def pred T1() { (false xor true xor true) };""", "false")>]
+    [<DataRow("07", """def pred T1() { (true xor true xor true) };""", "true")>]
+    [<TestMethod>]
+    member this.TestExDisjunctionCallsFplCommons(no:string, varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """uses Fpl.Commons %s""" varVal
+        let filename = "TestDisjunctionCallsFplCommons"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        checkForUnexpectedErrors VAR00
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+
+            let pr1 = theory.Scope["T1()"] 
+            let base1 = pr1.ValueList[0]
+            Assert.AreEqual<string>(expected, base1.ReprId)
+        | None -> 
+            Assert.IsTrue(false)

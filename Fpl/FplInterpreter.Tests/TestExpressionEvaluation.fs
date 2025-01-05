@@ -41,13 +41,13 @@ type TestExpressionEvaluation() =
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
-    [<DataRow("def pred T() { and(true,true,true) };", "true")>]
-    [<DataRow("def pred T() { and(true,false,true) };", "false")>]
-    [<DataRow("def pred T() { and(true,true,false) };", "false")>]
-    [<DataRow("def pred T() { and(false,true,true) };", "false")>]
-    [<DataRow("def pred T() { and(true,x,true) };", "undetermined")>]
-    [<DataRow("def pred T() { and(true,true,x) };", "undetermined")>]
-    [<DataRow("def pred T() { and(x,true,true) };", "undetermined")>]
+    [<DataRow("def pred T() { and(and(true,true),true) };", "true")>]
+    [<DataRow("def pred T() { and(and(true,false),true) };", "false")>]
+    [<DataRow("def pred T() { and(and(true,true),false) };", "false")>]
+    [<DataRow("def pred T() { and(and(false,true),true) };", "false")>]
+    [<DataRow("def pred T() { and(true,and(x,true)) };", "undetermined")>]
+    [<DataRow("def pred T() { and(true,and(true,x)) };", "undetermined")>]
+    [<DataRow("def pred T() { and(x,and(true,true)) };", "undetermined")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationConjunction(fplCode, expected: string) =
         ad.Clear()
@@ -74,13 +74,13 @@ type TestExpressionEvaluation() =
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
-    [<DataRow("def pred T() { or(false,false,false) };", "false")>]
-    [<DataRow("def pred T() { or(false,true,false) };", "true")>]
-    [<DataRow("def pred T() { or(false,false,true) };", "true")>]
-    [<DataRow("def pred T() { or(true,false,false) };", "true")>]
-    [<DataRow("def pred T() { or(false,x,false) };", "undetermined")>]
-    [<DataRow("def pred T() { or(false,false,x) };", "undetermined")>]
-    [<DataRow("def pred T() { or(x,false,false) };", "undetermined")>]
+    [<DataRow("def pred T() { or(false,or(false,false)) };", "false")>]
+    [<DataRow("def pred T() { or(false,or(true,false)) };", "true")>]
+    [<DataRow("def pred T() { or(or(false,false),true) };", "true")>]
+    [<DataRow("def pred T() { or(or(true,false),false) };", "true")>]
+    [<DataRow("def pred T() { or(false,or(x,false)) };", "undetermined")>]
+    [<DataRow("def pred T() { or(or(false,false),x) };", "undetermined")>]
+    [<DataRow("def pred T() { or(x,or(false,false)) };", "undetermined")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationDisjunction(fplCode, expected: string) =
         ad.Clear()
@@ -107,17 +107,17 @@ type TestExpressionEvaluation() =
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
-    [<DataRow("def pred T() { xor(false,false,false) };", "false")>]
-    [<DataRow("def pred T() { xor(false,false,true) };", "true")>]
-    [<DataRow("def pred T() { xor(false,true,false) };", "true")>]
-    [<DataRow("def pred T() { xor(true,false,false) };", "true")>]
-    [<DataRow("def pred T() { xor(false,true,true) };", "false")>]
-    [<DataRow("def pred T() { xor(true,false,true) };", "false")>]
-    [<DataRow("def pred T() { xor(true,true,false) };", "false")>]
-    [<DataRow("def pred T() { xor(true,true,true) };", "true")>]
-    [<DataRow("def pred T() { xor(false,x,false) };", "undetermined")>]
-    [<DataRow("def pred T() { xor(false,false,x) };", "undetermined")>]
-    [<DataRow("def pred T() { xor(x,false,false) };", "undetermined")>]
+    [<DataRow("def pred T() { xor(false,xor(false,false)) };", "false")>]
+    [<DataRow("def pred T() { xor(xor(false,false),true) };", "true")>]
+    [<DataRow("def pred T() { xor(xor(false,true),false) };", "true")>]
+    [<DataRow("def pred T() { xor(xor(true,false),false) };", "true")>]
+    [<DataRow("def pred T() { xor(false,xor(true,true)) };", "false")>]
+    [<DataRow("def pred T() { xor(xor(true,false),true) };", "false")>]
+    [<DataRow("def pred T() { xor(true,xor(true,false)) };", "false")>]
+    [<DataRow("def pred T() { xor(true,xor(true,true)) };", "true")>]
+    [<DataRow("def pred T() { xor(xor(false,x),false) };", "undetermined")>]
+    [<DataRow("def pred T() { xor(false,xor(false,x)) };", "undetermined")>]
+    [<DataRow("def pred T() { xor(x,xor(false,false)) };", "undetermined")>]
     [<TestMethod>]
     member this.TestExpressionEvaluationExclusiveOr(fplCode, expected: string) =
         ad.Clear()

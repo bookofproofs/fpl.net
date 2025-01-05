@@ -514,14 +514,14 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow("base15b", "-x'")>]
     [<DataRow("base16", "-(y + x = @2 * x)")>]
     [<DataRow("base17", "(y + x' = @2 * x)'")>]
-    [<DataRow("base18", "ex x:Range(a:T), y:C, z:obj {and (a,b,c)}")>]
+    [<DataRow("base18", "ex x:Range(a:T), y:C, z:obj {and (a,and(b,c))}")>]
     [<DataRow("base19", "exn$1 x:obj {all y:N {true}}")>]
     [<DataRow("base20", "all x:obj {not x}")>]
-    [<DataRow("base21", "and (x, y, z)")>]
+    [<DataRow("base21", "and (x, and(y, z))")>]
     [<DataRow("base21a", "not x")>]
     [<DataRow("base21b", "not (x)")>]
-    [<DataRow("base22", "xor (x, y, z)")>]
-    [<DataRow("base23", "or (x, y, z)")>]
+    [<DataRow("base22", "xor (x, xor(y, z))")>]
+    [<DataRow("base23", "or (x, or(y, z))")>]
     [<DataRow("base24", "iif (x, y)")>]
     [<DataRow("base25", "impl (x, y)")>]
     [<DataRow("base26", "is (x, Nat)")>]
@@ -592,11 +592,11 @@ type TestFplValueScopeTypeSignature() =
             | "base18" -> Assert.AreEqual<string>("pred(Range(T), C, obj)", base1.Type(SignatureType.Type))
             | "base19" -> Assert.AreEqual<string>("pred$1(obj)", base1.Type(SignatureType.Type))
             | "base20" -> Assert.AreEqual<string>("pred(obj)", base1.Type(SignatureType.Type))
-            | "base21" -> Assert.AreEqual<string>("pred(undef, undef, undef)", base1.Type(SignatureType.Type))
+            | "base21" -> Assert.AreEqual<string>("pred(undef, pred(undef, undef))", base1.Type(SignatureType.Type))
             | "base21a" -> Assert.AreEqual<string>("pred(undef)", base1.Type(SignatureType.Type))
             | "base21b" -> Assert.AreEqual<string>("pred(undef)", base1.Type(SignatureType.Type))
-            | "base22" -> Assert.AreEqual<string>("pred(undef, undef, undef)", base1.Type(SignatureType.Type))
-            | "base23" -> Assert.AreEqual<string>("pred(undef, undef, undef)", base1.Type(SignatureType.Type))
+            | "base22" -> Assert.AreEqual<string>("pred(undef, pred(undef, undef))", base1.Type(SignatureType.Type))
+            | "base23" -> Assert.AreEqual<string>("pred(undef, pred(undef, undef))", base1.Type(SignatureType.Type))
             | "base24" -> Assert.AreEqual<string>("pred(undef, undef)", base1.Type(SignatureType.Type))
             | "base25" -> Assert.AreEqual<string>("pred(undef, undef)", base1.Type(SignatureType.Type))
             | "base26" -> Assert.AreEqual<string>("pred(undef, Nat)", base1.Type(SignatureType.Type))

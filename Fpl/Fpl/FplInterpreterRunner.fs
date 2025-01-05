@@ -109,6 +109,8 @@ type FplRunner() =
                 | "impl" ->  evaluateImplication caller
                 | "not" ->  evaluateNegation caller
                 | "and" ->  evaluateConjunction caller
+                | "xor" ->  evaluateExclusiveOr caller
+                | "or" ->  evaluateDisjunction caller
                 | _ -> ()
         | _ -> ()
         
