@@ -89,7 +89,10 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ObjectType")
         let fv = es.PeekEvalStack()
         setUnitType fv "obj" "intr obj"
-        checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2
+        match checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2 with
+        | Some classNode -> 
+            fv.ValueList.Add classNode
+        | None -> ()
         checkID012Diagnostics st fv "obj" pos1 pos2 
         // we need an extra FplValue for objects to enable class inheritance from them
         let fv1 = FplValue.CreateFplValue((pos1,pos2),FplValueType.Object, es.PeekEvalStack())
@@ -570,13 +573,20 @@ let rec eval (st: SymbolTable) ast =
         match fv.BlockType with 
         | FplValueType.Class -> 
             if evalPath.EndsWith("InheritedClassType.PredicateIdentifier") then 
-                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+                match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
+                | Some classNode -> 
+                    fv.ValueList.Add classNode
+                | None -> ()
             else
                 fv.FplId <- identifier
                 fv.TypeId <- identifier
                 fv.ReprId <- $"class {identifier}"
                 checkID008Diagnostics fv pos1 pos2
-                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+                match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
+                | Some classNode -> 
+                    fv.ValueList.Add classNode
+                | None -> ()
+
         | FplValueType.Axiom
         | FplValueType.Theorem 
         | FplValueType.Lemma 
@@ -588,24 +598,33 @@ let rec eval (st: SymbolTable) ast =
         | FplValueType.MandatoryPredicate
         | FplValueType.OptionalPredicate
         | FplValueType.Predicate ->
-                fv.FplId <- identifier
-                fv.TypeId <- "pred"
-                fv.ReprId <- "undetermined"
-                checkID008Diagnostics fv pos1 pos2
-                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+            fv.FplId <- identifier
+            fv.TypeId <- "pred"
+            fv.ReprId <- "undetermined"
+            checkID008Diagnostics fv pos1 pos2
+            match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with 
+            | Some classNode -> 
+                fv.ValueList.Add classNode
+            | None -> ()
         | FplValueType.MandatoryFunctionalTerm
         | FplValueType.OptionalFunctionalTerm
         | FplValueType.FunctionalTerm ->
-                fv.FplId <- identifier
-                fv.TypeId <- "func"
-                checkID008Diagnostics fv pos1 pos2
-                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+            fv.FplId <- identifier
+            fv.TypeId <- "func"
+            checkID008Diagnostics fv pos1 pos2
+            match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with 
+            | Some classNode -> 
+                fv.ValueList.Add classNode
+            | None -> ()
         | FplValueType.Constructor -> 
-                fv.FplId <- identifier
-                fv.TypeId <- identifier
-                fv.ReprId <- "obj"
-                checkID008Diagnostics fv pos1 pos2
-                checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2
+            fv.FplId <- identifier
+            fv.TypeId <- identifier
+            fv.ReprId <- "obj"
+            checkID008Diagnostics fv pos1 pos2
+            match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with 
+            | Some classNode -> 
+                fv.ValueList.Add classNode
+            | None -> ()
         | FplValueType.VariadicVariableMany -> 
             fv.TypeId <- $"*{identifier}"
         | FplValueType.VariadicVariableMany1 -> 

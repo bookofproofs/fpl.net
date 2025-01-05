@@ -304,6 +304,9 @@ let checkID008Diagnostics (fv: FplValue) pos1 pos2 =
             ad.AddDiagnostic diagnostic
     | _ -> ()
 
+/// Given the class node fplValue and the identifier `name`, this function checks the 
+/// semantical consistency of a parent class with this name, covering ID009, ID010 and ID011 diagnostics.
+/// It will return None or Some reference to the parent class node with this name, if it could be found.
 let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) name pos1 pos2 =
     let rightContext = st.EvalPath()
     let classInheritanceChain = findClassInheritanceChain fplValue name
@@ -321,6 +324,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                     Diagnostic.Alternatives = None 
                 }
             ad.AddDiagnostic diagnostic
+            None
         else
             match classInheritanceChain with
             | Some chain ->
@@ -335,6 +339,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                         Diagnostic.Alternatives = None 
                     }
                 ad.AddDiagnostic diagnostic
+                None
             | _ ->
                 match FplValue.InScopeOfParent (fplValue) name with
                 | ScopeSearchResult.Found classCandidate ->
@@ -362,7 +367,9 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                         | _ -> ())
 
                     if not duplicateInheritanceChainFound then
-                        fplValue.ValueList.Add classCandidate
+                        Some classCandidate
+                    else
+                        None
                 | _ ->
                     let diagnostic =
                         { 
@@ -375,6 +382,8 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                             Diagnostic.Alternatives = None 
                         }
                     ad.AddDiagnostic diagnostic
+                    None
+
     elif rightContext.EndsWith("InheritedClassType.ObjectType") then
         match classInheritanceChain with
         | Some chain ->
@@ -389,6 +398,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                     Diagnostic.Alternatives = None 
                 }
             ad.AddDiagnostic diagnostic
+            None
         | _ ->
             let mutable duplicateInheritanceChainFound = false
 
@@ -415,6 +425,11 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
             if not duplicateInheritanceChainFound then
                 let obJ = FplValue.CreateFplValue((pos1, pos2),FplValueType.Object,fplValue)
                 fplValue.ValueList.Add obJ
+                Some obJ
+            else
+                None
+    else    
+        None
 
 let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) identifier (pos1: Position) pos2 =
     let context = st.EvalPath()
