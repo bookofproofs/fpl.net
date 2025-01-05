@@ -602,29 +602,17 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- "pred"
             fv.ReprId <- "undetermined"
             checkID008Diagnostics fv pos1 pos2
-            match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with 
-            | Some classNode -> 
-                fv.ValueList.Add classNode
-            | None -> ()
         | FplValueType.MandatoryFunctionalTerm
         | FplValueType.OptionalFunctionalTerm
         | FplValueType.FunctionalTerm ->
             fv.FplId <- identifier
             fv.TypeId <- "func"
             checkID008Diagnostics fv pos1 pos2
-            match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with 
-            | Some classNode -> 
-                fv.ValueList.Add classNode
-            | None -> ()
         | FplValueType.Constructor -> 
             fv.FplId <- identifier
             fv.TypeId <- identifier
             fv.ReprId <- "obj"
             checkID008Diagnostics fv pos1 pos2
-            match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with 
-            | Some classNode -> 
-                fv.ValueList.Add classNode
-            | None -> ()
         | FplValueType.VariadicVariableMany -> 
             fv.TypeId <- $"*{identifier}"
         | FplValueType.VariadicVariableMany1 -> 
