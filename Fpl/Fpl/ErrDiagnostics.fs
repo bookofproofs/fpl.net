@@ -121,6 +121,7 @@ type DiagnosticCode =
     | ID018 of string 
     | ID019 of string 
     | ID020 of string 
+    | ID021 of string 
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
@@ -203,6 +204,7 @@ type DiagnosticCode =
             | ID018 _ -> "ID018"
             | ID019 _ -> "ID019"
             | ID020 _ -> "ID020"
+            | ID021 _ -> "ID021"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
@@ -285,6 +287,7 @@ type DiagnosticCode =
             | ID018 name -> sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> sprintf "Missing call of base constructor `%s`." name
+            | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."

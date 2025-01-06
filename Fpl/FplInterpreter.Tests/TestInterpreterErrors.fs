@@ -808,6 +808,16 @@ type TestInterpreterErrors() =
         let code = ID020 ""
         runTestHelper "TestID020.fpl" fplCode code expected
 
+    [<DataRow("01", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A(); self} };", 0)>]
+    [<DataRow("01a", "def cl A:obj {intr} def cl B:A {ctor B() {dec base.A() base.A(); self} };", 1)>]
+    [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
+    [<DataRow("02a", "def cl A:obj { ctor A() {dec base.obj() base.obj(); self} };", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID021(no:string, fplCode:string, expected) =
+        let code = ID021 ""
+        runTestHelper "TestID021.fpl" fplCode code expected
+
     [<DataRow("def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
     [<DataRow("def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
     [<DataRow("def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `x` is undefined.")>]

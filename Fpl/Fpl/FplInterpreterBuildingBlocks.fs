@@ -93,7 +93,7 @@ let rec eval (st: SymbolTable) ast =
         | Some classNode -> 
             fv.ValueList.Add classNode
             // add parent class call for the "obj" identifier
-            es.ParentClassCalls.TryAdd("obj", None) |> ignore
+            es.ParentClassCalls.TryAdd("obj", None) |> ignore 
         | None -> ()
         checkID012Diagnostics st fv "obj" pos1 pos2 
         // we need an extra FplValue for objects to enable class inheritance from them
@@ -1356,7 +1356,10 @@ let rec eval (st: SymbolTable) ast =
             match parentClassOpt with
             | Some parentClass when es.ParentClassCalls.ContainsKey(parentClass.FplId) ->
                 // add the found parent class to the parentClassCalls 
-                es.ParentClassCalls[parentClass.FplId] <- Some parentClass
+                if Option.isNone es.ParentClassCalls[parentClass.FplId] then 
+                   es.ParentClassCalls[parentClass.FplId] <- Some parentClass
+                else
+                   emitID021Diagnostics parentClass.FplId pos1
             | _ -> () 
         st.EvalPop()
     | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
