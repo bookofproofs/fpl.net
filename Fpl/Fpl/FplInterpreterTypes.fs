@@ -1094,6 +1094,35 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             result
         collectVariables this
 
+    /// Returns Some or none FplValue being the enclosing class block of a node inside a class.
+    member this.GetClassBlock() = 
+        let rec getClassBlock (fv:FplValue) = 
+            match fv.BlockType with
+            | FplValueType.Root -> None
+            | FplValueType.Class -> Some fv
+            | _ -> 
+                match fv.Parent with
+                | Some parent -> getClassBlock parent 
+                | _ -> None
+        getClassBlock this
+
+    /// If this is a class definition, the function will return a list (possibly empty) list of all of its constructors.
+    member this.GetConstructors() = 
+        this.Scope
+        |> Seq.map (fun kvp -> kvp.Value)
+        |> Seq.filter (fun fv -> fv.BlockType = FplValueType.Constructor)
+        |> Seq.toList
+
+    /// If this is a definition, the function will return a (possibly empty) list of all of its properties.
+    member this.GetProperties() = 
+        this.Scope
+        |> Seq.map (fun kvp -> kvp.Value)
+        |> Seq.filter (fun fv -> fv.BlockType = FplValueType.MandatoryFunctionalTerm 
+                                                || fv.BlockType = FplValueType.OptionalFunctionalTerm
+                                                || fv.BlockType = FplValueType.MandatoryPredicate 
+                                                || fv.BlockType = FplValueType.OptionalPredicate )
+        |> Seq.toList
+
     /// Copies other FplValue to this one without changing its reference pointer.
     member this.Copy(other:FplValue) = 
         this.ReprId <- other.ReprId
@@ -1693,14 +1722,6 @@ let searchExtensionByName (root:FplValue) identifier =
 let copyParentToDerivedClass (parentClass:FplValue) (derivedClass:FplValue) =
     let shadowedVars = List<string>()
     let shadowedProperties = List<string>()
-    let rec getClassBlock (fv1:FplValue) = 
-        match fv1.BlockType with
-        | FplValueType.Root -> None
-        | FplValueType.Class -> Some fv1
-        | _ -> 
-            match fv1.Parent with
-            | Some parent -> getClassBlock parent 
-            | _ -> None
     let parentVariables = parentClass.GetVariables()
     parentVariables 
     |> List.iter (fun parentVar -> 
