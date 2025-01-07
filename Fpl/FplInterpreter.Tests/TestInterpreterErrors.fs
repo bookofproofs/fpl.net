@@ -544,6 +544,14 @@ type TestInterpreterErrors() =
         let code = VAR05 ""
         runTestHelper "TestVAR05.fpl" fplCode code expected
 
+    [<DataRow("00", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; self}} def cl S:T { dec ~x:obj; ctor S() { dec base.T() ; self}} ;", 1)>]
+    [<DataRow("01", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; self}} def cl S:T { dec ~y:obj; ctor S() { dec base.T() ; self}} ;", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestVAR06(no:string, fplCode:string, expected) =
+        let code = VAR06 ("","")
+        runTestHelper "TestVAR06.fpl" fplCode code expected
+
     [<DataRow("def pred Test(x,x:* pred) {true};", 1)>]
     [<DataRow("def pred Test(x,x:+ pred) {true};", 1)>]
     [<DataRow("def pred Test(x,x: pred) {true};", 1)>]
