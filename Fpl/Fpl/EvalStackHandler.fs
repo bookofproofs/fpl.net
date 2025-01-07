@@ -15,12 +15,12 @@ type EvalStack() =
         and set (value) = _inSignatureEvaluation <- value
 
     /// In the context of a class being evaluated, this dictionary provides a dictionary
-    /// of its parent classes (=Key) and integer values (=Value). The dictionary is used to 
-    /// count if for all of these classes a base constructor call is contained in the body 
-    /// of a specific class constructor. If it is not the case for alll of the parent classes,
-    /// ID020 diagnostics will be emitted.
+    /// of potential calls of parent classes (=Key). The optional FplValue values become some values
+    /// if the a particular call was found. 
+    /// This dictionary is used to emit ID020/ID021 diagnostics. If a class A inherits from class B but doesn't call its base constructor
+    /// ID020 diagnostics will be emitted. If a class A inherits from class B and calls its base constructor more than once
+    /// ID021 diagnostics will be emitted.
     member this.ParentClassCalls = _classCounters
-
       
     /// Resets the counters of th ID020 diagnostics evaluation.
     member this.ParentClassCountersInitialize() = 
