@@ -171,6 +171,19 @@ let emitVAR05diagnostics (fv:FplValue) =
     )
     |> ignore
 
+let emitVAR06iagnostic name parentClass pos = 
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos
+            Diagnostic.EndPos = pos
+            Diagnostic.Code = VAR06(name,parentClass)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitID000Diagnostics astType =
     let diagnostic =
         { 
