@@ -280,12 +280,20 @@ type DiagnosticCode =
             | ID009 name -> sprintf "Circular base type dependency involving `%s`." name
             | ID010 name -> sprintf "The type `%s` could not be found. Are you missing a uses clause?" name
             | ID011 (name, inheritanceChain) -> sprintf "Inheritance from `%s` can be dropped because of the inheritance chain %s." name inheritanceChain
-            | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are %s." name candidates
+            | ID012 (name, candidates) -> 
+                if candidates.Length > 0 then 
+                    sprintf "Base class `%s` not found, candidates are %s." name candidates
+                else
+                    sprintf "Base class `%s` not found, no candidates found." name 
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
             | ID015 signature -> sprintf "Referencing self impossible inside non-definitions; the outer block is %s." signature
             | ID016 signature -> sprintf "Referencing self impossible outside definitions, the outer block is %s." signature
-            | ID017 (name, candidates) -> sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
+            | ID017 (name, candidates) -> 
+                if candidates.Length > 0 then
+                   sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
+                else
+                   sprintf "The type `%s` could not be determined, found no candidates." name 
             | ID018 name -> sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> sprintf "Missing call of base constructor `%s`." name
