@@ -1689,4 +1689,22 @@ let searchExtensionByName (root:FplValue) identifier =
     else 
         ScopeSearchResult.Found candidates.Head
 
-
+/// Copy the variables and properties of a parent class into a derived class.
+let copyParentToDerivedClass (parentClass:FplValue) (derivedClass:FplValue) =
+    let shadowedVars = List<string>()
+    let shadowedProperties = List<string>()
+    let rec getClassBlock (fv1:FplValue) = 
+        match fv1.BlockType with
+        | FplValueType.Root -> None
+        | FplValueType.Class -> Some fv1
+        | _ -> 
+            match fv1.Parent with
+            | Some parent -> getClassBlock parent 
+            | _ -> None
+    let parentVariables = parentClass.GetVariables()
+    parentVariables 
+    |> List.iter (fun parentVar -> 
+        if derivedClass.Scope.ContainsKey(parentVar.FplId) then 
+            shadowedVars.Add(parentVar.FplId)
+    )
+    (shadowedVars,shadowedProperties)
