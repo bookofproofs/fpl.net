@@ -546,6 +546,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("00", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; self}} def cl S:T { dec ~x:obj; ctor S() { dec base.T() ; self}} ;", 1)>]
     [<DataRow("01", "def cl T:obj { dec ~x:obj; ctor T() { dec base.obj() ; self}} def cl S:T { dec ~y:obj; ctor S() { dec base.T() ; self}} ;", 0)>]
+    [<DataRow("02", "def cl T:Stypo { dec ~x:obj; ctor T() { dec base.Stypo() ; self}} ;", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR06(no:string, fplCode:string, expected) =
@@ -807,7 +808,7 @@ type TestInterpreterErrors() =
     [<DataRow("02", "def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
     [<DataRow("02a", "def cl A:obj { ctor A() {self} };", 1)>]
     [<DataRow("03", "def cl A:obj { ctor A() {dec base.obj(); self} };", 0)>]
-    [<DataRow("03a", "def cl A:C { ctor A() {dec base.obj(); self} };", 0)>]
+    [<DataRow("03a", "def cl A:C { ctor A() {dec base.obj(); self} };", 1)>]
     [<DataRow("04", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.obj(); self} };", 1)>]
     [<DataRow("04a", "uses Fpl.SetTheory def cl Test:Set {ctor Test() {dec base.Set(); self} };", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
