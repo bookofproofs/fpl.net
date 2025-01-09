@@ -434,7 +434,6 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
 
             if not duplicateInheritanceChainFound then
                 let obJ = FplValue.CreateFplValue((pos1, pos2),FplValueType.Object,fplValue)
-                fplValue.ValueList.Add obJ
                 Some obJ
             else
                 None
