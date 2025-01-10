@@ -92,14 +92,10 @@ let rec eval (st: SymbolTable) ast =
         match checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2 with
         | Some classNode -> 
             fv.ValueList.Add classNode
-            // add parent class call for the "obj" identifier
-            es.ParentClassCalls.TryAdd("obj", None) |> ignore 
         | None -> ()
+        // add potential parent class call for the "obj" identifier
+        es.ParentClassCalls.TryAdd("obj", None) |> ignore 
         checkID012Diagnostics st fv "obj" pos1 pos2 
-        // we need an extra FplValue for objects to enable class inheritance from them
-        let fv1 = FplValue.CreateFplValue((pos1,pos2),FplValueType.Object, es.PeekEvalStack())
-        es.PushEvalStack(fv1)
-        es.PopEvalStack()
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
@@ -577,10 +573,12 @@ let rec eval (st: SymbolTable) ast =
             if evalPath.EndsWith("InheritedClassType.PredicateIdentifier") then 
                 match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
                 | Some classNode -> 
+                    // add known class
                     fv.ValueList.Add classNode
-                    // add parent class call for this identifier
-                    es.ParentClassCalls.Add(identifier, None)
                 | None -> ()
+                // add potential parent class call for this identifier regardless if this class is known
+                // or if the identifier is duplicated
+                es.ParentClassCalls.TryAdd(identifier, None) |> ignore
             else
                 fv.FplId <- identifier
                 fv.TypeId <- identifier
@@ -626,7 +624,6 @@ let rec eval (st: SymbolTable) ast =
             fv.FplId <- fv.FplId + identifier
             fv.TypeId <- fv.TypeId + identifier
             checkID012Diagnostics st fv identifier pos1 pos2
-            
         | _ -> ()
         if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
             let candidates = findCandidatesByName st identifier false
@@ -1352,15 +1349,38 @@ let rec eval (st: SymbolTable) ast =
         es.PopEvalStack()
         if fv.ValueList.Count>0 then
             let parentConstructorCallReference = fv.ValueList[0]
-            let parentClassOpt = parentConstructorCallReference.GetValue
-            match parentClassOpt with
-            | Some parentClass when es.ParentClassCalls.ContainsKey(parentClass.FplId) ->
-                // add the found parent class to the parentClassCalls 
-                if Option.isNone es.ParentClassCalls[parentClass.FplId] then 
-                   es.ParentClassCalls[parentClass.FplId] <- Some parentClass
-                else
-                   emitID021Diagnostics parentClass.FplId pos1
-            | _ -> () 
+            let parentConstructorCallRefValue = parentConstructorCallReference.GetValue
+            match parentConstructorCallRefValue with
+            | Some refVal -> 
+                if es.ParentClassCalls.ContainsKey(refVal.FplId) then
+                    // Since the reference's id is the same as one of the classes this class is derived from,
+                    let derivedClassOpt = parentConstructorCallReference.GetClassBlock()
+                    match derivedClassOpt with
+                    | Some derivedClass ->
+                        let parentClassFilterList = 
+                            derivedClass.ValueList 
+                            |> Seq.filter (fun pc -> pc.FplId = refVal.FplId)
+                            |> Seq.toList
+                        if parentClassFilterList.Length > 0 then
+                            let parentClass = parentClassFilterList.Head
+                            // add the found parent class to the parentClassCalls 
+                            if Option.isNone es.ParentClassCalls[refVal.FplId] then 
+                                es.ParentClassCalls[parentClass.FplId] <- Some parentClass
+                                let (shadowedVars, shadowedProperties) = copyParentToDerivedClass parentClass derivedClass
+                                shadowedVars
+                                |> Seq.iter (fun name -> 
+                                    emitVAR06iagnostic name derivedClass.FplId pos1
+                                )
+                            else
+                                emitID021Diagnostics parentClass.FplId pos1
+                    | None ->
+                        // this case never happens, 
+                        // if so the bug will become apparent by failing to call the parent class constructor
+                        () 
+                else 
+                    () 
+            | None -> 
+                ()
         st.EvalPop()
     | Ast.JustArgInf((pos1, pos2), (justificationAst, argumentInferenceAst)) ->
         st.EvalPush("JustArgInf")
