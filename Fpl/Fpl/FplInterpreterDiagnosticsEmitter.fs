@@ -171,6 +171,19 @@ let emitVAR05diagnostics (fv:FplValue) =
     )
     |> ignore
 
+let emitVAR06iagnostic name parentClass pos = 
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos
+            Diagnostic.EndPos = pos
+            Diagnostic.Code = VAR06(name,parentClass)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitID000Diagnostics astType =
     let diagnostic =
         { 
@@ -421,7 +434,6 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
 
             if not duplicateInheritanceChainFound then
                 let obJ = FplValue.CreateFplValue((pos1, pos2),FplValueType.Object,fplValue)
-                fplValue.ValueList.Add obJ
                 Some obJ
             else
                 None
@@ -441,6 +453,18 @@ let emitID020Diagnostics identifier pos1 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID021Diagnostics identifier pos1 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos1
+            Diagnostic.Code = ID021 identifier
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
 
 let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) identifier (pos1: Position) pos2 =
     let context = st.EvalPath()

@@ -121,12 +121,14 @@ type DiagnosticCode =
     | ID018 of string 
     | ID019 of string 
     | ID020 of string 
+    | ID021 of string 
     // variable-related error codes
     | VAR00 
     | VAR01 of string 
     | VAR03 of string * string
     | VAR04 of string 
     | VAR05 of string 
+    | VAR06 of string * string
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -203,12 +205,14 @@ type DiagnosticCode =
             | ID018 _ -> "ID018"
             | ID019 _ -> "ID019"
             | ID020 _ -> "ID020"
+            | ID021 _ -> "ID021"
             // variable-related error codes
             | VAR00 -> "VAR00"
             | VAR01 _  -> "VAR01"
             | VAR03 _  -> "VAR03"
             | VAR04 _  -> "VAR04"
             | VAR05 _  -> "VAR05"
+            | VAR06 _  -> "VAR06"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -276,21 +280,31 @@ type DiagnosticCode =
             | ID009 name -> sprintf "Circular base type dependency involving `%s`." name
             | ID010 name -> sprintf "The type `%s` could not be found. Are you missing a uses clause?" name
             | ID011 (name, inheritanceChain) -> sprintf "Inheritance from `%s` can be dropped because of the inheritance chain %s." name inheritanceChain
-            | ID012 (name, candidates) -> sprintf "Base class `%s` not found, candidates are %s." name candidates
+            | ID012 (name, candidates) -> 
+                if candidates.Length > 0 then 
+                    sprintf "Base class `%s` not found, candidates are %s." name candidates
+                else
+                    sprintf "Base class `%s` not found, no candidates found." name 
             | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
             | ID015 signature -> sprintf "Referencing self impossible inside non-definitions; the outer block is %s." signature
             | ID016 signature -> sprintf "Referencing self impossible outside definitions, the outer block is %s." signature
-            | ID017 (name, candidates) -> sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
+            | ID017 (name, candidates) -> 
+                if candidates.Length > 0 then
+                   sprintf "The type `%s` could not be determined, found more than one candidates %s." name candidates
+                else
+                   sprintf "The type `%s` could not be determined, found no candidates." name 
             | ID018 name -> sprintf "The extension `%s` could not be matched. Declare an extension with this pattern." name
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> sprintf "Missing call of base constructor `%s`." name
+            | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
             // variable-related error codes
             | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
             | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
             | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
             | VAR04 name ->  sprintf $"Declared variable `{name}` not used in this scope."
             | VAR05 name ->  sprintf $"Bound variable `{name}` not used in this quantor."
+            | VAR06 (name, parentClass) ->  sprintf $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 

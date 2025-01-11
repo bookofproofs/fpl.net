@@ -88,8 +88,8 @@ axiom CompleteInduction(p:pred(n:Nat))
 
     impl
     (
-        and ( p(@0), all n:Nat { impl ( p(n), p(Succ(n)) ) } ),
-        all n:Nat { p(n) }
+        and ( p(@0), all n1:Nat { impl ( p(n1), p(Succ(n1)) ) } ),
+        all n1:Nat { p(n1) }
     )
 
 }
