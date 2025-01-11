@@ -93,9 +93,11 @@ let rec eval (st: SymbolTable) ast =
         | Some classNode -> 
             fv.ValueList.Add classNode
         | None -> ()
-        // add potential parent class call for the "obj" identifier
-        es.ParentClassCalls.TryAdd("obj", None) |> ignore 
         checkID012Diagnostics st fv "obj" pos1 pos2 
+        // add potential parent class call for this identifier (if it is one) 
+        let path = st.EvalPath()
+        if path.Contains("DefinitionClass.InheritedClassType") then 
+            es.ParentClassCalls.TryAdd("obj", None) |> ignore
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
@@ -576,9 +578,10 @@ let rec eval (st: SymbolTable) ast =
                     // add known class
                     fv.ValueList.Add classNode
                 | None -> ()
-                // add potential parent class call for this identifier regardless if this class is known
-                // or if the identifier is duplicated
-                es.ParentClassCalls.TryAdd(identifier, None) |> ignore
+                // add potential parent class call for this identifier
+                let path = st.EvalPath()
+                if path.Contains("DefinitionClass.InheritedClassType") then 
+                    es.ParentClassCalls.TryAdd(identifier, None) |> ignore
             else
                 fv.FplId <- identifier
                 fv.TypeId <- identifier

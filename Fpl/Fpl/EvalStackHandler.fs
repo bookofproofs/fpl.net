@@ -42,7 +42,6 @@ type EvalStack() =
                     fv.Type(SignatureType.Name)
         match FplValue.InScopeOfParent(fv) identifier with
         | ScopeSearchResult.Found conflict -> 
-            Some conflict 
             match next.BlockType with
             | FplValueType.Justification -> 
                 emitPR004Diagnostics fv conflict 
