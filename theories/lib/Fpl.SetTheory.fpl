@@ -110,12 +110,12 @@ def class SetBuilder: Set
         dec
         base.Set()
         assert
-            all u1:Set
+            all u2:Set
             {
                 iif
                 (
-                    In(u1,self),
-                    and ( In(u1,x), p(u1,o) )
+                    In(u2,self),
+                    and ( In(u2,x), p(u2,o) )
                 )
             }
         ;

@@ -211,7 +211,7 @@ let rec eval (st: SymbolTable) ast =
         varValue.ReprId <- "undef"
         varValue.IsSignatureVariable <- es.InSignatureEvaluation 
         if isDeclaration then 
-            match FplValue.VariableInBlockScopeByName fv name false with 
+            match FplValue.VariableInBlockScopeByName fv name true with 
             | ScopeSearchResult.Found other ->
                 // replace the variable by other on stack
                 es.PushEvalStack(other)
