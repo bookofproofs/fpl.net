@@ -211,13 +211,20 @@ let rec eval (st: SymbolTable) ast =
         varValue.ReprId <- "undef"
         varValue.IsSignatureVariable <- es.InSignatureEvaluation 
         if isDeclaration then 
+            // check for VAR03 diagnostics
             match FplValue.VariableInBlockScopeByName fv name true with 
             | ScopeSearchResult.Found other ->
                 // replace the variable by other on stack
-                es.PushEvalStack(other)
                 emitVAR03diagnostics varValue other 
+            | _ -> ()
+
+            match FplValue.VariableInBlockScopeByName fv name false with 
+            | ScopeSearchResult.Found other ->
+                // replace the variable by other on stack
+                es.PushEvalStack(other)
             | _ -> 
                 es.PushEvalStack(varValue)
+
         elif isLocalizationDeclaration then 
             match FplValue.VariableInBlockScopeByName fv name false with 
             | ScopeSearchResult.Found other ->
