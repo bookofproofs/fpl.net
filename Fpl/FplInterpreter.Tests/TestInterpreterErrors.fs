@@ -527,6 +527,7 @@ type TestInterpreterErrors() =
     [<DataRow("21c", "def pred S() {intr prty func T()->obj {dec ~x:obj; return xy}};", 1)>]
     [<DataRow("21d", "def pred S() {intr prty func T()->obj {dec ~x:obj; return x}};", 0)>]
     [<DataRow("22", "axiom T(p:pred(n:obj)) {all n:Nat{p(n)} };", 0)>]
+    [<DataRow("23", "axiom T(p:pred(n:obj)) {p(@0)};", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR04(no:string, fplCode:string, expected) =

@@ -188,22 +188,11 @@ let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
 let keywordUses = (skipString "uses") .>> SW
 let usesClause = positions "UsesClause" (keywordUses >>. theoryNamespace) |>> Ast.UsesClause
 
-let keywordExtension = (skipString "extension" <|> skipString "ext") .>> SW
-
-let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.ExtensionName
-
-let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionRegex
-
-let extensionBlock = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> IW .>> colon .>> IW) .>>. (slash >>. extensionRegex .>> slash)) |>> Ast.ExtensionBlock
-
-
 (* Signatures, Variable Declarations, and Types, and Coordinates *)
 // convention: All syntax production rules of FPL syntax extensions have to start with "ext", followed by
 // a Pascal Case id.
 // This ensures that they will not be mixed-up with original FPL ebnf productions
 // that are all PascalCase as well as FPL keywords, that are all small case.
-
-let xId = positions "ExtensionType" (at >>. extensionName) |>> Ast.ExtensionType 
 
 let dollarDigits = positions "DollarDigits" (regex "\$" >>. puint32 <?> "<dollarDigits>") |>> Ast.DollarDigits
 
@@ -232,6 +221,12 @@ let coordList = (sepBy1 coord comma) .>> IW
 let bracketedCoords = positions "BrackedCoordList" (leftBracket >>. coordList .>> rightBracket) |>> Ast.BrackedCoordList
 
 let namedVariableDeclarationList, namedVariableDeclarationListRef = createParserForwardedToRef()
+
+let keywordExtension = (skipString "extension" <|> skipString "ext") .>> SW
+
+let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.ExtensionName
+
+let xId = positions "ExtensionType" (at >>. extensionName) |>> Ast.ExtensionType 
 
 let specificClassType = choice [ objectHeader; xId; predicateIdentifier ] 
 
@@ -466,6 +461,15 @@ let returnStatement = positions "Return" (keywordReturn >>. predicate) .>> IW |>
 let funcContent = varDeclOrSpecList .>>. returnStatement |>> Ast.DefFunctionContent
 let functionalTermInstanceBlock = leftBrace >>. (keywordIntrinsic <|> funcContent) .>> spacesRightBrace
 let functionalTermInstance = positions "FunctionalTermInstance" (functionalTermSignature .>>. functionalTermInstanceBlock) |>> Ast.FunctionalTermInstance
+
+
+let extensionRegex = regex "[^\/]+" <?> "<extension regex>" |>> Ast.ExtensionRegex
+
+let extensionAssignment = positions "ExtensionAssignment" ((variable .>> IW .>> at .>> IW) .>>. (slash >>. extensionRegex .>> slash)) |>> Ast.ExtensionAssignment
+
+let extensionSignature = positions "ExtensionSignature" ((extensionAssignment .>> IW) .>>. mapping .>> IW) |>> Ast.ExtensionSignature
+let extensionTerm = leftBrace >>. funcContent .>> spacesRightBrace
+let extensionBlock = positions "ExtensionBlock" (keywordExtension >>. (extensionName .>> SW) .>>. extensionSignature .>>. extensionTerm) |>> Ast.DefinitionExtension
 
 let definitionProperty = choice [
     predicateInstance

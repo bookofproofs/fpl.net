@@ -50,7 +50,9 @@ type Ast =
     | ExtensionName of Positions * string
     | ExtensionRegex of string
     | ExtensionType of Positions * Ast 
-    | ExtensionBlock of Positions * (Ast * Ast)
+    | ExtensionAssignment of Positions * (Ast * Ast) 
+    | ExtensionSignature of Positions * (Ast * Ast)
+    | DefinitionExtension of Positions * ((Ast * Ast) * Ast)
     | UsesClause of Positions * Ast
     | BrackedCoordList of Positions * Ast list
     | ReferencingIdentifier of Positions * (Ast * Ast list)
