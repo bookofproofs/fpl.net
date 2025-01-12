@@ -2,8 +2,6 @@
 This theory is experimental and for test purposes only.
 */
 
-ext Digits: /\d+/
-
 uses Fpl.Commons
 uses Fpl.SetTheory
 
@@ -26,22 +24,20 @@ def func Succ(n: Nat) -> Nat
     intr
 }
 
-def func NatRepr(x: @Digits) -> Nat
+ext Digits x@/\d+/ -> Nat 
 {
-    
     dec
-        ~n:Nat
-        cases
-        (
-            | (x = @0) : n := Zero() 
-            | (x = @1) : n := Succ(Zero()) 
-            | (x = @2) : n := Succ(Succ(Zero())) 
-            ? n := Succ(delegate.Decrement(x))  
-        )
+    ~n:Nat
+    cases
+    (
+        | (x = @0) : n := Zero() 
+        | (x = @1) : n := Succ(Zero()) 
+        | (x = @2) : n := Succ(Succ(Zero())) 
+        ? n := Succ(delegate.Decrement(x))  
+    )
     ;
     return n
 }
-
 
 axiom ZeroIsNat()
 {

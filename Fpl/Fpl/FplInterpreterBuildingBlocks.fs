@@ -926,12 +926,23 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("InheritedClassType")
         eval st ast1
         st.EvalPop()
-    | Ast.ExtensionBlock((pos1, pos2), (extensionNameAst, extensionRegexAst)) ->
-        st.EvalPush("ExtensionBlock")
+    | Ast.ExtensionAssignment((pos1, pos2), (varAst, extensionRegexAst)) ->
+        st.EvalPush("ExtensionAssignment")
+        eval st varAst
+        eval st extensionRegexAst
+        st.EvalPop()
+    | Ast.ExtensionSignature((pos1, pos2), (extensionAssignmentAst, extensionMappingAst)) ->
+        st.EvalPush("ExtensionSignature")
+        eval st extensionAssignmentAst
+        eval st extensionMappingAst
+        st.EvalPop()
+    | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst,extensionSignatureAst), extensionTermAst)) ->
+        st.EvalPush("DefinitionExtension")
         let fv = FplValue.CreateFplValue((pos1,pos2),FplValueType.Extension, es.PeekEvalStack())
         es.PushEvalStack(fv)
         eval st extensionNameAst
-        eval st extensionRegexAst
+        eval st extensionSignatureAst
+        eval st extensionTermAst
         es.PopEvalStack()
         st.EvalPop()
     | Ast.Impl((pos1, pos2), (predicateAst1, predicateAst2)) ->
