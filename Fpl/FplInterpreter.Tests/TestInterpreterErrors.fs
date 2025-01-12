@@ -272,12 +272,12 @@ type TestInterpreterErrors() =
     [<DataRow("proof TestId$1$2 {1. |- trivial} ;", 0)>]
     [<DataRow("proof TestId$1$2$3 {1. |- trivial} ;", 0)>]
 
-    [<DataRow(@"ext Digits: /\d+/ def pred T() {true} ext Digits: /\d+/;", 1)>]
-    [<DataRow(@"ext Digits: /\d+/ def pred T() {true} ext Digits1: /\d+/;", 0)>]
-    [<DataRow(@"ext Digits: /\d+/ def pred T() {true} ext Digits1: /\d+/ def pred S() {true} ;", 0)>]
-    [<DataRow(@"ext Digits: /\d+/ def pred T() {true} ext Digits1: /\d+/ def pred T() {@1} ;", 1)>]
-    [<DataRow(@"ext Digits: /\d+/ def pred T(x:@Digits) {true};", 0)>]
-    [<DataRow(@"ext Digits: /\d+/ def pred T(x:@Typo) {true};", 0)>]
+    [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T() {true} ext Digits x@/\d+/ -> X {ret x};", 1)>]
+    [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T() {true} ext Digits1 x@/\d+/ -> X {ret x} ;", 0)>]
+    [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T() {true} ext Digits1 x@/\d+/ -> X {ret x} def pred S() {true} ;", 0)>]
+    [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T() {true} ext Digits1 x@/\d+/ -> X {ret x} def pred T() {@1} ;", 1)>]
+    [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T(x:@Digits) {true};", 0)>]
+    [<DataRow(@"ext Digits x@/\d+/ -> X {ret x} def pred T(x:@Typo) {true};", 0)>]
 
     [<DataRow("def func Sum(list:* Nat)->Nat {dec ~result: Nat; return result} def func Sum2(list:* Nat)->Nat {dec ~result: Nat; return result};", 0)>]
     [<DataRow("""def cl B:obj {intr} def cl A:obj {dec ~x:obj; ctor A(y:B[x:obj]) {self} };""", 0)>]
@@ -778,21 +778,21 @@ type TestInterpreterErrors() =
         let code = ID017 ("","")
         runTestHelper "TestID017.fpl" fplCode code expected
 
-    [<DataRow("00", @"ext Digits: /\d+/ def pred T() {@1};", 0)>]
-    [<DataRow("01", @"ext Alpha: /[a-z]+/ ext Digits: /\d+/ def pred T() {@123};", 0)>]
-    [<DataRow("02", @"ext Alpha: /[a-z]+/ ext Digits: /\d+/ def pred T() {@abc};", 0)>]
-    [<DataRow("03", @"ext Alpha: /[a-z]+/ def pred T() {@123};", 1)>]
-    [<DataRow("04", @"ext Digits: /\d+/ def pred T() {@abc};", 1)>]
-    [<DataRow("05", @"ext Alpha: /[a-z]+/ def pred T() {@abc};", 0)>]
+    [<DataRow("00", @"ext Digits x @ /\d+/ -> N {return x} def pred T() {@1};", 0)>]
+    [<DataRow("01", @"ext Alpha x @ /[a-z]+/ -> N {return x} ext Digits x @ /\d+/ -> P {ret x} def pred T() {@123};", 0)>]
+    [<DataRow("02", @"ext Alpha x @ /[a-z]+/ -> N {return x} ext Digits x @ /\d+/ -> P {ret x} def pred T() {@abc};", 0)>]
+    [<DataRow("03", @"ext Alpha x @ /[a-z]+/ -> N {return x} def pred T() {@123};", 1)>]
+    [<DataRow("04", @"ext Digits x @ /\d+/ -> N {return x} def pred T() {@abc};", 1)>]
+    [<DataRow("05", @"ext Alpha x @ /[a-z]+/ -> N {return x} def pred T() {@abc};", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID018(no:string, fplCode:string, expected) =
         let code = ID018 ""
         runTestHelper "TestID018.fpl" fplCode code expected
 
-    [<DataRow("00", @"ext Digits: /\d+/ def pred T(x:@Digits) {true};", 0)>]
-    [<DataRow("01", @"ext Digits: /\d+/ def pred T(x:@Typo) {true};", 1)>]
-    [<DataRow("01", @"ext Digits: /\d+/ def pred T(x:tpl) {true};", 0)>]
+    [<DataRow("00", @"ext Digits x @ /\d+/ def pred T(x:@Digits) {true};", 0)>]
+    [<DataRow("01", @"ext Digits x @ /\d+/ def pred T(x:@Typo) {true};", 1)>]
+    [<DataRow("01", @"ext Digits x @ /\d+/ def pred T(x:tpl) {true};", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID019(no:string, fplCode:string, expected) =
