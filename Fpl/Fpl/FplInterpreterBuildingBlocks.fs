@@ -1230,14 +1230,14 @@ let rec eval (st: SymbolTable) ast =
             | x::xs -> 
                 match emitSIG04Diagnostics currentOp [x] with 
                 | Some candidate -> 
-                    run.Run(currentOp, currentOp.NameStartPos, currentOp.NameEndPos) // execute the matched binary operator
+                    run.Run currentOp currentOp // execute the matched binary operator
                 | _ -> ()
             | _ -> ()
             fv.ValueList.RemoveAt(currMinIndex+1) 
             fv.ValueList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv
         let last = es.PeekEvalStack()
-        run.Run(last, last.NameStartPos, last.NameEndPos) // execute the last matched binary operator
+        run.Run last last // execute the last matched binary operator
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->

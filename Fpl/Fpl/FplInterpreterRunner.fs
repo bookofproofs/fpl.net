@@ -82,7 +82,7 @@ type FplRunner() =
             orig.Copy(kvp.Value)
         )
 
-    member this.Run(caller:FplValue, pos1:Position, pos2: Position) = 
+    member this.Run (rootCaller:FplValue) (caller:FplValue) = 
         match caller.BlockType with 
         | FplValueType.Reference ->
             if caller.Scope.Count > 0 then 
@@ -100,7 +100,7 @@ type FplRunner() =
                     // run all statements of the called node
                     called.ValueList
                     |> Seq.iter (fun fv -> 
-                        this.Run(fv, caller.NameStartPos, caller.NameEndPos)
+                        this.Run caller fv 
                         lastRepr <- fv.ReprId
                     )
                     |> ignore
@@ -116,7 +116,7 @@ type FplRunner() =
                 | "xor" ->  evaluateExclusiveOr caller
                 | "or" ->  evaluateDisjunction caller
                 | _ when caller.FplId.StartsWith("del.") ->
-                    emitID013Diagnostics caller pos1 pos2 |> ignore
+                    emitID013Diagnostics caller rootCaller.NameStartPos rootCaller.NameEndPos |> ignore
                 | _ -> ()
         | _ -> ()
         
