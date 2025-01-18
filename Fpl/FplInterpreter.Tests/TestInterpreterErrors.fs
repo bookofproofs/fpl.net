@@ -444,6 +444,7 @@ type TestInterpreterErrors() =
     [<DataRow("13", "prop A(d:pred) {true} cor A$1() { d };", 0)>]
     [<DataRow("14", "def class A: obj {ctor A(x: obj, p:obj(u: pred)) {dec assert u; self }};", 0)>]
     [<DataRow("15", "ext D x@/\d+/ -> pred { ret (x = @1) };", 0)>]
+    [<DataRow("16", "ext D x@/\d+/ -> pred { dec ~y:obj; ret (x = y) };", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestVAR01(no:string, fplCode:string, expected) =
@@ -792,9 +793,9 @@ type TestInterpreterErrors() =
         let code = ID018 ""
         runTestHelper "TestID018.fpl" fplCode code expected
 
-    [<DataRow("00", @"ext Digits x @ /\d+/ def pred T(x:@Digits) {true};", 0)>]
-    [<DataRow("01", @"ext Digits x @ /\d+/ def pred T(x:@Typo) {true};", 1)>]
-    [<DataRow("01", @"ext Digits x @ /\d+/ def pred T(x:tpl) {true};", 0)>]
+    [<DataRow("00", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:@Digits) {true};", 0)>]
+    [<DataRow("01", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:@Typo) {true};", 1)>]
+    [<DataRow("01", @"ext Digits x @ /\d+/->obj {dec ~y:obj; return y} def pred T(x:tpl) {true};", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID019(no:string, fplCode:string, expected) =
