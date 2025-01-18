@@ -154,6 +154,7 @@ type EvalStack() =
                 | FplValueType.Predicate
                 | FplValueType.Class
                 | FplValueType.Mapping 
+                | FplValueType.Extension 
                 | FplValueType.Variable 
                 | FplValueType.VariadicVariableMany
                 | FplValueType.VariadicVariableMany1 
