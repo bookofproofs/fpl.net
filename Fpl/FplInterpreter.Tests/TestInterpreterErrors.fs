@@ -428,24 +428,25 @@ type TestInterpreterErrors() =
         runTestHelper "TestVAR00.fpl" fplCode code expected
 
 
-    [<DataRow("def pred Test() {x};", 1)>]
-    [<DataRow("inf ExistsByExample(p: pred(c: obj)) {pre: p(c) con: ex x:obj {p(x)}};", 0)>]
-    [<DataRow("axiom A() { all x:Nat {true} };", 0)>]
-    [<DataRow("axiom A() { all x:obj {y} };", 1)>]
-    [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
-    [<DataRow("axiom A() { dec ~x:obj; true };", 0)>]
-    [<DataRow("""loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
-    [<DataRow("""loc and(p,q) := !tex: x "\wedge" q;;""", 1)>]
-    [<DataRow("""loc and(p,q) := !tex: x "\wedge" y;;""", 2)>]
-    [<DataRow("""def pred Add infix "+" 2 (x,y: obj) {intr} loc (x + y) := !tex: x "+" y !eng: x "plus" y !ger: x "plus" y;;""", 0)>]
-    [<DataRow("""def pred Add infix "+" 2 (x,y: obj) {intr} axiom A() {(x + y * z = 1)};""", 3)>]
-    [<DataRow("axiom A(arr: tpl[x:pred]) { x };", 0)>]
-    [<DataRow("prop A(d:pred) {true} proof A$1 {1. |- d qed};", 0)>]
-    [<DataRow("prop A(d:pred) {true} cor A$1() { d };", 0)>]
-    [<DataRow("def class A: obj {ctor A(x: obj, p:obj(u: pred)) {dec assert u; self }};", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<DataRow("00", "def pred Test() {x};", 1)>]
+    [<DataRow("01", "inf ExistsByExample(p: pred(c: obj)) {pre: p(c) con: ex x:obj {p(x)}};", 0)>]
+    [<DataRow("02", "axiom A() { all x:Nat {true} };", 0)>]
+    [<DataRow("03", "axiom A() { all x:obj {y} };", 1)>]
+    [<DataRow("04", "axiom A() { dec ~x:obj; true };", 0)>]
+    [<DataRow("05", "axiom A() { dec ~x:obj; true };", 0)>]
+    [<DataRow("06", """loc and(p,q) := !tex: p "\wedge" q;;""", 0)>]
+    [<DataRow("07", """loc and(p,q) := !tex: x "\wedge" q;;""", 1)>]
+    [<DataRow("08", """loc and(p,q) := !tex: x "\wedge" y;;""", 2)>]
+    [<DataRow("09", """def pred Add infix "+" 2 (x,y: obj) {intr} loc (x + y) := !tex: x "+" y !eng: x "plus" y !ger: x "plus" y;;""", 0)>]
+    [<DataRow("10", """def pred Add infix "+" 2 (x,y: obj) {intr} axiom A() {(x + y * z = 1)};""", 3)>]
+    [<DataRow("11", "axiom A(arr: tpl[x:pred]) { x };", 0)>]
+    [<DataRow("12", "prop A(d:pred) {true} proof A$1 {1. |- d qed};", 0)>]
+    [<DataRow("13", "prop A(d:pred) {true} cor A$1() { d };", 0)>]
+    [<DataRow("14", "def class A: obj {ctor A(x: obj, p:obj(u: pred)) {dec assert u; self }};", 0)>]
+    [<DataRow("15", "ext D x@/\d+/ -> pred { ret (x = @1) };", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
-    member this.TestVAR01(fplCode:string, expected) =
+    member this.TestVAR01(no:string, fplCode:string, expected) =
         let code = VAR01 ""
         runTestHelper "TestVAR01.fpl" fplCode code expected
 

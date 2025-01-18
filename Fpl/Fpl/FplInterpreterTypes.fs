@@ -976,6 +976,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             | FplValueType.Conjecture 
             | FplValueType.Proof 
             | FplValueType.RuleOfInference 
+            | FplValueType.Extension 
             | FplValueType.Predicate 
             | FplValueType.FunctionalTerm 
             | FplValueType.Class -> 
