@@ -4,6 +4,7 @@ open FplInterpreterTypes
 open FplInterpreterPredicateEvaluator
 open FplInterpreterDiagnosticsEmitter
 open System
+open FParsec
 
 type FplRunner() =
     let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
@@ -81,7 +82,7 @@ type FplRunner() =
             orig.Copy(kvp.Value)
         )
 
-    member this.Run(caller:FplValue) = 
+    member this.Run(caller:FplValue, pos1:Position, pos2: Position) = 
         match caller.BlockType with 
         | FplValueType.Reference ->
             if caller.Scope.Count > 0 then 
@@ -99,7 +100,7 @@ type FplRunner() =
                     // run all statements of the called node
                     called.ValueList
                     |> Seq.iter (fun fv -> 
-                        this.Run(fv)
+                        this.Run(fv, caller.NameStartPos, caller.NameEndPos)
                         lastRepr <- fv.ReprId
                     )
                     |> ignore
@@ -115,7 +116,7 @@ type FplRunner() =
                 | "xor" ->  evaluateExclusiveOr caller
                 | "or" ->  evaluateDisjunction caller
                 | _ when caller.FplId.StartsWith("del.") ->
-                    emitID013Diagnostics caller (caller.NameStartPos) (caller.NameEndPos) |> ignore
+                    emitID013Diagnostics caller pos1 pos2 |> ignore
                 | _ -> ()
         | _ -> ()
         
