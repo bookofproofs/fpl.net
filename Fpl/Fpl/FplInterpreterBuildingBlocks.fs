@@ -154,7 +154,11 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ExtensionRegex s -> 
         st.EvalPush("ExtensionRegex")
         let fv = es.PeekEvalStack()
-        fv.ReprId <- s
+        fv.ReprId <- s // set the extension's representation to the pattern
+        let vars = fv.GetVariables()
+        if vars.Length> 0 then
+            let mainVar = vars.Head
+            mainVar.ReprId <- s // set the extenions's main variable's representation to the pattern
         st.EvalPop() 
     // | DollarDigits of Positions * int
     | Ast.DollarDigits((pos1, pos2), s) -> 
@@ -200,8 +204,9 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
         let evalPath = st.EvalPath()
-        let isDeclaration = evalPath.Contains("NamedVarDecl.") 
+        let isDeclaration = evalPath.Contains("NamedVarDecl.")  
         let isLocalizationDeclaration = evalPath.StartsWith("AST.Namespace.Localization.Expression.")
+        let isExtensionDeclaration = evalPath.Contains("ExtensionAssignment.Var")
         let diagnosticsStopFlag = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false // enable var-related diagnostics in AST.Var, even if it was stopped (e.g. in Ast.Localization)
         let fv = es.PeekEvalStack()
@@ -225,6 +230,8 @@ let rec eval (st: SymbolTable) ast =
             | _ -> 
                 es.PushEvalStack(varValue)
 
+        elif isExtensionDeclaration then 
+            fv.Scope.Add(name, varValue)
         elif isLocalizationDeclaration then 
             match FplValue.VariableInBlockScopeByName fv name false with 
             | ScopeSearchResult.Found other ->
@@ -464,7 +471,8 @@ let rec eval (st: SymbolTable) ast =
         map.ReprId <- ""
         es.PushEvalStack(map)
         eval st variableTypeAst
-        fv.ReprId <- map.ReprId
+        if fv.BlockType <> FplValueType.Extension then
+            fv.ReprId <- map.ReprId
         es.PopEvalStack()
         st.EvalPop()
     | Ast.ClassIdentifier((pos1, pos2), ast1) ->

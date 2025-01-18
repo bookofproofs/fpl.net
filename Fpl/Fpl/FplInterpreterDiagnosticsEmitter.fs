@@ -501,25 +501,43 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
             ad.AddDiagnostic diagnostic
 
 let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) pos1 pos2 =
-    let candidates =
+    let matchReprId (fv1:FplValue) (identifier:string) = 
+        let regex = Regex(fv1.ReprId)
+        regex.IsMatch(identifier)
+        
+    let candidatesFromScope =
         st.Root.Scope
         |> Seq.map (fun theory ->
             theory.Value.Scope
             |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Extension)
             |> Seq.map (fun kvp -> kvp.Value)
             |> Seq.filter (fun ext -> 
-                        let regex = Regex(ext.ReprId)
-                        let isMatch = regex.IsMatch(identifier)
-                        if isMatch && not (fv.Scope.ContainsKey(fv.FplId)) then 
-                            // assign the reference FplValue fv only the first found match 
-                            // even, if there are multiple extensions that would match it 
-                            // (thus, the additional check for Scope.ContainsKey...)
-                            fv.Scope.Add(fv.FplId, ext)
-                        isMatch
+                if matchReprId ext identifier && not (fv.Scope.ContainsKey(fv.FplId)) then 
+                    // assign the reference FplValue fv only the first found match 
+                    // even, if there are multiple extensions that would match it 
+                    // (thus, the additional check for Scope.ContainsKey...)
+                    fv.Scope.Add(fv.FplId, ext)
+                    true
+                else
+                    false
             )
         )
         |> Seq.concat
         |> Seq.toList
+
+    let candidates = 
+        let parentExtension = filterTreePathByBlockType fv FplValueType.Extension
+        match parentExtension with 
+        | Some ext -> 
+            if matchReprId ext identifier then
+                // if fv is inside an extension block, we add this block to the candidates
+                // so we can match patterns inside this extension block's definition referring to 
+                // its own pattern even if it is not yet fully parsed and analysed
+                candidatesFromScope @ [ext]
+            else 
+                candidatesFromScope
+        | _ -> candidatesFromScope
+
     if candidates.Length = 0 then 
         let diagnostic =
             { 

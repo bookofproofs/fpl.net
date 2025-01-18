@@ -1701,6 +1701,14 @@ let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (acc
         | Some errMsg -> 
             checkCandidates toBeMatched candidates (accResultList @ [errMsg])
 
+let rec filterTreePathByBlockType (leaf:FplValue) (typ:FplValueType) = 
+    if leaf.BlockType = typ then 
+        Some leaf
+    else
+        match leaf.Parent with
+        | Some parent -> filterTreePathByBlockType parent typ
+        | _-> None
+
 let searchExtensionByName (root:FplValue) identifier = 
     let candidates =
         root.Scope
