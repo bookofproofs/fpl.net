@@ -1000,6 +1000,35 @@ type TestInterpreterErrors() =
         ad.Clear()
         runTestHelper "TestSIG04.fpl" fplCode code expected
 
+    [<DataRow("inh", """def cl A:obj { intr } def pred T() {dec ~n:A n:=A(); true};""", 0)>]
+    [<DataRow("inh_a", """def cl A:obj { intr } def pred T() {dec ~n:obj n:=A(); true};""", 0)>]
+    [<DataRow("inh_b", """def cl A:obj {intr} def cl B:A { intr } def pred T() {dec ~n:A n:=B(); true};""", 0)>]
+    [<DataRow("inh_c", """def cl A:obj {intr} def cl B:A { intr } def pred T() {dec ~n:B n:=A(); true};""", 1)>]
+    [<DataRow("inh_d", """def cl A:obj {intr} def cl B:A { intr } def pred T() {dec ~n:obj n:=B(); true};""", 0)>]
+    [<DataRow("inh_e", """def cl A:obj {intr} def cl B:A { intr } def pred T() {dec ~n:obj n:=A(); true};""", 0)>]
+    [<DataRow("inh_f", """def cl A:obj {intr} def cl B:obj { intr } def pred T() {dec ~n:B n:=A(); true};""", 1)>]
+    [<DataRow("inh_g", """def cl A:obj {intr} def cl B:obj { intr } def pred T() {dec ~n:A n:=B(); true};""", 1)>]
+    [<DataRow("inh_type_a", """def cl A:obj { intr } def pred T() {dec ~n:ind n:=A(); true};""", 1)>]
+    [<DataRow("inh_type_b", """def cl A:obj { intr } def pred T() {dec ~n:pred n:=A(); true};""", 1)>]
+    [<DataRow("inh_type_c", """def cl A:obj { intr } def pred T() {dec ~n:func n:=A(); true};""", 1)>]
+    [<DataRow("constr_a", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def pred T() {dec ~n:A n:=A(); true};""", 1)>]
+    [<DataRow("constr_b", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def pred T() {dec ~n:A ~x:ind n:=A(x); true};""", 1)>]
+    [<DataRow("constr_c", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def pred T() {dec ~n:A ~y:pred n:=A(y); true};""", 1)>]
+    [<DataRow("constr_d", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def pred T() {dec ~n:A ~z:tpl n:=A(z); true};""", 1)>]
+    [<DataRow("constr_e", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def pred T() {dec ~n:obj ~z:obj n:=A(z); true};""", 0)>]
+    [<DataRow("constr_inh_a", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:A { ctor B(x:pred) {dec base.A(); self} } def pred T() {dec ~n:A n:=B(); true};""", 1)>]
+    [<DataRow("constr_inh_b", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:A { ctor B(x:pred) {dec base.A(); self} } def pred T() {dec ~n:obj n:=B(); true};""", 1)>]
+    [<DataRow("constr_inh_c", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:A { ctor B(x:pred) {dec base.A(); self} } def pred T() {dec ~n:obj n:=A(); true};""", 1)>]
+    [<DataRow("constr_inh_d", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:A { ctor B(x:pred) {dec base.A(); self} } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", 1)>]
+    [<DataRow("constr_inh_e", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:obj { ctor B(x:pred) {dec base.obj(); self} } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", 1)>]
+    [<DataRow("constr_inh_f", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:obj { ctor B(x:pred) {dec base.obj(); self} } def pred T() {dec ~n:A ~x:pred n:=B(x); true};""", 0)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestSIG05Assignments(no:string, fplCode:string, expected) =
+        let code = SIG05 ("","")
+        ad.Clear()
+        runTestHelper "TestSIG05.fpl" fplCode code expected
+
     [<DataRow("""def pred Eq infix "=" 1000 (x,y: obj) {intr} axiom A(x:ind,y:obj) { (x = y) };""", 
         "No overload matching `=(ind, obj)`. `x:ind` does not match `x:obj` in TestSIG04MsgSpecificity.Eq(obj, obj).")>]
     [<DataRow("""def func Succ(n:Nat) -> obj {intr};""", 
