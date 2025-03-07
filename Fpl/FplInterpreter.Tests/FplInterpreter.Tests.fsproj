@@ -10,6 +10,7 @@
   <ItemGroup>
     <Compile Include="CommonTestHelpers.fs" />
     <Compile Include="CommonFplValueTestCases.fs" />
+    <Compile Include="TestRepresentation.fs" />
     <Compile Include="TestSignatureMatching.fs" />
     <Compile Include="TestPrecedence.fs" />
     <Compile Include="TestInfixOperations.fs" />
@@ -32,6 +33,7 @@
     <Compile Include="TestFplValue.fs" />
     <Compile Include="TestInterpreterErrors.fs" />
     <Compile Include="TestEvalAliasedNamespaceIdentifier.fs" />
+    <Compile Include="TestRepresentation.fs" />
   </ItemGroup>
 
   <ItemGroup>

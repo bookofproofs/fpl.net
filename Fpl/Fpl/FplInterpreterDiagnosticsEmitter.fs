@@ -779,7 +779,7 @@ let emitSIG03Diagnostics (retType:FplValue) (mapType:FplValue) =
         ad.AddDiagnostic diagnostic
     | _ -> ()
 
-let emitSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
+let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) = 
     match checkCandidates calling candidates [] with
     | (Some candidate,_) -> Some candidate // no error occured
     | (None, errList) -> 

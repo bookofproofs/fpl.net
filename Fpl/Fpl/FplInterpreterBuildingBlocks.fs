@@ -659,7 +659,7 @@ let rec eval (st: SymbolTable) ast =
             | (FplValueType.VariadicVariableMany1, _) -> 
                 emitID017Diagnostics identifier candidates pos1 pos2
             | _ -> 
-                match emitSIG04Diagnostics fv candidates with
+                match checkSIG04Diagnostics fv candidates with
                 | Some candidate -> 
                     match fv.BlockType with
                     | FplValueType.Reference -> fv.Scope.Add(identifier, candidate)
@@ -899,7 +899,7 @@ let rec eval (st: SymbolTable) ast =
                 let candidates = candidatesOfSelfOrParentEntity 
                                  @ candidatesOfVariables 
                                  @ candidatesOfVariableTypes 
-                emitSIG04Diagnostics refBlock candidates |> ignore
+                checkSIG04Diagnostics refBlock candidates |> ignore
             else
                 let candidatesFromTheory = findCandidatesByName st refBlock.FplId true
                 let candidatesFromPropertyScope = findCandidatesByNameInBlock refBlock refBlock.FplId
@@ -907,7 +907,7 @@ let rec eval (st: SymbolTable) ast =
                 let candidates = candidatesFromTheory  
                                  @ candidatesFromPropertyScope 
                                  @ candidatesFromDottedQualification
-                match emitSIG04Diagnostics refBlock candidates with
+                match checkSIG04Diagnostics refBlock candidates with
                 | Some matchedCandidate -> 
                     refBlock.Scope.Add(refBlock.FplId,matchedCandidate)
                 | _ -> ()
@@ -1228,7 +1228,7 @@ let rec eval (st: SymbolTable) ast =
             currentOp.ValueList.Add(secondOp)
             match precNodeList currentOp with
             | x::xs -> 
-                match emitSIG04Diagnostics currentOp [x] with 
+                match checkSIG04Diagnostics currentOp [x] with 
                 | Some candidate -> 
                     run.Run currentOp currentOp // execute the matched binary operator
                 | _ -> ()
@@ -1350,6 +1350,8 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(assignedValue)
         eval st predicateAst
         es.PopEvalStack() 
+        let candidates = assignee.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList 
+        checkSIG04Diagnostics assignedValue candidates |> ignore
         // todo assign value to the assignee by checking the type consistency first and finding an appropriate way to embed the result in the symbol table.
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
