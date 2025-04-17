@@ -835,15 +835,22 @@ type TestInterpreterErrors() =
         let code = ID021 ""
         runTestHelper "TestID021.fpl" fplCode code expected
 
-    [<DataRow("def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
-    [<DataRow("def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
-    [<DataRow("def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `x` is undefined.")>]
-    [<DataRow("def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the argument `y` is undefined.")>]
-    [<DataRow("""def pred Equal infix "=" 50 (x,y: tpl) {del.Equal(x,y)};""", 0, "missing error message")>]
-    [<DataRow("def pred T(x,y:pred) {del.Equal(true,y)};", 1, "Predicate `=` cannot be evaluated because the argument `y` is undetermined.")>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0, "missing error message")>]
+    [<DataRow("00", "def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
+    [<DataRow("01", "def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
+    [<DataRow("02", "def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
+    [<DataRow("03", "def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undefined.")>]
+    [<DataRow("04", """def pred Equal infix "=" 50 (x,y: tpl) {del.Equal(x,y)};""", 0, "missing error message")>]
+    [<DataRow("05", "def pred T(x,y:pred) {del.Equal(true,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undetermined.")>]
+    [<DataRow("06", "ax T() {all x,y:obj {del.Equal(x,y)}};", 0, "missing error message")>]
+    [<DataRow("06a", "def cl Nat: obj {intr} ax T() {all x,y:Nat {del.Equal(x,y)}};", 0, "missing error message")>]
+    [<DataRow("06b", "ax T() {all x,y:Bla {del.Equal(x,y)}};", 0, "missing error message")>]
+    [<DataRow("07", "ax T() {exn$1 x:obj {del.Equal(x,$1)}};", 0, "missing error message")>]
+    [<DataRow("07a", "def cl Nat: obj {intr} ax T() {exn$1 x:Nat {del.Equal(x,$1)}};", 0, "missing error message")>]
+    [<DataRow("08", """ax T() {all n:obj {exn$1 y:obj {del.Equal(y,n)}}};""", 0, "missing error message")>]
+    [<DataRow("08a", """def cl Nat: obj {intr} ax T() {all n:Nat {exn$1 y:Nat {del.Equal(y,n)}}};""", 0, "missing error message")>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0, "missing error message")>]
     [<TestMethod>]
-    member this.TestID013(fplCode:string, expected, expectedErrMsg:string) =
+    member this.TestID013(no:string, fplCode:string, expected, expectedErrMsg:string) =
         let code = ID013 ""
         let errMsg = runTestHelperWithText "TestID013.fpl" fplCode code expected
         Assert.AreEqual<string>(expectedErrMsg, errMsg)
