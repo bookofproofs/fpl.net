@@ -534,7 +534,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             this.FplId
         | _ -> 
             match (isSignature, this.TypeId) with
-            | (SignatureType.Repr, typeId) when typeId.StartsWith("*") || typeId.StartsWith("+") -> 
+            | (SignatureType.Repr, _) when (this.BlockType = VariadicVariableMany1 || this.BlockType = VariadicVariableMany) -> 
+            // | (SignatureType.Repr, typeId) when typeId.StartsWith("*") || typeId.StartsWith("+") -> 
                 let variadicContent = 
                     this.ValueList
                     |> Seq.map (fun fv -> fv.Type(isSignature))
