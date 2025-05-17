@@ -1040,7 +1040,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | FplValueType.Quantor
         | FplValueType.Conjecture -> 
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- "pred{undetermined}"
+            ret.ReprId <- "undetermined"
             ret.TypeId <- "pred"
             ret
         | FplValueType.Mapping -> 

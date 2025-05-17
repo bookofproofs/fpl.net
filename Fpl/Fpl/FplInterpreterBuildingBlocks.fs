@@ -102,7 +102,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
         let fv = es.PeekEvalStack()
-        setUnitType fv "pred" "pred{undetermined}"
+        setUnitType fv "pred" "undetermined"
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
@@ -425,7 +425,7 @@ let rec eval (st: SymbolTable) ast =
         fv.NameStartPos <- pos1
         fv.NameEndPos <- pos2
         fv.FplId <- "true"
-        fv.ReprId <- "pred{true}"
+        fv.ReprId <- "true"
         fv.TypeId <- "pred"
         st.EvalPop() 
     | Ast.False((pos1, pos2), _) -> 
@@ -434,7 +434,7 @@ let rec eval (st: SymbolTable) ast =
         fv.NameStartPos <- pos1
         fv.NameEndPos <- pos2
         fv.FplId <- "false"
-        fv.ReprId <- "pred{false}"
+        fv.ReprId <- "false"
         fv.TypeId <- "pred"
         st.EvalPop() 
     | Ast.Undefined((pos1, pos2), _) -> 
@@ -529,7 +529,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ByDef")
         let fv = es.PeekEvalStack()
         fv.FplId <- "bydef."
-        fv.ReprId <- "pred{undetermined}"
+        fv.ReprId <- "undetermined"
         fv.TypeId <- "bydef."
         eval st predicateWithQualificationAst
         emitPR001Diagnostics fv pos1 pos2
@@ -622,7 +622,7 @@ let rec eval (st: SymbolTable) ast =
         | FplValueType.Predicate ->
             fv.FplId <- identifier
             fv.TypeId <- "pred"
-            fv.ReprId <- "pred{undetermined}"
+            fv.ReprId <- "undetermined"
         | FplValueType.MandatoryFunctionalTerm
         | FplValueType.OptionalFunctionalTerm
         | FplValueType.FunctionalTerm ->
@@ -736,7 +736,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("And")
         let fv = es.PeekEvalStack()
         fv.FplId <- "and"
-        fv.ReprId <- "pred{undetermined}"
+        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -748,7 +748,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Or")
         let fv = es.PeekEvalStack()
         fv.FplId <- "or"
-        fv.ReprId <- "pred{undetermined}"
+        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -760,7 +760,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Xor")
         let fv = es.PeekEvalStack()
         fv.FplId <- "xor"
-        fv.ReprId <- "pred{undetermined}"
+        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -967,7 +967,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Impl")
         let fv = es.PeekEvalStack()
         fv.FplId <- "impl"
-        es.PeekEvalStack().ReprId <- "pred{undetermined}"
+        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -979,7 +979,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Iif")
         let fv = es.PeekEvalStack()
         fv.FplId <- "iif"
-        es.PeekEvalStack().ReprId <- "pred{undetermined}"
+        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -991,7 +991,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("IsOperator")
         let fv = es.PeekEvalStack()
         fv.FplId <- "is"
-        fv.ReprId <- "pred{undetermined}"
+        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         let operand = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv) 
         es.PushEvalStack(operand)
@@ -1361,7 +1361,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("PredicateInstance")
         eval st signatureAst
         let fv = es.PeekEvalStack()
-        es.PeekEvalStack().ReprId <- "pred{undetermined}"
+        es.PeekEvalStack().ReprId <- "undetermined"
         match optAst with
         | Some ast1 -> 
             eval st ast1

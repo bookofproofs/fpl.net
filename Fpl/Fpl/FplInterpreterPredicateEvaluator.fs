@@ -6,12 +6,12 @@ let evaluateNegation (fplValue:FplValue) =
     match argOpt with
     | Some arg ->
         match arg.ReprId with
-        | "pred{false}" -> 
-            fplValue.ReprId <- "pred{true}"
-        | "pred{true}" -> 
-            fplValue.ReprId <- "pred{false}"
-        | _ -> fplValue.ReprId <- "pred{undetermined}"
-    | _ -> fplValue.ReprId <- "pred{undetermined}"
+        | "false" -> 
+            fplValue.ReprId <- "true"
+        | "true" -> 
+            fplValue.ReprId <- "false"
+        | _ -> fplValue.ReprId <- "undetermined"
+    | _ -> fplValue.ReprId <- "undetermined"
     
 let evaluateConjunction (fplValue:FplValue) =
     let arg1Opt = fplValue.ValueList[0].GetValue
@@ -19,13 +19,13 @@ let evaluateConjunction (fplValue:FplValue) =
     match (arg1Opt,arg2Opt) with
     | (Some arg1, Some arg2) -> 
         match (arg1.ReprId, arg2.ReprId) with
-        | ("pred{true}", "pred{false}") 
-        | ("pred{false}", "pred{true}") 
-        | ("pred{false}", "pred{false}") -> fplValue.ReprId <- "pred{false}" 
-        | ("pred{true}", "pred{true}") -> fplValue.ReprId <- "pred{true}"
-        | _ -> fplValue.ReprId <- "pred{undetermined}"
+        | ("true", "false") 
+        | ("false", "true") 
+        | ("false", "false") -> fplValue.ReprId <- "false" 
+        | ("true", "true") -> fplValue.ReprId <- "true"
+        | _ -> fplValue.ReprId <- "undetermined"
     | _ ->
-        fplValue.ReprId <- "pred{undetermined}"
+        fplValue.ReprId <- "undetermined"
 
 let evaluateDisjunction (fplValue:FplValue) = 
     let arg1Opt = fplValue.ValueList[0].GetValue
@@ -33,13 +33,13 @@ let evaluateDisjunction (fplValue:FplValue) =
     match (arg1Opt,arg2Opt) with
     | (Some arg1, Some arg2) -> 
         match (arg1.ReprId, arg2.ReprId) with
-        | ("pred{true}", "pred{false}") 
-        | ("pred{false}", "pred{true}") 
-        | ("pred{true}", "pred{true}") -> fplValue.ReprId <- "pred{true}"
-        | ("pred{false}", "pred{false}") -> fplValue.ReprId <- "pred{false}" 
-        | _ -> fplValue.ReprId <- "pred{undetermined}"
+        | ("true", "false") 
+        | ("false", "true") 
+        | ("true", "true") -> fplValue.ReprId <- "true"
+        | ("false", "false") -> fplValue.ReprId <- "false" 
+        | _ -> fplValue.ReprId <- "undetermined"
     | _ ->
-        fplValue.ReprId <- "pred{undetermined}"
+        fplValue.ReprId <- "undetermined"
 
 let evaluateExclusiveOr (fplValue:FplValue) = 
     let arg1Opt = fplValue.ValueList[0].GetValue
@@ -47,13 +47,13 @@ let evaluateExclusiveOr (fplValue:FplValue) =
     match (arg1Opt,arg2Opt) with
     | (Some arg1, Some arg2) -> 
         match (arg1.ReprId, arg2.ReprId) with
-        | ("pred{true}", "pred{false}") 
-        | ("pred{false}", "pred{true}") -> fplValue.ReprId <- "pred{true}" 
-        | ("pred{true}", "pred{true}") 
-        | ("pred{false}", "pred{false}") -> fplValue.ReprId <- "pred{false}" 
-        | _ -> fplValue.ReprId <- "pred{undetermined}"
+        | ("true", "false") 
+        | ("false", "true") -> fplValue.ReprId <- "true" 
+        | ("true", "true") 
+        | ("false", "false") -> fplValue.ReprId <- "false" 
+        | _ -> fplValue.ReprId <- "undetermined"
     | _ ->
-        fplValue.ReprId <- "pred{undetermined}"
+        fplValue.ReprId <- "undetermined"
 
 let evaluateImplication (fplValue:FplValue) = 
     let arg1Opt = fplValue.ValueList[0].GetValue
@@ -61,13 +61,13 @@ let evaluateImplication (fplValue:FplValue) =
     match (arg1Opt,arg2Opt) with
     | (Some arg1, Some arg2) -> 
         match (arg1.ReprId, arg2.ReprId) with
-        | ("pred{true}", "pred{false}") -> fplValue.ReprId <- "pred{false}"
-        | ("pred{false}", "pred{true}") 
-        | ("pred{false}", "pred{false}") 
-        | ("pred{true}", "pred{true}") -> fplValue.ReprId <- "pred{true}"
-        | _ -> fplValue.ReprId <- "pred{undetermined}"
+        | ("true", "false") -> fplValue.ReprId <- "false"
+        | ("false", "true") 
+        | ("false", "false") 
+        | ("true", "true") -> fplValue.ReprId <- "true"
+        | _ -> fplValue.ReprId <- "undetermined"
     | _ ->
-        fplValue.ReprId <- "pred{undetermined}"
+        fplValue.ReprId <- "undetermined"
 
 let evaluateEquivalence (fplValue:FplValue) = 
     let arg1Opt = fplValue.ValueList[0].GetValue
@@ -75,15 +75,15 @@ let evaluateEquivalence (fplValue:FplValue) =
     match (arg1Opt,arg2Opt) with
     | (Some arg1, Some arg2) -> 
         match (arg1.ReprId, arg2.ReprId) with
-        | ("pred{true}", "pred{true}") 
-        | ("pred{false}", "pred{false}") -> fplValue.ReprId <- "pred{true}"
-        | ("pred{false}", "pred{true}") 
-        | ("pred{true}", "pred{false}") -> fplValue.ReprId <- "pred{false}"
-        | _ -> fplValue.ReprId <- "pred{undetermined}"
+        | ("true", "true") 
+        | ("false", "false") -> fplValue.ReprId <- "true"
+        | ("false", "true") 
+        | ("true", "false") -> fplValue.ReprId <- "false"
+        | _ -> fplValue.ReprId <- "undetermined"
     | _ ->
-        fplValue.ReprId <- "pred{undetermined}"
+        fplValue.ReprId <- "undetermined"
     
 let evaluateIsOperator (fv:FplValue) (operand:FplValue) (typeOfOperand:FplValue) = 
     match mpwa [operand] [typeOfOperand] with
-    | Some errMsg -> fv.ReprId <- "pred{false}"
-    | None -> fv.ReprId <- "pred{true}"
+    | Some errMsg -> fv.ReprId <- "false"
+    | None -> fv.ReprId <- "true"

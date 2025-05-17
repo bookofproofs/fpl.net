@@ -895,9 +895,9 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
     |> Seq.iter (fun argument ->
         let repr = argument.Type(SignatureType.Repr)
         match repr with
-        | "pred{true}"
-        | "pred{false}" -> ()
-        | "pred{undetermined}" -> emitLG000Diagnostics argument 
+        | "true"
+        | "false" -> ()
+        | "undetermined" -> emitLG000Diagnostics argument 
         | _ -> emitLG001Diagnostics argument.NameStartPos argument.NameEndPos argument
     )
 

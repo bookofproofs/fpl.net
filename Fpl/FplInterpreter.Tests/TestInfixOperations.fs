@@ -7,9 +7,9 @@ open CommonTestHelpers
 [<TestClass>]
 type TestInfixOperations() =
 
-    [<DataRow("""def pred T1() { dec ~x,y:obj; (x = y) }""", "pred{true}")>]
-    [<DataRow("""def pred T1() { (@1 = @2) }""", "pred{false}")>]
-    [<DataRow("""def pred T1() { (@1 = @1) }""", "pred{true}")>]
+    [<DataRow("""def pred T1() { dec ~x,y:obj; (x = y) }""", "true")>]
+    [<DataRow("""def pred T1() { (@1 = @2) }""", "false")>]
+    [<DataRow("""def pred T1() { (@1 = @1) }""", "true")>]
     [<TestMethod>]
     member this.TestEqualityPredicate(varVal, expected:string) =
         ad.Clear()
@@ -28,10 +28,10 @@ type TestInfixOperations() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00a", """def pred T1() { (true => false) };""", "pred{false}")>]
-    [<DataRow("00b", """def pred T1() { (false => false) };""", "pred{true}")>]
-    [<DataRow("00c", """def pred T1() { (false => true) };""", "pred{true}")>]
-    [<DataRow("00d", """def pred T1() { (true => true) };""", "pred{true}")>]
+    [<DataRow("00a", """def pred T1() { (true => false) };""", "false")>]
+    [<DataRow("00b", """def pred T1() { (false => false) };""", "true")>]
+    [<DataRow("00c", """def pred T1() { (false => true) };""", "true")>]
+    [<DataRow("00d", """def pred T1() { (true => true) };""", "true")>]
     [<TestMethod>]
     member this.TestImplicationCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
@@ -51,10 +51,10 @@ type TestInfixOperations() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("01a", """def pred T1() { (true <=> false) };""", "pred{false}")>]
-    [<DataRow("01b", """def pred T1() { (false <=> false) };""", "pred{true}")>]
-    [<DataRow("01c", """def pred T1() { (false <=> true) };""", "pred{false}")>]
-    [<DataRow("01d", """def pred T1() { (true <=> true) };""", "pred{true}")>]
+    [<DataRow("01a", """def pred T1() { (true <=> false) };""", "false")>]
+    [<DataRow("01b", """def pred T1() { (false <=> false) };""", "true")>]
+    [<DataRow("01c", """def pred T1() { (false <=> true) };""", "false")>]
+    [<DataRow("01d", """def pred T1() { (true <=> true) };""", "true")>]
     [<TestMethod>]
     member this.TestEquivalenceCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
@@ -74,10 +74,10 @@ type TestInfixOperations() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", """def pred Neg(x:pred) {not x} def pred T1() { ( Neg(true) ) };""", "pred{false}")>]
-    [<DataRow("00a", """def pred Neg(x:tpl) {not x} def pred T1() { ( Neg(true) ) };""", "pred{false}")>]
-    [<DataRow("01", """def pred Neg(x:pred) {not x} def pred T1() { ( Neg(false) ) };""", "pred{true}")>]
-    [<DataRow("01a", """def pred Neg(x:tpl) {not x} def pred T1() { ( Neg(false) ) };""", "pred{true}")>]
+    [<DataRow("00", """def pred Neg(x:pred) {not x} def pred T1() { ( Neg(true) ) };""", "false")>]
+    [<DataRow("00a", """def pred Neg(x:tpl) {not x} def pred T1() { ( Neg(true) ) };""", "false")>]
+    [<DataRow("01", """def pred Neg(x:pred) {not x} def pred T1() { ( Neg(false) ) };""", "true")>]
+    [<DataRow("01a", """def pred Neg(x:tpl) {not x} def pred T1() { ( Neg(false) ) };""", "true")>]
     [<TestMethod>]
     member this.TestNegationCalls(no:string, varVal, expected:string) =
         ad.Clear()
@@ -97,14 +97,14 @@ type TestInfixOperations() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", """def pred T1() { (false and false and false) };""", "pred{false}")>]
-    [<DataRow("01", """def pred T1() { (true and false and false) };""", "pred{false}")>]
-    [<DataRow("02", """def pred T1() { (false and true and false) };""", "pred{false}")>]
-    [<DataRow("03", """def pred T1() { (true and true and false) };""", "pred{false}")>]
-    [<DataRow("04", """def pred T1() { (false and false and true) };""", "pred{false}")>]
-    [<DataRow("05", """def pred T1() { (true and false and true) };""", "pred{false}")>]
-    [<DataRow("06", """def pred T1() { (false and true and true) };""", "pred{false}")>]
-    [<DataRow("07", """def pred T1() { (true and true and true) };""", "pred{true}")>]
+    [<DataRow("00", """def pred T1() { (false and false and false) };""", "false")>]
+    [<DataRow("01", """def pred T1() { (true and false and false) };""", "false")>]
+    [<DataRow("02", """def pred T1() { (false and true and false) };""", "false")>]
+    [<DataRow("03", """def pred T1() { (true and true and false) };""", "false")>]
+    [<DataRow("04", """def pred T1() { (false and false and true) };""", "false")>]
+    [<DataRow("05", """def pred T1() { (true and false and true) };""", "false")>]
+    [<DataRow("06", """def pred T1() { (false and true and true) };""", "false")>]
+    [<DataRow("07", """def pred T1() { (true and true and true) };""", "true")>]
     [<TestMethod>]
     member this.TestConjunctionCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
@@ -124,14 +124,14 @@ type TestInfixOperations() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", """def pred T1() { (false and false and false) };""", "pred{false}")>]
-    [<DataRow("01", """def pred T1() { (true and false and false) };""", "pred{false}")>]
-    [<DataRow("02", """def pred T1() { (false and true and false) };""", "pred{false}")>]
-    [<DataRow("03", """def pred T1() { (true and true and false) };""", "pred{false}")>]
-    [<DataRow("04", """def pred T1() { (false and false and true) };""", "pred{false}")>]
-    [<DataRow("05", """def pred T1() { (true and false and true) };""", "pred{false}")>]
-    [<DataRow("06", """def pred T1() { (false and true and true) };""", "pred{false}")>]
-    [<DataRow("07", """def pred T1() { (true and true and true) };""", "pred{true}")>]
+    [<DataRow("00", """def pred T1() { (false and false and false) };""", "false")>]
+    [<DataRow("01", """def pred T1() { (true and false and false) };""", "false")>]
+    [<DataRow("02", """def pred T1() { (false and true and false) };""", "false")>]
+    [<DataRow("03", """def pred T1() { (true and true and false) };""", "false")>]
+    [<DataRow("04", """def pred T1() { (false and false and true) };""", "false")>]
+    [<DataRow("05", """def pred T1() { (true and false and true) };""", "false")>]
+    [<DataRow("06", """def pred T1() { (false and true and true) };""", "false")>]
+    [<DataRow("07", """def pred T1() { (true and true and true) };""", "true")>]
     [<TestMethod>]
     member this.TestConjunctionCalls(no:string, varVal, expected:string) =
         ad.Clear()
@@ -151,14 +151,14 @@ type TestInfixOperations() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", """def pred T1() { (false or false or false) };""", "pred{false}")>]
-    [<DataRow("01", """def pred T1() { (true or false or false) };""", "pred{true}")>]
-    [<DataRow("02", """def pred T1() { (false or true or false) };""", "pred{true}")>]
-    [<DataRow("03", """def pred T1() { (true or true or false) };""", "pred{true}")>]
-    [<DataRow("04", """def pred T1() { (false or false or true) };""", "pred{true}")>]
-    [<DataRow("05", """def pred T1() { (true or false or true) };""", "pred{true}")>]
-    [<DataRow("06", """def pred T1() { (false or true or true) };""", "pred{true}")>]
-    [<DataRow("07", """def pred T1() { (true or true or true) };""", "pred{true}")>]
+    [<DataRow("00", """def pred T1() { (false or false or false) };""", "false")>]
+    [<DataRow("01", """def pred T1() { (true or false or false) };""", "true")>]
+    [<DataRow("02", """def pred T1() { (false or true or false) };""", "true")>]
+    [<DataRow("03", """def pred T1() { (true or true or false) };""", "true")>]
+    [<DataRow("04", """def pred T1() { (false or false or true) };""", "true")>]
+    [<DataRow("05", """def pred T1() { (true or false or true) };""", "true")>]
+    [<DataRow("06", """def pred T1() { (false or true or true) };""", "true")>]
+    [<DataRow("07", """def pred T1() { (true or true or true) };""", "true")>]
     [<TestMethod>]
     member this.TestDisjunctionCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
@@ -178,14 +178,14 @@ type TestInfixOperations() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00", """def pred T1() { (false xor false xor false) };""", "pred{false}")>]
-    [<DataRow("01", """def pred T1() { (true xor false xor false) };""", "pred{true}")>]
-    [<DataRow("02", """def pred T1() { (false xor true xor false) };""", "pred{true}")>]
-    [<DataRow("03", """def pred T1() { (true xor true xor false) };""", "pred{false}")>]
-    [<DataRow("04", """def pred T1() { (false xor false xor true) };""", "pred{true}")>]
-    [<DataRow("05", """def pred T1() { (true xor false xor true) };""", "pred{false}")>]
-    [<DataRow("06", """def pred T1() { (false xor true xor true) };""", "pred{false}")>]
-    [<DataRow("07", """def pred T1() { (true xor true xor true) };""", "pred{true}")>]
+    [<DataRow("00", """def pred T1() { (false xor false xor false) };""", "false")>]
+    [<DataRow("01", """def pred T1() { (true xor false xor false) };""", "true")>]
+    [<DataRow("02", """def pred T1() { (false xor true xor false) };""", "true")>]
+    [<DataRow("03", """def pred T1() { (true xor true xor false) };""", "false")>]
+    [<DataRow("04", """def pred T1() { (false xor false xor true) };""", "true")>]
+    [<DataRow("05", """def pred T1() { (true xor false xor true) };""", "false")>]
+    [<DataRow("06", """def pred T1() { (false xor true xor true) };""", "false")>]
+    [<DataRow("07", """def pred T1() { (true xor true xor true) };""", "true")>]
     [<TestMethod>]
     member this.TestExDisjunctionCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
