@@ -349,6 +349,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
+        fv.ReprId <- symbol
         fv.NameStartPos <- pos1
         fv.NameEndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
@@ -358,6 +359,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
+        fv.ReprId <- symbol
         fv.NameStartPos <- pos1
         fv.NameEndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
@@ -367,6 +369,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
+        fv.ReprId <- symbol
         fv.NameStartPos <- pos1
         fv.NameEndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
