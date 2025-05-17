@@ -528,19 +528,37 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with 
         | (FplValueType.Reference, true) -> 
             // delegate the type identifier to the referenced entitity
-            this.Scope[this.FplId].Type(isSignature)
+            let val1 = this.Scope[this.FplId]
+            val1.Type(isSignature)
         | (FplValueType.Stmt, _) 
         | (FplValueType.Extension, _) -> 
             this.FplId
         | _ -> 
+            let head = 
+                match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with 
+                | (FplValueType.Reference, true) -> 
+                    match isSignature with
+                    | SignatureType.Name -> this.Scope[this.FplId].Type(SignatureType.Name)
+                    | SignatureType.Type -> _typeId
+                    | SignatureType.Mixed -> _fplId
+                    | SignatureType.Repr -> _reprId
+                | (FplValueType.Mapping, _) -> 
+                    _typeId
+                | _ -> 
+                    match isSignature with
+                    | SignatureType.Name -> _fplId
+                    | SignatureType.Type -> _typeId
+                    | SignatureType.Mixed -> _fplId
+                    | SignatureType.Repr -> _reprId
             match (isSignature, this.TypeId) with
             | (SignatureType.Repr, _) when (this.BlockType = VariadicVariableMany1 || this.BlockType = VariadicVariableMany) -> 
-            // | (SignatureType.Repr, typeId) when typeId.StartsWith("*") || typeId.StartsWith("+") -> 
                 let variadicContent = 
                     this.ValueList
                     |> Seq.map (fun fv -> fv.Type(isSignature))
                     |> String.concat ", "
                 $"{this.Type(SignatureType.Type)}" + "{" + variadicContent + "}"
+            | (SignatureType.Repr, _) when this.BlockType = Variable -> 
+                head 
             | (SignatureType.Repr, typeId) when typeId = "pred" || typeId.StartsWith "pred(" || typeId.StartsWith "pred$" -> 
                 _reprId
             | (SignatureType.Repr, typeId) when typeId = "func" || typeId.StartsWith "func(" -> 
@@ -550,22 +568,6 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             | (SignatureType.Repr, typeId) when this.BlockType = FplValueType.Class -> 
                 _reprId
             | _ -> 
-                let head = 
-                    match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with 
-                    | (FplValueType.Reference, true) -> 
-                        match isSignature with
-                        | SignatureType.Name -> this.Scope[this.FplId].Type(SignatureType.Name)
-                        | SignatureType.Type -> _typeId
-                        | SignatureType.Mixed -> _fplId
-                        | SignatureType.Repr -> _reprId
-                    | (FplValueType.Mapping, _) -> 
-                        _typeId
-                    | _ -> 
-                        match isSignature with
-                        | SignatureType.Name -> _fplId
-                        | SignatureType.Type -> _typeId
-                        | SignatureType.Mixed -> _fplId
-                        | SignatureType.Repr -> _reprId
 
                 let propagate = 
                     match isSignature with
@@ -1038,7 +1040,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | FplValueType.Quantor
         | FplValueType.Conjecture -> 
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- "undetermined"
+            ret.ReprId <- "pred{undetermined}"
             ret.TypeId <- "pred"
             ret
         | FplValueType.Mapping -> 

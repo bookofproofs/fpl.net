@@ -1105,6 +1105,7 @@ type TestInterpreterErrors() =
         let code = LG000 ("","")
         runTestHelper "TestLG000.fpl" fplCode code expected
 
+    [<DataRow("00a", """def pred T() { true };""", 0)>]
     [<DataRow("00", """def pred T() { not true };""", 0)>]
     [<DataRow("01", """def pred T() { dec ~x:pred; not x };""", 0)>]
     [<DataRow("02", """def pred T() { dec ~x:pred; not (x) };""", 0)>]

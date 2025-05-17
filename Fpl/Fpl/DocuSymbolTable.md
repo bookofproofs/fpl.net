@@ -39,7 +39,7 @@ The following table documents how the FplValues are related to each other using 
 |#ArgInference|An argument inference of a proof argument.|`Ast.AssumeArgument`, `Ast.RevokeArgument`, `Ast.DerivedPredicate`|Argument|none|Reference|
 |#Translation|A translation of an expression inside a Localization in a particular language.|`Ast.Translation`|Localization|||
 |#Constructor|||Class|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class)|(Possibly empty) Nodes that represent the calls to some base classes constructors. Due to semantical errors in the code, the latter do not necessarily have to match the signatures of the actual constructors of the base classes of this constructor class.	The latter can be retrieved from the parent Class.|
-|#Reference|A reference to another FplValue in the symbol table.|`Ast.Trivial`, `Ast.DottedPredicate`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Expression`, `Ast.Trivial`, `Ast.ParentConstructorCall`||By convention, if the scope contains an element with the same key as the node's FplId, then the value is the reference node.||
+|#Reference|A reference to another FplValue in the symbol table.|`Ast.Trivial`, `Ast.DottedPredicate`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Expression`, `Ast.Trivial`, `Ast.ParentConstructorCall`|Constructor, Stmt, Reference|By convention, if the scope contains an element with the same key as the node's FplId, then the value is the reference node.||
 |#OptionalFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
 |#OptionalPredicate|||Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
 |#MandatoryFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
@@ -50,3 +50,4 @@ The following table documents how the FplValues are related to each other using 
 |Object||||||
 |Premise||||||
 |Conclusion||||||
+|Stmt||||||

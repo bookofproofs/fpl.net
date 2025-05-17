@@ -47,14 +47,17 @@ type Delegates() =
         | _ -> ()
 
         match a1Repr with
-        | "undetermined" -> 
+        | "pred{undetermined}" -> 
             failwithf "Predicate `=` cannot be evaluated because the left argument is undetermined." 
         | _ -> 
             match b1Repr with
-            | "undetermined" -> 
+            | "pred{undetermined}" -> 
                 failwithf "Predicate `=` cannot be evaluated because the right argument is undetermined." 
             | _ -> 
-                failwithf "OK:%b" (a1Repr = b1Repr)
+                if a1Repr = b1Repr then
+                    failwithf "OK:pred{true}" 
+                else
+                    failwithf "OK:pred{false}" 
 
     let _decrement (a:FplValue) =
         $"todo {a.Type(SignatureType.Repr)}" 
