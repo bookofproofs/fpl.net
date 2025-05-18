@@ -557,8 +557,11 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     |> Seq.map (fun fv -> fv.Type(isSignature))
                     |> String.concat ", "
                 $"{this.Type(SignatureType.Type)}" + "{" + variadicContent + "}"
-            | (SignatureType.Repr, _) when this.BlockType = Variable -> 
-                head 
+            | (SignatureType.Repr, _) when this.BlockType = Variable ->
+                let vOpt = this.GetValue
+                match vOpt with
+                | Some (v:FplValue) -> v.Type(isSignature)
+                | None -> head
             | (SignatureType.Repr, typeId) when typeId = "pred" || typeId.StartsWith "pred(" || typeId.StartsWith "pred$" -> 
                 _reprId
             | (SignatureType.Repr, typeId) when typeId = "func" || typeId.StartsWith "func(" -> 

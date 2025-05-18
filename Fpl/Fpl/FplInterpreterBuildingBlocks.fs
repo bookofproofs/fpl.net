@@ -10,6 +10,7 @@ open FplInterpreterDiagnosticsEmitter
 open FplInterpreterPredicateEvaluator
 open FplInterpreterRunner
 open EvalStackHandler
+open System.Runtime.InteropServices
 
 let es = EvalStack()
 let run = FplRunner()
@@ -166,11 +167,13 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let sid = $"${s.ToString()}"
         fv.FplId <- fv.FplId + sid
-        fv.TypeId <- 
-            if fv.TypeId<>"" then 
-                fv.TypeId + sid
-            else
-                "ind"
+        if fv.TypeId <> "" then
+            fv.TypeId <- fv.TypeId + sid
+            fv.ReprId <- "undetermined"
+        else
+            fv.TypeId <- "ind"
+            fv.ReprId <- sid
+                    
         fv.NameEndPos <- pos2
         st.EvalPop() 
     | Ast.ExtensionName((pos1, pos2), s) ->
