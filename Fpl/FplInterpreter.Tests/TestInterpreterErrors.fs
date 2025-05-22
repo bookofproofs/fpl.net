@@ -850,6 +850,9 @@ type TestInterpreterErrors() =
     [<DataRow("07b_", "def cl Nat: obj {intr} ax T() {exn$1 x:Nat {del.Equal(x,$1)}};", 0, "missing error message")>]
     [<DataRow("08", """ax T() {all n:obj {exn$1 y:obj {del.Equal(y,n)}}};""", 0, "missing error message")>]
     [<DataRow("08a", """def cl Nat: obj {intr} ax T() {all n:Nat {exn$1 y:Nat {del.Equal(y,n)}}};""", 0, "missing error message")>]
+    [<DataRow("09", """def func Add()->obj {intr} prop AddIsSomething(op:Add) {dec ~anotherAdd: Add; all n,m:obj { (add(n,m) = anotherAdd(n,m) )} };""", 0, "missing error message")>]
+    [<DataRow("10", """def func Add()->obj {intr} prop AddIsSomething() {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,m) = n) } };""", 0, "missing error message")>]
+    [<DataRow("11", """def func Add()->obj {intr} prop AddIsSomething() {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,@0) = n) } };""", 0, "missing error message")>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0, "missing error message")>]
     [<TestMethod>]
     member this.TestID013(no:string, fplCode:string, expected, expectedErrMsg:string) =
@@ -1002,6 +1005,7 @@ type TestInterpreterErrors() =
     [<DataRow("50", """def cl A:obj {intr property pred T() {true}} def cl B:A {ctor B() {dec base.A() assert self.T(); self}};""", 0)>]
     [<DataRow("51", """def func A(n,m:obj)->obj {intr} prop T(op:A) {dec ~x,y:obj; (op(x,y) = x)};""", 0)>]
     [<DataRow("52", """def cl T:obj { dec ~x:+tpl; ctor T(y:+tpl) {dec base.obj() x:=y; self} property func C(i:ind) -> tpl {return x[i]}};""", 0)>]
+    [<DataRow("53", """def cl Nat:obj {intr} ext D x@/\d+/ -> Nat {dec ~n,m:Nat cases ( | (x = @0) : n:=m ? m:=n ); return n } def func Add()->obj {intr} prop K(op:Add) {dec ~n:Nat; ( op(n,@0) = n ) } ;""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =
