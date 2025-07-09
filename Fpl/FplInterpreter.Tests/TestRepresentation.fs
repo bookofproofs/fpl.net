@@ -7,6 +7,33 @@ open CommonTestHelpers
 [<TestClass>]
 type TestRepresentation() =
 
+
+    [<DataRow("00","false", "false")>]
+    [<DataRow("01","true", "true")>]
+    [<DataRow("02","(x = x)", "true")>]
+    [<DataRow("02a","not(x = x)", "false")>]
+    [<DataRow("03","(x = y)", "false")>]
+    [<DataRow("04","not (x = y)", "true")>]
+    [<TestMethod>]
+    member this.TestPredicateRepresentation(var:string, varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """uses Fpl.Commons 
+            def cl A: obj  {intr} 
+            def cl B: obj  {intr} 
+            def pred T() { dec ~x,y:obj x:=A() y:=B(); %s };""" varVal
+        let filename = "TestPredicateRepresentation.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let predicateValue = pr.ValueList |> Seq.toList |> List.rev |> List.head
+            Assert.AreEqual<string>(expected, predicateValue.Type(SignatureType.Repr))
+        | None -> 
+            Assert.IsTrue(false)
+
     [<DataRow("00","n:=Zero()", "Zero()")>]
     [<TestMethod>]
     member this.TestAssignmentRepresentation(var:string, varVal, expected:string) =
@@ -107,6 +134,8 @@ type TestRepresentation() =
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
             let base1 = pr.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
+            let result = base1.Type(SignatureType.Repr)
+            printf "Representation: %s\n" (result)
+            Assert.AreEqual<string>(expected, result)
         | None -> 
             Assert.IsTrue(false)

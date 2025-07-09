@@ -797,6 +797,17 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             Some this.ValueList[0]
         | _ -> 
             None
+
+    /// Sets the value of this FplValue taking into account if this 
+    /// FplValue is a Reference to a variable. 
+    member this.SetValue(fplValue) =
+        match this.BlockType with
+        | FplValueType.Reference when this.Scope.ContainsKey(this.FplId) ->
+            let var = this.Scope[this.FplId]
+            var.ValueList.Add fplValue 
+        | _ -> 
+            this.ValueList.Add fplValue
+
     /// Indicates if this FplValue is a class.
     static member IsClass(fplValue:FplValue) = 
         fplValue.BlockType = FplValueType.Class

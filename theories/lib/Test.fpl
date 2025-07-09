@@ -1,0 +1,16 @@
+uses Fpl.Commons
+
+
+def cl A: obj {intr}
+def cl B: obj {intr}
+
+
+def pred T() 
+{ 
+    dec ~x,y:object
+    x:=A()
+    y:=B()
+    ;
+    del.Equal(x,y) 
+
+};

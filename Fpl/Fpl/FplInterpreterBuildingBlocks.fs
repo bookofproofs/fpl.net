@@ -1348,19 +1348,18 @@ let rec eval (st: SymbolTable) ast =
         fv.NameStartPos <- pos1
         fv.NameEndPos <- pos2
         fv.FplId <- "assign"
-        let assignee = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,es.PeekEvalStack())
+        let assignee = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,fv)
         es.PushEvalStack(assignee)
         eval st predicateWithQualificationAst
         es.PopEvalStack() 
-        let dummyValue = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,es.PeekEvalStack())
+        let dummyValue = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,fv)
         es.PushEvalStack(dummyValue)
         eval st predicateAst
         es.PopEvalStack() 
         let assignedValue = fv.ValueList |> Seq.toList |> List.rev |> List.head
         let candidates = assignee.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList 
         checkSIG04Diagnostics assignedValue candidates |> ignore
-        // todo assign value to the assignee by checking the type consistency first and finding an appropriate way to embed the result in the symbol table.
-
+        assignee.SetValue(assignedValue) |> ignore
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")
