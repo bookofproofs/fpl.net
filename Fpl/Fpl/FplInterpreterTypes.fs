@@ -267,40 +267,41 @@ type ParsedAstList() =
         ret
 
 type FplValueType =
+    | Root
+    | Theory
+    | RuleOfInference
     | Variable
     | VariadicVariableMany
     | VariadicVariableMany1
-    | MandatoryPredicate
-    | OptionalPredicate
+    | Class
+    | Constructor
+    | FunctionalTerm
     | MandatoryFunctionalTerm
     | OptionalFunctionalTerm
-    | Constructor
-    | Class
-    | Object
+    | Predicate
+    | MandatoryPredicate
+    | OptionalPredicate
+    | Axiom
     | Theorem
-    | Localization
     | Lemma
     | Proposition
+    | Conjecture
     | Corollary
     | Proof
-    | Conjecture
-    | Axiom
-    | RuleOfInference
-    | Quantor
-    | Predicate
-    | FunctionalTerm
-    | Reference
-    | Theory
     | Argument
     | Justification
     | ArgInference
-    | Language
+    | Localization
     | Translation
+    | Language
+    | Reference
+
+    | Object
+    | Quantor
     | Mapping
     | Stmt
     | Assertion
     | Extension
-    | Root
 
     member private this.UnqualifiedName =
         match this with

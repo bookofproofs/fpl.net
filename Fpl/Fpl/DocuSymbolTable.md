@@ -15,39 +15,369 @@ Each FplValue object has different properties, the most important of which are:
 * ValueList - implemented as a list of FplValues. 
 * Parent - A parent node in this FplValue, usually, the A's Parent references a B whose Scope contains the <A.Name, A> pair.
 
+The following infos describe how the FplValues are related to each other using their Scope and their ValueList.
 
-The following table documents how the FplValues are related to each other using their Scope and their ValueList.
+### BlockType `Root`
+The root of the SymbolTable. Created in `FplInterpreterTypes.SymbolTable` constructor.
+#### Possible Parent Nodes 
+None 
+#### Scope 
+Contains `Theory` nodes of the FPL code being interpreted.
+#### ValueList	
+Empty
 
-| BlockType | Description | Created in (match in FplInterpreterBuildingBlocks.eval function if not stated otherwise)| Parent's BlockType | Possible Scope Elements | Possible ValueList Elements |
-|----------|----------|----------|:----------:|:-------------:|:------:|
-|#Root | The root of the ST | `FplInterpreterTypes.SymbolTable` constructor | none | Theory | none |
-|#Theory  | A theory node corresponds to each evaluated FPL file. | `FplInterpreterBuildingBlocks.evaluateSymbolTable` function | Root | RuleOfInference, Class, FunctionaTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization | none |
-|#RuleOfInference|An inference rule that is valid in the theory in which it was declared or theories using this theory.|`Ast.RuleOfInference`|Theory|Variable, VariadicVariableMany, VariadicVariableMany1|1st Reference: Premise pradicate, 2nd Reference: Conclusion predicate|
-|#Class|A class defined in the theory or the theories using this theory.|`Ast.DefinitionClass`|Theory|Constructor, OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1|Class (list of nodes, from which this class inherits) These can be class nodes or primitive objects. The values are only added if they were previously declared in the code.|
-|#FunctionalTerm|A functional term defined in the theory or the theories using this theory.|`Ast.DefinitionFunctionalTerm`|Theory|OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1||
-|#Predicate|A predicate defined in the theory or the theories using this theory.|`Ast.DefinitionPredicate`|Theory|OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1||
-|#Axiom|An axiom defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the axiom's predicate)|
-|#Theorem|A theorem defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the theorems's predicate)|
-|#Lemma|A lemma defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the lemmas's predicate)|
-|#Proposition|A proposition defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the proposition's predicate)|
-|#Conjecture|A conjecture defined in the theory or the theories using this theory.||Theory|Variable, VariadicVariableMany, VariadicVariableMany1|Reference (only one, representing the conjectures's predicate)|
-|#Localization|A localization defined in the theory or the theories using this theory.|`Ast.Localization`|Theory|Variable, VariadicVariableMany, VariadicVariableMany1, Translation|Reference to the expression for which this localization was declared.|
-|#Corollary|A corollary of Parent.|`Ast.Corollary`|Axiom, Theorem, Lemma, Proposition, Conjecture, or Corollary|Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent|Reference (only one, representing the corollary's predicate)|
-|#Proof|A proof of a provable statement (see Parent).|`Ast.Proof`|Theorem, Lemma, Proposition, or Corollary|Argument, Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent|none|
-|#Argument|An argument of a proof|`Ast.Argument`|Proof|none|1st Justification, snd ArgInference|
-|#Justification|One or more justifications to a proof argument.|`Ast.Justification`|Argument|Reference|none|
-|#ArgInference|An argument inference of a proof argument.|`Ast.AssumeArgument`, `Ast.RevokeArgument`, `Ast.DerivedPredicate`|Argument|none|Reference|
-|#Translation|A translation of an expression inside a Localization in a particular language.|`Ast.Translation`|Localization|||
-|#Constructor|||Class|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class)|(Possibly empty) Nodes that represent the calls to some base classes constructors. Due to semantical errors in the code, the latter do not necessarily have to match the signatures of the actual constructors of the base classes of this constructor class.	The latter can be retrieved from the parent Class.|
-|#Reference|A reference to another FplValue in the symbol table.|`Ast.Trivial`, `Ast.DottedPredicate`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Expression`, `Ast.Trivial`, `Ast.ParentConstructorCall`|Constructor, Stmt, Reference|By convention, if the scope contains an element with the same key as the node's FplId, then the value is the reference node.||
-|#OptionalFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
-|#OptionalPredicate|||Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
-|#MandatoryFunctionalTerm||`Ast.FunctionalTermSignature`|Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
-|#MandatoryPredicate|||Class, Predicate, or FunctionalTerm|Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class, Predicate, or FunctionalTerm)||
-|#Variable|A variable declared in the scope of its Parent. Variables might be nested and have other Variables as parents.|`Ast.Var`|RuleOfInference, Class, FunctionalTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization, Corollary, Proof, Constructor, OptionalPredicate, MandatoryPredicate, OptionalFunctionalTerm, MandatoryFunctionalTerm, Variable|Empty or any nested variables|Empty or any declared type of the variable. This can be a Class|
-|#VariadicVariableMany||||||
-|#VariadicVariableMany1||||||
-|Object||||||
-|Premise||||||
-|Conclusion||||||
-|Stmt||||||
+---
+
+### BlockType `Theory`
+A theory node corresponds to each evaluated FPL file. Created in the `FplInterpreterBuildingBlocks.evaluateSymbolTable` function.
+#### Possible Parent Nodes 
+Root
+#### Scope 
+RuleOfInference, Class, FunctionaTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization
+#### ValueList	
+Empty
+
+---
+
+
+### BlockType `RuleOfInference`
+An inference rule that is valid in the theory in which it was declared or theories using this theory. Created in `Ast.RuleOfInference`.
+#### Possible Parent Nodes 
+Theory
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1
+#### ValueList	
+1st Reference: A Reference to a premise predicate 
+2nd Reference: A Reference to a vonclusion predicate
+
+---
+
+### BlockType `Variable`
+A variable declared in the scope of its Parent. Variables might be nested and have other Variables as parents. Created in `Ast.Var`.
+#### Possible Parent Nodes 
+RuleOfInference, Class, FunctionalTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization, Corollary, Proof, Constructor, OptionalPredicate, MandatoryPredicate, OptionalFunctionalTerm, MandatoryFunctionalTerm, another Variable
+#### Scope 
+If a variable is declared with a class type, the scope will contain that class. It can also contain nested variables.
+#### ValueList	
+If a variable is assigned a value, the Object representing its value.
+
+---
+
+### BlockType `VariadicVariableMany` and `VariadicVariableMany1`
+A collection of 0 (or 1) to many variables or other variadic variables. Created in todo.
+#### Possible Parent Nodes 
+Same as possibble parents of the Variable node.
+#### Scope 
+todo
+#### ValueList	
+If list of Variable, VariadicVariableMany or VariadicVariableMany1
+
+---
+
+### BlockType `Class`
+A class defined in the theory or the theories using this theory. Created in `Ast.DefinitionClass`.
+#### Possible Parent Nodes 
+Theory
+#### Scope 
+Constructor, OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1
+#### ValueList	
+Class (list of nodes, from which this class inherits). These can be class nodes or primitive objects. The values are only added if they were previously declared in the code.
+
+---
+
+### BlockType `Constructor`
+A class defined in the theory or the theories using this theory. Created in `Ast.DefinitionClass`.
+#### Possible Parent Nodes 
+Class
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class)
+#### ValueList	
+(Possibly empty) nodes that represent the calls to some base classes' constructors. Due to semantical errors in the code, the latter do not necessarily have to match the signatures of the actual constructors of the base classes of this constructor class.	The latter can be retrieved from the parent Class.
+
+---
+
+### BlockType `FunctionalTerm`
+A functional term defined in the theory or the theories using this theory. Created in `Ast.DefinitionFunctionalTerm`.
+#### Possible Parent Nodes 
+Theory
+#### Scope 
+OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1
+#### ValueList	
+todo
+
+---
+
+### BlockType `OptionalFunctionalTerm`
+An optional property of its parent that is a functional term. Created in `Ast.FunctionalTermSignature`.
+#### Possible Parent Nodes 
+Class, Predicate, or FunctionalTerm
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent).
+#### ValueList	
+todo
+
+---
+
+### BlockType `MandatoryFunctionalTerm`
+A mandatory property of its parent that is a functional term. Created in `Ast.FunctionalTermSignature`.
+#### Possible Parent Nodes 
+Class, Predicate, or FunctionalTerm
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent).
+#### ValueList	
+todo
+
+---
+
+### BlockType `Predicate`
+A predicate defined in the theory or the theories using this theory. Created in `Ast.DefinitionPredicate`.
+#### Possible Parent Nodes 
+Theory
+#### Scope 
+OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1
+#### ValueList	
+todo
+
+---
+
+### BlockType `OptionalPredicate`
+An optional property of its parent that is a predicate. Created in todo.
+#### Possible Parent Nodes 
+Class, Predicate, or FunctionalTerm
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent).
+#### ValueList	
+todo
+
+---
+
+### BlockType `MandatoryPredicate`
+A mandatory property of its parent that is a predicate. Created in todo.
+#### Possible Parent Nodes 
+Class, Predicate, or FunctionalTerm
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent).
+#### ValueList	
+todo
+
+---
+
+### BlockType `Axiom`
+An axiom defined in the theory or the theories using this theory. Created in todo.
+#### Possible Parent Nodes 
+Theory
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1
+#### ValueList	
+Reference (only one, representing the axiom's predicate)
+
+---
+
+### BlockType `Theorem`
+A theorem defined in the theory or the theories using this theory. Created in todo.
+#### Possible Parent Nodes 
+Theory
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1
+#### ValueList	
+Reference (only one, representing the theorems's predicate)
+
+---
+
+### BlockType `Lemma`
+A lemma defined in the theory or the theories using this theory. Created in todo.
+#### Possible Parent Nodes 
+Theory
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1
+#### ValueList	
+Reference (only one, representing the lemmas's predicate)
+
+---
+
+### BlockType `Proposition`
+A proposition defined in the theory or the theories using this theory. Created in todo.
+#### Possible Parent Nodes 
+Theory
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1
+#### ValueList	
+Reference (only one, representing the proposition's predicate)
+
+---
+
+### BlockType `Conjecture`
+A conjecture defined in the theory or the theories using this theory. Created in todo.
+#### Possible Parent Nodes 
+Theory
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1
+#### ValueList	
+Reference (only one, representing the conjectures's predicate)
+
+---
+
+### BlockType `Corollary`
+A corollary of its parent. Created in `Ast.Corollary`.
+#### Possible Parent Nodes 
+Axiom, Theorem, Lemma, Proposition, Conjecture, or Corollary
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent
+#### ValueList	
+Reference (only one, representing the corollary's predicate)
+
+---
+
+### BlockType `Proof`
+A proof of a provable statement (see Parent). Created in `Ast.Proof`.
+#### Possible Parent Nodes 
+Theorem, Lemma, Proposition, or Corollary
+#### Scope 
+Argument, Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent
+#### ValueList	
+Empty
+
+---
+
+### BlockType `Argument`
+An argument of a proof. Created in `Ast.Argument`.
+#### Possible Parent Nodes 
+Proof
+#### Scope 
+Empty
+#### ValueList	
+1st Justification, 
+2nd ArgInference
+
+---
+
+### BlockType `Justification`
+One or more justifications to a proof argument. Created in `Ast.Justification`.
+#### Possible Parent Nodes 
+Argument
+#### Scope 
+Reference
+#### ValueList	
+Empty
+
+---
+
+### BlockType `ArgInference`
+An argument inference of a proof argument. Created in `Ast.AssumeArgument`, `Ast.RevokeArgument`, `Ast.DerivedPredicate`
+#### Possible Parent Nodes 
+Argument
+#### Scope 
+None
+#### ValueList	
+Reference
+
+---
+
+### BlockType `Localization`
+A localization defined in the theory or the theories using this theory. Created in `Ast.Localization`.
+#### Possible Parent Nodes 
+Theory
+#### Scope 
+Variable, VariadicVariableMany, VariadicVariableMany1, Translation
+#### ValueList	
+Reference to the expression for which this localization was declared.
+
+---
+
+### BlockType `Translation`
+A translation of an expression inside a Localization in a particular language. Created in `Ast.Translation`
+#### Possible Parent Nodes 
+Localization
+#### Scope 
+todo
+#### ValueList	
+todo
+
+---
+
+### BlockType `Language`
+todo
+#### Possible Parent Nodes 
+todo
+#### Scope 
+todo
+#### ValueList	
+todo
+
+---
+
+### BlockType `Reference`
+A reference to another FplValue in the symbol table. Created in `Ast.Trivial`, `Ast.DottedPredicate`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Expression`, `Ast.Trivial`, `Ast.ParentConstructorCall`
+#### Possible Parent Nodes 
+Constructor, Stmt, Reference
+#### Scope 
+By convention, if the scope contains an element with the same key as the node's FplId, then the value is the reference node.
+#### ValueList	
+May contain further Reference nodes.
+
+---
+
+### BlockType `Object`
+todo
+#### Possible Parent Nodes 
+todo
+#### Scope 
+todo
+#### ValueList	
+todo
+
+---
+
+### BlockType `Quantor`
+todo
+#### Possible Parent Nodes 
+todo
+#### Scope 
+todo
+#### ValueList	
+todo
+
+---
+
+### BlockType `Mapping`
+todo
+#### Possible Parent Nodes 
+todo
+#### Scope 
+todo
+#### ValueList	
+todo
+
+---
+
+### BlockType `Stmt`
+todo
+#### Possible Parent Nodes 
+todo
+#### Scope 
+todo
+#### ValueList	
+todo
+
+---
+
+### BlockType `Assertion`
+todo
+#### Possible Parent Nodes 
+todo
+#### Scope 
+todo
+#### ValueList	
+todo
+
+---
+
+### BlockType `Extension`
+todo
+#### Possible Parent Nodes 
+todo
+#### Scope 
+todo
+#### ValueList	
+todo
+
