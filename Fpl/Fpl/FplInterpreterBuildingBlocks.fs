@@ -84,7 +84,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
         let fv = es.PeekEvalStack()
-        setUnitType fv "ind" "0"
+        setUnitType fv "ind" "ind"
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
@@ -659,7 +659,8 @@ let rec eval (st: SymbolTable) ast =
             | (FplValueType.Variable, 1)
             | (FplValueType.VariadicVariableMany, 1)
             | (FplValueType.VariadicVariableMany1, 1) -> 
-                fv.ValueList.Add(candidates.Head)
+                fv.Scope.Add(fv.FplId, candidates.Head)
+                fv.ReprId <- $"dec {candidates.Head.ReprId}"
             | (FplValueType.Variable, _)
             | (FplValueType.VariadicVariableMany, _)
             | (FplValueType.VariadicVariableMany1, _) -> 
@@ -1003,7 +1004,6 @@ let rec eval (st: SymbolTable) ast =
         let typeOfOperand = FplValue.CreateFplValue((pos1, pos2), FplValueType.Mapping, fv) 
         es.PushEvalStack(typeOfOperand)
         eval st variableTypeAst
-        let t = typeOfOperand.Type(SignatureType.Type)
         es.PopEvalStack()
         evaluateIsOperator fv operand typeOfOperand
         st.EvalPop()

@@ -287,7 +287,7 @@ type DiagnosticCode =
                     sprintf "Base class `%s` not found, candidates are %s." name candidates
                 else
                     sprintf "Base class `%s` not found, no candidates found." name 
-            | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
+            | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
             | ID015 signature -> sprintf "Referencing self impossible inside non-definitions; the outer block is %s." signature
             | ID016 signature -> sprintf "Referencing self impossible outside definitions, the outer block is %s." signature
