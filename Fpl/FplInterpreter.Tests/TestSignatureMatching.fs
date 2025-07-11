@@ -531,7 +531,7 @@ type TestSignatureMatching() =
     [<DataRow("constr_inh_e", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:obj { ctor B(x:pred) {dec base.obj(); self} } def pred T() {dec ~n:B ~x:obj n:=A(x); true};""", "x")>]
     [<DataRow("constr_inh_f", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def cl B:obj { ctor B(x:pred) {dec base.obj(); self} } def pred T() {dec ~n:A ~x:pred n:=B(x); true};""", "")>]
     [<TestMethod>]
-    member this.TestAssignments(no:string, varVal:string, var:string) =
+    member this.TestAssignmentsOfConstructors(no:string, varVal:string, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
         let filename = "TestAssignments"

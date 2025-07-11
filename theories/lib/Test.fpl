@@ -2,15 +2,29 @@ uses Fpl.Commons
 
 
 def cl A: obj {intr}
-def cl B: obj {intr}
+def cl B: A {intr}
+def cl C: obj {ctor C() {dec base.obj (); self }}
+def cl D: B {ctor D() {dec base.B(); self }}
 
+// without / with constructor 
+// without / with inheritance
+// without / with instantiation (with () / without ())
+// results in 12 different cases
 
 def pred T() 
 { 
-    dec ~x,y:object
-    x:=A()
-    y:=B()
+    dec ~o:object
+    ~a:A // without constructor, without inheritance without instantiation
+    ~aI1, aI2:A aI1:=A aI2:=A()
+    ~b,bI:B
+    ~c,cI:C
+    ~d,dI:D
+    
+    aI:=A
     ;
-    del.Equal(x,y) 
+
+
+
+    true
 
 };

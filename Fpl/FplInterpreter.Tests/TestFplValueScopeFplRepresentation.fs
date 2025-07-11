@@ -93,7 +93,7 @@ type TestFplValueScopeFplRepresentation() =
             | "t1" -> Assert.AreEqual<string>("obj()", t1.Type(SignatureType.Repr))
             | "t2" -> Assert.AreEqual<string>("obj(intr obj)", t2.Type(SignatureType.Repr))
             | "t3" -> Assert.AreEqual<string>("obj(undetermined)", t3.Type(SignatureType.Repr))
-            | "t4" -> Assert.AreEqual<string>("obj(0)", t4.Type(SignatureType.Repr))
+            | "t4" -> Assert.AreEqual<string>("obj(ind)", t4.Type(SignatureType.Repr))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -186,8 +186,8 @@ type TestFplValueScopeFplRepresentation() =
             | "t2" -> Assert.AreEqual<string>("true", t2.Type(SignatureType.Repr))
             | "t3" -> Assert.AreEqual<string>("intr obj", t3.Type(SignatureType.Repr))
             | "t4" -> Assert.AreEqual<string>("intr obj", t4.Type(SignatureType.Repr))
-            | "t5" -> Assert.AreEqual<string>("0", t5.Type(SignatureType.Repr))
-            | "t6" -> Assert.AreEqual<string>("0", t6.Type(SignatureType.Repr))
+            | "t5" -> Assert.AreEqual<string>("ind", t5.Type(SignatureType.Repr))
+            | "t6" -> Assert.AreEqual<string>("ind", t6.Type(SignatureType.Repr))
             | "t7" -> Assert.AreEqual<string>("undetermined", t7.Type(SignatureType.Repr))
             | "t8" -> Assert.AreEqual<string>("undetermined", t8.Type(SignatureType.Repr))
             | "t9" -> Assert.AreEqual<string>("tpl", t9.Type(SignatureType.Repr))
@@ -738,5 +738,98 @@ type TestFplValueScopeFplRepresentation() =
             | "base8" -> Assert.AreEqual<string>("intr obj", base1.Type(SignatureType.Repr))
             | "base9" -> Assert.AreEqual<string>("intr obj", base1.Type(SignatureType.Repr))
             | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+
+    [<DataRow("varIndUnset", """def pred T1() { dec ~x:ind; true};""")>]
+    [<DataRow("varIndSet0", """def pred T1() { dec ~x:ind x:=$0; true};""")>]
+    [<DataRow("varIndSet1", """def pred T1() { dec ~x:ind x:=$1; true};""")>]
+    [<DataRow("varIndSet42", """def pred T1() { dec ~x:ind x:=$42; true};""")>]
+    [<DataRow("varIndSet100", """def pred T1() { dec ~x:ind x:=$100; true};""")>]
+    [<DataRow("varFuncUnset", """def pred T1() { dec ~x:func; true};""")>]
+    [<DataRow("varPredUnset", """def pred T1() { dec ~x:pred; true};""")>]
+    [<TestMethod>]
+    member this.TestVariableRepresentationOtherThanObjects(var, varVal) =
+        ad.Clear()
+        let fplCode = sprintf "%s;" varVal
+        let filename = "TestVariableRepresentationOtherThanObjects"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let base1 = theory.Scope["T1()"]
+            let varObj = base1.Scope["x"]
+
+
+            match var with
+            | "varIndUnset" -> Assert.AreEqual<string>("ind", varObj.Type(SignatureType.Repr))
+            | "varIndSet0" -> Assert.AreEqual<string>("$0", varObj.Type(SignatureType.Repr))
+            | "varIndSet1" -> Assert.AreEqual<string>("$1", varObj.Type(SignatureType.Repr))
+            | "varIndSet42" -> Assert.AreEqual<string>("$42", varObj.Type(SignatureType.Repr))
+            | "varIndSet100" -> Assert.AreEqual<string>("$100", varObj.Type(SignatureType.Repr))
+            | "varFuncUnset" -> Assert.AreEqual<string>("func", varObj.Type(SignatureType.Repr))
+            | "varPredUnset" -> Assert.AreEqual<string>("undetermined", varObj.Type(SignatureType.Repr))
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("o", "dec obj")>]    // without anything
+    [<DataRow("a", "dec class A")>]    // without constructor, without inheritance, without instantiation
+    [<DataRow("aI1", "intr A")>]  // without constructor, without inheritance, with instantiation (without ())
+    [<DataRow("aI2", "intr A")>]  // without constructor, without inheritance, with instantiation (with ()) -> should also trigger another error
+    [<DataRow("b", "dec class B")>]    // without constructor, with inheritance, without instantiation
+    [<DataRow("bI1", "intr B:intr A")>]  // without constructor, with inheritance, with instantiation (without ())
+    [<DataRow("bI2", "intr B:intr A")>]  // without constructor, with inheritance, with instantiation (with ()) -> should also trigger another error
+    [<DataRow("c", "dec class C")>]    // with constructor, without inheritance, without instantiation
+    [<DataRow("cI1", "C:obj")>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
+    [<DataRow("cI2", "C:obj")>]  // with constructor, without inheritance, with instantiation (with ())
+    [<DataRow("d", "dec class D")>]    // with constructor, with inheritance, without instantiation
+    [<DataRow("dI1", "D:intr B:intr A")>]  // with constructor, with inheritance, with instantiation (without ())
+    [<DataRow("dI2", "D:intr B:intr A")>]  
+    [<TestMethod>]
+    member this.TestVariableRepresentationObjects(var, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """
+                uses Fpl.Commons
+
+                def cl A: obj {intr}
+                def cl B: A {intr}
+                def cl C: obj {ctor C() {dec base.obj (); self }}
+                def cl D: B {ctor D() {dec base.B(); self }}
+
+                def pred T() 
+                { 
+                    dec ~o:object 
+                    ~a:A 
+                    ~aI1:A aI1:=A 
+                    ~aI2:A aI2:=A() 
+                    ~b:B 
+                    ~bI1:B bI1:=B 
+                    ~bI2:B bI2:=B() 
+                    ~c:C 
+                    ~cI1:C cI1:=C 
+                    ~cI2:C cI2:=C() 
+                    ~d:D 
+                    ~dI1:D dI1:=D 
+                    ~dI2:D dI2:=D() 
+                    ;
+
+                    (a = b = c = d = o)
+                }
+        ;""" 
+        let filename = "TestVariableRepresentationObjects"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let base1 = theory.Scope["T()"]
+            let varObj = base1.Scope[var]
+            Assert.AreEqual<string>(expected, varObj.Type(SignatureType.Repr))
+
         | None -> 
             Assert.IsTrue(false)
