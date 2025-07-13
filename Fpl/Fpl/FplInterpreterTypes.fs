@@ -295,7 +295,6 @@ type FplValueType =
     | Translation
     | Language
     | Reference
-
     | Object
     | Quantor
     | Mapping

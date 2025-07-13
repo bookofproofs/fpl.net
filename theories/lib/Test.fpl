@@ -1,30 +1,27 @@
 uses Fpl.Commons
 
-
 def cl A: obj {intr}
 def cl B: A {intr}
 def cl C: obj {ctor C() {dec base.obj (); self }}
 def cl D: B {ctor D() {dec base.B(); self }}
 
-// without / with constructor 
-// without / with inheritance
-// without / with instantiation (with () / without ())
-// results in 12 different cases
-
 def pred T() 
 { 
-    dec ~o:object
-    ~a:A // without constructor, without inheritance without instantiation
-    ~aI1, aI2:A aI1:=A aI2:=A()
-    ~b,bI:B
-    ~c,cI:C
-    ~d,dI:D
-    
-    aI:=A
+    dec ~o:object 
+    ~a:A 
+    ~aI1:A aI1:=A 
+    ~aI2:A aI2:=A() 
+    ~b:B 
+    ~bI1:B bI1:=B 
+    ~bI2:B bI2:=B() 
+    ~c:C 
+    ~cI1:C cI1:=C 
+    ~cI2:C cI2:=C() 
+    ~d:D 
+    ~dI1:D dI1:=D 
+    ~dI2:D dI2:=D() 
     ;
 
-
-
-    true
-
-};
+    (a = b = c = d = o)
+}
+;
