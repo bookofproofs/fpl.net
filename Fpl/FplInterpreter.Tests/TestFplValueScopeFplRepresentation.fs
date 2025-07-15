@@ -792,8 +792,7 @@ type TestFplValueScopeFplRepresentation() =
     [<TestMethod>]
     member this.TestVariableRepresentationObjects(var, expected:string) =
         ad.Clear()
-        let fplCode = sprintf """
-                uses Fpl.Commons
+        let fplCode = sprintf """uses Fpl.Commons
 
                 def cl A: obj {intr}
                 def cl B: A {intr}

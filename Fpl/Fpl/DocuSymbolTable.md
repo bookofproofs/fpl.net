@@ -81,7 +81,7 @@ Theory
 #### Scope 
 Constructor, OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1
 #### ValueList	
-Class (list of nodes, from which this class inherits). These can be class nodes or primitive objects. The values are only added if they were previously declared in the code.
+Class (list of nodes, from which this class inherits). These can be class nodes or primitive objects. Class nodes are only added if they were previously declared in the code while a primitive object is added when a it is the root a class inherits from.
 
 ---
 
@@ -93,6 +93,17 @@ Class
 Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class)
 #### ValueList	
 (Possibly empty) nodes that represent the calls to some base classes' constructors. Due to semantical errors in the code, the latter do not necessarily have to match the signatures of the actual constructors of the base classes of this constructor class.	The latter can be retrieved from the parent Class.
+
+---
+
+### BlockType `Instance`
+An instance of an FPL class that is assigned to a variable. Created in `Ast.Assignment`.
+#### Possible Parent Nodes 
+Variable
+#### Scope 
+None
+#### ValueList	
+Only a single value of an `Instance`. It may contain a ValueList with another `Instance`. These instances correspond to the classes from which the instanciated class inherits (see also BlockType `Class`).
 
 ---
 
@@ -307,7 +318,7 @@ todo
 ---
 
 ### BlockType `Reference`
-A reference to another FplValue in the symbol table. Created in `Ast.Trivial`, `Ast.DottedPredicate`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Expression`, `Ast.Trivial`, `Ast.ParentConstructorCall`
+A reference to another FplValue in the symbol table. Created in `Ast.Trivial`, `Ast.DottedPredicate`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Expression`, `Ast.Trivial`, `Ast.ParentConstructorCall`, `Ast.Assignment`
 #### Possible Parent Nodes 
 Constructor, Stmt, Reference
 #### Scope 

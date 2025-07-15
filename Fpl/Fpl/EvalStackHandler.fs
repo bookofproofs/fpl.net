@@ -103,7 +103,7 @@ type EvalStack() =
                 | FplValueType.Localization -> 
                     next.FplId <- fv.FplId
                     next.TypeId <- fv.TypeId
-                    next.NameEndPos <- fv.NameEndPos
+                    next.EndPos <- fv.EndPos
                 | FplValueType.Justification -> 
                     EvalStack.tryAddToScope fv
                 | FplValueType.Argument ->
@@ -127,13 +127,13 @@ type EvalStack() =
                     EvalStack.tryAddToValueList fv 
                 | FplValueType.Quantor ->
                     EvalStack.tryAddToValueList fv 
-                    next.NameEndPos <- fv.NameEndPos
+                    next.EndPos <- fv.EndPos
                 | _ -> 
                     if next.Scope.ContainsKey(".") then 
                         ()
                     else
                         EvalStack.tryAddToValueList fv
-                    next.NameEndPos <- fv.NameEndPos
+                    next.EndPos <- fv.EndPos
             | FplValueType.Variable
             | FplValueType.VariadicVariableMany
             | FplValueType.VariadicVariableMany1 ->

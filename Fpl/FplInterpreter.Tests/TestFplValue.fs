@@ -744,8 +744,8 @@ type TestFplValue() =
         let block = result.Value.Root.Scope[filename]
         let fplValue = block.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(SignatureType.Type)
-        let actualSignatureStart = fplValue.NameStartPos.Index
-        let actualSignatureEnd = fplValue.NameEndPos.Index
+        let actualSignatureStart = fplValue.StartPos.Index
+        let actualSignatureEnd = fplValue.EndPos.Index
         Assert.AreEqual<string>(expectedType, actualTypeSignature)
         let expectedStart =
             if fplCode.StartsWith("def ") then 
@@ -976,8 +976,8 @@ type TestFplValue() =
         let block = result.Value.Root.Scope[filename].Scope["T"]
         let fplValue = block.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(SignatureType.Type)
-        let actualSignatureStart = fplValue.NameStartPos.Index
-        let actualSignatureEnd = fplValue.NameEndPos.Index
+        let actualSignatureStart = fplValue.StartPos.Index
+        let actualSignatureEnd = fplValue.EndPos.Index
         Assert.AreEqual<string>(expectedType, actualTypeSignature)
         let expectedStart =
                 (int64)19
@@ -1059,8 +1059,8 @@ type TestFplValue() =
         let cl = result.Value.Root.Scope[filename].Scope["T"]
         let fplValue = cl.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(SignatureType.Type)
-        let actualSignatureStart = fplValue.NameStartPos.Index
-        let actualSignatureEnd = fplValue.NameEndPos.Index
+        let actualSignatureStart = fplValue.StartPos.Index
+        let actualSignatureEnd = fplValue.EndPos.Index
         Assert.AreEqual<string>(expectedType, actualTypeSignature)
         let expectedStart =
                 (int64)14

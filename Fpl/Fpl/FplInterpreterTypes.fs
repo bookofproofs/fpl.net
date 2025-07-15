@@ -301,6 +301,7 @@ type FplValueType =
     | Stmt
     | Assertion
     | Extension
+    | Instance
 
     member private this.UnqualifiedName =
         match this with
@@ -339,6 +340,7 @@ type FplValueType =
         | Assertion -> "assertion"
         | Extension -> "extension"
         | Root -> "root"
+        | Instance -> "instance"
 
     member private this.Article =
         match this with
@@ -349,6 +351,7 @@ type FplValueType =
         | Assertion
         | ArgInference
         | Extension
+        | Instance
         | Axiom -> "an"
         | _ -> "a"
 
@@ -390,6 +393,7 @@ type FplValueType =
         | Stmt -> "stmt"
         | Assertion -> "ass"
         | Extension -> "ext"
+        | Instance -> "inst"
         | Root -> "root"
 
 type FixType =
@@ -425,8 +429,8 @@ type ScopeSearchResult =
 and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue option) =
     let mutable _expressionType = FixType.NoFix
     let mutable _exprTypeAlreadySet = false
-    let mutable _nameStartPos = fst positions
-    let mutable _nameEndPos = snd positions
+    let mutable _startPos = fst positions
+    let mutable _endPos = snd positions
     let mutable _blockType = blockType
     let mutable _auxiliaryInfo = 0
     let mutable _arity = 0
@@ -494,14 +498,14 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     member this.BlockTypeShortName = _blockType.ShortName
 
     /// Starting position of this FplValue
-    member this.NameStartPos
-        with get () = _nameStartPos
-        and set (value) = _nameStartPos <- value
+    member this.StartPos
+        with get () = _startPos
+        and set (value) = _startPos <- value
 
     /// This FplValue's name's end position that can be different from its endig position
-    member this.NameEndPos
-        with get () = _nameEndPos
-        and set (value) = _nameEndPos <- value
+    member this.EndPos
+        with get () = _endPos
+        and set (value) = _endPos <- value
 
     /// An auxiliary storage that is used e.g. for remembering how many variables were declared when traversing the Ast recursively.
     member this.AuxiliaryInfo
@@ -540,6 +544,15 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 Some(this.ValueList[0])
             else
                 None
+
+    member this.CreateInstance() =
+        let rec getInstance (par:FplValue) =
+            let inst = FplValue.CreateFplValue((_startPos,_endPos), FplValueType.Instance, par)
+            inst
+        match this.BlockType with
+        | FplValueType.Class ->
+            getInstance this
+        | _ -> failwith ($"Cannot create an instance of a non-class {this.Type(SignatureType.Mixed)}")    
 
     /// Type Identifier of this FplValue
     member this.Type(isSignature: SignatureType) =
@@ -868,7 +881,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 ""
             elif first then
                 let starPosWithoutFileName =
-                    $"(Ln: {fplValue.NameStartPos.Line}, Col: {fplValue.NameStartPos.Column})"
+                    $"(Ln: {fplValue.StartPos.Line}, Col: {fplValue.StartPos.Column})"
 
                 if FplValue.IsTheory(fplValue) then
                     getFullName fplValue.Parent.Value false + fplValueType + starPosWithoutFileName
@@ -1096,6 +1109,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "class"
             ret
+        | FplValueType.Instance
         | FplValueType.Object ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "obj"
@@ -1177,8 +1191,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 match fv.BlockType with
                 | FplValueType.Root -> FplValue.CreateRoot()
                 | FplValueType.Theory ->
-                    FplValue.CreateTheory((fv.NameStartPos, fv.NameEndPos), fv.Parent.Value, fv.FilePath.Value)
-                | _ -> FplValue.CreateFplValue((fv.NameStartPos, fv.NameEndPos), fv.BlockType, fv.Parent.Value)
+                    FplValue.CreateTheory((fv.StartPos, fv.EndPos), fv.Parent.Value, fv.FilePath.Value)
+                | _ -> FplValue.CreateFplValue((fv.StartPos, fv.EndPos), fv.BlockType, fv.Parent.Value)
 
             ret.ReprId <- fv.ReprId
             ret.FplId <- fv.FplId
@@ -1430,8 +1444,8 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
             sb.AppendLine($"{indent}\"Type\": \"{root.BlockType.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"FplValueType\": \"{fplTypeName}\",") |> ignore
             sb.AppendLine($"{indent}\"FplValueRepr\": \"{fplValueRepr}\",") |> ignore
-            sb.AppendLine($"{indent}\"Line\": \"{root.NameStartPos.Line}\",") |> ignore
-            sb.AppendLine($"{indent}\"Column\": \"{root.NameStartPos.Column}\",") |> ignore
+            sb.AppendLine($"{indent}\"Line\": \"{root.StartPos.Line}\",") |> ignore
+            sb.AppendLine($"{indent}\"Column\": \"{root.StartPos.Column}\",") |> ignore
             sb.AppendLine($"{indent}\"FilePath\": \"{currentPath}\",") |> ignore
 
             if preventInfinite then
@@ -1722,7 +1736,11 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
             Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
     | ([], p :: prs) ->
         let pType = p.Type(SignatureType.Type)
-        Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
+        let constructors = p.GetConstructors()
+        if FplValue.IsClass(p) && constructors.Length = 0 then
+            None
+        else
+            Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
     | (a :: [], []) ->
         if a.FplId = "???" then
             None

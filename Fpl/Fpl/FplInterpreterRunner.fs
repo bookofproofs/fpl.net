@@ -116,7 +116,7 @@ type FplRunner() =
                 | "xor" ->  evaluateExclusiveOr caller
                 | "or" ->  evaluateDisjunction caller
                 | _ when caller.FplId.StartsWith("del.") ->
-                    emitID013Diagnostics caller rootCaller.NameStartPos rootCaller.NameEndPos |> ignore
+                    emitID013Diagnostics caller rootCaller.StartPos rootCaller.EndPos |> ignore
                 | _ -> ()
         | _ -> ()
         

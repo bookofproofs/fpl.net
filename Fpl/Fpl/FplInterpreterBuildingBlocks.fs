@@ -34,7 +34,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
             es.Pop() |> ignore
             es.PushEvalStack(subNode)
             subNode.Parent <- rb.Parent
-            subNode.NameEndPos <- rb.NameEndPos
+            subNode.EndPos <- rb.EndPos
             if rb.Scope.ContainsKey(".") then 
                 subNode.Scope.Add(".",rb.Scope["."])
             match rb.Parent with 
@@ -174,7 +174,7 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- "ind"
             fv.ReprId <- sid
                     
-        fv.NameEndPos <- pos2
+        fv.EndPos <- pos2
         st.EvalPop() 
     | Ast.ExtensionName((pos1, pos2), s) ->
         st.EvalPush("ExtensionName")
@@ -184,8 +184,8 @@ let rec eval (st: SymbolTable) ast =
         | FplValueType.Extension ->
             fv.FplId <- extensionName
             fv.TypeId <- extensionName
-            fv.NameStartPos <- pos1
-            fv.NameEndPos <- pos2
+            fv.StartPos <- pos1
+            fv.EndPos <- pos2
         | FplValueType.VariadicVariableMany -> 
             let sid = $"*{extensionName}"
             fv.TypeId <- sid
@@ -285,8 +285,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- s
         fv.TypeId <- s
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         st.EvalPop() 
     | Ast.LocalizationString((pos1, pos2), s) -> 
         st.EvalPush("LocalizationString")
@@ -299,8 +299,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop()
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
@@ -308,8 +308,8 @@ let rec eval (st: SymbolTable) ast =
         let setId (fValue:FplValue) = 
             fValue.FplId <- s
             fValue.TypeId <- "pred"
-            fValue.NameStartPos <- pos1
-            fValue.NameEndPos <- pos2
+            fValue.StartPos <- pos1
+            fValue.EndPos <- pos2
         let fv = es.PeekEvalStack()
         setId fv
         let parent = fv.Parent.Value
@@ -353,8 +353,8 @@ let rec eval (st: SymbolTable) ast =
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.ReprId <- symbol
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop() 
     | Ast.PostfixOperator((pos1, pos2), symbol) -> 
@@ -363,8 +363,8 @@ let rec eval (st: SymbolTable) ast =
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.ReprId <- symbol
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop() 
     | Ast.PrefixOperator((pos1, pos2), symbol) -> 
@@ -373,16 +373,16 @@ let rec eval (st: SymbolTable) ast =
         fv.FplId <- symbol
         fv.TypeId <- symbol
         fv.ReprId <- symbol
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
         st.EvalPop() 
     // | Self of Positions * unit
     | Ast.Self((pos1, pos2), _) -> 
         st.EvalPush("Self")
         let rb = es.PeekEvalStack()
-        rb.NameStartPos <- pos1
-        rb.NameEndPos <- pos2
+        rb.StartPos <- pos1
+        rb.EndPos <- pos2
         rb.FplId <- "self"
         rb.TypeId <- "self"
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
@@ -403,8 +403,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Parent((pos1, pos2), _) -> 
         st.EvalPush("Parent")
         let rb = es.PeekEvalStack()
-        rb.NameStartPos <- pos1
-        rb.NameEndPos <- pos2
+        rb.StartPos <- pos1
+        rb.EndPos <- pos2
         rb.FplId <- "parent"
         rb.TypeId <- "parent"
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
@@ -425,8 +425,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.True((pos1, pos2), _) -> 
         st.EvalPush("True")
         let fv = es.PeekEvalStack()
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         fv.FplId <- "true"
         fv.ReprId <- "true"
         fv.TypeId <- "pred"
@@ -434,8 +434,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.False((pos1, pos2), _) -> 
         st.EvalPush("False")
         let fv = es.PeekEvalStack()
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         fv.FplId <- "false"
         fv.ReprId <- "false"
         fv.TypeId <- "pred"
@@ -443,8 +443,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Undefined((pos1, pos2), _) -> 
         st.EvalPush("Undefined")
         let fv = es.PeekEvalStack()
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         fv.FplId <- "undef"
         fv.TypeId <- "undef"
         st.EvalPop() 
@@ -485,7 +485,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ClassIdentifier")
         eval st ast1
         let fv = es.PeekEvalStack()
-        fv.NameEndPos <- pos2
+        fv.EndPos <- pos2
         st.EvalPop()
     | Ast.Extension((pos1, pos2), extensionString) ->
         st.EvalPush("Extension")
@@ -509,7 +509,7 @@ let rec eval (st: SymbolTable) ast =
         fv.FplId <- "not"
         fv.TypeId <- "pred"
         eval st predicateAst
-        fv.NameEndPos <- pos2
+        fv.EndPos <- pos2
         evaluateNegation fv
         emitLG000orLG001Diagnostics fv "negation"
         st.EvalPop()
@@ -520,8 +520,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Assertion((pos1, pos2), predicateAst) ->
         st.EvalPush("Assertion")
         let fv = es.PeekEvalStack()
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         fv.FplId <- "assert"
         let rb = FplValue.CreateFplValue((pos1,pos2), FplValueType.Reference, fv)
         es.PushEvalStack(rb)
@@ -684,7 +684,7 @@ let rec eval (st: SymbolTable) ast =
             | _ -> ()
             eval st child
         ) |> ignore
-        fv.NameEndPos <- pos2
+        fv.EndPos <- pos2
         st.EvalPop()
     | Ast.BracketedCoordsInType((pos1, pos2), asts) ->
         st.EvalPush("BracketedCoordsInType")
@@ -694,7 +694,7 @@ let rec eval (st: SymbolTable) ast =
         |> List.map (fun ast1 ->
             eval st ast1
         ) |> ignore
-        fv.NameEndPos <- pos2
+        fv.EndPos <- pos2
         st.EvalPop()
     | Ast.NamespaceIdentifier((pos1, pos2), asts) ->
         st.EvalPush("NamespaceIdentifier")
@@ -744,7 +744,7 @@ let rec eval (st: SymbolTable) ast =
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
-        fv.NameEndPos <- pos2
+        fv.EndPos <- pos2
         evaluateConjunction fv
         emitLG000orLG001Diagnostics fv "conjunction"
         st.EvalPop()
@@ -756,7 +756,7 @@ let rec eval (st: SymbolTable) ast =
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
-        fv.NameEndPos <- pos2
+        fv.EndPos <- pos2
         evaluateDisjunction fv
         emitLG000orLG001Diagnostics fv "disjunction"
         st.EvalPop()
@@ -768,7 +768,7 @@ let rec eval (st: SymbolTable) ast =
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
-        fv.NameEndPos <- pos2
+        fv.EndPos <- pos2
         evaluateExclusiveOr fv
         emitLG000orLG001Diagnostics fv "exclusive-or"
         st.EvalPop()
@@ -840,7 +840,7 @@ let rec eval (st: SymbolTable) ast =
         match astTupleOption with 
         | Some (_, ast3) -> 
             let fv = es.PeekEvalStack()
-            fv.NameEndPos <- pos2
+            fv.EndPos <- pos2
             eval st ast3 |> ignore
         | _ -> ()
         st.EvalPop()
@@ -975,7 +975,7 @@ let rec eval (st: SymbolTable) ast =
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
-        fv.NameEndPos <- pos2
+        fv.EndPos <- pos2
         evaluateImplication fv
         emitLG000orLG001Diagnostics fv "implication"
         st.EvalPop()
@@ -987,7 +987,7 @@ let rec eval (st: SymbolTable) ast =
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
-        fv.NameEndPos <- pos2
+        fv.EndPos <- pos2
         evaluateEquivalence fv
         emitLG000orLG001Diagnostics fv "equivalence"
         st.EvalPop()
@@ -1170,7 +1170,7 @@ let rec eval (st: SymbolTable) ast =
             else
                 fv.BlockType <- FplValueType.MandatoryFunctionalTerm
                 fv.TypeId <- "func"
-        fv.NameEndPos <- pos2
+        fv.EndPos <- pos2
         eval st mappingAst
         st.EvalPop()
         es.InSignatureEvaluation <- false
@@ -1282,7 +1282,7 @@ let rec eval (st: SymbolTable) ast =
         optionalSpecificationAst |> Option.map (eval st) |> Option.defaultValue ()
         eval st qualificationListAst
         let refBlock = es.PeekEvalStack() // if the reference was replaced, take this one
-        refBlock.NameEndPos <- pos2
+        refBlock.EndPos <- pos2
         simplifyTriviallyNestedExpressions refBlock
         let last = es.PeekEvalStack()
         es.PopEvalStack()
@@ -1316,8 +1316,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Cases((pos1, pos2), (conditionFollowedByResultListAsts, elseStatementAst)) ->
         st.EvalPush("Cases")
         let fv = es.PeekEvalStack()
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         fv.FplId <- "cases"
         conditionFollowedByResultListAsts 
         |> List.map (fun caseAst ->
@@ -1345,11 +1345,11 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Assignment((pos1, pos2), (predicateWithQualificationAst, predicateAst)) ->
         st.EvalPush("Assignment")
         let fv = es.PeekEvalStack()
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
-        fv.FplId <- "assign"
-        let assignee = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,fv)
-        es.PushEvalStack(assignee)
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
+        fv.FplId <- $"assign (ln {pos1.Line})"
+        let assigneeReference = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,fv)
+        es.PushEvalStack(assigneeReference)
         eval st predicateWithQualificationAst
         es.PopEvalStack() 
         let dummyValue = FplValue.CreateFplValue((pos1,pos2),FplValueType.Reference,fv)
@@ -1357,9 +1357,17 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
         es.PopEvalStack() 
         let assignedValue = fv.ValueList |> Seq.toList |> List.rev |> List.head
-        let candidates = assignee.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList 
-        checkSIG04Diagnostics assignedValue candidates |> ignore
-        assignee.SetValue(assignedValue) |> ignore
+        let assigneeOpt = assigneeReference.GetValue
+        match assigneeOpt with
+        | Some assignee ->
+            let candidates = assignee.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList 
+            let candidateOpt = checkSIG04Diagnostics assignedValue candidates 
+            match candidateOpt with
+            | Some candidate -> 
+                let classInstance = candidate.CreateInstance()
+                assignee.SetValue(classInstance) |> ignore
+            | None -> ()
+        | None -> ()
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")
@@ -1377,8 +1385,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ParentConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
         st.EvalPush("ParentConstructorCall")
         let fv = es.PeekEvalStack()
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         fv.FplId <- "bas"
         let refBlock = FplValue.CreateFplValue((pos1, pos2), FplValueType.Reference, fv) 
         es.PushEvalStack(refBlock)
@@ -1438,8 +1446,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ForIn((pos1, pos2), ((entityAst, inDomainAst), statementListAst)) ->
         st.EvalPush("ForIn")
         let fv = es.PeekEvalStack()
-        fv.NameStartPos <- pos1
-        fv.NameEndPos <- pos2
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
         fv.FplId <- "for"
         let entity = FplValue.CreateFplValue((pos1,pos2), FplValueType.Reference, fv)
         es.PushEvalStack(entity)
