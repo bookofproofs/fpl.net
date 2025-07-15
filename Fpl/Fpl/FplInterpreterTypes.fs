@@ -546,10 +546,25 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 None
 
     member this.CreateInstance() =
-        let rec getInstance (par:FplValue) =
-            let inst = FplValue.CreateFplValue((_startPos,_endPos), FplValueType.Instance, par)
+        let rec getInstance (parent:FplValue) =
+            let (inst:FplValue) = FplValue.CreateFplValue((_startPos,_endPos), FplValueType.Instance, parent)
+            inst.FplId <- this.FplId
+            inst.TypeId <- this.TypeId
+            let (constructors: FplValue list) = this.GetConstructors()
+            inst.ReprId <- 
+                // distinguish between intrinsic and non-intrinsic classes
+                // based on whether they have constructors or not
+                if constructors.Length = 0 then
+                    $"intr {this.TypeId}"
+                else
+                    $"{this.TypeId}"
+            this.ValueList
+            |> Seq.iter (fun value -> 
+                inst.ValueList.Add (value.CreateInstance())
+            )
             inst
         match this.BlockType with
+        | FplValueType.Object
         | FplValueType.Class ->
             getInstance this
         | _ -> failwith ($"Cannot create an instance of a non-class {this.Type(SignatureType.Mixed)}")    
@@ -600,7 +615,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 _reprId
             | (SignatureType.Repr, typeId) when typeId = "func" || typeId.StartsWith "func(" -> _reprId
             | (SignatureType.Repr, typeId) when typeId = "undef" || typeId = "ind" -> _reprId
-            | (SignatureType.Repr, typeId) when this.BlockType = FplValueType.Class -> _reprId
+            | (SignatureType.Repr, _) when this.BlockType = FplValueType.Class -> _reprId
             | _ ->
 
                 let propagate =
@@ -668,6 +683,15 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                             let paramT = paramTuple ()
                             sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
                         | _ -> ""
+                    | FplValueType.Instance ->
+                        let args =
+                            this.ValueList
+                            |> Seq.map (fun fv -> fv.Type(isSignature))
+                            |> String.concat ","
+                        if args <> String.Empty then
+                            sprintf "%s:%s" head args
+                        else
+                            head
                     | FplValueType.Translation ->
                         let args =
                             this.ValueList

@@ -778,11 +778,11 @@ type TestFplValueScopeFplRepresentation() =
 
     [<DataRow("o", "dec obj")>]    // without anything
     [<DataRow("a", "dec class A")>]    // without constructor, without inheritance, without instantiation
-    [<DataRow("aI1", "intr A")>]  // without constructor, without inheritance, with instantiation (without ())
-    [<DataRow("aI2", "intr A")>]  // without constructor, without inheritance, with instantiation (with ()) -> should also trigger another error
+    [<DataRow("aI1", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (without ())
+    [<DataRow("aI2", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (with ()) -> should also trigger another error
     [<DataRow("b", "dec class B")>]    // without constructor, with inheritance, without instantiation
-    [<DataRow("bI1", "intr B:intr A")>]  // without constructor, with inheritance, with instantiation (without ())
-    [<DataRow("bI2", "intr B:intr A")>]  // without constructor, with inheritance, with instantiation (with ()) -> should also trigger another error
+    [<DataRow("bI1", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (without ())
+    [<DataRow("bI2", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (with ()) -> should also trigger another error
     [<DataRow("c", "dec class C")>]    // with constructor, without inheritance, without instantiation
     [<DataRow("cI1", "C:obj")>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
     [<DataRow("cI2", "C:obj")>]  // with constructor, without inheritance, with instantiation (with ())
