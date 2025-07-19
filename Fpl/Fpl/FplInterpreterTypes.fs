@@ -546,8 +546,8 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 None
 
     member this.CreateInstance() =
-        let rec getInstance (parent:FplValue) =
-            let (inst:FplValue) = FplValue.CreateFplValue((_startPos,_endPos), FplValueType.Instance, parent)
+        let rec getInstance (previous:FplValue) =
+            let (inst:FplValue) = FplValue.CreateFplValue((_startPos,_endPos), FplValueType.Instance, previous)
             inst.FplId <- this.FplId
             inst.TypeId <- this.TypeId
             let (constructors: FplValue list) = this.GetConstructors()
@@ -558,16 +558,27 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     $"intr {this.TypeId}"
                 else
                     $"{this.TypeId}"
-            this.ValueList
-            |> Seq.iter (fun value -> 
-                inst.ValueList.Add (value.CreateInstance())
+            previous.ValueList
+            |> Seq.iter (fun next -> 
+                inst.ValueList.Add (next.CreateInstance())
             )
             inst
         match this.BlockType with
         | FplValueType.Object
+        | FplValueType.Constructor
         | FplValueType.Class ->
             getInstance this
-        | _ -> failwith ($"Cannot create an instance of a non-class {this.Type(SignatureType.Mixed)}")    
+        | FplValueType.Stmt when this.FplId = "bas" ->
+            // in case of a base class constructor call (that resides inside this that is a constructor)
+            // identify the 
+            let baseClassOpt = this.GetValue
+            match baseClassOpt with
+            | Some (baseClass:FplValue) -> 
+                getInstance baseClass
+            | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
+        | _ -> 
+            FplValue.CreateRoot() // todo
+            //failwith ($"Cannot create an instance of a non-class {this.Type(SignatureType.Mixed)}")    
 
     /// Type Identifier of this FplValue
     member this.Type(isSignature: SignatureType) =
@@ -607,7 +618,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 let vOpt = this.GetValue
 
                 match vOpt with
-                | Some(v: FplValue) -> v.Type(isSignature)
+                | Some (v: FplValue) -> v.Type(isSignature)
                 | None -> head
             | (SignatureType.Repr, typeId) when
                 typeId = "pred" || typeId.StartsWith "pred(" || typeId.StartsWith "pred$"
@@ -839,6 +850,19 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 Some var
         | FplValueType.Reference when this.FplId <> "" -> Some this
         | FplValueType.Reference when this.ValueList.Count = 0 -> Some this
+        | FplValueType.Stmt when this.FplId = "bas" && this.ValueList.Count > 0 -> 
+            let test = this.ValueList[0]
+            // in case of a base.obj() constructor call
+            if test.ValueList.Count = 2 && 
+                test.ValueList[0].BlockType = FplValueType.Object && 
+                test.ValueList[1].BlockType = FplValueType.Reference &&
+                test.ValueList[1].FplId = "???" then
+                // return an FplValue inbuilt Object 
+                Some  test.ValueList[0] 
+            elif test.ValueList.Count > 0 then
+               Some test 
+            else
+                None
         | _ when this.ValueList.Count > 0 -> Some this.ValueList[0]
         | _ -> None
 

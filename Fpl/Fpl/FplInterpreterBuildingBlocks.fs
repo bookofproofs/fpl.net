@@ -659,7 +659,7 @@ let rec eval (st: SymbolTable) ast =
             | (FplValueType.Variable, 1)
             | (FplValueType.VariadicVariableMany, 1)
             | (FplValueType.VariadicVariableMany1, 1) -> 
-                fv.Scope.Add(fv.FplId, candidates.Head)
+                fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
                 fv.ReprId <- $"dec {candidates.Head.ReprId}"
             | (FplValueType.Variable, _)
             | (FplValueType.VariadicVariableMany, _)
@@ -1356,18 +1356,27 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(dummyValue)
         eval st predicateAst
         es.PopEvalStack() 
-        let assignedValue = fv.ValueList |> Seq.toList |> List.rev |> List.head
+        let assignedValueList = fv.ValueList |> Seq.toList |> List.rev 
+        let assignedValueOpt = 
+            if assignedValueList.Length > 0 then
+                Some assignedValueList.Head
+            else
+                None
         let assigneeOpt = assigneeReference.GetValue
-        match assigneeOpt with
-        | Some assignee ->
-            let candidates = assignee.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList 
+        match (assigneeOpt, assignedValueOpt) with
+        | (Some assignee, Some assignedValue)  ->
+            let candidates = 
+                assignee.Scope 
+                |> Seq.map (fun kvp -> [kvp.Value] @ kvp.Value.GetConstructors()) // collect class nodes and their constructors
+                |> Seq.collect id // flatten the seq<FplValue list>  into FplValue seq
+                |> Seq.toList // convert it to a List
             let candidateOpt = checkSIG04Diagnostics assignedValue candidates 
             match candidateOpt with
             | Some candidate -> 
                 let classInstance = candidate.CreateInstance()
                 assignee.SetValue(classInstance) |> ignore
             | None -> ()
-        | None -> ()
+        | _ -> ()
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")

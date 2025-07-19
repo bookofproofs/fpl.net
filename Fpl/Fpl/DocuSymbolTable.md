@@ -322,7 +322,7 @@ A reference to another FplValue in the symbol table. Created in `Ast.Trivial`, `
 #### Possible Parent Nodes 
 Constructor, Stmt, Reference
 #### Scope 
-By convention, if the scope contains an element with the same key as the node's FplId, then the value is the reference node.
+By convention, if the scope contains an element with the same key as the node's FplId, then the value of the key-value pair is the referenced node.
 #### ValueList	
 May contain further Reference nodes.
 

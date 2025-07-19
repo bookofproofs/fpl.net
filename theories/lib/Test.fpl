@@ -4,6 +4,7 @@ def cl A: obj {intr}
 def cl B: A {intr}
 def cl C: obj {ctor C() {dec base.obj (); self }}
 def cl D: B {ctor D() {dec base.B(); self }}
+def cl C1: obj {ctor C1(i1:ind) {dec ~o:ind o:=i1 base.obj (); self }}
 
 def pred T() 
 { 
@@ -14,12 +15,8 @@ def pred T()
     ~b:B 
     ~bI1:B bI1:=B 
     ~bI2:B bI2:=B() 
-    ~c:C 
-    ~cI1:C cI1:=C 
-    ~cI2:C cI2:=C() 
-    ~d:D 
-    ~dI1:D dI1:=D 
     ~dI2:D dI2:=D() 
+    ~cI2:C1 
     ;
 
     (a = b = c = d = o)
