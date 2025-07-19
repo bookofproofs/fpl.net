@@ -16,7 +16,7 @@ def pred T()
     ~bI1:B bI1:=B 
     ~bI2:B bI2:=B() 
     ~dI2:D dI2:=D() 
-    ~cI2:C1 
+    ~cI2:C1 cI2:=C1($2)
     ;
 
     (a = b = c = d = o)
