@@ -557,7 +557,7 @@ type TestFplValueScopeBlockType() =
             | "base3" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
             | "base4" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
             | "base5" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
-            | "base6" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
+            | "base6" -> Assert.AreEqual<FplValueType>(FplValueType.Index, base1.BlockType)
             | "base7" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
             | "base8" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)
             | "base9" -> Assert.AreEqual<FplValueType>(FplValueType.Reference, base1.BlockType)

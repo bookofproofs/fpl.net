@@ -656,6 +656,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     | FplValueType.Argument
                     | FplValueType.Language
                     | FplValueType.Object
+                    | FplValueType.Index
                     | FplValueType.Class -> head
                     | FplValueType.Theorem
                     | FplValueType.Lemma
