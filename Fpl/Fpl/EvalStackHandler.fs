@@ -175,6 +175,8 @@ type EvalStack() =
             | FplValueType.Translation 
             | FplValueType.Stmt
             | FplValueType.Assertion
+            | FplValueType.Index
+            | FplValueType.Instance
             | FplValueType.Root -> 
                 EvalStack.tryAddToValueList fv 
 

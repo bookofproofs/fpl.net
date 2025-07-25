@@ -103,7 +103,18 @@ Variable
 #### Scope 
 None
 #### ValueList	
-Only a single value of an `Instance`. It may contain a ValueList with another `Instance`. These instances correspond to the classes from which the instanciated class inherits (see also BlockType `Class`).
+Only a single value of an `Instance`. It may contain a ValueList with another `Instance` objects. These instances correspond to the classes from which the instantiated class inherits (see also BlockType `Class`).
+
+---
+
+### BlockType `Index`
+This block type represents the value of an inbuilt index type of FPL. Created in `Ast.DollarDigits` in case when DollarDigits is parsed in the context of a parsed Expression.
+#### Possible Parent Nodes 
+Reference
+#### Scope 
+None
+#### ValueList	
+None.
 
 ---
 

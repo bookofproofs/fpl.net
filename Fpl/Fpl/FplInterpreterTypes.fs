@@ -302,6 +302,7 @@ type FplValueType =
     | Assertion
     | Extension
     | Instance
+    | Index
 
     member private this.UnqualifiedName =
         match this with
@@ -341,6 +342,7 @@ type FplValueType =
         | Extension -> "extension"
         | Root -> "root"
         | Instance -> "instance"
+        | Index -> "index"
 
     member private this.Article =
         match this with
@@ -352,6 +354,7 @@ type FplValueType =
         | ArgInference
         | Extension
         | Instance
+        | Index
         | Axiom -> "an"
         | _ -> "a"
 
@@ -394,6 +397,7 @@ type FplValueType =
         | Assertion -> "ass"
         | Extension -> "ext"
         | Instance -> "inst"
+        | Index -> "ind"
         | Root -> "root"
 
 type FixType =
@@ -1156,6 +1160,12 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         | FplValueType.Class ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "class"
+            ret
+        | FplValueType.Index ->
+            let ret = new FplValue(fplBlockType, positions, Some parent)
+            ret.ReprId <- "$0"
+            ret.TypeId <- "ind"
+            ret.FplId <- "$0"
             ret
         | FplValueType.Instance
         | FplValueType.Object ->

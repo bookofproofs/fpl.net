@@ -26,23 +26,26 @@ let eval_pos_char_list (st: SymbolTable) (startpos: Position) (endpos: Position)
 
 let eval_pos_string_ast (st: SymbolTable) str = ()
 
-/// Simplify trivially nested expressions 
+/// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their subnodes 
 let simplifyTriviallyNestedExpressions (rb:FplValue) = 
     if rb.ValueList.Count = 1 && rb.FplId = "" then
+        // removabel reference blocks are those with only a single value and unset FplId 
         let subNode = rb.ValueList[0]
-        if subNode.BlockType = FplValueType.Reference || subNode.BlockType = FplValueType.Quantor then 
-            es.Pop() |> ignore
-            es.PushEvalStack(subNode)
-            subNode.Parent <- rb.Parent
+        if subNode.BlockType = FplValueType.Reference || subNode.BlockType = FplValueType.Quantor || subNode.BlockType = FplValueType.Index then 
+            es.Pop() |> ignore // pop the removable reference block and ignored it
+            es.PushEvalStack(subNode) // push its subNode instead
+            // adjust subNode's Parent, EndPos, Scope
+            subNode.Parent <- rb.Parent 
             subNode.EndPos <- rb.EndPos
             if rb.Scope.ContainsKey(".") then 
                 subNode.Scope.Add(".",rb.Scope["."])
+            // adjust Parent's scope
             match rb.Parent with 
             | Some parent -> 
                 if parent.Scope.ContainsKey(".") then
                    parent.Scope["."] <- subNode
             | _ -> ()
-            // prevent recursive clearing of the subNode
+            // prevent recursive loops
             rb.ValueList.Clear() 
             rb.Scope.Clear()
 
@@ -164,17 +167,25 @@ let rec eval (st: SymbolTable) ast =
     // | DollarDigits of Positions * int
     | Ast.DollarDigits((pos1, pos2), s) -> 
         st.EvalPush("DollarDigits")
+        let path = st.EvalPath()
         let fv = es.PeekEvalStack()
         let sid = $"${s.ToString()}"
-        fv.FplId <- fv.FplId + sid
-        if fv.TypeId <> "" then
-            fv.TypeId <- fv.TypeId + sid
-            fv.ReprId <- "undetermined"
+        if path.Contains("Expression.DollarDigits") then
+            let value = FplValue.CreateFplValue((pos1, pos2), FplValueType.Index, fv)
+            value.FplId <- sid
+            value.ReprId <- sid
+            es.PushEvalStack(value)
+            es.PopEvalStack()
         else
-            fv.TypeId <- "ind"
-            fv.ReprId <- sid
+            fv.FplId <- fv.FplId + sid
+            if fv.TypeId <> "" then
+                fv.TypeId <- fv.TypeId + sid
+                fv.ReprId <- "undetermined"
+            else
+                fv.TypeId <- "ind"
+                fv.ReprId <- sid
                     
-        fv.EndPos <- pos2
+            fv.EndPos <- pos2
         st.EvalPop() 
     | Ast.ExtensionName((pos1, pos2), s) ->
         st.EvalPush("ExtensionName")
