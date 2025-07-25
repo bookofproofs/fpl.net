@@ -847,12 +847,14 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     member this.GetValue =
         match this.BlockType with
         | FplValueType.Reference when this.Scope.ContainsKey(this.FplId) ->
-            let var = this.Scope[this.FplId]
-
-            if var.ValueList.Count > 0 then
-                Some var.ValueList[0]
-            else
-                Some var
+            let refValue = this.Scope[this.FplId]
+            // if the reference value itself contains value(s) and is not a class, 
+            // return this value. 
+            // Exception: if refValue is a class, its "value list means something else - namely parent classes. In this case we only want to return the main class
+            if refValue.ValueList.Count > 0 && not (FplValue.IsClass(refValue)) then
+                Some refValue.ValueList[0] // return existing values except of classes, because those denoted their parent classes
+            else 
+                Some refValue 
         | FplValueType.Reference when this.FplId <> "" -> Some this
         | FplValueType.Reference when this.ValueList.Count = 0 -> Some this
         | FplValueType.Stmt when this.FplId = "bas" && this.ValueList.Count > 0 -> 

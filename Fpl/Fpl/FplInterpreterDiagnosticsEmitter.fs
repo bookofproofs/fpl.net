@@ -800,18 +800,34 @@ let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) =
     let valueOpt = toBeAssignedValue.GetValue
     match valueOpt with
     | Some value ->
-        if assignee.TypeId <> value.TypeId then
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = toBeAssignedValue.StartPos
-                    Diagnostic.EndPos = toBeAssignedValue.EndPos
-                    Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), value.Type(SignatureType.Type))
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic
+        let chainOpt = findClassInheritanceChain value assignee.TypeId
+        match chainOpt with
+        | Some chain ->
+            if not(chain.Contains(assignee.TypeId)) then
+                let diagnostic =
+                    { 
+                        Diagnostic.Uri = ad.CurrentUri
+                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                        Diagnostic.Severity = DiagnosticSeverity.Error
+                        Diagnostic.StartPos = toBeAssignedValue.StartPos
+                        Diagnostic.EndPos = toBeAssignedValue.EndPos
+                        Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), chain)
+                        Diagnostic.Alternatives = None 
+                    }
+                ad.AddDiagnostic diagnostic
+        | None -> 
+            if assignee.TypeId <> value.TypeId then
+                let diagnostic =
+                    { 
+                        Diagnostic.Uri = ad.CurrentUri
+                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                        Diagnostic.Severity = DiagnosticSeverity.Error
+                        Diagnostic.StartPos = toBeAssignedValue.StartPos
+                        Diagnostic.EndPos = toBeAssignedValue.EndPos
+                        Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), value.Type(SignatureType.Type))
+                        Diagnostic.Alternatives = None 
+                    }
+                ad.AddDiagnostic diagnostic
     | None ->
         let diagnostic =
             { 
