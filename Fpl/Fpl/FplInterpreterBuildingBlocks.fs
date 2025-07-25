@@ -1385,6 +1385,7 @@ let rec eval (st: SymbolTable) ast =
                     |> Seq.collect id // flatten the seq<FplValue list>  into FplValue seq
                     |> Seq.toList // convert it to a List
             let candidateOpt = checkSIG04Diagnostics assignedValue candidates 
+            checkSIG05Diagnostics assignee assignedValue
             match candidateOpt with
             | Some candidate -> 
                 let classInstance = candidate.CreateInstance()

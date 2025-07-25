@@ -796,6 +796,35 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
         ad.AddDiagnostic diagnostic
         None
 
+let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) = 
+    let valueOpt = toBeAssignedValue.GetValue
+    match valueOpt with
+    | Some value ->
+        if assignee.TypeId <> value.TypeId then
+            let diagnostic =
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = toBeAssignedValue.StartPos
+                    Diagnostic.EndPos = toBeAssignedValue.EndPos
+                    Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), value.Type(SignatureType.Type))
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
+    | None ->
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = toBeAssignedValue.StartPos
+                Diagnostic.EndPos = toBeAssignedValue.EndPos
+                Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), toBeAssignedValue.Type(SignatureType.Type))
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+
 let rec blocktIsProof (fplValue: FplValue) =
     if FplValue.IsProof(fplValue) then
         true
