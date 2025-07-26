@@ -30,8 +30,8 @@ type EvalStack() =
     static member tryAddToScope (fv:FplValue) = 
         let next = fv.Parent.Value
         let identifier = 
-            match fv.BlockType with
-            |  FplValueType.Constructor -> 
+            match fv.FplBlockType with
+            |  FplBlockType.Constructor -> 
                 fv.Type(SignatureType.Mixed)
             | _ -> 
                 if FplValue.IsBlock(fv) then 
@@ -42,19 +42,19 @@ type EvalStack() =
                     fv.Type(SignatureType.Name)
         match FplValue.InScopeOfParent(fv) identifier with
         | ScopeSearchResult.Found conflict -> 
-            match next.BlockType with
-            | FplValueType.Justification -> 
+            match next.FplBlockType with
+            | FplBlockType.Justification -> 
                 emitPR004Diagnostics fv conflict 
             | _ -> 
-                match fv.BlockType with
-                | FplValueType.Language -> 
+                match fv.FplBlockType with
+                | FplBlockType.Language -> 
                     let oldDiagnosticsStopped = ad.DiagnosticsStopped
                     ad.DiagnosticsStopped <- false
                     emitID014diagnostics fv conflict 
                     ad.DiagnosticsStopped <- oldDiagnosticsStopped
-                | FplValueType.Argument -> 
+                | FplBlockType.Argument -> 
                     emitPR003diagnostics fv conflict 
-                | FplValueType.Variable -> 
+                | FplBlockType.Variable -> 
                     ()
                 | _ ->
                     emitID001diagnostics fv conflict 
@@ -75,57 +75,57 @@ type EvalStack() =
         if _valueStack.Count > 0 then
             let next = _valueStack.Peek()
 
-            match fv.BlockType with
-            | FplValueType.Proof 
-            | FplValueType.Corollary ->
+            match fv.FplBlockType with
+            | FplBlockType.Proof 
+            | FplBlockType.Corollary ->
                 EvalStack.tryAddToScope fv
-            | FplValueType.Class 
-            | FplValueType.Theorem
-            | FplValueType.Localization
-            | FplValueType.Lemma
-            | FplValueType.Proposition
-            | FplValueType.Conjecture
-            | FplValueType.RuleOfInference
-            | FplValueType.Constructor
-            | FplValueType.MandatoryPredicate
-            | FplValueType.OptionalPredicate
-            | FplValueType.MandatoryFunctionalTerm
-            | FplValueType.OptionalFunctionalTerm
-            | FplValueType.Axiom
-            | FplValueType.Predicate
-            | FplValueType.Extension
-            | FplValueType.Argument 
-            | FplValueType.Language 
-            | FplValueType.FunctionalTerm ->
+            | FplBlockType.Class 
+            | FplBlockType.Theorem
+            | FplBlockType.Localization
+            | FplBlockType.Lemma
+            | FplBlockType.Proposition
+            | FplBlockType.Conjecture
+            | FplBlockType.RuleOfInference
+            | FplBlockType.Constructor
+            | FplBlockType.MandatoryPredicate
+            | FplBlockType.OptionalPredicate
+            | FplBlockType.MandatoryFunctionalTerm
+            | FplBlockType.OptionalFunctionalTerm
+            | FplBlockType.Axiom
+            | FplBlockType.Predicate
+            | FplBlockType.Extension
+            | FplBlockType.Argument 
+            | FplBlockType.Language 
+            | FplBlockType.FunctionalTerm ->
                 EvalStack.tryAddToScope fv
-            | FplValueType.Reference ->
-                match next.BlockType with
-                | FplValueType.Localization -> 
+            | FplBlockType.Reference ->
+                match next.FplBlockType with
+                | FplBlockType.Localization -> 
                     next.FplId <- fv.FplId
                     next.TypeId <- fv.TypeId
                     next.EndPos <- fv.EndPos
-                | FplValueType.Justification -> 
+                | FplBlockType.Justification -> 
                     EvalStack.tryAddToScope fv
-                | FplValueType.Argument ->
+                | FplBlockType.Argument ->
                     EvalStack.tryAddToValueList fv 
-                | FplValueType.Axiom
-                | FplValueType.Theorem 
-                | FplValueType.Lemma 
-                | FplValueType.Proposition 
-                | FplValueType.Corollary 
-                | FplValueType.Conjecture 
-                | FplValueType.Proof 
-                | FplValueType.RuleOfInference 
-                | FplValueType.Predicate 
-                | FplValueType.FunctionalTerm 
-                | FplValueType.Class 
-                | FplValueType.Constructor
-                | FplValueType.MandatoryFunctionalTerm
-                | FplValueType.OptionalFunctionalTerm
-                | FplValueType.MandatoryPredicate
-                | FplValueType.OptionalPredicate ->
+                | FplBlockType.Axiom
+                | FplBlockType.Theorem 
+                | FplBlockType.Lemma 
+                | FplBlockType.Proposition 
+                | FplBlockType.Corollary 
+                | FplBlockType.Conjecture 
+                | FplBlockType.Proof 
+                | FplBlockType.RuleOfInference 
+                | FplBlockType.Predicate 
+                | FplBlockType.FunctionalTerm 
+                | FplBlockType.Class 
+                | FplBlockType.Constructor
+                | FplBlockType.MandatoryFunctionalTerm
+                | FplBlockType.OptionalFunctionalTerm
+                | FplBlockType.MandatoryPredicate
+                | FplBlockType.OptionalPredicate ->
                     EvalStack.tryAddToValueList fv 
-                | FplValueType.Quantor ->
+                | FplBlockType.Quantor ->
                     EvalStack.tryAddToValueList fv 
                     next.EndPos <- fv.EndPos
                 | _ -> 
@@ -134,50 +134,50 @@ type EvalStack() =
                     else
                         EvalStack.tryAddToValueList fv
                     next.EndPos <- fv.EndPos
-            | FplValueType.Variable
-            | FplValueType.VariadicVariableMany
-            | FplValueType.VariadicVariableMany1 ->
-                match next.BlockType with 
-                | FplValueType.Theorem
-                | FplValueType.Lemma
-                | FplValueType.Proposition
-                | FplValueType.Conjecture
-                | FplValueType.RuleOfInference
-                | FplValueType.Constructor
-                | FplValueType.Corollary
-                | FplValueType.Proof
-                | FplValueType.MandatoryPredicate
-                | FplValueType.OptionalPredicate
-                | FplValueType.MandatoryFunctionalTerm
-                | FplValueType.OptionalFunctionalTerm
-                | FplValueType.Axiom
-                | FplValueType.Predicate
-                | FplValueType.Class
-                | FplValueType.Mapping 
-                | FplValueType.Extension 
-                | FplValueType.Variable 
-                | FplValueType.VariadicVariableMany
-                | FplValueType.VariadicVariableMany1 
-                | FplValueType.FunctionalTerm ->
+            | FplBlockType.Variable
+            | FplBlockType.VariadicVariableMany
+            | FplBlockType.VariadicVariableMany1 ->
+                match next.FplBlockType with 
+                | FplBlockType.Theorem
+                | FplBlockType.Lemma
+                | FplBlockType.Proposition
+                | FplBlockType.Conjecture
+                | FplBlockType.RuleOfInference
+                | FplBlockType.Constructor
+                | FplBlockType.Corollary
+                | FplBlockType.Proof
+                | FplBlockType.MandatoryPredicate
+                | FplBlockType.OptionalPredicate
+                | FplBlockType.MandatoryFunctionalTerm
+                | FplBlockType.OptionalFunctionalTerm
+                | FplBlockType.Axiom
+                | FplBlockType.Predicate
+                | FplBlockType.Class
+                | FplBlockType.Mapping 
+                | FplBlockType.Extension 
+                | FplBlockType.Variable 
+                | FplBlockType.VariadicVariableMany
+                | FplBlockType.VariadicVariableMany1 
+                | FplBlockType.FunctionalTerm ->
                     EvalStack.tryAddToScope fv
-                | FplValueType.Quantor  
-                | FplValueType.Localization -> 
+                | FplBlockType.Quantor  
+                | FplBlockType.Localization -> 
                     EvalStack.tryAddToScope fv
-                | FplValueType.Reference ->
+                | FplBlockType.Reference ->
                     EvalStack.tryAddToValueList fv
                 | _ -> ()
-            | FplValueType.Object
-            | FplValueType.Quantor
-            | FplValueType.Theory
-            | FplValueType.Justification 
-            | FplValueType.ArgInference 
-            | FplValueType.Mapping 
-            | FplValueType.Translation 
-            | FplValueType.Stmt
-            | FplValueType.Assertion
-            | FplValueType.Index
-            | FplValueType.Instance
-            | FplValueType.Root -> 
+            | FplBlockType.Object
+            | FplBlockType.Quantor
+            | FplBlockType.Theory
+            | FplBlockType.Justification 
+            | FplBlockType.ArgInference 
+            | FplBlockType.Mapping 
+            | FplBlockType.Translation 
+            | FplBlockType.Stmt
+            | FplBlockType.Assertion
+            | FplBlockType.Index
+            | FplBlockType.Instance
+            | FplBlockType.Root -> 
                 EvalStack.tryAddToValueList fv 
 
 

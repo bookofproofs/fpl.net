@@ -121,9 +121,9 @@ let emitVAR03diagnostics (fplValue: FplValue) (conflict: FplValue) =
     ad.AddDiagnostic diagnostic
 
 let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
-    match fplValue.BlockType with 
-    | FplValueType.Proof 
-    | FplValueType.Corollary ->
+    match fplValue.FplBlockType with 
+    | FplBlockType.Proof 
+    | FplBlockType.Corollary ->
         fplValue.Scope
         |> Seq.filter (fun kv -> FplValue.IsVariable(kv.Value))
         |> Seq.iter (fun kv -> 
@@ -433,7 +433,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 | _ -> ())
 
             if not duplicateInheritanceChainFound then
-                let obJ = FplValue.CreateFplValue((pos1, pos2),FplValueType.Object,fplValue)
+                let obJ = FplValue.CreateFplValue((pos1, pos2),FplBlockType.Object,fplValue)
                 Some obJ
             else
                 None
@@ -509,7 +509,7 @@ let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) po
         st.Root.Scope
         |> Seq.map (fun theory ->
             theory.Value.Scope
-            |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Extension)
+            |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Extension)
             |> Seq.map (fun kvp -> kvp.Value)
             |> Seq.filter (fun ext -> 
                 if matchReprId ext identifier && not (fv.Scope.ContainsKey(fv.FplId)) then 
@@ -526,7 +526,7 @@ let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) po
         |> Seq.toList
 
     let candidates = 
-        let parentExtension = filterTreePathByBlockType fv FplValueType.Extension
+        let parentExtension = filterTreePathByBlockType fv FplBlockType.Extension
         match parentExtension with 
         | Some ext -> 
             if matchReprId ext identifier then
@@ -669,7 +669,7 @@ let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     | _ -> ()
 
 let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
-    if fv.BlockType = FplValueType.Reference then
+    if fv.FplBlockType = FplBlockType.Reference then
         // collect candidates to match this reference from all theories and
         // add them to fplValues's scope
         let expressionId = fv.FplId
@@ -799,7 +799,7 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
 let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) = 
     let valueOpt = toBeAssignedValue.GetValue
     match valueOpt with
-    | Some value when value.BlockType = FplValueType.Class ->
+    | Some value when value.FplBlockType = FplBlockType.Class ->
         let chainOpt = findClassInheritanceChain value assignee.TypeId
         match chainOpt with
         | None ->
@@ -816,7 +816,7 @@ let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) =
                 }
             ad.AddDiagnostic diagnostic
         | _ -> () // inheritance chain found (no SIG05 diagnostics)
-    | Some value when value.BlockType = FplValueType.Constructor ->
+    | Some value when value.FplBlockType = FplBlockType.Constructor ->
         // find a class inheritance chain for the constructor's class (which is stored in its parent value)
         let chainOpt = findClassInheritanceChain value.Parent.Value assignee.TypeId
         match chainOpt with

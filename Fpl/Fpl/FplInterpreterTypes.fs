@@ -266,7 +266,7 @@ type ParsedAstList() =
 
         ret
 
-type FplValueType =
+type FplBlockType =
     | Root
     | Theory
     | RuleOfInference
@@ -430,7 +430,7 @@ type ScopeSearchResult =
     | NotFound
     | NotApplicable
 
-and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue option) =
+and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue option) =
     let mutable _expressionType = FixType.NoFix
     let mutable _exprTypeAlreadySet = false
     let mutable _startPos = fst positions
@@ -491,7 +491,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 )
 
     /// Type of the FPL block within this FplValue
-    member this.BlockType
+    member this.FplBlockType
         with get () = _blockType
         and set (value) = _blockType <- value
 
@@ -537,21 +537,21 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// Tries to find a mapping of this FplValue
     member this.Mapping =
-        match this.BlockType with
-        | FplValueType.Reference ->
+        match this.FplBlockType with
+        | FplBlockType.Reference ->
             if this.Scope.ContainsKey(this.FplId) then
                 this.Scope[this.FplId].Mapping
             else
                 None
         | _ ->
-            if this.ValueList.Count > 0 && this.ValueList[0].BlockType = FplValueType.Mapping then
+            if this.ValueList.Count > 0 && this.ValueList[0].FplBlockType = FplBlockType.Mapping then
                 Some(this.ValueList[0])
             else
                 None
 
     member this.CreateInstance() =
         let rec getInstance (previous:FplValue) =
-            let (inst:FplValue) = FplValue.CreateFplValue((_startPos,_endPos), FplValueType.Instance, previous)
+            let (inst:FplValue) = FplValue.CreateFplValue((_startPos,_endPos), FplBlockType.Instance, previous)
             inst.FplId <- this.FplId
             inst.TypeId <- this.TypeId
             let (constructors: FplValue list) = this.GetConstructors()
@@ -567,12 +567,12 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 inst.ValueList.Add (next.CreateInstance())
             )
             inst
-        match this.BlockType with
-        | FplValueType.Object
-        | FplValueType.Constructor
-        | FplValueType.Class ->
+        match this.FplBlockType with
+        | FplBlockType.Object
+        | FplBlockType.Constructor
+        | FplBlockType.Class ->
             getInstance this
-        | FplValueType.Stmt when this.FplId = "bas" ->
+        | FplBlockType.Stmt when this.FplId = "bas" ->
             // in case of a base class constructor call (that resides inside this that is a constructor)
             // identify the 
             let baseClassOpt = this.GetValue
@@ -586,23 +586,23 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// Type Identifier of this FplValue
     member this.Type(isSignature: SignatureType) =
-        match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with
-        | (FplValueType.Reference, true) ->
+        match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
+        | (FplBlockType.Reference, true) ->
             // delegate the type identifier to the referenced entitity
             let val1 = this.Scope[this.FplId]
             val1.Type(isSignature)
-        | (FplValueType.Stmt, _)
-        | (FplValueType.Extension, _) -> this.FplId
+        | (FplBlockType.Stmt, _)
+        | (FplBlockType.Extension, _) -> this.FplId
         | _ ->
             let head =
-                match (this.BlockType, this.Scope.ContainsKey(this.FplId)) with
-                | (FplValueType.Reference, true) ->
+                match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
+                | (FplBlockType.Reference, true) ->
                     match isSignature with
                     | SignatureType.Name -> this.Scope[this.FplId].Type(SignatureType.Name)
                     | SignatureType.Type -> _typeId
                     | SignatureType.Mixed -> _fplId
                     | SignatureType.Repr -> _reprId
-                | (FplValueType.Mapping, _) -> _typeId
+                | (FplBlockType.Mapping, _) -> _typeId
                 | _ ->
                     match isSignature with
                     | SignatureType.Name -> _fplId
@@ -612,13 +612,13 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
             match (isSignature, this.TypeId) with
             | (SignatureType.Repr, _) when
-                (this.BlockType = VariadicVariableMany1 || this.BlockType = VariadicVariableMany)
+                (this.FplBlockType = VariadicVariableMany1 || this.FplBlockType = VariadicVariableMany)
                 ->
                 let variadicContent =
                     this.ValueList |> Seq.map (fun fv -> fv.Type(isSignature)) |> String.concat ", "
 
                 $"{this.Type(SignatureType.Type)}" + "{" + variadicContent + "}"
-            | (SignatureType.Repr, _) when this.BlockType = Variable ->
+            | (SignatureType.Repr, _) when this.FplBlockType = Variable ->
                 let vOpt = this.GetValue
 
                 match vOpt with
@@ -630,7 +630,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 _reprId
             | (SignatureType.Repr, typeId) when typeId = "func" || typeId.StartsWith "func(" -> _reprId
             | (SignatureType.Repr, typeId) when typeId = "undef" || typeId = "ind" -> _reprId
-            | (SignatureType.Repr, _) when this.BlockType = FplValueType.Class -> _reprId
+            | (SignatureType.Repr, _) when this.FplBlockType = FplBlockType.Class -> _reprId
             | _ ->
 
                 let propagate =
@@ -645,33 +645,33 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                     |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
                         kvp.Value.IsSignatureVariable
                         || FplValue.IsVariable(this) && not (FplValue.IsClass(kvp.Value))
-                        || this.BlockType = FplValueType.Mapping)
+                        || this.FplBlockType = FplBlockType.Mapping)
                     |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
                     |> String.concat ", "
 
                 let idRec () =
-                    match this.BlockType with
-                    | FplValueType.Theory
-                    | FplValueType.Proof
-                    | FplValueType.Argument
-                    | FplValueType.Language
-                    | FplValueType.Object
-                    | FplValueType.Index
-                    | FplValueType.Class -> head
-                    | FplValueType.Theorem
-                    | FplValueType.Lemma
-                    | FplValueType.Proposition
-                    | FplValueType.Conjecture
-                    | FplValueType.RuleOfInference
-                    | FplValueType.Predicate
-                    | FplValueType.Corollary
-                    | FplValueType.Constructor
-                    | FplValueType.OptionalPredicate
-                    | FplValueType.MandatoryPredicate
-                    | FplValueType.Axiom ->
+                    match this.FplBlockType with
+                    | FplBlockType.Theory
+                    | FplBlockType.Proof
+                    | FplBlockType.Argument
+                    | FplBlockType.Language
+                    | FplBlockType.Object
+                    | FplBlockType.Index
+                    | FplBlockType.Class -> head
+                    | FplBlockType.Theorem
+                    | FplBlockType.Lemma
+                    | FplBlockType.Proposition
+                    | FplBlockType.Conjecture
+                    | FplBlockType.RuleOfInference
+                    | FplBlockType.Predicate
+                    | FplBlockType.Corollary
+                    | FplBlockType.Constructor
+                    | FplBlockType.OptionalPredicate
+                    | FplBlockType.MandatoryPredicate
+                    | FplBlockType.Axiom ->
                         let paramT = paramTuple ()
                         sprintf "%s(%s)" head paramT
-                    | FplValueType.Quantor ->
+                    | FplBlockType.Quantor ->
                         let paramT =
                             this.Scope
                             |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> FplValue.IsVariable(kvp.Value))
@@ -681,7 +681,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                         match paramT with
                         | "" -> head
                         | _ -> sprintf "%s(%s)" head paramT
-                    | FplValueType.Localization ->
+                    | FplBlockType.Localization ->
                         let paramT =
                             this.Scope
                             |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> FplValue.IsVariable(kvp.Value))
@@ -691,15 +691,15 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                         match paramT with
                         | "" -> head
                         | _ -> sprintf "%s(%s)" head paramT
-                    | FplValueType.OptionalFunctionalTerm
-                    | FplValueType.MandatoryFunctionalTerm
-                    | FplValueType.FunctionalTerm ->
+                    | FplBlockType.OptionalFunctionalTerm
+                    | FplBlockType.MandatoryFunctionalTerm
+                    | FplBlockType.FunctionalTerm ->
                         match this.Mapping with
                         | Some map ->
                             let paramT = paramTuple ()
                             sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
                         | _ -> ""
-                    | FplValueType.Instance ->
+                    | FplBlockType.Instance ->
                         let args =
                             this.ValueList
                             |> Seq.map (fun fv -> fv.Type(isSignature))
@@ -708,19 +708,19 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                             sprintf "%s:%s" head args
                         else
                             head
-                    | FplValueType.Translation ->
+                    | FplBlockType.Translation ->
                         let args =
                             this.ValueList
                             |> Seq.filter (fun fv ->
-                                fv.BlockType <> FplValueType.Stmt && fv.BlockType <> FplValueType.Assertion)
+                                fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
                             |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
                             |> String.concat ""
 
                         sprintf "%s%s" head args
-                    | FplValueType.Mapping
-                    | FplValueType.Variable
-                    | FplValueType.VariadicVariableMany
-                    | FplValueType.VariadicVariableMany1 ->
+                    | FplBlockType.Mapping
+                    | FplBlockType.Variable
+                    | FplBlockType.VariadicVariableMany
+                    | FplBlockType.VariadicVariableMany1 ->
                         let pars = paramTuple ()
 
                         match (pars, this.Mapping) with
@@ -736,7 +736,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                                 sprintf "%s[%s] -> %s" head pars (map.Type(propagate))
                             else
                                 sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
-                    | FplValueType.Reference ->
+                    | FplBlockType.Reference ->
                         let qualification =
                             if this.Scope.ContainsKey(".") then
                                 Some(this.Scope["."])
@@ -748,7 +748,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                             let a =
                                 this.ValueList
                                 |> Seq.filter (fun fv ->
-                                    fv.BlockType <> FplValueType.Stmt && fv.BlockType <> FplValueType.Assertion)
+                                    fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
                                 |> Seq.map (fun fv -> fv.Type(propagate))
                                 |> String.concat ", "
 
@@ -784,45 +784,45 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// Indicates if this FplValue is an FPL building block.
     static member IsFplBlock(fplValue: FplValue) =
-        match fplValue.BlockType with
-        | FplValueType.Axiom
-        | FplValueType.Theorem
-        | FplValueType.Lemma
-        | FplValueType.Proposition
-        | FplValueType.Corollary
-        | FplValueType.Conjecture
-        | FplValueType.Proof
-        | FplValueType.RuleOfInference
-        | FplValueType.Predicate
-        | FplValueType.FunctionalTerm
-        | FplValueType.Class -> true
+        match fplValue.FplBlockType with
+        | FplBlockType.Axiom
+        | FplBlockType.Theorem
+        | FplBlockType.Lemma
+        | FplBlockType.Proposition
+        | FplBlockType.Corollary
+        | FplBlockType.Conjecture
+        | FplBlockType.Proof
+        | FplBlockType.RuleOfInference
+        | FplBlockType.Predicate
+        | FplBlockType.FunctionalTerm
+        | FplBlockType.Class -> true
         | _ -> false
 
     /// Indicates if this FplValue is a definition
     static member IsDefinition(fplValue: FplValue) =
-        match fplValue.BlockType with
-        | FplValueType.Predicate
-        | FplValueType.FunctionalTerm
-        | FplValueType.Class -> true
+        match fplValue.FplBlockType with
+        | FplBlockType.Predicate
+        | FplBlockType.FunctionalTerm
+        | FplBlockType.Class -> true
         | _ -> false
 
     /// Indicates if this FplValue is an root of the symbol table.
-    static member IsRoot(fplValue: FplValue) = fplValue.BlockType = FplValueType.Root
+    static member IsRoot(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Root
 
     /// Qualified name of this FplValue
     member this.QualifiedName =
         let rec getFullName (fv: FplValue) (first: bool) =
             let fplValueType =
-                match fv.BlockType with
-                | FplValueType.Localization
-                | FplValueType.Reference -> fv.Type(SignatureType.Name)
-                | FplValueType.Localization
-                | FplValueType.Constructor
+                match fv.FplBlockType with
+                | FplBlockType.Localization
+                | FplBlockType.Reference -> fv.Type(SignatureType.Name)
+                | FplBlockType.Localization
+                | FplBlockType.Constructor
                 | _ when FplValue.IsBlock(fv) -> fv.Type(SignatureType.Mixed)
-                | FplValueType.Quantor -> fv.Type(SignatureType.Mixed)
+                | FplBlockType.Quantor -> fv.Type(SignatureType.Mixed)
                 | _ -> fv.FplId
 
-            if fv.BlockType = FplValueType.Root then
+            if fv.FplBlockType = FplBlockType.Root then
                 ""
             elif first then
                 if FplValue.IsRoot(fv.Parent.Value) then
@@ -845,26 +845,26 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// FplValue is a Reference to a variable. In the latter case,
     /// the value of the referenced variable is returned instead.
     member this.GetValue =
-        match this.BlockType with
-        | FplValueType.Reference when this.Scope.ContainsKey(this.FplId) ->
+        match this.FplBlockType with
+        | FplBlockType.Reference when this.Scope.ContainsKey(this.FplId) ->
             let refValue = this.Scope[this.FplId]
             // if the reference value itself contains value(s) and is not a class, 
             // return this value. 
             // Exceptions: 
             // 1) if refValue is a class, its "value list" means something else - namely parent classes. In this case we only want to return the main class
             // 2) if refValue is a constructor, its "value list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
-            if refValue.ValueList.Count > 0 && not (FplValue.IsClass(refValue)) && refValue.BlockType <> FplValueType.Constructor then
+            if refValue.ValueList.Count > 0 && not (FplValue.IsClass(refValue)) && refValue.FplBlockType <> FplBlockType.Constructor then
                 Some refValue.ValueList[0] // return existing values except of classes, because those denoted their parent classes
             else 
                 Some refValue 
-        | FplValueType.Reference when this.FplId <> "" -> Some this
-        | FplValueType.Reference when this.ValueList.Count = 0 -> Some this
-        | FplValueType.Stmt when this.FplId = "bas" && this.ValueList.Count > 0 -> 
+        | FplBlockType.Reference when this.FplId <> "" -> Some this
+        | FplBlockType.Reference when this.ValueList.Count = 0 -> Some this
+        | FplBlockType.Stmt when this.FplId = "bas" && this.ValueList.Count > 0 -> 
             let test = this.ValueList[0]
             // in case of a base.obj() constructor call
             if test.ValueList.Count = 2 && 
-                test.ValueList[0].BlockType = FplValueType.Object && 
-                test.ValueList[1].BlockType = FplValueType.Reference &&
+                test.ValueList[0].FplBlockType = FplBlockType.Object && 
+                test.ValueList[1].FplBlockType = FplBlockType.Reference &&
                 test.ValueList[1].FplId = "???" then
                 // return an FplValue inbuilt Object 
                 Some  test.ValueList[0] 
@@ -878,39 +878,39 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// Sets the value of this FplValue taking into account if this
     /// FplValue is a Reference to a variable.
     member this.SetValue(fplValue) =
-        match this.BlockType with
-        | FplValueType.Reference when this.Scope.ContainsKey(this.FplId) ->
+        match this.FplBlockType with
+        | FplBlockType.Reference when this.Scope.ContainsKey(this.FplId) ->
             let var = this.Scope[this.FplId]
             var.ValueList.Add fplValue
         | _ -> this.ValueList.Add fplValue
 
     /// Indicates if this FplValue is a class.
-    static member IsClass(fplValue: FplValue) = fplValue.BlockType = FplValueType.Class
+    static member IsClass(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Class
 
     /// Indicates if this FplValue is a proof.
-    static member IsProof(fplValue: FplValue) = fplValue.BlockType = FplValueType.Proof
+    static member IsProof(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Proof
 
     /// Indicates if this FplValue is a corollary.
     static member IsCorollary(fplValue: FplValue) =
-        fplValue.BlockType = FplValueType.Corollary
+        fplValue.FplBlockType = FplBlockType.Corollary
 
     /// Indicates if this FplValue is a property.
     static member IsProperty(fplValue: FplValue) =
-        fplValue.BlockType = FplValueType.MandatoryFunctionalTerm
-        || fplValue.BlockType = FplValueType.OptionalFunctionalTerm
-        || fplValue.BlockType = FplValueType.MandatoryPredicate
-        || fplValue.BlockType = FplValueType.OptionalPredicate
+        fplValue.FplBlockType = FplBlockType.MandatoryFunctionalTerm
+        || fplValue.FplBlockType = FplBlockType.OptionalFunctionalTerm
+        || fplValue.FplBlockType = FplBlockType.MandatoryPredicate
+        || fplValue.FplBlockType = FplBlockType.OptionalPredicate
 
     /// Indicates if this FplValue is a functional term.
     static member IsFunctionalTerm(fplValue: FplValue) =
-        fplValue.BlockType = FplValueType.MandatoryFunctionalTerm
-        || fplValue.BlockType = FplValueType.OptionalFunctionalTerm
-        || fplValue.BlockType = FplValueType.FunctionalTerm
+        fplValue.FplBlockType = FplBlockType.MandatoryFunctionalTerm
+        || fplValue.FplBlockType = FplBlockType.OptionalFunctionalTerm
+        || fplValue.FplBlockType = FplBlockType.FunctionalTerm
 
     /// Indicates if this FplValue is a constructor or a property
     static member IsConstructorOrProperty(fplValue: FplValue) =
-        match fplValue.BlockType with
-        | FplValueType.Constructor -> true
+        match fplValue.FplBlockType with
+        | FplBlockType.Constructor -> true
         | _ -> FplValue.IsProperty(fplValue)
 
     /// Indicates if this FplValue is a constructor or a property
@@ -919,13 +919,13 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// Indicates if this FplValue is a constructor or a theory
     static member IsTheory(fplValue: FplValue) =
-        fplValue.BlockType = FplValueType.Theory
+        fplValue.FplBlockType = FplBlockType.Theory
 
 
     /// Indicates if this FplValue is a block, a property, or a constructor.
     static member IsBlock(fplValue: FplValue) =
-        match fplValue.BlockType with
-        | FplValueType.Constructor -> true
+        match fplValue.FplBlockType with
+        | FplBlockType.Constructor -> true
         | _ -> FplValue.IsFplBlock(fplValue) || FplValue.IsProperty(fplValue)
 
 
@@ -934,7 +934,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         let rec getFullName (fplValue: FplValue) (first: bool) =
             let fplValueType = fplValue.Type(SignatureType.Mixed)
 
-            if fplValue.BlockType = FplValueType.Root then
+            if fplValue.FplBlockType = FplBlockType.Root then
                 ""
             elif first then
                 let starPosWithoutFileName =
@@ -954,9 +954,9 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// Indicates if this FplValue is a variable.
     static member IsVariable(fplValue: FplValue) =
-        fplValue.BlockType = FplValueType.Variable
-        || fplValue.BlockType = FplValueType.VariadicVariableMany
-        || fplValue.BlockType = FplValueType.VariadicVariableMany1
+        fplValue.FplBlockType = FplBlockType.Variable
+        || fplValue.FplBlockType = FplBlockType.VariadicVariableMany
+        || fplValue.FplBlockType = FplBlockType.VariadicVariableMany1
 
     /// Indicates if this FplValue is a variable declared in the signature (true) or in the block (false).
     member this.IsSignatureVariable
@@ -971,7 +971,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             else
                 raise (
                     ArgumentException(
-                        sprintf "Cannot set IsSignatureVariable for non-variable %s" this.BlockType.ShortName
+                        sprintf "Cannot set IsSignatureVariable for non-variable %s" this.FplBlockType.ShortName
                     )
                 )
 
@@ -982,15 +982,15 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// Indicates if this FplValue is a reference
     static member IsReference(fplValue: FplValue) =
-        fplValue.BlockType = FplValueType.Reference
+        fplValue.FplBlockType = FplBlockType.Reference
 
     /// Indicates if this FplValue is a variadic *variable.
     static member IsVariadicVariableMany(fplValue: FplValue) =
-        fplValue.BlockType = FplValueType.VariadicVariableMany
+        fplValue.FplBlockType = FplBlockType.VariadicVariableMany
 
     /// Indicates if this FplValue is a variadic +variable.
     static member IsVariadicVariableMany1(fplValue: FplValue) =
-        fplValue.BlockType = FplValueType.VariadicVariableMany1
+        fplValue.FplBlockType = FplBlockType.VariadicVariableMany1
 
     /// Checks if a block is in the scope of its parent, by the name of the block.
     static member InScopeOfParent (fplValue: FplValue) name =
@@ -1053,28 +1053,28 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                 else
                     foundList.Head
 
-            match fv.BlockType with
-            | FplValueType.Constructor
-            | FplValueType.Localization
-            | FplValueType.Quantor
-            | FplValueType.MandatoryFunctionalTerm
-            | FplValueType.OptionalFunctionalTerm
-            | FplValueType.MandatoryPredicate
-            | FplValueType.OptionalPredicate
-            | FplValueType.Proof
-            | FplValueType.Corollary
-            | FplValueType.Axiom
-            | FplValueType.Theorem
-            | FplValueType.Lemma
-            | FplValueType.Proposition
-            | FplValueType.Corollary
-            | FplValueType.Conjecture
-            | FplValueType.Proof
-            | FplValueType.RuleOfInference
-            | FplValueType.Extension
-            | FplValueType.Predicate
-            | FplValueType.FunctionalTerm
-            | FplValueType.Class ->
+            match fv.FplBlockType with
+            | FplBlockType.Constructor
+            | FplBlockType.Localization
+            | FplBlockType.Quantor
+            | FplBlockType.MandatoryFunctionalTerm
+            | FplBlockType.OptionalFunctionalTerm
+            | FplBlockType.MandatoryPredicate
+            | FplBlockType.OptionalPredicate
+            | FplBlockType.Proof
+            | FplBlockType.Corollary
+            | FplBlockType.Axiom
+            | FplBlockType.Theorem
+            | FplBlockType.Lemma
+            | FplBlockType.Proposition
+            | FplBlockType.Corollary
+            | FplBlockType.Conjecture
+            | FplBlockType.Proof
+            | FplBlockType.RuleOfInference
+            | FplBlockType.Extension
+            | FplBlockType.Predicate
+            | FplBlockType.FunctionalTerm
+            | FplBlockType.Class ->
                 if fv.Scope.ContainsKey name then
                     ScopeSearchResult.Found(fv.Scope[name])
                 elif fv.Parent.IsSome then
@@ -1086,7 +1086,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
                         firstBlockParent fv.Parent.Value
                 else
                     ScopeSearchResult.NotFound
-            | FplValueType.Theory -> ScopeSearchResult.NotFound
+            | FplBlockType.Theory -> ScopeSearchResult.NotFound
             | _ ->
                 if fv.Parent.IsSome then
                     firstBlockParent fv.Parent.Value
@@ -1098,15 +1098,15 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// Checks if an fplValue is provable. This will only be true if
     /// it is a theorem, a lemma, a proposition, or a corollary
     static member IsProvable(fplValue: FplValue) =
-        fplValue.BlockType = FplValueType.Theorem
-        || fplValue.BlockType = FplValueType.Corollary
-        || fplValue.BlockType = FplValueType.Lemma
-        || fplValue.BlockType = FplValueType.Proposition
+        fplValue.FplBlockType = FplBlockType.Theorem
+        || fplValue.FplBlockType = FplBlockType.Corollary
+        || fplValue.FplBlockType = FplBlockType.Lemma
+        || fplValue.FplBlockType = FplBlockType.Proposition
 
     /// A factory method for the evaluation of FPL theories
     static member CreateRoot() =
         let root =
-            new FplValue(FplValueType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+            new FplValue(FplBlockType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
 
         root.ReprId <- ""
         root.TypeId <- ""
@@ -1115,72 +1115,72 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
 
     /// A factory method for the evaluation of FPL theories
     static member CreateTheory(positions: Positions, parent: FplValue, filePath: string) =
-        let th = new FplValue(FplValueType.Theory, positions, Some parent)
+        let th = new FplValue(FplBlockType.Theory, positions, Some parent)
         th.FilePath <- Some filePath
         th
 
     /// A factory method for the evaluation of Fpl class definitions
-    static member CreateFplValue(positions: Positions, fplBlockType: FplValueType, parent: FplValue) =
+    static member CreateFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =
         match fplBlockType with
-        | FplValueType.Axiom
-        | FplValueType.Theorem
-        | FplValueType.Lemma
-        | FplValueType.Proposition
-        | FplValueType.Corollary
-        | FplValueType.Proof
-        | FplValueType.Predicate
-        | FplValueType.RuleOfInference
-        | FplValueType.Quantor
-        | FplValueType.Conjecture ->
+        | FplBlockType.Axiom
+        | FplBlockType.Theorem
+        | FplBlockType.Lemma
+        | FplBlockType.Proposition
+        | FplBlockType.Corollary
+        | FplBlockType.Proof
+        | FplBlockType.Predicate
+        | FplBlockType.RuleOfInference
+        | FplBlockType.Quantor
+        | FplBlockType.Conjecture ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "undetermined"
             ret.TypeId <- "pred"
             ret
-        | FplValueType.Mapping ->
+        | FplBlockType.Mapping ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret
-        | FplValueType.Constructor ->
+        | FplBlockType.Constructor ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "obj"
             ret.TypeId <- "pred"
             ret
-        | FplValueType.MandatoryPredicate
-        | FplValueType.OptionalPredicate
-        | FplValueType.Reference
-        | FplValueType.FunctionalTerm
-        | FplValueType.Variable
-        | FplValueType.VariadicVariableMany
-        | FplValueType.VariadicVariableMany1
-        | FplValueType.MandatoryFunctionalTerm
-        | FplValueType.Localization
-        | FplValueType.Argument
-        | FplValueType.Justification
-        | FplValueType.ArgInference
-        | FplValueType.Language
-        | FplValueType.Translation
-        | FplValueType.Stmt
-        | FplValueType.Assertion
-        | FplValueType.Extension
-        | FplValueType.OptionalFunctionalTerm -> new FplValue(fplBlockType, positions, Some parent)
-        | FplValueType.Class ->
+        | FplBlockType.MandatoryPredicate
+        | FplBlockType.OptionalPredicate
+        | FplBlockType.Reference
+        | FplBlockType.FunctionalTerm
+        | FplBlockType.Variable
+        | FplBlockType.VariadicVariableMany
+        | FplBlockType.VariadicVariableMany1
+        | FplBlockType.MandatoryFunctionalTerm
+        | FplBlockType.Localization
+        | FplBlockType.Argument
+        | FplBlockType.Justification
+        | FplBlockType.ArgInference
+        | FplBlockType.Language
+        | FplBlockType.Translation
+        | FplBlockType.Stmt
+        | FplBlockType.Assertion
+        | FplBlockType.Extension
+        | FplBlockType.OptionalFunctionalTerm -> new FplValue(fplBlockType, positions, Some parent)
+        | FplBlockType.Class ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "class"
             ret
-        | FplValueType.Index ->
+        | FplBlockType.Index ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "$0"
             ret.TypeId <- "ind"
             ret.FplId <- "$0"
             ret
-        | FplValueType.Instance
-        | FplValueType.Object ->
+        | FplBlockType.Instance
+        | FplBlockType.Object ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "obj"
             ret.TypeId <- "obj"
             ret.FplId <- "obj"
             ret
-        | FplValueType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead."))
-        | FplValueType.Theory -> raise (ArgumentException("Please use CreateTheory for creating the theories instead."))
+        | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead."))
+        | FplBlockType.Theory -> raise (ArgumentException("Please use CreateTheory for creating the theories instead."))
 
     /// A string representation of this FplValue
     override this.ToString() =
@@ -1205,9 +1205,9 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     /// Returns Some or none FplValue being the enclosing class block of a node inside a class.
     member this.GetClassBlock() =
         let rec getClassBlock (fv: FplValue) =
-            match fv.BlockType with
-            | FplValueType.Root -> None
-            | FplValueType.Class -> Some fv
+            match fv.FplBlockType with
+            | FplBlockType.Root -> None
+            | FplBlockType.Class -> Some fv
             | _ ->
                 match fv.Parent with
                 | Some parent -> getClassBlock parent
@@ -1219,7 +1219,7 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     member this.GetConstructors() =
         this.Scope
         |> Seq.map (fun kvp -> kvp.Value)
-        |> Seq.filter (fun fv -> fv.BlockType = FplValueType.Constructor)
+        |> Seq.filter (fun fv -> fv.FplBlockType = FplBlockType.Constructor)
         |> Seq.toList
 
     /// If this is a definition, the function will return a (possibly empty) list of all of its properties.
@@ -1227,10 +1227,10 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
         this.Scope
         |> Seq.map (fun kvp -> kvp.Value)
         |> Seq.filter (fun fv ->
-            fv.BlockType = FplValueType.MandatoryFunctionalTerm
-            || fv.BlockType = FplValueType.OptionalFunctionalTerm
-            || fv.BlockType = FplValueType.MandatoryPredicate
-            || fv.BlockType = FplValueType.OptionalPredicate)
+            fv.FplBlockType = FplBlockType.MandatoryFunctionalTerm
+            || fv.FplBlockType = FplBlockType.OptionalFunctionalTerm
+            || fv.FplBlockType = FplBlockType.MandatoryPredicate
+            || fv.FplBlockType = FplBlockType.OptionalPredicate)
         |> Seq.toList
 
     /// Copies other FplValue to this one without changing its reference pointer.
@@ -1251,11 +1251,11 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
     member this.Clone() =
         let rec recClone (fv: FplValue) =
             let ret =
-                match fv.BlockType with
-                | FplValueType.Root -> FplValue.CreateRoot()
-                | FplValueType.Theory ->
+                match fv.FplBlockType with
+                | FplBlockType.Root -> FplValue.CreateRoot()
+                | FplBlockType.Theory ->
                     FplValue.CreateTheory((fv.StartPos, fv.EndPos), fv.Parent.Value, fv.FilePath.Value)
-                | _ -> FplValue.CreateFplValue((fv.StartPos, fv.EndPos), fv.BlockType, fv.Parent.Value)
+                | _ -> FplValue.CreateFplValue((fv.StartPos, fv.EndPos), fv.FplBlockType, fv.Parent.Value)
 
             ret.ReprId <- fv.ReprId
             ret.FplId <- fv.FplId
@@ -1304,7 +1304,7 @@ let stripLastDollarDigit (s: string) =
 /// Tries to find a theorem-like statement for a proof
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
 let tryFindAssociatedBlockForProof (fplValue: FplValue) =
-    if fplValue.BlockType = FplValueType.Proof then
+    if fplValue.FplBlockType = FplBlockType.Proof then
         match fplValue.Parent with
         | Some theory ->
 
@@ -1331,7 +1331,7 @@ let tryFindAssociatedBlockForProof (fplValue: FplValue) =
             if provableBlocklist.Length > 1 then
                 ScopeSearchResult.FoundMultiple(
                     provableBlocklist
-                    |> List.map (fun fv -> sprintf "%s %s" fv.BlockType.Name (fv.Type(SignatureType.Mixed)))
+                    |> List.map (fun fv -> sprintf "%s %s" fv.FplBlockType.Name (fv.Type(SignatureType.Mixed)))
                     |> String.concat ", "
                 )
             elif provableBlocklist.Length > 0 then
@@ -1353,7 +1353,7 @@ let tryFindAssociatedBlockForProof (fplValue: FplValue) =
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
 let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
 
-    if fplValue.BlockType = FplValueType.Corollary then
+    if fplValue.FplBlockType = FplBlockType.Corollary then
         match fplValue.Parent with
         | Some theory ->
 
@@ -1375,22 +1375,22 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
                 buildingBlocksMatchingDollarDigitNameList
                 |> List.filter (fun fv ->
                     FplValue.IsProvable(fv)
-                    || fv.BlockType = FplValueType.Conjecture
-                    || fv.BlockType = FplValueType.Axiom)
+                    || fv.FplBlockType = FplBlockType.Conjecture
+                    || fv.FplBlockType = FplBlockType.Axiom)
 
             let notPotentialBlockList =
                 buildingBlocksMatchingDollarDigitNameList
                 |> List.filter (fun fv ->
                     not (
                         FplValue.IsProvable(fv)
-                        || fv.BlockType = FplValueType.Conjecture
-                        || fv.BlockType = FplValueType.Axiom
+                        || fv.FplBlockType = FplBlockType.Conjecture
+                        || fv.FplBlockType = FplBlockType.Axiom
                     ))
 
             if potentialBlockList.Length > 1 then
                 ScopeSearchResult.FoundMultiple(
                     potentialBlockList
-                    |> List.map (fun fv -> sprintf "%s %s" fv.BlockType.Name (fv.Type(SignatureType.Mixed)))
+                    |> List.map (fun fv -> sprintf "%s %s" fv.FplBlockType.Name (fv.Type(SignatureType.Mixed)))
                     |> String.concat ", "
                 )
             elif potentialBlockList.Length > 0 then
@@ -1411,9 +1411,9 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
 let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) =
     let rootType = classRoot.Type(SignatureType.Type)
 
-    match classRoot.BlockType with
-    | FplValueType.Class
-    | FplValueType.Object ->
+    match classRoot.FplBlockType with
+    | FplBlockType.Class
+    | FplBlockType.Object ->
         if rootType = baseClassName then
             Some(rootType)
         else
@@ -1510,7 +1510,7 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
             else
                 sb.AppendLine($"{indent}\"Name\": \"{name}\",") |> ignore
 
-            sb.AppendLine($"{indent}\"Type\": \"{root.BlockType.ShortName}\",") |> ignore
+            sb.AppendLine($"{indent}\"Type\": \"{root.FplBlockType.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"FplValueType\": \"{fplTypeName}\",") |> ignore
             sb.AppendLine($"{indent}\"FplValueRepr\": \"{fplValueRepr}\",") |> ignore
             sb.AppendLine($"{indent}\"Line\": \"{root.StartPos.Line}\",") |> ignore
@@ -1617,10 +1617,10 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
         |> Seq.iter (fun (block: FplValue) ->
             pm.Add(block)
 
-            if withClassConstructors && block.BlockType = FplValueType.Class then
+            if withClassConstructors && block.FplBlockType = FplBlockType.Class then
                 block.Scope
                 |> Seq.map (fun kvp -> kvp.Value)
-                |> Seq.filter (fun (fv: FplValue) -> fv.BlockType = FplValueType.Constructor)
+                |> Seq.filter (fun (fv: FplValue) -> fv.FplBlockType = FplBlockType.Constructor)
                 |> Seq.iter (fun (fv: FplValue) -> pm.Add(fv))))
     |> ignore
 
@@ -1631,11 +1631,11 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
 /// the specific name within the building block, whose syntax tree the FplValue `fv` is part of.
 let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
     let rec findDefinition (fv1: FplValue) =
-        match fv1.BlockType with
-        | FplValueType.Theory -> ScopeSearchResult.NotFound
-        | FplValueType.Class
-        | FplValueType.Predicate
-        | FplValueType.FunctionalTerm -> ScopeSearchResult.Found(fv1)
+        match fv1.FplBlockType with
+        | FplBlockType.Theory -> ScopeSearchResult.NotFound
+        | FplBlockType.Class
+        | FplBlockType.Predicate
+        | FplBlockType.FunctionalTerm -> ScopeSearchResult.Found(fv1)
         | _ ->
             match fv1.Parent with
             | Some parent -> findDefinition parent
@@ -1651,8 +1651,8 @@ let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
 
 let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
     let rec findQualifiedEntity (fv1: FplValue) =
-        match fv1.BlockType with
-        | FplValueType.Reference ->
+        match fv1.FplBlockType with
+        | FplBlockType.Reference ->
             if fv1.Scope.ContainsKey(".") && fv1.Scope.Count > 1 then
                 let result =
                     fv1.Scope
@@ -1670,8 +1670,8 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
 
     match findQualifiedEntity fv with
     | ScopeSearchResult.Found candidate ->
-        match candidate.BlockType with
-        | FplValueType.Variable ->
+        match candidate.FplBlockType with
+        | FplBlockType.Variable ->
             if candidate.ValueList.Count > 0 then
                 let (varType: FplValue) = candidate.ValueList[0]
 
@@ -1691,34 +1691,34 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
 let rec nextDefinition (fv: FplValue) counter =
     let blocks = Stack<FplValue>()
 
-    match fv.BlockType with
-    | FplValueType.Axiom
-    | FplValueType.Theorem
-    | FplValueType.Lemma
-    | FplValueType.Proposition
-    | FplValueType.Corollary
-    | FplValueType.Conjecture
-    | FplValueType.Proof
-    | FplValueType.Localization
-    | FplValueType.RuleOfInference ->
-        let name = $"{fv.BlockType.Name} {fv.Type(SignatureType.Name)}"
+    match fv.FplBlockType with
+    | FplBlockType.Axiom
+    | FplBlockType.Theorem
+    | FplBlockType.Lemma
+    | FplBlockType.Proposition
+    | FplBlockType.Corollary
+    | FplBlockType.Conjecture
+    | FplBlockType.Proof
+    | FplBlockType.Localization
+    | FplBlockType.RuleOfInference ->
+        let name = $"{fv.FplBlockType.Name} {fv.Type(SignatureType.Name)}"
         ScopeSearchResult.FoundIncorrectBlock name
-    | FplValueType.Theory ->
+    | FplBlockType.Theory ->
         let name =
             if blocks.Count > 0 then
                 let fv1 = blocks.Peek()
-                $"{fv1.BlockType.Name} {fv1.Type(SignatureType.Name)}"
+                $"{fv1.FplBlockType.Name} {fv1.Type(SignatureType.Name)}"
             else
                 "(no block found)"
 
         ScopeSearchResult.FoundIncorrectBlock name
-    | FplValueType.MandatoryPredicate
-    | FplValueType.OptionalPredicate
-    | FplValueType.MandatoryFunctionalTerm
-    | FplValueType.OptionalFunctionalTerm
-    | FplValueType.Predicate
-    | FplValueType.FunctionalTerm
-    | FplValueType.Class ->
+    | FplBlockType.MandatoryPredicate
+    | FplBlockType.OptionalPredicate
+    | FplBlockType.MandatoryFunctionalTerm
+    | FplBlockType.OptionalFunctionalTerm
+    | FplBlockType.Predicate
+    | FplBlockType.FunctionalTerm
+    | FplBlockType.Class ->
         blocks.Push(fv)
 
         if counter <= 0 then
@@ -1732,7 +1732,7 @@ let rec nextDefinition (fv: FplValue) counter =
                 let name =
                     if blocks.Count > 0 then
                         let fv1 = blocks.Peek()
-                        $"{fv1.BlockType.Name} {fv1.Type(SignatureType.Name)}"
+                        $"{fv1.FplBlockType.Name} {fv1.Type(SignatureType.Name)}"
                     else
                         "(no block found)"
 
@@ -1764,7 +1764,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
         elif
             aType.Length > 0
             && Char.IsUpper(aType[0])
-            && a.BlockType = FplValueType.Reference
+            && a.FplBlockType = FplBlockType.Reference
             && a.Scope.Count = 1
         then
             let var = a.Scope.Values |> Seq.toList |> List.head
@@ -1772,8 +1772,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
             if var.Scope.ContainsKey(var.FplId) then
                 let cl = var.Scope[var.FplId]
 
-                match cl.BlockType with
-                | FplValueType.Class ->
+                match cl.FplBlockType with
+                | FplBlockType.Class ->
                     let inheritanceList = findClassInheritanceChain cl pType
 
                     match inheritanceList with
@@ -1825,21 +1825,21 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
 /// Some(specific error message) or None, if the match succeeded.
 let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     let parameters =
-        match fvp.BlockType with
-        | FplValueType.Axiom
-        | FplValueType.Theorem
-        | FplValueType.Lemma
-        | FplValueType.Proposition
-        | FplValueType.Corollary
-        | FplValueType.Predicate
-        | FplValueType.FunctionalTerm
-        | FplValueType.RuleOfInference
-        | FplValueType.Conjecture
-        | FplValueType.Constructor
-        | FplValueType.MandatoryPredicate
-        | FplValueType.MandatoryFunctionalTerm
-        | FplValueType.OptionalPredicate
-        | FplValueType.OptionalFunctionalTerm ->
+        match fvp.FplBlockType with
+        | FplBlockType.Axiom
+        | FplBlockType.Theorem
+        | FplBlockType.Lemma
+        | FplBlockType.Proposition
+        | FplBlockType.Corollary
+        | FplBlockType.Predicate
+        | FplBlockType.FunctionalTerm
+        | FplBlockType.RuleOfInference
+        | FplBlockType.Conjecture
+        | FplBlockType.Constructor
+        | FplBlockType.MandatoryPredicate
+        | FplBlockType.MandatoryFunctionalTerm
+        | FplBlockType.OptionalPredicate
+        | FplBlockType.OptionalFunctionalTerm ->
             fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
         | _ -> fvp.Scope.Values |> Seq.toList
 
@@ -1869,8 +1869,8 @@ let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (acc
         | None -> (Some candidate, [])
         | Some errMsg -> checkCandidates toBeMatched candidates (accResultList @ [ errMsg ])
 
-let rec filterTreePathByBlockType (leaf: FplValue) (typ: FplValueType) =
-    if leaf.BlockType = typ then
+let rec filterTreePathByBlockType (leaf: FplValue) (typ: FplBlockType) =
+    if leaf.FplBlockType = typ then
         Some leaf
     else
         match leaf.Parent with
@@ -1882,7 +1882,7 @@ let searchExtensionByName (root: FplValue) identifier =
         root.Scope
         |> Seq.map (fun theory ->
             theory.Value.Scope
-            |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Extension)
+            |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Extension)
             |> Seq.map (fun kvp -> kvp.Value)
             |> Seq.filter (fun ext -> ext.FplId = identifier))
         |> Seq.concat
