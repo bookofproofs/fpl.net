@@ -1386,10 +1386,15 @@ let rec eval (st: SymbolTable) ast =
                     |> Seq.toList // convert it to a List
             let candidateOpt = checkSIG04Diagnostics assignedValue candidates 
             checkSIG05Diagnostics assignee assignedValue
-            match candidateOpt with
-            | Some candidate -> 
-                let classInstance = candidate.CreateInstance()
-                assignee.SetValue(classInstance) |> ignore
+            let valueOpt = 
+                match candidateOpt with
+                | Some candidate -> 
+                    let classInstance = candidate.CreateInstance()
+                    Some classInstance
+                | None -> 
+                    assignedValue.GetValue
+            match valueOpt with
+            | Some value -> assignee.SetValue(value) |> ignore
             | None -> ()
         | _ -> ()
         st.EvalPop()
