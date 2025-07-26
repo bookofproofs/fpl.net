@@ -850,8 +850,10 @@ and FplValue(blockType: FplValueType, positions: Positions, parent: FplValue opt
             let refValue = this.Scope[this.FplId]
             // if the reference value itself contains value(s) and is not a class, 
             // return this value. 
-            // Exception: if refValue is a class, its "value list means something else - namely parent classes. In this case we only want to return the main class
-            if refValue.ValueList.Count > 0 && not (FplValue.IsClass(refValue)) then
+            // Exceptions: 
+            // 1) if refValue is a class, its "value list" means something else - namely parent classes. In this case we only want to return the main class
+            // 2) if refValue is a constructor, its "value list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
+            if refValue.ValueList.Count > 0 && not (FplValue.IsClass(refValue)) && refValue.BlockType <> FplValueType.Constructor then
                 Some refValue.ValueList[0] // return existing values except of classes, because those denoted their parent classes
             else 
                 Some refValue 
@@ -1405,18 +1407,24 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
 
 /// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
 /// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
+/// The classRoot is required to have an FplValueType.Class.
 let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) =
     let rootType = classRoot.Type(SignatureType.Type)
 
-    if rootType = baseClassName then
-        Some(rootType)
-    else
-        classRoot.ValueList
-        |> Seq.collect (fun child ->
-            match findClassInheritanceChain child baseClassName with
-            | Some path -> [ rootType + ":" + path ]
-            | None -> [])
-        |> Seq.tryLast
+    match classRoot.BlockType with
+    | FplValueType.Class
+    | FplValueType.Object ->
+        if rootType = baseClassName then
+            Some(rootType)
+        else
+            classRoot.ValueList
+            |> Seq.collect (fun child ->
+                match findClassInheritanceChain child baseClassName with
+                | Some path -> [ rootType + ":" + path ]
+                | None -> [])
+            |> Seq.tryLast
+    | _ -> 
+        None
 
 type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
     let _parsedAsts = parsedAsts

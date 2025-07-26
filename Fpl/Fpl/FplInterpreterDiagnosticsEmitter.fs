@@ -799,36 +799,59 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
 let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) = 
     let valueOpt = toBeAssignedValue.GetValue
     match valueOpt with
-    | Some value ->
+    | Some value when value.BlockType = FplValueType.Class ->
         let chainOpt = findClassInheritanceChain value assignee.TypeId
         match chainOpt with
-        | Some chain ->
-            if not(chain.Contains(assignee.TypeId)) then
-                let diagnostic =
-                    { 
-                        Diagnostic.Uri = ad.CurrentUri
-                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                        Diagnostic.Severity = DiagnosticSeverity.Error
-                        Diagnostic.StartPos = toBeAssignedValue.StartPos
-                        Diagnostic.EndPos = toBeAssignedValue.EndPos
-                        Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), chain)
-                        Diagnostic.Alternatives = None 
-                    }
-                ad.AddDiagnostic diagnostic
-        | None -> 
-            if assignee.TypeId <> value.TypeId then
-                let diagnostic =
-                    { 
-                        Diagnostic.Uri = ad.CurrentUri
-                        Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                        Diagnostic.Severity = DiagnosticSeverity.Error
-                        Diagnostic.StartPos = toBeAssignedValue.StartPos
-                        Diagnostic.EndPos = toBeAssignedValue.EndPos
-                        Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), value.Type(SignatureType.Type))
-                        Diagnostic.Alternatives = None 
-                    }
-                ad.AddDiagnostic diagnostic
+        | None ->
+            // issue SIG05 diagnostics if either no inheritance chain found 
+            let diagnostic =
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = toBeAssignedValue.StartPos
+                    Diagnostic.EndPos = toBeAssignedValue.EndPos
+                    Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), value.Type(SignatureType.Type))
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
+        | _ -> () // inheritance chain found (no SIG05 diagnostics)
+    | Some value when value.BlockType = FplValueType.Constructor ->
+        // find a class inheritance chain for the constructor's class (which is stored in its parent value)
+        let chainOpt = findClassInheritanceChain value.Parent.Value assignee.TypeId
+        match chainOpt with
+        | None ->
+            // issue SIG05 diagnostics if either no inheritance chain found 
+            let diagnostic =
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = toBeAssignedValue.StartPos
+                    Diagnostic.EndPos = toBeAssignedValue.EndPos
+                    Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), value.Type(SignatureType.Type))
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic
+        | _ -> () // inheritance chain found (no SIG05 diagnostics)
+    | Some value when assignee.TypeId <> value.TypeId ->
+        // Issue SIG05 diagnostics if value is not a constructor and not a class and still the types are not the same 
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = toBeAssignedValue.StartPos
+                Diagnostic.EndPos = toBeAssignedValue.EndPos
+                Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), value.Type(SignatureType.Type))
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+    | Some value when assignee.TypeId = value.TypeId ->
+        // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
+        ()
     | None ->
+        // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri
