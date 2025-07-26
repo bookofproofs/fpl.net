@@ -1,7 +1,5 @@
 ﻿module FplInterpreterPredicateEvaluator
-open FplInterpreterDiagnosticsEmitter
 open FplInterpreterTypes
-open ErrDiagnostics
 
 let evaluateNegation (fplValue:FplValue) = 
     let argOpt = fplValue.ValueList[0].GetValue

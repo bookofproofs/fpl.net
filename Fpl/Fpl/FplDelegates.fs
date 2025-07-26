@@ -38,21 +38,21 @@ type Delegates() =
 
         match a1Repr with
         | "undef" -> 
-            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." a1.FplId
+            failwithf "Predicate `=` cannot be evaluated because the left argument is undefined." 
         | _ -> ()
 
         match b1Repr with
         | "undef" -> 
-            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undefined." b1.FplId
+            failwithf "Predicate `=` cannot be evaluated because the right argument is undefined." 
         | _ -> ()
 
         match a1Repr with
         | "undetermined" -> 
-            failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undetermined." a1.FplId
+            failwithf "Predicate `=` cannot be evaluated because the left argument is undetermined." 
         | _ -> 
             match b1Repr with
             | "undetermined" -> 
-                failwithf "Predicate `=` cannot be evaluated because the argument `%s` is undetermined." b1.FplId
+                failwithf "Predicate `=` cannot be evaluated because the right argument is undetermined." 
             | _ -> 
                 failwithf "OK:%b" (a1Repr = b1Repr)
 

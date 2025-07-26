@@ -4,6 +4,7 @@ open FplInterpreterTypes
 open FplInterpreterPredicateEvaluator
 open FplInterpreterDiagnosticsEmitter
 open System
+open FParsec
 
 type FplRunner() =
     let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
@@ -16,12 +17,12 @@ type FplRunner() =
         let rec replace (pars:FplValue list) (args:FplValue list) = 
             match (pars, args) with
             | (p::ps, ar::ars) -> 
-                match (p.BlockType, ar.BlockType) with
+                match (p.FplBlockType, ar.FplBlockType) with
                 // p is variadic, ar is variadic 
-                | (FplValueType.VariadicVariableMany,FplValueType.VariadicVariableMany)
-                | (FplValueType.VariadicVariableMany,FplValueType.VariadicVariableMany1)
-                | (FplValueType.VariadicVariableMany1,FplValueType.VariadicVariableMany)
-                | (FplValueType.VariadicVariableMany1,FplValueType.VariadicVariableMany1) ->
+                | (FplBlockType.VariadicVariableMany,FplBlockType.VariadicVariableMany)
+                | (FplBlockType.VariadicVariableMany,FplBlockType.VariadicVariableMany1)
+                | (FplBlockType.VariadicVariableMany1,FplBlockType.VariadicVariableMany)
+                | (FplBlockType.VariadicVariableMany1,FplBlockType.VariadicVariableMany1) ->
                     // copy the value list of the variadic ar to the value list of the variadic p
                     // by inserting the clones of the elements
                     ar.ValueList 
@@ -32,8 +33,8 @@ type FplRunner() =
                     // continue replacling variables with the remaining lists
                     replace ps ars
                 // p is variadic, ar is not variadic 
-                | (FplValueType.VariadicVariableMany,_)
-                | (FplValueType.VariadicVariableMany1,_) -> 
+                | (FplBlockType.VariadicVariableMany,_)
+                | (FplBlockType.VariadicVariableMany1,_) -> 
                     let arClone = ar.Clone()
                     p.ValueList.Add(arClone)
                     // continue replacling variables with the original pars and the remaining ars list
@@ -57,9 +58,9 @@ type FplRunner() =
         let toBeSavedScopeVariables = Dictionary<string, FplValue>()
         let pars = List<FplValue>()
         called.Scope
-        |> Seq.filter (fun kvp -> kvp.Value.BlockType = FplValueType.Variable || 
-                                  kvp.Value.BlockType = FplValueType.VariadicVariableMany || 
-                                  kvp.Value.BlockType = FplValueType.VariadicVariableMany1) 
+        |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Variable || 
+                                  kvp.Value.FplBlockType = FplBlockType.VariadicVariableMany || 
+                                  kvp.Value.FplBlockType = FplBlockType.VariadicVariableMany1) 
         |> Seq.iter (fun paramKvp -> 
             // save the clone of the original parameter variable
             let parOriginal = paramKvp.Value
@@ -81,17 +82,17 @@ type FplRunner() =
             orig.Copy(kvp.Value)
         )
 
-    member this.Run(caller:FplValue) = 
-        match caller.BlockType with 
-        | FplValueType.Reference ->
+    member this.Run (rootCaller:FplValue) (caller:FplValue) = 
+        match caller.FplBlockType with 
+        | FplBlockType.Reference ->
             if caller.Scope.Count > 0 then 
                 let called = 
                     caller.Scope 
                     |> Seq.map (fun kvp -> kvp.Value) 
                     |> Seq.toList 
                     |> List.head
-                match called.BlockType with 
-                | FplValueType.Predicate -> 
+                match called.FplBlockType with 
+                | FplBlockType.Predicate -> 
                     let pars = this.SaveVariables(called)
                     let args = caller.ValueList |> Seq.toList
                     this.ReplaceVariables pars args
@@ -99,7 +100,7 @@ type FplRunner() =
                     // run all statements of the called node
                     called.ValueList
                     |> Seq.iter (fun fv -> 
-                        this.Run(fv)
+                        this.Run caller fv 
                         lastRepr <- fv.ReprId
                     )
                     |> ignore
@@ -115,7 +116,7 @@ type FplRunner() =
                 | "xor" ->  evaluateExclusiveOr caller
                 | "or" ->  evaluateDisjunction caller
                 | _ when caller.FplId.StartsWith("del.") ->
-                    emitID013Diagnostics caller (caller.NameStartPos) (caller.NameEndPos) |> ignore
+                    emitID013Diagnostics caller rootCaller.StartPos rootCaller.EndPos |> ignore
                 | _ -> ()
         | _ -> ()
         

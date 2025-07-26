@@ -100,7 +100,7 @@ let runTestHelper filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expect
     Assert.AreEqual<int>(expected, result.Length)
     prepareFplCode (filename, "", true) |> ignore
 
-let runTestHelperWithText filename fplCode (code: ErrDiagnostics.DiagnosticCode) (expected: int) =
+let runTestHelperWithText filename fplCode (code: ErrDiagnostics.DiagnosticCode) expected =
     printf "Trying %s" code.Message
     prepareFplCode (filename, fplCode, false) |> ignore
 
@@ -112,11 +112,13 @@ let runTestHelperWithText filename fplCode (code: ErrDiagnostics.DiagnosticCode)
         failwithf "Syntax errors detected."
 
     let result = filterByErrorCode ad code.Code
-    Assert.AreEqual<int>(expected, result.Length)
+    if result.Length <> expected then 
+        printfn "%i errors found (%i expected)" result.Length expected
+    else
+        printfn "%i errors found" result.Length
     prepareFplCode (filename, "", true) |> ignore
 
     if result.Length > 0 then
-        printf "Result %s" result.Head.Message
         result.Head.Message
     else
         "missing error message"

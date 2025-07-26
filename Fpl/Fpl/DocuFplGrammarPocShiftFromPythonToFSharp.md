@@ -328,10 +328,10 @@ In the new version, ranges have been abandoned from the parser since dealing wit
 #### 13) Syntax of extensions vs. syntax of indexed variables
 
 Extensions can be used in FPL (among other things) to introduce infinitely many new symbols, such as "0,1,2", etc., to identify them with concrete mathematical objects 
-defined in FPL. For instance, if you defin natural numbers in FPL, you can map the symbols "0,1,2" with the semantical representations of natural numbers
+defined in FPL. For instance, if you define natural numbers in FPL, you can map the symbols "0,1,2" with the semantical representations of natural numbers
 as you have defined it in FPL.
-Such literals can be injected into FPL using the at @ operater. For instance, we can write `@1`, and the parser will except it, while `1` will produce a syntax error.
-In order to tell the FPL interpreter what `@1` means, you have to define a named extension that will map the (potentially infinitely many symbols) with concreate 
+Such literals can be injected into FPL using the at @ operator. For instance, we can write `@1`, and the parser will except it. On the other had, `1` will produce a syntax error.
+In order to tell the FPL interpreter the semantics of `@1`, you have to define a named extension that will map the (potentially infinitely many symbols) with the concrete 
 objects defined in FPL.
 
 The @ at the beginning is used to change the parsing mode into a regex-based mode. All characters that follow after the @
@@ -406,10 +406,10 @@ extension definition, it will assign the matched literal the user-defined name a
 ``` 
     // boundaries can be disambiguated 
     // extension type 
-    [[1,5]] // (closed range with boundaries 1 and 5 )
-    [(1,5]] // (left-open range with boundaries 1 and 5)
-    [[1,5)] // (right-open range with boundaries 1 and 5)
-    [(1,5)] // (left- and right-open range with boundaries 1 and 5)
+    [[@1,@5]] // (closed range with boundaries 1 and 5 )
+    [(@1,@5]] // (left-open range with boundaries 1 and 5)
+    [[@1,@5)] // (right-open range with boundaries 1 and 5)
+    [(@1,@5)] // (left- and right-open range with boundaries 1 and 5)
 
     // boundaries can be disambiguated 
     // index type 

@@ -466,4 +466,17 @@ type TestDefinitionPredicates () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<TestMethod>]
+    member this.TestDefinitionPredicate24 () =
+        let result = run (definitionPredicate .>> eof) """pred T() {dec ~cI2:C1 cI2:=C1($2); true }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionPredicate25 () =
+        let result = run (definitionPredicate .>> eof) """pred T() { $1 }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
     

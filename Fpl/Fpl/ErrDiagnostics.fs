@@ -135,6 +135,7 @@ type DiagnosticCode =
     | SIG02 of string * int * string
     | SIG03 of string * string 
     | SIG04 of string * int * string list
+    | SIG05 of string * string
     // proof-related error codes
     | PR000 of string 
     | PR001 
@@ -219,6 +220,7 @@ type DiagnosticCode =
             | SIG02 _ -> "SIG02"
             | SIG03 _ -> "SIG03"
             | SIG04 _ -> "SIG04"
+            | SIG05 _ -> "SIG05"
             // proof-related error codes
             | PR000 _ -> "PR000"
             | PR001 -> "PR001"
@@ -285,7 +287,7 @@ type DiagnosticCode =
                     sprintf "Base class `%s` not found, candidates are %s." name candidates
                 else
                     sprintf "Base class `%s` not found, no candidates found." name 
-            | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegete's diagnostic
+            | ID013 delegateDiagnostic -> sprintf "%s" delegateDiagnostic // just emit the delegate's diagnostic
             | ID014 (signature, conflict) -> sprintf "Language code `%s` was already declared at %s." signature conflict
             | ID015 signature -> sprintf "Referencing self impossible inside non-definitions; the outer block is %s." signature
             | ID016 signature -> sprintf "Referencing self impossible outside definitions, the outer block is %s." signature
@@ -319,6 +321,7 @@ type DiagnosticCode =
                 else 
                     let errMsg = errorList |> List.mapi (fun i s -> sprintf "%d. %s" (i + 1) s) |> String.concat ", "
                     $"No overload matching `{signature}`. Checked candidates: {errorList}." 
+            | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
             // proof-related error codes
             | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
             | PR001 -> $"Cannot refer to a definition outside a proof."

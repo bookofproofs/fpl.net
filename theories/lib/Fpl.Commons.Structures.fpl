@@ -7,8 +7,9 @@ uses Fpl.PeanoArithmetics
 definition class Tuple : obj
 {
     dec 
-        ~myFrom:index
-        ~myLength: index
+        ~myFrom:Nat
+        ~myLength: Nat
+        ~myArr: tpl[from, length:Nat]
     ;
     ctor Tuple(listOfTpl:+ tpl)
     {
@@ -19,7 +20,7 @@ definition class Tuple : obj
             for elem in listOfTpl
             {
                 i:=Succ(i)
-                self[i]:=elem
+                myArr[i]:=elem
             }
             myLength:=i
             base.obj()
@@ -27,11 +28,11 @@ definition class Tuple : obj
         self
     }
 
-    ctor Tuple(arr: tpl[from, length:index])
+    ctor Tuple(arr: tpl[from, length:Nat])
     {
         
         dec 
-            self:=arr
+            myArr:=arr
             myLength:=length
             myFrom:=from
             base.obj()
@@ -39,7 +40,7 @@ definition class Tuple : obj
         self
     }
 
-    property func Length() -> index
+    property func Length() -> Nat
     {
         return myLength
     }
@@ -76,6 +77,7 @@ def class CartesianProduct: Set
     dec
         ~myLength: Nat
         ~myFrom: Nat
+        ~mySetArray: Set[from , to:Nat]
     ;
 
     constructor CartesianProduct(setList:+ Set)
@@ -88,7 +90,7 @@ def class CartesianProduct: Set
             for setItem in setList
             {
                 i:=Succ(i)
-                self[i]:=setItem
+                mySetArray[i]:=setItem
             }
             myFrom := Nat(@1)
             myLength:=i
@@ -99,7 +101,7 @@ def class CartesianProduct: Set
     ctor CartesianProduct(setArray: Set[from , to:Nat])
     {
         dec
-            self:=setArray
+            mySetArray:=setArray
             myFrom:=from
             myLength:=to
             base.Set()
@@ -144,6 +146,7 @@ def class Relation: Set
 {
     dec 
         ~myArity: Nat
+        ~mySubset: Subset
     ;
 
     ctor Relation(setList:+ Set)
@@ -153,7 +156,7 @@ def class Relation: Set
             base.Set()
             cartProd := CartesianProduct(setList)
             myArity := cartProd.Length()
-            self := Subset(cartProd)
+            mySubset := Subset(cartProd)
         ;
         self
     }
