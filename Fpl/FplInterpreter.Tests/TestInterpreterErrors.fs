@@ -1012,6 +1012,9 @@ type TestInterpreterErrors() =
     [<DataRow("54c", """def cl C1: obj {ctor C1(i1:ind) {dec ~o:ind o:=i1 base.obj (); self }} ;""", 0)>]
     [<DataRow("55", """def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); self }} def pred T() {dec ~dI1:D dI1:=D; true } ;""", 1)>]
     [<DataRow("55a", """def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); self }} def pred T() {dec ~dI1:D dI1:=D(); true } ;""", 0)>]
+    [<DataRow("56", """def pred T() {dec ~x:ind x:=$1; true } ;""", 0)>]
+    [<DataRow("57", """def pred T() {dec ~x:pred x:=true; true } ;""", 0)>]
+    [<DataRow("57a", """def pred T() {dec ~x:pred x:=not true; true } ;""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestSIG04(no:string, fplCode:string, expected) =

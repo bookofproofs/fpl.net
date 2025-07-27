@@ -1377,14 +1377,15 @@ let rec eval (st: SymbolTable) ast =
         match (assigneeOpt, assignedValueOpt) with
         | (Some assignee, Some assignedValue)  ->
             let candidates = 
-                if assignee.TypeId = "ind" then
-                    [assignee]
-                else
-                    assignee.Scope 
-                    |> Seq.map (fun kvp -> [kvp.Value] @ kvp.Value.GetConstructors()) // collect class nodes and their constructors
-                    |> Seq.collect id // flatten the seq<FplValue list>  into FplValue seq
-                    |> Seq.toList // convert it to a List
-            let candidateOpt = checkSIG04Diagnostics assignedValue candidates 
+                assignee.Scope 
+                |> Seq.map (fun kvp -> [kvp.Value] @ kvp.Value.GetConstructors()) // collect class nodes and their constructors
+                |> Seq.collect id // flatten the seq<FplValue list>  into FplValue seq
+                |> Seq.toList // convert it to a List
+            let candidateOpt = 
+                match assignee.TypeId with
+                | "ind" 
+                | "pred" -> None
+                | _ -> checkSIG04Diagnostics assignedValue candidates
             checkSIG05Diagnostics assignee assignedValue
             let valueOpt = 
                 match candidateOpt with
