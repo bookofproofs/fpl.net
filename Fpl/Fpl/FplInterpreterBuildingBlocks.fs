@@ -1386,16 +1386,16 @@ let rec eval (st: SymbolTable) ast =
         let assigneeOpt = assigneeReference.GetValue
         match (assigneeOpt, assignedValueOpt) with
         | (Some assignee, Some assignedValue)  ->
-            let candidates = 
-                assignee.Scope 
-                |> Seq.map (fun kvp -> [kvp.Value] @ kvp.Value.GetConstructors()) // collect class nodes and their constructors
-                |> Seq.collect id // flatten the seq<FplValue list>  into FplValue seq
-                |> Seq.toList // convert it to a List
+            // the scope of the assigned value (which has the FplBlockType.Reference) 
+            // either already contains a matching candidate 
+            // or not. We will now match the assignee with the 
             let candidateOpt = 
-                match assignee.TypeId with
-                | "ind" 
-                | "pred" -> None
-                | _ -> checkSIG04Diagnostics assignedValue candidates
+                assignedValue.Scope 
+                |> Seq.filter (fun kvp -> kvp.Key = assignedValue.FplId)
+                |> Seq.map (fun kvp -> kvp.Value)
+                |> Seq.toList
+                |> List.tryLast
+
             checkSIG05Diagnostics assignee assignedValue
             let valueOpt = 
                 match candidateOpt with
