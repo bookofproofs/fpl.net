@@ -534,7 +534,7 @@ type TestSignatureMatching() =
     member this.TestAssignmentsOfConstructors(no:string, varVal:string, var:string) =
         ad.Clear()
         let fplCode = sprintf """%s""" varVal
-        let filename = "TestAssignments"
+        let filename = "TestAssignmentsOfConstructors"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -550,5 +550,34 @@ type TestSignatureMatching() =
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
             | None -> Assert.AreEqual<string>("no error","no error")
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("00", """def cl A:obj { intr } def pred T() {dec ~n:A n:=A; true};""", "A")>]
+    [<DataRow("01", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} } def pred T() {dec ~n:A ~x:obj n:=A(x); true};""", "A(obj)")>]
+    [<DataRow("02", """def cl A:obj { ctor A(x:pred) {dec base.obj(); self} } def pred T() {dec ~n:A ~x:pred n:=A(x); true};""", "A(pred)")>]
+    [<DataRow("03a", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} ctor A(x:pred) {dec base.obj(); self} ctor A(x:ind) {dec base.obj(); self} } def pred T() {dec ~n:A ~x:obj n:=A(x); true};""", "A(obj)")>]
+    [<DataRow("03b", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} ctor A(x:pred) {dec base.obj(); self} ctor A(x:ind) {dec base.obj(); self} } def pred T() {dec ~n:A ~x:pred n:=A(x); true};""", "A(pred)")>]
+    [<DataRow("03c", """def cl A:obj { ctor A(x:obj) {dec base.obj(); self} ctor A(x:pred) {dec base.obj(); self} ctor A(x:ind) {dec base.obj(); self} } def pred T() {dec ~n:A ~x:ind n:=A(x); true};""", "A(ind)")>]
+    [<TestMethod>]
+    /// Test if a reference of the assigned value gets the correct candidate 
+    /// depending on its signature and the available constructor candidates in the referenced class
+    /// regardless of the order in which the constructors in the referenced class are declared.
+    member this.TestAssignmentsOfConstructorsCorrectCandidates(no:string, varVal:string, expectedCandidateSignature:string) =
+        ad.Clear()
+        let fplCode = sprintf """%s""" varVal
+        let filename = "TestAssignmentsOfConstructorsCorrectCandidates"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let blocks = theory.Scope.Values |> Seq.toList 
+            let pred = blocks |> List.filter(fun fv -> fv.Type(SignatureType.Name).StartsWith("T(")) |> List.head
+            let stmtAssign = pred.ValueList[0]
+            let assignedReferenceValue = stmtAssign.ValueList[1]
+            let candidate = assignedReferenceValue.Scope[assignedReferenceValue.FplId]
+            Assert.AreEqual<string>(expectedCandidateSignature, candidate.Type(SignatureType.Type))
         | None -> 
             Assert.IsTrue(false)
