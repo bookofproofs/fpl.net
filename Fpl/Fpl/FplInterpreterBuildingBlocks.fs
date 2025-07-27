@@ -1,4 +1,18 @@
-﻿module FplInterpreterBuildingBlocks
+﻿/// This module evaluates the abstract syntax tree (AST) and interprets its semantics.
+/// It produces a SymbolTable object containing a current sementical representation of the AST.
+
+(* MIT License
+
+Copyright (c) 2024+ bookofproofs
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+*)
+module FplInterpreterBuildingBlocks
 
 open System
 open System.Collections.Generic
@@ -13,7 +27,7 @@ open EvalStackHandler
 open System.Runtime.InteropServices
 
 let es = EvalStack()
-let run = FplRunner()
+let runner = FplRunner()
 
 let eval_string (st: SymbolTable) s = ()
 
@@ -1257,14 +1271,14 @@ let rec eval (st: SymbolTable) ast =
             | x::xs -> 
                 match checkSIG04Diagnostics currentOp [x] with 
                 | Some candidate -> 
-                    run.Run currentOp currentOp // execute the matched binary operator
+                    runner.Run currentOp currentOp // execute the matched binary operator
                 | _ -> ()
             | _ -> ()
             fv.ValueList.RemoveAt(currMinIndex+1) 
             fv.ValueList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv
         let last = es.PeekEvalStack()
-        run.Run last last // execute the last matched binary operator
+        runner.Run last last // execute the last matched binary operator
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->

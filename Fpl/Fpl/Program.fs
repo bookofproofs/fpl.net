@@ -1,4 +1,8 @@
-﻿open FplGrammarCommons
+﻿/// This console "main" program is for test/debugging pursposes only.
+/// It is not really needed because the necessary FPL modules are run 
+/// as an FPL Language Server (see FplLS C# Project in the same solution).
+
+open FplGrammarCommons
 open ErrDiagnostics
 open FplParser
 open FplInterpreter
