@@ -34,7 +34,7 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","n:=Zero()", "Zero()")>]
+    [<DataRow("00","n:=Zero()", "intr Zero:intr Nat:intr obj")>]
     [<TestMethod>]
     member this.TestAssignmentRepresentation(var:string, varVal, expected:string) =
         ad.Clear()
@@ -48,7 +48,11 @@ type TestRepresentation() =
             let theory = r.Scope[filename]
             let fn = theory.Scope["T()"] 
             let assignmentStmt = fn.ValueList[0]
-            Assert.IsTrue(false)
+            let assignee = assignmentStmt.ValueList[0]
+            let assignedValue = assignee.GetValue
+            match assignedValue with 
+            | Some value -> Assert.AreEqual<string>(expected, value.Type(SignatureType.Repr))
+            | None -> Assert.AreEqual<string>(expected, "no value was assigned")
         | None -> 
             Assert.IsTrue(false)
             

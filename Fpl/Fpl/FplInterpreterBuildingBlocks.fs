@@ -92,7 +92,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         let fv = es.PeekEvalStack()
-        setUnitType fv "obj" "intr obj"
+        setUnitType fv "obj" "dec obj"
         match checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2 with
         | Some classNode -> 
             fv.ValueList.Add classNode
