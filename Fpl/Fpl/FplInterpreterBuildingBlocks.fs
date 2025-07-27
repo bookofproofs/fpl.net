@@ -886,6 +886,14 @@ let rec eval (st: SymbolTable) ast =
     | Ast.PredicateWithOptSpecification((pos1, pos2), (fplIdentifierAst, optionalSpecificationAst)) ->
         st.EvalPush("PredicateWithOptSpecification")
         let fv = es.PeekEvalStack()
+        let searchForCandidatesOfReferenceBlock (refBlock:FplValue) = 
+            let candidatesFromTheory = findCandidatesByName st refBlock.FplId true
+            let candidatesFromPropertyScope = findCandidatesByNameInBlock refBlock refBlock.FplId
+            let candidatesFromDottedQualification = findCandidatesByNameInDotted refBlock refBlock.FplId
+            candidatesFromTheory  
+            @ candidatesFromPropertyScope 
+            @ candidatesFromDottedQualification
+
         match optionalSpecificationAst with
         | Some specificationAst -> 
             let refBlock = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Reference, fv) 
@@ -919,20 +927,22 @@ let rec eval (st: SymbolTable) ast =
                                  @ candidatesOfVariableTypes 
                 checkSIG04Diagnostics refBlock candidates |> ignore
             else
-                let candidatesFromTheory = findCandidatesByName st refBlock.FplId true
-                let candidatesFromPropertyScope = findCandidatesByNameInBlock refBlock refBlock.FplId
-                let candidatesFromDottedQualification = findCandidatesByNameInDotted refBlock refBlock.FplId
-                let candidates = candidatesFromTheory  
-                                 @ candidatesFromPropertyScope 
-                                 @ candidatesFromDottedQualification
+                let candidates = searchForCandidatesOfReferenceBlock refBlock
                 match checkSIG04Diagnostics refBlock candidates with
                 | Some matchedCandidate -> 
-                    refBlock.Scope.Add(refBlock.FplId,matchedCandidate)
+                    refBlock.Scope.TryAdd(refBlock.FplId,matchedCandidate) |> ignore
                 | _ -> ()
+
             es.PopEvalStack()
         | None -> 
             // if no specification was found then simply continue in the same context
             eval st fplIdentifierAst
+            // make sure, we still add a referenced node candidate to the scope of a reference
+            let candidates = searchForCandidatesOfReferenceBlock fv
+            if candidates.Length > 0 then
+                fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
+            else
+                ()
 
         simplifyTriviallyNestedExpressions fv |> ignore
         st.EvalPop()
