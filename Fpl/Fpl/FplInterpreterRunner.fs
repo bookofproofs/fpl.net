@@ -62,9 +62,10 @@ type FplRunner() =
             | ([], []) -> ()
         replace parameters arguments
 
-    // Saves the clones (!) of the original scope variables of an FplValue block as a KeyValuePair to a stack memory.
-    // where the key is the block's FplId and the value is a dictionary of all scope variables.
-    // Returns a list of parameters of the called FplValue, i.e. its Signature Variables
+    /// Saves the clones (!) of the original scope variables of an FplValue block as a KeyValuePair to a stack memory.
+    /// where the key is the block's FplId and the value is a dictionary of all scope variables.
+    /// Returns a list of parameters of the called FplValue, i.e. its signature variables.
+    /// Since the block's FplId is unique in the scope, all variables are stored in a separate scope.
     member private this.SaveVariables(called:FplValue) = 
         // now process all scope variables and push by replacing them with their clones
         // and pushing the originals on the stack
@@ -86,7 +87,7 @@ type FplRunner() =
         _stack.Push(kvp)
         pars |> Seq.toList
        
-    // Restores the scope variables of an FplValue block from the stack.
+    /// Restores the scope variables of an FplValue block from the stack.
     member private this.RestoreVariables(fvPar:FplValue) = 
         let blockVars = _stack.Pop()
         blockVars.Value
