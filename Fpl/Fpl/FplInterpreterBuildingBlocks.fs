@@ -953,7 +953,24 @@ let rec eval (st: SymbolTable) ast =
             eval st fplIdentifierAst
             // make sure, we still add a referenced node candidate to the scope of a reference
             let candidates = searchForCandidatesOfReferenceBlock fv
-            if candidates.Length > 0 then
+            let classes = candidates |> List.filter (fun c -> c.FplBlockType = FplBlockType.Class)
+            let constructors = candidates |> List.filter (fun c -> c.FplBlockType = FplBlockType.Constructor)
+            if constructors.Length > 0 then
+                // if among the candidates are class constructors (that due to the FPL syntax always have a signature with 0 or more parameters)
+                // we check if to issue a SIG04 diagnostic. At this AST case, a class was referred with a PascalCaseIdentifier 
+                // without parentheses. This will only be accepted by the interpreter (without SIG04), if there is
+                // a parameterless constructor. In other words, referring a class without parentheses is only allowed
+                // if the class is intrinsic (has no constructors) or has a parameterless constructor.
+                match checkSIG04Diagnostics fv constructors with
+                | Some matchedCandidate -> 
+                    // add a parameterless constructor (if such exists)
+                    fv.Scope.TryAdd(fv.FplId,matchedCandidate) |> ignore
+                | _ -> ()
+            elif classes.Length > 0 && constructors.Length = 0 then
+                // add the class (intrinsic case, no constructors at all)
+                fv.Scope.TryAdd(fv.FplId, classes.Head) |> ignore
+            elif candidates.Length > 0 then
+                // not a class was referred, add the candidate (e.g., referenced variable)
                 fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
             else
                 ()
@@ -1368,7 +1385,7 @@ let rec eval (st: SymbolTable) ast =
         eval st elseStatementAst
         es.PopEvalStack()
         st.EvalPop()
-    // | Assignment of Positions * (Ast * Ast)
+    // | Signature of Positions * (Ast * Ast)
     | Ast.Signature((pos1, pos2), (predicateIdentifierAst, paramTupleAst)) ->
         es.InSignatureEvaluation <- true
         st.EvalPush("Signature")
@@ -1400,6 +1417,9 @@ let rec eval (st: SymbolTable) ast =
         let assigneeOpt = assigneeReference.GetValue
         match (assigneeOpt, assignedValueOpt) with
         | (Some assignee, Some assignedValue)  ->
+            checkSIG05Diagnostics assignee assignedValue
+            runner.Run assignedValue assignedValue
+            let resultOpt = runner.TryGetResult assignedValue
             // the scope of the assigned value (which has the FplBlockType.Reference) 
             // either already contains a matching candidate 
             // or not. We will now match the assignee with the 
@@ -1409,8 +1429,6 @@ let rec eval (st: SymbolTable) ast =
                 |> Seq.map (fun kvp -> kvp.Value)
                 |> Seq.toList
                 |> List.tryLast
-
-            checkSIG05Diagnostics assignee assignedValue
             let valueOpt = 
                 match candidateOpt with
                 | Some candidate -> 

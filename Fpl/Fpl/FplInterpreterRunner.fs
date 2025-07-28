@@ -26,7 +26,7 @@ type FplRunner() =
     member this.Stack = _stack
 
 
-    member private this.ReplaceVariables(parameters:FplValue list) (arguments:FplValue list) =
+    member private this.ReplaceVariables (parameters:FplValue list) (arguments:FplValue list) =
         let rec replace (pars:FplValue list) (args:FplValue list) = 
             match (pars, args) with
             | (p::ps, ar::ars) -> 
@@ -66,7 +66,7 @@ type FplRunner() =
     /// where the key is the block's FplId and the value is a dictionary of all scope variables.
     /// Returns a list of parameters of the called FplValue, i.e. its signature variables.
     /// Since the block's FplId is unique in the scope, all variables are stored in a separate scope.
-    member private this.SaveVariables(called:FplValue) = 
+    member private this.SaveVariables (called:FplValue) = 
         // now process all scope variables and push by replacing them with their clones
         // and pushing the originals on the stack
         let toBeSavedScopeVariables = Dictionary<string, FplValue>()
@@ -87,6 +87,23 @@ type FplRunner() =
         _stack.Push(kvp)
         pars |> Seq.toList
        
+    member private this.SaveResult (caller:FplValue) (result:FplValue) = 
+        let toBeSavedResult = Dictionary<string, FplValue>()
+        toBeSavedResult.Add("result", result)
+        let kvp = KeyValuePair(caller.FplId,toBeSavedResult)
+        _stack.Push(kvp)
+
+    member this.TryGetResult (caller:FplValue) =
+        if _stack.Count = 0 then
+            None
+        else
+            let head = _stack.Peek()
+            if head.Key = caller.FplId && head.Value.ContainsKey("result") then
+                let popped = _stack.Pop()
+                Some popped.Value["result"]
+            else
+                None
+
     /// Restores the scope variables of an FplValue block from the stack.
     member private this.RestoreVariables(fvPar:FplValue) = 
         let blockVars = _stack.Pop()
@@ -120,14 +137,18 @@ type FplRunner() =
                     |> ignore
                     caller.ReprId <- lastRepr
                     this.RestoreVariables(called)
+                | FplBlockType.Class ->
+                    let inst = called.CreateInstance()
+                    this.SaveResult rootCaller inst
+
                 | _ -> ()
             else
                 match caller.FplId with 
                 | "iif" -> evaluateEquivalence caller
-                | "impl" ->  evaluateImplication caller
-                | "not" ->  evaluateNegation caller
-                | "and" ->  evaluateConjunction caller
-                | "xor" ->  evaluateExclusiveOr caller
+                | "impl" -> evaluateImplication caller
+                | "not" -> evaluateNegation caller
+                | "and" -> evaluateConjunction caller
+                | "xor" -> evaluateExclusiveOr caller
                 | "or" ->  evaluateDisjunction caller
                 | _ when caller.FplId.StartsWith("del.") ->
                     emitID013Diagnostics caller rootCaller.StartPos rootCaller.EndPos |> ignore
