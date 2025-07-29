@@ -316,6 +316,7 @@ type FplBlockType =
     | Extension
     | Instance
     | Index
+    | Bool
 
     member private this.UnqualifiedName =
         match this with
@@ -356,6 +357,7 @@ type FplBlockType =
         | Root -> "root"
         | Instance -> "instance"
         | Index -> "index"
+        | Bool -> "boolean"
 
     member private this.Article =
         match this with
@@ -411,6 +413,7 @@ type FplBlockType =
         | Extension -> "ext"
         | Instance -> "inst"
         | Index -> "ind"
+        | Bool -> "bool"
         | Root -> "root"
 
 type FixType =
@@ -1144,6 +1147,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         | FplBlockType.Predicate
         | FplBlockType.RuleOfInference
         | FplBlockType.Quantor
+        | FplBlockType.Bool
         | FplBlockType.Conjecture ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "undetermined"
