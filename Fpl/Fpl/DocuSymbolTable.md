@@ -403,3 +403,20 @@ todo
 #### ValueList	
 todo
 
+### BlockType `Undefined`
+todo
+#### Possible Parent Nodes 
+todo
+#### Scope 
+todo
+#### ValueList	
+todo
+
+### BlockType `Bool`
+todo
+#### Possible Parent Nodes 
+todo
+#### Scope 
+todo
+#### ValueList	
+todo

@@ -317,6 +317,7 @@ type FplBlockType =
     | Instance
     | Index
     | Bool
+    | Undefined
 
     member private this.UnqualifiedName =
         match this with
@@ -358,6 +359,7 @@ type FplBlockType =
         | Instance -> "instance"
         | Index -> "index"
         | Bool -> "boolean"
+        | Undefined -> "undefined"
 
     member private this.Article =
         match this with
@@ -370,6 +372,7 @@ type FplBlockType =
         | Extension
         | Instance
         | Index
+        | Undefined
         | Axiom -> "an"
         | _ -> "a"
 
@@ -414,6 +417,7 @@ type FplBlockType =
         | Instance -> "inst"
         | Index -> "ind"
         | Bool -> "bool"
+        | Undefined -> "undef"
         | Root -> "root"
 
 type FixType =
@@ -1186,8 +1190,14 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         | FplBlockType.Index ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "$0"
-            ret.TypeId <- "ind"
+            ret.TypeId <- FplBlockType.Index.ShortName
             ret.FplId <- "$0"
+            ret
+        | FplBlockType.Undefined ->
+            let ret = new FplValue(fplBlockType, positions, Some parent)
+            ret.ReprId <- FplBlockType.Undefined.ShortName
+            ret.TypeId <- FplBlockType.Undefined.ShortName
+            ret.FplId <- FplBlockType.Undefined.ShortName
             ret
         | FplBlockType.Instance
         | FplBlockType.Object ->
