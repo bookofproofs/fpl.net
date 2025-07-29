@@ -462,6 +462,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     let mutable _typeId = ""
     let mutable (_filePath: string option) = None
     let mutable _reprId = "undef"
+    let mutable (_reprIdNew:FplValue option) = None
     let mutable _hasBrackets = false
     let mutable _isIntrinsic = false
     let mutable _isSignatureVariable = false
@@ -485,6 +486,11 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     member this.ReprId
         with get () = _reprId
         and set (value) = _reprId <- value
+
+    /// ReprIdNew of the FplValue.
+    member this.ReprIdNew
+        with get () = _reprIdNew
+        and set (value) = _reprIdNew <- value
 
     /// FplId of the FplValue.
     member this.FplId
