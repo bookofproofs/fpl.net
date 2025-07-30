@@ -462,7 +462,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     let mutable _typeId = ""
     let mutable (_filePath: string option) = None
     let mutable _reprId = "undef"
-    let mutable (_reprIdNew:FplValue option) = None
     let mutable _hasBrackets = false
     let mutable _isIntrinsic = false
     let mutable _isSignatureVariable = false
@@ -470,6 +469,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     let mutable _parent = parent
     let _scope = Dictionary<string, FplValue>()
     let _argList = List<FplValue>()
+    let _valueList = List<FplValue>()
     let _assertedPredicates = List<FplValue>()
 
     /// Indicates if this FplValue's Scope or ArgList can be treated as bracketed coordinates or as parenthesized parameters.
@@ -487,10 +487,8 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         with get () = _reprId
         and set (value) = _reprId <- value
 
-    /// ReprIdNew of the FplValue.
-    member this.ReprIdNew
-        with get () = _reprIdNew
-        and set (value) = _reprIdNew <- value
+    /// ValueList of the FplValue.
+    member this.ValueList = _valueList
 
     /// FplId of the FplValue.
     member this.FplId
@@ -612,201 +610,204 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
 
     /// Type Identifier of this FplValue
     member this.Type(isSignature: SignatureType) =
-        match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
-        | (FplBlockType.Reference, true) ->
-            // delegate the type identifier to the referenced entitity
-            let val1 = this.Scope[this.FplId]
-            val1.Type(isSignature)
-        | (FplBlockType.Stmt, _)
-        | (FplBlockType.Extension, _) -> this.FplId
-        | _ ->
-            let head =
-                match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
-                | (FplBlockType.Reference, true) ->
-                    match isSignature with
-                    | SignatureType.Name -> this.Scope[this.FplId].Type(SignatureType.Name)
-                    | SignatureType.Type -> _typeId
-                    | SignatureType.Mixed -> _fplId
-                    | SignatureType.Repr -> _reprId
-                | (FplBlockType.Mapping, _) -> _typeId
-                | _ ->
-                    match isSignature with
-                    | SignatureType.Name -> _fplId
-                    | SignatureType.Type -> _typeId
-                    | SignatureType.Mixed -> _fplId
-                    | SignatureType.Repr -> _reprId
-
-            match (isSignature, this.TypeId) with
-            | (SignatureType.Repr, _) when
-                (this.FplBlockType = VariadicVariableMany1 || this.FplBlockType = VariadicVariableMany)
-                ->
-                let variadicContent =
-                    this.ArgList |> Seq.map (fun fv -> fv.Type(isSignature)) |> String.concat ", "
-
-                $"{this.Type(SignatureType.Type)}" + "{" + variadicContent + "}"
-            | (SignatureType.Repr, _) when this.FplBlockType = Variable ->
-                let vOpt = this.GetValue
-
-                match vOpt with
-                | Some (v: FplValue) -> v.Type(isSignature)
-                | None -> head
-            | (SignatureType.Repr, typeId) when
-                typeId = "pred" || typeId.StartsWith "pred(" || typeId.StartsWith "pred$"
-                ->
-                _reprId
-            | (SignatureType.Repr, typeId) when typeId = "func" || typeId.StartsWith "func(" -> _reprId
-            | (SignatureType.Repr, typeId) when typeId = "undef" || typeId = "ind" -> _reprId
-            | (SignatureType.Repr, _) when this.FplBlockType = FplBlockType.Class -> _reprId
+        match isSignature with
+        | SignatureType.Repr -> 
+            this.ValueList
+            |> Seq.map (fun fv -> $"{fv.FplId}({fv.Type(isSignature)})")
+            |> String.concat ", "
+        | _ -> 
+            match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
+            | (FplBlockType.Reference, true) ->
+                // delegate the type identifier to the referenced entitity
+                let val1 = this.Scope[this.FplId]
+                val1.Type(isSignature)
+            | (FplBlockType.Stmt, _)
+            | (FplBlockType.Extension, _) -> this.FplId
             | _ ->
+                let head =
+                    match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
+                    | (FplBlockType.Reference, true) ->
+                        match isSignature with
+                        | SignatureType.Name -> this.Scope[this.FplId].Type(SignatureType.Name)
+                        | SignatureType.Type -> _typeId
+                        | SignatureType.Mixed -> _fplId
+                        | SignatureType.Repr -> _reprId
+                    | (FplBlockType.Mapping, _) -> _typeId
+                    | _ ->
+                        match isSignature with
+                        | SignatureType.Name -> _fplId
+                        | SignatureType.Type -> _typeId
+                        | SignatureType.Mixed -> _fplId
+                        | SignatureType.Repr -> _reprId
 
-                let propagate =
-                    match isSignature with
-                    | SignatureType.Name
-                    | SignatureType.Type
-                    | SignatureType.Repr -> isSignature
-                    | SignatureType.Mixed -> SignatureType.Type
+                match (isSignature, this.TypeId) with
+                | (SignatureType.Repr, _) when
+                    (this.FplBlockType = VariadicVariableMany1 || this.FplBlockType = VariadicVariableMany)
+                    ->
+                    let variadicContent =
+                        this.ArgList |> Seq.map (fun fv -> fv.Type(isSignature)) |> String.concat ", "
 
-                let paramTuple () =
-                    this.Scope
-                    |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
-                        kvp.Value.IsSignatureVariable
-                        || FplValue.IsVariable(this) && not (FplValue.IsClass(kvp.Value))
-                        || this.FplBlockType = FplBlockType.Mapping)
-                    |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
-                    |> String.concat ", "
+                    $"{this.Type(SignatureType.Type)}" + "{" + variadicContent + "}"
+                | (SignatureType.Repr, _) when this.FplBlockType = Variable ->
+                    let vOpt = this.GetValue
 
-                let idRec () =
-                    match this.FplBlockType with
-                    | FplBlockType.Theory
-                    | FplBlockType.Proof
-                    | FplBlockType.Argument
-                    | FplBlockType.Language
-                    | FplBlockType.Object
-                    | FplBlockType.Index
-                    | FplBlockType.Class -> head
-                    | FplBlockType.Theorem
-                    | FplBlockType.Lemma
-                    | FplBlockType.Proposition
-                    | FplBlockType.Conjecture
-                    | FplBlockType.RuleOfInference
-                    | FplBlockType.Predicate
-                    | FplBlockType.Corollary
-                    | FplBlockType.Constructor
-                    | FplBlockType.OptionalPredicate
-                    | FplBlockType.MandatoryPredicate
-                    | FplBlockType.Axiom ->
-                        let paramT = paramTuple ()
-                        sprintf "%s(%s)" head paramT
-                    | FplBlockType.Quantor ->
-                        let paramT =
-                            this.Scope
-                            |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> FplValue.IsVariable(kvp.Value))
-                            |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(isSignature))
-                            |> String.concat ", "
+                    match vOpt with
+                    | Some (v: FplValue) -> v.Type(isSignature)
+                    | None -> head
+                | (SignatureType.Repr, typeId) when
+                    typeId = "pred" || typeId.StartsWith "pred(" || typeId.StartsWith "pred$"
+                    ->
+                    _reprId
+                | (SignatureType.Repr, typeId) when typeId = "func" || typeId.StartsWith "func(" -> _reprId
+                | (SignatureType.Repr, typeId) when typeId = "undef" || typeId = "ind" -> _reprId
+                | (SignatureType.Repr, _) when this.FplBlockType = FplBlockType.Class -> _reprId
+                | _ ->
 
-                        match paramT with
-                        | "" -> head
-                        | _ -> sprintf "%s(%s)" head paramT
-                    | FplBlockType.Localization ->
-                        let paramT =
-                            this.Scope
-                            |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> FplValue.IsVariable(kvp.Value))
-                            |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(isSignature))
-                            |> String.concat ", "
+                    let propagate =
+                        match isSignature with
+                        | SignatureType.Name
+                        | SignatureType.Type
+                        | SignatureType.Repr -> isSignature
+                        | SignatureType.Mixed -> SignatureType.Type
 
-                        match paramT with
-                        | "" -> head
-                        | _ -> sprintf "%s(%s)" head paramT
-                    | FplBlockType.OptionalFunctionalTerm
-                    | FplBlockType.MandatoryFunctionalTerm
-                    | FplBlockType.FunctionalTerm ->
-                        match this.Mapping with
-                        | Some map ->
+                    let paramTuple () =
+                        this.Scope
+                        |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
+                            kvp.Value.IsSignatureVariable
+                            || FplValue.IsVariable(this) && not (FplValue.IsClass(kvp.Value))
+                            || this.FplBlockType = FplBlockType.Mapping)
+                        |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
+                        |> String.concat ", "
+
+                    let idRec () =
+                        match this.FplBlockType with
+                        | FplBlockType.Theory
+                        | FplBlockType.Proof
+                        | FplBlockType.Argument
+                        | FplBlockType.Language
+                        | FplBlockType.Object
+                        | FplBlockType.Index
+                        | FplBlockType.Class -> head
+                        | FplBlockType.Theorem
+                        | FplBlockType.Lemma
+                        | FplBlockType.Proposition
+                        | FplBlockType.Conjecture
+                        | FplBlockType.RuleOfInference
+                        | FplBlockType.Predicate
+                        | FplBlockType.Corollary
+                        | FplBlockType.Constructor
+                        | FplBlockType.OptionalPredicate
+                        | FplBlockType.MandatoryPredicate
+                        | FplBlockType.Axiom ->
                             let paramT = paramTuple ()
-                            sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
-                        | _ -> ""
-                    | FplBlockType.Instance ->
-                        let args =
-                            this.ArgList
-                            |> Seq.map (fun fv -> fv.Type(isSignature))
-                            |> String.concat ","
-                        if args <> String.Empty then
-                            sprintf "%s:%s" head args
-                        else
-                            head
-                    | FplBlockType.Translation ->
-                        let args =
-                            this.ArgList
-                            |> Seq.filter (fun fv ->
-                                fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
-                            |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
-                            |> String.concat ""
+                            sprintf "%s(%s)" head paramT
+                        | FplBlockType.Quantor ->
+                            let paramT =
+                                this.Scope
+                                |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> FplValue.IsVariable(kvp.Value))
+                                |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(isSignature))
+                                |> String.concat ", "
 
-                        sprintf "%s%s" head args
-                    | FplBlockType.Mapping
-                    | FplBlockType.Variable
-                    | FplBlockType.VariadicVariableMany
-                    | FplBlockType.VariadicVariableMany1 ->
-                        let pars = paramTuple ()
+                            match paramT with
+                            | "" -> head
+                            | _ -> sprintf "%s(%s)" head paramT
+                        | FplBlockType.Localization ->
+                            let paramT =
+                                this.Scope
+                                |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> FplValue.IsVariable(kvp.Value))
+                                |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(isSignature))
+                                |> String.concat ", "
 
-                        match (pars, this.Mapping) with
-                        | ("", None) -> head
-                        | ("", Some map) -> sprintf "%s() -> %s" head (map.Type(propagate))
-                        | (_, None) ->
-                            if this.HasBrackets then
-                                sprintf "%s[%s]" head pars
-                            else
-                                sprintf "%s(%s)" head pars
-                        | (_, Some map) ->
-                            if this.HasBrackets then
-                                sprintf "%s[%s] -> %s" head pars (map.Type(propagate))
-                            else
-                                sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
-                    | FplBlockType.Reference ->
-                        let qualification =
-                            if this.Scope.ContainsKey(".") then
-                                Some(this.Scope["."])
-                            else
-                                None
-                        // The arguments are reserved for the arguments or the coordinates of the reference
-                        // If the argument tuple equals "???", an empty argument or coordinates list has occurred
-                        let args =
-                            let a =
+                            match paramT with
+                            | "" -> head
+                            | _ -> sprintf "%s(%s)" head paramT
+                        | FplBlockType.OptionalFunctionalTerm
+                        | FplBlockType.MandatoryFunctionalTerm
+                        | FplBlockType.FunctionalTerm ->
+                            match this.Mapping with
+                            | Some map ->
+                                let paramT = paramTuple ()
+                                sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
+                            | _ -> ""
+                        | FplBlockType.Instance ->
+                            let args =
                                 this.ArgList
+                                |> Seq.map (fun fv -> fv.Type(isSignature))
+                                |> String.concat ","
+                            if args <> String.Empty then
+                                sprintf "%s:%s" head args
+                            else
+                                head
+                        | FplBlockType.Translation ->
+                            let args =
+                                this.ArgList
+                                |> Seq.filter (fun fv ->
+                                    fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
+                                |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
+                                |> String.concat ""
+
+                            sprintf "%s%s" head args
+                        | FplBlockType.Mapping
+                        | FplBlockType.Variable
+                        | FplBlockType.VariadicVariableMany
+                        | FplBlockType.VariadicVariableMany1 ->
+                            let pars = paramTuple ()
+
+                            match (pars, this.Mapping) with
+                            | ("", None) -> head
+                            | ("", Some map) -> sprintf "%s() -> %s" head (map.Type(propagate))
+                            | (_, None) ->
+                                if this.HasBrackets then
+                                    sprintf "%s[%s]" head pars
+                                else
+                                    sprintf "%s(%s)" head pars
+                            | (_, Some map) ->
+                                if this.HasBrackets then
+                                    sprintf "%s[%s] -> %s" head pars (map.Type(propagate))
+                                else
+                                    sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
+                        | FplBlockType.Reference ->
+                            let qualification =
+                                if this.Scope.ContainsKey(".") then
+                                    Some(this.Scope["."])
+                                else
+                                    None
+                            // The arguments are reserved for the arguments or the coordinates of the reference
+                            // If the argument tuple equals "???", an empty argument or coordinates list has occurred
+                            let args =
+                               this.ArgList
                                 |> Seq.filter (fun fv ->
                                     fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
                                 |> Seq.map (fun fv -> fv.Type(propagate))
                                 |> String.concat ", "
 
-                            a
+                            match (head, args, qualification) with
+                            | (_, "", Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
+                            | (_, "???", Some qual) ->
+                                if this.HasBrackets then
+                                    sprintf "%s[].%s" head (qual.Type(propagate))
+                                else
+                                    sprintf "%s().%s" head (qual.Type(propagate))
+                            | (_, _, Some qual) ->
+                                if this.HasBrackets then
+                                    sprintf "%s[%s].%s" head args (qual.Type(propagate))
+                                else
+                                    sprintf "%s(%s).%s" head args (qual.Type(propagate))
+                            | ("???", _, None) -> sprintf "%s" head
+                            | ("", _, None) -> sprintf "%s" args
+                            | (_, "", None) -> sprintf "%s" head
+                            | (_, "???", None) ->
+                                if this.HasBrackets then
+                                    sprintf "%s[]" head
+                                else
+                                    sprintf "%s()" head
+                            | (_, _, None) ->
+                                if this.HasBrackets then sprintf "%s[%s]" head args
+                                elif head = "bydef." then sprintf "%s%s" head args
+                                else sprintf "%s(%s)" head args
+                        | _ -> ""
 
-                        match (head, args, qualification) with
-                        | (_, "", Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
-                        | (_, "???", Some qual) ->
-                            if this.HasBrackets then
-                                sprintf "%s[].%s" head (qual.Type(propagate))
-                            else
-                                sprintf "%s().%s" head (qual.Type(propagate))
-                        | (_, _, Some qual) ->
-                            if this.HasBrackets then
-                                sprintf "%s[%s].%s" head args (qual.Type(propagate))
-                            else
-                                sprintf "%s(%s).%s" head args (qual.Type(propagate))
-                        | ("???", _, None) -> sprintf "%s" head
-                        | ("", _, None) -> sprintf "%s" args
-                        | (_, "", None) -> sprintf "%s" head
-                        | (_, "???", None) ->
-                            if this.HasBrackets then
-                                sprintf "%s[]" head
-                            else
-                                sprintf "%s()" head
-                        | (_, _, None) ->
-                            if this.HasBrackets then sprintf "%s[%s]" head args
-                            elif head = "bydef." then sprintf "%s%s" head args
-                            else sprintf "%s(%s)" head args
-                    | _ -> ""
-
-                idRec ()
+                    idRec ()
 
     /// Indicates if this FplValue is an FPL building block.
     static member IsFplBlock(fplValue: FplValue) =

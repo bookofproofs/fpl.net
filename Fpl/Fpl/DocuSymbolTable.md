@@ -9,10 +9,11 @@ This document focuses on the ST's dynamic aspects and state changes that are not
 The F# type `SymbolTable` is defined in the `FplInterpreterTypes` module. It is a recursive tree structure of the F# type `FplValue` defined in the same module. Each node of the ST is of the `FplValue` type. 
 
 Each FplValue object has different properties, the most important of which are:
-* BlockType - implemented as FplValueType that is a discriminated union type
-* Scope - implemented as a < key,value >  dictionary, using the Name attribute as key, and the corresponding FplValue as value.
-* Name - a unique string used in the scope to identify the element. 
-* ArgList - implemented as a list of FplValues. 
+* BlockType - implemented as FplBlockType that is a discriminated union type. FplValue.BlockType determines the structore of Scope, ArgList, and ValueList of the FplValue.
+* Scope - implemented as a < key,value >  dictionary, using the Name attribute as key, and the corresponding FplValue as value. The scope contains all related information needed for the structure and semantics of the FplValue that is unique.
+* FplId - a unique string used in the scope to identify the element. 
+* ArgList - implemented as a list of FplValues. It contains all arguments of the FplValue (if any)
+* ValueList - implemented as a list of FplValues. It contains all values of the FplValue (if any).
 * Parent - A parent node in this FplValue, usually, the A's Parent references a B whose Scope contains the <A.Name, A> pair.
 
 The following infos describe how the FplValues are related to each other using their Scope and their ArgList.
@@ -25,6 +26,8 @@ None
 Contains `Theory` nodes of the FPL code being interpreted.
 #### ArgList	
 Empty
+#### ValueList	
+todo
 
 ---
 
@@ -36,6 +39,8 @@ Root
 RuleOfInference, Class, FunctionaTerm, Predicate, Axiom, Theorem, Lemma, Proposition, Conjecture, Localization
 #### ArgList	
 Empty
+#### ValueList	
+todo
 
 ---
 
@@ -49,6 +54,8 @@ Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
 1st Reference: A Reference to a premise predicate 
 2nd Reference: A Reference to a vonclusion predicate
+#### ValueList	
+todo
 
 ---
 
@@ -60,6 +67,8 @@ RuleOfInference, Class, FunctionalTerm, Predicate, Axiom, Theorem, Lemma, Propos
 If a variable is declared with a class type, the scope will contain that class. It can also contain nested variables.
 #### ArgList	
 If a variable is assigned a value, the Object representing its value.
+#### ValueList	
+todo
 
 ---
 
@@ -71,6 +80,8 @@ Same as possibble parents of the Variable node.
 todo
 #### ArgList	
 If list of Variable, VariadicVariableMany or VariadicVariableMany1
+#### ValueList	
+todo
 
 ---
 
@@ -82,6 +93,8 @@ Theory
 Constructor, OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
 Class (list of nodes, from which this class inherits). These can be class nodes or primitive objects. Class nodes are only added if they were previously declared in the code while a primitive object is added when a it is the root a class inherits from.
+#### ValueList	
+todo
 
 ---
 
@@ -93,6 +106,8 @@ Class
 Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent Class)
 #### ArgList	
 (Possibly empty) nodes that represent the calls to some base classes' constructors. Due to semantical errors in the code, the latter do not necessarily have to match the signatures of the actual constructors of the base classes of this constructor class.	The latter can be retrieved from the parent Class.
+#### ValueList	
+todo
 
 ---
 
@@ -104,6 +119,8 @@ Variable
 None
 #### ArgList	
 Only a single value of an `Instance`. It may contain a ArgList with another `Instance` objects. These instances correspond to the classes from which the instantiated class inherits (see also BlockType `Class`).
+#### ValueList	
+todo
 
 ---
 
@@ -115,6 +132,8 @@ Reference
 None
 #### ArgList	
 None.
+#### ValueList	
+todo
 
 ---
 
@@ -125,6 +144,8 @@ Theory
 #### Scope 
 OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
+todo
+#### ValueList	
 todo
 
 ---
@@ -137,6 +158,8 @@ Class, Predicate, or FunctionalTerm
 Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent).
 #### ArgList	
 todo
+#### ValueList	
+todo
 
 ---
 
@@ -147,6 +170,8 @@ Class, Predicate, or FunctionalTerm
 #### Scope 
 Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent).
 #### ArgList	
+todo
+#### ValueList	
 todo
 
 ---
@@ -159,6 +184,8 @@ Theory
 OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
 todo
+#### ValueList	
+todo
 
 ---
 
@@ -169,6 +196,8 @@ Class, Predicate, or FunctionalTerm
 #### Scope 
 Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent).
 #### ArgList	
+todo
+#### ValueList	
 todo
 
 ---
@@ -181,6 +210,8 @@ Class, Predicate, or FunctionalTerm
 Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent).
 #### ArgList	
 todo
+#### ValueList	
+todo
 
 ---
 
@@ -192,6 +223,8 @@ Theory
 Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
 Reference (only one, representing the axiom's predicate)
+#### ValueList	
+todo
 
 ---
 
@@ -203,6 +236,8 @@ Theory
 Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
 Reference (only one, representing the theorems's predicate)
+#### ValueList	
+todo
 
 ---
 
@@ -214,6 +249,8 @@ Theory
 Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
 Reference (only one, representing the lemmas's predicate)
+#### ValueList	
+todo
 
 ---
 
@@ -225,6 +262,8 @@ Theory
 Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
 Reference (only one, representing the proposition's predicate)
+#### ValueList	
+todo
 
 ---
 
@@ -236,6 +275,8 @@ Theory
 Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
 Reference (only one, representing the conjectures's predicate)
+#### ValueList	
+todo
 
 ---
 
@@ -247,6 +288,8 @@ Axiom, Theorem, Lemma, Proposition, Conjecture, or Corollary
 Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent
 #### ArgList	
 Reference (only one, representing the corollary's predicate)
+#### ValueList	
+todo
 
 ---
 
@@ -258,6 +301,8 @@ Theorem, Lemma, Proposition, or Corollary
 Argument, Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent
 #### ArgList	
 Empty
+#### ValueList	
+todo
 
 ---
 
@@ -270,6 +315,8 @@ Empty
 #### ArgList	
 1st Justification, 
 2nd ArgInference
+#### ValueList	
+todo
 
 ---
 
@@ -281,6 +328,8 @@ Argument
 Reference
 #### ArgList	
 Empty
+#### ValueList	
+todo
 
 ---
 
@@ -292,6 +341,8 @@ Argument
 None
 #### ArgList	
 Reference
+#### ValueList	
+todo
 
 ---
 
@@ -303,6 +354,8 @@ Theory
 Variable, VariadicVariableMany, VariadicVariableMany1, Translation
 #### ArgList	
 Reference to the expression for which this localization was declared.
+#### ValueList	
+todo
 
 ---
 
@@ -313,6 +366,8 @@ Localization
 #### Scope 
 todo
 #### ArgList	
+todo
+#### ValueList	
 todo
 
 ---
@@ -325,6 +380,8 @@ todo
 todo
 #### ArgList	
 todo
+#### ValueList	
+todo
 
 ---
 
@@ -336,6 +393,8 @@ Constructor, Stmt, Reference
 By convention, if the scope contains an element with the same key as the node's FplId, then the value of the key-value pair is the referenced node.
 #### ArgList	
 May contain further Reference nodes.
+#### ValueList	
+todo
 
 ---
 
@@ -346,6 +405,8 @@ todo
 #### Scope 
 todo
 #### ArgList	
+todo
+#### ValueList	
 todo
 
 ---
@@ -358,6 +419,8 @@ todo
 todo
 #### ArgList	
 todo
+#### ValueList	
+todo
 
 ---
 
@@ -368,6 +431,8 @@ todo
 #### Scope 
 todo
 #### ArgList	
+todo
+#### ValueList	
 todo
 
 ---
@@ -380,6 +445,8 @@ todo
 todo
 #### ArgList	
 todo
+#### ValueList	
+todo
 
 ---
 
@@ -390,6 +457,8 @@ todo
 #### Scope 
 todo
 #### ArgList	
+todo
+#### ValueList	
 todo
 
 ---
@@ -402,6 +471,8 @@ todo
 todo
 #### ArgList	
 todo
+#### ValueList	
+todo
 
 ### BlockType `Undefined`
 todo
@@ -411,6 +482,8 @@ todo
 todo
 #### ArgList	
 todo
+#### ValueList	
+todo
 
 ### BlockType `Bool`
 todo
@@ -419,4 +492,6 @@ todo
 #### Scope 
 todo
 #### ArgList	
+todo
+#### ValueList	
 todo
