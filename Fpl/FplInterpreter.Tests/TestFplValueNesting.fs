@@ -25,7 +25,7 @@ type TestFplValueNesting() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["X()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
             let resS = base1.Type(SignatureType.Mixed)
 
             Assert.AreEqual<string>("true", resS)

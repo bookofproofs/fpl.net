@@ -36,12 +36,12 @@ type FplRunner() =
                 | (FplBlockType.VariadicVariableMany,FplBlockType.VariadicVariableMany1)
                 | (FplBlockType.VariadicVariableMany1,FplBlockType.VariadicVariableMany)
                 | (FplBlockType.VariadicVariableMany1,FplBlockType.VariadicVariableMany1) ->
-                    // copy the value list of the variadic ar to the value list of the variadic p
+                    // copy the argument list of the variadic ar to the arg list of the variadic p
                     // by inserting the clones of the elements
-                    ar.ValueList 
+                    ar.ArgList 
                     |> Seq.iter (fun fv -> 
                         let fvClone = fv.Clone() 
-                        p.ValueList.Add(fvClone)
+                        p.ArgList.Add(fvClone)
                     )
                     // continue replacling variables with the remaining lists
                     replace ps ars
@@ -49,7 +49,7 @@ type FplRunner() =
                 | (FplBlockType.VariadicVariableMany,_)
                 | (FplBlockType.VariadicVariableMany1,_) -> 
                     let arClone = ar.Clone()
-                    p.ValueList.Add(arClone)
+                    p.ArgList.Add(arClone)
                     // continue replacling variables with the original pars and the remaining ars list
                     replace pars ars
                 | _ -> 
@@ -125,11 +125,11 @@ type FplRunner() =
                 match called.FplBlockType with 
                 | FplBlockType.Predicate -> 
                     let pars = this.SaveVariables(called)
-                    let args = caller.ValueList |> Seq.toList
+                    let args = caller.ArgList |> Seq.toList
                     this.ReplaceVariables pars args
                     let mutable lastRepr = ""
                     // run all statements of the called node
-                    called.ValueList
+                    called.ArgList
                     |> Seq.iter (fun fv -> 
                         this.Run caller fv 
                         lastRepr <- fv.ReprId

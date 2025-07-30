@@ -29,8 +29,8 @@ type TestExpressionEvaluation() =
 
             let pr1 = theory.Scope["T()"]
             let expr = 
-                if pr1.ValueList.Count > 0 then
-                    pr1.ValueList[0]
+                if pr1.ArgList.Count > 0 then
+                    pr1.ArgList[0]
                 else 
                     pr1
             let actual = evalTreeFplRepresentation(expr)
@@ -62,8 +62,8 @@ type TestExpressionEvaluation() =
 
             let pr1 = theory.Scope["T()"]
             let expr = 
-                if pr1.ValueList.Count > 0 then
-                    pr1.ValueList[0]
+                if pr1.ArgList.Count > 0 then
+                    pr1.ArgList[0]
                 else 
                     pr1
             let actual = evalTreeFplRepresentation(expr)
@@ -95,8 +95,8 @@ type TestExpressionEvaluation() =
 
             let pr1 = theory.Scope["T()"]
             let expr = 
-                if pr1.ValueList.Count > 0 then
-                    pr1.ValueList[0]
+                if pr1.ArgList.Count > 0 then
+                    pr1.ArgList[0]
                 else 
                     pr1
             let actual = evalTreeFplRepresentation(expr)
@@ -132,8 +132,8 @@ type TestExpressionEvaluation() =
 
             let pr1 = theory.Scope["T()"]
             let expr = 
-                if pr1.ValueList.Count > 0 then
-                    pr1.ValueList[0]
+                if pr1.ArgList.Count > 0 then
+                    pr1.ArgList[0]
                 else 
                     pr1
             let actual = evalTreeFplRepresentation(expr)
@@ -166,8 +166,8 @@ type TestExpressionEvaluation() =
 
             let pr1 = theory.Scope["T()"]
             let expr = 
-                if pr1.ValueList.Count > 0 then
-                    pr1.ValueList[0]
+                if pr1.ArgList.Count > 0 then
+                    pr1.ArgList[0]
                 else 
                     pr1
             let actual = evalTreeFplRepresentation(expr)
@@ -200,8 +200,8 @@ type TestExpressionEvaluation() =
 
             let pr1 = theory.Scope["T()"]
             let expr = 
-                if pr1.ValueList.Count > 0 then
-                    pr1.ValueList[0]
+                if pr1.ArgList.Count > 0 then
+                    pr1.ArgList[0]
                 else 
                     pr1
             let actual = evalTreeFplRepresentation(expr)
@@ -263,7 +263,7 @@ type TestExpressionEvaluation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr1 = theory.Scope["T()"]
-            let isOperand = pr1.ValueList[0]
-            let mapping = isOperand.ValueList[1]
+            let isOperand = pr1.ArgList[0]
+            let mapping = isOperand.ArgList[1]
             Assert.AreEqual<string>(expected, mapping.Type(SignatureType.Type))
         | None -> Assert.IsTrue(false)

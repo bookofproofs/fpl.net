@@ -469,10 +469,10 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
 
     let mutable _parent = parent
     let _scope = Dictionary<string, FplValue>()
-    let _valueList = List<FplValue>()
+    let _argList = List<FplValue>()
     let _assertedPredicates = List<FplValue>()
 
-    /// Indicates if this FplValue's Scope or ValueList can be treated as bracketed coordinates or as parenthesized parameters.
+    /// Indicates if this FplValue's Scope or ArgList can be treated as bracketed coordinates or as parenthesized parameters.
     member this.HasBrackets
         with get () = _hasBrackets
         and set (value) = _hasBrackets <- value
@@ -555,11 +555,11 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     /// A list of asserted predicates for this FplValue
     member this.AssertedPredicates = _assertedPredicates
 
-    /// A scope inside this FplValue
+    /// A scope of this FplValue
     member this.Scope = _scope
 
-    /// A value list inside this FplValue
-    member this.ValueList = _valueList
+    /// An argument list of this FplValue
+    member this.ArgList = _argList
 
     /// Tries to find a mapping of this FplValue
     member this.Mapping =
@@ -570,8 +570,8 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             else
                 None
         | _ ->
-            if this.ValueList.Count > 0 && this.ValueList[0].FplBlockType = FplBlockType.Mapping then
-                Some(this.ValueList[0])
+            if this.ArgList.Count > 0 && this.ArgList[0].FplBlockType = FplBlockType.Mapping then
+                Some(this.ArgList[0])
             else
                 None
 
@@ -588,9 +588,9 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                     $"intr {this.TypeId}"
                 else
                     $"{this.TypeId}"
-            previous.ValueList
+            previous.ArgList
             |> Seq.iter (fun next -> 
-                inst.ValueList.Add (next.CreateInstance())
+                inst.ArgList.Add (next.CreateInstance())
             )
             inst
         match this.FplBlockType with
@@ -641,7 +641,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                 (this.FplBlockType = VariadicVariableMany1 || this.FplBlockType = VariadicVariableMany)
                 ->
                 let variadicContent =
-                    this.ValueList |> Seq.map (fun fv -> fv.Type(isSignature)) |> String.concat ", "
+                    this.ArgList |> Seq.map (fun fv -> fv.Type(isSignature)) |> String.concat ", "
 
                 $"{this.Type(SignatureType.Type)}" + "{" + variadicContent + "}"
             | (SignatureType.Repr, _) when this.FplBlockType = Variable ->
@@ -727,7 +727,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         | _ -> ""
                     | FplBlockType.Instance ->
                         let args =
-                            this.ValueList
+                            this.ArgList
                             |> Seq.map (fun fv -> fv.Type(isSignature))
                             |> String.concat ","
                         if args <> String.Empty then
@@ -736,7 +736,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                             head
                     | FplBlockType.Translation ->
                         let args =
-                            this.ValueList
+                            this.ArgList
                             |> Seq.filter (fun fv ->
                                 fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
                             |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
@@ -772,7 +772,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         // If the argument tuple equals "???", an empty argument or coordinates list has occurred
                         let args =
                             let a =
-                                this.ValueList
+                                this.ArgList
                                 |> Seq.filter (fun fv ->
                                     fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
                                 |> Seq.map (fun fv -> fv.Type(propagate))
@@ -877,28 +877,28 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             // if the reference value itself contains value(s) and is not a class, 
             // return this value. 
             // Exceptions: 
-            // 1) if refValue is a class, its "value list" means something else - namely parent classes. In this case we only want to return the main class
-            // 2) if refValue is a constructor, its "value list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
-            if refValue.ValueList.Count > 0 && not (FplValue.IsClass(refValue)) && refValue.FplBlockType <> FplBlockType.Constructor then
-                Some refValue.ValueList[0] // return existing values except of classes, because those denoted their parent classes
+            // 1) if refValue is a class, its "arg list" means something else - namely parent classes. In this case we only want to return the main class
+            // 2) if refValue is a constructor, its "arg list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
+            if refValue.ArgList.Count > 0 && not (FplValue.IsClass(refValue)) && refValue.FplBlockType <> FplBlockType.Constructor then
+                Some refValue.ArgList[0] // return existing values except of classes, because those denoted their parent classes
             else 
                 Some refValue 
         | FplBlockType.Reference when this.FplId <> "" -> Some this
-        | FplBlockType.Reference when this.ValueList.Count = 0 -> Some this
-        | FplBlockType.Stmt when this.FplId = "bas" && this.ValueList.Count > 0 -> 
-            let test = this.ValueList[0]
+        | FplBlockType.Reference when this.ArgList.Count = 0 -> Some this
+        | FplBlockType.Stmt when this.FplId = "bas" && this.ArgList.Count > 0 -> 
+            let test = this.ArgList[0]
             // in case of a base.obj() constructor call
-            if test.ValueList.Count = 2 && 
-                test.ValueList[0].FplBlockType = FplBlockType.Object && 
-                test.ValueList[1].FplBlockType = FplBlockType.Reference &&
-                test.ValueList[1].FplId = "???" then
+            if test.ArgList.Count = 2 && 
+                test.ArgList[0].FplBlockType = FplBlockType.Object && 
+                test.ArgList[1].FplBlockType = FplBlockType.Reference &&
+                test.ArgList[1].FplId = "???" then
                 // return an FplValue inbuilt Object 
-                Some  test.ValueList[0] 
-            elif test.ValueList.Count > 0 then
+                Some  test.ArgList[0] 
+            elif test.ArgList.Count > 0 then
                Some test 
             else
                 None
-        | _ when this.ValueList.Count > 0 -> Some this.ValueList[0]
+        | _ when this.ArgList.Count > 0 -> Some this.ArgList[0]
         | _ -> None
 
     /// Sets the value of this FplValue taking into account if this
@@ -907,8 +907,8 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         match this.FplBlockType with
         | FplBlockType.Reference when this.Scope.ContainsKey(this.FplId) ->
             let var = this.Scope[this.FplId]
-            var.ValueList.Add fplValue
-        | _ -> this.ValueList.Add fplValue
+            var.ArgList.Add fplValue
+        | _ -> this.ArgList.Add fplValue
 
     /// Indicates if this FplValue is a class.
     static member IsClass(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Class
@@ -1308,15 +1308,15 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                 let value = recClone kvp.Value
                 ret.Scope.Add(kvp.Key, value))
 
-            fv.ValueList
+            fv.ArgList
             |> Seq.iter (fun fv1 ->
                 let value = recClone fv1
-                ret.ValueList.Add(value))
+                ret.ArgList.Add(value))
 
             fv.AssertedPredicates
             |> Seq.iter (fun fv1 ->
                 // asserted predicates do not have to be cloned
-                ret.ValueList.Add(fv1))
+                ret.ArgList.Add(fv1))
 
             ret
 
@@ -1450,7 +1450,7 @@ let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) 
         if rootType = baseClassName then
             Some(rootType)
         else
-            classRoot.ValueList
+            classRoot.ArgList
             |> Seq.collect (fun child ->
                 match findClassInheritanceChain child baseClassName with
                 | Some path -> [ rootType + ":" + path ]
@@ -1552,7 +1552,7 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
 
             if preventInfinite then
                 sb.AppendLine($"{indent}\"Scope\": [],") |> ignore
-                sb.AppendLine($"{indent}\"ValueList\": []") |> ignore
+                sb.AppendLine($"{indent}\"ArgList\": []") |> ignore
             else
                 sb.AppendLine($"{indent}\"Scope\": [") |> ignore
 
@@ -1570,14 +1570,14 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
                         (root.FplId = "self" || root.FplId = "parent"))
 
                 sb.AppendLine($"{indent}],") |> ignore
-                sb.AppendLine($"{indent}\"ValueList\": [") |> ignore
+                sb.AppendLine($"{indent}\"ArgList\": [") |> ignore
 
                 let mutable valueList = 0
 
-                root.ValueList
+                root.ArgList
                 |> Seq.iter (fun child ->
                     valueList <- valueList + 1
-                    createJson child sb (level + 1) (valueList = root.ValueList.Count) false)
+                    createJson child sb (level + 1) (valueList = root.ArgList.Count) false)
 
                 sb.AppendLine($"{indent}]") |> ignore
 
@@ -1705,8 +1705,8 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
     | ScopeSearchResult.Found candidate ->
         match candidate.FplBlockType with
         | FplBlockType.Variable ->
-            if candidate.ValueList.Count > 0 then
-                let (varType: FplValue) = candidate.ValueList[0]
+            if candidate.ArgList.Count > 0 then
+                let (varType: FplValue) = candidate.ArgList[0]
 
                 varType.Scope
                 |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
@@ -1876,7 +1876,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
             fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
         | _ -> fvp.Scope.Values |> Seq.toList
 
-    let arguments = fva.ValueList |> Seq.toList
+    let arguments = fva.ArgList |> Seq.toList
 
     let stdMsg = $"{fvp.QualifiedName}"
     let argResult = mpwa arguments parameters

@@ -29,7 +29,7 @@ type TestPrecedence() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
             match var with
             | "b01" -> Assert.AreEqual<string>("=(+(x, *(y, z)), 1)", base1.Type(SignatureType.Name))
             | "b02" -> Assert.AreEqual<string>("=(+(*(x, y), z), 1)", base1.Type(SignatureType.Name))

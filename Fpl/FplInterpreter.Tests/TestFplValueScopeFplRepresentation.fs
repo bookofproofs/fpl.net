@@ -549,7 +549,7 @@ type TestFplValueScopeFplRepresentation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>("true", base1.Type(SignatureType.Repr))
@@ -650,7 +650,7 @@ type TestFplValueScopeFplRepresentation() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ValueList[0]
+            let base1 = ctor.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>("bas", base1.Type(SignatureType.Repr))
@@ -683,7 +683,7 @@ type TestFplValueScopeFplRepresentation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>("undef(undef, undef)", base1.Type(SignatureType.Repr))

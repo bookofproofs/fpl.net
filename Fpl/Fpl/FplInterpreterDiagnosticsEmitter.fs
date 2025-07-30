@@ -365,7 +365,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 | ScopeSearchResult.Found classCandidate ->
                     let mutable duplicateInheritanceChainFound = false
 
-                    fplValue.ValueList
+                    fplValue.ArgList
                     |> Seq.iter (fun child ->
                         let childType = child.Type(SignatureType.Type)
                         let classInheritanceChain = findClassInheritanceChain classCandidate childType
@@ -422,7 +422,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
         | _ ->
             let mutable duplicateInheritanceChainFound = false
 
-            fplValue.ValueList
+            fplValue.ArgList
             |> Seq.iter (fun child ->
                 let classInheritanceChain = findClassInheritanceChain child name
 
@@ -489,7 +489,7 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
         let mutable foundInheritanceClass = false
 
         let candidates =
-            classOfConstructor.ValueList
+            classOfConstructor.ArgList
             |> Seq.map (fun inheritanceClass ->
                 let inheritanceClassType = inheritanceClass.Type(SignatureType.Type)
                 if inheritanceClassType = identifier then
@@ -584,7 +584,7 @@ let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
     let d = Delegates()
 
     try
-        d.CallExternalDelegate(fv.FplId.Substring(4), fv.ValueList |> Seq.toList)
+        d.CallExternalDelegate(fv.FplId.Substring(4), fv.ArgList |> Seq.toList)
     with ex ->
         if ex.Message.StartsWith("OK:") then
             let result = ex.Message.Substring(3)
@@ -969,7 +969,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
             }
         diags.AddDiagnostic diagnostic
 
-    fplValue.ValueList
+    fplValue.ArgList
     |> Seq.iter (fun argument ->
         let repr = argument.Type(SignatureType.Repr)
         match repr with
@@ -982,7 +982,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
     let code = LG000("", "")
     let numbLG000 = filterByErrorCode diags code.Code
 
-    if numbLG000.Length = fplValue.ValueList.Count then
+    if numbLG000.Length = fplValue.ArgList.Count then
         () // we have no reason to emit any diagnostics since the are as many undetermined predicates as arguments
     else
         diags.Collection

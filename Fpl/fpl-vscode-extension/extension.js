@@ -238,8 +238,8 @@ typeToIconMap.set('ass','target');
 
 // A custom TreeItem
 class MyTreeItem extends vscode.TreeItem {
-    constructor(typ, inScope, label, lineNumber, columnNumber, filePath, fplValueType, fplValueRepr, scope = [], valueList = []) {
-        super(label, scope.length > 0 || valueList.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
+    constructor(typ, inScope, label, lineNumber, columnNumber, filePath, fplValueType, fplValueRepr, valuelist = [], scope = [], arglist = []) {
+        super(label, scope.length > 0 || arglist.length > 0 || valuelist.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
         this.typ = typ;
         this.lineNumber = lineNumber;
         this.columnNumber = columnNumber;
@@ -272,13 +272,17 @@ class MyTreeItem extends vscode.TreeItem {
         this.tooltip = "n: " + label + "\nt: "+ fplValueType + "\nr: " + fplValueRepr;
         this.scope = scope;
         if (this.typ == "th") log2Console(this.label + " " + scope.length, false);
-        this.valueList = valueList;
+        this.arglist = arglist;
+        this.valuelist = valuelist;
 
-        if (inScope) {
+        if (inScope == 1) {
             this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textPreformat.foreground');
         }
-        else {
+        else if (inScope == 2) {
             this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'focusBorder');
+        }
+        else {
+            this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textSeparator.foreground');
         }
 
         // Set the command to open the file and navigate to the line number
@@ -328,10 +332,13 @@ class FplTheoriesProvider {
             // Handle virtual nodes
             return Promise.resolve(this.parseScope(element.scope));
         } else {
-            // Create virtual child elements for Scope and ValueList if they are not empty
+            // Create virtual child elements for Scope and ArgList if they are not empty
             let children = [];
             if (element.scope && element.scope.length > 0) {
                 children.push(...this.parseScope(element.scope));
+            }
+            if (element.arglist && element.arglist.length > 0) {
+                children.push(...this.parseArgList(element.arglist));
             }
             if (element.valueList && element.valueList.length > 0) {
                 children.push(...this.parseValueList(element.valueList));
@@ -343,14 +350,18 @@ class FplTheoriesProvider {
     parseScope(scope) {
         // Convert each item in the scope to a MyTreeItem
 
-        return scope.map(item => new MyTreeItem(item.Type, true, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.Scope, item.ValueList));
+        return scope.map(item => new MyTreeItem(item.Type, 1, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.ValueList, item.Scope, item.ArgList));
+    }
+
+    parseArgList(arglist) {
+        // Convert each item in the arglist to a MyTreeItem
+        return arglist.map(item => new MyTreeItem(item.Type, 2, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.ValueList, item.Scope, item.ArgList));
     }
 
     parseValueList(valueList) {
         // Convert each item in the valueList to a MyTreeItem
-        return valueList.map(item => new MyTreeItem(item.Type, false, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.Scope, item.ValueList));
+        return valueList.map(item => new MyTreeItem(item.Type, 3, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.ValueList, item.Scope, item.ArgList));
     }
-
 }
 
 

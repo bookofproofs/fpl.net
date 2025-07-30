@@ -549,7 +549,7 @@ type TestFplValueScopeNameEndPos() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<int64>((int64)22, base1.EndPos.Column)
@@ -650,7 +650,7 @@ type TestFplValueScopeNameEndPos() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ValueList[0]
+            let base1 = ctor.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<int64>((int64)45, base1.EndPos.Column)
@@ -683,7 +683,7 @@ type TestFplValueScopeNameEndPos() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<int64>((int64)24, base1.EndPos.Column)
@@ -763,7 +763,7 @@ type TestFplValueScopeNameEndPos() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ValueList[0]
+            let mapping = base1.ArgList[0]
             match var with
             | "base1" -> Assert.AreEqual<int64>((int64)18, mapping.EndPos.Column)
             | "base2" -> Assert.AreEqual<int64>((int64)18, mapping.EndPos.Column)
@@ -797,8 +797,8 @@ type TestFplValueScopeNameEndPos() =
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
-            let just = arg.ValueList[0]
-            let ainf = arg.ValueList[1]
+            let just = arg.ArgList[0]
+            let ainf = arg.ArgList[1]
             let numbOfJustifications = just.Scope.Count
  
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
@@ -891,7 +891,7 @@ type TestFplValueScopeNameEndPos() =
             let theory = r.Scope[filename]
             let pred = theory.Scope[predName]
             let lang = pred.Scope["tex"]
-            let trsl = lang.ValueList[0]
+            let trsl = lang.ArgList[0]
 
             match var with
             | "base0" -> Assert.AreEqual<int64>((int64)23, trsl.EndPos.Column)

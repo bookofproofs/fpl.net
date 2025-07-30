@@ -29,7 +29,7 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
-            let predicateValue = pr.ValueList |> Seq.toList |> List.rev |> List.head
+            let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
             Assert.AreEqual<string>(expected, predicateValue.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
@@ -47,8 +47,8 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let fn = theory.Scope["T()"] 
-            let assignmentStmt = fn.ValueList[0]
-            let assignee = assignmentStmt.ValueList[0]
+            let assignmentStmt = fn.ArgList[0]
+            let assignee = assignmentStmt.ArgList[0]
             let assignedValue = assignee.GetValue
             match assignedValue with 
             | Some value -> Assert.AreEqual<string>(expected, value.Type(SignatureType.Repr))
@@ -69,7 +69,7 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let fn = theory.Scope["T() -> Nat"] 
-            let retStmt = fn.ValueList[0]
+            let retStmt = fn.ArgList[0]
             Assert.AreEqual<string>(expected, retStmt.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
@@ -87,7 +87,7 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
-            let base1 = pr.ValueList[0]
+            let base1 = pr.ArgList[0]
             Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
@@ -137,7 +137,7 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
-            let base1 = pr.ValueList[0]
+            let base1 = pr.ArgList[0]
             let result = base1.Type(SignatureType.Repr)
             printf "Representation: %s\n" (result)
             Assert.AreEqual<string>(expected, result)
