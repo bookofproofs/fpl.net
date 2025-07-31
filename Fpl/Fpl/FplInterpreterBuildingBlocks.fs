@@ -43,9 +43,12 @@ let eval_pos_string_ast (st: SymbolTable) str = ()
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their subnodes 
 let simplifyTriviallyNestedExpressions (rb:FplValue) = 
     if rb.ArgList.Count = 1 && rb.FplId = "" then
-        // removabel reference blocks are those with only a single value and unset FplId 
+        // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0]
-        if subNode.FplBlockType = FplBlockType.Reference || subNode.FplBlockType = FplBlockType.Quantor || subNode.FplBlockType = FplBlockType.Index then 
+        if subNode.FplBlockType = FplBlockType.Reference 
+            || subNode.FplBlockType = FplBlockType.Quantor 
+            || subNode.FplBlockType = FplBlockType.Index 
+            || subNode.FplBlockType = FplBlockType.Bool then 
             es.Pop() |> ignore // pop the removable reference block and ignored it
             es.PushEvalStack(subNode) // push its subNode instead
             // adjust subNode's Parent, EndPos, Scope
@@ -61,6 +64,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
             | _ -> ()
             // prevent recursive loops
             rb.ArgList.Clear() 
+            rb.ValueList.Clear()
             rb.Scope.Clear()
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
@@ -450,11 +454,14 @@ let rec eval (st: SymbolTable) ast =
     | Ast.True((pos1, pos2), _) -> 
         st.EvalPush("True")
         let fv = es.PeekEvalStack()
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.FplId <- "true"
-        fv.ReprId <- "true"
-        fv.TypeId <- "pred"
+        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Bool, fv)
+        value.StartPos <- pos1
+        value.EndPos <- pos2
+        value.FplId <- "true"
+        value.ReprId <- "true"
+        value.TypeId <- "pred"
+        es.PushEvalStack(value)
+        es.PopEvalStack()
         st.EvalPop() 
     | Ast.False((pos1, pos2), _) -> 
         st.EvalPush("False")

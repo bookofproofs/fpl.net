@@ -552,7 +552,7 @@ type TestFplValueScopeFplRepresentation() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("true", base1.Type(SignatureType.Repr))
+            | "base1" -> Assert.AreEqual<string>("true", pr1.Type(SignatureType.Repr))
             | "base2" -> Assert.AreEqual<string>("false", base1.Type(SignatureType.Repr))
             | "base3" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
             | "base4" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))

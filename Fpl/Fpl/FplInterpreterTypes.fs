@@ -612,9 +612,14 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     member this.Type(isSignature: SignatureType) =
         match isSignature with
         | SignatureType.Repr -> 
-            this.ValueList
-            |> Seq.map (fun fv -> $"{fv.FplId}({fv.Type(isSignature)})")
-            |> String.concat ", "
+            let children = 
+                this.ValueList
+                |> Seq.map (fun fv -> fv.Type(isSignature))
+                |> String.concat ", "
+            if children<>String.Empty then
+                $"{this.ReprId}({children})"
+            else
+                this.ReprId
         | _ -> 
             match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
             | (FplBlockType.Reference, true) ->
@@ -687,6 +692,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         | FplBlockType.Language
                         | FplBlockType.Object
                         | FplBlockType.Index
+                        | FplBlockType.Bool
                         | FplBlockType.Class -> head
                         | FplBlockType.Theorem
                         | FplBlockType.Lemma
