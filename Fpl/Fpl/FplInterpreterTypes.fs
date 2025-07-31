@@ -599,7 +599,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         | FplBlockType.Stmt when this.FplId = "bas" ->
             // in case of a base class constructor call (that resides inside this that is a constructor)
             // identify the 
-            let baseClassOpt = this.GetValue
+            let baseClassOpt = this.GetArgument
             match baseClassOpt with
             | Some (baseClass:FplValue) -> 
                 getInstance baseClass
@@ -654,7 +654,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
 
                     $"{this.Type(SignatureType.Type)}" + "{" + variadicContent + "}"
                 | (SignatureType.Repr, _) when this.FplBlockType = Variable ->
-                    let vOpt = this.GetValue
+                    let vOpt = this.GetArgument
 
                     match vOpt with
                     | Some (v: FplValue) -> v.Type(isSignature)
@@ -873,11 +873,9 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
 
         getFullName this true
 
-    /// Returns Some value of the FplValue taking into account if this
-    /// the value can be accessed directly or if the
-    /// FplValue is a Reference to a variable. In the latter case,
-    /// the value of the referenced variable is returned instead.
-    member this.GetValue =
+    /// Returns Some argument of the FplValue depending of the type of its 
+    /// FplBlockType. 
+    member this.GetArgument =
         match this.FplBlockType with
         | FplBlockType.Reference when this.Scope.ContainsKey(this.FplId) ->
             let refValue = this.Scope[this.FplId]

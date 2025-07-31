@@ -15,7 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 let evaluateNegation (fplValue:FplValue) = 
-    let argOpt = fplValue.ArgList[0].GetValue
+    let argOpt = fplValue.ArgList[0].GetArgument
     match argOpt with
     | Some arg ->
         match arg.ReprId with
@@ -27,8 +27,8 @@ let evaluateNegation (fplValue:FplValue) =
     | _ -> fplValue.ReprId <- "undetermined"
     
 let evaluateConjunction (fplValue:FplValue) =
-    let arg1Opt = fplValue.ArgList[0].GetValue
-    let arg2Opt = fplValue.ArgList[1].GetValue
+    let arg1Opt = fplValue.ArgList[0].GetArgument
+    let arg2Opt = fplValue.ArgList[1].GetArgument
     match (arg1Opt,arg2Opt) with
     | (Some arg1, Some arg2) -> 
         match (arg1.ReprId, arg2.ReprId) with
@@ -41,8 +41,8 @@ let evaluateConjunction (fplValue:FplValue) =
         fplValue.ReprId <- "undetermined"
 
 let evaluateDisjunction (fplValue:FplValue) = 
-    let arg1Opt = fplValue.ArgList[0].GetValue
-    let arg2Opt = fplValue.ArgList[1].GetValue
+    let arg1Opt = fplValue.ArgList[0].GetArgument
+    let arg2Opt = fplValue.ArgList[1].GetArgument
     match (arg1Opt,arg2Opt) with
     | (Some arg1, Some arg2) -> 
         match (arg1.ReprId, arg2.ReprId) with
@@ -55,8 +55,8 @@ let evaluateDisjunction (fplValue:FplValue) =
         fplValue.ReprId <- "undetermined"
 
 let evaluateExclusiveOr (fplValue:FplValue) = 
-    let arg1Opt = fplValue.ArgList[0].GetValue
-    let arg2Opt = fplValue.ArgList[1].GetValue
+    let arg1Opt = fplValue.ArgList[0].GetArgument
+    let arg2Opt = fplValue.ArgList[1].GetArgument
     match (arg1Opt,arg2Opt) with
     | (Some arg1, Some arg2) -> 
         match (arg1.ReprId, arg2.ReprId) with
@@ -69,8 +69,8 @@ let evaluateExclusiveOr (fplValue:FplValue) =
         fplValue.ReprId <- "undetermined"
 
 let evaluateImplication (fplValue:FplValue) = 
-    let arg1Opt = fplValue.ArgList[0].GetValue
-    let arg2Opt = fplValue.ArgList[1].GetValue
+    let arg1Opt = fplValue.ArgList[0].GetArgument
+    let arg2Opt = fplValue.ArgList[1].GetArgument
     match (arg1Opt,arg2Opt) with
     | (Some arg1, Some arg2) -> 
         match (arg1.ReprId, arg2.ReprId) with
@@ -83,8 +83,8 @@ let evaluateImplication (fplValue:FplValue) =
         fplValue.ReprId <- "undetermined"
 
 let evaluateEquivalence (fplValue:FplValue) = 
-    let arg1Opt = fplValue.ArgList[0].GetValue
-    let arg2Opt = fplValue.ArgList[1].GetValue
+    let arg1Opt = fplValue.ArgList[0].GetArgument
+    let arg2Opt = fplValue.ArgList[1].GetArgument
     match (arg1Opt,arg2Opt) with
     | (Some arg1, Some arg2) -> 
         match (arg1.ReprId, arg2.ReprId) with

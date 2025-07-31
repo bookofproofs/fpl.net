@@ -1421,7 +1421,7 @@ let rec eval (st: SymbolTable) ast =
                 Some assignedValueList.Head
             else
                 None
-        let assigneeOpt = assigneeReference.GetValue
+        let assigneeOpt = assigneeReference.GetArgument
         match (assigneeOpt, assignedValueOpt) with
         | (Some assignee, Some assignedValue)  ->
             checkSIG05Diagnostics assignee assignedValue
@@ -1442,7 +1442,7 @@ let rec eval (st: SymbolTable) ast =
                     let classInstance = candidate.CreateInstance()
                     Some classInstance
                 | None -> 
-                    assignedValue.GetValue
+                    assignedValue.GetArgument
             match valueOpt with
             | Some value -> assignee.SetValue(value) |> ignore
             | None -> ()
@@ -1474,7 +1474,7 @@ let rec eval (st: SymbolTable) ast =
         es.PopEvalStack()
         if fv.ArgList.Count>0 then
             let parentConstructorCallReference = fv.ArgList[0]
-            let parentConstructorCallRefValue = parentConstructorCallReference.GetValue
+            let parentConstructorCallRefValue = parentConstructorCallReference.GetArgument
             match parentConstructorCallRefValue with
             | Some refVal -> 
                 if es.ParentClassCalls.ContainsKey(refVal.FplId) then

@@ -49,7 +49,7 @@ type TestRepresentation() =
             let fn = theory.Scope["T()"] 
             let assignmentStmt = fn.ArgList[0]
             let assignee = assignmentStmt.ArgList[0]
-            let assignedValue = assignee.GetValue
+            let assignedValue = assignee.GetArgument
             match assignedValue with 
             | Some value -> Assert.AreEqual<string>(expected, value.Type(SignatureType.Repr))
             | None -> Assert.AreEqual<string>(expected, "no value was assigned")
