@@ -121,7 +121,13 @@ let evaluateEquivalence (fplValue:FplValue) =
         let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPredicate, fplValue)
         fplValue.ValueList.Add(newValue)
     
-let evaluateIsOperator (fv:FplValue) (operand:FplValue) (typeOfOperand:FplValue) = 
+let evaluateIsOperator (fplValue:FplValue) (operand:FplValue) (typeOfOperand:FplValue) = 
     match mpwa [operand] [typeOfOperand] with
-    | Some errMsg -> fv.ReprId <- "false"
-    | None -> fv.ReprId <- "true"
+    | Some errMsg -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPredicate, fplValue)
+        newValue.FplId <- "false"
+        fplValue.ValueList.Add(newValue)
+    | None -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPredicate, fplValue)
+        newValue.FplId <- "true"
+        fplValue.ValueList.Add(newValue)        

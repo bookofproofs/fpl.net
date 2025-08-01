@@ -1068,6 +1068,7 @@ let rec eval (st: SymbolTable) ast =
         eval st variableTypeAst
         es.PopEvalStack()
         evaluateIsOperator fv operand typeOfOperand
+        
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
         st.EvalPush("Delegate")
@@ -1714,8 +1715,10 @@ let rec eval (st: SymbolTable) ast =
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         if not fv.IsIntrinsic then // if not intrinsic, check variable usage
             emitVAR04diagnostics fv
-            fv.ValueList.AddRange(fv.ArgList[0].ValueList)
-        else
+            match fv.ArgList[0].FplBlockType with
+            | FplBlockType.Reference -> fv.ValueList.AddRange(fv.ArgList[0].ValueList)
+            | _ -> fv.ValueList.Add(fv.ArgList[0])
+        else    
             let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPredicate, fv)
             fv.ValueList.Add(value)
         es.PopEvalStack()

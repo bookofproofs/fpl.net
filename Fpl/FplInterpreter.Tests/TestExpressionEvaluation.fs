@@ -252,7 +252,8 @@ type TestExpressionEvaluation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr1 = theory.Scope["T()"]
-            Assert.AreEqual<string>(expected, pr1.ReprId)
+            let actual = evalTreeFplRepresentation(pr1)
+            Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
     [<DataRow("def pred T() { dec ~x:pred(y:obj); is(self,pred) };", "pred")>]
