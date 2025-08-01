@@ -488,7 +488,10 @@ let rec eval (st: SymbolTable) ast =
         let refBlock = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Reference, es.PeekEvalStack()) 
         es.PushEvalStack(refBlock)
         refBlock.FplId <- "trivial"
-        refBlock.TypeId <- "trivial"
+        refBlock.TypeId <- "pred"
+        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPredicate, es.PeekEvalStack())
+        value.FplId <- "true"
+        refBlock.ValueList.Add(value)
         es.PopEvalStack()
         st.EvalPop() 
     | Ast.Qed((pos1, pos2), _) -> 
@@ -1794,6 +1797,19 @@ let rec eval (st: SymbolTable) ast =
         emitVAR03diagnosticsForCorollaryOrProofVariable fv  
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         emitVAR04diagnostics fv
+        let value = FplValue.CreateFplValue((pos1,pos1), FplBlockType.IntrinsicPredicate, fv)
+        value.FplId <- "true"
+        // check if all arguments could be correctly inferred
+        fv.Scope
+        |> Seq.iter (fun kvp -> 
+            let argumentConclusion = kvp.Value.ArgList[1]
+            let result = argumentConclusion.Type(SignatureType.Repr)
+            match result with
+            | "true" -> ()
+            | _ -> value.FplId <- "false" // todo all other arguments that are either undetermined or false should issue an error
+
+        )
+        fv.ValueList.Add(value)
         es.PopEvalStack()
         st.EvalPop()
     | Ast.Precedence((pos1, pos2), precedence) ->
