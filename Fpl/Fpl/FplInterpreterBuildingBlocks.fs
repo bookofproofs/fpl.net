@@ -47,8 +47,8 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         let subNode = rb.ArgList[0]
         if subNode.FplBlockType = FplBlockType.Reference 
             || subNode.FplBlockType = FplBlockType.Quantor 
-            || subNode.FplBlockType = FplBlockType.Index 
-            || subNode.FplBlockType = FplBlockType.Bool then 
+            || subNode.FplBlockType = FplBlockType.IntrinsicIndex 
+            || subNode.FplBlockType = FplBlockType.IntrinsicPredicate then 
             es.Pop() |> ignore // pop the removable reference block and ignored it
             es.PushEvalStack(subNode) // push its subNode instead
             // adjust subNode's Parent, EndPos, Scope
@@ -189,7 +189,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let sid = $"${s.ToString()}"
         if path.Contains("Expression.DollarDigits") then
-            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Index, fv)
+            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicIndex, fv)
             value.FplId <- sid
             value.ReprId <- sid
             es.PushEvalStack(value)
@@ -454,7 +454,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.True((pos1, pos2), _) -> 
         st.EvalPush("True")
         let fv = es.PeekEvalStack()
-        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Bool, fv)
+        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPredicate, fv)
         value.StartPos <- pos1
         value.EndPos <- pos2
         value.FplId <- "true"
@@ -466,7 +466,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.False((pos1, pos2), _) -> 
         st.EvalPush("False")
         let fv = es.PeekEvalStack()
-        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Bool, fv)
+        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPredicate, fv)
         value.StartPos <- pos1
         value.EndPos <- pos2
         value.FplId <- "false"
@@ -1716,7 +1716,7 @@ let rec eval (st: SymbolTable) ast =
             emitVAR04diagnostics fv
             fv.ValueList.AddRange(fv.ArgList[0].ValueList)
         else
-            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Bool, fv)
+            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPredicate, fv)
             fv.ValueList.Add(value)
         es.PopEvalStack()
         st.EvalPop()

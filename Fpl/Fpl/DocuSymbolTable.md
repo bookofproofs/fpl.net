@@ -474,18 +474,7 @@ todo
 #### ValueList	
 todo
 
-### BlockType `Undefined`
-todo
-#### Possible Parent Nodes 
-todo
-#### Scope 
-todo
-#### ArgList	
-todo
-#### ValueList	
-todo
-
-### BlockType `Bool`
+### BlockType `IntrinsicPredicate`
 todo
 #### Possible Parent Nodes 
 todo

@@ -308,16 +308,15 @@ type FplBlockType =
     | Translation
     | Language
     | Reference
-    | Object
     | Quantor
     | Mapping
     | Stmt
     | Assertion
     | Extension
     | Instance
-    | Index
-    | Bool
-    | Undefined
+    | IntrinsicIndex
+    | IntrinsicObject
+    | IntrinsicPredicate
 
     member private this.UnqualifiedName =
         match this with
@@ -331,7 +330,6 @@ type FplBlockType =
         | OptionalFunctionalTerm -> "optional functional term property"
         | Constructor -> "constructor"
         | Class -> "class definition"
-        | Object -> "object"
         | Localization -> "localization"
         | Theorem -> "theorem"
         | Lemma -> "lemma"
@@ -357,22 +355,22 @@ type FplBlockType =
         | Extension -> "extension"
         | Root -> "root"
         | Instance -> "instance"
-        | Index -> "index"
-        | Bool -> "boolean"
-        | Undefined -> "undefined"
+        | IntrinsicIndex -> "intrinsic index"
+        | IntrinsicObject -> "intrinsic object"
+        | IntrinsicPredicate -> "intrinsic predicate"
 
     member private this.Article =
         match this with
         | OptionalPredicate
         | OptionalFunctionalTerm
-        | Object
         | Argument
         | Assertion
         | ArgInference
         | Extension
         | Instance
-        | Index
-        | Undefined
+        | IntrinsicIndex
+        | IntrinsicObject
+        | IntrinsicPredicate
         | Axiom -> "an"
         | _ -> "a"
 
@@ -390,7 +388,6 @@ type FplBlockType =
         | OptionalFunctionalTerm -> "ofunc"
         | Constructor -> "ctor"
         | Class -> "cl"
-        | Object -> "obj"
         | Localization -> "loc"
         | Theorem -> "thm"
         | Lemma -> "lem"
@@ -401,8 +398,8 @@ type FplBlockType =
         | Axiom -> "ax"
         | RuleOfInference -> "inf"
         | Quantor -> "qtr"
-        | Predicate -> "pred"
-        | FunctionalTerm -> "func"
+        | Predicate -> "defpred"
+        | FunctionalTerm -> "deffunc"
         | Reference -> "ref"
         | Theory -> "th"
         | Argument -> "arg"
@@ -415,9 +412,9 @@ type FplBlockType =
         | Assertion -> "ass"
         | Extension -> "ext"
         | Instance -> "inst"
-        | Index -> "ind"
-        | Bool -> "bool"
-        | Undefined -> "undef"
+        | IntrinsicIndex -> "ind"
+        | IntrinsicObject -> "obj"
+        | IntrinsicPredicate -> "pred"
         | Root -> "root"
 
 type FixType =
@@ -592,7 +589,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             )
             inst
         match this.FplBlockType with
-        | FplBlockType.Object
+        | FplBlockType.IntrinsicObject
         | FplBlockType.Constructor
         | FplBlockType.Class ->
             getInstance this
@@ -616,10 +613,10 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                 match (isRoot, fplValue.ValueList.Count = 0) with
                 | (true, true) -> 
                     match fplValue.FplBlockType with
-                    | FplBlockType.Bool -> fplValue.FplId
-                    | FplBlockType.Index -> fplValue.FplId
-                    | FplBlockType.Object -> fplValue.FplId
-                    | _ -> FplBlockType.Undefined.ShortName
+                    | FplBlockType.IntrinsicPredicate -> fplValue.FplId
+                    | FplBlockType.IntrinsicIndex -> fplValue.FplId
+                    | FplBlockType.IntrinsicObject -> fplValue.FplId
+                    | _ -> "undef"
                 | (false, false) 
                 | (true, false) ->
                     let subRepr = 
@@ -630,9 +627,9 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         |> String.concat ", "
                     if subRepr = String.Empty then
                         match fplValue.FplBlockType with
-                        | FplBlockType.Bool -> fplValue.FplId
-                        | FplBlockType.Index -> fplValue.FplId
-                        | FplBlockType.Object -> fplValue.FplId
+                        | FplBlockType.IntrinsicPredicate -> fplValue.FplId
+                        | FplBlockType.IntrinsicIndex -> fplValue.FplId
+                        | FplBlockType.IntrinsicObject -> fplValue.FplId
                         | _ -> ""
                     else
                         match fplValue.FplBlockType with
@@ -712,9 +709,9 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         | FplBlockType.Proof
                         | FplBlockType.Argument
                         | FplBlockType.Language
-                        | FplBlockType.Object
-                        | FplBlockType.Index
-                        | FplBlockType.Bool
+                        | FplBlockType.IntrinsicObject
+                        | FplBlockType.IntrinsicIndex
+                        | FplBlockType.IntrinsicPredicate
                         | FplBlockType.Class -> head
                         | FplBlockType.Theorem
                         | FplBlockType.Lemma
@@ -916,7 +913,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             let test = this.ArgList[0]
             // in case of a base.obj() constructor call
             if test.ArgList.Count = 2 && 
-                test.ArgList[0].FplBlockType = FplBlockType.Object && 
+                test.ArgList[0].FplBlockType = FplBlockType.IntrinsicObject && 
                 test.ArgList[1].FplBlockType = FplBlockType.Reference &&
                 test.ArgList[1].FplId = "???" then
                 // return an FplValue inbuilt Object 
@@ -1184,7 +1181,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         | FplBlockType.Predicate
         | FplBlockType.RuleOfInference
         | FplBlockType.Quantor
-        | FplBlockType.Bool
+        | FplBlockType.IntrinsicPredicate
         | FplBlockType.Conjecture ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.FplId <- "undetermined"
@@ -1220,20 +1217,14 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "class"
             ret
-        | FplBlockType.Index ->
+        | FplBlockType.IntrinsicIndex ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "$0"
-            ret.TypeId <- FplBlockType.Index.ShortName
+            ret.TypeId <- FplBlockType.IntrinsicIndex.ShortName
             ret.FplId <- "$0"
             ret
-        | FplBlockType.Undefined ->
-            let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- FplBlockType.Undefined.ShortName
-            ret.TypeId <- FplBlockType.Undefined.ShortName
-            ret.FplId <- FplBlockType.Undefined.ShortName
-            ret
         | FplBlockType.Instance
-        | FplBlockType.Object ->
+        | FplBlockType.IntrinsicObject ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
             ret.ReprId <- "obj"
             ret.TypeId <- "obj"
@@ -1473,7 +1464,7 @@ let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) 
 
     match classRoot.FplBlockType with
     | FplBlockType.Class
-    | FplBlockType.Object ->
+    | FplBlockType.IntrinsicObject ->
         if rootType = baseClassName then
             Some(rootType)
         else
