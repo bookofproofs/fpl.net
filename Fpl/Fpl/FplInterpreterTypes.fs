@@ -612,14 +612,35 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     member this.Type(isSignature: SignatureType) =
         match isSignature with
         | SignatureType.Repr -> 
-            let children = 
-                this.ValueList
-                |> Seq.map (fun fv -> fv.Type(isSignature))
-                |> String.concat ", "
-            if children<>String.Empty then
-                $"{this.ReprId}({children})"
-            else
-                this.ReprId
+            let rec children (fplValue:FplValue) isRoot = 
+                match (isRoot, fplValue.ValueList.Count = 0) with
+                | (true, true) -> 
+                    match fplValue.FplBlockType with
+                    | FplBlockType.Bool -> fplValue.FplId
+                    | FplBlockType.Index -> fplValue.FplId
+                    | FplBlockType.Object -> fplValue.FplId
+                    | _ -> FplBlockType.Undefined.ShortName
+                | (false, false) 
+                | (true, false) ->
+                    let subRepr = 
+                        fplValue.ValueList
+                        |> Seq.map (fun fv -> 
+                            children fv false 
+                        )
+                        |> String.concat ", "
+                    if subRepr = String.Empty then
+                        match fplValue.FplBlockType with
+                        | FplBlockType.Bool -> fplValue.FplId
+                        | FplBlockType.Index -> fplValue.FplId
+                        | FplBlockType.Object -> fplValue.FplId
+                        | _ -> ""
+                    else
+                        match fplValue.FplBlockType with
+                        | FplBlockType.Predicate -> subRepr
+                        | _ -> $"{fplValue.FplId}({subRepr})"
+                | (false, true) -> fplValue.FplId
+
+            children this true                     
         | _ -> 
             match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
             | (FplBlockType.Reference, true) ->
@@ -1165,7 +1186,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         | FplBlockType.Bool
         | FplBlockType.Conjecture ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- "undetermined"
+            ret.FplId <- "undetermined"
             ret.TypeId <- "pred"
             ret
         | FplBlockType.Mapping ->

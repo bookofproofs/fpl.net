@@ -28,16 +28,11 @@ type TestExpressionEvaluation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T()"]
-            let expr = 
-                if pr1.ArgList.Count > 0 then
-                    pr1.ArgList[0]
-                else 
-                    pr1
-            let actual = evalTreeFplRepresentation(expr)
+            let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (expr.Type(SignatureType.Mixed))
-            printfn "%s" (evalTreeFplId(expr))
+            printfn "%s" (pr1.Type(SignatureType.Mixed))
+            printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
@@ -71,6 +66,33 @@ type TestExpressionEvaluation() =
             printfn "actual  : %s" actual
             printfn "%s" (expr.Type(SignatureType.Mixed))
             printfn "%s" (evalTreeFplId(expr))
+            Assert.AreEqual<string>(expected, actual)
+        | None -> Assert.IsTrue(false)
+
+    [<DataRow("def pred T() { not true };", "false")>]
+    [<DataRow("def pred T() { not (true) };", "false")>]
+    [<DataRow("def pred T() { not ((true)) };", "false")>]
+    [<DataRow("def pred T() { not false };", "true")>]
+    [<DataRow("def pred T() { not (false) };", "true")>]
+    [<DataRow("def pred T() { not ((false)) };", "true")>]
+    [<TestMethod>]
+    member this.TestExpressionEvaluationNegation(fplCode, expected: string) =
+        ad.Clear()
+        let filename = "TestExpressionEvaluationNegation"
+        let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
+        prepareFplCode (filename, "", false) |> ignore
+
+        match stOption with
+        | Some st ->
+            let r = st.Root
+            let theory = r.Scope[filename]
+
+            let pr1 = theory.Scope["T()"]
+            let actual = evalTreeFplRepresentation(pr1)
+            printfn "expected: %s" expected 
+            printfn "actual  : %s" actual
+            printfn "%s" (pr1.Type(SignatureType.Mixed))
+            printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 

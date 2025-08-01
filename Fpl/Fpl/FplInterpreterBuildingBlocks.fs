@@ -466,11 +466,14 @@ let rec eval (st: SymbolTable) ast =
     | Ast.False((pos1, pos2), _) -> 
         st.EvalPush("False")
         let fv = es.PeekEvalStack()
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.FplId <- "false"
-        fv.ReprId <- "false"
-        fv.TypeId <- "pred"
+        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Bool, fv)
+        value.StartPos <- pos1
+        value.EndPos <- pos2
+        value.FplId <- "false"
+        value.ReprId <- "false"
+        value.TypeId <- "pred"
+        es.PushEvalStack(value)
+        es.PopEvalStack()
         st.EvalPop() 
     | Ast.Undefined((pos1, pos2), _) -> 
         st.EvalPush("Undefined")
@@ -1711,6 +1714,9 @@ let rec eval (st: SymbolTable) ast =
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         if not fv.IsIntrinsic then // if not intrinsic, check variable usage
             emitVAR04diagnostics fv
+        else
+            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Bool, fv)
+            fv.ValueList.Add(value)
         es.PopEvalStack()
         st.EvalPop()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))

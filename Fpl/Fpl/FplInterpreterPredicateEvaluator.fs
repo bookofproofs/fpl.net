@@ -15,16 +15,21 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 let evaluateNegation (fplValue:FplValue) = 
-    let argOpt = fplValue.ArgList[0].GetArgument
-    match argOpt with
-    | Some arg ->
-        match arg.ReprId with
-        | "false" -> 
-            fplValue.ReprId <- "true"
-        | "true" -> 
-            fplValue.ReprId <- "false"
-        | _ -> fplValue.ReprId <- "undetermined"
-    | _ -> fplValue.ReprId <- "undetermined"
+    let arg = fplValue.ArgList[0]
+    match arg.Type(SignatureType.Repr) with 
+    | "false" -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.Bool, fplValue)
+        newValue.FplId <- "true"
+        fplValue.ValueList.Add(newValue)
+    | "true" -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.Bool, fplValue)
+        newValue.FplId <- "false"
+        fplValue.ValueList.Add(newValue)
+    | "undetermined" -> 
+        fplValue.ValueList.Add(arg)
+    | _ -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.Bool, fplValue)
+        fplValue.ValueList.Add(newValue)
     
 let evaluateConjunction (fplValue:FplValue) =
     let arg1Opt = fplValue.ArgList[0].GetArgument
