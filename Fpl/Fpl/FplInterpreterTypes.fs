@@ -636,7 +636,8 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         | _ -> ""
                     else
                         match fplValue.FplBlockType with
-                        | FplBlockType.Predicate -> subRepr
+                        | FplBlockType.Predicate 
+                        | FplBlockType.Reference -> subRepr
                         | _ -> $"{fplValue.FplId}({subRepr})"
                 | (false, true) -> fplValue.FplId
 

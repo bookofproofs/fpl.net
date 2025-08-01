@@ -78,7 +78,6 @@ type EvalStack() =
     static member tryAddToArgList (fv:FplValue) = 
         let next = fv.Parent.Value
         next.ArgList.Add(fv)
-        next.ValueList.AddRange(fv.ValueList)
 
     // Pops an FplValue from stack without propagating it's name and signature to the next FplValue on the stack.
     member this.Pop() = _valueStack.Pop()

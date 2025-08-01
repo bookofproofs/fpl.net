@@ -1714,6 +1714,7 @@ let rec eval (st: SymbolTable) ast =
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         if not fv.IsIntrinsic then // if not intrinsic, check variable usage
             emitVAR04diagnostics fv
+            fv.ValueList.AddRange(fv.ArgList[0].ValueList)
         else
             let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Bool, fv)
             fv.ValueList.Add(value)
