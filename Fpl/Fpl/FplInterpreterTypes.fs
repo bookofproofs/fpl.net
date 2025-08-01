@@ -634,6 +634,16 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                     else
                         match fplValue.FplBlockType with
                         | FplBlockType.Predicate 
+                        | FplBlockType.Axiom 
+                        | FplBlockType.Theorem 
+                        | FplBlockType.Proposition 
+                        | FplBlockType.Lemma 
+                        | FplBlockType.Corollary 
+                        | FplBlockType.Conjecture 
+                        | FplBlockType.OptionalPredicate 
+                        | FplBlockType.MandatoryPredicate 
+                        | FplBlockType.Proof 
+                        | FplBlockType.RuleOfInference 
                         | FplBlockType.Reference -> subRepr
                         | _ -> $"{fplValue.FplId}({subRepr})"
                 | (false, true) -> fplValue.FplId

@@ -1359,7 +1359,7 @@ let rec eval (st: SymbolTable) ast =
         | FplBlockType.Predicate 
         | FplBlockType.MandatoryPredicate 
         | FplBlockType.OptionalPredicate ->
-            fv.ReprId <- last.ReprId
+            fv.ValueList.Add(last)
         | FplBlockType.Reference ->
             // simplify references created due to superfluous parentheses of expressions
             // by replacing them with their single value
@@ -1373,6 +1373,8 @@ let rec eval (st: SymbolTable) ast =
                         es.PushEvalStack(subNode)
                         subNode.Parent <- fv.Parent
                         fv.ArgList.Clear()
+        | FplBlockType.Localization -> 
+            fv.FplId <- last.FplId
         | _ -> ()
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)

@@ -41,7 +41,7 @@ type TestFplValueScopeFplRepresentation() =
         match res with
         | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>("undef", r.Type(SignatureType.Repr))
             | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
             | "inf1" -> Assert.AreEqual<string>("undetermined", inf1.Type(SignatureType.Repr))
             | "inf2" -> Assert.AreEqual<string>("undetermined", inf2.Type(SignatureType.Repr))
@@ -87,7 +87,7 @@ type TestFplValueScopeFplRepresentation() =
         match res with
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>("undef", r.Type(SignatureType.Repr))
             | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
             | "block" -> Assert.AreEqual<string>("class TestId", block.Type(SignatureType.Repr))
             | "t1" -> Assert.AreEqual<string>("obj()", t1.Type(SignatureType.Repr))
@@ -128,7 +128,7 @@ type TestFplValueScopeFplRepresentation() =
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
                                 axi1,corAxi1) -> 
                 match var with
-                | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
+                | "r" -> Assert.AreEqual<string>("undef", r.Type(SignatureType.Repr))
                 | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
                 | "thm1" -> Assert.AreEqual<string>("true", thm1.Type(SignatureType.Repr))
                 | "proofThm1" -> Assert.AreEqual<string>("undetermined", proofThm1.Type(SignatureType.Repr))
@@ -179,7 +179,7 @@ type TestFplValueScopeFplRepresentation() =
         | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
             t13:FplValue,t14:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>("undef", r.Type(SignatureType.Repr))
             | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
             | "block" -> Assert.AreEqual<string>("undetermined", block.Type(SignatureType.Repr))
             | "t1" -> Assert.AreEqual<string>("true", t1.Type(SignatureType.Repr))
@@ -236,7 +236,7 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>("undef", r.Type(SignatureType.Repr))
             | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
             | "block" -> Assert.AreEqual<string>("true", block.Type(SignatureType.Repr)); 
             | "x" -> Assert.AreEqual<string>("undetermined", x.Type(SignatureType.Repr))
@@ -306,7 +306,7 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>("undef", r.Type(SignatureType.Repr))
             | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
             | "block" -> Assert.AreEqual<string>("true", block.Type(SignatureType.Repr)); 
             | "x" -> Assert.AreEqual<string>("+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj){}", x.Type(SignatureType.Repr))
@@ -375,7 +375,7 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>("undef", r.Type(SignatureType.Repr))
             | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
             | "block" -> Assert.AreEqual<string>("true", block.Type(SignatureType.Repr)); 
             | "x" -> Assert.AreEqual<string>("undetermined", x.Type(SignatureType.Repr))
@@ -443,7 +443,7 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>("undef", r.Type(SignatureType.Repr))
             | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
             | "block" -> Assert.AreEqual<string>("true", block.Type(SignatureType.Repr)); 
             | "x" -> Assert.AreEqual<string>("+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj){}", x.Type(SignatureType.Repr))
