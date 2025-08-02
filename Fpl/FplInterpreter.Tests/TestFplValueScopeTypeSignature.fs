@@ -31,6 +31,13 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow("pre2")>]
     [<DataRow("fun1")>]
     [<DataRow("fun2")>]
+    [<DataRow("fun3")>]
+    [<DataRow("fun4")>]
+    [<DataRow("fun5")>]
+    [<DataRow("fun6")>]
+    [<DataRow("fun7")>]
+    [<DataRow("fun8")>]
+    [<DataRow("fun9")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
     [<DataRow("loc1")>]
@@ -39,7 +46,7 @@ type TestFplValueScopeTypeSignature() =
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("TypeSignature") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
             | "theory" -> Assert.AreEqual<string>("TestScopeBlocksTypeSignature", theory.Type(SignatureType.Type))
@@ -65,6 +72,13 @@ type TestFplValueScopeTypeSignature() =
             | "pre2" -> Assert.AreEqual<string>("pred()", pre2.Type(SignatureType.Type))
             | "fun1" -> Assert.AreEqual<string>("func() -> obj", fun1.Type(SignatureType.Type))
             | "fun2" -> Assert.AreEqual<string>("func() -> obj", fun2.Type(SignatureType.Type))
+            | "fun3" -> Assert.AreEqual<string>("func() -> obj", fun3.Type(SignatureType.Type))
+            | "fun4" -> Assert.AreEqual<string>("func() -> obj(pred)", fun4.Type(SignatureType.Type))
+            | "fun5" -> Assert.AreEqual<string>("func() -> SomeClass1", fun5.Type(SignatureType.Type))
+            | "fun6" -> Assert.AreEqual<string>("func() -> SomeClass1", fun6.Type(SignatureType.Type))
+            | "fun7" -> Assert.AreEqual<string>("func() -> SomeClass1", fun7.Type(SignatureType.Type))
+            | "fun8" -> Assert.AreEqual<string>("func() -> ind", fun8.Type(SignatureType.Type))
+            | "fun9" -> Assert.AreEqual<string>("func() -> ind", fun9.Type(SignatureType.Type))
             | "prf1" -> Assert.AreEqual<string>("pred$1", prf1.Type(SignatureType.Type))
             | "prf2" -> Assert.AreEqual<string>("pred$1", prf2.Type(SignatureType.Type))
             | "loc1" -> Assert.AreEqual<string>("pred(undef)", loc1.Type(SignatureType.Type))

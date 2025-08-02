@@ -32,6 +32,13 @@ type TestFplValueScopeName() =
     [<DataRow("pre2")>]
     [<DataRow("fun1")>]
     [<DataRow("fun2")>]
+    [<DataRow("fun3")>]
+    [<DataRow("fun4")>]
+    [<DataRow("fun5")>]
+    [<DataRow("fun6")>]
+    [<DataRow("fun7")>]
+    [<DataRow("fun8")>]
+    [<DataRow("fun9")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
     [<DataRow("loc1")>]
@@ -40,7 +47,7 @@ type TestFplValueScopeName() =
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("Name") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
             | "theory" -> Assert.AreEqual<string>("TestScopeBlocksName", theory.Type(SignatureType.Mixed))
@@ -70,6 +77,27 @@ type TestFplValueScopeName() =
             | "fun2" -> 
                 Assert.AreEqual<string>("SomeFunctionalTerm2() -> obj", fun2.Type(SignatureType.Mixed))
                 Assert.AreEqual<string>("SomeFunctionalTerm2() -> obj", fun2.Type(SignatureType.Name))
+            | "fun3" -> 
+                Assert.AreEqual<string>("SomeFunctionalTerm3() -> obj", fun3.Type(SignatureType.Mixed))
+                Assert.AreEqual<string>("SomeFunctionalTerm3() -> obj", fun3.Type(SignatureType.Name))
+            | "fun4" -> 
+                Assert.AreEqual<string>("SomeFunctionalTerm4() -> obj(pred)", fun4.Type(SignatureType.Mixed))
+                Assert.AreEqual<string>("SomeFunctionalTerm4() -> obj(c)", fun4.Type(SignatureType.Name))
+            | "fun5" -> 
+                Assert.AreEqual<string>("SomeFunctionalTerm5() -> SomeClass1", fun5.Type(SignatureType.Mixed))
+                Assert.AreEqual<string>("SomeFunctionalTerm5() -> SomeClass1", fun5.Type(SignatureType.Name))
+            | "fun6" -> 
+                Assert.AreEqual<string>("SomeFunctionalTerm6() -> SomeClass1", fun6.Type(SignatureType.Mixed))
+                Assert.AreEqual<string>("SomeFunctionalTerm6() -> SomeClass1", fun6.Type(SignatureType.Name))
+            | "fun7" -> 
+                Assert.AreEqual<string>("SomeFunctionalTerm7() -> SomeClass1", fun7.Type(SignatureType.Mixed))
+                Assert.AreEqual<string>("SomeFunctionalTerm7() -> SomeClass1", fun7.Type(SignatureType.Name))
+            | "fun8" -> 
+                Assert.AreEqual<string>("SomeFunctionalTerm8() -> ind", fun8.Type(SignatureType.Mixed))
+                Assert.AreEqual<string>("SomeFunctionalTerm8() -> ind", fun8.Type(SignatureType.Name))
+            | "fun9" -> 
+                Assert.AreEqual<string>("SomeFunctionalTerm9() -> ind", fun9.Type(SignatureType.Mixed))
+                Assert.AreEqual<string>("SomeFunctionalTerm9() -> ind", fun9.Type(SignatureType.Name))
             | "prf1" -> Assert.AreEqual<string>("SomeTheorem1$1", prf1.Type(SignatureType.Mixed))
             | "prf2" -> Assert.AreEqual<string>("SomeTheorem2$1", prf2.Type(SignatureType.Mixed))
             | "loc1" -> Assert.AreEqual<string>("not(x)", loc1.Type(SignatureType.Mixed))

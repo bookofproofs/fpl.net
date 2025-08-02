@@ -32,6 +32,13 @@ type TestFplValueScopeBlockType() =
     [<DataRow("pre2")>]
     [<DataRow("fun1")>]
     [<DataRow("fun2")>]
+    [<DataRow("fun3")>]
+    [<DataRow("fun4")>]
+    [<DataRow("fun5")>]
+    [<DataRow("fun6")>]
+    [<DataRow("fun7")>]
+    [<DataRow("fun8")>]
+    [<DataRow("fun9")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
     [<DataRow("loc1")>]
@@ -40,7 +47,7 @@ type TestFplValueScopeBlockType() =
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("BlockType") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FplBlockType>(FplBlockType.Root, r.FplBlockType)
             | "theory" -> Assert.AreEqual<FplBlockType>(FplBlockType.Theory, theory.FplBlockType)
@@ -66,6 +73,13 @@ type TestFplValueScopeBlockType() =
             | "pre2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Predicate, pre2.FplBlockType)
             | "fun1" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun1.FplBlockType)
             | "fun2" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun2.FplBlockType)
+            | "fun3" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun3.FplBlockType)
+            | "fun4" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun4.FplBlockType)
+            | "fun5" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun5.FplBlockType)
+            | "fun6" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun6.FplBlockType)
+            | "fun7" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun7.FplBlockType)
+            | "fun8" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun8.FplBlockType)
+            | "fun9" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun9.FplBlockType)
             | "prf1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Proof, prf1.FplBlockType)
             | "prf2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Proof, prf2.FplBlockType)
             | "loc1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Localization, loc1.FplBlockType)

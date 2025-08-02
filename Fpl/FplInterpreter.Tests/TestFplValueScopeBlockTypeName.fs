@@ -91,6 +91,7 @@ type TestFplBlockType() =
     [<DataRow("IntrinsicIndex")>]
     [<DataRow("IntrinsicObject")>]
     [<DataRow("IntrinsicPredicate")>]
+    [<DataRow("IntrinsicUndefined")>]
     [<DataRow("Root")>]
     [<TestMethod>]
     member this.TestFplBlockTypeShortName(var) =
@@ -131,6 +132,7 @@ type TestFplBlockType() =
         | "IntrinsicIndex" -> Assert.AreEqual<string>("ind",FplBlockType.IntrinsicIndex.ShortName)
         | "IntrinsicObject" -> Assert.AreEqual<string>("obj",FplBlockType.IntrinsicObject.ShortName)
         | "IntrinsicPredicate" -> Assert.AreEqual<string>("pred",FplBlockType.IntrinsicPredicate.ShortName)
+        | "IntrinsicUndefined" -> Assert.AreEqual<string>("undef",FplBlockType.IntrinsicUndefined.ShortName)
         | "Root" -> Assert.AreEqual<string>("root",FplBlockType.Root.ShortName)
         | _ -> 
             Assert.IsTrue(false)
