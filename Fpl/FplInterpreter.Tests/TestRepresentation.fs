@@ -93,6 +93,10 @@ type TestRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("00","""def pred T() { dec ~v:ind; true };""", "dec ind")>]
+    [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", "undetermined")>]
+    [<DataRow("00b","""def pred T() { dec ~v:obj; true };""", "dec obj")>]
+    [<DataRow("00c","""def pred T() { dec ~v:func; true };""", "dec func")>]
+    [<DataRow("00d","""def pred T() { dec ~v:tpl; true };""", "dec tpl")>]
     [<TestMethod>]
     member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
         ad.Clear()

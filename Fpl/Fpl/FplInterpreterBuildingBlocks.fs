@@ -97,6 +97,7 @@ let rec eval (st: SymbolTable) ast =
                 fv.TypeId <- $"{tplName}"
                 let value = FplValue.CreateFplValue(positions, requiredValueType, fv)
                 value.TypeId <- $"{tplName}"
+                value.FplId <- $"{tplName}"
                 value
             | _ ->
                 fv.TypeId <- FplBlockType.IntrinsicUndef.ShortName

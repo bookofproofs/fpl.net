@@ -450,7 +450,6 @@ type SignatureType =
     | Mixed
     | Repr
 
-
 type ScopeSearchResult =
     | FoundAssociate of FplValue
     | FoundMultiple of string
@@ -474,6 +473,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     let mutable _hasBrackets = false
     let mutable _isIntrinsic = false
     let mutable _isSignatureVariable = false
+    let mutable _isInitializedVariable = false
 
     let mutable _parent = parent
     let _scope = Dictionary<string, FplValue>()
@@ -625,9 +625,12 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                 match (isRoot, fv.ValueList.Count = 0) with
                 | (true, true) -> 
                     match fv.FplBlockType with
-                    | FplBlockType.IntrinsicPred -> fv.FplId
-                    | FplBlockType.IntrinsicInd -> fv.FplId
-                    | FplBlockType.IntrinsicObj -> fv.FplId
+                    | FplBlockType.IntrinsicPred 
+                    | FplBlockType.IntrinsicInd 
+                    | FplBlockType.IntrinsicObj 
+                    | FplBlockType.IntrinsicFunc 
+                    | FplBlockType.IntrinsicUndef 
+                    | FplBlockType.IntrinsicTpl -> fv.FplId
                     | FplBlockType.Class -> $"dec {fv.BlockTypeShortName} {fv.FplId}"
                     | FplBlockType.FunctionalTerm -> 
                         // since the FunctionTerm has no value, it has no return statement
@@ -642,15 +645,18 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                 | (true, false) ->
                     let subRepr = 
                         fv.ValueList
-                        |> Seq.map (fun fv -> 
-                            children fv false 
+                        |> Seq.map (fun subfv -> 
+                            children subfv false 
                         )
                         |> String.concat ", "
                     if subRepr = String.Empty then
                         match fv.FplBlockType with
-                        | FplBlockType.IntrinsicPred -> fv.FplId
-                        | FplBlockType.IntrinsicInd -> fv.FplId
-                        | FplBlockType.IntrinsicObj -> fv.FplId
+                        | FplBlockType.IntrinsicPred 
+                        | FplBlockType.IntrinsicInd 
+                        | FplBlockType.IntrinsicObj 
+                        | FplBlockType.IntrinsicFunc 
+                        | FplBlockType.IntrinsicUndef 
+                        | FplBlockType.IntrinsicTpl -> fv.FplId
                         | _ -> ""
                     else
                         match fv.FplBlockType with
@@ -665,7 +671,16 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         | FplBlockType.MandatoryPredicate 
                         | FplBlockType.Proof 
                         | FplBlockType.RuleOfInference 
-                        | FplBlockType.Reference -> subRepr
+                        | FplBlockType.Reference 
+                        | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
+                        | FplBlockType.Variable when 
+                            not (fv.IsInitializedVariable) 
+                            && fv.ValueList[0].TypeId = FplBlockType.IntrinsicPred.ShortName -> 
+                            subRepr
+                        | FplBlockType.Variable when 
+                            not (fv.IsInitializedVariable) 
+                            && fv.ValueList[0].TypeId <> FplBlockType.IntrinsicPred.ShortName -> 
+                            $"dec {subRepr}"
                         | _ -> $"{fv.FplId}({subRepr})"
                 | (false, true) -> fv.FplId
 
@@ -743,6 +758,9 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         | FplBlockType.IntrinsicObj
                         | FplBlockType.IntrinsicInd
                         | FplBlockType.IntrinsicPred
+                        | FplBlockType.IntrinsicFunc
+                        | FplBlockType.IntrinsicTpl
+                        | FplBlockType.IntrinsicUndef
                         | FplBlockType.Class -> head
                         | FplBlockType.Theorem
                         | FplBlockType.Lemma
@@ -1056,6 +1074,11 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                     )
                 )
 
+    /// Indicates if this FplValue is an initialized variable
+    member this.IsInitializedVariable
+        with get () = _isInitializedVariable
+        and set (value) = _isInitializedVariable <- value
+
     /// Indicates if this FplValue is an intrinsically defined block
     member this.IsIntrinsic
         with get () = _isIntrinsic
@@ -1240,9 +1263,8 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             new FplValue(fplBlockType, positions, Some parent)
         | FplBlockType.IntrinsicInd ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- "$0"
             ret.TypeId <- FplBlockType.IntrinsicInd.ShortName
-            ret.FplId <- "$0"
+            ret.FplId <- FplBlockType.IntrinsicInd.ShortName
             ret
         | FplBlockType.Class 
         | FplBlockType.Constructor 
@@ -1254,18 +1276,18 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             ret
         | FplBlockType.IntrinsicFunc ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- FplBlockType.IntrinsicFunc.ShortName
             ret.TypeId <- FplBlockType.IntrinsicFunc.ShortName
+            ret.FplId <- FplBlockType.IntrinsicFunc.ShortName
             ret
         | FplBlockType.IntrinsicTpl ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- FplBlockType.IntrinsicTpl.ShortName
             ret.TypeId <- FplBlockType.IntrinsicTpl.ShortName
+            ret.FplId <- FplBlockType.IntrinsicTpl.ShortName
             ret
         | FplBlockType.IntrinsicUndef ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- FplBlockType.IntrinsicUndef.ShortName
             ret.TypeId <- FplBlockType.IntrinsicUndef.ShortName
+            ret.FplId <- FplBlockType.IntrinsicUndef.ShortName
             ret
         | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead."))
         | FplBlockType.Theory -> raise (ArgumentException("Please use CreateTheory for creating the theories instead."))
