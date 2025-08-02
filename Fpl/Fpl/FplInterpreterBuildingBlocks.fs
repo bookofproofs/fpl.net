@@ -84,20 +84,35 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         fv.FplBlockType <- blockType
 
-    let setUnitType (fv:FplValue) typeName typeRepr =
+    let setUnitType (fv:FplValue) (requiredValueType:FplBlockType) (positions:Positions) (tplName:string)=
+        let spawnValue (requiredValueType:FplBlockType) =
+            match requiredValueType with
+            | FplBlockType.IntrinsicPred
+            | FplBlockType.IntrinsicInd 
+            | FplBlockType.IntrinsicObj 
+            | FplBlockType.IntrinsicFunc ->
+                fv.TypeId <- $"{requiredValueType.ShortName}"
+                FplValue.CreateFplValue(positions, requiredValueType, fv)
+            | FplBlockType.IntrinsicTpl ->
+                fv.TypeId <- $"{tplName}"
+                let value = FplValue.CreateFplValue(positions, requiredValueType, fv)
+                value.TypeId <- $"{tplName}"
+                value
+            | _ ->
+                fv.TypeId <- FplBlockType.IntrinsicUndef.ShortName
+                FplValue.CreateFplValue(positions, FplBlockType.IntrinsicUndef, fv)
+        
         match fv.FplBlockType with 
         | FplBlockType.VariadicVariableMany -> 
-            fv.TypeId <- $"*{typeName}"
-            fv.ReprId <- $"intr *{typeRepr}"
+            let value = spawnValue requiredValueType
+            fv.TypeId <- $"*{value.TypeId}"
         | FplBlockType.VariadicVariableMany1 -> 
-            fv.TypeId <- $"+{typeName}"
-            fv.ReprId <- $"intr +{typeRepr}"
+            fv.ValueList.Add(spawnValue requiredValueType)
+            fv.TypeId <- $"+{fv.TypeId}"
         | FplBlockType.Variable -> 
-            fv.TypeId <- typeName
-            fv.ReprId <- typeRepr
+            fv.ValueList.Add(spawnValue requiredValueType)
         | FplBlockType.Mapping -> 
-            fv.TypeId <- typeName
-            fv.ReprId <- typeRepr
+            fv.ValueList.Add(spawnValue requiredValueType)
         | _ -> ()
 
     match ast with
@@ -105,12 +120,12 @@ let rec eval (st: SymbolTable) ast =
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
         let fv = es.PeekEvalStack()
-        setUnitType fv "ind" "ind"
+        setUnitType fv FplBlockType.IntrinsicInd (pos1, pos2) ""
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         let fv = es.PeekEvalStack()
-        setUnitType fv "obj" "dec obj"
+        setUnitType fv FplBlockType.IntrinsicObj (pos1, pos2) ""
         match checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2 with
         | Some classNode -> 
             fv.ArgList.Add classNode
@@ -124,12 +139,12 @@ let rec eval (st: SymbolTable) ast =
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
         let fv = es.PeekEvalStack()
-        setUnitType fv "pred" "undetermined"
+        setUnitType fv FplBlockType.IntrinsicPred (pos1, pos2) ""
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
         let fv = es.PeekEvalStack()
-        setUnitType fv "func" "func"
+        setUnitType fv FplBlockType.IntrinsicFunc (pos1, pos2) ""
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
@@ -231,7 +246,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
         let fv = es.PeekEvalStack()
-        setUnitType fv s s
+        setUnitType fv FplBlockType.IntrinsicTpl (pos1, pos2) s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")

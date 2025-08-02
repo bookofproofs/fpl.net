@@ -38,12 +38,12 @@ type TestFplBlockType() =
     [<DataRow("Assertion")>]
     [<DataRow("Extension")>]
     [<DataRow("Instance")>]
-    [<DataRow("IntrinsicIndex")>]
-    [<DataRow("IntrinsicObject")>]
-    [<DataRow("IntrinsicPredicate")>]
-    [<DataRow("IntrinsicFunction")>]
-    [<DataRow("IntrinsicTemplate")>]
-    [<DataRow("IntrinsicUndefined")>]
+    [<DataRow("IntrinsicInd")>]
+    [<DataRow("IntrinsicObj")>]
+    [<DataRow("IntrinsicPred")>]
+    [<DataRow("IntrinsicFunc")>]
+    [<DataRow("IntrinsicTpl")>]
+    [<DataRow("IntrinsicUndef")>]
     [<DataRow("Root")>]
     [<TestMethod>]
     member this.TestBlockTypeName(var) =
@@ -70,6 +70,24 @@ type TestFplBlockType() =
         | "FunctionalTerm" -> Assert.AreEqual<string>("a functional term definition",FplBlockType.FunctionalTerm.Name)
         | "Theory" -> Assert.AreEqual<string>("a theory",FplBlockType.Theory.Name)
         | "Root" -> Assert.AreEqual<string>("a root",FplBlockType.Root.Name)
+        | "ArgInference" -> Assert.AreEqual<string>("an argument inference",FplBlockType.ArgInference.Name)
+        | "Argument" -> Assert.AreEqual<string>("an argument",FplBlockType.Argument.Name)
+        | "Assertion" -> Assert.AreEqual<string>("an assertion",FplBlockType.Assertion.Name)
+        | "Extension" -> Assert.AreEqual<string>("an extension",FplBlockType.Extension.Name)
+        | "Instance" -> Assert.AreEqual<string>("an instance",FplBlockType.Instance.Name)
+        | "IntrinsicFunc" -> Assert.AreEqual<string>("an intrinsic functional term",FplBlockType.IntrinsicFunc.Name)
+        | "IntrinsicInd" -> Assert.AreEqual<string>("an intrinsic index",FplBlockType.IntrinsicInd.Name)
+        | "IntrinsicObj" -> Assert.AreEqual<string>("an intrinsic object",FplBlockType.IntrinsicObj.Name)
+        | "IntrinsicPred" -> Assert.AreEqual<string>("an intrinsic predicate",FplBlockType.IntrinsicPred.Name)
+        | "IntrinsicTpl" -> Assert.AreEqual<string>("an intrinsic template",FplBlockType.IntrinsicTpl.Name)
+        | "IntrinsicUndef" -> Assert.AreEqual<string>("an intrinsic undefined",FplBlockType.IntrinsicUndef.Name)
+        | "Justification" -> Assert.AreEqual<string>("a justification",FplBlockType.Justification.Name)
+        | "Localization" -> Assert.AreEqual<string>("a localization",FplBlockType.Localization.Name)
+        | "Mapping" -> Assert.AreEqual<string>("a mapping",FplBlockType.Mapping.Name)
+        | "Reference" -> Assert.AreEqual<string>("a reference",FplBlockType.Reference.Name)
+        | "Stmt" -> Assert.AreEqual<string>("a statement",FplBlockType.Stmt.Name)
+        | "Translation" -> Assert.AreEqual<string>("a translation",FplBlockType.Translation.Name)
+        | "Language" -> Assert.AreEqual<string>("a language",FplBlockType.Language.Name)        
         | _ -> 
             Assert.IsTrue(false)
 
@@ -106,12 +124,12 @@ type TestFplBlockType() =
     [<DataRow("Assertion")>]
     [<DataRow("Extension")>]
     [<DataRow("Instance")>]
-    [<DataRow("IntrinsicIndex")>]
-    [<DataRow("IntrinsicObject")>]
-    [<DataRow("IntrinsicPredicate")>]
-    [<DataRow("IntrinsicFunction")>]
-    [<DataRow("IntrinsicTemplate")>]
-    [<DataRow("IntrinsicUndefined")>]
+    [<DataRow("IntrinsicInd")>]
+    [<DataRow("IntrinsicObj")>]
+    [<DataRow("IntrinsicPred")>]
+    [<DataRow("IntrinsicFunc")>]
+    [<DataRow("IntrinsicTpl")>]
+    [<DataRow("IntrinsicUndef")>]
     [<DataRow("Root")>]
     [<TestMethod>]
     member this.TestFplBlockTypeShortName(var) =
@@ -149,13 +167,13 @@ type TestFplBlockType() =
         | "Assertion" -> Assert.AreEqual<string>("ass",FplBlockType.Assertion.ShortName)
         | "Extension" -> Assert.AreEqual<string>("ext",FplBlockType.Extension.ShortName)
         | "Instance" -> Assert.AreEqual<string>("inst",FplBlockType.Instance.ShortName)
-        | "IntrinsicIndex" -> Assert.AreEqual<string>("ind",FplBlockType.IntrinsicInd.ShortName)
-        | "IntrinsicObject" -> Assert.AreEqual<string>("obj",FplBlockType.IntrinsicObj.ShortName)
-        | "IntrinsicPredicate" -> Assert.AreEqual<string>("pred",FplBlockType.IntrinsicPred.ShortName)
-        | "IntrinsicFunction" -> Assert.AreEqual<string>("func",FplBlockType.IntrinsicPred.ShortName)
-        | "IntrinsicTemplate" -> Assert.AreEqual<string>("tpl",FplBlockType.IntrinsicPred.ShortName)
-        | "IntrinsicUndefined" -> Assert.AreEqual<string>("undef",FplBlockType.IntrinsicUndef.ShortName)
+        | "IntrinsicInd" -> Assert.AreEqual<string>("ind",FplBlockType.IntrinsicInd.ShortName)
+        | "IntrinsicObj" -> Assert.AreEqual<string>("obj",FplBlockType.IntrinsicObj.ShortName)
+        | "IntrinsicPred" -> Assert.AreEqual<string>("pred",FplBlockType.IntrinsicPred.ShortName)
+        | "IntrinsicFunc" -> Assert.AreEqual<string>("func",FplBlockType.IntrinsicFunc.ShortName)
+        | "IntrinsicTpl" -> Assert.AreEqual<string>("tpl",FplBlockType.IntrinsicTpl.ShortName)
+        | "IntrinsicUndef" -> Assert.AreEqual<string>("undef",FplBlockType.IntrinsicUndef.ShortName)
         | "Root" -> Assert.AreEqual<string>("root",FplBlockType.Root.ShortName)
         | _ -> 
-            Assert.IsTrue(false)
+            Assert.IsTrue(false, var)
 

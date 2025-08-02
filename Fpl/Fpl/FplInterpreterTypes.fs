@@ -377,7 +377,9 @@ type FplBlockType =
         | IntrinsicInd
         | IntrinsicObj
         | IntrinsicPred
+        | IntrinsicTpl
         | IntrinsicUndef
+        | IntrinsicFunc
         | Axiom -> "an"
         | _ -> "a"
 
@@ -634,7 +636,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         // In this case, the "representation" of the function is
                         // its declared mapping type
                         let mapping = fv.ArgList |> Seq.head 
-                        $"dec {mapping.Type(SignatureType.Type)}"
+                        $"dec {mapping.Type(SignatureType.Repr)}"
                     | _ -> "undef"
                 | (false, false) 
                 | (true, false) ->
