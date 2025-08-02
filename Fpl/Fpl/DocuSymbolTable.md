@@ -94,7 +94,7 @@ Constructor, OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate,
 #### ArgList	
 Class (list of nodes, from which this class inherits). These can be class nodes or primitive objects. Class nodes are only added if they were previously declared in the code while a primitive object is added when a it is the root a class inherits from.
 #### ValueList	
-todo
+Empty, the representation is, however, accomplished by a string that is unique.
 
 ---
 
@@ -144,9 +144,9 @@ Theory
 #### Scope 
 OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
-todo
+The first argument contains the type representation of the `FunctionalTerm`'s mapping. The remaining arguments contain the `FunctionalTerm`'s statements (see `Stmt`) (if any).
 #### ValueList	
-todo
+Empty. However, the representation is
 
 ---
 
@@ -478,6 +478,17 @@ todo
 This 
 #### Possible Parent Nodes 
 todo
+#### Scope 
+Empty
+#### ArgList	
+Empty
+#### ValueList	
+Empty
+
+### FplBlockType `IntrinsicUndefined`
+An intrinsic value for everything in FPL that is "undefined". Created in `Ast.Return`.
+#### Possible Parent Nodes 
+FunctionalTerm, OptionalFunctionalTerm, MandatoryFunctionalTerm
 #### Scope 
 Empty
 #### ArgList	

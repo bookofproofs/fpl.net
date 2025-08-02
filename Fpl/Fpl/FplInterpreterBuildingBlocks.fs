@@ -591,8 +591,21 @@ let rec eval (st: SymbolTable) ast =
         stmt.FplId <- "return"
         es.PushEvalStack(stmt)
         eval st returneeAst
-        let refBlock = stmt.ArgList[0]
-        emitSIG03Diagnostics refBlock fv
+        let returnedReference = stmt.ArgList[0]
+        emitSIG03Diagnostics returnedReference fv
+        let returnedValueOpt = returnedReference.GetArgument
+        match returnedValueOpt with
+        | Some returnedValue -> 
+            if returnedValue.ValueList.Count > 0 then
+                fv.ValueList.AddRange(returnedValue.ValueList)
+            else
+                // todo diagnostics returns uninitialized value
+                let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicUndefined, fv)
+                fv.ValueList.Add(value)
+        | _ -> 
+            // add an undefined value since there was no argument of the 
+            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicUndefined, fv)
+            fv.ValueList.Add(value)
         es.PopEvalStack() 
         st.EvalPop()
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
