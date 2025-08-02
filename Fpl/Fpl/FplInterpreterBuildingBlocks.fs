@@ -47,8 +47,8 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         let subNode = rb.ArgList[0]
         if subNode.FplBlockType = FplBlockType.Reference 
             || subNode.FplBlockType = FplBlockType.Quantor 
-            || subNode.FplBlockType = FplBlockType.IntrinsicIndex 
-            || subNode.FplBlockType = FplBlockType.IntrinsicPredicate then 
+            || subNode.FplBlockType = FplBlockType.IntrinsicInd 
+            || subNode.FplBlockType = FplBlockType.IntrinsicPred then 
             es.Pop() |> ignore // pop the removable reference block and ignored it
             es.PushEvalStack(subNode) // push its subNode instead
             // adjust subNode's Parent, EndPos, Scope
@@ -189,7 +189,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let sid = $"${s.ToString()}"
         if path.Contains("Expression.DollarDigits") then
-            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicIndex, fv)
+            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicInd, fv)
             value.FplId <- sid
             value.ReprId <- sid
             es.PushEvalStack(value)
@@ -454,7 +454,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.True((pos1, pos2), _) -> 
         st.EvalPush("True")
         let fv = es.PeekEvalStack()
-        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPredicate, fv)
+        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPred, fv)
         value.StartPos <- pos1
         value.EndPos <- pos2
         value.FplId <- "true"
@@ -466,7 +466,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.False((pos1, pos2), _) -> 
         st.EvalPush("False")
         let fv = es.PeekEvalStack()
-        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPredicate, fv)
+        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPred, fv)
         value.StartPos <- pos1
         value.EndPos <- pos2
         value.FplId <- "false"
@@ -489,7 +489,7 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(refBlock)
         refBlock.FplId <- "trivial"
         refBlock.TypeId <- "pred"
-        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPredicate, es.PeekEvalStack())
+        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPred, es.PeekEvalStack())
         value.FplId <- "true"
         refBlock.ValueList.Add(value)
         es.PopEvalStack()
@@ -600,11 +600,11 @@ let rec eval (st: SymbolTable) ast =
                 fv.ValueList.AddRange(returnedValue.ValueList)
             else
                 // todo diagnostics returns uninitialized value
-                let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicUndefined, fv)
+                let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicUndef, fv)
                 fv.ValueList.Add(value)
         | _ -> 
             // add an undefined value since there was no argument of the 
-            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicUndefined, fv)
+            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicUndef, fv)
             fv.ValueList.Add(value)
         es.PopEvalStack() 
         st.EvalPop()
@@ -1734,7 +1734,7 @@ let rec eval (st: SymbolTable) ast =
         if not fv.IsIntrinsic then // if not intrinsic, check variable usage
             emitVAR04diagnostics fv
         else    
-            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPredicate, fv)
+            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPred, fv)
             fv.ValueList.Add(value)
         es.PopEvalStack()
         st.EvalPop()
@@ -1807,7 +1807,7 @@ let rec eval (st: SymbolTable) ast =
         emitVAR03diagnosticsForCorollaryOrProofVariable fv  
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         emitVAR04diagnostics fv
-        let value = FplValue.CreateFplValue((pos1,pos1), FplBlockType.IntrinsicPredicate, fv)
+        let value = FplValue.CreateFplValue((pos1,pos1), FplBlockType.IntrinsicPred, fv)
         value.FplId <- "true"
         // check if all arguments could be correctly inferred
         fv.Scope

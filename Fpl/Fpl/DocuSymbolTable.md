@@ -183,7 +183,7 @@ Theory
 #### Scope 
 OptionalFunctionalTerm, MandatoryFunctionalTerm, OptionalPredicate, MandatoryPredicate, Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
-Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Predicate`'s block, or an `IntrisicPredicate`, which can be true, false, or undetermined.
+Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Predicate`'s block, or an `IntrinsicPred`, which can be true, false, or undetermined.
 #### ValueList	
 A copy of the respective ArgList (only one element).
 
@@ -196,7 +196,7 @@ Class, Predicate, or FunctionalTerm
 #### Scope 
 Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent).
 #### ArgList	
-Contains only one element: either a `Reference` that reflects the structure of an expression inside the `OptionalPredicate`'s block, or an `IntrisicPredicate`, which can be true, false, or undetermined.
+Contains only one element: either a `Reference` that reflects the structure of an expression inside the `OptionalPredicate`'s block, or an `IntrinsicPred`, which can be true, false, or undetermined.
 #### ValueList	
 A copy of the respective ArgList (only one element).
 
@@ -209,7 +209,7 @@ Class, Predicate, or FunctionalTerm
 #### Scope 
 Variable, VariadicVariableMany, VariadicVariableMany1 (in addition to the scope of the parent).
 #### ArgList	
-Contains only one element: either a `Reference` that reflects the structure of an expression inside the `MandatoryPredicate`'s block, or an `IntrisicPredicate`, which can be true, false, or undetermined.
+Contains only one element: either a `Reference` that reflects the structure of an expression inside the `MandatoryPredicate`'s block, or an `IntrinsicPred`, which can be true, false, or undetermined.
 #### ValueList	
 A copy of the respective ArgList (only one element).
 
@@ -222,7 +222,7 @@ Theory
 #### Scope 
 Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
-Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Axiom`'s block, or an `IntrisicPredicate`, which can be true, false, or undetermined.
+Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Axiom`'s block, or an `IntrinsicPred`, which can be true, false, or undetermined.
 #### ValueList	
 A copy of the respective ArgList (only one element).
 
@@ -235,7 +235,7 @@ Theory
 #### Scope 
 Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
-Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Theorem`'s block, or an `IntrisicPredicate`, which can be true, false, or undetermined.
+Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Theorem`'s block, or an `IntrinsicPred`, which can be true, false, or undetermined.
 #### ValueList	
 A copy of the respective ArgList (only one element).
 
@@ -248,7 +248,7 @@ Theory
 #### Scope 
 Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
-Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Lemma`'s block, or an `IntrisicPredicate`, which can be true, false, or undetermined.
+Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Lemma`'s block, or an `IntrinsicPred`, which can be true, false, or undetermined.
 #### ValueList	
 A copy of the respective ArgList (only one element).
 
@@ -261,7 +261,7 @@ Theory
 #### Scope 
 Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
-Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Proposition`'s block, or an `IntrisicPredicate`, which can be true, false, or undetermined.
+Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Proposition`'s block, or an `IntrinsicPred`, which can be true, false, or undetermined.
 #### ValueList	
 A copy of the respective ArgList (only one element).
 
@@ -274,7 +274,7 @@ Theory
 #### Scope 
 Variable, VariadicVariableMany, VariadicVariableMany1
 #### ArgList	
-Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Conjecture`'s block, or an `IntrisicPredicate`, which can be true, false, or undetermined.
+Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Conjecture`'s block, or an `IntrinsicPred`, which can be true, false, or undetermined.
 #### ValueList	
 A copy of the respective ArgList (only one element).
 
@@ -287,7 +287,7 @@ Axiom, Theorem, Lemma, Proposition, Conjecture, or Corollary
 #### Scope 
 Variable, VariadicVariableMany, VariadicVariableMany1, including the scope of the parent
 #### ArgList	
-Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Corollary`'s block, or an `IntrisicPredicate`, which can be true, false, or undetermined.
+Contains only one element: either a `Reference` that reflects the structure of an expression inside the `Corollary`'s block, or an `IntrinsicPred`, which can be true, false, or undetermined.
 #### ValueList	
 A copy of the respective ArgList (only one element).
 
@@ -302,7 +302,7 @@ Argument, Variable, VariadicVariableMany, VariadicVariableMany1, including the s
 #### ArgList	
 Empty
 #### ValueList	
-If every `Argument` in the Scope can be inferred correctly, the ValueList will contain an `IntrisicPredicate` being true, otherwise being false. 
+If every `Argument` in the Scope can be inferred correctly, the ValueList will contain an `IntrinsicPred` being true, otherwise being false. 
 
 ---
 
@@ -398,19 +398,6 @@ todo
 
 ---
 
-### FplBlockType `Object`
-todo
-#### Possible Parent Nodes 
-todo
-#### Scope 
-todo
-#### ArgList	
-todo
-#### ValueList	
-todo
-
----
-
 ### FplBlockType `Quantor`
 todo
 #### Possible Parent Nodes 
@@ -474,8 +461,8 @@ todo
 #### ValueList	
 todo
 
-### FplBlockType `IntrinsicPredicate`
-This 
+### FplBlockType `IntrinsicPred`
+An intrinsic value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", "false", and "undetermined". 
 #### Possible Parent Nodes 
 todo
 #### Scope 
@@ -485,8 +472,41 @@ Empty
 #### ValueList	
 Empty
 
-### FplBlockType `IntrinsicUndefined`
-An intrinsic value for everything in FPL that is "undefined". Created in `Ast.Return`.
+### FplBlockType `IntrinsicFunc`
+An intrinsic value for everything in FPL that is a functional type. Variables with this value will accept functional terms as new values. Note that every functional term has a mapping that can be of another type. Thus, the mapping's type should not by confunsed with the functional type.
+#### Possible Parent Nodes 
+todo
+#### Scope 
+Empty
+#### ArgList	
+Empty
+#### ValueList	
+Empty
+
+### FplBlockType `IntrinsicObj`
+An intrinsic value for everything in FPL that is an object. At the same time, every FPL class is derived from `IntrinsicObj`. 
+#### Possible Parent Nodes 
+todo
+#### Scope 
+Empty
+#### ArgList	
+Empty
+#### ValueList	
+Empty
+
+### FplBlockType `IntrinsicTpl`
+This an inbuilt FPL type for templates that will accept any other type unless it is used consistently. I.e., an intrinsic template type has a special user-defined template identifier that is declared in the respective scope of the FPL code. Variables with declared with this user-defined template type will be treated as they had any other valid FPL type as long as the type inferred from the usage of the variables is consistent.
+#### Possible Parent Nodes 
+todo
+#### Scope 
+Empty
+#### ArgList	
+Empty
+#### ValueList	
+Empty
+
+### FplBlockType `IntrinsicUndef`
+An intrinsic value for everything in FPL that is "undefined". Created in todo.
 #### Possible Parent Nodes 
 FunctionalTerm, OptionalFunctionalTerm, MandatoryFunctionalTerm
 #### Scope 

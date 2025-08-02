@@ -566,12 +566,12 @@ type TestFplValueScopeBlockType() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.IntrinsicPredicate, base1.FplBlockType)
-            | "base2" -> Assert.AreEqual<FplBlockType>(FplBlockType.IntrinsicPredicate, base1.FplBlockType)
+            | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.IntrinsicPred, base1.FplBlockType)
+            | "base2" -> Assert.AreEqual<FplBlockType>(FplBlockType.IntrinsicPred, base1.FplBlockType)
             | "base3" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base4" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base5" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
-            | "base6" -> Assert.AreEqual<FplBlockType>(FplBlockType.IntrinsicIndex, base1.FplBlockType)
+            | "base6" -> Assert.AreEqual<FplBlockType>(FplBlockType.IntrinsicInd, base1.FplBlockType)
             | "base7" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base8" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base9" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)

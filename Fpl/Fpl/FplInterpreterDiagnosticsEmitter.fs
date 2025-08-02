@@ -443,7 +443,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 | _ -> ())
 
             if not duplicateInheritanceChainFound then
-                let obJ = FplValue.CreateFplValue((pos1, pos2),FplBlockType.IntrinsicObject,fplValue)
+                let obJ = FplValue.CreateFplValue((pos1, pos2),FplBlockType.IntrinsicObj,fplValue)
                 Some obJ
             else
                 None
@@ -860,7 +860,7 @@ let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) =
     | Some value when assignee.TypeId = value.TypeId ->
         // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
         ()
-    | None ->
+    | _ ->
         // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
         let diagnostic =
             { 

@@ -15,13 +15,13 @@ type TestRepresentation() =
     [<DataRow("03","(x = y)", "false")>]
     [<DataRow("04","not (x = y)", "true")>]
     [<TestMethod>]
-    member this.TestPredicateRepresentation(var:string, varVal, expected:string) =
+    member this.TestRepresentationPredicate(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.Commons 
             def cl A: obj  {intr} 
             def cl B: obj  {intr} 
             def pred T() { dec ~x,y:obj x:=A() y:=B(); %s };""" varVal
-        let filename = "TestPredicateRepresentation.fpl"
+        let filename = "TestRepresentationPredicate.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -36,10 +36,10 @@ type TestRepresentation() =
 
     [<DataRow("00","n:=Zero()", "intr Zero:intr Nat:intr obj")>]
     [<TestMethod>]
-    member this.TestAssignmentRepresentation(var:string, varVal, expected:string) =
+    member this.TestRepresentationAssignment(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { dec ~n:Nat %s; true };""" varVal
-        let filename = "TestAssignmentRepresentation.fpl"
+        let filename = "TestRepresentationAssignment.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -58,10 +58,10 @@ type TestRepresentation() =
             
     [<DataRow("00","n:=Zero()", "Zero()")>]
     [<TestMethod>]
-    member this.TestReturnRepresentation(var:string, varVal, expected:string) =
+    member this.TestRepresentationReturn(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.PeanoArithmetics def func T()->Nat { dec ~n:Nat %s; return n };""" varVal
-        let filename = "TestReturnRepresentation.fpl"
+        let filename = "TestRepresentationReturn.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -76,10 +76,10 @@ type TestRepresentation() =
 
     [<DataRow("00","(@0 = Zero())", "true")>]
     [<TestMethod>]
-    member this.TestCasesRepresentation(var:string, varVal, expected:string) =
+    member this.TestRepresentationCases(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { %s };""" varVal
-        let filename = "TestCasesRepresentation.fpl"
+        let filename = "TestRepresentationCases.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -89,6 +89,24 @@ type TestRepresentation() =
             let pr = theory.Scope["T()"] 
             let base1 = pr.ArgList[0]
             Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("00","""def pred T() { dec ~v:ind; true };""", "dec ind")>]
+    [<TestMethod>]
+    member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
+        ad.Clear()
+        let filename = "TestRepresentationUnitializedVars.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let v = pr.Scope["v"]
+            Assert.AreEqual<int>(1, v.ValueList.Count)
+            Assert.AreEqual<string>(expected, v.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -102,7 +120,7 @@ type TestRepresentation() =
     [<DataRow("02a","(@1 = C())", "true")>]
     [<DataRow("02b","(@2 = C())", "false")>]
     [<TestMethod>]
-    member this.TestCasesRepresentation2(var:string, varVal, expected:string) =
+    member this.TestRepresentationCases2(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """
             uses Fpl.Commons
@@ -129,7 +147,7 @@ type TestRepresentation() =
         
         
         def pred T() { %s };""" varVal
-        let filename = "TestCasesRepresentation2.fpl"
+        let filename = "TestRepresentationCases2.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with

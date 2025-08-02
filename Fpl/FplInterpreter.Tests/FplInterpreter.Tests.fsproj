@@ -33,7 +33,6 @@
     <Compile Include="TestFplValue.fs" />
     <Compile Include="TestInterpreterErrors.fs" />
     <Compile Include="TestEvalAliasedNamespaceIdentifier.fs" />
-    <Compile Include="TestRepresentation.fs" />
   </ItemGroup>
 
   <ItemGroup>

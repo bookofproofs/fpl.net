@@ -179,7 +179,7 @@ type EvalStack() =
                 | FplBlockType.Reference ->
                     EvalStack.tryAddToArgList fv
                 | _ -> ()
-            | FplBlockType.IntrinsicObject
+            | FplBlockType.IntrinsicObj
             | FplBlockType.Quantor
             | FplBlockType.Theory
             | FplBlockType.Justification 
@@ -188,8 +188,12 @@ type EvalStack() =
             | FplBlockType.Translation 
             | FplBlockType.Stmt
             | FplBlockType.Assertion
-            | FplBlockType.IntrinsicIndex
-            | FplBlockType.IntrinsicPredicate
+            | FplBlockType.IntrinsicInd
+            | FplBlockType.IntrinsicPred
+            | FplBlockType.IntrinsicFunc
+            | FplBlockType.IntrinsicObj
+            | FplBlockType.IntrinsicUndef
+            | FplBlockType.IntrinsicTpl
             | FplBlockType.Instance
             | FplBlockType.Root -> 
                 EvalStack.tryAddToArgList fv 
