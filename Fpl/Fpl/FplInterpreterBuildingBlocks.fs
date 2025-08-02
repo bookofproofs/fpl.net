@@ -1753,9 +1753,9 @@ let rec eval (st: SymbolTable) ast =
         es.InSignatureEvaluation <- false
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
 
-        // clear the storage of parent class counters before evaluting the list of parent classes
+        // clear the storage of parent class counters before evaluating the list of parent classes
         es.ParentClassCalls.Clear() 
-        // now evalute the list of parent classes while adding the identified classes to the storage
+        // now evaluate the list of parent classes while adding the identified classes to the storage
         classTypeListAsts |> List.map (eval st) |> ignore
 
         eval st classContentAst
@@ -1801,10 +1801,11 @@ let rec eval (st: SymbolTable) ast =
         value.FplId <- "true"
         // check if all arguments could be correctly inferred
         fv.Scope
+        |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Argument)
         |> Seq.iter (fun kvp -> 
-            let argumentConclusion = kvp.Value.ArgList[1]
-            let result = argumentConclusion.Type(SignatureType.Repr)
-            match result with
+            let argInference = kvp.Value.ArgList[1]
+            let argInferenceResult = argInference.Type(SignatureType.Repr)
+            match argInferenceResult with
             | "true" -> ()
             | _ -> value.FplId <- "false" // todo all other arguments that are either undetermined or false should issue an error
 
