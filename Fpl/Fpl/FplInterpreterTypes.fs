@@ -621,8 +621,8 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     member this.Type(isSignature: SignatureType) =
         match isSignature with
         | SignatureType.Repr -> 
-            let rec children (fv:FplValue) isRoot = 
-                match (isRoot, fv.ValueList.Count = 0) with
+            let rec children (fv:FplValue) isFirst = 
+                match (isFirst, fv.ValueList.Count = 0) with
                 | (true, true) -> 
                     match fv.FplBlockType with
                     | FplBlockType.IntrinsicPred 
@@ -671,16 +671,15 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         | FplBlockType.MandatoryPredicate 
                         | FplBlockType.Proof 
                         | FplBlockType.RuleOfInference 
-                        | FplBlockType.Reference 
+                        | FplBlockType.Reference -> subRepr
                         | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
-                        | FplBlockType.Variable when 
-                            not (fv.IsInitializedVariable) 
+                        | FplBlockType.Variable when not (fv.IsInitializedVariable) 
                             && fv.ValueList[0].TypeId = FplBlockType.IntrinsicPred.ShortName -> 
                             subRepr
                         | FplBlockType.Variable when 
                             not (fv.IsInitializedVariable) 
                             && fv.ValueList[0].TypeId <> FplBlockType.IntrinsicPred.ShortName -> 
-                            $"dec {subRepr}"
+                            $"dec {fv.Type(SignatureType.Type)}"
                         | _ -> $"{fv.FplId}({subRepr})"
                 | (false, true) -> fv.FplId
 

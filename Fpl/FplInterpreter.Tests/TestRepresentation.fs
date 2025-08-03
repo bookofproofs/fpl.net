@@ -97,6 +97,11 @@ type TestRepresentation() =
     [<DataRow("00b","""def pred T() { dec ~v:obj; true };""", "dec obj")>]
     [<DataRow("00c","""def pred T() { dec ~v:func; true };""", "dec func")>]
     [<DataRow("00d","""def pred T() { dec ~v:tpl; true };""", "dec tpl")>]
+    [<DataRow("01a","""def pred T() { dec ~v:tpl(d:ind); true };""", "dec tpl(ind)")>]
+    [<DataRow("01b","""def pred T() { dec ~v:tpl(d:pred(e,f:obj)); true };""", "dec tpl(pred(obj, obj))")>]
+    [<DataRow("01c","""def pred T() { dec ~v:func(d:tpl(e:obj,d,e:ind)) ->tpl1(d:pred(e,f:obj)); true };""", "dec func(tpl(obj, ind, ind)) -> tpl1(pred(obj, obj))")>]
+    [<DataRow("02","""def pred T() { dec ~v:A; true };""", "undef")>]
+    [<DataRow("02a","""def cl A:obj {intr} def pred T() { dec ~v:A; true };""", "dec A")>]
     [<TestMethod>]
     member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
         ad.Clear()
@@ -109,8 +114,8 @@ type TestRepresentation() =
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
             let v = pr.Scope["v"]
-            Assert.AreEqual<int>(1, v.ValueList.Count)
             Assert.AreEqual<string>(expected, v.Type(SignatureType.Repr))
+            Assert.AreEqual<int>(1, v.ValueList.Count)
         | None -> 
             Assert.IsTrue(false)
 
