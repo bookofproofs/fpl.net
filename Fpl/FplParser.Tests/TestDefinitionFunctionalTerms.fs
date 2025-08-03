@@ -499,3 +499,51 @@ type TestDefinitionFunctionalTerms01 () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm24a () =
+        let result = run (definitionFunctionalTerm .>> eof) """func T() ->obj { dec ~x:obj; return x }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm24b () =
+        let result = run (definitionFunctionalTerm .>> eof) """func T() -> obj { dec ~x:obj; return x }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm24c () =
+        let result = run (definitionFunctionalTerm .>> eof) """func T()-> obj { dec ~x:obj; return x }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm25a () =
+        let result = run (definitionFunctionalTerm .>> eof) """func T()->obj { dec ~x:func(d:tpl(e:obj,d,e:ind))->tpl(d:pred(e,f:obj)); return x }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm25b () =
+        let result = run (definitionFunctionalTerm .>> eof) """func T()->obj { dec ~x:func(d:tpl(e:obj,d,e:ind))-> tpl(d:pred(e,f:obj)); return x }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm25c () =
+        let result = run (definitionFunctionalTerm .>> eof) """func T()->obj { dec ~x:func(d:tpl(e:obj,d,e:ind)) -> tpl(d:pred(e,f:obj)); return x }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestDefinitionFunctionalTerm25d () =
+        let result = run (definitionFunctionalTerm .>> eof) """func T()->obj { dec ~x:func(d:tpl(e:obj,d,e:ind)) ->tpl(d:pred(e,f:obj)); return x }"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
