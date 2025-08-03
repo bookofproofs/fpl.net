@@ -115,7 +115,6 @@ type TestRepresentation() =
             let pr = theory.Scope["T()"] 
             let v = pr.Scope["v"]
             Assert.AreEqual<string>(expected, v.Type(SignatureType.Repr))
-            Assert.AreEqual<int>(1, v.ValueList.Count)
         | None -> 
             Assert.IsTrue(false)
 

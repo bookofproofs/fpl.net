@@ -85,35 +85,25 @@ let rec eval (st: SymbolTable) ast =
         fv.FplBlockType <- blockType
 
     let setUnitType (fv:FplValue) (requiredValueType:FplBlockType) (positions:Positions) (tplName:string)=
-        let spawnValue (requiredValueType:FplBlockType) =
-            match requiredValueType with
-            | FplBlockType.IntrinsicPred
-            | FplBlockType.IntrinsicInd 
-            | FplBlockType.IntrinsicObj 
-            | FplBlockType.IntrinsicFunc ->
-                fv.TypeId <- $"{requiredValueType.ShortName}"
-                FplValue.CreateFplValue(positions, requiredValueType, fv)
-            | FplBlockType.IntrinsicTpl ->
-                fv.TypeId <- $"{tplName}"
-                let value = FplValue.CreateFplValue(positions, requiredValueType, fv)
-                value.TypeId <- $"{tplName}"
-                value.FplId <- $"{tplName}"
-                value
-            | _ ->
-                fv.TypeId <- FplBlockType.IntrinsicUndef.ShortName
-                FplValue.CreateFplValue(positions, FplBlockType.IntrinsicUndef, fv)
+        match requiredValueType with
+        | FplBlockType.IntrinsicPred
+        | FplBlockType.IntrinsicInd 
+        | FplBlockType.IntrinsicObj 
+        | FplBlockType.IntrinsicFunc ->
+            match fv.FplBlockType with
+            | FplBlockType.Class -> () // do not override class's type with base obj
+            | _ ->  fv.TypeId <- $"{requiredValueType.ShortName}"
+        | FplBlockType.IntrinsicTpl ->
+            fv.TypeId <- $"{tplName}"
+        | _ ->
+            fv.TypeId <- FplBlockType.IntrinsicUndef.ShortName
+
         
         match fv.FplBlockType with 
         | FplBlockType.VariadicVariableMany -> 
-            let value = spawnValue requiredValueType
-            fv.TypeId <- $"*{value.TypeId}"
+            fv.TypeId <- $"*{fv.TypeId}"
         | FplBlockType.VariadicVariableMany1 -> 
-            fv.ValueList.Add(spawnValue requiredValueType)
             fv.TypeId <- $"+{fv.TypeId}"
-        | FplBlockType.Variable -> 
-            fv.ValueList.Add(spawnValue requiredValueType)
-        | FplBlockType.Mapping -> 
-            fv.ValueList.Add(spawnValue requiredValueType)
         | _ -> ()
 
     match ast with
@@ -723,6 +713,9 @@ let rec eval (st: SymbolTable) ast =
             | (FplBlockType.VariadicVariableMany, 0)
             | (FplBlockType.VariadicVariableMany1, 0) -> 
                 emitSIG04DiagnosticsForTypes identifier pos1 pos2
+                let undefValue = FplValue.CreateFplValue((fv.StartPos, fv.EndPos), FplBlockType.IntrinsicUndef, fv)
+                fv.ValueList.Add(undefValue)
+               
             | (FplBlockType.Variable, 1)
             | (FplBlockType.VariadicVariableMany, 1)
             | (FplBlockType.VariadicVariableMany1, 1) -> 

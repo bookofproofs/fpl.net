@@ -640,7 +640,15 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         // its declared mapping type
                         let mapping = fv.ArgList |> Seq.head 
                         $"dec {mapping.Type(SignatureType.Repr)}"
-                    | _ -> "undef"
+                    | FplBlockType.Variable when not (fv.IsInitializedVariable) 
+                        && fv.TypeId = FplBlockType.IntrinsicPred.ShortName -> 
+                        "undetermined"
+                    | FplBlockType.Variable when 
+                        not (fv.IsInitializedVariable) 
+                        && fv.TypeId <> FplBlockType.IntrinsicPred.ShortName 
+                        && fv.TypeId <> FplBlockType.IntrinsicUndef.ShortName -> 
+                        $"dec {fv.Type(SignatureType.Type)}"                    
+                    | _ -> FplBlockType.IntrinsicUndef.ShortName
                 | (false, false) 
                 | (true, false) ->
                     let subRepr = 
@@ -687,7 +695,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         | _ -> 
             match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
             | (FplBlockType.Reference, true) ->
-                // delegate the type identifier to the referenced entitity
+                // delegate the type identifier to the referenced entity
                 let val1 = this.Scope[this.FplId]
                 val1.Type(isSignature)
             | (FplBlockType.Stmt, _)
