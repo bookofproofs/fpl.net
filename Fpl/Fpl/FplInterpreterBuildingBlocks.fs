@@ -608,6 +608,7 @@ let rec eval (st: SymbolTable) ast =
                 // todo diagnostics returns uninitialized value
                 let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicUndef, fv)
                 fv.ValueList.Add(value)
+                fv.ValueList.Add(value)
         | _ -> 
             // add an undefined value since there was no argument of the 
             let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicUndef, fv)

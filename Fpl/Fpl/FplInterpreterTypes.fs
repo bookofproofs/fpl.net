@@ -323,7 +323,7 @@ type FplBlockType =
 
     member private this.UnqualifiedName =
         match this with
-        // parser error messages
+        // needed for parser error messages
         | Variable -> "variable"
         | VariadicVariableMany -> "zero-or-more variable"
         | VariadicVariableMany1 -> "one-or-more variable"
@@ -969,8 +969,12 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         match this.FplBlockType with
         | FplBlockType.Reference when this.Scope.ContainsKey(this.FplId) ->
             let var = this.Scope[this.FplId]
-            var.ArgList.Add fplValue
-        | _ -> this.ArgList.Add fplValue
+            var.ValueList.Clear()
+            var.ValueList.Add(fplValue)
+        | _ -> 
+            this.ValueList.Clear()
+            this.ValueList.Add(fplValue)
+        
 
     /// Indicates if this FplValue is a class.
     static member IsClass(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Class
@@ -1623,33 +1627,36 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
 
             if preventInfinite then
                 sb.AppendLine($"{indent}\"Scope\": [],") |> ignore
-                sb.AppendLine($"{indent}\"ArgList\": []") |> ignore
+                sb.AppendLine($"{indent}\"ArgList\": [],") |> ignore
+                sb.AppendLine($"{indent}\"ValueList\": []") |> ignore
             else
                 sb.AppendLine($"{indent}\"Scope\": [") |> ignore
-
                 let mutable counterScope = 0
-
                 root.Scope
                 |> Seq.iter (fun child ->
                     counterScope <- counterScope + 1
-
                     createJson
                         child.Value
                         sb
                         (level + 1)
                         (counterScope = root.Scope.Count)
                         (root.FplId = "self" || root.FplId = "parent"))
-
                 sb.AppendLine($"{indent}],") |> ignore
+
                 sb.AppendLine($"{indent}\"ArgList\": [") |> ignore
-
-                let mutable valueList = 0
-
+                let mutable argList = 0
                 root.ArgList
                 |> Seq.iter (fun child ->
-                    valueList <- valueList + 1
-                    createJson child sb (level + 1) (valueList = root.ArgList.Count) false)
+                    argList <- argList + 1
+                    createJson child sb (level + 1) (argList = root.ArgList.Count) false)
+                sb.AppendLine($"{indent}],") |> ignore
 
+                sb.AppendLine($"{indent}\"ValueList\": [") |> ignore
+                let mutable valueList = 0
+                root.ValueList
+                |> Seq.iter (fun child ->
+                    valueList <- valueList + 1
+                    createJson child sb (level + 1) (valueList = root.ValueList.Count) false)
                 sb.AppendLine($"{indent}]") |> ignore
 
             if isLast then

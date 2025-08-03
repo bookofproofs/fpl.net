@@ -1,24 +1,8 @@
-uses Fpl.Commons
-
-def cl A: obj {intr}
-def cl B: A {intr}
-def cl C: obj {ctor C() {dec base.obj (); self }}
-def cl D: B {ctor D() {dec base.B(); self }}
-def cl C1: obj {ctor C1(i1:ind) {dec ~o:ind o:=i1 base.obj (); self }}
 
 def pred T() 
 { 
-    dec ~o:object 
-    ~a:A 
-    ~aI1:A aI1:=A 
-    ~aI2:A aI2:=A() 
-    ~b:B 
-    ~bI1:B bI1:=B 
-    ~bI2:B bI2:=B() 
-    ~dI2:D dI2:=D() 
-    ~cI2:C1 cI2:=C1($2)
-    ;
-
-    (a = b = o)
+    dec ~x:pred
+    x:=and(false, true);
+    true
 }
 ;

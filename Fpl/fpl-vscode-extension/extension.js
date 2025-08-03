@@ -276,15 +276,17 @@ class MyTreeItem extends vscode.TreeItem {
         if (this.typ == "th") log2Console(this.label + " " + scope.length, false);
         this.arglist = arglist;
         this.valuelist = valuelist;
-
         if (inScope == 1) {
             this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textPreformat.foreground');
+            log2Console("1", true);
         }
         else if (inScope == 2) {
             this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'focusBorder');
+            log2Console("2", true);
         }
         else {
             this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textSeparator.foreground');
+            log2Console("3", true);
         }
 
         // Set the command to open the file and navigate to the line number
@@ -338,12 +340,15 @@ class FplTheoriesProvider {
             let children = [];
             if (element.scope && element.scope.length > 0) {
                 children.push(...this.parseScope(element.scope));
+                log2Console("scope list", false);
             }
             if (element.arglist && element.arglist.length > 0) {
                 children.push(...this.parseArgList(element.arglist));
+                log2Console("arg list", false);
             }
             if (element.valueList && element.valueList.length > 0) {
                 children.push(...this.parseValueList(element.valueList));
+                log2Console("value list", false);
             }
             return Promise.resolve(children);
         }
