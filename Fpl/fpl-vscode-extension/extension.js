@@ -211,7 +211,7 @@ typeToIconMap.set('opred','symbol-boolean');
 typeToIconMap.set('mfunc','symbol-interface');
 typeToIconMap.set('ofunc','symbol-interface');
 typeToIconMap.set('ctor','symbol-constructor');
-typeToIconMap.set('cl','symbol-class');
+typeToIconMap.set('def cl','symbol-class');
 typeToIconMap.set('obj','primitive-square');
 typeToIconMap.set('loc','location');
 typeToIconMap.set('thm','layout-panel-justify');
@@ -223,9 +223,9 @@ typeToIconMap.set('conj','question');
 typeToIconMap.set('ax','layout');
 typeToIconMap.set('inf','symbol-structure');
 typeToIconMap.set('qtr','circuit-board');
-typeToIconMap.set('defpred','symbol-boolean');
+typeToIconMap.set('def pred','symbol-boolean');
 typeToIconMap.set('pred','symbol-boolean');
-typeToIconMap.set('deffunc','symbol-interface');
+typeToIconMap.set('def func','symbol-interface');
 typeToIconMap.set('func','symbol-interface');
 typeToIconMap.set('ref','link');
 typeToIconMap.set('arg','indent');
@@ -236,6 +236,13 @@ typeToIconMap.set('trsl','symbol-text');
 typeToIconMap.set('map','preview');
 typeToIconMap.set('stmt','symbol-event');
 typeToIconMap.set('ass','target');
+typeToIconMap.set('ext','extensions');
+typeToIconMap.set('inst','output');
+typeToIconMap.set('ind','symbol-numeric');
+typeToIconMap.set('tpl','target');
+typeToIconMap.set('undef','question');
+
+
 
 
 // A custom TreeItem
@@ -246,11 +253,7 @@ class MyTreeItem extends vscode.TreeItem {
         this.lineNumber = lineNumber;
         this.columnNumber = columnNumber;
         this.filePath = filePath;
-        if (typ == "cl" || typ == "pred" || typ == "func") 
-        {
-            this.label = "def " + typ + ' ' + label;
-        }
-        else if (typ == "mpred") 
+        if (typ == "mpred") 
         {
             this.label = "pred prop " + label;
         }
@@ -276,17 +279,15 @@ class MyTreeItem extends vscode.TreeItem {
         if (this.typ == "th") log2Console(this.label + " " + scope.length, false);
         this.arglist = arglist;
         this.valuelist = valuelist;
+
         if (inScope == 1) {
             this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textPreformat.foreground');
-            log2Console("1", true);
         }
         else if (inScope == 2) {
             this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'focusBorder');
-            log2Console("2", true);
         }
         else {
             this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textSeparator.foreground');
-            log2Console("3", true);
         }
 
         // Set the command to open the file and navigate to the line number
@@ -340,15 +341,12 @@ class FplTheoriesProvider {
             let children = [];
             if (element.scope && element.scope.length > 0) {
                 children.push(...this.parseScope(element.scope));
-                log2Console("scope list", false);
             }
             if (element.arglist && element.arglist.length > 0) {
                 children.push(...this.parseArgList(element.arglist));
-                log2Console("arg list", false);
             }
-            if (element.valueList && element.valueList.length > 0) {
-                children.push(...this.parseValueList(element.valueList));
-                log2Console("value list", false);
+            if (element.valuelist && element.valuelist.length > 0) {
+                children.push(...this.parseValueList(element.valuelist));
             }
             return Promise.resolve(children);
         }
