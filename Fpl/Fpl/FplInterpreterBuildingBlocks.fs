@@ -252,6 +252,8 @@ let rec eval (st: SymbolTable) ast =
         varValue.FplId <- name
         varValue.TypeId <- "undef"
         varValue.ReprId <- "undef"
+        let undefined = FplValue.CreateFplValue((fv.StartPos,fv.EndPos), FplBlockType.IntrinsicUndef, fv)
+        varValue.ValueList.Add(undefined)
         varValue.IsSignatureVariable <- es.InSignatureEvaluation 
         if isDeclaration then 
             // check for VAR03 diagnostics
@@ -301,8 +303,8 @@ let rec eval (st: SymbolTable) ast =
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
             fv.FplId <- name
-            fv.TypeId <- "undef"
-            fv.ReprId <- "undef"
+            fv.TypeId <- FplBlockType.IntrinsicUndef.ShortName
+            fv.ReprId <- FplBlockType.IntrinsicUndef.ShortName
         ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
