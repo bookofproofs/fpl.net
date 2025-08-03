@@ -23,7 +23,7 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
+            let base1 = pr1.ValueList[0]
             Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
@@ -46,8 +46,8 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            let base1 = pr1.ValueList[0]
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -69,8 +69,8 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            let base1 = pr1.ValueList[0]
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -92,8 +92,8 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            let base1 = pr1.ValueList[0]
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -119,8 +119,8 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            let base1 = pr1.ValueList[0]
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -132,6 +132,10 @@ type TestInfixOperations() =
     [<DataRow("05", """def pred T1() { (true and false and true) };""", "false")>]
     [<DataRow("06", """def pred T1() { (false and true and true) };""", "false")>]
     [<DataRow("07", """def pred T1() { (true and true and true) };""", "true")>]
+    [<DataRow("08a", """def pred T1() { (true and true) };""", "true")>]
+    [<DataRow("08b", """def pred T1() { (true and false) };""", "false")>]
+    [<DataRow("08c", """def pred T1() { (false and true) };""", "false")>]
+    [<DataRow("08d", """def pred T1() { (false and false) };""", "false")>]
     [<TestMethod>]
     member this.TestConjunctionCalls(no:string, varVal, expected:string) =
         ad.Clear()
@@ -146,8 +150,8 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            let base1 = pr1.ValueList[0]
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -173,8 +177,8 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            let base1 = pr1.ValueList[0]
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -200,7 +204,7 @@ type TestInfixOperations() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ArgList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            let base1 = pr1.ValueList[0]
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)

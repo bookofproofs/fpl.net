@@ -1334,7 +1334,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
 
     /// Copies other FplValue to this one without changing its reference pointer.
     member this.Copy(other: FplValue) =
-        this.ReprId <- other.ReprId
         this.FplId <- other.FplId
 
         if other.IsSignatureVariable then
@@ -1345,6 +1344,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         this.AuxiliaryInfo <- other.AuxiliaryInfo
         this.HasBrackets <- other.HasBrackets
         this.IsIntrinsic <- other.IsIntrinsic
+        this.IsInitializedVariable <- other.IsInitializedVariable
 
     /// Clones this FplValue.
     member this.Clone() =
@@ -1356,7 +1356,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                     FplValue.CreateTheory((fv.StartPos, fv.EndPos), fv.Parent.Value, fv.FilePath.Value)
                 | _ -> FplValue.CreateFplValue((fv.StartPos, fv.EndPos), fv.FplBlockType, fv.Parent.Value)
 
-            ret.ReprId <- fv.ReprId
             ret.FplId <- fv.FplId
 
             if fv.IsSignatureVariable then
@@ -1368,6 +1367,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             ret.HasBrackets <- fv.HasBrackets
             ret.IsIntrinsic <- fv.IsIntrinsic
             ret.ExpressionType <- fv.ExpressionType
+            ret.IsInitializedVariable <- fv.IsInitializedVariable
 
             fv.Scope
             |> Seq.iter (fun kvp ->
@@ -1378,6 +1378,11 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             |> Seq.iter (fun fv1 ->
                 let value = recClone fv1
                 ret.ArgList.Add(value))
+
+            fv.ValueList
+            |> Seq.iter (fun fv1 ->
+                let value = recClone fv1
+                ret.ValueList.Add(value))
 
             fv.AssertedPredicates
             |> Seq.iter (fun fv1 ->

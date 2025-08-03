@@ -127,15 +127,17 @@ type FplRunner() =
                     let pars = this.SaveVariables(called)
                     let args = caller.ArgList |> Seq.toList
                     this.ReplaceVariables pars args
-                    let mutable lastRepr = ""
+                    let lastRepr = FplValue.CreateRoot()
                     // run all statements of the called node
                     called.ArgList
                     |> Seq.iter (fun fv -> 
                         this.Run caller fv 
-                        lastRepr <- fv.ReprId
+                        lastRepr.ValueList.Clear()
+                        lastRepr.ValueList.AddRange(fv.ValueList)
                     )
                     |> ignore
-                    caller.ReprId <- lastRepr
+                    caller.ValueList.Clear()
+                    caller.ValueList.AddRange(lastRepr.ValueList)
                     this.RestoreVariables(called)
                 | FplBlockType.Class ->
                     let inst = called.CreateInstance()
