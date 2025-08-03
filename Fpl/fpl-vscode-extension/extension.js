@@ -219,7 +219,7 @@ typeToIconMap.set('lem','layout-panel-center');
 typeToIconMap.set('prop','layout-panel-right');
 typeToIconMap.set('cor','layout-sidebar-right');
 typeToIconMap.set('prf','testing-passed-icon');
-typeToIconMap.set('conj','question');
+typeToIconMap.set('conj','workspace-unknown');
 typeToIconMap.set('ax','layout');
 typeToIconMap.set('inf','symbol-structure');
 typeToIconMap.set('qtr','circuit-board');
@@ -239,7 +239,7 @@ typeToIconMap.set('ass','target');
 typeToIconMap.set('ext','extensions');
 typeToIconMap.set('inst','output');
 typeToIconMap.set('ind','symbol-numeric');
-typeToIconMap.set('tpl','target');
+typeToIconMap.set('tpl','gear');
 typeToIconMap.set('undef','question');
 
 
