@@ -648,6 +648,9 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         && fv.TypeId <> FplBlockType.IntrinsicPred.ShortName 
                         && fv.TypeId <> FplBlockType.IntrinsicUndef.ShortName -> 
                         $"dec {fv.Type(SignatureType.Type)}"                    
+                    | FplBlockType.VariadicVariableMany
+                    | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
+                        $"dec {fv.Type(SignatureType.Type)}[]"                    
                     | _ -> FplBlockType.IntrinsicUndef.ShortName
                 | (false, false) 
                 | (true, false) ->
@@ -680,12 +683,16 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         | FplBlockType.Proof 
                         | FplBlockType.RuleOfInference 
                         | FplBlockType.Reference -> subRepr
+                        | FplBlockType.VariadicVariableMany
+                        | FplBlockType.VariadicVariableMany1                         
                         | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
                         | FplBlockType.Variable when not (fv.IsInitializedVariable) 
                             && fv.ValueList[0].TypeId = FplBlockType.IntrinsicPred.ShortName -> 
                             subRepr
-                        | FplBlockType.Variable when 
-                            not (fv.IsInitializedVariable) 
+                        | FplBlockType.VariadicVariableMany
+                        | FplBlockType.VariadicVariableMany1                         
+                        | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
+                        | FplBlockType.Variable when not (fv.IsInitializedVariable) 
                             && fv.ValueList[0].TypeId <> FplBlockType.IntrinsicPred.ShortName -> 
                             $"dec {fv.Type(SignatureType.Type)}"
                         | _ -> $"{fv.FplId}({subRepr})"
