@@ -22,41 +22,46 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 type FplRunner() =
     let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
 
-    // The stack memory of the runner collecting the variables of the current Runner
+    // The stack memory of the runner to store the variables of all run programs
     member this.Stack = _stack
 
 
     member private this.ReplaceVariables (parameters:FplValue list) (arguments:FplValue list) =
+        /// Copy the ValueList of the variadic ar to the ValueList of the variadic p
+        /// by removing the previous values (if any) and
+        /// inserting the clones of the elements.
+        let replaceValues (p:FplValue) (ar:FplValue) =
+            p.ValueList.Clear()
+            ar.ValueList 
+            |> Seq.iter (fun fv -> 
+                let fvClone = fv.Clone() 
+                p.ValueList.Add(fvClone)
+            )
+
         let rec replace (pars:FplValue list) (args:FplValue list) = 
             match (pars, args) with
             | (p::ps, ar::ars) -> 
                 match (p.FplBlockType, ar.FplBlockType) with
                 // p is variadic, ar is variadic 
-                | (FplBlockType.VariadicVariableMany,FplBlockType.VariadicVariableMany)
-                | (FplBlockType.VariadicVariableMany,FplBlockType.VariadicVariableMany1)
-                | (FplBlockType.VariadicVariableMany1,FplBlockType.VariadicVariableMany)
-                | (FplBlockType.VariadicVariableMany1,FplBlockType.VariadicVariableMany1) ->
-                    // copy the argument list of the variadic ar to the arg list of the variadic p
-                    // by inserting the clones of the elements
-                    ar.ArgList 
-                    |> Seq.iter (fun fv -> 
-                        let fvClone = fv.Clone() 
-                        p.ArgList.Add(fvClone)
-                    )
-                    // continue replacling variables with the remaining lists
+                | (FplBlockType.VariadicVariableMany, FplBlockType.VariadicVariableMany)
+                | (FplBlockType.VariadicVariableMany, FplBlockType.VariadicVariableMany1)
+                | (FplBlockType.VariadicVariableMany1, FplBlockType.VariadicVariableMany)
+                | (FplBlockType.VariadicVariableMany1, FplBlockType.VariadicVariableMany1) ->
+                    replaceValues p ar
+                    // continue replacing variables with the remaining lists
                     replace ps ars
-                // p is variadic, ar is not variadic 
-                | (FplBlockType.VariadicVariableMany,_)
-                | (FplBlockType.VariadicVariableMany1,_) -> 
-                    let arClone = ar.Clone()
-                    p.ArgList.Add(arClone)
-                    // continue replacling variables with the original pars and the remaining ars list
+                // p is variadic, ar is variable
+                | (FplBlockType.VariadicVariableMany, FplBlockType.Variable)
+                | (FplBlockType.VariadicVariableMany1, FplBlockType.Variable) ->
+                    replaceValues p ar              
+                    // continue replacing variables with the original pars and the remaining ars list
                     replace pars ars
-                | _ -> 
+                | (FplBlockType.Variable, FplBlockType.Variable) -> 
                     // otherwise, simply assign the argument's representation to the parameter's representation
-                    p.ReprId <- ar.Type(SignatureType.Repr)
-                    // continue replacling variables with the remaining lists
+                    replaceValues p ar
+                    // continue replacing variables with the remaining lists
                     replace ps ars
+                | _ -> ()
             | (p::ps, []) -> ()
             | ([], ar::ars) -> ()
             | ([], []) -> ()

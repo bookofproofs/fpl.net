@@ -75,13 +75,13 @@ todo
 ### FplBlockType `VariadicVariableMany` and `VariadicVariableMany1`
 A collection of 0 (or 1) to many variables or other variadic variables. Created in todo.
 #### Possible Parent Nodes 
-Same as possibble parents of the Variable node.
+Same as possible parents of the Variable node.
 #### Scope 
-todo
+If a variadic variable is declared with a class type, the scope will contain that class. It can also contain nested variables.
 #### ArgList	
-If list of Variable, VariadicVariableMany or VariadicVariableMany1
+Empty
 #### ValueList	
-todo
+If list of Variable, VariadicVariableMany or VariadicVariableMany1
 
 ---
 
