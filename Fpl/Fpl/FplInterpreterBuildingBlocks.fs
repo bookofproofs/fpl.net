@@ -402,7 +402,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
-        fv.ReprId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
@@ -412,7 +411,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
-        fv.ReprId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
@@ -422,7 +420,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
-        fv.ReprId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
@@ -479,7 +476,6 @@ let rec eval (st: SymbolTable) ast =
         value.StartPos <- pos1
         value.EndPos <- pos2
         value.FplId <- "true"
-        value.ReprId <- "true"
         value.TypeId <- "pred"
         es.PushEvalStack(value)
         es.PopEvalStack()
@@ -491,7 +487,6 @@ let rec eval (st: SymbolTable) ast =
         value.StartPos <- pos1
         value.EndPos <- pos2
         value.FplId <- "false"
-        value.ReprId <- "false"
         value.TypeId <- "pred"
         es.PushEvalStack(value)
         es.PopEvalStack()
@@ -590,7 +585,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ByDef")
         let fv = es.PeekEvalStack()
         fv.FplId <- "bydef."
-        fv.ReprId <- "undetermined"
         fv.TypeId <- "bydef."
         eval st predicateWithQualificationAst
         emitPR001Diagnostics fv pos1 pos2
@@ -678,7 +672,6 @@ let rec eval (st: SymbolTable) ast =
             else
                 fv.FplId <- identifier
                 fv.TypeId <- identifier
-                fv.ReprId <- $"class {identifier}"
                 match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
                 | Some classNode -> 
                     fv.ArgList.Add classNode
