@@ -512,8 +512,13 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
 
 let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) pos1 pos2 =
     let matchReprId (fv1:FplValue) (identifier:string) = 
-        let regex = Regex(fv1.ReprId)
-        regex.IsMatch(identifier)
+        let vars = fv1.GetVariables()
+        if vars.Length > 0 then
+            let mainVar = vars.Head
+            let regex = Regex(mainVar.TypeId)
+            regex.IsMatch(identifier)
+        else
+            false
         
     let candidatesFromScope =
         st.Root.Scope

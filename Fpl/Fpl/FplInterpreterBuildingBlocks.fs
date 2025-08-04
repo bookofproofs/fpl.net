@@ -199,11 +199,10 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ExtensionRegex s -> 
         st.EvalPush("ExtensionRegex")
         let fv = es.PeekEvalStack()
-        fv.ReprId <- s // set the extension's representation to the pattern
         let vars = fv.GetVariables()
         if vars.Length> 0 then
             let mainVar = vars.Head
-            mainVar.ReprId <- s // set the extenions's main variable's representation to the pattern
+            mainVar.TypeId <- s // set the extensions's main variable's type to the pattern
         st.EvalPop() 
     // | DollarDigits of Positions * int
     | Ast.DollarDigits((pos1, pos2), s) -> 
@@ -555,7 +554,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- extensionString
         fv.TypeId <- extensionString
-        fv.ReprId <- extensionString
         checkID018Diagnostics st fv extensionString pos1 pos2
         st.EvalPop()
     | Ast.ExtensionType((pos1, pos2), extensionNameAst) ->
