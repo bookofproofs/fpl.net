@@ -525,8 +525,6 @@ let rec eval (st: SymbolTable) ast =
         let map = FplValue.CreateFplValue((pos1, pos2),FplBlockType.Mapping,fv)
         es.PushEvalStack(map)
         eval st variableTypeAst
-        if fv.FplBlockType <> FplBlockType.Extension then
-            fv.ReprId <- map.ReprId
         es.PopEvalStack()
         st.EvalPop()
     | Ast.ClassIdentifier((pos1, pos2), ast1) ->

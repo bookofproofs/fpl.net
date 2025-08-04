@@ -469,7 +469,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     let mutable _fplId = ""
     let mutable _typeId = ""
     let mutable (_filePath: string option) = None
-    let mutable _reprId = "undef"
     let mutable _hasBrackets = false
     let mutable _isIntrinsic = false
     let mutable _isSignatureVariable = false
@@ -490,11 +489,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     member this.TypeId
         with get () = _typeId
         and set (value) = _typeId <- value
-
-    /// ReprId of the FplValue.
-    member this.ReprId
-        with get () = _reprId
-        and set (value) = _reprId <- value
 
     /// ValueList of the FplValue.
     member this.ValueList = _valueList
@@ -588,13 +582,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             inst.FplId <- this.FplId
             inst.TypeId <- this.TypeId
             let (constructors: FplValue list) = this.GetConstructors()
-            inst.ReprId <- 
-                // distinguish between intrinsic and non-intrinsic classes
-                // based on whether they have constructors or not
-                if constructors.Length = 0 && not (previous.FplBlockType = FplBlockType.Constructor) then
-                    $"intr {this.TypeId}"
-                else
-                    $"{this.TypeId}"
             previous.ArgList
             |> Seq.iter (fun next -> 
                 inst.ArgList.Add (next.CreateInstance())
@@ -1206,7 +1193,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         let root =
             new FplValue(FplBlockType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
 
-        root.ReprId <- ""
         root.TypeId <- ""
         root.FplId <- ""
         root
