@@ -697,7 +697,6 @@ let rec eval (st: SymbolTable) ast =
         | FplBlockType.Predicate ->
             fv.FplId <- identifier
             fv.TypeId <- "pred"
-            fv.ReprId <- "undetermined"
         | FplBlockType.MandatoryFunctionalTerm
         | FplBlockType.OptionalFunctionalTerm
         | FplBlockType.FunctionalTerm ->
@@ -707,7 +706,6 @@ let rec eval (st: SymbolTable) ast =
             fv.FplId <- identifier
             fv.TypeId <- identifier
             checkID008Diagnostics fv pos1 pos2
-            fv.ReprId <- "obj"
         | FplBlockType.VariadicVariableMany -> 
             fv.TypeId <- $"*{identifier}"
         | FplBlockType.VariadicVariableMany1 -> 
@@ -735,7 +733,6 @@ let rec eval (st: SymbolTable) ast =
             | (FplBlockType.VariadicVariableMany, 1)
             | (FplBlockType.VariadicVariableMany1, 1) -> 
                 fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
-                fv.ReprId <- $"dec {candidates.Head.ReprId}"
             | (FplBlockType.Variable, _)
             | (FplBlockType.VariadicVariableMany, _)
             | (FplBlockType.VariadicVariableMany1, _) -> 
@@ -815,7 +812,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("And")
         let fv = es.PeekEvalStack()
         fv.FplId <- "and"
-        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -827,7 +823,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Or")
         let fv = es.PeekEvalStack()
         fv.FplId <- "or"
-        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -839,7 +834,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Xor")
         let fv = es.PeekEvalStack()
         fv.FplId <- "xor"
-        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2

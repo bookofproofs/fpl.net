@@ -593,7 +593,7 @@ let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
     with ex ->
         if ex.Message.StartsWith("OK:") then
             let result = ex.Message.Substring(3)
-            fv.ReprId <- result
+            fv.ValueList[0].FplId <- result
             ""
         else
             let diagnostic =
