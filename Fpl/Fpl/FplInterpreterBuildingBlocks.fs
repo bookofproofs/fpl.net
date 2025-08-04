@@ -1073,7 +1073,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Impl")
         let fv = es.PeekEvalStack()
         fv.FplId <- "impl"
-        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -1085,7 +1084,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Iif")
         let fv = es.PeekEvalStack()
         fv.FplId <- "iif"
-        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -1497,7 +1495,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("PredicateInstance")
         eval st signatureAst
         let fv = es.PeekEvalStack()
-        es.PeekEvalStack().ReprId <- "undetermined"
         match optAst with
         | Some ast1 -> 
             eval st ast1
