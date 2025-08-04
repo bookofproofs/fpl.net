@@ -240,14 +240,11 @@ let rec eval (st: SymbolTable) ast =
         | FplBlockType.VariadicVariableMany -> 
             let sid = $"*{extensionName}"
             fv.TypeId <- sid
-            fv.ReprId <- $"intr {sid}"
         | FplBlockType.VariadicVariableMany1 -> 
             let sid = $"+{extensionName}"
             fv.TypeId <- sid
-            fv.ReprId <- $"intr {sid}"
         | _ -> 
             fv.TypeId <- extensionName
-            fv.ReprId <- $"intr {extensionName}"
             checkID019Diagnostics st extensionName pos1 pos2
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
