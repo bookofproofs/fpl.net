@@ -365,7 +365,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 | ScopeSearchResult.Found classCandidate ->
                     let mutable duplicateInheritanceChainFound = false
 
-                    fplValue.ValueList
+                    fplValue.ArgList
                     |> Seq.iter (fun child ->
                         let childType = child.Type(SignatureType.Type)
                         let classInheritanceChain = findClassInheritanceChain classCandidate childType
@@ -422,7 +422,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
         | _ ->
             let mutable duplicateInheritanceChainFound = false
 
-            fplValue.ValueList
+            fplValue.ArgList
             |> Seq.iter (fun child ->
                 let classInheritanceChain = findClassInheritanceChain child name
 
@@ -443,7 +443,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 | _ -> ())
 
             if not duplicateInheritanceChainFound then
-                let obJ = FplValue.CreateFplValue((pos1, pos2),FplBlockType.Object,fplValue)
+                let obJ = FplValue.CreateFplValue((pos1, pos2),FplBlockType.IntrinsicObj,fplValue)
                 Some obJ
             else
                 None
@@ -489,7 +489,7 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
         let mutable foundInheritanceClass = false
 
         let candidates =
-            classOfConstructor.ValueList
+            classOfConstructor.ArgList
             |> Seq.map (fun inheritanceClass ->
                 let inheritanceClassType = inheritanceClass.Type(SignatureType.Type)
                 if inheritanceClassType = identifier then
@@ -512,8 +512,13 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
 
 let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) pos1 pos2 =
     let matchReprId (fv1:FplValue) (identifier:string) = 
-        let regex = Regex(fv1.ReprId)
-        regex.IsMatch(identifier)
+        let vars = fv1.GetVariables()
+        if vars.Length > 0 then
+            let mainVar = vars.Head
+            let regex = Regex(mainVar.TypeId)
+            regex.IsMatch(identifier)
+        else
+            false
         
     let candidatesFromScope =
         st.Root.Scope
@@ -584,11 +589,11 @@ let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
     let d = Delegates()
 
     try
-        d.CallExternalDelegate(fv.FplId.Substring(4), fv.ValueList |> Seq.toList)
+        d.CallExternalDelegate(fv.FplId.Substring(4), fv.ArgList |> Seq.toList)
     with ex ->
         if ex.Message.StartsWith("OK:") then
             let result = ex.Message.Substring(3)
-            fv.ReprId <- result
+            fv.ValueList[0].FplId <- result
             ""
         else
             let diagnostic =
@@ -807,7 +812,7 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
         None
 
 let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) = 
-    let valueOpt = toBeAssignedValue.GetValue
+    let valueOpt = toBeAssignedValue.GetArgument
     match valueOpt with
     | Some value when value.FplBlockType = FplBlockType.Class ->
         let chainOpt = findClassInheritanceChain value assignee.TypeId
@@ -860,7 +865,7 @@ let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) =
     | Some value when assignee.TypeId = value.TypeId ->
         // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
         ()
-    | None ->
+    | _ ->
         // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
         let diagnostic =
             { 
@@ -969,7 +974,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
             }
         diags.AddDiagnostic diagnostic
 
-    fplValue.ValueList
+    fplValue.ArgList
     |> Seq.iter (fun argument ->
         let repr = argument.Type(SignatureType.Repr)
         match repr with
@@ -982,7 +987,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
     let code = LG000("", "")
     let numbLG000 = filterByErrorCode diags code.Code
 
-    if numbLG000.Length = fplValue.ValueList.Count then
+    if numbLG000.Length = fplValue.ArgList.Count then
         () // we have no reason to emit any diagnostics since the are as many undetermined predicates as arguments
     else
         diags.Collection

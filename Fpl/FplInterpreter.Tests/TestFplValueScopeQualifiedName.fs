@@ -31,6 +31,8 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("pre2")>]
     [<DataRow("fun1")>]
     [<DataRow("fun2")>]
+    [<DataRow("fun3")>]
+    [<DataRow("fun4")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
     [<DataRow("loc1")>]
@@ -39,7 +41,7 @@ type TestFplValueScopeQualifiedName() =
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("QualifiedName") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.QualifiedName)
             | "theory" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName", theory.QualifiedName)
@@ -65,6 +67,13 @@ type TestFplValueScopeQualifiedName() =
             | "pre2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomePredicate2()", pre2.QualifiedName)
             | "fun1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm1() -> obj", fun1.QualifiedName)
             | "fun2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm2() -> obj", fun2.QualifiedName)
+            | "fun3" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm3() -> obj", fun3.QualifiedName)
+            | "fun4" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm4() -> obj(pred)", fun4.QualifiedName)
+            | "fun5" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm5() -> SomeClass1", fun5.QualifiedName)
+            | "fun6" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm6() -> SomeClass1", fun6.QualifiedName)
+            | "fun7" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm7() -> SomeClass1", fun7.QualifiedName)
+            | "fun8" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm8() -> ind", fun8.QualifiedName)
+            | "fun9" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeFunctionalTerm9() -> ind", fun9.QualifiedName)
             | "prf1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeTheorem1().SomeTheorem1$1", prf1.QualifiedName)
             | "prf2" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.SomeTheorem2().SomeTheorem2$1", prf2.QualifiedName)
             | "loc1" -> Assert.AreEqual<string>("TestScopeBlocksQualifiedName.not(x)", loc1.QualifiedName)
@@ -543,7 +552,7 @@ type TestFplValueScopeQualifiedName() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, base1.QualifiedName)
@@ -644,8 +653,8 @@ type TestFplValueScopeQualifiedName() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let stmt = ctor.ValueList[0]
-            let base1 = stmt.ValueList[0]
+            let stmt = ctor.ArgList[0]
+            let base1 = stmt.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>("TestCallConstructorParentClassQualifiedName.A.A(T1, func, ind, pred).bas.B()", base1.QualifiedName)
@@ -678,7 +687,7 @@ type TestFplValueScopeQualifiedName() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.B()", base1.QualifiedName)
@@ -758,7 +767,7 @@ type TestFplValueScopeQualifiedName() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ValueList[0]
+            let mapping = base1.ArgList[0]
             match var with
             | "base1" -> Assert.AreEqual<string>("TestMappingQualifiedName.T() -> obj.", mapping.QualifiedName)
             | "base2" -> Assert.AreEqual<string>("TestMappingQualifiedName.T() -> ind.", mapping.QualifiedName)
@@ -792,8 +801,8 @@ type TestFplValueScopeQualifiedName() =
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
-            let just = arg.ValueList[0]
-            let ainf = arg.ValueList[1]
+            let just = arg.ArgList[0]
+            let ainf = arg.ArgList[1]
             let numbOfJustifications = just.Scope.Count
  
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
@@ -886,7 +895,7 @@ type TestFplValueScopeQualifiedName() =
             let theory = r.Scope[filename]
             let pred = theory.Scope[predName]
             let lang = pred.Scope["tex"]
-            let trsl = lang.ValueList[0]
+            let trsl = lang.ArgList[0]
 
             match var with
             | "base0" -> Assert.AreEqual<string>(@"TestTranslationQualifiedName.true.tex.", trsl.QualifiedName)

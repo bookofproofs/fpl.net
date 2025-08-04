@@ -311,6 +311,13 @@ type CommonFplValueTestCases =
             def pred SomePredicate2() {true}
             def func SomeFunctionalTerm1()->obj {intr}
             def func SomeFunctionalTerm2()->obj {intr}
+            def func SomeFunctionalTerm3()->obj {dec ~v:obj v:=v v:=v; return v}
+            def func SomeFunctionalTerm4()->obj(c:pred) {dec ~v:obj(c:pred) v:=v v:=v; return v}
+            def func SomeFunctionalTerm5()->SomeClass1 {dec ~v:SomeClass1; return v}
+            def func SomeFunctionalTerm6()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass; return v}
+            def func SomeFunctionalTerm7()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass(); return v}
+            def func SomeFunctionalTerm8()->ind {return $112}
+            def func SomeFunctionalTerm9()->ind {dec ~v:ind v:=$13; return v}
             proof SomeTheorem1$1 {1. |- trivial}
             proof SomeTheorem2$1 {1. |- trivial}
             loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;
@@ -346,11 +353,18 @@ type CommonFplValueTestCases =
                             let pre2 = CommonFplValueTestCases.getScopedElement theory "SomePredicate2()" subtype
                             let fun1 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm1() -> obj" subtype
                             let fun2 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm2() -> obj" subtype
+                            let fun3 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm3() -> obj" subtype
+                            let fun4 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm4() -> obj(pred)" subtype
+                            let fun5 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm5() -> SomeClass1" subtype
+                            let fun6 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm6() -> SomeClass1" subtype
+                            let fun7 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm7() -> SomeClass1" subtype
+                            let fun8 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm8() -> ind" subtype
+                            let fun9 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm9() -> ind" subtype
                             let prf1 = CommonFplValueTestCases.getScopedElement thm1 "SomeTheorem1$1" subtype
                             let prf2 = CommonFplValueTestCases.getScopedElement thm2 "SomeTheorem2$1" subtype
                             let loc1 = CommonFplValueTestCases.getScopedElement theory "not(x)" subtype
                             let loc2 = CommonFplValueTestCases.getScopedElement theory "Equal(x, y)" subtype
-                            Some (r,theory,inf1,inf2,axi1,axi2,pst1,pst2,thm1,thm2,pro1,pro2,lem1,lem2,cor1,cor2,con1,con2,cla1,cla2,pre1,pre2,fun1,fun2,prf1,prf2,loc1,loc2)
+                            Some (r,theory,inf1,inf2,axi1,axi2,pst1,pst2,thm1,thm2,pro1,pro2,lem1,lem2,cor1,cor2,con1,con2,cla1,cla2,pre1,pre2,fun1,fun2,fun3,fun4,fun5,fun6,fun7,fun8,fun9,prf1,prf2,loc1,loc2)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
         result

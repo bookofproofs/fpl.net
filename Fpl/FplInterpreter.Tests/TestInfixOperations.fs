@@ -47,7 +47,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -70,7 +70,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -93,7 +93,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -105,6 +105,10 @@ type TestInfixOperations() =
     [<DataRow("05", """def pred T1() { (true and false and true) };""", "false")>]
     [<DataRow("06", """def pred T1() { (false and true and true) };""", "false")>]
     [<DataRow("07", """def pred T1() { (true and true and true) };""", "true")>]
+    [<DataRow("08a", """def pred T1() { (true and true) };""", "true")>]
+    [<DataRow("08b", """def pred T1() { (true and false) };""", "false")>]
+    [<DataRow("08c", """def pred T1() { (false and true) };""", "false")>]
+    [<DataRow("08d", """def pred T1() { (false and false) };""", "false")>]
     [<TestMethod>]
     member this.TestConjunctionCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
@@ -120,7 +124,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -132,6 +136,10 @@ type TestInfixOperations() =
     [<DataRow("05", """def pred T1() { (true and false and true) };""", "false")>]
     [<DataRow("06", """def pred T1() { (false and true and true) };""", "false")>]
     [<DataRow("07", """def pred T1() { (true and true and true) };""", "true")>]
+    [<DataRow("08a", """def pred T1() { (true and true) };""", "true")>]
+    [<DataRow("08b", """def pred T1() { (true and false) };""", "false")>]
+    [<DataRow("08c", """def pred T1() { (false and true) };""", "false")>]
+    [<DataRow("08d", """def pred T1() { (false and false) };""", "false")>]
     [<TestMethod>]
     member this.TestConjunctionCalls(no:string, varVal, expected:string) =
         ad.Clear()
@@ -147,7 +155,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -159,6 +167,10 @@ type TestInfixOperations() =
     [<DataRow("05", """def pred T1() { (true or false or true) };""", "true")>]
     [<DataRow("06", """def pred T1() { (false or true or true) };""", "true")>]
     [<DataRow("07", """def pred T1() { (true or true or true) };""", "true")>]
+    [<DataRow("08a", """def pred T1() { (true or true) };""", "true")>]
+    [<DataRow("08b", """def pred T1() { (true or false) };""", "true")>]
+    [<DataRow("08c", """def pred T1() { (false or true) };""", "true")>]
+    [<DataRow("08d", """def pred T1() { (false or false) };""", "false")>]
     [<TestMethod>]
     member this.TestDisjunctionCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
@@ -174,7 +186,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
@@ -186,6 +198,10 @@ type TestInfixOperations() =
     [<DataRow("05", """def pred T1() { (true xor false xor true) };""", "false")>]
     [<DataRow("06", """def pred T1() { (false xor true xor true) };""", "false")>]
     [<DataRow("07", """def pred T1() { (true xor true xor true) };""", "true")>]
+    [<DataRow("08a", """def pred T1() { (true xor true) };""", "false")>]
+    [<DataRow("08b", """def pred T1() { (true xor false) };""", "true")>]
+    [<DataRow("08c", """def pred T1() { (false xor true) };""", "true")>]
+    [<DataRow("08d", """def pred T1() { (false xor false) };""", "false")>]
     [<TestMethod>]
     member this.TestExDisjunctionCallsFplCommons(no:string, varVal, expected:string) =
         ad.Clear()
@@ -201,6 +217,6 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.ReprId)
+            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)

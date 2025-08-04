@@ -32,6 +32,13 @@ type TestFplValueScopeFplId() =
     [<DataRow("pre2")>]
     [<DataRow("fun1")>]
     [<DataRow("fun2")>]
+    [<DataRow("fun3")>]
+    [<DataRow("fun4")>]
+    [<DataRow("fun5")>]
+    [<DataRow("fun6")>]
+    [<DataRow("fun7")>]
+    [<DataRow("fun8")>]
+    [<DataRow("fun9")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
     [<DataRow("loc1")>]
@@ -40,7 +47,7 @@ type TestFplValueScopeFplId() =
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("FplId") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.FplId)
             | "theory" -> Assert.AreEqual<string>("TestScopeBlocksFplId", theory.FplId)
@@ -66,6 +73,13 @@ type TestFplValueScopeFplId() =
             | "pre2" -> Assert.AreEqual<string>("SomePredicate2", pre2.FplId)
             | "fun1" -> Assert.AreEqual<string>("SomeFunctionalTerm1", fun1.FplId)
             | "fun2" -> Assert.AreEqual<string>("SomeFunctionalTerm2", fun2.FplId)
+            | "fun3" -> Assert.AreEqual<string>("SomeFunctionalTerm3", fun3.FplId)
+            | "fun4" -> Assert.AreEqual<string>("SomeFunctionalTerm4", fun4.FplId)
+            | "fun5" -> Assert.AreEqual<string>("SomeFunctionalTerm5", fun5.FplId)
+            | "fun6" -> Assert.AreEqual<string>("SomeFunctionalTerm6", fun6.FplId)
+            | "fun7" -> Assert.AreEqual<string>("SomeFunctionalTerm7", fun7.FplId)
+            | "fun8" -> Assert.AreEqual<string>("SomeFunctionalTerm8", fun8.FplId)
+            | "fun9" -> Assert.AreEqual<string>("SomeFunctionalTerm9", fun9.FplId)
             | "prf1" -> Assert.AreEqual<string>("SomeTheorem1$1", prf1.FplId)
             | "prf2" -> Assert.AreEqual<string>("SomeTheorem2$1", prf2.FplId)
             | "loc1" -> Assert.AreEqual<string>("not", loc1.FplId)
@@ -551,7 +565,7 @@ type TestFplValueScopeFplId() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>(varVal, base1.FplId)
@@ -653,8 +667,8 @@ type TestFplValueScopeFplId() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let stmt = ctor.ValueList[0]
-            let base1 = stmt.ValueList[0]
+            let stmt = ctor.ArgList[0]
+            let base1 = stmt.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>("B", base1.FplId)
@@ -687,7 +701,7 @@ type TestFplValueScopeFplId() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>("del.B", base1.FplId)
@@ -767,7 +781,7 @@ type TestFplValueScopeFplId() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ValueList[0]
+            let mapping = base1.ArgList[0]
             match var with
             | "base1" -> Assert.AreEqual<string>("", mapping.FplId)
             | "base2" -> Assert.AreEqual<string>("", mapping.FplId)
@@ -801,8 +815,8 @@ type TestFplValueScopeFplId() =
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
-            let just = arg.ValueList[0]
-            let ainf = arg.ValueList[1]
+            let just = arg.ArgList[0]
+            let ainf = arg.ArgList[1]
             let numbOfJustifications = just.Scope.Count
  
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
@@ -895,7 +909,7 @@ type TestFplValueScopeFplId() =
             let theory = r.Scope[filename]
             let pred = theory.Scope[predName]
             let lang = pred.Scope["tex"]
-            let trsl = lang.ValueList[0]
+            let trsl = lang.ArgList[0]
 
             match var with
             | "base0" -> Assert.AreEqual<string>(@"", trsl.FplId)

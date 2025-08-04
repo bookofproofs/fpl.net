@@ -84,7 +84,7 @@ type TestReferencesTypeOfSignature() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
             match var with
             | "base1" -> Assert.AreEqual<string>("pred", base1.Type(SignatureType.Type))
             | "base2" -> Assert.AreEqual<string>("pred", base1.Type(SignatureType.Type))
@@ -188,8 +188,8 @@ type TestReferencesTypeOfSignature() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let stmt = ctor.ValueList[0]
-            let base1 = stmt.ValueList[0]
+            let stmt = ctor.ArgList[0]
+            let base1 = stmt.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Type))
@@ -222,7 +222,7 @@ type TestReferencesTypeOfSignature() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<string>("del.B()", base1.Type(SignatureType.Type))

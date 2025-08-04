@@ -15,7 +15,9 @@ namespace FplLSTests
         [DataRow(@"d:/temp/fpl.net/theories/FoundationsOfAnalysisLandau/repo/Fpl.Commons.fpl")]
         [DataRow(@"d:\temp\fpl.net\theories\FoundationsOfAnalysisLandau\repo\Fpl.Commons.fpl")]
         [DataRow(@"file://temp/fpl.net/theories/FoundationsOfAnalysisLandau/repo/Fpl.Commons.fpl")]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task TestIdempotent(string path)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             var uri = PathEquivalentUri.EscapedUri(path);
             var nextUri = PathEquivalentUri.EscapedUri(uri.AbsoluteUri);
@@ -29,7 +31,9 @@ namespace FplLSTests
         [DataRow(@"d:/temp/fpl.net/theories/FoundationsOfAnalysisLandau/repo/Fpl.Commons.fpl")]
         [DataRow(@"d:\temp\fpl.net\theories\FoundationsOfAnalysisLandau\repo\Fpl.Commons.fpl")]
         [DataRow(@"file://temp/fpl.net/theories/FoundationsOfAnalysisLandau/repo/Fpl.Commons.fpl")]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task TestIdempotentUri(string path)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             var uri = new Uri(path);
             var nextUri = new Uri(uri.AbsoluteUri);

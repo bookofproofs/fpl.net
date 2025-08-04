@@ -42,10 +42,13 @@ let eval_pos_string_ast (st: SymbolTable) str = ()
 
 /// Simplify trivially nested expressions by removing from the stack FplValue nodes that were created due to too long parsing tree and replacing them by their subnodes 
 let simplifyTriviallyNestedExpressions (rb:FplValue) = 
-    if rb.ValueList.Count = 1 && rb.FplId = "" then
-        // removabel reference blocks are those with only a single value and unset FplId 
-        let subNode = rb.ValueList[0]
-        if subNode.FplBlockType = FplBlockType.Reference || subNode.FplBlockType = FplBlockType.Quantor || subNode.FplBlockType = FplBlockType.Index then 
+    if rb.ArgList.Count = 1 && rb.FplId = "" then
+        // removable reference blocks are those with only a single argument and unset FplId 
+        let subNode = rb.ArgList[0]
+        if subNode.FplBlockType = FplBlockType.Reference 
+            || subNode.FplBlockType = FplBlockType.Quantor 
+            || subNode.FplBlockType = FplBlockType.IntrinsicInd 
+            || subNode.FplBlockType = FplBlockType.IntrinsicPred then 
             es.Pop() |> ignore // pop the removable reference block and ignored it
             es.PushEvalStack(subNode) // push its subNode instead
             // adjust subNode's Parent, EndPos, Scope
@@ -60,7 +63,8 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
                    parent.Scope["."] <- subNode
             | _ -> ()
             // prevent recursive loops
-            rb.ValueList.Clear() 
+            rb.ArgList.Clear() 
+            rb.ValueList.Clear()
             rb.Scope.Clear()
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
@@ -80,20 +84,43 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         fv.FplBlockType <- blockType
 
-    let setUnitType (fv:FplValue) typeName typeRepr =
+    let setUnitType (fv:FplValue) (requiredValueType:FplBlockType) (positions:Positions) (tplName:string)=
+        match requiredValueType with
+        | FplBlockType.IntrinsicPred
+        | FplBlockType.IntrinsicInd 
+        | FplBlockType.IntrinsicObj 
+        | FplBlockType.IntrinsicFunc ->
+            match fv.FplBlockType with
+            | FplBlockType.Class -> () // do not override class's type with base obj
+            | FplBlockType.Reference ->
+                fv.TypeId <- $"{requiredValueType.ShortName}"
+                fv.ValueList.Clear()
+                fv.ValueList.Add(FplValue.CreateFplValue(positions, requiredValueType, fv))
+            | _ ->  fv.TypeId <- $"{requiredValueType.ShortName}"
+        | FplBlockType.IntrinsicTpl ->
+            match fv.FplBlockType with
+            | FplBlockType.Class -> () // do not override class's type with base obj
+            | FplBlockType.Reference ->
+                fv.TypeId <- $"{tplName}"
+                let value = FplValue.CreateFplValue(positions, requiredValueType, fv)
+                value.TypeId <- $"{tplName}"
+                value.FplId <- $"{tplName}"
+                fv.ValueList.Clear()
+                fv.ValueList.Add(value)
+            | _ ->  
+                fv.TypeId <- $"{tplName}"
+        | _ ->
+            fv.TypeId <- FplBlockType.IntrinsicUndef.ShortName
+            let value = FplValue.CreateFplValue(positions, FplBlockType.IntrinsicUndef, fv)
+            fv.ValueList.Clear()
+            fv.ValueList.Add(value)
+
+        
         match fv.FplBlockType with 
         | FplBlockType.VariadicVariableMany -> 
-            fv.TypeId <- $"*{typeName}"
-            fv.ReprId <- $"intr *{typeRepr}"
+            fv.TypeId <- $"*{fv.TypeId}"
         | FplBlockType.VariadicVariableMany1 -> 
-            fv.TypeId <- $"+{typeName}"
-            fv.ReprId <- $"intr +{typeRepr}"
-        | FplBlockType.Variable -> 
-            fv.TypeId <- typeName
-            fv.ReprId <- typeRepr
-        | FplBlockType.Mapping -> 
-            fv.TypeId <- typeName
-            fv.ReprId <- typeRepr
+            fv.TypeId <- $"+{fv.TypeId}"
         | _ -> ()
 
     match ast with
@@ -101,15 +128,15 @@ let rec eval (st: SymbolTable) ast =
     | Ast.IndexType((pos1, pos2),()) -> 
         st.EvalPush("IndexType")
         let fv = es.PeekEvalStack()
-        setUnitType fv "ind" "ind"
+        setUnitType fv FplBlockType.IntrinsicInd (pos1, pos2) ""
         st.EvalPop() |> ignore
     | Ast.ObjectType((pos1, pos2),()) -> 
         st.EvalPush("ObjectType")
         let fv = es.PeekEvalStack()
-        setUnitType fv "obj" "dec obj"
+        setUnitType fv FplBlockType.IntrinsicObj (pos1, pos2) ""
         match checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2 with
         | Some classNode -> 
-            fv.ValueList.Add classNode
+            fv.ArgList.Add classNode
         | None -> ()
         checkID012Diagnostics st fv "obj" pos1 pos2 
         // add potential parent class call for this identifier (if it is one) 
@@ -120,12 +147,12 @@ let rec eval (st: SymbolTable) ast =
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
         let fv = es.PeekEvalStack()
-        setUnitType fv "pred" "undetermined"
+        setUnitType fv FplBlockType.IntrinsicPred (pos1, pos2) ""
         st.EvalPop()
     | Ast.FunctionalTermType((pos1, pos2),()) -> 
         st.EvalPush("FunctionalTermType")
         let fv = es.PeekEvalStack()
-        setUnitType fv "func" "func"
+        setUnitType fv FplBlockType.IntrinsicFunc (pos1, pos2) ""
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
@@ -172,11 +199,10 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ExtensionRegex s -> 
         st.EvalPush("ExtensionRegex")
         let fv = es.PeekEvalStack()
-        fv.ReprId <- s // set the extension's representation to the pattern
         let vars = fv.GetVariables()
         if vars.Length> 0 then
             let mainVar = vars.Head
-            mainVar.ReprId <- s // set the extenions's main variable's representation to the pattern
+            mainVar.TypeId <- s // set the extensions's main variable's type to the pattern
         st.EvalPop() 
     // | DollarDigits of Positions * int
     | Ast.DollarDigits((pos1, pos2), s) -> 
@@ -185,19 +211,16 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let sid = $"${s.ToString()}"
         if path.Contains("Expression.DollarDigits") then
-            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Index, fv)
+            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicInd, fv)
             value.FplId <- sid
-            value.ReprId <- sid
             es.PushEvalStack(value)
             es.PopEvalStack()
         else
             fv.FplId <- fv.FplId + sid
             if fv.TypeId <> "" then
                 fv.TypeId <- fv.TypeId + sid
-                fv.ReprId <- "undetermined"
             else
                 fv.TypeId <- "ind"
-                fv.ReprId <- sid
                     
             fv.EndPos <- pos2
         st.EvalPop() 
@@ -214,20 +237,17 @@ let rec eval (st: SymbolTable) ast =
         | FplBlockType.VariadicVariableMany -> 
             let sid = $"*{extensionName}"
             fv.TypeId <- sid
-            fv.ReprId <- $"intr {sid}"
         | FplBlockType.VariadicVariableMany1 -> 
             let sid = $"+{extensionName}"
             fv.TypeId <- sid
-            fv.ReprId <- $"intr {sid}"
         | _ -> 
             fv.TypeId <- extensionName
-            fv.ReprId <- $"intr {extensionName}"
             checkID019Diagnostics st extensionName pos1 pos2
         st.EvalPop() 
     | Ast.TemplateType((pos1, pos2), s) -> 
         st.EvalPush("TemplateType")
         let fv = es.PeekEvalStack()
-        setUnitType fv s s
+        setUnitType fv FplBlockType.IntrinsicTpl (pos1, pos2) s
         st.EvalPop() 
     | Ast.Var((pos1, pos2), name) ->
         st.EvalPush("Var")
@@ -241,7 +261,8 @@ let rec eval (st: SymbolTable) ast =
         let varValue = FplValue.CreateFplValue((pos1,pos2), FplBlockType.Variable, fv)
         varValue.FplId <- name
         varValue.TypeId <- "undef"
-        varValue.ReprId <- "undef"
+        let undefined = FplValue.CreateFplValue((fv.StartPos,fv.EndPos), FplBlockType.IntrinsicUndef, fv)
+        varValue.ValueList.Add(undefined)
         varValue.IsSignatureVariable <- es.InSignatureEvaluation 
         if isDeclaration then 
             // check for VAR03 diagnostics
@@ -291,8 +312,7 @@ let rec eval (st: SymbolTable) ast =
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
             fv.FplId <- name
-            fv.TypeId <- "undef"
-            fv.ReprId <- "undef"
+            fv.TypeId <- FplBlockType.IntrinsicUndef.ShortName
         ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
@@ -377,7 +397,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
-        fv.ReprId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
@@ -387,7 +406,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
-        fv.ReprId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
@@ -397,7 +415,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- symbol
         fv.TypeId <- symbol
-        fv.ReprId <- symbol
         fv.StartPos <- pos1
         fv.EndPos <- pos2
         emitSIG01Diagnostics st fv pos1 pos2 
@@ -450,20 +467,24 @@ let rec eval (st: SymbolTable) ast =
     | Ast.True((pos1, pos2), _) -> 
         st.EvalPush("True")
         let fv = es.PeekEvalStack()
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.FplId <- "true"
-        fv.ReprId <- "true"
-        fv.TypeId <- "pred"
+        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPred, fv)
+        value.StartPos <- pos1
+        value.EndPos <- pos2
+        value.FplId <- "true"
+        value.TypeId <- "pred"
+        es.PushEvalStack(value)
+        es.PopEvalStack()
         st.EvalPop() 
     | Ast.False((pos1, pos2), _) -> 
         st.EvalPush("False")
         let fv = es.PeekEvalStack()
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.FplId <- "false"
-        fv.ReprId <- "false"
-        fv.TypeId <- "pred"
+        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPred, fv)
+        value.StartPos <- pos1
+        value.EndPos <- pos2
+        value.FplId <- "false"
+        value.TypeId <- "pred"
+        es.PushEvalStack(value)
+        es.PopEvalStack()
         st.EvalPop() 
     | Ast.Undefined((pos1, pos2), _) -> 
         st.EvalPush("Undefined")
@@ -478,7 +499,10 @@ let rec eval (st: SymbolTable) ast =
         let refBlock = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Reference, es.PeekEvalStack()) 
         es.PushEvalStack(refBlock)
         refBlock.FplId <- "trivial"
-        refBlock.TypeId <- "trivial"
+        refBlock.TypeId <- "pred"
+        let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPred, es.PeekEvalStack())
+        value.FplId <- "true"
+        refBlock.ValueList.Add(value)
         es.PopEvalStack()
         st.EvalPop() 
     | Ast.Qed((pos1, pos2), _) -> 
@@ -499,11 +523,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Mapping")
         let fv = es.PeekEvalStack()
         let map = FplValue.CreateFplValue((pos1, pos2),FplBlockType.Mapping,fv)
-        map.ReprId <- ""
         es.PushEvalStack(map)
         eval st variableTypeAst
-        if fv.FplBlockType <> FplBlockType.Extension then
-            fv.ReprId <- map.ReprId
         es.PopEvalStack()
         st.EvalPop()
     | Ast.ClassIdentifier((pos1, pos2), ast1) ->
@@ -517,7 +538,6 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.FplId <- extensionString
         fv.TypeId <- extensionString
-        fv.ReprId <- extensionString
         checkID018Diagnostics st fv extensionString pos1 pos2
         st.EvalPop()
     | Ast.ExtensionType((pos1, pos2), extensionNameAst) ->
@@ -557,7 +577,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ByDef")
         let fv = es.PeekEvalStack()
         fv.FplId <- "bydef."
-        fv.ReprId <- "undetermined"
         fv.TypeId <- "bydef."
         eval st predicateWithQualificationAst
         emitPR001Diagnostics fv pos1 pos2
@@ -578,8 +597,22 @@ let rec eval (st: SymbolTable) ast =
         stmt.FplId <- "return"
         es.PushEvalStack(stmt)
         eval st returneeAst
-        let refBlock = stmt.ValueList[0]
-        emitSIG03Diagnostics refBlock fv
+        let returnedReference = stmt.ArgList[0]
+        emitSIG03Diagnostics returnedReference fv
+        let returnedValueOpt = returnedReference.GetArgument
+        match returnedValueOpt with
+        | Some returnedValue -> 
+            if returnedValue.ValueList.Count > 0 then
+                fv.ValueList.AddRange(returnedValue.ValueList)
+            else
+                // todo diagnostics returns uninitialized value
+                let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicUndef, fv)
+                fv.ValueList.Add(value)
+                fv.ValueList.Add(value)
+        | _ -> 
+            // add an undefined value since there was no argument of the 
+            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicUndef, fv)
+            fv.ValueList.Add(value)
         es.PopEvalStack() 
         st.EvalPop()
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
@@ -622,7 +655,7 @@ let rec eval (st: SymbolTable) ast =
                 match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
                 | Some classNode -> 
                     // add known class
-                    fv.ValueList.Add classNode
+                    fv.ArgList.Add classNode
                 | None -> ()
                 // add potential parent class call for this identifier
                 let path = st.EvalPath()
@@ -631,10 +664,9 @@ let rec eval (st: SymbolTable) ast =
             else
                 fv.FplId <- identifier
                 fv.TypeId <- identifier
-                fv.ReprId <- $"class {identifier}"
                 match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
                 | Some classNode -> 
-                    fv.ValueList.Add classNode
+                    fv.ArgList.Add classNode
                 | None -> ()
 
         | FplBlockType.Axiom
@@ -650,7 +682,6 @@ let rec eval (st: SymbolTable) ast =
         | FplBlockType.Predicate ->
             fv.FplId <- identifier
             fv.TypeId <- "pred"
-            fv.ReprId <- "undetermined"
         | FplBlockType.MandatoryFunctionalTerm
         | FplBlockType.OptionalFunctionalTerm
         | FplBlockType.FunctionalTerm ->
@@ -660,7 +691,6 @@ let rec eval (st: SymbolTable) ast =
             fv.FplId <- identifier
             fv.TypeId <- identifier
             checkID008Diagnostics fv pos1 pos2
-            fv.ReprId <- "obj"
         | FplBlockType.VariadicVariableMany -> 
             fv.TypeId <- $"*{identifier}"
         | FplBlockType.VariadicVariableMany1 -> 
@@ -681,11 +711,13 @@ let rec eval (st: SymbolTable) ast =
             | (FplBlockType.VariadicVariableMany, 0)
             | (FplBlockType.VariadicVariableMany1, 0) -> 
                 emitSIG04DiagnosticsForTypes identifier pos1 pos2
+                let undefValue = FplValue.CreateFplValue((fv.StartPos, fv.EndPos), FplBlockType.IntrinsicUndef, fv)
+                fv.ValueList.Add(undefValue)
+               
             | (FplBlockType.Variable, 1)
             | (FplBlockType.VariadicVariableMany, 1)
             | (FplBlockType.VariadicVariableMany1, 1) -> 
                 fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
-                fv.ReprId <- $"dec {candidates.Head.ReprId}"
             | (FplBlockType.Variable, _)
             | (FplBlockType.VariadicVariableMany, _)
             | (FplBlockType.VariadicVariableMany1, _) -> 
@@ -695,7 +727,7 @@ let rec eval (st: SymbolTable) ast =
                 | Some candidate -> 
                     match fv.FplBlockType with
                     | FplBlockType.Reference -> fv.Scope.Add(identifier, candidate)
-                    | _ -> fv.ValueList.Add(candidate)
+                    | _ -> fv.ArgList.Add(candidate)
                 | _ -> ()
         
         st.EvalPop()
@@ -765,7 +797,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("And")
         let fv = es.PeekEvalStack()
         fv.FplId <- "and"
-        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -777,7 +808,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Or")
         let fv = es.PeekEvalStack()
         fv.FplId <- "or"
-        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -789,7 +819,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Xor")
         let fv = es.PeekEvalStack()
         fv.FplId <- "xor"
-        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -811,7 +840,7 @@ let rec eval (st: SymbolTable) ast =
                 eval st ast
                 stmtList.Add(es.Pop())
         ) |> ignore
-        fv.ValueList.AddRange(stmtList)
+        fv.ArgList.AddRange(stmtList)
         st.EvalPop()
     | Ast.StatementList((pos1, pos2), asts) ->
         st.EvalPush("StatementList")
@@ -932,8 +961,8 @@ let rec eval (st: SymbolTable) ast =
 
                 let candidatesOfVariableTypes = 
                     candidatesOfVariables
-                    |> Seq.filter (fun fv1 -> fv1.ValueList.Count = 1)
-                    |> Seq.map (fun fv1 -> fv1.ValueList[0])
+                    |> Seq.filter (fun fv1 -> fv1.ArgList.Count = 1)
+                    |> Seq.map (fun fv1 -> fv1.ArgList[0])
                     |> Seq.toList
 
                 let candidates = candidatesOfSelfOrParentEntity 
@@ -1023,7 +1052,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Impl")
         let fv = es.PeekEvalStack()
         fv.FplId <- "impl"
-        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -1035,7 +1063,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Iif")
         let fv = es.PeekEvalStack()
         fv.FplId <- "iif"
-        es.PeekEvalStack().ReprId <- "undetermined"
         fv.TypeId <- "pred"
         eval st predicateAst1
         eval st predicateAst2
@@ -1047,7 +1074,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("IsOperator")
         let fv = es.PeekEvalStack()
         fv.FplId <- "is"
-        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         let operand = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Reference, fv) 
         es.PushEvalStack(operand)
@@ -1058,6 +1084,7 @@ let rec eval (st: SymbolTable) ast =
         eval st variableTypeAst
         es.PopEvalStack()
         evaluateIsOperator fv operand typeOfOperand
+        
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
         st.EvalPush("Delegate")
@@ -1241,7 +1268,7 @@ let rec eval (st: SymbolTable) ast =
             let pred = FplValue.CreateFplValue((pos1,pos2),FplBlockType.Reference,fv)
             es.PushEvalStack(pred)
             eval st predAst
-            fv.ValueList.Add(es.Pop()) // pop the stack element (same reference as pred) and store it in a list
+            fv.ArgList.Add(es.Pop()) // pop the stack element (same reference as pred) and store it in a list
             // followed by the operator
             match optOperandAst with
             | Some opAst -> 
@@ -1250,7 +1277,7 @@ let rec eval (st: SymbolTable) ast =
                 // evaluate the operator by trying to find a definition for the operator
                 eval st opAst
                 // store the index of the infix operator, so we still know it after sorting the list by precedence later
-                fv.ValueList.Add(es.Pop()) // pop the stack element (same reference as infixOperator) and store it in a list
+                fv.ArgList.Add(es.Pop()) // pop the stack element (same reference as infixOperator) and store it in a list
             | None -> () // in this case, we consumed and evaluated all operators in the infix operation (due to FPL parser Ast structure)
         )
         |> ignore
@@ -1271,19 +1298,19 @@ let rec eval (st: SymbolTable) ast =
 
         // This while loop will evaluate multiple unparenthesized infix operations
         // according to their precedence by grouping them into binary operations and leave fv with only one binary operation
-        while fv.ValueList.Count > 1 do
+        while fv.ArgList.Count > 1 do
             let mutable currentMinimalPrecedence = Int32.MaxValue
             let mutable currMinIndex = 1
-            for i in 1 .. 2 .. fv.ValueList.Count - 1 do
-                let currPrecedence = getPrecedence fv.ValueList[i]
+            for i in 1 .. 2 .. fv.ArgList.Count - 1 do
+                let currPrecedence = getPrecedence fv.ArgList[i]
                 if currentMinimalPrecedence > currPrecedence then
                     currentMinimalPrecedence <- currPrecedence
                     currMinIndex <- i
-            let currentOp = fv.ValueList[currMinIndex]
-            let firstOp = fv.ValueList[currMinIndex-1]
-            let secondOp = fv.ValueList[currMinIndex+1]
-            currentOp.ValueList.Add(firstOp)
-            currentOp.ValueList.Add(secondOp)
+            let currentOp = fv.ArgList[currMinIndex]
+            let firstOp = fv.ArgList[currMinIndex-1]
+            let secondOp = fv.ArgList[currMinIndex+1]
+            currentOp.ArgList.Add(firstOp)
+            currentOp.ArgList.Add(secondOp)
             match precNodeList currentOp with
             | x::xs -> 
                 match checkSIG04Diagnostics currentOp [x] with 
@@ -1291,8 +1318,8 @@ let rec eval (st: SymbolTable) ast =
                     runner.Run currentOp currentOp // execute the matched binary operator
                 | _ -> ()
             | _ -> ()
-            fv.ValueList.RemoveAt(currMinIndex+1) 
-            fv.ValueList.RemoveAt(currMinIndex-1) 
+            fv.ArgList.RemoveAt(currMinIndex+1) 
+            fv.ArgList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv
         let last = es.PeekEvalStack()
         runner.Run last last // execute the last matched binary operator
@@ -1348,20 +1375,22 @@ let rec eval (st: SymbolTable) ast =
         | FplBlockType.Predicate 
         | FplBlockType.MandatoryPredicate 
         | FplBlockType.OptionalPredicate ->
-            fv.ReprId <- last.ReprId
+            fv.ValueList.Add(last)
         | FplBlockType.Reference ->
             // simplify references created due to superfluous parentheses of expressions
             // by replacing them with their single value
             if prefixOpAst.IsNone && 
                 postfixOpAst.IsNone &&
                 fv.FplId = "" && 
-                fv.ValueList.Count = 1 then
-                    let subNode = fv.ValueList[0]
+                fv.ArgList.Count = 1 then
+                    let subNode = fv.ArgList[0]
                     if subNode.FplBlockType = FplBlockType.Reference then 
                         es.Pop() |> ignore
                         es.PushEvalStack(subNode)
                         subNode.Parent <- fv.Parent
-                        fv.ValueList.Clear()
+                        fv.ArgList.Clear()
+        | FplBlockType.Localization -> 
+            fv.FplId <- last.FplId
         | _ -> ()
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
@@ -1408,13 +1437,13 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(dummyValue)
         eval st predicateAst
         es.PopEvalStack() 
-        let assignedValueList = fv.ValueList |> Seq.toList |> List.rev 
+        let assignedValueList = fv.ArgList |> Seq.toList |> List.rev 
         let assignedValueOpt = 
             if assignedValueList.Length > 0 then
                 Some assignedValueList.Head
             else
                 None
-        let assigneeOpt = assigneeReference.GetValue
+        let assigneeOpt = assigneeReference.GetArgument
         match (assigneeOpt, assignedValueOpt) with
         | (Some assignee, Some assignedValue)  ->
             checkSIG05Diagnostics assignee assignedValue
@@ -1435,7 +1464,7 @@ let rec eval (st: SymbolTable) ast =
                     let classInstance = candidate.CreateInstance()
                     Some classInstance
                 | None -> 
-                    assignedValue.GetValue
+                    assignedValue.GetArgument
             match valueOpt with
             | Some value -> assignee.SetValue(value) |> ignore
             | None -> ()
@@ -1445,7 +1474,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("PredicateInstance")
         eval st signatureAst
         let fv = es.PeekEvalStack()
-        es.PeekEvalStack().ReprId <- "undetermined"
         match optAst with
         | Some ast1 -> 
             eval st ast1
@@ -1465,9 +1493,9 @@ let rec eval (st: SymbolTable) ast =
         eval st inheritedClassTypeAst
         eval st argumentTupleAst
         es.PopEvalStack()
-        if fv.ValueList.Count>0 then
-            let parentConstructorCallReference = fv.ValueList[0]
-            let parentConstructorCallRefValue = parentConstructorCallReference.GetValue
+        if fv.ArgList.Count>0 then
+            let parentConstructorCallReference = fv.ArgList[0]
+            let parentConstructorCallRefValue = parentConstructorCallReference.GetArgument
             match parentConstructorCallRefValue with
             | Some refVal -> 
                 if es.ParentClassCalls.ContainsKey(refVal.FplId) then
@@ -1476,7 +1504,7 @@ let rec eval (st: SymbolTable) ast =
                     match derivedClassOpt with
                     | Some derivedClass ->
                         let parentClassFilterList = 
-                            derivedClass.ValueList 
+                            derivedClass.ArgList 
                             |> Seq.filter (fun pc -> pc.FplId = refVal.FplId)
                             |> Seq.toList
                         if parentClassFilterList.Length > 0 then
@@ -1704,6 +1732,9 @@ let rec eval (st: SymbolTable) ast =
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         if not fv.IsIntrinsic then // if not intrinsic, check variable usage
             emitVAR04diagnostics fv
+        else    
+            let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicPred, fv)
+            fv.ValueList.Add(value)
         es.PopEvalStack()
         st.EvalPop()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
@@ -1731,9 +1762,9 @@ let rec eval (st: SymbolTable) ast =
         es.InSignatureEvaluation <- false
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
 
-        // clear the storage of parent class counters before evaluting the list of parent classes
+        // clear the storage of parent class counters before evaluating the list of parent classes
         es.ParentClassCalls.Clear() 
-        // now evalute the list of parent classes while adding the identified classes to the storage
+        // now evaluate the list of parent classes while adding the identified classes to the storage
         classTypeListAsts |> List.map (eval st) |> ignore
 
         eval st classContentAst
@@ -1775,6 +1806,20 @@ let rec eval (st: SymbolTable) ast =
         emitVAR03diagnosticsForCorollaryOrProofVariable fv  
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         emitVAR04diagnostics fv
+        let value = FplValue.CreateFplValue((pos1,pos1), FplBlockType.IntrinsicPred, fv)
+        value.FplId <- "true"
+        // check if all arguments could be correctly inferred
+        fv.Scope
+        |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Argument)
+        |> Seq.iter (fun kvp -> 
+            let argInference = kvp.Value.ArgList[1]
+            let argInferenceResult = argInference.Type(SignatureType.Repr)
+            match argInferenceResult with
+            | "true" -> ()
+            | _ -> value.FplId <- "false" // todo all other arguments that are either undetermined or false should issue an error
+
+        )
+        fv.ValueList.Add(value)
         es.PopEvalStack()
         st.EvalPop()
     | Ast.Precedence((pos1, pos2), precedence) ->

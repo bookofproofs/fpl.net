@@ -31,6 +31,13 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("pre2")>]
     [<DataRow("fun1")>]
     [<DataRow("fun2")>]
+    [<DataRow("fun3")>]
+    [<DataRow("fun4")>]
+    [<DataRow("fun5")>]
+    [<DataRow("fun6")>]
+    [<DataRow("fun7")>]
+    [<DataRow("fun8")>]
+    [<DataRow("fun9")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
     [<DataRow("loc1")>]
@@ -39,7 +46,7 @@ type TestFplValueScopeQualifiedStartPos() =
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("QualifiedStartPos") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
             | "theory" -> Assert.IsTrue(theory.QualifiedStartPos.Contains("Ln: 1, Col: 1)"))
@@ -65,10 +72,17 @@ type TestFplValueScopeQualifiedStartPos() =
             | "pre2" -> Assert.IsTrue(pre2.QualifiedStartPos.Contains("Ln: 21, Col: 17)"))
             | "fun1" -> Assert.IsTrue(fun1.QualifiedStartPos.Contains("Ln: 22, Col: 17)"))
             | "fun2" -> Assert.IsTrue(fun2.QualifiedStartPos.Contains("Ln: 23, Col: 17)"))
-            | "prf1" -> Assert.IsTrue(prf1.QualifiedStartPos.Contains("Ln: 24, Col: 13)"))
-            | "prf2" -> Assert.IsTrue(prf2.QualifiedStartPos.Contains("Ln: 25, Col: 13)"))
-            | "loc1" -> Assert.IsTrue(loc1.QualifiedStartPos.Contains("Ln: 26, Col: 13)"))
-            | "loc2" -> Assert.IsTrue(loc2.QualifiedStartPos.Contains("Ln: 27, Col: 13)"))
+            | "fun3" -> Assert.IsTrue(fun3.QualifiedStartPos.Contains("Ln: 24, Col: 17)"))
+            | "fun4" -> Assert.IsTrue(fun4.QualifiedStartPos.Contains("Ln: 25, Col: 17)"))
+            | "fun5" -> Assert.IsTrue(fun5.QualifiedStartPos.Contains("Ln: 26, Col: 17)"))
+            | "fun6" -> Assert.IsTrue(fun6.QualifiedStartPos.Contains("Ln: 27, Col: 17)"))
+            | "fun7" -> Assert.IsTrue(fun7.QualifiedStartPos.Contains("Ln: 28, Col: 17)"))
+            | "fun8" -> Assert.IsTrue(fun8.QualifiedStartPos.Contains("Ln: 29, Col: 17)"))
+            | "fun9" -> Assert.IsTrue(fun9.QualifiedStartPos.Contains("Ln: 30, Col: 17)"))
+            | "prf1" -> Assert.IsTrue(prf1.QualifiedStartPos.Contains("Ln: 31, Col: 13)"))
+            | "prf2" -> Assert.IsTrue(prf2.QualifiedStartPos.Contains("Ln: 32, Col: 13)"))
+            | "loc1" -> Assert.IsTrue(loc1.QualifiedStartPos.Contains("Ln: 33, Col: 13)"))
+            | "loc2" -> Assert.IsTrue(loc2.QualifiedStartPos.Contains("Ln: 34, Col: 13)"))
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -544,7 +558,7 @@ type TestFplValueScopeQualifiedStartPos() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 17)"))
@@ -645,7 +659,7 @@ type TestFplValueScopeQualifiedStartPos() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ValueList[0]
+            let base1 = ctor.ArgList[0]
 
             match var with
             | "base1" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 11, Col: 37)"))
@@ -678,7 +692,7 @@ type TestFplValueScopeQualifiedStartPos() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.IsTrue(base1.QualifiedStartPos.ToString().Contains("Ln: 1, Col: 17)"))
@@ -758,7 +772,7 @@ type TestFplValueScopeQualifiedStartPos() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ValueList[0]
+            let mapping = base1.ArgList[0]
             match var with
             | "base1" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", mapping.QualifiedStartPos.ToString())
             | "base2" -> Assert.AreEqual<string>("TestMappingQualifiedStartPos(Ln: 1, Col: 15)", mapping.QualifiedStartPos.ToString())
@@ -792,8 +806,8 @@ type TestFplValueScopeQualifiedStartPos() =
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
-            let just = arg.ValueList[0]
-            let ainf = arg.ValueList[1]
+            let just = arg.ArgList[0]
+            let ainf = arg.ArgList[1]
             let numbOfJustifications = just.Scope.Count
  
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
@@ -886,7 +900,7 @@ type TestFplValueScopeQualifiedStartPos() =
             let theory = r.Scope[filename]
             let pred = theory.Scope[predName]
             let lang = pred.Scope["tex"]
-            let trsl = lang.ValueList[0]
+            let trsl = lang.ArgList[0]
 
             match var with
             | "base0" -> Assert.AreEqual<string>("TestTranslationQualifiedStartPos(Ln: 1, Col: 13)", trsl.QualifiedStartPos.ToString())

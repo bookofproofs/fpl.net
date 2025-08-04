@@ -15,88 +15,119 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 *)
 
 let evaluateNegation (fplValue:FplValue) = 
-    let argOpt = fplValue.ValueList[0].GetValue
-    match argOpt with
-    | Some arg ->
-        match arg.ReprId with
-        | "false" -> 
-            fplValue.ReprId <- "true"
-        | "true" -> 
-            fplValue.ReprId <- "false"
-        | _ -> fplValue.ReprId <- "undetermined"
-    | _ -> fplValue.ReprId <- "undetermined"
+    let arg = fplValue.ArgList[0]
+    match arg.Type(SignatureType.Repr) with 
+    | "false" -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "true"
+        fplValue.ValueList.Add(newValue)
+    | "true" -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "false"
+        fplValue.ValueList.Add(newValue)
+    | "undetermined" -> 
+        fplValue.ValueList.Add(arg)
+    | _ -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        fplValue.ValueList.Add(newValue)
     
 let evaluateConjunction (fplValue:FplValue) =
-    let arg1Opt = fplValue.ValueList[0].GetValue
-    let arg2Opt = fplValue.ValueList[1].GetValue
-    match (arg1Opt,arg2Opt) with
-    | (Some arg1, Some arg2) -> 
-        match (arg1.ReprId, arg2.ReprId) with
-        | ("true", "false") 
-        | ("false", "true") 
-        | ("false", "false") -> fplValue.ReprId <- "false" 
-        | ("true", "true") -> fplValue.ReprId <- "true"
-        | _ -> fplValue.ReprId <- "undetermined"
-    | _ ->
-        fplValue.ReprId <- "undetermined"
+    let arg1 = fplValue.ArgList[0]
+    let arg2 = fplValue.ArgList[1]
+    match (arg1.Type(SignatureType.Repr), arg2.Type(SignatureType.Repr)) with
+    | ("true", "false") 
+    | ("false", "true") 
+    | ("false", "false") -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "false"
+        fplValue.ValueList.Add(newValue)
+    | ("true", "true") -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "true"
+        fplValue.ValueList.Add(newValue)
+    | _ -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        fplValue.ValueList.Add(newValue)
 
 let evaluateDisjunction (fplValue:FplValue) = 
-    let arg1Opt = fplValue.ValueList[0].GetValue
-    let arg2Opt = fplValue.ValueList[1].GetValue
-    match (arg1Opt,arg2Opt) with
-    | (Some arg1, Some arg2) -> 
-        match (arg1.ReprId, arg2.ReprId) with
-        | ("true", "false") 
-        | ("false", "true") 
-        | ("true", "true") -> fplValue.ReprId <- "true"
-        | ("false", "false") -> fplValue.ReprId <- "false" 
-        | _ -> fplValue.ReprId <- "undetermined"
-    | _ ->
-        fplValue.ReprId <- "undetermined"
+    let arg1 = fplValue.ArgList[0]
+    let arg2 = fplValue.ArgList[1]
+    match (arg1.Type(SignatureType.Repr), arg2.Type(SignatureType.Repr)) with
+    | ("true", "false") 
+    | ("false", "true") 
+    | ("true", "true") -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "true"
+        fplValue.ValueList.Add(newValue)
+    | ("false", "false") -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "false"
+        fplValue.ValueList.Add(newValue)
+    | _ -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        fplValue.ValueList.Add(newValue)
 
 let evaluateExclusiveOr (fplValue:FplValue) = 
-    let arg1Opt = fplValue.ValueList[0].GetValue
-    let arg2Opt = fplValue.ValueList[1].GetValue
-    match (arg1Opt,arg2Opt) with
-    | (Some arg1, Some arg2) -> 
-        match (arg1.ReprId, arg2.ReprId) with
-        | ("true", "false") 
-        | ("false", "true") -> fplValue.ReprId <- "true" 
-        | ("true", "true") 
-        | ("false", "false") -> fplValue.ReprId <- "false" 
-        | _ -> fplValue.ReprId <- "undetermined"
-    | _ ->
-        fplValue.ReprId <- "undetermined"
+    let arg1 = fplValue.ArgList[0]
+    let arg2 = fplValue.ArgList[1]
+    match (arg1.Type(SignatureType.Repr), arg2.Type(SignatureType.Repr)) with
+    | ("true", "false") 
+    | ("false", "true") -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "true"
+        fplValue.ValueList.Add(newValue)
+    | ("true", "true") 
+    | ("false", "false") -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "false"
+        fplValue.ValueList.Add(newValue)
+    | _ -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        fplValue.ValueList.Add(newValue)
 
 let evaluateImplication (fplValue:FplValue) = 
-    let arg1Opt = fplValue.ValueList[0].GetValue
-    let arg2Opt = fplValue.ValueList[1].GetValue
-    match (arg1Opt,arg2Opt) with
-    | (Some arg1, Some arg2) -> 
-        match (arg1.ReprId, arg2.ReprId) with
-        | ("true", "false") -> fplValue.ReprId <- "false"
-        | ("false", "true") 
-        | ("false", "false") 
-        | ("true", "true") -> fplValue.ReprId <- "true"
-        | _ -> fplValue.ReprId <- "undetermined"
-    | _ ->
-        fplValue.ReprId <- "undetermined"
+    let arg1 = fplValue.ArgList[0]
+    let arg2 = fplValue.ArgList[1]
+    match (arg1.Type(SignatureType.Repr), arg2.Type(SignatureType.Repr)) with
+    | ("true", "false") -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "false"
+        fplValue.ValueList.Add(newValue)
+    | ("false", "true") 
+    | ("false", "false") 
+    | ("true", "true") -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "true"
+        fplValue.ValueList.Add(newValue)
+    | _ -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        fplValue.ValueList.Add(newValue)
 
 let evaluateEquivalence (fplValue:FplValue) = 
-    let arg1Opt = fplValue.ValueList[0].GetValue
-    let arg2Opt = fplValue.ValueList[1].GetValue
-    match (arg1Opt,arg2Opt) with
-    | (Some arg1, Some arg2) -> 
-        match (arg1.ReprId, arg2.ReprId) with
-        | ("true", "true") 
-        | ("false", "false") -> fplValue.ReprId <- "true"
-        | ("false", "true") 
-        | ("true", "false") -> fplValue.ReprId <- "false"
-        | _ -> fplValue.ReprId <- "undetermined"
-    | _ ->
-        fplValue.ReprId <- "undetermined"
+    let arg1 = fplValue.ArgList[0]
+    let arg2 = fplValue.ArgList[1]
+    match (arg1.Type(SignatureType.Repr), arg2.Type(SignatureType.Repr)) with
+    | ("true", "true") 
+    | ("false", "false") -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "true"
+        fplValue.ValueList.Add(newValue)
+    | ("false", "true") 
+    | ("true", "false") -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "false"
+        fplValue.ValueList.Add(newValue)
+    | _ -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        fplValue.ValueList.Add(newValue)
     
-let evaluateIsOperator (fv:FplValue) (operand:FplValue) (typeOfOperand:FplValue) = 
+let evaluateIsOperator (fplValue:FplValue) (operand:FplValue) (typeOfOperand:FplValue) = 
     match mpwa [operand] [typeOfOperand] with
-    | Some errMsg -> fv.ReprId <- "false"
-    | None -> fv.ReprId <- "true"
+    | Some errMsg -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "false"
+        fplValue.ValueList.Add(newValue)
+    | None -> 
+        let newValue = FplValue.CreateFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
+        newValue.FplId <- "true"
+        fplValue.ValueList.Add(newValue)        

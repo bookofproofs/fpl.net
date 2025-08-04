@@ -308,18 +308,22 @@ type FplBlockType =
     | Translation
     | Language
     | Reference
-    | Object
     | Quantor
     | Mapping
     | Stmt
     | Assertion
     | Extension
     | Instance
-    | Index
+    | IntrinsicInd
+    | IntrinsicObj
+    | IntrinsicPred
+    | IntrinsicUndef
+    | IntrinsicFunc
+    | IntrinsicTpl
 
     member private this.UnqualifiedName =
         match this with
-        // parser error messages
+        // needed for parser error messages
         | Variable -> "variable"
         | VariadicVariableMany -> "zero-or-more variable"
         | VariadicVariableMany1 -> "one-or-more variable"
@@ -329,7 +333,6 @@ type FplBlockType =
         | OptionalFunctionalTerm -> "optional functional term property"
         | Constructor -> "constructor"
         | Class -> "class definition"
-        | Object -> "object"
         | Localization -> "localization"
         | Theorem -> "theorem"
         | Lemma -> "lemma"
@@ -355,19 +358,28 @@ type FplBlockType =
         | Extension -> "extension"
         | Root -> "root"
         | Instance -> "instance"
-        | Index -> "index"
+        | IntrinsicInd -> "intrinsic index"
+        | IntrinsicObj -> "intrinsic object"
+        | IntrinsicPred -> "intrinsic predicate"
+        | IntrinsicFunc -> "intrinsic functional term"
+        | IntrinsicTpl -> "intrinsic template"
+        | IntrinsicUndef -> "intrinsic undefined"
 
     member private this.Article =
         match this with
         | OptionalPredicate
         | OptionalFunctionalTerm
-        | Object
         | Argument
         | Assertion
         | ArgInference
         | Extension
         | Instance
-        | Index
+        | IntrinsicInd
+        | IntrinsicObj
+        | IntrinsicPred
+        | IntrinsicTpl
+        | IntrinsicUndef
+        | IntrinsicFunc
         | Axiom -> "an"
         | _ -> "a"
 
@@ -384,8 +396,7 @@ type FplBlockType =
         | MandatoryFunctionalTerm -> "mfunc"
         | OptionalFunctionalTerm -> "ofunc"
         | Constructor -> "ctor"
-        | Class -> "cl"
-        | Object -> "obj"
+        | Class -> "def cl"
         | Localization -> "loc"
         | Theorem -> "thm"
         | Lemma -> "lem"
@@ -396,8 +407,8 @@ type FplBlockType =
         | Axiom -> "ax"
         | RuleOfInference -> "inf"
         | Quantor -> "qtr"
-        | Predicate -> "pred"
-        | FunctionalTerm -> "func"
+        | Predicate -> "def pred"
+        | FunctionalTerm -> "def func"
         | Reference -> "ref"
         | Theory -> "th"
         | Argument -> "arg"
@@ -408,9 +419,14 @@ type FplBlockType =
         | Mapping -> "map"
         | Stmt -> "stmt"
         | Assertion -> "ass"
-        | Extension -> "ext"
+        | Extension -> "def ext"
         | Instance -> "inst"
-        | Index -> "ind"
+        | IntrinsicInd -> "ind"
+        | IntrinsicObj -> "obj"
+        | IntrinsicPred -> "pred"
+        | IntrinsicFunc -> "func"
+        | IntrinsicTpl -> "tpl"
+        | IntrinsicUndef -> "undef"
         | Root -> "root"
 
 type FixType =
@@ -434,7 +450,6 @@ type SignatureType =
     | Mixed
     | Repr
 
-
 type ScopeSearchResult =
     | FoundAssociate of FplValue
     | FoundMultiple of string
@@ -454,17 +469,18 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     let mutable _fplId = ""
     let mutable _typeId = ""
     let mutable (_filePath: string option) = None
-    let mutable _reprId = "undef"
     let mutable _hasBrackets = false
     let mutable _isIntrinsic = false
     let mutable _isSignatureVariable = false
+    let mutable _isInitializedVariable = false
 
     let mutable _parent = parent
     let _scope = Dictionary<string, FplValue>()
+    let _argList = List<FplValue>()
     let _valueList = List<FplValue>()
     let _assertedPredicates = List<FplValue>()
 
-    /// Indicates if this FplValue's Scope or ValueList can be treated as bracketed coordinates or as parenthesized parameters.
+    /// Indicates if this FplValue's Scope or ArgList can be treated as bracketed coordinates or as parenthesized parameters.
     member this.HasBrackets
         with get () = _hasBrackets
         and set (value) = _hasBrackets <- value
@@ -474,10 +490,8 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         with get () = _typeId
         and set (value) = _typeId <- value
 
-    /// ReprId of the FplValue.
-    member this.ReprId
-        with get () = _reprId
-        and set (value) = _reprId <- value
+    /// ValueList of the FplValue.
+    member this.ValueList = _valueList
 
     /// FplId of the FplValue.
     member this.FplId
@@ -542,11 +556,11 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     /// A list of asserted predicates for this FplValue
     member this.AssertedPredicates = _assertedPredicates
 
-    /// A scope inside this FplValue
+    /// A scope of this FplValue
     member this.Scope = _scope
 
-    /// A value list inside this FplValue
-    member this.ValueList = _valueList
+    /// An argument list of this FplValue
+    member this.ArgList = _argList
 
     /// Tries to find a mapping of this FplValue
     member this.Mapping =
@@ -557,8 +571,8 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             else
                 None
         | _ ->
-            if this.ValueList.Count > 0 && this.ValueList[0].FplBlockType = FplBlockType.Mapping then
-                Some(this.ValueList[0])
+            if this.ArgList.Count > 0 && this.ArgList[0].FplBlockType = FplBlockType.Mapping then
+                Some(this.ArgList[0])
             else
                 None
 
@@ -568,27 +582,20 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             inst.FplId <- this.FplId
             inst.TypeId <- this.TypeId
             let (constructors: FplValue list) = this.GetConstructors()
-            inst.ReprId <- 
-                // distinguish between intrinsic and non-intrinsic classes
-                // based on whether they have constructors or not
-                if constructors.Length = 0 && not (previous.FplBlockType = FplBlockType.Constructor) then
-                    $"intr {this.TypeId}"
-                else
-                    $"{this.TypeId}"
-            previous.ValueList
+            previous.ArgList
             |> Seq.iter (fun next -> 
-                inst.ValueList.Add (next.CreateInstance())
+                inst.ArgList.Add (next.CreateInstance())
             )
             inst
         match this.FplBlockType with
-        | FplBlockType.Object
+        | FplBlockType.IntrinsicObj
         | FplBlockType.Constructor
         | FplBlockType.Class ->
             getInstance this
         | FplBlockType.Stmt when this.FplId = "bas" ->
             // in case of a base class constructor call (that resides inside this that is a constructor)
             // identify the 
-            let baseClassOpt = this.GetValue
+            let baseClassOpt = this.GetArgument
             match baseClassOpt with
             | Some (baseClass:FplValue) -> 
                 getInstance baseClass
@@ -599,59 +606,116 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
 
     /// Type Identifier of this FplValue
     member this.Type(isSignature: SignatureType) =
-        match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
-        | (FplBlockType.Reference, true) ->
-            // delegate the type identifier to the referenced entitity
-            let val1 = this.Scope[this.FplId]
-            val1.Type(isSignature)
-        | (FplBlockType.Stmt, _)
-        | (FplBlockType.Extension, _) -> this.FplId
-        | _ ->
-            let head =
-                match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
-                | (FplBlockType.Reference, true) ->
-                    match isSignature with
-                    | SignatureType.Name -> this.Scope[this.FplId].Type(SignatureType.Name)
-                    | SignatureType.Type -> _typeId
-                    | SignatureType.Mixed -> _fplId
-                    | SignatureType.Repr -> _reprId
-                | (FplBlockType.Mapping, _) -> _typeId
-                | _ ->
-                    match isSignature with
-                    | SignatureType.Name -> _fplId
-                    | SignatureType.Type -> _typeId
-                    | SignatureType.Mixed -> _fplId
-                    | SignatureType.Repr -> _reprId
+        match isSignature with
+        | SignatureType.Repr -> 
+            let rec children (fv:FplValue) isFirst = 
+                match (isFirst, fv.ValueList.Count = 0) with
+                | (true, true) -> 
+                    match fv.FplBlockType with
+                    | FplBlockType.IntrinsicPred 
+                    | FplBlockType.IntrinsicInd 
+                    | FplBlockType.IntrinsicObj 
+                    | FplBlockType.IntrinsicFunc 
+                    | FplBlockType.IntrinsicUndef 
+                    | FplBlockType.IntrinsicTpl -> fv.FplId
+                    | FplBlockType.Class -> $"dec {fv.BlockTypeShortName} {fv.FplId}"
+                    | FplBlockType.FunctionalTerm -> 
+                        // since the FunctionTerm has no value, it has no return statement
+                        // And the FPL syntax ensures that this can only be the case
+                        // if the Functional Term is intrinsic.
+                        // In this case, the "representation" of the function is
+                        // its declared mapping type
+                        let mapping = fv.ArgList |> Seq.head 
+                        $"dec {mapping.Type(SignatureType.Repr)}"
+                    | FplBlockType.Variable when not (fv.IsInitializedVariable) 
+                        && fv.TypeId = FplBlockType.IntrinsicPred.ShortName -> 
+                        "undetermined"
+                    | FplBlockType.Variable when 
+                        not (fv.IsInitializedVariable) 
+                        && fv.TypeId <> FplBlockType.IntrinsicPred.ShortName 
+                        && fv.TypeId <> FplBlockType.IntrinsicUndef.ShortName -> 
+                        $"dec {fv.Type(SignatureType.Type)}"                    
+                    | FplBlockType.VariadicVariableMany
+                    | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
+                        $"dec {fv.Type(SignatureType.Type)}[]"                    
+                    | _ -> FplBlockType.IntrinsicUndef.ShortName
+                | (false, false) 
+                | (true, false) ->
+                    let subRepr = 
+                        fv.ValueList
+                        |> Seq.map (fun subfv -> 
+                            children subfv false 
+                        )
+                        |> String.concat ", "
+                    if subRepr = String.Empty then
+                        match fv.FplBlockType with
+                        | FplBlockType.IntrinsicPred 
+                        | FplBlockType.IntrinsicInd 
+                        | FplBlockType.IntrinsicObj 
+                        | FplBlockType.IntrinsicFunc 
+                        | FplBlockType.IntrinsicUndef 
+                        | FplBlockType.IntrinsicTpl -> fv.FplId
+                        | _ -> ""
+                    else
+                        match fv.FplBlockType with
+                        | FplBlockType.Predicate 
+                        | FplBlockType.Axiom 
+                        | FplBlockType.Theorem 
+                        | FplBlockType.Proposition 
+                        | FplBlockType.Lemma 
+                        | FplBlockType.Corollary 
+                        | FplBlockType.Conjecture 
+                        | FplBlockType.OptionalPredicate 
+                        | FplBlockType.MandatoryPredicate 
+                        | FplBlockType.Proof 
+                        | FplBlockType.RuleOfInference 
+                        | FplBlockType.Reference -> subRepr
+                        | FplBlockType.VariadicVariableMany
+                        | FplBlockType.VariadicVariableMany1                         
+                        | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
+                        | FplBlockType.Variable when not (fv.IsInitializedVariable) 
+                            && fv.TypeId <> FplBlockType.IntrinsicPred.ShortName 
+                            && fv.TypeId <> FplBlockType.IntrinsicUndef.ShortName -> 
+                            $"dec {fv.Type(SignatureType.Type)}"                    
+                        | FplBlockType.VariadicVariableMany
+                        | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
+                            $"dec {fv.Type(SignatureType.Type)}[]" 
+                        | FplBlockType.Variable when not (fv.IsInitializedVariable) 
+                            && fv.ValueList[0].TypeId <> FplBlockType.IntrinsicPred.ShortName -> 
+                            $"dec {fv.Type(SignatureType.Type)}"
+                        | _ -> $"{fv.FplId}({subRepr})"
+                | (false, true) -> fv.FplId
 
-            match (isSignature, this.TypeId) with
-            | (SignatureType.Repr, _) when
-                (this.FplBlockType = VariadicVariableMany1 || this.FplBlockType = VariadicVariableMany)
-                ->
-                let variadicContent =
-                    this.ValueList |> Seq.map (fun fv -> fv.Type(isSignature)) |> String.concat ", "
-
-                $"{this.Type(SignatureType.Type)}" + "{" + variadicContent + "}"
-            | (SignatureType.Repr, _) when this.FplBlockType = Variable ->
-                let vOpt = this.GetValue
-
-                match vOpt with
-                | Some (v: FplValue) -> v.Type(isSignature)
-                | None -> head
-            | (SignatureType.Repr, typeId) when
-                typeId = "pred" || typeId.StartsWith "pred(" || typeId.StartsWith "pred$"
-                ->
-                _reprId
-            | (SignatureType.Repr, typeId) when typeId = "func" || typeId.StartsWith "func(" -> _reprId
-            | (SignatureType.Repr, typeId) when typeId = "undef" || typeId = "ind" -> _reprId
-            | (SignatureType.Repr, _) when this.FplBlockType = FplBlockType.Class -> _reprId
+            children this true                     
+        | _ -> 
+            match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
+            | (FplBlockType.Reference, true) ->
+                // delegate the type identifier to the referenced entity
+                let val1 = this.Scope[this.FplId]
+                val1.Type(isSignature)
+            | (FplBlockType.Stmt, _)
+            | (FplBlockType.Extension, _) -> this.FplId
             | _ ->
+                let head =
+                    match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
+                    | (FplBlockType.Reference, true) ->
+                        match isSignature with
+                        | SignatureType.Name -> this.Scope[this.FplId].Type(SignatureType.Name)
+                        | SignatureType.Mixed -> _fplId
+                        | SignatureType.Type -> _typeId
+                        | SignatureType.Repr -> ""
+                    | (FplBlockType.Mapping, _) -> _typeId
+                    | _ ->
+                        match isSignature with
+                        | SignatureType.Name 
+                        | SignatureType.Mixed -> _fplId
+                        | SignatureType.Type -> _typeId
+                        | SignatureType.Repr -> ""
 
                 let propagate =
                     match isSignature with
-                    | SignatureType.Name
-                    | SignatureType.Type
-                    | SignatureType.Repr -> isSignature
                     | SignatureType.Mixed -> SignatureType.Type
+                    | _ -> isSignature
 
                 let paramTuple () =
                     this.Scope
@@ -668,8 +732,12 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                     | FplBlockType.Proof
                     | FplBlockType.Argument
                     | FplBlockType.Language
-                    | FplBlockType.Object
-                    | FplBlockType.Index
+                    | FplBlockType.IntrinsicObj
+                    | FplBlockType.IntrinsicInd
+                    | FplBlockType.IntrinsicPred
+                    | FplBlockType.IntrinsicFunc
+                    | FplBlockType.IntrinsicTpl
+                    | FplBlockType.IntrinsicUndef
                     | FplBlockType.Class -> head
                     | FplBlockType.Theorem
                     | FplBlockType.Lemma
@@ -714,7 +782,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         | _ -> ""
                     | FplBlockType.Instance ->
                         let args =
-                            this.ValueList
+                            this.ArgList
                             |> Seq.map (fun fv -> fv.Type(isSignature))
                             |> String.concat ","
                         if args <> String.Empty then
@@ -723,7 +791,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                             head
                     | FplBlockType.Translation ->
                         let args =
-                            this.ValueList
+                            this.ArgList
                             |> Seq.filter (fun fv ->
                                 fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
                             |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
@@ -758,14 +826,11 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         // The arguments are reserved for the arguments or the coordinates of the reference
                         // If the argument tuple equals "???", an empty argument or coordinates list has occurred
                         let args =
-                            let a =
-                                this.ValueList
-                                |> Seq.filter (fun fv ->
-                                    fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
-                                |> Seq.map (fun fv -> fv.Type(propagate))
-                                |> String.concat ", "
-
-                            a
+                            this.ArgList
+                            |> Seq.filter (fun fv ->
+                                fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
+                            |> Seq.map (fun fv -> fv.Type(propagate))
+                            |> String.concat ", "
 
                         match (head, args, qualification) with
                         | (_, "", Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
@@ -853,39 +918,37 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
 
         getFullName this true
 
-    /// Returns Some value of the FplValue taking into account if this
-    /// the value can be accessed directly or if the
-    /// FplValue is a Reference to a variable. In the latter case,
-    /// the value of the referenced variable is returned instead.
-    member this.GetValue =
+    /// Returns Some argument of the FplValue depending of the type of its 
+    /// FplBlockType. 
+    member this.GetArgument =
         match this.FplBlockType with
         | FplBlockType.Reference when this.Scope.ContainsKey(this.FplId) ->
             let refValue = this.Scope[this.FplId]
             // if the reference value itself contains value(s) and is not a class, 
             // return this value. 
             // Exceptions: 
-            // 1) if refValue is a class, its "value list" means something else - namely parent classes. In this case we only want to return the main class
-            // 2) if refValue is a constructor, its "value list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
-            if refValue.ValueList.Count > 0 && not (FplValue.IsClass(refValue)) && refValue.FplBlockType <> FplBlockType.Constructor then
-                Some refValue.ValueList[0] // return existing values except of classes, because those denoted their parent classes
+            // 1) if refValue is a class, its "arg list" means something else - namely parent classes. In this case we only want to return the main class
+            // 2) if refValue is a constructor, its "arg list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
+            if refValue.ArgList.Count > 0 && not (FplValue.IsClass(refValue)) && refValue.FplBlockType <> FplBlockType.Constructor then
+                Some refValue.ArgList[0] // return existing values except of classes, because those denoted their parent classes
             else 
                 Some refValue 
         | FplBlockType.Reference when this.FplId <> "" -> Some this
-        | FplBlockType.Reference when this.ValueList.Count = 0 -> Some this
-        | FplBlockType.Stmt when this.FplId = "bas" && this.ValueList.Count > 0 -> 
-            let test = this.ValueList[0]
+        | FplBlockType.Reference when this.ArgList.Count = 0 -> Some this
+        | FplBlockType.Stmt when this.FplId = "bas" && this.ArgList.Count > 0 -> 
+            let test = this.ArgList[0]
             // in case of a base.obj() constructor call
-            if test.ValueList.Count = 2 && 
-                test.ValueList[0].FplBlockType = FplBlockType.Object && 
-                test.ValueList[1].FplBlockType = FplBlockType.Reference &&
-                test.ValueList[1].FplId = "???" then
+            if test.ArgList.Count = 2 && 
+                test.ArgList[0].FplBlockType = FplBlockType.IntrinsicObj && 
+                test.ArgList[1].FplBlockType = FplBlockType.Reference &&
+                test.ArgList[1].FplId = "???" then
                 // return an FplValue inbuilt Object 
-                Some  test.ValueList[0] 
-            elif test.ValueList.Count > 0 then
+                Some  test.ArgList[0] 
+            elif test.ArgList.Count > 0 then
                Some test 
             else
                 None
-        | _ when this.ValueList.Count > 0 -> Some this.ValueList[0]
+        | _ when this.ArgList.Count > 0 -> Some this.ArgList[0]
         | _ -> None
 
     /// Sets the value of this FplValue taking into account if this
@@ -894,8 +957,12 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         match this.FplBlockType with
         | FplBlockType.Reference when this.Scope.ContainsKey(this.FplId) ->
             let var = this.Scope[this.FplId]
-            var.ValueList.Add fplValue
-        | _ -> this.ValueList.Add fplValue
+            var.ValueList.Clear()
+            var.ValueList.Add(fplValue)
+        | _ -> 
+            this.ValueList.Clear()
+            this.ValueList.Add(fplValue)
+        
 
     /// Indicates if this FplValue is a class.
     static member IsClass(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Class
@@ -987,6 +1054,11 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         sprintf "Cannot set IsSignatureVariable for non-variable %s" this.FplBlockType.ShortName
                     )
                 )
+
+    /// Indicates if this FplValue is an initialized variable
+    member this.IsInitializedVariable
+        with get () = _isInitializedVariable
+        and set (value) = _isInitializedVariable <- value
 
     /// Indicates if this FplValue is an intrinsically defined block
     member this.IsIntrinsic
@@ -1121,7 +1193,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         let root =
             new FplValue(FplBlockType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
 
-        root.ReprId <- ""
         root.TypeId <- ""
         root.FplId <- ""
         root
@@ -1144,17 +1215,10 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         | FplBlockType.Predicate
         | FplBlockType.RuleOfInference
         | FplBlockType.Quantor
+        | FplBlockType.IntrinsicPred
         | FplBlockType.Conjecture ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- "undetermined"
-            ret.TypeId <- "pred"
-            ret
-        | FplBlockType.Mapping ->
-            let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret
-        | FplBlockType.Constructor ->
-            let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- "obj"
+            ret.FplId <- "undetermined"
             ret.TypeId <- "pred"
             ret
         | FplBlockType.MandatoryPredicate
@@ -1174,23 +1238,36 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         | FplBlockType.Stmt
         | FplBlockType.Assertion
         | FplBlockType.Extension
-        | FplBlockType.OptionalFunctionalTerm -> new FplValue(fplBlockType, positions, Some parent)
-        | FplBlockType.Class ->
+        | FplBlockType.Mapping 
+        | FplBlockType.OptionalFunctionalTerm -> 
+            new FplValue(fplBlockType, positions, Some parent)
+        | FplBlockType.IntrinsicInd ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- "class"
+            ret.TypeId <- FplBlockType.IntrinsicInd.ShortName
+            ret.FplId <- FplBlockType.IntrinsicInd.ShortName
             ret
-        | FplBlockType.Index ->
-            let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- "$0"
-            ret.TypeId <- "ind"
-            ret.FplId <- "$0"
-            ret
+        | FplBlockType.Class 
+        | FplBlockType.Constructor 
         | FplBlockType.Instance
-        | FplBlockType.Object ->
+        | FplBlockType.IntrinsicObj ->
             let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.ReprId <- "obj"
-            ret.TypeId <- "obj"
-            ret.FplId <- "obj"
+            ret.TypeId <- FplBlockType.IntrinsicObj.ShortName
+            ret.FplId <- FplBlockType.IntrinsicObj.ShortName
+            ret
+        | FplBlockType.IntrinsicFunc ->
+            let ret = new FplValue(fplBlockType, positions, Some parent)
+            ret.TypeId <- FplBlockType.IntrinsicFunc.ShortName
+            ret.FplId <- FplBlockType.IntrinsicFunc.ShortName
+            ret
+        | FplBlockType.IntrinsicTpl ->
+            let ret = new FplValue(fplBlockType, positions, Some parent)
+            ret.TypeId <- FplBlockType.IntrinsicTpl.ShortName
+            ret.FplId <- FplBlockType.IntrinsicTpl.ShortName
+            ret
+        | FplBlockType.IntrinsicUndef ->
+            let ret = new FplValue(fplBlockType, positions, Some parent)
+            ret.TypeId <- FplBlockType.IntrinsicUndef.ShortName
+            ret.FplId <- FplBlockType.IntrinsicUndef.ShortName
             ret
         | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead."))
         | FplBlockType.Theory -> raise (ArgumentException("Please use CreateTheory for creating the theories instead."))
@@ -1248,7 +1325,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
 
     /// Copies other FplValue to this one without changing its reference pointer.
     member this.Copy(other: FplValue) =
-        this.ReprId <- other.ReprId
         this.FplId <- other.FplId
 
         if other.IsSignatureVariable then
@@ -1259,6 +1335,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         this.AuxiliaryInfo <- other.AuxiliaryInfo
         this.HasBrackets <- other.HasBrackets
         this.IsIntrinsic <- other.IsIntrinsic
+        this.IsInitializedVariable <- other.IsInitializedVariable
 
     /// Clones this FplValue.
     member this.Clone() =
@@ -1270,7 +1347,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                     FplValue.CreateTheory((fv.StartPos, fv.EndPos), fv.Parent.Value, fv.FilePath.Value)
                 | _ -> FplValue.CreateFplValue((fv.StartPos, fv.EndPos), fv.FplBlockType, fv.Parent.Value)
 
-            ret.ReprId <- fv.ReprId
             ret.FplId <- fv.FplId
 
             if fv.IsSignatureVariable then
@@ -1282,11 +1358,17 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             ret.HasBrackets <- fv.HasBrackets
             ret.IsIntrinsic <- fv.IsIntrinsic
             ret.ExpressionType <- fv.ExpressionType
+            ret.IsInitializedVariable <- fv.IsInitializedVariable
 
             fv.Scope
             |> Seq.iter (fun kvp ->
                 let value = recClone kvp.Value
                 ret.Scope.Add(kvp.Key, value))
+
+            fv.ArgList
+            |> Seq.iter (fun fv1 ->
+                let value = recClone fv1
+                ret.ArgList.Add(value))
 
             fv.ValueList
             |> Seq.iter (fun fv1 ->
@@ -1296,7 +1378,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             fv.AssertedPredicates
             |> Seq.iter (fun fv1 ->
                 // asserted predicates do not have to be cloned
-                ret.ValueList.Add(fv1))
+                ret.ArgList.Add(fv1))
 
             ret
 
@@ -1426,11 +1508,11 @@ let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) 
 
     match classRoot.FplBlockType with
     | FplBlockType.Class
-    | FplBlockType.Object ->
+    | FplBlockType.IntrinsicObj ->
         if rootType = baseClassName then
             Some(rootType)
         else
-            classRoot.ValueList
+            classRoot.ArgList
             |> Seq.collect (fun child ->
                 match findClassInheritanceChain child baseClassName with
                 | Some path -> [ rootType + ":" + path ]
@@ -1532,33 +1614,36 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
 
             if preventInfinite then
                 sb.AppendLine($"{indent}\"Scope\": [],") |> ignore
+                sb.AppendLine($"{indent}\"ArgList\": [],") |> ignore
                 sb.AppendLine($"{indent}\"ValueList\": []") |> ignore
             else
                 sb.AppendLine($"{indent}\"Scope\": [") |> ignore
-
                 let mutable counterScope = 0
-
                 root.Scope
                 |> Seq.iter (fun child ->
                     counterScope <- counterScope + 1
-
                     createJson
                         child.Value
                         sb
                         (level + 1)
                         (counterScope = root.Scope.Count)
                         (root.FplId = "self" || root.FplId = "parent"))
-
                 sb.AppendLine($"{indent}],") |> ignore
+
+                sb.AppendLine($"{indent}\"ArgList\": [") |> ignore
+                let mutable argList = 0
+                root.ArgList
+                |> Seq.iter (fun child ->
+                    argList <- argList + 1
+                    createJson child sb (level + 1) (argList = root.ArgList.Count) false)
+                sb.AppendLine($"{indent}],") |> ignore
+
                 sb.AppendLine($"{indent}\"ValueList\": [") |> ignore
-
                 let mutable valueList = 0
-
                 root.ValueList
                 |> Seq.iter (fun child ->
                     valueList <- valueList + 1
                     createJson child sb (level + 1) (valueList = root.ValueList.Count) false)
-
                 sb.AppendLine($"{indent}]") |> ignore
 
             if isLast then
@@ -1685,8 +1770,8 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
     | ScopeSearchResult.Found candidate ->
         match candidate.FplBlockType with
         | FplBlockType.Variable ->
-            if candidate.ValueList.Count > 0 then
-                let (varType: FplValue) = candidate.ValueList[0]
+            if candidate.ArgList.Count > 0 then
+                let (varType: FplValue) = candidate.ArgList[0]
 
                 varType.Scope
                 |> Seq.filter (fun kvp -> kvp.Value.FplId = name)
@@ -1856,7 +1941,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
             fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
         | _ -> fvp.Scope.Values |> Seq.toList
 
-    let arguments = fva.ValueList |> Seq.toList
+    let arguments = fva.ArgList |> Seq.toList
 
     let stdMsg = $"{fvp.QualifiedName}"
     let argResult = mpwa arguments parameters

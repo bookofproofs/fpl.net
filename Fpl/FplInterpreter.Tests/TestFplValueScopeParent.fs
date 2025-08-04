@@ -31,6 +31,13 @@ type TestFplValueScopeParent() =
     [<DataRow("pre2")>]
     [<DataRow("fun1")>]
     [<DataRow("fun2")>]
+    [<DataRow("fun3")>]
+    [<DataRow("fun4")>]
+    [<DataRow("fun5")>]
+    [<DataRow("fun6")>]
+    [<DataRow("fun7")>]
+    [<DataRow("fun8")>]
+    [<DataRow("fun9")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
     [<DataRow("loc1")>]
@@ -39,7 +46,7 @@ type TestFplValueScopeParent() =
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("Parent") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
             | "theory" -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
@@ -65,6 +72,13 @@ type TestFplValueScopeParent() =
             | "pre2" -> Assert.AreEqual<FplValue>(theory, pre2.Parent.Value)
             | "fun1" -> Assert.AreEqual<FplValue>(theory, fun1.Parent.Value)
             | "fun2" -> Assert.AreEqual<FplValue>(theory, fun2.Parent.Value)
+            | "fun3" -> Assert.AreEqual<FplValue>(theory, fun3.Parent.Value)
+            | "fun4" -> Assert.AreEqual<FplValue>(theory, fun4.Parent.Value)
+            | "fun5" -> Assert.AreEqual<FplValue>(theory, fun5.Parent.Value)
+            | "fun6" -> Assert.AreEqual<FplValue>(theory, fun6.Parent.Value)
+            | "fun7" -> Assert.AreEqual<FplValue>(theory, fun7.Parent.Value)
+            | "fun8" -> Assert.AreEqual<FplValue>(theory, fun8.Parent.Value)
+            | "fun9" -> Assert.AreEqual<FplValue>(theory, fun9.Parent.Value)
             | "prf1" -> Assert.AreEqual<FplValue>(thm1, prf1.Parent.Value)
             | "prf2" -> Assert.AreEqual<FplValue>(thm2, prf2.Parent.Value)
             | "loc1" -> Assert.AreEqual<FplValue>(theory, loc1.Parent.Value)
@@ -555,7 +569,7 @@ type TestFplValueScopeParent() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<FplValue>(pr1, base1.Parent.Value)
@@ -656,7 +670,7 @@ type TestFplValueScopeParent() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ValueList[0]
+            let base1 = ctor.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<FplValue>(ctor, base1.Parent.Value)
@@ -689,7 +703,7 @@ type TestFplValueScopeParent() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<FplValue>(pr1, base1.Parent.Value)
@@ -769,7 +783,7 @@ type TestFplValueScopeParent() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ValueList[0]
+            let mapping = base1.ArgList[0]
             match var with
             | "base1" -> Assert.AreEqual<FplValue>(base1, mapping.Parent.Value)
             | "base2" -> Assert.AreEqual<FplValue>(base1, mapping.Parent.Value)
@@ -803,8 +817,8 @@ type TestFplValueScopeParent() =
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
-            let just = arg.ValueList[0]
-            let ainf = arg.ValueList[1]
+            let just = arg.ArgList[0]
+            let ainf = arg.ArgList[1]
             let numbOfJustifications = just.Scope.Count
  
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
@@ -897,7 +911,7 @@ type TestFplValueScopeParent() =
             let theory = r.Scope[filename]
             let pred = theory.Scope[predName]
             let lang = pred.Scope["tex"]
-            let trsl = lang.ValueList[0]
+            let trsl = lang.ArgList[0]
 
             match var with
             | "base0" -> Assert.AreEqual<FplValue>(lang, trsl.Parent.Value)

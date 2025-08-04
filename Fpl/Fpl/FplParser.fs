@@ -257,7 +257,7 @@ classTypeRef.Value <- positions "ClassType" (specificClassType .>>. opt bracketM
 
 let mapping, mappingRef = createParserForwardedToRef()
 let predicateType = positions "CompoundPredicateType" (keywordPredicate .>>. opt paramTuple) |>> Ast.CompoundPredicateType
-let functionalTermType = positions "CompoundFunctionalTermType" (keywordFunction .>>. opt (paramTuple .>>. mapping)) |>> Ast.CompoundFunctionalTermType
+let functionalTermType = positions "CompoundFunctionalTermType" (keywordFunction .>>. opt (paramTuple .>>. (IW >>. mapping))) |>> Ast.CompoundFunctionalTermType
 
 let compoundVariableType = choice [ keywordIndex; xId; classType; functionalTermType; predicateType ] 
 let variableType = positions "VariableType" (compoundVariableType) |>> Ast.VariableType

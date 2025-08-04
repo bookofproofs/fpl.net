@@ -26,8 +26,8 @@ type Delegates() =
 
     let _equal (a:FplValue) (b:FplValue) =
         let getActual (x:FplValue) = 
-            if x.ValueList.Count > 0 then
-                x.ValueList[0]
+            if x.ArgList.Count > 0 then
+                x.ArgList[0]
             else 
                 x
 

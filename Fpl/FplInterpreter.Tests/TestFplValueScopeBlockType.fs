@@ -32,6 +32,13 @@ type TestFplValueScopeBlockType() =
     [<DataRow("pre2")>]
     [<DataRow("fun1")>]
     [<DataRow("fun2")>]
+    [<DataRow("fun3")>]
+    [<DataRow("fun4")>]
+    [<DataRow("fun5")>]
+    [<DataRow("fun6")>]
+    [<DataRow("fun7")>]
+    [<DataRow("fun8")>]
+    [<DataRow("fun9")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
     [<DataRow("loc1")>]
@@ -40,7 +47,7 @@ type TestFplValueScopeBlockType() =
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("BlockType") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
+        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FplBlockType>(FplBlockType.Root, r.FplBlockType)
             | "theory" -> Assert.AreEqual<FplBlockType>(FplBlockType.Theory, theory.FplBlockType)
@@ -66,6 +73,13 @@ type TestFplValueScopeBlockType() =
             | "pre2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Predicate, pre2.FplBlockType)
             | "fun1" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun1.FplBlockType)
             | "fun2" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun2.FplBlockType)
+            | "fun3" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun3.FplBlockType)
+            | "fun4" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun4.FplBlockType)
+            | "fun5" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun5.FplBlockType)
+            | "fun6" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun6.FplBlockType)
+            | "fun7" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun7.FplBlockType)
+            | "fun8" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun8.FplBlockType)
+            | "fun9" -> Assert.AreEqual<FplBlockType>(FplBlockType.FunctionalTerm, fun9.FplBlockType)
             | "prf1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Proof, prf1.FplBlockType)
             | "prf2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Proof, prf2.FplBlockType)
             | "loc1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Localization, loc1.FplBlockType)
@@ -549,15 +563,15 @@ type TestFplValueScopeBlockType() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
-            | "base2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
+            | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.IntrinsicPred, base1.FplBlockType)
+            | "base2" -> Assert.AreEqual<FplBlockType>(FplBlockType.IntrinsicPred, base1.FplBlockType)
             | "base3" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base4" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base5" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
-            | "base6" -> Assert.AreEqual<FplBlockType>(FplBlockType.Index, base1.FplBlockType)
+            | "base6" -> Assert.AreEqual<FplBlockType>(FplBlockType.IntrinsicInd, base1.FplBlockType)
             | "base7" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base8" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base9" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
@@ -650,8 +664,8 @@ type TestFplValueScopeBlockType() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let stmt = ctor.ValueList[0]
-            let base1 = stmt.ValueList[0]
+            let stmt = ctor.ArgList[0]
+            let base1 = stmt.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
@@ -684,7 +698,7 @@ type TestFplValueScopeBlockType() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
@@ -764,7 +778,7 @@ type TestFplValueScopeBlockType() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ValueList[0]
+            let mapping = base1.ArgList[0]
             match var with
             | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
             | "base2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
@@ -798,8 +812,8 @@ type TestFplValueScopeBlockType() =
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
-            let just = arg.ValueList[0]
-            let ainf = arg.ValueList[1]
+            let just = arg.ArgList[0]
+            let ainf = arg.ArgList[1]
             let numbOfJustifications = just.Scope.Count
  
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
@@ -892,7 +906,7 @@ type TestFplValueScopeBlockType() =
             let theory = r.Scope[filename]
             let pred = theory.Scope[predName]
             let lang = pred.Scope["tex"]
-            let trsl = lang.ValueList[0]
+            let trsl = lang.ArgList[0]
 
             match var with
             | "base0" -> Assert.AreEqual<FplBlockType>(FplBlockType.Translation, trsl.FplBlockType)
