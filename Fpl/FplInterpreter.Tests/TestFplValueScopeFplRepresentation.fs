@@ -253,9 +253,9 @@ type TestFplValueScopeFplRepresentation() =
             | "r" -> Assert.AreEqual<string>("undef", r.Type(SignatureType.Repr))
             | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
             | "block" -> Assert.AreEqual<string>("true", block.Type(SignatureType.Repr)); 
-            | "x" -> Assert.AreEqual<string>("undetermined", x.Type(SignatureType.Repr))
-            | "y" -> Assert.AreEqual<string>("undetermined", y.Type(SignatureType.Repr))
-            | "s" -> Assert.AreEqual<string>("undef", s.Type(SignatureType.Repr))
+            | "x" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Type(SignatureType.Repr))
+            | "y" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Type(SignatureType.Repr))
+            | "s" -> Assert.AreEqual<string>("dec Set", s.Type(SignatureType.Repr))
             | "xu" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xu.Type(SignatureType.Repr))
             | "xv" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xv.Type(SignatureType.Repr))
             | "xw" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xw.Type(SignatureType.Repr))
@@ -392,8 +392,8 @@ type TestFplValueScopeFplRepresentation() =
             | "r" -> Assert.AreEqual<string>("undef", r.Type(SignatureType.Repr))
             | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
             | "block" -> Assert.AreEqual<string>("true", block.Type(SignatureType.Repr)); 
-            | "x" -> Assert.AreEqual<string>("undetermined", x.Type(SignatureType.Repr))
-            | "y" -> Assert.AreEqual<string>("undetermined", y.Type(SignatureType.Repr))
+            | "x" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Type(SignatureType.Repr))
+            | "y" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Type(SignatureType.Repr))
             | "xu" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xu.Type(SignatureType.Repr))
             | "xv" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xv.Type(SignatureType.Repr))
             | "xw" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xw.Type(SignatureType.Repr))
@@ -551,10 +551,10 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
-    member this.TestPredicate(var, varVal) =
+    member this.TestExpression(var, varVal) =
         ad.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
-        let filename = "TestPredicate.fpl"
+        let filename = "TestExpression.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -785,7 +785,7 @@ type TestFplValueScopeFplRepresentation() =
             | "varIndSet42" -> Assert.AreEqual<string>("$42", varObj.Type(SignatureType.Repr))
             | "varIndSet100" -> Assert.AreEqual<string>("$100", varObj.Type(SignatureType.Repr))
             | "varFuncUnset" -> Assert.AreEqual<string>("dec func", varObj.Type(SignatureType.Repr))
-            | "varPredUnset" -> Assert.AreEqual<string>("undetermined", varObj.Type(SignatureType.Repr))
+            | "varPredUnset" -> Assert.AreEqual<string>("dec pred", varObj.Type(SignatureType.Repr))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

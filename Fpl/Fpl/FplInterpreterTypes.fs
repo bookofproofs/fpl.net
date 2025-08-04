@@ -687,11 +687,12 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         | FplBlockType.VariadicVariableMany1                         
                         | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
                         | FplBlockType.Variable when not (fv.IsInitializedVariable) 
-                            && fv.ValueList[0].TypeId = FplBlockType.IntrinsicPred.ShortName -> 
-                            subRepr
+                            && fv.TypeId <> FplBlockType.IntrinsicPred.ShortName 
+                            && fv.TypeId <> FplBlockType.IntrinsicUndef.ShortName -> 
+                            $"dec {fv.Type(SignatureType.Type)}"                    
                         | FplBlockType.VariadicVariableMany
-                        | FplBlockType.VariadicVariableMany1                         
-                        | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
+                        | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
+                            $"dec {fv.Type(SignatureType.Type)}[]" 
                         | FplBlockType.Variable when not (fv.IsInitializedVariable) 
                             && fv.ValueList[0].TypeId <> FplBlockType.IntrinsicPred.ShortName -> 
                             $"dec {fv.Type(SignatureType.Type)}"
