@@ -236,7 +236,7 @@ typeToIconMap.set('trsl','symbol-text');
 typeToIconMap.set('map','preview');
 typeToIconMap.set('stmt','symbol-event');
 typeToIconMap.set('ass','target');
-typeToIconMap.set('ext','extensions');
+typeToIconMap.set('def ext','extensions');
 typeToIconMap.set('inst','output');
 typeToIconMap.set('ind','symbol-numeric');
 typeToIconMap.set('tpl','gear');

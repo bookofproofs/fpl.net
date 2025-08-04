@@ -419,7 +419,7 @@ type FplBlockType =
         | Mapping -> "map"
         | Stmt -> "stmt"
         | Assertion -> "ass"
-        | Extension -> "ext"
+        | Extension -> "def ext"
         | Instance -> "inst"
         | IntrinsicInd -> "ind"
         | IntrinsicObj -> "obj"
