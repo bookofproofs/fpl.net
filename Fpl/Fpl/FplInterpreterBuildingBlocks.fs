@@ -92,11 +92,28 @@ let rec eval (st: SymbolTable) ast =
         | FplBlockType.IntrinsicFunc ->
             match fv.FplBlockType with
             | FplBlockType.Class -> () // do not override class's type with base obj
+            | FplBlockType.Reference ->
+                fv.TypeId <- $"{requiredValueType.ShortName}"
+                fv.ValueList.Clear()
+                fv.ValueList.Add(FplValue.CreateFplValue(positions, requiredValueType, fv))
             | _ ->  fv.TypeId <- $"{requiredValueType.ShortName}"
         | FplBlockType.IntrinsicTpl ->
-            fv.TypeId <- $"{tplName}"
+            match fv.FplBlockType with
+            | FplBlockType.Class -> () // do not override class's type with base obj
+            | FplBlockType.Reference ->
+                fv.TypeId <- $"{tplName}"
+                let value = FplValue.CreateFplValue(positions, requiredValueType, fv)
+                value.TypeId <- $"{tplName}"
+                value.FplId <- $"{tplName}"
+                fv.ValueList.Clear()
+                fv.ValueList.Add(value)
+            | _ ->  
+                fv.TypeId <- $"{tplName}"
         | _ ->
             fv.TypeId <- FplBlockType.IntrinsicUndef.ShortName
+            let value = FplValue.CreateFplValue(positions, FplBlockType.IntrinsicUndef, fv)
+            fv.ValueList.Clear()
+            fv.ValueList.Add(value)
 
         
         match fv.FplBlockType with 
@@ -1085,7 +1102,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("IsOperator")
         let fv = es.PeekEvalStack()
         fv.FplId <- "is"
-        fv.ReprId <- "undetermined"
         fv.TypeId <- "pred"
         let operand = FplValue.CreateFplValue((pos1, pos2), FplBlockType.Reference, fv) 
         es.PushEvalStack(operand)
