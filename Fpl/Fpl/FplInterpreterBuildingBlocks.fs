@@ -213,17 +213,14 @@ let rec eval (st: SymbolTable) ast =
         if path.Contains("Expression.DollarDigits") then
             let value = FplValue.CreateFplValue((pos1, pos2), FplBlockType.IntrinsicInd, fv)
             value.FplId <- sid
-            value.ReprId <- sid
             es.PushEvalStack(value)
             es.PopEvalStack()
         else
             fv.FplId <- fv.FplId + sid
             if fv.TypeId <> "" then
                 fv.TypeId <- fv.TypeId + sid
-                fv.ReprId <- "undetermined"
             else
                 fv.TypeId <- "ind"
-                fv.ReprId <- sid
                     
             fv.EndPos <- pos2
         st.EvalPop() 
@@ -264,7 +261,6 @@ let rec eval (st: SymbolTable) ast =
         let varValue = FplValue.CreateFplValue((pos1,pos2), FplBlockType.Variable, fv)
         varValue.FplId <- name
         varValue.TypeId <- "undef"
-        varValue.ReprId <- "undef"
         let undefined = FplValue.CreateFplValue((fv.StartPos,fv.EndPos), FplBlockType.IntrinsicUndef, fv)
         varValue.ValueList.Add(undefined)
         varValue.IsSignatureVariable <- es.InSignatureEvaluation 
@@ -317,7 +313,6 @@ let rec eval (st: SymbolTable) ast =
                 emitVAR01diagnostics name pos1 pos2
             fv.FplId <- name
             fv.TypeId <- FplBlockType.IntrinsicUndef.ShortName
-            fv.ReprId <- FplBlockType.IntrinsicUndef.ShortName
         ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
@@ -528,7 +523,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Mapping")
         let fv = es.PeekEvalStack()
         let map = FplValue.CreateFplValue((pos1, pos2),FplBlockType.Mapping,fv)
-        map.ReprId <- ""
         es.PushEvalStack(map)
         eval st variableTypeAst
         if fv.FplBlockType <> FplBlockType.Extension then

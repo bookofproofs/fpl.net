@@ -165,7 +165,7 @@ type TestFplBlockType() =
         | "Mapping" -> Assert.AreEqual<string>("map",FplBlockType.Mapping.ShortName)
         | "Stmt" -> Assert.AreEqual<string>("stmt",FplBlockType.Stmt.ShortName)
         | "Assertion" -> Assert.AreEqual<string>("ass",FplBlockType.Assertion.ShortName)
-        | "Extension" -> Assert.AreEqual<string>("ext",FplBlockType.Extension.ShortName)
+        | "Extension" -> Assert.AreEqual<string>("def ext",FplBlockType.Extension.ShortName)
         | "Instance" -> Assert.AreEqual<string>("inst",FplBlockType.Instance.ShortName)
         | "IntrinsicInd" -> Assert.AreEqual<string>("ind",FplBlockType.IntrinsicInd.ShortName)
         | "IntrinsicObj" -> Assert.AreEqual<string>("obj",FplBlockType.IntrinsicObj.ShortName)
