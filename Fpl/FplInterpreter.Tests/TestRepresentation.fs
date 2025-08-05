@@ -87,20 +87,19 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
-            let base1 = pr.ArgList[0]
-            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
+            Assert.AreEqual<string>(expected, pr.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
 
     [<DataRow("00","""def pred T() { dec ~v:ind; true };""", "dec ind")>]
-    [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", "undetermined")>]
+    [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", "dec pred")>]
     [<DataRow("00b","""def pred T() { dec ~v:obj; true };""", "dec obj")>]
     [<DataRow("00c","""def pred T() { dec ~v:func; true };""", "dec func")>]
     [<DataRow("00d","""def pred T() { dec ~v:tpl; true };""", "dec tpl")>]
     [<DataRow("01a","""def pred T() { dec ~v:tpl(d:ind); true };""", "dec tpl(ind)")>]
     [<DataRow("01b","""def pred T() { dec ~v:tpl(d:pred(e,f:obj)); true };""", "dec tpl(pred(obj, obj))")>]
     [<DataRow("01c","""def pred T() { dec ~v:func(d:tpl(e:obj,d,e:ind)) ->tpl1(d:pred(e,f:obj)); true };""", "dec func(tpl(obj, ind, ind)) -> tpl1(pred(obj, obj))")>]
-    [<DataRow("02","""def pred T() { dec ~v:A; true };""", "undef")>]
+    [<DataRow("02","""def pred T() { dec ~v:A; true };""", "dec A")>]
     [<DataRow("02a","""def cl A:obj {intr} def pred T() { dec ~v:A; true };""", "dec A")>]
     [<TestMethod>]
     member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
@@ -117,6 +116,25 @@ type TestRepresentation() =
             Assert.AreEqual<string>(expected, v.Type(SignatureType.Repr))
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", "true")>]
+    [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", "false")>]
+    [<TestMethod>]
+    member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
+        ad.Clear()
+        let filename = "TestRepresentationUnitializedVars.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let v = pr.Scope["v"]
+            Assert.AreEqual<string>(expected, v.Type(SignatureType.Repr))
+        | None -> 
+            Assert.IsTrue(false)
+
 
     [<DataRow("00","(@0 = A())", "false")>]
     [<DataRow("00a","(@1 = A())", "false")>]
