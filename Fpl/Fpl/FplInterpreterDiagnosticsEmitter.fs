@@ -443,7 +443,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 | _ -> ())
 
             if not duplicateInheritanceChainFound then
-                let obJ = FplValue.CreateFplValue((pos1, pos2),FplBlockType.IntrinsicObj,fplValue)
+                let obJ = createFplValue((pos1, pos2),FplBlockType.IntrinsicObj,fplValue)
                 Some obJ
             else
                 None

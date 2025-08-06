@@ -576,34 +576,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             else
                 None
 
-    member this.CreateInstance() =
-        let rec getInstance (previous:FplValue) =
-            let (inst:FplValue) = FplValue.CreateFplValue((_startPos,_endPos), FplBlockType.Instance, previous)
-            inst.FplId <- this.FplId
-            inst.TypeId <- this.TypeId
-            let (constructors: FplValue list) = this.GetConstructors()
-            previous.ArgList
-            |> Seq.iter (fun next -> 
-                inst.ArgList.Add (next.CreateInstance())
-            )
-            inst
-        match this.FplBlockType with
-        | FplBlockType.IntrinsicObj
-        | FplBlockType.Constructor
-        | FplBlockType.Class ->
-            getInstance this
-        | FplBlockType.Stmt when this.FplId = "bas" ->
-            // in case of a base class constructor call (that resides inside this that is a constructor)
-            // identify the 
-            let baseClassOpt = this.GetArgument
-            match baseClassOpt with
-            | Some (baseClass:FplValue) -> 
-                getInstance baseClass
-            | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
-        | _ -> 
-            FplValue.CreateRoot() // todo
-            //failwith ($"Cannot create an instance of a non-class {this.Type(SignatureType.Mixed)}")    
-
     /// Type Identifier of this FplValue
     member this.Type(isSignature: SignatureType) =
         match isSignature with
@@ -643,7 +615,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                         | FplBlockType.Reference ->
                             let argOpt = fv.GetArgument
                             match argOpt with
-                            | Some arg when arg.FplBlockType = FplBlockType.Variable && arg.IsInitializedVariable ->
+                            | Some (arg:FplValue) when arg.FplBlockType = FplBlockType.Variable && arg.IsInitializedVariable ->
                                 arg.Type(SignatureType.Repr)
                             | _ -> FplBlockType.IntrinsicUndef.ShortName      
                         | _ -> FplBlockType.IntrinsicUndef.ShortName
@@ -1199,98 +1171,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
 
         firstBlockParent fplValue
 
-    /// Checks if an fplValue is provable. This will only be true if
-    /// it is a theorem, a lemma, a proposition, or a corollary
-    static member IsProvable(fplValue: FplValue) =
-        fplValue.FplBlockType = FplBlockType.Theorem
-        || fplValue.FplBlockType = FplBlockType.Corollary
-        || fplValue.FplBlockType = FplBlockType.Lemma
-        || fplValue.FplBlockType = FplBlockType.Proposition
-
-    /// A factory method for the evaluation of FPL theories
-    static member CreateRoot() =
-        let root =
-            new FplValue(FplBlockType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
-
-        root.TypeId <- ""
-        root.FplId <- ""
-        root
-
-    /// A factory method for the evaluation of FPL theories
-    static member CreateTheory(positions: Positions, parent: FplValue, filePath: string) =
-        let th = new FplValue(FplBlockType.Theory, positions, Some parent)
-        th.FilePath <- Some filePath
-        th
-
-    /// A factory method for the evaluation of Fpl class definitions
-    static member CreateFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =
-        match fplBlockType with
-        | FplBlockType.Axiom
-        | FplBlockType.Theorem
-        | FplBlockType.Lemma
-        | FplBlockType.Proposition
-        | FplBlockType.Corollary
-        | FplBlockType.Proof
-        | FplBlockType.Predicate
-        | FplBlockType.RuleOfInference
-        | FplBlockType.Quantor
-        | FplBlockType.IntrinsicPred
-        | FplBlockType.Conjecture ->
-            let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.FplId <- "undetermined"
-            ret.TypeId <- "pred"
-            ret
-        | FplBlockType.MandatoryPredicate
-        | FplBlockType.OptionalPredicate
-        | FplBlockType.Reference
-        | FplBlockType.FunctionalTerm
-        | FplBlockType.Variable
-        | FplBlockType.VariadicVariableMany
-        | FplBlockType.VariadicVariableMany1
-        | FplBlockType.MandatoryFunctionalTerm
-        | FplBlockType.Localization
-        | FplBlockType.Argument
-        | FplBlockType.Justification
-        | FplBlockType.ArgInference
-        | FplBlockType.Language
-        | FplBlockType.Translation
-        | FplBlockType.Stmt
-        | FplBlockType.Assertion
-        | FplBlockType.Extension
-        | FplBlockType.Mapping 
-        | FplBlockType.OptionalFunctionalTerm -> 
-            new FplValue(fplBlockType, positions, Some parent)
-        | FplBlockType.IntrinsicInd ->
-            let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.TypeId <- FplBlockType.IntrinsicInd.ShortName
-            ret.FplId <- FplBlockType.IntrinsicInd.ShortName
-            ret
-        | FplBlockType.Class 
-        | FplBlockType.Constructor 
-        | FplBlockType.Instance
-        | FplBlockType.IntrinsicObj ->
-            let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.TypeId <- FplBlockType.IntrinsicObj.ShortName
-            ret.FplId <- FplBlockType.IntrinsicObj.ShortName
-            ret
-        | FplBlockType.IntrinsicFunc ->
-            let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.TypeId <- FplBlockType.IntrinsicFunc.ShortName
-            ret.FplId <- FplBlockType.IntrinsicFunc.ShortName
-            ret
-        | FplBlockType.IntrinsicTpl ->
-            let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.TypeId <- FplBlockType.IntrinsicTpl.ShortName
-            ret.FplId <- FplBlockType.IntrinsicTpl.ShortName
-            ret
-        | FplBlockType.IntrinsicUndef ->
-            let ret = new FplValue(fplBlockType, positions, Some parent)
-            ret.TypeId <- FplBlockType.IntrinsicUndef.ShortName
-            ret.FplId <- FplBlockType.IntrinsicUndef.ShortName
-            ret
-        | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead."))
-        | FplBlockType.Theory -> raise (ArgumentException("Please use CreateTheory for creating the theories instead."))
-
     /// A string representation of this FplValue
     override this.ToString() =
         $"{this.BlockTypeShortName} {this.Type(SignatureType.Name)}"
@@ -1356,52 +1236,164 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         this.IsIntrinsic <- other.IsIntrinsic
         this.IsInitializedVariable <- other.IsInitializedVariable
 
-    /// Clones this FplValue.
-    member this.Clone() =
-        let rec recClone (fv: FplValue) =
-            let ret =
-                match fv.FplBlockType with
-                | FplBlockType.Root -> FplValue.CreateRoot()
-                | FplBlockType.Theory ->
-                    FplValue.CreateTheory((fv.StartPos, fv.EndPos), fv.Parent.Value, fv.FilePath.Value)
-                | _ -> FplValue.CreateFplValue((fv.StartPos, fv.EndPos), fv.FplBlockType, fv.Parent.Value)
+    /// A factory method for the evaluation of FPL theories
+let createRoot() =
+    let root =
+        new FplValue(FplBlockType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
 
-            ret.FplId <- fv.FplId
+    root.TypeId <- ""
+    root.FplId <- ""
+    root
 
-            if fv.IsSignatureVariable then
-                ret.IsSignatureVariable <- fv.IsSignatureVariable
+/// A factory method for the evaluation of FPL theories
+let createTheory(positions: Positions, parent: FplValue, filePath: string) =
+    let th = new FplValue(FplBlockType.Theory, positions, Some parent)
+    th.FilePath <- Some filePath
+    th
 
-            ret.TypeId <- fv.TypeId
-            ret.Arity <- fv.Arity
-            ret.AuxiliaryInfo <- fv.AuxiliaryInfo
-            ret.HasBrackets <- fv.HasBrackets
-            ret.IsIntrinsic <- fv.IsIntrinsic
-            ret.ExpressionType <- fv.ExpressionType
-            ret.IsInitializedVariable <- fv.IsInitializedVariable
+/// A factory method for the evaluation of Fpl class definitions
+let createFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =
+    match fplBlockType with
+    | FplBlockType.Axiom
+    | FplBlockType.Theorem
+    | FplBlockType.Lemma
+    | FplBlockType.Proposition
+    | FplBlockType.Corollary
+    | FplBlockType.Proof
+    | FplBlockType.Predicate
+    | FplBlockType.RuleOfInference
+    | FplBlockType.Quantor
+    | FplBlockType.IntrinsicPred
+    | FplBlockType.Conjecture ->
+        let ret = new FplValue(fplBlockType, positions, Some parent)
+        ret.FplId <- "undetermined"
+        ret.TypeId <- "pred"
+        ret
+    | FplBlockType.MandatoryPredicate
+    | FplBlockType.OptionalPredicate
+    | FplBlockType.Reference
+    | FplBlockType.FunctionalTerm
+    | FplBlockType.Variable
+    | FplBlockType.VariadicVariableMany
+    | FplBlockType.VariadicVariableMany1
+    | FplBlockType.MandatoryFunctionalTerm
+    | FplBlockType.Localization
+    | FplBlockType.Argument
+    | FplBlockType.Justification
+    | FplBlockType.ArgInference
+    | FplBlockType.Language
+    | FplBlockType.Translation
+    | FplBlockType.Stmt
+    | FplBlockType.Assertion
+    | FplBlockType.Extension
+    | FplBlockType.Mapping 
+    | FplBlockType.OptionalFunctionalTerm -> 
+        new FplValue(fplBlockType, positions, Some parent)
+    | FplBlockType.IntrinsicInd ->
+        let ret = new FplValue(fplBlockType, positions, Some parent)
+        ret.TypeId <- FplBlockType.IntrinsicInd.ShortName
+        ret.FplId <- FplBlockType.IntrinsicInd.ShortName
+        ret
+    | FplBlockType.Class 
+    | FplBlockType.Constructor 
+    | FplBlockType.Instance
+    | FplBlockType.IntrinsicObj ->
+        let ret = new FplValue(fplBlockType, positions, Some parent)
+        ret.TypeId <- FplBlockType.IntrinsicObj.ShortName
+        ret.FplId <- FplBlockType.IntrinsicObj.ShortName
+        ret
+    | FplBlockType.IntrinsicFunc ->
+        let ret = new FplValue(fplBlockType, positions, Some parent)
+        ret.TypeId <- FplBlockType.IntrinsicFunc.ShortName
+        ret.FplId <- FplBlockType.IntrinsicFunc.ShortName
+        ret
+    | FplBlockType.IntrinsicTpl ->
+        let ret = new FplValue(fplBlockType, positions, Some parent)
+        ret.TypeId <- FplBlockType.IntrinsicTpl.ShortName
+        ret.FplId <- FplBlockType.IntrinsicTpl.ShortName
+        ret
+    | FplBlockType.IntrinsicUndef ->
+        let ret = new FplValue(fplBlockType, positions, Some parent)
+        ret.TypeId <- FplBlockType.IntrinsicUndef.ShortName
+        ret.FplId <- FplBlockType.IntrinsicUndef.ShortName
+        ret
+    | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead."))
+    | FplBlockType.Theory -> raise (ArgumentException("Please use CreateTheory for creating the theories instead."))
 
-            fv.Scope
-            |> Seq.iter (fun kvp ->
-                let value = recClone kvp.Value
-                ret.Scope.Add(kvp.Key, value))
+let rec createInstance (fplValue:FplValue) =
+    let rec getInstance (previous:FplValue) =
+        let (inst:FplValue) = createFplValue((fplValue.StartPos,fplValue.EndPos), FplBlockType.Instance, previous)
+        inst.FplId <- fplValue.FplId
+        inst.TypeId <- fplValue.TypeId
+        let (constructors: FplValue list) = fplValue.GetConstructors()
+        previous.ArgList
+        |> Seq.iter (fun next -> 
+            inst.ArgList.Add (createInstance next)
+        )
+        inst
+    match fplValue.FplBlockType with
+    | FplBlockType.IntrinsicObj
+    | FplBlockType.Constructor
+    | FplBlockType.Class ->
+        getInstance fplValue
+    | FplBlockType.Stmt when fplValue.FplId = "bas" ->
+        // in case of a base class constructor call (that resides inside this that is a constructor)
+        // identify the 
+        let baseClassOpt = fplValue.GetArgument
+        match baseClassOpt with
+        | Some (baseClass:FplValue) -> 
+            getInstance baseClass
+        | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {fplValue.Type(SignatureType.Mixed)}") 
+    | _ -> 
+        createRoot() // todo
+        //failwith ($"Cannot create an instance of a non-class {this.Type(SignatureType.Mixed)}")    
 
-            fv.ArgList
-            |> Seq.iter (fun fv1 ->
-                let value = recClone fv1
-                ret.ArgList.Add(value))
+/// Clones this FplValue.
+let cloneFplValue fplValue =
+    let rec recClone (fv: FplValue) =
+        let ret =
+            match fv.FplBlockType with
+            | FplBlockType.Root -> createRoot()
+            | FplBlockType.Theory ->
+                createTheory((fv.StartPos, fv.EndPos), fv.Parent.Value, fv.FilePath.Value)
+            | _ -> createFplValue((fv.StartPos, fv.EndPos), fv.FplBlockType, fv.Parent.Value)
 
-            fv.ValueList
-            |> Seq.iter (fun fv1 ->
-                let value = recClone fv1
-                ret.ValueList.Add(value))
+        ret.FplId <- fv.FplId
 
-            fv.AssertedPredicates
-            |> Seq.iter (fun fv1 ->
-                // asserted predicates do not have to be cloned
-                ret.ArgList.Add(fv1))
+        if fv.IsSignatureVariable then
+            ret.IsSignatureVariable <- fv.IsSignatureVariable
 
-            ret
+        ret.TypeId <- fv.TypeId
+        ret.Arity <- fv.Arity
+        ret.AuxiliaryInfo <- fv.AuxiliaryInfo
+        ret.HasBrackets <- fv.HasBrackets
+        ret.IsIntrinsic <- fv.IsIntrinsic
+        ret.ExpressionType <- fv.ExpressionType
+        ret.IsInitializedVariable <- fv.IsInitializedVariable
 
-        recClone this
+        fv.Scope
+        |> Seq.iter (fun kvp ->
+            let value = recClone kvp.Value
+            ret.Scope.Add(kvp.Key, value))
+
+        fv.ArgList
+        |> Seq.iter (fun fv1 ->
+            let value = recClone fv1
+            ret.ArgList.Add(value))
+
+        fv.ValueList
+        |> Seq.iter (fun fv1 ->
+            let value = recClone fv1
+            ret.ValueList.Add(value))
+
+        fv.AssertedPredicates
+        |> Seq.iter (fun fv1 ->
+            // asserted predicates do not have to be cloned
+            ret.ArgList.Add(fv1))
+
+        ret
+
+    recClone fplValue
 
 // Create an FplValue list containing all Scopes of an FplNode
 let rec flattenScopes (root: FplValue) =
@@ -1414,6 +1406,14 @@ let rec flattenScopes (root: FplValue) =
 let stripLastDollarDigit (s: string) =
     let lastIndex = s.LastIndexOf('$')
     if lastIndex <> -1 then s.Substring(0, lastIndex) else s
+
+/// Checks if an fplValue is provable. This will only be true if
+/// it is a theorem, a lemma, a proposition, or a corollary
+let isProvable (fplValue: FplValue) =
+    fplValue.FplBlockType = FplBlockType.Theorem
+    || fplValue.FplBlockType = FplBlockType.Corollary
+    || fplValue.FplBlockType = FplBlockType.Lemma
+    || fplValue.FplBlockType = FplBlockType.Proposition
 
 /// Tries to find a theorem-like statement for a proof
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
@@ -1436,11 +1436,11 @@ let tryFindAssociatedBlockForProof (fplValue: FplValue) =
 
             let provableBlocklist =
                 buildingBlocksMatchingDollarDigitNameList
-                |> List.filter (fun fv -> FplValue.IsProvable(fv))
+                |> List.filter (fun fv -> isProvable fv)
 
             let notProvableBlocklist =
                 buildingBlocksMatchingDollarDigitNameList
-                |> List.filter (fun fv -> not (FplValue.IsProvable(fv)))
+                |> List.filter (fun fv -> not (isProvable fv ))
 
             if provableBlocklist.Length > 1 then
                 ScopeSearchResult.FoundMultiple(
@@ -1488,7 +1488,7 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
             let potentialBlockList =
                 buildingBlocksMatchingDollarDigitNameList
                 |> List.filter (fun fv ->
-                    FplValue.IsProvable(fv)
+                    isProvable fv
                     || fv.FplBlockType = FplBlockType.Conjecture
                     || fv.FplBlockType = FplBlockType.Axiom)
 
@@ -1496,7 +1496,7 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
                 buildingBlocksMatchingDollarDigitNameList
                 |> List.filter (fun fv ->
                     not (
-                        FplValue.IsProvable(fv)
+                        isProvable fv
                         || fv.FplBlockType = FplBlockType.Conjecture
                         || fv.FplBlockType = FplBlockType.Axiom
                     ))
@@ -1545,7 +1545,7 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
     let mutable _mainTheory = ""
     let _evalPath = Stack<string>()
     let _evalLog = List<string>()
-    let _root = FplValue.CreateRoot()
+    let _root = createRoot()
     let _debug = debug
 
     /// Returns the current main theory.

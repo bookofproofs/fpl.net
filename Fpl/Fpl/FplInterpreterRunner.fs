@@ -34,7 +34,7 @@ type FplRunner() =
             p.ValueList.Clear()
             ar.ValueList 
             |> Seq.iter (fun fv -> 
-                let fvClone = fv.Clone() 
+                let fvClone = cloneFplValue fv
                 p.ValueList.Add(fvClone)
             )
 
@@ -83,7 +83,7 @@ type FplRunner() =
         |> Seq.iter (fun paramKvp -> 
             // save the clone of the original parameter variable
             let parOriginal = paramKvp.Value
-            let parClone = parOriginal.Clone()
+            let parClone = cloneFplValue parOriginal
             toBeSavedScopeVariables.Add(paramKvp.Key, parClone)
             if paramKvp.Value.IsSignatureVariable then 
                 pars.Add(parOriginal)
@@ -91,23 +91,6 @@ type FplRunner() =
         let kvp = KeyValuePair(called.FplId,toBeSavedScopeVariables)
         _stack.Push(kvp)
         pars |> Seq.toList
-       
-    member private this.SaveResult (caller:FplValue) (result:FplValue) = 
-        let toBeSavedResult = Dictionary<string, FplValue>()
-        toBeSavedResult.Add("result", result)
-        let kvp = KeyValuePair(caller.FplId,toBeSavedResult)
-        _stack.Push(kvp)
-
-    member this.TryGetResult (caller:FplValue) =
-        if _stack.Count = 0 then
-            None
-        else
-            let head = _stack.Peek()
-            if head.Key = caller.FplId && head.Value.ContainsKey("result") then
-                let popped = _stack.Pop()
-                Some popped.Value["result"]
-            else
-                None
 
     /// Restores the scope variables of an FplValue block from the stack.
     member private this.RestoreVariables(fvPar:FplValue) = 
@@ -132,7 +115,7 @@ type FplRunner() =
                     let pars = this.SaveVariables(called)
                     let args = caller.ArgList |> Seq.toList
                     this.ReplaceVariables pars args
-                    let lastRepr = FplValue.CreateRoot()
+                    let lastRepr = createRoot()
                     // run all statements of the called node
                     called.ArgList
                     |> Seq.iter (fun fv -> 
@@ -144,10 +127,6 @@ type FplRunner() =
                     caller.ValueList.Clear()
                     caller.ValueList.AddRange(lastRepr.ValueList)
                     this.RestoreVariables(called)
-                | FplBlockType.Class ->
-                    let inst = called.CreateInstance()
-                    this.SaveResult rootCaller inst
-
                 | _ -> ()
             else
                 match caller.FplId with 
