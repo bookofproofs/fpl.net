@@ -34,7 +34,9 @@ let evaluateNegation (fplValue:FplValue) =
 let evaluateConjunction (fplValue:FplValue) =
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]
-    match (arg1.Type(SignatureType.Repr), arg2.Type(SignatureType.Repr)) with
+    let arg1Repr = arg1.Type(SignatureType.Repr)
+    let arg2Repr = arg2.Type(SignatureType.Repr)
+    match (arg1Repr, arg2Repr) with
     | ("true", "false") 
     | ("false", "true") 
     | ("false", "false") -> 

@@ -638,7 +638,15 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                     | FplBlockType.VariadicVariableMany
                     | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
                         $"dec {fv.Type(SignatureType.Type)}[]"                    
-                    | _ -> FplBlockType.IntrinsicUndef.ShortName
+                    | _ -> 
+                        match fv.FplBlockType with
+                        | FplBlockType.Reference ->
+                            let argOpt = fv.GetArgument
+                            match argOpt with
+                            | Some arg when arg.FplBlockType = FplBlockType.Variable && arg.IsInitializedVariable ->
+                                arg.Type(SignatureType.Repr)
+                            | _ -> FplBlockType.IntrinsicUndef.ShortName      
+                        | _ -> FplBlockType.IntrinsicUndef.ShortName
                 | (false, false) 
                 | (true, false) ->
                     let subRepr = 
@@ -684,7 +692,15 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                             && fv.ValueList[0].TypeId <> FplBlockType.IntrinsicPred.ShortName -> 
                             $"dec {fv.Type(SignatureType.Type)}"
                         | _ -> $"{fv.FplId}({subRepr})"
-                | (false, true) -> fv.FplId
+                | (false, true) -> 
+                    match fv.FplBlockType with
+                    | FplBlockType.Reference ->
+                        let argOpt = fv.GetArgument
+                        match argOpt with
+                        | Some arg when arg.FplBlockType = FplBlockType.Variable && arg.IsInitializedVariable ->
+                            arg.Type(SignatureType.Repr)
+                        | _ -> fv.FplId
+                    | _ -> fv.FplId
 
             children this true                     
         | _ -> 
@@ -959,10 +975,13 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             let var = this.Scope[this.FplId]
             var.ValueList.Clear()
             var.ValueList.Add(fplValue)
+        | FplBlockType.Variable -> 
+            this.ValueList.Clear()
+            this.ValueList.Add(fplValue)
+            this.IsInitializedVariable <- true
         | _ -> 
             this.ValueList.Clear()
             this.ValueList.Add(fplValue)
-        
 
     /// Indicates if this FplValue is a class.
     static member IsClass(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Class

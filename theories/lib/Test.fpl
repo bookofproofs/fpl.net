@@ -4,8 +4,8 @@
  prop T3() { dec ~v:func; true }
  lem T4() { dec ~v:func; true }
  cor T4$1() { dec ~v:ind; @1 }
- def pred T6() {intr}
+ def pred T6() {dec ~x:pred x:=true; x}
  def func T7() -> obj {intr}
  def cl T8:obj {intr}
- extension Digits x@ /\d+/ -> Nat { ret x}
+ extension Digits x@ /\d+/ -> T8 { ret x }
 ;

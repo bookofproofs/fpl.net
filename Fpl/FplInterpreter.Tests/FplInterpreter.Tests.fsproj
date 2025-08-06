@@ -10,6 +10,7 @@
   <ItemGroup>
     <Compile Include="CommonTestHelpers.fs" />
     <Compile Include="CommonFplValueTestCases.fs" />
+    <Compile Include="TestExpressionEvaluationEvaluationVariables.fs" />
     <Compile Include="TestRepresentation.fs" />
     <Compile Include="TestSignatureMatching.fs" />
     <Compile Include="TestPrecedence.fs" />
