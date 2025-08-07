@@ -8,7 +8,7 @@ open CommonTestHelpers
 [<TestClass>]
 type TestExpressionEvaluationVariables() =
     let evalTreeFplId (fplValue: FplValue) = getType SignatureType.Name fplValue
-    let evalTreeFplRepresentation (fplValue: FplValue) = getType SignatureType.Repr fplValue
+    let evalTreeFplRepresentation (fplValue: FplValue) = getRepresentation fplValue
 
     [<DataRow("def pred T() { dec ~x:pred x:=true; x };", "true")>]
     [<DataRow("def pred T() { dec ~x:pred x:=false; x };", "false")>]

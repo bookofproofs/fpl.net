@@ -976,7 +976,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
 
     fplValue.ArgList
     |> Seq.iter (fun argument ->
-        let repr = getType SignatureType.Repr argument
+        let repr = getRepresentation argument
         match repr with
         | "true"
         | "false" -> ()

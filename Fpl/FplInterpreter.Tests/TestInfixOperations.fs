@@ -24,7 +24,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr base1)
+            Assert.AreEqual<string>(expected, getRepresentation base1)
         | None -> 
             Assert.IsTrue(false)
 
@@ -47,7 +47,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr base1)
+            Assert.AreEqual<string>(expected, getRepresentation base1)
         | None -> 
             Assert.IsTrue(false)
 
@@ -70,7 +70,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr base1)
+            Assert.AreEqual<string>(expected, getRepresentation base1)
         | None -> 
             Assert.IsTrue(false)
 
@@ -93,7 +93,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr base1)
+            Assert.AreEqual<string>(expected, getRepresentation base1)
         | None -> 
             Assert.IsTrue(false)
 
@@ -124,7 +124,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr base1)
+            Assert.AreEqual<string>(expected, getRepresentation base1)
         | None -> 
             Assert.IsTrue(false)
 
@@ -155,7 +155,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr base1)
+            Assert.AreEqual<string>(expected, getRepresentation base1)
         | None -> 
             Assert.IsTrue(false)
 
@@ -186,7 +186,7 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr base1)
+            Assert.AreEqual<string>(expected, getRepresentation base1)
         | None -> 
             Assert.IsTrue(false)
 
@@ -217,6 +217,6 @@ type TestInfixOperations() =
 
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ValueList[0]
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr base1)
+            Assert.AreEqual<string>(expected, getRepresentation base1)
         | None -> 
             Assert.IsTrue(false)

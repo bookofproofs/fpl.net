@@ -30,7 +30,7 @@ type TestRepresentation() =
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
             let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr predicateValue)
+            Assert.AreEqual<string>(expected, getRepresentation predicateValue)
         | None -> 
             Assert.IsTrue(false)
 
@@ -51,7 +51,7 @@ type TestRepresentation() =
             let assignee = assignmentStmt.ArgList[0]
             let assignedValue = assignee.GetArgument
             match assignedValue with 
-            | Some value -> Assert.AreEqual<string>(expected, getType SignatureType.Repr value)
+            | Some value -> Assert.AreEqual<string>(expected, getRepresentation value)
             | None -> Assert.AreEqual<string>(expected, "no value was assigned")
         | None -> 
             Assert.IsTrue(false)
@@ -70,7 +70,7 @@ type TestRepresentation() =
             let theory = r.Scope[filename]
             let fn = theory.Scope["T() -> Nat"] 
             let retStmt = fn.ArgList[0]
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr retStmt)
+            Assert.AreEqual<string>(expected, getRepresentation retStmt)
         | None -> 
             Assert.IsTrue(false)
 
@@ -87,7 +87,7 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr pr)
+            Assert.AreEqual<string>(expected, getRepresentation pr)
         | None -> 
             Assert.IsTrue(false)
 
@@ -113,7 +113,7 @@ type TestRepresentation() =
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
             let v = pr.Scope["v"]
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr v)
+            Assert.AreEqual<string>(expected, getRepresentation v)
         | None -> 
             Assert.IsTrue(false)
 
@@ -131,7 +131,7 @@ type TestRepresentation() =
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
             let v = pr.Scope["v"]
-            Assert.AreEqual<string>(expected, getType SignatureType.Repr v)
+            Assert.AreEqual<string>(expected, getRepresentation v)
         | None -> 
             Assert.IsTrue(false)
 
@@ -182,7 +182,7 @@ type TestRepresentation() =
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
             let base1 = pr.ArgList[0]
-            let result = getType SignatureType.Repr base1
+            let result = getRepresentation base1
             printf "Representation: %s\n" (result)
             Assert.AreEqual<string>(expected, result)
         | None -> 
