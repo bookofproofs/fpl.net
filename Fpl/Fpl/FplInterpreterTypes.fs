@@ -1105,72 +1105,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
                 ScopeSearchResult.NotFound
         | None -> ScopeSearchResult.NotApplicable
 
-    /// Checks if a variable is defined in the scope of block, if any
-    /// looking for it recursively, up the symbol tree.
-    static member VariableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearch =
-        let rec firstBlockParent (fv: FplValue) =
-
-            let qualifiedVar (fv1: FplValue) =
-                let allVarsInScope = fv1.GetVariables()
-
-                // try out all variables in scope
-                let foundList =
-                    allVarsInScope
-                    |> Seq.map (fun (var: FplValue) ->
-                        if var.Scope.ContainsKey name then
-                            ScopeSearchResult.Found(var.Scope[name])
-                        else
-                            ScopeSearchResult.NotFound)
-                    |> Seq.filter (fun ssr -> ssr <> ScopeSearchResult.NotFound)
-                    |> Seq.toList
-
-                if foundList.IsEmpty then
-                    firstBlockParent fv1.Parent.Value
-                else
-                    foundList.Head
-
-            match fv.FplBlockType with
-            | FplBlockType.Constructor
-            | FplBlockType.Localization
-            | FplBlockType.Quantor
-            | FplBlockType.MandatoryFunctionalTerm
-            | FplBlockType.OptionalFunctionalTerm
-            | FplBlockType.MandatoryPredicate
-            | FplBlockType.OptionalPredicate
-            | FplBlockType.Proof
-            | FplBlockType.Corollary
-            | FplBlockType.Axiom
-            | FplBlockType.Theorem
-            | FplBlockType.Lemma
-            | FplBlockType.Proposition
-            | FplBlockType.Corollary
-            | FplBlockType.Conjecture
-            | FplBlockType.Proof
-            | FplBlockType.RuleOfInference
-            | FplBlockType.Extension
-            | FplBlockType.Predicate
-            | FplBlockType.FunctionalTerm
-            | FplBlockType.Class ->
-                if fv.Scope.ContainsKey name then
-                    ScopeSearchResult.Found(fv.Scope[name])
-                elif fv.Parent.IsSome then
-                    if withNestedVariableSearch then
-                        match qualifiedVar fv with
-                        | ScopeSearchResult.NotFound -> firstBlockParent fv.Parent.Value
-                        | s -> s
-                    else
-                        firstBlockParent fv.Parent.Value
-                else
-                    ScopeSearchResult.NotFound
-            | FplBlockType.Theory -> ScopeSearchResult.NotFound
-            | _ ->
-                if fv.Parent.IsSome then
-                    firstBlockParent fv.Parent.Value
-                else
-                    ScopeSearchResult.NotFound
-
-        firstBlockParent fplValue
-
     /// A string representation of this FplValue
     override this.ToString() =
         $"{this.BlockTypeShortName} {this.Type(SignatureType.Name)}"
@@ -1236,7 +1170,73 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         this.IsIntrinsic <- other.IsIntrinsic
         this.IsInitializedVariable <- other.IsInitializedVariable
 
-    /// A factory method for the evaluation of FPL theories
+/// Checks if a variable is defined in the scope of block, if any
+/// looking for it recursively, up the symbol tree.
+let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearch =
+    let rec firstBlockParent (fv: FplValue) =
+
+        let qualifiedVar (fv1: FplValue) =
+            let allVarsInScope = fv1.GetVariables()
+
+            // try out all variables in scope
+            let foundList =
+                allVarsInScope
+                |> Seq.map (fun (var: FplValue) ->
+                    if var.Scope.ContainsKey name then
+                        ScopeSearchResult.Found(var.Scope[name])
+                    else
+                        ScopeSearchResult.NotFound)
+                |> Seq.filter (fun ssr -> ssr <> ScopeSearchResult.NotFound)
+                |> Seq.toList
+
+            if foundList.IsEmpty then
+                firstBlockParent fv1.Parent.Value
+            else
+                foundList.Head
+
+        match fv.FplBlockType with
+        | FplBlockType.Constructor
+        | FplBlockType.Localization
+        | FplBlockType.Quantor
+        | FplBlockType.MandatoryFunctionalTerm
+        | FplBlockType.OptionalFunctionalTerm
+        | FplBlockType.MandatoryPredicate
+        | FplBlockType.OptionalPredicate
+        | FplBlockType.Proof
+        | FplBlockType.Corollary
+        | FplBlockType.Axiom
+        | FplBlockType.Theorem
+        | FplBlockType.Lemma
+        | FplBlockType.Proposition
+        | FplBlockType.Corollary
+        | FplBlockType.Conjecture
+        | FplBlockType.Proof
+        | FplBlockType.RuleOfInference
+        | FplBlockType.Extension
+        | FplBlockType.Predicate
+        | FplBlockType.FunctionalTerm
+        | FplBlockType.Class ->
+            if fv.Scope.ContainsKey name then
+                ScopeSearchResult.Found(fv.Scope[name])
+            elif fv.Parent.IsSome then
+                if withNestedVariableSearch then
+                    match qualifiedVar fv with
+                    | ScopeSearchResult.NotFound -> firstBlockParent fv.Parent.Value
+                    | s -> s
+                else
+                    firstBlockParent fv.Parent.Value
+            else
+                ScopeSearchResult.NotFound
+        | FplBlockType.Theory -> ScopeSearchResult.NotFound
+        | _ ->
+            if fv.Parent.IsSome then
+                firstBlockParent fv.Parent.Value
+            else
+                ScopeSearchResult.NotFound
+
+    firstBlockParent fplValue
+
+/// A factory method for the evaluation of FPL theories
 let createRoot() =
     let root =
         new FplValue(FplBlockType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
