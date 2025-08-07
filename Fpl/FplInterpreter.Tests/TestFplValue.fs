@@ -743,7 +743,7 @@ type TestFplValue() =
         checkForUnexpectedErrors PR002
         let block = result.Value.Root.Scope[filename]
         let fplValue = block.Scope[expectedName]
-        let actualTypeSignature = fplValue.Type(SignatureType.Type)
+        let actualTypeSignature = getType SignatureType.Type fplValue
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.EndPos.Index
         Assert.AreEqual<string>(expectedType, actualTypeSignature)
@@ -770,7 +770,7 @@ type TestFplValue() =
         let result = prepareFplCode(filename + ".fpl", fplCode, false) 
         let block = result.Value.Root.Scope[filename]
         let fplValue = block.Scope[expectedName]
-        let actualTypeSignature = fplValue.Type(SignatureType.Name)
+        let actualTypeSignature = getType SignatureType.Name fplValue
         Assert.AreEqual<string>(expectedName, actualTypeSignature)
         prepareFplCode(filename, "", true) |> ignore
 
@@ -975,7 +975,7 @@ type TestFplValue() =
         let result = prepareFplCode(filename + ".fpl", fplCode, false) 
         let block = result.Value.Root.Scope[filename].Scope["T"]
         let fplValue = block.Scope[expectedName]
-        let actualTypeSignature = fplValue.Type(SignatureType.Type)
+        let actualTypeSignature = getType SignatureType.Type fplValue
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.EndPos.Index
         Assert.AreEqual<string>(expectedType, actualTypeSignature)
@@ -1058,7 +1058,7 @@ type TestFplValue() =
         let result = prepareFplCode(filename + ".fpl", fplCode, false) 
         let cl = result.Value.Root.Scope[filename].Scope["T"]
         let fplValue = cl.Scope[expectedName]
-        let actualTypeSignature = fplValue.Type(SignatureType.Type)
+        let actualTypeSignature = getType SignatureType.Type fplValue
         let actualSignatureStart = fplValue.StartPos.Index
         let actualSignatureEnd = fplValue.EndPos.Index
         Assert.AreEqual<string>(expectedType, actualTypeSignature)

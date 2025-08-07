@@ -45,14 +45,14 @@ type EvalStack() =
         let identifier = 
             match fv.FplBlockType with
             |  FplBlockType.Constructor -> 
-                fv.Type(SignatureType.Mixed)
+                getType SignatureType.Mixed fv
             | _ -> 
                 if FplValue.IsBlock(fv) then 
-                    fv.Type(SignatureType.Mixed)
+                    getType SignatureType.Mixed fv
                 elif FplValue.IsVariable(fv) then 
                     fv.FplId
                 else
-                    fv.Type(SignatureType.Name)
+                    getType SignatureType.Name fv
         match inScopeOfParent fv identifier with
         | ScopeSearchResult.Found conflict -> 
             match next.FplBlockType with

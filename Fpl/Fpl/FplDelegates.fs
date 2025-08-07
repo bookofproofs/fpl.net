@@ -33,8 +33,8 @@ type Delegates() =
 
         let a1 = getActual(a)
         let b1 = getActual(b)
-        let a1Repr = a1.Type(SignatureType.Repr)
-        let b1Repr = b1.Type(SignatureType.Repr)
+        let a1Repr = getType SignatureType.Repr a1
+        let b1Repr = getType SignatureType.Repr b1
 
         match a1Repr with
         | "undef" -> 
@@ -57,7 +57,7 @@ type Delegates() =
                 failwithf "OK:%b" (a1Repr = b1Repr)
 
     let _decrement (a:FplValue) =
-        $"todo {a.Type(SignatureType.Repr)}" 
+        $"todo {getType SignatureType.Repr a}" 
 
     let _externalDelegates = 
         Map.ofList [

@@ -16,7 +16,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 let evaluateNegation (fplValue:FplValue) = 
     let arg = fplValue.ArgList[0]
-    match arg.Type(SignatureType.Repr) with 
+    match getType SignatureType.Repr arg with 
     | "false" -> 
         let newValue = createFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
         newValue.FplId <- "true"
@@ -34,8 +34,8 @@ let evaluateNegation (fplValue:FplValue) =
 let evaluateConjunction (fplValue:FplValue) =
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]
-    let arg1Repr = arg1.Type(SignatureType.Repr)
-    let arg2Repr = arg2.Type(SignatureType.Repr)
+    let arg1Repr = getType SignatureType.Repr arg1
+    let arg2Repr = getType SignatureType.Repr arg2
     match (arg1Repr, arg2Repr) with
     | ("true", "false") 
     | ("false", "true") 
@@ -54,7 +54,9 @@ let evaluateConjunction (fplValue:FplValue) =
 let evaluateDisjunction (fplValue:FplValue) = 
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]
-    match (arg1.Type(SignatureType.Repr), arg2.Type(SignatureType.Repr)) with
+    let arg1Repr = getType SignatureType.Repr arg1
+    let arg2Repr = getType SignatureType.Repr arg2
+    match (arg1Repr, arg2Repr) with
     | ("true", "false") 
     | ("false", "true") 
     | ("true", "true") -> 
@@ -72,7 +74,9 @@ let evaluateDisjunction (fplValue:FplValue) =
 let evaluateExclusiveOr (fplValue:FplValue) = 
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]
-    match (arg1.Type(SignatureType.Repr), arg2.Type(SignatureType.Repr)) with
+    let arg1Repr = getType SignatureType.Repr arg1
+    let arg2Repr = getType SignatureType.Repr arg2
+    match (arg1Repr, arg2Repr) with
     | ("true", "false") 
     | ("false", "true") -> 
         let newValue = createFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
@@ -90,7 +94,9 @@ let evaluateExclusiveOr (fplValue:FplValue) =
 let evaluateImplication (fplValue:FplValue) = 
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]
-    match (arg1.Type(SignatureType.Repr), arg2.Type(SignatureType.Repr)) with
+    let arg1Repr = getType SignatureType.Repr arg1
+    let arg2Repr = getType SignatureType.Repr arg2
+    match (arg1Repr, arg2Repr) with
     | ("true", "false") -> 
         let newValue = createFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)
         newValue.FplId <- "false"
@@ -108,7 +114,9 @@ let evaluateImplication (fplValue:FplValue) =
 let evaluateEquivalence (fplValue:FplValue) = 
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]
-    match (arg1.Type(SignatureType.Repr), arg2.Type(SignatureType.Repr)) with
+    let arg1Repr = getType SignatureType.Repr arg1
+    let arg2Repr = getType SignatureType.Repr arg2
+    match (arg1Repr, arg2Repr) with
     | ("true", "true") 
     | ("false", "false") -> 
         let newValue = createFplValue((fplValue.StartPos, fplValue.EndPos), FplBlockType.IntrinsicPred, fplValue)

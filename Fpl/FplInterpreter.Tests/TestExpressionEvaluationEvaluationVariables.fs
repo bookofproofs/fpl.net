@@ -7,8 +7,8 @@ open CommonTestHelpers
 
 [<TestClass>]
 type TestExpressionEvaluationVariables() =
-    let evalTreeFplId (fplValue: FplValue) = fplValue.Type(SignatureType.Name)
-    let evalTreeFplRepresentation (fplValue: FplValue) = fplValue.Type(SignatureType.Repr)
+    let evalTreeFplId (fplValue: FplValue) = getType SignatureType.Name fplValue
+    let evalTreeFplRepresentation (fplValue: FplValue) = getType SignatureType.Repr fplValue
 
     [<DataRow("def pred T() { dec ~x:pred x:=true; x };", "true")>]
     [<DataRow("def pred T() { dec ~x:pred x:=false; x };", "false")>]
@@ -28,7 +28,7 @@ type TestExpressionEvaluationVariables() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
+            printfn "%s" (getType SignatureType.Mixed pr1)
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -60,7 +60,7 @@ type TestExpressionEvaluationVariables() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
+            printfn "%s" (getType SignatureType.Mixed pr1)
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -87,7 +87,7 @@ type TestExpressionEvaluationVariables() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
+            printfn "%s" (getType SignatureType.Mixed pr1)
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -119,7 +119,7 @@ type TestExpressionEvaluationVariables() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
+            printfn "%s" (getType SignatureType.Mixed pr1)
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -155,7 +155,7 @@ type TestExpressionEvaluationVariables() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
+            printfn "%s" (getType SignatureType.Mixed pr1)
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -184,7 +184,7 @@ type TestExpressionEvaluationVariables() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
+            printfn "%s" (getType SignatureType.Mixed pr1)
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -213,7 +213,7 @@ type TestExpressionEvaluationVariables() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (pr1.Type(SignatureType.Mixed))
+            printfn "%s" (getType SignatureType.Mixed pr1)
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)

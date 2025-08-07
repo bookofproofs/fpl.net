@@ -1812,7 +1812,7 @@ let rec eval (st: SymbolTable) ast =
         |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Argument)
         |> Seq.iter (fun kvp -> 
             let argInference = kvp.Value.ArgList[1]
-            let argInferenceResult = argInference.Type(SignatureType.Repr)
+            let argInferenceResult = getType SignatureType.Repr argInference
             match argInferenceResult with
             | "true" -> ()
             | _ -> value.FplId <- "false" // todo all other arguments that are either undetermined or false should issue an error
