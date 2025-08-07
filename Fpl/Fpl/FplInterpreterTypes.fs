@@ -801,7 +801,7 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         this.IsInitializedVariable <- other.IsInitializedVariable
 
 /// Type identifier of an FplValue.
-let rec getType (isSignature: SignatureType) (fplValue:FplValue)=
+let rec getType (isSignature: SignatureType) (fplValue:FplValue) =
     match (fplValue.FplBlockType, fplValue.Scope.ContainsKey(fplValue.FplId)) with
     | (FplBlockType.Reference, true) ->
         // delegate the type identifier to the referenced entity
@@ -971,6 +971,193 @@ let rec getType (isSignature: SignatureType) (fplValue:FplValue)=
             | _ -> ""
 
         idRec ()
+
+/// Type identifier of an FplValue.
+let rec getTypeTuple (fplValue:FplValue) =
+    match (fplValue.FplBlockType, fplValue.Scope.ContainsKey(fplValue.FplId)) with
+    | (FplBlockType.Reference, true) ->
+        // delegate the type identifier to the referenced entity
+        let val1 = fplValue.Scope[fplValue.FplId]
+        getTypeTuple val1
+    | (FplBlockType.Stmt, _)
+    | (FplBlockType.Extension, _) -> (fplValue.FplId, fplValue.FplId, fplValue.FplId)
+    | _ ->
+        let (headName, headMixed, headType) =
+            match (fplValue.FplBlockType, fplValue.Scope.ContainsKey(fplValue.FplId)) with
+            | (FplBlockType.Reference, true) ->
+                getTypeTuple fplValue.Scope[fplValue.FplId]
+            | (FplBlockType.Mapping, _) -> (fplValue.TypeId, fplValue.TypeId, fplValue.TypeId)
+            | _ ->
+                (fplValue.FplId, fplValue.FplId, fplValue.TypeId)
+
+        let (paramName, paramMixed, paramType) =
+            fplValue.Scope
+            |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
+                kvp.Value.IsSignatureVariable
+                || (FplValue.IsVariable(fplValue) && not (FplValue.IsClass(kvp.Value)))
+                || fplValue.FplBlockType = FplBlockType.Mapping)
+            |> Seq.map (fun kvp -> getTypeTuple kvp.Value)
+            |> Seq.toList
+            |> List.unzip3
+            |> fun (names, mixed, types) ->
+                (String.concat ", " names, String.concat ", " mixed, String.concat ", " types)
+
+        let idRecTuple () =
+            match fplValue.FplBlockType with
+            | FplBlockType.Theory
+            | FplBlockType.Proof
+            | FplBlockType.Argument
+            | FplBlockType.Language
+            | FplBlockType.IntrinsicObj
+            | FplBlockType.IntrinsicInd
+            | FplBlockType.IntrinsicPred
+            | FplBlockType.IntrinsicFunc
+            | FplBlockType.IntrinsicTpl
+            | FplBlockType.IntrinsicUndef
+            | FplBlockType.Class ->
+                (headName, headMixed, headType)
+
+            | FplBlockType.Theorem
+            | FplBlockType.Lemma
+            | FplBlockType.Proposition
+            | FplBlockType.Conjecture
+            | FplBlockType.RuleOfInference
+            | FplBlockType.Predicate
+            | FplBlockType.Corollary
+            | FplBlockType.Constructor
+            | FplBlockType.OptionalPredicate
+            | FplBlockType.MandatoryPredicate
+            | FplBlockType.Axiom ->
+                (sprintf "%s(%s)" headName paramName,
+                 sprintf "%s(%s)" headMixed paramMixed,
+                 sprintf "%s(%s)" headType paramType)
+
+            | FplBlockType.Quantor
+            | FplBlockType.Localization ->
+                let (nameArgs, mixedArgs, typeArgs) =
+                    fplValue.Scope
+                    |> Seq.filter (fun kvp -> FplValue.IsVariable(kvp.Value))
+                    |> Seq.map (fun kvp -> getTypeTuple kvp.Value)
+                    |> Seq.toList
+                    |> List.unzip3
+                    |> fun (names, mixed, types) ->
+                        (String.concat ", " names, String.concat ", " mixed, String.concat ", " types)
+
+                let wrap h args = if args = "" then h else sprintf "%s(%s)" h args
+                (wrap headName nameArgs, wrap headMixed mixedArgs, wrap headType typeArgs)
+
+            | FplBlockType.OptionalFunctionalTerm
+            | FplBlockType.MandatoryFunctionalTerm
+            | FplBlockType.FunctionalTerm ->
+                match fplValue.Mapping with
+                | Some map ->
+                    let (mapName, mapMixed, mapType) = getTypeTuple map
+                    (sprintf "%s(%s) -> %s" headName paramName mapName,
+                     sprintf "%s(%s) -> %s" headMixed paramMixed mapMixed,
+                     sprintf "%s(%s) -> %s" headType paramType mapType)
+                | None -> ("", "", "")
+
+            | FplBlockType.Instance ->
+                let (nameArgs, mixedArgs, typeArgs) =
+                    fplValue.Scope
+                    |> Seq.filter (fun kvp -> FplValue.IsVariable(kvp.Value))
+                    |> Seq.map (fun kvp -> getTypeTuple kvp.Value)
+                    |> Seq.toList
+                    |> List.unzip3
+                    |> fun (names, mixed, types) ->
+                        (String.concat ", " names, String.concat ", " mixed, String.concat ", " types)
+
+                let wrap h args = if args = "" then h else sprintf "%s:%s" h args
+                (wrap headName nameArgs, wrap headMixed mixedArgs, wrap headType typeArgs)
+
+            | FplBlockType.Translation ->
+                let nameArgs =
+                    fplValue.ArgList
+                    |> Seq.filter (fun fv -> fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
+                    |> Seq.map (fun fv -> let (n, _, _) = getTypeTuple fv in n)
+                    |> String.concat ""
+
+                (sprintf "%s%s" headName nameArgs,
+                 sprintf "%s%s" headMixed nameArgs,
+                 sprintf "%s%s" headType nameArgs)
+
+            | FplBlockType.Mapping
+            | FplBlockType.Variable
+            | FplBlockType.VariadicVariableMany
+            | FplBlockType.VariadicVariableMany1 ->
+                let (mapName, mapMixed, mapType) =
+                    match fplValue.Mapping with
+                    | Some map -> getTypeTuple map
+                    | None -> ("", "", "")
+
+                let wrap h p m =
+                    match (p, m) with
+                    | ("", "") -> h
+                    | ("", _) -> sprintf "%s() -> %s" h m
+                    | (_, "") ->
+                        if fplValue.HasBrackets then sprintf "%s[%s]" h p else sprintf "%s(%s)" h p
+                    | (_, _) ->
+                        if fplValue.HasBrackets then sprintf "%s[%s] -> %s" h p m else sprintf "%s(%s) -> %s" h p m
+
+                (wrap headName paramName mapName,
+                 wrap headMixed paramMixed mapMixed,
+                 wrap headType paramType mapType)
+
+            | FplBlockType.Reference ->
+                let qualification =
+                    if fplValue.Scope.ContainsKey(".") then Some(fplValue.Scope["."]) else None
+
+                let (argsName, argsMixed, argsType) =
+                    fplValue.ArgList
+                    |> Seq.filter (fun fv -> fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
+                    |> Seq.map getTypeTuple
+                    |> Seq.toList
+                    |> fun lst ->
+                        let n = lst |> List.map (fun (n, _, _) -> n) |> String.concat ", "
+                        let m = lst |> List.map (fun (_, m, _) -> m) |> String.concat ", "
+                        let t = lst |> List.map (fun (_, _, t) -> t) |> String.concat ", "
+                        (n, m, t)
+
+                let format h a q =
+                    match (h, a, q) with
+                    | (_, "", Some qual) ->
+                        let (qn, qm, qt) = getTypeTuple qual
+                        (sprintf "%s.%s" h qn, sprintf "%s.%s" h qm, sprintf "%s.%s" h qt)
+                    | (_, "???", Some qual) ->
+                        let (qn, qm, qt) = getTypeTuple qual
+                        if fplValue.HasBrackets then
+                            (sprintf "%s[].%s" h qn, sprintf "%s[].%s" h qm, sprintf "%s[].%s" h qt)
+                        else
+                            (sprintf "%s().%s" h qn, sprintf "%s().%s" h qm, sprintf "%s().%s" h qt)
+                    | (_, _, Some qual) ->
+                        let (qn, qm, qt) = getTypeTuple qual
+                        if fplValue.HasBrackets then
+                            (sprintf "%s[%s].%s" h a qn, sprintf "%s[%s].%s" h a qm, sprintf "%s[%s].%s" h a qt)
+                        else
+                            (sprintf "%s(%s).%s" h a qn, sprintf "%s(%s).%s" h a qm, sprintf "%s(%s).%s" h a qt)
+                    | ("???", _, None) -> (h, h, h)
+                    | ("", _, None) -> (a, a, a)
+                    | (_, "", None) -> (h, h, h)
+                    | (_, "???", None) ->
+                        if fplValue.HasBrackets then
+                            (sprintf "%s[]" h, sprintf "%s[]" h, sprintf "%s[]" h)
+                        else
+                            (sprintf "%s()" h, sprintf "%s()" h, sprintf "%s()" h)
+                    | (_, _, None) ->
+                        if fplValue.HasBrackets then
+                            (sprintf "%s[%s]" h a, sprintf "%s[%s]" h a, sprintf "%s[%s]" h a)
+                        elif h = "bydef." then
+                            (sprintf "%s%s" h a, sprintf "%s%s" h a, sprintf "%s%s" h a)
+                        else
+                            (sprintf "%s(%s)" h a, sprintf "%s(%s)" h a, sprintf "%s(%s)" h a)
+
+                format headName argsName qualification
+
+            | _ -> ("", "", "")
+
+
+        idRecTuple ()
+
 
 /// Generates a representation of an FplValue.
 let rec getRepresentation (fplValue:FplValue) =
