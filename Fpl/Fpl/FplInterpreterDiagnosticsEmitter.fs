@@ -612,7 +612,7 @@ let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
 let emitID017Diagnostics name (candidates:FplValue list) pos1 pos2 =
     let candidatesName =
         candidates
-        |> Seq.map (fun fv -> fv.QualifiedName)
+        |> Seq.map (fun fv -> qualifiedName fv)
         |> String.concat ", "
 
     let diagnostic =

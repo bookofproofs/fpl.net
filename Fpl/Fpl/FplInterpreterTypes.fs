@@ -848,37 +848,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
 
                 idRec ()
 
-    /// Qualified name of this FplValue
-    member this.QualifiedName =
-        let rec getFullName (fv: FplValue) (first: bool) =
-            let fplValueType =
-                match fv.FplBlockType with
-                | FplBlockType.Localization
-                | FplBlockType.Reference -> fv.Type(SignatureType.Name)
-                | FplBlockType.Localization
-                | FplBlockType.Constructor
-                | _ when FplValue.IsBlock(fv) -> fv.Type(SignatureType.Mixed)
-                | FplBlockType.Quantor -> fv.Type(SignatureType.Mixed)
-                | _ -> fv.FplId
-
-            if fv.FplBlockType = FplBlockType.Root then
-                ""
-            elif first then
-                if FplValue.IsRoot(fv.Parent.Value) then
-                    getFullName fv.Parent.Value false + fplValueType
-                else if FplValue.IsVariable(fv) && not (FplValue.IsVariable(fv.Parent.Value)) then
-                    fplValueType
-                else
-                    getFullName fv.Parent.Value false + "." + fplValueType
-            else if FplValue.IsRoot(fv.Parent.Value) then
-                getFullName fv.Parent.Value false + fplValueType
-            else if FplValue.IsVariable(fv) && not (FplValue.IsVariable(fv.Parent.Value)) then
-                fplValueType
-            else
-                getFullName fv.Parent.Value false + "." + fplValueType
-
-        getFullName this true
-
     /// Returns Some argument of the FplValue depending of the type of its 
     /// FplBlockType. 
     member this.GetArgument =
@@ -1131,6 +1100,38 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         this.HasBrackets <- other.HasBrackets
         this.IsIntrinsic <- other.IsIntrinsic
         this.IsInitializedVariable <- other.IsInitializedVariable
+
+/// Qualified name of this FplValue
+let qualifiedName (fplValue:FplValue)=
+    let rec getFullName (fv: FplValue) (first: bool) =
+        let fplValueType =
+            match fv.FplBlockType with
+            | FplBlockType.Localization
+            | FplBlockType.Reference -> fv.Type(SignatureType.Name)
+            | FplBlockType.Localization
+            | FplBlockType.Constructor
+            | _ when FplValue.IsBlock(fv) -> fv.Type(SignatureType.Mixed)
+            | FplBlockType.Quantor -> fv.Type(SignatureType.Mixed)
+            | _ -> fv.FplId
+
+        if fv.FplBlockType = FplBlockType.Root then
+            ""
+        elif first then
+            if FplValue.IsRoot(fv.Parent.Value) then
+                getFullName fv.Parent.Value false + fplValueType
+            else if FplValue.IsVariable(fv) && not (FplValue.IsVariable(fv.Parent.Value)) then
+                fplValueType
+            else
+                getFullName fv.Parent.Value false + "." + fplValueType
+        else if FplValue.IsRoot(fv.Parent.Value) then
+            getFullName fv.Parent.Value false + fplValueType
+        else if FplValue.IsVariable(fv) && not (FplValue.IsVariable(fv.Parent.Value)) then
+            fplValueType
+        else
+            getFullName fv.Parent.Value false + "." + fplValueType
+
+    getFullName fplValue true
+
 
 /// Checks if a block named name is in the scope of the fplValue' parent.
 let inScopeOfParent (fplValue: FplValue) name =
@@ -1454,7 +1455,7 @@ let tryFindAssociatedBlockForProof (fplValue: FplValue) =
                 let potentialOther = notProvableBlocklist.Head
 
                 ScopeSearchResult.FoundIncorrectBlock(
-                    sprintf "%s %s" potentialOther.BlockTypeName potentialOther.QualifiedName
+                    sprintf "%s %s" potentialOther.BlockTypeName (qualifiedName potentialOther)
                 )
             else
                 ScopeSearchResult.NotFound
@@ -1511,7 +1512,7 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
                 ScopeSearchResult.FoundAssociate potentialTheorem
             elif notPotentialBlockList.Length > 0 then
                 let potentialOther = notPotentialBlockList.Head
-                ScopeSearchResult.FoundIncorrectBlock potentialOther.QualifiedName
+                ScopeSearchResult.FoundIncorrectBlock (qualifiedName potentialOther)
             else
                 ScopeSearchResult.NotFound
         | None -> ScopeSearchResult.NotApplicable
@@ -1961,7 +1962,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
 
     let arguments = fva.ArgList |> Seq.toList
 
-    let stdMsg = $"{fvp.QualifiedName}"
+    let stdMsg = $"{qualifiedName fvp}"
     let argResult = mpwa arguments parameters
 
     match argResult with
