@@ -53,7 +53,7 @@ type EvalStack() =
                     fv.FplId
                 else
                     fv.Type(SignatureType.Name)
-        match FplValue.InScopeOfParent(fv) identifier with
+        match inScopeOfParent fv identifier with
         | ScopeSearchResult.Found conflict -> 
             match next.FplBlockType with
             | FplBlockType.Justification -> 

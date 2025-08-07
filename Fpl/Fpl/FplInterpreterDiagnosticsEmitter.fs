@@ -361,7 +361,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                 ad.AddDiagnostic diagnostic
                 None
             | _ ->
-                match FplValue.InScopeOfParent (fplValue) name with
+                match inScopeOfParent fplValue name with
                 | ScopeSearchResult.Found classCandidate ->
                     let mutable duplicateInheritanceChainFound = false
 

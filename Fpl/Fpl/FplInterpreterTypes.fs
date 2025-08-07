@@ -848,33 +848,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
 
                 idRec ()
 
-    /// Indicates if this FplValue is an FPL building block.
-    static member IsFplBlock(fplValue: FplValue) =
-        match fplValue.FplBlockType with
-        | FplBlockType.Axiom
-        | FplBlockType.Theorem
-        | FplBlockType.Lemma
-        | FplBlockType.Proposition
-        | FplBlockType.Corollary
-        | FplBlockType.Conjecture
-        | FplBlockType.Proof
-        | FplBlockType.RuleOfInference
-        | FplBlockType.Predicate
-        | FplBlockType.FunctionalTerm
-        | FplBlockType.Class -> true
-        | _ -> false
-
-    /// Indicates if this FplValue is a definition
-    static member IsDefinition(fplValue: FplValue) =
-        match fplValue.FplBlockType with
-        | FplBlockType.Predicate
-        | FplBlockType.FunctionalTerm
-        | FplBlockType.Class -> true
-        | _ -> false
-
-    /// Indicates if this FplValue is an root of the symbol table.
-    static member IsRoot(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Root
-
     /// Qualified name of this FplValue
     member this.QualifiedName =
         let rec getFullName (fv: FplValue) (first: bool) =
@@ -955,6 +928,32 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
             this.ValueList.Clear()
             this.ValueList.Add(fplValue)
 
+    /// Indicates if this FplValue is an FPL building block.
+    static member IsFplBlock(fplValue: FplValue) =
+        match fplValue.FplBlockType with
+        | FplBlockType.Axiom
+        | FplBlockType.Theorem
+        | FplBlockType.Lemma
+        | FplBlockType.Proposition
+        | FplBlockType.Corollary
+        | FplBlockType.Conjecture
+        | FplBlockType.Proof
+        | FplBlockType.RuleOfInference
+        | FplBlockType.Predicate
+        | FplBlockType.FunctionalTerm
+        | FplBlockType.Class -> true
+        | _ -> false
+
+    /// Indicates if this FplValue is a definition
+    static member IsDefinition(fplValue: FplValue) =
+        match fplValue.FplBlockType with
+        | FplBlockType.Predicate
+        | FplBlockType.FunctionalTerm
+        | FplBlockType.Class -> true
+        | _ -> false
+
+    /// Indicates if this FplValue is an root of the symbol table.
+    static member IsRoot(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Root
     /// Indicates if this FplValue is a class.
     static member IsClass(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Class
 
@@ -1068,43 +1067,6 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
     static member IsVariadicVariableMany1(fplValue: FplValue) =
         fplValue.FplBlockType = FplBlockType.VariadicVariableMany1
 
-    /// Checks if a block is in the scope of its parent, by the name of the block.
-    static member InScopeOfParent (fplValue: FplValue) name =
-        let conflictInSiblingTheory (parent: FplValue) =
-            // if the parent is a theory, look also for its sibling theories
-            let (conflicts: ScopeSearchResult list) =
-                let root = parent.Parent.Value
-
-                root.Scope
-                |> Seq.filter (fun siblingTheory ->
-                    // look only for sibling theories
-                    siblingTheory.Value <> parent)
-                |> Seq.choose (fun siblingTheory ->
-                    if siblingTheory.Value.Scope.ContainsKey(name) then
-                        let foundConflict = siblingTheory.Value.Scope[name]
-                        Some(ScopeSearchResult.Found foundConflict)
-                    else
-                        None)
-                |> Seq.toList
-
-            let res = conflicts
-
-            if res.Length > 0 then
-                conflicts.Head
-            else
-                ScopeSearchResult.NotFound
-
-        match fplValue.Parent with
-        | Some parent ->
-            if parent.Scope.ContainsKey(name) then
-                let foundConflict = parent.Scope[name]
-                ScopeSearchResult.Found foundConflict
-            else if FplValue.IsTheory(parent) then
-                conflictInSiblingTheory parent
-            else
-                ScopeSearchResult.NotFound
-        | None -> ScopeSearchResult.NotApplicable
-
     /// A string representation of this FplValue
     override this.ToString() =
         $"{this.BlockTypeShortName} {this.Type(SignatureType.Name)}"
@@ -1169,6 +1131,43 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         this.HasBrackets <- other.HasBrackets
         this.IsIntrinsic <- other.IsIntrinsic
         this.IsInitializedVariable <- other.IsInitializedVariable
+
+/// Checks if a block named name is in the scope of the fplValue' parent.
+let inScopeOfParent (fplValue: FplValue) name =
+    let conflictInSiblingTheory (parent: FplValue) =
+        // if the parent is a theory, look also for its sibling theories
+        let (conflicts: ScopeSearchResult list) =
+            let root = parent.Parent.Value
+
+            root.Scope
+            |> Seq.filter (fun siblingTheory ->
+                // look only for sibling theories
+                siblingTheory.Value <> parent)
+            |> Seq.choose (fun siblingTheory ->
+                if siblingTheory.Value.Scope.ContainsKey(name) then
+                    let foundConflict = siblingTheory.Value.Scope[name]
+                    Some(ScopeSearchResult.Found foundConflict)
+                else
+                    None)
+            |> Seq.toList
+
+        let res = conflicts
+
+        if res.Length > 0 then
+            conflicts.Head
+        else
+            ScopeSearchResult.NotFound
+
+    match fplValue.Parent with
+    | Some parent ->
+        if parent.Scope.ContainsKey(name) then
+            let foundConflict = parent.Scope[name]
+            ScopeSearchResult.Found foundConflict
+        else if FplValue.IsTheory(parent) then
+            conflictInSiblingTheory parent
+        else
+            ScopeSearchResult.NotFound
+    | None -> ScopeSearchResult.NotApplicable
 
 /// Checks if a variable is defined in the scope of block, if any
 /// looking for it recursively, up the symbol tree.
