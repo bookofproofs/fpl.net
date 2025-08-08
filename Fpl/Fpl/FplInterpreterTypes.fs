@@ -449,6 +449,7 @@ type SignatureType =
     | Type
     | Mixed
 
+[<AbstractClass>]
 type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue option) =
     let mutable _expressionType = FixType.NoFix
     let mutable _exprTypeAlreadySet = false
@@ -470,6 +471,8 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     let _argList = List<FplValue>()
     let _valueList = List<FplValue>()
     let _assertedPredicates = List<FplValue>()
+
+    abstract member Init: unit -> unit
 
     /// Indicates if this FplValue's Scope or ArgList can be treated as bracketed coordinates or as parenthesized parameters.
     member this.HasBrackets
@@ -791,6 +794,150 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         this.HasBrackets <- other.HasBrackets
         this.IsIntrinsic <- other.IsIntrinsic
         this.IsInitializedVariable <- other.IsInitializedVariable
+
+type FplRoot(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Root, positions, parent)
+
+type FplTheory(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Theory, positions, parent)
+
+type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: FplValue option) =
+    inherit FplValue(blockType, positions, parent)
+    override this.Init (): unit = 
+        this.FplId <- "undetermined"
+        this.TypeId <- "pred"
+
+type FplGenericObject(blockType: FplBlockType, positions: Positions, parent: FplValue option) =
+    inherit FplValue(blockType, positions, parent)
+    override this.Init (): unit = 
+        this.FplId <- FplBlockType.IntrinsicObj.ShortName
+        this.TypeId <- FplBlockType.IntrinsicObj.ShortName
+
+type FplRuleOfInference(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.RuleOfInference, positions, parent)
+
+type FplVariable(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Variable, positions, parent)
+
+type FplVariadicVariableMany(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.VariadicVariableMany, positions, parent)
+
+type FplVariadicVariableMany1(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.VariadicVariableMany1, positions, parent)
+
+type FplClass(positions: Positions, parent: FplValue option) =
+    inherit FplGenericObject(FplBlockType.Class, positions, parent)
+
+type FplConstructor(positions: Positions, parent: FplValue option) =
+    inherit FplGenericObject(FplBlockType.Constructor, positions, parent)
+
+type FplFunctionalTerm(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.FunctionalTerm, positions, parent)
+
+type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.MandatoryFunctionalTerm, positions, parent)
+
+type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.OptionalFunctionalTerm, positions, parent)
+
+type FplPredicate(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.Predicate, positions, parent)
+
+type FplMandatoryPredicate(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.MandatoryPredicate, positions, parent)
+
+type FplOptionalPredicate(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.OptionalPredicate, positions, parent)
+
+type FplAxiom(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.Axiom, positions, parent)
+
+type FplTheorem(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.Theorem, positions, parent)
+
+type FplLemma(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.Lemma, positions, parent)
+
+type FplProposition(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.Proposition, positions, parent)
+
+type FplConjecture(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.Conjecture, positions, parent)
+
+type FplCorollary(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Corollary, positions, parent)
+
+type FplProof(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.Proof, positions, parent)
+
+type FplArgument(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Argument, positions, parent)
+
+type FplJustification(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Justification, positions, parent)
+
+type FplArgInference(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.ArgInference, positions, parent)
+
+type FplLocalization(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Localization, positions, parent)
+
+type FplTranslation(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Translation, positions, parent)
+
+type FplLanguage(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Language, positions, parent)
+
+type FplReference(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Reference, positions, parent)
+
+type FplQuantor(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.Quantor, positions, parent)
+
+type FplMapping(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Mapping, positions, parent)
+
+type FplStmt(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Stmt, positions, parent)
+
+type FplAssertion(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Assertion, positions, parent)
+
+type FplExtension(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.Extension, positions, parent)
+
+type FplInstance(positions: Positions, parent: FplValue option) =
+    inherit FplGenericObject(FplBlockType.Instance, positions, parent)
+
+type FplIntrinsicInd(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.IntrinsicInd, positions, parent)
+    override this.Init (): unit = 
+        this.TypeId <- FplBlockType.IntrinsicInd.ShortName
+        this.FplId <- FplBlockType.IntrinsicInd.ShortName
+
+type FplIntrinsicObj(positions: Positions, parent: FplValue option) =
+    inherit FplGenericObject(FplBlockType.IntrinsicObj, positions, parent)
+
+type FplIntrinsicPred(positions: Positions, parent: FplValue option) =
+    inherit FplGenericPredicate(FplBlockType.IntrinsicPred, positions, parent)
+
+type FplIntrinsicUndef(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.IntrinsicUndef, positions, parent)
+    override this.Init (): unit = 
+        this.TypeId <- FplBlockType.IntrinsicUndef.ShortName
+        this.FplId <- FplBlockType.IntrinsicUndef.ShortName
+
+type FplIntrinsicFunc(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.IntrinsicFunc, positions, parent)
+    override this.Init (): unit = 
+        this.TypeId <- FplBlockType.IntrinsicFunc.ShortName
+        this.FplId <- FplBlockType.IntrinsicFunc.ShortName
+
+type FplIntrinsicTpl(positions: Positions, parent: FplValue option) =
+    inherit FplValue(FplBlockType.IntrinsicTpl, positions, parent)
+    override this.Init (): unit = 
+        this.TypeId <- FplBlockType.IntrinsicTpl.ShortName
+        this.FplId <- FplBlockType.IntrinsicTpl.ShortName
 
 /// A discriminated union type for wrapping search results in the Scope of an FplValue.
 type ScopeSearchResult =
@@ -1236,7 +1383,7 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
 /// A factory method for the evaluation of FPL theories
 let createRoot() =
     let root =
-        new FplValue(FplBlockType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+        new FplRoot((Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
 
     root.TypeId <- ""
     root.FplId <- ""
@@ -1244,76 +1391,89 @@ let createRoot() =
 
 /// A factory method for the evaluation of FPL theories
 let createTheory(positions: Positions, parent: FplValue, filePath: string) =
-    let th = new FplValue(FplBlockType.Theory, positions, Some parent)
+    let th = new FplTheory(positions, Some parent)
     th.FilePath <- Some filePath
     th
 
 /// A factory method for the evaluation of Fpl class definitions
 let createFplValue(positions: Positions, fplBlockType: FplBlockType, parent: FplValue) =
     match fplBlockType with
-    | FplBlockType.Axiom
-    | FplBlockType.Theorem
-    | FplBlockType.Lemma
-    | FplBlockType.Proposition
-    | FplBlockType.Corollary
-    | FplBlockType.Proof
-    | FplBlockType.Predicate
-    | FplBlockType.RuleOfInference
-    | FplBlockType.Quantor
-    | FplBlockType.IntrinsicPred
+    | FplBlockType.Axiom ->
+        new FplAxiom(positions, Some parent)
+    | FplBlockType.Theorem ->
+        new FplTheorem(positions, Some parent)
+    | FplBlockType.Lemma ->
+        new FplLemma(positions, Some parent)
+    | FplBlockType.Proposition ->
+        new FplProposition(positions, Some parent)
+    | FplBlockType.Corollary ->
+        new FplCorollary(positions, Some parent)
+    | FplBlockType.Proof ->
+        new FplProof(positions, Some parent)
+    | FplBlockType.Predicate ->
+        new FplPredicate(positions, Some parent)
+    | FplBlockType.RuleOfInference ->
+        new FplRuleOfInference(positions, Some parent)
+    | FplBlockType.Quantor ->
+        new FplQuantor(positions, Some parent)
+    | FplBlockType.IntrinsicPred ->
+        new FplIntrinsicPred(positions, Some parent)
     | FplBlockType.Conjecture ->
-        let ret = new FplValue(fplBlockType, positions, Some parent)
-        ret.FplId <- "undetermined"
-        ret.TypeId <- "pred"
-        ret
-    | FplBlockType.MandatoryPredicate
-    | FplBlockType.OptionalPredicate
-    | FplBlockType.Reference
-    | FplBlockType.FunctionalTerm
-    | FplBlockType.Variable
-    | FplBlockType.VariadicVariableMany
-    | FplBlockType.VariadicVariableMany1
-    | FplBlockType.MandatoryFunctionalTerm
-    | FplBlockType.Localization
-    | FplBlockType.Argument
-    | FplBlockType.Justification
-    | FplBlockType.ArgInference
-    | FplBlockType.Language
-    | FplBlockType.Translation
-    | FplBlockType.Stmt
-    | FplBlockType.Assertion
-    | FplBlockType.Extension
-    | FplBlockType.Mapping 
+        new FplConjecture(positions, Some parent)
+    | FplBlockType.MandatoryPredicate -> 
+        new FplMandatoryPredicate(positions, Some parent)
+    | FplBlockType.OptionalPredicate -> 
+        new FplOptionalPredicate(positions, Some parent)
+    | FplBlockType.Reference -> 
+        new FplReference(positions, Some parent)
+    | FplBlockType.FunctionalTerm -> 
+        new FplFunctionalTerm(positions, Some parent)
+    | FplBlockType.Variable -> 
+        new FplVariable(positions, Some parent)
+    | FplBlockType.VariadicVariableMany -> 
+        new FplVariadicVariableMany(positions, Some parent)
+    | FplBlockType.VariadicVariableMany1 -> 
+        new FplVariadicVariableMany1(positions, Some parent)
+    | FplBlockType.MandatoryFunctionalTerm -> 
+        new FplMandatoryFunctionalTerm(positions, Some parent)
+    | FplBlockType.Localization -> 
+        new FplLocalization(positions, Some parent)
+    | FplBlockType.Argument -> 
+        new FplArgument(positions, Some parent)
+    | FplBlockType.Justification -> 
+        new FplJustification(positions, Some parent)
+    | FplBlockType.ArgInference -> 
+        new FplArgInference(positions, Some parent)
+    | FplBlockType.Language -> 
+        new FplLanguage(positions, Some parent)
+    | FplBlockType.Translation -> 
+        new FplTranslation(positions, Some parent)
+    | FplBlockType.Stmt -> 
+        new FplStmt(positions, Some parent)
+    | FplBlockType.Assertion -> 
+        new FplAssertion(positions, Some parent) 
+    | FplBlockType.Extension -> 
+        new FplExtension(positions, Some parent) 
+    | FplBlockType.Mapping -> 
+        new FplMapping(positions, Some parent) 
     | FplBlockType.OptionalFunctionalTerm -> 
-        new FplValue(fplBlockType, positions, Some parent)
+        new FplOptionalFunctionalTerm(positions, Some parent)
     | FplBlockType.IntrinsicInd ->
-        let ret = new FplValue(fplBlockType, positions, Some parent)
-        ret.TypeId <- FplBlockType.IntrinsicInd.ShortName
-        ret.FplId <- FplBlockType.IntrinsicInd.ShortName
-        ret
-    | FplBlockType.Class 
-    | FplBlockType.Constructor 
-    | FplBlockType.Instance
+        new FplIntrinsicInd(positions, Some parent)
+    | FplBlockType.Class ->
+        new FplClass(positions, Some parent)
+    | FplBlockType.Constructor ->
+        new FplConstructor(positions, Some parent)
+    | FplBlockType.Instance ->
+        new FplInstance(positions, Some parent)
     | FplBlockType.IntrinsicObj ->
-        let ret = new FplValue(fplBlockType, positions, Some parent)
-        ret.TypeId <- FplBlockType.IntrinsicObj.ShortName
-        ret.FplId <- FplBlockType.IntrinsicObj.ShortName
-        ret
+        new FplIntrinsicObj(positions, Some parent)
     | FplBlockType.IntrinsicFunc ->
-        let ret = new FplValue(fplBlockType, positions, Some parent)
-        ret.TypeId <- FplBlockType.IntrinsicFunc.ShortName
-        ret.FplId <- FplBlockType.IntrinsicFunc.ShortName
-        ret
+        new FplIntrinsicFunc(positions, Some parent)
     | FplBlockType.IntrinsicTpl ->
-        let ret = new FplValue(fplBlockType, positions, Some parent)
-        ret.TypeId <- FplBlockType.IntrinsicTpl.ShortName
-        ret.FplId <- FplBlockType.IntrinsicTpl.ShortName
-        ret
+        new FplIntrinsicTpl(positions, Some parent)
     | FplBlockType.IntrinsicUndef ->
-        let ret = new FplValue(fplBlockType, positions, Some parent)
-        ret.TypeId <- FplBlockType.IntrinsicUndef.ShortName
-        ret.FplId <- FplBlockType.IntrinsicUndef.ShortName
-        ret
+        new FplIntrinsicUndef(positions, Some parent)
     | FplBlockType.Root -> raise (ArgumentException("Please use CreateRoot for creating the root instead."))
     | FplBlockType.Theory -> raise (ArgumentException("Please use CreateTheory for creating the theories instead."))
 

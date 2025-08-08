@@ -494,6 +494,17 @@ Empty
 #### ValueList	
 Empty
 
+### FplBlockType `IntrinsicInd`
+An intrinsic value for array indexing in FPL that. Created in `Ast.DollarDigits`
+#### Possible Parent Nodes 
+`Reference`
+#### Scope 
+Empty
+#### ArgList	
+Empty
+#### ValueList	
+Empty
+
 ### FplBlockType `IntrinsicTpl`
 This an inbuilt FPL type for templates that will accept any other type unless it is used consistently. I.e., an intrinsic template type has a special user-defined template identifier that is declared in the respective scope of the FPL code. Variables with declared with this user-defined template type will be treated as they had any other valid FPL type as long as the type inferred from the usage of the variables is consistent.
 #### Possible Parent Nodes 

@@ -1,5 +1,5 @@
 ﻿/// This module evaluates the abstract syntax tree (AST) and interprets its semantics.
-/// It produces a SymbolTable object containing a current sementical representation of the AST.
+/// It produces a SymbolTable object containing a current semantical representation of the AST.
 
 (* MIT License
 
@@ -211,7 +211,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let sid = $"${s.ToString()}"
         if path.Contains("Expression.DollarDigits") then
-            let value = createFplValue((pos1, pos2), FplBlockType.IntrinsicInd, fv)
+            let value = new FplIntrinsicInd((pos1, pos2), Some fv)
             value.FplId <- sid
             es.PushEvalStack(value)
             es.PopEvalStack()
