@@ -449,15 +449,7 @@ type SignatureType =
     | Type
     | Mixed
 
-type ScopeSearchResult =
-    | FoundAssociate of FplValue
-    | FoundMultiple of string
-    | FoundIncorrectBlock of string
-    | Found of FplValue
-    | NotFound
-    | NotApplicable
-
-and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue option) =
+type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue option) =
     let mutable _expressionType = FixType.NoFix
     let mutable _exprTypeAlreadySet = false
     let mutable _startPos = fst positions
@@ -799,6 +791,15 @@ and FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue opt
         this.HasBrackets <- other.HasBrackets
         this.IsIntrinsic <- other.IsIntrinsic
         this.IsInitializedVariable <- other.IsInitializedVariable
+
+/// A discriminated union type for wrapping search results in the Scope of an FplValue.
+type ScopeSearchResult =
+    | FoundAssociate of FplValue
+    | FoundMultiple of string
+    | FoundIncorrectBlock of string
+    | Found of FplValue
+    | NotFound
+    | NotApplicable
 
 /// Type identifier of an FplValue.
 let rec getType (isSignature: SignatureType) (fplValue:FplValue) =
