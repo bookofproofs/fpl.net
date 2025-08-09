@@ -311,8 +311,8 @@ type CommonFplValueTestCases =
             def pred SomePredicate2() {true}
             def func SomeFunctionalTerm1()->obj {intr}
             def func SomeFunctionalTerm2()->obj {intr}
-            def func SomeFunctionalTerm3()->obj {dec ~v:obj v:=v v:=v; return v}
-            def func SomeFunctionalTerm4()->obj(c:pred) {dec ~v:obj(c:pred) v:=v v:=v; return v}
+            def func SomeFunctionalTerm3()->obj {dec ~v:obj v:=v; return v}
+            def func SomeFunctionalTerm4()->obj(c:pred) {dec ~v:obj(c:pred) v:=v; return v}
             def func SomeFunctionalTerm5()->SomeClass1 {dec ~v:SomeClass1; return v}
             def func SomeFunctionalTerm6()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass; return v}
             def func SomeFunctionalTerm7()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass(); return v}

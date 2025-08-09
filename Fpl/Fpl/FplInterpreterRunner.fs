@@ -34,7 +34,7 @@ type FplRunner() =
             p.ValueList.Clear()
             ar.ValueList 
             |> Seq.iter (fun fv -> 
-                let fvClone = cloneFplValue fv
+                let fvClone = fv.Clone()
                 p.ValueList.Add(fvClone)
             )
 
@@ -83,7 +83,7 @@ type FplRunner() =
         |> Seq.iter (fun paramKvp -> 
             // save the clone of the original parameter variable
             let parOriginal = paramKvp.Value
-            let parClone = cloneFplValue parOriginal
+            let parClone = parOriginal.Clone()
             toBeSavedScopeVariables.Add(paramKvp.Key, parClone)
             if paramKvp.Value.IsSignatureVariable then 
                 pars.Add(parOriginal)

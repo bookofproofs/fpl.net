@@ -99,7 +99,7 @@ Empty, the representation is, however, accomplished by a string that is unique.
 ---
 
 ### FplBlockType `Constructor`
-A class defined in the theory or the theories using this theory. Created in `Ast.DefinitionClass`.
+A class defined in the theory or the theories using this theory. Created in `Ast.Constructor`.
 #### Possible Parent Nodes 
 Class
 #### Scope 
@@ -203,7 +203,7 @@ A copy of the respective ArgList (only one element).
 ---
 
 ### FplBlockType `MandatoryPredicate`
-A mandatory property of its parent that is a predicate. Created in todo.
+A mandatory property of its parent that is a predicate. Created in `Ast.PropertyBlock`.
 #### Possible Parent Nodes 
 Class, Predicate, or FunctionalTerm
 #### Scope 
@@ -216,7 +216,7 @@ A copy of the respective ArgList (only one element).
 ---
 
 ### FplBlockType `Axiom`
-An axiom defined in the theory or the theories using this theory. Created in todo.
+An axiom defined in the theory or the theories using this theory. Created in `Ast.Axiom`.
 #### Possible Parent Nodes 
 Theory
 #### Scope 
@@ -229,7 +229,7 @@ A copy of the respective ArgList (only one element).
 ---
 
 ### FplBlockType `Theorem`
-A theorem defined in the theory or the theories using this theory. Created in todo.
+A theorem defined in the theory or the theories using this theory. Created in `Ast.Theorem`.
 #### Possible Parent Nodes 
 Theory
 #### Scope 
@@ -242,7 +242,7 @@ A copy of the respective ArgList (only one element).
 ---
 
 ### FplBlockType `Lemma`
-A lemma defined in the theory or the theories using this theory. Created in todo.
+A lemma defined in the theory or the theories using this theory. Created in `Ast.Lemma`.
 #### Possible Parent Nodes 
 Theory
 #### Scope 
@@ -255,7 +255,7 @@ A copy of the respective ArgList (only one element).
 ---
 
 ### FplBlockType `Proposition`
-A proposition defined in the theory or the theories using this theory. Created in todo.
+A proposition defined in the theory or the theories using this theory. Created in `Ast.Proposition`.
 #### Possible Parent Nodes 
 Theory
 #### Scope 
@@ -268,7 +268,7 @@ A copy of the respective ArgList (only one element).
 ---
 
 ### FplBlockType `Conjecture`
-A conjecture defined in the theory or the theories using this theory. Created in todo.
+A conjecture defined in the theory or the theories using this theory. Created in `Ast.Conjecture`.
 #### Possible Parent Nodes 
 Theory
 #### Scope 
@@ -360,9 +360,9 @@ todo
 ---
 
 ### FplBlockType `Translation`
-A translation of an expression inside a Localization in a particular language. Created in `Ast.Translation`
+A translation of an expression inside a Localization in a particular language. Created in `Ast.Translation`, `Ast.LocalizationTerm`
 #### Possible Parent Nodes 
-Localization
+`Language`
 #### Scope 
 todo
 #### ArgList	
@@ -373,7 +373,7 @@ todo
 ---
 
 ### FplBlockType `Language`
-todo
+This type is used for specifying the language for localization of FPL code. Created in `Ast.Translation`.
 #### Possible Parent Nodes 
 todo
 #### Scope 
@@ -386,7 +386,7 @@ todo
 ---
 
 ### FplBlockType `Reference`
-A reference to another FplValue in the symbol table. Created in `Ast.Trivial`, `Ast.DottedPredicate`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Expression`, `Ast.Trivial`, `Ast.ParentConstructorCall`, `Ast.Assignment`
+A reference to another FplValue in the symbol table. Created in `Ast.Trivial`, `Ast.DottedPredicate`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Expression`, `Ast.Trivial`, `Ast.ParentConstructorCall`, `Ast.Assignment`, `Ast.Trivial`, `Ast.Assertion`, `Ast.Expression`, `Ast.DottedPredicate`, `Ast.BrackedCoordList`, `Ast.ArgumentTuple`, `Ast.PredicateWithOptSpecification`, `Ast.IsOperator`, `Ast.Delegate`, `Ast.InfixOperation`, `Ast.Assignment`, `Ast.ParentConstructorCall`, `Ast.ForIn`, `Ast.All`, `Ast.Exists`, `Ast.ExistsN`, `Ast.Constructor`.
 #### Possible Parent Nodes 
 Constructor, Stmt, Reference
 #### Scope 
@@ -399,7 +399,7 @@ todo
 ---
 
 ### FplBlockType `Quantor`
-todo
+A quantor is a special FPL block type that is used to represent quantors in FPL. Created in  `Ast.Exists`, `Ast.All`, `Ast.ExistsN`.
 #### Possible Parent Nodes 
 todo
 #### Scope 
@@ -412,9 +412,9 @@ todo
 ---
 
 ### FplBlockType `Mapping`
-todo
+A mapping is a special FPL block type that is used to represent the type, a `FunctionalTerm`, `OptionalFunctionalTerm`, or `OptionalFunctionalTerm` is mapping its parameters to. Created in `Ast.Mapping`, `Ast.IsOperator`.
 #### Possible Parent Nodes 
-todo
+`FunctionalTerm`, `OptionalFunctionalTerm`, or `OptionalFunctionalTerm`
 #### Scope 
 todo
 #### ArgList	
@@ -425,7 +425,7 @@ todo
 ---
 
 ### FplBlockType `Stmt`
-todo
+A statement is a special FPL block type that is used to represent statements in FPL. Statements are used to perform actions and other side effects in FPL code, such as assignments, function calls, etc. Created in `Ast.Return`, `Ast.VarDeclBlock`, `Ast.Cases`, `Ast.ForIn`.
 #### Possible Parent Nodes 
 todo
 #### Scope 
@@ -451,7 +451,7 @@ todo
 ---
 
 ### FplBlockType `Extension`
-todo
+An extension is a special FPL block type that is used to represent extensions of FPL. Extensions are used to extend the symbols acceptable by the FPL parser as well as to give them custom semantics in FPL. Created in `Ast.DefinitionExtension`.
 #### Possible Parent Nodes 
 todo
 #### Scope 
@@ -463,6 +463,7 @@ todo
 
 ### FplBlockType `IntrinsicPred`
 An intrinsic value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", "false", and "undetermined". 
+Created in `Ast.True`, `Ast.False`, `evaluateConjunction`, `evaluateDisjunction`, `evaluateImplication`, `evaluateNegation`, `evaluateExclusiveOr`, `evaluateEquivalence`, `evaluateIsOperator`, `Ast.PredicateType`, `Ast.Trivial`, `Ast.DefinitionPredicate`, `Ast.Proof`.
 #### Possible Parent Nodes 
 todo
 #### Scope 
@@ -473,7 +474,7 @@ Empty
 Empty
 
 ### FplBlockType `IntrinsicFunc`
-An intrinsic value for everything in FPL that is a functional type. Variables with this value will accept functional terms as new values. Note that every functional term has a mapping that can be of another type. Thus, the mapping's type should not by confunsed with the functional type.
+An intrinsic value for everything in FPL that is a functional type. Variables with this value will accept functional terms as new values. Note that every functional term has a mapping that can be of another type. Thus, the mapping's type should not by confunsed with the functional type. Created in `Ast.FunctionalTermType`.
 #### Possible Parent Nodes 
 todo
 #### Scope 
@@ -485,6 +486,7 @@ Empty
 
 ### FplBlockType `IntrinsicObj`
 An intrinsic value for everything in FPL that is an object. At the same time, every FPL class is derived from `IntrinsicObj`. 
+Created in `checkID009_ID010_ID011_Diagnostics`, `Ast.ObjectType`
 #### Possible Parent Nodes 
 todo
 #### Scope 
@@ -495,7 +497,7 @@ Empty
 Empty
 
 ### FplBlockType `IntrinsicInd`
-An intrinsic value for array indexing in FPL that. Created in `Ast.DollarDigits`
+An intrinsic value for array indexing in FPL that. Created in `Ast.DollarDigits`, `Ast.IndexType`.
 #### Possible Parent Nodes 
 `Reference`
 #### Scope 
@@ -517,7 +519,7 @@ Empty
 Empty
 
 ### FplBlockType `IntrinsicUndef`
-An intrinsic value for everything in FPL that is "undefined". Created in todo.
+An intrinsic value for everything in FPL that is "undefined". Created in `Ast.Var`, `Ast.Return`, `Ast.PredicateIdentifier`.
 #### Possible Parent Nodes 
 FunctionalTerm, OptionalFunctionalTerm, MandatoryFunctionalTerm
 #### Scope 
