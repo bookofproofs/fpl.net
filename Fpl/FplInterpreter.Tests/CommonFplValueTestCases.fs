@@ -13,7 +13,7 @@ type CommonFplValueTestCases =
                 let kv = fv.Scope |> Seq.head
                 kv.Value
             else
-                FplInterpreterTypes.createRoot()
+                new FplInterpreterTypes.FplRoot()
         else
             fv.Scope[name]
 

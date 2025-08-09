@@ -115,7 +115,7 @@ type FplRunner() =
                     let pars = this.SaveVariables(called)
                     let args = caller.ArgList |> Seq.toList
                     this.ReplaceVariables pars args
-                    let lastRepr = createRoot()
+                    let lastRepr = new FplRoot()
                     // run all statements of the called node
                     called.ArgList
                     |> Seq.iter (fun fv -> 
