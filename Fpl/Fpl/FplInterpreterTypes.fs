@@ -383,6 +383,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     abstract member AssignParts: FplValue -> unit
     abstract member ShortName: string
     abstract member Name: string
+    abstract member Represent: unit -> string
 
     override this.AssignParts (ret:FplValue) =
         ret.FplId <- this.FplId
@@ -904,7 +905,7 @@ type FplRoot() =
         let ret = new FplRoot()
         this.AssignParts(ret)
         ret
-
+    override this.Represent () = ""
 
 type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this =
     inherit FplValue(FplBlockType.Theory, positions, Some parent)
@@ -918,6 +919,7 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
         let ret = new FplTheory((this.StartPos, this.EndPos), this.Parent.Value, this.FilePath.Value)
         this.AssignParts(ret)
         ret
+    override this.Represent () = ""
 
 [<AbstractClass>]
 type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
@@ -927,6 +929,23 @@ type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: 
         this.TypeId <- literalPred
 
     override this.Instantiate () = None
+
+[<AbstractClass>]
+type FplGenericPredicateWithExpression(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
+    inherit FplGenericPredicate(blockType, positions, parent)
+
+    override this.Represent () = 
+        let subRepr = 
+                this.ValueList
+                |> Seq.map (fun (subfv: FplValue) -> 
+                    subfv.Represent() 
+                )
+                |> String.concat ", "
+        if subRepr = String.Empty then
+            this.FplId
+        else
+            subRepr
+
 
 [<AbstractClass>]
 type FplGenericObject(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
@@ -973,6 +992,7 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
         let ret = new FplRuleOfInference((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+    override this.Represent () = ""
     
 
 type FplVariable(positions: Positions, parent: FplValue) =
@@ -987,6 +1007,18 @@ type FplVariable(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+    override this.Represent () = 
+        if not (this.IsInitializedVariable) then 
+            match this.TypeId with
+            | FplGrammarCommons.literalPred -> literalUndetermined
+            | FplGrammarCommons.literalUndef -> literalUndef
+            | _ -> $"dec {getType SignatureType.Type this}"    
+        else
+            this.ValueList
+            |> Seq.map (fun (subfv:FplValue) -> 
+                subfv.Represent()
+            )
+            |> String.concat ", "
 
 type FplVariadicVariableMany(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.VariadicVariableMany, positions, Some parent)
@@ -1000,6 +1032,18 @@ type FplVariadicVariableMany(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+    override this.Represent () = 
+        if not (this.IsInitializedVariable) then 
+            match this.TypeId with
+            | FplGrammarCommons.literalPred -> literalUndetermined
+            | FplGrammarCommons.literalUndef -> literalUndef
+            | _ -> $"dec {getType SignatureType.Type this}[]"    
+        else
+            this.ValueList
+            |> Seq.map (fun (subfv:FplValue) -> 
+                subfv.Represent()
+            )
+            |> String.concat ", "
 
 type FplVariadicVariableMany1(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.VariadicVariableMany1, positions, Some parent)
@@ -1013,6 +1057,18 @@ type FplVariadicVariableMany1(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+    override this.Represent () = 
+        if not (this.IsInitializedVariable) then 
+                    match this.TypeId with
+                    | FplGrammarCommons.literalPred -> literalUndetermined
+                    | FplGrammarCommons.literalUndef -> literalUndef
+                    | _ -> $"dec {getType SignatureType.Type this}[]"    
+                else
+                    this.ValueList
+                    |> Seq.map (fun (subfv:FplValue) -> 
+                        subfv.Represent()
+                    )
+                    |> String.concat ", "
 
 type FplInstance(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Instance, positions, parent)
@@ -1026,6 +1082,7 @@ type FplInstance(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+    override this.Represent () = ""
 
 type FplClass(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Class, positions, parent)
@@ -1041,6 +1098,7 @@ type FplClass(positions: Positions, parent: FplValue) =
     override this.Instantiate () = 
         Some (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
 
+    override this.Represent () = $"dec {literalCl} {this.FplId}"
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Constructor, positions, parent)
@@ -1056,6 +1114,8 @@ type FplConstructor(positions: Positions, parent: FplValue) =
     override this.Instantiate () = 
         Some (new FplInstance((this.StartPos, this.EndPos), this))
 
+    override this.Represent () = ""
+
 type FplFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.FunctionalTerm, positions, Some parent)
 
@@ -1068,6 +1128,8 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Represent () = ""
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.MandatoryFunctionalTerm, positions, Some parent)
@@ -1082,6 +1144,8 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+    override this.Represent () = ""
+
 type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.OptionalFunctionalTerm, positions, Some parent)
 
@@ -1095,6 +1159,8 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+    override this.Represent () = ""
+
 type FplPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Predicate, positions, parent)
 
@@ -1105,6 +1171,8 @@ type FplPredicate(positions: Positions, parent: FplValue) =
         let ret = new FplPredicate((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    override this.Represent () = ""
 
 type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.MandatoryPredicate, positions, parent)
@@ -1117,6 +1185,8 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+    override this.Represent () = ""
+
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.OptionalPredicate, positions, parent)
 
@@ -1128,8 +1198,10 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+    override this.Represent () = ""
+
 type FplAxiom(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.Axiom, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Axiom, positions, parent)
 
     override this.Name = "an axiom"
     override this.ShortName = literalAx
@@ -1139,8 +1211,9 @@ type FplAxiom(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+
 type FplTheorem(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.Theorem, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Theorem, positions, parent)
 
     override this.Name = "a theorem"
     override this.ShortName = literalThm
@@ -1150,8 +1223,9 @@ type FplTheorem(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+
 type FplLemma(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.Lemma, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Lemma, positions, parent)
 
     override this.Name = "a lemma"
     override this.ShortName = literalLem
@@ -1161,8 +1235,9 @@ type FplLemma(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+
 type FplProposition(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.Proposition, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Proposition, positions, parent)
 
     override this.Name = "a proposition"
     override this.ShortName = literalProp
@@ -1173,7 +1248,7 @@ type FplProposition(positions: Positions, parent: FplValue) =
         ret
 
 type FplConjecture(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.Conjecture, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Conjecture, positions, parent)
 
     override this.Name = "a conjecture"
     override this.ShortName = literalConj
@@ -1184,7 +1259,7 @@ type FplConjecture(positions: Positions, parent: FplValue) =
         ret
 
 type FplCorollary(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.Corollary, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Corollary, positions, parent)
 
     override this.Name = "a corollary"
     override this.ShortName = literalCor
@@ -1205,6 +1280,8 @@ type FplProof(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+    override this.Represent () = ""
+
 type FplArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Argument, positions, parent)
 
@@ -1215,6 +1292,8 @@ type FplArgument(positions: Positions, parent: FplValue) =
         let ret = new FplArgument((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    override this.Represent () = ""
 
 type FplJustification(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Justification, positions, parent)
@@ -1229,6 +1308,8 @@ type FplJustification(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+    override this.Represent () = ""
+
 type FplArgInference(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.ArgInference, positions, parent)
 
@@ -1239,6 +1320,8 @@ type FplArgInference(positions: Positions, parent: FplValue) =
         let ret = new FplArgInference((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    override this.Represent () = ""
 
 type FplLocalization(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Localization, positions, Some parent)
@@ -1253,6 +1336,8 @@ type FplLocalization(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+    override this.Represent () = ""
+
 type FplTranslation(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Translation, positions, Some parent)
 
@@ -1265,6 +1350,8 @@ type FplTranslation(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Represent () = ""
 
 type FplLanguage(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Language, positions, Some parent)
@@ -1279,6 +1366,8 @@ type FplLanguage(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+    override this.Represent () = ""
+
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Reference, positions, Some parent)
 
@@ -1292,6 +1381,8 @@ type FplReference(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+    override this.Represent () = ""
+
 type FplQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Quantor, positions, parent)
 
@@ -1302,6 +1393,8 @@ type FplQuantor(positions: Positions, parent: FplValue) =
         let ret = new FplQuantor((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    override this.Represent () = ""
 
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Mapping, positions, Some parent)
@@ -1315,6 +1408,8 @@ type FplMapping(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Represent () = ""
 
 type FplStmt(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Stmt, positions, Some parent)
@@ -1338,6 +1433,8 @@ type FplStmt(positions: Positions, parent: FplValue) =
         else
             None
 
+    override this.Represent () = ""
+
 type FplAssertion(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Assertion, positions, Some parent)
 
@@ -1351,6 +1448,8 @@ type FplAssertion(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+    override this.Represent () = ""
+
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Extension, positions, Some parent)
 
@@ -1363,6 +1462,8 @@ type FplExtension(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Represent () = ""
 
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicInd, positions, Some parent)
@@ -1381,6 +1482,8 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
 
     override this.Instantiate () = None
 
+    override this.Represent () = this.FplId
+
 type FplIntrinsicObj(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.IntrinsicObj, positions, parent)
 
@@ -1395,6 +1498,8 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
     override this.Instantiate () = 
         Some (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
 
+    override this.Represent () = this.FplId
+
 type FplIntrinsicPred(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.IntrinsicPred, positions, parent)
 
@@ -1405,6 +1510,8 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
         let ret = new FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    override this.Represent () = this.FplId
 
 type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicUndef, positions, Some parent)
@@ -1422,6 +1529,8 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 
     override this.Instantiate () = None
 
+    override this.Represent () = this.FplId
+
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicFunc, positions, Some parent)
     do
@@ -1438,6 +1547,8 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
 
     override this.Instantiate () = None
 
+    override this.Represent () = this.FplId
+
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicTpl, positions, Some parent)
     do
@@ -1453,6 +1564,8 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
         ret
 
     override this.Instantiate () = None
+
+    override this.Represent () = this.FplId
 
 /// A discriminated union type for wrapping search results in the Scope of an FplValue.
 type ScopeSearchResult =
