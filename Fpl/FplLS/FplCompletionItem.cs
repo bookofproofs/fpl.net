@@ -94,11 +94,11 @@ namespace FplLS
                 case literalAssL:
                 case literalAss:
                 case literalAssume:
-                case "bydef":
-                case "cl":
-                case "class":
-                case "con":
-                case "conclusion":
+                case literalByDef:
+                case literalCl:
+                case literalClL:
+                case literalCon:
+                case literalConL:
                 case "ext":
                 case "extension":
                 case "func":
@@ -124,7 +124,7 @@ namespace FplLS
                 case "trivial":
                     return new FplCompletionItemChoicesKeyword().GetChoices(this);
                 case "self":
-                case "base":
+                case literalBase:
                 case "parent":
                     return new FplCompletionItemChoicesSelf().GetChoices(this);
                 case literalAll:
@@ -143,13 +143,13 @@ namespace FplLS
                 case "or":
                 case "(":
                     return new FplCompletionItemChoicesPredicate().GetChoices(this);
-                case "ctor":
-                case "constructor":
+                case literalCtor:
+                case literalCtorL:
                     return new FplCompletionItemChoicesConstructor().GetChoices(this);
                 case "dec":
                 case "declaration":
                     return new FplCompletionItemChoicesDeclaration().GetChoices(this);
-                case "cases":
+                case literalCases:
                     return new FplCompletionItemChoicesCases().GetChoices(this);
                 case "for":
                     return new FplCompletionItemChoicesFor().GetChoices(this);
@@ -173,14 +173,14 @@ namespace FplLS
                 case "prop":
                 case "proposition":
                     return new FplCompletionItemChoicesTheoremLikeStmt("Proposition").GetChoices(this);
-                case "conj":
-                case "conjecture":
+                case literalConj:
+                case literalConjL:
                     return new FplCompletionItemChoicesTheoremLikeStmt("Conjecture").GetChoices(this);
                 case "inf":
                 case "inference":
                     return new FplCompletionItemChoicesRuleOfInference().GetChoices(this);
-                case "cor":
-                case "corollary":
+                case literalCor:
+                case literalCorL:
                     return new FplCompletionItemChoicesCorollary().GetChoices(this);
                 case "prf":
                 case "proof":
@@ -292,68 +292,68 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case "cases":
+                case literalCases:
                     this.Detail = "statement (cases)";
-                    this.SortText = "cases";
+                    this.SortText = literalCases;
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case "cl":
+                case literalCl:
                     this.Detail = "class (short form)";
                     this.SortText = "class02";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = true;
                     break;
-                case "class":
-                    this.Detail = "class";
+                case literalClL:
+                    this.Detail = literalClL;
                     this.SortText = "class01";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
-                case "con":
+                case literalCon:
                     this.Detail = "conclusion (short form)";
                     this.SortText = "conclusion02";
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = true;
                     break;
-                case "conclusion":
-                    this.Detail = "conclusion";
+                case literalConL:
+                    this.Detail = literalConL;
                     this.SortText = "conclusion01";
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = false;
                     break;
-                case "cor":
+                case literalCor:
                     this.Detail = "corollary (short form)";
                     this.SortText = "corollary02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case "corollary":
-                    this.Detail = "corollary";
+                case literalCorL:
+                    this.Detail = literalCorL;
                     this.SortText = "corollary01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case "conj":
+                case literalConj:
                     this.Detail = "conjecture (short form)";
                     this.SortText = "conjecture02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case "conjecture":
-                    this.Detail = "conjecture";
+                case literalConjL:
+                    this.Detail = literalConjL;
                     this.SortText = "conjecture01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case "ctor":
+                case literalCtor:
                     this.Detail = "constructor (short form)";
                     this.SortText = "constructor02";
                     this.Kind = CompletionItemKind.Constructor;
                     this.IsShort = true;
                     break;
-                case "constructor":
-                    this.Detail = "constructor";
+                case literalCtorL:
+                    this.Detail = literalCtorL;
                     this.SortText = "constructor01";
                     this.Kind = CompletionItemKind.Constructor;
                     this.IsShort = false;

@@ -141,27 +141,27 @@ let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
 let keywordSelf = positions "Self" (skipString "self") .>> IW |>> Ast.Self
 let keywordParent = positions "Parent" (skipString "parent") .>> IW |>> Ast.Parent
-let keywordBaseClassReference = skipString "base" .>> IW
+let keywordBaseClassReference = skipString literalBase .>> IW
 let keywordIndex = positions "IndexType" (skipString "index" <|> skipString "ind") |>> Ast.IndexType
 
 
 (* FplBlock-related Keywords *)
 let keywordPremise = (skipString "premise" <|> skipString "pre") >>. IW 
-let keywordConclusion = (skipString "conclusion" <|> skipString "con") >>. IW
+let keywordConclusion = (skipString literalConL <|> skipString literalCon) >>. IW
 
 
 (* Statement-related Keywords *)
 let keywordDel = skipString "delegate" <|> skipString "del" 
 let keywordFor = skipString "for" .>> SW 
 let keywordIn = skipString "in" .>> SW 
-let keywordCases = skipString "cases" .>> IW 
+let keywordCases = skipString literalCases .>> IW 
 let keywordAssert = skipString literalAssL .>> SW
 
 (* Predicate-related Keywords *)
 let keywordUndefined = positions "Undefined" (skipString "undefined" <|> skipString "undef") .>> IW |>> Ast.Undefined
 let keywordTrue = positions "True" (skipString "true") .>> IW  |>> Ast.True  
 let keywordFalse = positions "False" (skipString "false") .>> IW |>>  Ast.False  
-let keywordBydef = positions "bydef" (skipString "bydef") .>> SW  
+let keywordBydef = positions literalByDef (skipString literalByDef) .>> SW  
 let keywordAnd = skipString literalAnd .>> IW 
 let keywordOr = skipString "or" .>> IW 
 let keywordImpl = skipString "impl" .>> IW 
@@ -429,8 +429,8 @@ let ruleOfInference = positions "RuleOfInference" (keywordInference >>. signatur
 let keywordTheorem = (skipString "theorem" <|> skipString "thm") .>> SW
 let keywordLemma = (skipString "lemma" <|> skipString "lem") .>> SW
 let keywordProposition = (skipString "proposition" <|> skipString "prop") .>> SW
-let keywordCorollary = (skipString "corollary" <|> skipString "cor") .>> SW
-let keywordConjecture = (skipString "conjecture" <|> skipString "conj") .>> SW
+let keywordCorollary = (skipString literalCorL <|> skipString literalCor) .>> SW
+let keywordConjecture = (skipString literalConjL <|> skipString literalConj) .>> SW
 
 let theoremLikeBlock = leftBrace >>. varDeclOrSpecList .>>. spacesPredicate .>> spacesRightBrace
 let signatureWithTheoremLikeBlock = signature .>>. theoremLikeBlock
@@ -455,7 +455,7 @@ let keywordIntrinsic = positions "Intrinsic" (skipString "intrinsic" <|> skipStr
 
 let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateContent
 
-let keywordConstructor = (skipString "constructor" <|> skipString "ctor") .>> SW
+let keywordConstructor = (skipString literalCtorL <|> skipString literalCtor) .>> SW
 let constructorBlock = leftBrace >>. varDeclOrSpecList .>>. selfOrParent .>> spacesRightBrace 
 let constructor = positions "Constructor" (keywordConstructor >>. signature .>>. constructorBlock) |>> Ast.Constructor
 
@@ -533,7 +533,7 @@ let functionalTermDefinitionBlock = leftBrace  >>. ((keywordIntrinsic <|> funcCo
 let definitionFunctionalTerm = positions "DefinitionFunctionalTerm" ((functionalTermSignature .>> IW) .>>. functionalTermDefinitionBlock) |>> Ast.DefinitionFunctionalTerm
 
 // Class definitions
-let keywordClass = (skipString "class" <|> skipString "cl")
+let keywordClass = (skipString literalClL <|> skipString literalCl)
 
 let constructorList = many1 (constructor .>> IW)
 let classCompleteContent = varDeclOrSpecList .>>. constructorList|>> Ast.DefClassCompleteContent
@@ -612,18 +612,18 @@ let errInformation = [
     (PRP000, ["mand"; "opt"], property)
     (AXI000, [literalAx; "post"], axiom)
     (THM000, ["theorem"; "thm"], theorem)
-    (COR000, ["theorem"; "cor"], corollary)
+    (COR000, ["theorem"; literalCor], corollary)
     (LEM000, ["lem"], lemma)
     (PPS000, ["prop"], proposition)
-    (CNJ000, ["conj"], conjecture)
+    (CNJ000, [literalConj], conjecture)
     (VAR000, ["dec"], varDeclBlock)
-    (CTR000, ["constructor"; "ctor"], constructor)
+    (CTR000, [literalCtorL; literalCtor], constructor)
     (PRF000, ["proof"; "prf"], proof)
     (INF000, ["inf"], ruleOfInference)
     (LOC000, ["loc"], localization)
     (USE000, ["uses"], usesClause)
     (PRD000, [literalAnd; "or"; "impl"; "iif"; "xor"; "not"; literalAll; "ex"; "is"], compoundPredicate)
-    (SMT000, [literalAssL; "cases"; "base"; "for"; "del"], statement)
+    (SMT000, [literalAssL; literalCases; literalBase; "for"; "del"], statement)
     (AGI000, ["|-"], argumentInference)
     (CAS000, ["|"], conditionFollowedByResult)
     (DCS000, ["?"], elseStatement)
@@ -631,7 +631,7 @@ let errInformation = [
     (REV000, ["rev"], revokeArgument)
     (RET000, ["ret"], returnStatement)
     (PRE000, ["pre"], premise)
-    (CON000, ["con"], conclusion)
+    (CON000, [literalCon], conclusion)
     (TYD000, ["~"], varDecl)
 ]
 /// Finds the error information tuple based on a prefix of a string from the errInformation list. 

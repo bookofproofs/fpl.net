@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -99,7 +100,7 @@ namespace FplLS
                 ,{ "cmc","Chamic languages" }
                 ,{ "cnr","Montenegrin" }
                 ,{ "cop","Coptic" }
-                ,{ "cor","Cornish" }
+                ,{ literalCor,"Cornish" }
                 ,{ "cos","Corsican" }
                 ,{ "cpe","Creoles and pidgins, English based" }
                 ,{ "cpf","Creoles and pidgins, French-based" }

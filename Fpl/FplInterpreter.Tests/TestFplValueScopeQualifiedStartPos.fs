@@ -1,6 +1,7 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
+open FplGrammarCommons
 open FplInterpreterTypes
 open CommonTestHelpers
 
@@ -728,7 +729,7 @@ type TestFplValueScopeQualifiedStartPos() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = 
-                if varVal.Contains "cl" then 
+                if varVal.Contains literalCl then 
                     theory.Scope["T1"]
                 elif varVal.Contains "func" then 
                     theory.Scope["T1() -> obj"]

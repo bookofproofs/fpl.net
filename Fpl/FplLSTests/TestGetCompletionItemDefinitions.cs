@@ -1,8 +1,8 @@
 // Ignore Spelling: Fpl
 
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using System.Diagnostics.Metrics;
-using System.Reflection;
+using static FplGrammarCommons;
+
 
 namespace FplLSTests
 {
@@ -35,16 +35,16 @@ namespace FplLSTests
             Assert.AreEqual<int>(3, count);
         }
 
-        [DataRow("definition", "class", CompletionItemKind.Class, "definition01")]
+        [DataRow("definition", literalClL, CompletionItemKind.Class, "definition01")]
         [DataRow("definition", "predicate", CompletionItemKind.Class, "definition02")]
         [DataRow("definition", "function", CompletionItemKind.Class, "definition03")]
-        [DataRow("def", "cl", CompletionItemKind.Class, "zdefinition01")]
+        [DataRow("def", literalCl, CompletionItemKind.Class, "zdefinition01")]
         [DataRow("def", "pred", CompletionItemKind.Class, "zdefinition02")]
         [DataRow("def", "func", CompletionItemKind.Class, "zdefinition03")]
-        [DataRow("definition", "class", CompletionItemKind.Keyword, "zzzdefinition01")]
+        [DataRow("definition", literalClL, CompletionItemKind.Keyword, "zzzdefinition01")]
         [DataRow("definition", "predicate", CompletionItemKind.Keyword, "zzzdefinition02")]
         [DataRow("definition", "function", CompletionItemKind.Keyword, "zzzdefinition03")]
-        [DataRow("def", "cl", CompletionItemKind.Keyword, "zzzzdefinition01")]
+        [DataRow("def", literalCl, CompletionItemKind.Keyword, "zzzzdefinition01")]
         [DataRow("def", "pred", CompletionItemKind.Keyword, "zzzzdefinition02")]
         [DataRow("def", "func", CompletionItemKind.Keyword, "zzzzdefinition03")]
         [TestMethod]
@@ -61,8 +61,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("def", "cl")]
-        [DataRow("definition", "class")]
+        [DataRow("def", literalCl)]
+        [DataRow("definition", literalClL)]
         [DataRow("def", "pred")]
         [DataRow("definition", "predicate")]
         [DataRow("def", "func")]
@@ -81,8 +81,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("def", "cl")]
-        [DataRow("definition", "class")]
+        [DataRow("def", literalCl)]
+        [DataRow("definition", literalClL)]
         [DataRow("def", "pred")]
         [DataRow("definition", "predicate")]
         [DataRow("def", "func")]
@@ -122,8 +122,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("def", "cl")]
-        [DataRow("definition", "class")]
+        [DataRow("def", literalCl)]
+        [DataRow("definition", literalClL)]
         [DataRow("def", "pred")]
         [DataRow("definition", "predicate")]
         [DataRow("def", "func")]

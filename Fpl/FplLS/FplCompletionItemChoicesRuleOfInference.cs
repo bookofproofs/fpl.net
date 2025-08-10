@@ -1,6 +1,7 @@
 ﻿// Ignore Spelling: Fpl
 
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -25,7 +26,7 @@ namespace FplLS
             if (ci.IsShort)
             {
                 TokenPremise = "pre";
-                TokenConclusion = "con";
+                TokenConclusion = literalCon;
                 ci.Detail = $"inference (short)";
             }
             ci.Label += " ...";

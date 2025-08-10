@@ -195,19 +195,19 @@ let keyWordSet =
            literalAssume
            literalAx
            literalAxL
-           "base"
-           "bydef"
-           "cases"
-           "cl"
-           "class"
-           "conj"
-           "conjecture"
-           "con"
-           "conclusion"
-           "constructor"
-           "cor"
-           "corollary"
-           "ctor"
+           literalBase
+           literalByDef
+           literalCases
+           literalCl
+           literalClL
+           literalConj
+           literalConjL
+           literalCon
+           literalConL
+           literalCtorL
+           literalCor
+           literalCorL
+           literalCtor
            "dec"
            "declaration"
            "def"

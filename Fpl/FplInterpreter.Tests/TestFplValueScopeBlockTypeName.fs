@@ -241,7 +241,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("ofunc", x.ShortName)
         | "Constructor" ->
             let x = new FplConstructor(positions, parent)
-            Assert.AreEqual<string>("ctor", x.ShortName)
+            Assert.AreEqual<string>(literalCtor, x.ShortName)
         | "Class" ->
             let x = new FplClass(positions, parent)
             Assert.AreEqual<string>("def cl", x.ShortName)
@@ -259,13 +259,13 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("prop", x.ShortName)
         | "Corollary" ->
             let x = new FplCorollary(positions, parent)
-            Assert.AreEqual<string>("cor", x.ShortName)
+            Assert.AreEqual<string>(literalCor, x.ShortName)
         | "Proof" ->
             let x = new FplProof(positions, parent)
             Assert.AreEqual<string>("prf", x.ShortName)
         | "Conjecture" ->
             let x = new FplConjecture(positions, parent)
-            Assert.AreEqual<string>("conj", x.ShortName)
+            Assert.AreEqual<string>(literalConj, x.ShortName)
         | "Axiom" ->
             let x = new FplAxiom(positions, parent)
             Assert.AreEqual<string>(literalAx, x.ShortName)

@@ -3,6 +3,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
+open FplGrammarCommons
 
 [<TestClass>]
 type TestFplValueScopeExpressionType() =
@@ -732,7 +733,7 @@ type TestFplValueScopeExpressionType() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = 
-                if varVal.Contains "cl" then 
+                if varVal.Contains literalCl then 
                     theory.Scope["T1"]
                 elif varVal.Contains "func" then 
                     theory.Scope["T1() -> obj"]

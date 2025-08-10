@@ -1,6 +1,7 @@
 // Ignore Spelling: Fpl
 
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLSTests
 {
@@ -8,7 +9,7 @@ namespace FplLSTests
     public class TestGetCompletionItemCases
     {
 
-        [DataRow("cases")]
+        [DataRow(literalCases)]
         [TestMethod]
         public void TestAddCasesChoicesNumber(string choice)
         {
@@ -17,7 +18,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow("cases")]
+        [DataRow(literalCases)]
         [TestMethod]
         public void TestAddCasesKeywordCounts(string choice)
         {
@@ -31,7 +32,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("cases")]
+        [DataRow(literalCases)]
         [TestMethod]
         public void TestAddChoicesSortText(string choice)
         {
@@ -39,11 +40,11 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesCases().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("cases"));
+                Assert.IsTrue(item.SortText.Contains(literalCases));
             }
         }
 
-        [DataRow("cases")]
+        [DataRow(literalCases)]
         [TestMethod]
         public void TestAddCasesChoicesLabel(string choice)
         {
@@ -55,7 +56,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("cases")]
+        [DataRow(literalCases)]
         [TestMethod]
         public void TestAddCasesChoicesDetail(string choice)
         {
@@ -67,7 +68,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("cases")]
+        [DataRow(literalCases)]
         [TestMethod]
         public void TestAddCasesChoicesInsertText(string choice)
         {

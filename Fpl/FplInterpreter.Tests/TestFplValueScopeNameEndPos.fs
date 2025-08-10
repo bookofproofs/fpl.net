@@ -2,6 +2,7 @@
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
+open FplGrammarCommons
 open FplInterpreterTypes
 open CommonTestHelpers
 
@@ -733,7 +734,7 @@ type TestFplValueScopeNameEndPos() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = 
-                if varVal.Contains "cl" then 
+                if varVal.Contains literalCl then 
                     theory.Scope["T1"]
                 elif varVal.Contains "func" then 
                     theory.Scope["T1() -> obj"]

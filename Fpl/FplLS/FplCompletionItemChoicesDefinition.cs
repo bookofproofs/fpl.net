@@ -1,5 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using System.Net.Http.Headers;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -31,7 +31,7 @@ namespace FplLS
                 TokenObject = "obj";
                 TokenFunction = "func";
                 TokenPredicate = "pred";
-                TokenClass = "cl";
+                TokenClass = literalCl;
                 if (forKeyword)
                 {
                     ci.Label = GetLabelKeyword(ci, definitionType);

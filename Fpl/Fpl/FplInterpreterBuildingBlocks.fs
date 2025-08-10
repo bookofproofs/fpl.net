@@ -1413,7 +1413,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.StartPos <- pos1
         fv.EndPos <- pos2
-        fv.FplId <- "cases"
+        fv.FplId <- literalCases
         conditionFollowedByResultListAsts 
         |> List.map (fun caseAst ->
             let cas = new FplStmt((pos1,pos2), fv)

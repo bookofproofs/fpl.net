@@ -1046,7 +1046,7 @@ type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Constructor, positions, parent)
 
     override this.Name = "a constructor"
-    override this.ShortName = "ctor"
+    override this.ShortName = literalCtor
 
     override this.Clone () =
         let ret = new FplConstructor((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1176,7 +1176,7 @@ type FplConjecture(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Conjecture, positions, parent)
 
     override this.Name = "a conjecture"
-    override this.ShortName = "conj"
+    override this.ShortName = literalConj
 
     override this.Clone () =
         let ret = new FplConjecture((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1187,7 +1187,7 @@ type FplCorollary(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Corollary, positions, parent)
 
     override this.Name = "a corollary"
-    override this.ShortName = "cor"
+    override this.ShortName = literalCor
 
     override this.Clone () =
         let ret = new FplCorollary((this.StartPos, this.EndPos), this.Parent.Value)

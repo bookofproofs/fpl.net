@@ -1,6 +1,7 @@
 ﻿// Ignore Spelling: Fpl
 
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -29,11 +30,11 @@ namespace FplLS
                 ci.SortText = "parent02";
                 ret.Add(ci);
             }
-            if (defaultCi.Word == "base")
+            if (defaultCi.Word == literalBase)
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "ctor call (parent class)";
-                ci.InsertText = "base";
+                ci.InsertText = literalBase;
                 ci.Label = TokenPrefix + ci.InsertText;
                 ci.Kind = CompletionItemKind.Reference;
                 ci.SortText = "self03";

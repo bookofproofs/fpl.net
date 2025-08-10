@@ -1,6 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
+open FplGrammarCommons
 open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
@@ -127,14 +128,14 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestDerivedArgument03 () =
-        let result = run (derivedArgument .>> eof) """con"""
+        let result = run (derivedArgument .>> eof) literalCon
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestDerivedArgument04 () =
-        let result = run (derivedArgument .>> eof) """conclusion"""
+        let result = run (derivedArgument .>> eof) literalConL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
