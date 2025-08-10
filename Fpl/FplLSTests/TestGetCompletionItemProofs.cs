@@ -7,7 +7,7 @@ namespace FplLSTests
     {
 
         [DataRow("prf")]
-        [DataRow("proof")]
+        [DataRow(literalPrfL)]
         [TestMethod]
         public void TestAddProofChoicesNumber(string choice)
         {
