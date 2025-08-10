@@ -6,7 +6,7 @@ namespace FplLSTests
     [TestClass]
     public class TestGetCompletionItemKeyword
     {
-        [DataRow("alias")]
+        [DataRow(literalAlias)]
         [DataRow("assert")]
         [DataRow("ass")]
         [DataRow("assume")]
@@ -46,7 +46,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, actual.Count);
         }
 
-        [DataRow("alias")]
+        [DataRow(literalAlias)]
         [DataRow("assert")]
         [DataRow("ass")]
         [DataRow("assume")]
@@ -92,7 +92,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("alias")]
+        [DataRow(literalAlias)]
         [DataRow("assert")]
         [DataRow("ass")]
         [DataRow("assume")]
@@ -136,7 +136,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("alias")]
+        [DataRow(literalAlias)]
         [DataRow("assert")]
         [DataRow("ass")]
         [DataRow("assume")]
@@ -180,7 +180,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("alias")]
+        [DataRow(literalAlias)]
         [DataRow("assert")]
         [DataRow("ass")]
         [DataRow("assume")]
@@ -224,7 +224,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("alias")]
+        [DataRow(literalAlias)]
         [DataRow("assert")]
         [DataRow("ass")]
         [DataRow("assume")]

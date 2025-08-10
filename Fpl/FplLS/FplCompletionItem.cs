@@ -90,7 +90,7 @@ namespace FplLS
                     return new FplCompletionItemChoicesDelegate().GetChoices(this);
                 case "is":
                     return new FplCompletionItemChoicesIsOperator().GetChoices(this);
-                case "alias":
+                case literalAlias:
                 case "assert":
                 case "ass":
                 case "assume":
@@ -127,7 +127,7 @@ namespace FplLS
                 case "base":
                 case "parent":
                     return new FplCompletionItemChoicesSelf().GetChoices(this);
-                case "all":
+                case literalAll:
                 case "ex":
                 case "exn":
                     return new FplCompletionItemChoicesQuantor().GetChoices(this);
@@ -244,15 +244,15 @@ namespace FplLS
             this.Label = _prefix + Word;
             switch (Word)
             {
-                case "alias":
-                    this.Detail = "alias";
-                    this.SortText = "alias";
+                case literalAlias:
+                    this.Detail = literalAlias;
+                    this.SortText = literalAlias;
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = false;
                     break;
-                case "all":
+                case literalAll:
                     this.Detail = "predicate (all quantor)";
-                    this.SortText = keywAll;
+                    this.SortText = literalAll;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;

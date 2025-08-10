@@ -1,4 +1,5 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLSTests
 {
@@ -6,7 +7,7 @@ namespace FplLSTests
     public class TestGetCompletionItemQuantors
     {
 
-        [DataRow("all", 2)]
+        [DataRow(literalAll, 2)]
         [DataRow("ex", 2)]
         [DataRow("exn", 2)]
         [TestMethod]
@@ -17,7 +18,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(number, actual.Count);
         }
 
-        [DataRow("all", 1)]
+        [DataRow(literalAll, 1)]
         [DataRow("ex", 1)]
         [DataRow("exn", 1)]
         [TestMethod]
@@ -34,12 +35,12 @@ namespace FplLSTests
             Assert.AreEqual<int>(number, count);
         }
 
-        [DataRow("all", "all ...", CompletionItemKind.Operator, "all01")]
-        [DataRow("all", "type ...", CompletionItemKind.Operator, "all02")]
-        [DataRow("all", "list ...", CompletionItemKind.Operator, "all03")]
-        [DataRow("all", "range ...", CompletionItemKind.Operator, "all04")]
-        [DataRow("all", "combined ...", CompletionItemKind.Operator, "all05")]
-        [DataRow("all", "", CompletionItemKind.Keyword, "zzzall")]
+        [DataRow(literalAll, "all ...", CompletionItemKind.Operator, "all01")]
+        [DataRow(literalAll, "type ...", CompletionItemKind.Operator, "all02")]
+        [DataRow(literalAll, "list ...", CompletionItemKind.Operator, "all03")]
+        [DataRow(literalAll, "range ...", CompletionItemKind.Operator, "all04")]
+        [DataRow(literalAll, "combined ...", CompletionItemKind.Operator, "all05")]
+        [DataRow(literalAll, "", CompletionItemKind.Keyword, "zzzall")]
         [DataRow("ex", "ex ...", CompletionItemKind.Operator, "ex01")]
         [DataRow("ex", "type ...", CompletionItemKind.Operator, "ex02")]
         [DataRow("ex", "list ...", CompletionItemKind.Operator, "ex03")]
@@ -65,7 +66,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("all")]
+        [DataRow(literalAll)]
         [DataRow("ex")]
         [DataRow("exn")]
         [TestMethod]
@@ -82,7 +83,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("all")]
+        [DataRow(literalAll)]
         [DataRow("ex")]
         [DataRow("exn")]
         [TestMethod]
@@ -97,7 +98,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("all", "all")]
+        [DataRow(literalAll, literalAll)]
         [DataRow("ex", "exists")]
         [DataRow("exn", "n-times")]
         [TestMethod]
@@ -114,7 +115,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("all")]
+        [DataRow(literalAll)]
         [DataRow("ex")]
         [DataRow("exn")]
         [TestMethod]

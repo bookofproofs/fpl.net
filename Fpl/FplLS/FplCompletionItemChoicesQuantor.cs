@@ -32,7 +32,7 @@ namespace FplLS
             ci.InsertText = $"{ci.Word}{postfix} x:FplType" + GetBody();
             switch (ci.Word)
             {
-                case keywAll:
+                case literalAll:
                     ci.Detail = $"all quantor (in type)";
                     break;
                 case "ex":

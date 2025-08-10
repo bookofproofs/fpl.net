@@ -563,12 +563,12 @@ type TestFplValueScopeTypeSignature() =
             let pr1 = theory.Scope["T1()"] 
             let base1 = pr1.ArgList[0]
             match var with
-            | "base1" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type base1)
-            | "base2" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type base1)
+            | "base1" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type base1)
+            | "base2" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type base1)
             | "base3" -> Assert.AreEqual<string>("undef", getType SignatureType.Type base1)
-            | "base4" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type base1)
+            | "base4" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type base1)
             | "base5" -> Assert.AreEqual<string>("del.Test()", getType SignatureType.Type base1)
-            | "base6" -> Assert.AreEqual<string>(keywInd, getType SignatureType.Type base1)
+            | "base6" -> Assert.AreEqual<string>(literalInd, getType SignatureType.Type base1)
             | "base7" -> Assert.AreEqual<string>("bydef.Test()", getType SignatureType.Type base1)
             | "base8" -> Assert.AreEqual<string>("Test$1", getType SignatureType.Type base1)
             | "base9" -> Assert.AreEqual<string>("Test$1()", getType SignatureType.Type base1)
@@ -778,9 +778,9 @@ type TestFplValueScopeTypeSignature() =
             let mapping = base1.ArgList[0]
             match var with
             | "base1" -> Assert.AreEqual<string>("obj", getType SignatureType.Type mapping)
-            | "base2" -> Assert.AreEqual<string>(keywInd, getType SignatureType.Type mapping)
+            | "base2" -> Assert.AreEqual<string>(literalInd, getType SignatureType.Type mapping)
             | "base3" -> Assert.AreEqual<string>("func", getType SignatureType.Type mapping)
-            | "base4" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type mapping)
+            | "base4" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type mapping)
             | "base5" -> Assert.AreEqual<string>("A", getType SignatureType.Type mapping)
             | "base6" -> Assert.AreEqual<string>("obj(ind)", getType SignatureType.Type mapping)
             | "base7" -> Assert.AreEqual<string>("pred(*obj)", getType SignatureType.Type mapping)
@@ -816,11 +816,11 @@ type TestFplValueScopeTypeSignature() =
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
 
             match var with
-            | "base1" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type arg)
-            | "base2" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type arg)
-            | "base3" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type arg)
-            | "base4" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type arg)
-            | "base5" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type arg)
+            | "base1" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type arg)
+            | "base2" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type arg)
+            | "base3" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type arg)
+            | "base4" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type arg)
+            | "base5" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type arg)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

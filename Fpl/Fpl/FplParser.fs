@@ -112,7 +112,7 @@ let argumentIdentifier = positions "ArgumentIdentifier" (regex @"\d+\w*\.") <?> 
 let namespaceIdentifier = positions "NamespaceIdentifier" (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
 let predicateIdentifier = positions "PredicateIdentifier" (sepBy1 pascalCaseId dot) |>> Ast.PredicateIdentifier 
 
-let alias = positions "Alias" (skipString "alias" >>. SW >>. idStartsWithCap) |>> Ast.Alias
+let alias = positions "Alias" (skipString literalAlias >>. SW >>. idStartsWithCap) |>> Ast.Alias
 let star = positions "Star" (skipChar '*') |>> Ast.Star
 
 let aliasedNamespaceIdentifier = positions "AliasedNamespaceIdentifier" (namespaceIdentifier .>>. opt (alias <|> star)) |>> Ast.AliasedNamespaceIdentifier
@@ -168,7 +168,7 @@ let keywordImpl = skipString "impl" .>> IW
 let keywordIif = skipString "iif" .>> IW 
 let keywordXor = skipString "xor" .>> IW 
 let keywordNot = skipString "not" .>> attemptSW 
-let keywordAll = skipString keywAll .>> SW 
+let keywordAll = skipString literalAll .>> SW 
 let keywordEx = skipString "ex" .>> SW
 let keywordExN = skipString "exn" .>> IW
 let keywordIs = skipString "is" .>> attemptSW 
@@ -622,7 +622,7 @@ let errInformation = [
     (INF000, ["inf"], ruleOfInference)
     (LOC000, ["loc"], localization)
     (USE000, ["uses"], usesClause)
-    (PRD000, ["and"; "or"; "impl"; "iif"; "xor"; "not"; keywAll; "ex"; "is"], compoundPredicate)
+    (PRD000, ["and"; "or"; "impl"; "iif"; "xor"; "not"; literalAll; "ex"; "is"], compoundPredicate)
     (SMT000, ["assert"; "cases"; "base"; "for"; "del"], statement)
     (AGI000, ["|-"], argumentInference)
     (CAS000, ["|"], conditionFollowedByResult)

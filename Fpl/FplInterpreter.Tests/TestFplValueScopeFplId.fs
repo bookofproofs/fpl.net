@@ -613,7 +613,7 @@ type TestFplValueScopeFplId() =
             | "base17" -> Assert.AreEqual<string>("'", base1.FplId)
             | "base18" -> Assert.AreEqual<string>("ex", base1.FplId)
             | "base19" -> Assert.AreEqual<string>("exn$1", base1.FplId)
-            | "base20" -> Assert.AreEqual<string>(keywAll, base1.FplId)
+            | "base20" -> Assert.AreEqual<string>(literalAll, base1.FplId)
             | "base21" -> Assert.AreEqual<string>("and", base1.FplId)
             | "base21a" -> Assert.AreEqual<string>("not", base1.FplId)
             | "base21b" -> Assert.AreEqual<string>("not", base1.FplId)

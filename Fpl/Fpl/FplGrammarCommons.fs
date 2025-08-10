@@ -9,187 +9,187 @@ open FParsec
 
 (* Keyword constants *)
 [<Literal>]
-let keywAlias = "alias"
+let literalAlias = "alias"
 [<Literal>]
-let keywAll = "all"
+let literalAll = "all"
 [<Literal>]
-let keywAnd = "and"
+let literalAnd = "and"
 [<Literal>]
-let keywAss = "ass"
+let literalAss = "ass"
 [<Literal>]
-let keywAssL = "assert"
+let literalAssL = "assert"
 [<Literal>]
-let keywAssume = "assume"
+let literalAssume = "assume"
 [<Literal>]
-let keywAx = "ax"
+let literalAx = "ax"
 [<Literal>]
-let keywAxL = "axiom"
+let literalAxL = "axiom"
 [<Literal>]
-let keywBase = "base"
+let literalBase = "base"
 [<Literal>]
-let keywByDef = "bydef"
+let literalByDef = "bydef"
 [<Literal>]
-let keywCases = "cases"
+let literalCases = "cases"
 [<Literal>]
-let keywCl = "cl"
+let literalCl = "cl"
 [<Literal>]
-let keywClL = "class"
+let literalClL = "class"
 [<Literal>]
-let keywCon = "con"
+let literalCon = "con"
 [<Literal>]
-let keywConj = "conj"
+let literalConj = "conj"
 [<Literal>]
-let keywConjL = "conjecture"
+let literalConjL = "conjecture"
 [<Literal>]
-let keywConL = "conclusion"
+let literalConL = "conclusion"
 [<Literal>]
-let keywCor = "cor"
+let literalCor = "cor"
 [<Literal>]
-let keywCorL = "corollary"
+let literalCorL = "corollary"
 [<Literal>]
-let keywCtor = "ctor"
+let literalCtor = "ctor"
 [<Literal>]
-let keywCtorL = "constructor"
+let literalCtorL = "constructor"
 [<Literal>]
-let keywDec = "dec"
+let literalDec = "dec"
 [<Literal>]
-let keywDecL = "declaration"
+let literalDecL = "declaration"
 [<Literal>]
-let keywDef = "def"
+let literalDef = "def"
 [<Literal>]
-let keywDefL = "definition"
+let literalDefL = "definition"
 [<Literal>]
-let keywDel = "del"
+let literalDel = "del"
 [<Literal>]
-let keywDelL = "delegate"
+let literalDelL = "delegate"
 [<Literal>]
-let keywEx = "ex"
+let literalEx = "ex"
 [<Literal>]
-let keywExN = "exn"
+let literalExN = "exn"
 [<Literal>]
-let keywExt = "ext"
+let literalExt = "ext"
 [<Literal>]
-let keywExtL = "extension"
+let literalExtL = "extension"
 [<Literal>]
-let keywFalse = "false"
+let literalFalse = "false"
 [<Literal>]
-let keywFor = "for"
+let literalFor = "for"
 [<Literal>]
-let keywFunc = "func"
+let literalFunc = "func"
 [<Literal>]
-let keywFuncLong = "function"
+let literalFuncLong = "function"
 [<Literal>]
-let keywIif = "iif"
+let literalIif = "iif"
 [<Literal>]
-let keywImpl = "impl"
+let literalImpl = "impl"
 [<Literal>]
-let keywIn = "in"
+let literalIn = "in"
 [<Literal>]
-let keywInd = "ind"
+let literalInd = "ind"
 [<Literal>]
-let keywIndL = "index"
+let literalIndL = "index"
 [<Literal>]
-let keywInf = "inf"
+let literalInf = "inf"
 [<Literal>]
-let keywInfix = "infix"
+let literalInfix = "infix"
 [<Literal>]
-let keywInfL = "inference"
+let literalInfL = "inference"
 [<Literal>]
-let keywIntr = "intr"
+let literalIntr = "intr"
 [<Literal>]
-let keywIntrL = "intrinsic"
+let literalIntrL = "intrinsic"
 [<Literal>]
-let keywIs = "is"
+let literalIs = "is"
 [<Literal>]
-let keywLem = "lem"
+let literalLem = "lem"
 [<Literal>]
-let keywLemL = "lemma"
+let literalLemL = "lemma"
 [<Literal>]
-let keywLoc = "loc"
+let literalLoc = "loc"
 [<Literal>]
-let keywLocL = "localization"
+let literalLocL = "localization"
 [<Literal>]
-let keywNot = "not"
+let literalNot = "not"
 [<Literal>]
-let keywObj = "obj"
+let literalObj = "obj"
 [<Literal>]
-let keywObjL = "object"
+let literalObjL = "object"
 [<Literal>]
-let keywOpt = "opt"
+let literalOpt = "opt"
 [<Literal>]
-let keywOptL = "optional"
+let literalOptL = "optional"
 [<Literal>]
-let keywOr = "or"
+let literalOr = "or"
 [<Literal>]
-let keywParent = "parent"
+let literalParent = "parent"
 [<Literal>]
-let keywPost = "post"
+let literalPost = "post"
 [<Literal>]
-let keywPostFix = "postfix"
+let literalPostFix = "postfix"
 [<Literal>]
-let keywPostL = "postulate"
+let literalPostL = "postulate"
 [<Literal>]
-let keywPre = "pre"
+let literalPre = "pre"
 [<Literal>]
-let keywPred = "pred"
+let literalPred = "pred"
 [<Literal>]
-let keywPredL = "predicate"
+let literalPredL = "predicate"
 [<Literal>]
-let keywPrefix = "prefix"
+let literalPrefix = "prefix"
 [<Literal>]
-let keywPreL = "premise"
+let literalPreL = "premise"
 [<Literal>]
-let keywPrf = "prf"
+let literalPrf = "prf"
 [<Literal>]
-let keywPrfL = "proof"
+let literalPrfL = "proof"
 [<Literal>]
-let keywProp = "prop"
+let literalProp = "prop"
 [<Literal>]
-let keywPropL = "proposition"
+let literalPropL = "proposition"
 [<Literal>]
-let keywPrty = "prty"
+let literalPrty = "prty"
 [<Literal>]
-let keywPrtyL = "property"
+let literalPrtyL = "property"
 [<Literal>]
-let keywQed = "qed"
+let literalQed = "qed"
 [<Literal>]
-let keywRet = "ret"
+let literalRet = "ret"
 [<Literal>]
-let keywRetL = "return"
+let literalRetL = "return"
 [<Literal>]
-let keywRev = "rev"
+let literalRev = "rev"
 [<Literal>]
-let keywRevL = "revoke"
+let literalRevL = "revoke"
 [<Literal>]
-let keywSelf = "self"
+let literalSelf = "self"
 [<Literal>]
-let keywSymbol = "symbol"
+let literalSymbol = "symbol"
 [<Literal>]
-let keywThm = "thm"
+let literalThm = "thm"
 [<Literal>]
-let keywThmL = "theorem"
+let literalThmL = "theorem"
 [<Literal>]
-let keywTpl = "tpl"
+let literalTpl = "tpl"
 [<Literal>]
-let keywTrivial = "trivial"
+let literalTrivial = "trivial"
 [<Literal>]
-let keywTrue = "true"
+let literalTrue = "true"
 [<Literal>]
-let keywUndef = "undef"
+let literalUndef = "undef"
 [<Literal>]
-let keywUndefL = "undefined"
+let literalUndefL = "undefined"
 [<Literal>]
-let keywUndetermined = "undetermined"
+let literalUndetermined = "undetermined"
 [<Literal>]
-let keywUses = "uses"
+let literalUses = "uses"
 [<Literal>]
-let keywXor = "xor"
+let literalXor = "xor"
 
 let keyWordSet =
     HashSet<_>(
-        [| keywAlias
-           keywAll
-           keywAnd
+        [| literalAlias
+           literalAll
+           literalAnd
            "assert"
            "ass"
            "assume"
@@ -217,8 +217,8 @@ let keyWordSet =
            "ext"
            "extension"
            "ex"
-           keywExN
-           keywFalse
+           literalExN
+           literalFalse
            "for"
            "func"
            "function"
