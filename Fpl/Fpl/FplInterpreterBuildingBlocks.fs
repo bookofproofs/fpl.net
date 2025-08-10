@@ -94,10 +94,10 @@ let rec eval (st: SymbolTable) ast =
             match fv.FplBlockType with
             | FplBlockType.Class -> () // do not override class's type with base obj
             | FplBlockType.Reference ->
-                fv.TypeId <- $"{value.FplBlockType.ShortName}"
+                fv.TypeId <- $"{value.ShortName}"
                 fv.ValueList.Clear()
                 fv.ValueList.Add(value)
-            | _ ->  fv.TypeId <- $"{value.FplBlockType.ShortName}"
+            | _ ->  fv.TypeId <- $"{value.ShortName}"
         | FplBlockType.IntrinsicTpl ->
             match fv.FplBlockType with
             | FplBlockType.Class -> () // do not override class's type with base obj
@@ -110,7 +110,7 @@ let rec eval (st: SymbolTable) ast =
             | _ ->  
                 fv.TypeId <- $"{tplName}"
         | _ ->
-            fv.TypeId <- FplBlockType.IntrinsicUndef.ShortName
+            fv.TypeId <- value.ShortName
             fv.ValueList.Clear()
             fv.ValueList.Add(value)
 
@@ -316,7 +316,7 @@ let rec eval (st: SymbolTable) ast =
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
             fv.FplId <- name
-            fv.TypeId <- FplBlockType.IntrinsicUndef.ShortName
+            fv.TypeId <- constUndef
         ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 

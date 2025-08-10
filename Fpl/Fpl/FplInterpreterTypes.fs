@@ -279,6 +279,13 @@ type ParsedAstList() =
 
         ret
 
+let constInd = "ind"
+let constObj = "obj"
+let constPred = "pred"
+let constFunc = "func"
+let constTpl = "tpl"
+let constUndef = "undef"
+
 type FplBlockType =
     | Root
     | Theory
@@ -320,114 +327,6 @@ type FplBlockType =
     | IntrinsicUndef
     | IntrinsicFunc
     | IntrinsicTpl
-
-    member private this.UnqualifiedName =
-        match this with
-        // needed for parser error messages
-        | Variable -> "variable"
-        | VariadicVariableMany -> "zero-or-more variable"
-        | VariadicVariableMany1 -> "one-or-more variable"
-        | MandatoryPredicate -> "predicate property"
-        | OptionalPredicate -> "optional predicate property"
-        | MandatoryFunctionalTerm -> "functional term property"
-        | OptionalFunctionalTerm -> "optional functional term property"
-        | Constructor -> "constructor"
-        | Class -> "class definition"
-        | Localization -> "localization"
-        | Theorem -> "theorem"
-        | Lemma -> "lemma"
-        | Proposition -> "proposition"
-        | Corollary -> "corollary"
-        | Proof -> "proof"
-        | Conjecture -> "conjecture"
-        | Axiom -> "axiom"
-        | RuleOfInference -> "rule of inference"
-        | Quantor -> "quantor"
-        | Predicate -> "predicate definition"
-        | FunctionalTerm -> "functional term definition"
-        | Reference -> "reference"
-        | Theory -> "theory"
-        | Argument -> "argument"
-        | Justification -> "justification"
-        | ArgInference -> "argument inference"
-        | Language -> "language"
-        | Translation -> "translation"
-        | Mapping -> "mapping"
-        | Stmt -> "statement"
-        | Assertion -> "assertion"
-        | Extension -> "extension"
-        | Root -> "root"
-        | Instance -> "instance"
-        | IntrinsicInd -> "intrinsic index"
-        | IntrinsicObj -> "intrinsic object"
-        | IntrinsicPred -> "intrinsic predicate"
-        | IntrinsicFunc -> "intrinsic functional term"
-        | IntrinsicTpl -> "intrinsic template"
-        | IntrinsicUndef -> "intrinsic undefined"
-
-    member private this.Article =
-        match this with
-        | OptionalPredicate
-        | OptionalFunctionalTerm
-        | Argument
-        | Assertion
-        | ArgInference
-        | Extension
-        | Instance
-        | IntrinsicInd
-        | IntrinsicObj
-        | IntrinsicPred
-        | IntrinsicTpl
-        | IntrinsicUndef
-        | IntrinsicFunc
-        | Axiom -> "an"
-        | _ -> "a"
-
-    member this.Name = this.Article + " " + this.UnqualifiedName
-
-    member this.ShortName =
-        match this with
-        // parser error messages
-        | Variable -> "var"
-        | VariadicVariableMany -> "*var"
-        | VariadicVariableMany1 -> "+var"
-        | MandatoryPredicate -> "mpred"
-        | OptionalPredicate -> "opred"
-        | MandatoryFunctionalTerm -> "mfunc"
-        | OptionalFunctionalTerm -> "ofunc"
-        | Constructor -> "ctor"
-        | Class -> "def cl"
-        | Localization -> "loc"
-        | Theorem -> "thm"
-        | Lemma -> "lem"
-        | Proposition -> "prop"
-        | Corollary -> "cor"
-        | Proof -> "prf"
-        | Conjecture -> "conj"
-        | Axiom -> "ax"
-        | RuleOfInference -> "inf"
-        | Quantor -> "qtr"
-        | Predicate -> "def pred"
-        | FunctionalTerm -> "def func"
-        | Reference -> "ref"
-        | Theory -> "th"
-        | Argument -> "arg"
-        | Justification -> "just"
-        | ArgInference -> "ainf"
-        | Language -> "lang"
-        | Translation -> "trsl"
-        | Mapping -> "map"
-        | Stmt -> "stmt"
-        | Assertion -> "ass"
-        | Extension -> "def ext"
-        | Instance -> "inst"
-        | IntrinsicInd -> "ind"
-        | IntrinsicObj -> "obj"
-        | IntrinsicPred -> "pred"
-        | IntrinsicFunc -> "func"
-        | IntrinsicTpl -> "tpl"
-        | IntrinsicUndef -> "undef"
-        | Root -> "root"
 
 type FixType =
     | Infix of string * int
@@ -487,6 +386,9 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     abstract member Instantiate: unit -> FplValue option // not all FplValues can be instantiated, e.g. a theorem cannot be instantiated
     abstract member Clone: unit -> FplValue
     abstract member AssignParts: FplValue -> unit
+    abstract member ShortName: string
+    abstract member Name: string
+
     override this.AssignParts (ret:FplValue) =
         ret.FplId <- this.FplId
 
@@ -560,12 +462,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     member this.FplBlockType
         with get () = _blockType
         and set (value) = _blockType <- value
-
-    /// Name of the FPL block type within this FplValue
-    member this.BlockTypeName = _blockType.Name
-
-    /// Short name of the FPL block type within this FplValue
-    member this.BlockTypeShortName = _blockType.ShortName
 
     /// Starting position of this FplValue
     member this.StartPos
@@ -744,7 +640,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
             else
                 raise (
                     ArgumentException(
-                        sprintf "Cannot set IsSignatureVariable for non-variable %s" this.FplBlockType.ShortName
+                        sprintf "Cannot set IsSignatureVariable for non-variable %s" this.ShortName
                     )
                 )
 
@@ -1006,6 +902,8 @@ let rec getType (isSignature: SignatureType) (fplValue:FplValue) =
 
 type FplRoot() =
     inherit FplValue(FplBlockType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+    override this.Name = "a root"
+    override this.ShortName = "root"
     override this.Instantiate () = None
     override this.Clone () =
         let ret = new FplRoot()
@@ -1018,6 +916,8 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
     do
         this.FilePath <- Some filePath
 
+    override this.Name = "a theory"
+    override this.ShortName = "th"
     override this.Instantiate () = None
     override this.Clone () =
         let ret = new FplTheory((this.StartPos, this.EndPos), this.Parent.Value, this.FilePath.Value)
@@ -1038,8 +938,8 @@ type FplGenericObject(blockType: FplBlockType, positions: Positions, parent: Fpl
     inherit FplValue(blockType, positions, Some parent)
 
     do
-        this.FplId <- FplBlockType.IntrinsicObj.ShortName
-        this.TypeId <- FplBlockType.IntrinsicObj.ShortName
+        this.FplId <- constObj
+        this.TypeId <- constObj
 
         //let rec getInstance (previous:FplValue) =
         //    let (inst:FplValue) = createFplValue((fplValue.StartPos,fplValue.EndPos), FplBlockType.Instance, previous)
@@ -1070,6 +970,10 @@ type FplGenericObject(blockType: FplBlockType, positions: Positions, parent: Fpl
 
 type FplRuleOfInference(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.RuleOfInference, positions, parent)
+
+    override this.Name = "a rule of inference"
+    override this.ShortName = "inf"
+
     override this.Clone () =
         let ret = new FplRuleOfInference((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1078,6 +982,10 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
 
 type FplVariable(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Variable, positions, Some parent)
+
+    override this.Name = "a variable"
+    override this.ShortName = "var"
+
     override this.Clone () =
         let ret = new FplVariable((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1087,6 +995,10 @@ type FplVariable(positions: Positions, parent: FplValue) =
 
 type FplVariadicVariableMany(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.VariadicVariableMany, positions, Some parent)
+
+    override this.Name = "a zero-or-more variable"
+    override this.ShortName = "*var"
+
     override this.Clone () =
         let ret = new FplVariadicVariableMany((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1096,6 +1008,10 @@ type FplVariadicVariableMany(positions: Positions, parent: FplValue) =
 
 type FplVariadicVariableMany1(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.VariadicVariableMany1, positions, Some parent)
+
+    override this.Name = "a one-or-more variable"
+    override this.ShortName = "+var"
+
     override this.Clone () =
         let ret = new FplVariadicVariableMany1((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1105,7 +1021,10 @@ type FplVariadicVariableMany1(positions: Positions, parent: FplValue) =
 
 type FplInstance(positions: Positions, parent: FplValue) as this =
     inherit FplGenericObject(FplBlockType.Instance, positions, parent)
-    
+
+    override this.Name = "an instance"
+    override this.ShortName = "inst"
+
     override this.Clone () =
         let ret = new FplInstance((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1115,6 +1034,10 @@ type FplInstance(positions: Positions, parent: FplValue) as this =
 
 type FplClass(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Class, positions, parent)
+
+    override this.Name = "a class definition"
+    override this.ShortName = "def cl"
+
     override this.Clone () =
         let ret = new FplClass((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1126,6 +1049,10 @@ type FplClass(positions: Positions, parent: FplValue) =
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Constructor, positions, parent)
+
+    override this.Name = "a constructor"
+    override this.ShortName = "ctor"
+
     override this.Clone () =
         let ret = new FplConstructor((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1136,6 +1063,10 @@ type FplConstructor(positions: Positions, parent: FplValue) =
 
 type FplFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.FunctionalTerm, positions, Some parent)
+
+    override this.Name = "a functional term definition"
+    override this.ShortName = "def func"
+
     override this.Clone () =
         let ret = new FplFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1145,6 +1076,10 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue) =
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.MandatoryFunctionalTerm, positions, Some parent)
+
+    override this.Name = "a functional term property"
+    override this.ShortName = "mfunc"
+
     override this.Clone () =
         let ret = new FplMandatoryFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1154,6 +1089,10 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
 
 type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.OptionalFunctionalTerm, positions, Some parent)
+
+    override this.Name = "an optional functional term property"
+    override this.ShortName = "ofunc"
+
     override this.Clone () =
         let ret = new FplOptionalFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1163,6 +1102,10 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
 
 type FplPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Predicate, positions, parent)
+
+    override this.Name = "a predicate definition"
+    override this.ShortName = "def pred"
+
     override this.Clone () =
         let ret = new FplPredicate((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1170,6 +1113,10 @@ type FplPredicate(positions: Positions, parent: FplValue) =
 
 type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.MandatoryPredicate, positions, parent)
+
+    override this.Name = "a predicate property"
+    override this.ShortName = "mpred"
+
     override this.Clone () =
         let ret = new FplMandatoryPredicate((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1177,6 +1124,10 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
 
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.OptionalPredicate, positions, parent)
+
+    override this.Name = "an optional predicate property"
+    override this.ShortName = "opred"
+
     override this.Clone () =
         let ret = new FplOptionalPredicate((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1184,6 +1135,10 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
 
 type FplAxiom(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Axiom, positions, parent)
+
+    override this.Name = "an axiom"
+    override this.ShortName = "ax"
+
     override this.Clone () =
         let ret = new FplAxiom((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1191,6 +1146,10 @@ type FplAxiom(positions: Positions, parent: FplValue) =
 
 type FplTheorem(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Theorem, positions, parent)
+
+    override this.Name = "a theorem"
+    override this.ShortName = "thm"
+
     override this.Clone () =
         let ret = new FplTheorem((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1198,6 +1157,10 @@ type FplTheorem(positions: Positions, parent: FplValue) =
 
 type FplLemma(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Lemma, positions, parent)
+
+    override this.Name = "a lemma"
+    override this.ShortName = "lem"
+
     override this.Clone () =
         let ret = new FplLemma((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1205,6 +1168,10 @@ type FplLemma(positions: Positions, parent: FplValue) =
 
 type FplProposition(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Proposition, positions, parent)
+
+    override this.Name = "a proposition"
+    override this.ShortName = "prop"
+
     override this.Clone () =
         let ret = new FplProposition((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1212,6 +1179,10 @@ type FplProposition(positions: Positions, parent: FplValue) =
 
 type FplConjecture(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Conjecture, positions, parent)
+
+    override this.Name = "a conjecture"
+    override this.ShortName = "conj"
+
     override this.Clone () =
         let ret = new FplConjecture((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1219,6 +1190,10 @@ type FplConjecture(positions: Positions, parent: FplValue) =
 
 type FplCorollary(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Corollary, positions, parent)
+
+    override this.Name = "a corollary"
+    override this.ShortName = "cor"
+
     override this.Clone () =
         let ret = new FplCorollary((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1226,6 +1201,10 @@ type FplCorollary(positions: Positions, parent: FplValue) =
 
 type FplProof(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Proof, positions, parent)
+
+    override this.Name = "a proof"
+    override this.ShortName = "prf"
+
     override this.Clone () =
         let ret = new FplProof((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1233,6 +1212,10 @@ type FplProof(positions: Positions, parent: FplValue) =
 
 type FplArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Argument, positions, parent)
+
+    override this.Name = "an argument"
+    override this.ShortName = "arg"
+
     override this.Clone () =
         let ret = new FplArgument((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1240,6 +1223,10 @@ type FplArgument(positions: Positions, parent: FplValue) =
 
 type FplJustification(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Justification, positions, parent)
+
+    override this.Name = "a justification"
+    override this.ShortName = "just"
+
     override this.Clone () =
         let ret = new FplJustification((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1249,6 +1236,10 @@ type FplJustification(positions: Positions, parent: FplValue) =
 
 type FplArgInference(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.ArgInference, positions, parent)
+
+    override this.Name = "an argument inference"
+    override this.ShortName = "ainf"
+
     override this.Clone () =
         let ret = new FplArgInference((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1256,6 +1247,10 @@ type FplArgInference(positions: Positions, parent: FplValue) =
 
 type FplLocalization(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Localization, positions, Some parent)
+
+    override this.Name = "a localization"
+    override this.ShortName = "loc"
+
     override this.Clone () =
         let ret = new FplLocalization((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1265,6 +1260,10 @@ type FplLocalization(positions: Positions, parent: FplValue) =
 
 type FplTranslation(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Translation, positions, Some parent)
+
+    override this.Name = "a translation"
+    override this.ShortName = "trsl"
+
     override this.Clone () =
         let ret = new FplTranslation((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1274,6 +1273,10 @@ type FplTranslation(positions: Positions, parent: FplValue) =
 
 type FplLanguage(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Language, positions, Some parent)
+
+    override this.Name = "a language"
+    override this.ShortName = "lang"
+
     override this.Clone () =
         let ret = new FplLanguage((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1283,6 +1286,10 @@ type FplLanguage(positions: Positions, parent: FplValue) =
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Reference, positions, Some parent)
+
+    override this.Name = "a reference"
+    override this.ShortName = "ref"
+
     override this.Clone () =
         let ret = new FplReference((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1292,6 +1299,10 @@ type FplReference(positions: Positions, parent: FplValue) =
 
 type FplQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Quantor, positions, parent)
+
+    override this.Name = "a quantor"
+    override this.ShortName = "qtr"
+
     override this.Clone () =
         let ret = new FplQuantor((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1299,6 +1310,10 @@ type FplQuantor(positions: Positions, parent: FplValue) =
 
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Mapping, positions, Some parent)
+
+    override this.Name = "a mapping"
+    override this.ShortName = "map"
+
     override this.Clone () =
         let ret = new FplMapping((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1308,6 +1323,10 @@ type FplMapping(positions: Positions, parent: FplValue) =
 
 type FplStmt(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Stmt, positions, Some parent)
+
+    override this.Name = "a statement"
+    override this.ShortName = "stmt"
+
     override this.Clone () =
         let ret = new FplStmt((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1326,6 +1345,10 @@ type FplStmt(positions: Positions, parent: FplValue) =
 
 type FplAssertion(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Assertion, positions, Some parent)
+
+    override this.Name = "an assertion"
+    override this.ShortName = "ass"
+
     override this.Clone () =
         let ret = new FplAssertion((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1335,6 +1358,10 @@ type FplAssertion(positions: Positions, parent: FplValue) =
 
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Extension, positions, Some parent)
+
+    override this.Name = "an extension"
+    override this.ShortName = "def ext"
+
     override this.Clone () =
         let ret = new FplExtension((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1345,8 +1372,13 @@ type FplExtension(positions: Positions, parent: FplValue) =
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicInd, positions, Some parent)
     do 
-        this.TypeId <- FplBlockType.IntrinsicInd.ShortName
-        this.FplId <- FplBlockType.IntrinsicInd.ShortName
+        this.TypeId <- constInd
+        this.FplId <- constInd
+
+
+    override this.Name = "an intrinsic index"
+    override this.ShortName = "ind"
+
     override this.Clone () =
         let ret = new FplIntrinsicInd((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1356,6 +1388,10 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
 
 type FplIntrinsicObj(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.IntrinsicObj, positions, parent)
+
+    override this.Name = "an intrinsic object"
+    override this.ShortName = "obj"
+
     override this.Clone () =
         let ret = new FplIntrinsicObj((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1366,6 +1402,10 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
 
 type FplIntrinsicPred(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.IntrinsicPred, positions, parent)
+
+    override this.Name = "an intrinsic predicate"
+    override this.ShortName = "pred"
+
     override this.Clone () =
         let ret = new FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1374,8 +1414,11 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicUndef, positions, Some parent)
     do 
-        this.TypeId <- FplBlockType.IntrinsicUndef.ShortName
-        this.FplId <- FplBlockType.IntrinsicUndef.ShortName
+        this.TypeId <- constUndef
+        this.FplId <- constUndef
+
+    override this.Name = "an intrinsic undefined"
+    override this.ShortName = "undef"
 
     override this.Clone () =
         let ret = new FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1387,8 +1430,12 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicFunc, positions, Some parent)
     do
-        this.TypeId <- FplBlockType.IntrinsicFunc.ShortName
-        this.FplId <- FplBlockType.IntrinsicFunc.ShortName
+        this.TypeId <- constFunc
+        this.FplId <- constFunc
+
+    override this.Name = "an intrinsic functional term"
+    override this.ShortName = "func"
+
     override this.Clone () =
         let ret = new FplIntrinsicFunc((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1399,8 +1446,12 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicTpl, positions, Some parent)
     do
-        this.TypeId <- FplBlockType.IntrinsicTpl.ShortName
-        this.FplId <- FplBlockType.IntrinsicTpl.ShortName
+        this.TypeId <- constTpl
+        this.FplId <- constTpl
+
+    override this.Name = "an intrinsic template"
+    override this.ShortName = "tpl"
+
     override this.Clone () =
         let ret = new FplIntrinsicTpl((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
@@ -1429,7 +1480,7 @@ let rec getRepresentation (fplValue:FplValue) =
             | FplBlockType.IntrinsicFunc 
             | FplBlockType.IntrinsicUndef 
             | FplBlockType.IntrinsicTpl -> fv.FplId
-            | FplBlockType.Class -> $"dec {fv.BlockTypeShortName} {fv.FplId}"
+            | FplBlockType.Class -> $"dec {fv.ShortName} {fv.FplId}"
             | FplBlockType.FunctionalTerm -> 
                 // since the FunctionTerm has no value, it has no return statement
                 // And the FPL syntax ensures that this can only be the case
@@ -1439,12 +1490,12 @@ let rec getRepresentation (fplValue:FplValue) =
                 let mapping = fv.ArgList |> Seq.head 
                 $"dec {getRepresentation mapping}"
             | FplBlockType.Variable when not (fv.IsInitializedVariable) 
-                && fv.TypeId = FplBlockType.IntrinsicPred.ShortName -> 
+                && fv.TypeId = constPred -> 
                 "undetermined"
             | FplBlockType.Variable when 
                 not (fv.IsInitializedVariable) 
-                && fv.TypeId <> FplBlockType.IntrinsicPred.ShortName 
-                && fv.TypeId <> FplBlockType.IntrinsicUndef.ShortName -> 
+                && fv.TypeId <> constPred 
+                && fv.TypeId <> constUndef -> 
                 $"dec {getType SignatureType.Type fv}"                    
             | FplBlockType.VariadicVariableMany
             | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
@@ -1456,8 +1507,8 @@ let rec getRepresentation (fplValue:FplValue) =
                     match argOpt with
                     | Some (arg:FplValue) when arg.FplBlockType = FplBlockType.Variable && arg.IsInitializedVariable ->
                         getRepresentation arg
-                    | _ -> FplBlockType.IntrinsicUndef.ShortName      
-                | _ -> FplBlockType.IntrinsicUndef.ShortName
+                    | _ -> constUndef      
+                | _ -> constUndef
         | (false, false) 
         | (true, false) ->
             let subRepr = 
@@ -1493,14 +1544,14 @@ let rec getRepresentation (fplValue:FplValue) =
                 | FplBlockType.VariadicVariableMany1                         
                 | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
                 | FplBlockType.Variable when not (fv.IsInitializedVariable) 
-                    && fv.TypeId <> FplBlockType.IntrinsicPred.ShortName 
-                    && fv.TypeId <> FplBlockType.IntrinsicUndef.ShortName -> 
+                    && fv.TypeId <> constPred 
+                    && fv.TypeId <> constUndef -> 
                     $"dec {getType SignatureType.Type fv}"                    
                 | FplBlockType.VariadicVariableMany
                 | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
                     $"dec {getType SignatureType.Type fv}[]" 
                 | FplBlockType.Variable when not (fv.IsInitializedVariable) 
-                    && fv.ValueList[0].TypeId <> FplBlockType.IntrinsicPred.ShortName -> 
+                    && fv.ValueList[0].TypeId <> constPred -> 
                     $"dec {getType SignatureType.Type fv}"
                 | _ -> $"{fv.FplId}({subRepr})"
         | (false, true) -> 
@@ -1540,7 +1591,7 @@ let qualifiedStartPos (fplValue:FplValue) =
 
 
 /// A string representation of an FplValue
-let toString (fplValue:FplValue) = $"{fplValue.BlockTypeShortName} {getType SignatureType.Name fplValue}"
+let toString (fplValue:FplValue) = $"{fplValue.ShortName} {getType SignatureType.Name fplValue}"
 
 /// Qualified name of this FplValue
 let qualifiedName (fplValue:FplValue)=
@@ -1727,7 +1778,7 @@ let tryFindAssociatedBlockForProof (fplValue: FplValue) =
             if provableBlocklist.Length > 1 then
                 ScopeSearchResult.FoundMultiple(
                     provableBlocklist
-                    |> List.map (fun fv -> sprintf "%s %s" fv.FplBlockType.Name (getType SignatureType.Mixed fv))
+                    |> List.map (fun fv -> sprintf "%s %s" fv.Name (getType SignatureType.Mixed fv))
                     |> String.concat ", "
                 )
             elif provableBlocklist.Length > 0 then
@@ -1737,7 +1788,7 @@ let tryFindAssociatedBlockForProof (fplValue: FplValue) =
                 let potentialOther = notProvableBlocklist.Head
 
                 ScopeSearchResult.FoundIncorrectBlock(
-                    sprintf "%s %s" potentialOther.BlockTypeName (qualifiedName potentialOther)
+                    sprintf "%s %s" potentialOther.Name (qualifiedName potentialOther)
                 )
             else
                 ScopeSearchResult.NotFound
@@ -1786,7 +1837,7 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
             if potentialBlockList.Length > 1 then
                 ScopeSearchResult.FoundMultiple(
                     potentialBlockList
-                    |> List.map (fun fv -> sprintf "%s %s" fv.FplBlockType.Name (getType SignatureType.Mixed fv))
+                    |> List.map (fun fv -> sprintf "%s %s" fv.Name (getType SignatureType.Mixed fv))
                     |> String.concat ", "
                 )
             elif potentialBlockList.Length > 0 then
@@ -1906,7 +1957,7 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
             else
                 sb.AppendLine($"{indent}\"Name\": \"{name}\",") |> ignore
 
-            sb.AppendLine($"{indent}\"Type\": \"{root.FplBlockType.ShortName}\",") |> ignore
+            sb.AppendLine($"{indent}\"Type\": \"{root.ShortName}\",") |> ignore
             sb.AppendLine($"{indent}\"FplValueType\": \"{fplTypeName}\",") |> ignore
             sb.AppendLine($"{indent}\"FplValueRepr\": \"{fplValueRepr}\",") |> ignore
             sb.AppendLine($"{indent}\"Line\": \"{root.StartPos.Line}\",") |> ignore
@@ -2100,13 +2151,13 @@ let rec nextDefinition (fv: FplValue) counter =
     | FplBlockType.Proof
     | FplBlockType.Localization
     | FplBlockType.RuleOfInference ->
-        let name = $"{fv.FplBlockType.Name} {getType SignatureType.Name fv}"
+        let name = $"{fv.Name} {getType SignatureType.Name fv}"
         ScopeSearchResult.FoundIncorrectBlock name
     | FplBlockType.Theory ->
         let name =
             if blocks.Count > 0 then
                 let fv1 = blocks.Peek()
-                $"{fv1.FplBlockType.Name} {getType SignatureType.Name fv1}"
+                $"{fv1.Name} {getType SignatureType.Name fv1}"
             else
                 "(no block found)"
 
@@ -2131,7 +2182,7 @@ let rec nextDefinition (fv: FplValue) counter =
                 let name =
                     if blocks.Count > 0 then
                         let fv1 = blocks.Peek()
-                        $"{fv1.FplBlockType.Name} {getType SignatureType.Name fv}"
+                        $"{fv1.Name} {getType SignatureType.Name fv}"
                     else
                         "(no block found)"
 
