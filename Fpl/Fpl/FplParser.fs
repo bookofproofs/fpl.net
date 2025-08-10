@@ -152,7 +152,7 @@ let keywordConclusion = (skipString literalConL <|> skipString literalCon) >>. I
 
 (* Statement-related Keywords *)
 let keywordDel = skipString literalDelL <|> skipString literalDel 
-let keywordFor = skipString "for" .>> SW 
+let keywordFor = skipString literalFor .>> SW 
 let keywordIn = skipString "in" .>> SW 
 let keywordCases = skipString literalCases .>> IW 
 let keywordAssert = skipString literalAssL .>> SW
@@ -160,7 +160,7 @@ let keywordAssert = skipString literalAssL .>> SW
 (* Predicate-related Keywords *)
 let keywordUndefined = positions "Undefined" (skipString "undefined" <|> skipString "undef") .>> IW |>> Ast.Undefined
 let keywordTrue = positions "True" (skipString "true") .>> IW  |>> Ast.True  
-let keywordFalse = positions "False" (skipString "false") .>> IW |>>  Ast.False  
+let keywordFalse = positions "False" (skipString literalFalse) .>> IW |>>  Ast.False  
 let keywordBydef = positions literalByDef (skipString literalByDef) .>> SW  
 let keywordAnd = skipString literalAnd .>> IW 
 let keywordOr = skipString "or" .>> IW 
@@ -192,7 +192,7 @@ let objectHeader = choice [
 ] 
 
 let keywordPredicate = positions "PredicateType" (skipString "predicate" <|> skipString "pred") |>> Ast.PredicateType
-let keywordFunction = positions "FunctionalTermType" (skipString "function" <|> skipString "func") |>> Ast.FunctionalTermType
+let keywordFunction = positions "FunctionalTermType" (skipString literalFuncL <|> skipString literalFunc) |>> Ast.FunctionalTermType
 
 
 let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
@@ -623,7 +623,7 @@ let errInformation = [
     (LOC000, ["loc"], localization)
     (USE000, ["uses"], usesClause)
     (PRD000, [literalAnd; "or"; "impl"; "iif"; "xor"; "not"; literalAll; literalEx; "is"], compoundPredicate)
-    (SMT000, [literalAssL; literalCases; literalBase; "for"; literalDel], statement)
+    (SMT000, [literalAssL; literalCases; literalBase; literalFor; literalDel], statement)
     (AGI000, ["|-"], argumentInference)
     (CAS000, ["|"], conditionFollowedByResult)
     (DCS000, ["?"], elseStatement)

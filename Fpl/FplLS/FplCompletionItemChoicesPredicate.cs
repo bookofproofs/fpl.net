@@ -14,7 +14,7 @@ namespace FplLS
             switch (defaultCi.Word)
             {
                 case "true":
-                case "false":
+                case literalFalse:
                 case "undef":
                 case "undefined":
                     // keyword

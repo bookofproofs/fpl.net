@@ -1,8 +1,7 @@
 // Ignore Spelling: Fpl
 
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using System.Diagnostics.Metrics;
-using System.Reflection;
+using static FplGrammarCommons;
 
 namespace FplLSTests
 {
@@ -36,22 +35,22 @@ namespace FplLSTests
         }
 
         [DataRow("property", "predicate", CompletionItemKind.Value, false, "property02")]
-        [DataRow("property", "function", CompletionItemKind.Value, false, "property03")]
+        [DataRow("property", literalFuncL, CompletionItemKind.Value, false, "property03")]
         [DataRow("property", "predicate", CompletionItemKind.Value, true, "property05")]
-        [DataRow("property", "function", CompletionItemKind.Value, true, "property06")]
+        [DataRow("property", literalFuncL, CompletionItemKind.Value, true, "property06")]
         [DataRow("prty", "pred", CompletionItemKind.Value, false, "zproperty02")]
-        [DataRow("prty", "func", CompletionItemKind.Value, false, "zproperty03")]
+        [DataRow("prty", literalFunc, CompletionItemKind.Value, false, "zproperty03")]
         [DataRow("prty", "pred", CompletionItemKind.Value, true, "zproperty05")]
-        [DataRow("prty", "func", CompletionItemKind.Value, true, "zproperty06")]
+        [DataRow("prty", literalFunc, CompletionItemKind.Value, true, "zproperty06")]
 
         [DataRow("property", "predicate", CompletionItemKind.Keyword, false, "zzzproperty02")]
-        [DataRow("property", "function", CompletionItemKind.Keyword, false, "zzzproperty03")]
+        [DataRow("property", literalFuncL, CompletionItemKind.Keyword, false, "zzzproperty03")]
         [DataRow("property", "predicate", CompletionItemKind.Keyword, true, "zzzproperty05")]
-        [DataRow("property", "function", CompletionItemKind.Keyword, true, "zzzproperty06")]
+        [DataRow("property", literalFuncL, CompletionItemKind.Keyword, true, "zzzproperty06")]
         [DataRow("prty", "pred", CompletionItemKind.Keyword, false, "zzzzproperty02")]
-        [DataRow("prty", "func", CompletionItemKind.Keyword, false, "zzzzproperty03")]
+        [DataRow("prty", literalFunc, CompletionItemKind.Keyword, false, "zzzzproperty03")]
         [DataRow("prty", "pred", CompletionItemKind.Keyword, true, "zzzzproperty05")]
-        [DataRow("prty", "func", CompletionItemKind.Keyword, true, "zzzzproperty06")]
+        [DataRow("prty", literalFunc, CompletionItemKind.Keyword, true, "zzzzproperty06")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string subType, CompletionItemKind isKeyword, bool isOptional, string expected)
         {
@@ -69,7 +68,7 @@ namespace FplLSTests
         [DataRow("prty", "pred ")]
         [DataRow("property", "predicate")]
         [DataRow("prty", "func ")]
-        [DataRow("property", "function")]
+        [DataRow("property", literalFuncL)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice, string l)
         {
@@ -87,8 +86,8 @@ namespace FplLSTests
 
         [DataRow("prty", "pred")]
         [DataRow("property", "predicate")]
-        [DataRow("prty", "func")]
-        [DataRow("property", "function")]
+        [DataRow("prty", literalFunc)]
+        [DataRow("property", literalFuncL)]
         [TestMethod]
         public void TestAddPropertyChoicesLabel(string choice, string subType)
         {
@@ -141,7 +140,7 @@ namespace FplLSTests
                 {
                     Assert.IsTrue(item.Detail.Contains(l));
                     if (item.Detail.Contains("pred")) countPredicative++;
-                    if (item.Detail.Contains("func")) countFunctional++;
+                    if (item.Detail.Contains(literalFunc)) countFunctional++;
                 }
             }
             Assert.AreEqual<int>(2, countPredicative);
@@ -166,7 +165,7 @@ namespace FplLSTests
                     Assert.IsTrue(item.Detail.Contains(l));
                     if (item.Detail.Contains("opt")) countOptional++;
                     if (item.Detail.Contains("pred")) countPredicative++;
-                    if (item.Detail.Contains("func")) countFunctional++;
+                    if (item.Detail.Contains(literalFunc)) countFunctional++;
                 }
             }
             Assert.AreEqual<int>(2, countOptional);
@@ -177,8 +176,8 @@ namespace FplLSTests
 
         [DataRow("prty", "pred")]
         [DataRow("property", "predicate")]
-        [DataRow("prty", "func")]
-        [DataRow("property", "function")]
+        [DataRow("prty", literalFunc)]
+        [DataRow("property", literalFuncL)]
         [TestMethod]
         public void TestAddPropertyChoicesInsertText(string choice, string subType)
         {

@@ -462,7 +462,7 @@ todo
 todo
 
 ### FplBlockType `IntrinsicPred`
-An intrinsic value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", "false", and "undetermined". 
+An intrinsic value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", literalFalse, and "undetermined". 
 Created in `Ast.True`, `Ast.False`, `evaluateConjunction`, `evaluateDisjunction`, `evaluateImplication`, `evaluateNegation`, `evaluateExclusiveOr`, `evaluateEquivalence`, `evaluateIsOperator`, `Ast.PredicateType`, `Ast.Trivial`, `Ast.DefinitionPredicate`, `Ast.Proof`.
 #### Possible Parent Nodes 
 todo

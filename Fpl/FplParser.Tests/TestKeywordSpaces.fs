@@ -239,7 +239,7 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
-    [<DataRow("false")>]
+    [<DataRow(literalFalse)>]
     [<DataRow("true")>]
     [<DataRow("undefined")>]
     [<DataRow("undef")>]
@@ -250,7 +250,7 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("false")>]
+    [<DataRow(literalFalse)>]
     [<DataRow("true")>]
     [<DataRow("undefined")>]
     [<DataRow("undef")>]
@@ -261,7 +261,7 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("false")>]
+    [<DataRow(literalFalse)>]
     [<DataRow("true")>]
     [<DataRow("undefined")>]
     [<DataRow("undef")>]
@@ -456,8 +456,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("function")>]
-    [<DataRow("func")>]
+    [<DataRow(literalFuncL)>]
+    [<DataRow(literalFunc)>]
     [<TestMethod>]
     member this.TestSpacesFunctionalTerm (word:string) =
         let result = run (definition .>> eof) ("def " + word + "X()->obj{intr}")
@@ -465,8 +465,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
-    [<DataRow("function")>]
-    [<DataRow("func")>]
+    [<DataRow(literalFuncL)>]
+    [<DataRow(literalFunc)>]
     [<TestMethod>]
     member this.TestSpacesFunctionalTermWithSpace (word:string) =
         let result = run (definition .>> eof) ("def " + word + " X()->obj{intr}")
@@ -474,8 +474,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("function")>]
-    [<DataRow("func")>]
+    [<DataRow(literalFuncL)>]
+    [<DataRow(literalFunc)>]
     [<DataRow("object")>]
     [<DataRow("obj")>]
     [<DataRow("predicate")>]

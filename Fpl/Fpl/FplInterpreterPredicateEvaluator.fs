@@ -18,7 +18,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 let evaluateNegation (fplValue:FplValue) = 
     let arg = fplValue.ArgList[0]
     match getRepresentation arg with 
-    | "false" -> 
+    | FplGrammarCommons.literalFalse -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
         newValue.FplId <- literalTrue
         fplValue.ValueList.Add(newValue)
@@ -40,10 +40,10 @@ let evaluateConjunction (fplValue:FplValue) =
     let newValue =  new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
     newValue.FplId <- 
         match (arg1Repr, arg2Repr) with
-        | ("true", "false") 
-        | ("false", "true") 
-        | ("false", "false") -> 
-            literalFalse
+        | ("true", FplGrammarCommons.literalFalse) 
+        | (FplGrammarCommons.literalFalse, "true") 
+        | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) -> 
+            FplGrammarCommons.literalFalse
         | ("true", "true") -> 
             literalTrue
         | _ -> literalUndetermined
@@ -55,13 +55,13 @@ let evaluateDisjunction (fplValue:FplValue) =
     let arg1Repr = getRepresentation arg1
     let arg2Repr = getRepresentation arg2
     match (arg1Repr, arg2Repr) with
-    | ("true", "false") 
-    | ("false", "true") 
+    | ("true", FplGrammarCommons.literalFalse) 
+    | (FplGrammarCommons.literalFalse, "true") 
     | ("true", "true") -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
         newValue.FplId <- literalTrue
         fplValue.ValueList.Add(newValue)
-    | ("false", "false") -> 
+    | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
         newValue.FplId <- literalFalse
         fplValue.ValueList.Add(newValue)
@@ -75,13 +75,13 @@ let evaluateExclusiveOr (fplValue:FplValue) =
     let arg1Repr = getRepresentation arg1
     let arg2Repr = getRepresentation arg2
     match (arg1Repr, arg2Repr) with
-    | ("true", "false") 
-    | ("false", "true") -> 
+    | ("true", FplGrammarCommons.literalFalse) 
+    | (FplGrammarCommons.literalFalse, "true") -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
         newValue.FplId <- literalTrue
         fplValue.ValueList.Add(newValue)
     | ("true", "true") 
-    | ("false", "false") -> 
+    | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
         newValue.FplId <- literalFalse
         fplValue.ValueList.Add(newValue)
@@ -95,12 +95,12 @@ let evaluateImplication (fplValue:FplValue) =
     let arg1Repr = getRepresentation arg1
     let arg2Repr = getRepresentation arg2
     match (arg1Repr, arg2Repr) with
-    | ("true", "false") -> 
+    | ("true", FplGrammarCommons.literalFalse) -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
         newValue.FplId <-literalFalse
         fplValue.ValueList.Add(newValue)
-    | ("false", "true") 
-    | ("false", "false") 
+    | (FplGrammarCommons.literalFalse, "true") 
+    | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) 
     | ("true", "true") -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
         newValue.FplId <- literalTrue
@@ -116,12 +116,12 @@ let evaluateEquivalence (fplValue:FplValue) =
     let arg2Repr = getRepresentation arg2
     match (arg1Repr, arg2Repr) with
     | ("true", "true") 
-    | ("false", "false") -> 
+    | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
         newValue.FplId <- literalTrue
         fplValue.ValueList.Add(newValue)
-    | ("false", "true") 
-    | ("true", "false") -> 
+    | (FplGrammarCommons.literalFalse, "true") 
+    | ("true", FplGrammarCommons.literalFalse) -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
         newValue.FplId <- literalFalse
         fplValue.ValueList.Add(newValue)

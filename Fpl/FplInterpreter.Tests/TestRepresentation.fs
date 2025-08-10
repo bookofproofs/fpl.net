@@ -1,6 +1,7 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
+open FplGrammarCommons
 open FplInterpreterTypes
 open CommonTestHelpers
 
@@ -8,11 +9,11 @@ open CommonTestHelpers
 type TestRepresentation() =
 
 
-    [<DataRow("00","false", "false")>]
+    [<DataRow("00",literalFalse, literalFalse)>]
     [<DataRow("01","true", "true")>]
     [<DataRow("02","(x = x)", "true")>]
-    [<DataRow("02a","not(x = x)", "false")>]
-    [<DataRow("03","(x = y)", "false")>]
+    [<DataRow("02a","not(x = x)", literalFalse)>]
+    [<DataRow("03","(x = y)", literalFalse)>]
     [<DataRow("04","not (x = y)", "true")>]
     [<TestMethod>]
     member this.TestRepresentationPredicate(var:string, varVal, expected:string) =
@@ -118,7 +119,7 @@ type TestRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", "true")>]
-    [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", "false")>]
+    [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", literalFalse)>]
     [<TestMethod>]
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
         ad.Clear()
@@ -136,15 +137,15 @@ type TestRepresentation() =
             Assert.IsTrue(false)
 
 
-    [<DataRow("00","(@0 = A())", "false")>]
-    [<DataRow("00a","(@1 = A())", "false")>]
+    [<DataRow("00","(@0 = A())", literalFalse)>]
+    [<DataRow("00a","(@1 = A())", literalFalse)>]
     [<DataRow("00b","(@2 = A())", "true")>]
     [<DataRow("01","(@0 = B())", "true")>]
-    [<DataRow("01a","(@1 = B())", "false")>]
-    [<DataRow("01b","(@2 = A())", "false")>]
-    [<DataRow("02","(@0 = C())", "false")>]
+    [<DataRow("01a","(@1 = B())", literalFalse)>]
+    [<DataRow("01b","(@2 = A())", literalFalse)>]
+    [<DataRow("02","(@0 = C())", literalFalse)>]
     [<DataRow("02a","(@1 = C())", "true")>]
-    [<DataRow("02b","(@2 = C())", "false")>]
+    [<DataRow("02b","(@2 = C())", literalFalse)>]
     [<TestMethod>]
     member this.TestRepresentationCases2(var:string, varVal, expected:string) =
         ad.Clear()

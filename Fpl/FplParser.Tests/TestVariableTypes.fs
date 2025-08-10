@@ -2,6 +2,7 @@ namespace FplParser.Tests
 
 open FParsec
 open FplParser
+open FplGrammarCommons
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -28,14 +29,14 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType003 () =
-        let result = run (variableType .>> eof) """function"""
+        let result = run (variableType .>> eof) literalFuncL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType004 () =
-        let result = run (variableType .>> eof) """func"""
+        let result = run (variableType .>> eof) literalFunc
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -490,7 +491,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType046 () =
-        let result = run (variableType .>> eof) """func"""
+        let result = run (variableType .>> eof) literalFunc
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

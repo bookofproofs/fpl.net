@@ -209,8 +209,8 @@ type TestFplValueScopeFplRepresentation() =
             | "t10" -> Assert.AreEqual<string>("tpl", getRepresentation t10)
             | "t11" -> Assert.AreEqual<string>("", getRepresentation t11)
             | "t12" -> Assert.AreEqual<string>("", getRepresentation t12)
-            | "t13" -> Assert.AreEqual<string>("func", getRepresentation t13)
-            | "t14" -> Assert.AreEqual<string>("func", getRepresentation t14)
+            | "t13" -> Assert.AreEqual<string>(literalFunc, getRepresentation t13)
+            | "t14" -> Assert.AreEqual<string>(literalFunc, getRepresentation t14)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -492,7 +492,7 @@ type TestFplValueScopeFplRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("base1", "true")>]
-    [<DataRow("base2", "false")>]
+    [<DataRow("base2", literalFalse)>]
     [<DataRow("base3", "undef")>]
     [<DataRow("base4", "1.")>]
     [<DataRow("base5", "del.Test()")>]
@@ -736,7 +736,7 @@ type TestFplValueScopeFplRepresentation() =
             let base1 = 
                 if varVal.Contains literalCl then 
                     theory.Scope["T1"]
-                elif varVal.Contains "func" then 
+                elif varVal.Contains literalFunc then 
                     theory.Scope["T1() -> obj"]
                 else 
                     theory.Scope["T1()"]

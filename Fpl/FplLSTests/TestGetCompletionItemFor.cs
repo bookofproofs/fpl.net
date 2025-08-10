@@ -1,12 +1,12 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
+using static FplGrammarCommons;
 namespace FplLSTests
 {
     [TestClass]
     public class TestGetCompletionItemFor
     {
 
-        [DataRow("for")]
+        [DataRow(literalFor)]
         [TestMethod]
         public void TestAddForChoicesNumber(string choice)
         {
@@ -15,7 +15,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(4, actual.Count);
         }
 
-        [DataRow("for")]
+        [DataRow(literalFor)]
         [TestMethod]
         public void TestAddForKeywordCounts(string choice)
         {
@@ -29,9 +29,9 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("for", "range", CompletionItemKind.Property, "for01")]
-        [DataRow("for", "list", CompletionItemKind.Property, "for02")]
-        [DataRow("for", "", CompletionItemKind.Keyword, "zzzfor03")]
+        [DataRow(literalFor, "range", CompletionItemKind.Property, "for01")]
+        [DataRow(literalFor, "list", CompletionItemKind.Property, "for02")]
+        [DataRow(literalFor, "", CompletionItemKind.Keyword, "zzzfor03")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string l, CompletionItemKind kind, string expected)
         {
@@ -46,7 +46,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("for")]
+        [DataRow(literalFor)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -61,7 +61,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("for")]
+        [DataRow(literalFor)]
         [TestMethod]
         public void TestAddForChoicesLabel(string choice)
         {
@@ -73,7 +73,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("for")]
+        [DataRow(literalFor)]
         [TestMethod]
         public void TestAddForChoicesDetail(string choice)
         {
@@ -85,7 +85,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("for")]
+        [DataRow(literalFor)]
         [TestMethod]
         public void TestAddForChoicesInsertText(string choice)
         {

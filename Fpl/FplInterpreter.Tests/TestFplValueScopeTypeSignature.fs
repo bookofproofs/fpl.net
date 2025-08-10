@@ -489,7 +489,7 @@ type TestFplValueScopeTypeSignature() =
             Assert.IsTrue(false)
 
     [<DataRow("base1", "true")>]
-    [<DataRow("base2", "false")>]
+    [<DataRow("base2", literalFalse)>]
     [<DataRow("base3", "undef")>]
     [<DataRow("base4", "1.")>]
     [<DataRow("base5", "del.Test()")>]
@@ -733,7 +733,7 @@ type TestFplValueScopeTypeSignature() =
             let base1 = 
                 if varVal.Contains literalCl then 
                     theory.Scope["T1"]
-                elif varVal.Contains "func" then 
+                elif varVal.Contains literalFunc then 
                     theory.Scope["T1() -> obj"]
                 else 
                     theory.Scope["T1()"]
@@ -779,7 +779,7 @@ type TestFplValueScopeTypeSignature() =
             match var with
             | "base1" -> Assert.AreEqual<string>("obj", getType SignatureType.Type mapping)
             | "base2" -> Assert.AreEqual<string>(literalInd, getType SignatureType.Type mapping)
-            | "base3" -> Assert.AreEqual<string>("func", getType SignatureType.Type mapping)
+            | "base3" -> Assert.AreEqual<string>(literalFunc, getType SignatureType.Type mapping)
             | "base4" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type mapping)
             | "base5" -> Assert.AreEqual<string>("A", getType SignatureType.Type mapping)
             | "base6" -> Assert.AreEqual<string>("obj(ind)", getType SignatureType.Type mapping)

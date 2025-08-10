@@ -839,7 +839,7 @@ let preParsePreProcess (input:string) =
 /// The pattern has to start with non-whitespace characters (e.g. keywords or other strings that are distinctive for the language)
 /// we want to provide with emitting error recovery messages
 /// The list will be filtered to include only those matches that really start with that pattern, i.e. are proceeded some whitespace character 
-/// in the remaining source code. For instance, if "for" is the pattern than " for" will match, but "_for" will not.
+/// in the remaining source code. For instance, if literalFor is the pattern than " for" will match, but "_for" will not.
 
 let stringMatches (input: string) (pattern: string) =
     let regex = new Regex(pattern)

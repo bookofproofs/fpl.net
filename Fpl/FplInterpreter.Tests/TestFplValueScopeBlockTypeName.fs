@@ -328,7 +328,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalPred, x.ShortName)
         | "IntrinsicFunc" ->
             let x = new FplIntrinsicFunc(positions, parent)
-            Assert.AreEqual<string>("func", x.ShortName)
+            Assert.AreEqual<string>(literalFunc, x.ShortName)
         | "IntrinsicTpl" ->
             let x = new FplIntrinsicTpl(positions, parent)
             Assert.AreEqual<string>("tpl", x.ShortName)

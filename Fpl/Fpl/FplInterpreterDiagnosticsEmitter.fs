@@ -980,7 +980,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
         let repr = getRepresentation argument
         match repr with
         | "true"
-        | "false" -> ()
+        | FplGrammarCommons.literalFalse -> ()
         | "undetermined" -> emitLG000Diagnostics argument 
         | _ -> emitLG001Diagnostics argument.StartPos argument.EndPos argument
     )

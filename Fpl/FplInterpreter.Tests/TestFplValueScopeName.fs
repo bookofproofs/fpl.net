@@ -511,7 +511,7 @@ type TestFplValueScopeName() =
             Assert.IsTrue(false)
 
     [<DataRow("base1", "true")>]
-    [<DataRow("base2", "false")>]
+    [<DataRow("base2", literalFalse)>]
     [<DataRow("base3", "undef")>]
     [<DataRow("base4", "1.")>]
     [<DataRow("base5", "del.Test()")>]
@@ -882,7 +882,7 @@ type TestFplValueScopeName() =
             let base1 = 
                 if varVal.Contains literalCl then 
                     theory.Scope["T1"]
-                elif varVal.Contains "func" then 
+                elif varVal.Contains literalFunc then 
                     theory.Scope["T1() -> obj"]
                 else 
                     theory.Scope["T1()"]
@@ -929,7 +929,7 @@ type TestFplValueScopeName() =
             match var with
             | "base1" -> Assert.AreEqual<string>("obj", getType SignatureType.Mixed mapping)
             | "base2" -> Assert.AreEqual<string>(literalInd, getType SignatureType.Mixed mapping)
-            | "base3" -> Assert.AreEqual<string>("func", getType SignatureType.Mixed mapping)
+            | "base3" -> Assert.AreEqual<string>(literalFunc, getType SignatureType.Mixed mapping)
             | "base4" -> Assert.AreEqual<string>("pred", getType SignatureType.Mixed mapping)
             | "base5" -> Assert.AreEqual<string>("A", getType SignatureType.Mixed mapping)
             | "base6" -> Assert.AreEqual<string>("obj(ind)", getType SignatureType.Mixed mapping)

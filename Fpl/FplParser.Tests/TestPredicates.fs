@@ -2,6 +2,7 @@ namespace FplParser.Tests
 
 open FParsec
 open FplParser
+open FplGrammarCommons
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -29,7 +30,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate02 () =
-        let result = run (predicate .>> eof) """false"""
+        let result = run (predicate .>> eof) literalFalse
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -693,7 +693,7 @@ let rec eval (st: SymbolTable) ast =
         | FplBlockType.OptionalFunctionalTerm
         | FplBlockType.FunctionalTerm ->
             fv.FplId <- identifier
-            fv.TypeId <- "func"
+            fv.TypeId <- literalFunc
         | FplBlockType.Constructor -> 
             fv.FplId <- identifier
             fv.TypeId <- identifier
@@ -1256,13 +1256,13 @@ let rec eval (st: SymbolTable) ast =
                 fv.FplBlockType <- FplBlockType.FunctionalTerm
             else
                 fv.FplBlockType <- FplBlockType.OptionalFunctionalTerm
-                fv.TypeId <- "func"
+                fv.TypeId <- literalFunc
         | None -> 
             if FplValue.IsFplBlock(fv) then
                 fv.FplBlockType <- FplBlockType.FunctionalTerm
             else
                 fv.FplBlockType <- FplBlockType.MandatoryFunctionalTerm
-                fv.TypeId <- "func"
+                fv.TypeId <- literalFunc
         fv.EndPos <- pos2
         eval st mappingAst
         st.EvalPop()
@@ -1558,7 +1558,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.StartPos <- pos1
         fv.EndPos <- pos2
-        fv.FplId <- "for"
+        fv.FplId <- literalFor
         let entity = new FplReference((pos1,pos2), fv)
         es.PushEvalStack(entity)
         eval st entityAst

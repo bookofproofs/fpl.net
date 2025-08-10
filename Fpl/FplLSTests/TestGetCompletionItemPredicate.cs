@@ -9,7 +9,7 @@ namespace FplLSTests
     public class TestGetCompletionItemPredicate
     {
         [DataRow("true", 1)]
-        [DataRow("false", 1)]
+        [DataRow(literalFalse, 1)]
         [DataRow("undef", 1)]
         [DataRow("undefined", 1)]
         [DataRow("not", 2)]
@@ -28,7 +28,7 @@ namespace FplLSTests
         }
 
         [DataRow("true")]
-        [DataRow("false")]
+        [DataRow(literalFalse)]
         [DataRow("undef")]
         [DataRow("undefined")]
         [DataRow("not")]
@@ -57,7 +57,7 @@ namespace FplLSTests
         }
 
         [DataRow("true", CompletionItemKind.Keyword, "zzztrue")]
-        [DataRow("false", CompletionItemKind.Keyword, "zzzfalse")]
+        [DataRow(literalFalse, CompletionItemKind.Keyword, "zzzfalse")]
         [DataRow("undefined", CompletionItemKind.Keyword, "zzzundefined01")]
         [DataRow("undef", CompletionItemKind.Keyword, "zzzzundefined02")]
         [DataRow("not", CompletionItemKind.Operator, "not")]
@@ -88,7 +88,7 @@ namespace FplLSTests
         }
 
         [DataRow("true")]
-        [DataRow("false")]
+        [DataRow(literalFalse)]
         [DataRow("undef")]
         [DataRow("undefined")]
         [DataRow("not")]
@@ -113,7 +113,7 @@ namespace FplLSTests
         }
 
         [DataRow("true")]
-        [DataRow("false")]
+        [DataRow(literalFalse)]
         [DataRow("undef")]
         [DataRow("undefined")]
         [DataRow("not")]
@@ -135,7 +135,7 @@ namespace FplLSTests
         }
 
         [DataRow("true", "predicate (true)")]
-        [DataRow("false", "predicate (false)")]
+        [DataRow(literalFalse, "predicate (false)")]
         [DataRow("undef", "undefined (short form)")]
         [DataRow("undefined", "undefined")]
         [DataRow("not", "predicate (negation)")]
@@ -160,7 +160,7 @@ namespace FplLSTests
         }
 
         [DataRow("true")]
-        [DataRow("false")]
+        [DataRow(literalFalse)]
         [DataRow("undef")]
         [DataRow("undefined")]
         [DataRow("not")]

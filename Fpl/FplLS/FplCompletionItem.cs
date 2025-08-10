@@ -101,8 +101,8 @@ namespace FplLS
                 case literalConL:
                 case literalExt:
                 case literalExtL:
-                case "func":
-                case "function":
+                case literalFunc:
+                case literalFuncL:
                 case "ind":
                 case "index":
                 case "intr":
@@ -132,7 +132,7 @@ namespace FplLS
                 case literalExN:
                     return new FplCompletionItemChoicesQuantor().GetChoices(this);
                 case "true":
-                case "false":
+                case literalFalse:
                 case "undef":
                 case "undefined":
                 case "not":
@@ -151,7 +151,7 @@ namespace FplLS
                     return new FplCompletionItemChoicesDeclaration().GetChoices(this);
                 case literalCases:
                     return new FplCompletionItemChoicesCases().GetChoices(this);
-                case "for":
+                case literalFor:
                     return new FplCompletionItemChoicesFor().GetChoices(this);
                 case "prty":
                 case "property":
@@ -424,25 +424,25 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case "false":
+                case literalFalse:
                     this.Detail = "predicate (false)";
-                    this.SortText = "false";
+                    this.SortText = literalFalse;
                     this.Kind = CompletionItemKind.Constant;
                     this.IsShort = false;
                     break;
-                case "for":
+                case literalFor:
                     this.Detail = "statement (for loop)";
-                    this.SortText = "for";
+                    this.SortText = literalFor;
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case "func":
+                case literalFunc:
                     this.Detail = "type (functional term, short form)";
                     this.SortText = "function02";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = true;
                     break;
-                case "function":
+                case literalFuncL:
                     this.Detail = "type (functional term)";
                     this.SortText = "function01";
                     this.Kind = CompletionItemKind.TypeParameter;

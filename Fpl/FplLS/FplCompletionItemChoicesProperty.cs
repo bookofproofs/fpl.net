@@ -1,5 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
+using static FplGrammarCommons;
 namespace FplLS
 {
 
@@ -29,7 +29,7 @@ namespace FplLS
             if (ci.IsShort)
             {
                 TokenIntrinsic = "intr";
-                TokenFunction = "func";
+                TokenFunction = literalFunc;
                 TokenPredicate = "pred";
                 TokenOptional = "opt";
                 if (isKeyword)

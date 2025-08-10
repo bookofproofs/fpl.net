@@ -1429,7 +1429,7 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
         this.FplId <- literalFunc
 
     override this.Name = "an intrinsic functional term"
-    override this.ShortName = "func"
+    override this.ShortName = literalFunc
 
     override this.Clone () =
         let ret = new FplIntrinsicFunc((this.StartPos, this.EndPos), this.Parent.Value)
@@ -2240,7 +2240,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
             None
         elif aType = "???" && pType <> "???" then
             Some($"`()` does not match `{getType SignatureType.Name p}:{pType}`")
-        elif aType.StartsWith("func") then
+        elif aType.StartsWith(literalFunc) then
             let someMap = a.Mapping
 
             match someMap with

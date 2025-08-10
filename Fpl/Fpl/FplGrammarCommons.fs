@@ -77,7 +77,7 @@ let literalFor = "for"
 [<Literal>]
 let literalFunc = "func"
 [<Literal>]
-let literalFuncLong = "function"
+let literalFuncL = "function"
 [<Literal>]
 let literalIif = "iif"
 [<Literal>]
@@ -219,9 +219,9 @@ let keyWordSet =
            literalEx
            literalExN
            literalFalse
-           "for"
-           "func"
-           "function"
+           literalFor
+           literalFunc
+           literalFuncL
            "iif"
            "impl"
            "ind"
