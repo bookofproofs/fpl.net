@@ -116,7 +116,7 @@ namespace FplLS
                 ,{ "dan","Danish" }
                 ,{ "dar","Dargwa" }
                 ,{ "day","Land Dayak languages" }
-                ,{ "del","Delaware" }
+                ,{ literalDel,"Delaware" }
                 ,{ "den","Slave (Athapascan)" }
                 ,{ "deu","German" }
                 ,{ "dgr","Dogrib" }

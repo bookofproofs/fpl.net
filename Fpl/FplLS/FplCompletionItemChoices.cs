@@ -24,7 +24,7 @@ namespace FplLS
             TokenAssume = literalAssume;
             TokenClass = literalClL;
             TokenConclusion = literalConL;
-            TokenDeclaration = "declaration";
+            TokenDeclaration = literalDecL;
             TokenFunction = "function";
             TokenIntrinsic = "intrinsic";
             TokenObject = "object";
@@ -39,7 +39,7 @@ namespace FplLS
             TokenAssume = literalAss;
             TokenClass = literalCl;
             TokenConclusion = literalCon;
-            TokenDeclaration = "dec";
+            TokenDeclaration = literalDec;
             TokenFunction = "func";
             TokenIntrinsic = "intr";
             TokenObject = "obj";

@@ -151,7 +151,7 @@ let keywordConclusion = (skipString literalConL <|> skipString literalCon) >>. I
 
 
 (* Statement-related Keywords *)
-let keywordDel = skipString "delegate" <|> skipString "del" 
+let keywordDel = skipString literalDelL <|> skipString literalDel 
 let keywordFor = skipString "for" .>> SW 
 let keywordIn = skipString "in" .>> SW 
 let keywordCases = skipString literalCases .>> IW 
@@ -169,8 +169,8 @@ let keywordIif = skipString "iif" .>> IW
 let keywordXor = skipString "xor" .>> IW 
 let keywordNot = skipString "not" .>> attemptSW 
 let keywordAll = skipString literalAll .>> SW 
-let keywordEx = skipString "ex" .>> SW
-let keywordExN = skipString "exn" .>> IW
+let keywordEx = skipString literalEx .>> SW
+let keywordExN = skipString literalExN .>> IW
 let keywordIs = skipString "is" .>> attemptSW 
 
 
@@ -201,7 +201,7 @@ let keywordUses = (skipString "uses") .>> SW
 let usesClause = positions "UsesClause" (keywordUses >>. theoryNamespace) |>> Ast.UsesClause
 
 (* Signatures, Variable Declarations, and Types, and Coordinates *)
-// convention: All syntax production rules of FPL syntax extensions have to start with "ext", followed by
+// convention: All syntax production rules of FPL syntax extensions have to start with literalExt, followed by
 // a Pascal Case id.
 // This ensures that they will not be mixed-up with original FPL ebnf productions
 // that are all PascalCase as well as FPL keywords, that are all small case.
@@ -234,7 +234,7 @@ let bracketedCoords = positions "BrackedCoordList" (leftBracket >>. coordList .>
 
 let namedVariableDeclarationList, namedVariableDeclarationListRef = createParserForwardedToRef()
 
-let keywordExtension = (skipString "extension" <|> skipString "ext") .>> SW
+let keywordExtension = (skipString literalExtL <|> skipString literalExt) .>> SW
 
 let extensionName = positions "ExtensionName" (idStartsWithCap) |>> Ast.ExtensionName
 
@@ -406,7 +406,7 @@ predicateRef.Value <- expression
 predicateListRef.Value <- sepBy predicate comma
 
 (* FPL building blocks *)
-let keywordDeclaration = (skipString "declaration" <|> skipString "dec") .>> SW 
+let keywordDeclaration = (skipString literalDecL <|> skipString literalDec) .>> SW 
 
 let varDecl = tilde >>. namedVariableDeclaration
 let varDeclBlock = positions "VarDeclBlock" (IW >>. keywordDeclaration >>. (many ((varDecl <|> statement) .>> IW)) .>> semiColon) .>> IW |>> Ast.VarDeclBlock 
@@ -544,7 +544,7 @@ let classIdentifier = positions "ClassIdentifier" (predicateIdentifier .>> IW) |
 let classSignature = classIdentifier .>>. opt userDefinedObjSym .>>. (colon >>. inheritedClassTypeList)
 let definitionClass = positions "DefinitionClass" ((keywordClass >>. SW >>. classSignature .>> IW) .>>. classDefinitionBlock) |>> Ast.DefinitionClass 
 
-let keywordDefinition = (skipString "definition" <|> skipString "def") >>. SW
+let keywordDefinition = (skipString literalDefL <|> skipString literalDef) >>. SW
 let definition = keywordDefinition >>. choice [
     definitionClass
     definitionPredicate
@@ -608,7 +608,7 @@ let calculateCurrentContext (matchList:System.Collections.Generic.List<int>) i =
 let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postulate|post|theorem|thm|proposition|prop|lemma|lem|corollary|cor|conjecture|conj|declaration|dec|constructor|ctor|proof|prf|inference|inf|localization|loc|uses|and|or|impl|iif|xor|not|all|extension|ext|exn|ex|is|assert|cases|self\!|for|delegate|del|\|\-|\||\?|assume|ass|revoke|rev|return|ret)\W|(conclusion|con|premise|pre)\s*\:|(~|\!)[a-z]"
 
 let errInformation = [
-    (DEF000, ["def"], definition)
+    (DEF000, [literalDef], definition)
     (PRP000, ["mand"; "opt"], property)
     (AXI000, [literalAx; "post"], axiom)
     (THM000, ["theorem"; "thm"], theorem)
@@ -616,14 +616,14 @@ let errInformation = [
     (LEM000, ["lem"], lemma)
     (PPS000, ["prop"], proposition)
     (CNJ000, [literalConj], conjecture)
-    (VAR000, ["dec"], varDeclBlock)
+    (VAR000, [literalDec], varDeclBlock)
     (CTR000, [literalCtorL; literalCtor], constructor)
     (PRF000, ["proof"; "prf"], proof)
     (INF000, ["inf"], ruleOfInference)
     (LOC000, ["loc"], localization)
     (USE000, ["uses"], usesClause)
-    (PRD000, [literalAnd; "or"; "impl"; "iif"; "xor"; "not"; literalAll; "ex"; "is"], compoundPredicate)
-    (SMT000, [literalAssL; literalCases; literalBase; "for"; "del"], statement)
+    (PRD000, [literalAnd; "or"; "impl"; "iif"; "xor"; "not"; literalAll; literalEx; "is"], compoundPredicate)
+    (SMT000, [literalAssL; literalCases; literalBase; "for"; literalDel], statement)
     (AGI000, ["|-"], argumentInference)
     (CAS000, ["|"], conditionFollowedByResult)
     (DCS000, ["?"], elseStatement)

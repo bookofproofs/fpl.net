@@ -1,13 +1,13 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
+using static FplGrammarCommons;
 namespace FplLSTests
 {
     [TestClass]
     public class TestGetCompletionItemDelegate
     {
 
-        [DataRow("del")]
-        [DataRow("delegate")]
+        [DataRow(literalDel)]
+        [DataRow(literalDelL)]
         [TestMethod]
         public void TestAddDelegateChoicesNumber(string choice)
         {
@@ -16,8 +16,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, actual.Count);
         }
 
-        [DataRow("del")]
-        [DataRow("delegate")]
+        [DataRow(literalDel)]
+        [DataRow(literalDelL)]
         [TestMethod]
         public void TestAddDelegateEventCounts(string choice)
         {
@@ -31,10 +31,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("delegate", CompletionItemKind.Property, "delegate01")]
-        [DataRow("del", CompletionItemKind.Property, "delegate02")]
-        [DataRow("delegate", CompletionItemKind.Keyword, "zzzdelegate01")]
-        [DataRow("del", CompletionItemKind.Keyword, "zzzzdelegate02")]
+        [DataRow(literalDelL, CompletionItemKind.Property, "delegate01")]
+        [DataRow(literalDel, CompletionItemKind.Property, "delegate02")]
+        [DataRow(literalDelL, CompletionItemKind.Keyword, "zzzdelegate01")]
+        [DataRow(literalDel, CompletionItemKind.Keyword, "zzzzdelegate02")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -49,8 +49,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("del")]
-        [DataRow("delegate")]
+        [DataRow(literalDel)]
+        [DataRow(literalDelL)]
         [TestMethod]
         public void TestInsertTextEndsWithSpace(string choice)
         {
@@ -65,8 +65,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("del")]
-        [DataRow("delegate")]
+        [DataRow(literalDel)]
+        [DataRow(literalDelL)]
         [TestMethod]
         public void TestAddDelegateChoicesLabel(string choice)
         {
@@ -78,8 +78,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("del")]
-        [DataRow("delegate")]
+        [DataRow(literalDel)]
+        [DataRow(literalDelL)]
         [TestMethod]
         public void TestAddDelegateChoicesDetail(string choice)
         {
@@ -91,8 +91,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("del")]
-        [DataRow("delegate")]
+        [DataRow(literalDel)]
+        [DataRow(literalDelL)]
         [TestMethod]
         public void TestAddDelegateChoicesInsertText(string choice)
         {

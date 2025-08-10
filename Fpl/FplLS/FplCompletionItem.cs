@@ -85,8 +85,8 @@ namespace FplLS
                     return new FplCompletionItemChoicesVariable().GetChoices(this);
                 case "PascalCaseId":
                     return new FplCompletionItemChoicesPascalCaseId().GetChoices(this);
-                case "del":
-                case "delegate":
+                case literalDel:
+                case literalDelL:
                     return new FplCompletionItemChoicesDelegate().GetChoices(this);
                 case "is":
                     return new FplCompletionItemChoicesIsOperator().GetChoices(this);
@@ -99,8 +99,8 @@ namespace FplLS
                 case literalClL:
                 case literalCon:
                 case literalConL:
-                case "ext":
-                case "extension":
+                case literalExt:
+                case literalExtL:
                 case "func":
                 case "function":
                 case "ind":
@@ -128,8 +128,8 @@ namespace FplLS
                 case "parent":
                     return new FplCompletionItemChoicesSelf().GetChoices(this);
                 case literalAll:
-                case "ex":
-                case "exn":
+                case literalEx:
+                case literalExN:
                     return new FplCompletionItemChoicesQuantor().GetChoices(this);
                 case "true":
                 case "false":
@@ -146,8 +146,8 @@ namespace FplLS
                 case literalCtor:
                 case literalCtorL:
                     return new FplCompletionItemChoicesConstructor().GetChoices(this);
-                case "dec":
-                case "declaration":
+                case literalDec:
+                case literalDecL:
                     return new FplCompletionItemChoicesDeclaration().GetChoices(this);
                 case literalCases:
                     return new FplCompletionItemChoicesCases().GetChoices(this);
@@ -161,8 +161,8 @@ namespace FplLS
                 case "post":
                 case "postulate":
                     return new FplCompletionItemChoicesAxiom().GetChoices(this);
-                case "def":
-                case "definition":
+                case literalDef:
+                case literalDefL:
                     return new FplCompletionItemChoicesDefinition().GetChoices(this);
                 case "thm":
                 case "theorem":
@@ -358,51 +358,51 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Constructor;
                     this.IsShort = false;
                     break;
-                case "dec":
+                case literalDec:
                     this.Detail = "declaration (short form)";
                     this.SortText = "declaration02";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = true;
                     break;
-                case "declaration":
-                    this.Detail = "declaration";
+                case literalDecL:
+                    this.Detail = literalDecL;
                     this.SortText = "declaration01";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case "del":
+                case literalDel:
                     this.Detail = "delegate (short form)";
                     this.SortText = "delegate02";
                     this.Kind = CompletionItemKind.Event;
                     this.IsShort = true;
                     break;
-                case "delegate":
-                    this.Detail = "delegate";
+                case literalDelL:
+                    this.Detail = literalDelL;
                     this.SortText = "delegate01";
                     this.Kind = CompletionItemKind.Event;
                     this.IsShort = false;
                     break;
-                case "def":
+                case literalDef:
                     this.Detail = "definition (short form)";
                     this.SortText = "definition02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case "definition":
-                    this.Detail = "definition";
+                case literalDefL:
+                    this.Detail = literalDefL;
                     this.SortText = "definition01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case "ex":
+                case literalEx:
                     this.Detail = "predicate (exists quantor)";
-                    this.SortText = "ex";
+                    this.SortText = literalEx;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case "exn":
+                case literalExN:
                     this.Detail = "predicate (exists n-times quantor)";
-                    this.SortText = "exn";
+                    this.SortText = literalExN;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
@@ -412,14 +412,14 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case "ext":
+                case literalExt:
                     this.Detail = "extension (short form)";
                     this.SortText = "extension02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case "extension":
-                    this.Detail = "extension";
+                case literalExtL:
+                    this.Detail = literalExtL;
                     this.SortText = "extension01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;

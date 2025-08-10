@@ -1207,7 +1207,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Exists")
         let parent = es.PeekEvalStack()
         let fv = new FplQuantor((pos1, pos2), parent)
-        fv.FplId <- "ex"
+        fv.FplId <- literalEx
         fv.TypeId <- literalPred
         es.PushEvalStack(fv)
         fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
@@ -1229,7 +1229,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ExistsN")
         let parent = es.PeekEvalStack()
         let fv = new FplQuantor((pos1, pos2), parent)
-        fv.FplId <- "exn"
+        fv.FplId <- literalExN
         fv.TypeId <- literalPred
         fv.Arity <- 1
         es.PushEvalStack(fv)

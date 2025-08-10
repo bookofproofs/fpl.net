@@ -208,15 +208,15 @@ let keyWordSet =
            literalCor
            literalCorL
            literalCtor
-           "dec"
-           "declaration"
-           "def"
-           "definition"
-           "del"
-           "delegate"
-           "ext"
-           "extension"
-           "ex"
+           literalDec
+           literalDecL
+           literalDef
+           literalDefL
+           literalDel
+           literalDelL
+           literalExt
+           literalExtL
+           literalEx
            literalExN
            literalFalse
            "for"

@@ -199,7 +199,7 @@ type TestKeywordSpaces() =
 
     [<TestMethod>]
     member this.TestSpacesExt () =
-        let result = run (keywordExtension .>> eof) """ext"""
+        let result = run (keywordExtension .>> eof) literalExt
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -220,7 +220,7 @@ type TestKeywordSpaces() =
 
     [<TestMethod>]
     member this.TestSpacesExtC () =
-        let result = run (keywordExtension .>> eof) """extension"""
+        let result = run (keywordExtension .>> eof) literalExtL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
@@ -411,8 +411,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
-    [<DataRow("definition")>]
-    [<DataRow("def")>]
+    [<DataRow(literalDefL)>]
+    [<DataRow(literalDef)>]
     [<TestMethod>]
     member this.TestSpacesDefinition (word:string) =
         let result = run (definition .>> eof) (word + """class:obj{intr}""")

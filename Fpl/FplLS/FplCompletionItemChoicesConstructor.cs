@@ -1,5 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
+using static FplGrammarCommons;
 namespace FplLS
 {
     public class FplCompletionItemChoicesConstructor: FplCompletionItemChoices
@@ -22,7 +22,7 @@ namespace FplLS
 
             if (ci.IsShort)
             {
-                TokenDeclaration = "dec";
+                TokenDeclaration = literalDec;
             }
             ci.Label += " ...";
             ci.InsertText = 
