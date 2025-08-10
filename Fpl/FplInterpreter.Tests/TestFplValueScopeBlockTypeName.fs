@@ -271,7 +271,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalAx, x.ShortName)
         | "RuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent)
-            Assert.AreEqual<string>("inf", x.ShortName)
+            Assert.AreEqual<string>(literalInf, x.ShortName)
         | "Quantor" ->
             let x = new FplQuantor(positions, parent)
             Assert.AreEqual<string>("qtr", x.ShortName)

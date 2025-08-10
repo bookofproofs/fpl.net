@@ -28,7 +28,7 @@ namespace FplLS
             SetSortText(ci,propertyType,isOptional);
             if (ci.IsShort)
             {
-                TokenIntrinsic = "intr";
+                TokenIntrinsic = literalIntr;
                 TokenFunction = literalFunc;
                 TokenPredicate = "pred";
                 TokenOptional = "opt";

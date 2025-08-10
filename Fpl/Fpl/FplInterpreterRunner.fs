@@ -130,8 +130,8 @@ type FplRunner() =
                 | _ -> ()
             else
                 match caller.FplId with 
-                | "iif" -> evaluateEquivalence caller
-                | "impl" -> evaluateImplication caller
+                | FplGrammarCommons.literalIif -> evaluateEquivalence caller
+                | FplGrammarCommons.literalImpl -> evaluateImplication caller
                 | "not" -> evaluateNegation caller
                 | FplGrammarCommons.literalAnd -> evaluateConjunction caller
                 | "xor" -> evaluateExclusiveOr caller

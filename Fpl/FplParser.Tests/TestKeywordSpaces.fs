@@ -272,11 +272,11 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))
 
-    [<DataRow("impl")>]
+    [<DataRow(literalImpl)>]
     [<DataRow("xor")>]
     [<DataRow(literalAnd)>]
     [<DataRow("or")>]
-    [<DataRow("iif")>]
+    [<DataRow(literalIif)>]
     [<TestMethod>]
     member this.TestSpacesParenthesizedPredicate (word:string) =
         let result = run (predicate .>> eof) $"""{word}(false,true)"""
@@ -284,11 +284,11 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("impl")>]
+    [<DataRow(literalImpl)>]
     [<DataRow("xor")>]
     [<DataRow(literalAnd)>]
     [<DataRow("or")>]
-    [<DataRow("iif")>]
+    [<DataRow(literalIif)>]
     [<TestMethod>]
     member this.TestSpacesParenthesizedPredicateA (word:string) =
         let result = run (predicate .>> eof) $"""{word} (false,true)"""
@@ -296,11 +296,11 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("impl")>]
+    [<DataRow(literalImpl)>]
     [<DataRow("xor")>]
     [<DataRow(literalAnd)>]
     [<DataRow("or")>]
-    [<DataRow("iif")>]
+    [<DataRow(literalIif)>]
     [<TestMethod>]
     member this.TestSpacesParenthesizedPredicateB (word:string) =
         let result = run (predicate .>> eof) $"""{word}A(false,true)"""
@@ -308,8 +308,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("whitespace>"))
 
-    [<DataRow("intrinsic")>]
-    [<DataRow("intr")>]
+    [<DataRow(literalIntrL)>]
+    [<DataRow(literalIntr)>]
     [<TestMethod>]
     member this.TestSpacesIntrinsic (word:string) =
         let result = run (keywordIntrinsic .>> eof) $"""{word}"""
@@ -317,8 +317,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("intrinsic")>]
-    [<DataRow("intr")>]
+    [<DataRow(literalIntrL)>]
+    [<DataRow(literalIntr)>]
     [<TestMethod>]
     member this.TestSpacesIntrinsicA (word:string) =
         let result = run (keywordIntrinsic .>> eof) $"""{word} """
@@ -480,8 +480,8 @@ type TestKeywordSpaces() =
     [<DataRow("obj")>]
     [<DataRow("predicate")>]
     [<DataRow("pred")>]
-    [<DataRow("index")>]
-    [<DataRow("ind")>]
+    [<DataRow(literalIndL)>]
+    [<DataRow(literalInd)>]
     [<TestMethod>]
     member this.TestSpacesSimpleType (word:string) =
         let result = run (varDecl .>> eof) ("~a:" + word + "x")
@@ -572,8 +572,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
 
-    [<DataRow("inference")>]
-    [<DataRow("inf")>]
+    [<DataRow(literalInfL)>]
+    [<DataRow(literalInf)>]
     [<TestMethod>]
     member this.TestSpacesInference (word:string) =
         let result = run (ruleOfInference .>> eof) ($"{word}x" + " T() { pre:true con:true }")
@@ -609,7 +609,7 @@ type TestKeywordSpaces() =
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
 
     [<DataRow("prefix")>]
-    [<DataRow("infix")>]
+    [<DataRow(literalInfix)>]
     [<DataRow("postfix")>]
     [<TestMethod>]
     member this.TestSpacesSomeFixNotation (word:string) =

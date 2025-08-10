@@ -27,7 +27,7 @@ namespace FplLS
         {
             if (ci.IsShort)
             {
-                TokenIntrinsic = "intr";
+                TokenIntrinsic = literalIntr;
                 TokenObject = "obj";
                 TokenFunction = literalFunc;
                 TokenPredicate = "pred";

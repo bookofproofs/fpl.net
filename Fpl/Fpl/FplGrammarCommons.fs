@@ -222,17 +222,17 @@ let keyWordSet =
            literalFor
            literalFunc
            literalFuncL
-           "iif"
-           "impl"
-           "ind"
-           "index"
-           "infix"
-           "intr"
-           "intrinsic"
-           "inf"
-           "inference"
-           "in"
-           "is"
+           literalIif
+           literalImpl
+           literalInd
+           literalIndL
+           literalInfix
+           literalIntr
+           literalIntrL
+           literalInf
+           literalInfL
+           literalIn
+           literalIs
            "lem"
            "lemma"
            "loc"

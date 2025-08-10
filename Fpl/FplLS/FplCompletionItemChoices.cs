@@ -26,7 +26,7 @@ namespace FplLS
             TokenConclusion = literalConL;
             TokenDeclaration = literalDecL;
             TokenFunction = literalFuncL;
-            TokenIntrinsic = "intrinsic";
+            TokenIntrinsic = literalIntrL;
             TokenObject = "object";
             TokenOptional = "optional";
             TokenPredicate = "predicate";
@@ -41,7 +41,7 @@ namespace FplLS
             TokenConclusion = literalCon;
             TokenDeclaration = literalDec;
             TokenFunction = literalFunc;
-            TokenIntrinsic = "intr";
+            TokenIntrinsic = literalIntr;
             TokenObject = "obj";
             TokenOptional = "opt";
             TokenPredicate = "pred";

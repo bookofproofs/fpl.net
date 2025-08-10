@@ -15,7 +15,7 @@ namespace FplLS
             {
                 _bitPattern = 1;
             }
-            else if (symbolType.StartsWith("infix"))
+            else if (symbolType.StartsWith(literalInfix))
             {
                 _bitPattern = 2;
             }
@@ -81,7 +81,7 @@ namespace FplLS
             }
             if ((bits & 2) == 2)
             {
-                usableAs.Add("infix");
+                usableAs.Add(literalInfix);
             }
             if ((bits & 1) == 1)
             {

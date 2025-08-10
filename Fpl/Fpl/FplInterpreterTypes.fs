@@ -967,7 +967,7 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.RuleOfInference, positions, parent)
 
     override this.Name = "a rule of inference"
-    override this.ShortName = "inf"
+    override this.ShortName = literalInf
 
     override this.Clone () =
         let ret = new FplRuleOfInference((this.StartPos, this.EndPos), this.Parent.Value)

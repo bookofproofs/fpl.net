@@ -203,7 +203,7 @@ namespace FplLS
                 ,{ "ilo","Iloko" }
                 ,{ "ina","Interlingua (International Auxiliary Language Association)" }
                 ,{ "inc","Indic languages" }
-                ,{ "ind","Indonesian" }
+                ,{ literalInd,"Indonesian" }
                 ,{ "ine","Indo-European languages" }
                 ,{ "inh","Ingush" }
                 ,{ "ipk","Inupiaq" }

@@ -1071,7 +1071,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Iif((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Iif")
         let fv = es.PeekEvalStack()
-        fv.FplId <- "iif"
+        fv.FplId <- literalIif
         fv.TypeId <- literalPred
         eval st predicateAst1
         eval st predicateAst2
@@ -1082,7 +1082,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
         st.EvalPush("IsOperator")
         let fv = es.PeekEvalStack()
-        fv.FplId <- "is"
+        fv.FplId <- literalIs
         fv.TypeId <- literalPred
         let operand = new FplReference((pos1, pos2), fv) 
         es.PushEvalStack(operand)

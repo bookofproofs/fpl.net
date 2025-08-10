@@ -26,8 +26,8 @@ namespace FplLS
                     // keyword
                     var ci1 = defaultCi.Clone(); ci1.Kind = CompletionItemKind.Keyword; ci1.AdjustToKeyword(); ret.Add(ci1);
                     break;
-                case "iif":
-                case "impl":
+                case literalIif:
+                case literalImpl:
                     // snippet
                     var ci2 = defaultCi.Clone(); SetBody(ci2, 2); ret.Add(ci2);
                     // keyword

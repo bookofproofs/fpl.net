@@ -619,9 +619,9 @@ type TestFplValueScopeFplId() =
             | "base21b" -> Assert.AreEqual<string>("not", base1.FplId)
             | "base22" -> Assert.AreEqual<string>("xor", base1.FplId)
             | "base23" -> Assert.AreEqual<string>("or", base1.FplId)
-            | "base24" -> Assert.AreEqual<string>("iif", base1.FplId)
-            | "base25" -> Assert.AreEqual<string>("impl", base1.FplId)
-            | "base26" -> Assert.AreEqual<string>("is", base1.FplId)
+            | "base24" -> Assert.AreEqual<string>(literalIif, base1.FplId)
+            | "base25" -> Assert.AreEqual<string>(literalImpl, base1.FplId)
+            | "base26" -> Assert.AreEqual<string>(literalIs, base1.FplId)
             | "base27" -> Assert.AreEqual<string>("B", base1.FplId)
             | "base28" -> Assert.AreEqual<string>("C", base1.FplId)
             | "base29" -> Assert.AreEqual<string>("D", base1.FplId)
@@ -629,7 +629,7 @@ type TestFplValueScopeFplId() =
             | "base31" -> Assert.AreEqual<string>("C", base1.FplId)
             | "base32" -> Assert.AreEqual<string>("E", base1.FplId)
             | "base33" -> Assert.AreEqual<string>("p", base1.FplId)
-            | "base34" -> Assert.AreEqual<string>("is", base1.FplId)
+            | "base34" -> Assert.AreEqual<string>(literalIs, base1.FplId)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -882,7 +882,7 @@ type TestFplValueScopeFplId() =
             let pred = theory.Scope[predName]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("iif" , pred.FplId)
+            | "base1" -> Assert.AreEqual<string>(literalIif , pred.FplId)
             | "base2" -> Assert.AreEqual<string>("not", pred.FplId)
             | "base3" -> Assert.AreEqual<string>(literalAnd, pred.FplId)
             | "base4" -> Assert.AreEqual<string>("Equal", pred.FplId)

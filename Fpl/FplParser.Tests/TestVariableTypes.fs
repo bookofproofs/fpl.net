@@ -57,14 +57,14 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType007 () =
-        let result = run (variableType .>> eof) """index"""
+        let result = run (variableType .>> eof) literalIndL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType008 () =
-        let result = run (variableType .>> eof) """ind"""
+        let result = run (variableType .>> eof) literalInd
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -295,7 +295,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType022 () =
-        let result = run (variableType .>> eof) """ind"""
+        let result = run (variableType .>> eof) literalInd
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -142,7 +142,7 @@ let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 let keywordSelf = positions "Self" (skipString "self") .>> IW |>> Ast.Self
 let keywordParent = positions "Parent" (skipString "parent") .>> IW |>> Ast.Parent
 let keywordBaseClassReference = skipString literalBase .>> IW
-let keywordIndex = positions "IndexType" (skipString "index" <|> skipString "ind") |>> Ast.IndexType
+let keywordIndex = positions "IndexType" (skipString literalIndL <|> skipString literalInd) |>> Ast.IndexType
 
 
 (* FplBlock-related Keywords *)
@@ -153,7 +153,7 @@ let keywordConclusion = (skipString literalConL <|> skipString literalCon) >>. I
 (* Statement-related Keywords *)
 let keywordDel = skipString literalDelL <|> skipString literalDel 
 let keywordFor = skipString literalFor .>> SW 
-let keywordIn = skipString "in" .>> SW 
+let keywordIn = skipString literalIn .>> SW 
 let keywordCases = skipString literalCases .>> IW 
 let keywordAssert = skipString literalAssL .>> SW
 
@@ -164,14 +164,14 @@ let keywordFalse = positions "False" (skipString literalFalse) .>> IW |>>  Ast.F
 let keywordBydef = positions literalByDef (skipString literalByDef) .>> SW  
 let keywordAnd = skipString literalAnd .>> IW 
 let keywordOr = skipString "or" .>> IW 
-let keywordImpl = skipString "impl" .>> IW 
-let keywordIif = skipString "iif" .>> IW 
+let keywordImpl = skipString literalImpl .>> IW 
+let keywordIif = skipString literalIif .>> IW 
 let keywordXor = skipString "xor" .>> IW 
 let keywordNot = skipString "not" .>> attemptSW 
 let keywordAll = skipString literalAll .>> SW 
 let keywordEx = skipString literalEx .>> SW
 let keywordExN = skipString literalExN .>> IW
-let keywordIs = skipString "is" .>> attemptSW 
+let keywordIs = skipString literalIs .>> attemptSW 
 
 
 // Via templates, FPL supports generic types, which make it possible to define abstract mathematical
@@ -272,7 +272,7 @@ let localizationString = positions "LocalizationString" (regex "[^\"\n]*") <?> "
 let keywordSymbol = pstring "symbol" .>> IW
 let objectSymbolString = pchar '"' >>. objectMathSymbols .>> pchar '"'
 let infixString = pchar '"' >>. infixMathSymbols .>> pchar '"'
-let keywordInfix = pstring "infix" >>. IW
+let keywordInfix = pstring literalInfix >>. IW
 let postfixString = pchar '"' >>. postfixMathSymbols .>> pchar '"' 
 let keywordPostfix = pstring "postfix" >>. IW
 let prefixString = pchar '"' >>. prefixMathSymbols .>> pchar '"' 
@@ -422,7 +422,7 @@ let conclusion = IW >>. (keywordConclusion >>. colon >>. predicate)
 let premiseConclusionBlock = positions "PremiseConclusionBlock" (leftBrace >>. varDeclOrSpecList .>>. premise .>>. conclusion .>> spacesRightBrace) |>> Ast.PremiseConclusionBlock
 
 (* FPL building blocks - rules of reference *)
-let keywordInference = (skipString "inference" <|> skipString "inf") .>> SW 
+let keywordInference = (skipString literalInfL <|> skipString literalInf) .>> SW 
 let ruleOfInference = positions "RuleOfInference" (keywordInference >>. signature .>>. premiseConclusionBlock) |>> Ast.RuleOfInference
 
 (* FPL building blocks - Theorem-like statements and conjectures *)
@@ -451,7 +451,7 @@ let axiom = positions "Axiom" (keywordAxiom >>. signatureWithTheoremLikeBlock) |
 
 (* FPL building blocks - Constructors *)
 
-let keywordIntrinsic = positions "Intrinsic" (skipString "intrinsic" <|> skipString "intr") .>> IW |>> Ast.Intrinsic
+let keywordIntrinsic = positions "Intrinsic" (skipString literalIntrL <|> skipString literalIntr) .>> IW |>> Ast.Intrinsic
 
 let predContent = varDeclOrSpecList .>>. spacesPredicate |>> Ast.DefPredicateContent
 
@@ -619,10 +619,10 @@ let errInformation = [
     (VAR000, [literalDec], varDeclBlock)
     (CTR000, [literalCtorL; literalCtor], constructor)
     (PRF000, ["proof"; "prf"], proof)
-    (INF000, ["inf"], ruleOfInference)
+    (INF000, [literalInf], ruleOfInference)
     (LOC000, ["loc"], localization)
     (USE000, ["uses"], usesClause)
-    (PRD000, [literalAnd; "or"; "impl"; "iif"; "xor"; "not"; literalAll; literalEx; "is"], compoundPredicate)
+    (PRD000, [literalAnd; "or"; literalImpl; literalIif; "xor"; "not"; literalAll; literalEx; literalIs], compoundPredicate)
     (SMT000, [literalAssL; literalCases; literalBase; literalFor; literalDel], statement)
     (AGI000, ["|-"], argumentInference)
     (CAS000, ["|"], conditionFollowedByResult)

@@ -88,7 +88,7 @@ namespace FplLS
                 case literalDel:
                 case literalDelL:
                     return new FplCompletionItemChoicesDelegate().GetChoices(this);
-                case "is":
+                case literalIs:
                     return new FplCompletionItemChoicesIsOperator().GetChoices(this);
                 case literalAlias:
                 case literalAssL:
@@ -103,11 +103,11 @@ namespace FplLS
                 case literalExtL:
                 case literalFunc:
                 case literalFuncL:
-                case "ind":
-                case "index":
-                case "intr":
-                case "intrinsic":
-                case "in":
+                case literalInd:
+                case literalIndL:
+                case literalIntr:
+                case literalIntrL:
+                case literalIn:
                 case "obj":
                 case "object":
                 case "opt":
@@ -137,8 +137,8 @@ namespace FplLS
                 case "undefined":
                 case "not":
                 case "xor":
-                case "iif":
-                case "impl":
+                case literalIif:
+                case literalImpl:
                 case literalAnd:
                 case "or":
                 case "(":
@@ -176,8 +176,8 @@ namespace FplLS
                 case literalConj:
                 case literalConjL:
                     return new FplCompletionItemChoicesTheoremLikeStmt("Conjecture").GetChoices(this);
-                case "inf":
-                case "inference":
+                case literalInf:
+                case literalInfL:
                     return new FplCompletionItemChoicesRuleOfInference().GetChoices(this);
                 case literalCor:
                 case literalCorL:
@@ -193,7 +193,7 @@ namespace FplLS
                 case "prefix":
                 case "postfix":
                 case "symbol":
-                case "infix":
+                case literalInfix:
                     return new FplCompletionItemChoicesSymbol(Word, true).GetChoices(this);
                 case "prefix symbol":
                 case "postfix symbol":
@@ -448,69 +448,69 @@ namespace FplLS
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
-                case "iif":
+                case literalIif:
                     this.Detail = "predicate (equivalence, <=>)";
-                    this.SortText = "iif";
+                    this.SortText = literalIif;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case "impl":
+                case literalImpl:
                     this.Detail = "predicate (implication, =>)";
-                    this.SortText = "impl";
+                    this.SortText = literalImpl;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case "in":
+                case literalIn:
                     this.Detail = "clause (in type or in range)";
-                    this.SortText = "in";
+                    this.SortText = literalIn;
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case "ind":
+                case literalInd:
                     this.Detail = "type (index, short form)";
                     this.SortText = "index02";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = true;
                     break;
-                case "index":
+                case literalIndL:
                     this.Detail = "type (index)";
                     this.SortText = "index01";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
-                case "inf":
+                case literalInf:
                     this.Detail = "rule of inference (short form)";
                     this.SortText = "inference02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case "inference":
+                case literalInfL:
                     this.Detail = "rule of inference";
                     this.SortText = "inference01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case "infix":
+                case literalInfix:
                     this.Detail = "infix operator";
-                    this.SortText = "infix";
+                    this.SortText = literalInfix;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case "intr":
+                case literalIntr:
                     this.Detail = "intrinsic (short form)";
                     this.SortText = "intrinsic02";
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = true;
                     break;
-                case "intrinsic":
-                    this.Detail = "intrinsic";
+                case literalIntrL:
+                    this.Detail = literalIntrL;
                     this.SortText = "intrinsic01";
                     this.Kind = CompletionItemKind.Struct;
                     this.IsShort = false;
                     break;
-                case "is":
+                case literalIs:
                     this.Detail = "predicate (is of type)";
-                    this.SortText = "is";
+                    this.SortText = literalIs;
                     this.Kind = CompletionItemKind.Interface;
                     this.IsShort = false;
                     break;

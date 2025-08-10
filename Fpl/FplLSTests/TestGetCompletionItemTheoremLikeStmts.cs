@@ -6,8 +6,8 @@ namespace FplLSTests
     public class TestGetCompletionItemTheoremLikeStmts
     {
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
         [DataRow("thm", "Theorem")]
         [DataRow("theorem", "Theorem")]
         [DataRow("lem", "Lemma")]
@@ -25,8 +25,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
         [DataRow("thm", "Theorem")]
         [DataRow("theorem", "Theorem")]
         [DataRow("lem", "Lemma")]
@@ -48,10 +48,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("inference", "Inference", CompletionItemKind.Class, "inference01")]
-        [DataRow("inf", "Inference", CompletionItemKind.Class, "inference02")]
-        [DataRow("inference", "Inference", CompletionItemKind.Keyword, "zzzinference01")]
-        [DataRow("inf", "Inference", CompletionItemKind.Keyword, "zzzzinference02")]
+        [DataRow(literalInfL, "Inference", CompletionItemKind.Class, "inference01")]
+        [DataRow(literalInf, "Inference", CompletionItemKind.Class, "inference02")]
+        [DataRow(literalInfL, "Inference", CompletionItemKind.Keyword, "zzzinference01")]
+        [DataRow(literalInf, "Inference", CompletionItemKind.Keyword, "zzzzinference02")]
         [DataRow("theorem", "Theorem", CompletionItemKind.Class, "theorem01")]
         [DataRow("thm", "Theorem", CompletionItemKind.Class, "theorem02")]
         [DataRow("theorem", "Theorem", CompletionItemKind.Keyword, "zzztheorem01")]
@@ -82,8 +82,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
         [DataRow("thm", "Theorem")]
         [DataRow("theorem", "Theorem")]
         [DataRow("lem", "Lemma")]
@@ -106,8 +106,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
         [DataRow("thm", "Theorem")]
         [DataRow("theorem", "Theorem")]
         [DataRow("lem", "Lemma")]
@@ -127,8 +127,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
         [DataRow("thm", "Theorem")]
         [DataRow("theorem", "Theorem")]
         [DataRow("lem", "Lemma")]
@@ -155,8 +155,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
         [DataRow("thm", "Theorem")]
         [DataRow("theorem", "Theorem")]
         [DataRow("lem", "Lemma")]

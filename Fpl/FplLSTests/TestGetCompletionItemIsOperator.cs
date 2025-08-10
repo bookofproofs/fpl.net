@@ -1,12 +1,12 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
+using static FplGrammarCommons;
 namespace FplLSTests
 {
     [TestClass]
     public class TestGetCompletionItemIsOperator
     {
 
-        [DataRow("is")]
+        [DataRow(literalIs)]
         [TestMethod]
         public void TestAddIsOperatorChoicesNumber(string choice)
         {
@@ -15,7 +15,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow("is")]
+        [DataRow(literalIs)]
         [TestMethod]
         public void TestAddIsOperatorKeywordCounts(string choice)
         {
@@ -29,8 +29,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("is", CompletionItemKind.Property, "is")]
-        [DataRow("is", CompletionItemKind.Keyword, "zzzis")]
+        [DataRow(literalIs, CompletionItemKind.Property, literalIs)]
+        [DataRow(literalIs, CompletionItemKind.Keyword, "zzzis")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -45,7 +45,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("is")]
+        [DataRow(literalIs)]
         [TestMethod]
         public void TestAddIsOperatorChoicesLabel(string choice)
         {
@@ -57,7 +57,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("is")]
+        [DataRow(literalIs)]
         [TestMethod]
         public void TestAddIsOperatorChoicesDetail(string choice)
         {
@@ -69,7 +69,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("is")]
+        [DataRow(literalIs)]
         [TestMethod]
         public void TestAddIsOperatorChoicesInsertText(string choice)
         {
