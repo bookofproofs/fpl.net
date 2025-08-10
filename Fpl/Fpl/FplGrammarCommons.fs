@@ -190,11 +190,11 @@ let keyWordSet =
         [| literalAlias
            literalAll
            literalAnd
-           "assert"
-           "ass"
-           "assume"
-           "ax"
-           "axiom"
+           literalAssL
+           literalAss
+           literalAssume
+           literalAx
+           literalAxL
            "base"
            "bydef"
            "cases"

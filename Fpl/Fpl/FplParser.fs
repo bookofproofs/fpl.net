@@ -155,7 +155,7 @@ let keywordDel = skipString "delegate" <|> skipString "del"
 let keywordFor = skipString "for" .>> SW 
 let keywordIn = skipString "in" .>> SW 
 let keywordCases = skipString "cases" .>> IW 
-let keywordAssert = skipString "assert" .>> SW
+let keywordAssert = skipString literalAssL .>> SW
 
 (* Predicate-related Keywords *)
 let keywordUndefined = positions "Undefined" (skipString "undefined" <|> skipString "undef") .>> IW |>> Ast.Undefined
@@ -445,7 +445,7 @@ let corollary = positions "Corollary" (keywordCorollary >>. corollarySignature .
 
 (* FPL building blocks - Axioms *)
 
-let keywordAxiom = (skipString "axiom" <|> skipString "ax" <|> skipString "postulate" <|> skipString "post") >>. SW
+let keywordAxiom = (skipString literalAxL <|> skipString literalAx <|> skipString "postulate" <|> skipString "post") >>. SW
 
 let axiom = positions "Axiom" (keywordAxiom >>. signatureWithTheoremLikeBlock) |>> Ast.Axiom
 
@@ -503,7 +503,7 @@ let propertyList = opt (many1 (property .>> IW))
 let keywordRevoke = (skipString "revoke" <|> skipString "rev") .>> SW 
 let revokeArgument = positions "RevokeArgument" (keywordRevoke >>. argumentIdentifier) |>> Ast.RevokeArgument 
     
-let keywordAssume = skipString "assume" <|> skipString "ass" .>> SW 
+let keywordAssume = skipString literalAssume <|> skipString literalAss .>> SW 
 let assumeArgument = positions "AssumeArgument" (keywordAssume >>. predicate) |>> Ast.AssumeArgument
 let keywordTrivial  = positions "Trivial" (skipString "trivial") .>> IW |>> Ast.Trivial
 let keywordQed  = positions "Qed" (skipString "qed") .>> IW |>> Ast.Qed
@@ -610,7 +610,7 @@ let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postul
 let errInformation = [
     (DEF000, ["def"], definition)
     (PRP000, ["mand"; "opt"], property)
-    (AXI000, ["ax"; "post"], axiom)
+    (AXI000, [literalAx; "post"], axiom)
     (THM000, ["theorem"; "thm"], theorem)
     (COR000, ["theorem"; "cor"], corollary)
     (LEM000, ["lem"], lemma)
@@ -623,11 +623,11 @@ let errInformation = [
     (LOC000, ["loc"], localization)
     (USE000, ["uses"], usesClause)
     (PRD000, [literalAnd; "or"; "impl"; "iif"; "xor"; "not"; literalAll; "ex"; "is"], compoundPredicate)
-    (SMT000, ["assert"; "cases"; "base"; "for"; "del"], statement)
+    (SMT000, [literalAssL; "cases"; "base"; "for"; "del"], statement)
     (AGI000, ["|-"], argumentInference)
     (CAS000, ["|"], conditionFollowedByResult)
     (DCS000, ["?"], elseStatement)
-    (ASS000, ["ass"], assumeArgument)
+    (ASS000, [literalAss], assumeArgument)
     (REV000, ["rev"], revokeArgument)
     (RET000, ["ret"], returnStatement)
     (PRE000, ["pre"], premise)

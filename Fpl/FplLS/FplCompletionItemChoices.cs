@@ -21,7 +21,7 @@ namespace FplLS
         public string TokenRevoke { get; set; }
         public FplCompletionItemChoices()
         {
-            TokenAssume = "assume";
+            TokenAssume = literalAssume;
             TokenClass = "class";
             TokenConclusion = "conclusion";
             TokenDeclaration = "declaration";
@@ -36,7 +36,7 @@ namespace FplLS
 
         public void AdjustToShort()
         {
-            TokenAssume = "ass";
+            TokenAssume = literalAss;
             TokenClass = "cl";
             TokenConclusion = "con";
             TokenDeclaration = "dec";

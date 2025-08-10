@@ -268,7 +268,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("conj", x.ShortName)
         | "Axiom" ->
             let x = new FplAxiom(positions, parent)
-            Assert.AreEqual<string>("ax", x.ShortName)
+            Assert.AreEqual<string>(literalAx, x.ShortName)
         | "RuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent)
             Assert.AreEqual<string>("inf", x.ShortName)
@@ -310,7 +310,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("stmt", x.ShortName)
         | "Assertion" ->
             let x = new FplAssertion(positions, parent)
-            Assert.AreEqual<string>("ass", x.ShortName)
+            Assert.AreEqual<string>(literalAss, x.ShortName)
         | "Extension" ->
             let x = new FplExtension(positions, parent)
             Assert.AreEqual<string>("def ext", x.ShortName)

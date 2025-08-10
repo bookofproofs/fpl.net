@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 namespace FplLS
 {
     public class FplCompletionItemChoicesAxiom: FplCompletionItemChoices
@@ -8,7 +9,7 @@ namespace FplLS
             var ret = new List<FplCompletionItem>();
             // snippets
             var ci = defaultCi.Clone();
-            if (ci.Word.StartsWith("ax"))
+            if (ci.Word.StartsWith(literalAx))
             {
                 ci.InsertText = GetBody(ci.Word, "Axiom");
                 ci.Label += " ...";

@@ -574,7 +574,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.StartPos <- pos1
         fv.EndPos <- pos2
-        fv.FplId <- "assert"
+        fv.FplId <- literalAssL
         let rb = new FplReference((pos1,pos2), fv)
         es.PushEvalStack(rb)
         eval st predicateAst
@@ -626,7 +626,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("AssumeArgument")
         let fv = es.PeekEvalStack()
         let argInf = new FplArgInference((pos1, pos2), fv) 
-        argInf.FplId <- "assume"
+        argInf.FplId <- literalAssume
         es.PushEvalStack(argInf)
         eval st predicateAst
         es.PopEvalStack()

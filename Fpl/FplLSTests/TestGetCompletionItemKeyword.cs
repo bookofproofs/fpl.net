@@ -9,9 +9,9 @@ namespace FplLSTests
     public class TestGetCompletionItemKeyword
     {
         [DataRow(literalAlias)]
-        [DataRow("assert")]
-        [DataRow("ass")]
-        [DataRow("assume")]
+        [DataRow(literalAssL)]
+        [DataRow(literalAss)]
+        [DataRow(literalAssume)]
         [DataRow("bydef")]
         [DataRow("cl")]
         [DataRow("class")]
@@ -49,9 +49,9 @@ namespace FplLSTests
         }
 
         [DataRow(literalAlias)]
-        [DataRow("assert")]
-        [DataRow("ass")]
-        [DataRow("assume")]
+        [DataRow(literalAssL)]
+        [DataRow(literalAss)]
+        [DataRow(literalAssume)]
         [DataRow("bydef")]
         [DataRow("cl")]
         [DataRow("class")]
@@ -95,9 +95,9 @@ namespace FplLSTests
         }
 
         [DataRow(literalAlias)]
-        [DataRow("assert")]
-        [DataRow("ass")]
-        [DataRow("assume")]
+        [DataRow(literalAssL)]
+        [DataRow(literalAss)]
+        [DataRow(literalAssume)]
         [DataRow("bydef")]
         [DataRow("cl")]
         [DataRow("class")]
@@ -139,9 +139,9 @@ namespace FplLSTests
         }
 
         [DataRow(literalAlias)]
-        [DataRow("assert")]
-        [DataRow("ass")]
-        [DataRow("assume")]
+        [DataRow(literalAssL)]
+        [DataRow(literalAss)]
+        [DataRow(literalAssume)]
         [DataRow("bydef")]
         [DataRow("cl")]
         [DataRow("class")]
@@ -183,9 +183,9 @@ namespace FplLSTests
         }
 
         [DataRow(literalAlias)]
-        [DataRow("assert")]
-        [DataRow("ass")]
-        [DataRow("assume")]
+        [DataRow(literalAssL)]
+        [DataRow(literalAss)]
+        [DataRow(literalAssume)]
         [DataRow("bydef")]
         [DataRow("cl")]
         [DataRow("class")]
@@ -227,9 +227,9 @@ namespace FplLSTests
         }
 
         [DataRow(literalAlias)]
-        [DataRow("assert")]
-        [DataRow("ass")]
-        [DataRow("assume")]
+        [DataRow(literalAssL)]
+        [DataRow(literalAss)]
+        [DataRow(literalAssume)]
         [DataRow("bydef")]
         [DataRow("cl")]
         [DataRow("class")]

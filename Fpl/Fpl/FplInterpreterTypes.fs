@@ -1132,7 +1132,7 @@ type FplAxiom(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Axiom, positions, parent)
 
     override this.Name = "an axiom"
-    override this.ShortName = "ax"
+    override this.ShortName = literalAx
 
     override this.Clone () =
         let ret = new FplAxiom((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1342,7 +1342,7 @@ type FplAssertion(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Assertion, positions, Some parent)
 
     override this.Name = "an assertion"
-    override this.ShortName = "ass"
+    override this.ShortName = literalAss
 
     override this.Clone () =
         let ret = new FplAssertion((this.StartPos, this.EndPos), this.Parent.Value)

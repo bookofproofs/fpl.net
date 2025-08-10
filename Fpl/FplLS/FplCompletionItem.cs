@@ -91,9 +91,9 @@ namespace FplLS
                 case "is":
                     return new FplCompletionItemChoicesIsOperator().GetChoices(this);
                 case literalAlias:
-                case "assert":
-                case "ass":
-                case "assume":
+                case literalAssL:
+                case literalAss:
+                case literalAssume:
                 case "bydef":
                 case "cl":
                 case "class":
@@ -156,8 +156,8 @@ namespace FplLS
                 case "prty":
                 case "property":
                     return new FplCompletionItemChoicesProperty().GetChoices(this);
-                case "ax":
-                case "axiom":
+                case literalAx:
+                case literalAxL:
                 case "post":
                 case "postulate":
                     return new FplCompletionItemChoicesAxiom().GetChoices(this);
@@ -262,32 +262,32 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case "ass":
+                case literalAss:
                     this.Detail = "argument (assume, short form)";
                     this.SortText = "assume02";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = true;
                     break;
-                case "assert":
+                case literalAssL:
                     this.Detail = "statement (assert)";
-                    this.SortText = "assert";
+                    this.SortText = literalAssL;
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case "assume":
+                case literalAssume:
                     this.Detail = "argument (assume)";
                     this.SortText = "assume01";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case "ax":
+                case literalAx:
                     this.Detail = "axiom (short form)";
                     this.SortText = "axiom02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case "axiom":
-                    this.Detail = "axiom";
+                case literalAxL:
+                    this.Detail = literalAxL;
                     this.SortText = "axiom01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
