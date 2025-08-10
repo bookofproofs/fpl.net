@@ -1,6 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
+open FplGrammarCommons
 open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
@@ -19,7 +20,7 @@ type TestClassInheritanceTypes () =
 
     [<TestMethod>]
     member this.TestSpecificType4 () =
-        let result = run (specificClassType .>> eof) """tpl"""
+        let result = run (specificClassType .>> eof) literalTpl
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

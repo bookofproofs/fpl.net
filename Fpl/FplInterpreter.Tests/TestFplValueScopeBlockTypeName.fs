@@ -250,7 +250,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalLoc, x.ShortName)
         | "Theorem" ->
             let x = new FplTheorem(positions, parent)
-            Assert.AreEqual<string>("thm", x.ShortName)
+            Assert.AreEqual<string>(literalThm, x.ShortName)
         | "Lemma" ->
             let x = new FplLemma(positions, parent)
             Assert.AreEqual<string>(literalLem, x.ShortName)
@@ -331,10 +331,10 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalFunc, x.ShortName)
         | "IntrinsicTpl" ->
             let x = new FplIntrinsicTpl(positions, parent)
-            Assert.AreEqual<string>("tpl", x.ShortName)
+            Assert.AreEqual<string>(literalTpl, x.ShortName)
         | "IntrinsicUndef" ->
             let x = new FplIntrinsicUndef(positions, parent)
-            Assert.AreEqual<string>("undef", x.ShortName)
+            Assert.AreEqual<string>(literalUndef, x.ShortName)
         | "Root" ->
             let x = new FplRoot()
             Assert.AreEqual<string>("root", x.ShortName)

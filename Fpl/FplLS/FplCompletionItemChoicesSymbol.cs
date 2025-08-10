@@ -23,7 +23,7 @@ namespace FplLS
             {
                 _bitPattern = 4;
             }
-            else if (symbolType == "symbol" || symbolType == "object symbol")
+            else if (symbolType == literalSymbol || symbolType == "object symbol")
             {
                 _bitPattern = 8;
             }

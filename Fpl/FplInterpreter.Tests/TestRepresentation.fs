@@ -10,11 +10,11 @@ type TestRepresentation() =
 
 
     [<DataRow("00",literalFalse, literalFalse)>]
-    [<DataRow("01","true", "true")>]
-    [<DataRow("02","(x = x)", "true")>]
+    [<DataRow("01",literalTrue, literalTrue)>]
+    [<DataRow("02","(x = x)", literalTrue)>]
     [<DataRow("02a","not(x = x)", literalFalse)>]
     [<DataRow("03","(x = y)", literalFalse)>]
-    [<DataRow("04","not (x = y)", "true")>]
+    [<DataRow("04","not (x = y)", literalTrue)>]
     [<TestMethod>]
     member this.TestRepresentationPredicate(var:string, varVal, expected:string) =
         ad.Clear()
@@ -75,7 +75,7 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","(@0 = Zero())", "true")>]
+    [<DataRow("00","(@0 = Zero())", literalTrue)>]
     [<TestMethod>]
     member this.TestRepresentationCases(var:string, varVal, expected:string) =
         ad.Clear()
@@ -118,7 +118,7 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", "true")>]
+    [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", literalTrue)>]
     [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", literalFalse)>]
     [<TestMethod>]
     member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
@@ -139,12 +139,12 @@ type TestRepresentation() =
 
     [<DataRow("00","(@0 = A())", literalFalse)>]
     [<DataRow("00a","(@1 = A())", literalFalse)>]
-    [<DataRow("00b","(@2 = A())", "true")>]
-    [<DataRow("01","(@0 = B())", "true")>]
+    [<DataRow("00b","(@2 = A())", literalTrue)>]
+    [<DataRow("01","(@0 = B())", literalTrue)>]
     [<DataRow("01a","(@1 = B())", literalFalse)>]
     [<DataRow("01b","(@2 = A())", literalFalse)>]
     [<DataRow("02","(@0 = C())", literalFalse)>]
-    [<DataRow("02a","(@1 = C())", "true")>]
+    [<DataRow("02a","(@1 = C())", literalTrue)>]
     [<DataRow("02b","(@2 = C())", literalFalse)>]
     [<TestMethod>]
     member this.TestRepresentationCases2(var:string, varVal, expected:string) =

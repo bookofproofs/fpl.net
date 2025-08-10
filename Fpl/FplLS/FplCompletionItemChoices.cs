@@ -31,7 +31,7 @@ namespace FplLS
             TokenOptional = literalOptL;
             TokenPredicate = literalPredL;
             TokenPremise = literalPreL;
-            TokenRevoke = "revoke";
+            TokenRevoke = literalRevL;
         }
 
         public void AdjustToShort()
@@ -46,7 +46,7 @@ namespace FplLS
             TokenOptional = literalOpt;
             TokenPredicate = literalPred;
             TokenPremise = literalPre;
-            TokenRevoke = "rev";
+            TokenRevoke = literalRev;
         }
 
         public abstract List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi);

@@ -1,12 +1,12 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
+using static FplGrammarCommons;
 namespace FplLSTests
 {
     [TestClass]
     public class TestGetCompletionItemUses
     {
 
-        [DataRow("uses")]
+        [DataRow(literalUses)]
 
         [TestMethod]
         public void TestAddUsesChoicesNumber(string choice)
@@ -16,7 +16,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(4, actual.Count);
         }
 
-        [DataRow("uses")]
+        [DataRow(literalUses)]
         [TestMethod]
         public void TestAddUsesKeywordCounts(string choice)
         {
@@ -30,9 +30,9 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("uses", "...", CompletionItemKind.Property, "uses01")]
-        [DataRow("uses", "... alias", CompletionItemKind.Property, "uses02")]
-        [DataRow("uses", "", CompletionItemKind.Keyword, "uses03")]
+        [DataRow(literalUses, "...", CompletionItemKind.Property, "uses01")]
+        [DataRow(literalUses, "... alias", CompletionItemKind.Property, "uses02")]
+        [DataRow(literalUses, "", CompletionItemKind.Keyword, "uses03")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string l, CompletionItemKind kind, string expected)
         {
@@ -47,7 +47,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("uses")]
+        [DataRow(literalUses)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -62,7 +62,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("uses")]
+        [DataRow(literalUses)]
         [TestMethod]
         public void TestAddUsesChoicesLabel(string choice)
         {
@@ -74,7 +74,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("uses")]
+        [DataRow(literalUses)]
 
         [TestMethod]
         public void TestAddUsesChoicesDetail(string choice)
@@ -87,7 +87,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("uses")]
+        [DataRow(literalUses)]
 
         [TestMethod]
         public void TestAddUsesChoicesInsertText(string choice)

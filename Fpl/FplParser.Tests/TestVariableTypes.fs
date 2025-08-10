@@ -92,7 +92,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType012 () =
-        let result = run (variableType .>> eof) """tpl"""
+        let result = run (variableType .>> eof) literalTpl
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

@@ -114,14 +114,14 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestDerivedArgument01 () =
-        let result = run (derivedArgument .>> eof) """qed"""
+        let result = run (derivedArgument .>> eof) literalQed
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))
 
     [<TestMethod>]
     member this.TestDerivedArgument02 () =
-        let result = run (derivedArgument .>> eof) """trivial"""
+        let result = run (derivedArgument .>> eof) literalTrivial
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

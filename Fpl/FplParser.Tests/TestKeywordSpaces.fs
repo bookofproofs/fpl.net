@@ -240,9 +240,9 @@ type TestKeywordSpaces() =
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
     [<DataRow(literalFalse)>]
-    [<DataRow("true")>]
-    [<DataRow("undefined")>]
-    [<DataRow("undef")>]
+    [<DataRow(literalTrue)>]
+    [<DataRow(literalUndefL)>]
+    [<DataRow(literalUndef)>]
     [<TestMethod>]
     member this.TestSpacesFalseTrueUndef (word:string) =
         let result = run (predicate .>> eof) $"""and({word},true)"""
@@ -251,9 +251,9 @@ type TestKeywordSpaces() =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow(literalFalse)>]
-    [<DataRow("true")>]
-    [<DataRow("undefined")>]
-    [<DataRow("undef")>]
+    [<DataRow(literalTrue)>]
+    [<DataRow(literalUndefL)>]
+    [<DataRow(literalUndef)>]
     [<TestMethod>]
     member this.TestSpacesFalseTrueUndefA (word:string) =
         let result = run (predicate .>> eof) $"""and({word}, true )"""
@@ -262,9 +262,9 @@ type TestKeywordSpaces() =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow(literalFalse)>]
-    [<DataRow("true")>]
-    [<DataRow("undefined")>]
-    [<DataRow("undef")>]
+    [<DataRow(literalTrue)>]
+    [<DataRow(literalUndefL)>]
+    [<DataRow(literalUndef)>]
     [<TestMethod>]
     member this.TestSpacesFalseTrueUndefB (word:string) =
         let result = run (predicate .>> eof) $"""and({word}A)"""
@@ -273,7 +273,7 @@ type TestKeywordSpaces() =
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<whitespace>"))
 
     [<DataRow(literalImpl)>]
-    [<DataRow("xor")>]
+    [<DataRow(literalXor)>]
     [<DataRow(literalAnd)>]
     [<DataRow(literalOr)>]
     [<DataRow(literalIif)>]
@@ -285,7 +285,7 @@ type TestKeywordSpaces() =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow(literalImpl)>]
-    [<DataRow("xor")>]
+    [<DataRow(literalXor)>]
     [<DataRow(literalAnd)>]
     [<DataRow(literalOr)>]
     [<DataRow(literalIif)>]
@@ -297,7 +297,7 @@ type TestKeywordSpaces() =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<DataRow(literalImpl)>]
-    [<DataRow("xor")>]
+    [<DataRow(literalXor)>]
     [<DataRow(literalAnd)>]
     [<DataRow(literalOr)>]
     [<DataRow(literalIif)>]
@@ -374,8 +374,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("return")>]
-    [<DataRow("ret")>]
+    [<DataRow(literalRetL)>]
+    [<DataRow(literalRet)>]
     [<TestMethod>]
     member this.TestSpacesReturn (word:string) =
         let result = run (returnStatement .>> eof) $"""{word}x"""
@@ -383,8 +383,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
-    [<DataRow("revoke")>]
-    [<DataRow("rev")>]
+    [<DataRow(literalRevL)>]
+    [<DataRow(literalRev)>]
     [<TestMethod>]
     member this.TestSpacesRevoke (word:string) =
         let result = run (revokeArgument .>> eof) $"""{word}100."""
@@ -392,8 +392,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
-    [<DataRow("theorem")>]
-    [<DataRow("thm")>]
+    [<DataRow(literalThmL)>]
+    [<DataRow(literalThm)>]
     [<DataRow(literalLemL)>]
     [<DataRow(literalLem)>]
     [<DataRow(literalPropL)>]
@@ -519,7 +519,7 @@ type TestKeywordSpaces() =
 
     [<TestMethod>]
     member this.TestSpacesSelf () =
-        let result = run (selfOrParent .>> eof) "self"
+        let result = run (selfOrParent .>> eof) literalSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

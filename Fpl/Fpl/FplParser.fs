@@ -139,7 +139,7 @@ let variable = positions "Var" variableX |>> Ast.Var
 
 let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
-let keywordSelf = positions "Self" (skipString "self") .>> IW |>> Ast.Self
+let keywordSelf = positions "Self" (skipString literalSelf) .>> IW |>> Ast.Self
 let keywordParent = positions "Parent" (skipString literalParent) .>> IW |>> Ast.Parent
 let keywordBaseClassReference = skipString literalBase .>> IW
 let keywordIndex = positions "IndexType" (skipString literalIndL <|> skipString literalInd) |>> Ast.IndexType
@@ -158,15 +158,15 @@ let keywordCases = skipString literalCases .>> IW
 let keywordAssert = skipString literalAssL .>> SW
 
 (* Predicate-related Keywords *)
-let keywordUndefined = positions "Undefined" (skipString "undefined" <|> skipString "undef") .>> IW |>> Ast.Undefined
-let keywordTrue = positions "True" (skipString "true") .>> IW  |>> Ast.True  
+let keywordUndefined = positions "Undefined" (skipString literalUndefL <|> skipString literalUndef) .>> IW |>> Ast.Undefined
+let keywordTrue = positions "True" (skipString literalTrue) .>> IW  |>> Ast.True  
 let keywordFalse = positions "False" (skipString literalFalse) .>> IW |>>  Ast.False  
 let keywordBydef = positions literalByDef (skipString literalByDef) .>> SW  
 let keywordAnd = skipString literalAnd .>> IW 
 let keywordOr = skipString literalOr .>> IW 
 let keywordImpl = skipString literalImpl .>> IW 
 let keywordIif = skipString literalIif .>> IW 
-let keywordXor = skipString "xor" .>> IW 
+let keywordXor = skipString literalXor .>> IW 
 let keywordNot = skipString literalNot .>> attemptSW 
 let keywordAll = skipString literalAll .>> SW 
 let keywordEx = skipString literalEx .>> SW
@@ -178,11 +178,11 @@ let keywordIs = skipString literalIs .>> attemptSW
 // objects and their properties that defer the concrete
 // specification of one or more types until the definition or method is declared and instantiated by
 // client code
-let keywordTemplate = positions "TemplateType" (pstring "template" <|> pstring "tpl") |>> Ast.TemplateType
+let keywordTemplate = positions "TemplateType" (pstring "template" <|> pstring literalTpl) |>> Ast.TemplateType
 
 let templateTail = choice [ idStartsWithCap; (regex @"\d+") ]
 
-let templateWithTail = positions "TemplateType" (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) |>>  Ast.TemplateType
+let templateWithTail = positions "TemplateType" (many1Strings2 (pstring "template" <|> pstring literalTpl) templateTail) |>>  Ast.TemplateType
 
 let keywordObject = positions "ObjectType" (skipString literalObjL <|> skipString literalObj) |>> Ast.ObjectType 
 
@@ -197,7 +197,7 @@ let keywordFunction = positions "FunctionalTermType" (skipString literalFuncL <|
 
 let theoryNamespace = aliasedNamespaceIdentifier <|> namespaceIdentifier .>> IW
 
-let keywordUses = (skipString "uses") .>> SW
+let keywordUses = (skipString literalUses) .>> SW
 let usesClause = positions "UsesClause" (keywordUses >>. theoryNamespace) |>> Ast.UsesClause
 
 (* Signatures, Variable Declarations, and Types, and Coordinates *)
@@ -269,7 +269,7 @@ paramTupleRef.Value <- positions "ParamTuple" ((leftParen >>. IW >>. namedVariab
 let signature = positions "Signature" ((predicateIdentifier .>> IW) .>>. paramTuple) .>> IW |>> Ast.Signature
 let localizationString = positions "LocalizationString" (regex "[^\"\n]*") <?> "<language-specific string>" |>> Ast.LocalizationString
 
-let keywordSymbol = pstring "symbol" .>> IW
+let keywordSymbol = pstring literalSymbol .>> IW
 let objectSymbolString = pchar '"' >>. objectMathSymbols .>> pchar '"'
 let infixString = pchar '"' >>. infixMathSymbols .>> pchar '"'
 let keywordInfix = pstring literalInfix >>. IW
@@ -296,7 +296,7 @@ let assignmentStatement = positions "Assignment" ((predicateWithQualification .>
 
 let spacesRightBrace = (IW .>> rightBrace) 
 
-let keywordReturn = IW >>. (skipString "return" <|> skipString "ret") .>> SW 
+let keywordReturn = IW >>. (skipString literalRetL <|> skipString literalRet) .>> SW 
 
 let defaultResult = positions "DefaultResult" (IW >>. statementList) |>> Ast.DefaultResult
 let conditionFollowedByResult = positions "ConditionFollowedByResult" ((case >>. predicate .>> colon) .>>. (IW >>. statementList)) |>> Ast.ConditionFollowedByResult
@@ -426,7 +426,7 @@ let keywordInference = (skipString literalInfL <|> skipString literalInf) .>> SW
 let ruleOfInference = positions "RuleOfInference" (keywordInference >>. signature .>>. premiseConclusionBlock) |>> Ast.RuleOfInference
 
 (* FPL building blocks - Theorem-like statements and conjectures *)
-let keywordTheorem = (skipString "theorem" <|> skipString "thm") .>> SW
+let keywordTheorem = (skipString literalThmL <|> skipString literalThm) .>> SW
 let keywordLemma = (skipString literalLemL <|> skipString literalLem) .>> SW
 let keywordProposition = (skipString literalPropL <|> skipString literalProp) .>> SW
 let keywordCorollary = (skipString literalCorL <|> skipString literalCor) .>> SW
@@ -500,13 +500,13 @@ let propertyList = opt (many1 (property .>> IW))
 
 *)
 // justifying proof arguments can be the identifiers of Rules of References, conjectures, theorem-like statements, or axioms
-let keywordRevoke = (skipString "revoke" <|> skipString "rev") .>> SW 
+let keywordRevoke = (skipString literalRevL <|> skipString literalRev) .>> SW 
 let revokeArgument = positions "RevokeArgument" (keywordRevoke >>. argumentIdentifier) |>> Ast.RevokeArgument 
     
 let keywordAssume = skipString literalAssume <|> skipString literalAss .>> SW 
 let assumeArgument = positions "AssumeArgument" (keywordAssume >>. predicate) |>> Ast.AssumeArgument
-let keywordTrivial  = positions "Trivial" (skipString "trivial") .>> IW |>> Ast.Trivial
-let keywordQed  = positions "Qed" (skipString "qed") .>> IW |>> Ast.Qed
+let keywordTrivial  = positions "Trivial" (skipString literalTrivial) .>> IW |>> Ast.Trivial
+let keywordQed  = positions "Qed" (skipString literalQed) .>> IW |>> Ast.Qed
 let derivedPredicate = positions "DerivedPredicate" predicate |>> Ast.DerivedPredicate
 let derivedArgument = choice [
     keywordTrivial 
@@ -611,8 +611,8 @@ let errInformation = [
     (DEF000, [literalDef], definition)
     (PRP000, ["mand"; literalOpt], property)
     (AXI000, [literalAx; literalPost], axiom)
-    (THM000, ["theorem"; "thm"], theorem)
-    (COR000, ["theorem"; literalCor], corollary)
+    (THM000, [literalThmL; literalThm], theorem)
+    (COR000, [literalThmL; literalCor], corollary)
     (LEM000, [literalLem], lemma)
     (PPS000, [literalProp], proposition)
     (CNJ000, [literalConj], conjecture)
@@ -621,15 +621,15 @@ let errInformation = [
     (PRF000, [literalPrf; literalPrf], proof)
     (INF000, [literalInf], ruleOfInference)
     (LOC000, [literalLoc], localization)
-    (USE000, ["uses"], usesClause)
-    (PRD000, [literalAnd; literalOr; literalImpl; literalIif; "xor"; literalNot; literalAll; literalEx; literalIs], compoundPredicate)
+    (USE000, [literalUses], usesClause)
+    (PRD000, [literalAnd; literalOr; literalImpl; literalIif; literalXor; literalNot; literalAll; literalEx; literalIs], compoundPredicate)
     (SMT000, [literalAssL; literalCases; literalBase; literalFor; literalDel], statement)
     (AGI000, ["|-"], argumentInference)
     (CAS000, ["|"], conditionFollowedByResult)
     (DCS000, ["?"], elseStatement)
     (ASS000, [literalAss], assumeArgument)
-    (REV000, ["rev"], revokeArgument)
-    (RET000, ["ret"], returnStatement)
+    (REV000, [literalRev], revokeArgument)
+    (RET000, [literalRet], returnStatement)
     (PRE000, [literalPre], premise)
     (CON000, [literalCon], conclusion)
     (TYD000, ["~"], varDecl)

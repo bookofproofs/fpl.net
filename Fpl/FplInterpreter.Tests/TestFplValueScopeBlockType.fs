@@ -491,9 +491,9 @@ type TestFplValueScopeBlockType() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "true")>]
+    [<DataRow("base1", literalTrue)>]
     [<DataRow("base2", literalFalse)>]
-    [<DataRow("base3", "undef")>]
+    [<DataRow("base3", literalUndef)>]
     [<DataRow("base4", "1.")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
@@ -502,7 +502,7 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base12", "self")>]
+    [<DataRow("base12", literalSelf)>]
     [<DataRow("base13", "@1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "self.x")>]
@@ -829,7 +829,7 @@ type TestFplValueScopeBlockType() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", "true", """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base0", literalTrue, """!tex: "1" !eng: literalTrue !ger: "wahr";""")>]
     [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
     [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
     [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
@@ -888,7 +888,7 @@ type TestFplValueScopeBlockType() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", "true", """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base0", literalTrue, """!tex: "1" !eng: literalTrue !ger: "wahr";""")>]
     [<DataRow("base1", "iif(x, y)", """!tex: x " \Leftrightarrow " y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
     [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
     [<DataRow("base3", "and(p, q)", """!tex: p " \wedge " q !eng: p " and " q !ger: p " und " q;""")>]

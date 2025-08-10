@@ -10,7 +10,7 @@ namespace FplLS
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
         {
             var ret = new List<FplCompletionItem>();
-            if (defaultCi.Word == "self")
+            if (defaultCi.Word == literalSelf)
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "self reference";

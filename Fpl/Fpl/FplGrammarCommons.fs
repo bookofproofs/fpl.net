@@ -258,21 +258,21 @@ let keyWordSet =
            literalPropL
            literalPrty
            literalPrtyL
-           "qed"
-           "ret"
-           "return"
-           "rev"
-           "revoke"
-           "self"
-           "symbol"
-           "thm"
-           "theorem"
-           "trivial"
-           "true"
-           "undef"
-           "undefined"
-           "uses"
-           "xor" |]
+           literalQed
+           literalRet
+           literalRetL
+           literalRev
+           literalRevL
+           literalSelf
+           literalSymbol
+           literalThm
+           literalThmL
+           literalTrivial
+           literalTrue
+           literalUndef
+           literalUndefL
+           literalUses
+           literalXor |]
     )
 
 /// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines

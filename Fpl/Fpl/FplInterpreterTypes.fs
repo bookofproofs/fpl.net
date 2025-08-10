@@ -1143,7 +1143,7 @@ type FplTheorem(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Theorem, positions, parent)
 
     override this.Name = "a theorem"
-    override this.ShortName = "thm"
+    override this.ShortName = literalThm
 
     override this.Clone () =
         let ret = new FplTheorem((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1445,7 +1445,7 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
         this.FplId <- literalTpl
 
     override this.Name = "an intrinsic template"
-    override this.ShortName = "tpl"
+    override this.ShortName = literalTpl
 
     override this.Clone () =
         let ret = new FplIntrinsicTpl((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1974,7 +1974,7 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
                         sb
                         (level + 1)
                         (counterScope = root.Scope.Count)
-                        (root.FplId = "self" || root.FplId = literalParent))
+                        (root.FplId = literalSelf || root.FplId = literalParent))
                 sb.AppendLine($"{indent}],") |> ignore
 
                 sb.AppendLine($"{indent}\"ArgList\": [") |> ignore
@@ -2198,7 +2198,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
 
         if aType = pType then
             mpwa ars prs
-        elif pType.StartsWith("tpl") || pType.StartsWith("template") then
+        elif pType.StartsWith(literalTpl) || pType.StartsWith("template") then
             mpwa ars prs
         elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "???" then
             if ars.Length > 0 then mpwa ars pars else None

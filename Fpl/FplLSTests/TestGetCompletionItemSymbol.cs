@@ -14,7 +14,7 @@ namespace FplLSTests
         [DataRow(literalInfix, true, 2)]
         [DataRow(literalPrefix, true, 4)]
         [DataRow(literalPostFix, true, 1)]
-        [DataRow("symbol", true, 8)]
+        [DataRow(literalSymbol, true, 8)]
         [TestMethod]
         public void TestAddSymbolChoicesNumber(string choice, bool declarative, int bitMask)
         {
@@ -39,7 +39,7 @@ namespace FplLSTests
         [DataRow(literalInfix, true)]
         [DataRow(literalPrefix, true)]
         [DataRow(literalPostFix, true)]
-        [DataRow("symbol", true)]
+        [DataRow(literalSymbol, true)]
         [TestMethod]
         public void TestAddSymbolOperatorCounts(string choice, bool declarative)
         {
@@ -60,7 +60,7 @@ namespace FplLSTests
         [DataRow(literalInfix, true)]
         [DataRow(literalPrefix, true)]
         [DataRow(literalPostFix, true)]
-        [DataRow("symbol", true)]
+        [DataRow(literalSymbol, true)]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, bool declarative)
         {
@@ -79,7 +79,7 @@ namespace FplLSTests
         [DataRow(literalInfix, true)]
         [DataRow(literalPrefix, true)]
         [DataRow(literalPostFix, true)]
-        [DataRow("symbol", true)]
+        [DataRow(literalSymbol, true)]
         [TestMethod]
         public void TestInsertTextDoesNotEndWithSpace(string choice, bool declarative)
         {
@@ -98,7 +98,7 @@ namespace FplLSTests
         [DataRow(literalInfix, true)]
         [DataRow(literalPrefix, true)]
         [DataRow(literalPostFix, true)]
-        [DataRow("symbol", true)]
+        [DataRow(literalSymbol, true)]
         [TestMethod]
         public void TestAddSymbolChoicesLabel(string choice, bool declarative)
         {
@@ -125,7 +125,7 @@ namespace FplLSTests
         [DataRow(literalInfix, true)]
         [DataRow(literalPrefix, true)]
         [DataRow(literalPostFix, true)]
-        [DataRow("symbol", true)]
+        [DataRow(literalSymbol, true)]
         [TestMethod]
         public void TestAddSymbolChoicesDetail(string choice, bool declarative)
         {
@@ -144,7 +144,7 @@ namespace FplLSTests
         [DataRow(literalInfix, true)]
         [DataRow(literalPrefix, true)]
         [DataRow(literalPostFix, true)]
-        [DataRow("symbol", true)]
+        [DataRow(literalSymbol, true)]
         [TestMethod]
         public void TestAddSymbolChoicesInsertText(string choice, bool declarative)
         {

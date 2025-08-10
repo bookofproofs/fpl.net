@@ -979,9 +979,9 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
     |> Seq.iter (fun argument ->
         let repr = getRepresentation argument
         match repr with
-        | "true"
+        | FplGrammarCommons.literalTrue
         | FplGrammarCommons.literalFalse -> ()
-        | "undetermined" -> emitLG000Diagnostics argument 
+        | FplGrammarCommons.literalUndetermined -> emitLG000Diagnostics argument 
         | _ -> emitLG001Diagnostics argument.StartPos argument.EndPos argument
     )
 

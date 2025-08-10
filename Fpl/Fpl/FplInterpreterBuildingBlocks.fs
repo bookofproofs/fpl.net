@@ -430,8 +430,8 @@ let rec eval (st: SymbolTable) ast =
         let rb = es.PeekEvalStack()
         rb.StartPos <- pos1
         rb.EndPos <- pos2
-        rb.FplId <- "self"
-        rb.TypeId <- "self"
+        rb.FplId <- literalSelf
+        rb.TypeId <- literalSelf
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false
         let referencedBlock = nextDefinition rb 0
@@ -504,7 +504,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let refBlock = new FplReference((pos1, pos2), fv) 
         es.PushEvalStack(refBlock)
-        refBlock.FplId <- "trivial"
+        refBlock.FplId <- literalTrivial
         refBlock.TypeId <- literalPred
         let value = new FplIntrinsicPred((pos1, pos2), refBlock) 
         value.FplId <- literalTrue
@@ -601,7 +601,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Return")
         let fv = es.PeekEvalStack()
         let stmt = new FplStmt((pos1,pos2), fv)
-        stmt.FplId <- "return"
+        stmt.FplId <- literalRetL
         es.PushEvalStack(stmt)
         eval st returneeAst
         let returnedReference = stmt.ArgList[0]
@@ -635,7 +635,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("RevokeArgument")
         let fv = es.PeekEvalStack()
         let argInf = new FplArgInference((pos1, pos2), fv) 
-        argInf.FplId <- "revoke"
+        argInf.FplId <- literalRevL
         es.PushEvalStack(argInf)
         eval st predicateAst
         es.PopEvalStack()
@@ -826,7 +826,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Xor((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Xor")
         let fv = es.PeekEvalStack()
-        fv.FplId <- "xor"
+        fv.FplId <- literalXor
         fv.TypeId <- literalPred
         eval st predicateAst1
         eval st predicateAst2
@@ -956,7 +956,7 @@ let rec eval (st: SymbolTable) ast =
                 // with their declared types 
                 let candidatesOfSelfOrParentEntity = 
                     refBlock.Scope
-                    |> Seq.filter (fun kvp -> kvp.Key = "self" || kvp.Key = literalParent)
+                    |> Seq.filter (fun kvp -> kvp.Key = literalSelf || kvp.Key = literalParent)
                     |> Seq.map (fun kvp -> kvp.Value)
                     |> Seq.toList
 

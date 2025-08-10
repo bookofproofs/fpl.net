@@ -205,8 +205,8 @@ type TestFplValueScopeFplRepresentation() =
             | "t6" -> Assert.AreEqual<string>(literalInd, getRepresentation t6)
             | "t7" -> Assert.AreEqual<string>(literalUndetermined, getRepresentation t7)
             | "t8" -> Assert.AreEqual<string>(literalUndetermined, getRepresentation t8)
-            | "t9" -> Assert.AreEqual<string>("tpl", getRepresentation t9)
-            | "t10" -> Assert.AreEqual<string>("tpl", getRepresentation t10)
+            | "t9" -> Assert.AreEqual<string>(literalTpl, getRepresentation t9)
+            | "t10" -> Assert.AreEqual<string>(literalTpl, getRepresentation t10)
             | "t11" -> Assert.AreEqual<string>("", getRepresentation t11)
             | "t12" -> Assert.AreEqual<string>("", getRepresentation t12)
             | "t13" -> Assert.AreEqual<string>(literalFunc, getRepresentation t13)
@@ -491,9 +491,9 @@ type TestFplValueScopeFplRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "true")>]
+    [<DataRow("base1", literalTrue)>]
     [<DataRow("base2", literalFalse)>]
-    [<DataRow("base3", "undef")>]
+    [<DataRow("base3", literalUndef)>]
     [<DataRow("base4", "1.")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
@@ -742,10 +742,10 @@ type TestFplValueScopeFplRepresentation() =
                     theory.Scope["T1()"]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("undetermined", getRepresentation base1)
-            | "base2" -> Assert.AreEqual<string>("undetermined", getRepresentation base1)
-            | "base3" -> Assert.AreEqual<string>("undetermined", getRepresentation base1)
-            | "base4" -> Assert.AreEqual<string>("undetermined", getRepresentation base1)
+            | "base1" -> Assert.AreEqual<string>(literalUndetermined, getRepresentation base1)
+            | "base2" -> Assert.AreEqual<string>(literalUndetermined, getRepresentation base1)
+            | "base3" -> Assert.AreEqual<string>(literalUndetermined, getRepresentation base1)
+            | "base4" -> Assert.AreEqual<string>(literalUndetermined, getRepresentation base1)
             | "base5" -> Assert.AreEqual<string>("class T1", getRepresentation base1)
             | "base5a" -> Assert.AreEqual<string>("class T1", getRepresentation base1)
             | "base6" -> Assert.AreEqual<string>("dec obj", getRepresentation base1)

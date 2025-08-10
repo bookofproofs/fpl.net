@@ -13,10 +13,10 @@ namespace FplLS
             // snippets
             switch (defaultCi.Word)
             {
-                case "true":
+                case literalTrue:
                 case literalFalse:
-                case "undef":
-                case "undefined":
+                case literalUndef:
+                case literalUndefL:
                     // keyword
                     var ciK = defaultCi.Clone(); ciK.Kind = CompletionItemKind.Keyword; ciK.AdjustToKeyword(); ret.Add(ciK);
                     break;
@@ -39,7 +39,7 @@ namespace FplLS
                     break;
                 case literalAnd:
                 case literalOr:
-                case "xor":
+                case literalXor:
                     var ci3 = defaultCi.Clone(); SetBody(ci3, 3); ret.Add(ci3);
                     var ci3K = defaultCi.Clone(); ci3K.Kind = CompletionItemKind.Keyword; ci3K.AdjustToKeyword(); ret.Add(ci3K);
                     break;

@@ -7,7 +7,7 @@ namespace FplLSTests
     public class TestGetCompletionItemSelf
     {
 
-        [DataRow("self")]
+        [DataRow(literalSelf)]
         [DataRow(literalBase)]
         [DataRow(literalParent)]
         [TestMethod]
@@ -18,7 +18,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, actual.Count);
         }
 
-        [DataRow("self")]
+        [DataRow(literalSelf)]
         [DataRow(literalBase)]
         [DataRow(literalParent)]
         [TestMethod]
@@ -34,7 +34,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("self", CompletionItemKind.Reference, "self01")]
+        [DataRow(literalSelf, CompletionItemKind.Reference, "self01")]
         [DataRow(literalParent, CompletionItemKind.Reference, "parent02")]
         [DataRow(literalBase, CompletionItemKind.Reference, "self03")]
         [TestMethod]
@@ -51,7 +51,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("self")]
+        [DataRow(literalSelf)]
         [DataRow(literalBase)]
         [DataRow(literalParent)]
         [TestMethod]
@@ -68,7 +68,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("self")]
+        [DataRow(literalSelf)]
         [DataRow(literalBase)]
         [DataRow(literalParent)]
         [TestMethod]
@@ -82,7 +82,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("self", "self reference")]
+        [DataRow(literalSelf, "self reference")]
         [DataRow(literalBase, "ctor call (parent class)")]
         [DataRow(literalParent, "parent self reference")]
         [TestMethod]
@@ -96,7 +96,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("self")]
+        [DataRow(literalSelf)]
         [DataRow(literalBase)]
         [DataRow(literalParent)]
         [TestMethod]

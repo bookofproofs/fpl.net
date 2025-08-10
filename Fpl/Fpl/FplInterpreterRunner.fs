@@ -134,7 +134,7 @@ type FplRunner() =
                 | FplGrammarCommons.literalImpl -> evaluateImplication caller
                 | FplGrammarCommons.literalNot -> evaluateNegation caller
                 | FplGrammarCommons.literalAnd -> evaluateConjunction caller
-                | "xor" -> evaluateExclusiveOr caller
+                | FplGrammarCommons.literalXor -> evaluateExclusiveOr caller
                 | FplGrammarCommons.literalOr ->  evaluateDisjunction caller
                 | _ when caller.FplId.StartsWith("del.") ->
                     emitID013Diagnostics caller rootCaller.StartPos rootCaller.EndPos |> ignore

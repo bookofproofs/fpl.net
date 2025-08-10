@@ -9,9 +9,9 @@ open CommonTestHelpers
 type TestReferencesTypeOfSignature() =
 
 
-    [<DataRow("base1", "true")>]
+    [<DataRow("base1", literalTrue)>]
     [<DataRow("base2", literalFalse)>]
-    [<DataRow("base3", "undef")>]
+    [<DataRow("base3", literalUndef)>]
     [<DataRow("base4", "1.")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]

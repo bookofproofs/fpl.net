@@ -488,9 +488,9 @@ type TestFplValueScopeTypeSignature() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "true")>]
+    [<DataRow("base1", literalTrue)>]
     [<DataRow("base2", literalFalse)>]
-    [<DataRow("base3", "undef")>]
+    [<DataRow("base3", literalUndef)>]
     [<DataRow("base4", "1.")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
@@ -565,7 +565,7 @@ type TestFplValueScopeTypeSignature() =
             match var with
             | "base1" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type base1)
             | "base2" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type base1)
-            | "base3" -> Assert.AreEqual<string>("undef", getType SignatureType.Type base1)
+            | "base3" -> Assert.AreEqual<string>(literalUndef, getType SignatureType.Type base1)
             | "base4" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Type base1)
             | "base5" -> Assert.AreEqual<string>("del.Test()", getType SignatureType.Type base1)
             | "base6" -> Assert.AreEqual<string>(literalInd, getType SignatureType.Type base1)
@@ -573,7 +573,7 @@ type TestFplValueScopeTypeSignature() =
             | "base8" -> Assert.AreEqual<string>("Test$1", getType SignatureType.Type base1)
             | "base9" -> Assert.AreEqual<string>("Test$1()", getType SignatureType.Type base1)
             | "base10" -> Assert.AreEqual<string>("Test", getType SignatureType.Type base1)
-            | "base11" -> Assert.AreEqual<string>("undef", getType SignatureType.Type base1)
+            | "base11" -> Assert.AreEqual<string>(literalUndef, getType SignatureType.Type base1)
             | "base12" -> Assert.AreEqual<string>(literalParent, getType SignatureType.Type base1)
             | "base13" -> Assert.AreEqual<string>("1", getType SignatureType.Type base1)
             | "base11a" -> Assert.AreEqual<string>("undef.undef", getType SignatureType.Type base1)
@@ -825,7 +825,7 @@ type TestFplValueScopeTypeSignature() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", "true", """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base0", literalTrue, """!tex: "1" !eng: literalTrue !ger: "wahr";""")>]
     [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
     [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
     [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
@@ -884,7 +884,7 @@ type TestFplValueScopeTypeSignature() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", "true", """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base0", literalTrue, """!tex: "1" !eng: literalTrue !ger: "wahr";""")>]
     [<DataRow("base1", "iif(x, y)", """!tex: x " \Leftrightarrow " y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
     [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
     [<DataRow("base3", "and(p, q)", """!tex: p " \wedge " q !eng: p " and " q !ger: p " und " q;""")>]
