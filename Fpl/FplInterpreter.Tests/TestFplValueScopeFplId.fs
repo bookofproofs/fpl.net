@@ -83,7 +83,7 @@ type TestFplValueScopeFplId() =
             | "fun9" -> Assert.AreEqual<string>("SomeFunctionalTerm9", fun9.FplId)
             | "prf1" -> Assert.AreEqual<string>("SomeTheorem1$1", prf1.FplId)
             | "prf2" -> Assert.AreEqual<string>("SomeTheorem2$1", prf2.FplId)
-            | "loc1" -> Assert.AreEqual<string>("not", loc1.FplId)
+            | "loc1" -> Assert.AreEqual<string>(literalNot, loc1.FplId)
             | "loc2" -> Assert.AreEqual<string>("Equal", loc2.FplId)
             | _ -> Assert.IsTrue(false)
         | _ -> 
@@ -615,10 +615,10 @@ type TestFplValueScopeFplId() =
             | "base19" -> Assert.AreEqual<string>("exn$1", base1.FplId)
             | "base20" -> Assert.AreEqual<string>(literalAll, base1.FplId)
             | "base21" -> Assert.AreEqual<string>(literalAnd, base1.FplId)
-            | "base21a" -> Assert.AreEqual<string>("not", base1.FplId)
-            | "base21b" -> Assert.AreEqual<string>("not", base1.FplId)
+            | "base21a" -> Assert.AreEqual<string>(literalNot, base1.FplId)
+            | "base21b" -> Assert.AreEqual<string>(literalNot, base1.FplId)
             | "base22" -> Assert.AreEqual<string>("xor", base1.FplId)
-            | "base23" -> Assert.AreEqual<string>("or", base1.FplId)
+            | "base23" -> Assert.AreEqual<string>(literalOr, base1.FplId)
             | "base24" -> Assert.AreEqual<string>(literalIif, base1.FplId)
             | "base25" -> Assert.AreEqual<string>(literalImpl, base1.FplId)
             | "base26" -> Assert.AreEqual<string>(literalIs, base1.FplId)
@@ -883,7 +883,7 @@ type TestFplValueScopeFplId() =
 
             match var with
             | "base1" -> Assert.AreEqual<string>(literalIif , pred.FplId)
-            | "base2" -> Assert.AreEqual<string>("not", pred.FplId)
+            | "base2" -> Assert.AreEqual<string>(literalNot, pred.FplId)
             | "base3" -> Assert.AreEqual<string>(literalAnd, pred.FplId)
             | "base4" -> Assert.AreEqual<string>("Equal", pred.FplId)
             | "base5" -> Assert.AreEqual<string>("NotEqual", pred.FplId)

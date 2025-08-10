@@ -275,7 +275,7 @@ type TestKeywordSpaces() =
     [<DataRow(literalImpl)>]
     [<DataRow("xor")>]
     [<DataRow(literalAnd)>]
-    [<DataRow("or")>]
+    [<DataRow(literalOr)>]
     [<DataRow(literalIif)>]
     [<TestMethod>]
     member this.TestSpacesParenthesizedPredicate (word:string) =
@@ -287,7 +287,7 @@ type TestKeywordSpaces() =
     [<DataRow(literalImpl)>]
     [<DataRow("xor")>]
     [<DataRow(literalAnd)>]
-    [<DataRow("or")>]
+    [<DataRow(literalOr)>]
     [<DataRow(literalIif)>]
     [<TestMethod>]
     member this.TestSpacesParenthesizedPredicateA (word:string) =
@@ -299,7 +299,7 @@ type TestKeywordSpaces() =
     [<DataRow(literalImpl)>]
     [<DataRow("xor")>]
     [<DataRow(literalAnd)>]
-    [<DataRow("or")>]
+    [<DataRow(literalOr)>]
     [<DataRow(literalIif)>]
     [<TestMethod>]
     member this.TestSpacesParenthesizedPredicateB (word:string) =
@@ -394,8 +394,8 @@ type TestKeywordSpaces() =
 
     [<DataRow("theorem")>]
     [<DataRow("thm")>]
-    [<DataRow("lemma")>]
-    [<DataRow("lem")>]
+    [<DataRow(literalLemL)>]
+    [<DataRow(literalLem)>]
     [<DataRow("proposition")>]
     [<DataRow("prop")>]
     [<DataRow(literalConjL)>]
@@ -476,8 +476,8 @@ type TestKeywordSpaces() =
 
     [<DataRow(literalFuncL)>]
     [<DataRow(literalFunc)>]
-    [<DataRow("object")>]
-    [<DataRow("obj")>]
+    [<DataRow(literalObjL)>]
+    [<DataRow(literalObj)>]
     [<DataRow("predicate")>]
     [<DataRow("pred")>]
     [<DataRow(literalIndL)>]
@@ -581,8 +581,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
 
-    [<DataRow("localization")>]
-    [<DataRow("loc")>]
+    [<DataRow(literalLocL)>]
+    [<DataRow(literalLoc)>]
     [<TestMethod>]
     member this.TestSpacesLocalization (word:string) =
         let result = run (localization .>> eof) ($"{word}x" + " T() := !tex: x;")
@@ -599,8 +599,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
 
-    [<DataRow("optional")>]
-    [<DataRow("opt")>]
+    [<DataRow(literalOptL)>]
+    [<DataRow(literalOpt)>]
     [<TestMethod>]
     member this.TestSpacesOptional (word:string) =
         let result = run (property .>> eof) ($"property pred {word}x" + " T() {true}")

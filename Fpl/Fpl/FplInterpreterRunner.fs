@@ -132,10 +132,10 @@ type FplRunner() =
                 match caller.FplId with 
                 | FplGrammarCommons.literalIif -> evaluateEquivalence caller
                 | FplGrammarCommons.literalImpl -> evaluateImplication caller
-                | "not" -> evaluateNegation caller
+                | FplGrammarCommons.literalNot -> evaluateNegation caller
                 | FplGrammarCommons.literalAnd -> evaluateConjunction caller
                 | "xor" -> evaluateExclusiveOr caller
-                | "or" ->  evaluateDisjunction caller
+                | FplGrammarCommons.literalOr ->  evaluateDisjunction caller
                 | _ when caller.FplId.StartsWith("del.") ->
                     emitID013Diagnostics caller rootCaller.StartPos rootCaller.EndPos |> ignore
                 | _ -> ()

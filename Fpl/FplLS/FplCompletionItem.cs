@@ -108,10 +108,10 @@ namespace FplLS
                 case literalIntr:
                 case literalIntrL:
                 case literalIn:
-                case "obj":
-                case "object":
-                case "opt":
-                case "optional":
+                case literalObj:
+                case literalObjL:
+                case literalOpt:
+                case literalOptL:
                 case "pred":
                 case "predicate":
                 case "pre":
@@ -135,12 +135,12 @@ namespace FplLS
                 case literalFalse:
                 case "undef":
                 case "undefined":
-                case "not":
+                case literalNot:
                 case "xor":
                 case literalIif:
                 case literalImpl:
                 case literalAnd:
-                case "or":
+                case literalOr:
                 case "(":
                     return new FplCompletionItemChoicesPredicate().GetChoices(this);
                 case literalCtor:
@@ -167,8 +167,8 @@ namespace FplLS
                 case "thm":
                 case "theorem":
                     return new FplCompletionItemChoicesTheoremLikeStmt("Theorem").GetChoices(this);
-                case "lem":
-                case "lemma":
+                case literalLem:
+                case literalLemL:
                     return new FplCompletionItemChoicesTheoremLikeStmt("Lemma").GetChoices(this);
                 case "prop":
                 case "proposition":
@@ -185,8 +185,8 @@ namespace FplLS
                 case "prf":
                 case "proof":
                     return new FplCompletionItemChoicesProof().GetChoices(this);
-                case "loc":
-                case "localization":
+                case literalLoc:
+                case literalLocL:
                     return new FplCompletionItemChoicesLocalization().GetChoices(this);
                 case "uses":
                     return new FplCompletionItemChoicesUses().GetChoices(this);
@@ -514,63 +514,63 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Interface;
                     this.IsShort = false;
                     break;
-                case "lem":
+                case literalLem:
                     this.Detail = "lemma (short form)";
                     this.SortText = "lemma02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case "lemma":
-                    this.Detail = "lemma";
+                case literalLemL:
+                    this.Detail = literalLemL;
                     this.SortText = "lemma01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case "loc":
+                case literalLoc:
                     this.Detail = "localization (short form)";
                     this.SortText = "localization02";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = true;
                     break;
-                case "localization":
-                    this.Detail = "localization";
+                case literalLocL:
+                    this.Detail = literalLocL;
                     this.SortText = "localization01";
                     this.Kind = CompletionItemKind.Class;
                     this.IsShort = false;
                     break;
-                case "not":
+                case literalNot:
                     this.Detail = "predicate (negation)";
-                    this.SortText = "not";
+                    this.SortText = literalNot;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case "obj":
+                case literalObj:
                     this.Detail = "type (object, short form)";
                     this.SortText = "object02";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = true;
                     break;
-                case "object":
+                case literalObjL:
                     this.Detail = "type (object)";
                     this.SortText = "object01";
                     this.Kind = CompletionItemKind.TypeParameter;
                     this.IsShort = false;
                     break;
-                case "opt":
+                case literalOpt:
                     this.Detail = "optional (short form)";
                     this.SortText = "optional02";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = true;
                     break;
-                case "optional":
-                    this.Detail = "optional";
+                case literalOptL:
+                    this.Detail = literalOptL;
                     this.SortText = "optional01";
                     this.Kind = CompletionItemKind.Property;
                     this.IsShort = false;
                     break;
-                case "or":
+                case literalOr:
                     this.Detail = "predicate (disjunction)";
-                    this.SortText = "or";
+                    this.SortText = literalOr;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;

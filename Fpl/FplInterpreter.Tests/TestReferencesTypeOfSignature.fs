@@ -98,7 +98,7 @@ type TestReferencesTypeOfSignature() =
             | "base9" -> Assert.AreEqual<string>("Test$1()", getType SignatureType.Type base1)
             | "base10" -> Assert.AreEqual<string>("Test", getType SignatureType.Type base1)
             | "base11" -> Assert.AreEqual<string>(literalUndef, getType SignatureType.Type base1)
-            | "base11v1" -> Assert.AreEqual<string>("obj", getType SignatureType.Type base1)
+            | "base11v1" -> Assert.AreEqual<string>(literalObj, getType SignatureType.Type base1)
             | "base11v2" -> Assert.AreEqual<string>(literalInd, getType SignatureType.Type base1)
             | "base11v3" -> Assert.AreEqual<string>("Nat", getType SignatureType.Type base1)
             | "base12" -> Assert.AreEqual<string>("parent", getType SignatureType.Type base1)

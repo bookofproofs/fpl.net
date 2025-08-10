@@ -20,7 +20,7 @@ namespace FplLS
                     // keyword
                     var ciK = defaultCi.Clone(); ciK.Kind = CompletionItemKind.Keyword; ciK.AdjustToKeyword(); ret.Add(ciK);
                     break;
-                case "not":
+                case literalNot:
                     // snippet
                     var ci = defaultCi.Clone(); SetBody(ci, 1); ret.Add(ci);
                     // keyword
@@ -38,7 +38,7 @@ namespace FplLS
                     var ciEquals = defaultCi.Clone(); SetBodyEquality(ciEquals); ret.Add(ciEquals);
                     break;
                 case literalAnd:
-                case "or":
+                case literalOr:
                 case "xor":
                     var ci3 = defaultCi.Clone(); SetBody(ci3, 3); ret.Add(ci3);
                     var ci3K = defaultCi.Clone(); ci3K.Kind = CompletionItemKind.Keyword; ci3K.AdjustToKeyword(); ret.Add(ci3K);

@@ -1154,7 +1154,7 @@ type FplLemma(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Lemma, positions, parent)
 
     override this.Name = "a lemma"
-    override this.ShortName = "lem"
+    override this.ShortName = literalLem
 
     override this.Clone () =
         let ret = new FplLemma((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1244,7 +1244,7 @@ type FplLocalization(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Localization, positions, Some parent)
 
     override this.Name = "a localization"
-    override this.ShortName = "loc"
+    override this.ShortName = literalLoc
 
     override this.Clone () =
         let ret = new FplLocalization((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1385,7 +1385,7 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.IntrinsicObj, positions, parent)
 
     override this.Name = "an intrinsic object"
-    override this.ShortName = "obj"
+    override this.ShortName = literalObj
 
     override this.Clone () =
         let ret = new FplIntrinsicObj((this.StartPos, this.EndPos), this.Parent.Value)

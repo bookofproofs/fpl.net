@@ -15,14 +15,14 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType001 () =
-        let result = run (variableType .>> eof) """object"""
+        let result = run (variableType .>> eof) literalObjL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType002 () =
-        let result = run (variableType .>> eof) """obj"""
+        let result = run (variableType .>> eof) literalObj
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

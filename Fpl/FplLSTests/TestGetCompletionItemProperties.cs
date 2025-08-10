@@ -58,7 +58,7 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesProperty().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                if (item.Label.Contains(choice) && item.Label.Contains(subType) && item.Kind == isKeyword && isOptional == (item.Label.Contains("opt")))
+                if (item.Label.Contains(choice) && item.Label.Contains(subType) && item.Kind == isKeyword && isOptional == (item.Label.Contains(literalOpt)))
                 {
                     Assert.AreEqual<string>(expected, item.SortText);
                 }
@@ -103,7 +103,7 @@ namespace FplLSTests
                     postfix = " ...";
                 }
 
-                if (item.Label.Contains(subType) && item.Label.Contains("opt"))
+                if (item.Label.Contains(subType) && item.Label.Contains(literalOpt))
                 {
                     if (choice == "prty")
                     {
@@ -163,7 +163,7 @@ namespace FplLSTests
                 if (item.Kind != CompletionItemKind.Keyword)
                 {
                     Assert.IsTrue(item.Detail.Contains(l));
-                    if (item.Detail.Contains("opt")) countOptional++;
+                    if (item.Detail.Contains(literalOpt)) countOptional++;
                     if (item.Detail.Contains("pred")) countPredicative++;
                     if (item.Detail.Contains(literalFunc)) countFunctional++;
                 }

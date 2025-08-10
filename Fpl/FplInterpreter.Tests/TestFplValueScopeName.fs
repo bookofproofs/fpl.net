@@ -927,7 +927,7 @@ type TestFplValueScopeName() =
             let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
             let mapping = base1.ArgList[0]
             match var with
-            | "base1" -> Assert.AreEqual<string>("obj", getType SignatureType.Mixed mapping)
+            | "base1" -> Assert.AreEqual<string>(literalObj, getType SignatureType.Mixed mapping)
             | "base2" -> Assert.AreEqual<string>(literalInd, getType SignatureType.Mixed mapping)
             | "base3" -> Assert.AreEqual<string>(literalFunc, getType SignatureType.Mixed mapping)
             | "base4" -> Assert.AreEqual<string>("pred", getType SignatureType.Mixed mapping)

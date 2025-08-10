@@ -1,6 +1,7 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
+open FplGrammarCommons
 open FplInterpreterTypes
 open CommonTestHelpers
 
@@ -501,7 +502,7 @@ type TestSignatureMatching() =
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
             let cl = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T")) |> List.head
-            let res = findClassInheritanceChain cl "obj"
+            let res = findClassInheritanceChain cl literalObj
             match res with 
             | None -> Assert.AreEqual<string>("was not found", "was not found")
             | Some str -> Assert.AreEqual<string>(var, str)

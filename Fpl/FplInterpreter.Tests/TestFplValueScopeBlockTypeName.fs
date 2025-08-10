@@ -247,13 +247,13 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("def cl", x.ShortName)
         | "Localization" ->
             let x = new FplLocalization(positions, parent)
-            Assert.AreEqual<string>("loc", x.ShortName)
+            Assert.AreEqual<string>(literalLoc, x.ShortName)
         | "Theorem" ->
             let x = new FplTheorem(positions, parent)
             Assert.AreEqual<string>("thm", x.ShortName)
         | "Lemma" ->
             let x = new FplLemma(positions, parent)
-            Assert.AreEqual<string>("lem", x.ShortName)
+            Assert.AreEqual<string>(literalLem, x.ShortName)
         | "Proposition" ->
             let x = new FplProposition(positions, parent)
             Assert.AreEqual<string>("prop", x.ShortName)
@@ -322,7 +322,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalInd, x.ShortName)
         | "IntrinsicObj" ->
             let x = new FplIntrinsicObj(positions, parent)
-            Assert.AreEqual<string>("obj", x.ShortName)
+            Assert.AreEqual<string>(literalObj, x.ShortName)
         | "IntrinsicPred" ->
             let x = new FplIntrinsicPred(positions, parent)
             Assert.AreEqual<string>(literalPred, x.ShortName)

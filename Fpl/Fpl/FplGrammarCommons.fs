@@ -233,16 +233,16 @@ let keyWordSet =
            literalInfL
            literalIn
            literalIs
-           "lem"
-           "lemma"
-           "loc"
-           "localization"
-           "not"
-           "obj"
-           "object"
-           "opt"
-           "optional"
-           "or"
+           literalLem
+           literalLemL
+           literalLoc
+           literalLocL
+           literalNot
+           literalObj
+           literalObjL
+           literalOpt
+           literalOptL
+           literalOr
            "parent"
            "post"
            "postfix"

@@ -27,8 +27,8 @@ namespace FplLS
             TokenDeclaration = literalDecL;
             TokenFunction = literalFuncL;
             TokenIntrinsic = literalIntrL;
-            TokenObject = "object";
-            TokenOptional = "optional";
+            TokenObject = literalObjL;
+            TokenOptional = literalOptL;
             TokenPredicate = "predicate";
             TokenPremise = "premise";
             TokenRevoke = "revoke";
@@ -42,8 +42,8 @@ namespace FplLS
             TokenDeclaration = literalDec;
             TokenFunction = literalFunc;
             TokenIntrinsic = literalIntr;
-            TokenObject = "obj";
-            TokenOptional = "opt";
+            TokenObject = literalObj;
+            TokenOptional = literalOpt;
             TokenPredicate = "pred";
             TokenPremise = "pre";
             TokenRevoke = "rev";

@@ -31,7 +31,7 @@ namespace FplLS
                 TokenIntrinsic = literalIntr;
                 TokenFunction = literalFunc;
                 TokenPredicate = "pred";
-                TokenOptional = "opt";
+                TokenOptional = literalOpt;
                 if (isKeyword)
                 {
                     ci.Label = GetLabelKeyword(ci, propertyType, isOptional);

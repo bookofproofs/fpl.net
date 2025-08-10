@@ -136,15 +136,15 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let value = new FplIntrinsicObj((pos1, pos2), fv)
         setUnitType fv value ""
-        match checkID009_ID010_ID011_Diagnostics st fv "obj" pos1 pos2 with
+        match checkID009_ID010_ID011_Diagnostics st fv literalObj pos1 pos2 with
         | Some classNode -> 
             fv.ArgList.Add classNode
         | None -> ()
-        checkID012Diagnostics st fv "obj" pos1 pos2 
+        checkID012Diagnostics st fv literalObj pos1 pos2 
         // add potential parent class call for this identifier (if it is one) 
         let path = st.EvalPath()
         if path.Contains("DefinitionClass.InheritedClassType") then 
-            es.ParentClassCalls.TryAdd("obj", None) |> ignore
+            es.ParentClassCalls.TryAdd(literalObj, None) |> ignore
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
@@ -558,7 +558,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Not((pos1, pos2), predicateAst) ->
         st.EvalPush("Not")
         let fv = es.PeekEvalStack()
-        fv.FplId <- "not"
+        fv.FplId <- literalNot
         fv.TypeId <- literalPred
         eval st predicateAst
         fv.EndPos <- pos2
@@ -815,7 +815,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Or((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Or")
         let fv = es.PeekEvalStack()
-        fv.FplId <- "or"
+        fv.FplId <- literalOr
         fv.TypeId <- literalPred
         eval st predicateAst1
         eval st predicateAst2

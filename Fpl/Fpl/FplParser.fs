@@ -163,11 +163,11 @@ let keywordTrue = positions "True" (skipString "true") .>> IW  |>> Ast.True
 let keywordFalse = positions "False" (skipString literalFalse) .>> IW |>>  Ast.False  
 let keywordBydef = positions literalByDef (skipString literalByDef) .>> SW  
 let keywordAnd = skipString literalAnd .>> IW 
-let keywordOr = skipString "or" .>> IW 
+let keywordOr = skipString literalOr .>> IW 
 let keywordImpl = skipString literalImpl .>> IW 
 let keywordIif = skipString literalIif .>> IW 
 let keywordXor = skipString "xor" .>> IW 
-let keywordNot = skipString "not" .>> attemptSW 
+let keywordNot = skipString literalNot .>> attemptSW 
 let keywordAll = skipString literalAll .>> SW 
 let keywordEx = skipString literalEx .>> SW
 let keywordExN = skipString literalExN .>> IW
@@ -184,7 +184,7 @@ let templateTail = choice [ idStartsWithCap; (regex @"\d+") ]
 
 let templateWithTail = positions "TemplateType" (many1Strings2 (pstring "template" <|> pstring "tpl") templateTail) |>>  Ast.TemplateType
 
-let keywordObject = positions "ObjectType" (skipString "object" <|> skipString "obj") |>> Ast.ObjectType 
+let keywordObject = positions "ObjectType" (skipString literalObjL <|> skipString literalObj) |>> Ast.ObjectType 
 
 let objectHeader = choice [
     keywordObject
@@ -427,7 +427,7 @@ let ruleOfInference = positions "RuleOfInference" (keywordInference >>. signatur
 
 (* FPL building blocks - Theorem-like statements and conjectures *)
 let keywordTheorem = (skipString "theorem" <|> skipString "thm") .>> SW
-let keywordLemma = (skipString "lemma" <|> skipString "lem") .>> SW
+let keywordLemma = (skipString literalLemL <|> skipString literalLem) .>> SW
 let keywordProposition = (skipString "proposition" <|> skipString "prop") .>> SW
 let keywordCorollary = (skipString literalCorL <|> skipString literalCor) .>> SW
 let keywordConjecture = (skipString literalConjL <|> skipString literalConj) .>> SW
@@ -460,7 +460,7 @@ let constructorBlock = leftBrace >>. varDeclOrSpecList .>>. selfOrParent .>> spa
 let constructor = positions "Constructor" (keywordConstructor >>. signature .>>. constructorBlock) |>> Ast.Constructor
 
 (* FPL building blocks - Properties *)
-let keywordOptional = positions "Optional" (skipString "optional" <|> skipString "opt") .>> SW |>> Ast.Optional
+let keywordOptional = positions "Optional" (skipString literalOptL <|> skipString literalOpt) .>> SW |>> Ast.Optional
 let keywordProperty = positions "Property" (skipString "property" <|> skipString "prty") .>> SW |>> Ast.Property
 
 let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
@@ -554,7 +554,7 @@ let definition = keywordDefinition >>. choice [
 
 (* Localizations *)
 // Localizations provide a possibility to automatically translate FPL expressions into natural languages
-let keywordLocalization = (skipString "localization" <|> skipString "loc") >>. SW
+let keywordLocalization = (skipString literalLocL <|> skipString literalLoc) >>. SW
 let localizationLanguageCode = positions "LanguageCode" (regex @"[a-z]{3}" <?> "<ISO 639 language code>") |>> Ast.LanguageCode
 
 let ebnfTransl, ebnfTranslRef = createParserForwardedToRef()
@@ -609,20 +609,20 @@ let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postul
 
 let errInformation = [
     (DEF000, [literalDef], definition)
-    (PRP000, ["mand"; "opt"], property)
+    (PRP000, ["mand"; literalOpt], property)
     (AXI000, [literalAx; "post"], axiom)
     (THM000, ["theorem"; "thm"], theorem)
     (COR000, ["theorem"; literalCor], corollary)
-    (LEM000, ["lem"], lemma)
+    (LEM000, [literalLem], lemma)
     (PPS000, ["prop"], proposition)
     (CNJ000, [literalConj], conjecture)
     (VAR000, [literalDec], varDeclBlock)
     (CTR000, [literalCtorL; literalCtor], constructor)
     (PRF000, ["proof"; "prf"], proof)
     (INF000, [literalInf], ruleOfInference)
-    (LOC000, ["loc"], localization)
+    (LOC000, [literalLoc], localization)
     (USE000, ["uses"], usesClause)
-    (PRD000, [literalAnd; "or"; literalImpl; literalIif; "xor"; "not"; literalAll; literalEx; literalIs], compoundPredicate)
+    (PRD000, [literalAnd; literalOr; literalImpl; literalIif; "xor"; literalNot; literalAll; literalEx; literalIs], compoundPredicate)
     (SMT000, [literalAssL; literalCases; literalBase; literalFor; literalDel], statement)
     (AGI000, ["|-"], argumentInference)
     (CAS000, ["|"], conditionFollowedByResult)
