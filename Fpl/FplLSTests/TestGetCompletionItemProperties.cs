@@ -1,3 +1,5 @@
+// Ignore Spelling: Fpl
+
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using System.Diagnostics.Metrics;
 using System.Reflection;

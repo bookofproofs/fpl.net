@@ -1014,7 +1014,7 @@ type FplVariadicVariableMany1(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
-type FplInstance(positions: Positions, parent: FplValue) as this =
+type FplInstance(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Instance, positions, parent)
 
     override this.Name = "an instance"

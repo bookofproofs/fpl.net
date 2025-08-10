@@ -614,7 +614,7 @@ type TestFplValueScopeFplId() =
             | "base18" -> Assert.AreEqual<string>("ex", base1.FplId)
             | "base19" -> Assert.AreEqual<string>("exn$1", base1.FplId)
             | "base20" -> Assert.AreEqual<string>(literalAll, base1.FplId)
-            | "base21" -> Assert.AreEqual<string>("and", base1.FplId)
+            | "base21" -> Assert.AreEqual<string>(literalAnd, base1.FplId)
             | "base21a" -> Assert.AreEqual<string>("not", base1.FplId)
             | "base21b" -> Assert.AreEqual<string>("not", base1.FplId)
             | "base22" -> Assert.AreEqual<string>("xor", base1.FplId)
@@ -884,7 +884,7 @@ type TestFplValueScopeFplId() =
             match var with
             | "base1" -> Assert.AreEqual<string>("iif" , pred.FplId)
             | "base2" -> Assert.AreEqual<string>("not", pred.FplId)
-            | "base3" -> Assert.AreEqual<string>("and", pred.FplId)
+            | "base3" -> Assert.AreEqual<string>(literalAnd, pred.FplId)
             | "base4" -> Assert.AreEqual<string>("Equal", pred.FplId)
             | "base5" -> Assert.AreEqual<string>("NotEqual", pred.FplId)
             | _ -> Assert.IsTrue(false)

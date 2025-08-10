@@ -133,7 +133,7 @@ type FplRunner() =
                 | "iif" -> evaluateEquivalence caller
                 | "impl" -> evaluateImplication caller
                 | "not" -> evaluateNegation caller
-                | "and" -> evaluateConjunction caller
+                | FplGrammarCommons.literalAnd -> evaluateConjunction caller
                 | "xor" -> evaluateExclusiveOr caller
                 | "or" ->  evaluateDisjunction caller
                 | _ when caller.FplId.StartsWith("del.") ->

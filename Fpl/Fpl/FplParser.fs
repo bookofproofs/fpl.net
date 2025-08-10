@@ -162,7 +162,7 @@ let keywordUndefined = positions "Undefined" (skipString "undefined" <|> skipStr
 let keywordTrue = positions "True" (skipString "true") .>> IW  |>> Ast.True  
 let keywordFalse = positions "False" (skipString "false") .>> IW |>>  Ast.False  
 let keywordBydef = positions "bydef" (skipString "bydef") .>> SW  
-let keywordAnd = skipString "and" .>> IW 
+let keywordAnd = skipString literalAnd .>> IW 
 let keywordOr = skipString "or" .>> IW 
 let keywordImpl = skipString "impl" .>> IW 
 let keywordIif = skipString "iif" .>> IW 
@@ -622,7 +622,7 @@ let errInformation = [
     (INF000, ["inf"], ruleOfInference)
     (LOC000, ["loc"], localization)
     (USE000, ["uses"], usesClause)
-    (PRD000, ["and"; "or"; "impl"; "iif"; "xor"; "not"; literalAll; "ex"; "is"], compoundPredicate)
+    (PRD000, [literalAnd; "or"; "impl"; "iif"; "xor"; "not"; literalAll; "ex"; "is"], compoundPredicate)
     (SMT000, ["assert"; "cases"; "base"; "for"; "del"], statement)
     (AGI000, ["|-"], argumentInference)
     (CAS000, ["|"], conditionFollowedByResult)

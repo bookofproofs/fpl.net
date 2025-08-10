@@ -1,6 +1,7 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using static FplGrammarCommons;
 
+
 namespace FplLSTests
 {
     [TestClass]

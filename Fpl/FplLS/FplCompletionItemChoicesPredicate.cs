@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -36,7 +37,7 @@ namespace FplLS
                     // snippet for equality
                     var ciEquals = defaultCi.Clone(); SetBodyEquality(ciEquals); ret.Add(ciEquals);
                     break;
-                case "and":
+                case literalAnd:
                 case "or":
                 case "xor":
                     var ci3 = defaultCi.Clone(); SetBody(ci3, 3); ret.Add(ci3);

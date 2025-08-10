@@ -1,6 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
+open FplGrammarCommons
 open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
@@ -273,7 +274,7 @@ type TestKeywordSpaces() =
 
     [<DataRow("impl")>]
     [<DataRow("xor")>]
-    [<DataRow("and")>]
+    [<DataRow(literalAnd)>]
     [<DataRow("or")>]
     [<DataRow("iif")>]
     [<TestMethod>]
@@ -285,7 +286,7 @@ type TestKeywordSpaces() =
 
     [<DataRow("impl")>]
     [<DataRow("xor")>]
-    [<DataRow("and")>]
+    [<DataRow(literalAnd)>]
     [<DataRow("or")>]
     [<DataRow("iif")>]
     [<TestMethod>]
@@ -297,7 +298,7 @@ type TestKeywordSpaces() =
 
     [<DataRow("impl")>]
     [<DataRow("xor")>]
-    [<DataRow("and")>]
+    [<DataRow(literalAnd)>]
     [<DataRow("or")>]
     [<DataRow("iif")>]
     [<TestMethod>]

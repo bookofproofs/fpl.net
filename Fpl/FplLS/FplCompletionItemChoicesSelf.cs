@@ -1,4 +1,6 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+﻿// Ignore Spelling: Fpl
+
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLS
 {

@@ -139,7 +139,7 @@ namespace FplLS
                 case "xor":
                 case "iif":
                 case "impl":
-                case "and":
+                case literalAnd:
                 case "or":
                 case "(":
                     return new FplCompletionItemChoicesPredicate().GetChoices(this);
@@ -256,9 +256,9 @@ namespace FplLS
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;
-                case "and":
+                case literalAnd:
                     this.Detail = "predicate (conjunction)";
-                    this.SortText = "and";
+                    this.SortText = literalAnd;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;

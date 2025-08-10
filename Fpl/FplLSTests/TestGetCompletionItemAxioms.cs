@@ -1,3 +1,5 @@
+// Ignore Spelling: Fpl
+
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 
 namespace FplLSTests

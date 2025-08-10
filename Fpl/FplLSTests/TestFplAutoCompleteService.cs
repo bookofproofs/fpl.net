@@ -1,3 +1,5 @@
+// Ignore Spelling: Fpl
+
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using FplLS;
 using static FplGrammarTypes.Ast;
@@ -160,7 +162,7 @@ namespace FplLSTests
         // keywords without a short form
         [DataRow(literalAlias, literalAlias)]
         [DataRow(literalAll, "predicate (all quantor)")]
-        [DataRow("and", "predicate (conjunction)")]
+        [DataRow(literalAnd, "predicate (conjunction)")]
         [DataRow("assert", "statement (assert)")]
         [DataRow("cases", "statement (cases)")]
         [DataRow("ex", "predicate (exists quantor)")]
@@ -253,7 +255,7 @@ namespace FplLSTests
         // keywords without a short form
         [DataRow(literalAlias, CompletionItemKind.Struct)]
         [DataRow(literalAll, CompletionItemKind.Operator)]
-        [DataRow("and", CompletionItemKind.Operator)]
+        [DataRow(literalAnd, CompletionItemKind.Operator)]
         [DataRow("assert", CompletionItemKind.Property)]
         [DataRow("cases", CompletionItemKind.Property)]
         [DataRow("ex", CompletionItemKind.Operator)]
@@ -345,7 +347,7 @@ namespace FplLSTests
         // keywords without a short form
         [DataRow(literalAlias, literalAlias)]
         [DataRow(literalAll, literalAll)]
-        [DataRow("and", "and")]
+        [DataRow(literalAnd, literalAnd)]
         [DataRow("assert", "assert")]
         [DataRow("cases", "cases")]
         [DataRow("ex", "ex")]
@@ -438,7 +440,7 @@ namespace FplLSTests
         // keywords without a short form
         [DataRow(literalAlias, literalAlias)]
         [DataRow(literalAll, literalAll)]
-        [DataRow("and", "and")]
+        [DataRow(literalAnd, literalAnd)]
         [DataRow("assert", "assert")]
         [DataRow("cases", "cases")]
         [DataRow("ex", "ex")]
@@ -532,7 +534,7 @@ namespace FplLSTests
         // keywords without a short form
         [DataRow(literalAlias, false)]
         [DataRow(literalAll, false)]
-        [DataRow("and", false)]
+        [DataRow(literalAnd, false)]
         [DataRow("assert", false)]
         [DataRow("cases", false)]
         [DataRow("ex", false)]

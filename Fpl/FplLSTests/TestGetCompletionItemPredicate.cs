@@ -1,5 +1,7 @@
+// Ignore Spelling: Fpl
+
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using static FParsec.ErrorMessage;
+using static FplGrammarCommons;
 
 namespace FplLSTests
 {
@@ -14,7 +16,7 @@ namespace FplLSTests
         [DataRow("xor", 2)]
         [DataRow("iif", 2)]
         [DataRow("impl", 2)]
-        [DataRow("and", 2)]
+        [DataRow(literalAnd, 2)]
         [DataRow("or", 2)]
         [DataRow("(", 1)]
         [TestMethod]
@@ -33,7 +35,7 @@ namespace FplLSTests
         [DataRow("xor")]
         [DataRow("iif")]
         [DataRow("impl")]
-        [DataRow("and")]
+        [DataRow(literalAnd)]
         [DataRow("or")]
         [DataRow("(")]
         [TestMethod]
@@ -66,8 +68,8 @@ namespace FplLSTests
         [DataRow("iif", CompletionItemKind.Keyword, "zzziif")]
         [DataRow("impl", CompletionItemKind.Operator, "impl")]
         [DataRow("impl", CompletionItemKind.Keyword, "zzzimpl")]
-        [DataRow("and", CompletionItemKind.Operator, "and")]
-        [DataRow("and", CompletionItemKind.Keyword, "zzzand")]
+        [DataRow(literalAnd, CompletionItemKind.Operator, literalAnd)]
+        [DataRow(literalAnd, CompletionItemKind.Keyword, "zzzand")]
         [DataRow("or", CompletionItemKind.Operator, "or")]
         [DataRow("or", CompletionItemKind.Keyword, "zzzor")]
         [DataRow("(", CompletionItemKind.Operator, "(")]
@@ -93,7 +95,7 @@ namespace FplLSTests
         [DataRow("xor")]
         [DataRow("iif")]
         [DataRow("impl")]
-        [DataRow("and")]
+        [DataRow(literalAnd)]
         [DataRow("or")]
         [DataRow("(")]
         [TestMethod]
@@ -118,7 +120,7 @@ namespace FplLSTests
         [DataRow("xor")]
         [DataRow("iif")]
         [DataRow("impl")]
-        [DataRow("and")]
+        [DataRow(literalAnd)]
         [DataRow("or")]
         [DataRow("(")]
         [TestMethod]
@@ -140,7 +142,7 @@ namespace FplLSTests
         [DataRow("xor", "predicate (exclusive or)")]
         [DataRow("iif", "predicate (equivalence, <=>)")]
         [DataRow("impl", "predicate (implication, =>)")]
-        [DataRow("and", "predicate (conjunction)")]
+        [DataRow(literalAnd, "predicate (conjunction)")]
         [DataRow("or", "predicate (disjunction)")]
         [DataRow("(", "equality")]
         [TestMethod]
@@ -165,7 +167,7 @@ namespace FplLSTests
         [DataRow("xor")]
         [DataRow("iif")]
         [DataRow("impl")]
-        [DataRow("and")]
+        [DataRow(literalAnd)]
         [DataRow("or")]
         [DataRow("(")]
         [TestMethod]

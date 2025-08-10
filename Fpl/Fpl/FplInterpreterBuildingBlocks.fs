@@ -804,7 +804,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.And((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("And")
         let fv = es.PeekEvalStack()
-        fv.FplId <- "and"
+        fv.FplId <- literalAnd
         fv.TypeId <- literalPred
         eval st predicateAst1
         eval st predicateAst2
@@ -1835,7 +1835,7 @@ let rec eval (st: SymbolTable) ast =
             let argInference = kvp.Value.ArgList[1]
             let argInferenceResult = getRepresentation argInference
             match argInferenceResult with
-            | literalTrue -> ()
+            | FplGrammarCommons.literalTrue -> ()
             | _ -> value.FplId <- literalFalse // todo all other arguments that are either undetermined or false should issue an error
 
         )
