@@ -285,6 +285,14 @@ let constPred = "pred"
 let constFunc = "func"
 let constTpl = "tpl"
 let constUndef = "undef"
+let constFalse = "false"
+let constTrue = "true"
+let constUndetermined = "undetermined"
+let constImpl = "impl"
+let constAll = "all"
+let constEx = "ex"
+let constExN = "exn"
+
 
 type FplBlockType =
     | Root
@@ -928,8 +936,8 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
 type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
     inherit FplValue(blockType, positions, Some parent)
     do 
-        this.FplId <- "undetermined"
-        this.TypeId <- "pred"
+        this.FplId <- constUndetermined
+        this.TypeId <- constPred
 
     override this.Instantiate () = None
 
@@ -1377,7 +1385,7 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
 
 
     override this.Name = "an intrinsic index"
-    override this.ShortName = "ind"
+    override this.ShortName = constInd
 
     override this.Clone () =
         let ret = new FplIntrinsicInd((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1404,7 +1412,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.IntrinsicPred, positions, parent)
 
     override this.Name = "an intrinsic predicate"
-    override this.ShortName = "pred"
+    override this.ShortName = constPred
 
     override this.Clone () =
         let ret = new FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1418,7 +1426,7 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
         this.FplId <- constUndef
 
     override this.Name = "an intrinsic undefined"
-    override this.ShortName = "undef"
+    override this.ShortName = constUndef
 
     override this.Clone () =
         let ret = new FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1491,7 +1499,7 @@ let rec getRepresentation (fplValue:FplValue) =
                 $"dec {getRepresentation mapping}"
             | FplBlockType.Variable when not (fv.IsInitializedVariable) 
                 && fv.TypeId = constPred -> 
-                "undetermined"
+                constUndetermined
             | FplBlockType.Variable when 
                 not (fv.IsInitializedVariable) 
                 && fv.TypeId <> constPred 

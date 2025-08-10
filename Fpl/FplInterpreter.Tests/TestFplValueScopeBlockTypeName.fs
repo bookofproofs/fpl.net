@@ -318,13 +318,13 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("inst", x.ShortName)
         | "IntrinsicInd" ->
             let x = new FplIntrinsicInd(positions, parent)
-            Assert.AreEqual<string>("ind", x.ShortName)
+            Assert.AreEqual<string>(constInd, x.ShortName)
         | "IntrinsicObj" ->
             let x = new FplIntrinsicObj(positions, parent)
             Assert.AreEqual<string>("obj", x.ShortName)
         | "IntrinsicPred" ->
             let x = new FplIntrinsicPred(positions, parent)
-            Assert.AreEqual<string>("pred", x.ShortName)
+            Assert.AreEqual<string>(constPred, x.ShortName)
         | "IntrinsicFunc" ->
             let x = new FplIntrinsicFunc(positions, parent)
             Assert.AreEqual<string>("func", x.ShortName)

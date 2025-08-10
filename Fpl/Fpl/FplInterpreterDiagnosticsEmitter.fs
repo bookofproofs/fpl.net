@@ -958,7 +958,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
         let argName = getType SignatureType.Name arg
         let whatWeGot = 
             if argType = argName then
-                "undef"
+                constUndef
             else
                 argType
 

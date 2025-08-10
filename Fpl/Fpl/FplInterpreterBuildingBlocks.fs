@@ -223,7 +223,7 @@ let rec eval (st: SymbolTable) ast =
             if fv.TypeId <> "" then
                 fv.TypeId <- fv.TypeId + sid
             else
-                fv.TypeId <- "ind"
+                fv.TypeId <- constInd
                     
             fv.EndPos <- pos2
         st.EvalPop() 
@@ -264,7 +264,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let varValue = new FplVariable((pos1, pos2), fv) 
         varValue.FplId <- name
-        varValue.TypeId <- "undef"
+        varValue.TypeId <- constUndef
         let undefined = new FplIntrinsicUndef((pos1, pos2), varValue)  
         varValue.ValueList.Add(undefined)
         varValue.IsSignatureVariable <- es.InSignatureEvaluation 
@@ -356,7 +356,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ArgumentIdentifier")
         let setId (fValue:FplValue) = 
             fValue.FplId <- s
-            fValue.TypeId <- "pred"
+            fValue.TypeId <- constPred
             fValue.StartPos <- pos1
             fValue.EndPos <- pos2
         let fv = es.PeekEvalStack()
@@ -474,8 +474,8 @@ let rec eval (st: SymbolTable) ast =
         let value = new FplIntrinsicPred((pos1, pos2), fv)
         value.StartPos <- pos1
         value.EndPos <- pos2
-        value.FplId <- "true"
-        value.TypeId <- "pred"
+        value.FplId <- constTrue
+        value.TypeId <- constPred
         es.PushEvalStack(value)
         es.PopEvalStack()
         st.EvalPop() 
@@ -485,8 +485,8 @@ let rec eval (st: SymbolTable) ast =
         let value = new FplIntrinsicPred((pos1, pos2), fv)
         value.StartPos <- pos1
         value.EndPos <- pos2
-        value.FplId <- "false"
-        value.TypeId <- "pred"
+        value.FplId <- constFalse
+        value.TypeId <- constPred
         es.PushEvalStack(value)
         es.PopEvalStack()
         st.EvalPop() 
@@ -495,8 +495,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.StartPos <- pos1
         fv.EndPos <- pos2
-        fv.FplId <- "undef"
-        fv.TypeId <- "undef"
+        fv.FplId <- constUndef
+        fv.TypeId <- constUndef
         st.EvalPop() 
     | Ast.Trivial((pos1, pos2), _) -> 
         st.EvalPush("Trivial")
@@ -504,9 +504,9 @@ let rec eval (st: SymbolTable) ast =
         let refBlock = new FplReference((pos1, pos2), fv) 
         es.PushEvalStack(refBlock)
         refBlock.FplId <- "trivial"
-        refBlock.TypeId <- "pred"
+        refBlock.TypeId <- constPred
         let value = new FplIntrinsicPred((pos1, pos2), refBlock) 
-        value.FplId <- "true"
+        value.FplId <- constTrue
         refBlock.ValueList.Add(value)
         es.PopEvalStack()
         st.EvalPop() 
@@ -558,7 +558,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Not")
         let fv = es.PeekEvalStack()
         fv.FplId <- "not"
-        fv.TypeId <- "pred"
+        fv.TypeId <- constPred
         eval st predicateAst
         fv.EndPos <- pos2
         evaluateNegation fv
@@ -687,7 +687,7 @@ let rec eval (st: SymbolTable) ast =
         | FplBlockType.OptionalPredicate
         | FplBlockType.Predicate ->
             fv.FplId <- identifier
-            fv.TypeId <- "pred"
+            fv.TypeId <- constPred
         | FplBlockType.MandatoryFunctionalTerm
         | FplBlockType.OptionalFunctionalTerm
         | FplBlockType.FunctionalTerm ->
@@ -804,7 +804,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("And")
         let fv = es.PeekEvalStack()
         fv.FplId <- "and"
-        fv.TypeId <- "pred"
+        fv.TypeId <- constPred
         eval st predicateAst1
         eval st predicateAst2
         fv.EndPos <- pos2
@@ -815,7 +815,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Or")
         let fv = es.PeekEvalStack()
         fv.FplId <- "or"
-        fv.TypeId <- "pred"
+        fv.TypeId <- constPred
         eval st predicateAst1
         eval st predicateAst2
         fv.EndPos <- pos2
@@ -826,7 +826,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Xor")
         let fv = es.PeekEvalStack()
         fv.FplId <- "xor"
-        fv.TypeId <- "pred"
+        fv.TypeId <- constPred
         eval st predicateAst1
         eval st predicateAst2
         fv.EndPos <- pos2
@@ -1059,8 +1059,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Impl((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Impl")
         let fv = es.PeekEvalStack()
-        fv.FplId <- "impl"
-        fv.TypeId <- "pred"
+        fv.FplId <- constImpl
+        fv.TypeId <- constPred
         eval st predicateAst1
         eval st predicateAst2
         fv.EndPos <- pos2
@@ -1071,7 +1071,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Iif")
         let fv = es.PeekEvalStack()
         fv.FplId <- "iif"
-        fv.TypeId <- "pred"
+        fv.TypeId <- constPred
         eval st predicateAst1
         eval st predicateAst2
         fv.EndPos <- pos2
@@ -1082,7 +1082,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("IsOperator")
         let fv = es.PeekEvalStack()
         fv.FplId <- "is"
-        fv.TypeId <- "pred"
+        fv.TypeId <- constPred
         let operand = new FplReference((pos1, pos2), fv) 
         es.PushEvalStack(operand)
         eval st isOpArgAst
@@ -1186,7 +1186,7 @@ let rec eval (st: SymbolTable) ast =
         let parent = es.PeekEvalStack()
         let fv = new FplQuantor((pos1, pos2), parent)
         fv.FplId <- "all"
-        fv.TypeId <- "pred"
+        fv.TypeId <- constPred
         es.PushEvalStack(fv)
         fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
         namedVarDeclAstList
@@ -1207,7 +1207,7 @@ let rec eval (st: SymbolTable) ast =
         let parent = es.PeekEvalStack()
         let fv = new FplQuantor((pos1, pos2), parent)
         fv.FplId <- "ex"
-        fv.TypeId <- "pred"
+        fv.TypeId <- constPred
         es.PushEvalStack(fv)
         fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
         namedVarDeclAstList
@@ -1229,7 +1229,7 @@ let rec eval (st: SymbolTable) ast =
         let parent = es.PeekEvalStack()
         let fv = new FplQuantor((pos1, pos2), parent)
         fv.FplId <- "exn"
-        fv.TypeId <- "pred"
+        fv.TypeId <- constPred
         fv.Arity <- 1
         es.PushEvalStack(fv)
         eval st dollarDigitsAst
@@ -1826,7 +1826,7 @@ let rec eval (st: SymbolTable) ast =
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         emitVAR04diagnostics fv
         let value = new FplIntrinsicPred((pos1,pos1), fv)
-        value.FplId <- "true"
+        value.FplId <- constTrue
         // check if all arguments could be correctly inferred
         fv.Scope
         |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Argument)
@@ -1834,8 +1834,8 @@ let rec eval (st: SymbolTable) ast =
             let argInference = kvp.Value.ArgList[1]
             let argInferenceResult = getRepresentation argInference
             match argInferenceResult with
-            | "true" -> ()
-            | _ -> value.FplId <- "false" // todo all other arguments that are either undetermined or false should issue an error
+            | constTrue -> ()
+            | _ -> value.FplId <- constFalse // todo all other arguments that are either undetermined or false should issue an error
 
         )
         fv.ValueList.Add(value)

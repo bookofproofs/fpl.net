@@ -19,11 +19,11 @@ let evaluateNegation (fplValue:FplValue) =
     match getRepresentation arg with 
     | "false" -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "true"
+        newValue.FplId <- constTrue
         fplValue.ValueList.Add(newValue)
     | "true" -> 
         let newValue =  new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "false"
+        newValue.FplId <- constFalse
         fplValue.ValueList.Add(newValue)
     | "undetermined" -> 
         fplValue.ValueList.Add(arg)
@@ -42,10 +42,10 @@ let evaluateConjunction (fplValue:FplValue) =
         | ("true", "false") 
         | ("false", "true") 
         | ("false", "false") -> 
-            "false"
+            constFalse
         | ("true", "true") -> 
-            "true"
-        | _ -> "undetermined"
+            constTrue
+        | _ -> constUndetermined
     fplValue.ValueList.Add(newValue)
 
 let evaluateDisjunction (fplValue:FplValue) = 
@@ -58,11 +58,11 @@ let evaluateDisjunction (fplValue:FplValue) =
     | ("false", "true") 
     | ("true", "true") -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "true"
+        newValue.FplId <- constTrue
         fplValue.ValueList.Add(newValue)
     | ("false", "false") -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "false"
+        newValue.FplId <- constFalse
         fplValue.ValueList.Add(newValue)
     | _ -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
@@ -77,12 +77,12 @@ let evaluateExclusiveOr (fplValue:FplValue) =
     | ("true", "false") 
     | ("false", "true") -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "true"
+        newValue.FplId <- constTrue
         fplValue.ValueList.Add(newValue)
     | ("true", "true") 
     | ("false", "false") -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "false"
+        newValue.FplId <- constFalse
         fplValue.ValueList.Add(newValue)
     | _ -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
@@ -96,13 +96,13 @@ let evaluateImplication (fplValue:FplValue) =
     match (arg1Repr, arg2Repr) with
     | ("true", "false") -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "false"
+        newValue.FplId <-constFalse
         fplValue.ValueList.Add(newValue)
     | ("false", "true") 
     | ("false", "false") 
     | ("true", "true") -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "true"
+        newValue.FplId <- constTrue
         fplValue.ValueList.Add(newValue)
     | _ -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
@@ -117,12 +117,12 @@ let evaluateEquivalence (fplValue:FplValue) =
     | ("true", "true") 
     | ("false", "false") -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "true"
+        newValue.FplId <- constTrue
         fplValue.ValueList.Add(newValue)
     | ("false", "true") 
     | ("true", "false") -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "false"
+        newValue.FplId <- constFalse
         fplValue.ValueList.Add(newValue)
     | _ -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
@@ -132,9 +132,9 @@ let evaluateIsOperator (fplValue:FplValue) (operand:FplValue) (typeOfOperand:Fpl
     match mpwa [operand] [typeOfOperand] with
     | Some errMsg -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "false"
+        newValue.FplId <- constFalse
         fplValue.ValueList.Add(newValue)
     | None -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- "true"
+        newValue.FplId <- constTrue
         fplValue.ValueList.Add(newValue)        

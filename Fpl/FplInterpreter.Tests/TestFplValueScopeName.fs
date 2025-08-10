@@ -927,7 +927,7 @@ type TestFplValueScopeName() =
             let mapping = base1.ArgList[0]
             match var with
             | "base1" -> Assert.AreEqual<string>("obj", getType SignatureType.Mixed mapping)
-            | "base2" -> Assert.AreEqual<string>("ind", getType SignatureType.Mixed mapping)
+            | "base2" -> Assert.AreEqual<string>(constInd, getType SignatureType.Mixed mapping)
             | "base3" -> Assert.AreEqual<string>("func", getType SignatureType.Mixed mapping)
             | "base4" -> Assert.AreEqual<string>("pred", getType SignatureType.Mixed mapping)
             | "base5" -> Assert.AreEqual<string>("A", getType SignatureType.Mixed mapping)
