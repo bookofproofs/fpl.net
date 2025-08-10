@@ -93,7 +93,7 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestPremiseOrOtherPredicate01 () =
-        let result = run (predicate .>> eof) """pre"""
+        let result = run (predicate .>> eof) literalPre
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:"))

@@ -452,8 +452,8 @@ let rec eval (st: SymbolTable) ast =
         let rb = es.PeekEvalStack()
         rb.StartPos <- pos1
         rb.EndPos <- pos2
-        rb.FplId <- "parent"
-        rb.TypeId <- "parent"
+        rb.FplId <- literalParent
+        rb.TypeId <- literalParent
         let oldDiagnosticsStopped = ad.DiagnosticsStopped
         ad.DiagnosticsStopped <- false
         let referencedBlock = nextDefinition rb 1
@@ -956,7 +956,7 @@ let rec eval (st: SymbolTable) ast =
                 // with their declared types 
                 let candidatesOfSelfOrParentEntity = 
                     refBlock.Scope
-                    |> Seq.filter (fun kvp -> kvp.Key = "self" || kvp.Key = "parent")
+                    |> Seq.filter (fun kvp -> kvp.Key = "self" || kvp.Key = literalParent)
                     |> Seq.map (fun kvp -> kvp.Value)
                     |> Seq.toList
 

@@ -1,12 +1,12 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
+using static FplGrammarCommons;
 namespace FplLSTests
 {
     [TestClass]
     public class TestGetCompletionItemProofs
     {
 
-        [DataRow("prf")]
+        [DataRow(literalPrf)]
         [DataRow(literalPrfL)]
         [TestMethod]
         public void TestAddProofChoicesNumber(string choice)
@@ -16,8 +16,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(15, actual.Count);
         }
 
-        [DataRow("prf")]
-        [DataRow("proof")]
+        [DataRow(literalPrf)]
+        [DataRow(literalPrfL)]
         [TestMethod]
         public void TestAddProofKeywordCounts(string choice)
         {
@@ -31,10 +31,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("proof", CompletionItemKind.Property, "proof01")]
-        [DataRow("prf", CompletionItemKind.Property, "proof02")]
-        [DataRow("proof", CompletionItemKind.Keyword, "zzzproof01")]
-        [DataRow("prf", CompletionItemKind.Keyword, "zzzzproof02")]
+        [DataRow(literalPrfL, CompletionItemKind.Property, "proof01")]
+        [DataRow(literalPrf, CompletionItemKind.Property, "proof02")]
+        [DataRow(literalPrfL, CompletionItemKind.Keyword, "zzzproof01")]
+        [DataRow(literalPrf, CompletionItemKind.Keyword, "zzzzproof02")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -49,8 +49,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("proof")]
-        [DataRow("prf")]
+        [DataRow(literalPrfL)]
+        [DataRow(literalPrf)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -65,8 +65,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("prf")]
-        [DataRow("proof")]
+        [DataRow(literalPrf)]
+        [DataRow(literalPrfL)]
         [TestMethod]
         public void TestAddProofChoicesLabel(string choice)
         {
@@ -78,8 +78,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("prf", "proof")]
-        [DataRow("proof", "proof")]
+        [DataRow(literalPrf, literalPrfL)]
+        [DataRow(literalPrfL, literalPrfL)]
         [TestMethod]
         public void TestAddProofChoicesDetail(string choice, string l)
         {
@@ -98,8 +98,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("prf")]
-        [DataRow("proof")]
+        [DataRow(literalPrf)]
+        [DataRow(literalPrfL)]
         [TestMethod]
         public void TestAddProofChoicesInsertText(string choice)
         {

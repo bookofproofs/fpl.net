@@ -491,7 +491,7 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base12", "parent")>]
+    [<DataRow("base12", literalParent)>]
     [<DataRow("base13", "@1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "parent.x")>]

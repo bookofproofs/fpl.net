@@ -20,7 +20,7 @@ namespace FplLS
                 ci.SortText = "self01";
                 ret.Add(ci);
             }
-            if (defaultCi.Word == "parent")
+            if (defaultCi.Word == literalParent)
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "parent self reference";

@@ -499,7 +499,7 @@ type TestFplValueScopeTypeSignature() =
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base12", "parent")>]
+    [<DataRow("base12", literalParent)>]
     [<DataRow("base13", "@1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "parent.x")>]
@@ -574,7 +574,7 @@ type TestFplValueScopeTypeSignature() =
             | "base9" -> Assert.AreEqual<string>("Test$1()", getType SignatureType.Type base1)
             | "base10" -> Assert.AreEqual<string>("Test", getType SignatureType.Type base1)
             | "base11" -> Assert.AreEqual<string>("undef", getType SignatureType.Type base1)
-            | "base12" -> Assert.AreEqual<string>("parent", getType SignatureType.Type base1)
+            | "base12" -> Assert.AreEqual<string>(literalParent, getType SignatureType.Type base1)
             | "base13" -> Assert.AreEqual<string>("1", getType SignatureType.Type base1)
             | "base11a" -> Assert.AreEqual<string>("undef.undef", getType SignatureType.Type base1)
             | "base12a" -> Assert.AreEqual<string>("parent.undef", getType SignatureType.Type base1)

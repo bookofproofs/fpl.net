@@ -11,8 +11,8 @@ namespace FplLSTests
 
         [DataRow(literalAx)]
         [DataRow(literalAxL)]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesNumber(string choice)
         {
@@ -23,8 +23,8 @@ namespace FplLSTests
 
         [DataRow(literalAx)]
         [DataRow(literalAxL)]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddAxiomKeywordCounts(string choice)
         {
@@ -51,8 +51,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddPostulateChoicesSortText(string choice)
         {
@@ -60,14 +60,14 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("postulate"));
+                Assert.IsTrue(item.SortText.Contains(literalPostL));
             }
         }
 
         [DataRow(literalAx)]
         [DataRow(literalAxL)]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesLabel(string choice)
         {
@@ -81,8 +81,8 @@ namespace FplLSTests
 
         [DataRow(literalAx)]
         [DataRow(literalAxL)]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesDetail(string choice)
         {
@@ -96,8 +96,8 @@ namespace FplLSTests
 
         [DataRow(literalAx)]
         [DataRow(literalAxL)]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesInsertText(string choice)
         {
@@ -113,8 +113,8 @@ namespace FplLSTests
 
         [DataRow(literalAx)]
         [DataRow(literalAxL)]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {

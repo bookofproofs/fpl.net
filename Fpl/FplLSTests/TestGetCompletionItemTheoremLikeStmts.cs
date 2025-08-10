@@ -14,8 +14,8 @@ namespace FplLSTests
         [DataRow(literalLemL, "Lemma")]
         [DataRow(literalConj, "Conjecture")]
         [DataRow(literalConjL, "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestAddChoicesNumber(string choice, string l)
         {
@@ -33,8 +33,8 @@ namespace FplLSTests
         [DataRow(literalLemL, "Lemma")]
         [DataRow(literalConj, "Conjecture")]
         [DataRow(literalConjL, "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestAddKeywordCounts(string choice, string l)
         {
@@ -64,10 +64,10 @@ namespace FplLSTests
         [DataRow(literalConj, "Conjecture", CompletionItemKind.Class, "conjecture02")]
         [DataRow(literalConjL, "Conjecture", CompletionItemKind.Keyword, "zzzconjecture01")]
         [DataRow(literalConj, "Conjecture", CompletionItemKind.Keyword, "zzzzconjecture02")]
-        [DataRow("proposition", "Proposition", CompletionItemKind.Class, "proposition01")]
-        [DataRow("prop", "Proposition", CompletionItemKind.Class, "proposition02")]
-        [DataRow("proposition", "Proposition", CompletionItemKind.Keyword, "zzzproposition01")]
-        [DataRow("prop", "Proposition", CompletionItemKind.Keyword, "zzzzproposition02")]
+        [DataRow(literalPropL, "Proposition", CompletionItemKind.Class, "proposition01")]
+        [DataRow(literalProp, "Proposition", CompletionItemKind.Class, "proposition02")]
+        [DataRow(literalPropL, "Proposition", CompletionItemKind.Keyword, "zzzproposition01")]
+        [DataRow(literalProp, "Proposition", CompletionItemKind.Keyword, "zzzzproposition02")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string l, CompletionItemKind kind, string expected)
         {
@@ -90,8 +90,8 @@ namespace FplLSTests
         [DataRow(literalLemL, "Lemma")]
         [DataRow(literalConj, "Conjecture")]
         [DataRow(literalConjL, "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice, string l)
         {
@@ -114,8 +114,8 @@ namespace FplLSTests
         [DataRow(literalLemL, "Lemma")]
         [DataRow(literalConj, "Conjecture")]
         [DataRow(literalConjL, "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestAddChoicesLabel(string choice, string l)
         {
@@ -135,8 +135,8 @@ namespace FplLSTests
         [DataRow(literalLemL, "Lemma")]
         [DataRow(literalConj, "Conjecture")]
         [DataRow(literalConjL, "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestAddChoicesDetail(string choice, string l)
         {
@@ -163,8 +163,8 @@ namespace FplLSTests
         [DataRow(literalLemL, "Lemma")]
         [DataRow(literalConj, "Conjecture")]
         [DataRow(literalConjL, "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestAddChoicesInsertText(string choice, string l)
         {

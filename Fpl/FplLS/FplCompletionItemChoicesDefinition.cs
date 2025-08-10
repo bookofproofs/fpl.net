@@ -30,7 +30,7 @@ namespace FplLS
                 TokenIntrinsic = literalIntr;
                 TokenObject = literalObj;
                 TokenFunction = literalFunc;
-                TokenPredicate = "pred";
+                TokenPredicate = literalPred;
                 TokenClass = literalCl;
                 if (forKeyword)
                 {

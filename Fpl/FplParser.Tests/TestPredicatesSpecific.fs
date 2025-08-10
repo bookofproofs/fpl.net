@@ -60,7 +60,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPrimePredicate7 () =
-        let result = run (primePredicate .>> eof) """parent"""
+        let result = run (primePredicate .>> eof) literalParent
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

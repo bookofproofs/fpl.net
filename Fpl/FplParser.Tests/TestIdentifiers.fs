@@ -2,6 +2,7 @@ namespace FplParser.Tests
 
 open FParsec
 open FplParser
+open FplGrammarCommons
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -99,7 +100,7 @@ type TestIdentifiers () =
 
     [<TestMethod>]
     member this.TestSelf2 () =
-        let result = run (selfOrParent .>> eof) "parent"
+        let result = run (selfOrParent .>> eof) literalParent
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

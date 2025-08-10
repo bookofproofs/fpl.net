@@ -23,7 +23,7 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("base11v1", "dec ~v:obj; v")>]
     [<DataRow("base11v2", "dec ~v:ind; v")>]
     [<DataRow("base11v3", "dec ~v:Nat; v")>]
-    [<DataRow("base12", "parent")>]
+    [<DataRow("base12", literalParent)>]
     [<DataRow("base13", "@1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "parent.x")>]
@@ -101,7 +101,7 @@ type TestReferencesTypeOfSignature() =
             | "base11v1" -> Assert.AreEqual<string>(literalObj, getType SignatureType.Type base1)
             | "base11v2" -> Assert.AreEqual<string>(literalInd, getType SignatureType.Type base1)
             | "base11v3" -> Assert.AreEqual<string>("Nat", getType SignatureType.Type base1)
-            | "base12" -> Assert.AreEqual<string>("parent", getType SignatureType.Type base1)
+            | "base12" -> Assert.AreEqual<string>(literalParent, getType SignatureType.Type base1)
             | "base13" -> Assert.AreEqual<string>("1", getType SignatureType.Type base1)
             | "base11a" -> Assert.AreEqual<string>("undef.undef", getType SignatureType.Type base1)
             | "base12a" -> Assert.AreEqual<string>("parent.undef", getType SignatureType.Type base1)

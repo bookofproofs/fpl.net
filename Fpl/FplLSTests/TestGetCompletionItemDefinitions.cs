@@ -36,16 +36,16 @@ namespace FplLSTests
         }
 
         [DataRow(literalDefL, literalClL, CompletionItemKind.Class, "definition01")]
-        [DataRow(literalDefL, "predicate", CompletionItemKind.Class, "definition02")]
+        [DataRow(literalDefL, literalPredL, CompletionItemKind.Class, "definition02")]
         [DataRow(literalDefL, literalFuncL, CompletionItemKind.Class, "definition03")]
         [DataRow(literalDef, literalCl, CompletionItemKind.Class, "zdefinition01")]
-        [DataRow(literalDef, "pred", CompletionItemKind.Class, "zdefinition02")]
+        [DataRow(literalDef, literalPred, CompletionItemKind.Class, "zdefinition02")]
         [DataRow(literalDef, literalFunc, CompletionItemKind.Class, "zdefinition03")]
         [DataRow(literalDefL, literalClL, CompletionItemKind.Keyword, "zzzdefinition01")]
-        [DataRow(literalDefL, "predicate", CompletionItemKind.Keyword, "zzzdefinition02")]
+        [DataRow(literalDefL, literalPredL, CompletionItemKind.Keyword, "zzzdefinition02")]
         [DataRow(literalDefL, literalFuncL, CompletionItemKind.Keyword, "zzzdefinition03")]
         [DataRow(literalDef, literalCl, CompletionItemKind.Keyword, "zzzzdefinition01")]
-        [DataRow(literalDef, "pred", CompletionItemKind.Keyword, "zzzzdefinition02")]
+        [DataRow(literalDef, literalPred, CompletionItemKind.Keyword, "zzzzdefinition02")]
         [DataRow(literalDef, literalFunc, CompletionItemKind.Keyword, "zzzzdefinition03")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string subType, CompletionItemKind isKeyword, string expected)
@@ -63,8 +63,8 @@ namespace FplLSTests
 
         [DataRow(literalDef, literalCl)]
         [DataRow(literalDefL, literalClL)]
-        [DataRow(literalDef, "pred")]
-        [DataRow(literalDefL, "predicate")]
+        [DataRow(literalDef, literalPred)]
+        [DataRow(literalDefL, literalPredL)]
         [DataRow(literalDef, literalFunc)]
         [DataRow(literalDefL, literalFuncL)]
         [TestMethod]
@@ -83,8 +83,8 @@ namespace FplLSTests
 
         [DataRow(literalDef, literalCl)]
         [DataRow(literalDefL, literalClL)]
-        [DataRow(literalDef, "pred")]
-        [DataRow(literalDefL, "predicate")]
+        [DataRow(literalDef, literalPred)]
+        [DataRow(literalDefL, literalPredL)]
         [DataRow(literalDef, literalFunc)]
         [DataRow(literalDefL, literalFuncL)]
         [TestMethod]
@@ -124,8 +124,8 @@ namespace FplLSTests
 
         [DataRow(literalDef, literalCl)]
         [DataRow(literalDefL, literalClL)]
-        [DataRow(literalDef, "pred")]
-        [DataRow(literalDefL, "predicate")]
+        [DataRow(literalDef, literalPred)]
+        [DataRow(literalDefL, literalPredL)]
         [DataRow(literalDef, literalFunc)]
         [DataRow(literalDefL, literalFuncL)]
         [TestMethod]

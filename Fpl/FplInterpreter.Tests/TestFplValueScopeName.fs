@@ -521,7 +521,7 @@ type TestFplValueScopeName() =
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base12", "parent")>]
+    [<DataRow("base12", literalParent)>]
     [<DataRow("base13", "@1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "parent.x")>]
@@ -930,7 +930,7 @@ type TestFplValueScopeName() =
             | "base1" -> Assert.AreEqual<string>(literalObj, getType SignatureType.Mixed mapping)
             | "base2" -> Assert.AreEqual<string>(literalInd, getType SignatureType.Mixed mapping)
             | "base3" -> Assert.AreEqual<string>(literalFunc, getType SignatureType.Mixed mapping)
-            | "base4" -> Assert.AreEqual<string>("pred", getType SignatureType.Mixed mapping)
+            | "base4" -> Assert.AreEqual<string>(literalPred, getType SignatureType.Mixed mapping)
             | "base5" -> Assert.AreEqual<string>("A", getType SignatureType.Mixed mapping)
             | "base6" -> Assert.AreEqual<string>("obj(ind)", getType SignatureType.Mixed mapping)
             | "base7" -> Assert.AreEqual<string>("pred(*obj)", getType SignatureType.Mixed mapping)

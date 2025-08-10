@@ -1165,7 +1165,7 @@ type FplProposition(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Proposition, positions, parent)
 
     override this.Name = "a proposition"
-    override this.ShortName = "prop"
+    override this.ShortName = literalProp
 
     override this.Clone () =
         let ret = new FplProposition((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1198,7 +1198,7 @@ type FplProof(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Proof, positions, parent)
 
     override this.Name = "a proof"
-    override this.ShortName = "prf"
+    override this.ShortName = literalPrf
 
     override this.Clone () =
         let ret = new FplProof((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1974,7 +1974,7 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
                         sb
                         (level + 1)
                         (counterScope = root.Scope.Count)
-                        (root.FplId = "self" || root.FplId = "parent"))
+                        (root.FplId = "self" || root.FplId = literalParent))
                 sb.AppendLine($"{indent}],") |> ignore
 
                 sb.AppendLine($"{indent}\"ArgList\": [") |> ignore

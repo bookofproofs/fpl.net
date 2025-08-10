@@ -25,7 +25,7 @@ namespace FplLS
         {
             if (ci.IsShort)
             {
-                TokenPremise = "pre";
+                TokenPremise = literalPre;
                 TokenConclusion = literalCon;
                 ci.Detail = $"inference (short)";
             }

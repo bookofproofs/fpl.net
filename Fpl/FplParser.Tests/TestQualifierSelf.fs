@@ -2,6 +2,7 @@
 
 open FParsec
 open FplParser
+open FplGrammarCommons
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -95,7 +96,7 @@ type TestQualifiersSelf () =
 
     [<TestMethod>]
     member this.TestCoordsBothA () =
-        let result = run (predicate .>> eof) """parent"""
+        let result = run (predicate .>> eof) literalParent
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

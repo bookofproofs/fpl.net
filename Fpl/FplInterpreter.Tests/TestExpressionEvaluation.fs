@@ -257,7 +257,7 @@ type TestExpressionEvaluation() =
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
 
-    [<DataRow("def pred T() { dec ~x:pred(y:obj); is(self,pred) };", "pred")>]
+    [<DataRow("def pred T() { dec ~x:pred(y:obj); is(self,pred) };", literalPred)>]
     [<DataRow("def pred T() { dec ~x:pred(y:func(z:obj)->obj); is(x,pred(y:func(z:obj)->Nat)) };", "pred(func(obj) -> Nat)")>]
     [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func(z:obj)->obj)) };", "pred(func(obj) -> obj)")>]
     [<DataRow("def pred T() { dec ~x:pred(y:func()->obj); is(x,pred(y:func()->ind)) };", "pred(func() -> ind)")>]

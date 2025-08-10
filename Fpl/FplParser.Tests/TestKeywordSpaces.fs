@@ -347,8 +347,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
-    [<DataRow("premise")>]
-    [<DataRow("pre")>]
+    [<DataRow(literalPreL)>]
+    [<DataRow(literalPre)>]
     [<TestMethod>]
     member this.TestSpacesPremise (word:string) =
         let result = run (premise .>> eof) $"""{word}:true"""
@@ -356,8 +356,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("premise")>]
-    [<DataRow("pre")>]
+    [<DataRow(literalPreL)>]
+    [<DataRow(literalPre)>]
     [<TestMethod>]
     member this.TestSpacesPremiseA (word:string) =
         let result = run (premise .>> eof) $"""{word} :true"""
@@ -365,8 +365,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("premise")>]
-    [<DataRow("pre")>]
+    [<DataRow(literalPreL)>]
+    [<DataRow(literalPre)>]
     [<TestMethod>]
     member this.TestSpacesPremiseB (word:string) =
         let result = run (premise .>> eof) $"""{word}: true"""
@@ -396,14 +396,14 @@ type TestKeywordSpaces() =
     [<DataRow("thm")>]
     [<DataRow(literalLemL)>]
     [<DataRow(literalLem)>]
-    [<DataRow("proposition")>]
-    [<DataRow("prop")>]
+    [<DataRow(literalPropL)>]
+    [<DataRow(literalProp)>]
     [<DataRow(literalConjL)>]
     [<DataRow(literalConj)>]
     [<DataRow(literalAxL)>]
     [<DataRow(literalAx)>]
-    [<DataRow("postulate")>]
-    [<DataRow("post")>]
+    [<DataRow(literalPostL)>]
+    [<DataRow(literalPost)>]
     [<TestMethod>]
     member this.TestSpacesBuildingBlock (word:string) =
         let result = run (buildingBlock .>> eof) $"""{word}X(){true}"""
@@ -438,8 +438,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-    [<DataRow("predicate")>]
-    [<DataRow("pred")>]
+    [<DataRow(literalPredL)>]
+    [<DataRow(literalPred)>]
     [<TestMethod>]
     member this.TestSpacesPredicate (word:string) =
         let result = run (definition .>> eof) ("def " + word + "X(){intr}")
@@ -447,8 +447,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
-    [<DataRow("predicate")>]
-    [<DataRow("pred")>]
+    [<DataRow(literalPredL)>]
+    [<DataRow(literalPred)>]
     [<TestMethod>]
     member this.TestSpacesPredicateWithSpace (word:string) =
         let result = run (definition .>> eof) ("def " + word + " X(){intr}")
@@ -478,8 +478,8 @@ type TestKeywordSpaces() =
     [<DataRow(literalFunc)>]
     [<DataRow(literalObjL)>]
     [<DataRow(literalObj)>]
-    [<DataRow("predicate")>]
-    [<DataRow("pred")>]
+    [<DataRow(literalPredL)>]
+    [<DataRow(literalPred)>]
     [<DataRow(literalIndL)>]
     [<DataRow(literalInd)>]
     [<TestMethod>]
@@ -554,8 +554,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
 
-    [<DataRow("proof")>]
-    [<DataRow("prf")>]
+    [<DataRow(literalPrf)>]
+    [<DataRow(literalPrf)>]
     [<TestMethod>]
     member this.TestSpacesProof (word:string) =
         let result = run (proof .>> eof) ($"{word}x" + " T$1 {1. |- true }")
@@ -590,8 +590,8 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
 
-    [<DataRow("property")>]
-    [<DataRow("prty")>]
+    [<DataRow(literalPrtyL)>]
+    [<DataRow(literalPrty)>]
     [<TestMethod>]
     member this.TestSpacesProperty (word:string) =
         let result = run (property .>> eof) ($"{word}x" + " pred T() {true}")
@@ -608,9 +608,9 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("<significant whitespace>"))
 
-    [<DataRow("prefix")>]
+    [<DataRow(literalPrefix)>]
     [<DataRow(literalInfix)>]
-    [<DataRow("postfix")>]
+    [<DataRow(literalPostFix)>]
     [<TestMethod>]
     member this.TestSpacesSomeFixNotation (word:string) =
         let result = run (definition .>> eof) ($"def pred T {word}x \"~\"" + " () {true}")

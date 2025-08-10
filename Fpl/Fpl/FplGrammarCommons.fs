@@ -243,21 +243,21 @@ let keyWordSet =
            literalOpt
            literalOptL
            literalOr
-           "parent"
-           "post"
-           "postfix"
-           "postulate"
-           "pred"
-           "predicate"
-           "pre"
-           "prefix"
-           "premise"
-           "prf"
-           "proof"
-           "prop"
-           "proposition"
-           "prty"
-           "property"
+           literalParent
+           literalPost
+           literalPostFix
+           literalPostL
+           literalPred
+           literalPredL
+           literalPre
+           literalPrefix
+           literalPreL
+           literalPrf
+           literalPrf
+           literalProp
+           literalPropL
+           literalPrty
+           literalPrtyL
            "qed"
            "ret"
            "return"

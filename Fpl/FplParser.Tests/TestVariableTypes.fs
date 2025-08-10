@@ -43,14 +43,14 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType005 () =
-        let result = run (variableType .>> eof) """predicate"""
+        let result = run (variableType .>> eof) literalPredL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestVariableType006 () =
-        let result = run (variableType .>> eof) """pred"""
+        let result = run (variableType .>> eof) literalPred
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -281,7 +281,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType020 () =
-        let result = run (variableType .>> eof) """pred"""
+        let result = run (variableType .>> eof) literalPred
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -498,7 +498,7 @@ type TestVariableTypes () =
 
     [<TestMethod>]
     member this.TestVariableType047 () =
-        let result = run (variableType .>> eof) """predicate"""
+        let result = run (variableType .>> eof) literalPredL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

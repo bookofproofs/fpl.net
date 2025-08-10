@@ -256,13 +256,13 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalLem, x.ShortName)
         | "Proposition" ->
             let x = new FplProposition(positions, parent)
-            Assert.AreEqual<string>("prop", x.ShortName)
+            Assert.AreEqual<string>(literalProp, x.ShortName)
         | "Corollary" ->
             let x = new FplCorollary(positions, parent)
             Assert.AreEqual<string>(literalCor, x.ShortName)
         | "Proof" ->
             let x = new FplProof(positions, parent)
-            Assert.AreEqual<string>("prf", x.ShortName)
+            Assert.AreEqual<string>(literalPrf, x.ShortName)
         | "Conjecture" ->
             let x = new FplConjecture(positions, parent)
             Assert.AreEqual<string>(literalConj, x.ShortName)

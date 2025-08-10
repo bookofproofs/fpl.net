@@ -140,13 +140,13 @@ let variable = positions "Var" variableX |>> Ast.Var
 let variableList = (sepBy1 (variable .>> IW) comma) .>> IW
 
 let keywordSelf = positions "Self" (skipString "self") .>> IW |>> Ast.Self
-let keywordParent = positions "Parent" (skipString "parent") .>> IW |>> Ast.Parent
+let keywordParent = positions "Parent" (skipString literalParent) .>> IW |>> Ast.Parent
 let keywordBaseClassReference = skipString literalBase .>> IW
 let keywordIndex = positions "IndexType" (skipString literalIndL <|> skipString literalInd) |>> Ast.IndexType
 
 
 (* FplBlock-related Keywords *)
-let keywordPremise = (skipString "premise" <|> skipString "pre") >>. IW 
+let keywordPremise = (skipString literalPreL <|> skipString literalPre) >>. IW 
 let keywordConclusion = (skipString literalConL <|> skipString literalCon) >>. IW
 
 
@@ -191,7 +191,7 @@ let objectHeader = choice [
     (attempt templateWithTail) <|> keywordTemplate
 ] 
 
-let keywordPredicate = positions "PredicateType" (skipString "predicate" <|> skipString "pred") |>> Ast.PredicateType
+let keywordPredicate = positions "PredicateType" (skipString literalPredL <|> skipString literalPred) |>> Ast.PredicateType
 let keywordFunction = positions "FunctionalTermType" (skipString literalFuncL <|> skipString literalFunc) |>> Ast.FunctionalTermType
 
 
@@ -274,9 +274,9 @@ let objectSymbolString = pchar '"' >>. objectMathSymbols .>> pchar '"'
 let infixString = pchar '"' >>. infixMathSymbols .>> pchar '"'
 let keywordInfix = pstring literalInfix >>. IW
 let postfixString = pchar '"' >>. postfixMathSymbols .>> pchar '"' 
-let keywordPostfix = pstring "postfix" >>. IW
+let keywordPostfix = pstring literalPostFix >>. IW
 let prefixString = pchar '"' >>. prefixMathSymbols .>> pchar '"' 
-let keywordPrefix = pstring "prefix" >>. IW
+let keywordPrefix = pstring literalPrefix >>. IW
 let userDefinedObjSym = positions "Symbol" (keywordSymbol >>. objectSymbolString) .>> IW |>> Ast.Symbol
 let precedence = positions "Precedence" (pint32) .>> IW |>> Ast.Precedence
 
@@ -428,7 +428,7 @@ let ruleOfInference = positions "RuleOfInference" (keywordInference >>. signatur
 (* FPL building blocks - Theorem-like statements and conjectures *)
 let keywordTheorem = (skipString "theorem" <|> skipString "thm") .>> SW
 let keywordLemma = (skipString literalLemL <|> skipString literalLem) .>> SW
-let keywordProposition = (skipString "proposition" <|> skipString "prop") .>> SW
+let keywordProposition = (skipString literalPropL <|> skipString literalProp) .>> SW
 let keywordCorollary = (skipString literalCorL <|> skipString literalCor) .>> SW
 let keywordConjecture = (skipString literalConjL <|> skipString literalConj) .>> SW
 
@@ -445,7 +445,7 @@ let corollary = positions "Corollary" (keywordCorollary >>. corollarySignature .
 
 (* FPL building blocks - Axioms *)
 
-let keywordAxiom = (skipString literalAxL <|> skipString literalAx <|> skipString "postulate" <|> skipString "post") >>. SW
+let keywordAxiom = (skipString literalAxL <|> skipString literalAx <|> skipString literalPostL <|> skipString literalPost) >>. SW
 
 let axiom = positions "Axiom" (keywordAxiom >>. signatureWithTheoremLikeBlock) |>> Ast.Axiom
 
@@ -461,7 +461,7 @@ let constructor = positions "Constructor" (keywordConstructor >>. signature .>>.
 
 (* FPL building blocks - Properties *)
 let keywordOptional = positions "Optional" (skipString literalOptL <|> skipString literalOpt) .>> SW |>> Ast.Optional
-let keywordProperty = positions "Property" (skipString "property" <|> skipString "prty") .>> SW |>> Ast.Property
+let keywordProperty = positions "Property" (skipString literalPrtyL <|> skipString literalPrty) .>> SW |>> Ast.Property
 
 let predInstanceBlock = leftBrace >>. (keywordIntrinsic <|> predContent) .>> spacesRightBrace
 let predicateInstance = positions "PredicateInstance" ((keywordPredicate >>. SW >>. opt keywordOptional) .>>. signature .>>. (IW >>. predInstanceBlock)) |>> Ast.PredicateInstance
@@ -518,7 +518,7 @@ let justification = positions "Justification" (predicateList .>> IW) |>> Ast.Jus
 let justifiedArgument = positions "JustArgInf" (justification .>>. argumentInference) |>> Ast.JustArgInf
 let proofArgument = positions "Argument" ((argumentIdentifier .>> IW) .>>. justifiedArgument) .>> IW |>> Ast.Argument
 let proofArgumentList = many1 (IW >>. (proofArgument <|> varDeclBlock))
-let keywordProof = (skipString "proof" <|> skipString "prf") .>> SW 
+let keywordProof = (skipString literalPrfL <|> skipString literalPrf) .>> SW 
 let proofBlock = leftBrace >>. proofArgumentList .>>. opt keywordQed .>> spacesRightBrace
 let proof = positions "Proof" ((keywordProof >>. referencingIdentifier) .>>. (IW >>. proofBlock)) |>> Ast.Proof
 
@@ -610,15 +610,15 @@ let errRecPattern = "(definition|def|mandatory|mand|optional|opt|axiom|ax|postul
 let errInformation = [
     (DEF000, [literalDef], definition)
     (PRP000, ["mand"; literalOpt], property)
-    (AXI000, [literalAx; "post"], axiom)
+    (AXI000, [literalAx; literalPost], axiom)
     (THM000, ["theorem"; "thm"], theorem)
     (COR000, ["theorem"; literalCor], corollary)
     (LEM000, [literalLem], lemma)
-    (PPS000, ["prop"], proposition)
+    (PPS000, [literalProp], proposition)
     (CNJ000, [literalConj], conjecture)
     (VAR000, [literalDec], varDeclBlock)
     (CTR000, [literalCtorL; literalCtor], constructor)
-    (PRF000, ["proof"; "prf"], proof)
+    (PRF000, [literalPrf; literalPrf], proof)
     (INF000, [literalInf], ruleOfInference)
     (LOC000, [literalLoc], localization)
     (USE000, ["uses"], usesClause)
@@ -630,7 +630,7 @@ let errInformation = [
     (ASS000, [literalAss], assumeArgument)
     (REV000, ["rev"], revokeArgument)
     (RET000, ["ret"], returnStatement)
-    (PRE000, ["pre"], premise)
+    (PRE000, [literalPre], premise)
     (CON000, [literalCon], conclusion)
     (TYD000, ["~"], varDecl)
 ]
