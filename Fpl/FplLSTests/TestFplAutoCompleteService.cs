@@ -1,6 +1,7 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using FplLS;
 using static FplGrammarTypes.Ast;
+using static FplGrammarCommons;
 
 namespace FplLSTests
 {
@@ -436,7 +437,7 @@ namespace FplLSTests
         [DataRow("undefined", "undefined01")]
         // keywords without a short form
         [DataRow("alias", "alias")]
-        [DataRow("all", "all")]
+        [DataRow(keywAll, keywAll)]
         [DataRow("and", "and")]
         [DataRow("assert", "assert")]
         [DataRow("cases", "cases")]

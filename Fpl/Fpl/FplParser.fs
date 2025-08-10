@@ -168,7 +168,7 @@ let keywordImpl = skipString "impl" .>> IW
 let keywordIif = skipString "iif" .>> IW 
 let keywordXor = skipString "xor" .>> IW 
 let keywordNot = skipString "not" .>> attemptSW 
-let keywordAll = skipString "all" .>> SW 
+let keywordAll = skipString keywAll .>> SW 
 let keywordEx = skipString "ex" .>> SW
 let keywordExN = skipString "exn" .>> IW
 let keywordIs = skipString "is" .>> attemptSW 
@@ -622,7 +622,7 @@ let errInformation = [
     (INF000, ["inf"], ruleOfInference)
     (LOC000, ["loc"], localization)
     (USE000, ["uses"], usesClause)
-    (PRD000, ["and"; "or"; "impl"; "iif"; "xor"; "not"; "all"; "ex"; "is"], compoundPredicate)
+    (PRD000, ["and"; "or"; "impl"; "iif"; "xor"; "not"; keywAll; "ex"; "is"], compoundPredicate)
     (SMT000, ["assert"; "cases"; "base"; "for"; "del"], statement)
     (AGI000, ["|-"], argumentInference)
     (CAS000, ["|"], conditionFollowedByResult)

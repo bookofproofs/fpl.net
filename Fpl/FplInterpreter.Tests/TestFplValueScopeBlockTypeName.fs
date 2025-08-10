@@ -1,6 +1,7 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
+open FplGrammarCommons
 open FplInterpreterTypes
 
 [<TestClass>]
@@ -318,13 +319,13 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("inst", x.ShortName)
         | "IntrinsicInd" ->
             let x = new FplIntrinsicInd(positions, parent)
-            Assert.AreEqual<string>(constInd, x.ShortName)
+            Assert.AreEqual<string>(keywInd, x.ShortName)
         | "IntrinsicObj" ->
             let x = new FplIntrinsicObj(positions, parent)
             Assert.AreEqual<string>("obj", x.ShortName)
         | "IntrinsicPred" ->
             let x = new FplIntrinsicPred(positions, parent)
-            Assert.AreEqual<string>(constPred, x.ShortName)
+            Assert.AreEqual<string>(keywPred, x.ShortName)
         | "IntrinsicFunc" ->
             let x = new FplIntrinsicFunc(positions, parent)
             Assert.AreEqual<string>("func", x.ShortName)

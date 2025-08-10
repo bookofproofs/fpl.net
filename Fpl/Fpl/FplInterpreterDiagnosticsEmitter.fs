@@ -4,6 +4,7 @@ module FplInterpreterDiagnosticsEmitter
 open System.Collections.Generic
 open System.Text.RegularExpressions
 open FParsec
+open FplGrammarCommons
 open ErrDiagnostics
 open FplDelegates
 open FplInterpreterTypes
@@ -958,7 +959,7 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
         let argName = getType SignatureType.Name arg
         let whatWeGot = 
             if argType = argName then
-                constUndef
+                keywUndef
             else
                 argType
 

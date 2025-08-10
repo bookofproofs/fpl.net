@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
+using static FplGrammarCommons;
 
 namespace FplLS
 {

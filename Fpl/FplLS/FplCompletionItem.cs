@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -251,7 +252,7 @@ namespace FplLS
                     break;
                 case "all":
                     this.Detail = "predicate (all quantor)";
-                    this.SortText = "all";
+                    this.SortText = keywAll;
                     this.Kind = CompletionItemKind.Operator;
                     this.IsShort = false;
                     break;

@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -31,7 +32,7 @@ namespace FplLS
             ci.InsertText = $"{ci.Word}{postfix} x:FplType" + GetBody();
             switch (ci.Word)
             {
-                case "all":
+                case keywAll:
                     ci.Detail = $"all quantor (in type)";
                     break;
                 case "ex":

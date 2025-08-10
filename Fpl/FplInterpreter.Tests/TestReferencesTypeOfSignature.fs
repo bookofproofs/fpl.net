@@ -1,5 +1,6 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open FplGrammarCommons
 open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
@@ -86,19 +87,19 @@ type TestReferencesTypeOfSignature() =
             let pr1 = theory.Scope["T()"] 
             let base1 = pr1.ArgList[0]
             match var with
-            | "base1" -> Assert.AreEqual<string>(constPred, getType SignatureType.Type base1)
-            | "base2" -> Assert.AreEqual<string>(constPred, getType SignatureType.Type base1)
-            | "base3" -> Assert.AreEqual<string>(constUndef, getType SignatureType.Type base1)
-            | "base4" -> Assert.AreEqual<string>(constPred, getType SignatureType.Type base1)
+            | "base1" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type base1)
+            | "base2" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type base1)
+            | "base3" -> Assert.AreEqual<string>(keywUndef, getType SignatureType.Type base1)
+            | "base4" -> Assert.AreEqual<string>(keywPred, getType SignatureType.Type base1)
             | "base5" -> Assert.AreEqual<string>("del.Test()", getType SignatureType.Type base1)
-            | "base6" -> Assert.AreEqual<string>(constInd, getType SignatureType.Type base1)
+            | "base6" -> Assert.AreEqual<string>(keywInd, getType SignatureType.Type base1)
             | "base7" -> Assert.AreEqual<string>("bydef.Test()", getType SignatureType.Type base1)
             | "base8" -> Assert.AreEqual<string>("Test$1", getType SignatureType.Type base1)
             | "base9" -> Assert.AreEqual<string>("Test$1()", getType SignatureType.Type base1)
             | "base10" -> Assert.AreEqual<string>("Test", getType SignatureType.Type base1)
-            | "base11" -> Assert.AreEqual<string>(constUndef, getType SignatureType.Type base1)
+            | "base11" -> Assert.AreEqual<string>(keywUndef, getType SignatureType.Type base1)
             | "base11v1" -> Assert.AreEqual<string>("obj", getType SignatureType.Type base1)
-            | "base11v2" -> Assert.AreEqual<string>(constInd, getType SignatureType.Type base1)
+            | "base11v2" -> Assert.AreEqual<string>(keywInd, getType SignatureType.Type base1)
             | "base11v3" -> Assert.AreEqual<string>("Nat", getType SignatureType.Type base1)
             | "base12" -> Assert.AreEqual<string>("parent", getType SignatureType.Type base1)
             | "base13" -> Assert.AreEqual<string>("1", getType SignatureType.Type base1)

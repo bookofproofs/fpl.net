@@ -7,12 +7,189 @@ open FParsec
 
 (* This module contains information needed by both, the error recovery module and the parser *)
 
-(* Fpl Keywords *)
+(* Keyword constants *)
+[<Literal>]
+let keywAlias = "alias"
+[<Literal>]
+let keywAll = "all"
+[<Literal>]
+let keywAnd = "and"
+[<Literal>]
+let keywAss = "ass"
+[<Literal>]
+let keywAssL = "assert"
+[<Literal>]
+let keywAssume = "assume"
+[<Literal>]
+let keywAx = "ax"
+[<Literal>]
+let keywAxL = "axiom"
+[<Literal>]
+let keywBase = "base"
+[<Literal>]
+let keywByDef = "bydef"
+[<Literal>]
+let keywCases = "cases"
+[<Literal>]
+let keywCl = "cl"
+[<Literal>]
+let keywClL = "class"
+[<Literal>]
+let keywCon = "con"
+[<Literal>]
+let keywConj = "conj"
+[<Literal>]
+let keywConjL = "conjecture"
+[<Literal>]
+let keywConL = "conclusion"
+[<Literal>]
+let keywCor = "cor"
+[<Literal>]
+let keywCorL = "corollary"
+[<Literal>]
+let keywCtor = "ctor"
+[<Literal>]
+let keywCtorL = "constructor"
+[<Literal>]
+let keywDec = "dec"
+[<Literal>]
+let keywDecL = "declaration"
+[<Literal>]
+let keywDef = "def"
+[<Literal>]
+let keywDefL = "definition"
+[<Literal>]
+let keywDel = "del"
+[<Literal>]
+let keywDelL = "delegate"
+[<Literal>]
+let keywEx = "ex"
+[<Literal>]
+let keywExN = "exn"
+[<Literal>]
+let keywExt = "ext"
+[<Literal>]
+let keywExtL = "extension"
+[<Literal>]
+let keywFalse = "false"
+[<Literal>]
+let keywFor = "for"
+[<Literal>]
+let keywFunc = "func"
+[<Literal>]
+let keywFuncLong = "function"
+[<Literal>]
+let keywIif = "iif"
+[<Literal>]
+let keywImpl = "impl"
+[<Literal>]
+let keywIn = "in"
+[<Literal>]
+let keywInd = "ind"
+[<Literal>]
+let keywIndL = "index"
+[<Literal>]
+let keywInf = "inf"
+[<Literal>]
+let keywInfix = "infix"
+[<Literal>]
+let keywInfL = "inference"
+[<Literal>]
+let keywIntr = "intr"
+[<Literal>]
+let keywIntrL = "intrinsic"
+[<Literal>]
+let keywIs = "is"
+[<Literal>]
+let keywLem = "lem"
+[<Literal>]
+let keywLemL = "lemma"
+[<Literal>]
+let keywLoc = "loc"
+[<Literal>]
+let keywLocL = "localization"
+[<Literal>]
+let keywNot = "not"
+[<Literal>]
+let keywObj = "obj"
+[<Literal>]
+let keywObjL = "object"
+[<Literal>]
+let keywOpt = "opt"
+[<Literal>]
+let keywOptL = "optional"
+[<Literal>]
+let keywOr = "or"
+[<Literal>]
+let keywParent = "parent"
+[<Literal>]
+let keywPost = "post"
+[<Literal>]
+let keywPostFix = "postfix"
+[<Literal>]
+let keywPostL = "postulate"
+[<Literal>]
+let keywPre = "pre"
+[<Literal>]
+let keywPred = "pred"
+[<Literal>]
+let keywPredL = "predicate"
+[<Literal>]
+let keywPrefix = "prefix"
+[<Literal>]
+let keywPreL = "premise"
+[<Literal>]
+let keywPrf = "prf"
+[<Literal>]
+let keywPrfL = "proof"
+[<Literal>]
+let keywProp = "prop"
+[<Literal>]
+let keywPropL = "proposition"
+[<Literal>]
+let keywPrty = "prty"
+[<Literal>]
+let keywPrtyL = "property"
+[<Literal>]
+let keywQed = "qed"
+[<Literal>]
+let keywRet = "ret"
+[<Literal>]
+let keywRetL = "return"
+[<Literal>]
+let keywRev = "rev"
+[<Literal>]
+let keywRevL = "revoke"
+[<Literal>]
+let keywSelf = "self"
+[<Literal>]
+let keywSymbol = "symbol"
+[<Literal>]
+let keywThm = "thm"
+[<Literal>]
+let keywThmL = "theorem"
+[<Literal>]
+let keywTpl = "tpl"
+[<Literal>]
+let keywTrivial = "trivial"
+[<Literal>]
+let keywTrue = "true"
+[<Literal>]
+let keywUndef = "undef"
+[<Literal>]
+let keywUndefL = "undefined"
+[<Literal>]
+let keywUndetermined = "undetermined"
+[<Literal>]
+let keywUses = "uses"
+[<Literal>]
+let keywXor = "xor"
+
 let keyWordSet =
     HashSet<_>(
-        [| "alias"
-           "all"
-           "and"
+        [| keywAlias
+           keywAll
+           keywAnd
            "assert"
            "ass"
            "assume"
@@ -40,8 +217,8 @@ let keyWordSet =
            "ext"
            "extension"
            "ex"
-           "exn"
-           "false"
+           keywExN
+           keywFalse
            "for"
            "func"
            "function"

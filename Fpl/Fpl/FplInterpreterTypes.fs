@@ -7,6 +7,7 @@ open System.Collections.Generic
 open System.Text
 open System.IO
 open FParsec
+open FplGrammarCommons
 open FplGrammarTypes
 open FplParser
 open ErrDiagnostics
@@ -278,20 +279,6 @@ type ParsedAstList() =
         |> Seq.iter (fun pa -> ret.TryAdd(pa.Parsing.Uri, pa.Parsing.FplSourceCode) |> ignore)
 
         ret
-
-let constInd = "ind"
-let constObj = "obj"
-let constPred = "pred"
-let constFunc = "func"
-let constTpl = "tpl"
-let constUndef = "undef"
-let constFalse = "false"
-let constTrue = "true"
-let constUndetermined = "undetermined"
-let constImpl = "impl"
-let constAll = "all"
-let constEx = "ex"
-let constExN = "exn"
 
 
 type FplBlockType =
@@ -936,8 +923,8 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
 type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
     inherit FplValue(blockType, positions, Some parent)
     do 
-        this.FplId <- constUndetermined
-        this.TypeId <- constPred
+        this.FplId <- keywUndetermined
+        this.TypeId <- keywPred
 
     override this.Instantiate () = None
 
@@ -946,8 +933,8 @@ type FplGenericObject(blockType: FplBlockType, positions: Positions, parent: Fpl
     inherit FplValue(blockType, positions, Some parent)
 
     do
-        this.FplId <- constObj
-        this.TypeId <- constObj
+        this.FplId <- keywObj
+        this.TypeId <- keywObj
 
         //let rec getInstance (previous:FplValue) =
         //    let (inst:FplValue) = createFplValue((fplValue.StartPos,fplValue.EndPos), FplBlockType.Instance, previous)
@@ -1380,12 +1367,12 @@ type FplExtension(positions: Positions, parent: FplValue) =
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicInd, positions, Some parent)
     do 
-        this.TypeId <- constInd
-        this.FplId <- constInd
+        this.TypeId <- keywInd
+        this.FplId <- keywInd
 
 
     override this.Name = "an intrinsic index"
-    override this.ShortName = constInd
+    override this.ShortName = keywInd
 
     override this.Clone () =
         let ret = new FplIntrinsicInd((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1412,7 +1399,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.IntrinsicPred, positions, parent)
 
     override this.Name = "an intrinsic predicate"
-    override this.ShortName = constPred
+    override this.ShortName = keywPred
 
     override this.Clone () =
         let ret = new FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1422,11 +1409,11 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicUndef, positions, Some parent)
     do 
-        this.TypeId <- constUndef
-        this.FplId <- constUndef
+        this.TypeId <- keywUndef
+        this.FplId <- keywUndef
 
     override this.Name = "an intrinsic undefined"
-    override this.ShortName = constUndef
+    override this.ShortName = keywUndef
 
     override this.Clone () =
         let ret = new FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1438,8 +1425,8 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicFunc, positions, Some parent)
     do
-        this.TypeId <- constFunc
-        this.FplId <- constFunc
+        this.TypeId <- keywFunc
+        this.FplId <- keywFunc
 
     override this.Name = "an intrinsic functional term"
     override this.ShortName = "func"
@@ -1454,8 +1441,8 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicTpl, positions, Some parent)
     do
-        this.TypeId <- constTpl
-        this.FplId <- constTpl
+        this.TypeId <- keywTpl
+        this.FplId <- keywTpl
 
     override this.Name = "an intrinsic template"
     override this.ShortName = "tpl"
@@ -1498,12 +1485,12 @@ let rec getRepresentation (fplValue:FplValue) =
                 let mapping = fv.ArgList |> Seq.head 
                 $"dec {getRepresentation mapping}"
             | FplBlockType.Variable when not (fv.IsInitializedVariable) 
-                && fv.TypeId = constPred -> 
-                constUndetermined
+                && fv.TypeId = keywPred -> 
+                keywUndetermined
             | FplBlockType.Variable when 
                 not (fv.IsInitializedVariable) 
-                && fv.TypeId <> constPred 
-                && fv.TypeId <> constUndef -> 
+                && fv.TypeId <> keywPred 
+                && fv.TypeId <> keywUndef -> 
                 $"dec {getType SignatureType.Type fv}"                    
             | FplBlockType.VariadicVariableMany
             | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
@@ -1515,8 +1502,8 @@ let rec getRepresentation (fplValue:FplValue) =
                     match argOpt with
                     | Some (arg:FplValue) when arg.FplBlockType = FplBlockType.Variable && arg.IsInitializedVariable ->
                         getRepresentation arg
-                    | _ -> constUndef      
-                | _ -> constUndef
+                    | _ -> keywUndef      
+                | _ -> keywUndef
         | (false, false) 
         | (true, false) ->
             let subRepr = 
@@ -1552,14 +1539,14 @@ let rec getRepresentation (fplValue:FplValue) =
                 | FplBlockType.VariadicVariableMany1                         
                 | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
                 | FplBlockType.Variable when not (fv.IsInitializedVariable) 
-                    && fv.TypeId <> constPred 
-                    && fv.TypeId <> constUndef -> 
+                    && fv.TypeId <> keywPred 
+                    && fv.TypeId <> keywUndef -> 
                     $"dec {getType SignatureType.Type fv}"                    
                 | FplBlockType.VariadicVariableMany
                 | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
                     $"dec {getType SignatureType.Type fv}[]" 
                 | FplBlockType.Variable when not (fv.IsInitializedVariable) 
-                    && fv.ValueList[0].TypeId <> constPred -> 
+                    && fv.ValueList[0].TypeId <> keywPred -> 
                     $"dec {getType SignatureType.Type fv}"
                 | _ -> $"{fv.FplId}({subRepr})"
         | (false, true) -> 

@@ -37,21 +37,21 @@ type Delegates() =
         let b1Repr = getRepresentation b1
 
         match a1Repr with
-        | constUndef -> 
+        | keywUndef -> 
             failwithf "Predicate `=` cannot be evaluated because the left argument is undefined." 
         | _ -> ()
 
         match b1Repr with
-        | constUndef -> 
+        | keywUndef -> 
             failwithf "Predicate `=` cannot be evaluated because the right argument is undefined." 
         | _ -> ()
 
         match a1Repr with
-        | constUndetermined -> 
+        | keywUndetermined -> 
             failwithf "Predicate `=` cannot be evaluated because the left argument is undetermined." 
         | _ -> 
             match b1Repr with
-            | constUndetermined -> 
+            | keywUndetermined -> 
                 failwithf "Predicate `=` cannot be evaluated because the right argument is undetermined." 
             | _ -> 
                 failwithf "OK:%b" (a1Repr = b1Repr)

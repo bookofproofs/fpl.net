@@ -19,6 +19,7 @@ open System
 open System.Collections.Generic
 open FParsec
 open ErrDiagnostics
+open FplGrammarCommons
 open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
@@ -223,7 +224,7 @@ let rec eval (st: SymbolTable) ast =
             if fv.TypeId <> "" then
                 fv.TypeId <- fv.TypeId + sid
             else
-                fv.TypeId <- constInd
+                fv.TypeId <- keywInd
                     
             fv.EndPos <- pos2
         st.EvalPop() 
@@ -264,7 +265,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         let varValue = new FplVariable((pos1, pos2), fv) 
         varValue.FplId <- name
-        varValue.TypeId <- constUndef
+        varValue.TypeId <- keywUndef
         let undefined = new FplIntrinsicUndef((pos1, pos2), varValue)  
         varValue.ValueList.Add(undefined)
         varValue.IsSignatureVariable <- es.InSignatureEvaluation 
@@ -316,7 +317,7 @@ let rec eval (st: SymbolTable) ast =
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
             fv.FplId <- name
-            fv.TypeId <- constUndef
+            fv.TypeId <- keywUndef
         ad.DiagnosticsStopped <- diagnosticsStopFlag
         st.EvalPop() 
     | Ast.DelegateId((pos1, pos2), s) -> 
@@ -356,7 +357,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ArgumentIdentifier")
         let setId (fValue:FplValue) = 
             fValue.FplId <- s
-            fValue.TypeId <- constPred
+            fValue.TypeId <- keywPred
             fValue.StartPos <- pos1
             fValue.EndPos <- pos2
         let fv = es.PeekEvalStack()
@@ -474,8 +475,8 @@ let rec eval (st: SymbolTable) ast =
         let value = new FplIntrinsicPred((pos1, pos2), fv)
         value.StartPos <- pos1
         value.EndPos <- pos2
-        value.FplId <- constTrue
-        value.TypeId <- constPred
+        value.FplId <- keywTrue
+        value.TypeId <- keywPred
         es.PushEvalStack(value)
         es.PopEvalStack()
         st.EvalPop() 
@@ -485,8 +486,8 @@ let rec eval (st: SymbolTable) ast =
         let value = new FplIntrinsicPred((pos1, pos2), fv)
         value.StartPos <- pos1
         value.EndPos <- pos2
-        value.FplId <- constFalse
-        value.TypeId <- constPred
+        value.FplId <- keywFalse
+        value.TypeId <- keywPred
         es.PushEvalStack(value)
         es.PopEvalStack()
         st.EvalPop() 
@@ -495,8 +496,8 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         fv.StartPos <- pos1
         fv.EndPos <- pos2
-        fv.FplId <- constUndef
-        fv.TypeId <- constUndef
+        fv.FplId <- keywUndef
+        fv.TypeId <- keywUndef
         st.EvalPop() 
     | Ast.Trivial((pos1, pos2), _) -> 
         st.EvalPush("Trivial")
@@ -504,9 +505,9 @@ let rec eval (st: SymbolTable) ast =
         let refBlock = new FplReference((pos1, pos2), fv) 
         es.PushEvalStack(refBlock)
         refBlock.FplId <- "trivial"
-        refBlock.TypeId <- constPred
+        refBlock.TypeId <- keywPred
         let value = new FplIntrinsicPred((pos1, pos2), refBlock) 
-        value.FplId <- constTrue
+        value.FplId <- keywTrue
         refBlock.ValueList.Add(value)
         es.PopEvalStack()
         st.EvalPop() 
@@ -558,7 +559,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Not")
         let fv = es.PeekEvalStack()
         fv.FplId <- "not"
-        fv.TypeId <- constPred
+        fv.TypeId <- keywPred
         eval st predicateAst
         fv.EndPos <- pos2
         evaluateNegation fv
@@ -687,7 +688,7 @@ let rec eval (st: SymbolTable) ast =
         | FplBlockType.OptionalPredicate
         | FplBlockType.Predicate ->
             fv.FplId <- identifier
-            fv.TypeId <- constPred
+            fv.TypeId <- keywPred
         | FplBlockType.MandatoryFunctionalTerm
         | FplBlockType.OptionalFunctionalTerm
         | FplBlockType.FunctionalTerm ->
@@ -804,7 +805,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("And")
         let fv = es.PeekEvalStack()
         fv.FplId <- "and"
-        fv.TypeId <- constPred
+        fv.TypeId <- keywPred
         eval st predicateAst1
         eval st predicateAst2
         fv.EndPos <- pos2
@@ -815,7 +816,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Or")
         let fv = es.PeekEvalStack()
         fv.FplId <- "or"
-        fv.TypeId <- constPred
+        fv.TypeId <- keywPred
         eval st predicateAst1
         eval st predicateAst2
         fv.EndPos <- pos2
@@ -826,7 +827,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Xor")
         let fv = es.PeekEvalStack()
         fv.FplId <- "xor"
-        fv.TypeId <- constPred
+        fv.TypeId <- keywPred
         eval st predicateAst1
         eval st predicateAst2
         fv.EndPos <- pos2
@@ -1059,8 +1060,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Impl((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Impl")
         let fv = es.PeekEvalStack()
-        fv.FplId <- constImpl
-        fv.TypeId <- constPred
+        fv.FplId <- keywImpl
+        fv.TypeId <- keywPred
         eval st predicateAst1
         eval st predicateAst2
         fv.EndPos <- pos2
@@ -1071,7 +1072,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("Iif")
         let fv = es.PeekEvalStack()
         fv.FplId <- "iif"
-        fv.TypeId <- constPred
+        fv.TypeId <- keywPred
         eval st predicateAst1
         eval st predicateAst2
         fv.EndPos <- pos2
@@ -1082,7 +1083,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("IsOperator")
         let fv = es.PeekEvalStack()
         fv.FplId <- "is"
-        fv.TypeId <- constPred
+        fv.TypeId <- keywPred
         let operand = new FplReference((pos1, pos2), fv) 
         es.PushEvalStack(operand)
         eval st isOpArgAst
@@ -1185,8 +1186,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("All")
         let parent = es.PeekEvalStack()
         let fv = new FplQuantor((pos1, pos2), parent)
-        fv.FplId <- "all"
-        fv.TypeId <- constPred
+        fv.FplId <- keywAll
+        fv.TypeId <- keywPred
         es.PushEvalStack(fv)
         fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
         namedVarDeclAstList
@@ -1207,7 +1208,7 @@ let rec eval (st: SymbolTable) ast =
         let parent = es.PeekEvalStack()
         let fv = new FplQuantor((pos1, pos2), parent)
         fv.FplId <- "ex"
-        fv.TypeId <- constPred
+        fv.TypeId <- keywPred
         es.PushEvalStack(fv)
         fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
         namedVarDeclAstList
@@ -1229,7 +1230,7 @@ let rec eval (st: SymbolTable) ast =
         let parent = es.PeekEvalStack()
         let fv = new FplQuantor((pos1, pos2), parent)
         fv.FplId <- "exn"
-        fv.TypeId <- constPred
+        fv.TypeId <- keywPred
         fv.Arity <- 1
         es.PushEvalStack(fv)
         eval st dollarDigitsAst
@@ -1826,7 +1827,7 @@ let rec eval (st: SymbolTable) ast =
         optQedAst |> Option.map (eval st) |> Option.defaultValue ()
         emitVAR04diagnostics fv
         let value = new FplIntrinsicPred((pos1,pos1), fv)
-        value.FplId <- constTrue
+        value.FplId <- keywTrue
         // check if all arguments could be correctly inferred
         fv.Scope
         |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Argument)
@@ -1834,8 +1835,8 @@ let rec eval (st: SymbolTable) ast =
             let argInference = kvp.Value.ArgList[1]
             let argInferenceResult = getRepresentation argInference
             match argInferenceResult with
-            | constTrue -> ()
-            | _ -> value.FplId <- constFalse // todo all other arguments that are either undetermined or false should issue an error
+            | keywTrue -> ()
+            | _ -> value.FplId <- keywFalse // todo all other arguments that are either undetermined or false should issue an error
 
         )
         fv.ValueList.Add(value)
