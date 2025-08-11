@@ -1191,6 +1191,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+    override this.IsFplBlock () = true
     override this.IsBlock () = true
     override this.IsDefinition (): bool = true
     override this.IsFunctionalTerm (): bool = true
