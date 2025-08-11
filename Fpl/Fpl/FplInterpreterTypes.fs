@@ -677,17 +677,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         |> Seq.filter (fun fv -> fv.FplBlockType = FplBlockType.Constructor)
         |> Seq.toList
 
-    /// If this is a definition, the function will return a (possibly empty) list of all of its properties.
-    member this.GetProperties() =
-        this.Scope
-        |> Seq.map (fun kvp -> kvp.Value)
-        |> Seq.filter (fun fv ->
-            fv.FplBlockType = FplBlockType.MandatoryFunctionalTerm
-            || fv.FplBlockType = FplBlockType.OptionalFunctionalTerm
-            || fv.FplBlockType = FplBlockType.MandatoryPredicate
-            || fv.FplBlockType = FplBlockType.OptionalPredicate)
-        |> Seq.toList
-
     /// Copies other FplValue to this one without changing its reference pointer.
     member this.Copy(other: FplValue) =
         this.FplId <- other.FplId
@@ -2265,7 +2254,7 @@ let rec nextDefinition (fv: FplValue) counter =
         | Some parent -> nextDefinition parent counter
         | None -> ScopeSearchResult.NotFound
 
-
+/// Tries to match parameters of an FplValue with its arguments recursively
 let rec mpwa (args: FplValue list) (pars: FplValue list) =
     match (args, pars) with
     | (a :: ars, p :: prs) ->
@@ -2306,7 +2295,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                 | _ ->
                     // this case does not occur but for we cover it for completeness reasons
                     Some(
-                        $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does'nt match `{p.Type(SignatureType.Name)}:{pType}`"
+                        $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`"
                     )
             else
                 Some(
@@ -2326,9 +2315,12 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
             Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
     | ([], p :: prs) ->
         let pType = p.Type(SignatureType.Type)
-        let constructors = p.GetConstructors()
-        if p.IsClass() && constructors.Length = 0 then
-            None
+        if p.IsClass() then
+            let constructors = p.GetConstructors()
+            if constructors.Length = 0 then
+                None
+            else
+                Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
         else
             Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
     | (a :: [], []) ->
@@ -2336,10 +2328,10 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
             None
         else
             let aType = a.Type(SignatureType.Type)
-            Some($"no matching paramater for `{a.Type(SignatureType.Name)}:{aType}`")
+            Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
     | (a :: ars, []) ->
         let aType = a.Type(SignatureType.Type)
-        Some($"no matching paramater for `{a.Type(SignatureType.Name)}:{aType}`")
+        Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
     | ([], []) -> None
 
 /// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns

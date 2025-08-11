@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestSignatureMatching() =
 
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj ~c:ind; T(a,b,c)} ;""",
-        "no matching paramater for `c:ind` in TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
+        "no matching parameter for `c:ind` in TestSignatureMatchingReferencesPlain.T(obj, obj)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
@@ -40,7 +40,7 @@ type TestSignatureMatching() =
             Assert.IsTrue(false)
 
     [<DataRow("""def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:pred ~c:ind; T(a,b,c)} ;""",
-        "no matching paramater for `c:ind` in TestSignatureMatchingReferencesPred.T(pred, pred)")>]
+        "no matching parameter for `c:ind` in TestSignatureMatchingReferencesPred.T(pred, pred)")>]
     [<DataRow("""def pred T (x,y:pred) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:pred; T(a,b)} ;""",
@@ -175,7 +175,7 @@ type TestSignatureMatching() =
             Assert.IsTrue(false)
 
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj ~c:ind; T(a,b,c)} ;""",
-        "no matching paramater for `c:ind` in TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
+        "no matching parameter for `c:ind` in TestSignatureMatchingReferencesClasses.T(obj, obj)")>]
     [<DataRow("""def pred T (x,y:obj) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
         "")>]
     [<DataRow("""def pred T (x,y:Nat) {true} def pred Caller() {dec ~a,b:obj; T(a,b)} ;""",
@@ -266,7 +266,7 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x:+obj) {true} def pred Caller() {T()} ;""",
         "() does not match `x:+obj` in TestSignatureMatchingReferencesVariadicObj.T(+obj)")>]
     [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a,b:*obj; T(a,b)} ;""",
-        "no matching paramater for `b:*obj` in TestSignatureMatchingReferencesVariadicObj.T(*obj)")>]
+        "no matching parameter for `b:*obj` in TestSignatureMatchingReferencesVariadicObj.T(*obj)")>]
     [<DataRow("""def pred T (x:*obj) {true} def pred Caller() {dec ~a:*obj; T(a)} ;""",
         "")>]
     [<TestMethod>]
@@ -303,7 +303,7 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x:+ind) {true} def pred Caller() {T()} ;""",
         "() does not match `x:+ind` in TestSignatureMatchingReferencesVariadicInd.T(+ind)")>]
     [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a,b:*ind; T(a,b)} ;""",
-        "no matching paramater for `b:*ind` in TestSignatureMatchingReferencesVariadicInd.T(*ind)")>]
+        "no matching parameter for `b:*ind` in TestSignatureMatchingReferencesVariadicInd.T(*ind)")>]
     [<DataRow("""def pred T (x:*ind) {true} def pred Caller() {dec ~a:*ind; T(a)} ;""",
         "")>]
     [<TestMethod>]
@@ -363,7 +363,7 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x:+pred) {true} def pred Caller() {T()} ;""",
         "() does not match `x:+pred` in TestSignatureMatchingReferencesVariadicPred.T(+pred)")>]
     [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a,b:*pred; T(a,b)} ;""",
-        "no matching paramater for `b:*pred` in TestSignatureMatchingReferencesVariadicPred.T(*pred)")>]
+        "no matching parameter for `b:*pred` in TestSignatureMatchingReferencesVariadicPred.T(*pred)")>]
     [<DataRow("""def pred T (x:*pred) {true} def pred Caller() {dec ~a:*pred; T(a)} ;""",
         "")>]
     [<TestMethod>]
@@ -400,7 +400,7 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x:+func) {true} def pred Caller() {T()} ;""",
         "() does not match `x:+func` in TestSignatureMatchingReferencesVariadicFunc.T(+func)")>]
     [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a,b:*func; T(a,b)} ;""",
-        "no matching paramater for `b:*func` in TestSignatureMatchingReferencesVariadicFunc.T(*func)")>]
+        "no matching parameter for `b:*func` in TestSignatureMatchingReferencesVariadicFunc.T(*func)")>]
     [<DataRow("""def pred T (x:*func) {true} def pred Caller() {dec ~a:*func; T(a)} ;""",
         "")>]
     [<TestMethod>]
@@ -437,7 +437,7 @@ type TestSignatureMatching() =
     [<DataRow("""def pred T (x:+Nat) {true} def pred Caller() {T()} ;""",
         "() does not match `x:+Nat` in TestSignatureMatchingReferencesVariadicNat.T(+Nat)")>]
     [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a,b:*Nat; T(a,b)} ;""",
-        "no matching paramater for `b:*Nat` in TestSignatureMatchingReferencesVariadicNat.T(*Nat)")>]
+        "no matching parameter for `b:*Nat` in TestSignatureMatchingReferencesVariadicNat.T(*Nat)")>]
     [<DataRow("""def pred T (x:*Nat) {true} def pred Caller() {dec ~a:*Nat; T(a)} ;""",
         "")>]
     [<TestMethod>]
