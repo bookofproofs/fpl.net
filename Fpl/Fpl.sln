@@ -14,6 +14,9 @@ EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FplInterpreter.Tests", "FplInterpreter.Tests\FplInterpreter.Tests.fsproj", "{D7B507CD-32E5-4ECD-8E6E-D76F0F0C5318}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{980CFF4A-DD73-4DA5-A84A-0759F39CB526}"
+	ProjectSection(SolutionItems) = preProject
+		.runsettings = .runsettings
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

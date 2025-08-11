@@ -48,7 +48,7 @@ type TestExpressionEvaluationVariables() =
     [<TestMethod>]
     member this.TestExpressionEvaluationConjunction(fplCode, expected: string) =
         ad.Clear()
-        let filename = "TestExpressionEvaluationConjunction"
+        let filename = "TestExpressionEvaluationConjunction1"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
 
@@ -107,7 +107,7 @@ type TestExpressionEvaluationVariables() =
     [<TestMethod>]
     member this.TestExpressionEvaluationDisjunction(fplCode, expected: string) =
         ad.Clear()
-        let filename = "TestExpressionEvaluationDisjunction"
+        let filename = $"TestExpressionEvaluationDisjunction"
         let stOption = prepareFplCode (filename + ".fpl", fplCode, false)
         prepareFplCode (filename, "", false) |> ignore
 

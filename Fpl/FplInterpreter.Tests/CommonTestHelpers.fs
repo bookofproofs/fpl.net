@@ -50,7 +50,8 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
     let currDir = Directory.GetCurrentDirectory()
 
     printf "\n"
-    File.WriteAllText(Path.Combine(currDir, filename), fplCode)
+    if fplCode <> "" then 
+        File.WriteAllText(Path.Combine(currDir, filename), fplCode)
     let uri = PathEquivalentUri(Path.Combine(currDir, filename))
 
     let fplLibUrl =
