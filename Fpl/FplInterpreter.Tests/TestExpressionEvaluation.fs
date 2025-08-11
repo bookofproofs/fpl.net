@@ -8,8 +8,8 @@ open CommonTestHelpers
 
 [<TestClass>]
 type TestExpressionEvaluation() =
-    let evalTreeFplId (fplValue: FplValue) = getType SignatureType.Name fplValue
-    let evalTreeFplRepresentation (fplValue: FplValue) = getRepresentation fplValue
+    let evalTreeFplId (fplValue: FplValue) = fplValue.Type(SignatureType.Name)
+    let evalTreeFplRepresentation (fplValue: FplValue) = fplValue.Represent()
 
     [<DataRow("def pred T() { true };", literalTrue)>]
     [<DataRow("def pred T() { false };", literalFalse)>]
@@ -31,7 +31,7 @@ type TestExpressionEvaluation() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (getType SignatureType.Mixed pr1)
+            printfn "%s" (pr1.Type(SignatureType.Mixed))
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -63,7 +63,7 @@ type TestExpressionEvaluation() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (getType SignatureType.Mixed pr1)
+            printfn "%s" (pr1.Type(SignatureType.Mixed))
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -90,7 +90,7 @@ type TestExpressionEvaluation() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (getType SignatureType.Mixed pr1)
+            printfn "%s" (pr1.Type(SignatureType.Mixed))
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -122,7 +122,7 @@ type TestExpressionEvaluation() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (getType SignatureType.Mixed pr1)
+            printfn "%s" (pr1.Type(SignatureType.Mixed))
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -158,7 +158,7 @@ type TestExpressionEvaluation() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (getType SignatureType.Mixed pr1)
+            printfn "%s" (pr1.Type(SignatureType.Mixed))
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -187,7 +187,7 @@ type TestExpressionEvaluation() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (getType SignatureType.Mixed pr1)
+            printfn "%s" (pr1.Type(SignatureType.Mixed))
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -216,7 +216,7 @@ type TestExpressionEvaluation() =
             let actual = evalTreeFplRepresentation(pr1)
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
-            printfn "%s" (getType SignatureType.Mixed pr1)
+            printfn "%s" (pr1.Type(SignatureType.Mixed))
             printfn "%s" (evalTreeFplId(pr1))
             Assert.AreEqual<string>(expected, actual)
         | None -> Assert.IsTrue(false)
@@ -275,5 +275,5 @@ type TestExpressionEvaluation() =
             let pr1 = theory.Scope["T()"]
             let isOperand = pr1.ArgList[0]
             let mapping = isOperand.ArgList[1]
-            Assert.AreEqual<string>(expected, getType SignatureType.Type mapping)
+            Assert.AreEqual<string>(expected, mapping.Type(SignatureType.Type))
         | None -> Assert.IsTrue(false)

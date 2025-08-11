@@ -903,10 +903,10 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     not (fv.IsInitializedVariable) 
                     && fv.TypeId <> literalPred 
                     && fv.TypeId <> literalUndef -> 
-                    $"dec {getType SignatureType.Type fv}"                    
+                    $"dec {fv.Type(SignatureType.Type)}"                    
                 | FplBlockType.VariadicVariableMany
                 | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
-                    $"dec {getType SignatureType.Type fv}[]"                    
+                    $"dec {fv.Type(SignatureType.Type)}[]"                    
                 | _ -> 
                     match fv.FplBlockType with
                     | FplBlockType.Reference ->
@@ -953,13 +953,13 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     | FplBlockType.Variable when not (fv.IsInitializedVariable) 
                         && fv.TypeId <> literalPred 
                         && fv.TypeId <> literalUndef -> 
-                        $"dec {getType SignatureType.Type fv}"                    
+                        $"dec {fv.Type(SignatureType.Type)}"                    
                     | FplBlockType.VariadicVariableMany
                     | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
-                        $"dec {getType SignatureType.Type fv}[]" 
+                        $"dec {fv.Type(SignatureType.Type)}[]" 
                     | FplBlockType.Variable when not (fv.IsInitializedVariable) 
                         && fv.ValueList[0].TypeId <> literalPred -> 
-                        $"dec {getType SignatureType.Type fv}"
+                        $"dec {fv.Type(SignatureType.Type)}"
                     | _ -> $"{fv.FplId}({subRepr})"
             | (false, true) -> 
                 match fv.FplBlockType with
@@ -1033,7 +1033,7 @@ type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: 
     override this.Instantiate () = None
 
 [<AbstractClass>]
-type FplGenericPredicateWithExpression(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
+type FplGenericPredicateWithExpression(blockType: FplBlockType, positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(blockType, positions, parent)
 
 [<AbstractClass>]
@@ -1066,10 +1066,10 @@ type FplGenericObject(blockType: FplBlockType, positions: Positions, parent: Fpl
         //    match baseClassOpt with
         //    | Some (baseClass:FplValue) -> 
         //        getInstance baseClass
-        //    | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {getType SignatureType.Mixed fplValue}") 
+        //    | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {fplValue.Type(SignatureType.Mixed)}") 
         //| _ -> 
         //    createRoot() // todo
-        //    //failwith ($"Cannot create an instance of a non-class {getType SignatureType.Mixed this}")    
+        //    //failwith ($"Cannot create an instance of a non-class {this.Type(SignatureType.Mixed)}")    
 
 type FplRuleOfInference(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.RuleOfInference, positions, parent)
@@ -1508,7 +1508,7 @@ type FplStmt(positions: Positions, parent: FplValue) =
             match baseClassOpt with
             | Some (baseClass:FplValue) when baseClass.FplBlockType = FplBlockType.Class -> 
                 Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
-            | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {getType SignatureType.Mixed this}") 
+            | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
         else
             None
 
@@ -1640,7 +1640,7 @@ type ScopeSearchResult =
 /// Qualified starting position of this FplValue
 let qualifiedStartPos (fplValue:FplValue) =
     let rec getFullName (fv: FplValue) (first: bool) =
-        let fvType = getType SignatureType.Mixed fv
+        let fvType = fv.Type(SignatureType.Mixed)
 
         if fv.FplBlockType = FplBlockType.Root then
             ""
@@ -1661,7 +1661,7 @@ let qualifiedStartPos (fplValue:FplValue) =
 
 
 /// A string representation of an FplValue
-let toString (fplValue:FplValue) = $"{fplValue.ShortName} {getType SignatureType.Name fplValue}"
+let toString (fplValue:FplValue) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
 
 /// Qualified name of this FplValue
 let qualifiedName (fplValue:FplValue)=
@@ -1669,11 +1669,11 @@ let qualifiedName (fplValue:FplValue)=
         let fplValueType =
             match fv.FplBlockType with
             | FplBlockType.Localization
-            | FplBlockType.Reference -> getType SignatureType.Name fv
+            | FplBlockType.Reference -> fv.Type(SignatureType.Name)
             | FplBlockType.Localization
             | FplBlockType.Constructor
-            | _ when fv.IsBlock() -> getType SignatureType.Mixed fv
-            | FplBlockType.Quantor -> getType SignatureType.Mixed fv
+            | _ when fv.IsBlock() -> fv.Type(SignatureType.Mixed)
+            | FplBlockType.Quantor -> fv.Type(SignatureType.Mixed)
             | _ -> fv.FplId
 
         if fv.FplBlockType = FplBlockType.Root then
@@ -1848,7 +1848,7 @@ let tryFindAssociatedBlockForProof (fplValue: FplValue) =
             if provableBlocklist.Length > 1 then
                 ScopeSearchResult.FoundMultiple(
                     provableBlocklist
-                    |> List.map (fun fv -> sprintf "%s %s" fv.Name (getType SignatureType.Mixed fv))
+                    |> List.map (fun fv -> sprintf "%s %s" fv.Name (fv.Type(SignatureType.Mixed)))
                     |> String.concat ", "
                 )
             elif provableBlocklist.Length > 0 then
@@ -1882,7 +1882,7 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
                 // the potential theorem name of the corollary is the
                 // concatenated type signature of the name of the corollary
                 // without the last dollar digit
-                let potentialBlockName = stripLastDollarDigit (getType SignatureType.Mixed fplValue)
+                let potentialBlockName = stripLastDollarDigit (fplValue.Type(SignatureType.Mixed))
 
                 flattenedScopes
                 |> Seq.filter (fun fv -> fv.FplId = potentialBlockName)
@@ -1907,7 +1907,7 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
             if potentialBlockList.Length > 1 then
                 ScopeSearchResult.FoundMultiple(
                     potentialBlockList
-                    |> List.map (fun fv -> sprintf "%s %s" fv.Name (getType SignatureType.Mixed fv))
+                    |> List.map (fun fv -> sprintf "%s %s" fv.Name (fv.Type(SignatureType.Mixed)))
                     |> String.concat ", "
                 )
             elif potentialBlockList.Length > 0 then
@@ -1926,7 +1926,7 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
 /// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
 /// The classRoot is required to have an FplValueType.Class.
 let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) =
-    let rootType = getType SignatureType.Type classRoot
+    let rootType = classRoot.Type(SignatureType.Type)
 
     match classRoot.FplBlockType with
     | FplBlockType.Class
@@ -2018,9 +2018,9 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
                     String.Empty, String.Empty
 
             sb.AppendLine(indentMinusOne + "{") |> ignore
-            let name = $"{getType SignatureType.Name root}".Replace(@"\", @"\\")
-            let fplTypeName = $"{getType SignatureType.Type root}".Replace(@"\", @"\\")
-            let fplValueRepr = $"{getRepresentation root}".Replace(@"\", @"\\")
+            let name = $"{root.Type(SignatureType.Name)}".Replace(@"\", @"\\")
+            let fplTypeName = $"{root.Type(SignatureType.Type)}".Replace(@"\", @"\\")
+            let fplValueRepr = $"{root.Represent()}".Replace(@"\", @"\\")
 
             if name = this.MainTheory then
                 sb.AppendLine($"{indent}\"Name\": \"(Main) {name}\",") |> ignore
@@ -2088,7 +2088,7 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
         sb.AppendLine("SymbolTable: ") |> ignore
 
         this.Root.Scope
-        |> Seq.map (fun theory -> $"{getType SignatureType.Mixed theory.Value} ({theory.Value.Scope.Count})")
+        |> Seq.map (fun theory -> $"{theory.Value.Type(SignatureType.Mixed)} ({theory.Value.Scope.Count})")
         |> String.concat Environment.NewLine
         |> sb.AppendLine
         |> ignore
@@ -2221,13 +2221,13 @@ let rec nextDefinition (fv: FplValue) counter =
     | FplBlockType.Proof
     | FplBlockType.Localization
     | FplBlockType.RuleOfInference ->
-        let name = $"{fv.Name} {getType SignatureType.Name fv}"
+        let name = $"{fv.Name} {fv.Type(SignatureType.Name)}"
         ScopeSearchResult.FoundIncorrectBlock name
     | FplBlockType.Theory ->
         let name =
             if blocks.Count > 0 then
                 let fv1 = blocks.Peek()
-                $"{fv1.Name} {getType SignatureType.Name fv1}"
+                $"{fv1.Name} {fv1.Type(SignatureType.Name)}"
             else
                 "(no block found)"
 
@@ -2252,7 +2252,7 @@ let rec nextDefinition (fv: FplValue) counter =
                 let name =
                     if blocks.Count > 0 then
                         let fv1 = blocks.Peek()
-                        $"{fv1.Name} {getType SignatureType.Name fv}"
+                        $"{fv1.Name} {fv.Type(SignatureType.Name)}"
                     else
                         "(no block found)"
 
@@ -2268,8 +2268,8 @@ let rec nextDefinition (fv: FplValue) counter =
 let rec mpwa (args: FplValue list) (pars: FplValue list) =
     match (args, pars) with
     | (a :: ars, p :: prs) ->
-        let aType = getType SignatureType.Type a
-        let pType = getType SignatureType.Type p 
+        let aType = a.Type(SignatureType.Type)
+        let pType = p.Type(SignatureType.Type) 
 
         if aType = pType then
             mpwa ars prs
@@ -2278,7 +2278,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
         elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "???" then
             if ars.Length > 0 then mpwa ars pars else None
         elif pType.StartsWith("+") && aType = "???" then
-            Some($"() does not match `{getType SignatureType.Name p}:{pType}`")
+            Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif pType = $"+{aType}" then
             if ars.Length > 0 then mpwa ars pars else None
         elif
@@ -2300,45 +2300,45 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
                     | Some str -> mpwa ars prs
                     | None ->
                         Some(
-                            $"`{getType SignatureType.Name a}:{aType}` neither matches `{getType SignatureType.Name p}:{pType}` nor the base classes"
+                            $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
                         )
                 | _ ->
                     // this case does not occur but for we cover it for completeness reasons
                     Some(
-                        $"`{getType SignatureType.Name a}:{aType}` is undefined and does'nt match `{getType SignatureType.Name p}:{pType}`"
+                        $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does'nt match `{p.Type(SignatureType.Name)}:{pType}`"
                     )
             else
                 Some(
-                    $"`{getType SignatureType.Name a}:{aType}` is undefined and does not match `{getType SignatureType.Name p}:{pType}`"
+                    $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`"
                 )
         elif aType.StartsWith(pType + "(") then
             None
         elif aType = "???" && pType <> "???" then
-            Some($"`()` does not match `{getType SignatureType.Name p}:{pType}`")
+            Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif aType.StartsWith(literalFunc) then
             let someMap = a.Mapping
 
             match someMap with
             | Some map -> mpwa [ map ] [ p ]
-            | _ -> Some($"`{getType SignatureType.Name a}:{aType}` does not match `{getType SignatureType.Name p}:{pType}`")
+            | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         else
-            Some($"`{getType SignatureType.Name a}:{aType}` does not match `{getType SignatureType.Name p}:{pType}`")
+            Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
     | ([], p :: prs) ->
-        let pType = getType SignatureType.Type p
+        let pType = p.Type(SignatureType.Type)
         let constructors = p.GetConstructors()
         if p.IsClass() && constructors.Length = 0 then
             None
         else
-            Some($"missing argument for `{getType SignatureType.Name p}:{pType}`")
+            Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
     | (a :: [], []) ->
         if a.FplId = "???" then
             None
         else
-            let aType = getType SignatureType.Type a
-            Some($"no matching paramater for `{getType SignatureType.Name a}:{aType}`")
+            let aType = a.Type(SignatureType.Type)
+            Some($"no matching paramater for `{a.Type(SignatureType.Name)}:{aType}`")
     | (a :: ars, []) ->
-        let aType = getType SignatureType.Type a
-        Some($"no matching paramater for `{getType SignatureType.Name a}:{aType}`")
+        let aType = a.Type(SignatureType.Type)
+        Some($"no matching paramater for `{a.Type(SignatureType.Name)}:{aType}`")
     | ([], []) -> None
 
 /// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns

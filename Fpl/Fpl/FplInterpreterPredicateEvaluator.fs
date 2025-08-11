@@ -17,7 +17,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 let evaluateNegation (fplValue:FplValue) = 
     let arg = fplValue.ArgList[0]
-    match getRepresentation arg with 
+    match arg.Represent() with 
     | FplGrammarCommons.literalFalse -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
         newValue.FplId <- literalTrue
@@ -35,8 +35,8 @@ let evaluateNegation (fplValue:FplValue) =
 let evaluateConjunction (fplValue:FplValue) =
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]
-    let arg1Repr = getRepresentation arg1
-    let arg2Repr = getRepresentation arg2
+    let arg1Repr = arg1.Represent()
+    let arg2Repr = arg2.Represent()
     let newValue =  new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
     newValue.FplId <- 
         match (arg1Repr, arg2Repr) with
@@ -52,8 +52,8 @@ let evaluateConjunction (fplValue:FplValue) =
 let evaluateDisjunction (fplValue:FplValue) = 
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]
-    let arg1Repr = getRepresentation arg1
-    let arg2Repr = getRepresentation arg2
+    let arg1Repr = arg1.Represent()
+    let arg2Repr = arg2.Represent()
     match (arg1Repr, arg2Repr) with
     | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalFalse) 
     | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalTrue) 
@@ -72,8 +72,8 @@ let evaluateDisjunction (fplValue:FplValue) =
 let evaluateExclusiveOr (fplValue:FplValue) = 
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]
-    let arg1Repr = getRepresentation arg1
-    let arg2Repr = getRepresentation arg2
+    let arg1Repr = arg1.Represent()
+    let arg2Repr = arg2.Represent()
     match (arg1Repr, arg2Repr) with
     | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalFalse) 
     | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalTrue) -> 
@@ -92,8 +92,8 @@ let evaluateExclusiveOr (fplValue:FplValue) =
 let evaluateImplication (fplValue:FplValue) = 
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]
-    let arg1Repr = getRepresentation arg1
-    let arg2Repr = getRepresentation arg2
+    let arg1Repr = arg1.Represent()
+    let arg2Repr = arg2.Represent()
     match (arg1Repr, arg2Repr) with
     | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalFalse) -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
@@ -112,8 +112,8 @@ let evaluateImplication (fplValue:FplValue) =
 let evaluateEquivalence (fplValue:FplValue) = 
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]
-    let arg1Repr = getRepresentation arg1
-    let arg2Repr = getRepresentation arg2
+    let arg1Repr = arg1.Represent()
+    let arg2Repr = arg2.Represent()
     match (arg1Repr, arg2Repr) with
     | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) 
     | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) -> 

@@ -1833,7 +1833,7 @@ let rec eval (st: SymbolTable) ast =
         |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Argument)
         |> Seq.iter (fun kvp -> 
             let argInference = kvp.Value.ArgList[1]
-            let argInferenceResult = getRepresentation argInference
+            let argInferenceResult = argInference.Represent()
             match argInferenceResult with
             | FplGrammarCommons.literalTrue -> ()
             | _ -> value.FplId <- literalFalse // todo all other arguments that are either undetermined or false should issue an error

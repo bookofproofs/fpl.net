@@ -27,7 +27,7 @@ type TestFplValueNesting() =
 
             let pr1 = theory.Scope["X()"] 
             let base1 = pr1.ArgList[0]
-            let resS = getType SignatureType.Mixed base1
+            let resS = base1.Type(SignatureType.Mixed)
 
             Assert.AreEqual<string>(literalTrue, resS)
         | _ -> Assert.IsTrue(false)
@@ -49,7 +49,7 @@ type TestFplValueNesting() =
             let arg1 = prf.Scope["1."]
             let arg2 = prf.Scope["2."]
             let arg3 = prf.Scope["3."]
-            Assert.AreEqual<string>("1.",getType SignatureType.Mixed arg1)
-            Assert.AreEqual<string>("2.",getType SignatureType.Mixed arg2)
-            Assert.AreEqual<string>("3.",getType SignatureType.Mixed arg3)
+            Assert.AreEqual<string>("1.",arg1.Type(SignatureType.Mixed))
+            Assert.AreEqual<string>("2.",arg2.Type(SignatureType.Mixed))
+            Assert.AreEqual<string>("3.",arg3.Type(SignatureType.Mixed))
         | _ -> Assert.IsTrue(false)

@@ -33,8 +33,8 @@ type Delegates() =
 
         let a1 = getActual(a)
         let b1 = getActual(b)
-        let a1Repr = getRepresentation a1
-        let b1Repr = getRepresentation b1
+        let a1Repr = a1.Represent()
+        let b1Repr = b1.Represent()
 
         match a1Repr with
         | FplGrammarCommons.literalUndef -> 
@@ -57,7 +57,7 @@ type Delegates() =
                 failwithf "OK:%b" (a1Repr = b1Repr)
 
     let _decrement (a:FplValue) =
-        $"todo {getRepresentation a}" 
+        $"todo {a.Represent()}" 
 
     let _externalDelegates = 
         Map.ofList [

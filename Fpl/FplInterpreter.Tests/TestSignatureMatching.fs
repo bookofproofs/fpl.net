@@ -30,8 +30,8 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("Caller(")) |> List.head
+            let fvPars = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("Caller(")) |> List.head
             let fvArgs = pred.ArgList[0]
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
@@ -59,8 +59,8 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("Caller(")) |> List.head
+            let fvPars = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("Caller(")) |> List.head
             let fvArgs = pred.ArgList[0]
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
@@ -84,8 +84,8 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("Caller(")) |> List.head
+            let fvPars = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("Caller(")) |> List.head
             let fvArgs = pred.ArgList[0]
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
@@ -139,8 +139,8 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("Caller(")) |> List.head
+            let fvPars = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("Caller(")) |> List.head
             let retStmt = pred.ArgList[pred.ArgList.Count - 1]
             let fvArgs = retStmt.ArgList[0]
             match matchArgumentsWithParameters fvArgs fvPars with
@@ -165,8 +165,8 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("Caller(")) |> List.head
+            let fvPars = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("Caller(")) |> List.head
             let fvArgs = pred.ArgList[0]
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
@@ -200,8 +200,8 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("Caller(")) |> List.head
+            let fvPars = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("Caller(")) |> List.head
             let fvArgs = pred.ArgList[0]
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
@@ -241,7 +241,7 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let testClass = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("C")) |> List.head
+            let testClass = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("C")) |> List.head
             let parentClass = testClass.ArgList[0]
             let constructorParentClass = parentClass.Scope.Values |> Seq.toList |> List.head
             let constructor = testClass.Scope.Values |> Seq.toList |> List.head
@@ -281,8 +281,8 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("Caller(")) |> List.head
+            let fvPars = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("Caller(")) |> List.head
             let fvArgs = pred.ArgList[0]
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
@@ -318,8 +318,8 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("Caller(")) |> List.head
+            let fvPars = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("Caller(")) |> List.head
             let fvArgs = pred.ArgList[0]
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
@@ -341,7 +341,7 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let block = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
+            let block = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
             let fvPars = block.Scope |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
             let fvArgs = block.ArgList[0] 
             match matchArgumentsWithParameters fvArgs fvPars with
@@ -378,8 +378,8 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("Caller(")) |> List.head
+            let fvPars = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("Caller(")) |> List.head
             let fvArgs = pred.ArgList[0]
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
@@ -415,8 +415,8 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("Caller(")) |> List.head
+            let fvPars = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("Caller(")) |> List.head
             let fvArgs = pred.ArgList[0]
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
@@ -452,8 +452,8 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let fvPars = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("Caller(")) |> List.head
+            let fvPars = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("Caller(")) |> List.head
             let fvArgs = pred.ArgList[0]
             match matchArgumentsWithParameters fvArgs fvPars with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
@@ -501,7 +501,7 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let cl = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T")) |> List.head
+            let cl = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T")) |> List.head
             let res = findClassInheritanceChain cl literalObj
             match res with 
             | None -> Assert.AreEqual<string>("was not found", "was not found")
@@ -543,7 +543,7 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
             let stmtAssign = pred.ArgList[0]
             let fvParsPre = stmtAssign.ArgList[0]
             let fvPars = fvParsPre.GetArgument.Value
@@ -575,10 +575,10 @@ type TestSignatureMatching() =
             let r = st.Root
             let theory = r.Scope[filename]
             let blocks = theory.Scope.Values |> Seq.toList 
-            let pred = blocks |> List.filter(fun fv -> (getType SignatureType.Name fv).StartsWith("T(")) |> List.head
+            let pred = blocks |> List.filter(fun fv -> (fv.Type(SignatureType.Name)).StartsWith("T(")) |> List.head
             let stmtAssign = pred.ArgList[0]
             let assignedReferenceValue = stmtAssign.ArgList[1]
             let candidate = assignedReferenceValue.Scope[assignedReferenceValue.FplId]
-            Assert.AreEqual<string>(expectedCandidateSignature, getType SignatureType.Type candidate)
+            Assert.AreEqual<string>(expectedCandidateSignature, candidate.Type(SignatureType.Type))
         | None -> 
             Assert.IsTrue(false)
