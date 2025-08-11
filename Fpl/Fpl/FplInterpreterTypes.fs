@@ -398,46 +398,22 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     /// Indicates if this FplValue is an FPL building block, a property, or a constructor.
     abstract member IsBlock: unit -> bool
 
-    /// Indicates if this FplValue is a definition.
-    abstract member IsDefinition: unit -> bool
-    
     /// Indicates if this FplValue is a class.
     abstract member IsClass: unit -> bool
-
-    /// Indicates if this FplValue is a functional term.
-    abstract member IsFunctionalTerm: unit -> bool
-
-    /// Indicates if this FplValue is a proof or a corollary.
-    abstract member IsProofOrCorollary: unit -> bool
 
     /// Indicates if this FplValue is a proof.
     abstract member IsProof: unit -> bool
 
-    /// Indicates if this FplValue is a corollary.
-    abstract member IsCorollary: unit -> bool
-
-    /// Indicates if this FplValue is a constructor or a property.
-    abstract member IsConstructorOrProperty: unit -> bool
-
-    /// Indicates if this FplValue is a property.
-    abstract member IsProperty: unit -> bool
-
     /// Indicates if this FplValue is a variable or some variadic variable.
     abstract member IsVariable: unit -> bool
 
-    (* Default implementations = everything is false, only the trues are overidden in derived classes *)
+    (* Default implementations = everything is false, only the trues are overridden in derived classes *)
     override this.IsRoot () = false
     override this.IsTheory () = false
     override this.IsFplBlock () = false
     override this.IsBlock () = false
-    override this.IsDefinition (): bool = false
     override this.IsClass (): bool = false
-    override this.IsFunctionalTerm (): bool = false
-    override this.IsProofOrCorollary (): bool = false
     override this.IsProof (): bool = false
-    override this.IsCorollary (): bool = false
-    override this.IsConstructorOrProperty (): bool = false
-    override this.IsProperty (): bool = false
     override this.IsVariable (): bool = false
     
     override this.AssignParts (ret:FplValue) =
@@ -628,18 +604,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     member this.IsIntrinsic
         with get () = _isIntrinsic
         and set (value) = _isIntrinsic <- value
-
-    /// Indicates if this FplValue is a reference
-    static member IsReference(fplValue: FplValue) =
-        fplValue.FplBlockType = FplBlockType.Reference
-
-    /// Indicates if this FplValue is a variadic *variable.
-    static member IsVariadicVariableMany(fplValue: FplValue) =
-        fplValue.FplBlockType = FplBlockType.VariadicVariableMany
-
-    /// Indicates if this FplValue is a variadic +variable.
-    static member IsVariadicVariableMany1(fplValue: FplValue) =
-        fplValue.FplBlockType = FplBlockType.VariadicVariableMany1
 
     /// Create a (possibly empty) list of all variables in the scope of this FplValue.
     /// If the FplValue is itself a variable, it will be included in the list.
@@ -973,18 +937,6 @@ type FplRoot() =
         this.AssignParts(ret)
         ret
     override this.IsRoot () = true
-    override this.IsTheory () = false
-    override this.IsFplBlock () = false
-    override this.IsBlock () = false
-    override this.IsDefinition (): bool = false
-    override this.IsClass (): bool = false
-    override this.IsFunctionalTerm (): bool = false
-    override this.IsProofOrCorollary (): bool = false
-    override this.IsProof (): bool = false
-    override this.IsCorollary (): bool = false
-    override this.IsConstructorOrProperty (): bool = false
-    override this.IsProperty (): bool = false
-    override this.IsVariable (): bool = false
 
 type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this =
     inherit FplValue(FplBlockType.Theory, positions, Some parent)
@@ -998,19 +950,8 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
         let ret = new FplTheory((this.StartPos, this.EndPos), this.Parent.Value, this.FilePath.Value)
         this.AssignParts(ret)
         ret
-    override this.IsRoot () = false
+
     override this.IsTheory () = true
-    override this.IsFplBlock () = false
-    override this.IsBlock () = false
-    override this.IsDefinition (): bool = false
-    override this.IsClass (): bool = false
-    override this.IsFunctionalTerm (): bool = false
-    override this.IsProofOrCorollary (): bool = false
-    override this.IsProof (): bool = false
-    override this.IsCorollary (): bool = false
-    override this.IsConstructorOrProperty (): bool = false
-    override this.IsProperty (): bool = false
-    override this.IsVariable (): bool = false
 
 [<AbstractClass>]
 type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
@@ -1147,7 +1088,6 @@ type FplClass(positions: Positions, parent: FplValue) =
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
-    override this.IsDefinition (): bool = true
     override this.IsClass (): bool = true
 
 type FplConstructor(positions: Positions, parent: FplValue) =
@@ -1165,7 +1105,6 @@ type FplConstructor(positions: Positions, parent: FplValue) =
         Some (new FplInstance((this.StartPos, this.EndPos), this))
 
     override this.IsBlock () = true
-    override this.IsConstructorOrProperty (): bool = true
 
 type FplFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.FunctionalTerm, positions, Some parent)
@@ -1182,8 +1121,6 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
-    override this.IsDefinition (): bool = true
-    override this.IsFunctionalTerm (): bool = true
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.MandatoryFunctionalTerm, positions, Some parent)
@@ -1199,9 +1136,6 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.Instantiate () = None
 
     override this.IsBlock () = true
-    override this.IsFunctionalTerm (): bool = true
-    override this.IsConstructorOrProperty (): bool = true
-    override this.IsProperty (): bool = true
 
 type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.OptionalFunctionalTerm, positions, Some parent)
@@ -1217,9 +1151,6 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.Instantiate () = None
 
     override this.IsBlock () = true
-    override this.IsFunctionalTerm (): bool = true
-    override this.IsConstructorOrProperty (): bool = true
-    override this.IsProperty (): bool = true
 
 type FplPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Predicate, positions, parent)
@@ -1234,7 +1165,6 @@ type FplPredicate(positions: Positions, parent: FplValue) =
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
-    override this.IsDefinition (): bool = true
 
 type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.MandatoryPredicate, positions, parent)
@@ -1248,8 +1178,6 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
         ret
 
     override this.IsBlock () = true
-    override this.IsConstructorOrProperty (): bool = true
-    override this.IsProperty (): bool = true
 
 
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
@@ -1264,8 +1192,6 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
         ret
 
     override this.IsBlock () = true
-    override this.IsConstructorOrProperty (): bool = true
-    override this.IsProperty (): bool = true
 
 type FplAxiom(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(FplBlockType.Axiom, positions, parent)
@@ -1350,8 +1276,6 @@ type FplCorollary(positions: Positions, parent: FplValue) =
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
-    override this.IsProofOrCorollary (): bool = true
-    override this.IsCorollary (): bool = true
 
 type FplProof(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Proof, positions, parent)
@@ -1366,7 +1290,6 @@ type FplProof(positions: Positions, parent: FplValue) =
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
-    override this.IsProofOrCorollary (): bool = true
     override this.IsProof (): bool = true
 
 type FplArgument(positions: Positions, parent: FplValue) =
