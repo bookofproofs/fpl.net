@@ -47,9 +47,9 @@ type EvalStack() =
             |  FplBlockType.Constructor -> 
                 getType SignatureType.Mixed fv
             | _ -> 
-                if FplValue.IsBlock(fv) then 
+                if fv.IsBlock() then 
                     getType SignatureType.Mixed fv
-                elif FplValue.IsVariable(fv) then 
+                elif fv.IsVariable() then 
                     fv.FplId
                 else
                     getType SignatureType.Name fv

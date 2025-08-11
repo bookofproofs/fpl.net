@@ -136,7 +136,7 @@ let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
     | FplBlockType.Proof 
     | FplBlockType.Corollary ->
         fplValue.Scope
-        |> Seq.filter (fun kv -> FplValue.IsVariable(kv.Value))
+        |> Seq.filter (fun kv -> kv.Value.IsVariable())
         |> Seq.iter (fun kv -> 
             let res = variableInBlockScopeByName (kv.Value) (getType SignatureType.Mixed kv.Value) false
             match res with
@@ -881,15 +881,15 @@ let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) =
         ad.AddDiagnostic diagnostic
 
 let rec blocktIsProof (fplValue: FplValue) =
-    if FplValue.IsProof(fplValue) then
+    if fplValue.IsProof() then
         true
     else
         match fplValue.Parent with
         | Some parent ->
-            if FplValue.IsTheory(parent) then
+            if parent.IsTheory() then
                 false
-            elif FplValue.IsFplBlock(parent) then
-                FplValue.IsProof(parent)
+            elif parent.IsFplBlock() then
+                parent.IsProof()
             else
                 blocktIsProof parent
         | None -> false

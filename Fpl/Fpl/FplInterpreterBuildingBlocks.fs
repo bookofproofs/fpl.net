@@ -1252,13 +1252,13 @@ let rec eval (st: SymbolTable) ast =
         match optAst with
         | Some ast1 -> 
             eval st ast1
-            if FplValue.IsFplBlock(fv) then
+            if fv.IsFplBlock() then
                 fv.FplBlockType <- FplBlockType.FunctionalTerm
             else
                 fv.FplBlockType <- FplBlockType.OptionalFunctionalTerm
                 fv.TypeId <- literalFunc
         | None -> 
-            if FplValue.IsFplBlock(fv) then
+            if fv.IsFplBlock() then
                 fv.FplBlockType <- FplBlockType.FunctionalTerm
             else
                 fv.FplBlockType <- FplBlockType.MandatoryFunctionalTerm

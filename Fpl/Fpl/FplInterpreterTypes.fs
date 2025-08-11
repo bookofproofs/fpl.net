@@ -357,8 +357,8 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     let mutable (_filePath: string option) = None
     let mutable _hasBrackets = false
     let mutable _isIntrinsic = false
-    let mutable _isSignatureVariable = false
     let mutable _isInitializedVariable = false
+    let mutable _isSignatureVariable = false
 
     let mutable _parent = parent
     let _scope = Dictionary<string, FplValue>()
@@ -385,6 +385,60 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     abstract member Name: string
     abstract member Represent: unit -> string
 
+    /// Indicates if this FplValue is an root of the symbol table.
+    abstract member IsRoot: unit -> bool
+
+    /// Indicates if this FplValue is a constructor or a theory
+    abstract member IsTheory: unit -> bool
+
+    /// Indicates if this FplValue is an FPL building block.
+    abstract member IsFplBlock: unit -> bool
+
+    /// Indicates if this FplValue is an FPL building block, a property, or a constructor.
+    abstract member IsBlock: unit -> bool
+
+    /// Indicates if this FplValue is a definition.
+    abstract member IsDefinition: unit -> bool
+    
+    /// Indicates if this FplValue is a class.
+    abstract member IsClass: unit -> bool
+
+    /// Indicates if this FplValue is a functional term.
+    abstract member IsFunctionalTerm: unit -> bool
+
+    /// Indicates if this FplValue is a proof or a corollary.
+    abstract member IsProofOrCorollary: unit -> bool
+
+    /// Indicates if this FplValue is a proof.
+    abstract member IsProof: unit -> bool
+
+    /// Indicates if this FplValue is a corollary.
+    abstract member IsCorollary: unit -> bool
+
+    /// Indicates if this FplValue is a constructor or a property.
+    abstract member IsConstructorOrProperty: unit -> bool
+
+    /// Indicates if this FplValue is a property.
+    abstract member IsProperty: unit -> bool
+
+    /// Indicates if this FplValue is a variable or some variadic variable.
+    abstract member IsVariable: unit -> bool
+
+    (* Default implementations = everything is false, only the trues are overidden in derived classes *)
+    override this.IsRoot () = false
+    override this.IsTheory () = false
+    override this.IsFplBlock () = false
+    override this.IsBlock () = false
+    override this.IsDefinition (): bool = false
+    override this.IsClass (): bool = false
+    override this.IsFunctionalTerm (): bool = false
+    override this.IsProofOrCorollary (): bool = false
+    override this.IsProof (): bool = false
+    override this.IsCorollary (): bool = false
+    override this.IsConstructorOrProperty (): bool = false
+    override this.IsProperty (): bool = false
+    override this.IsVariable (): bool = false
+    
     override this.AssignParts (ret:FplValue) =
         ret.FplId <- this.FplId
 
@@ -454,6 +508,23 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     )
                 )
 
+    /// Indicates if this FplValue is a variable declared in the signature (true) or in the block (false).
+    member this.IsSignatureVariable
+        with get () =
+            if this.IsVariable() then
+                _isSignatureVariable
+            else
+                false
+        and set (value) =
+            if this.IsVariable() then
+                _isSignatureVariable <- value
+            else
+                raise (
+                    ArgumentException(
+                        sprintf "Cannot set IsSignatureVariable for non-variable %s" this.ShortName
+                    )
+                )
+
     /// Type of the FPL block within this FplValue
     member this.FplBlockType
         with get () = _blockType
@@ -509,7 +580,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
             // Exceptions: 
             // 1) if refValue is a class, its "arg list" means something else - namely parent classes. In this case we only want to return the main class
             // 2) if refValue is a constructor, its "arg list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
-            if refValue.ArgList.Count > 0 && not (FplValue.IsClass(refValue)) && refValue.FplBlockType <> FplBlockType.Constructor then
+            if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && refValue.FplBlockType <> FplBlockType.Constructor then
                 Some refValue.ArgList[0] // return existing values except of classes, because those denoted their parent classes
             else 
                 Some refValue 
@@ -547,99 +618,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
             this.ValueList.Clear()
             this.ValueList.Add(fplValue)
 
-    /// Indicates if this FplValue is an FPL building block.
-    static member IsFplBlock(fplValue: FplValue) =
-        match fplValue.FplBlockType with
-        | FplBlockType.Axiom
-        | FplBlockType.Theorem
-        | FplBlockType.Lemma
-        | FplBlockType.Proposition
-        | FplBlockType.Corollary
-        | FplBlockType.Conjecture
-        | FplBlockType.Proof
-        | FplBlockType.RuleOfInference
-        | FplBlockType.Predicate
-        | FplBlockType.FunctionalTerm
-        | FplBlockType.Class -> true
-        | _ -> false
-
-    /// Indicates if this FplValue is a definition
-    static member IsDefinition(fplValue: FplValue) =
-        match fplValue.FplBlockType with
-        | FplBlockType.Predicate
-        | FplBlockType.FunctionalTerm
-        | FplBlockType.Class -> true
-        | _ -> false
-
-    /// Indicates if this FplValue is an root of the symbol table.
-    static member IsRoot(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Root
-    /// Indicates if this FplValue is a class.
-    static member IsClass(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Class
-
-    /// Indicates if this FplValue is a proof.
-    static member IsProof(fplValue: FplValue) = fplValue.FplBlockType = FplBlockType.Proof
-
-    /// Indicates if this FplValue is a corollary.
-    static member IsCorollary(fplValue: FplValue) =
-        fplValue.FplBlockType = FplBlockType.Corollary
-
-    /// Indicates if this FplValue is a property.
-    static member IsProperty(fplValue: FplValue) =
-        fplValue.FplBlockType = FplBlockType.MandatoryFunctionalTerm
-        || fplValue.FplBlockType = FplBlockType.OptionalFunctionalTerm
-        || fplValue.FplBlockType = FplBlockType.MandatoryPredicate
-        || fplValue.FplBlockType = FplBlockType.OptionalPredicate
-
-    /// Indicates if this FplValue is a functional term.
-    static member IsFunctionalTerm(fplValue: FplValue) =
-        fplValue.FplBlockType = FplBlockType.MandatoryFunctionalTerm
-        || fplValue.FplBlockType = FplBlockType.OptionalFunctionalTerm
-        || fplValue.FplBlockType = FplBlockType.FunctionalTerm
-
-    /// Indicates if this FplValue is a constructor or a property
-    static member IsConstructorOrProperty(fplValue: FplValue) =
-        match fplValue.FplBlockType with
-        | FplBlockType.Constructor -> true
-        | _ -> FplValue.IsProperty(fplValue)
-
-    /// Indicates if this FplValue is a constructor or a property
-    static member IsProofOrCorollary(fplValue: FplValue) =
-        FplValue.IsProof(fplValue) || FplValue.IsCorollary(fplValue)
-
-    /// Indicates if this FplValue is a constructor or a theory
-    static member IsTheory(fplValue: FplValue) =
-        fplValue.FplBlockType = FplBlockType.Theory
-
-
-    /// Indicates if this FplValue is a block, a property, or a constructor.
-    static member IsBlock(fplValue: FplValue) =
-        match fplValue.FplBlockType with
-        | FplBlockType.Constructor -> true
-        | _ -> FplValue.IsFplBlock(fplValue) || FplValue.IsProperty(fplValue)
-
-    /// Indicates if this FplValue is a variable.
-    static member IsVariable(fplValue: FplValue) =
-        fplValue.FplBlockType = FplBlockType.Variable
-        || fplValue.FplBlockType = FplBlockType.VariadicVariableMany
-        || fplValue.FplBlockType = FplBlockType.VariadicVariableMany1
-
-    /// Indicates if this FplValue is a variable declared in the signature (true) or in the block (false).
-    member this.IsSignatureVariable
-        with get () =
-            if FplValue.IsVariable(this) then
-                _isSignatureVariable
-            else
-                false
-        and set (value) =
-            if FplValue.IsVariable(this) then
-                _isSignatureVariable <- value
-            else
-                raise (
-                    ArgumentException(
-                        sprintf "Cannot set IsSignatureVariable for non-variable %s" this.ShortName
-                    )
-                )
-
     /// Indicates if this FplValue is an initialized variable
     member this.IsInitializedVariable
         with get () = _isInitializedVariable
@@ -668,7 +646,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         let rec collectVariables (fv: FplValue) =
             let mutable result = []
 
-            if FplValue.IsVariable(fv) then
+            if fv.IsVariable() then
                 result <- fv :: result
 
             for kvp in fv.Scope do
@@ -756,7 +734,7 @@ let rec getType (isSignature: SignatureType) (fplValue:FplValue) =
             fplValue.Scope
             |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
                 kvp.Value.IsSignatureVariable
-                || FplValue.IsVariable(fplValue) && not (FplValue.IsClass(kvp.Value))
+                || fplValue.IsVariable() && not (kvp.Value.IsClass())
                 || fplValue.FplBlockType = FplBlockType.Mapping)
             |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> getType propagate kvp.Value)
             |> String.concat ", "
@@ -790,7 +768,7 @@ let rec getType (isSignature: SignatureType) (fplValue:FplValue) =
             | FplBlockType.Quantor ->
                 let paramT =
                     fplValue.Scope
-                    |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> FplValue.IsVariable(kvp.Value))
+                    |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
                     |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> getType isSignature kvp.Value)
                     |> String.concat ", "
 
@@ -800,7 +778,7 @@ let rec getType (isSignature: SignatureType) (fplValue:FplValue) =
             | FplBlockType.Localization ->
                 let paramT =
                     fplValue.Scope
-                    |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> FplValue.IsVariable(kvp.Value))
+                    |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
                     |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> getType isSignature kvp.Value)
                     |> String.concat ", "
 
@@ -906,6 +884,19 @@ type FplRoot() =
         this.AssignParts(ret)
         ret
     override this.Represent () = ""
+    override this.IsRoot () = true
+    override this.IsTheory () = false
+    override this.IsFplBlock () = false
+    override this.IsBlock () = false
+    override this.IsDefinition (): bool = false
+    override this.IsClass (): bool = false
+    override this.IsFunctionalTerm (): bool = false
+    override this.IsProofOrCorollary (): bool = false
+    override this.IsProof (): bool = false
+    override this.IsCorollary (): bool = false
+    override this.IsConstructorOrProperty (): bool = false
+    override this.IsProperty (): bool = false
+    override this.IsVariable (): bool = false
 
 type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this =
     inherit FplValue(FplBlockType.Theory, positions, Some parent)
@@ -920,6 +911,19 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
         this.AssignParts(ret)
         ret
     override this.Represent () = ""
+    override this.IsRoot () = false
+    override this.IsTheory () = true
+    override this.IsFplBlock () = false
+    override this.IsBlock () = false
+    override this.IsDefinition (): bool = false
+    override this.IsClass (): bool = false
+    override this.IsFunctionalTerm (): bool = false
+    override this.IsProofOrCorollary (): bool = false
+    override this.IsProof (): bool = false
+    override this.IsCorollary (): bool = false
+    override this.IsConstructorOrProperty (): bool = false
+    override this.IsProperty (): bool = false
+    override this.IsVariable (): bool = false
 
 [<AbstractClass>]
 type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
@@ -993,7 +997,8 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
     override this.Represent () = ""
-    
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true    
 
 type FplVariable(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Variable, positions, Some parent)
@@ -1020,6 +1025,8 @@ type FplVariable(positions: Positions, parent: FplValue) =
             )
             |> String.concat ", "
 
+    override this.IsVariable (): bool = true
+
 type FplVariadicVariableMany(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.VariadicVariableMany, positions, Some parent)
 
@@ -1045,6 +1052,9 @@ type FplVariadicVariableMany(positions: Positions, parent: FplValue) =
             )
             |> String.concat ", "
 
+    override this.IsVariable (): bool = true
+
+
 type FplVariadicVariableMany1(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.VariadicVariableMany1, positions, Some parent)
 
@@ -1069,6 +1079,8 @@ type FplVariadicVariableMany1(positions: Positions, parent: FplValue) =
                         subfv.Represent()
                     )
                     |> String.concat ", "
+
+    override this.IsVariable (): bool = true
 
 type FplInstance(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Instance, positions, parent)
@@ -1100,6 +1112,11 @@ type FplClass(positions: Positions, parent: FplValue) =
 
     override this.Represent () = $"dec {literalCl} {this.FplId}"
 
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
+    override this.IsDefinition (): bool = true
+    override this.IsClass (): bool = true
+
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Constructor, positions, parent)
 
@@ -1116,6 +1133,9 @@ type FplConstructor(positions: Positions, parent: FplValue) =
 
     override this.Represent () = ""
 
+    override this.IsBlock () = true
+    override this.IsConstructorOrProperty (): bool = true
+
 type FplFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.FunctionalTerm, positions, Some parent)
 
@@ -1130,6 +1150,10 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.Instantiate () = None
 
     override this.Represent () = ""
+
+    override this.IsBlock () = true
+    override this.IsDefinition (): bool = true
+    override this.IsFunctionalTerm (): bool = true
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.MandatoryFunctionalTerm, positions, Some parent)
@@ -1146,6 +1170,11 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.Represent () = ""
 
+    override this.IsBlock () = true
+    override this.IsFunctionalTerm (): bool = true
+    override this.IsConstructorOrProperty (): bool = true
+    override this.IsProperty (): bool = true
+
 type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.OptionalFunctionalTerm, positions, Some parent)
 
@@ -1161,6 +1190,11 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.Represent () = ""
 
+    override this.IsBlock () = true
+    override this.IsFunctionalTerm (): bool = true
+    override this.IsConstructorOrProperty (): bool = true
+    override this.IsProperty (): bool = true
+
 type FplPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Predicate, positions, parent)
 
@@ -1173,6 +1207,10 @@ type FplPredicate(positions: Positions, parent: FplValue) =
         ret
 
     override this.Represent () = ""
+
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
+    override this.IsDefinition (): bool = true
 
 type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.MandatoryPredicate, positions, parent)
@@ -1187,6 +1225,11 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
 
     override this.Represent () = ""
 
+    override this.IsBlock () = true
+    override this.IsConstructorOrProperty (): bool = true
+    override this.IsProperty (): bool = true
+
+
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.OptionalPredicate, positions, parent)
 
@@ -1200,6 +1243,10 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
 
     override this.Represent () = ""
 
+    override this.IsBlock () = true
+    override this.IsConstructorOrProperty (): bool = true
+    override this.IsProperty (): bool = true
+
 type FplAxiom(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(FplBlockType.Axiom, positions, parent)
 
@@ -1211,6 +1258,8 @@ type FplAxiom(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
 
 type FplTheorem(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(FplBlockType.Theorem, positions, parent)
@@ -1223,6 +1272,8 @@ type FplTheorem(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
 
 type FplLemma(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(FplBlockType.Lemma, positions, parent)
@@ -1235,6 +1286,8 @@ type FplLemma(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
 
 type FplProposition(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(FplBlockType.Proposition, positions, parent)
@@ -1247,6 +1300,9 @@ type FplProposition(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
+
 type FplConjecture(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(FplBlockType.Conjecture, positions, parent)
 
@@ -1258,6 +1314,9 @@ type FplConjecture(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
+
 type FplCorollary(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(FplBlockType.Corollary, positions, parent)
 
@@ -1268,6 +1327,11 @@ type FplCorollary(positions: Positions, parent: FplValue) =
         let ret = new FplCorollary((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
+    override this.IsProofOrCorollary (): bool = true
+    override this.IsCorollary (): bool = true
 
 type FplProof(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Proof, positions, parent)
@@ -1281,6 +1345,11 @@ type FplProof(positions: Positions, parent: FplValue) =
         ret
 
     override this.Represent () = ""
+
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
+    override this.IsProofOrCorollary (): bool = true
+    override this.IsProof (): bool = true
 
 type FplArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Argument, positions, parent)
@@ -1686,11 +1755,11 @@ let qualifiedStartPos (fplValue:FplValue) =
             let starPosWithoutFileName =
                 $"(Ln: {fv.StartPos.Line}, Col: {fv.StartPos.Column})"
 
-            if FplValue.IsTheory(fv) then
+            if fv.IsTheory() then
                 getFullName fv.Parent.Value false + fvType + starPosWithoutFileName
             else
                 getFullName fv.Parent.Value false + starPosWithoutFileName
-        else if FplValue.IsTheory(fv) then
+        else if fv.IsTheory() then
             getFullName fv.Parent.Value false + fvType
         else
             getFullName fv.Parent.Value false
@@ -1710,22 +1779,22 @@ let qualifiedName (fplValue:FplValue)=
             | FplBlockType.Reference -> getType SignatureType.Name fv
             | FplBlockType.Localization
             | FplBlockType.Constructor
-            | _ when FplValue.IsBlock(fv) -> getType SignatureType.Mixed fv
+            | _ when fv.IsBlock() -> getType SignatureType.Mixed fv
             | FplBlockType.Quantor -> getType SignatureType.Mixed fv
             | _ -> fv.FplId
 
         if fv.FplBlockType = FplBlockType.Root then
             ""
         elif first then
-            if FplValue.IsRoot(fv.Parent.Value) then
+            if fv.Parent.Value.IsRoot() then
                 getFullName fv.Parent.Value false + fplValueType
-            else if FplValue.IsVariable(fv) && not (FplValue.IsVariable(fv.Parent.Value)) then
+            else if fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
                 fplValueType
             else
                 getFullName fv.Parent.Value false + "." + fplValueType
-        else if FplValue.IsRoot(fv.Parent.Value) then
+        else if fv.Parent.Value.IsRoot() then
             getFullName fv.Parent.Value false + fplValueType
-        else if FplValue.IsVariable(fv) && not (FplValue.IsVariable(fv.Parent.Value)) then
+        else if fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
             fplValueType
         else
             getFullName fv.Parent.Value false + "." + fplValueType
@@ -1764,7 +1833,7 @@ let inScopeOfParent (fplValue: FplValue) name =
         if parent.Scope.ContainsKey(name) then
             let foundConflict = parent.Scope[name]
             ScopeSearchResult.Found foundConflict
-        else if FplValue.IsTheory(parent) then
+        else if parent.IsTheory() then
             conflictInSiblingTheory parent
         else
             ScopeSearchResult.NotFound
@@ -2364,7 +2433,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
     | ([], p :: prs) ->
         let pType = getType SignatureType.Type p
         let constructors = p.GetConstructors()
-        if FplValue.IsClass(p) && constructors.Length = 0 then
+        if p.IsClass() && constructors.Length = 0 then
             None
         else
             Some($"missing argument for `{getType SignatureType.Name p}:{pType}`")
