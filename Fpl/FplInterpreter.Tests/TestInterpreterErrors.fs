@@ -5,6 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
+open TestSharedConfig
 
 [<TestClass>]
 type TestInterpreterErrors() =
@@ -27,7 +28,7 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
+            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
             FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -49,7 +50,7 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
+            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
             FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
             Some (st)
 
@@ -67,7 +68,7 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
+            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
             FplInterpreter.fplInterpreter st A uri fplLibUrl |> ignore
             Some (st)
 
@@ -88,7 +89,7 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
+            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
             FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -107,7 +108,7 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
+            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
             FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -126,7 +127,7 @@ type TestInterpreterErrors() =
             None
         else
             let parsedAsts = ParsedAstList()
-            let st = SymbolTable(parsedAsts, true)
+            let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
             FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
             Some (st)
 
@@ -145,7 +146,7 @@ type TestInterpreterErrors() =
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true)
+        let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
         FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)
@@ -161,7 +162,7 @@ type TestInterpreterErrors() =
         let fplLibUrl = "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let uri = PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
         let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true)
+        let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
         FplInterpreter.fplInterpreter st input uri fplLibUrl |> ignore 
         let result = filterByErrorCode ad code.Code
         Assert.AreEqual<int>(1, result.Length)

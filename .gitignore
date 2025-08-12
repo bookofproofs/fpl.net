@@ -40,3 +40,6 @@
 /Fpl/fpl-vscode-extension/publishToMarketPlace.txt
 /Fpl/fpl-vscode-extension/.vscode/publishToMarketPlace.txt
 /Fpl/FplInterpreter.Tests/repo
+
+/Fpl/TestSharedConfig/bin/Debug/net8.0
+/Fpl/TestSharedConfig/obj

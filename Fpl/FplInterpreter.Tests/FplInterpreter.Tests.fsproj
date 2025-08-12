@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Fpl\Fpl.fsproj" />
+    <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

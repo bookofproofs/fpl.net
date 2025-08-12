@@ -6,6 +6,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
+open TestSharedConfig
 
 let rec deleteDirectory path =
     if Directory.Exists(path) then
@@ -59,12 +60,13 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
 
     if delete then
         deleteFiles currDir "*.fpl"
-        deleteDirectory (Path.Combine(currDir,"lib"))
-        deleteDirectory (Path.Combine(currDir,"repo"))
+        if not (TestConfig.OfflineMode) then
+            deleteDirectory (Path.Combine(currDir,"lib"))
+            deleteDirectory (Path.Combine(currDir,"repo"))
         None
     else
         let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true)
+        let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
         FplInterpreter.fplInterpreter st fplCode uri fplLibUrl |> ignore
 
         let syntaxErrorFound =
@@ -133,7 +135,7 @@ let loadFplFile (path: string) =
 
     let parsedAsts = ParsedAstList()
     let fplCode = File.ReadAllText(path)
-    let st = SymbolTable(parsedAsts, false)
+    let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
     FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
     Some(st)
 

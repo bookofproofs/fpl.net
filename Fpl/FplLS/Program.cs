@@ -37,7 +37,7 @@ namespace FplLS
         {
             ParsedAstList _parsedAstsList = [];
 
-            var st = new SymbolTable(_parsedAstsList, false);
+            var st = new SymbolTable(_parsedAstsList, false, false);
 
             var server = await LanguageServer.From(options =>
                 options

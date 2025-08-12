@@ -57,10 +57,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Fpl\Fpl.fsproj" />
+    <ProjectReference Include="..\TestSharedConfig\TestSharedConfig.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="9.0.300" />
+    <PackageReference Update="FSharp.Core" Version="9.0.303" />
   </ItemGroup>
 
 </Project>

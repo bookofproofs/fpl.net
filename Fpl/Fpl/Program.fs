@@ -1,4 +1,4 @@
-﻿/// This console "main" program is for test/debugging pursposes only.
+﻿/// This console "main" program is for test/debugging purposes only.
 /// It is not really needed because the necessary FPL modules are run 
 /// as an FPL Language Server (see FplLS C# Project in the same solution).
 
@@ -8,9 +8,6 @@ open FplParser
 open FplInterpreter
 open FplInterpreterTypes
 open System.IO
-open FParsec
-open System.Text.RegularExpressions
-open System.Collections.Generic
 open System.Runtime.CompilerServices
 
 let deleteFilesWithExtension dir extension =
@@ -34,7 +31,7 @@ let prepareFplCode(fplCode:string, delete:bool) =
         None
     else
         let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true)
+        let st = SymbolTable(parsedAsts, true, false)
         Some (FplInterpreter.fplInterpreter st fplCode uri fplLibUrl)
 
 let loadFplFile(path:string) = 
@@ -43,7 +40,7 @@ let loadFplFile(path:string) =
         "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
     let parsedAsts = ParsedAstList()
     let fplCode = File.ReadAllText(path)
-    let st = SymbolTable(parsedAsts, false)
+    let st = SymbolTable(parsedAsts, false, true)
     FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
 
 let input = """uses Fpl.SetTheory;"""

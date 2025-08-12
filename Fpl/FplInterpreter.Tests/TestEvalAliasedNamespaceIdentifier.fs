@@ -7,6 +7,7 @@ open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterUsesClause
 open CommonTestHelpers
+open TestSharedConfig
 
 [<TestClass>]
 type TestEvalAliasedNamespaceIdentifier() =
@@ -32,6 +33,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAliasedNamespaceIdentifier.EndPos = pos
                 EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
                 EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascelCaseId.Split('.') |> Array.toList 
+                EvalAliasedNamespaceIdentifier.DebugMode = false
             }
 
         Assert.AreEqual<string>(expected, eval.FileNamePattern)
@@ -57,6 +59,7 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAliasedNamespaceIdentifier.EndPos = pos
                 EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
                 EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascelCaseId ] 
+                EvalAliasedNamespaceIdentifier.DebugMode = false
             }
 
         Assert.AreEqual<string>(expected, eval.Name)
@@ -101,8 +104,8 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAlias.EndPos = pos
                 EvalAlias.AliasOrStar = ""
             }
-        let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos)
-        let libMap = downloadLibMap (PathEquivalentUri(url)) url
+        let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos, false)
+        let libMap = downloadLibMap (PathEquivalentUri(url)) url e.DebugMode
         Assert.IsTrue(libMap.Length > 0)
 
     [<TestMethod>]
@@ -115,8 +118,8 @@ type TestEvalAliasedNamespaceIdentifier() =
                 EvalAlias.EndPos = pos
                 EvalAlias.AliasOrStar = ""
             }
-        let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos)
-        let libMap = downloadLibMap (PathEquivalentUri(url)) url
+        let e = EvalAliasedNamespaceIdentifier.CreateEani([],evalAlias,pos,pos, false)
+        let libMap = downloadLibMap (PathEquivalentUri(url)) url e.DebugMode
         Assert.AreEqual<int>(0, ad.CountDiagnostics)
 
     [<DataRow("Fpl *", 4)>]
@@ -128,15 +131,15 @@ type TestEvalAliasedNamespaceIdentifier() =
     [<TestMethod>]
     member this.TestFindFilesInLibMapWithWildcard(usesClause: string, expected:int) =
         let filename = "TestFindFilesInLibMapWithWildcard.fpl"
-        let st = prepareFplCode (filename, sprintf "uses %s;" usesClause, false) 
+        let stOpt = prepareFplCode (filename, sprintf "uses %s;" usesClause, false) 
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         
         let uri =
             PathEquivalentUri(Path.Combine(Directory.GetCurrentDirectory(), "Test.fpl"))
-        let sources = acquireSources uri fplLibUrl
-        let testAst = st.Value.ParsedAsts.TryFindAstById("TestFindFilesInLibMapWithWildcard").Value
-        let eaniList = eval_uses_clause testAst.Parsing.Ast
+        let sources = acquireSources uri fplLibUrl stOpt.Value.OfflineMode
+        let testAst = stOpt.Value.ParsedAsts.TryFindAstById("TestFindFilesInLibMapWithWildcard").Value
+        let eaniList = eval_uses_clause stOpt.Value.OfflineMode testAst.Parsing.Ast 
         if eaniList.IsEmpty then 
             Assert.AreEqual<int>(expected, 0)
         else
@@ -182,7 +185,7 @@ type TestEvalAliasedNamespaceIdentifier() =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
 
         // perform test
-        let sources = acquireSources uri fplLibUrl 
+        let sources = acquireSources uri fplLibUrl false
         Assert.AreEqual<int>(5, sources.Length)
 
         // clean up test
@@ -215,7 +218,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, false)
+        let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
         loadAllUsesClauses st input uri fplLibUrl 
         parsedAsts
 
@@ -270,7 +273,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, false)
+        let st = SymbolTable(parsedAsts, false, TestConfig.OfflineMode)
         loadAllUsesClauses st input uri fplLibUrl 
         parsedAsts
 
@@ -350,7 +353,7 @@ type TestEvalAliasedNamespaceIdentifier() =
         let fplLibUrl =
             "https://raw.githubusercontent.com/bookofproofs/fpl.net/main/theories/lib"
         let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, false)
+        let st = SymbolTable(parsedAsts, false, TestConfig.OfflineMode)
         loadAllUsesClauses st input uri fplLibUrl 
         parsedAsts
 

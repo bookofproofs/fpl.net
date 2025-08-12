@@ -34,10 +34,11 @@ type EvalAliasedNamespaceIdentifier =
     { StartPos: Position
       EndPos: Position
       EvalAlias: EvalAlias
-      PascalCaseIdList: string list }
+      PascalCaseIdList: string list 
+      DebugMode: bool}
 
     /// Creates an EvalAliasedNamespaceIdentifier with a string, alias or star, and positions.
-    static member CreateEani(pascalCaseId: string, aliasOrStar: string, startPos, endPos) =
+    static member CreateEani(pascalCaseId: string, aliasOrStar: string, startPos, endPos, debugMode) =
         let evalAlias =
             { EvalAlias.StartPos = startPos
               EvalAlias.EndPos = endPos
@@ -46,20 +47,22 @@ type EvalAliasedNamespaceIdentifier =
         { EvalAliasedNamespaceIdentifier.StartPos = startPos
           EvalAliasedNamespaceIdentifier.EndPos = endPos
           EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
-          EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascalCaseId ] }
+          EvalAliasedNamespaceIdentifier.PascalCaseIdList = [ pascalCaseId ] 
+          EvalAliasedNamespaceIdentifier.DebugMode = debugMode}
 
     /// Creates an EvalAliasedNamespaceIdentifier with a string list and a given EvalAlias and positions.
-    static member CreateEani(pascalCaseIdList: string list, evalAlias: EvalAlias, startPos, endPos) =
+    static member CreateEani(pascalCaseIdList: string list, evalAlias: EvalAlias, startPos, endPos, debugMode) =
         { EvalAliasedNamespaceIdentifier.StartPos = startPos
           EvalAliasedNamespaceIdentifier.EndPos = endPos
           EvalAliasedNamespaceIdentifier.EvalAlias = evalAlias
-          EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList }
+          EvalAliasedNamespaceIdentifier.PascalCaseIdList = pascalCaseIdList 
+          EvalAliasedNamespaceIdentifier.DebugMode = debugMode}
 
     /// Creates an EvalAliasedNamespaceIdentifier with a given Uri.
-    static member CreateEani(uri: PathEquivalentUri) =
+    static member CreateEani(uri: PathEquivalentUri, debugMode) =
         let pascalCaseId = uri.TheoryName
         let pos = Position("", 0, 1, 1)
-        EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseId, "*", pos, pos)
+        EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseId, "*", pos, pos, debugMode)
 
     member this.FileNamePattern =
         let pascalCaseIdList = String.concat "." this.PascalCaseIdList
@@ -219,7 +222,7 @@ type ParsingProperties =
         let checksum = computeMD5Checksum fplCode
 
         if this.Checksum <> checksum then
-            // if there ist a Parsed Ast with the same Name as the eani.Name
+            // if there is a Parsed Ast with the same Name as the eani.Name
             // and its checksum differs from the previous checksum
             // then replace the ast, checksum, location, source code, the
             this.Uri <- uri
@@ -834,12 +837,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
             match (isFirst, fv.ValueList.Count = 0) with
             | (true, true) -> 
                 match fv.FplBlockType with
-                | FplBlockType.IntrinsicPred 
-                | FplBlockType.IntrinsicInd 
-                | FplBlockType.IntrinsicObj 
-                | FplBlockType.IntrinsicFunc 
-                | FplBlockType.IntrinsicUndef 
-                | FplBlockType.IntrinsicTpl -> fv.FplId
                 | FplBlockType.Class -> $"dec {fv.ShortName} {fv.FplId}"
                 | FplBlockType.FunctionalTerm -> 
                     // since the FunctionTerm has no value, it has no return statement
@@ -1468,6 +1465,8 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
 
     override this.Instantiate () = None
 
+    override this.Represent (): string = this.FplId
+
 type FplIntrinsicObj(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.IntrinsicObj, positions, parent)
 
@@ -1482,6 +1481,8 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
     override this.Instantiate () = 
         Some (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
 
+    override this.Represent (): string = this.FplId
+
 type FplIntrinsicPred(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.IntrinsicPred, positions, parent)
 
@@ -1492,6 +1493,8 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
         let ret = new FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    override this.Represent (): string = this.FplId
 
 type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicUndef, positions, Some parent)
@@ -1509,6 +1512,8 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 
     override this.Instantiate () = None
 
+    override this.Represent (): string = this.FplId
+
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicFunc, positions, Some parent)
     do
@@ -1525,6 +1530,8 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
 
     override this.Instantiate () = None
 
+    override this.Represent (): string = this.FplId
+
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.IntrinsicTpl, positions, Some parent)
     do
@@ -1540,6 +1547,8 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
         ret
 
     override this.Instantiate () = None
+
+    override this.Represent (): string = this.FplId
 
 /// A discriminated union type for wrapping search results in the Scope of an FplValue.
 type ScopeSearchResult =
@@ -1856,13 +1865,20 @@ let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) 
     | _ -> 
         None
 
-type SymbolTable(parsedAsts: ParsedAstList, debug: bool) =
+type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
     let _parsedAsts = parsedAsts
     let mutable _mainTheory = ""
     let _evalPath = Stack<string>()
     let _evalLog = List<string>()
     let _root = new FplRoot()
     let _debug = debug
+    let _offlineMode = offlineMode
+
+    /// Returns the current OfflineMode, with which the SymbolTable was created. 
+    /// OfflineMode=True should not be used in production. If true, the unit tests will try to 
+    /// get a local copy of Fpl libraries instead of trying to download them from the Internet.
+    member this.OfflineMode
+        with get () = _offlineMode
 
     /// Returns the current main theory.
     member this.MainTheory
