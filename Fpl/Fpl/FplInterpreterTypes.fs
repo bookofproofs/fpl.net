@@ -837,7 +837,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
             match (isFirst, fv.ValueList.Count = 0) with
             | (true, true) -> 
                 match fv.FplBlockType with
-                | FplBlockType.Class -> $"dec {fv.ShortName} {fv.FplId}"
                 | FplBlockType.FunctionalTerm -> 
                     // since the FunctionTerm has no value, it has no return statement
                     // And the FPL syntax ensures that this can only be the case
@@ -1073,6 +1072,7 @@ type FplClass(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
     override this.IsClass (): bool = true
+    override this.Represent (): string = $"dec {literalCl} {this.FplId}"
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Constructor, positions, parent)
