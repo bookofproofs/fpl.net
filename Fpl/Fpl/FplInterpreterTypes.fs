@@ -875,14 +875,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     )
                     |> String.concat ", "
                 if subRepr = String.Empty then
-                    match fv.FplBlockType with
-                    | FplBlockType.IntrinsicPred 
-                    | FplBlockType.IntrinsicInd 
-                    | FplBlockType.IntrinsicObj 
-                    | FplBlockType.IntrinsicFunc 
-                    | FplBlockType.IntrinsicUndef 
-                    | FplBlockType.IntrinsicTpl -> fv.FplId
-                    | _ -> ""
+                    ""
                 else
                     match fv.FplBlockType with
                     | FplBlockType.Predicate 
