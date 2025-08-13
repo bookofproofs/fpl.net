@@ -878,18 +878,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     ""
                 else
                     match fv.FplBlockType with
-                    | FplBlockType.Predicate 
-                    | FplBlockType.Axiom 
-                    | FplBlockType.Theorem 
-                    | FplBlockType.Proposition 
-                    | FplBlockType.Lemma 
-                    | FplBlockType.Corollary 
-                    | FplBlockType.Conjecture 
-                    | FplBlockType.OptionalPredicate 
-                    | FplBlockType.MandatoryPredicate 
-                    | FplBlockType.Proof 
-                    | FplBlockType.RuleOfInference 
-                    | FplBlockType.Reference -> subRepr
+                    | FplBlockType.Reference -> subRepr 
                     | FplBlockType.VariadicVariableMany
                     | FplBlockType.VariadicVariableMany1                         
                     | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
@@ -951,6 +940,11 @@ type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: 
         this.TypeId <- literalPred
 
     override this.Instantiate () = None
+    override this.Represent (): string = 
+        this.ValueList
+        |> Seq.map (fun subfv -> subfv.Represent())
+        |> String.concat ", "
+
 
 [<AbstractClass>]
 type FplGenericPredicateWithExpression(blockType: FplBlockType, positions: Positions, parent: FplValue) =
