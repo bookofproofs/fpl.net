@@ -231,13 +231,15 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Number() =
-        let result = this.PrepareTestLoadAllUsesClauses01()
-        Assert.AreEqual<int>(2, result.Count)
+        if not TestConfig.OfflineMode then 
+            let result = this.PrepareTestLoadAllUsesClauses01()
+            Assert.AreEqual<int>(2, result.Count)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id1() =
-        let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Test")
-        Assert.AreEqual<string>("Test", result.Value.Id)
+        if not TestConfig.OfflineMode then 
+            let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Test")
+            Assert.AreEqual<string>("Test", result.Value.Id)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id2() =
@@ -254,9 +256,10 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id1ReferencingAsts() =
-        let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Test")
-        // "Test" knows that nothing is referencing to it
-        Assert.AreEqual<string list>([], result.Value.Sorting.ReferencingAsts)
+        if not TestConfig.OfflineMode then 
+            let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Test")
+            // "Test" knows that nothing is referencing to it
+            Assert.AreEqual<string list>([], result.Value.Sorting.ReferencingAsts)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id2ReferencedAsts() =
@@ -267,9 +270,10 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses01Id2ReferencingAsts() =
-        let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Fpl.Commons")
-        // "Fpl.Commons" knows that "Test" is referencing to it
-        Assert.AreEqual<string list>(["Test"], result.Value.Sorting.ReferencingAsts)
+        if not TestConfig.OfflineMode then 
+            let result = this.PrepareTestLoadAllUsesClauses01().TryFindAstById("Fpl.Commons")
+            // "Fpl.Commons" knows that "Test" is referencing to it
+            Assert.AreEqual<string list>(["Test"], result.Value.Sorting.ReferencingAsts)
 
     member this.PrepareTestLoadAllUsesClauses02() =
         let input = """
@@ -341,16 +345,18 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id3() =
-        let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.Commons")
-        let actual = result.Value.Id
-        Assert.AreEqual<string>("Fpl.Commons", actual)
+        if not TestConfig.OfflineMode then 
+            let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.Commons")
+            let actual = result.Value.Id
+            Assert.AreEqual<string>("Fpl.Commons", actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id3ReferencedAsts() =
-        let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.Commons")
-        // "Fpl.Commons" knows that it doesn't reference to anything
-        let actual = result.Value.Sorting.ReferencedAsts
-        Assert.AreEqual<string list>([], actual)
+        if not TestConfig.OfflineMode then 
+            let result = this.PrepareTestLoadAllUsesClauses02().TryFindAstById("Fpl.Commons")
+            // "Fpl.Commons" knows that it doesn't reference to anything
+            let actual = result.Value.Sorting.ReferencedAsts
+            Assert.AreEqual<string list>([], actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses02Id3ReferencingAsts() =
@@ -382,9 +388,10 @@ type TestEvalAliasedNamespaceIdentifier() =
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id1() =
-        let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Test")
-        let actual = result.Value.Id
-        Assert.AreEqual<string>("Test", actual)
+        if not TestConfig.OfflineMode then 
+            let result = this.PrepareTestLoadAllUsesClauses03().TryFindAstById("Test")
+            let actual = result.Value.Id
+            Assert.AreEqual<string>("Test", actual)
 
     [<TestMethod>]
     member this.TestLoadAllUsesClauses03Id1ReferencedAsts() =
