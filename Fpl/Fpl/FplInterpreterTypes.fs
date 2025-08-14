@@ -1390,7 +1390,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                     sprintf "%s()" literalUndef
             | (_, _, None) ->
                 if this.HasBrackets then sprintf "%s[%s]" literalUndef args
-                elif this.FplId = "bydef." then sprintf "%s%s" this.FplId args
+                elif this.FplId = $"{literalByDef}." then sprintf "%s %s" literalByDef args
                 else sprintf "%s(%s)" literalUndef args
 
         else
