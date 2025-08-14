@@ -582,7 +582,7 @@ type TestFplValueScopeFplRepresentation() =
             | "base13" -> Assert.AreEqual<string>("1", base1.Represent())
             | "base11a" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
             | "base12a" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
-            | "base10b" -> Assert.AreEqual<string>("undef(undef)", base1.Represent())
+            | "base10b" -> Assert.AreEqual<string>("undef()", base1.Represent())
             | "base11b" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
             | "base12b" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
             | "base13b" -> Assert.AreEqual<string>("1(undef)", base1.Represent())

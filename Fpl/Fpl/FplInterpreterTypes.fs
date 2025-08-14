@@ -877,7 +877,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     ""
                 else
                     match fv.FplBlockType with
-                    | FplBlockType.Reference -> subRepr 
                     | FplBlockType.VariadicVariableMany
                     | FplBlockType.VariadicVariableMany1                         
                     | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
@@ -892,15 +891,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                         && fv.ValueList[0].TypeId <> literalPred -> 
                         $"dec {fv.Type(SignatureType.Type)}"
                     | _ -> $"{fv.FplId}({subRepr})"
-            | (false, true) -> 
-                match fv.FplBlockType with
-                | FplBlockType.Reference ->
-                    let argOpt = fv.GetArgument
-                    match argOpt with
-                    | Some arg when arg.FplBlockType = FplBlockType.Variable && arg.IsInitializedVariable ->
-                        arg.Represent()
-                    | _ -> fv.FplId
-                | _ -> fv.FplId
+            | (false, true) -> fv.FplId
 
         children this true                     
     
@@ -1362,6 +1353,32 @@ type FplReference(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Represent (): string = 
+        if this.ValueList.Count = 0 then
+            let subRepr = 
+                this.ArgList
+                |> Seq.map (fun arg -> arg.Represent())
+                |> String.concat ", "
+            if subRepr  <> String.Empty then
+                if subRepr = "???" then
+                    $"{literalUndef}()"
+                else
+                    $"{literalUndef}({subRepr})"
+            else
+                if this.FplId = "???" then 
+                    this.FplId
+                else
+                    literalUndef
+        else
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if subRepr = String.Empty then 
+                literalUndef
+            else
+                subRepr
 
 type FplQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Quantor, positions, parent)
