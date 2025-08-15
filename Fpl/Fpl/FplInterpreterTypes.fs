@@ -285,7 +285,7 @@ type ParsedAstList() =
 
 
 type FplBlockType =
-    | Root
+    | Todo
     | Theory
     | RuleOfInference
     | Variable
@@ -631,7 +631,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     member this.GetClassBlock() =
         let rec getClassBlock (fv: FplValue) =
             match fv.FplBlockType with
-            | FplBlockType.Root -> None
             | FplBlockType.Class -> Some fv
             | _ ->
                 match fv.Parent with
@@ -872,7 +871,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     
 
 type FplRoot() =
-    inherit FplValue(FplBlockType.Root, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
+    inherit FplValue(FplBlockType.Todo, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
     override this.Name = "a root"
     override this.ShortName = "root"
     override this.Instantiate () = None
@@ -1598,20 +1597,21 @@ let qualifiedStartPos (fplValue:FplValue) =
     let rec getFullName (fv: FplValue) (first: bool) =
         let fvType = fv.Type(SignatureType.Mixed)
 
-        if fv.FplBlockType = FplBlockType.Root then
-            ""
-        elif first then
-            let starPosWithoutFileName =
-                $"(Ln: {fv.StartPos.Line}, Col: {fv.StartPos.Column})"
+        match fv with 
+        | :? FplRoot -> ""
+        | _ -> 
+            if first then
+                let starPosWithoutFileName =
+                    $"(Ln: {fv.StartPos.Line}, Col: {fv.StartPos.Column})"
 
-            if fv.IsTheory() then
-                getFullName fv.Parent.Value false + fvType + starPosWithoutFileName
+                if fv.IsTheory() then
+                    getFullName fv.Parent.Value false + fvType + starPosWithoutFileName
+                else
+                    getFullName fv.Parent.Value false + starPosWithoutFileName
+            else if fv.IsTheory() then
+                getFullName fv.Parent.Value false + fvType
             else
-                getFullName fv.Parent.Value false + starPosWithoutFileName
-        else if fv.IsTheory() then
-            getFullName fv.Parent.Value false + fvType
-        else
-            getFullName fv.Parent.Value false
+                getFullName fv.Parent.Value false
 
     getFullName fplValue true
 

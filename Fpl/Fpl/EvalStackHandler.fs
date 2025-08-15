@@ -189,8 +189,7 @@ type EvalStack() =
             | FplBlockType.IntrinsicObj
             | FplBlockType.IntrinsicUndef
             | FplBlockType.IntrinsicTpl
-            | FplBlockType.Instance
-            | FplBlockType.Root -> 
+            | FplBlockType.Instance -> 
                 fv.TryAddToParentsArgList() 
 
 
