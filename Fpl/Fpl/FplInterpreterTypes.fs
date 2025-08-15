@@ -645,6 +645,20 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         |> Seq.filter (fun fv -> fv.FplBlockType = FplBlockType.Constructor)
         |> Seq.toList
 
+    /// 
+    member this.GetParamTuple(signatureType:SignatureType) =
+        let propagate =
+            match signatureType with
+            | SignatureType.Mixed -> SignatureType.Type
+            | _ -> signatureType
+        this.Scope
+        |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
+            kvp.Value.IsSignatureVariable
+            || this.IsVariable() && not (kvp.Value.IsClass())
+            || this.FplBlockType = FplBlockType.Mapping)
+        |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
+        |> String.concat ", "
+
     /// Copies other FplValue to this one without changing its reference pointer.
     member this.Copy(other: FplValue) =
         this.FplId <- other.FplId
@@ -691,16 +705,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
             let propagate =
                 match isSignature with
                 | SignatureType.Mixed -> SignatureType.Type
-                | _ -> isSignature
-
-            let paramTuple () =
-                this.Scope
-                |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
-                    kvp.Value.IsSignatureVariable
-                    || this.IsVariable() && not (kvp.Value.IsClass())
-                    || this.FplBlockType = FplBlockType.Mapping)
-                |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
-                |> String.concat ", "
+                | _ -> isSignature 
 
             let idRec () =
                 match this.FplBlockType with
@@ -714,18 +719,10 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 | FplBlockType.IntrinsicTpl
                 | FplBlockType.IntrinsicUndef
                 | FplBlockType.Class -> head
-                | FplBlockType.Theorem
-                | FplBlockType.Lemma
-                | FplBlockType.Proposition
-                | FplBlockType.Conjecture
-                | FplBlockType.RuleOfInference
-                | FplBlockType.Predicate
-                | FplBlockType.Corollary
                 | FplBlockType.Constructor
                 | FplBlockType.OptionalPredicate
-                | FplBlockType.MandatoryPredicate
-                | FplBlockType.Axiom ->
-                    let paramT = paramTuple ()
+                | FplBlockType.MandatoryPredicate ->
+                    let paramT = this.GetParamTuple(isSignature)
                     sprintf "%s(%s)" head paramT
                 | FplBlockType.Quantor ->
                     let paramT =
@@ -752,7 +749,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 | FplBlockType.FunctionalTerm ->
                     match this.Mapping with
                     | Some map ->
-                        let paramT = paramTuple ()
+                        let paramT = this.GetParamTuple(isSignature)
                         sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
                     | _ -> ""
                 | FplBlockType.Instance ->
@@ -777,7 +774,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 | FplBlockType.Variable
                 | FplBlockType.VariadicVariableMany
                 | FplBlockType.VariadicVariableMany1 ->
-                    let pars = paramTuple ()
+                    let pars = this.GetParamTuple(isSignature)
 
                     match (pars, this.Mapping) with
                     | ("", None) -> head
@@ -925,6 +922,15 @@ type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: 
 type FplGenericPredicateWithExpression(blockType: FplBlockType, positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(blockType, positions, parent)
 
+    override this.Type(signatureType:SignatureType) = 
+        let paramT = this.GetParamTuple(signatureType)
+        let head = 
+            match signatureType with
+                    | SignatureType.Name 
+                    | SignatureType.Mixed -> this.FplId
+                    | SignatureType.Type -> this.TypeId
+        sprintf "%s(%s)" head paramT
+            
 [<AbstractClass>]
 type FplGenericObject(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
     inherit FplValue(blockType, positions, Some parent)
@@ -961,7 +967,7 @@ type FplGenericObject(blockType: FplBlockType, positions: Positions, parent: Fpl
         //    //failwith ($"Cannot create an instance of a non-class {this.Type(SignatureType.Mixed)}")    
 
 type FplRuleOfInference(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.RuleOfInference, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.RuleOfInference, positions, parent)
 
     override this.Name = "a rule of inference"
     override this.ShortName = literalInf
@@ -1135,7 +1141,7 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
 type FplPredicate(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.Predicate, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Predicate, positions, parent)
 
     override this.Name = "a predicate definition"
     override this.ShortName = "def pred"
