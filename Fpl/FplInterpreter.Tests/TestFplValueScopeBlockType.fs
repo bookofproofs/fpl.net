@@ -51,7 +51,7 @@ type TestFplValueScopeBlockType() =
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.AreEqual<FplBlockType>(FplBlockType.Theory, theory.FplBlockType)
+            | "theory" ->Assert.IsInstanceOfType<FplTheory>(theory)
             | "inf1" -> Assert.AreEqual<FplBlockType>(FplBlockType.RuleOfInference, inf1.FplBlockType)
             | "inf2" -> Assert.AreEqual<FplBlockType>(FplBlockType.RuleOfInference, inf2.FplBlockType)
             | "axi1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Axiom, axi1.FplBlockType)
@@ -104,7 +104,7 @@ type TestFplValueScopeBlockType() =
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.AreEqual<FplBlockType>(FplBlockType.Theory, theory.FplBlockType)
+            | "theory" ->Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.AreEqual<FplBlockType>(FplBlockType.Class, block.FplBlockType)
             | "t1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Constructor, t1.FplBlockType)
             | "t2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Constructor, t2.FplBlockType)
@@ -145,7 +145,7 @@ type TestFplValueScopeBlockType() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-                | "theory" -> Assert.AreEqual<FplBlockType>(FplBlockType.Theory, theory.FplBlockType)
+                | "theory" ->Assert.IsInstanceOfType<FplTheory>(theory)
                 | "thm1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Theorem, thm1.FplBlockType)
                 | "proofThm1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Proof, proofThm1.FplBlockType)
                 | "lem1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Lemma, lem1.FplBlockType)
@@ -196,7 +196,7 @@ type TestFplValueScopeBlockType() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.AreEqual<FplBlockType>(FplBlockType.Theory, theory.FplBlockType)
+            | "theory" ->Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.AreEqual<FplBlockType>(FplBlockType.Predicate, block.FplBlockType)
             | "t1" -> Assert.AreEqual<FplBlockType>(FplBlockType.MandatoryPredicate, t1.FplBlockType)
             | "t2" -> Assert.AreEqual<FplBlockType>(FplBlockType.OptionalPredicate, t2.FplBlockType)
@@ -253,7 +253,7 @@ type TestFplValueScopeBlockType() =
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.AreEqual<FplBlockType>(FplBlockType.Theory, theory.FplBlockType)
+            | "theory" ->Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.AreEqual<FplBlockType>(FplBlockType.Predicate, block.FplBlockType)
             | "x" -> Assert.AreEqual<FplBlockType>(FplBlockType.Variable, x.FplBlockType)
             | "y" -> Assert.AreEqual<FplBlockType>(FplBlockType.Variable, y.FplBlockType)
@@ -322,7 +322,7 @@ type TestFplValueScopeBlockType() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.AreEqual<FplBlockType>(FplBlockType.Theory, theory.FplBlockType)
+            | "theory" ->Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.AreEqual<FplBlockType>(FplBlockType.Predicate, block.FplBlockType)
             | "x" -> Assert.AreEqual<FplBlockType>(FplBlockType.VariadicVariableMany1, x.FplBlockType)
             | "y" -> Assert.AreEqual<FplBlockType>(FplBlockType.VariadicVariableMany1, y.FplBlockType)
@@ -391,7 +391,7 @@ type TestFplValueScopeBlockType() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.AreEqual<FplBlockType>(FplBlockType.Theory, theory.FplBlockType)
+            | "theory" ->Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.AreEqual<FplBlockType>(FplBlockType.Predicate, block.FplBlockType)
             | "x" -> Assert.AreEqual<FplBlockType>(FplBlockType.Variable, x.FplBlockType)
             | "y" -> Assert.AreEqual<FplBlockType>(FplBlockType.Variable, y.FplBlockType)
@@ -459,7 +459,7 @@ type TestFplValueScopeBlockType() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsInstanceOfType<FplRoot>(r)
-            | "theory" -> Assert.AreEqual<FplBlockType>(FplBlockType.Theory, theory.FplBlockType)
+            | "theory" ->Assert.IsInstanceOfType<FplTheory>(theory)
             | "block" -> Assert.AreEqual<FplBlockType>(FplBlockType.Predicate, block.FplBlockType)
             | "x" -> Assert.AreEqual<FplBlockType>(FplBlockType.VariadicVariableMany1, x.FplBlockType)
             | "y" -> Assert.AreEqual<FplBlockType>(FplBlockType.VariadicVariableMany1, y.FplBlockType)
