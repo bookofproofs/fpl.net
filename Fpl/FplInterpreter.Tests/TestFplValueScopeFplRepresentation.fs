@@ -285,7 +285,6 @@ type TestFplValueScopeFplRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-
     [<DataRow("r")>]
     [<DataRow("theory")>]
     [<DataRow("block")>]
@@ -674,6 +673,45 @@ type TestFplValueScopeFplRepresentation() =
             | "base4" -> Assert.AreEqual<string>("bas", base1.Represent())
             | "base5" -> Assert.AreEqual<string>("bas", base1.Represent())
             | "base6" -> Assert.AreEqual<string>("bas", base1.Represent())
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+
+    [<DataRow("base1", """def func T()->obj {intr};""")>]
+    [<DataRow("base2", """def func T()->ind {intr};""")>]
+    [<DataRow("base3", """def func T()->func {intr};""")>]
+    [<DataRow("base4", """def func T()->pred {intr};""")>]
+    [<DataRow("base5", """def cl A:obj {intr} def func T()->A {intr};""")>]
+    [<DataRow("base6", """def func T()->obj(z:ind) {intr};""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
+    [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
+    [<DataRow("base10", """def cl A:obj {intr} def func T()->A(f:func(x:A)->A) {intr};""")>]
+    [<TestMethod>]
+    member this.TestMapping(var, varVal) =
+        ad.Clear()
+        let fplCode = sprintf "%s;" varVal
+        let filename = "TestMappingRepresentation"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+            let mapping = base1.ArgList[0]
+            match var with
+            | "base1" -> Assert.AreEqual<string>($"dec {literalObj}", mapping.Represent())
+            | "base2" -> Assert.AreEqual<string>($"dec {literalInd}", mapping.Represent())
+            | "base3" -> Assert.AreEqual<string>($"dec {literalFunc}", mapping.Represent())
+            | "base4" -> Assert.AreEqual<string>($"dec {literalPred}", mapping.Represent())
+            | "base5" -> Assert.AreEqual<string>("dec A", mapping.Represent())
+            | "base6" -> Assert.AreEqual<string>($"dec {literalObj}({literalInd})", mapping.Represent())
+            | "base7" -> Assert.AreEqual<string>($"dec {literalPred}(*{literalObj})", mapping.Represent())
+            | "base8" -> Assert.AreEqual<string>($"dec {literalFunc}(*{literalPred}({literalObj})) -> {literalPred}({literalInd})", mapping.Represent())
+            | "base9" -> Assert.AreEqual<string>($"dec {literalPred}(+{literalFunc}(A) -> A)", mapping.Represent())
+            | "base10" -> Assert.AreEqual<string>($"dec A({literalFunc}(A) -> A)", mapping.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

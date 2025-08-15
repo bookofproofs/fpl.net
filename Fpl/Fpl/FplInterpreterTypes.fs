@@ -830,7 +830,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
             idRec ()
 
-
     /// Generates a representation of this FplValue.
     override this.Represent() = 
         let rec children (fv:FplValue) isFirst = 
@@ -1416,6 +1415,8 @@ type FplMapping(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
 
 type FplStmt(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Stmt, positions, Some parent)
