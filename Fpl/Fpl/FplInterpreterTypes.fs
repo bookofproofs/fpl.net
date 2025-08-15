@@ -844,27 +844,9 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     // In this case, the "representation" of the function is
                     // its declared mapping type
                     let mapping = fv.ArgList |> Seq.head 
-                    $"dec {mapping.Represent()}"
-                | FplBlockType.Variable when not (fv.IsInitializedVariable) 
-                    && fv.TypeId = literalPred -> 
-                    literalUndetermined
-                | FplBlockType.Variable when 
-                    not (fv.IsInitializedVariable) 
-                    && fv.TypeId <> literalPred 
-                    && fv.TypeId <> literalUndef -> 
-                    $"dec {fv.Type(SignatureType.Type)}"                    
-                | FplBlockType.VariadicVariableMany
-                | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
-                    $"dec {fv.Type(SignatureType.Type)}[]"                    
+                    $"dec {mapping.Represent()}"              
                 | _ -> 
-                    match fv.FplBlockType with
-                    | FplBlockType.Reference ->
-                        let argOpt = fv.GetArgument
-                        match argOpt with
-                        | Some (arg:FplValue) when arg.FplBlockType = FplBlockType.Variable && arg.IsInitializedVariable ->
-                            arg.Represent()
-                        | _ -> literalUndef      
-                    | _ -> literalUndef
+                    literalUndef
             | (false, false) 
             | (true, false) ->
                 let subRepr = 
@@ -875,22 +857,8 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     |> String.concat ", "
                 if subRepr = String.Empty then
                     ""
-                else
-                    match fv.FplBlockType with
-                    | FplBlockType.VariadicVariableMany
-                    | FplBlockType.VariadicVariableMany1                         
-                    | FplBlockType.Variable when fv.IsInitializedVariable -> subRepr
-                    | FplBlockType.Variable when not (fv.IsInitializedVariable) 
-                        && fv.TypeId <> literalPred 
-                        && fv.TypeId <> literalUndef -> 
-                        $"dec {fv.Type(SignatureType.Type)}"                    
-                    | FplBlockType.VariadicVariableMany
-                    | FplBlockType.VariadicVariableMany1 when not (fv.IsInitializedVariable) ->
-                        $"dec {fv.Type(SignatureType.Type)}[]" 
-                    | FplBlockType.Variable when not (fv.IsInitializedVariable) 
-                        && fv.ValueList[0].TypeId <> literalPred -> 
-                        $"dec {fv.Type(SignatureType.Type)}"
-                    | _ -> $"{fv.FplId}({subRepr})"
+                else 
+                    $"{fv.FplId}({subRepr})"
             | (false, true) -> fv.FplId
 
         children this true                     
