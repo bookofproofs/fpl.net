@@ -664,6 +664,13 @@ let rec eval (st: SymbolTable) ast =
         let identifier = String.concat "." pascalCaseIdList
         let evalPath = st.EvalPath()
         let fv = es.PeekEvalStack()
+
+        match fv with 
+        | :? FplRuleOfInference ->
+            fv.FplId <- identifier
+            fv.TypeId <- literalPred
+        | _ -> ()
+
         match fv.FplBlockType with 
         | FplBlockType.Class -> 
             if evalPath.EndsWith("InheritedClassType.PredicateIdentifier") then 
@@ -691,7 +698,6 @@ let rec eval (st: SymbolTable) ast =
         | FplBlockType.Corollary 
         | FplBlockType.Conjecture 
         | FplBlockType.Proof 
-        | FplBlockType.RuleOfInference 
         | FplBlockType.MandatoryPredicate
         | FplBlockType.OptionalPredicate
         | FplBlockType.Predicate ->

@@ -86,6 +86,10 @@ type EvalStack() =
             if fv.IsTheory() then
                 fv.TryAddToParentsArgList() 
             else
+                match fv with 
+                | :? FplRuleOfInference -> 
+                    EvalStack.tryAddToScope fv
+                | _ -> ()
 
                 match fv.FplBlockType with
                 | FplBlockType.Proof 
@@ -97,7 +101,6 @@ type EvalStack() =
                 | FplBlockType.Lemma
                 | FplBlockType.Proposition
                 | FplBlockType.Conjecture
-                | FplBlockType.RuleOfInference
                 | FplBlockType.Constructor
                 | FplBlockType.MandatoryPredicate
                 | FplBlockType.OptionalPredicate
@@ -111,6 +114,11 @@ type EvalStack() =
                 | FplBlockType.FunctionalTerm ->
                     EvalStack.tryAddToScope fv
                 | FplBlockType.Reference ->
+                    match next with 
+                    | :? FplRuleOfInference -> 
+                        fv.TryAddToParentsArgList() 
+                    | _ -> ()
+
                     match next.FplBlockType with
                     | FplBlockType.Localization -> 
                         next.FplId <- fv.FplId
@@ -127,7 +135,6 @@ type EvalStack() =
                     | FplBlockType.Corollary 
                     | FplBlockType.Conjecture 
                     | FplBlockType.Proof 
-                    | FplBlockType.RuleOfInference 
                     | FplBlockType.Predicate 
                     | FplBlockType.FunctionalTerm 
                     | FplBlockType.Class 
@@ -149,12 +156,17 @@ type EvalStack() =
                 | FplBlockType.Variable
                 | FplBlockType.VariadicVariableMany
                 | FplBlockType.VariadicVariableMany1 ->
+                    match next with 
+                    | :? FplRuleOfInference -> 
+                        EvalStack.tryAddToScope fv
+                    | _ -> ()
+
+
                     match next.FplBlockType with 
                     | FplBlockType.Theorem
                     | FplBlockType.Lemma
                     | FplBlockType.Proposition
                     | FplBlockType.Conjecture
-                    | FplBlockType.RuleOfInference
                     | FplBlockType.Constructor
                     | FplBlockType.Corollary
                     | FplBlockType.Proof
