@@ -78,14 +78,6 @@ let rec eval (st: SymbolTable) ast =
         | None -> ()
         eval st predicateAst
 
-    let evalMany blockType pos1 pos2 = 
-        let fv = es.PeekEvalStack()
-        match fv.Parent with 
-        | Some parent -> 
-            checkVAR00Diagnostics parent.AuxiliaryInfo pos1 pos2
-        | _ -> ()
-        fv.FplBlockType <- blockType
-
     let setUnitType (fv:FplValue) (value:FplValue) (tplName:string)=
         match value.FplBlockType with
         | FplBlockType.IntrinsicPred
@@ -115,12 +107,14 @@ let rec eval (st: SymbolTable) ast =
             fv.ValueList.Clear()
             fv.ValueList.Add(value)
 
-        
-        match fv.FplBlockType with 
-        | FplBlockType.VariadicVariableMany -> 
-            fv.TypeId <- $"*{fv.TypeId}"
-        | FplBlockType.VariadicVariableMany1 -> 
-            fv.TypeId <- $"+{fv.TypeId}"
+        match fv with
+        | :? FplVariable as v -> 
+            if v.IsMany then
+                fv.TypeId <- $"*{fv.TypeId}"
+            elif v.IsMany1 then
+                fv.TypeId <- $"+{fv.TypeId}"
+            else 
+                ()
         | _ -> ()
 
     match ast with
@@ -160,11 +154,25 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Many((pos1, pos2),()) ->
         st.EvalPush("Many")
-        evalMany FplBlockType.VariadicVariableMany pos1 pos2
+        let fv = es.PeekEvalStack()
+        match fv.Parent with 
+        | Some parent -> 
+            checkVAR00Diagnostics parent.AuxiliaryInfo pos1 pos2
+        | _ -> ()
+        match fv with 
+        | :? FplVariable as var -> var.SetToMany()
+        | _ -> ()
         st.EvalPop()
     | Ast.Many1((pos1, pos2),()) ->
         st.EvalPush("Many1")
-        evalMany FplBlockType.VariadicVariableMany1 pos1 pos2
+        let fv = es.PeekEvalStack()
+        match fv.Parent with 
+        | Some parent -> 
+            checkVAR00Diagnostics parent.AuxiliaryInfo pos1 pos2
+        | _ -> ()
+        match fv with 
+        | :? FplVariable as var -> var.SetToMany1()
+        | _ -> ()
         st.EvalPop()
     | Ast.One((pos1, pos2),()) ->
         st.EvalPush("One")

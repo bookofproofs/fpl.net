@@ -990,9 +990,29 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
 
 type FplVariable(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Variable, positions, Some parent)
-
+    let mutable _variadicType = String.Empty // "" = variable, "many" = many, "many1" = many1 
     override this.Name = "a variable"
     override this.ShortName = "var"
+
+    member this.SetToMany() = 
+        if _variadicType = String.Empty then
+            _variadicType <- "many"
+            this.FplBlockType <- FplBlockType.VariadicVariableMany
+        else 
+            failwith($"The variadic type was already set to {_variadicType}.")
+
+    member this.SetToMany1() = 
+        if _variadicType = String.Empty then
+            _variadicType <- "many1"
+            this.FplBlockType <- FplBlockType.VariadicVariableMany1
+        else 
+            failwith($"The variadic type was already set to {_variadicType}.")
+
+    member this.IsVariadic = _variadicType <> String.Empty
+
+    member this.IsMany = _variadicType = "many"
+    member this.IsMany1 = _variadicType = "many1"
+
 
     override this.Clone () =
         let ret = new FplVariable((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1001,37 +1021,39 @@ type FplVariable(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
-    override this.IsVariable (): bool = true
+    override this.IsVariable () = true
 
-type FplVariadicVariableMany(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.VariadicVariableMany, positions, Some parent)
+    override this.Represent () = 
+        if this.ValueList.Count = 0 then
+            if this.IsInitializedVariable then 
+                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
+                literalUndef
+            else
+                match this.TypeId with
+                | FplGrammarCommons.literalUndef -> literalUndef
+                | _ -> 
+                    if this.IsVariadic then
+                        $"dec {this.Type(SignatureType.Type)}[]" 
+                    else
+                        $"dec {this.Type(SignatureType.Type)}" 
+        else
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if this.IsInitializedVariable then 
+                subRepr
+            else
+                match this.TypeId with
+                | FplGrammarCommons.literalUndef -> literalUndef
+                | _ -> 
+                    if this.IsVariadic then
+                        $"dec {this.Type(SignatureType.Type)}[]" 
+                    else
+                        $"dec {this.Type(SignatureType.Type)}" 
 
-    override this.Name = "a zero-or-more variable"
-    override this.ShortName = "*var"
-
-    override this.Clone () =
-        let ret = new FplVariadicVariableMany((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = None
-
-    override this.IsVariable (): bool = true
 
 
-type FplVariadicVariableMany1(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.VariadicVariableMany1, positions, Some parent)
-
-    override this.Name = "a one-or-more variable"
-    override this.ShortName = "+var"
-
-    override this.Clone () =
-        let ret = new FplVariadicVariableMany1((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = None
-    override this.IsVariable (): bool = true
 
 type FplInstance(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Instance, positions, parent)
@@ -1062,8 +1084,8 @@ type FplClass(positions: Positions, parent: FplValue) =
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
-    override this.IsClass (): bool = true
-    override this.Represent (): string = $"dec {literalCl} {this.FplId}"
+    override this.IsClass () = true
+    override this.Represent () = $"dec {literalCl} {this.FplId}"
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Constructor, positions, parent)

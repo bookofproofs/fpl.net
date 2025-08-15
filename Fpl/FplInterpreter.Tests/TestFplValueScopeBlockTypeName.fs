@@ -56,10 +56,12 @@ type TestFplBlockType() =
             let x = new FplVariable(positions, parent) 
             Assert.AreEqual<string>("a variable", x.Name)
         | "VariadicVariableMany" ->
-            let x = new FplVariadicVariableMany(positions, parent)
+            let x = new FplVariable(positions, parent)
+            x.SetToMany() |> ignore
             Assert.AreEqual<string>("a zero-or-more variable", x.Name)
         | "VariadicVariableMany1" ->
-            let x = new FplVariadicVariableMany1(positions, parent)
+            let x = new FplVariable(positions, parent)
+            x.SetToMany1() |> ignore
             Assert.AreEqual<string>("a one-or-more variable", x.Name)
         | "MandatoryFunctionalTerm" ->
             let x = new FplMandatoryFunctionalTerm(positions, parent)
@@ -222,10 +224,12 @@ type TestFplBlockType() =
             let x = new FplVariable(positions, parent)
             Assert.AreEqual<string>("var", x.ShortName)
         | "VariadicVariableMany" ->
-            let x = new FplVariadicVariableMany(positions, parent)
+            let x = new FplVariable(positions, parent)
+            x.SetToMany() |> ignore
             Assert.AreEqual<string>("*var", x.ShortName)
         | "VariadicVariableMany1" ->
-            let x = new FplVariadicVariableMany1(positions, parent)
+            let x = new FplVariable(positions, parent)
+            x.SetToMany1() |> ignore
             Assert.AreEqual<string>("+var", x.ShortName)
         | "MandatoryPredicate" ->
             let x = new FplMandatoryPredicate(positions, parent)
