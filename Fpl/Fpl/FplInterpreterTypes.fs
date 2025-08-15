@@ -1304,6 +1304,9 @@ type FplLocalization(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+    override this.Represent() = this.Type(SignatureType.Name)
+        
+
 type FplTranslation(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Translation, positions, Some parent)
 

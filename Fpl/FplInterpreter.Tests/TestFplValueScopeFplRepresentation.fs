@@ -82,8 +82,8 @@ type TestFplValueScopeFplRepresentation() =
             | "fun9" -> Assert.AreEqual<string>("dec ind", fun9.Represent())
             | "prf1" -> Assert.AreEqual<string>(literalUndetermined, prf1.Represent())
             | "prf2" -> Assert.AreEqual<string>(literalUndetermined, prf2.Represent())
-            | "loc1" -> Assert.AreEqual<string>(literalUndef, loc1.Represent())
-            | "loc2" -> Assert.AreEqual<string>("undef(undef, undef)", loc2.Represent())
+            | "loc1" -> Assert.AreEqual<string>("not(x)", loc1.Represent())
+            | "loc2" -> Assert.AreEqual<string>("Equal(x, y)", loc2.Represent())
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
