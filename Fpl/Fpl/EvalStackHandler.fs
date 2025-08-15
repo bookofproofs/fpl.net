@@ -74,11 +74,6 @@ type EvalStack() =
         | _ -> 
             next.Scope.Add(identifier,fv)
 
-    /// adds the FplValue to it's parent's ArgList
-    static member tryAddToArgList (fv:FplValue) = 
-        let next = fv.Parent.Value
-        next.ArgList.Add(fv)
-
     // Pops an FplValue from stack without propagating it's name and signature to the next FplValue on the stack.
     member this.Pop() = _valueStack.Pop()
 
@@ -120,7 +115,7 @@ type EvalStack() =
                 | FplBlockType.Justification -> 
                     EvalStack.tryAddToScope fv
                 | FplBlockType.Argument ->
-                    EvalStack.tryAddToArgList fv 
+                    fv.TryAddToParentsArgList() 
                 | FplBlockType.Axiom
                 | FplBlockType.Theorem 
                 | FplBlockType.Lemma 
@@ -137,15 +132,15 @@ type EvalStack() =
                 | FplBlockType.OptionalFunctionalTerm
                 | FplBlockType.MandatoryPredicate
                 | FplBlockType.OptionalPredicate ->
-                    EvalStack.tryAddToArgList fv 
+                    fv.TryAddToParentsArgList() 
                 | FplBlockType.Quantor ->
-                    EvalStack.tryAddToArgList fv 
+                    fv.TryAddToParentsArgList() 
                     next.EndPos <- fv.EndPos
                 | _ -> 
                     if next.Scope.ContainsKey(".") then 
                         ()
                     else
-                        EvalStack.tryAddToArgList fv
+                        fv.TryAddToParentsArgList()
                     next.EndPos <- fv.EndPos
             | FplBlockType.Variable
             | FplBlockType.VariadicVariableMany
@@ -177,7 +172,7 @@ type EvalStack() =
                 | FplBlockType.Localization -> 
                     EvalStack.tryAddToScope fv
                 | FplBlockType.Reference ->
-                    EvalStack.tryAddToArgList fv
+                    fv.TryAddToParentsArgList()
                 | _ -> ()
             | FplBlockType.IntrinsicObj
             | FplBlockType.Quantor
@@ -196,7 +191,7 @@ type EvalStack() =
             | FplBlockType.IntrinsicTpl
             | FplBlockType.Instance
             | FplBlockType.Root -> 
-                EvalStack.tryAddToArgList fv 
+                fv.TryAddToParentsArgList() 
 
 
     // Pushes an FplValue to the stack.

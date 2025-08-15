@@ -388,6 +388,9 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     abstract member Name: string
     abstract member Represent: unit -> string
     abstract member Type: SignatureType -> string
+    
+    /// Adds this FplValue to it's parent's ArgList, if such a Parent exists.
+    abstract member TryAddToParentsArgList: unit -> unit
 
     /// Indicates if this FplValue is an root of the symbol table.
     abstract member IsRoot: unit -> bool
@@ -658,6 +661,11 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         this.IsIntrinsic <- other.IsIntrinsic
         this.IsInitializedVariable <- other.IsInitializedVariable
 
+    override this.TryAddToParentsArgList () = 
+        match this.Parent with 
+        | Some parent -> parent.ArgList.Add(this)
+        | _ -> ()
+
     /// Generates a type string identifier or type-specific naming convention of this FplValue.
     override this.Type(isSignature: SignatureType)  = 
         match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
@@ -874,6 +882,10 @@ type FplRoot() =
         ret
     override this.IsRoot () = true
 
+    override this.Type(_:SignatureType) = String.Empty
+    override this.Represent () = literalUndef
+    override this.TryAddToParentsArgList () = () 
+
 type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this =
     inherit FplValue(FplBlockType.Theory, positions, Some parent)
     do
@@ -888,6 +900,7 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
         ret
 
     override this.IsTheory () = true
+
 
 [<AbstractClass>]
 type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
@@ -1619,21 +1632,22 @@ let qualifiedName (fplValue:FplValue)=
             | FplBlockType.Quantor -> fv.Type(SignatureType.Mixed)
             | _ -> fv.FplId
 
-        if fv.FplBlockType = FplBlockType.Root then
-            ""
-        elif first then
-            if fv.Parent.Value.IsRoot() then
+        match fv with
+        | :? FplRoot -> ""
+        | _ -> 
+            if first then
+                if fv.Parent.Value.IsRoot() then
+                    getFullName fv.Parent.Value false + fplValueType
+                else if fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
+                    fplValueType
+                else
+                    getFullName fv.Parent.Value false + "." + fplValueType
+            else if fv.Parent.Value.IsRoot() then
                 getFullName fv.Parent.Value false + fplValueType
             else if fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
                 fplValueType
             else
                 getFullName fv.Parent.Value false + "." + fplValueType
-        else if fv.Parent.Value.IsRoot() then
-            getFullName fv.Parent.Value false + fplValueType
-        else if fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
-            fplValueType
-        else
-            getFullName fv.Parent.Value false + "." + fplValueType
 
     getFullName fplValue true
 
