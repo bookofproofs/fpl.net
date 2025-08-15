@@ -87,6 +87,7 @@ type EvalStack() =
                 fv.TryAddToParentsArgList() 
             else
                 match fv with 
+                | :? FplAxiom  
                 | :? FplRuleOfInference -> 
                     EvalStack.tryAddToScope fv
                 | _ -> ()
@@ -106,7 +107,6 @@ type EvalStack() =
                 | FplBlockType.OptionalPredicate
                 | FplBlockType.MandatoryFunctionalTerm
                 | FplBlockType.OptionalFunctionalTerm
-                | FplBlockType.Axiom
                 | FplBlockType.Predicate
                 | FplBlockType.Extension
                 | FplBlockType.Argument 
@@ -115,6 +115,7 @@ type EvalStack() =
                     EvalStack.tryAddToScope fv
                 | FplBlockType.Reference ->
                     match next with 
+                    | :? FplAxiom  
                     | :? FplRuleOfInference -> 
                         fv.TryAddToParentsArgList() 
                     | _ -> ()
@@ -128,7 +129,6 @@ type EvalStack() =
                         EvalStack.tryAddToScope fv
                     | FplBlockType.Argument ->
                         fv.TryAddToParentsArgList() 
-                    | FplBlockType.Axiom
                     | FplBlockType.Theorem 
                     | FplBlockType.Lemma 
                     | FplBlockType.Proposition 
@@ -157,6 +157,7 @@ type EvalStack() =
                 | FplBlockType.VariadicVariableMany
                 | FplBlockType.VariadicVariableMany1 ->
                     match next with 
+                    | :? FplAxiom 
                     | :? FplRuleOfInference -> 
                         EvalStack.tryAddToScope fv
                     | _ -> ()
@@ -174,7 +175,6 @@ type EvalStack() =
                     | FplBlockType.OptionalPredicate
                     | FplBlockType.MandatoryFunctionalTerm
                     | FplBlockType.OptionalFunctionalTerm
-                    | FplBlockType.Axiom
                     | FplBlockType.Predicate
                     | FplBlockType.Class
                     | FplBlockType.Mapping 

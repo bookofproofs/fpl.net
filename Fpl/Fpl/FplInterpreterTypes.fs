@@ -297,7 +297,6 @@ type FplBlockType =
     | Predicate
     | MandatoryPredicate
     | OptionalPredicate
-    | Axiom
     | Theorem
     | Lemma
     | Proposition
@@ -1181,7 +1180,7 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
 type FplAxiom(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicateWithExpression(FplBlockType.Axiom, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Todo, positions, parent)
 
     override this.Name = "an axiom"
     override this.ShortName = literalAx
@@ -1725,6 +1724,7 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
             ScopeSearchResult.NotFound
         else
             match fv with 
+            | :? FplAxiom 
             | :? FplRuleOfInference -> 
                 if fv.Scope.ContainsKey name then
                     ScopeSearchResult.Found(fv.Scope[name])
@@ -1748,7 +1748,6 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
                 | FplBlockType.OptionalPredicate
                 | FplBlockType.Proof
                 | FplBlockType.Corollary
-                | FplBlockType.Axiom
                 | FplBlockType.Theorem
                 | FplBlockType.Lemma
                 | FplBlockType.Proposition
@@ -1867,21 +1866,22 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
                 flattenedScopes
                 |> Seq.filter (fun fv -> fv.FplId = potentialBlockName)
                 |> Seq.toList
+            
+            let isAxiomOrConnjecture (fv:FplValue) = 
+                match fv with
+                | :? FplConjecture 
+                | :? FplAxiom -> true
+                | _ -> false
 
             let potentialBlockList =
                 buildingBlocksMatchingDollarDigitNameList
-                |> List.filter (fun fv ->
-                    isProvable fv
-                    || fv.FplBlockType = FplBlockType.Conjecture
-                    || fv.FplBlockType = FplBlockType.Axiom)
+                |> List.filter (fun fv -> isProvable fv || isAxiomOrConnjecture fv)
 
             let notPotentialBlockList =
                 buildingBlocksMatchingDollarDigitNameList
                 |> List.filter (fun fv ->
                     not (
-                        isProvable fv
-                        || fv.FplBlockType = FplBlockType.Conjecture
-                        || fv.FplBlockType = FplBlockType.Axiom
+                        isProvable fv || isAxiomOrConnjecture fv
                     ))
 
             if potentialBlockList.Length > 1 then
@@ -2211,12 +2211,12 @@ let rec nextDefinition (fv: FplValue) counter =
         ScopeSearchResult.FoundIncorrectBlock name
     else
         match fv with
+        | :? FplAxiom 
         | :? FplRuleOfInference -> 
             let name = $"{fv.Name} {fv.Type(SignatureType.Name)}"
             ScopeSearchResult.FoundIncorrectBlock name
         | _ ->
             match fv.FplBlockType with
-            | FplBlockType.Axiom
             | FplBlockType.Theorem
             | FplBlockType.Lemma
             | FplBlockType.Proposition
@@ -2343,11 +2343,11 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
 let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     let parameters =
         match fvp with
+        | :? FplAxiom
         | :? FplRuleOfInference ->
             fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
         | _ ->
             match fvp.FplBlockType with
-            | FplBlockType.Axiom
             | FplBlockType.Theorem
             | FplBlockType.Lemma
             | FplBlockType.Proposition

@@ -666,6 +666,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
 
         match fv with 
+        | :? FplAxiom
         | :? FplRuleOfInference ->
             fv.FplId <- identifier
             fv.TypeId <- literalPred
@@ -691,7 +692,6 @@ let rec eval (st: SymbolTable) ast =
                     fv.ArgList.Add classNode
                 | None -> ()
 
-        | FplBlockType.Axiom
         | FplBlockType.Theorem 
         | FplBlockType.Lemma 
         | FplBlockType.Proposition 
@@ -1393,8 +1393,12 @@ let rec eval (st: SymbolTable) ast =
         simplifyTriviallyNestedExpressions refBlock
         let last = es.PeekEvalStack()
         es.PopEvalStack()
+        match fv with
+        | :? FplAxiom -> 
+            fv.ValueList.Add(last)
+        | _ -> ()
+
         match fv.FplBlockType with
-        | FplBlockType.Axiom 
         | FplBlockType.Corollary 
         | FplBlockType.Proposition 
         | FplBlockType.Theorem 
