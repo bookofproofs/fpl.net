@@ -310,7 +310,6 @@ type FplBlockType =
     | Assertion
     | Extension
     | Instance
-    | IntrinsicObj
     | IntrinsicPred
     | IntrinsicUndef
     | IntrinsicFunc
@@ -542,39 +541,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
             else
                 None
 
-    /// Returns Some argument of the FplValue depending of the type of its 
-    /// FplBlockType. 
-    member this.GetArgument =
-        match this.FplBlockType with
-        | FplBlockType.Reference when this.Scope.ContainsKey(this.FplId) ->
-            let refValue = this.Scope[this.FplId]
-            // if the reference value itself contains value(s) and is not a class, 
-            // return this value. 
-            // Exceptions: 
-            // 1) if refValue is a class, its "arg list" means something else - namely parent classes. In this case we only want to return the main class
-            // 2) if refValue is a constructor, its "arg list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
-            if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && refValue.FplBlockType <> FplBlockType.Constructor then
-                Some refValue.ArgList[0] // return existing values except of classes, because those denoted their parent classes
-            else 
-                Some refValue 
-        | FplBlockType.Reference when this.FplId <> "" -> Some this
-        | FplBlockType.Reference when this.ArgList.Count = 0 -> Some this
-        | FplBlockType.Stmt when this.FplId = "bas" && this.ArgList.Count > 0 -> 
-            let test = this.ArgList[0]
-            // in case of a base.obj() constructor call
-            if test.ArgList.Count = 2 && 
-                test.ArgList[0].FplBlockType = FplBlockType.IntrinsicObj && 
-                test.ArgList[1].FplBlockType = FplBlockType.Reference &&
-                test.ArgList[1].FplId = "???" then
-                // return an FplValue inbuilt Object 
-                Some  test.ArgList[0] 
-            elif test.ArgList.Count > 0 then
-               Some test 
-            else
-                None
-        | _ when this.ArgList.Count > 0 -> Some this.ArgList[0]
-        | _ -> None
-
     /// Sets the value of this FplValue taking into account if this
     /// FplValue is a Reference to a variable.
     member this.SetValue(fplValue) =
@@ -703,7 +669,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 | FplBlockType.Proof
                 | FplBlockType.Argument
                 | FplBlockType.Language
-                | FplBlockType.IntrinsicObj
                 | FplBlockType.IntrinsicPred
                 | FplBlockType.IntrinsicFunc
                 | FplBlockType.IntrinsicTpl
@@ -1439,28 +1404,6 @@ type FplMapping(positions: Positions, parent: FplValue) =
 
     override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
 
-type FplStmt(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Stmt, positions, Some parent)
-
-    override this.Name = "a statement"
-    override this.ShortName = "stmt"
-
-    override this.Clone () =
-        let ret = new FplStmt((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-    override this.Instantiate () =
-        if this.FplId = "bas" then
-            // in case of a base class constructor call (that resides inside this that is a constructor)
-            // identify the 
-            let baseClassOpt = this.GetArgument
-            match baseClassOpt with
-            | Some (baseClass:FplValue) when baseClass.FplBlockType = FplBlockType.Class -> 
-                Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
-            | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
-        else
-            None
-
 type FplAssertion(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Assertion, positions, Some parent)
 
@@ -1513,7 +1456,7 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     override this.Represent (): string = this.FplId
 
 type FplIntrinsicObj(positions: Positions, parent: FplValue) =
-    inherit FplGenericObject(FplBlockType.IntrinsicObj, positions, parent)
+    inherit FplGenericObject(FplBlockType.Todo, positions, parent)
 
     override this.Name = "an intrinsic object"
     override this.ShortName = literalObj
@@ -1525,6 +1468,12 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = 
         Some (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
+
+    override this.Type (signatureType:SignatureType) = 
+        match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> this.FplId
+            | SignatureType.Type -> this.TypeId
 
     override this.Represent (): string = this.FplId
 
@@ -1594,6 +1543,70 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     override this.Instantiate () = None
 
     override this.Represent (): string = this.FplId
+
+/// Returns Some argument of the FplValue depending of the type of it.
+let getArgument (fv:FplValue) =
+    let isIntrinsicObj (fv1:FplValue) = 
+        match fv1 with
+        | :? FplIntrinsicObj -> true
+        | _ -> false
+
+    let isReference (fv1:FplValue) = 
+        match fv1 with
+        | :? FplReference -> true
+        | _ -> false
+
+    match fv.FplBlockType with
+    | FplBlockType.Reference when fv.Scope.ContainsKey(fv.FplId) ->
+        let refValue = fv.Scope[fv.FplId]
+        // if the reference value itself contains value(s) and is not a class, 
+        // return this value. 
+        // Exceptions: 
+        // 1) if refValue is a class, its "arg list" means something else - namely parent classes. In this case we only want to return the main class
+        // 2) if refValue is a constructor, its "arg list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
+        if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && refValue.FplBlockType <> FplBlockType.Constructor then
+            Some refValue.ArgList[0] // return existing values except of classes, because those denoted their parent classes
+        else 
+            Some refValue 
+    | FplBlockType.Reference when fv.FplId <> "" -> Some fv
+    | FplBlockType.Reference when fv.ArgList.Count = 0 -> Some fv
+    | FplBlockType.Stmt when fv.FplId = "bas" && fv.ArgList.Count > 0 -> 
+        let test = fv.ArgList[0]
+        // in case of a base.obj() constructor call
+        if test.ArgList.Count = 2 && 
+            isIntrinsicObj test.ArgList[0] && 
+            isReference test.ArgList[1] &&
+            test.ArgList[1].FplId = "???" then
+            // return an FplValue inbuilt Object 
+            Some  test.ArgList[0] 
+        elif test.ArgList.Count > 0 then
+            Some test 
+        else
+            None
+    | _ when fv.ArgList.Count > 0 -> Some fv.ArgList[0]
+    | _ -> None
+
+type FplStmt(positions: Positions, parent: FplValue) =
+    inherit FplValue(FplBlockType.Stmt, positions, Some parent)
+
+    override this.Name = "a statement"
+    override this.ShortName = "stmt"
+
+    override this.Clone () =
+        let ret = new FplStmt((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+    override this.Instantiate () =
+        if this.FplId = "bas" then
+            // in case of a base class constructor call (that resides inside this that is a constructor)
+            // identify the 
+            let baseClassOpt = getArgument this
+            match baseClassOpt with
+            | Some (baseClass:FplValue) when baseClass.FplBlockType = FplBlockType.Class -> 
+                Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
+            | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
+        else
+            None
 
 /// A discriminated union type for wrapping search results in the Scope of an FplValue.
 type ScopeSearchResult =
@@ -1914,9 +1927,9 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
 let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) =
     let rootType = classRoot.Type(SignatureType.Type)
 
-    match classRoot.FplBlockType with
-    | FplBlockType.Class
-    | FplBlockType.IntrinsicObj ->
+    match classRoot with
+    | :? FplClass
+    | :? FplIntrinsicObj ->
         if rootType = baseClassName then
             Some(rootType)
         else

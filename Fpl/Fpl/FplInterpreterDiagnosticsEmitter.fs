@@ -813,7 +813,7 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
         None
 
 let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) = 
-    let valueOpt = toBeAssignedValue.GetArgument
+    let valueOpt = getArgument toBeAssignedValue
     match valueOpt with
     | Some value when value.FplBlockType = FplBlockType.Class ->
         let chainOpt = findClassInheritanceChain value assignee.TypeId
