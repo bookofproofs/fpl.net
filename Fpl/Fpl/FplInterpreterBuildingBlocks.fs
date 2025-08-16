@@ -90,8 +90,7 @@ let rec eval (st: SymbolTable) ast =
             | :? FplClass -> () // do not override class's type with base obj
             | :? FplReference ->
                 fv.TypeId <- $"{value.ShortName}"
-                fv.ValueList.Clear()
-                fv.ValueList.Add(value)
+                fv.SetValue value
             | _ ->  fv.TypeId <- $"{value.ShortName}"
         | :? FplIntrinsicTpl ->
             match fv with
@@ -100,14 +99,12 @@ let rec eval (st: SymbolTable) ast =
                 fv.TypeId <- $"{tplName}"
                 value.TypeId <- $"{tplName}"
                 value.FplId <- $"{tplName}"
-                fv.ValueList.Clear()
-                fv.ValueList.Add(value)
+                fv.SetValue value
             | _ ->  
                 fv.TypeId <- $"{tplName}"
         | _ ->
             fv.TypeId <- value.ShortName
-            fv.ValueList.Clear()
-            fv.ValueList.Add(value)
+            fv.SetValue value
 
         match fv with
         | :? FplVariable as v -> 
