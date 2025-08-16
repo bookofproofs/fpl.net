@@ -84,6 +84,20 @@ type EvalStack() =
             let next = _valueStack.Peek()
 
             match fv with 
+            | :? FplIntrinsicObj
+            | :? FplQuantor
+            | :? FplJustification 
+            | :? FplArgInference 
+            | :? FplMapping 
+            | :? FplTranslation 
+            | :? FplStmt
+            | :? FplAssertion
+            | :? FplIntrinsicPred
+            | :? FplIntrinsicFunc
+            | :? FplIntrinsicObj
+            | :? FplIntrinsicUndef
+            | :? FplIntrinsicTpl
+            | :? FplInstance 
             | :? FplTheory 
             | :? FplIntrinsicInd ->
                 fv.TryAddToParentsArgList() 
@@ -94,26 +108,21 @@ type EvalStack() =
             | :? FplPredicate  
             | :? FplConjecture  
             | :? FplAxiom  
-            | :? FplRuleOfInference -> 
+            | :? FplRuleOfInference
+            | :? FplProof 
+            | :? FplClass 
+            | :? FplLocalization
+            | :? FplConstructor
+            | :? FplMandatoryPredicate
+            | :? FplOptionalPredicate
+            | :? FplMandatoryFunctionalTerm
+            | :? FplOptionalFunctionalTerm
+            | :? FplExtension
+            | :? FplArgument 
+            | :? FplLanguage 
+            | :? FplFunctionalTerm ->
                 EvalStack.tryAddToScope fv
-            | _ -> ()
-
-            match fv.FplBlockType with
-            | FplBlockType.Proof ->
-                EvalStack.tryAddToScope fv
-            | FplBlockType.Class 
-            | FplBlockType.Localization
-            | FplBlockType.Constructor
-            | FplBlockType.MandatoryPredicate
-            | FplBlockType.OptionalPredicate
-            | FplBlockType.MandatoryFunctionalTerm
-            | FplBlockType.OptionalFunctionalTerm
-            | FplBlockType.Extension
-            | FplBlockType.Argument 
-            | FplBlockType.Language 
-            | FplBlockType.FunctionalTerm ->
-                EvalStack.tryAddToScope fv
-            | FplBlockType.Reference ->
+            | :? FplReference ->
                 match next with 
                 | :? FplTheorem  
                 | :? FplLemma  
@@ -122,29 +131,24 @@ type EvalStack() =
                 | :? FplConjecture  
                 | :? FplPredicate  
                 | :? FplAxiom  
-                | :? FplRuleOfInference -> 
+                | :? FplRuleOfInference 
+                | :? FplArgument 
+                | :? FplProof 
+                | :? FplFunctionalTerm 
+                | :? FplClass 
+                | :? FplConstructor
+                | :? FplMandatoryFunctionalTerm
+                | :? FplOptionalFunctionalTerm
+                | :? FplMandatoryPredicate
+                | :? FplOptionalPredicate ->
                     fv.TryAddToParentsArgList() 
-                | _ -> ()
-
-                match next.FplBlockType with
-                | FplBlockType.Localization -> 
+                | :? FplLocalization -> 
                     next.FplId <- fv.FplId
                     next.TypeId <- fv.TypeId
                     next.EndPos <- fv.EndPos
-                | FplBlockType.Justification -> 
+                | :? FplJustification -> 
                     EvalStack.tryAddToScope fv
-                | FplBlockType.Argument ->
-                    fv.TryAddToParentsArgList() 
-                | FplBlockType.Proof 
-                | FplBlockType.FunctionalTerm 
-                | FplBlockType.Class 
-                | FplBlockType.Constructor
-                | FplBlockType.MandatoryFunctionalTerm
-                | FplBlockType.OptionalFunctionalTerm
-                | FplBlockType.MandatoryPredicate
-                | FplBlockType.OptionalPredicate ->
-                    fv.TryAddToParentsArgList() 
-                | FplBlockType.Quantor ->
+                | :? FplQuantor ->
                     fv.TryAddToParentsArgList() 
                     next.EndPos <- fv.EndPos
                 | _ -> 
@@ -153,9 +157,7 @@ type EvalStack() =
                     else
                         fv.TryAddToParentsArgList()
                     next.EndPos <- fv.EndPos
-            | FplBlockType.Variable
-            | FplBlockType.VariadicVariableMany
-            | FplBlockType.VariadicVariableMany1 ->
+            | :? FplVariable ->
                 match next with 
                 | :? FplTheorem 
                 | :? FplLemma 
@@ -164,48 +166,25 @@ type EvalStack() =
                 | :? FplConjecture
                 | :? FplPredicate 
                 | :? FplAxiom 
-                | :? FplRuleOfInference -> 
+                | :? FplRuleOfInference 
+                | :? FplConstructor
+                | :? FplProof
+                | :? FplMandatoryPredicate
+                | :? FplOptionalPredicate
+                | :? FplMandatoryFunctionalTerm
+                | :? FplOptionalFunctionalTerm
+                | :? FplClass
+                | :? FplMapping 
+                | :? FplExtension 
+                | :? FplVariable 
+                | :? FplFunctionalTerm 
+                | :? FplQuantor  
+                | :? FplLocalization -> 
                     EvalStack.tryAddToScope fv
-                | _ -> ()
-
-
-                match next.FplBlockType with 
-                | FplBlockType.Constructor
-                | FplBlockType.Proof
-                | FplBlockType.MandatoryPredicate
-                | FplBlockType.OptionalPredicate
-                | FplBlockType.MandatoryFunctionalTerm
-                | FplBlockType.OptionalFunctionalTerm
-                | FplBlockType.Class
-                | FplBlockType.Mapping 
-                | FplBlockType.Extension 
-                | FplBlockType.Variable 
-                | FplBlockType.VariadicVariableMany
-                | FplBlockType.VariadicVariableMany1 
-                | FplBlockType.FunctionalTerm ->
-                    EvalStack.tryAddToScope fv
-                | FplBlockType.Quantor  
-                | FplBlockType.Localization -> 
-                    EvalStack.tryAddToScope fv
-                | FplBlockType.Reference ->
+                | :? FplReference ->
                     fv.TryAddToParentsArgList()
                 | _ -> ()
-            | FplBlockType.IntrinsicObj
-            | FplBlockType.Quantor
-            | FplBlockType.Justification 
-            | FplBlockType.ArgInference 
-            | FplBlockType.Mapping 
-            | FplBlockType.Translation 
-            | FplBlockType.Stmt
-            | FplBlockType.Assertion
-            | FplBlockType.IntrinsicPred
-            | FplBlockType.IntrinsicFunc
-            | FplBlockType.IntrinsicObj
-            | FplBlockType.IntrinsicUndef
-            | FplBlockType.IntrinsicTpl
-            | FplBlockType.Instance 
-            | FplBlockType.Todo -> 
-                fv.TryAddToParentsArgList() 
+            | _ -> () 
 
     // Pushes an FplValue to the stack.
     member this.PushEvalStack fv = _valueStack.Push fv
