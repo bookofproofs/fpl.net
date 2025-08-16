@@ -242,16 +242,16 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ExtensionName")
         let fv = es.PeekEvalStack()
         let extensionName = $"@{s}"
-        match fv.FplBlockType with 
-        | FplBlockType.Extension ->
+        match fv with 
+        | :? FplExtension ->
             fv.FplId <- extensionName
             fv.TypeId <- extensionName
             fv.StartPos <- pos1
             fv.EndPos <- pos2
-        | FplBlockType.VariadicVariableMany -> 
+        | :? FplVariable as var when var.IsMany -> 
             let sid = $"*{extensionName}"
             fv.TypeId <- sid
-        | FplBlockType.VariadicVariableMany1 -> 
+        | :? FplVariable as var when var.IsMany1 -> 
             let sid = $"+{extensionName}"
             fv.TypeId <- sid
         | _ -> 
