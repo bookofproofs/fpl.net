@@ -1370,42 +1370,46 @@ type FplReference(positions: Positions, parent: FplValue) =
 
     override this.Represent (): string = 
         if this.ValueList.Count = 0 then
-            let args = 
-                this.ArgList
-                |> Seq.map (fun arg -> arg.Represent())
-                |> String.concat ", "
 
-            let qualification =
-                if this.Scope.ContainsKey(".") then
-                    Some(this.Scope["."])
-                else
-                    None
+            if this.Scope.ContainsKey(this.FplId) then
+                this.Scope[this.FplId].Represent()
+            else
+                let args = 
+                    this.ArgList
+                    |> Seq.map (fun arg -> arg.Represent())
+                    |> String.concat ", "
 
-            match (this.FplId, args, qualification) with
-            | (_, "", Some qual) -> sprintf "%s.%s" literalUndef (qual.Represent())
-            | (_, "???", Some qual) ->
-                if this.HasBrackets then
-                    sprintf "%s[].%s" literalUndef (qual.Represent())
-                else
-                    sprintf "%s().%s" literalUndef (qual.Represent())
-            | (_, _, Some qual) ->
-                if this.HasBrackets then
-                    sprintf "%s[%s].%s" literalUndef args (qual.Represent())
-                else
-                    sprintf "%s(%s).%s" literalUndef args (qual.Represent())
-            | ("???", _, None) -> "()" 
-            | ("", _, None) -> sprintf "%s" args
-            | (_, "()", None) -> sprintf "%s()" literalUndef
-            | (_, "", None) -> sprintf "%s" literalUndef
-            | (_, "???", None) ->
-                if this.HasBrackets then
-                    sprintf "%s[]" literalUndef
-                else
-                    sprintf "%s()" literalUndef
-            | (_, _, None) ->
-                if this.HasBrackets then sprintf "%s[%s]" literalUndef args
-                elif this.FplId = $"{literalByDef}." then sprintf "%s %s" literalByDef args
-                else sprintf "%s(%s)" literalUndef args
+                let qualification =
+                    if this.Scope.ContainsKey(".") then
+                        Some(this.Scope["."])
+                    else
+                        None
+
+                match (this.FplId, args, qualification) with
+                | (_, "", Some qual) -> sprintf "%s.%s" literalUndef (qual.Represent())
+                | (_, "???", Some qual) ->
+                    if this.HasBrackets then
+                        sprintf "%s[].%s" literalUndef (qual.Represent())
+                    else
+                        sprintf "%s().%s" literalUndef (qual.Represent())
+                | (_, _, Some qual) ->
+                    if this.HasBrackets then
+                        sprintf "%s[%s].%s" literalUndef args (qual.Represent())
+                    else
+                        sprintf "%s(%s).%s" literalUndef args (qual.Represent())
+                | ("???", _, None) -> "()" 
+                | ("", _, None) -> sprintf "%s" args
+                | (_, "()", None) -> sprintf "%s()" literalUndef
+                | (_, "", None) -> sprintf "%s" literalUndef
+                | (_, "???", None) ->
+                    if this.HasBrackets then
+                        sprintf "%s[]" literalUndef
+                    else
+                        sprintf "%s()" literalUndef
+                | (_, _, None) ->
+                    if this.HasBrackets then sprintf "%s[%s]" literalUndef args
+                    elif this.FplId = $"{literalByDef}." then sprintf "%s %s" literalByDef args
+                    else sprintf "%s(%s)" literalUndef args
 
         else
             let subRepr = 

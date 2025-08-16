@@ -26,7 +26,7 @@ type TestExpressionEvaluationVariables() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T()"]
-            let actual = evalTreeFplRepresentation(pr1)
+            let actual = pr1.Represent()
             printfn "expected: %s" expected 
             printfn "actual  : %s" actual
             printfn "%s" (pr1.Type(SignatureType.Mixed))
@@ -41,6 +41,10 @@ type TestExpressionEvaluationVariables() =
     [<DataRow("def pred T() { dec ~x,y,z:pred x:=true z:=true; and(x,and(y,z)) };", literalUndetermined)>]
     [<DataRow("def pred T() { dec ~x,y,z:pred x:=true y:=true; and(x,and(y,z)) };", literalUndetermined)>]
     [<DataRow("def pred T() { dec ~x,y,z:pred y:=true z:=true; and(x,and(y,z)) };", literalUndetermined)>]
+    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false z:=true; and(x,and(y,z)) };", literalFalse)>]
+    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=true; and(x,and(y,z)) };", literalFalse)>]
+    [<DataRow("def pred T() { dec ~x,y,z:pred y:=false z:=true; and(x,and(y,z)) };", literalFalse)>]
+    [<DataRow("def pred T() { dec ~x,y,z:pred y:=true z:=false; and(x,and(y,z)) };", literalFalse)>]
     [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=true; and(x,y) };", literalTrue)>]
     [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=false; and(x,y) };", literalFalse)>]
     [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=true; and(x,y) };", literalFalse)>]
@@ -100,6 +104,10 @@ type TestExpressionEvaluationVariables() =
     [<DataRow("def pred T() { dec ~x,y,z:pred x:=false z:=false; or(x,or(y,z)) };", literalUndetermined)>]
     [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=false; or(or(x,y),z) };", literalUndetermined)>]
     [<DataRow("def pred T() { dec ~x,y,z:pred y:=false z:=false; or(x,or(y,z)) };", literalUndetermined)>]
+    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false z:=true; or(x,or(y,z)) };", literalTrue)>]
+    [<DataRow("def pred T() { dec ~x,y,z:pred x:=false y:=true; or(x,or(y,z)) };", literalTrue)>]
+    [<DataRow("def pred T() { dec ~x,y,z:pred y:=false z:=true; or(x,or(y,z)) };", literalTrue)>]
+    [<DataRow("def pred T() { dec ~x,y,z:pred y:=true z:=false; or(x,or(y,z)) };", literalTrue)>]
     [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=true; or(x,y) };", literalTrue)>]
     [<DataRow("def pred T() { dec ~x,y:pred x:=true y:=false; or(x,y) };", literalTrue)>]
     [<DataRow("def pred T() { dec ~x,y:pred x:=false y:=true; or(x,y) };", literalTrue)>]

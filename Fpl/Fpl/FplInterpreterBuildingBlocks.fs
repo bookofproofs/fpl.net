@@ -1416,11 +1416,13 @@ let rec eval (st: SymbolTable) ast =
                 fv.FplId = "" && 
                 fv.ArgList.Count = 1 then
                     let subNode = fv.ArgList[0]
-                    if subNode.FplBlockType = FplBlockType.Reference then 
+                    match subNode with
+                    | :? FplReference ->
                         es.Pop() |> ignore
                         es.PushEvalStack(subNode)
                         subNode.Parent <- fv.Parent
                         fv.ArgList.Clear()
+                    | _ -> ()
         | FplBlockType.Localization -> 
             fv.FplId <- last.FplId
         | _ -> ()
