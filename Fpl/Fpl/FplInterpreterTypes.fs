@@ -310,7 +310,6 @@ type FplBlockType =
     | Assertion
     | Extension
     | Instance
-    | IntrinsicUndef
     | IntrinsicFunc
     | IntrinsicTpl
 
@@ -670,7 +669,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 | FplBlockType.Language
                 | FplBlockType.IntrinsicFunc
                 | FplBlockType.IntrinsicTpl
-                | FplBlockType.IntrinsicUndef
                 | FplBlockType.Class -> head
                 | FplBlockType.Constructor
                 | FplBlockType.OptionalPredicate
@@ -1495,7 +1493,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
     override this.Represent (): string = this.FplId
 
 type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(FplBlockType.IntrinsicUndef, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
     do 
         this.TypeId <- literalUndef
         this.FplId <- literalUndef
@@ -1510,6 +1508,12 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 
     override this.Instantiate () = None
 
+    override this.Type (signatureType:SignatureType) = 
+        match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> this.FplId
+            | SignatureType.Type -> this.TypeId
+                    
     override this.Represent (): string = this.FplId
 
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
