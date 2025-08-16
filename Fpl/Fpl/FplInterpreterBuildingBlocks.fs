@@ -678,10 +678,7 @@ let rec eval (st: SymbolTable) ast =
         | :? FplRuleOfInference ->
             fv.FplId <- identifier
             fv.TypeId <- literalPred
-        | _ -> ()
-
-        match fv.FplBlockType with 
-        | FplBlockType.Class -> 
+        | :? FplClass -> 
             if evalPath.EndsWith("InheritedClassType.PredicateIdentifier") then 
                 match checkID009_ID010_ID011_Diagnostics st fv identifier pos1 pos2 with
                 | Some classNode -> 
@@ -700,56 +697,50 @@ let rec eval (st: SymbolTable) ast =
                     fv.ArgList.Add classNode
                 | None -> ()
 
-        | FplBlockType.Proof 
-        | FplBlockType.MandatoryPredicate
-        | FplBlockType.OptionalPredicate ->
+        | :? FplProof 
+        | :? FplMandatoryPredicate
+        | :? FplOptionalPredicate ->
             fv.FplId <- identifier
             fv.TypeId <- literalPred
-        | FplBlockType.MandatoryFunctionalTerm
-        | FplBlockType.OptionalFunctionalTerm
-        | FplBlockType.FunctionalTerm ->
+        | :? FplMandatoryFunctionalTerm
+        | :? FplOptionalFunctionalTerm
+        | :? FplFunctionalTerm ->
             fv.FplId <- identifier
             fv.TypeId <- literalFunc
-        | FplBlockType.Constructor -> 
+        | :? FplConstructor -> 
             fv.FplId <- identifier
             fv.TypeId <- identifier
             checkID008Diagnostics fv pos1 pos2
-        | FplBlockType.VariadicVariableMany -> 
+        | :? FplVariable as var when var.IsMany -> 
             fv.TypeId <- $"*{identifier}"
-        | FplBlockType.VariadicVariableMany1 -> 
+        | :? FplVariable as var when var.IsMany1 -> 
             fv.TypeId <- $"+{identifier}"
-        | FplBlockType.Variable -> 
+        | :? FplVariable as var when not var.IsVariadic  -> 
             fv.TypeId <- identifier
-        | FplBlockType.Mapping -> 
+        | :? FplMapping -> 
             fv.TypeId <- fv.TypeId + identifier
-        | FplBlockType.Reference -> 
+        | :? FplReference -> 
             fv.FplId <- fv.FplId + identifier
             fv.TypeId <- fv.TypeId + identifier
             checkID012Diagnostics st fv identifier pos1 pos2
         | _ -> ()
         if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
             let candidates = findCandidatesByName st identifier false
-            match (fv.FplBlockType, candidates.Length) with
-            | (FplBlockType.Variable, 0)
-            | (FplBlockType.VariadicVariableMany, 0)
-            | (FplBlockType.VariadicVariableMany1, 0) -> 
+            match (fv, candidates.Length) with
+            | (:? FplVariable, 0) -> 
                 emitSIG04DiagnosticsForTypes identifier pos1 pos2
                 let undefValue = new FplIntrinsicUndef((fv.StartPos, fv.EndPos), fv)
                 fv.ValueList.Add(undefValue)
                
-            | (FplBlockType.Variable, 1)
-            | (FplBlockType.VariadicVariableMany, 1)
-            | (FplBlockType.VariadicVariableMany1, 1) -> 
+            | (:? FplVariable, 1) -> 
                 fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
-            | (FplBlockType.Variable, _)
-            | (FplBlockType.VariadicVariableMany, _)
-            | (FplBlockType.VariadicVariableMany1, _) -> 
+            | (:? FplVariable, _) -> 
                 emitID017Diagnostics identifier candidates pos1 pos2
             | _ -> 
                 match checkSIG04Diagnostics fv candidates with
                 | Some candidate -> 
-                    match fv.FplBlockType with
-                    | FplBlockType.Reference -> fv.Scope.Add(identifier, candidate)
+                    match fv with
+                    | :? FplReference -> fv.Scope.Add(identifier, candidate)
                     | _ -> fv.ArgList.Add(candidate)
                 | _ -> ()
         
