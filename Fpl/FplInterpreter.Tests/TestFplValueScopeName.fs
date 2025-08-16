@@ -591,7 +591,9 @@ type TestFplValueScopeName() =
             | "base3" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base4" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base5" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
-            | "base6" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
+            | "base6" -> 
+                let arg = base1.GetArgument
+                Assert.AreEqual<string>("$1", arg.Value.Type(SignatureType.Name))
             | "base7" -> Assert.AreEqual<string>("bydef.Test()", base1.Type(SignatureType.Name))
             | "base8" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base9" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))

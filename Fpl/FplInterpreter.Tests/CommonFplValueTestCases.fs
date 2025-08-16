@@ -437,3 +437,26 @@ type CommonFplValueTestCases =
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
         result
+
+    static member ScopeIntrinsicPrimitives(subtype) =
+        ad.Clear()
+        let fplCode = """
+            def cl A:obj {intr}
+            def func B()->obj {intr}
+            def pred T() {dec ~a:ind a:=$1 b:~b:pred b:=true ~c:obj c:=A(); true };
+        """
+        let filename = "TestScopeIntrinsicPrimitives" + subtype
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+
+        let result = match stOption with
+                        | Some st -> 
+                            let r = st.Root
+                            let theory = CommonFplValueTestCases.getScopedElement r filename subtype
+                            let pred = CommonFplValueTestCases.getScopedElement theory "T()" subtype
+                            let predInitialized = CommonFplValueTestCases.getScopedElement theory "T()" subtype
+                            let aVar = CommonFplValueTestCases.getScopedElement pred "a" subtype
+                            let bVar = CommonFplValueTestCases.getScopedElement pred "b" subtype
+                            Some (aVar,bVar)
+                        | None -> None
+        prepareFplCode(filename, "", true) |> ignore
+        result

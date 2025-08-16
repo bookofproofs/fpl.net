@@ -574,7 +574,9 @@ type TestFplValueScopeFplId() =
             | "base3" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base4" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base5" -> Assert.AreEqual<string>("del.Test", base1.FplId)
-            | "base6" -> Assert.AreEqual<string>(varVal, base1.FplId)
+            | "base6" -> 
+                let arg = base1.GetArgument
+                Assert.AreEqual<string>(varVal, arg.Value.FplId)
             | "base7" -> Assert.AreEqual<string>("bydef.", base1.FplId)
             | "base8" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base9" -> Assert.AreEqual<string>("Test$1", base1.FplId)
@@ -921,4 +923,18 @@ type TestFplValueScopeFplId() =
             | "base5" -> Assert.AreEqual<string>(@"", trsl.FplId)
             | _ -> Assert.IsTrue(false)
         | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("todo")>]
+    [<DataRow("todo")>]
+    [<TestMethod>]
+    member this.TestIntrinsicPrimitives(var) =
+        let res = CommonFplValueTestCases.ScopeIntrinsicPrimitives("FplId") 
+        match res with
+        | Some (loc1:FplValue,loc2:FplValue) -> 
+            match var with 
+            | "todo" -> Assert.AreEqual<string>(literalNot, loc1.FplId)
+            | "todo" -> Assert.AreEqual<string>("Equal", loc2.FplId)
+            | _ -> Assert.IsTrue(false)
+        | _ -> 
             Assert.IsTrue(false)

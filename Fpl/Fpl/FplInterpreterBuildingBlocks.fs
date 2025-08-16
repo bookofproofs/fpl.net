@@ -47,10 +47,11 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
     if rb.ArgList.Count = 1 && rb.FplId = "" then
         // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0]
-        if subNode.FplBlockType = FplBlockType.Reference 
-            || subNode.FplBlockType = FplBlockType.Quantor 
-            || subNode.FplBlockType = FplBlockType.IntrinsicInd 
-            || subNode.FplBlockType = FplBlockType.IntrinsicPred then 
+        match subNode with
+        | :? FplReference
+        | :? FplQuantor
+        | :? FplIntrinsicInd
+        | :? FplIntrinsicPred ->
             es.Pop() |> ignore // pop the removable reference block and ignored it
             es.PushEvalStack(subNode) // push its subNode instead
             // adjust subNode's Parent, EndPos, Scope
@@ -68,6 +69,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
             rb.ArgList.Clear() 
             rb.ValueList.Clear()
             rb.Scope.Clear()
+        | _ -> ()
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
@@ -79,22 +81,22 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
 
     let setUnitType (fv:FplValue) (value:FplValue) (tplName:string)=
-        match value.FplBlockType with
-        | FplBlockType.IntrinsicPred
-        | FplBlockType.IntrinsicInd 
-        | FplBlockType.IntrinsicObj 
-        | FplBlockType.IntrinsicFunc ->
-            match fv.FplBlockType with
-            | FplBlockType.Class -> () // do not override class's type with base obj
-            | FplBlockType.Reference ->
+        match value with
+        | :? FplIntrinsicPred
+        | :? FplIntrinsicInd 
+        | :? FplIntrinsicObj 
+        | :? FplIntrinsicFunc ->
+            match fv with
+            | :? FplClass -> () // do not override class's type with base obj
+            | :? FplReference ->
                 fv.TypeId <- $"{value.ShortName}"
                 fv.ValueList.Clear()
                 fv.ValueList.Add(value)
             | _ ->  fv.TypeId <- $"{value.ShortName}"
-        | FplBlockType.IntrinsicTpl ->
-            match fv.FplBlockType with
-            | FplBlockType.Class -> () // do not override class's type with base obj
-            | FplBlockType.Reference ->
+        | :? FplIntrinsicTpl ->
+            match fv with
+            | :? FplClass -> () // do not override class's type with base obj
+            | :? FplReference ->
                 fv.TypeId <- $"{tplName}"
                 value.TypeId <- $"{tplName}"
                 value.FplId <- $"{tplName}"

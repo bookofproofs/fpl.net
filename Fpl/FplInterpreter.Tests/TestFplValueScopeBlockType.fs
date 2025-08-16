@@ -572,7 +572,9 @@ type TestFplValueScopeBlockType() =
             | "base3" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base4" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base5" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
-            | "base6" -> Assert.AreEqual<FplBlockType>(FplBlockType.IntrinsicInd, base1.FplBlockType)
+            | "base6" -> 
+                let arg = base1.GetArgument
+                Assert.IsInstanceOfType<FplIntrinsicInd>(arg.Value)
             | "base7" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base8" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)
             | "base9" -> Assert.AreEqual<FplBlockType>(FplBlockType.Reference, base1.FplBlockType)

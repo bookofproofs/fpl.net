@@ -310,7 +310,6 @@ type FplBlockType =
     | Assertion
     | Extension
     | Instance
-    | IntrinsicInd
     | IntrinsicObj
     | IntrinsicPred
     | IntrinsicUndef
@@ -637,7 +636,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         |> Seq.filter (fun fv -> fv.FplBlockType = FplBlockType.Constructor)
         |> Seq.toList
 
-    /// 
+    /// Generates a string of parameters based on SignatureType
     member this.GetParamTuple(signatureType:SignatureType) =
         let propagate =
             match signatureType with
@@ -705,7 +704,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 | FplBlockType.Argument
                 | FplBlockType.Language
                 | FplBlockType.IntrinsicObj
-                | FplBlockType.IntrinsicInd
                 | FplBlockType.IntrinsicPred
                 | FplBlockType.IntrinsicFunc
                 | FplBlockType.IntrinsicTpl
@@ -1490,7 +1488,7 @@ type FplExtension(positions: Positions, parent: FplValue) =
     override this.Instantiate () = None
 
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(FplBlockType.IntrinsicInd, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
     do 
         this.TypeId <- literalInd
         this.FplId <- literalInd
@@ -1506,6 +1504,12 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
 
     override this.Instantiate () = None
 
+    override this.Type (signatureType:SignatureType) = 
+        match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> this.FplId
+            | SignatureType.Type -> this.TypeId
+                    
     override this.Represent (): string = this.FplId
 
 type FplIntrinsicObj(positions: Positions, parent: FplValue) =
