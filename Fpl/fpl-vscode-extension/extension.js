@@ -70,6 +70,58 @@ function deleteFile(pathToFile) {
     log2Console("File " + pathToFile + " deleted successfully", false);
 }
 
+
+
+/**
+ * Downloads a file from the given URL to the specified destination path,
+ * following redirects (e.g., 302) if necessary.
+ * @param {string} url - The URL to download from.
+ * @param {string} dest - The local file path to save to.
+ * @param {number} [maxRedirects=5] - Maximum number of redirects to follow.
+ * @returns {Promise<void>}
+ */
+function downloadFile(url, dest, maxRedirects = 5) {
+    const https = require('https');
+    const fs = require('fs');
+    const urlModule = require('url');
+
+    return new Promise((resolve, reject) => {
+        const doRequest = (url, redirectsLeft) => {
+            const file = fs.createWriteStream(dest);
+            https.get(url, (response) => {
+                if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                    // Handle redirect
+                    if (redirectsLeft === 0) {
+                        reject(new Error('Too many redirects'));
+                        return;
+                    }
+                    // Clean up the file stream before redirecting
+                    file.close(() => {});
+                    const redirectUrl = urlModule.resolve(url, response.headers.location);
+                    doRequest(redirectUrl, redirectsLeft - 1);
+                    return;
+                }
+                if (response.statusCode !== 200) {
+                    reject(new Error(`Failed to get '${url}' (${response.statusCode})`));
+                    response.resume();
+                    return;
+                }
+                response.pipe(file);
+                // @ts-ignore
+                file.on('finish', () => file.close(resolve));
+            }).on('error', (err) => {
+                fs.unlink(dest, () => reject(err));
+            });
+            file.on('error', (err) => {
+                fs.unlink(dest, () => reject(err));
+            });
+        };
+        doRequest(url, maxRedirects);
+    });
+}
+
+
+
 /**
  * @param {string} runtimeName
  * @param {string} downloadPath
@@ -78,59 +130,58 @@ function deleteFile(pathToFile) {
  */
 function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
     return new Promise((resolve, reject) => {
-        try {
-            log2Console('trying to install ' + runtimeName, false);
-            const https = require('https');
-            const fs = require('fs');
-            const path = require('path');
-            const tar = require('tar');
+    
+        log2Console('trying to download ' + runtimeName + ' to ' + downloadPath + ' from ' + fileUrlDir + '/' + fileUrlName, false);
+        
+        
+        const path = require('path');
+        const tar = require('tar');
+        const AdmZip = require('adm-zip');
 
-            // URL of the file to download
-            let fileUrl = fileUrlDir + '/' + fileUrlName;
+        // URL of the file to download
+        let fileUrl = fileUrlDir + '/' + fileUrlName;
 
-            // Path to save the downloaded file
-            let pathToDownloadedFile = downloadPath + '/' + fileUrlName;
+        // Path to save the downloaded file
+        let pathToDownloadedFile = downloadPath + '/' + fileUrlName;
 
-            // Download and extract the runtime
-            let file = fs.createWriteStream(pathToDownloadedFile);
-            https.get(fileUrl, function (response) {
-                response.pipe(file);
+        // Usage example:
+        downloadFile(fileUrl, pathToDownloadedFile)
+            .then(() => {
+                log2Console('Runtime ' + runtimeName + ' downloaded successfully', false);
 
-                file.on('finish', function () {
-                    file.close(() => {
-                        log2Console('Runtime ' + runtimeName + ' downloaded successfully', false);
+                    if (path.extname(pathToDownloadedFile) == '.gz') {
+                        log2Console('Trying to unmpack using tar node.js: ' + pathToDownloadedFile, false);
+                        tar.x({
+                            file: pathToDownloadedFile,
+                            cwd: downloadPath
+                        });
+                        // remove the tar.gz file
+                        deleteFile(pathToDownloadedFile);
+                        log2Console('runtime ' + runtimeName + ' installed successfully', false);
+                        resolve('runtime ' + runtimeName + ' installed successfully');
+                    }
+                    else if (path.extname(pathToDownloadedFile) == '.zip') {
+                        log2Console('Trying to unpack file using adm-zip node.js: ' + pathToDownloadedFile, false);
+                        var zip = new AdmZip(pathToDownloadedFile);
+                        zip.extractAllTo(downloadPath, true)
+                        deleteFile(pathToDownloadedFile);
+                        log2Console('runtime ' + runtimeName + ' installed successfully', false);
+                        resolve('runtime ' + runtimeName + ' installed successfully');
+                    }
+                    else {
+                        reject("no decompression algorithm found for downloaded file " + pathToDownloadedFile);
+                    }
 
-                        if (path.extname(pathToDownloadedFile) == '.gz') {
-                            tar.x({
-                                file: pathToDownloadedFile,
-                                cwd: downloadPath
-                            });
-                            // remove the tar.gz file
-                            deleteFile(pathToDownloadedFile);
-                            log2Console('runtime ' + runtimeName + ' installed successfully', false);
-                            resolve('runtime ' + runtimeName + ' installed successfully');
-                        }
-                        else if (path.extname(pathToDownloadedFile) == '.zip') {
-                            const AdmZip = require('adm-zip');
-                            var zip = new AdmZip(pathToDownloadedFile);
-                            zip.extractAllTo(downloadPath, true)
-                            deleteFile(pathToDownloadedFile);
-                            log2Console('runtime ' + runtimeName + ' installed successfully', false);
-                            resolve('runtime ' + runtimeName + ' installed successfully');
-                        }
-                        else {
-                            reject("no decompression algorithm found for downloaded file " + pathToDownloadedFile);
-                        }
-                        return;
-                    });
-                });
-                return;
+            }
+            )
+            .catch(err => {
+                log2Console('Automatic download failed:' + err, true);
+                log2Console('To resolve this issue and finish installing the FPL extension:', false);
+                log2Console('1) Try to manually download the file: ' + fileUrl , false);
+                log2Console('2) Unpack its contents to this folder: ' + downloadPath, false);
+                log2Console('3) Close and open VS Code again.', false);
             });
-        }
-        catch (error) {
-            log2Console(error.message, true);
-            reject(error.message);
-        }
+
     });
 }
 
