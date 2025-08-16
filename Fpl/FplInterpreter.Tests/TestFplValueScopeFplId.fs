@@ -937,12 +937,12 @@ type TestFplValueScopeFplId() =
         match res with
         | Some (i:FplValue, b:FplValue, p:FplValue, o:FplValue, u:FplValue, t:FplValue) -> 
             match var with 
-            | "i" -> Assert.AreEqual<string>(literalNot, i.FplId)
-            | "b" -> Assert.AreEqual<string>("Equal", b.FplId)
-            | "p" -> Assert.AreEqual<string>("Equal", p.FplId)
-            | "o" -> Assert.AreEqual<string>("Equal", o.FplId)
-            | "u" -> Assert.AreEqual<string>("Equal", u.FplId)
-            | "t" -> Assert.AreEqual<string>("Equal", t.FplId)
+            | "i" -> Assert.AreEqual<string>($"$1", i.FplId)
+            | "b" -> Assert.AreEqual<string>($"{literalFunc}", b.FplId)
+            | "p" -> Assert.AreEqual<string>($"{literalTrue}", p.FplId)
+            | "o" -> Assert.AreEqual<string>($"A", o.FplId)
+            | "u" -> Assert.AreEqual<string>($"{literalUndef}", u.FplId)
+            | "t" -> Assert.AreEqual<string>("$2", t.FplId)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)

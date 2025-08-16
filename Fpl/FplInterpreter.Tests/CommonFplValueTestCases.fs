@@ -449,11 +449,11 @@ type CommonFplValueTestCases =
             def pred T() {
                 dec 
                     ~i:ind i:=$1 
-                    ~b:B  
+                    ~b:func b:=B()  
                     ~p:pred p:=true 
                     ~o:obj o:=A()
                     ~u:obj u:=undef
-                    ~t:tpl t:$2
+                    ~t:tpl t:=$2
                 ;
                 true 
             };
