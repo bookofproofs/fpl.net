@@ -2,6 +2,9 @@
 
 open CommonTestHelpers
 open ErrDiagnostics
+open FplInterpreterTypes
+open FParsec
+
 
 type CommonFplValueTestCases =
 
@@ -443,20 +446,43 @@ type CommonFplValueTestCases =
         let fplCode = """
             def cl A:obj {intr}
             def func B()->obj {intr}
-            def pred T() {dec ~a:ind a:=$1 b:~b:pred b:=true ~c:obj c:=A(); true };
+            def pred T() {
+                dec 
+                    ~i:ind i:=$1 
+                    ~b:B  
+                    ~p:pred p:=true 
+                    ~o:obj o:=A()
+                    ~u:obj u:=undef
+                    ~t:tpl t:$2
+                ;
+                true 
+            };
         """
         let filename = "TestScopeIntrinsicPrimitives" + subtype
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let getValue (varObj:FplValue) =
+            match varObj with
+            | :? FplVariable as var -> var.ValueList[0]
+            | _ -> new FplIntrinsicUndef((Position("",0,0,0), Position("",0,0,0) ), varObj)
 
         let result = match stOption with
                         | Some st -> 
                             let r = st.Root
                             let theory = CommonFplValueTestCases.getScopedElement r filename subtype
                             let pred = CommonFplValueTestCases.getScopedElement theory "T()" subtype
-                            let predInitialized = CommonFplValueTestCases.getScopedElement theory "T()" subtype
-                            let aVar = CommonFplValueTestCases.getScopedElement pred "a" subtype
+                            let iVar = CommonFplValueTestCases.getScopedElement pred "i" subtype
+                            let i = getValue iVar
                             let bVar = CommonFplValueTestCases.getScopedElement pred "b" subtype
-                            Some (aVar,bVar)
+                            let b = getValue bVar
+                            let pVar = CommonFplValueTestCases.getScopedElement pred "p" subtype
+                            let p = getValue pVar
+                            let oVar = CommonFplValueTestCases.getScopedElement pred "o" subtype
+                            let o = getValue oVar
+                            let uVar = CommonFplValueTestCases.getScopedElement pred "u" subtype
+                            let u = getValue uVar
+                            let tVar = CommonFplValueTestCases.getScopedElement pred "t" subtype
+                            let t = getValue tVar
+                            Some (i, b, p, o, u, t)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
         result

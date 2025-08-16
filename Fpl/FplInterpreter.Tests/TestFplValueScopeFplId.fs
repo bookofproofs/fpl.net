@@ -925,16 +925,24 @@ type TestFplValueScopeFplId() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("todo")>]
-    [<DataRow("todo")>]
+    [<DataRow("i")>]
+    [<DataRow("b")>]
+    [<DataRow("p")>]
+    [<DataRow("o")>]
+    [<DataRow("u")>]
+    [<DataRow("t")>]
     [<TestMethod>]
     member this.TestIntrinsicPrimitives(var) =
         let res = CommonFplValueTestCases.ScopeIntrinsicPrimitives("FplId") 
         match res with
-        | Some (loc1:FplValue,loc2:FplValue) -> 
+        | Some (i:FplValue, b:FplValue, p:FplValue, o:FplValue, u:FplValue, t:FplValue) -> 
             match var with 
-            | "todo" -> Assert.AreEqual<string>(literalNot, loc1.FplId)
-            | "todo" -> Assert.AreEqual<string>("Equal", loc2.FplId)
+            | "i" -> Assert.AreEqual<string>(literalNot, i.FplId)
+            | "b" -> Assert.AreEqual<string>("Equal", b.FplId)
+            | "p" -> Assert.AreEqual<string>("Equal", p.FplId)
+            | "o" -> Assert.AreEqual<string>("Equal", o.FplId)
+            | "u" -> Assert.AreEqual<string>("Equal", u.FplId)
+            | "t" -> Assert.AreEqual<string>("Equal", t.FplId)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
