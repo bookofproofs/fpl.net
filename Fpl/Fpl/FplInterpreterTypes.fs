@@ -929,20 +929,26 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
 type FplVariable(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Variable, positions, Some parent)
     let mutable _variadicType = String.Empty // "" = variable, "many" = many, "many1" = many1 
-    override this.Name = "a variable"
-    override this.ShortName = "var"
+    override this.Name = 
+        match _variadicType with
+        | "many" -> "a zero-or-more variable"
+        | "many1"-> "a one-or-more variable"
+        | _ -> "a variable"
+    override this.ShortName = 
+        match _variadicType with
+        | "many" -> "*var"
+        | "many1"-> "+var"
+        | _ -> "var"
 
     member this.SetToMany() = 
         if _variadicType = String.Empty then
             _variadicType <- "many"
-            this.FplBlockType <- FplBlockType.VariadicVariableMany
         else 
             failwith($"The variadic type was already set to {_variadicType}.")
 
     member this.SetToMany1() = 
         if _variadicType = String.Empty then
             _variadicType <- "many1"
-            this.FplBlockType <- FplBlockType.VariadicVariableMany1
         else 
             failwith($"The variadic type was already set to {_variadicType}.")
 
