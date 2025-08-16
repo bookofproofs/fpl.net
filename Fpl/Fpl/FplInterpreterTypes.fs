@@ -287,7 +287,6 @@ type ParsedAstList() =
 type FplBlockType =
     | Todo
     | Variable
-    | Class
     | Constructor
     | FunctionalTerm
     | MandatoryFunctionalTerm
@@ -577,18 +576,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
         collectVariables this
 
-    /// Returns Some or none FplValue being the enclosing class block of a node inside a class.
-    member this.GetClassBlock() =
-        let rec getClassBlock (fv: FplValue) =
-            match fv.FplBlockType with
-            | FplBlockType.Class -> Some fv
-            | _ ->
-                match fv.Parent with
-                | Some parent -> getClassBlock parent
-                | _ -> None
-
-        getClassBlock this
-
     /// If this is a class definition, the function will return a list (possibly empty) list of all of its constructors.
     member this.GetConstructors() =
         this.Scope
@@ -662,8 +649,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 match this.FplBlockType with
                 | FplBlockType.Proof
                 | FplBlockType.Argument
-                | FplBlockType.Language
-                | FplBlockType.Class -> head
+                | FplBlockType.Language -> head
                 | FplBlockType.Constructor
                 | FplBlockType.OptionalPredicate
                 | FplBlockType.MandatoryPredicate ->
@@ -774,7 +760,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 | _ -> ""
 
             idRec ()
-
     /// Generates a representation of this FplValue.
     override this.Represent() = 
         let rec children (fv:FplValue) isFirst = 
@@ -1009,7 +994,7 @@ type FplInstance(positions: Positions, parent: FplValue) =
     override this.Instantiate () = None
 
 type FplClass(positions: Positions, parent: FplValue) =
-    inherit FplGenericObject(FplBlockType.Class, positions, parent)
+    inherit FplGenericObject(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a class definition"
     override this.ShortName = "def cl"
@@ -1025,7 +1010,23 @@ type FplClass(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
     override this.IsClass () = true
+    
+    override this.Type(signatureType:SignatureType) =
+        match signatureType with
+        | SignatureType.Name 
+        | SignatureType.Mixed -> this.FplId
+        | SignatureType.Type -> this.TypeId
+
     override this.Represent () = $"dec {literalCl} {this.FplId}"
+
+/// Returns Some or none FplValue being the enclosing class block of a node inside a class.
+let rec getClassBlock (fv: FplValue) =
+    match fv with
+    | :? FplClass -> Some fv
+    | _ ->
+        match fv.Parent with
+        | Some parent -> getClassBlock parent
+        | _ -> None
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Constructor, positions, parent)
@@ -1042,6 +1043,11 @@ type FplConstructor(positions: Positions, parent: FplValue) =
         Some (new FplInstance((this.StartPos, this.EndPos), this))
 
     override this.IsBlock () = true
+
+let isConstructor (fv:FplValue) =
+    match fv with
+    | :? FplConstructor -> true
+    | _ -> false
 
 type FplFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.FunctionalTerm, positions, Some parent)
@@ -1620,7 +1626,7 @@ type FplStmt(positions: Positions, parent: FplValue) =
             // identify the 
             let baseClassOpt = getArgument this
             match baseClassOpt with
-            | Some (baseClass:FplValue) when baseClass.FplBlockType = FplBlockType.Class -> 
+            | Some (baseClass:FplValue) when baseClass.IsClass() -> 
                 Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
             | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
         else
@@ -1777,19 +1783,18 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
                 else
                     ScopeSearchResult.NotFound
             | _ ->
-                match fv.FplBlockType with
-                | FplBlockType.Constructor
-                | FplBlockType.Localization
-                | FplBlockType.Quantor
-                | FplBlockType.MandatoryFunctionalTerm
-                | FplBlockType.OptionalFunctionalTerm
-                | FplBlockType.MandatoryPredicate
-                | FplBlockType.OptionalPredicate
-                | FplBlockType.Proof
-                | FplBlockType.Proof
-                | FplBlockType.Extension
-                | FplBlockType.FunctionalTerm
-                | FplBlockType.Class ->
+                match fv with
+                | :? FplConstructor
+                | :? FplLocalization
+                | :? FplQuantor
+                | :? FplMandatoryFunctionalTerm
+                | :? FplOptionalFunctionalTerm
+                | :? FplMandatoryPredicate
+                | :? FplOptionalPredicate
+                | :? FplProof
+                | :? FplExtension
+                | :? FplFunctionalTerm
+                | :? FplClass ->
                     if fv.Scope.ContainsKey name then
                         ScopeSearchResult.Found(fv.Scope[name])
                     elif fv.Parent.IsSome then
@@ -2161,7 +2166,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
         |> Seq.iter (fun (block: FplValue) ->
             pm.Add(block)
 
-            if withClassConstructors && block.FplBlockType = FplBlockType.Class then
+            if withClassConstructors && block.IsClass() then
                 block.Scope
                 |> Seq.map (fun kvp -> kvp.Value)
                 |> Seq.filter (fun (fv: FplValue) -> fv.FplBlockType = FplBlockType.Constructor)
@@ -2181,9 +2186,9 @@ let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
             match fv1 with
             | :? FplPredicate -> ScopeSearchResult.Found(fv1)
             | _ ->
-                match fv1.FplBlockType with
-                | FplBlockType.Class
-                | FplBlockType.FunctionalTerm -> ScopeSearchResult.Found(fv1)
+                match fv1 with
+                | :? FplClass
+                | :? FplFunctionalTerm -> ScopeSearchResult.Found(fv1)
                 | _ ->
                     match fv1.Parent with
                     | Some parent -> findDefinition parent
@@ -2256,7 +2261,9 @@ let rec nextDefinition (fv: FplValue) counter =
         | :? FplCorollary
         | :? FplConjecture
         | :? FplAxiom 
-        | :? FplRuleOfInference -> 
+        | :? FplRuleOfInference 
+        | :? FplProof
+        | :? FplLocalization ->
             let name = $"{fv.Name} {fv.Type(SignatureType.Name)}"
             ScopeSearchResult.FoundIncorrectBlock name
         | :? FplPredicate ->
@@ -2278,42 +2285,36 @@ let rec nextDefinition (fv: FplValue) counter =
                                 "(no block found)"
 
                         ScopeSearchResult.FoundMultiple name
-        | _ ->
-            match fv.FplBlockType with
-            | FplBlockType.Proof
-            | FplBlockType.Localization ->
-                let name = $"{fv.Name} {fv.Type(SignatureType.Name)}"
-                ScopeSearchResult.FoundIncorrectBlock name
-            | FplBlockType.MandatoryPredicate
-            | FplBlockType.OptionalPredicate
-            | FplBlockType.MandatoryFunctionalTerm
-            | FplBlockType.OptionalFunctionalTerm
-            | FplBlockType.FunctionalTerm
-            | FplBlockType.Class ->
-                blocks.Push(fv)
+        | :? FplMandatoryPredicate
+        | :? FplOptionalPredicate
+        | :? FplMandatoryFunctionalTerm
+        | :? FplOptionalFunctionalTerm
+        | :? FplFunctionalTerm
+        | :? FplClass ->
+            blocks.Push(fv)
 
-                if counter <= 0 then
-                    ScopeSearchResult.Found fv
-                else
-                    let next = fv.Parent
-
-                    match next with
-                    | Some parent -> nextDefinition parent (counter - 1)
-                    | None ->
-                        let name =
-                            if blocks.Count > 0 then
-                                let fv1 = blocks.Peek()
-                                $"{fv1.Name} {fv.Type(SignatureType.Name)}"
-                            else
-                                "(no block found)"
-
-                        ScopeSearchResult.FoundMultiple name
-            | _ ->
+            if counter <= 0 then
+                ScopeSearchResult.Found fv
+            else
                 let next = fv.Parent
 
                 match next with
-                | Some parent -> nextDefinition parent counter
-                | None -> ScopeSearchResult.NotFound
+                | Some parent -> nextDefinition parent (counter - 1)
+                | None ->
+                    let name =
+                        if blocks.Count > 0 then
+                            let fv1 = blocks.Peek()
+                            $"{fv1.Name} {fv.Type(SignatureType.Name)}"
+                        else
+                            "(no block found)"
+
+                    ScopeSearchResult.FoundMultiple name
+        | _ ->
+            let next = fv.Parent
+
+            match next with
+            | Some parent -> nextDefinition parent counter
+            | None -> ScopeSearchResult.NotFound
 
 /// Tries to match parameters of an FplValue with its arguments recursively
 let rec mpwa (args: FplValue list) (pars: FplValue list) =
@@ -2343,8 +2344,8 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
             if var.Scope.ContainsKey(var.FplId) then
                 let cl = var.Scope[var.FplId]
 
-                match cl.FplBlockType with
-                | FplBlockType.Class ->
+                match cl with
+                | :? FplClass ->
                     let inheritanceList = findClassInheritanceChain cl pType
 
                     match inheritanceList with

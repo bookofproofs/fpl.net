@@ -302,9 +302,9 @@ let rec eval (st: SymbolTable) ast =
                 emitVAR03diagnostics varValue other 
             | _ -> 
                 let rec getLocalization (fValue:FplValue) = 
-                    if fValue.FplBlockType = FplBlockType.Localization then
-                        fValue
-                    else
+                    match fValue with
+                    | :? FplLocalization -> fValue
+                    | _ ->
                         match fValue.Parent with
                         | Some parent -> getLocalization parent
                         | None -> fValue
@@ -316,8 +316,8 @@ let rec eval (st: SymbolTable) ast =
         else
             match variableInBlockScopeByName fv name true with 
             | ScopeSearchResult.Found other -> 
-                match fv.FplBlockType with
-                | FplBlockType.Reference ->
+                match fv with
+                | :? FplReference ->
                     if not (fv.Scope.ContainsKey(name)) then
                         fv.Scope.Add(name, other)
                 | _ -> ()
@@ -373,14 +373,14 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
         setId fv
         let parent = fv.Parent.Value
-        match parent.FplBlockType with
-        | FplBlockType.ArgInference 
-        | FplBlockType.Justification ->
+        match parent with
+        | :? FplArgInference 
+        | :? FplJustification ->
             let arg = parent.Parent.Value
             let proof = arg.Parent.Value
             if not (proof.Scope.ContainsKey(s)) then 
                 emitPR005Diagnostics fv 
-        | FplBlockType.Argument -> ()
+        | :? FplArgument -> ()
         | _ -> 
             emitPR000Diagnostics fv 
 
@@ -997,8 +997,8 @@ let rec eval (st: SymbolTable) ast =
             eval st fplIdentifierAst
             // make sure, we still add a referenced node candidate to the scope of a reference
             let candidates = searchForCandidatesOfReferenceBlock fv
-            let classes = candidates |> List.filter (fun c -> c.FplBlockType = FplBlockType.Class)
-            let constructors = candidates |> List.filter (fun c -> c.FplBlockType = FplBlockType.Constructor)
+            let classes = candidates |> List.filter (fun c -> c.IsClass())
+            let constructors = candidates |> List.filter (fun c -> isConstructor c) 
             if constructors.Length > 0 then
                 // if among the candidates are class constructors (that due to the FPL syntax always have a signature with 0 or more parameters)
                 // we check if to issue a SIG04 diagnostic. At this AST case, a class was referred with a PascalCaseIdentifier 
@@ -1523,7 +1523,7 @@ let rec eval (st: SymbolTable) ast =
             | Some refVal -> 
                 if es.ParentClassCalls.ContainsKey(refVal.FplId) then
                     // Since the reference's id is the same as one of the classes this class is derived from,
-                    let derivedClassOpt = parentConstructorCallReference.GetClassBlock()
+                    let derivedClassOpt = getClassBlock parentConstructorCallReference
                     match derivedClassOpt with
                     | Some derivedClass ->
                         let parentClassFilterList = 

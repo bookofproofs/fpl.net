@@ -43,8 +43,8 @@ type EvalStack() =
     static member tryAddToScope (fv:FplValue) = 
         let next = fv.Parent.Value
         let identifier = 
-            match fv.FplBlockType with
-            |  FplBlockType.Constructor -> 
+            match fv with
+            | :? FplConstructor -> 
                 fv.Type(SignatureType.Mixed)
             | _ -> 
                 if fv.IsBlock() then 
@@ -55,19 +55,19 @@ type EvalStack() =
                     fv.Type(SignatureType.Name)
         match inScopeOfParent fv identifier with
         | ScopeSearchResult.Found conflict -> 
-            match next.FplBlockType with
-            | FplBlockType.Justification -> 
+            match next with
+            | :? FplJustification -> 
                 emitPR004Diagnostics fv conflict 
             | _ -> 
-                match fv.FplBlockType with
-                | FplBlockType.Language -> 
+                match fv with
+                | :? FplLanguage -> 
                     let oldDiagnosticsStopped = ad.DiagnosticsStopped
                     ad.DiagnosticsStopped <- false
                     emitID014diagnostics fv conflict 
                     ad.DiagnosticsStopped <- oldDiagnosticsStopped
-                | FplBlockType.Argument -> 
+                | :? FplArgument -> 
                     emitPR003diagnostics fv conflict 
-                | FplBlockType.Variable -> 
+                | :? FplVariable -> 
                     ()
                 | _ ->
                     emitID001diagnostics fv conflict 
