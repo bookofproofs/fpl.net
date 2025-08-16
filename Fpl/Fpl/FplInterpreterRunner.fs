@@ -110,8 +110,8 @@ type FplRunner() =
                     |> Seq.map (fun kvp -> kvp.Value) 
                     |> Seq.toList 
                     |> List.head
-                match called.FplBlockType with 
-                | FplBlockType.Predicate -> 
+                match called with 
+                | :? FplPredicate -> 
                     let pars = this.SaveVariables(called)
                     let args = caller.ArgList |> Seq.toList
                     this.ReplaceVariables pars args

@@ -132,9 +132,9 @@ let emitVAR03diagnostics (fplValue: FplValue) (conflict: FplValue) =
     ad.AddDiagnostic diagnostic
 
 let emitVAR03diagnosticsForCorollaryOrProofVariable (fplValue: FplValue) =
-    match fplValue.FplBlockType with 
-    | FplBlockType.Proof 
-    | FplBlockType.Corollary ->
+    match fplValue with 
+    | :? FplProof 
+    | :? FplCorollary ->
         fplValue.Scope
         |> Seq.filter (fun kv -> kv.Value.IsVariable())
         |> Seq.iter (fun kv -> 

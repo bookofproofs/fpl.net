@@ -294,12 +294,8 @@ type FplBlockType =
     | FunctionalTerm
     | MandatoryFunctionalTerm
     | OptionalFunctionalTerm
-    | Predicate
     | MandatoryPredicate
     | OptionalPredicate
-    | Proposition
-    | Conjecture
-    | Corollary
     | Proof
     | Argument
     | Justification
@@ -1137,7 +1133,7 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
 type FplPredicate(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicateWithExpression(FplBlockType.Predicate, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a predicate definition"
     override this.ShortName = "def pred"
@@ -1220,7 +1216,7 @@ type FplLemma(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
 type FplProposition(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicateWithExpression(FplBlockType.Proposition, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a proposition"
     override this.ShortName = literalProp
@@ -1234,7 +1230,7 @@ type FplProposition(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
 type FplConjecture(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicateWithExpression(FplBlockType.Conjecture, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a conjecture"
     override this.ShortName = literalConj
@@ -1248,7 +1244,7 @@ type FplConjecture(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
 type FplCorollary(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicateWithExpression(FplBlockType.Corollary, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a corollary"
     override this.ShortName = literalCor
@@ -1728,6 +1724,10 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
             match fv with 
             | :? FplTheorem 
             | :? FplLemma 
+            | :? FplProposition 
+            | :? FplCorollary
+            | :? FplConjecture 
+            | :? FplPredicate 
             | :? FplAxiom 
             | :? FplRuleOfInference -> 
                 if fv.Scope.ContainsKey name then
@@ -1751,13 +1751,8 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
                 | FplBlockType.MandatoryPredicate
                 | FplBlockType.OptionalPredicate
                 | FplBlockType.Proof
-                | FplBlockType.Corollary
-                | FplBlockType.Proposition
-                | FplBlockType.Corollary
-                | FplBlockType.Conjecture
                 | FplBlockType.Proof
                 | FplBlockType.Extension
-                | FplBlockType.Predicate
                 | FplBlockType.FunctionalTerm
                 | FplBlockType.Class ->
                     if fv.Scope.ContainsKey name then
@@ -1861,7 +1856,8 @@ let tryFindAssociatedBlockForProof (fplValue: FplValue) =
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
 let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
 
-    if fplValue.FplBlockType = FplBlockType.Corollary then
+    match fplValue with 
+    | :? FplCorollary ->
         match fplValue.Parent with
         | Some theory ->
 
@@ -1905,7 +1901,7 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
             else
                 ScopeSearchResult.NotFound
         | None -> ScopeSearchResult.NotApplicable
-    else
+    | _ ->
         ScopeSearchResult.NotApplicable
 
 /// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
@@ -2147,14 +2143,16 @@ let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
         if fv1.IsTheory() then
             ScopeSearchResult.NotFound
         else
-            match fv1.FplBlockType with
-            | FplBlockType.Class
-            | FplBlockType.Predicate
-            | FplBlockType.FunctionalTerm -> ScopeSearchResult.Found(fv1)
+            match fv1 with
+            | :? FplPredicate -> ScopeSearchResult.Found(fv1)
             | _ ->
-                match fv1.Parent with
-                | Some parent -> findDefinition parent
-                | None -> ScopeSearchResult.NotFound
+                match fv1.FplBlockType with
+                | FplBlockType.Class
+                | FplBlockType.FunctionalTerm -> ScopeSearchResult.Found(fv1)
+                | _ ->
+                    match fv1.Parent with
+                    | Some parent -> findDefinition parent
+                    | None -> ScopeSearchResult.NotFound
 
     match findDefinition fv with
     | ScopeSearchResult.Found candidate ->
@@ -2219,15 +2217,34 @@ let rec nextDefinition (fv: FplValue) counter =
         match fv with
         | :? FplTheorem
         | :? FplLemma
+        | :? FplProposition
+        | :? FplCorollary
+        | :? FplConjecture
         | :? FplAxiom 
         | :? FplRuleOfInference -> 
             let name = $"{fv.Name} {fv.Type(SignatureType.Name)}"
             ScopeSearchResult.FoundIncorrectBlock name
+        | :? FplPredicate ->
+                blocks.Push(fv)
+
+                if counter <= 0 then
+                    ScopeSearchResult.Found fv
+                else
+                    let next = fv.Parent
+
+                    match next with
+                    | Some parent -> nextDefinition parent (counter - 1)
+                    | None ->
+                        let name =
+                            if blocks.Count > 0 then
+                                let fv1 = blocks.Peek()
+                                $"{fv1.Name} {fv.Type(SignatureType.Name)}"
+                            else
+                                "(no block found)"
+
+                        ScopeSearchResult.FoundMultiple name
         | _ ->
             match fv.FplBlockType with
-            | FplBlockType.Proposition
-            | FplBlockType.Corollary
-            | FplBlockType.Conjecture
             | FplBlockType.Proof
             | FplBlockType.Localization ->
                 let name = $"{fv.Name} {fv.Type(SignatureType.Name)}"
@@ -2236,7 +2253,6 @@ let rec nextDefinition (fv: FplValue) counter =
             | FplBlockType.OptionalPredicate
             | FplBlockType.MandatoryFunctionalTerm
             | FplBlockType.OptionalFunctionalTerm
-            | FplBlockType.Predicate
             | FplBlockType.FunctionalTerm
             | FplBlockType.Class ->
                 blocks.Push(fv)
@@ -2351,16 +2367,16 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
         match fvp with
         | :? FplTheorem
         | :? FplLemma
+        | :? FplProposition
+        | :? FplCorollary
+        | :? FplConjecture
+        | :? FplPredicate
         | :? FplAxiom
         | :? FplRuleOfInference ->
             fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
         | _ ->
             match fvp.FplBlockType with
-            | FplBlockType.Proposition
-            | FplBlockType.Corollary
-            | FplBlockType.Predicate
             | FplBlockType.FunctionalTerm
-            | FplBlockType.Conjecture
             | FplBlockType.Constructor
             | FplBlockType.MandatoryPredicate
             | FplBlockType.MandatoryFunctionalTerm

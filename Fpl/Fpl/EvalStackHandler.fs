@@ -89,25 +89,25 @@ type EvalStack() =
                 match fv with 
                 | :? FplTheorem  
                 | :? FplLemma  
+                | :? FplProposition  
+                | :? FplCorollary  
+                | :? FplPredicate  
+                | :? FplConjecture  
                 | :? FplAxiom  
                 | :? FplRuleOfInference -> 
                     EvalStack.tryAddToScope fv
                 | _ -> ()
 
                 match fv.FplBlockType with
-                | FplBlockType.Proof 
-                | FplBlockType.Corollary ->
+                | FplBlockType.Proof ->
                     EvalStack.tryAddToScope fv
                 | FplBlockType.Class 
                 | FplBlockType.Localization
-                | FplBlockType.Proposition
-                | FplBlockType.Conjecture
                 | FplBlockType.Constructor
                 | FplBlockType.MandatoryPredicate
                 | FplBlockType.OptionalPredicate
                 | FplBlockType.MandatoryFunctionalTerm
                 | FplBlockType.OptionalFunctionalTerm
-                | FplBlockType.Predicate
                 | FplBlockType.Extension
                 | FplBlockType.Argument 
                 | FplBlockType.Language 
@@ -117,6 +117,10 @@ type EvalStack() =
                     match next with 
                     | :? FplTheorem  
                     | :? FplLemma  
+                    | :? FplProposition  
+                    | :? FplCorollary  
+                    | :? FplConjecture  
+                    | :? FplPredicate  
                     | :? FplAxiom  
                     | :? FplRuleOfInference -> 
                         fv.TryAddToParentsArgList() 
@@ -131,11 +135,7 @@ type EvalStack() =
                         EvalStack.tryAddToScope fv
                     | FplBlockType.Argument ->
                         fv.TryAddToParentsArgList() 
-                    | FplBlockType.Proposition 
-                    | FplBlockType.Corollary 
-                    | FplBlockType.Conjecture 
                     | FplBlockType.Proof 
-                    | FplBlockType.Predicate 
                     | FplBlockType.FunctionalTerm 
                     | FplBlockType.Class 
                     | FplBlockType.Constructor
@@ -159,6 +159,10 @@ type EvalStack() =
                     match next with 
                     | :? FplTheorem 
                     | :? FplLemma 
+                    | :? FplProposition 
+                    | :? FplCorollary
+                    | :? FplConjecture
+                    | :? FplPredicate 
                     | :? FplAxiom 
                     | :? FplRuleOfInference -> 
                         EvalStack.tryAddToScope fv
@@ -166,16 +170,12 @@ type EvalStack() =
 
 
                     match next.FplBlockType with 
-                    | FplBlockType.Proposition
-                    | FplBlockType.Conjecture
                     | FplBlockType.Constructor
-                    | FplBlockType.Corollary
                     | FplBlockType.Proof
                     | FplBlockType.MandatoryPredicate
                     | FplBlockType.OptionalPredicate
                     | FplBlockType.MandatoryFunctionalTerm
                     | FplBlockType.OptionalFunctionalTerm
-                    | FplBlockType.Predicate
                     | FplBlockType.Class
                     | FplBlockType.Mapping 
                     | FplBlockType.Extension 
