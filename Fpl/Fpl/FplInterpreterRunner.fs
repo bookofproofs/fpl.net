@@ -26,37 +26,36 @@ type FplRunner() =
     member this.Stack = _stack
 
 
-    member private this.ReplaceVariables (parameters:FplValue list) (arguments:FplValue list) =
-        /// Copy the ValueList of the variadic ar to the ValueList of the variadic p
-        /// by removing the previous values (if any) and
-        /// inserting the clones of the elements.
-        let replaceValues (p:FplValue) (ar:FplValue) =
+    /// Copy the ValueList of the variadic ar to the ValueList of the variadic p
+    /// by removing the previous values (if any) and
+    /// inserting the clones of the elements.
+    member private this.ReplaceVariables (parameters:FplVariable list) (arguments:FplValue list) =
+        let replaceValues (p: FplVariable) (ar: FplValue) =
             p.ValueList.Clear()
-            ar.ValueList 
-            |> Seq.iter (fun fv -> 
+            ar.ValueList
+            |> Seq.iter (fun fv ->
                 let fvClone = fv.Clone()
                 p.ValueList.Add(fvClone)
             )
 
-        let rec replace (pars:FplValue list) (args:FplValue list) = 
+        let rec replace (pars:FplVariable list) (args: FplValue list) = 
             match (pars, args) with
-            | (p::ps, ar::ars) -> 
-                match (p.FplBlockType, ar.FplBlockType) with
+            | (p::ps, ar::ars) ->
+                match p.IsVariadic, ar with
                 // p is variadic, ar is variadic 
-                | (FplBlockType.VariadicVariableMany, FplBlockType.VariadicVariableMany)
-                | (FplBlockType.VariadicVariableMany, FplBlockType.VariadicVariableMany1)
-                | (FplBlockType.VariadicVariableMany1, FplBlockType.VariadicVariableMany)
-                | (FplBlockType.VariadicVariableMany1, FplBlockType.VariadicVariableMany1) ->
+                | true, (:? FplVariable as arVar) when arVar.IsVariadic ->
                     replaceValues p ar
                     // continue replacing variables with the remaining lists
                     replace ps ars
-                // p is variadic, ar is variable
-                | (FplBlockType.VariadicVariableMany, FplBlockType.Variable)
-                | (FplBlockType.VariadicVariableMany1, FplBlockType.Variable) ->
+                // p is variadic, ar is anything
+                | true, _ ->
                     replaceValues p ar              
                     // continue replacing variables with the original pars and the remaining ars list
                     replace pars ars
-                | (FplBlockType.Variable, FplBlockType.Variable) -> 
+                // p is not variadic, ar is variadic 
+                | false, (:? FplVariable as arVar) when arVar.IsVariadic -> ()
+                 // p is not variadic, ar is anything but variadic 
+                | false, _ ->
                     // otherwise, simply assign the argument's representation to the parameter's representation
                     replaceValues p ar
                     // continue replacing variables with the remaining lists
@@ -77,9 +76,7 @@ type FplRunner() =
         let toBeSavedScopeVariables = Dictionary<string, FplValue>()
         let pars = List<FplValue>()
         called.Scope
-        |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Variable || 
-                                  kvp.Value.FplBlockType = FplBlockType.VariadicVariableMany || 
-                                  kvp.Value.FplBlockType = FplBlockType.VariadicVariableMany1) 
+        |> Seq.filter (fun kvp -> kvp.Value.IsVariable()) 
         |> Seq.iter (fun paramKvp -> 
             // save the clone of the original parameter variable
             let parOriginal = paramKvp.Value
@@ -112,7 +109,7 @@ type FplRunner() =
                     |> List.head
                 match called with 
                 | :? FplPredicate -> 
-                    let pars = this.SaveVariables(called)
+                    let pars = this.SaveVariables(called) |> List.map (fun v -> v :?> FplVariable)
                     let args = caller.ArgList |> Seq.toList
                     this.ReplaceVariables pars args
                     let lastRepr = new FplRoot()
