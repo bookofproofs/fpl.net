@@ -310,8 +310,6 @@ type FplBlockType =
     | Assertion
     | Extension
     | Instance
-    | IntrinsicFunc
-    | IntrinsicTpl
 
 type FixType =
     | Infix of string * int
@@ -667,8 +665,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 | FplBlockType.Proof
                 | FplBlockType.Argument
                 | FplBlockType.Language
-                | FplBlockType.IntrinsicFunc
-                | FplBlockType.IntrinsicTpl
                 | FplBlockType.Class -> head
                 | FplBlockType.Constructor
                 | FplBlockType.OptionalPredicate
@@ -1517,7 +1513,7 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     override this.Represent (): string = this.FplId
 
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(FplBlockType.IntrinsicFunc, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
     do
         this.TypeId <- literalFunc
         this.FplId <- literalFunc
@@ -1532,10 +1528,16 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
 
     override this.Instantiate () = None
 
+    override this.Type (signatureType:SignatureType) = 
+        match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> this.FplId
+            | SignatureType.Type -> this.TypeId
+                    
     override this.Represent (): string = this.FplId
 
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(FplBlockType.IntrinsicTpl, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
     do
         this.TypeId <- literalTpl
         this.FplId <- literalTpl
@@ -1550,6 +1552,12 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
 
     override this.Instantiate () = None
 
+    override this.Type (signatureType:SignatureType) = 
+        match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> this.FplId
+            | SignatureType.Type -> this.TypeId
+                    
     override this.Represent (): string = this.FplId
 
 /// Returns Some argument of the FplValue depending of the type of it.
