@@ -297,7 +297,6 @@ type FplBlockType =
     | Predicate
     | MandatoryPredicate
     | OptionalPredicate
-    | Theorem
     | Lemma
     | Proposition
     | Conjecture
@@ -1194,7 +1193,7 @@ type FplAxiom(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
 type FplTheorem(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicateWithExpression(FplBlockType.Theorem, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a theorem"
     override this.ShortName = literalThm
@@ -1371,7 +1370,7 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.Represent (): string = 
         if this.ValueList.Count = 0 then
 
-            if this.Scope.ContainsKey(this.FplId) then
+            if this.Scope.ContainsKey(this.FplId) && this.Scope[this.FplId].IsVariable() then
                 this.Scope[this.FplId].Represent()
             else
                 let args = 
@@ -1728,6 +1727,7 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
             ScopeSearchResult.NotFound
         else
             match fv with 
+            | :? FplTheorem 
             | :? FplAxiom 
             | :? FplRuleOfInference -> 
                 if fv.Scope.ContainsKey name then
@@ -1752,7 +1752,6 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
                 | FplBlockType.OptionalPredicate
                 | FplBlockType.Proof
                 | FplBlockType.Corollary
-                | FplBlockType.Theorem
                 | FplBlockType.Lemma
                 | FplBlockType.Proposition
                 | FplBlockType.Corollary
@@ -1793,13 +1792,23 @@ let stripLastDollarDigit (s: string) =
     let lastIndex = s.LastIndexOf('$')
     if lastIndex <> -1 then s.Substring(0, lastIndex) else s
 
-/// Checks if an fplValue is provable. This will only be true if
+/// Checks if an fv is provable. This will only be true if
 /// it is a theorem, a lemma, a proposition, or a corollary
-let isProvable (fplValue: FplValue) =
-    fplValue.FplBlockType = FplBlockType.Theorem
-    || fplValue.FplBlockType = FplBlockType.Corollary
-    || fplValue.FplBlockType = FplBlockType.Lemma
-    || fplValue.FplBlockType = FplBlockType.Proposition
+let isProvable (fv: FplValue) =
+    match fv with
+    | :? FplTheorem
+    | :? FplLemma
+    | :? FplProposition
+    | :? FplCorollary -> true
+    | _ -> false
+
+/// Checks if an fplValue is a conjecture or an axiom. This is used to decide whether or
+/// not it is not provable.
+let isAxiomOrConnjecture (fv:FplValue) = 
+    match fv with
+    | :? FplConjecture 
+    | :? FplAxiom -> true
+    | _ -> false
 
 /// Tries to find a theorem-like statement for a proof
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
@@ -1849,7 +1858,7 @@ let tryFindAssociatedBlockForProof (fplValue: FplValue) =
     else
         ScopeSearchResult.NotApplicable
 
-/// Tries to find a therem-like statement, a conjecture, or an axiom for a corollary
+/// Tries to find a theorem-like statement, a conjecture, or an axiom for a corollary
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
 let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
 
@@ -1870,12 +1879,6 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
                 flattenedScopes
                 |> Seq.filter (fun fv -> fv.FplId = potentialBlockName)
                 |> Seq.toList
-            
-            let isAxiomOrConnjecture (fv:FplValue) = 
-                match fv with
-                | :? FplConjecture 
-                | :? FplAxiom -> true
-                | _ -> false
 
             let potentialBlockList =
                 buildingBlocksMatchingDollarDigitNameList
@@ -2215,13 +2218,13 @@ let rec nextDefinition (fv: FplValue) counter =
         ScopeSearchResult.FoundIncorrectBlock name
     else
         match fv with
+        | :? FplTheorem
         | :? FplAxiom 
         | :? FplRuleOfInference -> 
             let name = $"{fv.Name} {fv.Type(SignatureType.Name)}"
             ScopeSearchResult.FoundIncorrectBlock name
         | _ ->
             match fv.FplBlockType with
-            | FplBlockType.Theorem
             | FplBlockType.Lemma
             | FplBlockType.Proposition
             | FplBlockType.Corollary
@@ -2347,12 +2350,12 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
 let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     let parameters =
         match fvp with
+        | :? FplTheorem
         | :? FplAxiom
         | :? FplRuleOfInference ->
             fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
         | _ ->
             match fvp.FplBlockType with
-            | FplBlockType.Theorem
             | FplBlockType.Lemma
             | FplBlockType.Proposition
             | FplBlockType.Corollary

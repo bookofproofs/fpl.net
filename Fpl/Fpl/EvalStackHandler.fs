@@ -87,6 +87,7 @@ type EvalStack() =
                 fv.TryAddToParentsArgList() 
             else
                 match fv with 
+                | :? FplTheorem  
                 | :? FplAxiom  
                 | :? FplRuleOfInference -> 
                     EvalStack.tryAddToScope fv
@@ -97,7 +98,6 @@ type EvalStack() =
                 | FplBlockType.Corollary ->
                     EvalStack.tryAddToScope fv
                 | FplBlockType.Class 
-                | FplBlockType.Theorem
                 | FplBlockType.Localization
                 | FplBlockType.Lemma
                 | FplBlockType.Proposition
@@ -115,6 +115,7 @@ type EvalStack() =
                     EvalStack.tryAddToScope fv
                 | FplBlockType.Reference ->
                     match next with 
+                    | :? FplTheorem  
                     | :? FplAxiom  
                     | :? FplRuleOfInference -> 
                         fv.TryAddToParentsArgList() 
@@ -129,7 +130,6 @@ type EvalStack() =
                         EvalStack.tryAddToScope fv
                     | FplBlockType.Argument ->
                         fv.TryAddToParentsArgList() 
-                    | FplBlockType.Theorem 
                     | FplBlockType.Lemma 
                     | FplBlockType.Proposition 
                     | FplBlockType.Corollary 
@@ -157,6 +157,7 @@ type EvalStack() =
                 | FplBlockType.VariadicVariableMany
                 | FplBlockType.VariadicVariableMany1 ->
                     match next with 
+                    | :? FplTheorem 
                     | :? FplAxiom 
                     | :? FplRuleOfInference -> 
                         EvalStack.tryAddToScope fv
@@ -164,7 +165,6 @@ type EvalStack() =
 
 
                     match next.FplBlockType with 
-                    | FplBlockType.Theorem
                     | FplBlockType.Lemma
                     | FplBlockType.Proposition
                     | FplBlockType.Conjecture

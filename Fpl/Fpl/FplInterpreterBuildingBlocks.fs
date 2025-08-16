@@ -666,6 +666,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = es.PeekEvalStack()
 
         match fv with 
+        | :? FplTheorem
         | :? FplAxiom
         | :? FplRuleOfInference ->
             fv.FplId <- identifier
@@ -692,7 +693,6 @@ let rec eval (st: SymbolTable) ast =
                     fv.ArgList.Add classNode
                 | None -> ()
 
-        | FplBlockType.Theorem 
         | FplBlockType.Lemma 
         | FplBlockType.Proposition 
         | FplBlockType.Corollary 
@@ -1394,6 +1394,7 @@ let rec eval (st: SymbolTable) ast =
         let last = es.PeekEvalStack()
         es.PopEvalStack()
         match fv with
+        | :? FplTheorem  
         | :? FplAxiom -> 
             fv.ValueList.Add(last)
         | _ -> ()
@@ -1401,7 +1402,6 @@ let rec eval (st: SymbolTable) ast =
         match fv.FplBlockType with
         | FplBlockType.Corollary 
         | FplBlockType.Proposition 
-        | FplBlockType.Theorem 
         | FplBlockType.Lemma
         | FplBlockType.Conjecture 
         | FplBlockType.Predicate 
