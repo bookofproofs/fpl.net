@@ -286,7 +286,6 @@ type ParsedAstList() =
 
 type FplBlockType =
     | Todo
-    | Variable
     | Constructor
     | FunctionalTerm
     | MandatoryFunctionalTerm
@@ -692,8 +691,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                         |> String.concat ""
 
                     sprintf "%s%s" head args
-                | FplBlockType.Mapping
-                | FplBlockType.Variable ->
+                | FplBlockType.Mapping ->
                     let pars = this.GetParamTuple(isSignature)
 
                     match (pars, this.Mapping) with
@@ -899,7 +897,7 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true    
 
 type FplVariable(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Variable, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
     let mutable _variadicType = String.Empty // "" = variable, "many" = many, "many1" = many1 
     override this.Name = 
         match _variadicType with
@@ -942,6 +940,34 @@ type FplVariable(positions: Positions, parent: FplValue) =
     override this.SetValue fv =
         base.SetValue(fv)
         this.IsInitializedVariable <- true
+
+    override this.Type signatureType =
+        let pars = this.GetParamTuple(signatureType)
+        let head =
+            match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> this.FplId
+            | SignatureType.Type -> this.TypeId
+
+        let propagate =
+            match signatureType with
+            | SignatureType.Mixed -> SignatureType.Type
+            | _ -> signatureType 
+
+        match (pars, this.Mapping) with
+        | ("", None) -> head
+        | ("", Some map) -> sprintf "%s() -> %s" head (map.Type(propagate))
+        | (_, None) ->
+            if this.HasBrackets then
+                sprintf "%s[%s]" head pars
+            else
+                sprintf "%s(%s)" head pars
+        | (_, Some map) ->
+            if this.HasBrackets then
+                sprintf "%s[%s] -> %s" head pars (map.Type(propagate))
+            else
+                sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
+
 
     override this.Represent () = 
         if this.ValueList.Count = 0 then
@@ -2226,8 +2252,8 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
 
     match findQualifiedEntity fv with
     | ScopeSearchResult.Found candidate ->
-        match candidate.FplBlockType with
-        | FplBlockType.Variable ->
+        match candidate with
+        | :? FplVariable ->
             if candidate.ArgList.Count > 0 then
                 let (varType: FplValue) = candidate.ArgList[0]
 
