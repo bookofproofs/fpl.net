@@ -297,7 +297,6 @@ type FplBlockType =
     | Predicate
     | MandatoryPredicate
     | OptionalPredicate
-    | Lemma
     | Proposition
     | Conjecture
     | Corollary
@@ -1207,7 +1206,7 @@ type FplTheorem(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
 type FplLemma(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicateWithExpression(FplBlockType.Lemma, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a lemma"
     override this.ShortName = literalLem
@@ -1728,6 +1727,7 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
         else
             match fv with 
             | :? FplTheorem 
+            | :? FplLemma 
             | :? FplAxiom 
             | :? FplRuleOfInference -> 
                 if fv.Scope.ContainsKey name then
@@ -1752,7 +1752,6 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
                 | FplBlockType.OptionalPredicate
                 | FplBlockType.Proof
                 | FplBlockType.Corollary
-                | FplBlockType.Lemma
                 | FplBlockType.Proposition
                 | FplBlockType.Corollary
                 | FplBlockType.Conjecture
@@ -2219,13 +2218,13 @@ let rec nextDefinition (fv: FplValue) counter =
     else
         match fv with
         | :? FplTheorem
+        | :? FplLemma
         | :? FplAxiom 
         | :? FplRuleOfInference -> 
             let name = $"{fv.Name} {fv.Type(SignatureType.Name)}"
             ScopeSearchResult.FoundIncorrectBlock name
         | _ ->
             match fv.FplBlockType with
-            | FplBlockType.Lemma
             | FplBlockType.Proposition
             | FplBlockType.Corollary
             | FplBlockType.Conjecture
@@ -2351,12 +2350,12 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     let parameters =
         match fvp with
         | :? FplTheorem
+        | :? FplLemma
         | :? FplAxiom
         | :? FplRuleOfInference ->
             fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
         | _ ->
             match fvp.FplBlockType with
-            | FplBlockType.Lemma
             | FplBlockType.Proposition
             | FplBlockType.Corollary
             | FplBlockType.Predicate
