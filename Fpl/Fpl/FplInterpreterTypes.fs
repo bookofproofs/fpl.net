@@ -395,7 +395,14 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     /// Indicates if this FplValue is a variable or some variadic variable.
     abstract member IsVariable: unit -> bool
 
+    /// Clears the ValueList and adds the argument to it. Previous value(s), if any, get lost.
+    abstract member SetValue: FplValue -> unit
+
     (* Default implementations = everything is false, only the trues are overridden in derived classes *)
+    override this.SetValue fv =
+        this.ValueList.Clear()
+        this.ValueList.Add(fv)
+
     override this.IsRoot () = false
     override this.IsTheory () = false
     override this.IsFplBlock () = false
@@ -533,22 +540,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 Some(this.ArgList[0])
             else
                 None
-
-    /// Sets the value of this FplValue taking into account if this
-    /// FplValue is a Reference to a variable.
-    member this.SetValue(fplValue) =
-        match this.FplBlockType with
-        | FplBlockType.Reference when this.Scope.ContainsKey(this.FplId) ->
-            let var = this.Scope[this.FplId]
-            var.ValueList.Clear()
-            var.ValueList.Add(fplValue)
-        | FplBlockType.Variable -> 
-            this.ValueList.Clear()
-            this.ValueList.Add(fplValue)
-            this.IsInitializedVariable <- true
-        | _ -> 
-            this.ValueList.Clear()
-            this.ValueList.Add(fplValue)
 
     /// Indicates if this FplValue is an initialized variable
     member this.IsInitializedVariable
@@ -948,6 +939,10 @@ type FplVariable(positions: Positions, parent: FplValue) =
 
     override this.IsVariable () = true
 
+    override this.SetValue fv =
+        base.SetValue(fv)
+        this.IsInitializedVariable <- true
+
     override this.Represent () = 
         if this.ValueList.Count = 0 then
             if this.IsInitializedVariable then 
@@ -1324,6 +1319,14 @@ type FplReference(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.SetValue fv = 
+        if this.Scope.ContainsKey(this.FplId) then
+            let var = this.Scope[this.FplId]
+            var.SetValue(fv)
+        else
+            base.SetValue(fv)
+
 
     override this.Represent (): string = 
         if this.ValueList.Count = 0 then
