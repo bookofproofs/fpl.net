@@ -287,8 +287,6 @@ type ParsedAstList() =
 type FplBlockType =
     | Todo
     | Variable
-    | VariadicVariableMany
-    | VariadicVariableMany1
     | Class
     | Constructor
     | FunctionalTerm
@@ -718,9 +716,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
                     sprintf "%s%s" head args
                 | FplBlockType.Mapping
-                | FplBlockType.Variable
-                | FplBlockType.VariadicVariableMany
-                | FplBlockType.VariadicVariableMany1 ->
+                | FplBlockType.Variable ->
                     let pars = this.GetParamTuple(isSignature)
 
                     match (pars, this.Mapping) with
