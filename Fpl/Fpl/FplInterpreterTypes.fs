@@ -1014,8 +1014,7 @@ type FplConstructor(positions: Positions, parent: FplValue) =
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
 
-    override this.Represent () = 
-        base.Represent()
+    override this.Represent () = this.Type(SignatureType.Mixed)
 
 let isConstructor (fv:FplValue) =
     match fv with

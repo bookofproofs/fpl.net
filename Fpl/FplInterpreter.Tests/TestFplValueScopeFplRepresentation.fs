@@ -104,11 +104,11 @@ type TestFplValueScopeFplRepresentation() =
             match var with 
             | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
             | "theory" -> Assert.AreEqual<string>(literalUndef, theory.Represent())
-            | "block" -> Assert.AreEqual<string>("class TestId", block.Represent())
-            | "t1" -> Assert.AreEqual<string>("obj()", t1.Represent())
-            | "t2" -> Assert.AreEqual<string>("obj(dec obj)", t2.Represent())
-            | "t3" -> Assert.AreEqual<string>("obj(undetermined)", t3.Represent())
-            | "t4" -> Assert.AreEqual<string>("obj(ind)", t4.Represent())
+            | "block" -> Assert.AreEqual<string>("dec cl TestId", block.Represent())
+            | "t1" -> Assert.AreEqual<string>("TestId()", t1.Represent())
+            | "t2" -> Assert.AreEqual<string>("TestId(obj)", t2.Represent())
+            | "t3" -> Assert.AreEqual<string>("TestId(pred)", t3.Represent())
+            | "t4" -> Assert.AreEqual<string>("TestId(ind)", t4.Represent())
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -624,7 +624,7 @@ type TestFplValueScopeFplRepresentation() =
             | "base30" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}({literalUndef}))", base1.Represent())
             | "base31" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}({literalUndef}), {literalUndef}({literalUndef}, {literalUndef}, {literalUndef}))", base1.Represent())
             | "base32" -> Assert.AreEqual<string>($"{literalUndef}({literalTrue}, {literalUndef}, {literalFalse})", base1.Represent())
-            | "base33" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base33" -> Assert.AreEqual<string>("dec pred(obj)", base1.Represent())
             | "base34" -> Assert.AreEqual<string>(literalFalse, base1.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
