@@ -286,7 +286,6 @@ type ParsedAstList() =
 
 type FplBlockType =
     | Todo
-    | Localization
     | Translation
     | Assertion
     | Instance
@@ -582,16 +581,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
         let idRec () =
             match this.FplBlockType with
-            | FplBlockType.Localization ->
-                let paramT =
-                    this.Scope
-                    |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
-                    |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(isSignature))
-                    |> String.concat ", "
-
-                match paramT with
-                | "" -> head
-                | _ -> sprintf "%s(%s)" head paramT
             | FplBlockType.Instance ->
                 let args =
                     this.ArgList
@@ -1052,7 +1041,7 @@ type FplArgInference(positions: Positions, parent: FplValue) =
         head
 
 type FplLocalization(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Localization, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
 
     override this.Name = "a localization"
     override this.ShortName = literalLoc
@@ -1063,6 +1052,18 @@ type FplLocalization(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let paramT =
+            this.Scope
+            |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
+            |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(signatureType))
+            |> String.concat ", "
+
+        match paramT with
+        | "" -> head
+        | _ -> sprintf "%s(%s)" head paramT
 
     override this.Represent() = this.Type(SignatureType.Name)
         

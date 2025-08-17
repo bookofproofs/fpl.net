@@ -83,8 +83,8 @@ type TestFplValueScopeBlockType() =
             | "fun9" -> Assert.IsInstanceOfType<FplFunctionalTerm>(fun9)
             | "prf1" -> Assert.IsInstanceOfType<FplProof>(prf1)
             | "prf2" -> Assert.IsInstanceOfType<FplProof>(prf2)
-            | "loc1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Localization, loc1.FplBlockType)
-            | "loc2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Localization, loc2.FplBlockType)
+            | "loc1" -> Assert.IsInstanceOfType<FplLocalization>(loc1)
+            | "loc2" -> Assert.IsInstanceOfType<FplLocalization>(loc2)
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -880,11 +880,11 @@ type TestFplValueScopeBlockType() =
             let pred = theory.Scope[predName]
 
             match var with
-            | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Localization, pred.FplBlockType)
-            | "base2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Localization, pred.FplBlockType)
-            | "base3" -> Assert.AreEqual<FplBlockType>(FplBlockType.Localization, pred.FplBlockType)
-            | "base4" -> Assert.AreEqual<FplBlockType>(FplBlockType.Localization, pred.FplBlockType)
-            | "base5" -> Assert.AreEqual<FplBlockType>(FplBlockType.Localization, pred.FplBlockType)
+            | "base1" -> Assert.IsInstanceOfType<FplLocalization>(pred)
+            | "base2" -> Assert.IsInstanceOfType<FplLocalization>(pred)
+            | "base3" -> Assert.IsInstanceOfType<FplLocalization>(pred)
+            | "base4" -> Assert.IsInstanceOfType<FplLocalization>(pred)
+            | "base5" -> Assert.IsInstanceOfType<FplLocalization>(pred)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
