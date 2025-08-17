@@ -291,7 +291,6 @@ type FplBlockType =
     | ArgInference
     | Localization
     | Translation
-    | Language
     | Assertion
     | Extension
     | Instance
@@ -595,8 +594,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
             let idRec () =
                 match this.FplBlockType with
-                | FplBlockType.Argument
-                | FplBlockType.Language -> head
+                | FplBlockType.Argument -> head
                 | FplBlockType.Localization ->
                     let paramT =
                         this.Scope
@@ -1010,7 +1008,6 @@ type FplProof(positions: Positions, parent: FplValue) =
     override this.Type signatureType =
         let head = getFplHead this signatureType
         head
-        
 
 type FplArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Argument, positions, parent)
@@ -1077,7 +1074,7 @@ type FplTranslation(positions: Positions, parent: FplValue) =
     override this.Instantiate () = None
 
 type FplLanguage(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Language, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
 
     override this.Name = "a language"
     override this.ShortName = "lang"
@@ -1088,6 +1085,17 @@ type FplLanguage(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
+
+    override this.Represent () = this.FplId
+
+let isLanguage (fv:FplValue) =
+    match fv with
+    | :? FplLanguage -> true
+    | _ -> false
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Todo, positions, Some parent)

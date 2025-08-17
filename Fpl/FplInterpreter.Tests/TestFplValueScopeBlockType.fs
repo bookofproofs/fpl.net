@@ -851,12 +851,12 @@ type TestFplValueScopeBlockType() =
             let lang = pred.Scope["tex"]
 
             match var with
-            | "base0" -> Assert.AreEqual<FplBlockType>(FplBlockType.Language, lang.FplBlockType)
-            | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Language, lang.FplBlockType)
-            | "base2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Language, lang.FplBlockType)
-            | "base3" -> Assert.AreEqual<FplBlockType>(FplBlockType.Language, lang.FplBlockType)
-            | "base4" -> Assert.AreEqual<FplBlockType>(FplBlockType.Language, lang.FplBlockType)
-            | "base5" -> Assert.AreEqual<FplBlockType>(FplBlockType.Language, lang.FplBlockType)
+            | "base0" -> Assert.IsInstanceOfType<FplLanguage>(lang)
+            | "base1" -> Assert.IsInstanceOfType<FplLanguage>(lang)
+            | "base2" -> Assert.IsInstanceOfType<FplLanguage>(lang)
+            | "base3" -> Assert.IsInstanceOfType<FplLanguage>(lang)
+            | "base4" -> Assert.IsInstanceOfType<FplLanguage>(lang)
+            | "base5" -> Assert.IsInstanceOfType<FplLanguage>(lang)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

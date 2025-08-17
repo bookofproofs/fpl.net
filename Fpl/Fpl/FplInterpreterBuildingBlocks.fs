@@ -1167,7 +1167,7 @@ let rec eval (st: SymbolTable) ast =
                 let loc = es.PeekEvalStack()
                 let lanList = 
                     loc.Scope 
-                    |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Language) 
+                    |> Seq.filter (fun kvp -> isLanguage kvp.Value) 
                     |> Seq.map (fun kvp -> kvp.Value) 
                     |> Seq.toList 
                     |> List.rev
