@@ -756,11 +756,16 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
         children this true                     
     
-let getFplHead (fv:FplValue) (signatureType:SignatureType) =
+let private getFplHead (fv:FplValue) (signatureType:SignatureType) =
     match signatureType with
             | SignatureType.Name 
             | SignatureType.Mixed -> fv.FplId
             | SignatureType.Type -> fv.TypeId
+
+let private propagateSignatureType (signatureType:SignatureType) =
+    match signatureType with
+    | SignatureType.Mixed -> SignatureType.Type
+    | _ -> signatureType 
 
 type FplRoot() =
     inherit FplValue(FplBlockType.Todo, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
@@ -922,11 +927,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
     override this.Type signatureType =
         let pars = this.GetParamTuple(signatureType)
         let head = getFplHead this signatureType
-
-        let propagate =
-            match signatureType with
-            | SignatureType.Mixed -> SignatureType.Type
-            | _ -> signatureType 
+        let propagate = propagateSignatureType signatureType
 
         match (pars, this.Mapping) with
         | ("", None) -> head
@@ -1050,11 +1051,7 @@ type FplGenericFunctionalTerm(blockType: FplBlockType, positions: Positions, par
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
-
-        let propagate =
-            match signatureType with
-            | SignatureType.Mixed -> SignatureType.Type
-            | _ -> signatureType 
+        let propagate = propagateSignatureType signatureType
 
         match this.Mapping with
         | Some map ->
