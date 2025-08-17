@@ -286,7 +286,6 @@ type ParsedAstList() =
 
 type FplBlockType =
     | Todo
-    | Proof
     | Argument
     | Justification
     | ArgInference
@@ -596,7 +595,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
             let idRec () =
                 match this.FplBlockType with
-                | FplBlockType.Proof
                 | FplBlockType.Argument
                 | FplBlockType.Language -> head
                 | FplBlockType.Localization ->
@@ -995,7 +993,7 @@ type FplCorollary(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
 type FplProof(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.Proof, positions, parent)
+    inherit FplGenericPredicate(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a proof"
     override this.ShortName = literalPrf
@@ -1008,6 +1006,11 @@ type FplProof(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
     override this.IsProof (): bool = true
+
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
+        
 
 type FplArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Argument, positions, parent)
@@ -1919,7 +1922,8 @@ let isAxiomOrConnjecture (fv:FplValue) =
 /// Tries to find a theorem-like statement for a proof
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
 let tryFindAssociatedBlockForProof (fplValue: FplValue) =
-    if fplValue.FplBlockType = FplBlockType.Proof then
+    match fplValue with
+    | :? FplProof ->
         match fplValue.Parent with
         | Some theory ->
 
@@ -1961,7 +1965,7 @@ let tryFindAssociatedBlockForProof (fplValue: FplValue) =
             else
                 ScopeSearchResult.NotFound
         | None -> ScopeSearchResult.NotApplicable
-    else
+    | _ ->
         ScopeSearchResult.NotApplicable
 
 /// Tries to find a theorem-like statement, a conjecture, or an axiom for a corollary
