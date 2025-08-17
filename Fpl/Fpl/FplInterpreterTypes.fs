@@ -293,7 +293,6 @@ type FplBlockType =
     | Localization
     | Translation
     | Language
-    | Stmt
     | Assertion
     | Extension
     | Instance
@@ -582,7 +581,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
     override this.Type isSignature  = 
         match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
-        | (FplBlockType.Stmt, _)
         | (FplBlockType.Extension, _) -> this.FplId
         | _ ->
             let head =
@@ -624,7 +622,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     let args =
                         this.ArgList
                         |> Seq.filter (fun fv ->
-                            fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
+                            fv.FplBlockType <> FplBlockType.Assertion)
                         |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
                         |> String.concat ""
 
@@ -1127,7 +1125,7 @@ type FplReference(positions: Positions, parent: FplValue) =
             let args =
                 this.ArgList
                 |> Seq.filter (fun fv ->
-                    fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
+                    fv.FplBlockType <> FplBlockType.Assertion)
                 |> Seq.map (fun fv -> fv.Type(propagate))
                 |> String.concat ", "
 
@@ -1644,7 +1642,7 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     override this.Represent (): string = this.FplId
 
 type FplStmt(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Stmt, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
 
     override this.Name = "a statement"
     override this.ShortName = "stmt"
@@ -1682,6 +1680,9 @@ type FplStmt(positions: Positions, parent: FplValue) =
             | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
         else
             None
+
+    override this.Type signatureType = this.FplId
+    override this.Represent () = ""
 
 /// Returns Some argument of the FplValue depending of the type of it.
 let getArgument (fv:FplValue) =

@@ -245,7 +245,7 @@ type TestSignatureMatching() =
             let parentClass = testClass.ArgList[0]
             let constructorParentClass = parentClass.Scope.Values |> Seq.toList |> List.head
             let constructor = testClass.Scope.Values |> Seq.toList |> List.head
-            let baseConstructorCall = constructor.ArgList |> Seq.filter (fun fv -> fv.FplBlockType = FplBlockType.Stmt && fv.FplId = "bas") |> Seq.toList |> List.head
+            let baseConstructorCall = constructor.ArgList |> Seq.filter (fun fv -> fv.FplId = "bas") |> Seq.toList |> List.head
             let fvArgs = baseConstructorCall.ArgList[0]
             match matchArgumentsWithParameters fvArgs constructorParentClass with
             | Some errMsg -> Assert.AreEqual<string>(var, errMsg)
