@@ -287,7 +287,6 @@ type ParsedAstList() =
 type FplBlockType =
     | Todo
     | Constructor
-    | FunctionalTerm
     | MandatoryFunctionalTerm
     | OptionalFunctionalTerm
     | MandatoryPredicate
@@ -600,13 +599,25 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         this.IsIntrinsic <- other.IsIntrinsic
         this.IsInitializedVariable <- other.IsInitializedVariable
 
+        this.Scope.Clear()
+        other.Scope |> Seq.iter (fun kvp -> this.Scope.Add(kvp.Key, kvp.Value))
+
+        this.ArgList.Clear()
+        this.ArgList.AddRange(other.ArgList)
+
+        this.ValueList.Clear()
+        this.ValueList.AddRange(other.ValueList)
+
+        this.AssertedPredicates.Clear()
+        this.AssertedPredicates.AddRange(other.AssertedPredicates)
+
     override this.TryAddToParentsArgList () = 
         match this.Parent with 
         | Some parent -> parent.ArgList.Add(this)
         | _ -> ()
 
     /// Generates a type string identifier or type-specific naming convention of this FplValue.
-    override this.Type(isSignature: SignatureType)  = 
+    override this.Type isSignature  = 
         match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
         | (FplBlockType.Reference, true) ->
             // delegate the type identifier to the referenced entity
@@ -655,8 +666,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     | "" -> head
                     | _ -> sprintf "%s(%s)" head paramT
                 | FplBlockType.OptionalFunctionalTerm
-                | FplBlockType.MandatoryFunctionalTerm
-                | FplBlockType.FunctionalTerm ->
+                | FplBlockType.MandatoryFunctionalTerm ->
                     match this.Mapping with
                     | Some map ->
                         let paramT = this.GetParamTuple(isSignature)
@@ -742,18 +752,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     override this.Represent() = 
         let rec children (fv:FplValue) isFirst = 
             match (isFirst, fv.ValueList.Count = 0) with
-            | (true, true) -> 
-                match fv.FplBlockType with
-                | FplBlockType.FunctionalTerm -> 
-                    // since the FunctionTerm has no value, it has no return statement
-                    // And the FPL syntax ensures that this can only be the case
-                    // if the Functional Term is intrinsic.
-                    // In this case, the "representation" of the function is
-                    // its declared mapping type
-                    let mapping = fv.ArgList |> Seq.head 
-                    $"dec {mapping.Represent()}"              
-                | _ -> 
-                    literalUndef
+            | (true, true) -> literalUndef
             | (false, false) 
             | (true, false) ->
                 let subRepr = 
@@ -782,7 +781,7 @@ type FplRoot() =
         ret
     override this.IsRoot () = true
 
-    override this.Type(_:SignatureType) = String.Empty
+    override this.Type _ = String.Empty
     override this.Represent () = literalUndef
     override this.TryAddToParentsArgList () = () 
 
@@ -801,7 +800,7 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
 
     override this.IsTheory () = true
 
-    override this.Type(signatureType:SignatureType) =
+    override this.Type signatureType =
         match signatureType with
         | SignatureType.Name 
         | SignatureType.Mixed -> this.FplId
@@ -828,7 +827,7 @@ type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: 
 type FplGenericPredicateWithExpression(blockType: FplBlockType, positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(blockType, positions, parent)
 
-    override this.Type(signatureType:SignatureType) = 
+    override this.Type signatureType = 
         let paramT = this.GetParamTuple(signatureType)
         let head = 
             match signatureType with
@@ -1021,7 +1020,7 @@ type FplClass(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
     override this.IsClass () = true
     
-    override this.Type(signatureType:SignatureType) =
+    override this.Type signatureType =
         match signatureType with
         | SignatureType.Name 
         | SignatureType.Mixed -> this.FplId
@@ -1060,7 +1059,7 @@ let isConstructor (fv:FplValue) =
     | _ -> false
 
 type FplFunctionalTerm(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.FunctionalTerm, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
 
     override this.Name = "a functional term definition"
     override this.ShortName = "def func"
@@ -1074,6 +1073,44 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
+
+    override this.Type signatureType = 
+        let head =
+            match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> this.FplId
+            | SignatureType.Type -> this.TypeId
+
+        let propagate =
+            match signatureType with
+            | SignatureType.Mixed -> SignatureType.Type
+            | _ -> signatureType 
+
+        match this.Mapping with
+        | Some map ->
+            let paramT = this.GetParamTuple(signatureType)
+            sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
+        | _ -> ""
+
+    override this.Represent () = 
+        if this.ValueList.Count = 0 then 
+            // since the FunctionTerm has no value, it has no return statement
+            // And the FPL syntax ensures that this can only be the case
+            // if the Functional Term is intrinsic.
+            // In this case, the "representation" of the function is
+            // its declared mapping type
+            let mapping = this.ArgList |> Seq.head 
+            $"dec {mapping.Represent()}"
+        else
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if subRepr = String.Empty then 
+                literalUndef
+            else
+                subRepr            
+
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.MandatoryFunctionalTerm, positions, Some parent)
@@ -2446,13 +2483,13 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
         | :? FplRuleOfInference ->
             fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
         | _ ->
-            match fvp.FplBlockType with
-            | FplBlockType.FunctionalTerm
-            | FplBlockType.Constructor
-            | FplBlockType.MandatoryPredicate
-            | FplBlockType.MandatoryFunctionalTerm
-            | FplBlockType.OptionalPredicate
-            | FplBlockType.OptionalFunctionalTerm ->
+            match fvp with
+            | :? FplFunctionalTerm
+            | :? FplConstructor
+            | :? FplMandatoryPredicate
+            | :? FplMandatoryFunctionalTerm
+            | :? FplOptionalPredicate
+            | :? FplOptionalFunctionalTerm ->
                 fvp.Scope.Values |> Seq.filter (fun fv -> fv.IsSignatureVariable) |> Seq.toList
             | _ -> fvp.Scope.Values |> Seq.toList
 

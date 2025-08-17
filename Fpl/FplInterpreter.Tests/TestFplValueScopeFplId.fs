@@ -574,9 +574,7 @@ type TestFplValueScopeFplId() =
             | "base3" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base4" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base5" -> Assert.AreEqual<string>("del.Test", base1.FplId)
-            | "base6" -> 
-                let arg = getArgument base1
-                Assert.AreEqual<string>(varVal, arg.Value.FplId)
+            | "base6" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base7" -> Assert.AreEqual<string>("bydef.", base1.FplId)
             | "base8" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base9" -> Assert.AreEqual<string>("Test$1", base1.FplId)

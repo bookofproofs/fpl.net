@@ -1257,13 +1257,22 @@ let rec eval (st: SymbolTable) ast =
         | Some ast1 -> 
             eval st ast1
             if fv.IsFplBlock() then
-                fv.FplBlockType <- FplBlockType.FunctionalTerm
+                es.Pop() |> ignore
+                let fvNew = new FplFunctionalTerm((fv.StartPos, pos2), fv.Parent.Value)
+                fvNew.Copy fv
+                fvNew.EndPos <- pos2
+                es.PushEvalStack(fvNew)
+
             else
                 fv.FplBlockType <- FplBlockType.OptionalFunctionalTerm
                 fv.TypeId <- literalFunc
         | None -> 
             if fv.IsFplBlock() then
-                fv.FplBlockType <- FplBlockType.FunctionalTerm
+                es.Pop() |> ignore
+                let fvNew = new FplFunctionalTerm((fv.StartPos, pos2), fv.Parent.Value)
+                fvNew.Copy fv
+                fvNew.EndPos <- pos2
+                es.PushEvalStack(fvNew)
             else
                 fv.FplBlockType <- FplBlockType.MandatoryFunctionalTerm
                 fv.TypeId <- literalFunc

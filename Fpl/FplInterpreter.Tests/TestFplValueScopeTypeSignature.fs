@@ -568,9 +568,7 @@ type TestFplValueScopeTypeSignature() =
             | "base3" -> Assert.AreEqual<string>(literalUndef, base1.Type(SignatureType.Type))
             | "base4" -> Assert.AreEqual<string>(literalPred, base1.Type(SignatureType.Type))
             | "base5" -> Assert.AreEqual<string>("del.Test()", base1.Type(SignatureType.Type))
-            | "base6" -> 
-                let arg = getArgument base1
-                Assert.AreEqual<string>(literalInd, arg.Value.Type(SignatureType.Type))
+            | "base6" -> Assert.AreEqual<string>(literalInd, base1.Type(SignatureType.Type))
             | "base7" -> Assert.AreEqual<string>("bydef.Test()", base1.Type(SignatureType.Type))
             | "base8" -> Assert.AreEqual<string>("Test$1", base1.Type(SignatureType.Type))
             | "base9" -> Assert.AreEqual<string>("Test$1()", base1.Type(SignatureType.Type))
