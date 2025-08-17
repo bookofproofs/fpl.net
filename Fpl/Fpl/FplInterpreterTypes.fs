@@ -286,7 +286,6 @@ type ParsedAstList() =
 
 type FplBlockType =
     | Todo
-    | Assertion
     | Instance
 
 type FixType =
@@ -1075,8 +1074,6 @@ type FplTranslation(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         let args =
             this.ArgList
-            |> Seq.filter (fun fv ->
-                fv.FplBlockType <> FplBlockType.Assertion)
             |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
             |> String.concat ""
 
@@ -1108,6 +1105,19 @@ let isLanguage (fv:FplValue) =
     match fv with
     | :? FplLanguage -> true
     | _ -> false
+
+type FplAssertion(positions: Positions, parent: FplValue) =
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
+
+    override this.Name = "an assertion"
+    override this.ShortName = literalAss
+
+    override this.Clone () =
+        let ret = new FplAssertion((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Instantiate () = None
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Todo, positions, Some parent)
@@ -1147,8 +1157,6 @@ type FplReference(positions: Positions, parent: FplValue) =
             // If the argument tuple equals "???", an empty argument or coordinates list has occurred
             let args =
                 this.ArgList
-                |> Seq.filter (fun fv ->
-                    fv.FplBlockType <> FplBlockType.Assertion)
                 |> Seq.map (fun fv -> fv.Type(propagate))
                 |> String.concat ", "
 
@@ -1494,19 +1502,6 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.Instantiate () = None
 
     override this.IsBlock () = true
-
-type FplAssertion(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Assertion, positions, Some parent)
-
-    override this.Name = "an assertion"
-    override this.ShortName = literalAss
-
-    override this.Clone () =
-        let ret = new FplAssertion((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = None
 
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Todo, positions, Some parent)
