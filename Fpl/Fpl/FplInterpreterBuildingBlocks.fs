@@ -1128,7 +1128,8 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("PropertyBlock")
         eval st keywordPropertyAst
         let parent = es.PeekEvalStack()
-        let fv = new FplMandatoryPredicate((pos1, pos2), parent) // todo, is this correct? properties might be also functional terms
+        // This correct. The context instance will be determined in Ast.FunctionalTermSignature
+        let fv = new FplMandatoryPredicate((pos1, pos2), parent) 
         es.PushEvalStack(fv)
         eval st definitionPropertyAst
         if not fv.IsIntrinsic then // if not intrinsic, check variable usage

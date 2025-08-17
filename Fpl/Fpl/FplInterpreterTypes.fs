@@ -158,7 +158,7 @@ type FplSources(paths: PathEquivalentUri list, pathToLocalRegistry: string) =
                         then
                             true // the second is the lib subdirectory
                         else
-                            true // the third is the internet source
+                            true // the third is the Internet source
                     )
 
                 let pathTypes =
@@ -1079,7 +1079,7 @@ type FplGenericFunctionalTerm(blockType: FplBlockType, positions: Positions, par
             // In this case, the "representation" of the function is
             // its declared mapping type
             let mapping = this.ArgList |> Seq.head 
-            $"dec {mapping.Represent()}"
+            mapping.Represent()
         else
             let subRepr = 
                 this.ValueList
