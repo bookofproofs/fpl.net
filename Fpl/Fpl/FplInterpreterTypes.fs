@@ -287,8 +287,6 @@ type ParsedAstList() =
 type FplBlockType =
     | Todo
     | Constructor
-    | MandatoryPredicate
-    | OptionalPredicate
     | Proof
     | Argument
     | Justification
@@ -648,9 +646,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 | FplBlockType.Proof
                 | FplBlockType.Argument
                 | FplBlockType.Language -> head
-                | FplBlockType.Constructor
-                | FplBlockType.OptionalPredicate
-                | FplBlockType.MandatoryPredicate ->
+                | FplBlockType.Constructor ->
                     let paramT = this.GetParamTuple(isSignature)
                     sprintf "%s(%s)" head paramT
                 | FplBlockType.Localization ->
@@ -808,6 +804,7 @@ type FplGenericPredicate(blockType: FplBlockType, positions: Positions, parent: 
         this.TypeId <- literalPred
 
     override this.Instantiate () = None
+
     override this.Represent (): string = 
         this.ValueList
         |> Seq.map (fun subfv -> subfv.Represent())
@@ -819,12 +816,13 @@ type FplGenericPredicateWithExpression(blockType: FplBlockType, positions: Posit
     inherit FplGenericPredicate(blockType, positions, parent)
 
     override this.Type signatureType = 
-        let paramT = this.GetParamTuple(signatureType)
         let head = 
             match signatureType with
                     | SignatureType.Name 
                     | SignatureType.Mixed -> this.FplId
                     | SignatureType.Type -> this.TypeId
+
+        let paramT = this.GetParamTuple(signatureType)
         sprintf "%s(%s)" head paramT
             
 [<AbstractClass>]
@@ -1090,7 +1088,6 @@ type FplGenericFunctionalTerm(blockType: FplBlockType, positions: Positions, par
             else
                 subRepr
 
-
 type FplFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplGenericFunctionalTerm(FplBlockType.Todo, positions, parent)
 
@@ -1152,7 +1149,7 @@ type FplPredicate(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
 type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.MandatoryPredicate, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a predicate property"
     override this.ShortName = "mpred"
@@ -1166,7 +1163,7 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
 
 
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.OptionalPredicate, positions, parent)
+    inherit FplGenericPredicateWithExpression(FplBlockType.Todo, positions, parent)
 
     override this.Name = "an optional predicate property"
     override this.ShortName = "opred"

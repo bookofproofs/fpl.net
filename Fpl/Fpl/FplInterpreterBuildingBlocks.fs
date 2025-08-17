@@ -1128,7 +1128,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("PropertyBlock")
         eval st keywordPropertyAst
         let parent = es.PeekEvalStack()
-        // This correct. The context instance will be determined in Ast.FunctionalTermSignature
+        // This correct. The context instance will be determined in Ast.FunctionalTermSignature and Ast.PredicateInstance
         let fv = new FplMandatoryPredicate((pos1, pos2), parent) 
         es.PushEvalStack(fv)
         eval st definitionPropertyAst
@@ -1404,11 +1404,11 @@ let rec eval (st: SymbolTable) ast =
             fv.ValueList.Add(last)
         | _ -> ()
 
-        match fv.FplBlockType with
-        | FplBlockType.MandatoryPredicate 
-        | FplBlockType.OptionalPredicate ->
+        match fv with
+        | :? FplMandatoryPredicate 
+        | :? FplOptionalPredicate ->
             fv.ValueList.Add(last)
-        | FplBlockType.Reference ->
+        | :? FplReference ->
             // simplify references created due to superfluous parentheses of expressions
             // by replacing them with their single value
             if prefixOpAst.IsNone && 
@@ -1423,7 +1423,7 @@ let rec eval (st: SymbolTable) ast =
                         subNode.Parent <- fv.Parent
                         fv.ArgList.Clear()
                     | _ -> ()
-        | FplBlockType.Localization -> 
+        | :? FplLocalization -> 
             fv.FplId <- last.FplId
         | _ -> ()
         st.EvalPop()
@@ -1507,9 +1507,15 @@ let rec eval (st: SymbolTable) ast =
         match optAst with
         | Some ast1 -> 
             eval st ast1
-            fv.FplBlockType <- FplBlockType.OptionalPredicate
+            es.Pop() |> ignore
+            let fvNew = new FplOptionalPredicate((fv.StartPos, fv.EndPos), fv.Parent.Value)
+            fvNew.Copy fv
+            es.PushEvalStack(fvNew)
         | None -> 
-            fv.FplBlockType <- FplBlockType.MandatoryPredicate
+            es.Pop() |> ignore
+            let fvNew = new FplMandatoryPredicate((fv.StartPos, fv.EndPos), fv.Parent.Value)
+            fvNew.Copy fv
+            es.PushEvalStack(fvNew)
         eval st predInstanceBlockAst
         st.EvalPop()
     | Ast.ParentConstructorCall((pos1, pos2), (inheritedClassTypeAst, argumentTupleAst)) ->
