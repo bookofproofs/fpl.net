@@ -286,8 +286,6 @@ type ParsedAstList() =
 
 type FplBlockType =
     | Todo
-    | Justification
-    | ArgInference
     | Localization
     | Translation
     | Assertion
@@ -1028,7 +1026,7 @@ let isArgument (fv:FplValue) =
     | _ -> false
 
 type FplJustification(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.Justification, positions, parent)
+    inherit FplGenericPredicate(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a justification"
     override this.ShortName = "just"
@@ -1040,8 +1038,13 @@ type FplJustification(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
+
+
 type FplArgInference(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.ArgInference, positions, parent)
+    inherit FplGenericPredicate(FplBlockType.Todo, positions, parent)
 
     override this.Name = "an argument inference"
     override this.ShortName = "ainf"
@@ -1050,6 +1053,10 @@ type FplArgInference(positions: Positions, parent: FplValue) =
         let ret = new FplArgInference((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
 
 type FplLocalization(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Localization, positions, Some parent)
