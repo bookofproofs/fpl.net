@@ -1256,27 +1256,27 @@ let rec eval (st: SymbolTable) ast =
         match optAst with
         | Some ast1 -> 
             eval st ast1
+            es.Pop() |> ignore
             if fv.IsFplBlock() then
-                es.Pop() |> ignore
                 let fvNew = new FplFunctionalTerm((fv.StartPos, pos2), fv.Parent.Value)
                 fvNew.Copy fv
-                fvNew.EndPos <- pos2
                 es.PushEvalStack(fvNew)
-
             else
-                fv.FplBlockType <- FplBlockType.OptionalFunctionalTerm
-                fv.TypeId <- literalFunc
+                let fvNew = new FplOptionalFunctionalTerm((fv.StartPos, pos2), fv.Parent.Value)
+                fvNew.Copy fv
+                fvNew.TypeId <- literalFunc
+                es.PushEvalStack(fvNew)
         | None -> 
+            es.Pop() |> ignore
             if fv.IsFplBlock() then
-                es.Pop() |> ignore
                 let fvNew = new FplFunctionalTerm((fv.StartPos, pos2), fv.Parent.Value)
                 fvNew.Copy fv
-                fvNew.EndPos <- pos2
                 es.PushEvalStack(fvNew)
             else
-                fv.FplBlockType <- FplBlockType.MandatoryFunctionalTerm
-                fv.TypeId <- literalFunc
-        fv.EndPos <- pos2
+                let fvNew = new FplMandatoryFunctionalTerm((fv.StartPos, pos2), fv.Parent.Value)
+                fvNew.Copy fv
+                fvNew.TypeId <- literalFunc
+                es.PushEvalStack(fvNew)
         eval st mappingAst
         st.EvalPop()
         es.InSignatureEvaluation <- false

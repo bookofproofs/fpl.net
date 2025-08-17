@@ -287,8 +287,6 @@ type ParsedAstList() =
 type FplBlockType =
     | Todo
     | Constructor
-    | MandatoryFunctionalTerm
-    | OptionalFunctionalTerm
     | MandatoryPredicate
     | OptionalPredicate
     | Proof
@@ -665,13 +663,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     match paramT with
                     | "" -> head
                     | _ -> sprintf "%s(%s)" head paramT
-                | FplBlockType.OptionalFunctionalTerm
-                | FplBlockType.MandatoryFunctionalTerm ->
-                    match this.Mapping with
-                    | Some map ->
-                        let paramT = this.GetParamTuple(isSignature)
-                        sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
-                    | _ -> ""
                 | FplBlockType.Instance ->
                     let args =
                         this.ArgList
@@ -1058,21 +1049,9 @@ let isConstructor (fv:FplValue) =
     | :? FplConstructor -> true
     | _ -> false
 
-type FplFunctionalTerm(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Todo, positions, Some parent)
-
-    override this.Name = "a functional term definition"
-    override this.ShortName = "def func"
-
-    override this.Clone () =
-        let ret = new FplFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = None
-
-    override this.IsFplBlock () = true
-    override this.IsBlock () = true
+[<AbstractClass>]
+type FplGenericFunctionalTerm(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
+    inherit FplValue(blockType, positions, Some parent)
 
     override this.Type signatureType = 
         let head =
@@ -1109,11 +1088,27 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue) =
             if subRepr = String.Empty then 
                 literalUndef
             else
-                subRepr            
+                subRepr
 
+
+type FplFunctionalTerm(positions: Positions, parent: FplValue) =
+    inherit FplGenericFunctionalTerm(FplBlockType.Todo, positions, parent)
+
+    override this.Name = "a functional term definition"
+    override this.ShortName = "def func"
+
+    override this.Clone () =
+        let ret = new FplFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Instantiate () = None
+
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.MandatoryFunctionalTerm, positions, Some parent)
+    inherit FplGenericFunctionalTerm(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a functional term property"
     override this.ShortName = "mfunc"
@@ -1128,7 +1123,7 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
 type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.OptionalFunctionalTerm, positions, Some parent)
+    inherit FplGenericFunctionalTerm(FplBlockType.Todo, positions, parent)
 
     override this.Name = "an optional functional term property"
     override this.ShortName = "ofunc"
