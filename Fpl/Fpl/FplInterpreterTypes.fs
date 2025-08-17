@@ -300,7 +300,6 @@ type FplBlockType =
     | Translation
     | Language
     | Reference
-    | Quantor
     | Mapping
     | Stmt
     | Assertion
@@ -645,16 +644,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 | FplBlockType.MandatoryPredicate ->
                     let paramT = this.GetParamTuple(isSignature)
                     sprintf "%s(%s)" head paramT
-                | FplBlockType.Quantor ->
-                    let paramT =
-                        this.Scope
-                        |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
-                        |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(isSignature))
-                        |> String.concat ", "
-
-                    match paramT with
-                    | "" -> head
-                    | _ -> sprintf "%s(%s)" head paramT
                 | FplBlockType.Localization ->
                     let paramT =
                         this.Scope
@@ -1408,7 +1397,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                 subRepr
 
 type FplQuantor(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.Quantor, positions, parent)
+    inherit FplGenericPredicate(FplBlockType.Todo, positions, parent)
 
     override this.Name = "a quantor"
     override this.ShortName = "qtr"
@@ -1417,6 +1406,23 @@ type FplQuantor(positions: Positions, parent: FplValue) =
         let ret = new FplQuantor((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    override this.Type signatureType =
+        let head = 
+            match signatureType with
+                | SignatureType.Name 
+                | SignatureType.Mixed -> this.FplId
+                | SignatureType.Type -> this.TypeId
+
+        let paramT =
+            this.Scope
+            |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
+            |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(signatureType))
+            |> String.concat ", "
+
+        match paramT with
+        | "" -> head
+        | _ -> sprintf "%s(%s)" head paramT
 
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Mapping, positions, Some parent)
@@ -1699,13 +1705,13 @@ let toString (fplValue:FplValue) = $"{fplValue.ShortName} {fplValue.Type(Signatu
 let qualifiedName (fplValue:FplValue)=
     let rec getFullName (fv: FplValue) (first: bool) =
         let fplValueType =
-            match fv.FplBlockType with
-            | FplBlockType.Localization
-            | FplBlockType.Reference -> fv.Type(SignatureType.Name)
-            | FplBlockType.Localization
-            | FplBlockType.Constructor
+            match fv with
+            | :? FplLocalization
+            | :? FplReference -> fv.Type(SignatureType.Name)
+            | :? FplLocalization
+            | :? FplConstructor
             | _ when fv.IsBlock() -> fv.Type(SignatureType.Mixed)
-            | FplBlockType.Quantor -> fv.Type(SignatureType.Mixed)
+            | :? FplQuantor -> fv.Type(SignatureType.Mixed)
             | _ -> fv.FplId
 
         match fv with
