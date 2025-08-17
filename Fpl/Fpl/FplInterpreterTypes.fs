@@ -388,6 +388,9 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     /// Indicates if this FplValue is a variable or some variadic variable.
     abstract member IsVariable: unit -> bool
 
+    /// Indicates if this FplValue is a mapping.
+    abstract member IsMapping: unit -> bool
+
     /// Clears the ValueList and adds the argument to it. Previous value(s), if any, get lost.
     abstract member SetValue: FplValue -> unit
 
@@ -403,6 +406,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     override this.IsClass (): bool = false
     override this.IsProof (): bool = false
     override this.IsVariable (): bool = false
+    override this.IsMapping (): bool = false
     
     override this.AssignParts (ret:FplValue) =
         ret.FplId <- this.FplId
@@ -567,7 +571,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         |> Seq.filter (fun fv -> fv.FplBlockType = FplBlockType.Constructor)
         |> Seq.toList
 
-    /// Generates a string of parameters based on SignatureType
+            /// Generates a string of parameters based on SignatureType
     member this.GetParamTuple(signatureType:SignatureType) =
         let propagate =
             match signatureType with
@@ -580,7 +584,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
             || this.FplBlockType = FplBlockType.Mapping)
         |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
         |> String.concat ", "
-
     /// Copies other FplValue to this one without changing its reference pointer.
     member this.Copy(other: FplValue) =
         this.FplId <- other.FplId
@@ -767,6 +770,17 @@ let private propagateSignatureType (signatureType:SignatureType) =
     | SignatureType.Mixed -> SignatureType.Type
     | _ -> signatureType 
 
+/// Generates a string of parameters based on SignatureType
+let private getParamTuple (fv:FplValue)  (signatureType:SignatureType) =
+        let propagate = propagateSignatureType signatureType
+        fv.Scope
+        |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
+            kvp.Value.IsSignatureVariable
+            || fv.IsVariable() && not (kvp.Value.IsClass())
+            || fv.IsMapping())
+        |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
+        |> String.concat ", "
+
 type FplRoot() =
     inherit FplValue(FplBlockType.Todo, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
     override this.Name = "a root"
@@ -828,7 +842,7 @@ type FplGenericPredicateWithExpression(blockType: FplBlockType, positions: Posit
     override this.Type signatureType = 
         let head = getFplHead this signatureType
 
-        let paramT = this.GetParamTuple(signatureType)
+        let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
             
 [<AbstractClass>]
@@ -925,7 +939,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
         this.IsInitializedVariable <- true
 
     override this.Type signatureType =
-        let pars = this.GetParamTuple(signatureType)
+        let pars = getParamTuple this signatureType
         let head = getFplHead this signatureType
         let propagate = propagateSignatureType signatureType
 
@@ -1046,7 +1060,7 @@ let isConstructor (fv:FplValue) =
     | _ -> false
 
 [<AbstractClass>]
-type FplGenericFunctionalTerm(blockType: FplBlockType, positions: Positions, parent: FplValue) as this =
+type FplGenericFunctionalTerm(blockType: FplBlockType, positions: Positions, parent: FplValue) =
     inherit FplValue(blockType, positions, Some parent)
 
     override this.Type signatureType = 
@@ -1055,7 +1069,7 @@ type FplGenericFunctionalTerm(blockType: FplBlockType, positions: Positions, par
 
         match this.Mapping with
         | Some map ->
-            let paramT = this.GetParamTuple(signatureType)
+            let paramT = getParamTuple this signatureType
             sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
         | _ -> ""
 
@@ -1449,6 +1463,8 @@ type FplMapping(positions: Positions, parent: FplValue) =
         let ret = new FplMapping((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    override this.IsMapping () = true
 
     override this.Instantiate () = None
 
