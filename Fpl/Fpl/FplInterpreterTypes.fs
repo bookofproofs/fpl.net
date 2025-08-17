@@ -289,7 +289,6 @@ type FplBlockType =
     | Localization
     | Translation
     | Assertion
-    | Extension
     | Instance
 
 type FixType =
@@ -575,53 +574,47 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         | _ -> ()
 
     override this.Type isSignature  = 
-        match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
-        | (FplBlockType.Extension, _) -> this.FplId
-        | _ ->
-            let head =
-                match isSignature with
-                | SignatureType.Name 
-                | SignatureType.Mixed -> this.FplId
-                | SignatureType.Type -> this.TypeId
+        let head =
+            match isSignature with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> this.FplId
+            | SignatureType.Type -> this.TypeId
 
-            let propagate =
-                match isSignature with
-                | SignatureType.Mixed -> SignatureType.Type
-                | _ -> isSignature 
+        let idRec () =
+            match this.FplBlockType with
+            | FplBlockType.Localization ->
+                let paramT =
+                    this.Scope
+                    |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
+                    |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(isSignature))
+                    |> String.concat ", "
 
-            let idRec () =
-                match this.FplBlockType with
-                | FplBlockType.Localization ->
-                    let paramT =
-                        this.Scope
-                        |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
-                        |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(isSignature))
-                        |> String.concat ", "
+                match paramT with
+                | "" -> head
+                | _ -> sprintf "%s(%s)" head paramT
+            | FplBlockType.Instance ->
+                let args =
+                    this.ArgList
+                    |> Seq.map (fun fv -> fv.Type(isSignature))
+                    |> String.concat ","
+                if args <> String.Empty then
+                    sprintf "%s:%s" head args
+                else
+                    head
+            | FplBlockType.Translation ->
+                let args =
+                    this.ArgList
+                    |> Seq.filter (fun fv ->
+                        fv.FplBlockType <> FplBlockType.Assertion)
+                    |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
+                    |> String.concat ""
 
-                    match paramT with
-                    | "" -> head
-                    | _ -> sprintf "%s(%s)" head paramT
-                | FplBlockType.Instance ->
-                    let args =
-                        this.ArgList
-                        |> Seq.map (fun fv -> fv.Type(isSignature))
-                        |> String.concat ","
-                    if args <> String.Empty then
-                        sprintf "%s:%s" head args
-                    else
-                        head
-                | FplBlockType.Translation ->
-                    let args =
-                        this.ArgList
-                        |> Seq.filter (fun fv ->
-                            fv.FplBlockType <> FplBlockType.Assertion)
-                        |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
-                        |> String.concat ""
+                sprintf "%s%s" head args
+            | _ -> ""
 
-                    sprintf "%s%s" head args
-                | _ -> ""
+        idRec ()
 
-            idRec ()
+
     /// Generates a representation of this FplValue.
     override this.Represent() = 
         let rec children (fv:FplValue) isFirst = 
@@ -1511,7 +1504,7 @@ type FplAssertion(positions: Positions, parent: FplValue) =
     override this.Instantiate () = None
 
 type FplExtension(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Extension, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
 
     override this.Name = "an extension"
     override this.ShortName = "def ext"
@@ -1522,6 +1515,15 @@ type FplExtension(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Type signatureType = this.FplId
+
+    override this.Represent () = this.FplId
+
+let isExtension (fv:FplValue) =
+    match fv with
+    | :? FplExtension -> true
+    | _ -> false
 
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     inherit FplValue(FplBlockType.Todo, positions, Some parent)
@@ -2546,12 +2548,13 @@ let rec checkCandidates (toBeMatched: FplValue) (candidates: FplValue list) (acc
         | None -> (Some candidate, [])
         | Some errMsg -> checkCandidates toBeMatched candidates (accResultList @ [ errMsg ])
 
-let rec filterTreePathByBlockType (leaf: FplValue) (typ: FplBlockType) =
-    if leaf.FplBlockType = typ then
+let rec getParentExtension (leaf: FplValue) =
+    match leaf with
+    | :? FplExtension ->
         Some leaf
-    else
+    | _ -> 
         match leaf.Parent with
-        | Some parent -> filterTreePathByBlockType parent typ
+        | Some parent -> getParentExtension parent 
         | _ -> None
 
 let searchExtensionByName (root: FplValue) identifier =
@@ -2559,7 +2562,7 @@ let searchExtensionByName (root: FplValue) identifier =
         root.Scope
         |> Seq.map (fun theory ->
             theory.Value.Scope
-            |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Extension)
+            |> Seq.filter (fun kvp -> isExtension kvp.Value)
             |> Seq.map (fun kvp -> kvp.Value)
             |> Seq.filter (fun ext -> ext.FplId = identifier))
         |> Seq.concat

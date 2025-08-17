@@ -525,7 +525,7 @@ let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) po
         st.Root.Scope
         |> Seq.map (fun theory ->
             theory.Value.Scope
-            |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Extension)
+            |> Seq.filter (fun kvp -> isExtension kvp.Value)
             |> Seq.map (fun kvp -> kvp.Value)
             |> Seq.filter (fun ext -> 
                 if matchReprId ext identifier && not (fv.Scope.ContainsKey(fv.FplId)) then 
@@ -542,7 +542,7 @@ let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) po
         |> Seq.toList
 
     let candidates = 
-        let parentExtension = filterTreePathByBlockType fv FplBlockType.Extension
+        let parentExtension = getParentExtension fv 
         match parentExtension with 
         | Some ext -> 
             if matchReprId ext identifier then
