@@ -911,12 +911,12 @@ type TestFplValueScopeBlockType() =
             let trsl = lang.ArgList[0]
 
             match var with
-            | "base0" -> Assert.AreEqual<FplBlockType>(FplBlockType.Translation, trsl.FplBlockType)
-            | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Translation, trsl.FplBlockType)
-            | "base2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Translation, trsl.FplBlockType)
-            | "base3" -> Assert.AreEqual<FplBlockType>(FplBlockType.Translation, trsl.FplBlockType)
-            | "base4" -> Assert.AreEqual<FplBlockType>(FplBlockType.Translation, trsl.FplBlockType)
-            | "base5" -> Assert.AreEqual<FplBlockType>(FplBlockType.Translation, trsl.FplBlockType)
+            | "base0" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
+            | "base1" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
+            | "base2" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
+            | "base3" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
+            | "base4" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
+            | "base5" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

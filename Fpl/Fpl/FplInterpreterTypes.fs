@@ -286,7 +286,6 @@ type ParsedAstList() =
 
 type FplBlockType =
     | Todo
-    | Translation
     | Assertion
     | Instance
 
@@ -590,15 +589,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     sprintf "%s:%s" head args
                 else
                     head
-            | FplBlockType.Translation ->
-                let args =
-                    this.ArgList
-                    |> Seq.filter (fun fv ->
-                        fv.FplBlockType <> FplBlockType.Assertion)
-                    |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
-                    |> String.concat ""
-
-                sprintf "%s%s" head args
             | _ -> ""
 
         idRec ()
@@ -1069,7 +1059,7 @@ type FplLocalization(positions: Positions, parent: FplValue) =
         
 
 type FplTranslation(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Translation, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
 
     override this.Name = "a translation"
     override this.ShortName = "trsl"
@@ -1080,6 +1070,20 @@ type FplTranslation(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let args =
+            this.ArgList
+            |> Seq.filter (fun fv ->
+                fv.FplBlockType <> FplBlockType.Assertion)
+            |> Seq.map (fun fv -> fv.Type(SignatureType.Name))
+            |> String.concat ""
+
+        sprintf "%s%s" head args
+
+    override this.Represent () = this.FplId 
+
 
 type FplLanguage(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Todo, positions, Some parent)
