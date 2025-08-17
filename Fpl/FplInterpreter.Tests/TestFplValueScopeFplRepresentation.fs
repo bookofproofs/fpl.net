@@ -201,16 +201,16 @@ type TestFplValueScopeFplRepresentation() =
             | "t2" -> Assert.AreEqual<string>(literalTrue, t2.Represent())
             | "t3" -> Assert.AreEqual<string>("dec obj", t3.Represent())
             | "t4" -> Assert.AreEqual<string>("dec obj", t4.Represent())
-            | "t5" -> Assert.AreEqual<string>(literalInd, t5.Represent())
-            | "t6" -> Assert.AreEqual<string>(literalInd, t6.Represent())
-            | "t7" -> Assert.AreEqual<string>(literalUndetermined, t7.Represent())
-            | "t8" -> Assert.AreEqual<string>(literalUndetermined, t8.Represent())
-            | "t9" -> Assert.AreEqual<string>(literalTpl, t9.Represent())
-            | "t10" -> Assert.AreEqual<string>(literalTpl, t10.Represent())
-            | "t11" -> Assert.AreEqual<string>("", t11.Represent())
-            | "t12" -> Assert.AreEqual<string>("", t12.Represent())
-            | "t13" -> Assert.AreEqual<string>(literalFunc, t13.Represent())
-            | "t14" -> Assert.AreEqual<string>(literalFunc, t14.Represent())
+            | "t5" -> Assert.AreEqual<string>($"dec {literalInd}", t5.Represent())
+            | "t6" -> Assert.AreEqual<string>($"dec {literalInd}", t6.Represent())
+            | "t7" -> Assert.AreEqual<string>($"dec {literalPred}", t7.Represent())
+            | "t8" -> Assert.AreEqual<string>($"dec {literalPred}", t8.Represent())
+            | "t9" -> Assert.AreEqual<string>($"dec {literalTpl}", t9.Represent())
+            | "t10" -> Assert.AreEqual<string>($"dec {literalTpl}", t10.Represent())
+            | "t11" -> Assert.AreEqual<string>($"dec Nat", t11.Represent())
+            | "t12" -> Assert.AreEqual<string>($"dec Nat", t12.Represent())
+            | "t13" -> Assert.AreEqual<string>($"dec {literalFunc}", t13.Represent())
+            | "t14" -> Assert.AreEqual<string>($"dec {literalFunc}", t14.Represent())
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -833,7 +833,7 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("a", """def cl A: obj {intr} def pred T() {dec ~a:A; true};""", "dec A")>]    // without constructor, without inheritance, without instantiation
     [<DataRow("aI1", """def cl A: obj {intr} def pred T() {dec ~aI1:A aI1:=A; true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (without ())
     [<DataRow("aI2", """def cl A: obj {intr} def pred T() {dec ~aI2:A aI2:=A(); true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (with ()) -> should also trigger another error
-    [<DataRow("b", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~b:B; true};""", "dec class B")>]    // without constructor, with inheritance, without instantiation
+    [<DataRow("b", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~b:B; true};""", "dec B")>]    // without constructor, with inheritance, without instantiation
     [<DataRow("bI1", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~bI1:B bI1:=B; true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (without ())
     [<DataRow("bI2", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~bI2:B bI2:=B(); true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (with ()) -> should also trigger another error
     [<DataRow("c", """def cl A: obj {intr} def cl B: A {intr} def cl C: obj {ctor C() {dec base.obj (); self }} def pred T() {dec ~c:C; true};""", "dec C")>]    // with constructor, without inheritance, without instantiation
