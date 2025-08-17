@@ -293,7 +293,6 @@ type FplBlockType =
     | Localization
     | Translation
     | Language
-    | Reference
     | Stmt
     | Assertion
     | Extension
@@ -583,25 +582,14 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
     override this.Type isSignature  = 
         match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
-        | (FplBlockType.Reference, true) ->
-            // delegate the type identifier to the referenced entity
-            let val1 = this.Scope[this.FplId]
-            val1.Type(isSignature)
         | (FplBlockType.Stmt, _)
         | (FplBlockType.Extension, _) -> this.FplId
         | _ ->
             let head =
-                match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
-                | (FplBlockType.Reference, true) ->
-                    match isSignature with
-                    | SignatureType.Name -> this.Scope[this.FplId].Type(SignatureType.Name)
-                    | SignatureType.Mixed -> this.FplId
-                    | SignatureType.Type -> this.TypeId
-                | _ ->
-                    match isSignature with
-                    | SignatureType.Name 
-                    | SignatureType.Mixed -> this.FplId
-                    | SignatureType.Type -> this.TypeId
+                match isSignature with
+                | SignatureType.Name 
+                | SignatureType.Mixed -> this.FplId
+                | SignatureType.Type -> this.TypeId
 
             let propagate =
                 match isSignature with
@@ -641,45 +629,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                         |> String.concat ""
 
                     sprintf "%s%s" head args
-                | FplBlockType.Reference ->
-                    let qualification =
-                        if this.Scope.ContainsKey(".") then
-                            Some(this.Scope["."])
-                        else
-                            None
-                    // The arguments are reserved for the arguments or the coordinates of the reference
-                    // If the argument tuple equals "???", an empty argument or coordinates list has occurred
-                    let args =
-                        this.ArgList
-                        |> Seq.filter (fun fv ->
-                            fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
-                        |> Seq.map (fun fv -> fv.Type(propagate))
-                        |> String.concat ", "
-
-                    match (head, args, qualification) with
-                    | (_, "", Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
-                    | (_, "???", Some qual) ->
-                        if this.HasBrackets then
-                            sprintf "%s[].%s" head (qual.Type(propagate))
-                        else
-                            sprintf "%s().%s" head (qual.Type(propagate))
-                    | (_, _, Some qual) ->
-                        if this.HasBrackets then
-                            sprintf "%s[%s].%s" head args (qual.Type(propagate))
-                        else
-                            sprintf "%s(%s).%s" head args (qual.Type(propagate))
-                    | ("???", _, None) -> sprintf "%s" head
-                    | ("", _, None) -> sprintf "%s" args
-                    | (_, "", None) -> sprintf "%s" head
-                    | (_, "???", None) ->
-                        if this.HasBrackets then
-                            sprintf "%s[]" head
-                        else
-                            sprintf "%s()" head
-                    | (_, _, None) ->
-                        if this.HasBrackets then sprintf "%s[%s]" head args
-                        elif head = "bydef." then sprintf "%s%s" head args
-                        else sprintf "%s(%s)" head args
                 | _ -> ""
 
             idRec ()
@@ -1140,7 +1089,7 @@ type FplLanguage(positions: Positions, parent: FplValue) =
     override this.Instantiate () = None
 
 type FplReference(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Reference, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
 
     override this.Name = "a reference"
     override this.ShortName = "ref"
@@ -1158,6 +1107,54 @@ type FplReference(positions: Positions, parent: FplValue) =
             var.SetValue(fv)
         else
             base.SetValue(fv)
+
+    override this.Type signatureType =
+        if this.Scope.ContainsKey(this.FplId) then
+            // delegate the type identifier to the referenced entity
+            let val1 = this.Scope[this.FplId]
+            val1.Type(signatureType)
+        else
+            let head = getFplHead this signatureType
+            let propagate = propagateSignatureType signatureType
+
+            let qualification =
+                if this.Scope.ContainsKey(".") then
+                    Some(this.Scope["."])
+                else
+                    None
+            // The arguments are reserved for the arguments or the coordinates of the reference
+            // If the argument tuple equals "???", an empty argument or coordinates list has occurred
+            let args =
+                this.ArgList
+                |> Seq.filter (fun fv ->
+                    fv.FplBlockType <> FplBlockType.Stmt && fv.FplBlockType <> FplBlockType.Assertion)
+                |> Seq.map (fun fv -> fv.Type(propagate))
+                |> String.concat ", "
+
+            match (head, args, qualification) with
+            | (_, "", Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
+            | (_, "???", Some qual) ->
+                if this.HasBrackets then
+                    sprintf "%s[].%s" head (qual.Type(propagate))
+                else
+                    sprintf "%s().%s" head (qual.Type(propagate))
+            | (_, _, Some qual) ->
+                if this.HasBrackets then
+                    sprintf "%s[%s].%s" head args (qual.Type(propagate))
+                else
+                    sprintf "%s(%s).%s" head args (qual.Type(propagate))
+            | ("???", _, None) -> sprintf "%s" head
+            | ("", _, None) -> sprintf "%s" args
+            | (_, "", None) -> sprintf "%s" head
+            | (_, "???", None) ->
+                if this.HasBrackets then
+                    sprintf "%s[]" head
+                else
+                    sprintf "%s()" head
+            | (_, _, None) ->
+                if this.HasBrackets then sprintf "%s[%s]" head args
+                elif head = "bydef." then sprintf "%s%s" head args
+                else sprintf "%s(%s)" head args
 
 
     override this.Represent (): string = 
@@ -1212,6 +1209,11 @@ type FplReference(positions: Positions, parent: FplValue) =
                 literalUndef
             else
                 subRepr
+
+let isReference (fv:FplValue) =
+    match fv with
+    | :? FplReference -> true
+    | _ -> false
 
 type FplQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Todo, positions, parent)
@@ -1284,8 +1286,8 @@ type FplMapping(positions: Positions, parent: FplValue) =
 
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
-    match fv.FplBlockType with
-    | FplBlockType.Reference ->
+    match fv with
+    | :? FplReference ->
         if fv.Scope.ContainsKey(fv.FplId) then
             getMapping fv.Scope[fv.FplId]
         else
@@ -1545,6 +1547,11 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
 
     override this.Represent (): string = this.FplId
 
+let isIntrinsicObj (fv1:FplValue) = 
+    match fv1 with
+    | :? FplIntrinsicObj -> true
+    | _ -> false
+
 type FplIntrinsicPred(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Todo, positions, parent)
 
@@ -1636,48 +1643,6 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
                     
     override this.Represent (): string = this.FplId
 
-/// Returns Some argument of the FplValue depending of the type of it.
-let getArgument (fv:FplValue) =
-    let isIntrinsicObj (fv1:FplValue) = 
-        match fv1 with
-        | :? FplIntrinsicObj -> true
-        | _ -> false
-
-    let isReference (fv1:FplValue) = 
-        match fv1 with
-        | :? FplReference -> true
-        | _ -> false
-
-    match fv.FplBlockType with
-    | FplBlockType.Reference when fv.Scope.ContainsKey(fv.FplId) ->
-        let refValue = fv.Scope[fv.FplId]
-        // if the reference value itself contains value(s) and is not a class, 
-        // return this value. 
-        // Exceptions: 
-        // 1) if refValue is a class, its "arg list" means something else - namely parent classes. In this case we only want to return the main class
-        // 2) if refValue is a constructor, its "arg list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
-        if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && not (isConstructor refValue) then
-            Some refValue.ArgList[0] // return existing values except of classes, because those denoted their parent classes
-        else 
-            Some refValue 
-    | FplBlockType.Reference when fv.FplId <> "" -> Some fv
-    | FplBlockType.Reference when fv.ArgList.Count = 0 -> Some fv
-    | FplBlockType.Stmt when fv.FplId = "bas" && fv.ArgList.Count > 0 -> 
-        let test = fv.ArgList[0]
-        // in case of a base.obj() constructor call
-        if test.ArgList.Count = 2 && 
-            isIntrinsicObj test.ArgList[0] && 
-            isReference test.ArgList[1] &&
-            test.ArgList[1].FplId = "???" then
-            // return an FplValue inbuilt Object 
-            Some  test.ArgList[0] 
-        elif test.ArgList.Count > 0 then
-            Some test 
-        else
-            None
-    | _ when fv.ArgList.Count > 0 -> Some fv.ArgList[0]
-    | _ -> None
-
 type FplStmt(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Stmt, positions, Some parent)
 
@@ -1688,17 +1653,55 @@ type FplStmt(positions: Positions, parent: FplValue) =
         let ret = new FplStmt((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
     override this.Instantiate () =
         if this.FplId = "bas" then
             // in case of a base class constructor call (that resides inside this that is a constructor)
             // identify the 
-            let baseClassOpt = getArgument this
+
+            let baseClassOpt = 
+                if this.ArgList.Count > 0 then
+                    let test = this.ArgList[0]
+                    // in case of a base.obj() constructor call
+                    if test.ArgList.Count = 2 && 
+                        isIntrinsicObj test.ArgList[0] && 
+                        isReference test.ArgList[1] &&
+                        test.ArgList[1].FplId = "???" then
+                        // return an FplValue inbuilt Object 
+                        Some  test.ArgList[0] 
+                    elif test.ArgList.Count > 0 then
+                        Some test 
+                    else
+                        None
+                else 
+                    None
+
             match baseClassOpt with
             | Some (baseClass:FplValue) when baseClass.IsClass() -> 
                 Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
             | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
         else
             None
+
+/// Returns Some argument of the FplValue depending of the type of it.
+let getArgument (fv:FplValue) =
+    match fv with
+    | :? FplReference when fv.Scope.ContainsKey(fv.FplId) ->
+        let refValue = fv.Scope[fv.FplId]
+        // if the reference value itself contains value(s) and is not a class, 
+        // return this value. 
+        // Exceptions: 
+        // 1) if refValue is a class, its "arg list" means something else - namely parent classes. In this case we only want to return the main class
+        // 2) if refValue is a constructor, its "arg list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
+        if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && not (isConstructor refValue) then
+            Some refValue.ArgList[0] // return existing values except of classes, because those denoted their parent classes
+        else 
+            Some refValue 
+    | :? FplReference when fv.FplId <> "" -> Some fv
+    | :? FplReference when fv.ArgList.Count = 0 -> Some fv
+    | _ when fv.ArgList.Count > 0 -> Some fv.ArgList[0]
+    | _ -> None
+
 
 /// A discriminated union type for wrapping search results in the Scope of an FplValue.
 type ScopeSearchResult =
@@ -2272,8 +2275,8 @@ let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
 
 let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
     let rec findQualifiedEntity (fv1: FplValue) =
-        match fv1.FplBlockType with
-        | FplBlockType.Reference ->
+        match fv1 with
+        | :? FplReference ->
             if fv1.Scope.ContainsKey(".") && fv1.Scope.Count > 1 then
                 let result =
                     fv1.Scope
@@ -2404,7 +2407,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
         elif
             aType.Length > 0
             && Char.IsUpper(aType[0])
-            && a.FplBlockType = FplBlockType.Reference
+            && isReference a
             && a.Scope.Count = 1
         then
             let var = a.Scope.Values |> Seq.toList |> List.head

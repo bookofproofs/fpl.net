@@ -99,8 +99,8 @@ type FplRunner() =
         )
 
     member this.Run (rootCaller:FplValue) (caller:FplValue) = 
-        match caller.FplBlockType with 
-        | FplBlockType.Reference ->
+        match caller with 
+        | :? FplReference ->
             if caller.Scope.Count > 0 then 
                 let called = 
                     caller.Scope 

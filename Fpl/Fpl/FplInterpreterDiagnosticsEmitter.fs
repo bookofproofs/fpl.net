@@ -685,7 +685,8 @@ let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     | _ -> ()
 
 let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
-    if fv.FplBlockType = FplBlockType.Reference then
+    match fv with
+    | :? FplReference ->
         // collect candidates to match this reference from all theories and
         // add them to fplValues's scope
         let expressionId = fv.FplId
@@ -727,6 +728,7 @@ let emitSIG01Diagnostics (st: SymbolTable) (fv: FplValue) pos1 pos2 =
                     Diagnostic.Alternatives = Some "Declare a functional term, predicate, or class with this symbol." 
                 }
             ad.AddDiagnostic diagnostic
+    | _ -> ()
 
 let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
     let precedences = Dictionary<int, FplValue>()
