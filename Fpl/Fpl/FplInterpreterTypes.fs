@@ -286,7 +286,6 @@ type ParsedAstList() =
 
 type FplBlockType =
     | Todo
-    | Instance
 
 type FixType =
     | Infix of string * int
@@ -569,50 +568,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         match this.Parent with 
         | Some parent -> parent.ArgList.Add(this)
         | _ -> ()
-
-    override this.Type isSignature  = 
-        let head =
-            match isSignature with
-            | SignatureType.Name 
-            | SignatureType.Mixed -> this.FplId
-            | SignatureType.Type -> this.TypeId
-
-        let idRec () =
-            match this.FplBlockType with
-            | FplBlockType.Instance ->
-                let args =
-                    this.ArgList
-                    |> Seq.map (fun fv -> fv.Type(isSignature))
-                    |> String.concat ","
-                if args <> String.Empty then
-                    sprintf "%s:%s" head args
-                else
-                    head
-            | _ -> ""
-
-        idRec ()
-
-
-    /// Generates a representation of this FplValue.
-    override this.Represent() = 
-        let rec children (fv:FplValue) isFirst = 
-            match (isFirst, fv.ValueList.Count = 0) with
-            | (true, true) -> literalUndef
-            | (false, false) 
-            | (true, false) ->
-                let subRepr = 
-                    fv.ValueList
-                    |> Seq.map (fun subfv -> 
-                        children subfv false 
-                    )
-                    |> String.concat ", "
-                if subRepr = String.Empty then
-                    ""
-                else 
-                    $"{fv.FplId}({subRepr})"
-            | (false, true) -> fv.FplId
-
-        children this true                     
+              
     
 let private getFplHead (fv:FplValue) (signatureType:SignatureType) =
     match signatureType with
@@ -749,7 +705,7 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true    
 
 type FplInstance(positions: Positions, parent: FplValue) =
-    inherit FplGenericObject(FplBlockType.Instance, positions, parent)
+    inherit FplGenericObject(FplBlockType.Todo, positions, parent)
 
     override this.Name = "an instance"
     override this.ShortName = "inst"
@@ -760,6 +716,21 @@ type FplInstance(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType 
+        head
+
+    override this.Represent () = 
+        let subRepr = 
+            this.ValueList
+            |> Seq.map (fun subfv -> subfv.Represent())
+            |> String.concat ", "
+        if subRepr = String.Empty then 
+            literalUndef
+        else
+            subRepr
+
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Todo, positions, parent)
@@ -1118,6 +1089,10 @@ type FplAssertion(positions: Positions, parent: FplValue) =
         ret
 
     override this.Instantiate () = None
+
+    override this.Type signatureType = this.FplId
+        
+    override this.Represent () = ""
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Todo, positions, Some parent)
