@@ -756,6 +756,11 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
         children this true                     
     
+let getFplHead (fv:FplValue) (signatureType:SignatureType) =
+    match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> fv.FplId
+            | SignatureType.Type -> fv.TypeId
 
 type FplRoot() =
     inherit FplValue(FplBlockType.Todo, (Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
@@ -816,11 +821,7 @@ type FplGenericPredicateWithExpression(blockType: FplBlockType, positions: Posit
     inherit FplGenericPredicate(blockType, positions, parent)
 
     override this.Type signatureType = 
-        let head = 
-            match signatureType with
-                    | SignatureType.Name 
-                    | SignatureType.Mixed -> this.FplId
-                    | SignatureType.Type -> this.TypeId
+        let head = getFplHead this signatureType
 
         let paramT = this.GetParamTuple(signatureType)
         sprintf "%s(%s)" head paramT
@@ -920,11 +921,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
 
     override this.Type signatureType =
         let pars = this.GetParamTuple(signatureType)
-        let head =
-            match signatureType with
-            | SignatureType.Name 
-            | SignatureType.Mixed -> this.FplId
-            | SignatureType.Type -> this.TypeId
+        let head = getFplHead this signatureType
 
         let propagate =
             match signatureType with
@@ -1052,11 +1049,7 @@ type FplGenericFunctionalTerm(blockType: FplBlockType, positions: Positions, par
     inherit FplValue(blockType, positions, Some parent)
 
     override this.Type signatureType = 
-        let head =
-            match signatureType with
-            | SignatureType.Name 
-            | SignatureType.Mixed -> this.FplId
-            | SignatureType.Type -> this.TypeId
+        let head = getFplHead this signatureType
 
         let propagate =
             match signatureType with
@@ -1437,11 +1430,7 @@ type FplQuantor(positions: Positions, parent: FplValue) =
         ret
 
     override this.Type signatureType =
-        let head = 
-            match signatureType with
-                | SignatureType.Name 
-                | SignatureType.Mixed -> this.FplId
-                | SignatureType.Type -> this.TypeId
+        let head = getFplHead this signatureType
 
         let paramT =
             this.Scope
