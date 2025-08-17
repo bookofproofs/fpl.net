@@ -286,7 +286,6 @@ type ParsedAstList() =
 
 type FplBlockType =
     | Todo
-    | Argument
     | Justification
     | ArgInference
     | Localization
@@ -594,7 +593,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
             let idRec () =
                 match this.FplBlockType with
-                | FplBlockType.Argument -> head
                 | FplBlockType.Localization ->
                     let paramT =
                         this.Scope
@@ -1010,7 +1008,7 @@ type FplProof(positions: Positions, parent: FplValue) =
         head
 
 type FplArgument(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(FplBlockType.Argument, positions, parent)
+    inherit FplGenericPredicate(FplBlockType.Todo, positions, parent)
 
     override this.Name = "an argument"
     override this.ShortName = "arg"
@@ -1019,6 +1017,15 @@ type FplArgument(positions: Positions, parent: FplValue) =
         let ret = new FplArgument((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+    
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
+
+let isArgument (fv:FplValue) = 
+    match fv with
+    | :? FplArgument -> true
+    | _ -> false
 
 type FplJustification(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(FplBlockType.Justification, positions, parent)

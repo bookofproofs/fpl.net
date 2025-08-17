@@ -821,11 +821,11 @@ type TestFplValueScopeBlockType() =
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
 
             match var with
-            | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Argument, arg.FplBlockType)
-            | "base2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Argument, arg.FplBlockType)
-            | "base3" -> Assert.AreEqual<FplBlockType>(FplBlockType.Argument, arg.FplBlockType)
-            | "base4" -> Assert.AreEqual<FplBlockType>(FplBlockType.Argument, arg.FplBlockType)
-            | "base5" -> Assert.AreEqual<FplBlockType>(FplBlockType.Argument, arg.FplBlockType)
+            | "base1" -> Assert.IsInstanceOfType<FplArgument>(arg)
+            | "base2" -> Assert.IsInstanceOfType<FplArgument>(arg)
+            | "base3" -> Assert.IsInstanceOfType<FplArgument>(arg)
+            | "base4" -> Assert.IsInstanceOfType<FplArgument>(arg)
+            | "base5" -> Assert.IsInstanceOfType<FplArgument>(arg)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

@@ -1856,7 +1856,7 @@ let rec eval (st: SymbolTable) ast =
         value.FplId <- literalTrue
         // check if all arguments could be correctly inferred
         fv.Scope
-        |> Seq.filter (fun kvp -> kvp.Value.FplBlockType = FplBlockType.Argument)
+        |> Seq.filter (fun kvp -> isArgument kvp.Value)
         |> Seq.iter (fun kvp -> 
             let argInference = kvp.Value.ArgList[1]
             let argInferenceResult = argInference.Represent()
