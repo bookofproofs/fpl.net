@@ -294,7 +294,6 @@ type FplBlockType =
     | Translation
     | Language
     | Reference
-    | Mapping
     | Stmt
     | Assertion
     | Extension
@@ -361,6 +360,8 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
     abstract member ShortName: string
     abstract member Name: string
     abstract member Represent: unit -> string
+
+    /// Generates a type string identifier or type-specific naming convention of this FplValue.
     abstract member Type: SignatureType -> string
     
     /// Adds this FplValue to it's parent's ArgList, if such a Parent exists.
@@ -523,20 +524,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         with get () = _parent
         and set (value) = _parent <- value
 
-    /// Tries to find a mapping of this FplValue
-    member this.Mapping =
-        match this.FplBlockType with
-        | FplBlockType.Reference ->
-            if this.Scope.ContainsKey(this.FplId) then
-                this.Scope[this.FplId].Mapping
-            else
-                None
-        | _ ->
-            if this.ArgList.Count > 0 && this.ArgList[0].FplBlockType = FplBlockType.Mapping then
-                Some(this.ArgList[0])
-            else
-                None
-
     /// Indicates if this FplValue is an initialized variable
     member this.IsInitializedVariable
         with get () = _isInitializedVariable
@@ -562,20 +549,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
             result
 
         collectVariables this
-
-    /// Generates a string of parameters based on SignatureType
-    member this.GetParamTuple(signatureType:SignatureType) =
-        let propagate =
-            match signatureType with
-            | SignatureType.Mixed -> SignatureType.Type
-            | _ -> signatureType
-        this.Scope
-        |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) ->
-            kvp.Value.IsSignatureVariable
-            || this.IsVariable() && not (kvp.Value.IsClass())
-            || this.FplBlockType = FplBlockType.Mapping)
-        |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
-        |> String.concat ", "
 
     /// Copies other FplValue to this one without changing its reference pointer.
     member this.Copy(other: FplValue) =
@@ -608,7 +581,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
         | Some parent -> parent.ArgList.Add(this)
         | _ -> ()
 
-    /// Generates a type string identifier or type-specific naming convention of this FplValue.
     override this.Type isSignature  = 
         match (this.FplBlockType, this.Scope.ContainsKey(this.FplId)) with
         | (FplBlockType.Reference, true) ->
@@ -625,7 +597,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                     | SignatureType.Name -> this.Scope[this.FplId].Type(SignatureType.Name)
                     | SignatureType.Mixed -> this.FplId
                     | SignatureType.Type -> this.TypeId
-                | (FplBlockType.Mapping, _) -> this.TypeId
                 | _ ->
                     match isSignature with
                     | SignatureType.Name 
@@ -670,22 +641,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                         |> String.concat ""
 
                     sprintf "%s%s" head args
-                | FplBlockType.Mapping ->
-                    let pars = this.GetParamTuple(isSignature)
-
-                    match (pars, this.Mapping) with
-                    | ("", None) -> head
-                    | ("", Some map) -> sprintf "%s() -> %s" head (map.Type(propagate))
-                    | (_, None) ->
-                        if this.HasBrackets then
-                            sprintf "%s[%s]" head pars
-                        else
-                            sprintf "%s(%s)" head pars
-                    | (_, Some map) ->
-                        if this.HasBrackets then
-                            sprintf "%s[%s] -> %s" head pars (map.Type(propagate))
-                        else
-                            sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
                 | FplBlockType.Reference ->
                     let qualification =
                         if this.Scope.ContainsKey(".") then
@@ -883,103 +838,6 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true    
 
-type FplVariable(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Todo, positions, Some parent)
-    let mutable _variadicType = String.Empty // "" = variable, "many" = many, "many1" = many1 
-    override this.Name = 
-        match _variadicType with
-        | "many" -> "a zero-or-more variable"
-        | "many1"-> "a one-or-more variable"
-        | _ -> "a variable"
-    override this.ShortName = 
-        match _variadicType with
-        | "many" -> "*var"
-        | "many1"-> "+var"
-        | _ -> "var"
-
-    member this.SetToMany() = 
-        if _variadicType = String.Empty then
-            _variadicType <- "many"
-        else 
-            failwith($"The variadic type was already set to {_variadicType}.")
-
-    member this.SetToMany1() = 
-        if _variadicType = String.Empty then
-            _variadicType <- "many1"
-        else 
-            failwith($"The variadic type was already set to {_variadicType}.")
-
-    member this.IsVariadic = _variadicType <> String.Empty
-
-    member this.IsMany = _variadicType = "many"
-    member this.IsMany1 = _variadicType = "many1"
-
-
-    override this.Clone () =
-        let ret = new FplVariable((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = None
-
-    override this.IsVariable () = true
-
-    override this.SetValue fv =
-        base.SetValue(fv)
-        this.IsInitializedVariable <- true
-
-    override this.Type signatureType =
-        let pars = getParamTuple this signatureType
-        let head = getFplHead this signatureType
-        let propagate = propagateSignatureType signatureType
-
-        match (pars, this.Mapping) with
-        | ("", None) -> head
-        | ("", Some map) -> sprintf "%s() -> %s" head (map.Type(propagate))
-        | (_, None) ->
-            if this.HasBrackets then
-                sprintf "%s[%s]" head pars
-            else
-                sprintf "%s(%s)" head pars
-        | (_, Some map) ->
-            if this.HasBrackets then
-                sprintf "%s[%s] -> %s" head pars (map.Type(propagate))
-            else
-                sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
-
-
-    override this.Represent () = 
-        if this.ValueList.Count = 0 then
-            if this.IsInitializedVariable then 
-                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
-                literalUndef
-            else
-                match this.TypeId with
-                | FplGrammarCommons.literalUndef -> literalUndef
-                | _ -> 
-                    if this.IsVariadic then
-                        $"dec {this.Type(SignatureType.Type)}[]" 
-                    else
-                        $"dec {this.Type(SignatureType.Type)}" 
-        else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
-            if this.IsInitializedVariable then 
-                subRepr
-            else
-                match this.TypeId with
-                | FplGrammarCommons.literalUndef -> literalUndef
-                | _ -> 
-                    if this.IsVariadic then
-                        $"dec {this.Type(SignatureType.Type)}[]" 
-                    else
-                        $"dec {this.Type(SignatureType.Type)}" 
-
-
-
-
 type FplInstance(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Instance, positions, parent)
 
@@ -1063,86 +921,6 @@ let rec getClassBlock (fv: FplValue) =
         match fv.Parent with
         | Some parent -> getClassBlock parent
         | _ -> None
-
-
-[<AbstractClass>]
-type FplGenericFunctionalTerm(blockType: FplBlockType, positions: Positions, parent: FplValue) =
-    inherit FplValue(blockType, positions, Some parent)
-
-    override this.Type signatureType = 
-        let head = getFplHead this signatureType
-        let propagate = propagateSignatureType signatureType
-
-        match this.Mapping with
-        | Some map ->
-            let paramT = getParamTuple this signatureType
-            sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
-        | _ -> ""
-
-    override this.Represent () = 
-        if this.ValueList.Count = 0 then 
-            // since the FunctionTerm has no value, it has no return statement
-            // And the FPL syntax ensures that this can only be the case
-            // if the Functional Term is intrinsic.
-            // In this case, the "representation" of the function is
-            // its declared mapping type
-            let mapping = this.ArgList |> Seq.head 
-            mapping.Represent()
-        else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
-            if subRepr = String.Empty then 
-                literalUndef
-            else
-                subRepr
-
-type FplFunctionalTerm(positions: Positions, parent: FplValue) =
-    inherit FplGenericFunctionalTerm(FplBlockType.Todo, positions, parent)
-
-    override this.Name = "a functional term definition"
-    override this.ShortName = "def func"
-
-    override this.Clone () =
-        let ret = new FplFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = None
-
-    override this.IsFplBlock () = true
-    override this.IsBlock () = true
-
-type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
-    inherit FplGenericFunctionalTerm(FplBlockType.Todo, positions, parent)
-
-    override this.Name = "a functional term property"
-    override this.ShortName = "mfunc"
-
-    override this.Clone () =
-        let ret = new FplMandatoryFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = None
-
-    override this.IsBlock () = true
-
-type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
-    inherit FplGenericFunctionalTerm(FplBlockType.Todo, positions, parent)
-
-    override this.Name = "an optional functional term property"
-    override this.ShortName = "ofunc"
-
-    override this.Clone () =
-        let ret = new FplOptionalFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = None
-
-    override this.IsBlock () = true
 
 type FplPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(FplBlockType.Todo, positions, parent)
@@ -1460,7 +1238,7 @@ type FplQuantor(positions: Positions, parent: FplValue) =
         | _ -> sprintf "%s(%s)" head paramT
 
 type FplMapping(positions: Positions, parent: FplValue) =
-    inherit FplValue(FplBlockType.Mapping, positions, Some parent)
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
 
     override this.Name = "a mapping"
     override this.ShortName = "map"
@@ -1474,7 +1252,225 @@ type FplMapping(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+    override this.Type signatureType = 
+        let pars = getParamTuple this signatureType
+        let propagate = propagateSignatureType signatureType
+
+        let myMapping = 
+            if this.ArgList.Count > 0 then 
+                let arg = this.ArgList[0]
+                match arg with 
+                | :? FplMapping ->
+                    Some(arg)
+                | _ -> None
+            else
+                None
+
+        match (pars, myMapping) with
+        | ("", None) -> this.TypeId
+        | ("", Some map) -> sprintf "%s() -> %s" this.TypeId (map.Type(propagate))
+        | (_, None) ->
+            if this.HasBrackets then
+                sprintf "%s[%s]" this.TypeId pars
+            else
+                sprintf "%s(%s)" this.TypeId pars
+        | (_, Some map) ->
+            if this.HasBrackets then
+                sprintf "%s[%s] -> %s" this.TypeId pars (map.Type(propagate))
+            else
+                sprintf "%s(%s) -> %s" this.TypeId pars (map.Type(propagate))
+
     override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
+
+/// Tries to find a mapping of an FplValue
+let rec getMapping (fv:FplValue) =
+    match fv.FplBlockType with
+    | FplBlockType.Reference ->
+        if fv.Scope.ContainsKey(fv.FplId) then
+            getMapping fv.Scope[fv.FplId]
+        else
+            None
+    | _ ->
+        if fv.ArgList.Count > 0 then 
+            let arg = fv.ArgList[0]
+            match arg with 
+            | :? FplMapping ->
+                Some(arg)
+            | _ -> None
+        else
+            None
+
+type FplVariable(positions: Positions, parent: FplValue) =
+    inherit FplValue(FplBlockType.Todo, positions, Some parent)
+    let mutable _variadicType = String.Empty // "" = variable, "many" = many, "many1" = many1 
+    override this.Name = 
+        match _variadicType with
+        | "many" -> "a zero-or-more variable"
+        | "many1"-> "a one-or-more variable"
+        | _ -> "a variable"
+    override this.ShortName = 
+        match _variadicType with
+        | "many" -> "*var"
+        | "many1"-> "+var"
+        | _ -> "var"
+
+    member this.SetToMany() = 
+        if _variadicType = String.Empty then
+            _variadicType <- "many"
+        else 
+            failwith($"The variadic type was already set to {_variadicType}.")
+
+    member this.SetToMany1() = 
+        if _variadicType = String.Empty then
+            _variadicType <- "many1"
+        else 
+            failwith($"The variadic type was already set to {_variadicType}.")
+
+    member this.IsVariadic = _variadicType <> String.Empty
+
+    member this.IsMany = _variadicType = "many"
+    member this.IsMany1 = _variadicType = "many1"
+
+
+    override this.Clone () =
+        let ret = new FplVariable((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Instantiate () = None
+
+    override this.IsVariable () = true
+
+    override this.SetValue fv =
+        base.SetValue(fv)
+        this.IsInitializedVariable <- true
+
+    override this.Type signatureType =
+        let pars = getParamTuple this signatureType
+        let head = getFplHead this signatureType
+        let propagate = propagateSignatureType signatureType
+
+        match (pars, getMapping this) with
+        | ("", None) -> head
+        | ("", Some map) -> sprintf "%s() -> %s" head (map.Type(propagate))
+        | (_, None) ->
+            if this.HasBrackets then
+                sprintf "%s[%s]" head pars
+            else
+                sprintf "%s(%s)" head pars
+        | (_, Some map) ->
+            if this.HasBrackets then
+                sprintf "%s[%s] -> %s" head pars (map.Type(propagate))
+            else
+                sprintf "%s(%s) -> %s" head pars (map.Type(propagate))
+
+    override this.Represent () = 
+        if this.ValueList.Count = 0 then
+            if this.IsInitializedVariable then 
+                // this case should never happen, because isInitializesVariable is a contradiction to ValueList.Count 0
+                literalUndef
+            else
+                match this.TypeId with
+                | FplGrammarCommons.literalUndef -> literalUndef
+                | _ -> 
+                    if this.IsVariadic then
+                        $"dec {this.Type(SignatureType.Type)}[]" 
+                    else
+                        $"dec {this.Type(SignatureType.Type)}" 
+        else
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if this.IsInitializedVariable then 
+                subRepr
+            else
+                match this.TypeId with
+                | FplGrammarCommons.literalUndef -> literalUndef
+                | _ -> 
+                    if this.IsVariadic then
+                        $"dec {this.Type(SignatureType.Type)}[]" 
+                    else
+                        $"dec {this.Type(SignatureType.Type)}" 
+
+[<AbstractClass>]
+type FplGenericFunctionalTerm(blockType: FplBlockType, positions: Positions, parent: FplValue) =
+    inherit FplValue(blockType, positions, Some parent)
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let propagate = propagateSignatureType signatureType
+
+        match getMapping this with
+        | Some map ->
+            let paramT = getParamTuple this signatureType
+            sprintf "%s(%s) -> %s" head paramT (map.Type(propagate))
+        | _ -> ""
+
+    override this.Represent () = 
+        if this.ValueList.Count = 0 then 
+            // since the FunctionTerm has no value, it has no return statement
+            // And the FPL syntax ensures that this can only be the case
+            // if the Functional Term is intrinsic.
+            // In this case, the "representation" of the function is
+            // its declared mapping type
+            let mapping = this.ArgList |> Seq.head 
+            mapping.Represent()
+        else
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
+                |> String.concat ", "
+            if subRepr = String.Empty then 
+                literalUndef
+            else
+                subRepr
+
+type FplFunctionalTerm(positions: Positions, parent: FplValue) =
+    inherit FplGenericFunctionalTerm(FplBlockType.Todo, positions, parent)
+
+    override this.Name = "a functional term definition"
+    override this.ShortName = "def func"
+
+    override this.Clone () =
+        let ret = new FplFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Instantiate () = None
+
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
+
+type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
+    inherit FplGenericFunctionalTerm(FplBlockType.Todo, positions, parent)
+
+    override this.Name = "a functional term property"
+    override this.ShortName = "mfunc"
+
+    override this.Clone () =
+        let ret = new FplMandatoryFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Instantiate () = None
+
+    override this.IsBlock () = true
+
+type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
+    inherit FplGenericFunctionalTerm(FplBlockType.Todo, positions, parent)
+
+    override this.Name = "an optional functional term property"
+    override this.ShortName = "ofunc"
+
+    override this.Clone () =
+        let ret = new FplOptionalFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Instantiate () = None
+
+    override this.IsBlock () = true
 
 type FplAssertion(positions: Positions, parent: FplValue) =
     inherit FplValue(FplBlockType.Assertion, positions, Some parent)
@@ -2440,7 +2436,7 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
         elif aType = "???" && pType <> "???" then
             Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}`")
         elif aType.StartsWith(literalFunc) then
-            let someMap = a.Mapping
+            let someMap = getMapping a
 
             match someMap with
             | Some map -> mpwa [ map ] [ p ]
@@ -2504,7 +2500,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     | None -> None
 
 let matchWithMapping (fva: FplValue) (fvp: FplValue) =
-    let targetMapping = fvp.Mapping
+    let targetMapping = getMapping fvp
 
     match targetMapping with
     | Some tm -> mpwa [ fva ] [ tm ]

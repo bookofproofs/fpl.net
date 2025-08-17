@@ -782,16 +782,16 @@ type TestFplValueScopeBlockType() =
             let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
             let mapping = base1.ArgList[0]
             match var with
-            | "base1" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
-            | "base2" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
-            | "base3" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
-            | "base4" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
-            | "base5" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
-            | "base6" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
-            | "base7" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
-            | "base8" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
-            | "base9" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
-            | "base10" -> Assert.AreEqual<FplBlockType>(FplBlockType.Mapping, mapping.FplBlockType)
+            | "base1" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+            | "base2" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+            | "base3" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+            | "base4" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+            | "base5" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+            | "base6" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+            | "base7" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+            | "base8" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+            | "base9" -> Assert.IsInstanceOfType<FplMapping>(mapping)
+            | "base10" -> Assert.IsInstanceOfType<FplMapping>(mapping)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
