@@ -832,7 +832,7 @@ let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) =
                 }
             ad.AddDiagnostic diagnostic
         | _ -> () // inheritance chain found (no SIG05 diagnostics)
-    | Some value when value.FplBlockType = FplBlockType.Constructor ->
+    | Some value when isConstructor value ->
         // find a class inheritance chain for the constructor's class (which is stored in its parent value)
         let chainOpt = findClassInheritanceChain value.Parent.Value assignee.TypeId
         match chainOpt with

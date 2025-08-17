@@ -286,7 +286,6 @@ type ParsedAstList() =
 
 type FplBlockType =
     | Todo
-    | Constructor
     | Proof
     | Argument
     | Justification
@@ -564,14 +563,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
 
         collectVariables this
 
-    /// If this is a class definition, the function will return a list (possibly empty) list of all of its constructors.
-    member this.GetConstructors() =
-        this.Scope
-        |> Seq.map (fun kvp -> kvp.Value)
-        |> Seq.filter (fun fv -> fv.FplBlockType = FplBlockType.Constructor)
-        |> Seq.toList
-
-            /// Generates a string of parameters based on SignatureType
+    /// Generates a string of parameters based on SignatureType
     member this.GetParamTuple(signatureType:SignatureType) =
         let propagate =
             match signatureType with
@@ -584,6 +576,7 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
             || this.FplBlockType = FplBlockType.Mapping)
         |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(propagate))
         |> String.concat ", "
+
     /// Copies other FplValue to this one without changing its reference pointer.
     member this.Copy(other: FplValue) =
         this.FplId <- other.FplId
@@ -649,9 +642,6 @@ type FplValue(blockType: FplBlockType, positions: Positions, parent: FplValue op
                 | FplBlockType.Proof
                 | FplBlockType.Argument
                 | FplBlockType.Language -> head
-                | FplBlockType.Constructor ->
-                    let paramT = this.GetParamTuple(isSignature)
-                    sprintf "%s(%s)" head paramT
                 | FplBlockType.Localization ->
                     let paramT =
                         this.Scope
@@ -1003,6 +993,35 @@ type FplInstance(positions: Positions, parent: FplValue) =
 
     override this.Instantiate () = None
 
+type FplConstructor(positions: Positions, parent: FplValue) =
+    inherit FplGenericObject(FplBlockType.Todo, positions, parent)
+
+    override this.Name = "a constructor"
+    override this.ShortName = literalCtor
+
+    override this.Clone () =
+        let ret = new FplConstructor((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Instantiate () = 
+        Some (new FplInstance((this.StartPos, this.EndPos), this))
+
+    override this.IsBlock () = true
+
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        let paramT = getParamTuple this signatureType
+        sprintf "%s(%s)" head paramT
+
+    override this.Represent () = 
+        base.Represent()
+
+let isConstructor (fv:FplValue) =
+    match fv with
+    | :? FplConstructor -> true
+    | _ -> false
+
 type FplClass(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(FplBlockType.Todo, positions, parent)
 
@@ -1021,6 +1040,14 @@ type FplClass(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
     override this.IsClass () = true
     
+    /// If this is a class definition, the function will return a list (possibly empty) list of all of its constructors.
+    member this.GetConstructors() =
+        this.Scope
+        |> Seq.map (fun kvp -> kvp.Value)
+        |> Seq.filter (fun fv -> isConstructor fv)
+        |> Seq.toList
+
+    
     override this.Type signatureType =
         match signatureType with
         | SignatureType.Name 
@@ -1038,26 +1065,6 @@ let rec getClassBlock (fv: FplValue) =
         | Some parent -> getClassBlock parent
         | _ -> None
 
-type FplConstructor(positions: Positions, parent: FplValue) =
-    inherit FplGenericObject(FplBlockType.Constructor, positions, parent)
-
-    override this.Name = "a constructor"
-    override this.ShortName = literalCtor
-
-    override this.Clone () =
-        let ret = new FplConstructor((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = 
-        Some (new FplInstance((this.StartPos, this.EndPos), this))
-
-    override this.IsBlock () = true
-
-let isConstructor (fv:FplValue) =
-    match fv with
-    | :? FplConstructor -> true
-    | _ -> false
 
 [<AbstractClass>]
 type FplGenericFunctionalTerm(blockType: FplBlockType, positions: Positions, parent: FplValue) =
@@ -1654,7 +1661,7 @@ let getArgument (fv:FplValue) =
         // Exceptions: 
         // 1) if refValue is a class, its "arg list" means something else - namely parent classes. In this case we only want to return the main class
         // 2) if refValue is a constructor, its "arg list" means something else - namely the calls to some base classes' constructors classes. In this case we only want to return the main constructor
-        if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && refValue.FplBlockType <> FplBlockType.Constructor then
+        if refValue.ArgList.Count > 0 && not (refValue.IsClass()) && not (isConstructor refValue) then
             Some refValue.ArgList[0] // return existing values except of classes, because those denoted their parent classes
         else 
             Some refValue 
@@ -2235,7 +2242,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
             if withClassConstructors && block.IsClass() then
                 block.Scope
                 |> Seq.map (fun kvp -> kvp.Value)
-                |> Seq.filter (fun (fv: FplValue) -> fv.FplBlockType = FplBlockType.Constructor)
+                |> Seq.filter (fun (fv: FplValue) -> isConstructor fv)
                 |> Seq.iter (fun (fv: FplValue) -> pm.Add(fv))))
     |> ignore
 
@@ -2443,13 +2450,14 @@ let rec mpwa (args: FplValue list) (pars: FplValue list) =
             Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
     | ([], p :: prs) ->
         let pType = p.Type(SignatureType.Type)
-        if p.IsClass() then
-            let constructors = p.GetConstructors()
+        match p with 
+        | :? FplClass as cl ->
+            let constructors = cl.GetConstructors()
             if constructors.Length = 0 then
                 None
             else
                 Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
-        else
+        | _ -> 
             Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
     | (a :: [], []) ->
         if a.FplId = "???" then
