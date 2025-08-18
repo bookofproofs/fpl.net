@@ -60,7 +60,6 @@ type FplRunner() =
                     replaceValues p ar
                     // continue replacing variables with the remaining lists
                     replace ps ars
-                | _ -> ()
             | (p::ps, []) -> ()
             | ([], ar::ars) -> ()
             | ([], []) -> ()

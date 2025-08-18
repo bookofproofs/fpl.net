@@ -350,11 +350,8 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// Adds this FplValue to it's parent's ArgList, if such a Parent exists.
     abstract member TryAddToParentsArgList: unit -> unit
 
-    /// Indicates if this FplValue is an root of the symbol table.
-    abstract member IsRoot: unit -> bool
-
-    /// Indicates if this FplValue is a constructor or a theory
-    abstract member IsTheory: unit -> bool
+    /// Abstract member for running this FplValue
+    abstract member Run: unit -> unit
 
     /// Indicates if this FplValue is an FPL building block.
     abstract member IsFplBlock: unit -> bool
@@ -382,8 +379,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
         this.ValueList.Clear()
         this.ValueList.Add(fv)
 
-    override this.IsRoot () = false
-    override this.IsTheory () = false
     override this.IsFplBlock () = false
     override this.IsBlock () = false
     override this.IsClass (): bool = false
@@ -591,11 +586,17 @@ type FplRoot() =
         let ret = new FplRoot()
         this.AssignParts(ret)
         ret
-    override this.IsRoot () = true
 
     override this.Type _ = String.Empty
     override this.Represent () = literalUndef
     override this.TryAddToParentsArgList () = () 
+    override this.Run () = ()
+
+/// Indicates if an FplValue is the root of the SymbolTable.
+let isRoot (fv:FplValue) = 
+    match fv with
+    | :? FplRoot -> true
+    | _ -> false
 
 type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this =
     inherit FplValue(positions, Some parent)
@@ -610,8 +611,6 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
         this.AssignParts(ret)
         ret
 
-    override this.IsTheory () = true
-
     override this.Type signatureType =
         match signatureType with
         | SignatureType.Name 
@@ -619,7 +618,14 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
         | SignatureType.Type -> this.TypeId
 
     override this.Represent () = literalUndef
+    override this.Run () = ()
 
+
+/// Indicates if an FplValue is the root of the SymbolTable.
+let isTheory (fv:FplValue) = 
+    match fv with
+    | :? FplTheory -> true
+    | _ -> false
 
 [<AbstractClass>]
 type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
@@ -646,6 +652,10 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
         let paramT = getParamTuple this signatureType
         sprintf "%s(%s)" head paramT
             
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
 [<AbstractClass>]
 type FplGenericObject(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -694,6 +704,9 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true    
 
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
 type FplInstance(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
 
@@ -721,6 +734,7 @@ type FplInstance(positions: Positions, parent: FplValue) =
         else
             subRepr
 
+    override this.Run () = ()
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
@@ -744,6 +758,9 @@ type FplConstructor(positions: Positions, parent: FplValue) =
         sprintf "%s(%s)" head paramT
 
     override this.Represent () = this.Type(SignatureType.Mixed)
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 let isConstructor (fv:FplValue) =
     match fv with
@@ -774,7 +791,6 @@ type FplClass(positions: Positions, parent: FplValue) =
         |> Seq.map (fun kvp -> kvp.Value)
         |> Seq.filter (fun fv -> isConstructor fv)
         |> Seq.toList
-
     
     override this.Type signatureType =
         match signatureType with
@@ -783,6 +799,10 @@ type FplClass(positions: Positions, parent: FplValue) =
         | SignatureType.Type -> this.TypeId
 
     override this.Represent () = $"dec {literalCl} {this.FplId}"
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
 
 /// Returns Some or none FplValue being the enclosing class block of a node inside a class.
 let rec getClassBlock (fv: FplValue) =
@@ -807,6 +827,7 @@ type FplPredicate(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
+
 type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
 
@@ -819,7 +840,6 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
         ret
 
     override this.IsBlock () = true
-
 
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -847,6 +867,8 @@ type FplAxiom(positions: Positions, parent: FplValue) =
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
+
+
 
 type FplTheorem(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -937,6 +959,9 @@ type FplProof(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         head
 
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
 type FplArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
@@ -951,6 +976,9 @@ type FplArgument(positions: Positions, parent: FplValue) =
     override this.Type signatureType =
         let head = getFplHead this signatureType
         head
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 let isArgument (fv:FplValue) = 
     match fv with
@@ -974,6 +1002,8 @@ type FplJustification(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         head
 
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 type FplArgInference(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
@@ -989,6 +1019,9 @@ type FplArgInference(positions: Positions, parent: FplValue) =
     override this.Type signatureType =
         let head = getFplHead this signatureType
         head
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 type FplLocalization(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1017,6 +1050,8 @@ type FplLocalization(positions: Positions, parent: FplValue) =
 
     override this.Represent() = this.Type(SignatureType.Name)
         
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 type FplTranslation(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1042,6 +1077,8 @@ type FplTranslation(positions: Positions, parent: FplValue) =
 
     override this.Represent () = this.FplId 
 
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 type FplLanguage(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1061,6 +1098,9 @@ type FplLanguage(positions: Positions, parent: FplValue) =
         head
 
     override this.Represent () = this.FplId
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 let isLanguage (fv:FplValue) =
     match fv with
@@ -1083,6 +1123,9 @@ type FplAssertion(positions: Positions, parent: FplValue) =
     override this.Type signatureType = this.FplId
         
     override this.Represent () = ""
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1204,6 +1247,10 @@ type FplReference(positions: Positions, parent: FplValue) =
             else
                 subRepr
 
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
+
 let isReference (fv:FplValue) =
     match fv with
     | :? FplReference -> true
@@ -1232,6 +1279,9 @@ type FplQuantor(positions: Positions, parent: FplValue) =
         match paramT with
         | "" -> head
         | _ -> sprintf "%s(%s)" head paramT
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1277,6 +1327,9 @@ type FplMapping(positions: Positions, parent: FplValue) =
                 sprintf "%s(%s) -> %s" this.TypeId pars (map.Type(propagate))
 
     override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
@@ -1389,6 +1442,10 @@ type FplVariable(positions: Positions, parent: FplValue) =
                     else
                         $"dec {this.Type(SignatureType.Type)}" 
 
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
+
 [<AbstractClass>]
 type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1421,6 +1478,9 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) =
                 literalUndef
             else
                 subRepr
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 type FplFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplGenericFunctionalTerm(positions, parent)
@@ -1485,6 +1545,9 @@ type FplExtension(positions: Positions, parent: FplValue) =
 
     override this.Represent () = this.FplId
 
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
 let isExtension (fv:FplValue) =
     match fv with
     | :? FplExtension -> true
@@ -1515,6 +1578,10 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
                     
     override this.Represent (): string = this.FplId
 
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
+
 type FplIntrinsicObj(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
 
@@ -1536,6 +1603,9 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
             | SignatureType.Type -> this.TypeId
 
     override this.Represent (): string = this.FplId
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 let isIntrinsicObj (fv1:FplValue) = 
     match fv1 with
@@ -1561,6 +1631,9 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
                     
     override this.Represent (): string = this.FplId
 
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
 type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do 
@@ -1584,6 +1657,9 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
             | SignatureType.Type -> this.TypeId
                     
     override this.Represent (): string = this.FplId
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -1609,6 +1685,10 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
                     
     override this.Represent (): string = this.FplId
 
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
+
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do
@@ -1632,6 +1712,9 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
             | SignatureType.Type -> this.TypeId
                     
     override this.Represent (): string = this.FplId
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 type FplStmt(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1676,6 +1759,9 @@ type FplStmt(positions: Positions, parent: FplValue) =
     override this.Type signatureType = this.FplId
     override this.Represent () = ""
 
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
 /// Returns Some argument of the FplValue depending of the type of it.
 let getArgument (fv:FplValue) =
     match fv with
@@ -1710,16 +1796,16 @@ let qualifiedStartPos (fplValue:FplValue) =
     let rec getFullName (fv: FplValue) (first: bool) =
         let fvType = fv.Type(SignatureType.Mixed)
 
-        if fv.IsRoot() then ""
+        if isRoot fv then ""
         elif first then
             let starPosWithoutFileName =
                 $"(Ln: {fv.StartPos.Line}, Col: {fv.StartPos.Column})"
 
-            if fv.IsTheory() then
+            if isTheory fv then
                 getFullName fv.Parent.Value false + fvType + starPosWithoutFileName
             else
                 getFullName fv.Parent.Value false + starPosWithoutFileName
-        else if fv.IsTheory() then
+        else if isTheory fv then
             getFullName fv.Parent.Value false + fvType
         else
             getFullName fv.Parent.Value false
@@ -1747,13 +1833,13 @@ let qualifiedName (fplValue:FplValue)=
         | :? FplRoot -> ""
         | _ -> 
             if first then
-                if fv.Parent.Value.IsRoot() then
+                if isRoot fv.Parent.Value then
                     getFullName fv.Parent.Value false + fplValueType
                 else if fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
                     fplValueType
                 else
                     getFullName fv.Parent.Value false + "." + fplValueType
-            else if fv.Parent.Value.IsRoot() then
+            else if isRoot fv.Parent.Value then
                 getFullName fv.Parent.Value false + fplValueType
             else if fv.IsVariable() && not (fv.Parent.Value.IsVariable()) then
                 fplValueType
@@ -1794,7 +1880,7 @@ let inScopeOfParent (fplValue: FplValue) name =
         if parent.Scope.ContainsKey(name) then
             let foundConflict = parent.Scope[name]
             ScopeSearchResult.Found foundConflict
-        else if parent.IsTheory() then
+        else if isTheory parent then
             conflictInSiblingTheory parent
         else
             ScopeSearchResult.NotFound
@@ -1823,7 +1909,7 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
                 firstBlockParent fv1.Parent.Value
             else
                 foundList.Head
-        if fv.IsTheory() then 
+        if isTheory fv then 
             ScopeSearchResult.NotFound
         else
             match fv with 
@@ -2245,7 +2331,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
 /// the specific name within the building block, whose syntax tree the FplValue `fv` is part of.
 let findCandidatesByNameInBlock (fv: FplValue) (name: string) =
     let rec findDefinition (fv1: FplValue) =
-        if fv1.IsTheory() then
+        if isTheory fv1 then
             ScopeSearchResult.NotFound
         else
             match fv1 with
@@ -2309,7 +2395,7 @@ let findCandidatesByNameInDotted (fv: FplValue) (name: string) =
 let rec nextDefinition (fv: FplValue) counter =
     let blocks = Stack<FplValue>()
 
-    if fv.IsTheory() then
+    if isTheory fv then
         let name =
             if blocks.Count > 0 then
                 let fv1 = blocks.Peek()

@@ -888,7 +888,7 @@ let rec blocktIsProof (fplValue: FplValue) =
     else
         match fplValue.Parent with
         | Some parent ->
-            if parent.IsTheory() then
+            if isTheory parent then
                 false
             elif parent.IsFplBlock() then
                 parent.IsProof()
