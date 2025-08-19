@@ -337,7 +337,11 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// ValueList of the FplValue.
     member this.ValueList = _valueList
 
-    abstract member Instantiate: unit -> FplValue option // not all FplValues can be instantiated, e.g. a theorem cannot be instantiated
+    /// Not all FplValues can be instantiated, e.g. a theorem cannot be instantiated
+    abstract member Instantiate: unit -> FplValue option 
+    
+    /// Is used during the transformation of the AST into a symboltable by deciding, if this FplValue should become part of its Parent's Scope or part of its Parent's Arguments
+    abstract member PairWithParent: unit -> unit
     abstract member Clone: unit -> FplValue
     abstract member AssignParts: FplValue -> unit
     abstract member ShortName: string
@@ -591,6 +595,8 @@ type FplRoot() =
     override this.Represent () = literalUndef
     override this.TryAddToParentsArgList () = () 
     override this.Run () = ()
+    override this.PairWithParent () = ()
+
 
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isRoot (fv:FplValue) = 
@@ -619,7 +625,7 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
 
     override this.Represent () = literalUndef
     override this.Run () = ()
-
+    override this.PairWithParent () = this.TryAddToParentsArgList() 
 
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isTheory (fv:FplValue) = 
@@ -640,6 +646,9 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
         this.ValueList
         |> Seq.map (fun subfv -> subfv.Represent())
         |> String.concat ", "
+
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
 
 /// Implements the semantics of an FPL predicate prime predicate that is intrinsic.
 /// It serves as a value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", literalFalse, and "undetermined". 
@@ -665,6 +674,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
+
 [<AbstractClass>]
 type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
@@ -678,6 +688,8 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
 
     override this.Run (): unit = 
         raise (NotImplementedException())
+
+
 
 [<AbstractClass>]
 type FplGenericObject(positions: Positions, parent: FplValue) as this =
@@ -713,6 +725,10 @@ type FplGenericObject(positions: Positions, parent: FplValue) as this =
         //| _ -> 
         //    createRoot() // todo
         //    //failwith ($"Cannot create an instance of a non-class {this.Type(SignatureType.Mixed)}")    
+
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
 
 type FplRuleOfInference(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -758,6 +774,8 @@ type FplInstance(positions: Positions, parent: FplValue) =
             subRepr
 
     override this.Run () = ()
+
+
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
@@ -1076,6 +1094,10 @@ type FplLocalization(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
+
 type FplTranslation(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
@@ -1103,6 +1125,10 @@ type FplTranslation(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
+
 type FplLanguage(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
@@ -1124,6 +1150,10 @@ type FplLanguage(positions: Positions, parent: FplValue) =
 
     override this.Run (): unit = 
         raise (NotImplementedException())
+
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
 
 let isLanguage (fv:FplValue) =
     match fv with
@@ -1149,6 +1179,10 @@ type FplAssertion(positions: Positions, parent: FplValue) =
 
     override this.Run (): unit = 
         raise (NotImplementedException())
+
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1271,6 +1305,9 @@ type FplReference(positions: Positions, parent: FplValue) =
                 subRepr
 
     override this.Run (): unit = 
+        raise (NotImplementedException())
+
+    override this.PairWithParent (): unit = 
         raise (NotImplementedException())
 
 
@@ -1479,6 +1516,10 @@ type FplMapping(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
+
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
     match fv with
@@ -1593,6 +1634,9 @@ type FplVariable(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
 
 [<AbstractClass>]
 type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) =
@@ -1629,6 +1673,10 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.Run (): unit = 
         raise (NotImplementedException())
+
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
 
 type FplFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplGenericFunctionalTerm(positions, parent)
@@ -1696,6 +1744,10 @@ type FplExtension(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
+
 let isExtension (fv:FplValue) =
     match fv with
     | :? FplExtension -> true
@@ -1727,6 +1779,9 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     override this.Represent (): string = this.FplId
 
     override this.Run (): unit = 
+        raise (NotImplementedException())
+
+    override this.PairWithParent (): unit = 
         raise (NotImplementedException())
 
 
@@ -1787,6 +1842,10 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
+
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do
@@ -1813,6 +1872,11 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
 
     override this.Run (): unit = 
         raise (NotImplementedException())
+
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
+
 
 
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
@@ -1841,6 +1905,10 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
 
     override this.Run (): unit = 
         raise (NotImplementedException())
+
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
 
 type FplStmt(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1887,6 +1955,10 @@ type FplStmt(positions: Positions, parent: FplValue) =
 
     override this.Run (): unit = 
         raise (NotImplementedException())
+
+    override this.PairWithParent (): unit = 
+        raise (NotImplementedException())
+
 
 /// Returns Some argument of the FplValue depending of the type of it.
 let getArgument (fv:FplValue) =
