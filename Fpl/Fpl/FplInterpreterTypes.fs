@@ -1404,6 +1404,44 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
 
         this.SetValue(newValue)  
 
+
+/// Implements the semantics of an FPL not compound predicate.
+type FplNegation(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericPredicate(positions, parent)
+
+    do 
+        this.FplId <- literalNot
+
+    override this.Name = "a negation"
+    override this.ShortName = "predNot"
+
+    override this.Clone () =
+        let ret = new FplNegation((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let args = 
+            this.ArgList
+            |> Seq.map (fun arg -> arg.Type(signatureType))
+            |> String.concat ", "
+        sprintf "%s(%s)" head args
+
+    override this.Run () = 
+        let arg = this.ArgList[0]
+        let argRepr = arg.Represent()
+        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+
+        newValue.FplId <- 
+            match argRepr with 
+            // FPL truth-table
+            | FplGrammarCommons.literalFalse -> literalTrue
+            | FplGrammarCommons.literalTrue -> literalFalse
+            | _ -> literalUndetermined  
+
+        this.SetValue(newValue)  
+
 type FplQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
@@ -1951,6 +1989,7 @@ let qualifiedName (fplValue:FplValue)=
             | :? FplExclusiveOr 
             | :? FplConjunction
             | :? FplDisjunction 
+            | :? FplNegation 
             | :? FplReference -> fv.Type(SignatureType.Name)
             | :? FplLocalization
             | :? FplConstructor

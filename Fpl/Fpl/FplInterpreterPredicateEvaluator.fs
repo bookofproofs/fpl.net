@@ -15,23 +15,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-let evaluateNegation (fplValue:FplValue) = 
-    let arg = fplValue.ArgList[0]
-    match arg.Represent() with 
-    | FplGrammarCommons.literalFalse -> 
-        let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- literalTrue
-        fplValue.ValueList.Add(newValue)
-    | FplGrammarCommons.literalTrue -> 
-        let newValue =  new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- literalFalse
-        fplValue.ValueList.Add(newValue)
-    | FplGrammarCommons.literalUndetermined -> 
-        fplValue.ValueList.Add(arg)
-    | _ -> 
-        let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        fplValue.ValueList.Add(newValue)
-
 let evaluateImplication (fplValue:FplValue) = 
     let arg1 = fplValue.ArgList[0]
     let arg2 = fplValue.ArgList[1]

@@ -51,6 +51,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         | :? FplConjunction
         | :? FplExclusiveOr 
         | :? FplDisjunction 
+        | :? FplNegation 
         | :? FplReference
         | :? FplQuantor
         | :? FplIntrinsicInd
@@ -567,13 +568,12 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Not((pos1, pos2), predicateAst) ->
         st.EvalPush("Not")
-        let fv = es.PeekEvalStack()
-        fv.FplId <- literalNot
-        fv.TypeId <- literalPred
+        let fv = es.Pop()
+        let fvNew = new FplNegation((pos1, pos2), fv.Parent.Value)
+        es.PushEvalStack(fvNew)
         eval st predicateAst
-        fv.EndPos <- pos2
-        evaluateNegation fv
-        emitLG000orLG001Diagnostics fv "negation"
+        fvNew.Run()
+        emitLG000orLG001Diagnostics fvNew "negation"
         st.EvalPop()
     | Ast.InEntity((pos1, pos2), ast1) ->
         st.EvalPush("InEntity")

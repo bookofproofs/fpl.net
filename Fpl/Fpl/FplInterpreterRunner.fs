@@ -102,6 +102,7 @@ type FplRunner() =
         | :? FplConjunction
         | :? FplExclusiveOr 
         | :? FplDisjunction 
+        | :? FplNegation 
         | :? FplReference ->
             if caller.Scope.Count > 0 then 
                 let called = 
@@ -131,7 +132,7 @@ type FplRunner() =
                 match caller.FplId with 
                 | FplGrammarCommons.literalIif -> evaluateEquivalence caller
                 | FplGrammarCommons.literalImpl -> evaluateImplication caller
-                | FplGrammarCommons.literalNot -> evaluateNegation caller
+                | FplGrammarCommons.literalNot -> caller.Run()
                 | FplGrammarCommons.literalAnd -> caller.Run()
                 | FplGrammarCommons.literalXor -> caller.Run()
                 | FplGrammarCommons.literalOr ->  caller.Run()
