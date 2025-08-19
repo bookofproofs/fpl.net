@@ -83,19 +83,18 @@ type EvalStack() =
         if _valueStack.Count > 0 then
             let next = _valueStack.Peek()
 
-
             match fv with 
             | :? FplIntrinsicObj
+            | :? FplQuantor
             | :? FplJustification 
             | :? FplArgInference 
             | :? FplMapping 
             | :? FplTranslation 
             | :? FplStmt
             | :? FplAssertion
-            | :? FplQuantor ->
-                fv.PairWithParent()
             | :? FplIntrinsicPred
             | :? FplIntrinsicFunc
+            | :? FplIntrinsicObj
             | :? FplIntrinsicUndef
             | :? FplIntrinsicTpl
             | :? FplInstance 
