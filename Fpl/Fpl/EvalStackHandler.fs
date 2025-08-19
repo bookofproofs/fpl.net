@@ -123,6 +123,7 @@ type EvalStack() =
             | :? FplFunctionalTerm ->
                 EvalStack.tryAddToScope fv
             | :? FplConjunction 
+            | :? FplDisjunction 
             | :? FplReference ->
                 match next with 
                 | :? FplTheorem  
@@ -183,6 +184,7 @@ type EvalStack() =
                 | :? FplLocalization -> 
                     EvalStack.tryAddToScope fv
                 | :? FplConjunction
+                | :? FplDisjunction 
                 | :? FplReference ->
                     fv.TryAddToParentsArgList()
                 | _ -> ()

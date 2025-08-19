@@ -1279,8 +1279,6 @@ let isReference (fv:FplValue) =
     | :? FplReference -> true
     | _ -> false
 
-
-
 /// Implements the semantics of an FPL conjunction compound predicate.
 type FplConjunction(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -1310,7 +1308,8 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
         let arg1Repr = arg1.Represent()
         let arg2Repr = arg2.Represent()
         let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        newValue.FplId <- 
+        newValue.FplId <-
+            // FPL truth-table
             match (arg1Repr, arg2Repr) with
             | (FplGrammarCommons.literalFalse, _) 
             | (_, FplGrammarCommons.literalFalse)  -> 
@@ -1318,6 +1317,47 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
             | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) -> 
                 literalTrue
             | _ -> literalUndetermined
+        this.SetValue(newValue)  
+
+/// Implements the semantics of an FPL disjunction compound predicate.
+type FplDisjunction(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericPredicate(positions, parent)
+
+    do 
+        this.FplId <- literalOr
+
+    override this.Name = "a disjunction"
+    override this.ShortName = "predDisj"
+
+    override this.Clone () =
+        let ret = new FplConjunction((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let args = 
+            this.ArgList
+            |> Seq.map (fun arg -> arg.Type(signatureType))
+            |> String.concat ", "
+        sprintf "%s(%s)" head args
+
+    override this.Run () = 
+        let arg1 = this.ArgList[0]
+        let arg2 = this.ArgList[1]
+        let arg1Repr = arg1.Represent()
+        let arg2Repr = arg2.Represent()
+        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        newValue.FplId <-
+            // FPL truth-table
+            match (arg1Repr, arg2Repr) with
+            | (FplGrammarCommons.literalTrue, _) 
+            | (_, FplGrammarCommons.literalTrue) -> 
+                literalTrue
+            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) -> 
+                literalFalse
+            | _ -> 
+                literalUndetermined
         this.SetValue(newValue)  
 
 type FplQuantor(positions: Positions, parent: FplValue) =
@@ -1865,6 +1905,7 @@ let qualifiedName (fplValue:FplValue)=
             match fv with
             | :? FplLocalization
             | :? FplConjunction
+            | :? FplDisjunction 
             | :? FplReference -> fv.Type(SignatureType.Name)
             | :? FplLocalization
             | :? FplConstructor

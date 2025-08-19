@@ -616,7 +616,7 @@ type TestFplValueScopeBlockType() =
             | "base21a" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base21b" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base22" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base23" -> Assert.IsInstanceOfType<FplReference>(base1)
+            | "base23" -> Assert.IsInstanceOfType<FplDisjunction>(base1)
             | "base24" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base25" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base26" -> Assert.IsInstanceOfType<FplReference>(base1)
