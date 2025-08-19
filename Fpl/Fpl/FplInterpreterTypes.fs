@@ -1287,7 +1287,7 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
         this.FplId <- literalAnd
 
     override this.Name = "a conjunction"
-    override this.ShortName = "predConj"
+    override this.ShortName = "predAnd"
 
     override this.Clone () =
         let ret = new FplConjunction((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1327,7 +1327,7 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
         this.FplId <- literalOr
 
     override this.Name = "a disjunction"
-    override this.ShortName = "predDisj"
+    override this.ShortName = "predOr"
 
     override this.Clone () =
         let ret = new FplConjunction((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1358,6 +1358,50 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
                 literalFalse
             | _ -> 
                 literalUndetermined
+        this.SetValue(newValue)  
+
+/// Implements the semantics of an FPL xor compound predicate.
+type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericPredicate(positions, parent)
+
+    do 
+        this.FplId <- literalXor
+
+    override this.Name = "an exclusive or"
+    override this.ShortName = "predXor"
+
+    override this.Clone () =
+        let ret = new FplConjunction((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let args = 
+            this.ArgList
+            |> Seq.map (fun arg -> arg.Type(signatureType))
+            |> String.concat ", "
+        sprintf "%s(%s)" head args
+
+    override this.Run () = 
+        let arg1 = this.ArgList[0]
+        let arg2 = this.ArgList[1]
+        let arg1Repr = arg1.Represent()
+        let arg2Repr = arg2.Represent()
+        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+
+        newValue.FplId <- 
+            // FPL truth-table
+            match (arg1Repr, arg2Repr) with
+            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalFalse) 
+            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalTrue) -> 
+                literalTrue
+            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) 
+            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) -> 
+                literalFalse
+            | _ -> 
+                literalUndetermined
+
         this.SetValue(newValue)  
 
 type FplQuantor(positions: Positions, parent: FplValue) =
@@ -1904,6 +1948,7 @@ let qualifiedName (fplValue:FplValue)=
         let fplValueType =
             match fv with
             | :? FplLocalization
+            | :? FplExclusiveOr 
             | :? FplConjunction
             | :? FplDisjunction 
             | :? FplReference -> fv.Type(SignatureType.Name)

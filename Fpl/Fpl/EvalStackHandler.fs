@@ -124,6 +124,7 @@ type EvalStack() =
                 EvalStack.tryAddToScope fv
             | :? FplConjunction 
             | :? FplDisjunction 
+            | :? FplExclusiveOr 
             | :? FplReference ->
                 match next with 
                 | :? FplTheorem  
@@ -185,6 +186,7 @@ type EvalStack() =
                     EvalStack.tryAddToScope fv
                 | :? FplConjunction
                 | :? FplDisjunction 
+                | :? FplExclusiveOr 
                 | :? FplReference ->
                     fv.TryAddToParentsArgList()
                 | _ -> ()

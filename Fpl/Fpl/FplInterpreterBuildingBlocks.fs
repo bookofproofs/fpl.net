@@ -49,6 +49,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         let subNode = rb.ArgList[0]
         match subNode with
         | :? FplConjunction
+        | :? FplExclusiveOr 
         | :? FplDisjunction 
         | :? FplReference
         | :? FplQuantor
@@ -829,14 +830,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Xor((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Xor")
-        let fv = es.PeekEvalStack()
-        fv.FplId <- literalXor
-        fv.TypeId <- literalPred
+        let fv = es.Pop()
+        let fvNew = new FplExclusiveOr((pos1, pos2), fv.Parent.Value)
+        es.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fv.EndPos <- pos2
-        evaluateExclusiveOr fv
-        emitLG000orLG001Diagnostics fv "exclusive-or"
+        fvNew.Run()
+        emitLG000orLG001Diagnostics fvNew "exclusive-or"
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), varDeclOrStmtAstList) ->
         st.EvalPush("VarDeclBlock")
