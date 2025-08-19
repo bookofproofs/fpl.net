@@ -1046,6 +1046,9 @@ type FplJustification(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
+    override this.PairWithParent () = this.TryAddToParentsArgList()
+
+
 type FplArgInference(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
@@ -1063,6 +1066,8 @@ type FplArgInference(positions: Positions, parent: FplValue) =
 
     override this.Run (): unit = 
         raise (NotImplementedException())
+
+    override this.PairWithParent () = this.TryAddToParentsArgList()
 
 type FplLocalization(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1125,9 +1130,7 @@ type FplTranslation(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
-    override this.PairWithParent (): unit = 
-        raise (NotImplementedException())
-
+    override this.PairWithParent () = this.TryAddToParentsArgList() 
 
 type FplLanguage(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1180,8 +1183,7 @@ type FplAssertion(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
-    override this.PairWithParent (): unit = 
-        raise (NotImplementedException())
+    override this.PairWithParent () = this.TryAddToParentsArgList() 
 
 
 type FplReference(positions: Positions, parent: FplValue) =
@@ -1468,6 +1470,8 @@ type FplQuantor(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
+    override this.PairWithParent () = this.TryAddToParentsArgList()
+
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
@@ -1516,9 +1520,7 @@ type FplMapping(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
-    override this.PairWithParent (): unit = 
-        raise (NotImplementedException())
-
+    override this.PairWithParent () = this.TryAddToParentsArgList()
 
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
@@ -1807,8 +1809,7 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
 
     override this.Represent (): string = this.FplId
 
-    override this.Run (): unit = 
-        raise (NotImplementedException())
+    override this.Run () = this.TryAddToParentsArgList() 
 
 let isIntrinsicObj (fv1:FplValue) = 
     match fv1 with
@@ -1956,8 +1957,7 @@ type FplStmt(positions: Positions, parent: FplValue) =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
-    override this.PairWithParent (): unit = 
-        raise (NotImplementedException())
+    override this.PairWithParent () = this.TryAddToParentsArgList() 
 
 
 /// Returns Some argument of the FplValue depending of the type of it.
