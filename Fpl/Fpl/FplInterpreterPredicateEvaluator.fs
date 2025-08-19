@@ -31,22 +31,6 @@ let evaluateNegation (fplValue:FplValue) =
     | _ -> 
         let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
         fplValue.ValueList.Add(newValue)
-    
-let evaluateConjunction (fplValue:FplValue) =
-    let arg1 = fplValue.ArgList[0]
-    let arg2 = fplValue.ArgList[1]
-    let arg1Repr = arg1.Represent()
-    let arg2Repr = arg2.Represent()
-    let newValue =  new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-    newValue.FplId <- 
-        match (arg1Repr, arg2Repr) with
-        | (FplGrammarCommons.literalFalse, _) 
-        | (_, FplGrammarCommons.literalFalse)  -> 
-            FplGrammarCommons.literalFalse
-        | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) -> 
-            literalTrue
-        | _ -> literalUndetermined
-    fplValue.ValueList.Add(newValue)
 
 let evaluateDisjunction (fplValue:FplValue) = 
     let arg1 = fplValue.ArgList[0]

@@ -48,6 +48,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         // removable reference blocks are those with only a single argument and unset FplId 
         let subNode = rb.ArgList[0]
         match subNode with
+        | :? FplConjunction
         | :? FplReference
         | :? FplQuantor
         | :? FplIntrinsicInd
@@ -807,14 +808,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.And((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("And")
-        let fv = es.PeekEvalStack()
-        fv.FplId <- literalAnd
-        fv.TypeId <- literalPred
+        let fv = es.Pop()
+        let fvNew = new FplConjunction((pos1, pos2), fv.Parent.Value)
+        es.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fv.EndPos <- pos2
-        evaluateConjunction fv
-        emitLG000orLG001Diagnostics fv "conjunction"
+        fvNew.Run()
+        emitLG000orLG001Diagnostics fvNew "conjunction"
         st.EvalPop()
     | Ast.Or((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Or")

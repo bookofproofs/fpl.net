@@ -99,6 +99,7 @@ type FplRunner() =
 
     member this.Run (rootCaller:FplValue) (caller:FplValue) = 
         match caller with 
+        | :? FplConjunction
         | :? FplReference ->
             if caller.Scope.Count > 0 then 
                 let called = 
@@ -129,7 +130,7 @@ type FplRunner() =
                 | FplGrammarCommons.literalIif -> evaluateEquivalence caller
                 | FplGrammarCommons.literalImpl -> evaluateImplication caller
                 | FplGrammarCommons.literalNot -> evaluateNegation caller
-                | FplGrammarCommons.literalAnd -> evaluateConjunction caller
+                | FplGrammarCommons.literalAnd -> caller.Run()
                 | FplGrammarCommons.literalXor -> evaluateExclusiveOr caller
                 | FplGrammarCommons.literalOr ->  evaluateDisjunction caller
                 | _ when caller.FplId.StartsWith("del.") ->

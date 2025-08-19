@@ -641,6 +641,29 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
         |> Seq.map (fun subfv -> subfv.Represent())
         |> String.concat ", "
 
+/// Implements the semantics of an FPL predicate prime predicate that is intrinsic.
+/// It serves as a value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", literalFalse, and "undetermined". 
+type FplIntrinsicPred(positions: Positions, parent: FplValue) =
+    inherit FplGenericPredicate(positions, parent)
+
+    override this.Name = "an intrinsic predicate"
+    override this.ShortName = literalPred
+
+    override this.Clone () =
+        let ret = new FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type (signatureType:SignatureType) = 
+        match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> this.FplId
+            | SignatureType.Type -> this.TypeId
+                    
+    override this.Represent (): string = this.FplId
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 [<AbstractClass>]
 type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
@@ -1256,6 +1279,47 @@ let isReference (fv:FplValue) =
     | :? FplReference -> true
     | _ -> false
 
+
+
+/// Implements the semantics of an FPL conjunction compound predicate.
+type FplConjunction(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericPredicate(positions, parent)
+
+    do 
+        this.FplId <- literalAnd
+
+    override this.Name = "a conjunction"
+    override this.ShortName = "predConj"
+
+    override this.Clone () =
+        let ret = new FplConjunction((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let args = 
+            this.ArgList
+            |> Seq.map (fun arg -> arg.Type(signatureType))
+            |> String.concat ", "
+        sprintf "%s(%s)" head args
+
+    override this.Run () = 
+        let arg1 = this.ArgList[0]
+        let arg2 = this.ArgList[1]
+        let arg1Repr = arg1.Represent()
+        let arg2Repr = arg2.Represent()
+        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        newValue.FplId <- 
+            match (arg1Repr, arg2Repr) with
+            | (FplGrammarCommons.literalFalse, _) 
+            | (_, FplGrammarCommons.literalFalse)  -> 
+                FplGrammarCommons.literalFalse
+            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) -> 
+                literalTrue
+            | _ -> literalUndetermined
+        this.SetValue(newValue)  
+
 type FplQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
@@ -1612,28 +1676,6 @@ let isIntrinsicObj (fv1:FplValue) =
     | :? FplIntrinsicObj -> true
     | _ -> false
 
-type FplIntrinsicPred(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(positions, parent)
-
-    override this.Name = "an intrinsic predicate"
-    override this.ShortName = literalPred
-
-    override this.Clone () =
-        let ret = new FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type (signatureType:SignatureType) = 
-        match signatureType with
-            | SignatureType.Name 
-            | SignatureType.Mixed -> this.FplId
-            | SignatureType.Type -> this.TypeId
-                    
-    override this.Represent (): string = this.FplId
-
-    override this.Run (): unit = 
-        raise (NotImplementedException())
-
 type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do 
@@ -1822,6 +1864,7 @@ let qualifiedName (fplValue:FplValue)=
         let fplValueType =
             match fv with
             | :? FplLocalization
+            | :? FplConjunction
             | :? FplReference -> fv.Type(SignatureType.Name)
             | :? FplLocalization
             | :? FplConstructor

@@ -980,11 +980,14 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
     fplValue.ArgList
     |> Seq.iter (fun argument ->
         let repr = argument.Represent()
-        match repr with
-        | FplGrammarCommons.literalTrue
-        | FplGrammarCommons.literalFalse -> ()
-        | FplGrammarCommons.literalUndetermined -> emitLG000Diagnostics argument 
-        | _ -> emitLG001Diagnostics argument.StartPos argument.EndPos argument
+        if repr = $"{literalDec} {literalPred}" then 
+            emitLG000Diagnostics argument
+        else
+            match repr with
+            | FplGrammarCommons.literalTrue
+            | FplGrammarCommons.literalFalse -> ()
+            | FplGrammarCommons.literalUndetermined -> emitLG000Diagnostics argument 
+            | _ -> emitLG001Diagnostics argument.StartPos argument.EndPos argument
     )
 
     let code = LG000("", "")
