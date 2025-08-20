@@ -106,6 +106,7 @@ type FplRunner() =
         | :? FplEquivalence 
         | :? FplIsOperator 
         | :? FplEquality 
+        | :? FplDecrement 
         | :? FplReference ->
             if caller.Scope.Count > 0 then 
                 let called = 
@@ -140,6 +141,7 @@ type FplRunner() =
                 | :? FplExclusiveOr 
                 | :? FplDisjunction 
                 | :? FplIsOperator 
+                | :? FplDecrement 
                 | :? FplEquality -> caller.Run() 
                 | _ -> ()
         | _ -> ()

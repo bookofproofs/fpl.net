@@ -54,6 +54,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         | :? FplEquivalence 
         | :? FplIsOperator 
         | :? FplEquality 
+        | :? FplDecrement 
         | :? FplReference
         | :? FplQuantor
         | :? FplIntrinsicInd
@@ -1107,21 +1108,20 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(refBlock)
         eval st fplDelegateIdentifierAst
         eval st argumentTupleAst
-        let delegOpt = 
-            match refBlock.FplId with 
-            | "Equal" -> 
-                Some (new FplEquality((pos1, pos2), fv))
-            | "Decrement" -> 
-                Some (new FplEquality((pos1, pos2), fv))
-            | _ -> None
-        match delegOpt with
-        | Some deleg ->
+        match refBlock.FplId with 
+        | "Equal" -> 
+            let deleg = new FplEquality((pos1, pos2), fv)
             deleg.Copy fv
             es.Pop() |> ignore
             es.PushEvalStack(deleg)
             deleg.Run()
-        | _ ->
-            emitID013Diagnostics pos1 pos2 $"Unknown delegate `{refBlock.FplId}`"  
+        | "Decrement" -> 
+            let deleg = new FplDecrement((pos1, pos2), fv)
+            deleg.Copy fv
+            es.Pop() |> ignore
+            es.PushEvalStack(deleg)
+            deleg.Run()
+        | _ -> emitID013Diagnostics pos1 pos2 $"Unknown delegate `{refBlock.FplId}`"  
         es.PopEvalStack()
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)

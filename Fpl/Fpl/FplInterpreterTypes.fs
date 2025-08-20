@@ -1582,7 +1582,7 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
         this.TypeId <- literalPred
 
     override this.Name = "an equality"
-    override this.ShortName = literalDel
+    override this.ShortName = "predEq"
 
     override this.Clone () =
         let ret = new FplEquality((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1653,6 +1653,68 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
                 let newValue = FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
                 newValue.FplId <- $"{(a1Repr = b1Repr)}" 
                 this.SetValue(newValue)
+
+
+/// Implements the semantics of an FPL decrement delegate.
+type FplDecrement(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+
+    do 
+        this.FplId <- $"{literalDel}."
+
+    override this.Name = "a decrement"
+    override this.ShortName = literalDel
+
+    override this.Clone () =
+        let ret = new FplEquality((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    member this.Copy(other) =
+        base.Copy(other)
+        this.TypeId <- literalPred
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let propagate = propagateSignatureType signatureType
+        let args = 
+            this.ArgList
+            |> Seq.map (fun arg -> arg.Type(propagate))
+            |> String.concat ", "
+
+        sprintf "%s(%s)" head args
+
+    member private this.Diagnostic message = 
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = this.StartPos
+                Diagnostic.EndPos = this.EndPos
+                Diagnostic.Code = ID013 message
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+
+    override this.Instantiate (): FplValue option = 
+        raise (NotImplementedException())
+
+    override this.Represent () = 
+        raise (NotImplementedException())
+
+    override this.Run () = 
+        if this.ArgList.Count <> 1 then 
+            this.Diagnostic $"Decrement takes 1 arguments, got {this.ArgList.Count}." 
+        else
+
+
+        let a1 = this.ArgList[0]
+        let a1Repr = a1.Represent()
+
+        let newValue = FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
+        newValue.FplId <- $"todo" 
+        this.SetValue(newValue)
 
 
 type FplMapping(positions: Positions, parent: FplValue) =
