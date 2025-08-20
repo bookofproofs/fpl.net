@@ -105,6 +105,7 @@ type FplRunner() =
         | :? FplImplication 
         | :? FplEquivalence 
         | :? FplIsOperator 
+        | :? FplDelegate 
         | :? FplReference ->
             if caller.Scope.Count > 0 then 
                 let called = 

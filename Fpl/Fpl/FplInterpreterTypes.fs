@@ -1368,7 +1368,7 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
             | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) -> 
                 literalTrue
             | _ -> literalUndetermined
-        this.SetValue(newValue)  
+        this.SetValue(newValue)
 
 /// Implements the semantics of an FPL disjunction compound predicate.
 type FplDisjunction(positions: Positions, parent: FplValue) as this =
@@ -1572,6 +1572,55 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
             | _ -> literalUndetermined
         
         this.SetValue(newValue)  
+
+/// Implements the semantics of an FPL delegate.
+type FplDelegate(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericPredicate(positions, parent)
+
+    do 
+        this.FplId <- $"{literalDel}."
+        this.TypeId <- $"{literalDel}."
+
+    override this.Name = "a conjunction"
+    override this.ShortName = "predAnd"
+
+    override this.Clone () =
+        let ret = new FplDelegate((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let propagate = propagateSignatureType signatureType
+        let args = 
+            this.ArgList
+            |> Seq.map (fun arg -> arg.Type(propagate))
+            |> String.concat ", "
+
+        match (head, args) with
+        | ("???", _) -> sprintf "%s" head
+        | ("", _) -> sprintf "%s" args
+        | (_, "") -> sprintf "%s" head
+        | (_, "???") -> sprintf "%s()" head
+        | (_, _) -> sprintf "%s(%s)" head args
+
+    override this.Run () = 
+        let arg1 = this.ArgList[0]
+        let arg2 = this.ArgList[1]
+        let arg1Repr = arg1.Represent()
+        let arg2Repr = arg2.Represent()
+        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        newValue.FplId <-
+            // FPL truth-table
+            match (arg1Repr, arg2Repr) with
+            | (FplGrammarCommons.literalFalse, _) 
+            | (_, FplGrammarCommons.literalFalse)  -> 
+                FplGrammarCommons.literalFalse
+            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) -> 
+                literalTrue
+            | _ -> literalUndetermined
+        this.SetValue(newValue)
+
 
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -2210,6 +2259,7 @@ let qualifiedName (fplValue:FplValue)=
             | :? FplImplication 
             | :? FplEquivalence 
             | :? FplIsOperator 
+            | :? FplDelegate 
             | :? FplReference -> fv.Type(SignatureType.Name)
             | :? FplLocalization
             | :? FplConstructor

@@ -53,6 +53,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         | :? FplImplication 
         | :? FplEquivalence 
         | :? FplIsOperator 
+        | :? FplDelegate 
         | :? FplReference
         | :? FplQuantor
         | :? FplIntrinsicInd
@@ -1100,9 +1101,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
         st.EvalPush("Delegate")
         let fv = es.PeekEvalStack()
-        let refBlock = new FplReference((pos1, pos2), fv) 
-        refBlock.FplId <- "del."
-        refBlock.TypeId <- "del."
+        let refBlock = new FplDelegate((pos1, pos2), fv) 
         es.PushEvalStack(refBlock)
         eval st fplDelegateIdentifierAst
         eval st argumentTupleAst
