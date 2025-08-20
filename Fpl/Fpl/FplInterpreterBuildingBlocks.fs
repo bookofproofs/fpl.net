@@ -23,10 +23,8 @@ open FplGrammarCommons
 open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
-open FplInterpreterPredicateEvaluator
 open FplInterpreterRunner
 open EvalStackHandler
-open System.Runtime.InteropServices
 
 let es = EvalStack()
 let runner = FplRunner()
@@ -54,6 +52,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         | :? FplNegation 
         | :? FplImplication 
         | :? FplEquivalence 
+        | :? FplIsOperator 
         | :? FplReference
         | :? FplQuantor
         | :? FplIntrinsicInd
@@ -1085,19 +1084,18 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
         st.EvalPush("IsOperator")
-        let fv = es.PeekEvalStack()
-        fv.FplId <- literalIs
-        fv.TypeId <- literalPred
-        let operand = new FplReference((pos1, pos2), fv) 
+        let fv = es.Pop()
+        let fvNew = new FplIsOperator((pos1, pos2), fv.Parent.Value)
+        es.PushEvalStack(fvNew)
+        let operand = new FplReference((pos1, pos2), fvNew) 
         es.PushEvalStack(operand)
         eval st isOpArgAst
         es.PopEvalStack()
-        let typeOfOperand = new FplMapping((pos1, pos2), fv) 
+        let typeOfOperand = new FplMapping((pos1, pos2), fvNew) 
         es.PushEvalStack(typeOfOperand)
         eval st variableTypeAst
         es.PopEvalStack()
-        evaluateIsOperator fv operand typeOfOperand
-        
+        fvNew.Run()        
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
         st.EvalPush("Delegate")

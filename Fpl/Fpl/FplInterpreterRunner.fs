@@ -4,7 +4,6 @@
 module FplInterpreterRunner
 open System.Collections.Generic
 open FplInterpreterTypes
-open FplInterpreterPredicateEvaluator
 open FplInterpreterDiagnosticsEmitter
 
 (* MIT License
@@ -105,6 +104,7 @@ type FplRunner() =
         | :? FplNegation 
         | :? FplImplication 
         | :? FplEquivalence 
+        | :? FplIsOperator 
         | :? FplReference ->
             if caller.Scope.Count > 0 then 
                 let called = 
@@ -132,12 +132,13 @@ type FplRunner() =
                 | _ -> ()
             else
                 match caller.FplId with 
-                | FplGrammarCommons.literalIif -> caller.Run()
-                | FplGrammarCommons.literalImpl -> caller.Run()
-                | FplGrammarCommons.literalNot -> caller.Run()
-                | FplGrammarCommons.literalAnd -> caller.Run()
-                | FplGrammarCommons.literalXor -> caller.Run()
-                | FplGrammarCommons.literalOr ->  caller.Run()
+                | FplGrammarCommons.literalIif 
+                | FplGrammarCommons.literalImpl 
+                | FplGrammarCommons.literalNot 
+                | FplGrammarCommons.literalAnd 
+                | FplGrammarCommons.literalXor 
+                | FplGrammarCommons.literalOr 
+                | FplGrammarCommons.literalIs ->  caller.Run()
                 | _ when caller.FplId.StartsWith("del.") ->
                     emitID013Diagnostics caller rootCaller.StartPos rootCaller.EndPos |> ignore
                 | _ -> ()

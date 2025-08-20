@@ -836,6 +836,57 @@ let rec getClassBlock (fv: FplValue) =
         | Some parent -> getClassBlock parent
         | _ -> None
 
+type FplIntrinsicObj(positions: Positions, parent: FplValue) =
+    inherit FplGenericObject(positions, parent)
+
+    override this.Name = "an intrinsic object"
+    override this.ShortName = literalObj
+
+    override this.Clone () =
+        let ret = new FplIntrinsicObj((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Instantiate () = 
+        Some (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
+
+    override this.Type (signatureType:SignatureType) = 
+        match signatureType with
+            | SignatureType.Name 
+            | SignatureType.Mixed -> this.FplId
+            | SignatureType.Type -> this.TypeId
+
+    override this.Represent (): string = this.FplId
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
+let isIntrinsicObj (fv1:FplValue) = 
+    match fv1 with
+    | :? FplIntrinsicObj -> true
+    | _ -> false
+
+/// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
+/// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
+/// The classRoot is required to have an FplValueType.Class.
+let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) =
+    let rootType = classRoot.Type(SignatureType.Type)
+
+    match classRoot with
+    | :? FplClass
+    | :? FplIntrinsicObj ->
+        if rootType = baseClassName then
+            Some(rootType)
+        else
+            classRoot.ArgList
+            |> Seq.collect (fun child ->
+                match findClassInheritanceChain child baseClassName with
+                | Some path -> [ rootType + ":" + path ]
+                | None -> [])
+            |> Seq.tryLast
+    | _ -> 
+        None
+
 type FplPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
 
@@ -1330,7 +1381,7 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
     override this.ShortName = "predOr"
 
     override this.Clone () =
-        let ret = new FplConjunction((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplDisjunction((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
@@ -1371,7 +1422,7 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
     override this.ShortName = "predXor"
 
     override this.Clone () =
-        let ret = new FplConjunction((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplExclusiveOr((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
@@ -1453,7 +1504,7 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
     override this.ShortName = "predImpl"
 
     override this.Clone () =
-        let ret = new FplNegation((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplImplication((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
@@ -1493,7 +1544,7 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
     override this.ShortName = "predIif"
 
     override this.Clone () =
-        let ret = new FplNegation((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplEquivalence((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
@@ -1521,33 +1572,6 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
             | _ -> literalUndetermined
         
         this.SetValue(newValue)  
-
-type FplQuantor(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(positions, parent)
-
-    override this.Name = "a quantor"
-    override this.ShortName = "qtr"
-
-    override this.Clone () =
-        let ret = new FplQuantor((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type signatureType =
-        let head = getFplHead this signatureType
-
-        let paramT =
-            this.Scope
-            |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
-            |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(signatureType))
-            |> String.concat ", "
-
-        match paramT with
-        | "" -> head
-        | _ -> sprintf "%s(%s)" head paramT
-
-    override this.Run (): unit = 
-        raise (NotImplementedException())
 
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1614,6 +1638,149 @@ let rec getMapping (fv:FplValue) =
             | _ -> None
         else
             None
+
+/// Tries to match parameters of an FplValue with its arguments recursively
+let rec mpwa (args: FplValue list) (pars: FplValue list) =
+    match (args, pars) with
+    | (a :: ars, p :: prs) ->
+        let aType = a.Type(SignatureType.Type)
+        let pType = p.Type(SignatureType.Type) 
+
+        if aType = pType then
+            mpwa ars prs
+        elif pType.StartsWith(literalTpl) || pType.StartsWith("template") then
+            mpwa ars prs
+        elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "???" then
+            if ars.Length > 0 then mpwa ars pars else None
+        elif pType.StartsWith("+") && aType = "???" then
+            Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        elif pType = $"+{aType}" then
+            if ars.Length > 0 then mpwa ars pars else None
+        elif
+            aType.Length > 0
+            && Char.IsUpper(aType[0])
+            && isReference a
+            && a.Scope.Count = 1
+        then
+            let var = a.Scope.Values |> Seq.toList |> List.head
+
+            if var.Scope.ContainsKey(var.FplId) then
+                let cl = var.Scope[var.FplId]
+
+                match cl with
+                | :? FplClass ->
+                    let inheritanceList = findClassInheritanceChain cl pType
+
+                    match inheritanceList with
+                    | Some str -> mpwa ars prs
+                    | None ->
+                        Some(
+                            $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
+                        )
+                | _ ->
+                    // this case does not occur but for we cover it for completeness reasons
+                    Some(
+                        $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`"
+                    )
+            else
+                Some(
+                    $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`"
+                )
+        elif aType.StartsWith(pType + "(") then
+            None
+        elif aType = "???" && pType <> "???" then
+            Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        elif aType.StartsWith(literalFunc) then
+            let someMap = getMapping a
+
+            match someMap with
+            | Some map -> mpwa [ map ] [ p ]
+            | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+        else
+            Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
+    | ([], p :: prs) ->
+        let pType = p.Type(SignatureType.Type)
+        match p with 
+        | :? FplClass as cl ->
+            let constructors = cl.GetConstructors()
+            if constructors.Length = 0 then
+                None
+            else
+                Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
+        | _ -> 
+            Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
+    | (a :: [], []) ->
+        if a.FplId = "???" then
+            None
+        else
+            let aType = a.Type(SignatureType.Type)
+            Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
+    | (a :: ars, []) ->
+        let aType = a.Type(SignatureType.Type)
+        Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
+    | ([], []) -> None
+
+/// Implements the semantics of the FPL is operator.
+type FplIsOperator(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericPredicate(positions, parent)
+
+    do 
+        this.FplId <- literalIs
+
+    override this.Name = "an is operator"
+    override this.ShortName = "predIs"
+
+    override this.Clone () =
+        let ret = new FplIsOperator((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let args = 
+            this.ArgList
+            |> Seq.map (fun arg -> arg.Type(signatureType))
+            |> String.concat ", "
+        sprintf "%s(%s)" head args
+        
+    override this.Run () = 
+        let operand = this.ArgList[0]
+        let typeOfOperand = this.ArgList[1]
+        let newValue = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        newValue.FplId <- 
+            // FPL truth-table
+            match mpwa [operand] [typeOfOperand] with
+            | Some errMsg -> literalFalse
+            | None -> literalTrue
+        
+        this.SetValue(newValue)  
+
+type FplQuantor(positions: Positions, parent: FplValue) =
+    inherit FplGenericPredicate(positions, parent)
+
+    override this.Name = "a quantor"
+    override this.ShortName = "qtr"
+
+    override this.Clone () =
+        let ret = new FplQuantor((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+
+        let paramT =
+            this.Scope
+            |> Seq.filter (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.IsVariable())
+            |> Seq.map (fun (kvp: KeyValuePair<string, FplValue>) -> kvp.Value.Type(signatureType))
+            |> String.concat ", "
+
+        match paramT with
+        | "" -> head
+        | _ -> sprintf "%s(%s)" head paramT
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
 
 type FplVariable(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1848,36 +2015,6 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
         raise (NotImplementedException())
 
 
-type FplIntrinsicObj(positions: Positions, parent: FplValue) =
-    inherit FplGenericObject(positions, parent)
-
-    override this.Name = "an intrinsic object"
-    override this.ShortName = literalObj
-
-    override this.Clone () =
-        let ret = new FplIntrinsicObj((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = 
-        Some (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
-
-    override this.Type (signatureType:SignatureType) = 
-        match signatureType with
-            | SignatureType.Name 
-            | SignatureType.Mixed -> this.FplId
-            | SignatureType.Type -> this.TypeId
-
-    override this.Represent (): string = this.FplId
-
-    override this.Run (): unit = 
-        raise (NotImplementedException())
-
-let isIntrinsicObj (fv1:FplValue) = 
-    match fv1 with
-    | :? FplIntrinsicObj -> true
-    | _ -> false
-
 type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do 
@@ -2072,6 +2209,7 @@ let qualifiedName (fplValue:FplValue)=
             | :? FplNegation 
             | :? FplImplication 
             | :? FplEquivalence 
+            | :? FplIsOperator 
             | :? FplReference -> fv.Type(SignatureType.Name)
             | :? FplLocalization
             | :? FplConstructor
@@ -2344,27 +2482,6 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
         | None -> ScopeSearchResult.NotApplicable
     | _ ->
         ScopeSearchResult.NotApplicable
-
-/// Checks if the baseClassName is contained in the classRoot's base classes (it derives from).
-/// If so, the function will produce Some path where path equals a string of base classes concatenated by ":".
-/// The classRoot is required to have an FplValueType.Class.
-let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) =
-    let rootType = classRoot.Type(SignatureType.Type)
-
-    match classRoot with
-    | :? FplClass
-    | :? FplIntrinsicObj ->
-        if rootType = baseClassName then
-            Some(rootType)
-        else
-            classRoot.ArgList
-            |> Seq.collect (fun child ->
-                match findClassInheritanceChain child baseClassName with
-                | Some path -> [ rootType + ":" + path ]
-                | None -> [])
-            |> Seq.tryLast
-    | _ -> 
-        None
 
 type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
     let _parsedAsts = parsedAsts
@@ -2716,87 +2833,6 @@ let rec nextDefinition (fv: FplValue) counter =
             match next with
             | Some parent -> nextDefinition parent counter
             | None -> ScopeSearchResult.NotFound
-
-/// Tries to match parameters of an FplValue with its arguments recursively
-let rec mpwa (args: FplValue list) (pars: FplValue list) =
-    match (args, pars) with
-    | (a :: ars, p :: prs) ->
-        let aType = a.Type(SignatureType.Type)
-        let pType = p.Type(SignatureType.Type) 
-
-        if aType = pType then
-            mpwa ars prs
-        elif pType.StartsWith(literalTpl) || pType.StartsWith("template") then
-            mpwa ars prs
-        elif pType = $"*{aType}" || pType.StartsWith("*") && aType = "???" then
-            if ars.Length > 0 then mpwa ars pars else None
-        elif pType.StartsWith("+") && aType = "???" then
-            Some($"() does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        elif pType = $"+{aType}" then
-            if ars.Length > 0 then mpwa ars pars else None
-        elif
-            aType.Length > 0
-            && Char.IsUpper(aType[0])
-            && isReference a
-            && a.Scope.Count = 1
-        then
-            let var = a.Scope.Values |> Seq.toList |> List.head
-
-            if var.Scope.ContainsKey(var.FplId) then
-                let cl = var.Scope[var.FplId]
-
-                match cl with
-                | :? FplClass ->
-                    let inheritanceList = findClassInheritanceChain cl pType
-
-                    match inheritanceList with
-                    | Some str -> mpwa ars prs
-                    | None ->
-                        Some(
-                            $"`{a.Type(SignatureType.Name)}:{aType}` neither matches `{p.Type(SignatureType.Name)}:{pType}` nor the base classes"
-                        )
-                | _ ->
-                    // this case does not occur but for we cover it for completeness reasons
-                    Some(
-                        $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and doesn't match `{p.Type(SignatureType.Name)}:{pType}`"
-                    )
-            else
-                Some(
-                    $"`{a.Type(SignatureType.Name)}:{aType}` is undefined and does not match `{p.Type(SignatureType.Name)}:{pType}`"
-                )
-        elif aType.StartsWith(pType + "(") then
-            None
-        elif aType = "???" && pType <> "???" then
-            Some($"`()` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        elif aType.StartsWith(literalFunc) then
-            let someMap = getMapping a
-
-            match someMap with
-            | Some map -> mpwa [ map ] [ p ]
-            | _ -> Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-        else
-            Some($"`{a.Type(SignatureType.Name)}:{aType}` does not match `{p.Type(SignatureType.Name)}:{pType}`")
-    | ([], p :: prs) ->
-        let pType = p.Type(SignatureType.Type)
-        match p with 
-        | :? FplClass as cl ->
-            let constructors = cl.GetConstructors()
-            if constructors.Length = 0 then
-                None
-            else
-                Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
-        | _ -> 
-            Some($"missing argument for `{p.Type(SignatureType.Name)}:{pType}`")
-    | (a :: [], []) ->
-        if a.FplId = "???" then
-            None
-        else
-            let aType = a.Type(SignatureType.Type)
-            Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
-    | (a :: ars, []) ->
-        let aType = a.Type(SignatureType.Type)
-        Some($"no matching parameter for `{a.Type(SignatureType.Name)}:{aType}`")
-    | ([], []) -> None
 
 /// Tries to match the arguments of `fva` FplValue with the parameters of the `fvp` FplValue and returns
 /// Some(specific error message) or None, if the match succeeded.

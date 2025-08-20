@@ -128,6 +128,7 @@ type EvalStack() =
             | :? FplNegation 
             | :? FplImplication 
             | :? FplEquivalence 
+            | :? FplIsOperator 
             | :? FplReference ->
                 match next with 
                 | :? FplTheorem  
@@ -193,6 +194,7 @@ type EvalStack() =
                 | :? FplNegation 
                 | :? FplImplication 
                 | :? FplEquivalence 
+                | :? FplIsOperator 
                 | :? FplReference ->
                     fv.TryAddToParentsArgList()
                 | _ -> ()
