@@ -126,6 +126,7 @@ type EvalStack() =
             | :? FplDisjunction 
             | :? FplExclusiveOr 
             | :? FplNegation 
+            | :? FplImplication 
             | :? FplReference ->
                 match next with 
                 | :? FplTheorem  
@@ -189,6 +190,7 @@ type EvalStack() =
                 | :? FplDisjunction 
                 | :? FplExclusiveOr 
                 | :? FplNegation 
+                | :? FplImplication 
                 | :? FplReference ->
                     fv.TryAddToParentsArgList()
                 | _ -> ()

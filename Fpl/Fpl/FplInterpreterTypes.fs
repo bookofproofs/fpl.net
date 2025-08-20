@@ -1405,7 +1405,7 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
         this.SetValue(newValue)  
 
 
-/// Implements the semantics of an FPL not compound predicate.
+/// Implements the semantics of an FPL negation compound predicate.
 type FplNegation(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
 
@@ -1440,6 +1440,46 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
             | FplGrammarCommons.literalTrue -> literalFalse
             | _ -> literalUndetermined  
 
+        this.SetValue(newValue)  
+
+/// Implements the semantics of an FPL implication compound predicate.
+type FplImplication(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericPredicate(positions, parent)
+
+    do 
+        this.FplId <- literalImpl
+
+    override this.Name = "an implication"
+    override this.ShortName = "predImpl"
+
+    override this.Clone () =
+        let ret = new FplNegation((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let args = 
+            this.ArgList
+            |> Seq.map (fun arg -> arg.Type(signatureType))
+            |> String.concat ", "
+        sprintf "%s(%s)" head args
+
+    override this.Run () = 
+        let arg1 = this.ArgList[0]
+        let arg2 = this.ArgList[1]
+        let arg1Repr = arg1.Represent()
+        let arg2Repr = arg2.Represent()
+        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        newValue.FplId <- 
+            match (arg1Repr, arg2Repr) with
+            // FPL truth-table
+            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalFalse) -> literalFalse
+            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalTrue) 
+            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) 
+            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) -> literalTrue
+            | _ -> literalUndetermined
+        
         this.SetValue(newValue)  
 
 type FplQuantor(positions: Positions, parent: FplValue) =
@@ -1990,6 +2030,7 @@ let qualifiedName (fplValue:FplValue)=
             | :? FplConjunction
             | :? FplDisjunction 
             | :? FplNegation 
+            | :? FplImplication 
             | :? FplReference -> fv.Type(SignatureType.Name)
             | :? FplLocalization
             | :? FplConstructor

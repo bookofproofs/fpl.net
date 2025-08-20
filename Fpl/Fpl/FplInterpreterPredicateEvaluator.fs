@@ -15,25 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 *)
 
-let evaluateImplication (fplValue:FplValue) = 
-    let arg1 = fplValue.ArgList[0]
-    let arg2 = fplValue.ArgList[1]
-    let arg1Repr = arg1.Represent()
-    let arg2Repr = arg2.Represent()
-    match (arg1Repr, arg2Repr) with
-    | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalFalse) -> 
-        let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <-literalFalse
-        fplValue.ValueList.Add(newValue)
-    | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalTrue) 
-    | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) 
-    | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) -> 
-        let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        newValue.FplId <- literalTrue
-        fplValue.ValueList.Add(newValue)
-    | _ -> 
-        let newValue = new FplIntrinsicPred((fplValue.StartPos, fplValue.EndPos), fplValue)
-        fplValue.ValueList.Add(newValue)
+
 
 let evaluateEquivalence (fplValue:FplValue) = 
     let arg1 = fplValue.ArgList[0]

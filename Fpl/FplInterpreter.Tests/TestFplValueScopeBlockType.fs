@@ -618,7 +618,7 @@ type TestFplValueScopeBlockType() =
             | "base22" -> Assert.IsInstanceOfType<FplExclusiveOr>(base1)
             | "base23" -> Assert.IsInstanceOfType<FplDisjunction>(base1)
             | "base24" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base25" -> Assert.IsInstanceOfType<FplReference>(base1)
+            | "base25" -> Assert.IsInstanceOfType<FplImplication>(base1)
             | "base26" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base27" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base28" -> Assert.IsInstanceOfType<FplReference>(base1)
