@@ -1573,21 +1573,25 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
         
         this.SetValue(newValue)  
 
-/// Implements the semantics of an FPL delegate.
-type FplDelegate(positions: Positions, parent: FplValue) as this =
+/// Implements the semantics of an FPL equality.
+type FplEquality(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
 
     do 
         this.FplId <- $"{literalDel}."
-        this.TypeId <- $"{literalDel}."
+        this.TypeId <- literalPred
 
-    override this.Name = "a conjunction"
-    override this.ShortName = "predAnd"
+    override this.Name = "an equality"
+    override this.ShortName = literalDel
 
     override this.Clone () =
-        let ret = new FplDelegate((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplEquality((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
+
+    member this.Copy(other) =
+        base.Copy(other)
+        this.TypeId <- literalPred
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
@@ -1597,29 +1601,58 @@ type FplDelegate(positions: Positions, parent: FplValue) as this =
             |> Seq.map (fun arg -> arg.Type(propagate))
             |> String.concat ", "
 
-        match (head, args) with
-        | ("???", _) -> sprintf "%s" head
-        | ("", _) -> sprintf "%s" args
-        | (_, "") -> sprintf "%s" head
-        | (_, "???") -> sprintf "%s()" head
-        | (_, _) -> sprintf "%s(%s)" head args
+        sprintf "%s(%s)" head args
+
+    member private this.Diagnostic message = 
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = this.StartPos
+                Diagnostic.EndPos = this.EndPos
+                Diagnostic.Code = ID013 message
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
 
     override this.Run () = 
-        let arg1 = this.ArgList[0]
-        let arg2 = this.ArgList[1]
-        let arg1Repr = arg1.Represent()
-        let arg2Repr = arg2.Represent()
-        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
-        newValue.FplId <-
-            // FPL truth-table
-            match (arg1Repr, arg2Repr) with
-            | (FplGrammarCommons.literalFalse, _) 
-            | (_, FplGrammarCommons.literalFalse)  -> 
-                FplGrammarCommons.literalFalse
-            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) -> 
-                literalTrue
-            | _ -> literalUndetermined
-        this.SetValue(newValue)
+        if this.ArgList.Count <> 2 then 
+            this.Diagnostic $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." 
+        else
+
+        let getActual (x:FplValue) = 
+            if x.ArgList.Count > 0 then
+                x.ArgList[0]
+            else 
+                x
+
+        let a1 = getActual(this.ArgList[0])
+        let b1 = getActual(this.ArgList[1])
+        let a1Repr = a1.Represent()
+        let b1Repr = b1.Represent()
+
+        match a1Repr with
+        | FplGrammarCommons.literalUndef -> 
+            this.Diagnostic "Predicate `=` cannot be evaluated because the left argument is undefined." 
+        | _ -> ()
+
+        match b1Repr with
+        | FplGrammarCommons.literalUndef -> 
+            this.Diagnostic "Predicate `=` cannot be evaluated because the right argument is undefined." 
+        | _ -> ()
+
+        match a1Repr with
+        | FplGrammarCommons.literalUndetermined -> 
+            this.Diagnostic "Predicate `=` cannot be evaluated because the left argument is undetermined." 
+        | _ -> 
+            match b1Repr with
+            | FplGrammarCommons.literalUndetermined -> 
+                this.Diagnostic "Predicate `=` cannot be evaluated because the right argument is undetermined." 
+            | _ -> 
+                let newValue = FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
+                newValue.FplId <- $"{(a1Repr = b1Repr)}" 
+                this.SetValue(newValue)
 
 
 type FplMapping(positions: Positions, parent: FplValue) =
@@ -2259,7 +2292,7 @@ let qualifiedName (fplValue:FplValue)=
             | :? FplImplication 
             | :? FplEquivalence 
             | :? FplIsOperator 
-            | :? FplDelegate 
+            | :? FplEquality 
             | :? FplReference -> fv.Type(SignatureType.Name)
             | :? FplLocalization
             | :? FplConstructor

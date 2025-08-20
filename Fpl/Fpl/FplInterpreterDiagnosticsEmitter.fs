@@ -6,7 +6,6 @@ open System.Text.RegularExpressions
 open FParsec
 open FplGrammarCommons
 open ErrDiagnostics
-open FplDelegates
 open FplInterpreterTypes
 (* MIT License
 
@@ -586,29 +585,18 @@ let checkID019Diagnostics (st: SymbolTable) (name:string) pos1 pos2 =
             ad.AddDiagnostic diagnostic
         | _ -> ()
     
-let emitID013Diagnostics (fv: FplValue) pos1 pos2 =
-    let d = Delegates()
-
-    try
-        d.CallExternalDelegate(fv.FplId.Substring(4), fv.ArgList |> Seq.toList)
-    with ex ->
-        if ex.Message.StartsWith("OK:") then
-            let result = ex.Message.Substring(3)
-            fv.ValueList[0].FplId <- result
-            ""
-        else
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = pos1
-                    Diagnostic.EndPos = pos2
-                    Diagnostic.Code = ID013 ex.Message
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic
-            ""
+let emitID013Diagnostics pos1 pos2 message =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID013 message
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
 
 let emitID017Diagnostics name (candidates:FplValue list) pos1 pos2 =
     let candidatesName =

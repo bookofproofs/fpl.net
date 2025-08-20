@@ -105,7 +105,7 @@ type FplRunner() =
         | :? FplImplication 
         | :? FplEquivalence 
         | :? FplIsOperator 
-        | :? FplDelegate 
+        | :? FplEquality 
         | :? FplReference ->
             if caller.Scope.Count > 0 then 
                 let called = 
@@ -132,16 +132,15 @@ type FplRunner() =
                     this.RestoreVariables(called)
                 | _ -> ()
             else
-                match caller.FplId with 
-                | FplGrammarCommons.literalIif 
-                | FplGrammarCommons.literalImpl 
-                | FplGrammarCommons.literalNot 
-                | FplGrammarCommons.literalAnd 
-                | FplGrammarCommons.literalXor 
-                | FplGrammarCommons.literalOr 
-                | FplGrammarCommons.literalIs ->  caller.Run()
-                | _ when caller.FplId.StartsWith("del.") ->
-                    emitID013Diagnostics caller rootCaller.StartPos rootCaller.EndPos |> ignore
+                match caller with 
+                | :? FplEquivalence 
+                | :? FplImplication 
+                | :? FplNegation 
+                | :? FplConjunction 
+                | :? FplExclusiveOr 
+                | :? FplDisjunction 
+                | :? FplIsOperator 
+                | :? FplEquality -> caller.Run() 
                 | _ -> ()
         | _ -> ()
         
