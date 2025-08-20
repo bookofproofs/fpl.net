@@ -104,6 +104,7 @@ type FplRunner() =
         | :? FplDisjunction 
         | :? FplNegation 
         | :? FplImplication 
+        | :? FplEquivalence 
         | :? FplReference ->
             if caller.Scope.Count > 0 then 
                 let called = 
@@ -131,7 +132,7 @@ type FplRunner() =
                 | _ -> ()
             else
                 match caller.FplId with 
-                | FplGrammarCommons.literalIif -> evaluateEquivalence caller
+                | FplGrammarCommons.literalIif -> caller.Run()
                 | FplGrammarCommons.literalImpl -> caller.Run()
                 | FplGrammarCommons.literalNot -> caller.Run()
                 | FplGrammarCommons.literalAnd -> caller.Run()

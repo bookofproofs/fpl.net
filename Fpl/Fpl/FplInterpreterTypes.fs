@@ -1482,6 +1482,46 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
         
         this.SetValue(newValue)  
 
+/// Implements the semantics of an FPL equivalence compound predicate.
+type FplEquivalence(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericPredicate(positions, parent)
+
+    do 
+        this.FplId <- literalIif
+
+    override this.Name = "an equivalence"
+    override this.ShortName = "predIif"
+
+    override this.Clone () =
+        let ret = new FplNegation((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let args = 
+            this.ArgList
+            |> Seq.map (fun arg -> arg.Type(signatureType))
+            |> String.concat ", "
+        sprintf "%s(%s)" head args
+
+    override this.Run () = 
+        let arg1 = this.ArgList[0]
+        let arg2 = this.ArgList[1]
+        let arg1Repr = arg1.Represent()
+        let arg2Repr = arg2.Represent()
+        let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
+        newValue.FplId <- 
+            match (arg1Repr, arg2Repr) with
+            // FPL truth-table
+            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) 
+            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) -> literalTrue
+            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalTrue) 
+            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalFalse) -> literalFalse
+            | _ -> literalUndetermined
+        
+        this.SetValue(newValue)  
+
 type FplQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
@@ -2031,6 +2071,7 @@ let qualifiedName (fplValue:FplValue)=
             | :? FplDisjunction 
             | :? FplNegation 
             | :? FplImplication 
+            | :? FplEquivalence 
             | :? FplReference -> fv.Type(SignatureType.Name)
             | :? FplLocalization
             | :? FplConstructor

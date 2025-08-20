@@ -53,6 +53,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         | :? FplDisjunction 
         | :? FplNegation 
         | :? FplImplication 
+        | :? FplEquivalence 
         | :? FplReference
         | :? FplQuantor
         | :? FplIntrinsicInd
@@ -1074,14 +1075,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Iif((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Iif")
-        let fv = es.PeekEvalStack()
-        fv.FplId <- literalIif
-        fv.TypeId <- literalPred
+        let fv = es.Pop()
+        let fvNew = new FplEquivalence((pos1, pos2), fv.Parent.Value)
+        es.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fv.EndPos <- pos2
-        evaluateEquivalence fv
-        emitLG000orLG001Diagnostics fv "equivalence"
+        fvNew.Run()
+        emitLG000orLG001Diagnostics fvNew "equivalence"
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
         st.EvalPush("IsOperator")
