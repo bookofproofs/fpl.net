@@ -48,132 +48,168 @@ type TestFplBlockType() =
     [<DataRow("IntrinsicFunc")>]
     [<DataRow("IntrinsicTpl")>]
     [<DataRow("IntrinsicUndef")>]
+    [<DataRow("Implication")>]
+    [<DataRow("Equivalence")>]
+    [<DataRow("Equality")>]
+    [<DataRow("Decrement")>]
+    [<DataRow("Negation")>]
+    [<DataRow("Conjunction")>]
+    [<DataRow("Disjunction")>]
+    [<DataRow("ExclusiveOr")>]
+    [<DataRow("IsOperator")>]
     [<DataRow("Root")>]
     [<TestMethod>]
     member this.TestBlockTypeName(var) =
         match var with
         | "Variable" -> 
             let x = new FplVariable(positions, parent) 
-            Assert.AreEqual<string>("a variable", x.Name)
+            Assert.AreEqual<string>("variable", x.Name)
         | "VariadicVariableMany" ->
             let x = new FplVariable(positions, parent)
             x.SetToMany() |> ignore
-            Assert.AreEqual<string>("a zero-or-more variable", x.Name)
+            Assert.AreEqual<string>("zero-or-more variable", x.Name)
         | "VariadicVariableMany1" ->
             let x = new FplVariable(positions, parent)
             x.SetToMany1() |> ignore
-            Assert.AreEqual<string>("a one-or-more variable", x.Name)
+            Assert.AreEqual<string>("one-or-more variable", x.Name)
         | "MandatoryFunctionalTerm" ->
             let x = new FplMandatoryFunctionalTerm(positions, parent)
-            Assert.AreEqual<string>("a functional term property", x.Name)
+            Assert.AreEqual<string>("functional term property", x.Name)
         | "OptionalFunctionalTerm" ->
             let x = new FplOptionalFunctionalTerm(positions, parent)
-            Assert.AreEqual<string>("an optional functional term property", x.Name)
+            Assert.AreEqual<string>("optional functional term property", x.Name)
         | "MandatoryPredicate" ->
             let x = new FplMandatoryPredicate(positions, parent)
-            Assert.AreEqual<string>("a predicate property", x.Name)        
+            Assert.AreEqual<string>("predicate property", x.Name)        
         | "OptionalPredicate" ->
             let x = new FplOptionalPredicate(positions, parent)
-            Assert.AreEqual<string>("an optional predicate property", x.Name)
+            Assert.AreEqual<string>("optional predicate property", x.Name)
         | "Constructor" ->
             let x = new FplConstructor(positions, parent)
-            Assert.AreEqual<string>("a constructor", x.Name)
+            Assert.AreEqual<string>("constructor", x.Name)
         | "Class" ->
             let x = new FplClass(positions, parent)
-            Assert.AreEqual<string>("a class definition", x.Name)
+            Assert.AreEqual<string>("class definition", x.Name)
         | "Theorem" ->
             let x = new FplTheorem(positions, parent)
-            Assert.AreEqual<string>("a theorem", x.Name)
+            Assert.AreEqual<string>("theorem", x.Name)
         | "Lemma" ->
             let x = new FplLemma(positions, parent)
-            Assert.AreEqual<string>("a lemma", x.Name)
+            Assert.AreEqual<string>("lemma", x.Name)
         | "Proposition" ->
             let x = new FplProposition(positions, parent)
-            Assert.AreEqual<string>("a proposition", x.Name)
+            Assert.AreEqual<string>("proposition", x.Name)
         | "Corollary" ->
             let x = new FplCorollary(positions, parent)
-            Assert.AreEqual<string>("a corollary", x.Name)
+            Assert.AreEqual<string>("corollary", x.Name)
         | "Proof" ->
             let x = new FplProof(positions, parent)
-            Assert.AreEqual<string>("a proof", x.Name)
+            Assert.AreEqual<string>("proof", x.Name)
         | "Conjecture" ->
             let x = new FplConjecture(positions, parent)
-            Assert.AreEqual<string>("a conjecture", x.Name)
+            Assert.AreEqual<string>("conjecture", x.Name)
         | "Axiom" ->
             let x = new FplAxiom(positions, parent)
-            Assert.AreEqual<string>("an axiom", x.Name)
+            Assert.AreEqual<string>("axiom", x.Name)
         | "RuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent)
-            Assert.AreEqual<string>("a rule of inference", x.Name)
+            Assert.AreEqual<string>("rule of inference", x.Name)
         | "Quantor" ->
             let x = new FplQuantor(positions, parent)
-            Assert.AreEqual<string>("a quantor", x.Name)
+            Assert.AreEqual<string>("quantor", x.Name)
         | "Predicate" ->
             let x = new FplPredicate(positions, parent)
-            Assert.AreEqual<string>("a predicate definition", x.Name)
+            Assert.AreEqual<string>("predicate definition", x.Name)
         | "FunctionalTerm" ->
             let x = new FplFunctionalTerm(positions, parent)
-            Assert.AreEqual<string>("a functional term definition", x.Name)
+            Assert.AreEqual<string>("functional term definition", x.Name)
         | "Theory" ->
             let x = new FplTheory(positions, parent, "")
-            Assert.AreEqual<string>("a theory", x.Name)
+            Assert.AreEqual<string>("theory", x.Name)
         | "Root" ->
             let x = new FplRoot()
-            Assert.AreEqual<string>("a root", x.Name)
+            Assert.AreEqual<string>("root", x.Name)
         | "ArgInference" ->
             let x = new FplArgInference(positions, parent)
-            Assert.AreEqual<string>("an argument inference", x.Name)
+            Assert.AreEqual<string>("argument inference", x.Name)
         | "Argument" ->
             let x = new FplArgument(positions, parent)
-            Assert.AreEqual<string>("an argument", x.Name)
+            Assert.AreEqual<string>("argument", x.Name)
         | "Assertion" ->
             let x = new FplAssertion(positions, parent)
-            Assert.AreEqual<string>("an assertion", x.Name)
+            Assert.AreEqual<string>("assertion", x.Name)
         | "Extension" ->
             let x = new FplExtension(positions, parent)
-            Assert.AreEqual<string>("an extension", x.Name)
+            Assert.AreEqual<string>("extension", x.Name)
         | "Instance" ->
             let x = new FplInstance(positions, parent)
-            Assert.AreEqual<string>("an instance", x.Name)
+            Assert.AreEqual<string>("instance", x.Name)
         | "IntrinsicFunc" ->
             let x = new FplIntrinsicFunc(positions, parent)
-            Assert.AreEqual<string>("an intrinsic functional term", x.Name)
+            Assert.AreEqual<string>("intrinsic functional term", x.Name)
         | "IntrinsicInd" ->
             let x = new FplIntrinsicInd(positions, parent)
-            Assert.AreEqual<string>("an intrinsic index", x.Name)
+            Assert.AreEqual<string>("intrinsic index", x.Name)
         | "IntrinsicObj" ->
             let x = new FplIntrinsicObj(positions, parent)
-            Assert.AreEqual<string>("an intrinsic object", x.Name)
+            Assert.AreEqual<string>("intrinsic object", x.Name)
         | "IntrinsicPred" ->
             let x = new FplIntrinsicPred(positions, parent)
-            Assert.AreEqual<string>("an intrinsic predicate", x.Name)
+            Assert.AreEqual<string>("intrinsic predicate", x.Name)
         | "IntrinsicTpl" ->
             let x = new FplIntrinsicTpl(positions, parent)
-            Assert.AreEqual<string>("an intrinsic template", x.Name)
+            Assert.AreEqual<string>("intrinsic template", x.Name)
         | "IntrinsicUndef" ->
             let x = new FplIntrinsicUndef(positions, parent)
-            Assert.AreEqual<string>("an intrinsic undefined", x.Name)
+            Assert.AreEqual<string>("intrinsic undefined", x.Name)
         | "Justification" ->
             let x = new FplJustification(positions, parent)
-            Assert.AreEqual<string>("a justification", x.Name)
+            Assert.AreEqual<string>("justification", x.Name)
         | "Localization" ->
             let x = new FplLocalization(positions, parent)
-            Assert.AreEqual<string>("a localization", x.Name)
+            Assert.AreEqual<string>("localization", x.Name)
         | "Mapping" ->
             let x = new FplMapping(positions, parent)
-            Assert.AreEqual<string>("a mapping", x.Name)
+            Assert.AreEqual<string>("mapping", x.Name)
         | "Reference" ->
             let x = new FplReference(positions, parent)
-            Assert.AreEqual<string>("a reference", x.Name)
+            Assert.AreEqual<string>("reference", x.Name)
         | "Stmt" ->
             let x = new FplStmt(positions, parent)
-            Assert.AreEqual<string>("a statement", x.Name)
+            Assert.AreEqual<string>("statement", x.Name)
         | "Translation" ->
             let x = new FplTranslation(positions, parent)
-            Assert.AreEqual<string>("a translation", x.Name)
+            Assert.AreEqual<string>("translation", x.Name)
         | "Language" ->
             let x = new FplLanguage(positions, parent)
-            Assert.AreEqual<string>("a language", x.Name)        
+            Assert.AreEqual<string>("language", x.Name)        
+        | "Implication" ->
+            let x = new FplImplication(positions, parent)
+            Assert.AreEqual<string>("implication", x.Name)        
+        | "Equivalence" ->
+            let x = new FplEquivalence(positions, parent)
+            Assert.AreEqual<string>("equivalence", x.Name)        
+        | "Equality" ->
+            let x = new FplEquality(positions, parent)
+            Assert.AreEqual<string>("equality", x.Name)        
+        | "Decrement" ->
+            let x = new FplDecrement(positions, parent)
+            Assert.AreEqual<string>("decrement", x.Name)        
+        | "Negation" ->
+            let x = new FplNegation(positions, parent)
+            Assert.AreEqual<string>("negation", x.Name)        
+        | "Conjunction" ->
+            let x = new FplConjunction(positions, parent)
+            Assert.AreEqual<string>("conjunction", x.Name)        
+        | "Disjunction" ->
+            let x = new FplDisjunction(positions, parent)
+            Assert.AreEqual<string>("disjunction", x.Name)        
+        | "ExclusiveOr" ->
+            let x = new FplExclusiveOr(positions, parent)
+            Assert.AreEqual<string>("exclusive disjunction", x.Name)        
+        | "IsOperator" ->
+            let x = new FplIsOperator(positions, parent)
+            Assert.AreEqual<string>("is operator", x.Name)        
         | _ -> 
             Assert.IsTrue(false)
 

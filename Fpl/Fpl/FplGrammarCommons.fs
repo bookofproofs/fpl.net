@@ -171,6 +171,8 @@ let literalThmL = "theorem"
 [<Literal>]
 let literalTpl = "tpl"
 [<Literal>]
+let literalTplL = "template"
+[<Literal>]
 let literalTrivial = "trivial"
 [<Literal>]
 let literalTrue = "true"

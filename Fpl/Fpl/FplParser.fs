@@ -178,7 +178,7 @@ let keywordIs = skipString literalIs .>> attemptSW
 // objects and their properties that defer the concrete
 // specification of one or more types until the definition or method is declared and instantiated by
 // client code
-let keywordTemplate = positions "TemplateType" (pstring "template" <|> pstring literalTpl) |>> Ast.TemplateType
+let keywordTemplate = positions "TemplateType" (pstring literalTplL <|> pstring literalTpl) |>> Ast.TemplateType
 
 let templateTail = choice [ idStartsWithCap; (regex @"\d+") ]
 
