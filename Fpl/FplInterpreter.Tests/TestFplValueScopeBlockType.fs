@@ -580,29 +580,29 @@ type TestFplValueScopeBlockType() =
             | "base10" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13" -> Assert.IsInstanceOfType<FplReference>(base1)
+            | "base13" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
             | "base11a" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12a" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base10b" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11b" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12b" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13b" -> Assert.IsInstanceOfType<FplReference>(base1)
+            | "base13b" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
             | "base10c" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11c" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12c" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13c" -> Assert.IsInstanceOfType<FplReference>(base1)
+            | "base13c" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
             | "base10d" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11d" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12d" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13d" -> Assert.IsInstanceOfType<FplReference>(base1)
+            | "base13d" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
             | "base10e" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11e" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12e" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13e" -> Assert.IsInstanceOfType<FplReference>(base1)
+            | "base13e" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
             | "base10f" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base11f" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base12f" -> Assert.IsInstanceOfType<FplReference>(base1)
-            | "base13f" -> Assert.IsInstanceOfType<FplReference>(base1)
+            | "base13f" -> Assert.IsInstanceOfType<FplExtensionObj>(base1)
             | "base14" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base15" -> Assert.IsInstanceOfType<FplReference>(base1)
             | "base15a" -> Assert.IsInstanceOfType<FplReference>(base1)
@@ -918,5 +918,53 @@ type TestFplValueScopeBlockType() =
             | "base4" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
             | "base5" -> Assert.IsInstanceOfType<FplTranslation>(trsl)
             | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("@0", "")>]
+    [<DataRow("@1", "")>]
+    [<DataRow("@2", "")>]
+    [<DataRow("@3", "")>]
+    [<DataRow("@4", "")>]
+    [<DataRow("@100", "")>]
+    [<DataRow("@42", "")>]
+    [<TestMethod>]
+    member this.TestDecrement(varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """def pred T() { del.Decrement(%s) };""" varVal
+        let filename = "TestDecrementBlockType.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let base1 = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            Assert.IsInstanceOfType<FplDecrement>(base1)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("@0", "")>]
+    [<DataRow("@1", "")>]
+    [<DataRow("@2", "")>]
+    [<DataRow("@3", "")>]
+    [<DataRow("@4", "")>]
+    [<DataRow("@100", "")>]
+    [<DataRow("@42", "")>]
+    [<TestMethod>]
+    member this.TestExtensionObj(varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """def pred T() { %s };""" varVal
+        let filename = "TestExtensionObjBlockType.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let base1 = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            Assert.IsInstanceOfType<FplExtensionObj>(base1)
         | None -> 
             Assert.IsTrue(false)

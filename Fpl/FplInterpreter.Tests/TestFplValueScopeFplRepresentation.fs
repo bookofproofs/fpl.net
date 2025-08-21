@@ -584,23 +584,23 @@ type TestFplValueScopeFplRepresentation() =
             | "base10b" -> Assert.AreEqual<string>($"{literalUndef}()", base1.Represent())
             | "base11b" -> Assert.AreEqual<string>($"{literalUndef}()", base1.Represent())
             | "base12b" -> Assert.AreEqual<string>($"{literalUndef}()", base1.Represent())
-            | "base13b" -> Assert.AreEqual<string>($"{literalUndef}()", base1.Represent())
+            | "base13b" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
             | "base10c" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef})", base1.Represent())
             | "base11c" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef})", base1.Represent())
             | "base12c" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef})", base1.Represent())
-            | "base13c" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef})", base1.Represent())
+            | "base13c" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
             | "base10d" -> Assert.AreEqual<string>($"{literalUndef}[{literalUndef}, {literalUndef}]", base1.Represent())
             | "base11d" -> Assert.AreEqual<string>($"{literalUndef}[{literalUndef}, {literalUndef}]", base1.Represent())
             | "base12d" -> Assert.AreEqual<string>($"{literalUndef}[{literalUndef}, {literalUndef}]", base1.Represent())
-            | "base13d" -> Assert.AreEqual<string>($"{literalUndef}[{literalUndef}.{literalUndef}]", base1.Represent())
+            | "base13d" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
             | "base10e" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef}).{literalUndef}[{literalUndef}, {literalUndef}]", base1.Represent())
             | "base11e" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef}).{literalUndef}[{literalUndef}, {literalUndef}]", base1.Represent())
-            | "base12e" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef}).{literalUndef}[{literalUndef}, {literalUndef}]", base1.Represent())
-            | "base13e" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef}).{literalUndef}[{literalUndef}, {literalUndef}]", base1.Represent())
+            | "base12e" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef}).{literalUndef}", base1.Represent())
+            | "base13e" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
             | "base10f" -> Assert.AreEqual<string>($"{literalUndef}[{literalUndef}, {literalUndef}].{literalUndef}({literalUndef}, {literalUndef})", base1.Represent())
             | "base11f" -> Assert.AreEqual<string>($"{literalUndef}[{literalUndef}, {literalUndef}].{literalUndef}({literalUndef}, {literalUndef})", base1.Represent())
             | "base12f" -> Assert.AreEqual<string>($"{literalUndef}[{literalUndef}, {literalUndef}].{literalUndef}({literalUndef}, {literalUndef})", base1.Represent())
-            | "base13f" -> Assert.AreEqual<string>($"{literalUndef}[{literalUndef}.{literalUndef}].{literalUndef}({literalUndef}, {literalUndef})", base1.Represent())
+            | "base13f" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
             | "base14" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
             | "base15" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef})", base1.Represent())
             | "base15a" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef})", base1.Represent())
@@ -716,6 +716,7 @@ type TestFplValueScopeFplRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("base0", "dec ~x,y:pred; del.Equal(x,y)")>]
     [<DataRow("base1", "del.Equal(x,y)")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
     [<DataRow("base3", "del.D(self,b,c)")>]
@@ -739,7 +740,8 @@ type TestFplValueScopeFplRepresentation() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("undef(undef, undef)", base1.Represent())
+            | "base0" -> Assert.AreEqual<string>("undetermined", base1.Represent())
+            | "base1" -> Assert.AreEqual<string>("undef", base1.Represent())
             | "base2" -> Assert.AreEqual<string>("undef(undef, undef, undef, undef)", base1.Represent())
             | "base3" -> Assert.AreEqual<string>("undef(undef, undef, undef)", base1.Represent())
             | "base4" -> Assert.AreEqual<string>("undef(undef(undef))", base1.Represent())

@@ -590,7 +590,7 @@ type TestFplValueScopeName() =
             | "base2" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base3" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base4" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
-            | "base5" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
+            | "base5" -> Assert.AreEqual<string>("Test()", base1.Type(SignatureType.Name))
             | "base6" -> Assert.AreEqual<string>("$1", base1.Type(SignatureType.Name))
             | "base7" -> Assert.AreEqual<string>("bydef.Test()", base1.Type(SignatureType.Name))
             | "base8" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
@@ -847,13 +847,13 @@ type TestFplValueScopeName() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("del.B()", base1.Type(SignatureType.Mixed))
-            | "base2" -> Assert.AreEqual<string>("del.C(T1, ind, ind, undef)", base1.Type(SignatureType.Mixed))
-            | "base3" -> Assert.AreEqual<string>("del.D(parent, ind, ind)", base1.Type(SignatureType.Mixed))
-            | "base4" -> Assert.AreEqual<string>("del.B(In(undef))", base1.Type(SignatureType.Mixed))
-            | "base5" -> Assert.AreEqual<string>("del.Test()", base1.Type(SignatureType.Mixed))
-            | "base6" -> Assert.AreEqual<string>("del.C(Test1(T1), Test2(ind, ind, undef))", base1.Type(SignatureType.Mixed))
-            | "base7" -> Assert.AreEqual<string>("del.E(pred, undef, pred)", base1.Type(SignatureType.Mixed))
+            | "base1" -> Assert.AreEqual<string>("B()", base1.Type(SignatureType.Mixed))
+            | "base2" -> Assert.AreEqual<string>("C(T1, ind, ind, undef)", base1.Type(SignatureType.Mixed))
+            | "base3" -> Assert.AreEqual<string>("D(parent, ind, ind)", base1.Type(SignatureType.Mixed))
+            | "base4" -> Assert.AreEqual<string>("B(In(undef))", base1.Type(SignatureType.Mixed))
+            | "base5" -> Assert.AreEqual<string>("Test()", base1.Type(SignatureType.Mixed))
+            | "base6" -> Assert.AreEqual<string>("C(Test1(T1), Test2(ind, ind, undef))", base1.Type(SignatureType.Mixed))
+            | "base7" -> Assert.AreEqual<string>("E(pred, undef, pred)", base1.Type(SignatureType.Mixed))
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

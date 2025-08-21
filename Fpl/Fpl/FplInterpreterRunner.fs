@@ -106,6 +106,7 @@ type FplRunner() =
         | :? FplEquivalence 
         | :? FplIsOperator 
         | :? FplEquality 
+        | :? FplExtensionObj 
         | :? FplDecrement 
         | :? FplReference ->
             if caller.Scope.Count > 0 then 
@@ -139,6 +140,7 @@ type FplRunner() =
                 | :? FplNegation 
                 | :? FplConjunction 
                 | :? FplExclusiveOr 
+                | :? FplExtensionObj 
                 | :? FplDisjunction 
                 | :? FplIsOperator 
                 | :? FplDecrement 

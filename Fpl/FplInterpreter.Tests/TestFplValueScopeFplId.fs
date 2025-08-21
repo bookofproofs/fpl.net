@@ -573,7 +573,7 @@ type TestFplValueScopeFplId() =
             | "base2" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base3" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base4" -> Assert.AreEqual<string>(varVal, base1.FplId)
-            | "base5" -> Assert.AreEqual<string>("del.Test", base1.FplId)
+            | "base5" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base6" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base7" -> Assert.AreEqual<string>("bydef.", base1.FplId)
             | "base8" -> Assert.AreEqual<string>(varVal, base1.FplId)
@@ -705,13 +705,13 @@ type TestFplValueScopeFplId() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("del.B", base1.FplId)
-            | "base2" -> Assert.AreEqual<string>("del.C", base1.FplId)
-            | "base3" -> Assert.AreEqual<string>("del.D", base1.FplId)
-            | "base4" -> Assert.AreEqual<string>("del.B", base1.FplId)
-            | "base5" -> Assert.AreEqual<string>("del.Test", base1.FplId)
-            | "base6" -> Assert.AreEqual<string>("del.C", base1.FplId)
-            | "base7" -> Assert.AreEqual<string>("del.E", base1.FplId)
+            | "base1" -> Assert.AreEqual<string>("B", base1.FplId)
+            | "base2" -> Assert.AreEqual<string>("C", base1.FplId)
+            | "base3" -> Assert.AreEqual<string>("D", base1.FplId)
+            | "base4" -> Assert.AreEqual<string>("B", base1.FplId)
+            | "base5" -> Assert.AreEqual<string>("Test", base1.FplId)
+            | "base6" -> Assert.AreEqual<string>("C", base1.FplId)
+            | "base7" -> Assert.AreEqual<string>("E", base1.FplId)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

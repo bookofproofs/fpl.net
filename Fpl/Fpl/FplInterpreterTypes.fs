@@ -1573,6 +1573,31 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
         
         this.SetValue(newValue)  
 
+type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+    do 
+        this.TypeId <- literalUndef
+        this.FplId <- literalUndef
+
+    override this.Name = $"{literalIntrL} {literalUndefL}"
+    override this.ShortName = literalUndef
+
+    override this.Clone () =
+        let ret = new FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Instantiate () = None
+
+    override this.Type (signatureType:SignatureType) = 
+        getFplHead this signatureType
+                    
+    override this.Represent (): string = this.FplId
+
+    override this.Run (): unit = 
+        raise (NotImplementedException())
+
+
 /// Implements the semantics of an FPL equality.
 type FplEquality(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -1632,27 +1657,102 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
         let a1Repr = a1.Represent()
         let b1Repr = b1.Represent()
 
+        let newValue = new FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
         match a1Repr with
         | FplGrammarCommons.literalUndef -> 
             this.Diagnostic "Predicate `=` cannot be evaluated because the left argument is undefined." 
-        | _ -> ()
-
-        match b1Repr with
-        | FplGrammarCommons.literalUndef -> 
-            this.Diagnostic "Predicate `=` cannot be evaluated because the right argument is undefined." 
-        | _ -> ()
-
-        match a1Repr with
-        | FplGrammarCommons.literalUndetermined -> 
-            this.Diagnostic "Predicate `=` cannot be evaluated because the left argument is undetermined." 
+            this.SetValue(newValue)
         | _ -> 
             match b1Repr with
-            | FplGrammarCommons.literalUndetermined -> 
-                this.Diagnostic "Predicate `=` cannot be evaluated because the right argument is undetermined." 
+            | FplGrammarCommons.literalUndef -> 
+                this.Diagnostic "Predicate `=` cannot be evaluated because the right argument is undefined." 
+                this.SetValue(newValue)
             | _ -> 
                 let newValue = FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
-                newValue.FplId <- $"{(a1Repr = b1Repr)}" 
-                this.SetValue(newValue)
+                match a1Repr with
+                | "dec pred"  
+                | FplGrammarCommons.literalUndetermined -> 
+                    this.Diagnostic "Predicate `=` cannot be evaluated because the left argument is undetermined." 
+                    this.SetValue(newValue)
+                | _ -> 
+                    match b1Repr with
+                    | "dec pred"  
+                    | FplGrammarCommons.literalUndetermined -> 
+                        this.Diagnostic "Predicate `=` cannot be evaluated because the right argument is undetermined." 
+                        this.SetValue(newValue)
+                    | _ -> 
+                        newValue.FplId <- $"{(a1Repr = b1Repr)}" 
+                        this.SetValue(newValue)
+
+/// Implements an object that is used to provide a representation of extensions in FPL.
+type FplExtensionObj(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+
+    do 
+        this.TypeId <- literalObj
+
+
+    override this.Name = $"{literalExtL} {literalObjL}"
+    override this.ShortName = literalObj
+
+    override this.Clone () =
+        let ret = new FplExtensionObj((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Instantiate () = None
+
+    override this.Type signatureType = 
+        let head = getFplHead this signatureType
+        let propagate = propagateSignatureType signatureType
+        let args = 
+            this.ArgList
+            |> Seq.map (fun arg -> arg.Type(propagate))
+            |> String.concat ", "
+
+        let qualification =
+            if this.Scope.ContainsKey(".") then
+                Some(this.Scope["."])
+            else
+                None
+
+        match (head, args, qualification) with
+        | (_, "", Some qual) -> sprintf "%s.%s" head (qual.Type(propagate))
+        | (_, "???", Some qual) ->
+            if this.HasBrackets then
+                sprintf "%s[].%s" head (qual.Type(propagate))
+            else
+                sprintf "%s().%s" head (qual.Type(propagate))
+        | (_, _, Some qual) ->
+            if this.HasBrackets then
+                sprintf "%s[%s].%s" head args (qual.Type(propagate))
+            else
+                sprintf "%s(%s).%s" head args (qual.Type(propagate))
+        | ("???", _, None) -> sprintf "%s" head
+        | ("", _, None) -> sprintf "%s" args
+        | (_, "", None) -> sprintf "%s" head
+        | (_, "???", None) ->
+            if this.HasBrackets then
+                sprintf "%s[]" head
+            else
+                sprintf "%s()" head
+        | (_, _, None) ->
+            if this.HasBrackets then sprintf "%s[%s]" head args
+            elif head = "bydef." then sprintf "%s%s" head args
+            else sprintf "%s(%s)" head args
+
+
+    override this.Represent () = 
+        let subRepr = 
+            this.ValueList
+            |> Seq.map (fun subfv -> subfv.Represent())
+            |> String.concat ", "
+        if subRepr = String.Empty then 
+            literalUndef
+        else
+            subRepr
+
+    override this.Run () = ()
 
 
 /// Implements the semantics of an FPL decrement delegate.
@@ -1672,7 +1772,7 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
 
     member this.Copy(other) =
         base.Copy(other)
-        this.TypeId <- literalPred
+        this.TypeId <- literalObj
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
@@ -1701,7 +1801,14 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
         raise (NotImplementedException())
 
     override this.Represent () = 
-        raise (NotImplementedException())
+        let subRepr = 
+            this.ValueList
+            |> Seq.map (fun subfv -> subfv.Type(SignatureType.Name))
+            |> String.concat ", "
+        if subRepr = String.Empty then 
+            literalUndef
+        else
+            subRepr        
 
     override this.Run () = 
         if this.ArgList.Count <> 1 then 
@@ -1709,13 +1816,17 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
         else
 
 
-        let a1 = this.ArgList[0]
-        let a1Repr = a1.Represent()
+        let arg = this.ArgList[0]
 
-        let newValue = FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
-        newValue.FplId <- $"todo" 
+        let newValue = FplExtensionObj((this.StartPos, this.EndPos), this.Parent.Value)
+        let n = int arg.FplId
+        let n' = n - 1
+        newValue.FplId <- 
+            if n' < 0 then 
+                ""
+            else
+                string n'
         this.SetValue(newValue)
-
 
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -2155,31 +2266,6 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     override this.Run (): unit = 
         raise (NotImplementedException())
 
-
-type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-    do 
-        this.TypeId <- literalUndef
-        this.FplId <- literalUndef
-
-    override this.Name = $"{literalIntrL} {literalUndefL}"
-    override this.ShortName = literalUndef
-
-    override this.Clone () =
-        let ret = new FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = None
-
-    override this.Type (signatureType:SignatureType) = 
-        getFplHead this signatureType
-                    
-    override this.Represent (): string = this.FplId
-
-    override this.Run (): unit = 
-        raise (NotImplementedException())
-
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do
@@ -2342,6 +2428,7 @@ let qualifiedName (fplValue:FplValue)=
             | :? FplImplication 
             | :? FplEquivalence 
             | :? FplIsOperator 
+            | :? FplExtensionObj 
             | :? FplEquality 
             | :? FplReference -> fv.Type(SignatureType.Name)
             | :? FplLocalization

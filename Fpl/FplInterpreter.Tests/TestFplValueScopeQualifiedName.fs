@@ -560,7 +560,7 @@ type TestFplValueScopeQualifiedName() =
             | "base2" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
             | "base3" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
             | "base4" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
-            | "base5" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
+            | "base5" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().Test()", qualifiedName base1)
             | "base6" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
             | "base7" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().bydef.Test()", qualifiedName base1)
             | "base8" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
@@ -691,13 +691,13 @@ type TestFplValueScopeQualifiedName() =
             let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.B()", qualifiedName base1)
-            | "base2" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.C(a, b, c, d)", qualifiedName base1)
-            | "base3" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.D(T1(), b, c)", qualifiedName base1)
-            | "base4" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.B(In(x))", qualifiedName base1)
-            | "base5" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.Test()", qualifiedName base1)
-            | "base6" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.C(Test1(a), Test2(b, c, d))", qualifiedName base1)
-            | "base7" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().del.E(true, undef, false)", qualifiedName base1)
+            | "base1" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().B()", qualifiedName base1)
+            | "base2" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().C(a, b, c, d)", qualifiedName base1)
+            | "base3" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().D(T1(), b, c)", qualifiedName base1)
+            | "base4" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().B(In(x))", qualifiedName base1)
+            | "base5" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().Test()", qualifiedName base1)
+            | "base6" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().C(Test1(a), Test2(b, c, d))", qualifiedName base1)
+            | "base7" -> Assert.AreEqual<string>("TestDelegateQualifiedName.T1().E(true, undef, false)", qualifiedName base1)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

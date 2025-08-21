@@ -55,6 +55,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         | :? FplIsOperator 
         | :? FplEquality 
         | :? FplDecrement 
+        | :? FplExtensionObj 
         | :? FplReference
         | :? FplQuantor
         | :? FplIntrinsicInd
@@ -337,8 +338,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DelegateId((pos1, pos2), s) -> 
         st.EvalPush("DelegateId")
         let fv = es.PeekEvalStack()
-        fv.FplId <- fv.FplId + s
-        fv.TypeId <- fv.TypeId + s
+        fv.FplId <- s
         st.EvalPop() 
     | Ast.Alias((pos1, pos2), s) -> 
         st.EvalPush("Alias")
@@ -556,10 +556,11 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Extension((pos1, pos2), extensionString) ->
         st.EvalPush("Extension")
-        let fv = es.PeekEvalStack()
-        fv.FplId <- extensionString
-        fv.TypeId <- extensionString
-        checkID018Diagnostics st fv extensionString pos1 pos2
+        let fv = es.Pop()
+        let fplNew = new FplExtensionObj((pos1,pos2), fv.Parent.Value)
+        es.PushEvalStack(fplNew)
+        fplNew.FplId <- extensionString
+        checkID018Diagnostics st fplNew extensionString pos1 pos2
         st.EvalPop()
     | Ast.ExtensionType((pos1, pos2), extensionNameAst) ->
         st.EvalPush("ExtensionType")
@@ -958,6 +959,7 @@ let rec eval (st: SymbolTable) ast =
             es.PushEvalStack(refBlock)
             eval st fplIdentifierAst
             eval st specificationAst |> ignore
+            let refBlock = es.PeekEvalStack()
             if System.Char.IsLower(refBlock.FplId[0]) then
                 // match the signatures of small-letter entities (like the self or parent entity, or variables with arguments) 
                 // with their declared types 
@@ -1111,17 +1113,19 @@ let rec eval (st: SymbolTable) ast =
         match refBlock.FplId with 
         | "Equal" -> 
             let deleg = new FplEquality((pos1, pos2), fv)
-            deleg.Copy fv
+            deleg.Copy refBlock
             es.Pop() |> ignore
             es.PushEvalStack(deleg)
             deleg.Run()
         | "Decrement" -> 
             let deleg = new FplDecrement((pos1, pos2), fv)
-            deleg.Copy fv
+            deleg.Copy refBlock
             es.Pop() |> ignore
             es.PushEvalStack(deleg)
             deleg.Run()
-        | _ -> emitID013Diagnostics pos1 pos2 $"Unknown delegate `{refBlock.FplId}`"  
+        | _ -> 
+            refBlock.TypeId <- literalUndef
+            emitID013Diagnostics pos1 pos2 $"Unknown delegate `{refBlock.FplId}`"  
         es.PopEvalStack()
         st.EvalPop()
     // | ClosedOrOpenRange of Positions * ((Ast * Ast option) * Ast)
@@ -1414,13 +1418,13 @@ let rec eval (st: SymbolTable) ast =
         | :? FplConjecture  
         | :? FplPredicate  
         | :? FplAxiom -> 
-            fv.ValueList.Add(last)
+            fv.SetValue(last)
         | _ -> ()
 
         match fv with
         | :? FplMandatoryPredicate 
         | :? FplOptionalPredicate ->
-            fv.ValueList.Add(last)
+            fv.SetValue(last)
         | :? FplReference ->
             // simplify references created due to superfluous parentheses of expressions
             // by replacing them with their single value
