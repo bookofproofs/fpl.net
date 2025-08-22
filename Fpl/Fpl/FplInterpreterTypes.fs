@@ -11,6 +11,7 @@ open FplGrammarCommons
 open FplGrammarTypes
 open FplParser
 open ErrDiagnostics
+open FplInterpreterDiagnosticsEmitterPre
 
 (* MIT License
 
@@ -374,10 +375,17 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// Clears the ValueList and adds the argument to it. Previous value(s), if any, get lost.
     abstract member SetValue: FplValue -> unit
 
+    /// Clears the ValueList and adds the argument to it. Previous value(s), if any, get lost.
+    abstract member SetValuesOf: FplValue -> unit
+
     (* Default implementations = everything is false, only the trues are overridden in derived classes *)
     override this.SetValue fv =
         this.ValueList.Clear()
         this.ValueList.Add(fv)
+
+    override this.SetValuesOf fv =
+        this.ValueList.Clear()
+        this.ValueList.AddRange(fv.ValueList)
 
     override this.IsFplBlock () = false
     override this.IsBlock () = false
@@ -2380,6 +2388,81 @@ let getArgument (fv:FplValue) =
     | _ when fv.ArgList.Count > 0 -> Some fv.ArgList[0]
     | _ -> None
 
+/// Implements the return statement in FPL.
+type FplReturn(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+
+    do
+        this.FplId <- literalRet
+        this.TypeId <- literalUndef
+
+    override this.Name = $"{literalRetL} statement"
+    override this.ShortName = "stmt"
+
+    override this.Clone () =
+        let ret = new FplReturn((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Instantiate () =
+        if this.FplId = "bas" then
+            // in case of a base class constructor call (that resides inside this that is a constructor)
+            // identify the 
+
+            let baseClassOpt = 
+                if this.ArgList.Count > 0 then
+                    let test = this.ArgList[0]
+                    // in case of a base.obj() constructor call
+                    if test.ArgList.Count = 2 && 
+                        isIntrinsicObj test.ArgList[0] && 
+                        isReference test.ArgList[1] &&
+                        test.ArgList[1].FplId = "???" then
+                        // return an FplValue inbuilt Object 
+                        Some  test.ArgList[0] 
+                    elif test.ArgList.Count > 0 then
+                        Some test 
+                    else
+                        None
+                else 
+                    None
+
+            match baseClassOpt with
+            | Some (baseClass:FplValue) when baseClass.IsClass() -> 
+                Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
+            | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
+        else
+            None
+
+    override this.Type signatureType = this.FplId
+    override this.Represent () = this.FplId
+
+    member private this.MatchWithMapping (fva: FplValue) (fvp: FplValue) =
+        let targetMapping = getMapping fvp
+
+        match targetMapping with
+        | Some tm -> mpwa [ fva ] [ tm ]
+        | None -> Some($"Btest")
+
+
+    override this.Run () =
+        let returnedReference = this.ArgList[0]
+        let mapType = this.Parent.Value
+        match this.MatchWithMapping returnedReference mapType with
+        | Some errMsg -> emitSIG03Diagnostics errMsg (mapType.Type(SignatureType.Type)) (returnedReference.StartPos) (returnedReference.EndPos)
+        | _ -> 
+            let returnedValueOpt = getArgument returnedReference
+            match returnedValueOpt with
+            | Some returnedValue -> 
+                if returnedValue.ValueList.Count > 0 then
+                    this.SetValuesOf returnedValue
+                else
+                    // todo diagnostics returns uninitialized value
+                    let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+                    this.SetValue(value)
+            | _ -> 
+                // add an undefined value since there was no argument of the returnedValue
+                let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+                this.SetValue(value)
 
 /// A discriminated union type for wrapping search results in the Scope of an FplValue.
 type ScopeSearchResult =
@@ -3088,12 +3171,7 @@ let matchArgumentsWithParameters (fva: FplValue) (fvp: FplValue) =
     | Some aErr -> Some($"{aErr} in {stdMsg}")
     | None -> None
 
-let matchWithMapping (fva: FplValue) (fvp: FplValue) =
-    let targetMapping = getMapping fvp
 
-    match targetMapping with
-    | Some tm -> mpwa [ fva ] [ tm ]
-    | None -> Some($"Btest")
 
 /// Tries to match the signatures of toBeMatched with the signatures of all candidates and accoumulates any
 /// error messages in accResultList.

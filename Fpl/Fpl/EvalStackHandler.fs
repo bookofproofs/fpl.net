@@ -91,6 +91,7 @@ type EvalStack() =
             | :? FplMapping 
             | :? FplTranslation 
             | :? FplStmt
+            | :? FplReturn
             | :? FplAssertion
             | :? FplIntrinsicPred
             | :? FplIntrinsicFunc

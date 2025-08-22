@@ -12,6 +12,7 @@
     <Compile Include="FplGrammarCommons.fs" />
     <Compile Include="FplGrammarTypes.fs" />
     <Compile Include="ErrDiagnostics.fs" />
+    <Compile Include="FplInterpreterDiagnosticsEmitterPre.fs" />
     <None Include="CHANGES.md" />
     <None Include="DocuSymbolTable.md" />
     <None Include="DocuFplGrammarPocShiftFromPythonToFSharp.md" />

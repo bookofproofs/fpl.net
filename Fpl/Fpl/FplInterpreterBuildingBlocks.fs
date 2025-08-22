@@ -614,26 +614,10 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Return((pos1, pos2), returneeAst) ->
         st.EvalPush("Return")
         let fv = es.PeekEvalStack()
-        let stmt = new FplStmt((pos1,pos2), fv)
-        stmt.FplId <- literalRetL
+        let stmt = new FplReturn((pos1,pos2), fv)
         es.PushEvalStack(stmt)
         eval st returneeAst
-        let returnedReference = stmt.ArgList[0]
-        emitSIG03Diagnostics returnedReference fv
-        let returnedValueOpt = getArgument returnedReference
-        match returnedValueOpt with
-        | Some returnedValue -> 
-            if returnedValue.ValueList.Count > 0 then
-                fv.ValueList.AddRange(returnedValue.ValueList)
-            else
-                // todo diagnostics returns uninitialized value
-                let value = new FplIntrinsicUndef((pos1, pos2), fv)
-                fv.ValueList.Add(value)
-                fv.ValueList.Add(value)
-        | _ -> 
-            // add an undefined value since there was no argument of the 
-            let value = new FplIntrinsicUndef((pos1, pos2), fv)
-            fv.ValueList.Add(value)
+        stmt.Run()
         es.PopEvalStack() 
         st.EvalPop()
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
