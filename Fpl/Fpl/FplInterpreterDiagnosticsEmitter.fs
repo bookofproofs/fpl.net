@@ -7,6 +7,7 @@ open FParsec
 open FplGrammarCommons
 open ErrDiagnostics
 open FplInterpreterTypes
+open FplInterpreterDiagnosticsEmitterPre
 (* MIT License
 
 Copyright (c) 2024+ bookofproofs
@@ -695,74 +696,6 @@ let checkSIG04Diagnostics (calling:FplValue) (candidates: FplValue list) =
             }
         ad.AddDiagnostic diagnostic
         None
-
-let checkSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) = 
-    let valueOpt = getArgument toBeAssignedValue
-    match valueOpt with
-    | Some value when value.IsClass() ->
-        let chainOpt = findClassInheritanceChain value assignee.TypeId
-        match chainOpt with
-        | None ->
-            // issue SIG05 diagnostics if either no inheritance chain found 
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = toBeAssignedValue.StartPos
-                    Diagnostic.EndPos = toBeAssignedValue.EndPos
-                    Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), value.Type(SignatureType.Type))
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic
-        | _ -> () // inheritance chain found (no SIG05 diagnostics)
-    | Some value when isConstructor value ->
-        // find a class inheritance chain for the constructor's class (which is stored in its parent value)
-        let chainOpt = findClassInheritanceChain value.Parent.Value assignee.TypeId
-        match chainOpt with
-        | None ->
-            // issue SIG05 diagnostics if either no inheritance chain found 
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = toBeAssignedValue.StartPos
-                    Diagnostic.EndPos = toBeAssignedValue.EndPos
-                    Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), value.Type(SignatureType.Type))
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic
-        | _ -> () // inheritance chain found (no SIG05 diagnostics)
-    | Some value when assignee.TypeId <> value.TypeId ->
-        // Issue SIG05 diagnostics if value is not a constructor and not a class and still the types are not the same 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = toBeAssignedValue.StartPos
-                Diagnostic.EndPos = toBeAssignedValue.EndPos
-                Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), value.Type(SignatureType.Type))
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-    | Some value when assignee.TypeId = value.TypeId ->
-        // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
-        ()
-    | _ ->
-        // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = toBeAssignedValue.StartPos
-                Diagnostic.EndPos = toBeAssignedValue.EndPos
-                Diagnostic.Code = SIG05(assignee.Type(SignatureType.Type), toBeAssignedValue.Type(SignatureType.Type))
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
 
 let rec blocktIsProof (fplValue: FplValue) =
     if fplValue.IsProof() then

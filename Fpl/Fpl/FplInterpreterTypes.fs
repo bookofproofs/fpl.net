@@ -338,7 +338,6 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// ValueList of the FplValue.
     member this.ValueList = _valueList
 
-    abstract member Instantiate: unit -> FplValue option // not all FplValues can be instantiated, e.g. a theorem cannot be instantiated
     abstract member Clone: unit -> FplValue
     abstract member AssignParts: FplValue -> unit
     abstract member ShortName: string
@@ -351,8 +350,8 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// Adds this FplValue to it's parent's ArgList, if such a Parent exists.
     abstract member TryAddToParentsArgList: unit -> unit
 
-    /// Abstract member for running this FplValue
-    abstract member Run: unit -> unit
+    /// Abstract member for running this FplValue. It has None or Some optional FplVariableStack as paramter.
+    abstract member Run: FplVariableStack -> unit
 
     /// Indicates if this FplValue is an FPL building block.
     abstract member IsFplBlock: unit -> bool
@@ -368,6 +367,9 @@ type FplValue(positions: Positions, parent: FplValue option) =
 
     /// Indicates if this FplValue is a variable or some variadic variable.
     abstract member IsVariable: unit -> bool
+
+    /// Indicates if this FplValue is a variable or some variadic variable.
+    abstract member IsVariadic: unit -> bool
 
     /// Indicates if this FplValue is a mapping.
     abstract member IsMapping: unit -> bool
@@ -389,10 +391,11 @@ type FplValue(positions: Positions, parent: FplValue option) =
 
     override this.IsFplBlock () = false
     override this.IsBlock () = false
-    override this.IsClass (): bool = false
-    override this.IsProof (): bool = false
-    override this.IsVariable (): bool = false
-    override this.IsMapping (): bool = false
+    override this.IsClass () = false
+    override this.IsProof () = false
+    override this.IsVariable () = false
+    override this.IsVariadic () = false
+    override this.IsMapping () = false
     
     override this.AssignParts (ret:FplValue) =
         ret.FplId <- this.FplId
@@ -562,6 +565,87 @@ type FplValue(positions: Positions, parent: FplValue option) =
         | Some parent -> parent.ArgList.Add(this)
         | _ -> ()
               
+/// This type implements the functionality needed to "run" FPL statements step-by-step
+/// while managing the storage of variables. FPL uses a call-by-value approach when it comes to 
+/// replacing parameters by a calling function with arguments.
+and FplVariableStack() = 
+    let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
+
+    // The stack memory of the runner to store the variables of all run programs
+    member this.Stack = _stack
+
+    /// Copy the ValueList of the variadic ar to the ValueList of the variadic p
+    /// by removing the previous values (if any) and
+    /// inserting the clones of the elements.
+    member this.ReplaceVariables (parameters:FplValue list) (arguments:FplValue list) =
+        let replaceValues (p:FplValue) (ar:FplValue)  =
+            (p.ValueList:List<FplValue>).Clear()
+            ar.ValueList
+            |> Seq.iter (fun (fv:FplValue) ->
+                let fvClone = fv.Clone()
+                p.ValueList.Add(fvClone)
+            )
+
+        let rec replace (pars:FplValue list) (args: FplValue list) = 
+            match (pars, args) with
+            | (p::ps, ar::ars) ->
+                match p.IsVariadic(), ar.IsVariadic() with
+                // p is variadic, ar is variadic 
+                | true, true ->
+                    replaceValues p ar
+                    // continue replacing variables with the remaining lists
+                    replace ps ars
+                // p is variadic, ar is anything
+                | true, _ ->
+                    replaceValues p ar              
+                    // continue replacing variables with the original pars and the remaining ars list
+                    replace pars ars
+                // p is not variadic, ar is variadic 
+                | false, true -> ()
+                 // p is not variadic, ar is anything but variadic 
+                | false, _ ->
+                    // otherwise, simply assign the argument's representation to the parameter's representation
+                    replaceValues p ar
+                    // continue replacing variables with the remaining lists
+                    replace ps ars
+            | (p::ps, []) -> ()
+            | ([], ar::ars) -> ()
+            | ([], []) -> ()
+        replace parameters arguments
+
+    /// Saves the clones (!) of the original scope variables of an FplValue block as a KeyValuePair to a stack memory.
+    /// where the key is the block's FplId and the value is a dictionary of all scope variables.
+    /// Returns a list of parameters of the called FplValue, i.e. its signature variables.
+    /// Since the block's FplId is unique in the scope, all variables are stored in a separate scope.
+    member this.SaveVariables (called:FplValue) = 
+        // now process all scope variables and push by replacing them with their clones
+        // and pushing the originals on the stack
+        let toBeSavedScopeVariables = Dictionary<string, FplValue>()
+        let pars = List<FplValue>()
+        called.Scope
+        |> Seq.filter (fun (kvp:KeyValuePair<string,FplValue>) -> kvp.Value.IsVariable()) 
+        |> Seq.iter (fun paramKvp -> 
+            // save the clone of the original parameter variable
+            let parOriginal = paramKvp.Value
+            let parClone = parOriginal.Clone()
+            toBeSavedScopeVariables.Add(paramKvp.Key, parClone)
+            if paramKvp.Value.IsSignatureVariable then 
+                pars.Add(parOriginal)
+        )
+        let kvp = KeyValuePair(called.FplId,toBeSavedScopeVariables)
+        _stack.Push(kvp)
+        pars |> Seq.toList
+
+    /// Restores the scope variables of an FplValue block from the stack.
+    member this.RestoreVariables (fvPar:FplValue) = 
+        let blockVars = _stack.Pop()
+        blockVars.Value
+        |> Seq.iter (fun kvp -> 
+            let orig = (fvPar.Scope:Dictionary<string, FplValue>)[kvp.Key] 
+            orig.Copy(kvp.Value)
+        )
+
+
     
 let private getFplHead (fv:FplValue) (signatureType:SignatureType) =
     match signatureType with
@@ -589,7 +673,7 @@ type FplRoot() =
     inherit FplValue((Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
     override this.Name = "root"
     override this.ShortName = "root"
-    override this.Instantiate () = None
+
     override this.Clone () =
         let ret = new FplRoot()
         this.AssignParts(ret)
@@ -598,7 +682,7 @@ type FplRoot() =
     override this.Type _ = String.Empty
     override this.Represent () = literalUndef
     override this.TryAddToParentsArgList () = () 
-    override this.Run () = ()
+    override this.Run variableStack = ()
 
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isRoot (fv:FplValue) = 
@@ -613,7 +697,7 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
 
     override this.Name = "theory"
     override this.ShortName = "th"
-    override this.Instantiate () = None
+
     override this.Clone () =
         let ret = new FplTheory((this.StartPos, this.EndPos), this.Parent.Value, this.FilePath.Value)
         this.AssignParts(ret)
@@ -626,7 +710,7 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
         | SignatureType.Type -> this.TypeId
 
     override this.Represent () = literalUndef
-    override this.Run () = ()
+    override this.Run variableStack = ()
 
 
 /// Indicates if an FplValue is the root of the SymbolTable.
@@ -641,8 +725,6 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
     do 
         this.FplId <- literalUndetermined
         this.TypeId <- literalPred
-
-    override this.Instantiate () = None
 
     override this.Represent (): string = 
         this.ValueList
@@ -670,7 +752,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
                     
     override this.Represent (): string = this.FplId
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 [<AbstractClass>]
@@ -684,7 +766,7 @@ type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
         sprintf "%s(%s)" head paramT
             
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 [<AbstractClass>]
@@ -735,7 +817,7 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true    
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 type FplInstance(positions: Positions, parent: FplValue) =
@@ -748,8 +830,6 @@ type FplInstance(positions: Positions, parent: FplValue) =
         let ret = new FplInstance((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Instantiate () = None
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType 
@@ -765,7 +845,7 @@ type FplInstance(positions: Positions, parent: FplValue) =
         else
             subRepr
 
-    override this.Run () = ()
+    override this.Run variableStack = ()
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
@@ -778,9 +858,6 @@ type FplConstructor(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = 
-        Some (new FplInstance((this.StartPos, this.EndPos), this))
-
     override this.IsBlock () = true
 
     override this.Type signatureType =
@@ -790,8 +867,9 @@ type FplConstructor(positions: Positions, parent: FplValue) =
 
     override this.Represent () = this.Type(SignatureType.Mixed)
 
-    override this.Run (): unit = 
-        raise (NotImplementedException())
+    override this.Run _ = 
+        this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
+
 
 let isConstructor (fv:FplValue) =
     match fv with
@@ -808,9 +886,6 @@ type FplClass(positions: Positions, parent: FplValue) =
         let ret = new FplClass((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Instantiate () = 
-        Some (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
@@ -831,8 +906,8 @@ type FplClass(positions: Positions, parent: FplValue) =
 
     override this.Represent () = $"dec {literalCl} {this.FplId}"
 
-    override this.Run (): unit = 
-        raise (NotImplementedException())
+    override this.Run _ = 
+        this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
 
 
 /// Returns Some or none FplValue being the enclosing class block of a node inside a class.
@@ -855,9 +930,6 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = 
-        Some (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
-
     override this.Type (signatureType:SignatureType) = 
         match signatureType with
             | SignatureType.Name 
@@ -866,8 +938,8 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
 
     override this.Represent (): string = this.FplId
 
-    override this.Run (): unit = 
-        raise (NotImplementedException())
+    override this.Run variableStack = 
+        this.SetValue (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
 
 let isIntrinsicObj (fv1:FplValue) = 
     match fv1 with
@@ -1041,7 +1113,7 @@ type FplProof(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         head
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 type FplArgument(positions: Positions, parent: FplValue) =
@@ -1059,7 +1131,7 @@ type FplArgument(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         head
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 let isArgument (fv:FplValue) = 
@@ -1078,13 +1150,11 @@ type FplJustification(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = None
-
     override this.Type signatureType =
         let head = getFplHead this signatureType
         head
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 type FplArgInference(positions: Positions, parent: FplValue) =
@@ -1102,7 +1172,7 @@ type FplArgInference(positions: Positions, parent: FplValue) =
         let head = getFplHead this signatureType
         head
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 type FplLocalization(positions: Positions, parent: FplValue) =
@@ -1115,8 +1185,6 @@ type FplLocalization(positions: Positions, parent: FplValue) =
         let ret = new FplLocalization((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Instantiate () = None
 
     override this.Type signatureType = 
         let head = getFplHead this signatureType
@@ -1132,7 +1200,7 @@ type FplLocalization(positions: Positions, parent: FplValue) =
 
     override this.Represent() = this.Type(SignatureType.Name)
         
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 type FplTranslation(positions: Positions, parent: FplValue) =
@@ -1146,8 +1214,6 @@ type FplTranslation(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = None
-
     override this.Type signatureType = 
         let head = getFplHead this signatureType
         let args =
@@ -1159,7 +1225,7 @@ type FplTranslation(positions: Positions, parent: FplValue) =
 
     override this.Represent () = this.FplId 
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 type FplLanguage(positions: Positions, parent: FplValue) =
@@ -1173,15 +1239,13 @@ type FplLanguage(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = None
-
     override this.Type signatureType =
         let head = getFplHead this signatureType
         head
 
     override this.Represent () = this.FplId
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 let isLanguage (fv:FplValue) =
@@ -1200,13 +1264,33 @@ type FplAssertion(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = None
-
     override this.Type signatureType = this.FplId
         
     override this.Represent () = ""
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
+        raise (NotImplementedException())
+
+type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+    do 
+        this.TypeId <- literalUndef
+        this.FplId <- literalUndef
+
+    override this.Name = $"{literalIntrL} {literalUndefL}"
+    override this.ShortName = literalUndef
+
+    override this.Clone () =
+        let ret = new FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type (signatureType:SignatureType) = 
+        getFplHead this signatureType
+                    
+    override this.Represent (): string = this.FplId
+
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 type FplReference(positions: Positions, parent: FplValue) =
@@ -1219,8 +1303,6 @@ type FplReference(positions: Positions, parent: FplValue) =
         let ret = new FplReference((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Instantiate () = None
 
     override this.SetValue fv = 
         if this.Scope.ContainsKey(this.FplId) then
@@ -1329,9 +1411,31 @@ type FplReference(positions: Positions, parent: FplValue) =
             else
                 subRepr
 
-    override this.Run (): unit = 
-        raise (NotImplementedException())
-
+    override this.Run variableStack =
+        if this.Scope.Count > 0 then 
+            let called = 
+                this.Scope 
+                |> Seq.map (fun kvp -> kvp.Value) 
+                |> Seq.toList 
+                |> List.head
+            if called.IsBlock() then
+                let pars = variableStack.SaveVariables(called) 
+                let args = this.ArgList |> Seq.toList
+                variableStack.ReplaceVariables pars args
+                let lastRepr = new FplRoot()
+                // run all statements of the called node
+                called.ArgList
+                |> Seq.iter (fun fv -> 
+                    fv.Run variableStack
+                )
+                this.SetValuesOf called
+                variableStack.RestoreVariables(called)
+        elif this.ArgList.Count = 1 then
+            let arg = this.ArgList[0]
+            this.SetValuesOf arg
+        else
+            let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
+            this.SetValue(undef)
 
 let isReference (fv:FplValue) =
     match fv with
@@ -1361,7 +1465,7 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Run () = 
+    override this.Run _ = 
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         let arg1Repr = arg1.Represent()
@@ -1401,7 +1505,7 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Run () = 
+    override this.Run _ = 
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         let arg1Repr = arg1.Represent()
@@ -1442,7 +1546,7 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Run () = 
+    override this.Run _ = 
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         let arg1Repr = arg1.Represent()
@@ -1487,7 +1591,7 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Run () = 
+    override this.Run _ = 
         let arg = this.ArgList[0]
         let argRepr = arg.Represent()
         let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
@@ -1524,7 +1628,7 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Run () = 
+    override this.Run _ = 
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         let arg1Repr = arg1.Represent()
@@ -1564,7 +1668,7 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Run () = 
+    override this.Run _ = 
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
         let arg1Repr = arg1.Represent()
@@ -1580,31 +1684,6 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
             | _ -> literalUndetermined
         
         this.SetValue(newValue)  
-
-type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
-    inherit FplValue(positions, Some parent)
-    do 
-        this.TypeId <- literalUndef
-        this.FplId <- literalUndef
-
-    override this.Name = $"{literalIntrL} {literalUndefL}"
-    override this.ShortName = literalUndef
-
-    override this.Clone () =
-        let ret = new FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Instantiate () = None
-
-    override this.Type (signatureType:SignatureType) = 
-        getFplHead this signatureType
-                    
-    override this.Represent (): string = this.FplId
-
-    override this.Run (): unit = 
-        raise (NotImplementedException())
-
 
 /// Implements the semantics of an FPL equality.
 type FplEquality(positions: Positions, parent: FplValue) as this =
@@ -1636,7 +1715,7 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
 
         sprintf "%s(%s)" head args
 
-    override this.Run () = 
+    override this.Run _ = 
         if this.ArgList.Count <> 2 then 
             emitID013Diagnostics this.StartPos this.EndPos $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." 
         else
@@ -1695,8 +1774,6 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = None
-
     override this.Type signatureType = 
         let head = getFplHead this signatureType
         let propagate = propagateSignatureType signatureType
@@ -1747,7 +1824,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
         else
             subRepr
 
-    override this.Run () = ()
+    override this.Run _ = ()
 
 
 /// Implements the semantics of an FPL decrement delegate.
@@ -1792,9 +1869,6 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
             }
         ad.AddDiagnostic diagnostic
 
-    override this.Instantiate (): FplValue option = 
-        raise (NotImplementedException())
-
     override this.Represent () = 
         let subRepr = 
             this.ValueList
@@ -1805,7 +1879,7 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
         else
             subRepr        
 
-    override this.Run () = 
+    override this.Run _ = 
         if this.ArgList.Count <> 1 then 
             this.Diagnostic $"Decrement takes 1 arguments, got {this.ArgList.Count}." 
         else
@@ -1835,8 +1909,6 @@ type FplMapping(positions: Positions, parent: FplValue) =
         ret
 
     override this.IsMapping () = true
-
-    override this.Instantiate () = None
 
     override this.Type signatureType = 
         let pars = getParamTuple this signatureType
@@ -1868,7 +1940,7 @@ type FplMapping(positions: Positions, parent: FplValue) =
 
     override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
 
-    override this.Run (): unit = 
+    override this.Run variableStack= 
         raise (NotImplementedException())
 
 /// Tries to find a mapping of an FplValue
@@ -1993,7 +2065,7 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
         
-    override this.Run () = 
+    override this.Run _ = 
         let operand = this.ArgList[0]
         let typeOfOperand = this.ArgList[1]
         let newValue = new FplIntrinsicPred((this.StartPos, this.EndPos), this)
@@ -2029,7 +2101,7 @@ type FplQuantor(positions: Positions, parent: FplValue) =
         | "" -> head
         | _ -> sprintf "%s(%s)" head paramT
 
-    override this.Run (): unit = 
+    override this.Run _ = 
         raise (NotImplementedException())
 
 type FplVariable(positions: Positions, parent: FplValue) =
@@ -2058,7 +2130,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
         else 
             failwith($"The variadic type was already set to {_variadicType}.")
 
-    member this.IsVariadic = _variadicType <> String.Empty
+    override this.IsVariadic() = _variadicType <> String.Empty
 
     member this.IsMany = _variadicType = "many"
     member this.IsMany1 = _variadicType = "many1"
@@ -2068,8 +2140,6 @@ type FplVariable(positions: Positions, parent: FplValue) =
         let ret = new FplVariable((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Instantiate () = None
 
     override this.IsVariable () = true
 
@@ -2105,7 +2175,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
                 match this.TypeId with
                 | FplGrammarCommons.literalUndef -> literalUndef
                 | _ -> 
-                    if this.IsVariadic then
+                    if this.IsVariadic() then
                         $"dec {this.Type(SignatureType.Type)}[]" 
                     else
                         $"dec {this.Type(SignatureType.Type)}" 
@@ -2120,12 +2190,12 @@ type FplVariable(positions: Positions, parent: FplValue) =
                 match this.TypeId with
                 | FplGrammarCommons.literalUndef -> literalUndef
                 | _ -> 
-                    if this.IsVariadic then
+                    if this.IsVariadic() then
                         $"dec {this.Type(SignatureType.Type)}[]" 
                     else
                         $"dec {this.Type(SignatureType.Type)}" 
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 
@@ -2162,7 +2232,7 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) =
             else
                 subRepr
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 type FplFunctionalTerm(positions: Positions, parent: FplValue) =
@@ -2175,8 +2245,6 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue) =
         let ret = new FplFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Instantiate () = None
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
@@ -2192,8 +2260,6 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = None
-
     override this.IsBlock () = true
 
 type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
@@ -2206,8 +2272,6 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
         let ret = new FplOptionalFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
-
-    override this.Instantiate () = None
 
     override this.IsBlock () = true
 
@@ -2222,13 +2286,11 @@ type FplExtension(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = None
-
     override this.Type signatureType = this.FplId
 
     override this.Represent () = this.FplId
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 let isExtension (fv:FplValue) =
@@ -2251,14 +2313,12 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = None
-
     override this.Type (signatureType:SignatureType) = 
         getFplHead this signatureType
                     
     override this.Represent (): string = this.FplId
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
@@ -2275,14 +2335,12 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = None
-
     override this.Type (signatureType:SignatureType) = 
         getFplHead this signatureType
                     
     override this.Represent (): string = this.FplId
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 
@@ -2300,14 +2358,12 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () = None
-
     override this.Type (signatureType:SignatureType) = 
         getFplHead this signatureType
                     
     override this.Represent (): string = this.FplId
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 type FplStmt(positions: Positions, parent: FplValue) =
@@ -2321,39 +2377,39 @@ type FplStmt(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () =
-        if this.FplId = "bas" then
-            // in case of a base class constructor call (that resides inside this that is a constructor)
-            // identify the 
+    //override this.Instantiate () =
+    //    if this.FplId = "bas" then
+    //        // in case of a base class constructor call (that resides inside this that is a constructor)
+    //        // identify the 
 
-            let baseClassOpt = 
-                if this.ArgList.Count > 0 then
-                    let test = this.ArgList[0]
-                    // in case of a base.obj() constructor call
-                    if test.ArgList.Count = 2 && 
-                        isIntrinsicObj test.ArgList[0] && 
-                        isReference test.ArgList[1] &&
-                        test.ArgList[1].FplId = "???" then
-                        // return an FplValue inbuilt Object 
-                        Some  test.ArgList[0] 
-                    elif test.ArgList.Count > 0 then
-                        Some test 
-                    else
-                        None
-                else 
-                    None
+    //        let baseClassOpt = 
+    //            if this.ArgList.Count > 0 then
+    //                let test = this.ArgList[0]
+    //                // in case of a base.obj() constructor call
+    //                if test.ArgList.Count = 2 && 
+    //                    isIntrinsicObj test.ArgList[0] && 
+    //                    isReference test.ArgList[1] &&
+    //                    test.ArgList[1].FplId = "???" then
+    //                    // return an FplValue inbuilt Object 
+    //                    Some  test.ArgList[0] 
+    //                elif test.ArgList.Count > 0 then
+    //                    Some test 
+    //                else
+    //                    None
+    //            else 
+    //                None
 
-            match baseClassOpt with
-            | Some (baseClass:FplValue) when baseClass.IsClass() -> 
-                Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
-            | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
-        else
-            None
+    //        match baseClassOpt with
+    //        | Some (baseClass:FplValue) when baseClass.IsClass() -> 
+    //            Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
+    //        | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
+    //    else
+    //        None
 
     override this.Type signatureType = this.FplId
     override this.Represent () = ""
 
-    override this.Run (): unit = 
+    override this.Run variableStack = 
         raise (NotImplementedException())
 
 /// Returns Some argument of the FplValue depending of the type of it.
@@ -2391,34 +2447,34 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         this.AssignParts(ret)
         ret
 
-    override this.Instantiate () =
-        if this.FplId = "bas" then
-            // in case of a base class constructor call (that resides inside this that is a constructor)
-            // identify the 
+    //override this.Instantiate () =
+    //    if this.FplId = "bas" then
+    //        // in case of a base class constructor call (that resides inside this that is a constructor)
+    //        // identify the 
 
-            let baseClassOpt = 
-                if this.ArgList.Count > 0 then
-                    let test = this.ArgList[0]
-                    // in case of a base.obj() constructor call
-                    if test.ArgList.Count = 2 && 
-                        isIntrinsicObj test.ArgList[0] && 
-                        isReference test.ArgList[1] &&
-                        test.ArgList[1].FplId = "???" then
-                        // return an FplValue inbuilt Object 
-                        Some  test.ArgList[0] 
-                    elif test.ArgList.Count > 0 then
-                        Some test 
-                    else
-                        None
-                else 
-                    None
+    //        let baseClassOpt = 
+    //            if this.ArgList.Count > 0 then
+    //                let test = this.ArgList[0]
+    //                // in case of a base.obj() constructor call
+    //                if test.ArgList.Count = 2 && 
+    //                    isIntrinsicObj test.ArgList[0] && 
+    //                    isReference test.ArgList[1] &&
+    //                    test.ArgList[1].FplId = "???" then
+    //                    // return an FplValue inbuilt Object 
+    //                    Some  test.ArgList[0] 
+    //                elif test.ArgList.Count > 0 then
+    //                    Some test 
+    //                else
+    //                    None
+    //            else 
+    //                None
 
-            match baseClassOpt with
-            | Some (baseClass:FplValue) when baseClass.IsClass() -> 
-                Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
-            | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
-        else
-            None
+        //    match baseClassOpt with
+        //    | Some (baseClass:FplValue) when baseClass.IsClass() -> 
+        //        Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
+        //    | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
+        //else
+        //    None
 
     override this.Type signatureType = this.FplId
     override this.Represent () = this.FplId
@@ -2431,7 +2487,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         | None -> Some($"Btest")
 
 
-    override this.Run () =
+    override this.Run _ =
         let returnedReference = this.ArgList[0]
         let mapType = this.Parent.Value
         match this.MatchWithMapping returnedReference mapType with
@@ -2450,6 +2506,69 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                 // add an undefined value since there was no argument of the returnedValue
                 let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
                 this.SetValue(value)
+
+/// Implements the assigment statement in FPL.
+type FplAssignment(positions: Positions, parent: FplValue) as this =
+    inherit FplValue(positions, Some parent)
+
+    do
+        this.FplId <- $"assign (ln {this.StartPos.Line})"
+        this.TypeId <- literalUndef
+
+    override this.Name = $"assigment statement"
+    override this.ShortName = "stmt"
+
+    override this.Clone () =
+        let ret = new FplAssignment((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        getFplHead this signatureType
+
+    override this.Represent () = this.TypeId
+
+    member private this.CheckSIG05Diagnostics (assignee:FplValue) (toBeAssignedValue: FplValue) = 
+        let valueOpt = getArgument toBeAssignedValue
+        match valueOpt with
+        | Some value when value.IsClass() ->
+            let chainOpt = findClassInheritanceChain value assignee.TypeId
+            match chainOpt with
+            | None ->
+                // issue SIG05 diagnostics if either no inheritance chain found 
+                emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
+            | _ -> () // inheritance chain found (no SIG05 diagnostics)
+        | Some value when isConstructor value ->
+            // find a class inheritance chain for the constructor's class (which is stored in its parent value)
+            let chainOpt = findClassInheritanceChain value.Parent.Value assignee.TypeId
+            match chainOpt with
+            | None ->
+                // issue SIG05 diagnostics if either no inheritance chain found 
+                emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
+            | _ -> () // inheritance chain found (no SIG05 diagnostics)
+        | Some value when assignee.TypeId <> value.TypeId ->
+            // Issue SIG05 diagnostics if value is not a constructor and not a class and still the types are not the same 
+            emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (value.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
+        | Some value when assignee.TypeId = value.TypeId ->
+            // Issue no SIG05 diagnostics if value is not a constructor and not a class but the types match
+            ()
+        | _ ->
+            // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
+            emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (toBeAssignedValue.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
+
+    override this.Run variableStack = 
+        let assigneeReference = this.ArgList[0]
+        let assignedValueOpt = getArgument this
+        match assignedValueOpt with
+        | Some assignedValue ->
+            let assigneeOpt = getArgument assigneeReference
+            match assigneeOpt with
+            | (Some assignee)  ->
+                this.CheckSIG05Diagnostics assignee assignedValue
+                assignedValue.Run variableStack
+                assignee.SetValuesOf assignedValue
+            | None -> ()
+        | None -> ()
 
 /// A discriminated union type for wrapping search results in the Scope of an FplValue.
 type ScopeSearchResult =

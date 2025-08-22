@@ -121,6 +121,20 @@ let emitSIG03Diagnostics errMsg mapTypeStr pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+
+let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 = 
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = SIG05(assigneeTypeStr, assignedTypeStr)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
         
 let emitVAR06iagnostic name parentClass pos = 
     let diagnostic =

@@ -24,11 +24,10 @@ open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitterPre
 open FplInterpreterDiagnosticsEmitter
-open FplInterpreterRunner
 open EvalStackHandler
 
 let es = EvalStack()
-let runner = FplRunner()
+let variableStack = FplVariableStack()
 
 let eval_string (st: SymbolTable) s = ()
 
@@ -577,7 +576,7 @@ let rec eval (st: SymbolTable) ast =
         let fvNew = new FplNegation((pos1, pos2), fv.Parent.Value)
         es.PushEvalStack(fvNew)
         eval st predicateAst
-        fvNew.Run()
+        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "negation"
         st.EvalPop()
     | Ast.InEntity((pos1, pos2), ast1) ->
@@ -618,7 +617,7 @@ let rec eval (st: SymbolTable) ast =
         let stmt = new FplReturn((pos1,pos2), fv)
         es.PushEvalStack(stmt)
         eval st returneeAst
-        stmt.Run()
+        stmt.Run variableStack
         es.PopEvalStack() 
         st.EvalPop()
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
@@ -704,7 +703,7 @@ let rec eval (st: SymbolTable) ast =
             fv.TypeId <- $"*{identifier}"
         | :? FplVariable as var when var.IsMany1 -> 
             fv.TypeId <- $"+{identifier}"
-        | :? FplVariable as var when not var.IsVariadic  -> 
+        | :? FplVariable as var when not (var.IsVariadic()) -> 
             fv.TypeId <- identifier
         | :? FplMapping -> 
             fv.TypeId <- fv.TypeId + identifier
@@ -804,7 +803,7 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fvNew.Run()
+        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "conjunction"
         st.EvalPop()
     | Ast.Or((pos1, pos2), (predicateAst1, predicateAst2)) ->
@@ -814,7 +813,7 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fvNew.Run()
+        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "disjunction"
         st.EvalPop()
     | Ast.Xor((pos1, pos2), (predicateAst1, predicateAst2)) ->
@@ -824,7 +823,7 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fvNew.Run()
+        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "exclusive-or"
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), varDeclOrStmtAstList) ->
@@ -1058,7 +1057,7 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fvNew.Run()
+        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "implication"
         st.EvalPop()
     | Ast.Iif((pos1, pos2), (predicateAst1, predicateAst2)) ->
@@ -1068,7 +1067,7 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fvNew.Run()
+        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "equivalence"
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
@@ -1084,7 +1083,7 @@ let rec eval (st: SymbolTable) ast =
         es.PushEvalStack(typeOfOperand)
         eval st variableTypeAst
         es.PopEvalStack()
-        fvNew.Run()        
+        fvNew.Run variableStack      
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
         st.EvalPush("Delegate")
@@ -1101,13 +1100,13 @@ let rec eval (st: SymbolTable) ast =
             deleg.Copy refBlock
             es.Pop() |> ignore
             es.PushEvalStack(deleg)
-            deleg.Run()
+            deleg.Run variableStack
         | "Decrement" -> 
             let deleg = new FplDecrement((pos1, pos2), fv)
             deleg.Copy refBlock
             es.Pop() |> ignore
             es.PushEvalStack(deleg)
-            deleg.Run()
+            deleg.Run variableStack
         | _ -> 
             refBlock.TypeId <- literalUndef
             emitID013Diagnostics pos1 pos2 $"Unknown delegate `{refBlock.FplId}`"  
@@ -1345,14 +1344,14 @@ let rec eval (st: SymbolTable) ast =
             | x::xs -> 
                 match checkSIG04Diagnostics currentOp [x] with 
                 | Some candidate -> 
-                    runner.Run currentOp currentOp // execute the matched binary operator
+                    currentOp.Run variableStack // execute the matched binary operator
                 | _ -> ()
             | _ -> ()
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv
         let last = es.PeekEvalStack()
-        runner.Run last last // execute the last matched binary operator
+        last.Run variableStack // execute the last matched binary operator
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
@@ -1461,46 +1460,18 @@ let rec eval (st: SymbolTable) ast =
         es.InSignatureEvaluation <- false
     | Ast.Assignment((pos1, pos2), (predicateWithQualificationAst, predicateAst)) ->
         st.EvalPush("Assignment")
-        let fv = es.PeekEvalStack()
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.FplId <- $"assign (ln {pos1.Line})"
-        let assigneeReference = new FplReference((pos1,pos2), fv)
+        let fv = es.Pop()
+        let fvNew = new FplAssignment((pos1, pos2), fv.Parent.Value)
+        es.PushEvalStack(fvNew)
+        let assigneeReference = new FplReference((pos1,pos2), fvNew)
         es.PushEvalStack(assigneeReference)
         eval st predicateWithQualificationAst
         es.PopEvalStack() 
-        let dummyValue = new FplReference((pos1,pos2), fv)
+        let dummyValue = new FplReference((pos1,pos2), fvNew)
         es.PushEvalStack(dummyValue)
         eval st predicateAst
+        fvNew.Run variableStack
         es.PopEvalStack() 
-        let assignedValueList = fv.ArgList |> Seq.toList |> List.rev 
-        let assignedValueOpt = 
-            if assignedValueList.Length > 0 then
-                Some assignedValueList.Head
-            else
-                None
-        let assigneeOpt = getArgument assigneeReference
-        match (assigneeOpt, assignedValueOpt) with
-        | (Some assignee, Some assignedValue)  ->
-            checkSIG05Diagnostics assignee assignedValue
-            runner.Run assignedValue assignedValue
-            // the scope of the assigned value (which has the FplBlockType.Reference) 
-            // either already contains a matching candidate 
-            // or not. We will now match the assignee with the 
-            let candidateOpt = 
-                assignedValue.Scope 
-                |> Seq.filter (fun kvp -> kvp.Key = assignedValue.FplId)
-                |> Seq.map (fun kvp -> kvp.Value)
-                |> Seq.toList
-                |> List.tryLast
-            let valueOpt = 
-                match candidateOpt with
-                | Some candidate -> candidate.Instantiate()
-                | None -> getArgument assignedValue
-            match valueOpt with
-            | Some value -> assignee.SetValue(value) |> ignore
-            | None -> ()
-        | _ -> ()
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")
