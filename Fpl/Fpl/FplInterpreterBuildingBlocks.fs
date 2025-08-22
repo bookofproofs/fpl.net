@@ -22,6 +22,7 @@ open ErrDiagnostics
 open FplGrammarCommons
 open FplGrammarTypes
 open FplInterpreterTypes
+open FplInterpreterDiagnosticsEmitterPre
 open FplInterpreterDiagnosticsEmitter
 open FplInterpreterRunner
 open EvalStackHandler
@@ -383,7 +384,7 @@ let rec eval (st: SymbolTable) ast =
             let arg = parent.Parent.Value
             let proof = arg.Parent.Value
             if not (proof.Scope.ContainsKey(s)) then 
-                emitPR005Diagnostics fv 
+                emitPR005Diagnostics fv.StartPos fv.EndPos (fv.Type(SignatureType.Mixed))
         | :? FplArgument -> ()
         | _ -> 
             emitPR000Diagnostics fv 
@@ -1683,7 +1684,7 @@ let rec eval (st: SymbolTable) ast =
         | ScopeSearchResult.NotFound ->
             emitID006diagnostics fv  
         | ScopeSearchResult.FoundMultiple listOfKandidates ->
-            emitID007diagnostics fv listOfKandidates  
+            emitID007diagnostics fv.StartPos fv.EndPos (fv.Type(SignatureType.Type)) listOfKandidates  
         | _ -> ()
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.

@@ -1636,22 +1636,9 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
 
         sprintf "%s(%s)" head args
 
-    member private this.Diagnostic message = 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = this.StartPos
-                Diagnostic.EndPos = this.EndPos
-                Diagnostic.Code = ID013 message
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-
     override this.Run () = 
         if this.ArgList.Count <> 2 then 
-            this.Diagnostic $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." 
+            emitID013Diagnostics this.StartPos this.EndPos $"Predicate `=` takes 2 arguments, got {this.ArgList.Count}." 
         else
 
         let getActual (x:FplValue) = 
@@ -1668,25 +1655,25 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
         let newValue = new FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
         match a1Repr with
         | FplGrammarCommons.literalUndef -> 
-            this.Diagnostic "Predicate `=` cannot be evaluated because the left argument is undefined." 
+            emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the left argument is undefined." 
             this.SetValue(newValue)
         | _ -> 
             match b1Repr with
             | FplGrammarCommons.literalUndef -> 
-                this.Diagnostic "Predicate `=` cannot be evaluated because the right argument is undefined." 
+                emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the right argument is undefined." 
                 this.SetValue(newValue)
             | _ -> 
                 let newValue = FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
                 match a1Repr with
                 | "dec pred"  
                 | FplGrammarCommons.literalUndetermined -> 
-                    this.Diagnostic "Predicate `=` cannot be evaluated because the left argument is undetermined." 
+                    emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the left argument is undetermined." 
                     this.SetValue(newValue)
                 | _ -> 
                     match b1Repr with
                     | "dec pred"  
                     | FplGrammarCommons.literalUndetermined -> 
-                        this.Diagnostic "Predicate `=` cannot be evaluated because the right argument is undetermined." 
+                        emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the right argument is undetermined." 
                         this.SetValue(newValue)
                     | _ -> 
                         newValue.FplId <- $"{(a1Repr = b1Repr)}" 
