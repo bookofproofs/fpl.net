@@ -4,7 +4,6 @@
 module FplInterpreterRunner
 open System.Collections.Generic
 open FplInterpreterTypes
-open FplInterpreterDiagnosticsEmitter
 
 (* MIT License
 
@@ -98,16 +97,6 @@ type FplRunner() =
 
     member this.Run (rootCaller:FplValue) (caller:FplValue) = 
         match caller with 
-        | :? FplConjunction
-        | :? FplExclusiveOr 
-        | :? FplDisjunction 
-        | :? FplNegation 
-        | :? FplImplication 
-        | :? FplEquivalence 
-        | :? FplIsOperator 
-        | :? FplEquality 
-        | :? FplExtensionObj 
-        | :? FplDecrement 
         | :? FplReference ->
             if caller.Scope.Count > 0 then 
                 let called = 
@@ -144,6 +133,7 @@ type FplRunner() =
                 | :? FplDisjunction 
                 | :? FplIsOperator 
                 | :? FplDecrement 
+                | :? FplReturn 
                 | :? FplEquality -> caller.Run() 
                 | _ -> ()
         | _ -> ()
