@@ -58,21 +58,6 @@ let emitID001diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
 
     ad.AddDiagnostic diagnostic
 
-let emitPR004Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR004(alreadyDeclaredTypeStr, qualifiedStartPosConflictStr)
-            Diagnostic.Alternatives = None 
-        }
-
-    ad.AddDiagnostic diagnostic
-
-
 let emitID007diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
     let diagnostic =
         { 
@@ -95,6 +80,19 @@ let emitID013Diagnostics pos1 pos2 message =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID013 message
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitID014diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID014(alreadyDeclaredMixedStr, qualifiedStartPosConflictStr)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -123,6 +121,20 @@ let emitID021Diagnostics identifier pos1 =
             Diagnostic.Code = ID021 identifier
             Diagnostic.Alternatives = None 
         }
+    ad.AddDiagnostic diagnostic
+
+let emitPR004Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR004(alreadyDeclaredTypeStr, qualifiedStartPosConflictStr)
+            Diagnostic.Alternatives = None 
+        }
+
     ad.AddDiagnostic diagnostic
 
 let emitPR005Diagnostics pos1 pos2 mixedTypeStr =
