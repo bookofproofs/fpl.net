@@ -83,7 +83,7 @@ let emitVAR03diagnostics (fplValue: FplValue) (conflict: FplValue) =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = fplValue.StartPos
             Diagnostic.EndPos = fplValue.EndPos
-            Diagnostic.Code = VAR03(fplValue.Type(SignatureType.Mixed), qualifiedStartPos conflict)
+            Diagnostic.Code = VAR03(fplValue.Type(SignatureType.Mixed), conflict.QualifiedStartPos)
             Diagnostic.Alternatives = Some "Remove this variable declaration or rename the variable." 
         }
 
@@ -596,7 +596,7 @@ let emitSIG02Diagnostics (st: SymbolTable) (fplValue: FplValue) pos1 pos2 =
                 | _ -> ()))
 
         if precedences.ContainsKey(precedence) then
-            let conflict = qualifiedStartPos precedences[precedence]
+            let conflict = precedences[precedence].QualifiedStartPos
 
             let diagnostic =
                 { 

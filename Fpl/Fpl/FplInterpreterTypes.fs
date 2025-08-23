@@ -347,8 +347,11 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// Generates a type string identifier or type-specific naming convention of this FplValue.
     abstract member Type: SignatureType -> string
     
-    /// Adds this FplValue to it's parent's ArgList, if such a Parent exists.
+    /// Adds this FplValue to its parent's ArgList, if such a Parent exists.
     abstract member TryAddToParentsArgList: unit -> unit
+
+    /// Adds this FplValue to its parent's Scope, if such a Parent exists
+    abstract member TryAddToParentsScope: unit -> unit
 
     /// Abstract member for running this FplValue. It has None or Some optional FplVariableStack as paramter.
     abstract member Run: FplVariableStack -> unit
@@ -569,6 +572,64 @@ type FplValue(positions: Positions, parent: FplValue option) =
         | Some parent -> parent.ArgList.Add(this)
         | _ -> ()
               
+
+    /// Qualified starting position of this FplValue
+    member this.QualifiedStartPos =
+        let rec getFullName (fv: FplValue) (first: bool) =
+            let fvType = fv.Type(SignatureType.Mixed)
+
+            if fv.ShortName = "root" then ""
+            elif first then
+                let starPosWithoutFileName =
+                    $"(Ln: {fv.StartPos.Line}, Col: {fv.StartPos.Column})"
+
+                if fv.ShortName = "th" then
+                    getFullName fv.Parent.Value false + fvType + starPosWithoutFileName
+                else
+                    getFullName fv.Parent.Value false + starPosWithoutFileName
+            else if fv.ShortName = "th" then
+                getFullName fv.Parent.Value false + fvType
+            else
+                getFullName fv.Parent.Value false
+
+        getFullName this true
+
+    /// Adds the FplValue to it's parent's Scope.
+    override this.TryAddToParentsScope () = 
+        let next = this.Parent.Value
+        let identifier = 
+            match this.ShortName with
+            | FplGrammarCommons.literalCtor -> // constructor
+                this.Type(SignatureType.Mixed)
+            | _ -> 
+                if this.IsBlock() then 
+                    this.Type(SignatureType.Mixed)
+                elif this.IsVariable() then 
+                    this.FplId
+                else
+                    this.Type(SignatureType.Name)
+        match this.InScopeOfParent identifier with
+        | ScopeSearchResult.Found conflict -> 
+            match next.ShortName with
+            | "just" -> // justification
+                emitPR004Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+            | _ -> 
+                match this.ShortName with
+                | "lang" -> // language
+                    let oldDiagnosticsStopped = ad.DiagnosticsStopped
+                    ad.DiagnosticsStopped <- false
+                    emitID014diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+                    ad.DiagnosticsStopped <- oldDiagnosticsStopped
+                | "arg" -> 
+                    emitPR003diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+                | "var" 
+                | "+var" 
+                | "*var" -> // variable
+                    ()
+                | _ ->
+                    emitID001diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+        | _ -> 
+            next.Scope.Add(identifier,this)
 
     /// Checks if a block named name is in the scope of the fplValue' parent.
     member this.InScopeOfParent name =
@@ -2536,28 +2597,6 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             | :? FplVariable -> assignee.IsInitializedVariable <- true
             | _ -> ()
         | _ -> ()
-
-/// Qualified starting position of this FplValue
-let qualifiedStartPos (fplValue:FplValue) =
-    let rec getFullName (fv: FplValue) (first: bool) =
-        let fvType = fv.Type(SignatureType.Mixed)
-
-        if isRoot fv then ""
-        elif first then
-            let starPosWithoutFileName =
-                $"(Ln: {fv.StartPos.Line}, Col: {fv.StartPos.Column})"
-
-            if isTheory fv then
-                getFullName fv.Parent.Value false + fvType + starPosWithoutFileName
-            else
-                getFullName fv.Parent.Value false + starPosWithoutFileName
-        else if isTheory fv then
-            getFullName fv.Parent.Value false + fvType
-        else
-            getFullName fv.Parent.Value false
-
-    getFullName fplValue true
-
 
 /// A string representation of an FplValue
 let toString (fplValue:FplValue) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"

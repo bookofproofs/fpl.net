@@ -20,43 +20,6 @@ open FplInterpreterDiagnosticsEmitterPre
 type EvalStack() = 
     let _valueStack = Stack<FplValue>()
 
-    /// Adds the FplValue to it's parent's Scope.
-    static member tryAddToScope (fv:FplValue) = 
-        let next = fv.Parent.Value
-        let identifier = 
-            match fv.ShortName with
-            | FplGrammarCommons.literalCtor -> // constructor
-                fv.Type(SignatureType.Mixed)
-            | _ -> 
-                if fv.IsBlock() then 
-                    fv.Type(SignatureType.Mixed)
-                elif fv.IsVariable() then 
-                    fv.FplId
-                else
-                    fv.Type(SignatureType.Name)
-        match fv.InScopeOfParent identifier with
-        | ScopeSearchResult.Found conflict -> 
-            match next.ShortName with
-            | "just" -> // justification
-                emitPR004Diagnostics (fv.Type(SignatureType.Type)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
-            | _ -> 
-                match fv.ShortName with
-                | "lang" -> // language
-                    let oldDiagnosticsStopped = ad.DiagnosticsStopped
-                    ad.DiagnosticsStopped <- false
-                    emitID014diagnostics (fv.Type(SignatureType.Mixed)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
-                    ad.DiagnosticsStopped <- oldDiagnosticsStopped
-                | "arg" -> 
-                    emitPR003diagnostics (fv.Type(SignatureType.Mixed)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
-                | "var" 
-                | "+var" 
-                | "*var" -> // variable
-                    ()
-                | _ ->
-                    emitID001diagnostics (fv.Type(SignatureType.Type)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
-        | _ -> 
-            next.Scope.Add(identifier,fv)
-
     // Pops an FplValue from stack without propagating it's name and signature to the next FplValue on the stack.
     member this.Pop() = _valueStack.Pop()
 
@@ -105,7 +68,7 @@ type EvalStack() =
             | :? FplArgument 
             | :? FplLanguage 
             | :? FplFunctionalTerm ->
-                EvalStack.tryAddToScope fv
+                fv.TryAddToParentsScope()
             | :? FplConjunction 
             | :? FplDisjunction 
             | :? FplExclusiveOr 
@@ -141,7 +104,7 @@ type EvalStack() =
                     next.TypeId <- fv.TypeId
                     next.EndPos <- fv.EndPos
                 | :? FplJustification -> 
-                    EvalStack.tryAddToScope fv
+                    fv.TryAddToParentsScope()
                 | :? FplQuantor ->
                     fv.TryAddToParentsArgList() 
                     next.EndPos <- fv.EndPos
@@ -174,7 +137,7 @@ type EvalStack() =
                 | :? FplFunctionalTerm 
                 | :? FplQuantor  
                 | :? FplLocalization -> 
-                    EvalStack.tryAddToScope fv
+                    fv.TryAddToParentsScope()
                 | :? FplConjunction
                 | :? FplDisjunction 
                 | :? FplExclusiveOr 
