@@ -2185,8 +2185,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
                     else
                         $"dec {this.Type(SignatureType.Type)}" 
 
-    override this.Run variableStack = 
-        raise (NotImplementedException())
+    override this.Run _ = ()
 
 
 [<AbstractClass>]
