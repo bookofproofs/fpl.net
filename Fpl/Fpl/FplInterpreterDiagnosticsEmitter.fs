@@ -33,20 +33,6 @@ let emitUnexpectedErrorDiagnostics errMsg =
 
     ad.AddDiagnostic(diagnostic)
 
-let emitID001diagnostics (fplValue: FplValue) (conflict: FplValue) =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.EndPos
-            Diagnostic.Code = ID001(fplValue.Type(SignatureType.Type), qualifiedStartPos conflict)
-            Diagnostic.Alternatives = None 
-        }
-
-    ad.AddDiagnostic diagnostic
-
 let emitID014diagnostics (fplValue: FplValue) (conflict: FplValue) =
     let diagnostic =
         { 

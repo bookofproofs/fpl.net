@@ -16,6 +16,7 @@ open System.Collections.Generic
 open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
+open FplInterpreterDiagnosticsEmitterPre
 
 type EvalStack() = 
     let _valueStack = Stack<FplValue>()
@@ -51,7 +52,7 @@ type EvalStack() =
                 | :? FplVariable -> 
                     ()
                 | _ ->
-                    emitID001diagnostics fv conflict 
+                    emitID001diagnostics (fv.Type(SignatureType.Type)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
         | _ -> 
             next.Scope.Add(identifier,fv)
 
