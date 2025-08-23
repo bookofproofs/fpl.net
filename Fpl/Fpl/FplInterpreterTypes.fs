@@ -1363,7 +1363,7 @@ type FplReference(positions: Positions, parent: FplValue) =
     override this.Represent (): string = 
         if this.ValueList.Count = 0 then
 
-            if this.Scope.ContainsKey(this.FplId) && this.Scope[this.FplId].IsVariable() then
+            if this.Scope.ContainsKey(this.FplId) then
                 this.Scope[this.FplId].Represent()
             else
                 let args = 
@@ -1404,14 +1404,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                     else sprintf "%s(%s)" literalUndef args
 
         else
-            let subRepr = 
-                this.ValueList
-                |> Seq.map (fun subfv -> subfv.Represent())
-                |> String.concat ", "
-            if subRepr = String.Empty then 
-                literalUndef
-            else
-                subRepr
+            literalUndef
 
     override this.Run variableStack =
         if this.Scope.Count > 0 then 
