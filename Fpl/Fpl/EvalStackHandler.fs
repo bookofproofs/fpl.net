@@ -19,13 +19,9 @@ open FplInterpreterDiagnosticsEmitter
 
 type EvalStack() = 
     let _valueStack = Stack<FplValue>()
-    let mutable _inSignatureEvaluation = false
     let mutable _classCounters = Dictionary<string,FplValue option>()
 
-    /// Indicates if this EvalStack is evaluating a signature on a FPL building block
-    member this.InSignatureEvaluation
-        with get () = _inSignatureEvaluation
-        and set (value) = _inSignatureEvaluation <- value
+
 
     /// In the context of a class being evaluated, this dictionary provides a dictionary
     /// of potential calls of parent classes (=Key). The optional FplValue values become some values

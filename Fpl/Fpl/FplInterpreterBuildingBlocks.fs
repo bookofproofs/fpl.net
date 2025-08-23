@@ -283,7 +283,7 @@ let rec eval (st: SymbolTable) ast =
         varValue.TypeId <- literalUndef
         let undefined = new FplIntrinsicUndef((pos1, pos2), varValue)  
         varValue.ValueList.Add(undefined)
-        varValue.IsSignatureVariable <- es.InSignatureEvaluation 
+        varValue.IsSignatureVariable <- variableStack.InSignatureEvaluation 
         if isDeclaration then 
             // check for VAR03 diagnostics
             match variableInBlockScopeByName fv name true with 
@@ -1251,7 +1251,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature((pos1, pos2), ((optAst, signatureWithUserDefinedStringAst), mappingAst)) -> 
-        es.InSignatureEvaluation <- true
+        variableStack.InSignatureEvaluation <- true
         st.EvalPush("FunctionalTermSignature")
         eval st signatureWithUserDefinedStringAst
         let fv = es.PeekEvalStack()
@@ -1281,7 +1281,7 @@ let rec eval (st: SymbolTable) ast =
                 es.PushEvalStack(fvNew)
         eval st mappingAst
         st.EvalPop()
-        es.InSignatureEvaluation <- false
+        variableStack.InSignatureEvaluation <- false
     | Ast.PredicateWithQualification(predicateWithOptSpecificationAst, qualificationListAst) ->
         st.EvalPush("PredicateWithQualification")
         eval st predicateWithOptSpecificationAst
@@ -1451,13 +1451,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     // | Signature of Positions * (Ast * Ast)
     | Ast.Signature((pos1, pos2), (predicateIdentifierAst, paramTupleAst)) ->
-        es.InSignatureEvaluation <- true
+        variableStack.InSignatureEvaluation <- true
         st.EvalPush("Signature")
         eval st predicateIdentifierAst
         eval st paramTupleAst
         let fv = es.PeekEvalStack()
         st.EvalPop()
-        es.InSignatureEvaluation <- false
+        variableStack.InSignatureEvaluation <- false
     | Ast.Assignment((pos1, pos2), (predicateWithQualificationAst, predicateAst)) ->
         st.EvalPush("Assignment")
         let fv = es.Pop()
@@ -1635,10 +1635,10 @@ let rec eval (st: SymbolTable) ast =
     // | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
     | Ast.CorollarySignature(referencingIdentifierAst, paramTupleAst) ->
         st.EvalPush("CorollarySignature")
-        es.InSignatureEvaluation <- true
+        variableStack.InSignatureEvaluation <- true
         eval st referencingIdentifierAst
         eval st paramTupleAst
-        es.InSignatureEvaluation <- false
+        variableStack.InSignatureEvaluation <- false
         st.EvalPop()
     | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Corollary")
@@ -1741,9 +1741,9 @@ let rec eval (st: SymbolTable) ast =
         let fplTheory = es.PeekEvalStack()
         let fv = new FplPredicate((pos1, pos2), fplTheory)
         es.PushEvalStack(fv)
-        es.InSignatureEvaluation <- true
+        variableStack.InSignatureEvaluation <- true
         eval st signatureWithUserDefinedStringAst
-        es.InSignatureEvaluation <- false
+        variableStack.InSignatureEvaluation <- false
         eval st predicateContentAst
         optPropertyListAsts |> Option.map (List.map (eval st) >> ignore) |> Option.defaultValue ()
         if not fv.IsIntrinsic then // if not intrinsic, check variable usage
@@ -1774,10 +1774,10 @@ let rec eval (st: SymbolTable) ast =
         let parent = es.PeekEvalStack()
         let fv = new FplClass((pos1, pos2), parent)
         es.PushEvalStack(fv)
-        es.InSignatureEvaluation <- true
+        variableStack.InSignatureEvaluation <- true
 
         eval st predicateIdentifierAst
-        es.InSignatureEvaluation <- false
+        variableStack.InSignatureEvaluation <- false
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
 
         // clear the storage of parent class counters before evaluating the list of parent classes

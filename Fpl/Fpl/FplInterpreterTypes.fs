@@ -570,10 +570,17 @@ type FplValue(positions: Positions, parent: FplValue option) =
         | _ -> ()
               
 /// This type implements the functionality needed to "run" FPL statements step-by-step
-/// while managing the storage of variables. FPL uses a call-by-value approach when it comes to 
+/// while managing the storage of variables and other evaluation-related information.
+/// FPL uses a call-by-value approach when it comes to 
 /// replacing parameters by a calling function with arguments.
 and FplVariableStack() = 
+    let mutable _inSignatureEvaluation = false
     let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
+    
+    /// Indicates if this EvalStack is evaluating a signature on a FPL building block
+    member this.InSignatureEvaluation
+        with get () = _inSignatureEvaluation
+        and set (value) = _inSignatureEvaluation <- value
 
     // The stack memory of the runner to store the variables of all run programs
     member this.Stack = _stack
@@ -779,33 +786,6 @@ type FplGenericObject(positions: Positions, parent: FplValue) as this =
     do
         this.FplId <- literalObj
         this.TypeId <- literalObj
-
-        //let rec getInstance (previous:FplValue) =
-        //    let (inst:FplValue) = createFplValue((fplValue.StartPos,fplValue.EndPos), FplBlockType.Instance, previous)
-        //    inst.FplId <- fplValue.FplId
-        //    inst.TypeId <- fplValue.TypeId
-        //    let (constructors: FplValue list) = fplValue.GetConstructors()
-        //    previous.ArgList
-        //    |> Seq.iter (fun next -> 
-        //        inst.ArgList.Add (createInstance next)
-        //    )
-        //    inst
-        //match this.FplBlockType with
-        //| FplBlockType.IntrinsicObj
-        //| FplBlockType.Constructor
-        //| FplBlockType.Class ->
-        //    getInstance this
-        //| FplBlockType.Stmt when fplValue.FplId = "bas" ->
-        //    // in case of a base class constructor call (that resides inside this that is a constructor)
-        //    // identify the 
-        //    let baseClassOpt = fplValue.GetArgument
-        //    match baseClassOpt with
-        //    | Some (baseClass:FplValue) -> 
-        //        getInstance baseClass
-        //    | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {fplValue.Type(SignatureType.Mixed)}") 
-        //| _ -> 
-        //    createRoot() // todo
-        //    //failwith ($"Cannot create an instance of a non-class {this.Type(SignatureType.Mixed)}")    
 
 type FplRuleOfInference(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -2363,35 +2343,6 @@ type FplStmt(positions: Positions, parent: FplValue) =
         this.AssignParts(ret)
         ret
 
-    //override this.Instantiate () =
-    //    if this.FplId = "bas" then
-    //        // in case of a base class constructor call (that resides inside this that is a constructor)
-    //        // identify the 
-
-    //        let baseClassOpt = 
-    //            if this.ArgList.Count > 0 then
-    //                let test = this.ArgList[0]
-    //                // in case of a base.obj() constructor call
-    //                if test.ArgList.Count = 2 && 
-    //                    isIntrinsicObj test.ArgList[0] && 
-    //                    isReference test.ArgList[1] &&
-    //                    test.ArgList[1].FplId = "???" then
-    //                    // return an FplValue inbuilt Object 
-    //                    Some  test.ArgList[0] 
-    //                elif test.ArgList.Count > 0 then
-    //                    Some test 
-    //                else
-    //                    None
-    //            else 
-    //                None
-
-    //        match baseClassOpt with
-    //        | Some (baseClass:FplValue) when baseClass.IsClass() -> 
-    //            Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
-    //        | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
-    //    else
-    //        None
-
     override this.Type signatureType = this.FplId
     override this.Represent () = ""
 
@@ -2433,35 +2384,6 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         this.AssignParts(ret)
         ret
 
-    //override this.Instantiate () =
-    //    if this.FplId = "bas" then
-    //        // in case of a base class constructor call (that resides inside this that is a constructor)
-    //        // identify the 
-
-    //        let baseClassOpt = 
-    //            if this.ArgList.Count > 0 then
-    //                let test = this.ArgList[0]
-    //                // in case of a base.obj() constructor call
-    //                if test.ArgList.Count = 2 && 
-    //                    isIntrinsicObj test.ArgList[0] && 
-    //                    isReference test.ArgList[1] &&
-    //                    test.ArgList[1].FplId = "???" then
-    //                    // return an FplValue inbuilt Object 
-    //                    Some  test.ArgList[0] 
-    //                elif test.ArgList.Count > 0 then
-    //                    Some test 
-    //                else
-    //                    None
-    //            else 
-    //                None
-
-        //    match baseClassOpt with
-        //    | Some (baseClass:FplValue) when baseClass.IsClass() -> 
-        //        Some (new FplInstance((this.StartPos, this.EndPos), baseClass.Parent.Value))
-        //    | _ -> failwith ($"Cannot create an instance of a base class, missing constructor {this.Type(SignatureType.Mixed)}") 
-        //else
-        //    None
-
     override this.Type signatureType = this.FplId
     override this.Represent () = this.FplId
 
@@ -2471,7 +2393,6 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         match targetMapping with
         | Some tm -> mpwa [ fva ] [ tm ]
         | None -> Some($"Btest")
-
 
     override this.Run _ =
         let returnedReference = this.ArgList[0]
