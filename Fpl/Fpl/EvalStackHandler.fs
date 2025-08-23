@@ -48,7 +48,7 @@ type EvalStack() =
                     emitID014diagnostics (fv.Type(SignatureType.Mixed)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
                     ad.DiagnosticsStopped <- oldDiagnosticsStopped
                 | :? FplArgument -> 
-                    emitPR003diagnostics fv conflict 
+                    emitPR003diagnostics (fv.Type(SignatureType.Mixed)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
                 | :? FplVariable -> 
                     ()
                 | _ ->

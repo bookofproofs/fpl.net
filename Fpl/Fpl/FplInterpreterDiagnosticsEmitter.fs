@@ -61,20 +61,6 @@ let emitID016diagnostics name (self:FplValue) =
         }
     ad.AddDiagnostic diagnostic
 
-let emitPR003diagnostics (fplValue: FplValue) (conflict: FplValue) =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.EndPos
-            Diagnostic.Code = PR003(fplValue.Type(SignatureType.Mixed), qualifiedStartPos conflict)
-            Diagnostic.Alternatives = None 
-        }
-
-    ad.AddDiagnostic diagnostic
-
 let emitVAR01diagnostics name pos1 pos2 =
     let diagnostic =
         { 

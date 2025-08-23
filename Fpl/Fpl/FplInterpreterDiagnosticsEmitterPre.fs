@@ -123,6 +123,20 @@ let emitID021Diagnostics identifier pos1 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitPR003diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR003(alreadyDeclaredMixedStr, qualifiedStartPosConflictStr)
+            Diagnostic.Alternatives = None 
+        }
+
+    ad.AddDiagnostic diagnostic
+
 let emitPR004Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
