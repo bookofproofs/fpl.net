@@ -1361,7 +1361,7 @@ type FplReference(positions: Positions, parent: FplValue) =
 
 
     override this.Represent (): string = 
-        if this.Scope.ContainsKey(this.FplId) then
+        if this.Scope.ContainsKey(this.FplId) && this.Scope[this.FplId].IsVariable() then
             this.Scope[this.FplId].Represent()
         else
             let args = 
@@ -1931,8 +1931,7 @@ type FplMapping(positions: Positions, parent: FplValue) =
 
     override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
 
-    override this.Run variableStack= 
-        raise (NotImplementedException())
+    override this.Run _ = ()
 
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
@@ -2352,8 +2351,7 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
                     
     override this.Represent (): string = this.FplId
 
-    override this.Run variableStack = 
-        raise (NotImplementedException())
+    override this.Run _ = () 
 
 type FplStmt(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
