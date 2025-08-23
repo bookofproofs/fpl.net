@@ -58,6 +58,20 @@ let emitID001diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
 
     ad.AddDiagnostic diagnostic
 
+let emitPR004Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR004(alreadyDeclaredTypeStr, qualifiedStartPosConflictStr)
+            Diagnostic.Alternatives = None 
+        }
+
+    ad.AddDiagnostic diagnostic
+
 
 let emitID007diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
     let diagnostic =

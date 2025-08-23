@@ -39,7 +39,7 @@ type EvalStack() =
         | ScopeSearchResult.Found conflict -> 
             match next with
             | :? FplJustification -> 
-                emitPR004Diagnostics fv conflict 
+                emitPR004Diagnostics (fv.Type(SignatureType.Type)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
             | _ -> 
                 match fv with
                 | :? FplLanguage -> 
