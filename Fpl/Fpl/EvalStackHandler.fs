@@ -15,7 +15,6 @@ module EvalStackHandler
 open System.Collections.Generic
 open ErrDiagnostics
 open FplInterpreterTypes
-open FplInterpreterDiagnosticsEmitter
 open FplInterpreterDiagnosticsEmitterPre
 
 type EvalStack() = 
@@ -25,8 +24,8 @@ type EvalStack() =
     static member tryAddToScope (fv:FplValue) = 
         let next = fv.Parent.Value
         let identifier = 
-            match fv with
-            | :? FplConstructor -> 
+            match fv.ShortName with
+            | FplGrammarCommons.literalCtor -> // constructor
                 fv.Type(SignatureType.Mixed)
             | _ -> 
                 if fv.IsBlock() then 
@@ -37,19 +36,21 @@ type EvalStack() =
                     fv.Type(SignatureType.Name)
         match fv.InScopeOfParent identifier with
         | ScopeSearchResult.Found conflict -> 
-            match next with
-            | :? FplJustification -> 
+            match next.ShortName with
+            | "just" -> // justification
                 emitPR004Diagnostics (fv.Type(SignatureType.Type)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
             | _ -> 
-                match fv with
-                | :? FplLanguage -> 
+                match fv.ShortName with
+                | "lang" -> // language
                     let oldDiagnosticsStopped = ad.DiagnosticsStopped
                     ad.DiagnosticsStopped <- false
                     emitID014diagnostics (fv.Type(SignatureType.Mixed)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
                     ad.DiagnosticsStopped <- oldDiagnosticsStopped
-                | :? FplArgument -> 
+                | "arg" -> 
                     emitPR003diagnostics (fv.Type(SignatureType.Mixed)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
-                | :? FplVariable -> 
+                | "var" 
+                | "+var" 
+                | "*var" -> // variable
                     ()
                 | _ ->
                     emitID001diagnostics (fv.Type(SignatureType.Type)) (qualifiedStartPos conflict) fv.StartPos fv.EndPos 
