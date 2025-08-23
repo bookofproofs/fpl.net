@@ -752,8 +752,7 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
                     
     override this.Represent (): string = this.FplId
 
-    override this.Run variableStack = 
-        raise (NotImplementedException())
+    override this.Run _ = ()
 
 [<AbstractClass>]
 type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
@@ -1290,8 +1289,7 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
                     
     override this.Represent (): string = this.FplId
 
-    override this.Run variableStack = 
-        raise (NotImplementedException())
+    override this.Run _ = ()
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -2318,8 +2316,7 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
                     
     override this.Represent (): string = this.FplId
 
-    override this.Run variableStack = 
-        raise (NotImplementedException())
+    override this.Run _ = ()
 
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -2340,8 +2337,7 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
                     
     override this.Represent (): string = this.FplId
 
-    override this.Run variableStack = 
-        raise (NotImplementedException())
+    override this.Run _ = () 
 
 
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
