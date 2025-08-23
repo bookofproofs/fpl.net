@@ -19,21 +19,6 @@ open FplInterpreterDiagnosticsEmitter
 
 type EvalStack() = 
     let _valueStack = Stack<FplValue>()
-    let mutable _classCounters = Dictionary<string,FplValue option>()
-
-
-
-    /// In the context of a class being evaluated, this dictionary provides a dictionary
-    /// of potential calls of parent classes (=Key). The optional FplValue values become some values
-    /// if the a particular call was found. 
-    /// This dictionary is used to emit ID020/ID021 diagnostics. If a class A inherits from class B but doesn't call its base constructor
-    /// ID020 diagnostics will be emitted. If a class A inherits from class B and calls its base constructor more than once
-    /// ID021 diagnostics will be emitted.
-    member this.ParentClassCalls = _classCounters
-      
-    /// Resets the counters of th ID020 diagnostics evaluation.
-    member this.ParentClassCountersInitialize() = 
-        _classCounters |> Seq.iter (fun kvp -> _classCounters[kvp.Key] <- None)
 
     /// Adds the FplValue to it's parent's Scope.
     static member tryAddToScope (fv:FplValue) = 

@@ -145,7 +145,7 @@ let rec eval (st: SymbolTable) ast =
         // add potential parent class call for this identifier (if it is one) 
         let path = st.EvalPath()
         if path.Contains("DefinitionClass.InheritedClassType") then 
-            es.ParentClassCalls.TryAdd(literalObj, None) |> ignore
+            variableStack.ParentClassCalls.TryAdd(literalObj, None) |> ignore
         st.EvalPop()
     | Ast.PredicateType((pos1, pos2),()) -> 
         st.EvalPush("PredicateType")
@@ -676,7 +676,7 @@ let rec eval (st: SymbolTable) ast =
                 // add potential parent class call for this identifier
                 let path = st.EvalPath()
                 if path.Contains("DefinitionClass.InheritedClassType") then 
-                    es.ParentClassCalls.TryAdd(identifier, None) |> ignore
+                    variableStack.ParentClassCalls.TryAdd(identifier, None) |> ignore
             else
                 fv.FplId <- identifier
                 fv.TypeId <- identifier
@@ -1507,7 +1507,7 @@ let rec eval (st: SymbolTable) ast =
             let parentConstructorCallRefValue = getArgument parentConstructorCallReference
             match parentConstructorCallRefValue with
             | Some refVal -> 
-                if es.ParentClassCalls.ContainsKey(refVal.FplId) then
+                if variableStack.ParentClassCalls.ContainsKey(refVal.FplId) then
                     // Since the reference's id is the same as one of the classes this class is derived from,
                     let derivedClassOpt = getClassBlock parentConstructorCallReference
                     match derivedClassOpt with
@@ -1519,8 +1519,8 @@ let rec eval (st: SymbolTable) ast =
                         if parentClassFilterList.Length > 0 then
                             let parentClass = parentClassFilterList.Head
                             // add the found parent class to the parentClassCalls 
-                            if Option.isNone es.ParentClassCalls[refVal.FplId] then 
-                                es.ParentClassCalls[parentClass.FplId] <- Some parentClass
+                            if Option.isNone variableStack.ParentClassCalls[refVal.FplId] then 
+                                variableStack.ParentClassCalls[parentClass.FplId] <- Some parentClass
                                 let (shadowedVars, shadowedProperties) = copyParentToDerivedClass parentClass derivedClass
                                 shadowedVars
                                 |> Seq.iter (fun name -> 
@@ -1688,7 +1688,7 @@ let rec eval (st: SymbolTable) ast =
         // of the constructor in which we want to count the calls to parent classes.
         // (we need to reset the counters for every constructor of the same class to avoid 
         // ID020 false positives for the wrong constructors)
-        es.ParentClassCountersInitialize()  
+        variableStack.ParentClassCountersInitialize()  
 
         // evaluate the declaration block
         match optVarDeclOrSpecListAst with
@@ -1696,7 +1696,7 @@ let rec eval (st: SymbolTable) ast =
         | None -> ()
 
         // check if the constructor calls all necessary parent classes
-        es.ParentClassCalls 
+        variableStack.ParentClassCalls 
         |> Seq.iter (fun kvp -> 
             match kvp.Value with
             | Some calledClassNode -> ()
@@ -1781,7 +1781,7 @@ let rec eval (st: SymbolTable) ast =
         optUserDefinedObjSymAst |> Option.map (eval st) |> Option.defaultValue ()
 
         // clear the storage of parent class counters before evaluating the list of parent classes
-        es.ParentClassCalls.Clear() 
+        variableStack.ParentClassCalls.Clear() 
         // now evaluate the list of parent classes while adding the identified classes to the storage
         classTypeListAsts |> List.map (eval st) |> ignore
 

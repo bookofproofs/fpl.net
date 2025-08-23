@@ -575,6 +575,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
 /// replacing parameters by a calling function with arguments.
 and FplVariableStack() = 
     let mutable _inSignatureEvaluation = false
+    let _classCounters = Dictionary<string,FplValue option>()
     let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
     
     /// Indicates if this EvalStack is evaluating a signature on a FPL building block
@@ -582,6 +583,18 @@ and FplVariableStack() =
         with get () = _inSignatureEvaluation
         and set (value) = _inSignatureEvaluation <- value
 
+    /// In the context of a class being evaluated, this dictionary provides a dictionary
+    /// of potential calls of parent classes (=Key). The optional FplValue values become some values
+    /// if the a particular call was found. 
+    /// This dictionary is used to emit ID020/ID021 diagnostics. If a class A inherits from class B but doesn't call its base constructor
+    /// ID020 diagnostics will be emitted. If a class A inherits from class B and calls its base constructor more than once
+    /// ID021 diagnostics will be emitted.
+    member this.ParentClassCalls = _classCounters
+    
+    /// Resets the counters of th ID020 diagnostics evaluation.
+    member this.ParentClassCountersInitialize() = 
+        _classCounters |> Seq.iter (fun kvp -> _classCounters[kvp.Key] <- None)
+        
     // The stack memory of the runner to store the variables of all run programs
     member this.Stack = _stack
 
