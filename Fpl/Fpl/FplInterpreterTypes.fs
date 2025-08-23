@@ -387,7 +387,11 @@ type FplValue(positions: Positions, parent: FplValue option) =
 
     override this.SetValuesOf fv =
         this.ValueList.Clear()
-        this.ValueList.AddRange(fv.ValueList)
+        if fv.ValueList.Count = 0 then
+            // if fv has no values then it should be the value itself
+            this.ValueList.Add(fv)
+        else
+            this.ValueList.AddRange(fv.ValueList)
 
     override this.IsFplBlock () = false
     override this.IsBlock () = false
@@ -2553,18 +2557,17 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (toBeAssignedValue.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
 
     override this.Run variableStack = 
-        let assigneeReference = this.ArgList[0]
-        let assignedValueOpt = getArgument this
-        match assignedValueOpt with
-        | Some assignedValue ->
-            let assigneeOpt = getArgument assigneeReference
-            match assigneeOpt with
-            | (Some assignee)  ->
-                this.CheckSIG05Diagnostics assignee assignedValue
-                assignedValue.Run variableStack
-                assignee.SetValuesOf assignedValue
-            | None -> ()
-        | None -> ()
+        let assigneeReferenceOpt = getArgument this.ArgList[0]
+        let assignedValueOpt = getArgument this.ArgList[1]
+        match assigneeReferenceOpt, assignedValueOpt with
+        | Some assignee, Some assignedValue ->
+            this.CheckSIG05Diagnostics assignee assignedValue
+            assignedValue.Run variableStack
+            assignee.SetValuesOf assignedValue
+            match assignee with
+            | :? FplVariable -> assignee.IsInitializedVariable <- true
+            | _ -> ()
+        | _ -> ()
 
 /// A discriminated union type for wrapping search results in the Scope of an FplValue.
 type ScopeSearchResult =

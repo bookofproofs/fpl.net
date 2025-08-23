@@ -617,8 +617,8 @@ let rec eval (st: SymbolTable) ast =
         let stmt = new FplReturn((pos1,pos2), fv)
         es.PushEvalStack(stmt)
         eval st returneeAst
-        stmt.Run variableStack
         es.PopEvalStack() 
+        stmt.Run variableStack
         st.EvalPop()
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
         st.EvalPush("AssumeArgument")
@@ -1470,8 +1470,8 @@ let rec eval (st: SymbolTable) ast =
         let dummyValue = new FplReference((pos1,pos2), fvNew)
         es.PushEvalStack(dummyValue)
         eval st predicateAst
-        fvNew.Run variableStack
         es.PopEvalStack() 
+        fvNew.Run variableStack
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")
