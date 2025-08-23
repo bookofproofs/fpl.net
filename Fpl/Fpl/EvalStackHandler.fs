@@ -34,7 +34,7 @@ type EvalStack() =
                     fv.FplId
                 else
                     fv.Type(SignatureType.Name)
-        match inScopeOfParent fv identifier with
+        match fv.InScopeOfParent identifier with
         | ScopeSearchResult.Found conflict -> 
             match next with
             | :? FplJustification -> 

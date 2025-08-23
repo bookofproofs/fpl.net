@@ -569,6 +569,54 @@ type FplValue(positions: Positions, parent: FplValue option) =
         | Some parent -> parent.ArgList.Add(this)
         | _ -> ()
               
+
+    /// Checks if a block named name is in the scope of the fplValue' parent.
+    member this.InScopeOfParent name =
+        let conflictInSiblingTheory (parent: FplValue) =
+            // if the parent is a theory, look also for its sibling theories
+            let (conflicts: ScopeSearchResult list) =
+                let root = parent.Parent.Value
+
+                root.Scope
+                |> Seq.filter (fun siblingTheory ->
+                    // look only for sibling theories
+                    siblingTheory.Value <> parent)
+                |> Seq.choose (fun siblingTheory ->
+                    if siblingTheory.Value.Scope.ContainsKey(name) then
+                        let foundConflict = siblingTheory.Value.Scope[name]
+                        Some(ScopeSearchResult.Found foundConflict)
+                    else
+                        None)
+                |> Seq.toList
+
+            let res = conflicts
+
+            if res.Length > 0 then
+                conflicts.Head
+            else
+                ScopeSearchResult.NotFound
+
+        match this.Parent with
+        | Some parent ->
+            if parent.Scope.ContainsKey(name) then
+                let foundConflict = parent.Scope[name]
+                ScopeSearchResult.Found foundConflict
+            else if parent.ShortName = "th" then
+                conflictInSiblingTheory parent
+            else
+                ScopeSearchResult.NotFound
+        | None -> ScopeSearchResult.NotApplicable
+
+
+/// A discriminated union type for wrapping search results in the Scope of an FplValue.
+and ScopeSearchResult =
+    | FoundAssociate of FplValue
+    | FoundMultiple of string
+    | FoundIncorrectBlock of string
+    | Found of FplValue
+    | NotFound
+    | NotApplicable
+
 /// This type implements the functionality needed to "run" FPL statements step-by-step
 /// while managing the storage of variables and other evaluation-related information.
 /// FPL uses a call-by-value approach when it comes to 
@@ -2489,15 +2537,6 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             | _ -> ()
         | _ -> ()
 
-/// A discriminated union type for wrapping search results in the Scope of an FplValue.
-type ScopeSearchResult =
-    | FoundAssociate of FplValue
-    | FoundMultiple of string
-    | FoundIncorrectBlock of string
-    | Found of FplValue
-    | NotFound
-    | NotApplicable
-
 /// Qualified starting position of this FplValue
 let qualifiedStartPos (fplValue:FplValue) =
     let rec getFullName (fv: FplValue) (first: bool) =
@@ -2563,44 +2602,6 @@ let qualifiedName (fplValue:FplValue)=
                 getFullName fv.Parent.Value false + "." + fplValueType
 
     getFullName fplValue true
-
-
-/// Checks if a block named name is in the scope of the fplValue' parent.
-let inScopeOfParent (fplValue: FplValue) name =
-    let conflictInSiblingTheory (parent: FplValue) =
-        // if the parent is a theory, look also for its sibling theories
-        let (conflicts: ScopeSearchResult list) =
-            let root = parent.Parent.Value
-
-            root.Scope
-            |> Seq.filter (fun siblingTheory ->
-                // look only for sibling theories
-                siblingTheory.Value <> parent)
-            |> Seq.choose (fun siblingTheory ->
-                if siblingTheory.Value.Scope.ContainsKey(name) then
-                    let foundConflict = siblingTheory.Value.Scope[name]
-                    Some(ScopeSearchResult.Found foundConflict)
-                else
-                    None)
-            |> Seq.toList
-
-        let res = conflicts
-
-        if res.Length > 0 then
-            conflicts.Head
-        else
-            ScopeSearchResult.NotFound
-
-    match fplValue.Parent with
-    | Some parent ->
-        if parent.Scope.ContainsKey(name) then
-            let foundConflict = parent.Scope[name]
-            ScopeSearchResult.Found foundConflict
-        else if isTheory parent then
-            conflictInSiblingTheory parent
-        else
-            ScopeSearchResult.NotFound
-    | None -> ScopeSearchResult.NotApplicable
 
 /// Checks if a variable is defined in the scope of block, if any
 /// looking for it recursively, up the symbol tree.
