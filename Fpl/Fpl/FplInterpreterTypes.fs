@@ -792,23 +792,7 @@ and FplVariableStack() =
         let fv = _valueStack.Pop()
         if _valueStack.Count > 0 then
             let next = _valueStack.Peek()
-
-            match fv.Name with 
-            | "zero-or-more variable"
-            | "one-or-more variable"
-            | "variable" ->
-                if next.IsBlock() then 
-                     fv.TryAddToParentsScope()
-                elif next.IsVariable() then 
-                     fv.TryAddToParentsScope()
-                else
-                    match next.Name with 
-                    | "mapping" 
-                    | "quantor" -> 
-                        fv.TryAddToParentsScope()
-                    | _ ->
-                        fv.TryAddToParentsArgList()
-            | _ -> fv.EmbedInSymbolTable (Some next) 
+            fv.EmbedInSymbolTable (Some next) 
 
     // Pushes an FplValue to the stack.
     member this.PushEvalStack fv = _valueStack.Push fv
@@ -2430,9 +2414,16 @@ type FplVariable(positions: Positions, parent: FplValue) =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = 
-        raise (NotImplementedException())
-
+    override this.EmbedInSymbolTable nextOpt =
+        match nextOpt with 
+        | Some next when next.IsBlock() ->
+            this.TryAddToParentsScope()
+        | Some next when next.IsVariable() ->
+            this.TryAddToParentsScope()
+        | Some next when next.Name = "mapping" || next.Name = "quantor" ->  
+            this.TryAddToParentsScope()
+        | _ ->
+            this.TryAddToParentsArgList()
 
 [<AbstractClass>]
 type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) =
