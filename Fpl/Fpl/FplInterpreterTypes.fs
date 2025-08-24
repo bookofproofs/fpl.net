@@ -794,10 +794,6 @@ and FplVariableStack() =
             let next = _valueStack.Peek()
 
             match fv.Name with 
-            | "disjunction"
-            | "exclusive disjunction" 
-            | "negation"
-            | "implication" 
             | "equivalence" 
             | "is operator" 
             | "equality" ->
@@ -960,6 +956,21 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
         this.ValueList
         |> Seq.map (fun subfv -> subfv.Represent())
         |> String.concat ", "
+
+    override this.EmbedInSymbolTable nextOpt = 
+        match nextOpt with 
+        | Some next when next.Name = "justification" -> 
+            this.TryAddToParentsScope()
+        | Some next when next.Name = "localization" -> 
+            next.FplId <- this.FplId
+            next.TypeId <- this.TypeId
+            next.EndPos <- this.EndPos
+        | Some next when next.IsBlock() || next.Name = "argument" ->
+            this.TryAddToParentsArgList() 
+        | Some next -> 
+            this.TryAddToParentsArgList()
+            next.EndPos <- this.EndPos
+        | _ -> ()
 
 /// Implements the semantics of an FPL predicate prime predicate that is intrinsic.
 /// It serves as a value for everything in FPL that is "predicative in nature". These can be predicates, theorem-like-statements, proofs or predicative expressions. The value can have one of three values in FPL: "true", literalFalse, and "undetermined". 
@@ -1737,23 +1748,6 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
             | _ -> literalUndetermined
         this.SetValue(newValue)
 
-    override this.EmbedInSymbolTable nextOpt = 
-        match nextOpt with 
-        | Some next when next.Name = "justification" -> 
-            this.TryAddToParentsScope()
-        | Some next when next.Name = "localization" -> 
-            next.FplId <- this.FplId
-            next.TypeId <- this.TypeId
-            next.EndPos <- this.EndPos
-        | Some next when next.IsBlock() || next.Name = "argument" ->
-            this.TryAddToParentsArgList() 
-        | Some next when next.Scope.ContainsKey(".") -> 
-            next.EndPos <- this.EndPos
-        | Some next -> 
-            this.TryAddToParentsArgList()
-            next.EndPos <- this.EndPos
-        | _ -> ()
-
 
 /// Implements the semantics of an FPL disjunction compound predicate.
 type FplDisjunction(positions: Positions, parent: FplValue) as this =
@@ -1795,9 +1789,6 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
             | _ -> 
                 literalUndetermined
         this.SetValue(newValue)  
-
-    override this.EmbedInSymbolTable _ = 
-        raise (NotImplementedException())
 
 
 /// Implements the semantics of an FPL xor compound predicate.
@@ -1844,9 +1835,6 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
 
         this.SetValue(newValue)  
 
-    override this.EmbedInSymbolTable _ = 
-        raise (NotImplementedException())
-
 /// Implements the semantics of an FPL negation compound predicate.
 type FplNegation(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -1883,10 +1871,6 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
             | _ -> literalUndetermined  
 
         this.SetValue(newValue)  
-
-    override this.EmbedInSymbolTable _ = 
-        raise (NotImplementedException())
-
 
 /// Implements the semantics of an FPL implication compound predicate.
 type FplImplication(positions: Positions, parent: FplValue) as this =
@@ -1926,11 +1910,7 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
             | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) -> literalTrue
             | _ -> literalUndetermined
         
-        this.SetValue(newValue)  
-
-    override this.EmbedInSymbolTable _ = 
-        raise (NotImplementedException())
-
+        this.SetValue(newValue) 
 
 /// Implements the semantics of an FPL equivalence compound predicate.
 type FplEquivalence(positions: Positions, parent: FplValue) as this =
