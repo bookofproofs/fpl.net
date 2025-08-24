@@ -794,7 +794,6 @@ and FplVariableStack() =
             let next = _valueStack.Peek()
 
             match fv.Name with 
-            | "conjunction"
             | "disjunction"
             | "exclusive disjunction" 
             | "negation"
@@ -1727,21 +1726,23 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
             | _ -> literalUndetermined
         this.SetValue(newValue)
 
-    override this.EmbedInSymbolTable nextOpt = ()
-        //match nextOpt with 
-        //| Some next when next.IsBlock() -> this.TryAddToParentsScope()
-        //| Some next when (next :? FplLocalization) -> 
-        //    next.FplId <- this.FplId
-        //    next.TypeId <- this.TypeId
-        //    next.EndPos <- this.EndPos
-        //| Some next when (next :? FplJustification) -> 
-        //    this.TryAddToParentsScope()
-        //| Some next -> 
-        //    this.TryAddToParentsArgList()
-        //    next.EndPos <- this.EndPos
-        //| _ -> 
-        //    this.TryAddToParentsArgList()
-            
+    override this.EmbedInSymbolTable nextOpt = 
+        match nextOpt with 
+        | Some next when next.Name = "justification" -> 
+            this.TryAddToParentsScope()
+        | Some next when next.Name = "localization" -> 
+            next.FplId <- this.FplId
+            next.TypeId <- this.TypeId
+            next.EndPos <- this.EndPos
+        | Some next when next.IsBlock() || next.Name = "argument" ->
+            this.TryAddToParentsArgList() 
+        | Some next when next.Scope.ContainsKey(".") -> 
+            next.EndPos <- this.EndPos
+        | Some next -> 
+            this.TryAddToParentsArgList()
+            next.EndPos <- this.EndPos
+        | _ -> ()
+
 
 /// Implements the semantics of an FPL disjunction compound predicate.
 type FplDisjunction(positions: Positions, parent: FplValue) as this =
