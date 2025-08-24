@@ -794,27 +794,6 @@ and FplVariableStack() =
             let next = _valueStack.Peek()
 
             match fv.Name with 
-            | "equivalence" 
-            | "is operator" 
-            | "equality" ->
-                if next.IsBlock() then 
-                    fv.TryAddToParentsArgList() 
-                else
-                    match next.Name with 
-                    | "localization" -> 
-                        next.FplId <- fv.FplId
-                        next.TypeId <- fv.TypeId
-                        next.EndPos <- fv.EndPos
-                    | "justification" -> 
-                        fv.TryAddToParentsScope()
-                    | "argument" ->
-                        fv.TryAddToParentsArgList() 
-                    | _ -> 
-                        if next.Scope.ContainsKey(".") then 
-                            ()
-                        else
-                            fv.TryAddToParentsArgList()
-                        next.EndPos <- fv.EndPos
             | "zero-or-more variable"
             | "one-or-more variable"
             | "variable" ->
@@ -1950,11 +1929,7 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
             | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalFalse) -> literalFalse
             | _ -> literalUndetermined
         
-        this.SetValue(newValue)  
-
-    override this.EmbedInSymbolTable _ = 
-        raise (NotImplementedException())
-
+        this.SetValue(newValue)
 
 /// Implements the semantics of an FPL equality.
 type FplEquality(positions: Positions, parent: FplValue) as this =
@@ -2028,9 +2003,6 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
                     | _ -> 
                         newValue.FplId <- $"{(a1Repr = b1Repr)}" 
                         this.SetValue(newValue)
-
-    override this.EmbedInSymbolTable _ = 
-        raise (NotImplementedException())
 
 
 /// Implements an object that is used to provide a representation of extensions in FPL.
@@ -2360,10 +2332,6 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
             | None -> literalTrue
         
         this.SetValue(newValue)  
-
-    override this.EmbedInSymbolTable _ = 
-        raise (NotImplementedException())
-
 
 type FplQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
