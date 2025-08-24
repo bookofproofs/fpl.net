@@ -800,8 +800,7 @@ and FplVariableStack() =
             | "implication" 
             | "equivalence" 
             | "is operator" 
-            | "equality" 
-            | "reference" ->
+            | "equality" ->
                 if next.IsBlock() then 
                     fv.TryAddToParentsArgList() 
                 else
@@ -1676,8 +1675,22 @@ type FplReference(positions: Positions, parent: FplValue) =
             let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
             this.SetValue(undef)
 
-    override this.EmbedInSymbolTable _ = 
-        raise (NotImplementedException())
+    override this.EmbedInSymbolTable nextOpt = 
+        match nextOpt with 
+        | Some next when next.Name = "justification" -> 
+            this.TryAddToParentsScope()
+        | Some next when next.Name = "localization" -> 
+            next.FplId <- this.FplId
+            next.TypeId <- this.TypeId
+            next.EndPos <- this.EndPos
+        | Some next when next.IsBlock() || next.Name = "argument" ->
+            this.TryAddToParentsArgList() 
+        | Some next when next.Scope.ContainsKey(".") -> 
+            next.EndPos <- this.EndPos
+        | Some next -> 
+            this.TryAddToParentsArgList()
+            next.EndPos <- this.EndPos
+        | _ -> ()
 
 let isReference (fv:FplValue) =
     match fv with
