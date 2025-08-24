@@ -353,6 +353,9 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// Adds this FplValue to its parent's Scope, if such a Parent exists
     abstract member TryAddToParentsScope: unit -> unit
 
+    /// Embeds this FplValue in the SymbolTable by adding it to the Scope or as an argument of its predecessor in the SymbolTable.
+    abstract member EmbedInSymbolTable: FplVariableStack -> unit
+
     /// Abstract member for running this FplValue. It has None or Some optional FplVariableStack as paramter.
     abstract member Run: FplVariableStack -> unit
 
@@ -779,6 +782,8 @@ and FplVariableStack() =
             orig.Copy(kvp.Value)
         )
 
+    member this.EvalStack = _valueStack
+
     // Pops an FplValue from stack without propagating it's name and signature to the next FplValue on the stack.
     member this.Pop() = _valueStack.Pop()
 
@@ -789,44 +794,6 @@ and FplVariableStack() =
             let next = _valueStack.Peek()
 
             match fv.Name with 
-            | "intrinsic object"
-            | "quantor"
-            | "justification"
-            | "argument inference"
-            | "mapping"
-            | "translation" 
-            | "statement"
-            | "return statement"
-            | "assertion"
-            | "intrinsic predicate"
-            | "intrinsic functional term"
-            | "undef"
-            | "tpl"
-            | "instance" 
-            | "theory" 
-            | "intrinsic index" ->
-                fv.TryAddToParentsArgList() 
-            | "theorem" 
-            | "lemma"  
-            | "proposition"  
-            | "corollary"  
-            | "predicate definition"  
-            | "conjecture"  
-            | "axiom"  
-            | "rule of inference"
-            | "proof"
-            | "class definition"
-            | "localization"
-            | "constructor"
-            | "predicate property"
-            | "optional predicate property"
-            | "functional term property"
-            | "optional functional term property"
-            | "extension definition"
-            | "argument"
-            | "language"
-            | "functional term definition" ->
-                fv.TryAddToParentsScope()
             | "conjunction" 
             | "disjunction"
             | "exclusive disjunction" 
@@ -913,7 +880,7 @@ and FplVariableStack() =
                 | "reference" ->
                     fv.TryAddToParentsArgList()
                 | _ -> ()
-            | _ -> () 
+            | _ -> fv.EmbedInSymbolTable this 
 
     // Pushes an FplValue to the stack.
     member this.PushEvalStack fv = _valueStack.Push fv
@@ -962,6 +929,9 @@ type FplRoot() =
     override this.TryAddToParentsArgList () = () 
     override this.Run variableStack = ()
 
+    override this.EmbedInSymbolTable variableStack = () 
+
+
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isRoot (fv:FplValue) = 
     match fv with
@@ -990,6 +960,8 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string) as this
     override this.Represent () = literalUndef
     override this.Run variableStack = ()
 
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope()
 
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isTheory (fv:FplValue) = 
@@ -1032,6 +1004,8 @@ type FplIntrinsicPred(positions: Positions, parent: FplValue) =
 
     override this.Run _ = ()
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
 [<AbstractClass>]
 type FplGenericPredicateWithExpression(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
@@ -1070,6 +1044,8 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         raise (NotImplementedException())
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
 type FplInstance(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
 
@@ -1095,7 +1071,9 @@ type FplInstance(positions: Positions, parent: FplValue) =
         else
             subRepr
 
-    override this.Run variableStack = ()
+    override this.Run _ = ()
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
 type FplConstructor(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
@@ -1120,6 +1098,7 @@ type FplConstructor(positions: Positions, parent: FplValue) =
     override this.Run _ = 
         this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
 let isConstructor (fv:FplValue) =
     match fv with
@@ -1160,6 +1139,8 @@ type FplClass(positions: Positions, parent: FplValue) =
         this.SetValue(new FplInstance((this.StartPos, this.EndPos), this))
 
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
 /// Returns Some or none FplValue being the enclosing class block of a node inside a class.
 let rec getClassBlock (fv: FplValue) =
     match fv with
@@ -1190,6 +1171,8 @@ type FplIntrinsicObj(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         this.SetValue (new FplInstance((this.StartPos, this.EndPos), this.Parent.Value))
+
+    override this.EmbedInSymbolTable variableStack = this.TryAddToParentsArgList() 
 
 let isIntrinsicObj (fv1:FplValue) = 
     match fv1 with
@@ -1231,6 +1214,7 @@ type FplPredicate(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
 type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -1245,6 +1229,8 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
 
     override this.IsBlock () = true
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
 
@@ -1257,6 +1243,8 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
         ret
 
     override this.IsBlock () = true
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
 type FplAxiom(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -1272,6 +1260,7 @@ type FplAxiom(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
 
 type FplTheorem(positions: Positions, parent: FplValue) =
@@ -1288,6 +1277,8 @@ type FplTheorem(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
 type FplLemma(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
 
@@ -1301,6 +1292,8 @@ type FplLemma(positions: Positions, parent: FplValue) =
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
 type FplProposition(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -1316,6 +1309,8 @@ type FplProposition(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
 type FplConjecture(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
 
@@ -1330,6 +1325,8 @@ type FplConjecture(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
 type FplCorollary(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
 
@@ -1343,6 +1340,9 @@ type FplCorollary(positions: Positions, parent: FplValue) =
 
     override this.IsFplBlock () = true
     override this.IsBlock () = true
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
 
 type FplProof(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
@@ -1366,6 +1366,8 @@ type FplProof(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         raise (NotImplementedException())
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
 type FplArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
@@ -1383,6 +1385,9 @@ type FplArgument(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         raise (NotImplementedException())
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
 
 let isArgument (fv:FplValue) = 
     match fv with
@@ -1407,6 +1412,8 @@ type FplJustification(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         raise (NotImplementedException())
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
 type FplArgInference(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
@@ -1424,6 +1431,8 @@ type FplArgInference(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         raise (NotImplementedException())
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
 type FplLocalization(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1453,6 +1462,8 @@ type FplLocalization(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         raise (NotImplementedException())
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
 type FplTranslation(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
@@ -1478,6 +1489,9 @@ type FplTranslation(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         raise (NotImplementedException())
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
+
 type FplLanguage(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
@@ -1497,6 +1511,8 @@ type FplLanguage(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         raise (NotImplementedException())
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
 let isLanguage (fv:FplValue) =
     match fv with
@@ -1521,6 +1537,8 @@ type FplAssertion(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         raise (NotImplementedException())
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
 type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do 
@@ -1541,6 +1559,8 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
     override this.Represent (): string = this.FplId
 
     override this.Run _ = ()
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -1675,6 +1695,9 @@ type FplReference(positions: Positions, parent: FplValue) =
             let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
             this.SetValue(undef)
 
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
+
 let isReference (fv:FplValue) =
     match fv with
     | :? FplReference -> true
@@ -1720,6 +1743,13 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
             | _ -> literalUndetermined
         this.SetValue(newValue)
 
+    override this.EmbedInSymbolTable variableStack = 
+        if variableStack.EvalStack.Count > 1 then
+            let fv = variableStack.EvalStack.Pop()
+            let next = variableStack.EvalStack.Peek()
+            variableStack.EvalStack.Push(fv)
+            
+
 /// Implements the semantics of an FPL disjunction compound predicate.
 type FplDisjunction(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -1760,6 +1790,10 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
             | _ -> 
                 literalUndetermined
         this.SetValue(newValue)  
+
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
+
 
 /// Implements the semantics of an FPL xor compound predicate.
 type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
@@ -1805,6 +1839,8 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
 
         this.SetValue(newValue)  
 
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
 
 /// Implements the semantics of an FPL negation compound predicate.
 type FplNegation(positions: Positions, parent: FplValue) as this =
@@ -1842,6 +1878,10 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
             | _ -> literalUndetermined  
 
         this.SetValue(newValue)  
+
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
+
 
 /// Implements the semantics of an FPL implication compound predicate.
 type FplImplication(positions: Positions, parent: FplValue) as this =
@@ -1883,6 +1923,10 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
         
         this.SetValue(newValue)  
 
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
+
+
 /// Implements the semantics of an FPL equivalence compound predicate.
 type FplEquivalence(positions: Positions, parent: FplValue) as this =
     inherit FplGenericPredicate(positions, parent)
@@ -1922,6 +1966,10 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
             | _ -> literalUndetermined
         
         this.SetValue(newValue)  
+
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
+
 
 /// Implements the semantics of an FPL equality.
 type FplEquality(positions: Positions, parent: FplValue) as this =
@@ -1996,6 +2044,10 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
                         newValue.FplId <- $"{(a1Repr = b1Repr)}" 
                         this.SetValue(newValue)
 
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
+
+
 /// Implements an object that is used to provide a representation of extensions in FPL.
 type FplExtensionObj(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -2063,6 +2115,9 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
             subRepr
 
     override this.Run _ = ()
+
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
 
 
 /// Implements the semantics of an FPL decrement delegate.
@@ -2135,6 +2190,10 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
                 string n'
         this.SetValue(newValue)
 
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
+
+
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
@@ -2179,6 +2238,8 @@ type FplMapping(positions: Positions, parent: FplValue) =
     override this.Represent() = $"dec {this.Type(SignatureType.Type)}"
 
     override this.Run _ = ()
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
 /// Tries to find a mapping of an FplValue
 let rec getMapping (fv:FplValue) =
@@ -2314,6 +2375,10 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
         
         this.SetValue(newValue)  
 
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
+
+
 type FplQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
@@ -2341,6 +2406,8 @@ type FplQuantor(positions: Positions, parent: FplValue) =
     override this.Run _ = 
         raise (NotImplementedException())
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+    
 type FplVariable(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
     let mutable _variadicType = String.Empty // "" = variable, "many" = many, "many1" = many1 
@@ -2434,6 +2501,9 @@ type FplVariable(positions: Positions, parent: FplValue) =
 
     override this.Run _ = ()
 
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
+
 
 [<AbstractClass>]
 type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) =
@@ -2485,6 +2555,9 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.IsFplBlock () = true
     override this.IsBlock () = true
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
+
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplGenericFunctionalTerm(positions, parent)
 
@@ -2498,6 +2571,8 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.IsBlock () = true
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
 type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplGenericFunctionalTerm(positions, parent)
 
@@ -2510,6 +2585,8 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
         ret
 
     override this.IsBlock () = true
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -2528,6 +2605,8 @@ type FplExtension(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         raise (NotImplementedException())
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
 let isExtension (fv:FplValue) =
     match fv with
@@ -2556,6 +2635,9 @@ type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = ()
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
+
 type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
     do
@@ -2577,6 +2659,7 @@ type FplIntrinsicFunc(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = () 
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
 type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -2599,6 +2682,8 @@ type FplIntrinsicTpl(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = () 
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
 type FplStmt(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
@@ -2615,6 +2700,9 @@ type FplStmt(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         raise (NotImplementedException())
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
 
 /// Returns Some argument of the FplValue depending of the type of it.
 let getArgument (fv:FplValue) =
@@ -2681,6 +2769,8 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
                 let value = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
                 this.SetValue(value)
 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
 /// Implements the assigment statement in FPL.
 type FplAssignment(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
@@ -2742,6 +2832,10 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             | :? FplVariable -> assignee.IsInitializedVariable <- true
             | _ -> ()
         | _ -> ()
+
+    override this.EmbedInSymbolTable variableStack = 
+        raise (NotImplementedException())
+
 
 /// A string representation of an FplValue
 let toString (fplValue:FplValue) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
