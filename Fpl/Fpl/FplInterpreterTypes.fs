@@ -801,8 +801,6 @@ and FplVariableStack() =
             | "equivalence" 
             | "is operator" 
             | "equality" 
-            | "extension object" 
-            | "decrement"
             | "reference" ->
                 if next.IsBlock() then 
                     fv.TryAddToParentsArgList() 
@@ -2110,8 +2108,10 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
 
     override this.Run _ = ()
 
-    override this.EmbedInSymbolTable _ = 
-        raise (NotImplementedException())
+    override this.EmbedInSymbolTable nextOpt = 
+        match nextOpt with
+        | Some next when next.Scope.ContainsKey(".") -> ()
+        | _ -> this.TryAddToParentsArgList() 
 
 
 /// Implements the semantics of an FPL decrement delegate.
@@ -2184,8 +2184,7 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
                 string n'
         this.SetValue(newValue)
 
-    override this.EmbedInSymbolTable _ = 
-        raise (NotImplementedException())
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList()
 
 
 type FplMapping(positions: Positions, parent: FplValue) =
