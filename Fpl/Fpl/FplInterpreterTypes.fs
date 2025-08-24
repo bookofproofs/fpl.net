@@ -797,44 +797,17 @@ and FplVariableStack() =
             | "zero-or-more variable"
             | "one-or-more variable"
             | "variable" ->
-                match next.Name with 
-                | "theorem"
-                | "lemma" 
-                | "proposition"
-                | "corollary" 
-                | "conjecture"  
-                | "predicate definition"   
-                | "axiom"  
-                | "rule of inference"
-                | "constructor"
-                | "proof"
-                | "predicate property"
-                | "optional predicate property"
-                | "functional term property"
-                | "optional functional term property"
-                | "class definition"
-                | "mapping" 
-                | "extension definition" 
-                | "zero-or-more variable"
-                | "one-or-more variable"
-                | "variable" 
-                | "functional term definition"
-                | "quantor"  
-                | "localization" -> 
-                    fv.TryAddToParentsScope()
-                | "conjunction"
-                | "disjunction" 
-                | "exclusive disjunction" 
-                | "negation" 
-                | "implication" 
-                | "equivalence" 
-                | "is operator" 
-                | "equality" 
-                | "extension object"
-                | "decrement" 
-                | "reference" ->
-                    fv.TryAddToParentsArgList()
-                | _ -> ()
+                if next.IsBlock() then 
+                     fv.TryAddToParentsScope()
+                elif next.IsVariable() then 
+                     fv.TryAddToParentsScope()
+                else
+                    match next.Name with 
+                    | "mapping" 
+                    | "quantor" -> 
+                        fv.TryAddToParentsScope()
+                    | _ ->
+                        fv.TryAddToParentsArgList()
             | _ -> fv.EmbedInSymbolTable (Some next) 
 
     // Pushes an FplValue to the stack.
@@ -1429,6 +1402,8 @@ type FplLocalization(positions: Positions, parent: FplValue) =
 
     override this.Represent() = this.Type(SignatureType.Name)
         
+    override this.IsBlock() = true
+
     override this.Run variableStack = 
         raise (NotImplementedException())
 
@@ -2554,6 +2529,8 @@ type FplExtension(positions: Positions, parent: FplValue) =
         ret
 
     override this.Type signatureType = this.FplId
+
+    override this.IsBlock () = true
 
     override this.Represent () = this.FplId
 
