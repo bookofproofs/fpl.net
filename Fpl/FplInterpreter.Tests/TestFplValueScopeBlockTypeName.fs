@@ -140,7 +140,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("assertion", x.Name)
         | "Extension" ->
             let x = new FplExtension(positions, parent)
-            Assert.AreEqual<string>("extension", x.Name)
+            Assert.AreEqual<string>("extension definition", x.Name)
         | "Instance" ->
             let x = new FplInstance(positions, parent)
             Assert.AreEqual<string>("instance", x.Name)

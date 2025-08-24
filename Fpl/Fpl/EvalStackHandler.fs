@@ -29,83 +29,82 @@ type EvalStack() =
         if _valueStack.Count > 0 then
             let next = _valueStack.Peek()
 
-            match fv with 
-            | :? FplIntrinsicObj
-            | :? FplQuantor
-            | :? FplJustification 
-            | :? FplArgInference 
-            | :? FplMapping 
-            | :? FplTranslation 
-            | :? FplStmt
-            | :? FplReturn
-            | :? FplAssertion
-            | :? FplIntrinsicPred
-            | :? FplIntrinsicFunc
-            | :? FplIntrinsicObj
-            | :? FplIntrinsicUndef
-            | :? FplIntrinsicTpl
-            | :? FplInstance 
-            | :? FplTheory 
-            | :? FplIntrinsicInd ->
+            match fv.Name with 
+            | "intrinsic object"
+            | "quantor"
+            | "justification"
+            | "argument inference"
+            | "mapping"
+            | "translation" 
+            | "statement"
+            | "return statement"
+            | "assertion"
+            | "intrinsic predicate"
+            | "intrinsic functional term"
+            | "undef"
+            | "tpl"
+            | "instance" 
+            | "theory" 
+            | "intrinsic index" ->
                 fv.TryAddToParentsArgList() 
-            | :? FplTheorem  
-            | :? FplLemma  
-            | :? FplProposition  
-            | :? FplCorollary  
-            | :? FplPredicate  
-            | :? FplConjecture  
-            | :? FplAxiom  
-            | :? FplRuleOfInference
-            | :? FplProof 
-            | :? FplClass 
-            | :? FplLocalization
-            | :? FplConstructor
-            | :? FplMandatoryPredicate
-            | :? FplOptionalPredicate
-            | :? FplMandatoryFunctionalTerm
-            | :? FplOptionalFunctionalTerm
-            | :? FplExtension
-            | :? FplArgument 
-            | :? FplLanguage 
-            | :? FplFunctionalTerm ->
+            | "theorem" 
+            | "lemma"  
+            | "proposition"  
+            | "corollary"  
+            | "predicate definition"  
+            | "conjecture"  
+            | "axiom"  
+            | "rule of inference"
+            | "proof"
+            | "class definition"
+            | "localization"
+            | "constructor"
+            | "predicate property"
+            | "optional predicate property"
+            | "functional term property"
+            | "optional functional term property"
+            | "extension definition"
+            | "argument"
+            | "language"
+            | "functional term definition" ->
                 fv.TryAddToParentsScope()
-            | :? FplConjunction 
-            | :? FplDisjunction 
-            | :? FplExclusiveOr 
-            | :? FplNegation 
-            | :? FplImplication 
-            | :? FplEquivalence 
-            | :? FplIsOperator 
-            | :? FplEquality 
-            | :? FplExtensionObj 
-            | :? FplDecrement 
-            | :? FplReference ->
-                match next with 
-                | :? FplTheorem  
-                | :? FplLemma  
-                | :? FplProposition  
-                | :? FplCorollary  
-                | :? FplConjecture  
-                | :? FplPredicate  
-                | :? FplAxiom  
-                | :? FplRuleOfInference 
-                | :? FplArgument 
-                | :? FplProof 
-                | :? FplFunctionalTerm 
-                | :? FplClass 
-                | :? FplConstructor
-                | :? FplMandatoryFunctionalTerm
-                | :? FplOptionalFunctionalTerm
-                | :? FplMandatoryPredicate
-                | :? FplOptionalPredicate ->
+            | "conjunction" 
+            | "disjunction"
+            | "exclusive disjunction" 
+            | "negation"
+            | "implication" 
+            | "equivalence" 
+            | "is operator" 
+            | "equality" 
+            | "extension object" 
+            | "decrement"
+            | "reference" ->
+                match next.Name with 
+                | "theorem"
+                | "lemma"   
+                | "proposition"   
+                | "corollary" 
+                | "conjecture"  
+                | "predicate definition"  
+                | "axiom"   
+                | "rule of inference" 
+                | "argument"
+                | "proof"
+                | "functional term definition"
+                | "class definition" 
+                | "constructor"
+                | "functional term property"
+                | "optional functional term property"
+                | "predicate property"
+                | "optional predicate property" ->
                     fv.TryAddToParentsArgList() 
-                | :? FplLocalization -> 
+                | "localization" -> 
                     next.FplId <- fv.FplId
                     next.TypeId <- fv.TypeId
                     next.EndPos <- fv.EndPos
-                | :? FplJustification -> 
+                | "justification" -> 
                     fv.TryAddToParentsScope()
-                | :? FplQuantor ->
+                | "quantor" ->
                     fv.TryAddToParentsArgList() 
                     next.EndPos <- fv.EndPos
                 | _ -> 
@@ -114,41 +113,45 @@ type EvalStack() =
                     else
                         fv.TryAddToParentsArgList()
                     next.EndPos <- fv.EndPos
-            | :? FplVariable ->
-                match next with 
-                | :? FplTheorem 
-                | :? FplLemma 
-                | :? FplProposition 
-                | :? FplCorollary
-                | :? FplConjecture
-                | :? FplPredicate 
-                | :? FplAxiom 
-                | :? FplRuleOfInference 
-                | :? FplConstructor
-                | :? FplProof
-                | :? FplMandatoryPredicate
-                | :? FplOptionalPredicate
-                | :? FplMandatoryFunctionalTerm
-                | :? FplOptionalFunctionalTerm
-                | :? FplClass
-                | :? FplMapping 
-                | :? FplExtension 
-                | :? FplVariable 
-                | :? FplFunctionalTerm 
-                | :? FplQuantor  
-                | :? FplLocalization -> 
+            | "zero-or-more variable"
+            | "one-or-more variable"
+            | "variable" ->
+                match next.Name with 
+                | "theorem"
+                | "lemma" 
+                | "proposition"
+                | "corollary" 
+                | "conjecture"  
+                | "predicate definition"   
+                | "axiom"  
+                | "rule of inference"
+                | "constructor"
+                | "proof"
+                | "predicate property"
+                | "optional predicate property"
+                | "functional term property"
+                | "optional functional term property"
+                | "class definition"
+                | "mapping" 
+                | "extension definition" 
+                | "zero-or-more variable"
+                | "one-or-more variable"
+                | "variable" 
+                | "functional term definition"
+                | "quantor"  
+                | "localization" -> 
                     fv.TryAddToParentsScope()
-                | :? FplConjunction
-                | :? FplDisjunction 
-                | :? FplExclusiveOr 
-                | :? FplNegation 
-                | :? FplImplication 
-                | :? FplEquivalence 
-                | :? FplIsOperator 
-                | :? FplEquality 
-                | :? FplExtensionObj 
-                | :? FplDecrement 
-                | :? FplReference ->
+                | "conjunction"
+                | "disjunction" 
+                | "exclusive disjunction" 
+                | "negation" 
+                | "implication" 
+                | "equivalence" 
+                | "is operator" 
+                | "equality" 
+                | "extension object"
+                | "decrement" 
+                | "reference" ->
                     fv.TryAddToParentsArgList()
                 | _ -> ()
             | _ -> () 

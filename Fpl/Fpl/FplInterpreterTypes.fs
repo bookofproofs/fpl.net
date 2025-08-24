@@ -2369,7 +2369,7 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
-    override this.Name = literalExtL
+    override this.Name =  $"{literalExtL} {literalDefL}" 
     override this.ShortName = $"{literalDef} {literalExt}"
 
     override this.Clone () =
