@@ -1400,11 +1400,7 @@ let rec eval (st: SymbolTable) ast =
         | :? FplCorollary  
         | :? FplConjecture  
         | :? FplPredicate  
-        | :? FplAxiom -> 
-            fv.SetValue(last)
-        | _ -> ()
-
-        match fv with
+        | :? FplAxiom 
         | :? FplMandatoryPredicate 
         | :? FplOptionalPredicate ->
             fv.SetValue(last)
