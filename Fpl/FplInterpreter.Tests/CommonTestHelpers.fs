@@ -45,6 +45,7 @@ let deleteFilesWithExtension dir extension =
 let filterByErrorCode (input: Diagnostics) errCode =
     input.Collection |> List.filter (fun d -> d.Code.Code = errCode)
 
+let fplCodeNeedsOnline (fplCode:string) = fplCode.Contains("uses Fpl")
 
 let prepareFplCode (filename: string, fplCode: string, delete: bool) =
     ad.Clear()
@@ -66,7 +67,7 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
         None
     else
         let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
+        let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode || not (fplCodeNeedsOnline fplCode))
         FplInterpreter.fplInterpreter st fplCode uri fplLibUrl |> ignore
 
         let syntaxErrorFound =

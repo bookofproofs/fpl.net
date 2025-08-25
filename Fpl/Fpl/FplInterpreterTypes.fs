@@ -1978,7 +1978,7 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
                         emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the right argument is undetermined." 
                         this.SetValue(newValue)
                     | _ -> 
-                        newValue.FplId <- $"{(a1Repr = b1Repr)}" 
+                        newValue.FplId <- $"{(a1Repr = b1Repr)}".ToLower() 
                         this.SetValue(newValue)
 
 
