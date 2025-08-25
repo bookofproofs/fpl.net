@@ -1350,6 +1350,7 @@ let rec eval (st: SymbolTable) ast =
         simplifyTriviallyNestedExpressions fv
         let last = variableStack.PeekEvalStack()
         last.Run variableStack // execute the last matched binary operator
+        fv.SetValuesOf last
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->

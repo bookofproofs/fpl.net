@@ -717,10 +717,19 @@ and FplVariableStack() =
     member this.ReplaceVariables (parameters:FplValue list) (arguments:FplValue list) =
         let replaceValues (p:FplValue) (ar:FplValue)  =
             (p.ValueList:List<FplValue>).Clear()
-            ar.ValueList
-            |> Seq.iter (fun (fv:FplValue) ->
+            let valueList = 
+                match ar.Name with 
+                | "reference" when ar.FplId = String.Empty ->
+                    ar.ArgList |> Seq.toList
+                | "reference" when ar.Scope.ContainsKey(ar.FplId) ->
+                    ar.Scope.Values |> Seq.toList
+                | _ -> ar.ValueList |> Seq.toList
+                
+            valueList
+            |> List.iter (fun (fv:FplValue) ->
                 let fvClone = fv.Clone()
                 p.ValueList.Add(fvClone)
+                p.IsInitializedVariable <- true
             )
 
         let rec replace (pars:FplValue list) (args: FplValue list) = 
@@ -1557,46 +1566,55 @@ type FplReference(positions: Positions, parent: FplValue) =
 
 
     override this.Represent (): string = 
-        if this.Scope.ContainsKey(this.FplId) && this.Scope[this.FplId].IsVariable() then
-            this.Scope[this.FplId].Represent()
+        if this.ValueList.Count = 0 then 
+            if this.Scope.ContainsKey(this.FplId) && this.Scope[this.FplId].IsVariable() then
+                this.Scope[this.FplId].Represent()
+            else
+                let args = 
+                    this.ArgList
+                    |> Seq.map (fun arg -> arg.Represent())
+                    |> String.concat ", "
+
+                let qualification =
+                    if this.Scope.ContainsKey(".") then
+                        Some(this.Scope["."])
+                    else
+                        None
+
+                match (this.FplId, args, qualification) with
+                | (_, "", Some qual) -> sprintf "%s.%s" literalUndef (qual.Represent())
+                | (_, "???", Some qual) ->
+                    if this.HasBrackets then
+                        sprintf "%s[].%s" literalUndef (qual.Represent())
+                    else
+                        sprintf "%s().%s" literalUndef (qual.Represent())
+                | (_, _, Some qual) ->
+                    if this.HasBrackets then
+                        sprintf "%s[%s].%s" literalUndef args (qual.Represent())
+                    else
+                        sprintf "%s(%s).%s" literalUndef args (qual.Represent())
+                | ("???", _, None) -> "()" 
+                | ("", _, None) -> sprintf "%s" args
+                | (_, "()", None) -> sprintf "%s()" literalUndef
+                | (_, "", None) -> sprintf "%s" literalUndef
+                | (_, "???", None) ->
+                    if this.HasBrackets then
+                        sprintf "%s[]" literalUndef
+                    else
+                        sprintf "%s()" literalUndef
+                | (_, _, None) ->
+                    if this.HasBrackets then sprintf "%s[%s]" literalUndef args
+                    elif this.FplId = $"{literalByDef}." then sprintf "%s %s" literalByDef args
+                    else sprintf "%s(%s)" literalUndef args
         else
-            let args = 
-                this.ArgList
-                |> Seq.map (fun arg -> arg.Represent())
+            let subRepr = 
+                this.ValueList
+                |> Seq.map (fun subfv -> subfv.Represent())
                 |> String.concat ", "
-
-            let qualification =
-                if this.Scope.ContainsKey(".") then
-                    Some(this.Scope["."])
-                else
-                    None
-
-            match (this.FplId, args, qualification) with
-            | (_, "", Some qual) -> sprintf "%s.%s" literalUndef (qual.Represent())
-            | (_, "???", Some qual) ->
-                if this.HasBrackets then
-                    sprintf "%s[].%s" literalUndef (qual.Represent())
-                else
-                    sprintf "%s().%s" literalUndef (qual.Represent())
-            | (_, _, Some qual) ->
-                if this.HasBrackets then
-                    sprintf "%s[%s].%s" literalUndef args (qual.Represent())
-                else
-                    sprintf "%s(%s).%s" literalUndef args (qual.Represent())
-            | ("???", _, None) -> "()" 
-            | ("", _, None) -> sprintf "%s" args
-            | (_, "()", None) -> sprintf "%s()" literalUndef
-            | (_, "", None) -> sprintf "%s" literalUndef
-            | (_, "???", None) ->
-                if this.HasBrackets then
-                    sprintf "%s[]" literalUndef
-                else
-                    sprintf "%s()" literalUndef
-            | (_, _, None) ->
-                if this.HasBrackets then sprintf "%s[%s]" literalUndef args
-                elif this.FplId = $"{literalByDef}." then sprintf "%s %s" literalByDef args
-                else sprintf "%s(%s)" literalUndef args
-
+            if subRepr = String.Empty then 
+                literalUndef
+            else
+                subRepr            
 
     override this.Run variableStack =
         if this.Scope.Count > 0 then 
@@ -1609,11 +1627,11 @@ type FplReference(positions: Positions, parent: FplValue) =
                 let pars = variableStack.SaveVariables(called) 
                 let args = this.ArgList |> Seq.toList
                 variableStack.ReplaceVariables pars args
-                let lastRepr = new FplRoot()
                 // run all statements of the called node
                 called.ArgList
                 |> Seq.iter (fun fv -> 
                     fv.Run variableStack
+                    called.SetValuesOf fv
                 )
                 this.SetValuesOf called
                 variableStack.RestoreVariables(called)
