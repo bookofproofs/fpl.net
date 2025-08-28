@@ -968,3 +968,46 @@ type TestFplValueScopeBlockType() =
             Assert.IsInstanceOfType<FplExtensionObj>(base1)
         | None -> 
             Assert.IsTrue(false)
+
+    [<DataRow("base1", "$1",  0)>]
+    [<DataRow("base2", "$2",  2)>]
+    [<DataRow("base3", "$3",  1)>]
+    [<DataRow("base4", "$0",  3)>]
+    [<DataRow("base5", "$4", 1)>]
+    [<TestMethod>]
+    member this.TestCaseStatement(var, input, (output:int)) =
+        ad.Clear()
+        let fplCode = sprintf """def pred Test(x:pred) { dec 
+                ~n:pred
+                n:= cases
+                (
+                    | (x = $1) : false 
+                    | (x = $2) : true 
+                    | (x = $3) : false 
+                    ? undef  
+                )
+                ;n } def pred T() {Test(%s)};""" input 
+        let filename = "TestCaseStatement"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let proof = theory.Scope["T$1"]
+            let arg = proof.Scope["100."]
+            let just = arg.ArgList[0]
+            let ainf = arg.ArgList[1]
+            let numbOfJustifications = just.Scope.Count
+ 
+            Assert.AreEqual<int>(output, numbOfJustifications)
+
+            match var with
+            | "base1" -> Assert.IsInstanceOfType<FplArgument>(arg)
+            | "base2" -> Assert.IsInstanceOfType<FplArgument>(arg)
+            | "base3" -> Assert.IsInstanceOfType<FplArgument>(arg)
+            | "base4" -> Assert.IsInstanceOfType<FplArgument>(arg)
+            | "base5" -> Assert.IsInstanceOfType<FplArgument>(arg)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)

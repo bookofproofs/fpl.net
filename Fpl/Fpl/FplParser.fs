@@ -288,22 +288,26 @@ let userDefinedSymbol = opt (choice [userDefinedPrefix; userDefinedInfix; userDe
 let signatureWithUserDefinedString = positions "SignatureWithUserDefinedString" (predicateIdentifier .>> IW .>>. userDefinedSymbol .>>. paramTuple) .>> IW |>> Ast.SignatureWithUserDefinedString
 (* Statements *)
 let argumentTuple = positions "ArgumentTuple" ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
+let result, resultRef = createParserForwardedToRef()
 
 let word = regex @"\w+" <?> "<word>" .>> IW
 let fplDelegateIdentifier = positions "DelegateId" (keywordDel >>. dot >>. word) .>> IW |>> Ast.DelegateId
 let fplDelegate = positions "Delegate" (fplDelegateIdentifier .>>. argumentTuple) |>> Ast.Delegate
-let assignmentStatement = positions "Assignment" ((predicateWithQualification .>> IW .>> colonEqual) .>>. predicate) |>> Ast.Assignment
 
 let spacesRightBrace = (IW .>> rightBrace) 
 
 let keywordReturn = IW >>. (skipString literalRetL <|> skipString literalRet) .>> SW 
 
-let defaultResult = positions "DefaultResult" (IW >>. statementList) |>> Ast.DefaultResult
-let conditionFollowedByResult = positions "ConditionFollowedByResult" ((case >>. predicate .>> colon) .>>. (IW >>. statementList)) |>> Ast.ConditionFollowedByResult
+let resultList = many result
+
+let defaultResult = positions "DefaultResult" (IW >>. resultList) |>> Ast.DefaultResult
+let conditionFollowedByResult = positions "ConditionFollowedByResult" ((case >>. predicate .>> colon) .>>. (IW >>. resultList)) |>> Ast.ConditionFollowedByResult
 let conditionFollowedByResultList = many1 (IW >>. conditionFollowedByResult)
 
 let elseStatement = elseCase >>. IW >>. defaultResult .>> IW
 let casesStatement = positions "Cases" (((keywordCases >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
+
+let assignmentStatement = positions "Assignment" ((predicateWithQualification .>> IW .>> colonEqual) .>>. (predicate <|> casesStatement)) |>> Ast.Assignment
 
 let inEntity = keywordIn >>. positions "InEntity" (predicateWithQualification) .>> IW |>> Ast.InEntity
 
@@ -321,15 +325,20 @@ let inheritedClassType = positions "InheritedClassType" (choice [keywordObject; 
 let callConstructorParentClass = positions "ParentConstructorCall" (keywordBaseClassReference >>. dot >>. inheritedClassType .>>. argumentTuple .>> IW) |>> Ast.ParentConstructorCall
 
 let statement = 
-    (choice [
+    IW >>. (choice [
         callConstructorParentClass
         casesStatement
         assertionStatement
         forStatement
         assignmentStatement
-    ])
+    ]) .>> IW
 
-statementListRef.Value <- many (IW >>. statement .>> IW)
+statementListRef.Value <- many statement
+
+resultRef.Value <- choice [ 
+    statement 
+    predicate ]
+
 
 (* Predicates *)
 let optionalSpecification = opt (choice [bracketedCoords; argumentTuple])
@@ -404,6 +413,8 @@ let expression = positions "Expression" (opt prefixOp .>>. choice [compoundPredi
 predicateRef.Value <- expression
 
 predicateListRef.Value <- sepBy predicate comma
+
+
 
 (* FPL building blocks *)
 let keywordDeclaration = (skipString literalDecL <|> skipString literalDec) .>> SW 

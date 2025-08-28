@@ -162,3 +162,29 @@ type TestStatements () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+
+    [<TestMethod>]
+    member this.TestCases06 () =
+        let result = run (assignmentStatement .>> eof) """n:=cases
+                (
+                    | (x = $1) : false 
+                    | (x = $2) : true 
+                    | (x = $3) : false 
+                    ? undef  
+                )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestCases07 () =
+        let result = run (casesStatement .>> eof) """cases
+                (
+                    | (x = $1) : false 
+                    | (x = $2) : true 
+                    | (x = $3) : false 
+                    ? undef  
+                )"""
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
