@@ -1455,20 +1455,18 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.MapCases((pos1, pos2), (conditionFollowedByResultListAsts, elseStatementAst)) ->
         st.EvalPush("MapCases")
-        let fv = variableStack.PeekEvalStack()
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.FplId <- literalCases
+        let fv = variableStack.Pop()
+        let fvNew = new FplMapCases((pos1, pos2), fv.Parent.Value)
+        variableStack.PushEvalStack(fvNew)
         conditionFollowedByResultListAsts 
         |> List.map (fun caseAst ->
-            let cas = new FplStmt((pos1,pos2), fv)
+            let cas = new FplConditionResult((pos1,pos2), fvNew)
             cas.FplId <- "mcase"
             variableStack.PushEvalStack(cas)
             eval st caseAst
             variableStack.PopEvalStack()
         ) |> ignore
-        let cas = new FplStmt((pos1,pos2), fv)
-        cas.FplId <- "melse"
+        let cas = new FplReference((pos1,pos2), fvNew)
         variableStack.PushEvalStack(cas)
         eval st elseStatementAst
         variableStack.PopEvalStack()

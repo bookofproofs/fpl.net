@@ -897,7 +897,7 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
         this.FplId <- literalUndetermined
         this.TypeId <- literalPred
 
-    override this.Represent (): string = 
+    override this.Represent () =
         this.ValueList
         |> Seq.map (fun subfv -> subfv.Represent())
         |> String.concat ", "
@@ -2780,6 +2780,62 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         | _ -> ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList()
+
+type FplMapCases(positions: Positions, parent: FplValue) =
+    inherit FplValue(positions, Some parent)
+
+    override this.Name = "mapcases statement"
+    override this.ShortName = "stmt"
+
+    override this.Clone () =
+        let ret = new FplMapCases((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        getFplHead this signatureType
+
+    override this.Represent () = 
+        this.ValueList
+        |> Seq.map (fun subfv -> subfv.Represent())
+        |> String.concat ", "
+
+    override this.Run variableStack = 
+        raise (NotImplementedException())
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
+type FplConditionResult(positions: Positions, parent: FplValue) =
+    inherit FplValue(positions, Some parent)
+
+    override this.Name = "condition result statement"
+    override this.ShortName = "stmt"
+
+    override this.Clone () =
+        let ret = new FplConditionResult((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        getFplHead this signatureType
+
+    override this.Represent () = 
+        this.ValueList
+        |> Seq.map (fun subfv -> subfv.Represent())
+        |> String.concat ", "
+
+    override this.Run variableStack = 
+        let condition = this.ArgList[0]
+        let result = this.ArgList[1]
+        let condRepresent = condition.Represent()
+        if condRepresent = "true" then
+            this.SetValuesOf result
+        else
+            let undef = FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
+            this.SetValue(undef)
+
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
 
 /// A string representation of an FplValue

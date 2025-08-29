@@ -999,11 +999,51 @@ type TestFplValueScopeBlockType() =
             let res = assignment.ArgList[1]
  
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplArgument>(res)
-            | "base2" -> Assert.IsInstanceOfType<FplArgument>(res)
-            | "base3" -> Assert.IsInstanceOfType<FplArgument>(res)
-            | "base4" -> Assert.IsInstanceOfType<FplArgument>(res)
-            | "base5" -> Assert.IsInstanceOfType<FplArgument>(res)
+            | "base1" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base2" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base3" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base4" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | "base5" -> Assert.IsInstanceOfType<FplMapCases>(res)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "$1",  0)>]
+    [<DataRow("base2", "$2",  2)>]
+    [<DataRow("base3", "$3",  1)>]
+    [<DataRow("base4", "$0",  3)>]
+    [<DataRow("base5", "$4", 1)>]
+    [<TestMethod>]
+    member this.TestConditionResultStatement(var, input, (output:int)) =
+        ad.Clear()
+        let fplCode = sprintf """def pred Test(x:pred) { dec 
+                ~n:pred
+                n:= mcases
+                (
+                    | (x = $1) : false 
+                    | (x = $2) : true 
+                    | (x = $3) : false 
+                    ? undef  
+                )
+                ;n } def pred T() {Test(%s)};""" input 
+        let filename = "TestConditionResultStatement"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["Test(pred)"]
+            let assignment = pred.ArgList[0]
+            let res = assignment.ArgList[1]
+            let cr = res.ArgList[0]
+ 
+            match var with
+            | "base1" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
+            | "base2" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
+            | "base3" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
+            | "base4" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
+            | "base5" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
