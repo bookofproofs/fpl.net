@@ -829,13 +829,13 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         let stmtList = List<FplValue>()
         varDeclOrStmtAstList 
-        |> List.map(fun ast -> 
-            match ast with 
-            | Ast.NamedVarDecl _ -> eval st ast
+        |> List.map(fun subAst -> 
+            match subAst with 
+            | Ast.NamedVarDecl _ -> eval st subAst
             | _ -> 
                 let stmt = new FplStmt((pos1,pos2), fv)
                 variableStack.PushEvalStack(stmt)
-                eval st ast
+                eval st subAst
                 stmtList.Add(variableStack.Pop())
         ) |> ignore
         fv.ArgList.AddRange(stmtList)
@@ -847,6 +847,10 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DefaultResult((pos1, pos2), asts) ->
         st.EvalPush("DefaultResult")
         asts |> List.map (eval st) |> ignore
+        st.EvalPop()
+    | Ast.DefaultMapResult((pos1, pos2), ast1) ->
+        st.EvalPush("DefaultMapResult")
+        eval st ast1 
         st.EvalPop()
     | Ast.Justification((pos1, pos2), predicateList) ->
         st.EvalPush("Justification")
@@ -1038,6 +1042,11 @@ let rec eval (st: SymbolTable) ast =
         eval st extensionAssignmentAst
         eval st extensionMappingAst
         st.EvalPop()
+    | Ast.ConditionFollowedByMapResult((pos1, pos2), (ast1, ast2)) ->
+        st.EvalPush("ConditionFollowedByMapResult")
+        eval st ast1
+        eval st ast2 
+        st.EvalPop()
     | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst,extensionSignatureAst), extensionTermAst)) ->
         st.EvalPush("DefinitionExtension")
         let parent = variableStack.PeekEvalStack()
@@ -1157,8 +1166,8 @@ let rec eval (st: SymbolTable) ast =
         ad.DiagnosticsStopped <- true // stop all diagnostics during localization
         variableStack.PushEvalStack(fv)
         eval st predicateAst
-        translationListAsts |> List.map (fun ast -> 
-            eval st ast
+        translationListAsts |> List.map (fun subAst -> 
+            eval st subAst
             let vars = fv.GetVariables()
             vars
             |> List.filter (fun (var:FplValue) -> var.AuxiliaryInfo = 0)
@@ -1440,6 +1449,26 @@ let rec eval (st: SymbolTable) ast =
         ) |> ignore
         let cas = new FplStmt((pos1,pos2), fv)
         cas.FplId <- "else"
+        variableStack.PushEvalStack(cas)
+        eval st elseStatementAst
+        variableStack.PopEvalStack()
+        st.EvalPop()
+    | Ast.MapCases((pos1, pos2), (conditionFollowedByResultListAsts, elseStatementAst)) ->
+        st.EvalPush("MapCases")
+        let fv = variableStack.PeekEvalStack()
+        fv.StartPos <- pos1
+        fv.EndPos <- pos2
+        fv.FplId <- literalCases
+        conditionFollowedByResultListAsts 
+        |> List.map (fun caseAst ->
+            let cas = new FplStmt((pos1,pos2), fv)
+            cas.FplId <- "mcase"
+            variableStack.PushEvalStack(cas)
+            eval st caseAst
+            variableStack.PopEvalStack()
+        ) |> ignore
+        let cas = new FplStmt((pos1,pos2), fv)
+        cas.FplId <- "melse"
         variableStack.PushEvalStack(cas)
         eval st elseStatementAst
         variableStack.PopEvalStack()

@@ -975,11 +975,11 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base4", "$0",  3)>]
     [<DataRow("base5", "$4", 1)>]
     [<TestMethod>]
-    member this.TestCaseStatement(var, input, (output:int)) =
+    member this.TestMCaseStatement(var, input, (output:int)) =
         ad.Clear()
         let fplCode = sprintf """def pred Test(x:pred) { dec 
                 ~n:pred
-                n:= cases
+                n:= mcases
                 (
                     | (x = $1) : false 
                     | (x = $2) : true 
@@ -987,27 +987,61 @@ type TestFplValueScopeBlockType() =
                     ? undef  
                 )
                 ;n } def pred T() {Test(%s)};""" input 
-        let filename = "TestCaseStatement"
+        let filename = "TestMCaseStatement"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-            let proof = theory.Scope["T$1"]
-            let arg = proof.Scope["100."]
-            let just = arg.ArgList[0]
-            let ainf = arg.ArgList[1]
-            let numbOfJustifications = just.Scope.Count
+            let pred = theory.Scope["Test(pred)"]
+            let assignment = pred.ArgList[0]
+            let res = assignment.ArgList[1]
  
-            Assert.AreEqual<int>(output, numbOfJustifications)
-
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplArgument>(arg)
-            | "base2" -> Assert.IsInstanceOfType<FplArgument>(arg)
-            | "base3" -> Assert.IsInstanceOfType<FplArgument>(arg)
-            | "base4" -> Assert.IsInstanceOfType<FplArgument>(arg)
-            | "base5" -> Assert.IsInstanceOfType<FplArgument>(arg)
+            | "base1" -> Assert.IsInstanceOfType<FplArgument>(res)
+            | "base2" -> Assert.IsInstanceOfType<FplArgument>(res)
+            | "base3" -> Assert.IsInstanceOfType<FplArgument>(res)
+            | "base4" -> Assert.IsInstanceOfType<FplArgument>(res)
+            | "base5" -> Assert.IsInstanceOfType<FplArgument>(res)
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "$1",  0)>]
+    [<DataRow("base2", "$2",  2)>]
+    [<DataRow("base3", "$3",  1)>]
+    [<DataRow("base4", "$0",  3)>]
+    [<DataRow("base5", "$4", 1)>]
+    [<TestMethod>]
+    member this.TestCaseStatement(var, input, (output:int)) =
+        ad.Clear()
+        let fplCode = sprintf """def pred Test(x:pred) { dec 
+                ~n:pred
+                cases
+                (
+                    | (x = $1) : n:=false 
+                    | (x = $2) : n:=true 
+                    | (x = $3) : n:=false 
+                    ? n:=undef  
+                )
+                ;n } def pred T() {Test(%s)};""" input 
+        let filename = "TestMCaseStatement"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["Test(pred)"]
+            let cases = pred.ArgList[0]
+ 
+            match var with
+            | "base1" -> Assert.IsInstanceOfType<FplArgument>(cases)
+            | "base2" -> Assert.IsInstanceOfType<FplArgument>(cases)
+            | "base3" -> Assert.IsInstanceOfType<FplArgument>(cases)
+            | "base4" -> Assert.IsInstanceOfType<FplArgument>(cases)
+            | "base5" -> Assert.IsInstanceOfType<FplArgument>(cases)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

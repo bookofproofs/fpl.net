@@ -118,6 +118,9 @@ type Ast =
     | ConditionFollowedByResult of Positions * (Ast * Ast list)
     | DefaultResult of Positions * Ast list 
     | Cases of Positions * (Ast list * Ast)
+    | ConditionFollowedByMapResult of Positions * (Ast * Ast)
+    | DefaultMapResult of Positions * Ast  
+    | MapCases of Positions * (Ast list * Ast)
     | Assignment of Positions * (Ast * Ast)
     | ForIn of Positions * ((Ast * Ast) * Ast list)
     | Return of Positions * Ast

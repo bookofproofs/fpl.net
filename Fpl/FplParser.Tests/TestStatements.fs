@@ -162,10 +162,10 @@ type TestStatements () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
-
+    // new flavour / keyword of cases allowing proedicates to be the result
     [<TestMethod>]
     member this.TestCases06 () =
-        let result = run (assignmentStatement .>> eof) """n:=cases
+        let result = run (assignmentStatement .>> eof) """n:=mcases
                 (
                     | (x = $1) : false 
                     | (x = $2) : true 
@@ -176,9 +176,10 @@ type TestStatements () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
+    // new flavour / keyword of cases allowing proedicates to be the result
     [<TestMethod>]
     member this.TestCases07 () =
-        let result = run (casesStatement .>> eof) """cases
+        let result = run (mapCases .>> eof) """mcases
                 (
                     | (x = $1) : false 
                     | (x = $2) : true 

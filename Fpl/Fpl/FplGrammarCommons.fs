@@ -109,6 +109,8 @@ let literalLoc = "loc"
 [<Literal>]
 let literalLocL = "localization"
 [<Literal>]
+let literalMapCases = "mcases"
+[<Literal>]
 let literalNot = "not"
 [<Literal>]
 let literalObj = "obj"
@@ -239,6 +241,7 @@ let keyWordSet =
            literalLemL
            literalLoc
            literalLocL
+           literalMapCases
            literalNot
            literalObj
            literalObjL

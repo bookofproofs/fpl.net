@@ -155,6 +155,7 @@ let keywordDel = skipString literalDelL <|> skipString literalDel
 let keywordFor = skipString literalFor .>> SW 
 let keywordIn = skipString literalIn .>> SW 
 let keywordCases = skipString literalCases .>> IW 
+let keywordMapCases = skipString literalMapCases .>> IW 
 let keywordAssert = skipString literalAssL .>> SW
 
 (* Predicate-related Keywords *)
@@ -288,7 +289,6 @@ let userDefinedSymbol = opt (choice [userDefinedPrefix; userDefinedInfix; userDe
 let signatureWithUserDefinedString = positions "SignatureWithUserDefinedString" (predicateIdentifier .>> IW .>>. userDefinedSymbol .>>. paramTuple) .>> IW |>> Ast.SignatureWithUserDefinedString
 (* Statements *)
 let argumentTuple = positions "ArgumentTuple" ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
-let result, resultRef = createParserForwardedToRef()
 
 let word = regex @"\w+" <?> "<word>" .>> IW
 let fplDelegateIdentifier = positions "DelegateId" (keywordDel >>. dot >>. word) .>> IW |>> Ast.DelegateId
@@ -298,16 +298,21 @@ let spacesRightBrace = (IW .>> rightBrace)
 
 let keywordReturn = IW >>. (skipString literalRetL <|> skipString literalRet) .>> SW 
 
-let resultList = many result
 
-let defaultResult = positions "DefaultResult" (IW >>. resultList) |>> Ast.DefaultResult
-let conditionFollowedByResult = positions "ConditionFollowedByResult" ((case >>. predicate .>> colon) .>>. (IW >>. resultList)) |>> Ast.ConditionFollowedByResult
+let defaultResult = positions "DefaultResult" statementList |>> Ast.DefaultResult
+let conditionFollowedByResult = positions "ConditionFollowedByResult" ((case >>. predicate .>> colon) .>>. statementList) |>> Ast.ConditionFollowedByResult
 let conditionFollowedByResultList = many1 (IW >>. conditionFollowedByResult)
-
 let elseStatement = elseCase >>. IW >>. defaultResult .>> IW
 let casesStatement = positions "Cases" (((keywordCases >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
 
-let assignmentStatement = positions "Assignment" ((predicateWithQualification .>> IW .>> colonEqual) .>>. (predicate <|> casesStatement)) |>> Ast.Assignment
+let defaultMapResult = positions "DefaultMapResult" (IW >>. predicate) |>> Ast.DefaultMapResult
+let conditionFollowedByMapResult = positions "ConditionFollowedByMapResult" ((case >>. predicate .>> colon) .>>. (IW >>. predicate)) |>> Ast.ConditionFollowedByMapResult
+let conditionFollowedByMapResultList = many1 (IW >>. conditionFollowedByMapResult)
+let elseMapStatement = elseCase >>. IW >>. defaultMapResult .>> IW
+let mapCases = positions "MapCases" (((keywordMapCases >>. leftParen >>. IW >>. conditionFollowedByMapResultList .>>. elseMapStatement .>> rightParen))) |>> Ast.MapCases
+
+
+let assignmentStatement = positions "Assignment" ((predicateWithQualification .>> IW .>> colonEqual) .>>. (predicate <|> mapCases)) |>> Ast.Assignment
 
 let inEntity = keywordIn >>. positions "InEntity" (predicateWithQualification) .>> IW |>> Ast.InEntity
 
@@ -334,11 +339,6 @@ let statement =
     ]) .>> IW
 
 statementListRef.Value <- many statement
-
-resultRef.Value <- choice [ 
-    statement 
-    predicate ]
-
 
 (* Predicates *)
 let optionalSpecification = opt (choice [bracketedCoords; argumentTuple])
