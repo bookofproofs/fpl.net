@@ -333,6 +333,7 @@ let statement =
     IW >>. (choice [
         callConstructorParentClass
         casesStatement
+        mapCases
         assertionStatement
         forStatement
         assignmentStatement
