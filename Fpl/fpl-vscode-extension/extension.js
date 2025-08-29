@@ -281,7 +281,7 @@ typeToIconMap.set('prf','testing-passed-icon');
 typeToIconMap.set('conj','workspace-unknown');
 typeToIconMap.set('ax','layout');
 typeToIconMap.set('inf','symbol-structure');
-typeToIconMap.set('qtr','circuit-board');
+typeToIconMap.set('qtr','symbol-boolean');
 typeToIconMap.set('def pred','symbol-boolean');
 typeToIconMap.set('pred','symbol-boolean');
 typeToIconMap.set('def func','symbol-interface');
