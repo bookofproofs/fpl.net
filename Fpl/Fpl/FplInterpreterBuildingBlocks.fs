@@ -280,7 +280,7 @@ let rec eval (st: SymbolTable) ast =
         varValue.FplId <- name
         varValue.TypeId <- literalUndef
         let undefined = new FplIntrinsicUndef((pos1, pos2), varValue)  
-        varValue.ValueList.Add(undefined)
+        varValue.SetValue(undefined)
         varValue.IsSignatureVariable <- variableStack.InSignatureEvaluation 
         if isDeclaration then 
             // check for VAR03 diagnostics
@@ -329,6 +329,10 @@ let rec eval (st: SymbolTable) ast =
             | _ -> 
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
+                if fv.Name = "reference" then 
+                    // for references, still add the variable to the scope of the reference. 
+                    // It will then be treated as a "variable" that is undefined
+                    fv.Scope.Add(name, varValue)
             fv.FplId <- name
             fv.TypeId <- literalUndef
         ad.DiagnosticsStopped <- diagnosticsStopFlag

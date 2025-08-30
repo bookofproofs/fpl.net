@@ -2410,7 +2410,8 @@ type FplVariable(positions: Positions, parent: FplValue) =
 
     override this.SetValue fv =
         base.SetValue(fv)
-        this.IsInitializedVariable <- true
+        if fv.FplId <> literalUndef then
+            this.IsInitializedVariable <- true
 
     override this.Type signatureType =
         let pars = getParamTuple this signatureType
