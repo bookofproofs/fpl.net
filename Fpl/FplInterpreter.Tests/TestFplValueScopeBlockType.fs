@@ -977,7 +977,13 @@ type TestFplValueScopeBlockType() =
     [<TestMethod>]
     member this.TestMCaseStatement(var, input) =
         ad.Clear()
-        let fplCode = sprintf """def pred Test(x:pred) { dec 
+        let fplCode = sprintf """
+                def pred Equal infix "=" 50 (x,y: tpl)
+                {
+                    del.Equal(x,y)
+                }
+                
+                def pred Test(x:ind) { dec 
                 ~n:pred
                 n:= mcases
                 (
@@ -994,7 +1000,7 @@ type TestFplValueScopeBlockType() =
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-            let pred = theory.Scope["Test(pred)"]
+            let pred = theory.Scope["Test(ind)"]
             let assignment = pred.ArgList[0]
             let res = assignment.ArgList[1]
  
@@ -1016,7 +1022,13 @@ type TestFplValueScopeBlockType() =
     [<TestMethod>]
     member this.TestConditionResultStatement(var, input) =
         ad.Clear()
-        let fplCode = sprintf """def pred Test(x:pred) { dec 
+        let fplCode = sprintf """
+                def pred Equal infix "=" 50 (x,y: tpl)
+                {
+                    del.Equal(x,y)
+                }              
+                
+                def pred Test(x:ind) { dec 
                 ~n:pred
                 n:= mcases
                 (
@@ -1033,7 +1045,7 @@ type TestFplValueScopeBlockType() =
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-            let pred = theory.Scope["Test(pred)"]
+            let pred = theory.Scope["Test(ind)"]
             let assignment = pred.ArgList[0]
             let res = assignment.ArgList[1]
             let cr = res.ArgList[0]
@@ -1056,7 +1068,13 @@ type TestFplValueScopeBlockType() =
     [<TestMethod>]
     member this.TestCaseStatement(var, input, (output:int)) =
         ad.Clear()
-        let fplCode = sprintf """def pred Test(x:pred) { dec 
+        let fplCode = sprintf """
+                def pred Equal infix "=" 50 (x,y: tpl)
+                {
+                    del.Equal(x,y)
+                }              
+        
+                def pred Test(x:ind) { dec 
                 ~n:pred
                 cases
                 (
@@ -1073,7 +1091,7 @@ type TestFplValueScopeBlockType() =
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-            let pred = theory.Scope["Test(pred)"]
+            let pred = theory.Scope["Test(ind)"]
             let cases = pred.ArgList[0]
  
             match var with

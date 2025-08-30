@@ -2809,9 +2809,10 @@ type FplConditionResult(positions: Positions, parent: FplValue) =
     member this.GetCondition() = this.ArgList[0]
     member this.GetResult() = this.ArgList[1]
 
-    override this.Run _ = 
+    override this.Run variableStack = 
         let condition = this.GetCondition()
         let result = this.GetResult()
+        condition.Run variableStack
         let condRepresent = condition.Represent()
         if condRepresent = "true" then
             this.SetValuesOf result

@@ -54,6 +54,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         | :? FplEquality 
         | :? FplDecrement 
         | :? FplExtensionObj 
+        | :? FplIntrinsicUndef 
         | :? FplReference
         | :? FplQuantor
         | :? FplIntrinsicInd

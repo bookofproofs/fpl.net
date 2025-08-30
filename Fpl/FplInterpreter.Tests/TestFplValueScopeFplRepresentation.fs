@@ -870,7 +870,13 @@ type TestFplValueScopeFplRepresentation() =
     [<TestMethod>]
     member this.TestMCaseStatement(var, input, (output:string)) =
         ad.Clear()
-        let fplCode = sprintf """def pred Test(x:pred) { dec 
+        let fplCode = sprintf """
+                def pred Equal infix "=" 50 (x,y: tpl)
+                {
+                    del.Equal(x,y)
+                }              
+        
+                def pred Test(x:ind) { dec 
                 ~n:pred
                 n:= mcases
                 (
@@ -887,7 +893,7 @@ type TestFplValueScopeFplRepresentation() =
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-            let pred = theory.Scope["Test(pred)"]
+            let pred = theory.Scope["Test(ind)"]
             let assignment = pred.ArgList[0]
             let res = assignment.ArgList[1]
  
@@ -909,7 +915,13 @@ type TestFplValueScopeFplRepresentation() =
     [<TestMethod>]
     member this.TestConditionResultStatement(var, input, (output:string)) =
         ad.Clear()
-        let fplCode = sprintf """def pred Test(x:pred) { dec 
+        let fplCode = sprintf """
+                def pred Equal infix "=" 50 (x,y: tpl)
+                {
+                    del.Equal(x,y)
+                }
+                
+                def pred Test(x:ind) { dec 
                 ~n:pred
                 n:= mcases
                 (
@@ -926,7 +938,7 @@ type TestFplValueScopeFplRepresentation() =
         | Some st -> 
             let r = st.Root
             let theory = r.Scope[filename]
-            let pred = theory.Scope["Test(pred)"]
+            let pred = theory.Scope["Test(ind)"]
             let assignment = pred.ArgList[0]
             let res = assignment.ArgList[1]
             match var with
