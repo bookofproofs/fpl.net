@@ -506,10 +506,9 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Undefined((pos1, pos2), _) -> 
         st.EvalPush("Undefined")
         let fv = variableStack.PeekEvalStack()
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.FplId <- literalUndef
-        fv.TypeId <- literalUndef
+        let fvNew = new FplIntrinsicUndef((pos1, pos2), fv)
+        variableStack.PushEvalStack(fvNew)
+        variableStack.PopEvalStack()
         st.EvalPop() 
     | Ast.Trivial((pos1, pos2), _) -> 
         st.EvalPush("Trivial")

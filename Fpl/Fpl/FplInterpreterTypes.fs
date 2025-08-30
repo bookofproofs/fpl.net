@@ -1634,10 +1634,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                 variableStack.RestoreVariables(called)
         elif this.ArgList.Count = 1 then
             let arg = this.ArgList[0]
-            this.SetValuesOf arg
-        else
-            let undef = new FplIntrinsicUndef((this.StartPos, this.EndPos), this)
-            this.SetValue(undef)
+            arg.Run variableStack
 
     override this.EmbedInSymbolTable nextOpt = 
         match nextOpt with 
