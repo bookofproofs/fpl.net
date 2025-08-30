@@ -92,23 +92,32 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","($0 = $0)", literalTrue)>]
-    [<DataRow("00","($1 = $2)", literalFalse)>]
-    [<DataRow("00","($3 = $3)", literalTrue)>]
-    [<DataRow("00","(@3 = $3)", literalUndef)>]
-    [<DataRow("00","(true = false)", literalFalse)>]
-    [<DataRow("00","(undef = undef)", literalUndef)>]
-    [<DataRow("00","(true = true)", literalTrue)>]
-    [<DataRow("00","(true = undef)", literalUndef)>]
+    [<DataRow("($0 = $0)", literalTrue)>]
+    [<DataRow("($1 = $2)", literalFalse)>]
+    [<DataRow("($3 = $3)", literalTrue)>]
+    [<DataRow("(@3 = $3)", literalUndef)>]
+    [<DataRow("(true = false)", literalFalse)>]
+    [<DataRow("(undef = undef)", literalUndef)>]
+    [<DataRow("(true = true)", literalTrue)>]
+    [<DataRow("(true = undef)", literalUndef)>]
+    [<DataRow("(undef = true)", literalUndef)>]
+    [<DataRow("(a = true)", literalUndetermined)>]
+    [<DataRow("(i = $3)", literalUndetermined)>]
+    [<DataRow("(j = $2)", literalTrue)>]
+    [<DataRow("(k = $2)", literalFalse)>]
+    [<DataRow("(true = a)", literalUndetermined)>]
+    [<DataRow("($3 = i)", literalUndetermined)>]
+    [<DataRow("($2 = j)", literalTrue)>]
+    [<DataRow("($2 = k)", literalFalse)>]
     [<TestMethod>]
-    member this.TestRepresentationEquality(var:string, varVal, expected:string) =
+    member this.TestRepresentationEquality(varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """
         def pred Equal infix "=" 50 (x,y: tpl)
         {
             del.Equal(x,y)
         } 
-        def pred T() { %s };""" varVal
+        def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
         let filename = "TestRepresentationCases.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
