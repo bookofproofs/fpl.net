@@ -860,3 +860,87 @@ type TestFplValueScopeFplRepresentation() =
 
         | None -> 
             Assert.IsTrue(false)
+
+
+    [<DataRow("base1", "$1",  literalFalse)>]
+    [<DataRow("base2", "$2",  literalTrue)>]
+    [<DataRow("base3", "$3",  literalFalse)>]
+    [<DataRow("base4", "$0",  literalUndef)>]
+    [<DataRow("base5", "$4", literalUndef)>]
+    [<TestMethod>]
+    member this.TestMCaseStatement(var, input, (output:string)) =
+        ad.Clear()
+        let fplCode = sprintf """def pred Test(x:pred) { dec 
+                ~n:pred
+                n:= mcases
+                (
+                    | (x = $1) : false 
+                    | (x = $2) : true 
+                    | (x = $3) : false 
+                    ? undef  
+                )
+                ;n } def pred T() {Test(%s)};""" input 
+        let filename = "TestMCaseStatementFplRepresentation"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["Test(pred)"]
+            let assignment = pred.ArgList[0]
+            let res = assignment.ArgList[1]
+ 
+            match var with
+            | "base1" -> Assert.AreEqual<string>(output, res.Represent())
+            | "base2" -> Assert.AreEqual<string>(output, res.Represent())
+            | "base3" -> Assert.AreEqual<string>(output, res.Represent())
+            | "base4" -> Assert.AreEqual<string>(output, res.Represent())
+            | "base5" -> Assert.AreEqual<string>(output, res.Represent())
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "$1",  literalFalse)>]
+    [<DataRow("base2", "$2",  literalTrue)>]
+    [<DataRow("base3", "$3",  literalFalse)>]
+    [<DataRow("base4", "$0",  "")>]
+    [<DataRow("base5", "$4", "")>]
+    [<TestMethod>]
+    member this.TestConditionResultStatement(var, input, (output:string)) =
+        ad.Clear()
+        let fplCode = sprintf """def pred Test(x:pred) { dec 
+                ~n:pred
+                n:= mcases
+                (
+                    | (x = $1) : false 
+                    | (x = $2) : true 
+                    | (x = $3) : false 
+                    ? undef  
+                )
+                ;n } def pred T() {Test(%s)};""" input 
+        let filename = "TestConditionResultStatementFplRepresentation"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["Test(pred)"]
+            let assignment = pred.ArgList[0]
+            let res = assignment.ArgList[1]
+            match var with
+            | "base1" -> 
+                let cr = res.ArgList[0] 
+                Assert.AreEqual<string>(output, cr.Represent())
+            | "base2" -> 
+                let cr = res.ArgList[1] 
+                Assert.AreEqual<string>(output, cr.Represent())
+            | "base3" -> 
+                let cr = res.ArgList[2] 
+                Assert.AreEqual<string>(output, cr.Represent())
+            | "base4" -> () 
+            | "base5" -> ()
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)

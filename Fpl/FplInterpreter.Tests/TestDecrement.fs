@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestDecrement() =
 
 
-    [<DataRow("@0", "undef")>]
+    [<DataRow("@0", literalUndef)>]
     [<DataRow("@1", "0")>]
     [<DataRow("@2", "1")>]
     [<DataRow("@3", "2")>]

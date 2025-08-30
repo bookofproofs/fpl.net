@@ -92,6 +92,35 @@ type TestRepresentation() =
         | None -> 
             Assert.IsTrue(false)
 
+    [<DataRow("00","($0 = $0)", literalTrue)>]
+    [<DataRow("00","($1 = $2)", literalFalse)>]
+    [<DataRow("00","($3 = $3)", literalTrue)>]
+    [<DataRow("00","(@3 = $3)", literalUndef)>]
+    [<DataRow("00","(true = false)", literalFalse)>]
+    [<DataRow("00","(undef = undef)", literalUndef)>]
+    [<DataRow("00","(true = true)", literalTrue)>]
+    [<DataRow("00","(true = undef)", literalUndef)>]
+    [<TestMethod>]
+    member this.TestRepresentationEquality(var:string, varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """
+        def pred Equal infix "=" 50 (x,y: tpl)
+        {
+            del.Equal(x,y)
+        } 
+        def pred T() { %s };""" varVal
+        let filename = "TestRepresentationCases.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            Assert.AreEqual<string>(expected, pr.Represent())
+        | None -> 
+            Assert.IsTrue(false)
+
     [<DataRow("00","""def pred T() { dec ~v:ind; true };""", "dec ind")>]
     [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", "dec pred")>]
     [<DataRow("00b","""def pred T() { dec ~v:obj; true };""", "dec obj")>]

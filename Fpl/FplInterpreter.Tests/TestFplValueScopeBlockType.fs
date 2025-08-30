@@ -969,13 +969,13 @@ type TestFplValueScopeBlockType() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "$1",  0)>]
-    [<DataRow("base2", "$2",  2)>]
-    [<DataRow("base3", "$3",  1)>]
-    [<DataRow("base4", "$0",  3)>]
-    [<DataRow("base5", "$4", 1)>]
+    [<DataRow("base1", "$1")>]
+    [<DataRow("base2", "$2")>]
+    [<DataRow("base3", "$3")>]
+    [<DataRow("base4", "$0")>]
+    [<DataRow("base5", "$4")>]
     [<TestMethod>]
-    member this.TestMCaseStatement(var, input, (output:int)) =
+    member this.TestMCaseStatement(var, input) =
         ad.Clear()
         let fplCode = sprintf """def pred Test(x:pred) { dec 
                 ~n:pred
@@ -1008,13 +1008,13 @@ type TestFplValueScopeBlockType() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "$1",  0)>]
-    [<DataRow("base2", "$2",  2)>]
-    [<DataRow("base3", "$3",  1)>]
-    [<DataRow("base4", "$0",  3)>]
-    [<DataRow("base5", "$4", 1)>]
+    [<DataRow("base1", "$1")>]
+    [<DataRow("base2", "$2")>]
+    [<DataRow("base3", "$3")>]
+    [<DataRow("base4", "$0")>]
+    [<DataRow("base5", "$4")>]
     [<TestMethod>]
-    member this.TestConditionResultStatement(var, input, (output:int)) =
+    member this.TestConditionResultStatement(var, input) =
         ad.Clear()
         let fplCode = sprintf """def pred Test(x:pred) { dec 
                 ~n:pred

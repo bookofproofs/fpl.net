@@ -2781,29 +2781,6 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList()
 
-type FplMapCases(positions: Positions, parent: FplValue) =
-    inherit FplValue(positions, Some parent)
-
-    override this.Name = "mapcases statement"
-    override this.ShortName = "stmt"
-
-    override this.Clone () =
-        let ret = new FplMapCases((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.Type signatureType = 
-        getFplHead this signatureType
-
-    override this.Represent () = 
-        this.ValueList
-        |> Seq.map (fun subfv -> subfv.Represent())
-        |> String.concat ", "
-
-    override this.Run variableStack = 
-        raise (NotImplementedException())
-
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
 type FplConditionResult(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -2824,9 +2801,12 @@ type FplConditionResult(positions: Positions, parent: FplValue) =
         |> Seq.map (fun subfv -> subfv.Represent())
         |> String.concat ", "
 
-    override this.Run variableStack = 
-        let condition = this.ArgList[0]
-        let result = this.ArgList[1]
+    member this.GetCondition() = this.ArgList[0]
+    member this.GetResult() = this.ArgList[1]
+
+    override this.Run _ = 
+        let condition = this.GetCondition()
+        let result = this.GetResult()
         let condRepresent = condition.Represent()
         if condRepresent = "true" then
             this.SetValuesOf result
@@ -2837,6 +2817,66 @@ type FplConditionResult(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
+
+type FplMapCases(positions: Positions, parent: FplValue) =
+    inherit FplValue(positions, Some parent)
+
+    override this.Name = "mapcases statement"
+    override this.ShortName = "stmt"
+
+    override this.Clone () =
+        let ret = new FplMapCases((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        getFplHead this signatureType
+
+    override this.Represent () = 
+        this.ValueList
+        |> Seq.map (fun subfv -> subfv.Represent())
+        |> String.concat ", "
+
+    member this.GetConditionResultList() = 
+        this.ArgList
+        |> Seq.choose (fun item ->
+            match item with
+            | :? FplConditionResult as condRes -> Some condRes
+            | _ -> None)
+
+    member this.GetElseResult() = this.ArgList[this.ArgList.Count-1]
+
+    override this.Run _ = 
+        let resultLst = this.GetConditionResultList()
+        let elseResult = this.GetElseResult()
+        let findTrueCondition = 
+            Seq.tryFind (fun (res:FplConditionResult) -> res.GetCondition().Represent() = "true") resultLst
+        match findTrueCondition with
+        | Some found -> this.SetValuesOf (found.GetResult())
+        | None -> this.SetValuesOf elseResult
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
+type FplCases(positions: Positions, parent: FplValue) =
+    inherit FplValue(positions, Some parent)
+
+    override this.Name = "cases statement"
+    override this.ShortName = "stmt"
+
+    override this.Clone () =
+        let ret = new FplCases((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        getFplHead this signatureType
+
+    override this.Represent () = literalUndef
+
+    override this.Run variableStack = 
+        raise (NotImplementedException())
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
 /// A string representation of an FplValue
 let toString (fplValue:FplValue) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
