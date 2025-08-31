@@ -28,6 +28,7 @@ let fplInterpreter (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl =
             st.MainTheory <- uri.TheoryName
         loadAllUsesClauses st input uri fplLibUrl 
         evaluateSymbolTable st
+        st.Root.Run variableStack
     with ex -> 
         emitUnexpectedErrorDiagnostics (ex.Message + Environment.NewLine + ex.StackTrace)
     

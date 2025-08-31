@@ -490,10 +490,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("True")
         let fv = variableStack.PeekEvalStack()
         let value = new FplIntrinsicPred((pos1, pos2), fv)
-        value.StartPos <- pos1
-        value.EndPos <- pos2
         value.FplId <- literalTrue
-        value.TypeId <- literalPred
         variableStack.PushEvalStack(value)
         variableStack.PopEvalStack()
         st.EvalPop() 
@@ -578,7 +575,6 @@ let rec eval (st: SymbolTable) ast =
         let fvNew = new FplNegation((pos1, pos2), fv.Parent.Value)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst
-        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "negation"
         st.EvalPop()
     | Ast.InEntity((pos1, pos2), ast1) ->
@@ -805,7 +801,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "conjunction"
         st.EvalPop()
     | Ast.Or((pos1, pos2), (predicateAst1, predicateAst2)) ->
@@ -815,7 +810,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "disjunction"
         st.EvalPop()
     | Ast.Xor((pos1, pos2), (predicateAst1, predicateAst2)) ->
@@ -825,7 +819,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "exclusive-or"
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), varDeclOrStmtAstList) ->
@@ -1068,7 +1061,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "implication"
         st.EvalPop()
     | Ast.Iif((pos1, pos2), (predicateAst1, predicateAst2)) ->
@@ -1078,7 +1070,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        fvNew.Run variableStack
         emitLG000orLG001Diagnostics fvNew "equivalence"
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
@@ -1094,7 +1085,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(typeOfOperand)
         eval st variableTypeAst
         variableStack.PopEvalStack()
-        fvNew.Run variableStack      
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
         st.EvalPush("Delegate")

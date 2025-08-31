@@ -1212,7 +1212,11 @@ type FplPredicate(positions: Positions, parent: FplValue) =
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        this.ArgList
+        |> Seq.iter (fun fv -> 
+            fv.Run variableStack
+            this.SetValuesOf fv
+        )
 
     member this.RunOrder = None
 
@@ -1362,9 +1366,13 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        this.ArgList
+        |> Seq.iter (fun fv -> 
+            fv.Run variableStack
+            this.SetValuesOf fv
+        )
 
-
+    override this.RunOrder = Some _runOrder
 
 type FplCorollary(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -1803,9 +1811,11 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Run _ = 
+    override this.Run variableStack = 
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
+        arg1.Run variableStack
+        arg2.Run variableStack
         let arg1Repr = arg1.Represent()
         let arg2Repr = arg2.Represent()
         let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
@@ -1844,9 +1854,11 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Run _ = 
+    override this.Run variableStack = 
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
+        arg1.Run variableStack
+        arg2.Run variableStack
         let arg1Repr = arg1.Represent()
         let arg2Repr = arg2.Represent()
         let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
@@ -1886,9 +1898,11 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Run _ = 
+    override this.Run variableStack = 
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
+        arg1.Run variableStack
+        arg2.Run variableStack
         let arg1Repr = arg1.Represent()
         let arg2Repr = arg2.Represent()
         let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
@@ -2007,9 +2021,11 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
             |> String.concat ", "
         sprintf "%s(%s)" head args
 
-    override this.Run _ = 
+    override this.Run variableStack = 
         let arg1 = this.ArgList[0]
         let arg2 = this.ArgList[1]
+        arg1.Run variableStack
+        arg2.Run variableStack
         let arg1Repr = arg1.Represent()
         let arg2Repr = arg2.Represent()
         let newValue =  new FplIntrinsicPred((this.StartPos, this.EndPos), this)
