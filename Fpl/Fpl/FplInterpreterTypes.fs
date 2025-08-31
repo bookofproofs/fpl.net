@@ -864,7 +864,6 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string, runOrde
         | SignatureType.Type -> this.TypeId
 
     override this.Represent () = literalUndef
-    override this.Run variableStack = ()
 
     /// The RunOrder in which this theory is to be executed.
     override this.RunOrder = Some _runOrder
@@ -885,15 +884,17 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string, runOrde
     /// Only some of the building block run on their own in the theory, including axioms, theorems, lemmas, propositions, and conjectures.
     /// All other building blocks (e.g. definitions, rules of inferences, etc.) are run when called by the first type of blocks.
     /// The RunOrder is set when creating the FplTheory during the parsing of the AST.
-    member this.GetOrderedBlocksRunningByThemselves() =
+    member private this.GetOrderedBlocksRunningByThemselves() =
         this.Scope.Values
-        |> Seq.choose (fun item ->
-            match item.RunOrder with
-            | Some _ -> Some item
+        |> Seq.choose (fun block ->
+            match block.RunOrder with
+            | Some _ -> Some block
             | _ -> None)
-        |> Seq.sortBy (fun th -> th.RunOrder.Value) 
+        |> Seq.sortBy (fun block -> block.RunOrder.Value) 
 
-
+    override this.Run variableStack = 
+        this.GetOrderedBlocksRunningByThemselves()
+        |> Seq.iter (fun theory -> theory.Run variableStack)        
 
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isTheory (fv:FplValue) = 
@@ -914,22 +915,25 @@ type FplRoot() =
     override this.Type _ = String.Empty
     override this.Represent () = literalUndef
     override this.TryAddToParentsArgList () = () 
-    override this.Run variableStack = ()
 
     override this.EmbedInSymbolTable _ = () 
 
-    /// Returns all theories in the scope of this root ordered by their RunOrder descending.
-    /// This means that the theory with the highest RunOrder comes first.
-    /// The RunOrder is set when creating the FplTheory during the parsing of the AST.
-    member this.GetOrderedTheories() =
+    /// Returns all theories in the scope of this root ordered by their discovery time (parsing of the AST).
+    /// This means that the theory with the lowest RunOrder comes first.
+    member private this.GetOrderedTheories() =
         this.Scope.Values
         |> Seq.choose (fun item ->
             match item with
-            | :? FplTheory as condRes -> Some condRes
+            | :? FplTheory as theory -> Some theory
             | _ -> None)
-        |> Seq.sortByDescending (fun th -> th.RunOrder.Value) 
+        |> Seq.sortBy (fun th -> th.RunOrder.Value) 
 
     override this.RunOrder = None
+
+    override this.Run variableStack = 
+        this.GetOrderedTheories()
+        |> Seq.iter (fun theory -> theory.Run variableStack)        
+
 
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isRoot (fv:FplValue) = 
@@ -2202,7 +2206,7 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
     do 
         this.FplId <- $"{literalDel}."
 
-    override this.Name = "decrement"
+    override this.Name = "decrement statement"
     override this.ShortName = "decr"
 
     override this.Clone () =
@@ -2872,7 +2876,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         this.FplId <- $"assign (ln {this.StartPos.Line})"
         this.TypeId <- literalUndef
 
-    override this.Name = $"assigment statement"
+    override this.Name = $"assignment statement"
     override this.ShortName = "stmt"
 
     override this.Clone () =
@@ -2971,7 +2975,7 @@ type FplConditionResult(positions: Positions, parent: FplValue) =
 type FplMapCases(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
-    override this.Name = "mapcases statement"
+    override this.Name = $"{literalMapCases} statement"
     override this.ShortName = "stmt"
 
     override this.Clone () =

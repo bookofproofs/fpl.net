@@ -1918,6 +1918,3 @@ let evaluateSymbolTable (st: SymbolTable) =
             variableStack.PopEvalStack()
         | None -> found <- false
 
-let runSymbolTable (st:SymbolTable) =
-    st.Root.GetOrderedTheories()
-    |> Seq.iter (fun theory -> theory.Run variableStack)
