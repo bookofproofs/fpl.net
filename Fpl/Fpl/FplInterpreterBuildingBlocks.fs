@@ -1778,6 +1778,7 @@ let rec eval (st: SymbolTable) ast =
             let value = new FplIntrinsicPred((pos1, pos2), fv)
             fv.ValueList.Add(value)
         variableStack.PopEvalStack()
+        //fv.Run variableStack
         st.EvalPop()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
     | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, (funcContentAst, optPropertyListAsts))) ->
@@ -1887,6 +1888,7 @@ let evaluateSymbolTable (st: SymbolTable) =
     st.OrderAsts()
 
     let mutable found = true
+    let mutable order = 0
 
     while found do
         let usesClausesEvaluatedParsedAst =
@@ -1896,9 +1898,10 @@ let evaluateSymbolTable (st: SymbolTable) =
         | Some pa ->
             variableStack.ClearEvalStack()
             // evaluate the ParsedAst of a theory
-            let theoryValue = new FplTheory((Position("",0,1,1), Position("",0,1,1)), st.Root, pa.Parsing.Uri.AbsolutePath);
+            let theoryValue = new FplTheory((Position("",0,1,1), Position("",0,1,1)), st.Root, pa.Parsing.Uri.AbsolutePath, order);
             if not (st.Root.Scope.ContainsKey(pa.Id)) then
                 st.Root.Scope.Add(pa.Id, theoryValue)
+                order <- order + 1 // after adding a new theory to the symbol table, increase the order counter
             else
                 st.Root.Scope[pa.Id] <- theoryValue
             theoryValue.FplId <- pa.Id
@@ -1909,3 +1912,7 @@ let evaluateSymbolTable (st: SymbolTable) =
             pa.Status <- ParsedAstStatus.Evaluated
             variableStack.PopEvalStack()
         | None -> found <- false
+
+let runSymbolTable (st:SymbolTable) =
+    st.Root.GetOrderedTheories()
+    |> Seq.iter (fun theory -> theory.Run variableStack)

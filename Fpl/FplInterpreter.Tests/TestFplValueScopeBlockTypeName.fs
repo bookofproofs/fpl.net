@@ -124,7 +124,7 @@ type TestFplBlockType() =
             let x = new FplFunctionalTerm(positions, parent)
             Assert.AreEqual<string>("functional term definition", x.Name)
         | "Theory" ->
-            let x = new FplTheory(positions, parent, "")
+            let x = new FplTheory(positions, parent, "", 0)
             Assert.AreEqual<string>("theory", x.Name)
         | "Root" ->
             let x = new FplRoot()
@@ -325,7 +325,7 @@ type TestFplBlockType() =
             let x = new FplReference(positions, parent)
             Assert.AreEqual<string>("ref", x.ShortName)
         | "Theory" ->
-            let x = new FplTheory(positions, parent, "")
+            let x = new FplTheory(positions, parent, "", 0)
             Assert.AreEqual<string>("th", x.ShortName)
         | "Argument" ->
             let x = new FplArgument(positions, parent)
