@@ -1611,7 +1611,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Theorem((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Theorem")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplTheorem((pos1, pos2), parent)
+        let theory = parent :?> FplTheory
+        let fv = new FplTheorem((pos1, pos2), theory, theory.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
@@ -1621,7 +1622,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Lemma((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Lemma")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplLemma((pos1, pos2), parent)
+        let theory = parent :?> FplTheory
+        let fv = new FplLemma((pos1, pos2), theory, theory.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
@@ -1631,7 +1633,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Proposition((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Proposition")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplProposition((pos1, pos2), parent)
+        let theory = parent :?> FplTheory
+        let fv = new FplProposition((pos1, pos2), theory, theory.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
@@ -1641,7 +1644,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Conjecture((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Conjecture")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplConjecture((pos1, pos2), parent)
+        let theory = parent :?> FplTheory
+        let fv = new FplConjecture((pos1, pos2), theory, theory.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
@@ -1651,7 +1655,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Axiom((pos1, pos2), (signatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Axiom")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplAxiom((pos1, pos2), parent)
+        let theory = parent :?> FplTheory
+        let fv = new FplAxiom((pos1, pos2), theory, theory.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st signatureAst
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst

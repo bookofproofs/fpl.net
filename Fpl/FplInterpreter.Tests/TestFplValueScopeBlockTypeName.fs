@@ -91,13 +91,13 @@ type TestFplBlockType() =
             let x = new FplClass(positions, parent)
             Assert.AreEqual<string>("class definition", x.Name)
         | "Theorem" ->
-            let x = new FplTheorem(positions, parent)
+            let x = new FplTheorem(positions, parent, 0)
             Assert.AreEqual<string>("theorem", x.Name)
         | "Lemma" ->
-            let x = new FplLemma(positions, parent)
+            let x = new FplLemma(positions, parent, 0)
             Assert.AreEqual<string>("lemma", x.Name)
         | "Proposition" ->
-            let x = new FplProposition(positions, parent)
+            let x = new FplProposition(positions, parent, 0)
             Assert.AreEqual<string>("proposition", x.Name)
         | "Corollary" ->
             let x = new FplCorollary(positions, parent)
@@ -106,10 +106,10 @@ type TestFplBlockType() =
             let x = new FplProof(positions, parent)
             Assert.AreEqual<string>("proof", x.Name)
         | "Conjecture" ->
-            let x = new FplConjecture(positions, parent)
+            let x = new FplConjecture(positions, parent, 0)
             Assert.AreEqual<string>("conjecture", x.Name)
         | "Axiom" ->
-            let x = new FplAxiom(positions, parent)
+            let x = new FplAxiom(positions, parent, 0)
             Assert.AreEqual<string>("axiom", x.Name)
         | "RuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent)
@@ -289,13 +289,13 @@ type TestFplBlockType() =
             let x = new FplLocalization(positions, parent)
             Assert.AreEqual<string>(literalLoc, x.ShortName)
         | "Theorem" ->
-            let x = new FplTheorem(positions, parent)
+            let x = new FplTheorem(positions, parent, 0)
             Assert.AreEqual<string>(literalThm, x.ShortName)
         | "Lemma" ->
-            let x = new FplLemma(positions, parent)
+            let x = new FplLemma(positions, parent, 0)
             Assert.AreEqual<string>(literalLem, x.ShortName)
         | "Proposition" ->
-            let x = new FplProposition(positions, parent)
+            let x = new FplProposition(positions, parent, 0)
             Assert.AreEqual<string>(literalProp, x.ShortName)
         | "Corollary" ->
             let x = new FplCorollary(positions, parent)
@@ -304,10 +304,10 @@ type TestFplBlockType() =
             let x = new FplProof(positions, parent)
             Assert.AreEqual<string>(literalPrf, x.ShortName)
         | "Conjecture" ->
-            let x = new FplConjecture(positions, parent)
+            let x = new FplConjecture(positions, parent, 0)
             Assert.AreEqual<string>(literalConj, x.ShortName)
         | "Axiom" ->
-            let x = new FplAxiom(positions, parent)
+            let x = new FplAxiom(positions, parent, 0)
             Assert.AreEqual<string>(literalAx, x.ShortName)
         | "RuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent)
