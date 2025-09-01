@@ -1195,9 +1195,17 @@ let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) 
     | _ -> 
         None
 
+type IReady =
+    abstract member IsReady : bool
+
 type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
+    let mutable _isReady = false
     let _runOrder = runOrder
+
+    interface IReady with
+        member _.IsReady = _isReady
+
 
     override this.Name = $"{literalPredL} {literalDefL}"
     override this.ShortName = $"{literalDef} {literalPred}"
@@ -1213,11 +1221,13 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
     override this.Run variableStack = 
-        this.ArgList
-        |> Seq.iter (fun fv -> 
-            fv.Run variableStack
-            this.SetValuesOf fv
-        )
+        if not _isReady then
+            this.ArgList
+            |> Seq.iter (fun fv -> 
+                fv.Run variableStack
+                this.SetValuesOf fv
+            )
+            _isReady <- this.Arity = 0 
 
     member this.RunOrder = Some runOrder
 
