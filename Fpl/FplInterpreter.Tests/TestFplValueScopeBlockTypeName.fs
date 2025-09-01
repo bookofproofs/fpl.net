@@ -125,7 +125,7 @@ type TestFplBlockType() =
             let x = new FplExtensionObj(positions, parent)
             Assert.AreEqual<string>($"{literalExtL} {literalObjL}", x.Name)
         | "FplFunctionalTerm" ->
-            let x = new FplFunctionalTerm(positions, parent)
+            let x = new FplFunctionalTerm(positions, parent, 0)
             Assert.AreEqual<string>("functional term definition", x.Name)
         | "FplImplication" ->
             let x = new FplImplication(positions, parent)
@@ -188,7 +188,7 @@ type TestFplBlockType() =
             let x = new FplOptionalPredicate(positions, parent)
             Assert.AreEqual<string>("optional predicate property", x.Name)
         | "FplPredicate" ->
-            let x = new FplPredicate(positions, parent)
+            let x = new FplPredicate(positions, parent, 0)
             Assert.AreEqual<string>("predicate definition", x.Name)
         | "FplProof" ->
             let x = new FplProof(positions, parent)
@@ -354,7 +354,7 @@ type TestFplBlockType() =
             let x = new FplExtensionObj(positions, parent)
             Assert.AreEqual<string>(literalObj, x.ShortName)
         | "FplFunctionalTerm" ->
-            let x = new FplFunctionalTerm(positions, parent)
+            let x = new FplFunctionalTerm(positions, parent, 0)
             Assert.AreEqual<string>("def func", x.ShortName)
         | "FplImplication" ->
             let x = new FplImplication(positions, parent)
@@ -417,7 +417,7 @@ type TestFplBlockType() =
             let x = new FplOptionalPredicate(positions, parent)
             Assert.AreEqual<string>("opred", x.ShortName)
         | "FplPredicate" ->
-            let x = new FplPredicate(positions, parent)
+            let x = new FplPredicate(positions, parent, 0)
             Assert.AreEqual<string>("def pred", x.ShortName)
         | "FplProof" ->
             let x = new FplProof(positions, parent)
@@ -583,7 +583,7 @@ type TestFplBlockType() =
             let x = new FplExtensionObj(positions, parent)
             Assert.AreEqual<string>(literalObj, x.FplId)
         | "FplFunctionalTerm" ->
-            let x = new FplFunctionalTerm(positions, parent)
+            let x = new FplFunctionalTerm(positions, parent, 0)
             Assert.AreEqual<string>("def func", x.FplId)
         | "FplImplication" ->
             let x = new FplImplication(positions, parent)
@@ -646,7 +646,7 @@ type TestFplBlockType() =
             let x = new FplOptionalPredicate(positions, parent)
             Assert.AreEqual<string>("opred", x.FplId)
         | "FplPredicate" ->
-            let x = new FplPredicate(positions, parent)
+            let x = new FplPredicate(positions, parent, 0)
             Assert.AreEqual<string>("def pred", x.FplId)
         | "FplProof" ->
             let x = new FplProof(positions, parent)
@@ -812,7 +812,7 @@ type TestFplBlockType() =
             let x = new FplExtensionObj(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplFunctionalTerm" ->
-            let x = new FplFunctionalTerm(positions, parent)
+            let x = new FplFunctionalTerm(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplImplication" ->
             let x = new FplImplication(positions, parent)
@@ -875,7 +875,7 @@ type TestFplBlockType() =
             let x = new FplOptionalPredicate(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplPredicate" ->
-            let x = new FplPredicate(positions, parent)
+            let x = new FplPredicate(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplProof" ->
             let x = new FplProof(positions, parent)
@@ -1044,7 +1044,7 @@ type TestFplBlockType() =
                 let x = new FplExtensionObj(positions, parent)
                 x.Run variableStack 
             | "FplFunctionalTerm" ->
-                let x = new FplFunctionalTerm(positions, parent)
+                let x = new FplFunctionalTerm(positions, parent, 0)
                 x.Run variableStack 
             | "FplImplication" ->
                 let x = new FplImplication(positions, parent)
@@ -1107,7 +1107,7 @@ type TestFplBlockType() =
                 let x = new FplOptionalPredicate(positions, parent)
                 x.Run variableStack 
             | "FplPredicate" ->
-                let x = new FplPredicate(positions, parent)
+                let x = new FplPredicate(positions, parent, 0)
                 x.Run variableStack 
             | "FplProof" ->
                 let x = new FplProof(positions, parent)

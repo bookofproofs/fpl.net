@@ -1261,7 +1261,8 @@ let rec eval (st: SymbolTable) ast =
             eval st ast1
             variableStack.Pop() |> ignore
             if fv.IsFplBlock() then
-                let fvNew = new FplFunctionalTerm((fv.StartPos, pos2), fv.Parent.Value)
+                let theory = fv.Parent.Value :?> FplTheory
+                let fvNew = new FplFunctionalTerm((fv.StartPos, pos2), theory, theory.GetNextAvailableFplBlockRunOrder)
                 fvNew.Copy fv
                 variableStack.PushEvalStack(fvNew)
             else
@@ -1272,7 +1273,8 @@ let rec eval (st: SymbolTable) ast =
         | None -> 
             variableStack.Pop() |> ignore
             if fv.IsFplBlock() then
-                let fvNew = new FplFunctionalTerm((fv.StartPos, pos2), fv.Parent.Value)
+                let theory = fv.Parent.Value :?> FplTheory
+                let fvNew = new FplFunctionalTerm((fv.StartPos, pos2), theory, theory.GetNextAvailableFplBlockRunOrder)
                 fvNew.Copy fv
                 variableStack.PushEvalStack(fvNew)
             else
@@ -1759,8 +1761,9 @@ let rec eval (st: SymbolTable) ast =
     // | DefinitionPredicate of Positions * (Ast * (Ast * Ast list option))
     | Ast.DefinitionPredicate((pos1, pos2), (signatureWithUserDefinedStringAst, (predicateContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionPredicate")
-        let fplTheory = variableStack.PeekEvalStack()
-        let fv = new FplPredicate((pos1, pos2), fplTheory)
+        let parent = variableStack.PeekEvalStack()
+        let theory = parent :?> FplTheory
+        let fv = new FplPredicate((pos1, pos2), theory, theory.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         variableStack.InSignatureEvaluation <- true
         eval st signatureWithUserDefinedStringAst
@@ -1773,13 +1776,13 @@ let rec eval (st: SymbolTable) ast =
             let value = new FplIntrinsicPred((pos1, pos2), fv)
             fv.ValueList.Add(value)
         variableStack.PopEvalStack()
-        //fv.Run variableStack
         st.EvalPop()
     // | DefinitionFunctionalTerm of Positions * ((Ast * Ast) * (Ast * Ast list option))
     | Ast.DefinitionFunctionalTerm((pos1, pos2), (functionalTermSignatureAst, (funcContentAst, optPropertyListAsts))) ->
         st.EvalPush("DefinitionFunctionalTerm")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplFunctionalTerm((pos1, pos2), parent)
+        let theory = parent :?> FplTheory
+        let fv = new FplFunctionalTerm((pos1, pos2), theory, theory.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st functionalTermSignatureAst
         eval st funcContentAst

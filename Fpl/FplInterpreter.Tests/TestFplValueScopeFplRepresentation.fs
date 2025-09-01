@@ -737,6 +737,8 @@ type TestFplValueScopeFplRepresentation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
+            let variableStack = new FplVariableStack()
+            pr1.Run variableStack
             let base1 = pr1.ArgList[0]
 
             match var with

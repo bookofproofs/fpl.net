@@ -347,7 +347,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
     /// An optional order in which this FplValue ist to be run after the symbol table is completely created.
     /// None means that it is not running but itself but called to be run from other FplValues.
     /// Some int means that it is running by itself after the creation of the symbol table. 
-    /// Only theories in root, and axioms, theorems, lemmas, propositions and conjectures in theories run by themself and call all other types of FplValue to run.
+    /// Only theories in root, and axioms, theorems, lemmas, propositions, conjectures, and definitions of predicates and functional terms in theories run by themself and call all other types of FplValue to run.
     abstract member RunOrder: int option
 
     /// Generates a type string identifier or type-specific naming convention of this FplValue.
@@ -882,7 +882,7 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string, runOrde
 
     /// Returns all Fpl Building Blocks that run on their own in this theory ordered by their RunOrder ascending.
     /// Only some of the building block run on their own in the theory, including axioms, theorems, lemmas, propositions, and conjectures.
-    /// All other building blocks (e.g. definitions, rules of inferences, etc.) are run when called by the first type of blocks.
+    /// All other building blocks (e.g. rules of inferences, definitions of classes, etc.) are run when called by the first type of blocks.
     /// The RunOrder is set when creating the FplTheory during the parsing of the AST.
     member private this.GetOrderedBlocksRunningByThemselves() =
         this.Scope.Values
@@ -1195,14 +1195,15 @@ let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) 
     | _ -> 
         None
 
-type FplPredicate(positions: Positions, parent: FplValue) =
+type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
+    let _runOrder = runOrder
 
     override this.Name = $"{literalPredL} {literalDefL}"
     override this.ShortName = $"{literalDef} {literalPred}"
 
     override this.Clone () =
-        let ret = new FplPredicate((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplPredicate((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
 
@@ -1218,8 +1219,7 @@ type FplPredicate(positions: Positions, parent: FplValue) =
             this.SetValuesOf fv
         )
 
-    member this.RunOrder = None
-
+    member this.RunOrder = Some runOrder
 
 type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -2657,14 +2657,15 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.RunOrder = None
 
 
-type FplFunctionalTerm(positions: Positions, parent: FplValue) =
+type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericFunctionalTerm(positions, parent)
+    let _runOrder = runOrder
 
     override this.Name = $"functional term {literalDefL}"
     override this.ShortName = $"{literalDef} {literalFunc}"
 
     override this.Clone () =
-        let ret = new FplFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
 
@@ -2673,7 +2674,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
-    member this.RunOrder = None
+    member this.RunOrder = Some _runOrder
 
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
