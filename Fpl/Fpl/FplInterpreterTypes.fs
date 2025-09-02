@@ -304,6 +304,9 @@ type SignatureType =
     | Type
     | Mixed
 
+/// Maximum number of calls allowed for an Fpl Node
+let maxRecursion = 5
+
 [<AbstractClass>]
 type FplValue(positions: Positions, parent: FplValue option) =
     let mutable _expressionType = FixType.NoFix
@@ -884,17 +887,19 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string, runOrde
     /// Only some of the building block run on their own in the theory, including axioms, theorems, lemmas, propositions, and conjectures.
     /// All other building blocks (e.g. rules of inferences, definitions of classes, etc.) are run when called by the first type of blocks.
     /// The RunOrder is set when creating the FplTheory during the parsing of the AST.
-    member private this.GetOrderedBlocksRunningByThemselves() =
+    member private this.OrderedBlocksRunningByThemselves =
         this.Scope.Values
         |> Seq.choose (fun block ->
             match block.RunOrder with
             | Some _ -> Some block
             | _ -> None)
         |> Seq.sortBy (fun block -> block.RunOrder.Value) 
+        |> Seq.toList
 
     override this.Run variableStack = 
-        this.GetOrderedBlocksRunningByThemselves()
-        |> Seq.iter (fun theory -> theory.Run variableStack)        
+        let blocks = this.OrderedBlocksRunningByThemselves
+        blocks
+        |> Seq.iter (fun block -> block.Run variableStack)        
 
 /// Indicates if an FplValue is the root of the SymbolTable.
 let isTheory (fv:FplValue) = 
@@ -920,7 +925,7 @@ type FplRoot() =
 
     /// Returns all theories in the scope of this root ordered by their discovery time (parsing of the AST).
     /// This means that the theory with the lowest RunOrder comes first.
-    member private this.GetOrderedTheories() =
+    member private this.OrderedTheories =
         this.Scope.Values
         |> Seq.choose (fun item ->
             match item with
@@ -931,7 +936,7 @@ type FplRoot() =
     override this.RunOrder = None
 
     override this.Run variableStack = 
-        this.GetOrderedTheories()
+        this.OrderedTheories
         |> Seq.iter (fun theory -> theory.Run variableStack)        
 
 
@@ -1036,7 +1041,7 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
-    member this.RunOrder = None
+    override this.RunOrder = None
 
 type FplInstance(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
@@ -1133,7 +1138,7 @@ type FplClass(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
-    member this.RunOrder = None
+    override this.RunOrder = None
 
 
 /// Returns Some or none FplValue being the enclosing class block of a node inside a class.
@@ -1195,17 +1200,23 @@ let rec findClassInheritanceChain (classRoot: FplValue) (baseClassName: string) 
     | _ -> 
         None
 
+type ICanBeCalledRecusively =
+    abstract member CallCounter : int
+
 type IReady =
     abstract member IsReady : bool
 
 type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
-    let mutable _isReady = false
     let _runOrder = runOrder
+    let mutable _isReady = false
+    let mutable _callCounter = 0
 
     interface IReady with
         member _.IsReady = _isReady
 
+    interface ICanBeCalledRecusively with
+        member _.CallCounter = _callCounter
 
     override this.Name = $"{literalPredL} {literalDefL}"
     override this.ShortName = $"{literalDef} {literalPred}"
@@ -1222,14 +1233,18 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
 
     override this.Run variableStack = 
         if not _isReady then
-            this.ArgList
-            |> Seq.iter (fun fv -> 
-                fv.Run variableStack
-                this.SetValuesOf fv
-            )
-            _isReady <- this.Arity = 0 
+            _callCounter <- _callCounter + 1
+            if _callCounter > maxRecursion then
+                emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+            else
+                this.ArgList
+                |> Seq.iter (fun fv -> 
+                    fv.Run variableStack
+                    this.SetValuesOf fv
+                )
+                _isReady <- this.Arity = 0 
 
-    member this.RunOrder = Some runOrder
+    override this.RunOrder = Some _runOrder
 
 type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -1272,6 +1287,10 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
 type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
+    let mutable _isReady = false
+
+    interface IReady with
+        member _.IsReady = _isReady
 
     override this.Name = literalAxL
     override this.ShortName = literalAx
@@ -1287,9 +1306,15 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        if not _isReady then
+            this.ArgList
+            |> Seq.iter (fun fv -> 
+                fv.Run variableStack
+                this.SetValuesOf fv
+            )
+            _isReady <- this.Arity = 0 
 
-    member this.RunOrder = Some _runOrder
+    override this.RunOrder = Some _runOrder
 
 type FplTheorem(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -1311,7 +1336,7 @@ type FplTheorem(positions: Positions, parent: FplValue, runOrder) =
     override this.Run variableStack = 
         raise (NotImplementedException())
 
-    member this.RunOrder = Some _runOrder
+    override this.RunOrder = Some _runOrder
 
 
 type FplLemma(positions: Positions, parent: FplValue, runOrder) =
@@ -1334,7 +1359,7 @@ type FplLemma(positions: Positions, parent: FplValue, runOrder) =
     override this.Run variableStack = 
         raise (NotImplementedException())
 
-    member this.RunOrder = Some _runOrder
+    override this.RunOrder = Some _runOrder
 
 type FplProposition(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -1356,11 +1381,15 @@ type FplProposition(positions: Positions, parent: FplValue, runOrder) =
     override this.Run variableStack = 
         raise (NotImplementedException())
 
-    member this.RunOrder = Some _runOrder
+    override this.RunOrder = Some _runOrder
 
 type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
+    let mutable _isReady = false
+
+    interface IReady with
+        member _.IsReady = _isReady
 
     override this.Name = literalConjL
     override this.ShortName = literalConj
@@ -1376,11 +1405,14 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
     override this.Run variableStack = 
-        this.ArgList
-        |> Seq.iter (fun fv -> 
-            fv.Run variableStack
-            this.SetValuesOf fv
-        )
+        if not _isReady then
+            this.ArgList
+            |> Seq.iter (fun fv -> 
+                fv.Run variableStack
+                this.SetValuesOf fv
+            )
+            _isReady <- this.Arity = 0 
+
 
     override this.RunOrder = Some _runOrder
 
@@ -1430,7 +1462,7 @@ type FplProof(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
-    member this.RunOrder = None
+    override this.RunOrder = None
 
 
 type FplArgument(positions: Positions, parent: FplValue) =
@@ -1759,17 +1791,16 @@ type FplReference(positions: Positions, parent: FplValue) =
                 |> Seq.toList 
                 |> List.head
             if called.IsBlock() then
-                let pars = variableStack.SaveVariables(called) 
-                let args = this.ArgList |> Seq.toList
-                variableStack.ReplaceVariables pars args
-                // run all statements of the called node
-                called.ArgList
-                |> Seq.iter (fun fv -> 
-                    fv.Run variableStack
-                    called.SetValuesOf fv
-                )
-                this.SetValuesOf called
-                variableStack.RestoreVariables(called)
+                match box called with
+                | :? ICanBeCalledRecusively as calledRecursively when calledRecursively.CallCounter > maxRecursion -> () // stop recursion
+                | _ ->
+                    let pars = variableStack.SaveVariables(called) 
+                    let args = this.ArgList |> Seq.toList
+                    variableStack.ReplaceVariables pars args
+                    // run all statements of the called node
+                    called.Run variableStack
+                    this.SetValuesOf called
+                    variableStack.RestoreVariables(called)
         elif this.ArgList.Count = 1 then
             let arg = this.ArgList[0]
             arg.Run variableStack
@@ -2661,15 +2692,13 @@ type FplGenericFunctionalTerm(positions: Positions, parent: FplValue) =
             else
                 subRepr
 
-    override this.Run variableStack = 
-        raise (NotImplementedException())
-
-    override this.RunOrder = None
-
-
 type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericFunctionalTerm(positions, parent)
     let _runOrder = runOrder
+    let mutable _isReady = false
+
+    interface IReady with
+        member _.IsReady = _isReady
 
     override this.Name = $"functional term {literalDefL}"
     override this.ShortName = $"{literalDef} {literalFunc}"
@@ -2684,7 +2713,10 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
-    member this.RunOrder = Some _runOrder
+    override this.RunOrder = Some _runOrder
+
+    override this.Run variableStack = 
+        raise (NotImplementedException())
 
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
@@ -2702,6 +2734,11 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
+    override this.RunOrder = None
+
+    override this.Run variableStack = 
+        raise (NotImplementedException())
+
 type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplGenericFunctionalTerm(positions, parent)
 
@@ -2716,6 +2753,11 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
+    override this.RunOrder = None
+
+    override this.Run variableStack = 
+        raise (NotImplementedException())
 
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)

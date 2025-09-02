@@ -110,16 +110,25 @@ type TestArity() =
             let r = st.Root
             let theory = r.Scope[filename]
             let test = theory.Scope.Values |> Seq.toList |> List.head 
-            match box test with
-            | :? IReady as testReady -> 
-                if test.Arity = 0 && testReady.IsReady then
-                    Assert.AreEqual<string>("arity 0 => ready", "arity 0 => ready")
-                elif test.Arity = 0 && not testReady.IsReady then
-                    Assert.AreEqual<string>("arity 0 => ready", "arity 0 but not ready")
-                elif test.Arity <> 0 && testReady.IsReady then
-                    Assert.AreEqual<string>("arity not 0 => not ready", "arity not 0, but ready")
-                elif test.Arity <> 0 && not testReady.IsReady then
-                    Assert.AreEqual<string>("arity not 0 => not ready", "arity not 0 => not ready")
-            | _ -> failwith("Interface IReady not implemented")
+            match test with
+            | :? FplCorollary
+            | :? FplProof ->
+                match box test with
+                | :? IReady as testReady -> 
+                    failwith("Interface IReady should be implemented neither for proofs nor for corollaries, because they are already run from blocks implementing this interface. This, they will be run only when their caller is not ready.")
+                | _ -> 
+                      Assert.AreEqual<int>(arity, test.Arity)
+            | _ ->
+                match box test with
+                | :? IReady as testReady -> 
+                    if test.Arity = 0 && testReady.IsReady then
+                        Assert.AreEqual<string>("arity 0 => ready", "arity 0 => ready")
+                    elif test.Arity = 0 && not testReady.IsReady then
+                        Assert.AreEqual<string>("arity 0 => ready", "arity 0 but not ready")
+                    elif test.Arity <> 0 && testReady.IsReady then
+                        Assert.AreEqual<string>("arity not 0 => not ready", "arity not 0, but ready")
+                    elif test.Arity <> 0 && not testReady.IsReady then
+                        Assert.AreEqual<string>("arity not 0 => not ready", "arity not 0 => not ready")
+                | _ -> failwith("Interface IReady not implemented")
         | None -> 
             Assert.IsTrue(false)
