@@ -1328,3 +1328,14 @@ type TestInterpreterErrors() =
             let result = filterByErrorCode ad code.Code
             Assert.AreEqual<string>(expected, result.Head.Message)
 
+
+    [<DataRow("00", """def pred T() { true };""", 0)>]
+    [<DataRow("01", """def pred T() { self };""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestLG002(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = LG002 ("",0)
+            runTestHelper "TestLG002.fpl" fplCode code expected
