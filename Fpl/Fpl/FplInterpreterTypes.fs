@@ -1776,6 +1776,7 @@ type FplReference(positions: Positions, parent: FplValue) =
         else
             let subRepr = 
                 this.ValueList
+                |> Seq.filter (fun subfv -> subfv <> this) // prevent reference "self" being the value of itself causing an infinite loop
                 |> Seq.map (fun subfv -> subfv.Represent())
                 |> String.concat ", "
             if subRepr = String.Empty then 
