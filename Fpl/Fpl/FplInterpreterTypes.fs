@@ -2697,6 +2697,7 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericFunctionalTerm(positions, parent)
     let _runOrder = runOrder
     let mutable _isReady = false
+    let mutable _callCounter = 0
 
     interface IReady with
         member _.IsReady = _isReady
@@ -2717,7 +2718,17 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
     override this.RunOrder = Some _runOrder
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        if not _isReady then
+            _callCounter <- _callCounter + 1
+            if _callCounter > maxRecursion then
+                emitLG002diagnostic (this.Type(SignatureType.Name)) _callCounter this.StartPos this.EndPos
+            else
+                this.ArgList
+                |> Seq.iter (fun fv -> 
+                    fv.Run variableStack
+                    this.SetValuesOf fv
+                )
+                _isReady <- this.Arity = 0 
 
 
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
