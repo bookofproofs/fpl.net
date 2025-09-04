@@ -1832,7 +1832,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Proof((pos1, pos2), (referencingIdentifierAst, (proofArgumentListAst, optQedAst))) ->
         st.EvalPush("Proof")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplProof((pos1, pos2), parent)
+        let theory = parent :?> FplTheory
+        let fv = new FplProof((pos1, pos2), theory, theory.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st referencingIdentifierAst
         match tryFindAssociatedBlockForProof fv with

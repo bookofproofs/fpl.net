@@ -1418,7 +1418,7 @@ type TestInterpreterErrors() =
     [<DataRow("01", """theorem T() { true } proof T$1 {1. |- trivial};""", 0)>]
     [<DataRow("01a", """theorem T() { true };""", 1)>]
     [<DataRow("02", """proposition T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("02a", """proposition T() { true };""", 0)>]
+    [<DataRow("02a", """proposition T() { true };""", 1)>]
     [<DataRow("03", """lemma T() { true } proof T$1 {1. |- trivial};""", 0)>]
     [<DataRow("03a", """lemma T() { true };""", 1)>]
     [<DataRow("04", """corollary T$1() { true } proof T$1$1 {1. |- trivial};""", 0)>]

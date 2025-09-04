@@ -191,7 +191,7 @@ type TestFplBlockType() =
             let x = new FplPredicate(positions, parent, 0)
             Assert.AreEqual<string>("predicate definition", x.Name)
         | "FplProof" ->
-            let x = new FplProof(positions, parent)
+            let x = new FplProof(positions, parent, 0)
             Assert.AreEqual<string>("proof", x.Name)
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
@@ -420,7 +420,7 @@ type TestFplBlockType() =
             let x = new FplPredicate(positions, parent, 0)
             Assert.AreEqual<string>("def pred", x.ShortName)
         | "FplProof" ->
-            let x = new FplProof(positions, parent)
+            let x = new FplProof(positions, parent, 0)
             Assert.AreEqual<string>(literalPrf, x.ShortName)
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
@@ -649,7 +649,7 @@ type TestFplBlockType() =
             let x = new FplPredicate(positions, parent, 0)
             Assert.AreEqual<string>("def pred", x.FplId)
         | "FplProof" ->
-            let x = new FplProof(positions, parent)
+            let x = new FplProof(positions, parent, 0)
             Assert.AreEqual<string>(literalPrf, x.FplId)
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
@@ -878,7 +878,7 @@ type TestFplBlockType() =
             let x = new FplPredicate(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplProof" ->
-            let x = new FplProof(positions, parent)
+            let x = new FplProof(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
@@ -1110,7 +1110,7 @@ type TestFplBlockType() =
                 let x = new FplPredicate(positions, parent, 0)
                 x.Run variableStack 
             | "FplProof" ->
-                let x = new FplProof(positions, parent)
+                let x = new FplProof(positions, parent, 0)
                 x.Run variableStack 
             | "FplProposition" ->
                 let x = new FplProposition(positions, parent, 0)

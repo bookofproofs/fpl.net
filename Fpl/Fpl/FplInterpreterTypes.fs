@@ -1356,6 +1356,14 @@ type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder)
             emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
             emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
 
+            // evaluate all corollaries and proofs of the theorem-like statement
+            this.Scope.Values
+            |> Seq.filter (fun fv -> fv.Name = literalPrfL || fv.Name = literalCorL) 
+            |> Seq.sortBy (fun block -> block.RunOrder.Value) 
+            |> Seq.iter (fun fv -> 
+                fv.Run variableStack
+            )
+
         if not _hasProof then 
            emitPR007Diagnostics (this.Type(SignatureType.Name)) this.Name this.StartPos this.EndPos
 
@@ -2298,7 +2306,6 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
                 arg.Represent()
             | Some arg -> arg.FplId
             | None -> argPre.FplId
-            | _ -> "0"
 
         let mutable n = 0
         System.Int32.TryParse(numericValue, &n) |> ignore
@@ -2774,14 +2781,15 @@ let isExtension (fv:FplValue) =
     | :? FplExtension -> true
     | _ -> false
 
-type FplProof(positions: Positions, parent: FplValue) =
+type FplProof(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicate(positions, parent)
-
+    let _runOrder = runOrder
+    
     override this.Name = literalPrfL
     override this.ShortName = literalPrf
 
     override this.Clone () =
-        let ret = new FplProof((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplProof((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
 
