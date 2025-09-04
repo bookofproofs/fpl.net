@@ -123,7 +123,7 @@ let emitID021Diagnostics identifier pos1 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitLG002diagnostic name times pos1 pos2 = 
+let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -131,10 +131,32 @@ let emitLG002diagnostic name times pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = LG002(name,times)
+            Diagnostic.Code = LG002(nodeTypeName,times)
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
+
+let emitLG003diagnostic nodeTypeName (nodeName:string) nodeRepr pos1 pos2 = 
+    let startsWithAny (prefixes:string list) (input:string) = 
+        prefixes |> List.exists input.StartsWith
+
+    if nodeRepr = literalFalse then
+        let code = 
+            if startsWithAny ["a"; "e"; "i"; "o"; "u"] nodeName then
+                LG003(nodeTypeName, $"an {nodeName}")
+            else
+                LG003(nodeTypeName, $"a {nodeName}")
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = code
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
 
 let emitPR003diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =

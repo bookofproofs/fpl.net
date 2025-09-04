@@ -1313,6 +1313,9 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
                 this.SetValuesOf fv
             )
             _isReady <- this.Arity = 0 
+            emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
+                
+
 
     override this.RunOrder = Some _runOrder
 
