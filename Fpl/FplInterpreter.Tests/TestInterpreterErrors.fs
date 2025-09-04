@@ -681,6 +681,8 @@ type TestInterpreterErrors() =
     [<DataRow("lemma Test() {true} proof Test$1 {1. |- trivial};", 0)>]
     [<DataRow("proposition Test() {true} proof Test$1 {1. |- trivial};", 0)>]
     [<DataRow("corollary Test$1() {true} proof Test$1$1 {1. |- trivial};", 0)>]
+    [<DataRow("inf T() { pre: true con: true } proof T$1 {1. |- trivial};", 1)>]
+    [<DataRow("ext T x@/\d+/ -> obj {ret x} proof T$1 {1. |- trivial};", 1)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID002(fplCode:string, expected) =
@@ -1394,26 +1396,7 @@ type TestInterpreterErrors() =
             let code = LG004 "" 
             runTestHelper "TestLG004.fpl" fplCode code expected
 
-    [<DataRow("00", """axiom T() { true } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("01", """theorem T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("02", """proposition T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("03", """lemma T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("04", """corollary T$1() { true } proof T$1$1 {1. |- trivial};""", 0)>]
-    [<DataRow("05", """conjecture T() { true } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("06", """postulate T() { true } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("07", """def pred T() { true } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("08", """def func T()->obj { intr } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("09", """inf T() { pre: true con: true } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("10", """def cl T:obj { intr } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("11", """ext T x@/\d+/ -> obj {ret x} proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
-    [<TestMethod>]
-    member this.TestPR006(no:string, fplCode:string, expected) =
-        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
-            ()
-        else
-            let code = PR006 ("", "") 
-            runTestHelper "TestPR006.fpl" fplCode code expected
+
 
     [<DataRow("01", """theorem T() { true } proof T$1 {1. |- trivial};""", 0)>]
     [<DataRow("01a", """theorem T() { true };""", 1)>]

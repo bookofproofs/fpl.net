@@ -2805,20 +2805,10 @@ type FplProof(positions: Positions, parent: FplValue, runOrder) =
         // todo evaluate proof by evaluating all arguments according to their order in the FPL code
         // todo issue a diagnostic, if the proof does not evaluate to true
         let parent = this.Parent.Value 
-        match parent with
-        | :? FplAxiom
-        | :? FplRuleOfInference
-        | :? FplPredicate
-        | :? FplFunctionalTerm
-        | :? FplExtension
-        | :? FplClass
-        | :? FplConjecture ->
-            emitPR006Diagnostics (parent.Type(SignatureType.Name)) parent.Name this.StartPos this.EndPos
-        | _ -> 
-            match box parent with 
-            | :? IHaveAProof as parentWithProof ->
-                parentWithProof.HasProof <- true
-            | _ -> ()
+        match box parent with 
+        | :? IHaveAProof as parentWithProof ->
+            parentWithProof.HasProof <- true
+        | _ -> ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 

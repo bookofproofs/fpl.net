@@ -1841,7 +1841,7 @@ let rec eval (st: SymbolTable) ast =
             // everything is ok, change the parent of the provable from theory to the found parent 
             fv.Parent <- Some potentialParent
         | ScopeSearchResult.FoundIncorrectBlock block ->
-            emitID002diagnostics fv block  
+            emitID002diagnostics (fv.Type(SignatureType.Type)) block fv.StartPos fv.EndPos
         | ScopeSearchResult.NotFound ->
             emitID003diagnostics fv  
         | ScopeSearchResult.FoundMultiple listOfKandidates ->

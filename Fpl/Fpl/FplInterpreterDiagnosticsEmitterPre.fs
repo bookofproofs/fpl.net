@@ -218,23 +218,20 @@ let emitPR005Diagnostics pos1 pos2 mixedTypeStr =
         }
     ad.AddDiagnostic diagnostic
 
-let emitPR006Diagnostics nodeTypeName nodeName pos1 pos2 = 
-        let code = 
-            if startsWithAny ["a"; "e"; "i"; "o"; "u"] nodeName then
-                PR006 (nodeTypeName, $"an {nodeName}")
-            else
-                PR006 (nodeTypeName, $"a {nodeName}")
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = code
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
+
+let emitID002diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID002(nodeTypeName, incorrectBlockType)
+            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+        }
+
+    ad.AddDiagnostic diagnostic
 
 let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 = 
         let code = 
