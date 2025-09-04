@@ -1206,6 +1206,9 @@ type ICanBeCalledRecusively =
 type IReady =
     abstract member IsReady : bool
 
+type IHaveAProof =
+    abstract member HasProof : bool with get, set
+
 type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
@@ -1318,72 +1321,89 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
-type FplTheorem(positions: Positions, parent: FplValue, runOrder) =
+[<AbstractClass>]
+type FplGenericTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
     let _runOrder = runOrder
+    let mutable _isReady = false
+    let mutable _hasProof = false
+
+
+    override this.Name = literalThmL
+    override this.ShortName = literalThm
+
+    interface IReady with
+        member _.IsReady = _isReady
+
+    interface IHaveAProof with
+        member this.HasProof
+            with get (): bool = _hasProof
+            and set (value) = _hasProof <- value
+    
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
+    override this.Run variableStack = 
+        if not _isReady then
+            this.ArgList
+            |> Seq.iter (fun fv -> 
+                fv.Run variableStack
+                this.SetValuesOf fv
+            )
+            _isReady <- this.Arity = 0 
+            emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
+            emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
+
+        if not _hasProof then 
+           emitPR007Diagnostics (this.Type(SignatureType.Name)) this.Name this.StartPos this.EndPos
+
+    override this.RunOrder = Some _runOrder
+
+type FplTheorem(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
     override this.Name = literalThmL
     override this.ShortName = literalThm
 
     override this.Clone () =
-        let ret = new FplTheorem((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
+        let ret = new FplTheorem((this.StartPos, this.EndPos), this.Parent.Value, this.RunOrder.Value)
         this.AssignParts(ret)
         ret
 
-    override this.IsFplBlock () = true
-    override this.IsBlock () = true
-
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
-
-    override this.Run variableStack = 
-        raise (NotImplementedException())
-
-    override this.RunOrder = Some _runOrder
-
-
 type FplLemma(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericPredicateWithExpression(positions, parent)
-    let _runOrder = runOrder
+    inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
     override this.Name = literalLemL
     override this.ShortName = literalLem
 
     override this.Clone () =
-        let ret = new FplLemma((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
+        let ret = new FplLemma((this.StartPos, this.EndPos), this.Parent.Value, this.RunOrder.Value)
         this.AssignParts(ret)
         ret
 
-    override this.IsFplBlock () = true
-    override this.IsBlock () = true
-
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
-
-    override this.Run variableStack = 
-        raise (NotImplementedException())
-
-    override this.RunOrder = Some _runOrder
-
 type FplProposition(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericPredicateWithExpression(positions, parent)
-    let _runOrder = runOrder
+    inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
     override this.Name = literalPropL
     override this.ShortName = literalProp
 
     override this.Clone () =
-        let ret = new FplProposition((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
+        let ret = new FplProposition((this.StartPos, this.EndPos), this.Parent.Value, this.RunOrder.Value)
         this.AssignParts(ret)
         ret
 
-    override this.IsFplBlock () = true
-    override this.IsBlock () = true
+type FplCorollary(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericTheoremLikeStmt(positions, parent, runOrder)
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.Name = literalCorL
+    override this.ShortName = literalCor
 
-    override this.Run variableStack = 
-        raise (NotImplementedException())
-
-    override this.RunOrder = Some _runOrder
+    override this.Clone () =
+        let ret = new FplCorollary((this.StartPos, this.EndPos), this.Parent.Value, this.RunOrder.Value)
+        this.AssignParts(ret)
+        ret
 
 type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -1417,28 +1437,6 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
 
 
     override this.RunOrder = Some _runOrder
-
-type FplCorollary(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicateWithExpression(positions, parent)
-
-    override this.Name = literalCorL
-    override this.ShortName = literalCor
-
-    override this.Clone () =
-        let ret = new FplCorollary((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.IsFplBlock () = true
-    override this.IsBlock () = true
-
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
-
-    override this.Run variableStack = 
-        raise (NotImplementedException())
-
-    member this.RunOrder = None
-
 
 type FplArgument(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
@@ -2808,7 +2806,11 @@ type FplProof(positions: Positions, parent: FplValue) =
         | :? FplClass
         | :? FplConjecture ->
             emitPR006Diagnostics (parent.Type(SignatureType.Name)) parent.Name this.StartPos this.EndPos
-        | _ -> ()
+        | _ -> 
+            match box parent with 
+            | :? IHaveAProof as parentWithProof ->
+                parentWithProof.HasProof <- true
+            | _ -> ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 

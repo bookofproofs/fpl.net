@@ -236,6 +236,24 @@ let emitPR006Diagnostics nodeTypeName nodeName pos1 pos2 =
             }
         ad.AddDiagnostic diagnostic
 
+let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 = 
+        let code = 
+            if startsWithAny ["a"; "e"; "i"; "o"; "u"] nodeName then
+                PR007 (nodeTypeName, $"an {nodeName}")
+            else
+                PR007 (nodeTypeName, $"a {nodeName}")
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Warning
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = code
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+
 let emitSIG03Diagnostics errMsg mapTypeStr pos1 pos2 = 
     let diagnostic =
         { 

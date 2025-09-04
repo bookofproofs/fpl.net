@@ -101,7 +101,7 @@ type TestFplBlockType() =
             let x = new FplConstructor(positions, parent)
             Assert.AreEqual<string>("constructor", x.Name)
         | "FplCorollary" ->
-            let x = new FplCorollary(positions, parent)
+            let x = new FplCorollary(positions, parent, 0)
             Assert.AreEqual<string>("corollary", x.Name)
         | "FplDecrement" ->
             let x = new FplDecrement(positions, parent)
@@ -330,7 +330,7 @@ type TestFplBlockType() =
             let x = new FplConstructor(positions, parent)
             Assert.AreEqual<string>(literalCtor, x.ShortName)
         | "FplCorollary" ->
-            let x = new FplCorollary(positions, parent)
+            let x = new FplCorollary(positions, parent, 0)
             Assert.AreEqual<string>(literalCor, x.ShortName)
         | "FplDecrement" ->
             let x = new FplDecrement(positions, parent)
@@ -559,7 +559,7 @@ type TestFplBlockType() =
             let x = new FplConstructor(positions, parent)
             Assert.AreEqual<string>(literalCtor, x.FplId)
         | "FplCorollary" ->
-            let x = new FplCorollary(positions, parent)
+            let x = new FplCorollary(positions, parent, 0)
             Assert.AreEqual<string>(literalCor, x.FplId)
         | "FplDecrement" ->
             let x = new FplDecrement(positions, parent)
@@ -788,7 +788,7 @@ type TestFplBlockType() =
             let x = new FplConstructor(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplCorollary" ->
-            let x = new FplCorollary(positions, parent)
+            let x = new FplCorollary(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplDecrement" ->
             let x = new FplDecrement(positions, parent)
@@ -1020,7 +1020,7 @@ type TestFplBlockType() =
                 let x = new FplConstructor(positions, parent)
                 x.Run variableStack 
             | "FplCorollary" ->
-                let x = new FplCorollary(positions, parent)
+                let x = new FplCorollary(positions, parent, 0)
                 x.Run variableStack 
             | "FplDecrement" ->
                 let x = new FplDecrement(positions, parent)

@@ -1666,7 +1666,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->
         st.EvalPush("Corollary")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplCorollary((pos1, pos2), parent)
+        let theory = parent :?> FplTheory
+        let fv = new FplCorollary((pos1, pos2), theory, theory.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fv)
         eval st corollarySignatureAst
         match tryFindAssociatedBlockForCorollary fv with

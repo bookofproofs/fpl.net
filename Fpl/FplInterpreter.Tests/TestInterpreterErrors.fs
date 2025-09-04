@@ -1396,16 +1396,16 @@ type TestInterpreterErrors() =
 
     [<DataRow("00", """axiom T() { true } proof T$1 {1. |- trivial};""", 1)>]
     [<DataRow("01", """theorem T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("04", """proposition T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("06", """lemma T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("08", """corollary T$1() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("10", """conjecture T() { true } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("12", """postulate T() { true } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("14", """def pred T() { true } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("16", """def func T()->obj { intr } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("18", """inf T() { pre: true con: true } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("19", """def cl T:obj { intr } proof T$1 {1. |- trivial};""", 1)>]
-    [<DataRow("20", """ext T x@/\d+/ -> obj {ret x} proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("02", """proposition T() { true } proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("03", """lemma T() { true } proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("04", """corollary T$1() { true } proof T$1$1 {1. |- trivial};""", 0)>]
+    [<DataRow("05", """conjecture T() { true } proof T$1 {1. |- trivial};""", 1)>]
+    [<DataRow("06", """postulate T() { true } proof T$1 {1. |- trivial};""", 1)>]
+    [<DataRow("07", """def pred T() { true } proof T$1 {1. |- trivial};""", 1)>]
+    [<DataRow("08", """def func T()->obj { intr } proof T$1 {1. |- trivial};""", 1)>]
+    [<DataRow("09", """inf T() { pre: true con: true } proof T$1 {1. |- trivial};""", 1)>]
+    [<DataRow("10", """def cl T:obj { intr } proof T$1 {1. |- trivial};""", 1)>]
+    [<DataRow("11", """ext T x@/\d+/ -> obj {ret x} proof T$1 {1. |- trivial};""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR006(no:string, fplCode:string, expected) =
@@ -1414,3 +1414,20 @@ type TestInterpreterErrors() =
         else
             let code = PR006 ("", "") 
             runTestHelper "TestPR006.fpl" fplCode code expected
+
+    [<DataRow("01", """theorem T() { true } proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("01a", """theorem T() { true };""", 1)>]
+    [<DataRow("02", """proposition T() { true } proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("02a", """proposition T() { true };""", 0)>]
+    [<DataRow("03", """lemma T() { true } proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("03a", """lemma T() { true };""", 1)>]
+    [<DataRow("04", """corollary T$1() { true } proof T$1$1 {1. |- trivial};""", 0)>]
+    [<DataRow("04a", """corollary T$1() { true };""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR007(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR007 ("", "") 
+            runTestHelper "TestPR007.fpl" fplCode code expected
