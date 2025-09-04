@@ -136,16 +136,35 @@ let emitLG002diagnostic nodeTypeName times pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitLG003diagnostic nodeTypeName (nodeName:string) nodeRepr pos1 pos2 = 
-    let startsWithAny (prefixes:string list) (input:string) = 
-        prefixes |> List.exists input.StartsWith
+let startsWithAny (prefixes:string list) (input:string) = 
+    prefixes |> List.exists input.StartsWith
 
+let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 = 
     if nodeRepr = literalFalse then
         let code = 
             if startsWithAny ["a"; "e"; "i"; "o"; "u"] nodeName then
                 LG003(nodeTypeName, $"an {nodeName}")
             else
                 LG003(nodeTypeName, $"a {nodeName}")
+        let diagnostic =
+            { 
+                Diagnostic.Uri = ad.CurrentUri
+                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+                Diagnostic.Severity = DiagnosticSeverity.Error
+                Diagnostic.StartPos = pos1
+                Diagnostic.EndPos = pos2
+                Diagnostic.Code = code
+                Diagnostic.Alternatives = None 
+            }
+        ad.AddDiagnostic diagnostic
+
+let emitLG004diagnostic nodeName arity pos1 pos2 = 
+    if arity > 0 then
+        let code = 
+            if startsWithAny ["a"; "e"; "i"; "o"; "u"] nodeName then
+                LG004 $"an {nodeName}"
+            else
+                LG004 $"a {nodeName}"
         let diagnostic =
             { 
                 Diagnostic.Uri = ad.CurrentUri

@@ -148,6 +148,7 @@ type DiagnosticCode =
     | LG001 of string * string * string
     | LG002 of string * int
     | LG003 of string * string
+    | LG004 of string
     member this.Code = 
         match this with
             // parser error messages
@@ -235,6 +236,7 @@ type DiagnosticCode =
             | LG001 _ -> "LG001"
             | LG002 _ -> "LG002"
             | LG003 _ -> "LG003"
+            | LG004 _ -> "LG004"
     member this.Message = 
         match this with
             // parser error messages
@@ -337,7 +339,8 @@ type DiagnosticCode =
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
             | LG002 (nodeName, times) -> $"Possible infinite recursion detected, `{nodeName}` was called for more than {times} times.`."
-            | LG003 (nodeName, nodeType) -> $"`{nodeName}` evaluates to `false` and cannot be `{nodeType}`.`."
+            | LG003 (nodeName, nodeType) -> $"`{nodeName}` evaluates to `false` and cannot be {nodeType}."
+            | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =
