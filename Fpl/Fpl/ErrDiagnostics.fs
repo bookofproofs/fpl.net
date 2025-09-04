@@ -122,20 +122,12 @@ type DiagnosticCode =
     | ID019 of string 
     | ID020 of string 
     | ID021 of string 
-    // variable-related error codes
-    | VAR00 
-    | VAR01 of string 
-    | VAR03 of string * string
-    | VAR04 of string 
-    | VAR05 of string 
-    | VAR06 of string * string
-    // signature-related error codes
-    | SIG00 of string * int
-    | SIG01 of string 
-    | SIG02 of string * int * string
-    | SIG03 of string * string 
-    | SIG04 of string * int * string list
-    | SIG05 of string * string
+    // logic-related error codes
+    | LG000 of string * string 
+    | LG001 of string * string * string
+    | LG002 of string * int
+    | LG003 of string * string
+    | LG004 of string
     // proof-related error codes
     | PR000 of string 
     | PR001 
@@ -143,12 +135,21 @@ type DiagnosticCode =
     | PR003 of string * string
     | PR004 of string * string
     | PR005 of string
-    // logic-related error codes
-    | LG000 of string * string 
-    | LG001 of string * string * string
-    | LG002 of string * int
-    | LG003 of string * string
-    | LG004 of string
+    | PR006 of string * string
+    // signature-related error codes
+    | SIG00 of string * int
+    | SIG01 of string 
+    | SIG02 of string * int * string
+    | SIG03 of string * string 
+    | SIG04 of string * int * string list
+    | SIG05 of string * string
+    // variable-related error codes
+    | VAR00 
+    | VAR01 of string 
+    | VAR03 of string * string
+    | VAR04 of string 
+    | VAR05 of string 
+    | VAR06 of string * string
     member this.Code = 
         match this with
             // parser error messages
@@ -210,20 +211,12 @@ type DiagnosticCode =
             | ID019 _ -> "ID019"
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
-            // variable-related error codes
-            | VAR00 -> "VAR00"
-            | VAR01 _  -> "VAR01"
-            | VAR03 _  -> "VAR03"
-            | VAR04 _  -> "VAR04"
-            | VAR05 _  -> "VAR05"
-            | VAR06 _  -> "VAR06"
-            // signature-related error codes
-            | SIG00 _ -> "SIG00"
-            | SIG01 _ -> "SIG01"
-            | SIG02 _ -> "SIG02"
-            | SIG03 _ -> "SIG03"
-            | SIG04 _ -> "SIG04"
-            | SIG05 _ -> "SIG05"
+            // logic-related error codes
+            | LG000 _ -> "LG000"
+            | LG001 _ -> "LG001"
+            | LG002 _ -> "LG002"
+            | LG003 _ -> "LG003"
+            | LG004 _ -> "LG004"
             // proof-related error codes
             | PR000 _ -> "PR000"
             | PR001 -> "PR001"
@@ -231,12 +224,21 @@ type DiagnosticCode =
             | PR003 _ -> "PR003"
             | PR004 _ -> "PR004"
             | PR005 _ -> "PR005"
-            // logic-related error codes
-            | LG000 _ -> "LG000"
-            | LG001 _ -> "LG001"
-            | LG002 _ -> "LG002"
-            | LG003 _ -> "LG003"
-            | LG004 _ -> "LG004"
+            | PR006 _ -> "PR006"
+            // signature-related error codes
+            | SIG00 _ -> "SIG00"
+            | SIG01 _ -> "SIG01"
+            | SIG02 _ -> "SIG02"
+            | SIG03 _ -> "SIG03"
+            | SIG04 _ -> "SIG04"
+            | SIG05 _ -> "SIG05"
+            // variable-related error codes
+            | VAR00 -> "VAR00"
+            | VAR01 _  -> "VAR01"
+            | VAR03 _  -> "VAR03"
+            | VAR04 _  -> "VAR04"
+            | VAR05 _  -> "VAR05"
+            | VAR06 _  -> "VAR06"
     member this.Message = 
         match this with
             // parser error messages
@@ -306,13 +308,20 @@ type DiagnosticCode =
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> sprintf "Missing call of base constructor `%s`." name
             | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
-            // variable-related error codes
-            | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
-            | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
-            | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
-            | VAR04 name ->  sprintf $"Declared variable `{name}` not used in this scope."
-            | VAR05 name ->  sprintf $"Bound variable `{name}` not used in this quantor."
-            | VAR06 (name, parentClass) ->  sprintf $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
+            // logic-related error codes
+            | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
+            | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
+            | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
+            | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
+            | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
+            // proof-related error codes
+            | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
+            | PR001 -> $"Cannot refer to a definition outside a proof."
+            | PR002 -> $"Avoid referencing to proofs directly."
+            | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
+            | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
+            | PR005 name ->  $"Argument identifier `{name}` not declared in this scope."
+            | PR006 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and does not require a proof."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
@@ -328,19 +337,13 @@ type DiagnosticCode =
                     let errMsg = errorList |> List.mapi (fun i s -> sprintf "%d. %s" (i + 1) s) |> String.concat ", "
                     $"No overload matching `{signature}`. Checked candidates: {errorList}." 
             | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
-            // proof-related error codes
-            | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
-            | PR001 -> $"Cannot refer to a definition outside a proof."
-            | PR002 -> $"Avoid referencing to proofs directly."
-            | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
-            | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
-            | PR005 name ->  sprintf $"Argument identifier `{name}` not declared in this scope."
-            // logic-related error codes
-            | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
-            | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
-            | LG002 (nodeName, times) -> $"Possible infinite recursion detected, `{nodeName}` was called for more than {times} times.`."
-            | LG003 (nodeName, nodeType) -> $"`{nodeName}` evaluates to `false` and cannot be {nodeType}."
-            | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
+            // variable-related error codes
+            | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
+            | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
+            | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
+            | VAR04 name ->  sprintf $"Declared variable `{name}` not used in this scope."
+            | VAR05 name ->  sprintf $"Bound variable `{name}` not used in this quantor."
+            | VAR06 (name, parentClass) ->  sprintf $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =

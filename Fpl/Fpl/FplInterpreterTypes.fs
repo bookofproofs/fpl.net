@@ -1316,7 +1316,6 @@ type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
             emitLG003diagnostic (this.Type(SignatureType.Name)) this.Name (this.Represent()) this.StartPos this.EndPos
             emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
 
-
     override this.RunOrder = Some _runOrder
 
 type FplTheorem(positions: Positions, parent: FplValue, runOrder) =
@@ -1439,33 +1438,6 @@ type FplCorollary(positions: Positions, parent: FplValue) =
         raise (NotImplementedException())
 
     member this.RunOrder = None
-
-
-type FplProof(positions: Positions, parent: FplValue) =
-    inherit FplGenericPredicate(positions, parent)
-
-    override this.Name = literalPrfL
-    override this.ShortName = literalPrf
-
-    override this.Clone () =
-        let ret = new FplProof((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
-
-    override this.IsFplBlock () = true
-    override this.IsBlock () = true
-    override this.IsProof (): bool = true
-
-    override this.Type signatureType =
-        let head = getFplHead this signatureType
-        head
-
-    override this.Run variableStack = 
-        raise (NotImplementedException())
-
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
-
-    override this.RunOrder = None
 
 
 type FplArgument(positions: Positions, parent: FplValue) =
@@ -2803,6 +2775,44 @@ let isExtension (fv:FplValue) =
     match fv with
     | :? FplExtension -> true
     | _ -> false
+
+type FplProof(positions: Positions, parent: FplValue) =
+    inherit FplGenericPredicate(positions, parent)
+
+    override this.Name = literalPrfL
+    override this.ShortName = literalPrf
+
+    override this.Clone () =
+        let ret = new FplProof((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
+    override this.IsProof (): bool = true
+
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
+
+    override this.Run variableStack = 
+        // todo evaluate proof by evaluating all arguments according to their order in the FPL code
+        // todo issue a diagnostic, if the proof does not evaluate to true
+        let parent = this.Parent.Value 
+        match parent with
+        | :? FplAxiom
+        | :? FplRuleOfInference
+        | :? FplPredicate
+        | :? FplFunctionalTerm
+        | :? FplExtension
+        | :? FplClass
+        | :? FplConjecture ->
+            emitPR006Diagnostics (parent.Type(SignatureType.Name)) parent.Name this.StartPos this.EndPos
+        | _ -> ()
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
+    override this.RunOrder = None
 
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
