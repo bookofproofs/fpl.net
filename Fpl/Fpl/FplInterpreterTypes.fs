@@ -1037,7 +1037,8 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
     override this.IsBlock () = true    
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
@@ -1265,7 +1266,8 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
 
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
@@ -1284,7 +1286,8 @@ type FplOptionalPredicate(positions: Positions, parent: FplValue) =
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
 
 type FplAxiom(positions: Positions, parent: FplValue, runOrder) =
@@ -1462,7 +1465,8 @@ type FplArgument(positions: Positions, parent: FplValue) =
         head
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
@@ -1488,7 +1492,8 @@ type FplJustification(positions: Positions, parent: FplValue) =
         head
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
@@ -1508,7 +1513,8 @@ type FplArgInference(positions: Positions, parent: FplValue) =
         head
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
@@ -1540,7 +1546,8 @@ type FplLocalization(positions: Positions, parent: FplValue) =
     override this.IsBlock() = true
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
     override this.RunOrder = None
 
@@ -1569,7 +1576,8 @@ type FplTranslation(positions: Positions, parent: FplValue) =
     override this.Represent () = this.FplId 
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
@@ -1593,7 +1601,8 @@ type FplLanguage(positions: Positions, parent: FplValue) =
     override this.Represent () = this.FplId
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
@@ -1620,7 +1629,8 @@ type FplAssertion(positions: Positions, parent: FplValue) =
     override this.Represent () = ""
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
@@ -2529,7 +2539,8 @@ type FplQuantor(positions: Positions, parent: FplValue) =
         | _ -> sprintf "%s(%s)" head paramT
 
     override this.Run _ = 
-        raise (NotImplementedException())
+        // todo implement quantor run
+        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
     
@@ -2729,7 +2740,8 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.RunOrder = None
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
 type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplGenericFunctionalTerm(positions, parent)
@@ -2749,7 +2761,8 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     override this.RunOrder = None
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -2769,7 +2782,8 @@ type FplExtension(positions: Positions, parent: FplValue) =
     override this.Represent () = this.FplId
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
@@ -2906,7 +2920,8 @@ type FplStmt(positions: Positions, parent: FplValue) =
     override this.Represent () = ""
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
@@ -3129,7 +3144,8 @@ type FplCases(positions: Positions, parent: FplValue) =
     override this.Represent () = literalUndef
 
     override this.Run variableStack = 
-        raise (NotImplementedException())
+        // todo implement run
+        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
