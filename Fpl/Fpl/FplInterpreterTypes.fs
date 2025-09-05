@@ -3016,12 +3016,17 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         let assignedValueOpt = getArgument this.ArgList[1]
         match assigneeReferenceOpt, assignedValueOpt with
         | Some assignee, Some assignedValue ->
-            this.CheckSIG05Diagnostics assignee assignedValue
-            assignedValue.Run variableStack
-            assignee.SetValuesOf assignedValue
-            match assignee with
-            | :? FplVariable -> assignee.IsInitializedVariable <- true
-            | _ -> ()
+            let nameAssignee = assignee.Type(SignatureType.Name)
+            let nameAssignedValue = assignedValue.Type(SignatureType.Name)
+            if nameAssignee = nameAssignedValue then
+                emitLG005diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
+            else
+                this.CheckSIG05Diagnostics assignee assignedValue
+                assignedValue.Run variableStack
+                assignee.SetValuesOf assignedValue
+                match assignee with
+                | :? FplVariable -> assignee.IsInitializedVariable <- true
+                | _ -> ()
         | _ -> ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList()

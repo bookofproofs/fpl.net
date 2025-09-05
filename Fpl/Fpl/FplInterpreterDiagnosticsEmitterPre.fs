@@ -58,6 +58,20 @@ let emitID001diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
 
     ad.AddDiagnostic diagnostic
 
+let emitID002diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID002(nodeTypeName, incorrectBlockType)
+            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+        }
+
+    ad.AddDiagnostic diagnostic
+
 let emitID007diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
     let diagnostic =
         { 
@@ -177,6 +191,20 @@ let emitLG004diagnostic nodeName arity pos1 pos2 =
             }
         ad.AddDiagnostic diagnostic
 
+let emitLG005diagnostics name pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = LG005 name
+            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+        }
+
+    ad.AddDiagnostic diagnostic
+
 let emitPR003diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
@@ -216,21 +244,6 @@ let emitPR005Diagnostics pos1 pos2 mixedTypeStr =
             Diagnostic.Code = PR005 mixedTypeStr // argument reference not defined
             Diagnostic.Alternatives = None 
         }
-    ad.AddDiagnostic diagnostic
-
-
-let emitID002diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID002(nodeTypeName, incorrectBlockType)
-            Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
-        }
-
     ad.AddDiagnostic diagnostic
 
 let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 = 
@@ -276,7 +289,6 @@ let emitSIG05Diagnostics assigneeTypeStr assignedTypeStr pos1 pos2 =
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
-
         
 let emitVAR06iagnostic name parentClass pos = 
     let diagnostic =

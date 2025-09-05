@@ -128,6 +128,7 @@ type DiagnosticCode =
     | LG002 of string * int
     | LG003 of string * string
     | LG004 of string
+    | LG005 of string
     // proof-related error codes
     | PR000 of string 
     | PR001 
@@ -217,6 +218,7 @@ type DiagnosticCode =
             | LG002 _ -> "LG002"
             | LG003 _ -> "LG003"
             | LG004 _ -> "LG004"
+            | LG005 _ -> "LG005"
             // proof-related error codes
             | PR000 _ -> "PR000"
             | PR001 -> "PR001"
@@ -314,6 +316,7 @@ type DiagnosticCode =
             | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
             | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
+            | LG005 name -> $"`Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
             // proof-related error codes
             | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
             | PR001 -> $"Cannot refer to a definition outside a proof."
