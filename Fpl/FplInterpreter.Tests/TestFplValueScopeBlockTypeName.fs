@@ -789,7 +789,7 @@ type TestFplBlockType() =
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplCorollary" ->
             let x = new FplCorollary(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.IsTrue(x.RunOrder.IsSome)
         | "FplDecrement" ->
             let x = new FplDecrement(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
@@ -813,7 +813,7 @@ type TestFplBlockType() =
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplFunctionalTerm" ->
             let x = new FplFunctionalTerm(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.IsTrue(x.RunOrder.IsSome)
         | "FplImplication" ->
             let x = new FplImplication(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
@@ -876,10 +876,10 @@ type TestFplBlockType() =
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplPredicate" ->
             let x = new FplPredicate(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.IsTrue(x.RunOrder.IsSome)
         | "FplProof" ->
             let x = new FplProof(positions, parent, 0)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            Assert.IsTrue(x.RunOrder.IsSome)
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsSome)

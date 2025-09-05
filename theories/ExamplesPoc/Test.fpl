@@ -1,15 +1,105 @@
-
-theorem T() {
-    true 
+inference ModusPonens()
+{
+    dec
+        ~p,q: pred
+    ;
+    premise:
+        and (p, impl (p,q) )
+    conclusion:
+        q
 }
 
-proof T$1
+
+inference ExistsByExample(p: pred(c: obj, other:* obj))
 {
-    // Direct Proof
-    // Strategy: Assume that the premise is true, then prove that the conclusion also must be true.
-    
-    100. |- trivial
-    
+    dec
+        ~x: obj
+    ;
+    premise:
+        p(c, other)
+    conclusion:
+        ex x:obj {p(x, other)}
+}
+
+def class A: obj
+{
+    intr
+}
+
+def class B: obj
+{
+    intr
+}
+
+def class C: obj
+{
+    intr
+}
+
+def pred Greater infix ">" 5 (x,y: obj)
+{
+    intr
+}
+
+axiom GreaterAB()
+{
+    dec
+        ~a: A
+        ~b: B
+    ;
+    (a > b)
+}
+
+axiom GreaterBC()
+{
+    dec
+        ~b: B
+        ~c: C
+    ;
+    (b > c)
+}
+
+axiom GreaterTransitive()
+{
+    dec
+        ~x,y,z: obj
+    ;
+    impl
+    (
+        and
+        (
+            (x > y), (y > z)
+        ),
+        (x > z)
+    )
+}
+
+lemma Example4()
+{
+    dec
+        ~x,y,z: obj
+    ;
+    ex x:obj 
+    { 
+        and ((x > y), (x > z)) 
+    }
+}
+
+proof Example4$1
+{
+    dec
+        ~a:A
+        ~b:B
+        ~c:C
+
+    ;
+    1. GreaterAB |- (a > b) 
+    2. GreaterBC |- (b > c) 
+    3. 1., 2. |- and ((a > b), (b > c)) 
+    4. 3., GreaterTransitive |- impl ( and ((a > b), (b > c)), (a > c) ) 
+    5. 4., ModusPonens |- (a > c)
+    6. 5., 1. |- and ((a > c), (a > b)) 
+    7. 6., ExistsByExample(and((a > c), (a > b))) |- trivial
     qed
 }
 

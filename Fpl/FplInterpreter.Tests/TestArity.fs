@@ -111,11 +111,16 @@ type TestArity() =
             let theory = r.Scope[filename]
             let test = theory.Scope.Values |> Seq.toList |> List.head 
             match test with
-            | :? FplCorollary
+            | :? FplRuleOfInference ->
+                match box test with
+                | :? IReady as testReady -> 
+                    failwith("Interface IReady should not be implemented for rules of inferences because they are can be run repeatedly from different proofs with different predicates.")
+                | _ -> 
+                      Assert.AreEqual<int>(arity, test.Arity)
             | :? FplProof ->
                 match box test with
                 | :? IReady as testReady -> 
-                    failwith("Interface IReady should be implemented neither for proofs nor for corollaries, because they are already run from blocks implementing this interface. This, they will be run only when their caller is not ready.")
+                    failwith("Interface IReady should not be implemented for proofs because they are already run from blocks implementing this interface. This, they will be run only when their caller is not ready.")
                 | _ -> 
                       Assert.AreEqual<int>(arity, test.Arity)
             | _ ->

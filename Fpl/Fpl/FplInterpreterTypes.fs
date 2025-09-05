@@ -2816,17 +2816,28 @@ type FplProof(positions: Positions, parent: FplValue, runOrder) =
         head
 
     override this.Run variableStack = 
-        // todo evaluate proof by evaluating all arguments according to their order in the FPL code
-        // todo issue a diagnostic, if the proof does not evaluate to true
+        // tell the parent theorem-like statement that it has a proof
         let parent = this.Parent.Value 
         match box parent with 
         | :? IHaveAProof as parentWithProof ->
             parentWithProof.HasProof <- true
         | _ -> ()
+        // evaluate the proof by evaluating all arguments according to their order in the FPL code
+        let mutable allArgumentsEvaluateToTrue = true
+        this.Scope.Values
+        |> Seq.filter (fun fv -> fv.Name = "argument")
+        |> Seq.map (fun arg -> 
+            arg.Run variableStack
+            let argRepr = arg.Represent()
+            allArgumentsEvaluateToTrue <- allArgumentsEvaluateToTrue && argRepr = literalTrue 
+        )
+        |> ignore
+        if not allArgumentsEvaluateToTrue then
+            emitPR006Diagnostics this.StartPos this.StartPos
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
-    override this.RunOrder = None
+    override this.RunOrder = Some _runOrder
 
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)

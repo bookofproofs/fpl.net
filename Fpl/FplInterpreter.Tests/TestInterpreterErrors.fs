@@ -1411,6 +1411,20 @@ type TestInterpreterErrors() =
             let code = LG005 "" 
             runTestHelper "TestLG004.fpl" fplCode code expected
 
+    [<DataRow("01", """thm T() { true } proof T$1 {1. |- trivial};""", 0)>]
+    [<DataRow("02a", """thm T() { true } proof T$1 {1. true |- true};""", 0)>]
+    [<DataRow("02b", """thm T() { true } proof T$1 {1. false |- false};""", 1)>]
+    [<DataRow("02c", """thm T() { true } proof T$1 {1. false |- true};""", 1)>]
+    [<DataRow("02d", """thm T() { true } proof T$1 {1. true |- false};""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR006(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR006 
+            runTestHelper "TestPR006.fpl" fplCode code expected
+
     [<DataRow("01", """theorem T() { true } proof T$1 {1. |- trivial};""", 0)>]
     [<DataRow("01a", """theorem T() { true };""", 1)>]
     [<DataRow("02", """proposition T() { true } proof T$1 {1. |- trivial};""", 0)>]
