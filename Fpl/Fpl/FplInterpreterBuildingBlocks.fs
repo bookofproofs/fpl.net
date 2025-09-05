@@ -616,7 +616,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(stmt)
         eval st returneeAst
         variableStack.PopEvalStack() 
-        stmt.Run variableStack
         st.EvalPop()
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
         st.EvalPush("AssumeArgument")
@@ -1101,13 +1100,11 @@ let rec eval (st: SymbolTable) ast =
             deleg.Copy refBlock
             variableStack.Pop() |> ignore
             variableStack.PushEvalStack(deleg)
-            deleg.Run variableStack
         | "Decrement" -> 
             let deleg = new FplDecrement((pos1, pos2), fv)
             deleg.Copy refBlock
             variableStack.Pop() |> ignore
             variableStack.PushEvalStack(deleg)
-            deleg.Run variableStack
         | _ -> 
             refBlock.TypeId <- literalUndef
             emitID013Diagnostics pos1 pos2 $"Unknown delegate `{refBlock.FplId}`"  
@@ -1353,9 +1350,6 @@ let rec eval (st: SymbolTable) ast =
             fv.ArgList.RemoveAt(currMinIndex+1) 
             fv.ArgList.RemoveAt(currMinIndex-1) 
         simplifyTriviallyNestedExpressions fv
-        let last = variableStack.PeekEvalStack()
-        last.Run variableStack // execute the last matched binary operator
-        fv.SetValuesOf last
         st.EvalPop()
     // | Expression of Positions * ((((Ast option * Ast) * Ast option) * Ast option) * Ast)
     | Ast.Expression((pos1, pos2), ((((prefixOpAst, predicateAst), postfixOpAst), optionalSpecificationAst), qualificationListAst)) ->
