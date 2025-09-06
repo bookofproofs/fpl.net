@@ -1450,34 +1450,29 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
-type FplArgument(positions: Positions, parent: FplValue, runOrder) =
+type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicate(positions, parent)
     let _runOrder = runOrder
 
-    override this.Name = "argument"
-    override this.ShortName = "arg"
+    override this.Name = "justification item"
+    override this.ShortName = "just"
 
     override this.Clone () =
-        let ret = new FplArgument((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
+        let ret = new FplJustificationItem((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
-    
+
     override this.Type signatureType =
         let head = getFplHead this signatureType
         head
 
     override this.Run variableStack = 
+        // todo implement run
         ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
     override this.RunOrder = Some _runOrder
-
-
-let isArgument (fv:FplValue) = 
-    match fv with
-    | :? FplArgument -> true
-    | _ -> false
 
 type FplJustification(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
@@ -1520,6 +1515,60 @@ type FplArgInference(positions: Positions, parent: FplValue) =
         ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
+type FplArgument(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericPredicate(positions, parent)
+    let _runOrder = runOrder
+
+    override this.Name = "argument"
+    override this.ShortName = "arg"
+
+    override this.Clone () =
+        let ret = new FplArgument((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
+        this.AssignParts(ret)
+        ret
+    
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
+
+    override this.Run variableStack = 
+        // the argument has two elements, the justification and an argument inference
+        let justification = this.ArgList[0]
+        let argumentInference = this.ArgList[1]
+
+        let orderdListJustifications =
+            justification.Scope.Values
+            |> Seq.sortBy (fun fv -> fv.RunOrder)
+            |> Seq.toList
+        (* todo: Enhance variableStack by the context in which this argument is being evaluated
+            Here are some preliminary considerations: 
+            1) The context should include 
+                a) the argumentInference of the previous argument (if such exists) - the first argument doesn't have such a predecessor
+                b) if the argument has more than justification, variableStack should store a list of applying the previous argumentInference from a) each justification sorted by their RunOrder 
+                   so then next justification from the list can be applied to the last result from variableStack. 
+                   The idea is that a list of justification could be "unzipped" in the FPL code by writing a sequence
+                   of arguments, each having only a single justification from the original list. This unzipped FPL code should be semantically
+                   the same as "zipping/hiding" the arguments by listing multiply justifications and only inferinig to the last argumentInference.
+                c) possibly the structure of the to-be-proven predicate of the original theorem
+            2) The evaluation of the argument should then handle the following cases
+                a) whether or not the argumentInference of this argument is an FplAssume or FplRevoke 
+                b) whether or not the justification is an axiom
+                c) whether or not the justification is a rule of inference
+                d) whether or not the justification is a by definition
+        *)
+        ()
+
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
+    override this.RunOrder = Some _runOrder
+
+
+let isArgument (fv:FplValue) = 
+    match fv with
+    | :? FplArgument -> true
+    | _ -> false
 
 type FplLocalization(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)

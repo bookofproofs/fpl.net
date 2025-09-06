@@ -39,6 +39,7 @@ type TestFplBlockType() =
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
+    [<DataRow("FplJustificationItem")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
     [<DataRow("FplLocalization")>]
@@ -157,6 +158,9 @@ type TestFplBlockType() =
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
             Assert.AreEqual<string>("justification", x.Name)
+        | "FplJustificationItem" ->
+            let x = new FplJustificationItem(positions, parent, 0)
+            Assert.AreEqual<string>("justification item", x.Name)
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
             Assert.AreEqual<string>("language", x.Name)        
@@ -267,6 +271,7 @@ type TestFplBlockType() =
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
+    [<DataRow("FplJustificationItem")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
     [<DataRow("FplLocalization")>]
@@ -386,6 +391,9 @@ type TestFplBlockType() =
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
             Assert.AreEqual<string>("just", x.ShortName)
+        | "FplJustificationItem" ->
+            let x = new FplJustificationItem(positions, parent, 0)
+            Assert.AreEqual<string>("just", x.ShortName)
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
             Assert.AreEqual<string>("lang", x.ShortName)
@@ -496,6 +504,7 @@ type TestFplBlockType() =
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
+    [<DataRow("FplJustificationItem")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
     [<DataRow("FplLocalization")>]
@@ -615,6 +624,9 @@ type TestFplBlockType() =
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
             Assert.AreEqual<string>("just", x.FplId)
+        | "FplJustificationItem" ->
+            let x = new FplJustificationItem(positions, parent, 0)
+            Assert.AreEqual<string>("just", x.FplId)
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
             Assert.AreEqual<string>("lang", x.FplId)
@@ -725,6 +737,7 @@ type TestFplBlockType() =
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
+    [<DataRow("FplJustificationItem")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
     [<DataRow("FplLocalization")>]
@@ -844,6 +857,9 @@ type TestFplBlockType() =
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplJustificationItem" ->
+            let x = new FplJustificationItem(positions, parent, 0)
+            Assert.IsTrue(x.RunOrder.IsSome)
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
@@ -955,6 +971,7 @@ type TestFplBlockType() =
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
+    [<DataRow("FplJustificationItem")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
     [<DataRow("FplLocalization")>]
@@ -1075,6 +1092,9 @@ type TestFplBlockType() =
                 x.Run variableStack 
             | "FplJustification" ->
                 let x = new FplJustification(positions, parent)
+                x.Run variableStack 
+            | "FplJustificationItem" ->
+                let x = new FplJustificationItem(positions, parent, 0)
                 x.Run variableStack 
             | "FplLanguage" ->
                 let x = new FplLanguage(positions, parent)

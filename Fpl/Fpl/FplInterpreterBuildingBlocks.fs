@@ -848,6 +848,11 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("DefaultMapResult")
         eval st ast1 
         st.EvalPop()
+    | Ast.JustificationItem((pos1, pos2), ast1) ->
+        st.EvalPush("JustificationItem")
+        let fv = variableStack.PeekEvalStack()
+        eval st ast1 
+        st.EvalPop()
     | Ast.Justification((pos1, pos2), predicateList) ->
         st.EvalPush("Justification")
         let fv = variableStack.PeekEvalStack()

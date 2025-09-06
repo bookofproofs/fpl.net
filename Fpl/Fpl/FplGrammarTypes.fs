@@ -95,6 +95,7 @@ type Ast =
     | Delegate of Positions * (Ast * Ast)
     | ArgumentIdentifier of Positions * string
     | ReferenceToProofOrCorollary of Positions * (Ast * Ast option) 
+    | JustificationItem of Positions * Ast 
     | Justification of Positions * Ast list
     | ArgumentTuple of Positions * Ast list
     | ByDef of Positions * Ast

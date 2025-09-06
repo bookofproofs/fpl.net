@@ -526,7 +526,9 @@ let derivedArgument = choice [
 ]
 
 let argumentInference = vDash >>. IW >>. (assumeArgument <|> revokeArgument <|> derivedArgument)
-let justification = positions "Justification" (predicateList .>> IW) |>> Ast.Justification
+let justificationItem = positions "JustificationItem" predicate |>> Ast.JustificationItem
+let justificationItemList = sepBy justificationItem comma
+let justification = positions "Justification" (justificationItemList .>> IW) |>> Ast.Justification
 let justifiedArgument = positions "JustArgInf" (justification .>>. argumentInference) |>> Ast.JustArgInf
 let proofArgument = positions "Argument" ((argumentIdentifier .>> IW) .>>. justifiedArgument) .>> IW |>> Ast.Argument
 let proofArgumentList = many1 (IW >>. (proofArgument <|> varDeclBlock))
