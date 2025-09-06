@@ -699,6 +699,18 @@ and FplVariableStack() =
     let _classCounters = Dictionary<string,FplValue option>()
     let _stack = Stack<KeyValuePair<string, Dictionary<string,FplValue>>>()
     let _valueStack = Stack<FplValue>()
+
+    let mutable _nextRunOrder = 0
+    /// Returns the next available RunOrder to be stored, when inserting an FplValue into its parent.
+    /// The need for this functionality is that sometimes, the block is inserted into the parent's scope, which is a dictionary.
+    /// When running the nodes in the dictionary, their run order will ensure that they are being run in the the order they have bin inserted.
+    /// This order is incremented and stored when specific FplValue when they are created.
+    /// All FplValues can have either Some or None RunOrder.
+    /// Those with Some RunOrder include e.g. the following building blocks: axioms, theorems, lemmas, propositions, proofs, corollaries, arguments in proofs.
+    /// Those with None include all other types of FplValues. They do not run by their own. They are "called" by those with Some RunOrder.
+    member this.GetNextAvailableFplBlockRunOrder = 
+        _nextRunOrder <- _nextRunOrder + 1
+        _nextRunOrder
     
     /// Indicates if this EvalStack is evaluating a signature on a FPL building block
     member this.InSignatureEvaluation
@@ -847,7 +859,6 @@ let private getParamTuple (fv:FplValue)  (signatureType:SignatureType) =
 type FplTheory(positions: Positions, parent: FplValue, filePath: string, runOrder) as this =
     inherit FplValue(positions, Some parent)
     let _runOrder = runOrder
-    let mutable _nextRunOrder = 0
 
     do
         this.FilePath <- Some filePath
@@ -870,16 +881,6 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string, runOrde
 
     /// The RunOrder in which this theory is to be executed.
     override this.RunOrder = Some _runOrder
-
-    /// Returns the next available RunOrder to be stored, when inserting a FPL Building Block into this theory.
-    /// This order is incremented and stored when specific FPL Building Blocks when they are created.
-    /// All Building Blocks in the Theory can have either Some or None RunOrder.
-    /// Those with Some RunOrder include only the following building blocks: axioms, theorems, lemmas, propositions.
-    /// Those with None include all other building blocks, including definitions (of predicates, classes, functional terms), localizations, extensions, and rules of inferences.
-    /// FPL Building Blocks with None RunOrder do not run by their own. They are "called" from  but only when they are called by those with Some RunOrder.
-    member this.GetNextAvailableFplBlockRunOrder = 
-        _nextRunOrder <- _nextRunOrder + 1
-        _nextRunOrder
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope()
 
@@ -1449,14 +1450,15 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
-type FplArgument(positions: Positions, parent: FplValue) =
+type FplArgument(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicate(positions, parent)
+    let _runOrder = runOrder
 
     override this.Name = "argument"
     override this.ShortName = "arg"
 
     override this.Clone () =
-        let ret = new FplArgument((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplArgument((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
     
@@ -1465,10 +1467,11 @@ type FplArgument(positions: Positions, parent: FplValue) =
         head
 
     override this.Run variableStack = 
-        // todo implement run
         ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
+    override this.RunOrder = Some _runOrder
 
 
 let isArgument (fv:FplValue) = 
@@ -2826,6 +2829,7 @@ type FplProof(positions: Positions, parent: FplValue, runOrder) =
         let mutable allArgumentsEvaluateToTrue = true
         this.Scope.Values
         |> Seq.filter (fun fv -> fv.Name = "argument")
+        |> Seq.sortBy (fun fv -> fv.RunOrder)
         |> Seq.map (fun arg -> 
             arg.Run variableStack
             let argRepr = arg.Represent()

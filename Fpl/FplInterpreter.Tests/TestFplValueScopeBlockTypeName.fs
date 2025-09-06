@@ -71,7 +71,7 @@ type TestFplBlockType() =
             let x = new FplArgInference(positions, parent)
             Assert.AreEqual<string>("argument inference", x.Name)
         | "FplArgument" ->
-            let x = new FplArgument(positions, parent)
+            let x = new FplArgument(positions, parent, 0)
             Assert.AreEqual<string>("argument", x.Name)
         | "FplAssertion" ->
             let x = new FplAssertion(positions, parent)
@@ -300,7 +300,7 @@ type TestFplBlockType() =
             let x = new FplArgInference(positions, parent)
             Assert.AreEqual<string>("ainf", x.ShortName)
         | "FplArgument" ->
-            let x = new FplArgument(positions, parent)
+            let x = new FplArgument(positions, parent, 0)
             Assert.AreEqual<string>("arg", x.ShortName)
         | "FplAssertion" ->
             let x = new FplAssertion(positions, parent)
@@ -529,7 +529,7 @@ type TestFplBlockType() =
             let x = new FplArgInference(positions, parent)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplArgument" ->
-            let x = new FplArgument(positions, parent)
+            let x = new FplArgument(positions, parent, 0)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplAssertion" ->
             let x = new FplAssertion(positions, parent)
@@ -758,8 +758,8 @@ type TestFplBlockType() =
             let x = new FplArgInference(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplArgument" ->
-            let x = new FplArgument(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            let x = new FplArgument(positions, parent, 0)
+            Assert.IsTrue(x.RunOrder.IsSome)
         | "FplAssertion" ->
             let x = new FplAssertion(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
@@ -990,7 +990,7 @@ type TestFplBlockType() =
                 let x = new FplArgInference(positions, parent)
                 x.Run variableStack 
             | "FplArgument" ->
-                let x = new FplArgument(positions, parent)
+                let x = new FplArgument(positions, parent, 0)
                 x.Run variableStack 
             | "FplAssertion" ->
                 let x = new FplAssertion(positions, parent)
