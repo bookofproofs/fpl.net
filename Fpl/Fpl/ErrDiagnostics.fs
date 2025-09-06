@@ -138,6 +138,7 @@ type DiagnosticCode =
     | PR005 of string
     | PR006 
     | PR007 of string * string
+    | PR008 of string * string * string
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -229,6 +230,7 @@ type DiagnosticCode =
             | PR005 _ -> "PR005"
             | PR006 -> "PR006"
             | PR007 _ -> "PR007"
+            | PR008 _ -> "PR008"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -328,6 +330,7 @@ type DiagnosticCode =
             | PR005 name ->  $"Argument identifier `{name}` not declared in this scope."
             | PR006 -> "Not all arguments of the proof could be verified."
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
+            | PR008 (nodeName, expectedInputArgInference, actualInputArgInference) ->  $"This {nodeName} expects `{expectedInputArgInference}` and could not be applied to the proceeding argument inference which was `{actualInputArgInference}`."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
