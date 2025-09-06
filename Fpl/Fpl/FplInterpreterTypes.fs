@@ -610,16 +610,12 @@ type FplValue(positions: Positions, parent: FplValue option) =
     override this.TryAddToParentsScope () = 
         let next = this.Parent.Value
         let identifier = 
-            match this.ShortName with
-            | FplGrammarCommons.literalCtor -> // constructor
+            if this.IsBlock() then 
                 this.Type(SignatureType.Mixed)
-            | _ -> 
-                if this.IsBlock() then 
-                    this.Type(SignatureType.Mixed)
-                elif this.IsVariable() then 
-                    this.FplId
-                else
-                    this.Type(SignatureType.Name)
+            elif this.IsVariable() then 
+                this.FplId
+            else
+                this.Type(SignatureType.Name)
         match this.InScopeOfParent identifier with
         | ScopeSearchResult.Found conflict -> 
             match next.ShortName with
@@ -1451,7 +1447,7 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
     override this.RunOrder = Some _runOrder
 
 type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericPredicate(positions, parent)
+    inherit FplValue(positions, Some parent)
     let _runOrder = runOrder
 
     override this.Name = "justification item"
@@ -1466,11 +1462,14 @@ type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
         let head = getFplHead this signatureType
         head
 
+    override this.Represent() = this.Type(SignatureType.Name)
+
     override this.Run variableStack = 
         // todo implement run
         ()
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
     override this.RunOrder = Some _runOrder
 
@@ -1775,7 +1774,7 @@ type FplReference(positions: Positions, parent: FplValue) =
                 else sprintf "%s(%s)" head args
 
 
-    override this.Represent (): string = 
+    override this.Represent () = 
         if this.ValueList.Count = 0 then 
             if this.Scope.ContainsKey(this.FplId) && this.Scope[this.FplId].IsVariable() then
                 this.Scope[this.FplId].Represent()

@@ -848,17 +848,20 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("DefaultMapResult")
         eval st ast1 
         st.EvalPop()
-    | Ast.JustificationItem((pos1, pos2), ast1) ->
+    | Ast.JustificationItem((pos1, pos2), predicateAst) ->
         st.EvalPush("JustificationItem")
-        let fv = variableStack.PeekEvalStack()
-        eval st ast1 
+        //todo let fv = variableStack.PeekEvalStack()
+        //let fvNew = new FplJustificationItem((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder)
+        //variableStack.PushEvalStack(fvNew)
+        eval st predicateAst 
+        //variableStack.PopEvalStack()
         st.EvalPop()
-    | Ast.Justification((pos1, pos2), predicateList) ->
+    | Ast.Justification((pos1, pos2), justificationItemAsts) ->
         st.EvalPush("Justification")
         let fv = variableStack.PeekEvalStack()
         let just = new FplJustification((pos1, pos2), fv) 
         variableStack.PushEvalStack(just)
-        predicateList |> List.map (eval st) |> ignore
+        justificationItemAsts |> List.map (eval st) |> ignore
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.ArgumentTuple((pos1, pos2), predicateListAst) ->

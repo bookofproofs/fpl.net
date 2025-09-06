@@ -1441,3 +1441,15 @@ type TestInterpreterErrors() =
         else
             let code = PR007 ("", "") 
             runTestHelper "TestPR007.fpl" fplCode code expected
+
+    [<DataRow("01", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- and (x, impl(x,z)) 2. ModusPonens() |- z };""", 0)>]
+    [<DataRow("01a", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- or (x, z) 2. ModusPonens() |- z };""", 1)>]
+    [<DataRow("01b", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- and (x, impl(y,z)) 2. ModusPonens() |- z };""", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestPR008(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = PR008 ("", "", "") 
+            runTestHelper "TestPR008.fpl" fplCode code expected
