@@ -122,13 +122,6 @@ type TestPredicatesSpecific () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestDisjunctrion5 () =
-        let result = run (disjunction .>> eof) """or(1.,2.)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
     member this.TestImplication1 () =
         let result = run (implication .>> eof) """impl(true,false)"""
         let actual = sprintf "%O" result
@@ -234,13 +227,6 @@ type TestPredicatesSpecific () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestPredicateWithArgs3 () =
-        let result = run (predicateWithQualification .>> eof) """ProceedingResults(1.,2.)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
     member this.TestPredicateWithArgs4 () =
         let result = run (predicateWithQualification .>> eof) """Add(result,list[i])"""
         let actual = sprintf "%O" result
@@ -270,7 +256,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs3a () =
-        let result = run (predicateWithQualification .>> eof) """x[ProceedingResults(1.,2.)]"""
+        let result = run (predicateWithQualification .>> eof) """x[ProceedingResults(x,y)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -533,14 +519,14 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestByDef01 () =
-        let result = run (byDefinition .>> eof) """bydef x"""
+        let result = run (byDefinition .>> eof) """bydef A"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestByDef02 () =
-        let result = run (byDefinition .>> eof) """bydef x[y]"""
+        let result = run (byDefinition .>> eof) """bydef Bdd"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

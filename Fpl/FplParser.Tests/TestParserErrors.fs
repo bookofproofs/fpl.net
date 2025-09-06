@@ -233,10 +233,10 @@ type TestParserErrors() =
         ad.Clear()
         let code = AGI000
         printf "Trying %s" code.Message
-        let input = """def pred T() { 1. |- :: };"""
+        let input = """def pred T() { 1. |- .ddx };"""
         let ast = fplParser input
         let result = filterByErrorCode ad code
-        Assert.IsTrue(result.Length>0)
+        Assert.IsTrue(result.Length=0)
 
     [<TestMethod>]
     member this.TestCAS000() =

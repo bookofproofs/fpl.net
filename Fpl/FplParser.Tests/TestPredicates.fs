@@ -107,7 +107,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate13 () =
-        let result = run (predicate .>> eof) """or(1.,2.)"""
+        let result = run (predicate .>> eof) """or(x.z,y)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -212,7 +212,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate27 () =
-        let result = run (predicate .>> eof) """ProceedingResults(1.,2.)"""
+        let result = run (predicate .>> eof) """ProceedingResults$1(x,y)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -347,13 +347,6 @@ type TestPredicates () =
     [<TestMethod>]
     member this.TestPredicate46 () =
         let result = run (predicate .>> eof) """exn$3 x:Is {not (iif ( iif ( true, iif( true, false)), not true ))}"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate47 () =
-        let result = run (predicate .>> eof) """or(1.,2.)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

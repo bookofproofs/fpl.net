@@ -107,7 +107,6 @@ let extension = positions "Extension" (at >>. extensionString) |>> Ast.Extension
 let IdStartsWithSmallCase = regex @"[a-z]\w*" 
 let idStartsWithCap = (regex @"[A-Z]\w*") <?> "<PascalCaseId>"
 let pascalCaseId = idStartsWithCap |>> Ast.PascalCaseId
-let argumentIdentifier = positions "ArgumentIdentifier" (regex @"\d+\w*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 
 let namespaceIdentifier = positions "NamespaceIdentifier" (sepBy1 pascalCaseId dot) .>> IW |>> Ast.NamespaceIdentifier
 let predicateIdentifier = positions "PredicateIdentifier" (sepBy1 pascalCaseId dot) |>> Ast.PredicateIdentifier 
@@ -346,21 +345,17 @@ let optionalSpecification = opt (choice [bracketedCoords; argumentTuple])
 let predicateWithOptSpecification = positions "PredicateWithOptSpecification" (fplIdentifier .>>. optionalSpecification) |>> Ast.PredicateWithOptSpecification
 let dottedPredicate = positions "DottedPredicate" (dot >>. predicateWithOptSpecification) |>> Ast.DottedPredicate
 let qualificationList = positions "QualificationList" (many dottedPredicate) |>> Ast.QualificationList
-
-predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification 
-
 let dollarDigitList = many1 dollarDigits
 let referencingIdentifier = positions "ReferencingIdentifier" (predicateIdentifier .>>. dollarDigitList) .>> IW |>> Ast.ReferencingIdentifier
 let referenceToProofOrCorollary = positions "ReferenceToProofOrCorollary" (referencingIdentifier .>>. opt argumentTuple) .>> IW |>> Ast.ReferenceToProofOrCorollary
 
-let byDefinition = positions "ByDef" (keywordBydef >>. predicateWithQualification ) |>> Ast.ByDef 
+predicateWithQualificationRef.Value <- predicateWithOptSpecification .>>. qualificationList |>> Ast.PredicateWithQualification 
+
 
 primePredicateRef.Value <- choice [
     keywordTrue
     keywordFalse
     keywordUndefined
-    byDefinition
-    attempt argumentIdentifier
     fplDelegate 
     dollarDigits
     attempt referenceToProofOrCorollary
@@ -368,6 +363,15 @@ primePredicateRef.Value <- choice [
     objectSymbol
 ]
 
+let argumentIdentifier = positions "ArgumentIdentifier" (regex @"\d+\w*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
+let byDefinition = positions "ByDef" (keywordBydef >>. predicateIdentifier ) |>> Ast.ByDef 
+
+let justificationReference = choice [
+    attempt referencingIdentifier
+    byDefinition
+    predicateIdentifier
+    argumentIdentifier
+]
 
 let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParen 
 let conjunction = positions "And" (keywordAnd >>. twoPredicatesInParens)  |>> Ast.And
@@ -526,7 +530,7 @@ let derivedArgument = choice [
 ]
 
 let argumentInference = vDash >>. IW >>. (assumeArgument <|> revokeArgument <|> derivedArgument)
-let justificationItem = positions "JustificationItem" predicate |>> Ast.JustificationItem
+let justificationItem = positions "JustificationItem" justificationReference |>> Ast.JustificationItem
 let justificationItemList = sepBy justificationItem comma
 let justification = positions "Justification" (justificationItemList .>> IW) |>> Ast.Justification
 let justifiedArgument = positions "JustArgInf" (justification .>>. argumentInference) |>> Ast.JustArgInf

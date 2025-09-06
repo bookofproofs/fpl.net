@@ -30,7 +30,7 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestJustification03 () =
-        let result = run (justification .>> eof) """ProceedingResults(1.,2.)"""
+        let result = run (justification .>> eof) """ProceedingResults, 1."""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -58,7 +58,7 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestJustification07 () =
-        let result = run (justification .>> eof) """6., ExistsByExample(and(Greater(a,c), Greater(a,b)))  """
+        let result = run (justification .>> eof) """6., ExistsByExample  """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -72,21 +72,21 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestJustification09 () =
-        let result = run (justification .>> eof) """and(a,b)  """
+        let result = run (justification .>> eof) """1.,2.,  3.  """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustification10 () =
-        let result = run (justification .>> eof) """and(a,b), 2.  """
+        let result = run (justification .>> eof) """BB, 2.  """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestJustification12 () =
-        let result = run (justification .>> eof) """or(1.,2.), 2.  """
+        let result = run (justification .>> eof) """C, 2.  """
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -205,7 +205,7 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestJustifiedArgument03 () =
-        let result = run (justifiedArgument .>> eof) """and(a,b) |- revoke 2."""
+        let result = run (justifiedArgument .>> eof) """bydef A, 1., C |- revoke 2."""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -219,7 +219,7 @@ type TestProofs () =
 
     [<TestMethod>]
     member this.TestArgument02 () =
-        let result = run (justifiedArgument .>> eof) """and(a,b) |- revoke 2."""
+        let result = run (justifiedArgument .>> eof) """B, C |- revoke 2."""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -256,7 +256,7 @@ type TestProofs () =
     member this.TestProof01 () =
         let result = run (proof .>> eof) """proof Example4$1
         {
-            1. GreaterAB() |- Greater(a,b)
+            1. GreaterAB |- Greater(a,b)
             qed
         }"""
         let actual = sprintf "%O" result
@@ -290,7 +290,7 @@ type TestProofs () =
     member this.TestProof04 () =
         let result = run (proof .>> eof) """proof Example4$1
         {
-            1. SomeCorollary$1() |- (a > b)
+            1. SomeCorollary$1 |- (a > b)
             qed
         }"""
         let actual = sprintf "%O" result

@@ -795,7 +795,7 @@ type TestFplValueScopeNameEndPos() =
             Assert.IsTrue(false)
 
     [<DataRow("base1", """100. |- trivial""", 0)>]
-    [<DataRow("base2", """100. ExistsByExample(c), 1. |- false""", 2)>]
+    [<DataRow("base2", """100. ExistsByExample, 1. |- false""", 2)>]
     [<DataRow("base3", """100. T1() |- assume not somePremise """, 1)>]
     [<DataRow("base4", """100. 2., 3., 5. |- iif (a,b)""", 3)>]
     [<DataRow("base5", """100. |- revoke 3.""", 0)>]

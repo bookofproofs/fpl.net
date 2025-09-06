@@ -43,7 +43,7 @@ type TestExpressions () =
 
             def pred T4() 
             {
-                1.
+                1.x
             }
 
             def pred T5() 
@@ -58,12 +58,12 @@ type TestExpressions () =
 
             def pred T7() 
             {
-                bydef Test()
+                true
             } 
 
             def pred T8() 
             {
-                Test$1
+                Test$2$1()
             }
             
             def pred T9() 
