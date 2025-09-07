@@ -3489,6 +3489,7 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplJustificationItem) (can
         | false, :? FplClass
         | false, :? FplFunctionalTerm ->
             ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
+        | true, :? FplAxiom
         | true, :? FplConjecture
         | true, :? FplTheorem
         | true, :? FplCorollary

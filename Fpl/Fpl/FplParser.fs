@@ -364,7 +364,7 @@ primePredicateRef.Value <- choice [
 ]
 
 let argumentIdentifier = positions "ArgumentIdentifier" (regex @"\d+\w*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
-let byDefinition = positions "ByDef" (keywordBydef >>. predicateIdentifier ) |>> Ast.ByDef 
+let byDefinition = positions "ByDef" (keywordBydef >>. choice [attempt referencingIdentifier; predicateIdentifier] ) |>> Ast.ByDef 
 
 let justificationReference = choice [
     attempt referencingIdentifier
