@@ -44,7 +44,7 @@ let emitID000Diagnostics astType =
 
     ad.AddDiagnostic diagnostic
 
-let emitID001diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
+let emitID001Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -58,7 +58,7 @@ let emitID001diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
 
     ad.AddDiagnostic diagnostic
 
-let emitID002diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
+let emitID002Diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -69,10 +69,9 @@ let emitID002diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
             Diagnostic.Code = ID002(nodeTypeName, incorrectBlockType)
             Diagnostic.Alternatives = Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
         }
-
     ad.AddDiagnostic diagnostic
 
-let emitID004diagnostics nodeTypeName listOfCandidates pos1 pos2 =
+let emitID004Diagnostics nodeTypeName listOfCandidates pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -85,7 +84,7 @@ let emitID004diagnostics nodeTypeName listOfCandidates pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitID007diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
+let emitID007Diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -106,7 +105,7 @@ let emitID010Diagnostics identifier pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID010 identifier // identifier not foun
+            Diagnostic.Code = ID010 identifier // identifier not found
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
@@ -137,7 +136,7 @@ let emitID013Diagnostics pos1 pos2 message =
         }
     ad.AddDiagnostic diagnostic
 
-let emitID014diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
+let emitID014Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -189,6 +188,36 @@ let emitID021Diagnostics identifier pos1 =
         }
     ad.AddDiagnostic diagnostic
 
+let emitID022Diagnostics incorrectBlockType isByDef pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID022(incorrectBlockType, isByDef)
+            Diagnostic.Alternatives = 
+                if isByDef then 
+                    Some "Expected a definition (def class, def predicate, def function)." 
+                else
+                    Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitID023Diagnostics multipleCandidates pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID023 multipleCandidates
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitLG002diagnostic nodeTypeName times pos1 pos2 = 
     let diagnostic =
         { 
@@ -202,13 +231,10 @@ let emitLG002diagnostic nodeTypeName times pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
 
-let startsWithAny (prefixes:string list) (input:string) = 
-    prefixes |> List.exists input.StartsWith
-
 let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 = 
     if nodeRepr = literalFalse then
         let code = 
-            if startsWithAny ["a"; "e"; "i"; "o"; "u"] nodeName then
+            if isEnglishAn nodeName then
                 LG003(nodeTypeName, $"an {nodeName}")
             else
                 LG003(nodeTypeName, $"a {nodeName}")
@@ -227,7 +253,7 @@ let emitLG003diagnostic nodeTypeName nodeName nodeRepr pos1 pos2 =
 let emitLG004diagnostic nodeName arity pos1 pos2 = 
     if arity > 0 then
         let code = 
-            if startsWithAny ["a"; "e"; "i"; "o"; "u"] nodeName then
+            if isEnglishAn nodeName then
                 LG004 $"an {nodeName}"
             else
                 LG004 $"a {nodeName}"
@@ -243,7 +269,7 @@ let emitLG004diagnostic nodeName arity pos1 pos2 =
             }
         ad.AddDiagnostic diagnostic
 
-let emitLG005diagnostics name pos1 pos2 =
+let emitLG005Diagnostics name pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -257,7 +283,7 @@ let emitLG005diagnostics name pos1 pos2 =
 
     ad.AddDiagnostic diagnostic
 
-let emitPR003diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
+let emitPR003Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -314,7 +340,7 @@ let emitPR006Diagnostics pos1 pos2 =
 
 let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 = 
         let code = 
-            if startsWithAny ["a"; "e"; "i"; "o"; "u"] nodeName then
+            if isEnglishAn nodeName then
                 PR007 (nodeTypeName, $"an {nodeName}")
             else
                 PR007 (nodeTypeName, $"a {nodeName}")

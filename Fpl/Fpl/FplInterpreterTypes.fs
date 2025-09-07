@@ -626,16 +626,16 @@ type FplValue(positions: Positions, parent: FplValue option) =
                 | "lang" -> // language
                     let oldDiagnosticsStopped = ad.DiagnosticsStopped
                     ad.DiagnosticsStopped <- false
-                    emitID014diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+                    emitID014Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
                     ad.DiagnosticsStopped <- oldDiagnosticsStopped
                 | "arg" -> 
-                    emitPR003diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+                    emitPR003Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
                 | "var" 
                 | "+var" 
                 | "*var" -> // variable
                     ()
                 | _ ->
-                    emitID001diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
+                    emitID001Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
         | _ -> 
             next.Scope.Add(identifier,this)
 
@@ -3100,7 +3100,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             let nameAssignee = assignee.Type(SignatureType.Name)
             let nameAssignedValue = assignedValue.Type(SignatureType.Name)
             if nameAssignee = nameAssignedValue then
-                emitLG005diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
+                emitLG005Diagnostics nameAssignedValue assignedValue.StartPos assignedValue.EndPos
             else
                 this.CheckSIG05Diagnostics assignee assignedValue
                 assignedValue.Run variableStack
@@ -3469,6 +3469,41 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
         | None -> ScopeSearchResult.NotApplicable
     | _ ->
         ScopeSearchResult.NotApplicable
+
+/// Tries to find a theorem-like statement, an axiom or a corollary
+/// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
+let tryFindAssociatedBlockForJustificationItem (fvJi: FplJustificationItem) (candidates:FplValue list) =
+    let nameOfOther (fv:FplValue) =
+        if isEnglishAn fv.Name then 
+            $"'{fv.Type(SignatureType.Name)} which is an {fv.Name}'"
+        else 
+            $"'{fv.Type(SignatureType.Name)} which is a {fv.Name}"
+    
+    match candidates.Length with
+    | 1 ->  // todo - do not accept non-definitions for by def or definitions for non-bydef 
+        let potentialCandidate = candidates.Head
+        match fvJi.ByDefMode, potentialCandidate with
+        | false, :? FplConjecture
+        | false, :? FplProof
+        | false, :? FplPredicate
+        | false, :? FplClass
+        | false, :? FplFunctionalTerm ->
+            ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
+        | true, :? FplConjecture
+        | true, :? FplTheorem
+        | true, :? FplCorollary
+        | true, :? FplProposition
+        | true, :? FplLemma
+        | true, :? FplProof ->
+            ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
+        | _ ->
+            ScopeSearchResult.FoundAssociate potentialCandidate    
+    | 0 -> ScopeSearchResult.NotFound
+    | _ -> ScopeSearchResult.FoundMultiple(
+                candidates
+                |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
+                |> String.concat ", "
+            )
 
 type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
     let _parsedAsts = parsedAsts

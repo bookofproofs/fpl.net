@@ -122,6 +122,8 @@ type DiagnosticCode =
     | ID019 of string 
     | ID020 of string 
     | ID021 of string 
+    | ID022 of string * bool
+    | ID023 of string 
     // logic-related error codes
     | LG000 of string * string 
     | LG001 of string * string * string
@@ -214,6 +216,8 @@ type DiagnosticCode =
             | ID019 _ -> "ID019"
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
+            | ID022 _ -> "ID022"
+            | ID023 _ -> "ID023"
             // logic-related error codes
             | LG000 _ -> "LG000"
             | LG001 _ -> "LG001"
@@ -295,7 +299,7 @@ type DiagnosticCode =
             | ID008 (name, expectedName)  -> sprintf "Misspelled constructor name `%s`, expecting `%s`." name expectedName
             | ID009 name -> sprintf "Circular base type dependency involving `%s`." name
             | ID010 name -> sprintf "The type `%s` could not be found. Are you missing a uses clause?" name
-            | ID011 (name, inheritanceChain) -> sprintf "Inheritance from `%s` can be dropped because of the inheritance chain %s." name inheritanceChain
+            | ID011 (name, inheritanceChain) -> $"Inheritance from `{name}` can be dropped because of the inheritance chain {inheritanceChain}."  
             | ID012 (name, candidates) -> 
                 if candidates.Length > 0 then 
                     sprintf "Base class `%s` not found, candidates are %s." name candidates
@@ -314,6 +318,12 @@ type DiagnosticCode =
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> sprintf "Missing call of base constructor `%s`." name
             | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
+            | ID022 (incorrectBlockType, isByDef) -> 
+                if isByDef then 
+                    $"Cannot find a justifying `by definition`, found only {incorrectBlockType}." 
+                else
+                    $"Cannot find a justifying theorem-like statement, found only {incorrectBlockType}." 
+            | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
             | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
@@ -893,3 +903,10 @@ let stringMatches (input: string) (pattern: string) =
                 list.Add(m.Index)
     list.Add(input.Length)
     list
+
+/// A helper function for checking if a string starts with any of some string prefixes.
+let startsWithAny (prefixes:string list) (input:string) = 
+    prefixes |> List.exists input.StartsWith
+
+/// A helper function for checking if a string requires the "an" indefinite article in English.
+let isEnglishAn somString = startsWithAny ["a"; "e"; "i"; "o"; "u"] somString 

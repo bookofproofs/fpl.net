@@ -846,6 +846,36 @@ type TestInterpreterErrors() =
             let code = ID012 ("","")
             runTestHelper "TestID012.fpl" fplCode code expected
 
+
+    [<DataRow("00", "def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
+    [<DataRow("01", "def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
+    [<DataRow("02", "def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
+    [<DataRow("03", "def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undefined.")>]
+    [<DataRow("04", """def pred Equal infix "=" 50 (x,y: tpl) {del.Equal(x,y)};""", 0, "missing error message")>]
+    [<DataRow("05", "def pred T(x,y:pred) {del.Equal(true,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undetermined.")>]
+    [<DataRow("06", "ax T() {all x,y:obj {del.Equal(x,y)}};", 0, "missing error message")>]
+    [<DataRow("06a", "def cl Nat: obj {intr} ax T() {all x,y:Nat {del.Equal(x,y)}};", 0, "missing error message")>]
+    [<DataRow("06b", "ax T() {all x,y:Bla {del.Equal(x,y)}};", 0, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
+    [<DataRow("07", "ax T() {exn$1 x:obj {del.Equal(x,@1)}};", 0, "missing error message")>]
+    [<DataRow("07a", "def cl Nat: obj {intr} ax T() {exn$1 x:Nat {del.Equal(x,@1)}};", 0, "missing error message")>]
+    [<DataRow("07b", "ax T() {exn$1 x:obj {del.Equal(x,$1)}};", 0, "missing error message")>]
+    [<DataRow("07b_", "def cl Nat: obj {intr} ax T() {exn$1 x:Nat {del.Equal(x,$1)}};", 0, "missing error message")>]
+    [<DataRow("08", """ax T() {all n:obj {exn$1 y:obj {del.Equal(y,n)}}};""", 0, "missing error message")>]
+    [<DataRow("08a", """def cl Nat: obj {intr} ax T() {all n:Nat {exn$1 y:Nat {del.Equal(y,n)}}};""", 0, "missing error message")>]
+    [<DataRow("09", """def func Add()->obj {intr} prop AddIsSomething(op:Add) {dec ~anotherAdd: Add; all n,m:obj { (add(n,m) = anotherAdd(n,m) )} };""", 0, "missing error message")>]
+    [<DataRow("10", """def func Add()->obj {intr} prop AddIsSomething() {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,m) = n) } };""", 0, "missing error message")>]
+    [<DataRow("11", """def func Add()->obj {intr} prop AddIsSomething() {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,@0) = n) } };""", 0, "missing error message")>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0, "missing error message")>]
+    [<TestMethod>]
+    member this.TestID013(no:string, fplCode:string, expected, expectedErrMsg:string) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID013 ""
+            let errMsg = runTestHelperWithText "TestID013.fpl" fplCode code expected
+            Assert.AreEqual<string>(expectedErrMsg, errMsg)
+
+
     [<DataRow("def pred A() {true} def pred A(x:obj) {true} def pred T(x:A) {intr};", 1)>]
     [<DataRow("def pred A() {true} def func A(x:obj)->obj {intr} def pred T(x:A) {intr};", 1)>]
     [<DataRow("def pred A() {true} def func A()->obj {intr} def pred T(x:A) {intr};", 1)>]
@@ -928,33 +958,25 @@ type TestInterpreterErrors() =
             let code = ID021 ""
             runTestHelper "TestID021.fpl" fplCode code expected
 
-    [<DataRow("00", "def pred T() {del.Test()};", 1, "Unknown delegate `Test`")>]
-    [<DataRow("01", "def pred T() {del.Test1(x,y)};", 1, "Unknown delegate `Test1`")>]
-    [<DataRow("02", "def pred T() {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
-    [<DataRow("03", "def pred T(x:pred) {del.Equal(x,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undefined.")>]
-    [<DataRow("04", """def pred Equal infix "=" 50 (x,y: tpl) {del.Equal(x,y)};""", 0, "missing error message")>]
-    [<DataRow("05", "def pred T(x,y:pred) {del.Equal(true,y)};", 1, "Predicate `=` cannot be evaluated because the right argument is undetermined.")>]
-    [<DataRow("06", "ax T() {all x,y:obj {del.Equal(x,y)}};", 0, "missing error message")>]
-    [<DataRow("06a", "def cl Nat: obj {intr} ax T() {all x,y:Nat {del.Equal(x,y)}};", 0, "missing error message")>]
-    [<DataRow("06b", "ax T() {all x,y:Bla {del.Equal(x,y)}};", 0, "Predicate `=` cannot be evaluated because the left argument is undefined.")>]
-    [<DataRow("07", "ax T() {exn$1 x:obj {del.Equal(x,@1)}};", 0, "missing error message")>]
-    [<DataRow("07a", "def cl Nat: obj {intr} ax T() {exn$1 x:Nat {del.Equal(x,@1)}};", 0, "missing error message")>]
-    [<DataRow("07b", "ax T() {exn$1 x:obj {del.Equal(x,$1)}};", 0, "missing error message")>]
-    [<DataRow("07b_", "def cl Nat: obj {intr} ax T() {exn$1 x:Nat {del.Equal(x,$1)}};", 0, "missing error message")>]
-    [<DataRow("08", """ax T() {all n:obj {exn$1 y:obj {del.Equal(y,n)}}};""", 0, "missing error message")>]
-    [<DataRow("08a", """def cl Nat: obj {intr} ax T() {all n:Nat {exn$1 y:Nat {del.Equal(y,n)}}};""", 0, "missing error message")>]
-    [<DataRow("09", """def func Add()->obj {intr} prop AddIsSomething(op:Add) {dec ~anotherAdd: Add; all n,m:obj { (add(n,m) = anotherAdd(n,m) )} };""", 0, "missing error message")>]
-    [<DataRow("10", """def func Add()->obj {intr} prop AddIsSomething() {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,m) = n) } };""", 0, "missing error message")>]
-    [<DataRow("11", """def func Add()->obj {intr} prop AddIsSomething() {dec ~anotherAdd: Add; all n,m:obj { (anotherAdd(n,@0) = n) } };""", 0, "missing error message")>]
-    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0, "missing error message")>]
+
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", true, 0)>]
+    [<DataRow("99a", "uses Fpl.Commons.Structures ;", false, 0)>]
     [<TestMethod>]
-    member this.TestID013(no:string, fplCode:string, expected, expectedErrMsg:string) =
+    member this.TestID022(no:string, fplCode:string, isByDef, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = ID013 ""
-            let errMsg = runTestHelperWithText "TestID013.fpl" fplCode code expected
-            Assert.AreEqual<string>(expectedErrMsg, errMsg)
+            let code = ID022 ("", isByDef)
+            runTestHelper "TestID022.fpl" fplCode code expected
+
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
+    [<TestMethod>]
+    member this.TestID023(no:string, fplCode:string, expected) =
+        if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
+            ()
+        else
+            let code = ID023 ""
+            runTestHelper "TestID023.fpl" fplCode code expected
 
     [<DataRow("""def pred Or infix "or" 0 (x:+ pred) {true};""", 0)>]
     [<DataRow("""def pred Or infix "or" 0 (x:* pred) {true};""", 0)>]

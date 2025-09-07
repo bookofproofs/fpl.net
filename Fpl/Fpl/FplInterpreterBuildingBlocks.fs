@@ -710,13 +710,6 @@ let rec eval (st: SymbolTable) ast =
             checkID012Diagnostics st fv identifier pos1 pos2
         | :? FplJustificationItem as fvJi -> 
             fvJi.FplId <- identifier
-            let candidates = findCandidatesByName st identifier fvJi.ByDefMode
-            match candidates.Length with
-            | 1 ->  // todo - do not accept non-definitions for by def or definitions for non-bydef 
-                fvJi.Scope.TryAdd(fvJi.FplId, candidates.Head) |> ignore
-            | 0 -> emitID010Diagnostics identifier pos1 pos2
-            | _ -> () // to do to many candidates
-
         | _ -> ()
         if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
             let candidates = findCandidatesByName st identifier false
@@ -864,9 +857,20 @@ let rec eval (st: SymbolTable) ast =
     | Ast.JustificationItem((pos1, pos2), predicateAst) ->
         st.EvalPush("JustificationItem")
         let fv = variableStack.PeekEvalStack()
-        let fvNew = new FplJustificationItem((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder)
-        variableStack.PushEvalStack(fvNew)
+        let fvJi = new FplJustificationItem((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder)
+        variableStack.PushEvalStack(fvJi)
         eval st predicateAst 
+        let candidates = findCandidatesByName st fvJi.FplId fvJi.ByDefMode
+        match tryFindAssociatedBlockForJustificationItem fvJi candidates with
+        | ScopeSearchResult.FoundAssociate potentialCandidate -> 
+            fvJi.Scope.TryAdd(fvJi.FplId, potentialCandidate) |> ignore
+        | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
+            emitID022Diagnostics otherBlock fvJi.ByDefMode fvJi.StartPos fvJi.EndPos
+        | ScopeSearchResult.NotFound ->
+            emitID010Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos
+        | ScopeSearchResult.FoundMultiple listOfKandidates ->
+            emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos
+        | _ -> ()
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Justification((pos1, pos2), justificationItemAsts) ->
@@ -1686,7 +1690,7 @@ let rec eval (st: SymbolTable) ast =
         | ScopeSearchResult.NotFound ->
             emitID006diagnostics fv  
         | ScopeSearchResult.FoundMultiple listOfKandidates ->
-            emitID007diagnostics fv.StartPos fv.EndPos (fv.Type(SignatureType.Type)) listOfKandidates  
+            emitID007Diagnostics fv.StartPos fv.EndPos (fv.Type(SignatureType.Type)) listOfKandidates  
         | _ -> ()
         evalCommonStepsVarDeclPredicate optVarDeclOrSpecList predicateAst
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the corollary.
@@ -1845,11 +1849,11 @@ let rec eval (st: SymbolTable) ast =
             // everything is ok, change the parent of the provable from theory to the found parent 
             fv.Parent <- Some potentialParent
         | ScopeSearchResult.FoundIncorrectBlock block ->
-            emitID002diagnostics (fv.Type(SignatureType.Type)) block fv.StartPos fv.EndPos
+            emitID002Diagnostics (fv.Type(SignatureType.Type)) block fv.StartPos fv.EndPos
         | ScopeSearchResult.NotFound ->
             emitID003diagnostics fv  
         | ScopeSearchResult.FoundMultiple listOfKandidates ->
-            emitID004diagnostics (fv.Type(SignatureType.Type)) listOfKandidates fv.StartPos fv.EndPos
+            emitID004Diagnostics (fv.Type(SignatureType.Type)) listOfKandidates fv.StartPos fv.EndPos
         | _ -> ()
         proofArgumentListAst |> List.map (eval st) |> ignore
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the proof.
