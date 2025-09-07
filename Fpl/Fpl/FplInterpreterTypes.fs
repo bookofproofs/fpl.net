@@ -1770,7 +1770,6 @@ type FplReference(positions: Positions, parent: FplValue) =
                     sprintf "%s()" head
             | (_, _, None) ->
                 if this.HasBrackets then sprintf "%s[%s]" head args
-                elif head = "bydef." then sprintf "%s%s" head args
                 else sprintf "%s(%s)" head args
 
 
@@ -1813,7 +1812,6 @@ type FplReference(positions: Positions, parent: FplValue) =
                         sprintf "%s()" literalUndef
                 | (_, _, None) ->
                     if this.HasBrackets then sprintf "%s[%s]" literalUndef args
-                    elif this.FplId = $"{literalByDef}." then sprintf "%s %s" literalByDef args
                     else sprintf "%s(%s)" literalUndef args
         else
             let subRepr = 
@@ -1850,13 +1848,11 @@ type FplReference(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable nextOpt = 
         match nextOpt with 
-        | Some next when next.Name = "justification" -> 
-            this.TryAddToParentsScope()
         | Some next when next.Name = "localization" -> 
             next.FplId <- this.FplId
             next.TypeId <- this.TypeId
             next.EndPos <- this.EndPos
-        | Some next when next.IsBlock() || next.Name = "argument" ->
+        | Some next when next.IsBlock() ->
             this.TryAddToParentsArgList() 
         | Some next when next.Scope.ContainsKey(".") -> 
             next.EndPos <- this.EndPos

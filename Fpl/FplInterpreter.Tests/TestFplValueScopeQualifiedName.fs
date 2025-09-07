@@ -559,7 +559,7 @@ type TestFplValueScopeQualifiedName() =
             | "base1" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
             | "base2" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
             | "base3" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
-            | "base4" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
+            | "base4" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().-(1)", qualifiedName base1)
             | "base5" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().Test()", qualifiedName base1)
             | "base6" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
             | "base7" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().Test$1(x)", qualifiedName base1)

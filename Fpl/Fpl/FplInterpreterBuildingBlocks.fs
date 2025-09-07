@@ -850,11 +850,11 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.JustificationItem((pos1, pos2), predicateAst) ->
         st.EvalPush("JustificationItem")
-        //todo let fv = variableStack.PeekEvalStack()
-        //let fvNew = new FplJustificationItem((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder)
-        //variableStack.PushEvalStack(fvNew)
+        let fv = variableStack.PeekEvalStack()
+        let fvNew = new FplJustificationItem((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder)
+        variableStack.PushEvalStack(fvNew)
         eval st predicateAst 
-        //variableStack.PopEvalStack()
+        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Justification((pos1, pos2), justificationItemAsts) ->
         st.EvalPush("Justification")
