@@ -1433,6 +1433,7 @@ type TestInterpreterErrors() =
     [<DataRow("03a", """lemma T() { true };""", 1)>]
     [<DataRow("04", """corollary T$1() { true } proof T$1$1 {1. |- trivial};""", 0)>]
     [<DataRow("04a", """corollary T$1() { true };""", 1)>]
+    [<DataRow("04b", """corollary T$1() { true } proof T$1$1 {1. bydef A |- trivial};""", 0)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR007(no:string, fplCode:string, expected) =

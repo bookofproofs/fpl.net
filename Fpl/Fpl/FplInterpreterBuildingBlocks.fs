@@ -595,8 +595,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ByDef((pos1, pos2), predicateWithQualificationAst) ->
         st.EvalPush("ByDef")
         let fv = variableStack.PeekEvalStack()
-        fv.FplId <- "bydef."
-        fv.TypeId <- "bydef."
+        let fvJi = fv :?> FplJustificationItem
+        fvJi.ByDefMode <- true
         eval st predicateWithQualificationAst
         emitPR001Diagnostics fv pos1 pos2
         st.EvalPop()

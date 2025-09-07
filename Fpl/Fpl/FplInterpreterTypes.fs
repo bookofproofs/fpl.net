@@ -1449,6 +1449,7 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
 type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
     inherit FplValue(positions, Some parent)
     let _runOrder = runOrder
+    let mutable _byDefMode = false
 
     override this.Name = "justification item"
     override this.ShortName = "just"
@@ -1472,6 +1473,12 @@ type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
     override this.RunOrder = Some _runOrder
+
+    /// Sets or gets the bydef mode of this justification item.
+    member this.ByDefMode 
+        with get () = _byDefMode
+        and set (v) = _byDefMode <- v
+
 
 type FplJustification(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
