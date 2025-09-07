@@ -185,21 +185,6 @@ let emitID006diagnostics (fplValue: FplValue) =
 
     ad.AddDiagnostic diagnostic
 
-let emitID004diagnostics (fplValue: FplValue) listOfCandidates =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = fplValue.StartPos
-            Diagnostic.EndPos = fplValue.EndPos
-            Diagnostic.Code = ID004(fplValue.Type(SignatureType.Type), listOfCandidates)
-            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
-        }
-    ad.AddDiagnostic diagnostic
-
-
-
 let checkVAR00Diagnostics numberOfVariadicVars startPos endPos =
     if numberOfVariadicVars > 1 then
         let diagnostic =
@@ -298,17 +283,7 @@ let checkID009_ID010_ID011_Diagnostics (st: SymbolTable) (fplValue: FplValue) na
                     else
                         None
                 | _ ->
-                    let diagnostic =
-                        { 
-                            Diagnostic.Uri = ad.CurrentUri
-                            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                            Diagnostic.Severity = DiagnosticSeverity.Error
-                            Diagnostic.StartPos = pos1
-                            Diagnostic.EndPos = pos2
-                            Diagnostic.Code = ID010 name // class not found
-                            Diagnostic.Alternatives = None 
-                        }
-                    ad.AddDiagnostic diagnostic
+                    emitID010Diagnostics name pos1 pos2
                     None
 
     elif rightContext.EndsWith("InheritedClassType.ObjectType") then
@@ -379,17 +354,8 @@ let checkID012Diagnostics (st: SymbolTable) (parentConstructorCall: FplValue) id
             |> String.concat ", "
 
         if not foundInheritanceClass then
-            let diagnostic =
-                { 
-                    Diagnostic.Uri = ad.CurrentUri
-                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                    Diagnostic.Severity = DiagnosticSeverity.Error
-                    Diagnostic.StartPos = pos1
-                    Diagnostic.EndPos = pos2
-                    Diagnostic.Code = ID012(identifier, candidates) // call of parent class does not match the class id
-                    Diagnostic.Alternatives = None 
-                }
-            ad.AddDiagnostic diagnostic
+            emitID012Diagnostics identifier candidates pos1 pos2
+           
 
 let checkID018Diagnostics (st: SymbolTable) (fv:FplValue) (identifier:string) pos1 pos2 =
     let matchReprId (fv1:FplValue) (identifier:string) = 
@@ -465,24 +431,6 @@ let checkID019Diagnostics (st: SymbolTable) (name:string) pos1 pos2 =
                 }
             ad.AddDiagnostic diagnostic
         | _ -> ()
-
-let emitID017Diagnostics name (candidates:FplValue list) pos1 pos2 =
-    let candidatesName =
-        candidates
-        |> Seq.map (fun fv -> qualifiedName fv)
-        |> String.concat ", "
-
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID017(name, candidatesName) 
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
 
 let emitSIG00Diagnostics (fplValue: FplValue) pos1 pos2 =
     let detailed (exprType: FixType) expectedArity actualArity pos1 pos2 =

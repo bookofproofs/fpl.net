@@ -708,6 +708,15 @@ let rec eval (st: SymbolTable) ast =
             fv.FplId <- fv.FplId + identifier
             fv.TypeId <- fv.TypeId + identifier
             checkID012Diagnostics st fv identifier pos1 pos2
+        | :? FplJustificationItem as fvJi -> 
+            fvJi.FplId <- identifier
+            let candidates = findCandidatesByName st identifier fvJi.ByDefMode
+            match candidates.Length with
+            | 1 ->  // todo - do not accept non-definitions for by def or definitions for non-bydef 
+                fvJi.Scope.TryAdd(fvJi.FplId, candidates.Head) |> ignore
+            | 0 -> emitID010Diagnostics identifier pos1 pos2
+            | _ -> () // to do to many candidates
+
         | _ -> ()
         if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
             let candidates = findCandidatesByName st identifier false
@@ -720,7 +729,11 @@ let rec eval (st: SymbolTable) ast =
             | (:? FplVariable, 1) -> 
                 fv.Scope.TryAdd(fv.FplId, candidates.Head) |> ignore
             | (:? FplVariable, _) -> 
-                emitID017Diagnostics identifier candidates pos1 pos2
+                let candidatesNames =
+                    candidates
+                    |> Seq.map (fun fv -> qualifiedName fv)
+                    |> String.concat ", "
+                emitID017Diagnostics identifier candidatesNames pos1 pos2
             | _ -> 
                 match checkSIG04Diagnostics fv candidates with
                 | Some candidate -> 
@@ -1836,7 +1849,7 @@ let rec eval (st: SymbolTable) ast =
         | ScopeSearchResult.NotFound ->
             emitID003diagnostics fv  
         | ScopeSearchResult.FoundMultiple listOfKandidates ->
-            emitID004diagnostics fv listOfKandidates  
+            emitID004diagnostics (fv.Type(SignatureType.Type)) listOfKandidates fv.StartPos fv.EndPos
         | _ -> ()
         proofArgumentListAst |> List.map (eval st) |> ignore
         // now, we are ready to emit VAR03 diagnostics for all variables declared in the signature of the proof.

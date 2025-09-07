@@ -72,6 +72,19 @@ let emitID002diagnostics nodeTypeName incorrectBlockType pos1 pos2 =
 
     ad.AddDiagnostic diagnostic
 
+let emitID004diagnostics nodeTypeName listOfCandidates pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID004(nodeTypeName, listOfCandidates)
+            Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitID007diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
     let diagnostic =
         { 
@@ -82,6 +95,32 @@ let emitID007diagnostics pos1 pos2 fplValueTypeStr listOfCandidates =
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID007(fplValueTypeStr, listOfCandidates)
             Diagnostic.Alternatives = Some "Disambiguate the candidates by naming them differently." 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitID010Diagnostics identifier pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID010 identifier // identifier not foun
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitID012Diagnostics identifier candidates pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID012(identifier, candidates) // call of parent class does not match the class id
+            Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
 
@@ -107,6 +146,19 @@ let emitID014diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr po
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID014(alreadyDeclaredMixedStr, qualifiedStartPosConflictStr)
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitID017Diagnostics name candidatesNames pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = ID017(name, candidatesNames) 
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic
