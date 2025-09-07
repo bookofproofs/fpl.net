@@ -417,6 +417,7 @@ type TestInterpreterErrors() =
     [<DataRow("""proof T$1 { 1. |- trivial qed};""", 0)>]
     [<DataRow("""proof T$1 { 1. 2., 3. |- trivial qed};""", 2)>]
     [<DataRow("""proof T$1 { 1. |- trivial 2. 1. |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 2. 1., 1a. |- trivial qed};""", 1)>]
     [<DataRow("""proof T$1 { 1. 1., 1., 1. |- trivial qed};""", 3)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]

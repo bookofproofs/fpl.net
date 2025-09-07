@@ -387,6 +387,10 @@ let rec eval (st: SymbolTable) ast =
             let proof = arg.Parent.Value
             if not (proof.Scope.ContainsKey(s)) then 
                 emitPR005Diagnostics fv.StartPos fv.EndPos (fv.Type(SignatureType.Mixed))
+            else
+                let referencedArgument = proof.Scope[s]
+
+                fv.ArgList.Add(referencedArgument) 
         | :? FplArgument -> ()
         | _ -> 
             emitPR000Diagnostics fv 

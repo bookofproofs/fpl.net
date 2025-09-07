@@ -1479,6 +1479,33 @@ type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
         with get () = _byDefMode
         and set (v) = _byDefMode <- v
 
+    member this.ParentJustification = this.Parent.Value
+
+    /// Returns Some FPL node that is referenced by this JustificationItem (if it could be found) or None
+    member this.ReferencedJustification = 
+        if this.Scope.Count > 0 then 
+            Some (this.Scope.Values |> Seq.head)
+        else
+            None
+
+    /// Returns a) Some expression inferred by the proceeding JustificationItem in the same proof argument.
+    /// b) If there is no proceeding JustificationItem in the same proof argument, but there is a proceeding argument proof,
+    ///    the function will return Some expression parsed from that proceeding proof argument. 
+    ///    Note that this parsed expression might differ from the InferredExpression of the proceeding proof arguments last JustificationItem.
+    /// c) If there is no proceeding JustificationItem and even no proceeding proof argument, the function will return None.
+    member this.PreviousExpression = 
+        if this.ArgList.Count > 0 then 
+            Some this.ArgList[0]
+        else
+            None
+
+    /// Returns Some expression that could be inferred by this JustificationItem based on its PreviousExpression and its ReferencedJustification.
+    /// None will be returned if Such an InferredExpression could not be inferred
+    member this.InferredExpression = 
+        if this.ArgList.Count > 1 then 
+            Some this.ArgList[1]
+        else
+            None
 
 type FplJustification(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
@@ -1498,6 +1525,11 @@ type FplJustification(positions: Positions, parent: FplValue) =
     override this.Run variableStack = 
         // todo implement run
         ()
+
+    member this.GetOrderedJustificationItems =
+        this.Scope.Values
+            |> Seq.sortBy (fun fv -> fv.RunOrder)
+            |> Seq.toList
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
@@ -1538,15 +1570,30 @@ type FplArgument(positions: Positions, parent: FplValue, runOrder) =
         let head = getFplHead this signatureType
         head
 
+    member this.Justification = 
+        if this.ArgList.Count>0 then 
+            let justification = this.ArgList[0]
+            Some (justification :?> FplJustification)
+        else
+            None
+
+    member this.ArgumentInference = 
+        if this.ArgList.Count>1 then 
+            let argInference = this.ArgList[1]
+            Some (argInference :?> FplArgInference)
+        else
+            None
+
     override this.Run variableStack = 
         // the argument has two elements, the justification and an argument inference
-        let justification = this.ArgList[0]
-        let argumentInference = this.ArgList[1]
+        let justificationOpt = this.Justification
+        let argInferenceOpt = this.ArgumentInference
 
-        let orderdListJustifications =
-            justification.Scope.Values
-            |> Seq.sortBy (fun fv -> fv.RunOrder)
-            |> Seq.toList
+        match justificationOpt, argInferenceOpt with
+        | Some justification, Some argInference -> 
+            let orderdListJustifications = justification.GetOrderedJustificationItems
+            ()
+        | _ -> ()
         (* todo: Enhance variableStack by the context in which this argument is being evaluated
             Here are some preliminary considerations: 
             1) The context should include 
@@ -1563,7 +1610,6 @@ type FplArgument(positions: Positions, parent: FplValue, runOrder) =
                 c) whether or not the justification is a rule of inference
                 d) whether or not the justification is a by definition
         *)
-        ()
 
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
