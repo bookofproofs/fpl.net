@@ -792,6 +792,12 @@ type TestInterpreterErrors() =
     [<DataRow("def cl Set:obj {intr} def cl Test:SetTypo {intr};", 1)>]
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:Set; true};", 0)>]
     [<DataRow("def cl Set:obj {intr} def pred Test() {dec ~x:object; is(x,Set)};", 0)>]
+
+    [<DataRow("def cl A:obj {intr} thm T() {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("def cl A:obj {intr} thm T() {true} proof T$1 {1. bydef B |- trivial };", 1)>]
+    [<DataRow("thm A() {true} thm T() {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("thm B() {true} thm T() {true} proof T$1 {1. A |- trivial };", 1)>]
+
     // the following examples should not emit ID010 because this context is covered by the SIG04 diagnostics
     [<DataRow("def pred Test(x:Set) {intr};", 0)>]
     [<DataRow("def class Set: obj {intr} def pred IsEmpty(x: Set) {true};", 0)>]
@@ -989,6 +995,12 @@ type TestInterpreterErrors() =
             let code = ID022 ("", isByDef)
             runTestHelper "TestID022.fpl" fplCode code expected
 
+    [<DataRow("00a", "def cl A:obj {intr} thm T() {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("00b", "def cl A:obj {intr} def cl B:A {intr} thm T() {true} proof T$1 {1. bydef A |- trivial };", 0)>]
+    [<DataRow("01a", "lem A() {true} thm T() {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("01b", "lem A() {true} def pred A(x:obj) {intr} thm T() {true} proof T$1 {1. bydef A |- trivial };", 1)>]
+    [<DataRow("02a", "cor A$1() {true} thm T() {true} proof T$1 {1. A$1 |- trivial };", 0)>]
+    [<DataRow("02b", "proof A$1 {1. |-  trivial} cor A$1() {true} thm T() {true} proof T$1 {1. A$1 |- trivial };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestID023(no:string, fplCode:string, expected) =
