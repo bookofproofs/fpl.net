@@ -542,43 +542,43 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplAssertion" ->
             let x = new FplAssertion(positions, parent)
-            Assert.AreEqual<string>(literalAss, x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplAssignment" ->
             let x = new FplAssignment(positions, parent)
-            Assert.AreEqual<string>("stmt", x.FplId)
+            Assert.AreEqual<string>("assign (ln 0)", x.FplId)
         | "FplAxiom" ->
             let x = new FplAxiom(positions, parent, 0)
-            Assert.AreEqual<string>(literalAx, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplCases" ->
             let x = new FplCases(positions, parent)
-            Assert.AreEqual<string>("stmt", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplClass" ->
             let x = new FplClass(positions, parent)
-            Assert.AreEqual<string>("def cl", x.FplId)
+            Assert.AreEqual<string>(literalObj, x.FplId)
         | "FplConditionResult" ->
             let x = new FplConditionResult(positions, parent)
-            Assert.AreEqual<string>("stmt", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplConjecture" ->
             let x = new FplConjecture(positions, parent, 0)
-            Assert.AreEqual<string>(literalConj, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplConjunction" ->
             let x = new FplConjunction(positions, parent)
             Assert.AreEqual<string>("and", x.FplId)        
         | "FplConstructor" ->
             let x = new FplConstructor(positions, parent)
-            Assert.AreEqual<string>(literalCtor, x.FplId)
+            Assert.AreEqual<string>(literalObj, x.FplId)
         | "FplCorollary" ->
             let x = new FplCorollary(positions, parent, 0)
-            Assert.AreEqual<string>(literalCor, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplDecrement" ->
             let x = new FplDecrement(positions, parent)
-            Assert.AreEqual<string>("decr", x.FplId)        
+            Assert.AreEqual<string>("del.", x.FplId)        
         | "FplDisjunction" ->
             let x = new FplDisjunction(positions, parent)
             Assert.AreEqual<string>(literalOr, x.FplId)        
         | "FplEquality" ->
             let x = new FplEquality(positions, parent)
-            Assert.AreEqual<string>("=", x.FplId)        
+            Assert.AreEqual<string>("del.", x.FplId)        
         | "FplEquivalence" ->
             let x = new FplEquivalence(positions, parent)
             Assert.AreEqual<string>("iif", x.FplId)        
@@ -587,19 +587,19 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalXor, x.FplId)        
         | "FplExtension" ->
             let x = new FplExtension(positions, parent)
-            Assert.AreEqual<string>("def ext", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplExtensionObj" ->
             let x = new FplExtensionObj(positions, parent)
-            Assert.AreEqual<string>(literalObj, x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplFunctionalTerm" ->
             let x = new FplFunctionalTerm(positions, parent, 0)
-            Assert.AreEqual<string>("def func", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplImplication" ->
             let x = new FplImplication(positions, parent)
             Assert.AreEqual<string>(literalImpl, x.FplId)        
         | "FplInstance" ->
             let x = new FplInstance(positions, parent)
-            Assert.AreEqual<string>("inst", x.FplId)
+            Assert.AreEqual<string>(literalObj, x.FplId)
         | "FplIntrinsicFunc" ->
             let x = new FplIntrinsicFunc(positions, parent)
             Assert.AreEqual<string>(literalFunc, x.FplId)
@@ -611,7 +611,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalObj, x.FplId)
         | "FplIntrinsicPred" ->
             let x = new FplIntrinsicPred(positions, parent)
-            Assert.AreEqual<string>(literalPred, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplIntrinsicTpl" ->
             let x = new FplIntrinsicTpl(positions, parent)
             Assert.AreEqual<string>(literalTpl, x.FplId)
@@ -623,87 +623,87 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalIs, x.FplId)        
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
-            Assert.AreEqual<string>("just", x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplJustificationItem" ->
             let x = new FplJustificationItem(positions, parent, 0)
-            Assert.AreEqual<string>("just", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
-            Assert.AreEqual<string>("lang", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplLemma" ->
             let x = new FplLemma(positions, parent, 0)
-            Assert.AreEqual<string>(literalLem, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplLocalization" ->
             let x = new FplLocalization(positions, parent)
-            Assert.AreEqual<string>(literalLoc, x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplMandatoryFunctionalTerm" ->
             let x = new FplMandatoryFunctionalTerm(positions, parent)
-            Assert.AreEqual<string>("mfunc", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplMandatoryPredicate" ->
             let x = new FplMandatoryPredicate(positions, parent)
-            Assert.AreEqual<string>("mpred", x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplMapCases" ->
             let x = new FplMapCases(positions, parent)
-            Assert.AreEqual<string>("stmt", x.FplId)        
+            Assert.AreEqual<string>("", x.FplId)        
         | "FplMapping" ->
             let x = new FplMapping(positions, parent)
-            Assert.AreEqual<string>("map", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplNegation" ->
             let x = new FplNegation(positions, parent)
             Assert.AreEqual<string>(literalNot, x.FplId)
         | "FplOptionalFunctionalTerm" ->
             let x = new FplOptionalFunctionalTerm(positions, parent)
-            Assert.AreEqual<string>("ofunc", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplOptionalPredicate" ->
             let x = new FplOptionalPredicate(positions, parent)
-            Assert.AreEqual<string>("opred", x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplPredicate" ->
             let x = new FplPredicate(positions, parent, 0)
-            Assert.AreEqual<string>("def pred", x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplProof" ->
             let x = new FplProof(positions, parent, 0)
-            Assert.AreEqual<string>(literalPrf, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
-            Assert.AreEqual<string>(literalProp, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplQuantor" ->
             let x = new FplQuantor(positions, parent)
-            Assert.AreEqual<string>("qtr", x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplReference" ->
             let x = new FplReference(positions, parent)
-            Assert.AreEqual<string>("ref", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplReturn" ->
             let x = new FplReturn(positions, parent)
-            Assert.AreEqual<string>("stmt", x.FplId)
+            Assert.AreEqual<string>(literalRet, x.FplId)
         | "FplRoot" ->
             let x = new FplRoot()
-            Assert.AreEqual<string>("root", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplRuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent)
-            Assert.AreEqual<string>(literalInf, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplStmt" ->
             let x = new FplStmt(positions, parent)
-            Assert.AreEqual<string>("stmt", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplTheorem" ->
             let x = new FplTheorem(positions, parent, 0)
-            Assert.AreEqual<string>(literalThm, x.FplId)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplTheory" ->
             let x = new FplTheory(positions, parent, "", 0)
-            Assert.AreEqual<string>("th", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplTranslation" ->
             let x = new FplTranslation(positions, parent)
-            Assert.AreEqual<string>("trsl", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplVariable" ->
             let x = new FplVariable(positions, parent)
-            Assert.AreEqual<string>("var", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplVariadicVariableMany" ->
             let x = new FplVariable(positions, parent)
             x.SetToMany() |> ignore
-            Assert.AreEqual<string>("*var", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplVariadicVariableMany1" ->
             let x = new FplVariable(positions, parent)
             x.SetToMany1() |> ignore
-            Assert.AreEqual<string>("+var", x.FplId)
+            Assert.AreEqual<string>("", x.FplId)
         | _ -> 
             Assert.IsTrue(false, var)
 

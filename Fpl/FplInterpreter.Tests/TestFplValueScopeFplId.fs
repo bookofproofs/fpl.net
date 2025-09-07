@@ -495,10 +495,10 @@ type TestFplValueScopeFplId() =
     [<DataRow("base1", literalTrue)>]
     [<DataRow("base2", literalFalse)>]
     [<DataRow("base3", literalUndef)>]
-    [<DataRow("base4", "1.")>]
+    [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "bydef Test()")>] 
+    [<DataRow("base7", "Test$1(x)")>] 
     [<DataRow("base8", "Test$1")>]
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
@@ -572,10 +572,10 @@ type TestFplValueScopeFplId() =
             | "base1" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base2" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base3" -> Assert.AreEqual<string>(varVal, base1.FplId)
-            | "base4" -> Assert.AreEqual<string>(varVal, base1.FplId)
+            | "base4" -> Assert.AreEqual<string>("-", base1.FplId)
             | "base5" -> Assert.AreEqual<string>("Test", base1.FplId)
             | "base6" -> Assert.AreEqual<string>(varVal, base1.FplId)
-            | "base7" -> Assert.AreEqual<string>("bydef.", base1.FplId)
+            | "base7" -> Assert.AreEqual<string>("Test$1", base1.FplId)
             | "base8" -> Assert.AreEqual<string>(varVal, base1.FplId)
             | "base9" -> Assert.AreEqual<string>("Test$1", base1.FplId)
             | "base10" -> Assert.AreEqual<string>(varVal, base1.FplId)

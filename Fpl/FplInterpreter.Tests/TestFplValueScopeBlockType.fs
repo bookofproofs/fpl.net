@@ -495,10 +495,10 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base1", literalTrue)>]
     [<DataRow("base2", literalFalse)>]
     [<DataRow("base3", literalUndef)>]
-    [<DataRow("base4", "1.")>]
+    [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "bydef Test()")>] 
+    [<DataRow("base7", "Test$(x)")>] 
     [<DataRow("base8", "Test$1")>]
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
@@ -1095,11 +1095,11 @@ type TestFplValueScopeBlockType() =
             let cases = pred.ArgList[0]
  
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplArgument>(cases)
-            | "base2" -> Assert.IsInstanceOfType<FplArgument>(cases)
-            | "base3" -> Assert.IsInstanceOfType<FplArgument>(cases)
-            | "base4" -> Assert.IsInstanceOfType<FplArgument>(cases)
-            | "base5" -> Assert.IsInstanceOfType<FplArgument>(cases)
+            | "base1" -> Assert.IsInstanceOfType<FplStmt>(cases)
+            | "base2" -> Assert.IsInstanceOfType<FplStmt>(cases)
+            | "base3" -> Assert.IsInstanceOfType<FplStmt>(cases)
+            | "base4" -> Assert.IsInstanceOfType<FplStmt>(cases)
+            | "base5" -> Assert.IsInstanceOfType<FplStmt>(cases)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

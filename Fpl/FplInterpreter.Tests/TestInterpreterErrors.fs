@@ -1412,10 +1412,10 @@ type TestInterpreterErrors() =
             runTestHelper "TestLG004.fpl" fplCode code expected
 
     [<DataRow("01", """thm T() { true } proof T$1 {1. |- trivial};""", 0)>]
-    [<DataRow("02a", """thm T() { true } proof T$1 {1. true |- true};""", 0)>]
-    [<DataRow("02b", """thm T() { true } proof T$1 {1. false |- false};""", 1)>]
-    [<DataRow("02c", """thm T() { true } proof T$1 {1. false |- true};""", 1)>]
-    [<DataRow("02d", """thm T() { true } proof T$1 {1. true |- false};""", 1)>]
+    [<DataRow("02a", """thm T() { true } proof T$1 {1. |- true};""", 0)>]
+    [<DataRow("02b", """thm T() { true } proof T$1 {1. 2. |- false};""", 1)>]
+    [<DataRow("02c", """thm T() { true } proof T$1 {1. B |- true};""", 1)>]
+    [<DataRow("02d", """thm T() { true } proof T$1 {1. bydef S |- false};""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR006(no:string, fplCode:string, expected) =

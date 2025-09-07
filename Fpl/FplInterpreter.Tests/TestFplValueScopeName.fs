@@ -513,10 +513,10 @@ type TestFplValueScopeName() =
     [<DataRow("base1", literalTrue)>]
     [<DataRow("base2", literalFalse)>]
     [<DataRow("base3", literalUndef)>]
-    [<DataRow("base4", "1.")>]
+    [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "bydef Test()")>] 
+    [<DataRow("base7", "Test$1(x)")>] 
     [<DataRow("base8", "Test$1")>]
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
@@ -592,7 +592,7 @@ type TestFplValueScopeName() =
             | "base4" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base5" -> Assert.AreEqual<string>("Test()", base1.Type(SignatureType.Name))
             | "base6" -> Assert.AreEqual<string>("$1", base1.Type(SignatureType.Name))
-            | "base7" -> Assert.AreEqual<string>("bydef.Test()", base1.Type(SignatureType.Name))
+            | "base7" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base8" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base9" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))
             | "base10" -> Assert.AreEqual<string>(varVal, base1.Type(SignatureType.Name))

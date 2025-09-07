@@ -493,10 +493,10 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base1", literalTrue)>]
     [<DataRow("base2", literalFalse)>]
     [<DataRow("base3", literalUndef)>]
-    [<DataRow("base4", "1.")>]
+    [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "bydef Test()")>] 
+    [<DataRow("base7", "Test$1(x)")>] 
     [<DataRow("base8", "Test$1")>]
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
@@ -572,7 +572,7 @@ type TestFplValueScopeFplRepresentation() =
             | "base4" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
             | "base5" -> Assert.AreEqual<string>($"{literalUndef}()", base1.Represent())
             | "base6" -> Assert.AreEqual<string>($"$1", base1.Represent())
-            | "base7" -> Assert.AreEqual<string>($"{literalByDef} {literalUndef}()", base1.Represent())
+            | "base7" -> Assert.AreEqual<string>($"{literalUndef}()", base1.Represent())
             | "base8" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
             | "base9" -> Assert.AreEqual<string>($"{literalUndef}()", base1.Represent())
             | "base10" -> Assert.AreEqual<string>(literalUndef, base1.Represent())

@@ -483,10 +483,10 @@ type TestFplValueScopeQualifiedName() =
     [<DataRow("base1", literalTrue)>]
     [<DataRow("base2", literalFalse)>]
     [<DataRow("base3", literalUndef)>]
-    [<DataRow("base4", "1.")>]
+    [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "bydef Test()")>] 
+    [<DataRow("base7", "Test$1(x)")>] 
     [<DataRow("base8", "Test$1")>]
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
@@ -562,7 +562,7 @@ type TestFplValueScopeQualifiedName() =
             | "base4" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
             | "base5" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().Test()", qualifiedName base1)
             | "base6" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
-            | "base7" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().bydef.Test()", qualifiedName base1)
+            | "base7" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1().Test$1(x)", qualifiedName base1)
             | "base8" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
             | "base9" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
             | "base10" -> Assert.AreEqual<string>("TestPredicateQualifiedName.T1()." + varVal, qualifiedName base1)
