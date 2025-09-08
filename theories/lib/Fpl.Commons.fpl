@@ -37,8 +37,9 @@ inf DisjunctiveSyllogism()
         q
 }
 
-inf ExistsByExample(p: pred(c: obj))
+inf ExistsByExample()
 {
+    dec ~p: pred(c: obj);
     premise:  
         p(c)
     conclusion: 

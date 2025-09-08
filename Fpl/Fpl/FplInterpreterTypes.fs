@@ -1020,14 +1020,15 @@ type FplGenericObject(positions: Positions, parent: FplValue) as this =
     override this.RunOrder = None
 
 
-type FplRuleOfInference(positions: Positions, parent: FplValue) =
+type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
+    let _runOrder = runOrder
 
     override this.Name = $"rule of {literalInfL}"
     override this.ShortName = literalInf
 
     override this.Clone () =
-        let ret = new FplRuleOfInference((this.StartPos, this.EndPos), this.Parent.Value)
+        let ret = new FplRuleOfInference((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
     override this.IsFplBlock () = true
@@ -1035,11 +1036,12 @@ type FplRuleOfInference(positions: Positions, parent: FplValue) =
 
     override this.Run variableStack = 
         // todo implement run
+        emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
         ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
-    override this.RunOrder = None
+    override this.RunOrder = Some _runOrder
 
 type FplInstance(positions: Positions, parent: FplValue) =
     inherit FplGenericObject(positions, parent)
@@ -1442,6 +1444,7 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
                 this.SetValuesOf fv
             )
             _isReady <- this.Arity = 0 
+            emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
 
 
     override this.RunOrder = Some _runOrder

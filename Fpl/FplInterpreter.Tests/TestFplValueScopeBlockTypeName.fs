@@ -213,7 +213,7 @@ type TestFplBlockType() =
             let x = new FplRoot()
             Assert.AreEqual<string>("root", x.Name)
         | "FplRuleOfInference" ->
-            let x = new FplRuleOfInference(positions, parent)
+            let x = new FplRuleOfInference(positions, parent, 0)
             Assert.AreEqual<string>("rule of inference", x.Name)
         | "FplStmt" ->
             let x = new FplStmt(positions, parent)
@@ -446,7 +446,7 @@ type TestFplBlockType() =
             let x = new FplRoot()
             Assert.AreEqual<string>("root", x.ShortName)
         | "FplRuleOfInference" ->
-            let x = new FplRuleOfInference(positions, parent)
+            let x = new FplRuleOfInference(positions, parent, 0)
             Assert.AreEqual<string>(literalInf, x.ShortName)
         | "FplStmt" ->
             let x = new FplStmt(positions, parent)
@@ -679,7 +679,7 @@ type TestFplBlockType() =
             let x = new FplRoot()
             Assert.AreEqual<string>("", x.FplId)
         | "FplRuleOfInference" ->
-            let x = new FplRuleOfInference(positions, parent)
+            let x = new FplRuleOfInference(positions, parent, 0)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplStmt" ->
             let x = new FplStmt(positions, parent)
@@ -912,8 +912,8 @@ type TestFplBlockType() =
             let x = new FplRoot()
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplRuleOfInference" ->
-            let x = new FplRuleOfInference(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
+            let x = new FplRuleOfInference(positions, parent, 0)
+            Assert.IsTrue(x.RunOrder.IsSome)
         | "FplStmt" ->
             let x = new FplStmt(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
@@ -1148,7 +1148,7 @@ type TestFplBlockType() =
                 let x = new FplRoot()
                 x.Run variableStack 
             | "FplRuleOfInference" ->
-                let x = new FplRuleOfInference(positions, parent)
+                let x = new FplRuleOfInference(positions, parent, 0)
                 x.Run variableStack 
             | "FplStmt" ->
                 let x = new FplStmt(positions, parent)

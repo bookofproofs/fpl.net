@@ -532,7 +532,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.RuleOfInference((pos1, pos2), (signatureAst, premiseConclusionBlockAst)) ->
         st.EvalPush("RuleOfInference")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplRuleOfInference((pos1, pos2), parent)
+        let fv = new FplRuleOfInference((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
         ad.DiagnosticsStopped <- true // stop all diagnostics during rule of inference
         variableStack.PushEvalStack(fv)
         eval st signatureAst

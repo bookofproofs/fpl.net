@@ -9,30 +9,16 @@ inference ModusPonens()
         q
 }
 
-inference ProceedingResults(p:+ pred)
+
+inference ExistsByExample()
 {
     dec
-        ~proceedingResult: pred
-    ;
-    premise: 
-        all proceedingResult in p
-        {
-            proceedingResult
-        }
-
-    conclusion:
-        and (p)
-}
-
-inference ExistsByExample(p: pred(c: obj, other:* obj))
-{
-    dec
-        ~x: obj
+        ~p: pred(c: obj, other:* obj)
     ;
     premise:
         p(c, other)
     conclusion:
-        ex x {p(x, other)}
+        ex x: obj {p(x, other)}
 }
 
 def class A: obj
@@ -91,9 +77,9 @@ axiom GreaterTransitive()
 lemma Example4()
 {
     dec
-        ~x,y,z: obj
+        ~y,z: obj
     ;
-    ex x 
+    ex x: obj 
     { 
         and ((x > y), (x > z)) 
     }
@@ -109,12 +95,12 @@ proof Example4$1
     ;
     1. GreaterAB |- (a > b) 
     2. GreaterBC |- (b > c) 
-    3. 1., 2. |- and ((a > b), (b > c)) 
-    4. 3., GreaterTransitive |- impl ( and ((a > b), (b > c)), (a > c) ) 
-    5. 4., ModusPonens |- (a > c)
-    6. 5., 1. |- and ((a > c), (a > b)) 
-    7. 6., ExistsByExample(and((a > c), (a > b))) |- 
-        ex x 
+    3. 1, 2 |- and ((a > b), (b > c)) 
+    4. 3, GreaterTransitive |- impl ( and ((a > b), (b > c)), (a > c) ) 
+    5. 4, ModusPonens |- (a > c)
+    6. 5, 1 |- and ((a > c), (a > b)) 
+    7. 6, ExistsByExample |- 
+        ex x:obj 
         { 
             and ((x > y), (x > z)) 
         }
