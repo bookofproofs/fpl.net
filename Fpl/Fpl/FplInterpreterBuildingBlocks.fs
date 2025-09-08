@@ -372,13 +372,13 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.ArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("ArgumentIdentifier")
-        let setId (fValue:FplValue) = 
-            fValue.FplId <- s
-            fValue.TypeId <- literalPred
-            fValue.StartPos <- pos1
-            fValue.EndPos <- pos2
         let fv = variableStack.PeekEvalStack()
-        setId fv
+        fv.FplId <- s
+        st.EvalPop() 
+    | Ast.RefArgumentIdentifier((pos1, pos2), s) -> 
+        st.EvalPush("RefArgumentIdentifier")
+        let fv = variableStack.PeekEvalStack()
+        fv.FplId <- s
         let parent = fv.Parent.Value
         match parent with
         | :? FplArgInference 
@@ -389,9 +389,7 @@ let rec eval (st: SymbolTable) ast =
                 emitPR005Diagnostics fv.StartPos fv.EndPos (fv.Type(SignatureType.Mixed))
             else
                 let referencedArgument = proof.Scope[s]
-
                 fv.ArgList.Add(referencedArgument) 
-        | :? FplArgument -> ()
         | _ -> 
             emitPR000Diagnostics fv 
 

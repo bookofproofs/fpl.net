@@ -3446,7 +3446,7 @@ let tryFindAssociatedBlockForProof (fplValue: FplValue) =
                 // the potential block name of the proof is the
                 // concatenated type signature of the name of the proof
                 // without the last dollar digit
-                flattenedScopes |> List.filter (fun fv -> fv.FplId = potentialProvableName)
+                flattenedScopes |> List.filter (fun fv -> fv.FplId = potentialProvableName || fv.FplId = $"@{potentialProvableName}")
 
             let provableBlocklist =
                 buildingBlocksMatchingDollarDigitNameList

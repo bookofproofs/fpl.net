@@ -742,10 +742,10 @@ type TestFplValueScopeExpressionType() =
 
             match var with
             | "base1" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base2" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base3" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base4" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
-            | "base5" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
+            | "base2" -> Assert.AreEqual<FixType>(FixType.Infix(">", -1), base1.ExpressionType)
+            | "base3" -> Assert.AreEqual<FixType>(FixType.Postfix "'", base1.ExpressionType)
+            | "base4" -> Assert.AreEqual<FixType>(FixType.Prefix "-", base1.ExpressionType)
+            | "base5" -> Assert.AreEqual<FixType>(FixType.Symbol "∅", base1.ExpressionType)
             | "base5a" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
             | "base6" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
             | "base7" -> Assert.AreEqual<FixType>(FixType.NoFix, base1.ExpressionType)
