@@ -1,6 +1,8 @@
+// Ignore Spelling: Fpl
+
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using System.Diagnostics.Metrics;
-using System.Reflection;
+using static FplGrammarCommons;
+
 
 namespace FplLSTests
 {
@@ -8,8 +10,8 @@ namespace FplLSTests
     public class TestGetCompletionItemDefinitions
     {
 
-        [DataRow("def")]
-        [DataRow("definition")]
+        [DataRow(literalDef)]
+        [DataRow(literalDefL)]
         [TestMethod]
         public void TestAddDefinitionChoicesNumber(string choice)
         {
@@ -18,8 +20,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(6, actual.Count);
         }
 
-        [DataRow("def")]
-        [DataRow("definition")]
+        [DataRow(literalDef)]
+        [DataRow(literalDefL)]
         [TestMethod]
         public void TestAddDefinitionKeywordCounts(string choice)
         {
@@ -33,18 +35,18 @@ namespace FplLSTests
             Assert.AreEqual<int>(3, count);
         }
 
-        [DataRow("definition", "class", CompletionItemKind.Class, "definition01")]
-        [DataRow("definition", "predicate", CompletionItemKind.Class, "definition02")]
-        [DataRow("definition", "function", CompletionItemKind.Class, "definition03")]
-        [DataRow("def", "cl", CompletionItemKind.Class, "zdefinition01")]
-        [DataRow("def", "pred", CompletionItemKind.Class, "zdefinition02")]
-        [DataRow("def", "func", CompletionItemKind.Class, "zdefinition03")]
-        [DataRow("definition", "class", CompletionItemKind.Keyword, "zzzdefinition01")]
-        [DataRow("definition", "predicate", CompletionItemKind.Keyword, "zzzdefinition02")]
-        [DataRow("definition", "function", CompletionItemKind.Keyword, "zzzdefinition03")]
-        [DataRow("def", "cl", CompletionItemKind.Keyword, "zzzzdefinition01")]
-        [DataRow("def", "pred", CompletionItemKind.Keyword, "zzzzdefinition02")]
-        [DataRow("def", "func", CompletionItemKind.Keyword, "zzzzdefinition03")]
+        [DataRow(literalDefL, literalClL, CompletionItemKind.Class, "definition01")]
+        [DataRow(literalDefL, literalPredL, CompletionItemKind.Class, "definition02")]
+        [DataRow(literalDefL, literalFuncL, CompletionItemKind.Class, "definition03")]
+        [DataRow(literalDef, literalCl, CompletionItemKind.Class, "zdefinition01")]
+        [DataRow(literalDef, literalPred, CompletionItemKind.Class, "zdefinition02")]
+        [DataRow(literalDef, literalFunc, CompletionItemKind.Class, "zdefinition03")]
+        [DataRow(literalDefL, literalClL, CompletionItemKind.Keyword, "zzzdefinition01")]
+        [DataRow(literalDefL, literalPredL, CompletionItemKind.Keyword, "zzzdefinition02")]
+        [DataRow(literalDefL, literalFuncL, CompletionItemKind.Keyword, "zzzdefinition03")]
+        [DataRow(literalDef, literalCl, CompletionItemKind.Keyword, "zzzzdefinition01")]
+        [DataRow(literalDef, literalPred, CompletionItemKind.Keyword, "zzzzdefinition02")]
+        [DataRow(literalDef, literalFunc, CompletionItemKind.Keyword, "zzzzdefinition03")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string subType, CompletionItemKind isKeyword, string expected)
         {
@@ -59,12 +61,12 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("def", "cl")]
-        [DataRow("definition", "class")]
-        [DataRow("def", "pred")]
-        [DataRow("definition", "predicate")]
-        [DataRow("def", "func")]
-        [DataRow("definition", "function")]
+        [DataRow(literalDef, literalCl)]
+        [DataRow(literalDefL, literalClL)]
+        [DataRow(literalDef, literalPred)]
+        [DataRow(literalDefL, literalPredL)]
+        [DataRow(literalDef, literalFunc)]
+        [DataRow(literalDefL, literalFuncL)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice, string l)
         {
@@ -79,12 +81,12 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("def", "cl")]
-        [DataRow("definition", "class")]
-        [DataRow("def", "pred")]
-        [DataRow("definition", "predicate")]
-        [DataRow("def", "func")]
-        [DataRow("definition", "function")]
+        [DataRow(literalDef, literalCl)]
+        [DataRow(literalDefL, literalClL)]
+        [DataRow(literalDef, literalPred)]
+        [DataRow(literalDefL, literalPredL)]
+        [DataRow(literalDef, literalFunc)]
+        [DataRow(literalDefL, literalFuncL)]
         [TestMethod]
         public void TestAddDefinitionChoicesLabel(string choice, string subType)
         {
@@ -107,8 +109,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, counterRelated);
         }
 
-        [DataRow("def")]
-        [DataRow("definition")]
+        [DataRow(literalDef)]
+        [DataRow(literalDefL)]
         [TestMethod]
         public void TestAddDefinitionChoicesDetail(string choice)
         {
@@ -120,12 +122,12 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("def", "cl")]
-        [DataRow("definition", "class")]
-        [DataRow("def", "pred")]
-        [DataRow("definition", "predicate")]
-        [DataRow("def", "func")]
-        [DataRow("definition", "function")]
+        [DataRow(literalDef, literalCl)]
+        [DataRow(literalDefL, literalClL)]
+        [DataRow(literalDef, literalPred)]
+        [DataRow(literalDefL, literalPredL)]
+        [DataRow(literalDef, literalFunc)]
+        [DataRow(literalDefL, literalFuncL)]
         [TestMethod]
         public void TestAddDefinitionChoicesInsertText(string choice, string subType)
         {

@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -99,7 +100,7 @@ namespace FplLS
                 ,{ "cmc","Chamic languages" }
                 ,{ "cnr","Montenegrin" }
                 ,{ "cop","Coptic" }
-                ,{ "cor","Cornish" }
+                ,{ literalCor,"Cornish" }
                 ,{ "cos","Corsican" }
                 ,{ "cpe","Creoles and pidgins, English based" }
                 ,{ "cpf","Creoles and pidgins, French-based" }
@@ -115,7 +116,7 @@ namespace FplLS
                 ,{ "dan","Danish" }
                 ,{ "dar","Dargwa" }
                 ,{ "day","Land Dayak languages" }
-                ,{ "del","Delaware" }
+                ,{ literalDel,"Delaware" }
                 ,{ "den","Slave (Athapascan)" }
                 ,{ "deu","German" }
                 ,{ "dgr","Dogrib" }
@@ -202,7 +203,7 @@ namespace FplLS
                 ,{ "ilo","Iloko" }
                 ,{ "ina","Interlingua (International Auxiliary Language Association)" }
                 ,{ "inc","Indic languages" }
-                ,{ "ind","Indonesian" }
+                ,{ literalInd,"Indonesian" }
                 ,{ "ine","Indo-European languages" }
                 ,{ "inh","Ingush" }
                 ,{ "ipk","Inupiaq" }

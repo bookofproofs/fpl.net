@@ -2,6 +2,7 @@ namespace FplParser.Tests
 
 open FParsec
 open FplParser
+open FplGrammarCommons
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -15,35 +16,35 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate01 () =
-        let result = run (predicate .>> eof) """true"""
+        let result = run (predicate .>> eof) literalTrue
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate01a () =
-        let result = run (primePredicate .>> eof) """true"""
+        let result = run (primePredicate .>> eof) literalTrue
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate02 () =
-        let result = run (predicate .>> eof) """false"""
+        let result = run (predicate .>> eof) literalFalse
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate03 () =
-        let result = run (predicate .>> eof) """undef"""
+        let result = run (predicate .>> eof) literalUndef
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPredicate04 () =
-        let result = run (predicate .>> eof) """undefined"""
+        let result = run (predicate .>> eof) literalUndefL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -106,7 +107,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate13 () =
-        let result = run (predicate .>> eof) """or(1.,2.)"""
+        let result = run (predicate .>> eof) """or(x.z,y)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -211,7 +212,7 @@ type TestPredicates () =
 
     [<TestMethod>]
     member this.TestPredicate27 () =
-        let result = run (predicate .>> eof) """ProceedingResults(1.,2.)"""
+        let result = run (predicate .>> eof) """ProceedingResults$1(x,y)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -346,13 +347,6 @@ type TestPredicates () =
     [<TestMethod>]
     member this.TestPredicate46 () =
         let result = run (predicate .>> eof) """exn$3 x:Is {not (iif ( iif ( true, iif( true, false)), not true ))}"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestPredicate47 () =
-        let result = run (predicate .>> eof) """or(1.,2.)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

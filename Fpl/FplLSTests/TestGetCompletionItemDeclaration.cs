@@ -1,14 +1,14 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using System.Data;
-
+using static FplGrammarCommons;
 namespace FplLSTests
 {
     [TestClass]
     public class TestGetCompletionItemDeclaration
     {
 
-        [DataRow("dec")]
-        [DataRow("declaration")]
+        [DataRow(literalDec)]
+        [DataRow(literalDecL)]
         [TestMethod]
         public void TestAddDeclarationChoicesNumber(string choice)
         {
@@ -17,8 +17,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow("dec")]
-        [DataRow("declaration")]
+        [DataRow(literalDec)]
+        [DataRow(literalDecL)]
         [TestMethod]
         public void TestAddDeclarationKeywordCounts(string choice)
         {
@@ -32,10 +32,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("declaration", CompletionItemKind.Property, "declaration01")]
-        [DataRow("dec", CompletionItemKind.Property, "declaration02")]
-        [DataRow("declaration", CompletionItemKind.Keyword, "zzzdeclaration01")]
-        [DataRow("dec", CompletionItemKind.Keyword, "zzzzdeclaration02")]
+        [DataRow(literalDecL, CompletionItemKind.Property, "declaration01")]
+        [DataRow(literalDec, CompletionItemKind.Property, "declaration02")]
+        [DataRow(literalDecL, CompletionItemKind.Keyword, "zzzdeclaration01")]
+        [DataRow(literalDec, CompletionItemKind.Keyword, "zzzzdeclaration02")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -50,8 +50,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("declaration")]
-        [DataRow("dec")]
+        [DataRow(literalDecL)]
+        [DataRow(literalDec)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -66,8 +66,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("dec")]
-        [DataRow("declaration")]
+        [DataRow(literalDec)]
+        [DataRow(literalDecL)]
         [TestMethod]
         public void TestAddDeclarationChoicesLabel(string choice)
         {
@@ -79,8 +79,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("dec")]
-        [DataRow("declaration")]
+        [DataRow(literalDec)]
+        [DataRow(literalDecL)]
         [TestMethod]
         public void TestAddDeclarationChoicesDetail(string choice)
         {
@@ -92,8 +92,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("dec")]
-        [DataRow("declaration")]
+        [DataRow(literalDec)]
+        [DataRow(literalDecL)]
         [TestMethod]
         public void TestAddDeclarationChoicesInsertText(string choice)
         {

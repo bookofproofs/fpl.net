@@ -2,6 +2,9 @@
 
 open CommonTestHelpers
 open ErrDiagnostics
+open FplInterpreterTypes
+open FParsec
+
 
 type CommonFplValueTestCases =
 
@@ -13,7 +16,7 @@ type CommonFplValueTestCases =
                 let kv = fv.Scope |> Seq.head
                 kv.Value
             else
-                FplInterpreterTypes.FplValue.CreateRoot()
+                new FplInterpreterTypes.FplRoot()
         else
             fv.Scope[name]
 
@@ -311,6 +314,13 @@ type CommonFplValueTestCases =
             def pred SomePredicate2() {true}
             def func SomeFunctionalTerm1()->obj {intr}
             def func SomeFunctionalTerm2()->obj {intr}
+            def func SomeFunctionalTerm3()->obj {dec ~v:obj v:=v; return v}
+            def func SomeFunctionalTerm4()->obj(c:pred) {dec ~v:obj(c:pred) v:=v; return v}
+            def func SomeFunctionalTerm5()->SomeClass1 {dec ~v:SomeClass1; return v}
+            def func SomeFunctionalTerm6()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass; return v}
+            def func SomeFunctionalTerm7()->SomeClass1 {dec ~v:SomeClass1 v:=SomeClass(); return v}
+            def func SomeFunctionalTerm8()->ind {return $112}
+            def func SomeFunctionalTerm9()->ind {dec ~v:ind v:=$13; return v}
             proof SomeTheorem1$1 {1. |- trivial}
             proof SomeTheorem2$1 {1. |- trivial}
             loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;
@@ -346,11 +356,18 @@ type CommonFplValueTestCases =
                             let pre2 = CommonFplValueTestCases.getScopedElement theory "SomePredicate2()" subtype
                             let fun1 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm1() -> obj" subtype
                             let fun2 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm2() -> obj" subtype
+                            let fun3 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm3() -> obj" subtype
+                            let fun4 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm4() -> obj(pred)" subtype
+                            let fun5 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm5() -> SomeClass1" subtype
+                            let fun6 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm6() -> SomeClass1" subtype
+                            let fun7 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm7() -> SomeClass1" subtype
+                            let fun8 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm8() -> ind" subtype
+                            let fun9 = CommonFplValueTestCases.getScopedElement theory "SomeFunctionalTerm9() -> ind" subtype
                             let prf1 = CommonFplValueTestCases.getScopedElement thm1 "SomeTheorem1$1" subtype
                             let prf2 = CommonFplValueTestCases.getScopedElement thm2 "SomeTheorem2$1" subtype
                             let loc1 = CommonFplValueTestCases.getScopedElement theory "not(x)" subtype
                             let loc2 = CommonFplValueTestCases.getScopedElement theory "Equal(x, y)" subtype
-                            Some (r,theory,inf1,inf2,axi1,axi2,pst1,pst2,thm1,thm2,pro1,pro2,lem1,lem2,cor1,cor2,con1,con2,cla1,cla2,pre1,pre2,fun1,fun2,prf1,prf2,loc1,loc2)
+                            Some (r,theory,inf1,inf2,axi1,axi2,pst1,pst2,thm1,thm2,pro1,pro2,lem1,lem2,cor1,cor2,con1,con2,cla1,cla2,pre1,pre2,fun1,fun2,fun3,fun4,fun5,fun6,fun7,fun8,fun9,prf1,prf2,loc1,loc2)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
         result
@@ -420,6 +437,52 @@ type CommonFplValueTestCases =
                             Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
                                 axi1,corAxi1)
+                        | None -> None
+        prepareFplCode(filename, "", true) |> ignore
+        result
+
+    static member ScopeIntrinsicPrimitives(subtype) =
+        ad.Clear()
+        let fplCode = """
+            def cl A:obj {intr}
+            def func B()->obj {intr}
+            def pred T() {
+                dec 
+                    ~i:ind i:=$1 
+                    ~b:func b:=B()  
+                    ~p:pred p:=true 
+                    ~o:obj o:=A()
+                    ~u:obj u:=undef
+                    ~t:tpl t:=$2
+                ;
+                true 
+            };
+        """
+        let filename = "TestScopeIntrinsicPrimitives" + subtype
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        let getValue (varObj:FplValue) =
+            match varObj with
+            | :? FplVariable as var -> var.ValueList[0]
+            | _ -> new FplIntrinsicUndef((Position("",0,0,0), Position("",0,0,0) ), varObj)
+
+        let result = match stOption with
+                        | Some st -> 
+                            let r = st.Root
+                            let theory = CommonFplValueTestCases.getScopedElement r filename subtype
+                            let pred = CommonFplValueTestCases.getScopedElement theory "T()" subtype
+                            let iVar = CommonFplValueTestCases.getScopedElement pred "i" subtype
+                            let i = getValue iVar
+                            let bVar = CommonFplValueTestCases.getScopedElement pred "b" subtype
+                            let b = getValue bVar
+                            let pVar = CommonFplValueTestCases.getScopedElement pred "p" subtype
+                            let p = getValue pVar
+                            let oVar = CommonFplValueTestCases.getScopedElement pred "o" subtype
+                            let o = getValue oVar
+                            let uVar = CommonFplValueTestCases.getScopedElement pred "u" subtype
+                            let u = getValue uVar
+                            let tVar = CommonFplValueTestCases.getScopedElement pred "t" subtype
+                            let t = getValue tVar
+                            Some (i, b, p, o, u, t)
                         | None -> None
         prepareFplCode(filename, "", true) |> ignore
         result

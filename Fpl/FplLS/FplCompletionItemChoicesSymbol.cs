@@ -11,19 +11,19 @@ namespace FplLS
         public FplCompletionItemChoicesSymbol(string symbolType, bool declarative)
         {
             _symbolType = symbolType;
-            if (symbolType.StartsWith("postfix"))
+            if (symbolType.StartsWith(literalPostFix))
             {
                 _bitPattern = 1;
             }
-            else if (symbolType.StartsWith("infix"))
+            else if (symbolType.StartsWith(literalInfix))
             {
                 _bitPattern = 2;
             }
-            else if (symbolType.StartsWith("prefix"))
+            else if (symbolType.StartsWith(literalPrefix))
             {
                 _bitPattern = 4;
             }
-            else if (symbolType == "symbol" || symbolType == "object symbol")
+            else if (symbolType == literalSymbol || symbolType == "object symbol")
             {
                 _bitPattern = 8;
             }
@@ -77,15 +77,15 @@ namespace FplLS
             }
             if ((bits & 4) == 4)
             {
-                usableAs.Add("prefix");
+                usableAs.Add(literalPrefix);
             }
             if ((bits & 2) == 2)
             {
-                usableAs.Add("infix");
+                usableAs.Add(literalInfix);
             }
             if ((bits & 1) == 1)
             {
-                usableAs.Add("postfix");
+                usableAs.Add(literalPostFix);
             }
             if (usableAs.Count > 0)
             {

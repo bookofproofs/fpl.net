@@ -9,7 +9,7 @@
       "FplLS/1.0.0": {
         "dependencies": {
           "Fpl": "1.0.0",
-          "Microsoft.NET.ILLink.Tasks": "8.0.18",
+          "Microsoft.NET.ILLink.Tasks": "8.0.19",
           "OmniSharp.Extensions.LanguageServer": "0.17.0",
           "System.Reactive.Reference": "4.4.0.0"
         },
@@ -19,7 +19,7 @@
       },
       "FParsec/1.1.1": {
         "dependencies": {
-          "FSharp.Core": "9.0.300"
+          "FSharp.Core": "9.0.303"
         },
         "runtime": {
           "lib/netstandard2.0/FParsec.dll": {
@@ -32,11 +32,11 @@
           }
         }
       },
-      "FSharp.Core/9.0.300": {
+      "FSharp.Core/9.0.303": {
         "runtime": {
           "lib/netstandard2.1/FSharp.Core.dll": {
             "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.3.25.18101"
+            "fileVersion": "9.3.325.36101"
           }
         }
       },
@@ -154,7 +154,7 @@
           }
         }
       },
-      "Microsoft.NET.ILLink.Tasks/8.0.18": {},
+      "Microsoft.NET.ILLink.Tasks/8.0.19": {},
       "Microsoft.NETCore.Platforms/2.0.0": {},
       "Microsoft.NETCore.Targets/1.1.0": {},
       "Microsoft.VisualStudio.Threading/16.4.33": {
@@ -370,11 +370,23 @@
       "Fpl/1.0.0": {
         "dependencies": {
           "FParsec": "1.1.1",
-          "FSharp.Core": "9.0.300",
-          "Newtonsoft.Json": "13.0.3"
+          "FSharp.Core": "9.0.303",
+          "Newtonsoft.Json": "13.0.3",
+          "TestSharedConfig": "1.0.0"
         },
         "runtime": {
           "Fpl.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "TestSharedConfig/1.0.0": {
+        "dependencies": {
+          "FSharp.Core": "9.0.303"
+        },
+        "runtime": {
+          "TestSharedConfig.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
@@ -403,12 +415,12 @@
       "path": "fparsec/1.1.1",
       "hashPath": "fparsec.1.1.1.nupkg.sha512"
     },
-    "FSharp.Core/9.0.300": {
+    "FSharp.Core/9.0.303": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-TVt2J7RCE1KCS2IaONF+p8/KIZ1eHNbW+7qmKF6hGoD4tXl+o07ja1mPtFjMqRa5uHMFaTrGTPn/m945WnDLiQ==",
-      "path": "fsharp.core/9.0.300",
-      "hashPath": "fsharp.core.9.0.300.nupkg.sha512"
+      "sha512": "sha512-6JlV8aD8qQvcmfoe/PMOxCHXc0uX4lR23u0fAyQtnVQxYULLoTZgwgZHSnRcuUHOvS3wULFWcwdnP1iwslH60g==",
+      "path": "fsharp.core/9.0.303",
+      "hashPath": "fsharp.core.9.0.303.nupkg.sha512"
     },
     "MediatR/8.0.1": {
       "type": "package",
@@ -487,12 +499,12 @@
       "path": "microsoft.extensions.primitives/3.1.0",
       "hashPath": "microsoft.extensions.primitives.3.1.0.nupkg.sha512"
     },
-    "Microsoft.NET.ILLink.Tasks/8.0.18": {
+    "Microsoft.NET.ILLink.Tasks/8.0.19": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-OiXqr2YIBEV9dsAWEtasK470ALyJ0VxJ9k4MotOxlWV6HeEgrJKYMW4HHj1OCCXvqE0/A25wEKPkpfiBARgDZA==",
-      "path": "microsoft.net.illink.tasks/8.0.18",
-      "hashPath": "microsoft.net.illink.tasks.8.0.18.nupkg.sha512"
+      "sha512": "sha512-IhHf+zeZiaE5EXRyxILd4qM+Hj9cxV3sa8MpzZgeEhpvaG3a1VEGF6UCaPFLO44Kua3JkLKluE0SWVamS50PlA==",
+      "path": "microsoft.net.illink.tasks/8.0.19",
+      "hashPath": "microsoft.net.illink.tasks.8.0.19.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/2.0.0": {
       "type": "package",
@@ -705,6 +717,11 @@
       "hashPath": "system.valuetuple.4.5.0.nupkg.sha512"
     },
     "Fpl/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "TestSharedConfig/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

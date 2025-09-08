@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -20,32 +21,32 @@ namespace FplLS
         public string TokenRevoke { get; set; }
         public FplCompletionItemChoices()
         {
-            TokenAssume = "assume";
-            TokenClass = "class";
-            TokenConclusion = "conclusion";
-            TokenDeclaration = "declaration";
-            TokenFunction = "function";
-            TokenIntrinsic = "intrinsic";
-            TokenObject = "object";
-            TokenOptional = "optional";
-            TokenPredicate = "predicate";
-            TokenPremise = "premise";
-            TokenRevoke = "revoke";
+            TokenAssume = literalAssume;
+            TokenClass = literalClL;
+            TokenConclusion = literalConL;
+            TokenDeclaration = literalDecL;
+            TokenFunction = literalFuncL;
+            TokenIntrinsic = literalIntrL;
+            TokenObject = literalObjL;
+            TokenOptional = literalOptL;
+            TokenPredicate = literalPredL;
+            TokenPremise = literalPreL;
+            TokenRevoke = literalRevL;
         }
 
         public void AdjustToShort()
         {
-            TokenAssume = "ass";
-            TokenClass = "cl";
-            TokenConclusion = "con";
-            TokenDeclaration = "dec";
-            TokenFunction = "func";
-            TokenIntrinsic = "intr";
-            TokenObject = "obj";
-            TokenOptional = "opt";
-            TokenPredicate = "pred";
-            TokenPremise = "pre";
-            TokenRevoke = "rev";
+            TokenAssume = literalAss;
+            TokenClass = literalCl;
+            TokenConclusion = literalCon;
+            TokenDeclaration = literalDec;
+            TokenFunction = literalFunc;
+            TokenIntrinsic = literalIntr;
+            TokenObject = literalObj;
+            TokenOptional = literalOpt;
+            TokenPredicate = literalPred;
+            TokenPremise = literalPre;
+            TokenRevoke = literalRev;
         }
 
         public abstract List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi);

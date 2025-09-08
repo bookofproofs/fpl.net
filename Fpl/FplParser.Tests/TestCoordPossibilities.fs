@@ -2,6 +2,7 @@
 
 open FParsec
 open FplParser
+open FplGrammarCommons
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -39,14 +40,14 @@ type TestCoordPossibilities () =
 
     [<TestMethod>]
     member this.TestSelf () =
-        let result = run (coord .>> eof) """self"""
+        let result = run (coord .>> eof) literalSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestSelf1 () =
-        let result = run (coord .>> eof) """parent"""
+        let result = run (coord .>> eof) literalParent
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

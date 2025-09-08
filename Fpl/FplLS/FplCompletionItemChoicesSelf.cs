@@ -1,4 +1,7 @@
-﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+﻿// Ignore Spelling: Fpl
+
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -7,7 +10,7 @@ namespace FplLS
         public override List<FplCompletionItem> GetChoices(FplCompletionItem defaultCi) 
         {
             var ret = new List<FplCompletionItem>();
-            if (defaultCi.Word == "self")
+            if (defaultCi.Word == literalSelf)
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "self reference";
@@ -17,7 +20,7 @@ namespace FplLS
                 ci.SortText = "self01";
                 ret.Add(ci);
             }
-            if (defaultCi.Word == "parent")
+            if (defaultCi.Word == literalParent)
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "parent self reference";
@@ -27,11 +30,11 @@ namespace FplLS
                 ci.SortText = "parent02";
                 ret.Add(ci);
             }
-            if (defaultCi.Word == "base")
+            if (defaultCi.Word == literalBase)
             {
                 var ci = defaultCi.Clone();
                 ci.Detail = "ctor call (parent class)";
-                ci.InsertText = "base";
+                ci.InsertText = literalBase;
                 ci.Label = TokenPrefix + ci.InsertText;
                 ci.Kind = CompletionItemKind.Reference;
                 ci.SortText = "self03";

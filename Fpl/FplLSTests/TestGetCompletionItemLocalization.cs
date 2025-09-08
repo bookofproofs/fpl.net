@@ -1,13 +1,13 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
+using static FplGrammarCommons;
 namespace FplLSTests
 {
     [TestClass]
     public class TestGetCompletionItemLocalization
     {
 
-        [DataRow("localization")]
-        [DataRow("loc")]
+        [DataRow(literalLocL)]
+        [DataRow(literalLoc)]
         [TestMethod]
         public void TestAddLocalizationChoicesNumber(string choice)
         {
@@ -16,8 +16,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow("localization")]
-        [DataRow("loc")]
+        [DataRow(literalLocL)]
+        [DataRow(literalLoc)]
         [TestMethod]
         public void TestAddLocalizationKeywordCounts(string choice)
         {
@@ -31,10 +31,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("localization", CompletionItemKind.Property, "localization01")]
-        [DataRow("loc", CompletionItemKind.Property, "localization02")]
-        [DataRow("localization", CompletionItemKind.Keyword, "zzzlocalization01")]
-        [DataRow("loc", CompletionItemKind.Keyword, "zzzzlocalization02")]
+        [DataRow(literalLocL, CompletionItemKind.Property, "localization01")]
+        [DataRow(literalLoc, CompletionItemKind.Property, "localization02")]
+        [DataRow(literalLocL, CompletionItemKind.Keyword, "zzzlocalization01")]
+        [DataRow(literalLoc, CompletionItemKind.Keyword, "zzzzlocalization02")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -49,8 +49,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("localization")]
-        [DataRow("loc")]
+        [DataRow(literalLocL)]
+        [DataRow(literalLoc)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -65,8 +65,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("localization")]
-        [DataRow("loc")]
+        [DataRow(literalLocL)]
+        [DataRow(literalLoc)]
         [TestMethod]
         public void TestAddLocalizationChoicesLabel(string choice)
         {
@@ -78,8 +78,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("localization")]
-        [DataRow("loc")]
+        [DataRow(literalLocL)]
+        [DataRow(literalLoc)]
         [TestMethod]
         public void TestAddLocalizationChoicesDetail(string choice)
         {
@@ -91,8 +91,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("localization")]
-        [DataRow("loc")]
+        [DataRow(literalLocL)]
+        [DataRow(literalLoc)]
         [TestMethod]
         public void TestAddLocalizationChoicesInsertText(string choice)
         {

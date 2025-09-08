@@ -70,6 +70,58 @@ function deleteFile(pathToFile) {
     log2Console("File " + pathToFile + " deleted successfully", false);
 }
 
+
+
+/**
+ * Downloads a file from the given URL to the specified destination path,
+ * following redirects (e.g., 302) if necessary.
+ * @param {string} url - The URL to download from.
+ * @param {string} dest - The local file path to save to.
+ * @param {number} [maxRedirects=5] - Maximum number of redirects to follow.
+ * @returns {Promise<void>}
+ */
+function downloadFile(url, dest, maxRedirects = 5) {
+    const https = require('https');
+    const fs = require('fs');
+    const urlModule = require('url');
+
+    return new Promise((resolve, reject) => {
+        const doRequest = (url, redirectsLeft) => {
+            const file = fs.createWriteStream(dest);
+            https.get(url, (response) => {
+                if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                    // Handle redirect
+                    if (redirectsLeft === 0) {
+                        reject(new Error('Too many redirects'));
+                        return;
+                    }
+                    // Clean up the file stream before redirecting
+                    file.close(() => {});
+                    const redirectUrl = urlModule.resolve(url, response.headers.location);
+                    doRequest(redirectUrl, redirectsLeft - 1);
+                    return;
+                }
+                if (response.statusCode !== 200) {
+                    reject(new Error(`Failed to get '${url}' (${response.statusCode})`));
+                    response.resume();
+                    return;
+                }
+                response.pipe(file);
+                // @ts-ignore
+                file.on('finish', () => file.close(resolve));
+            }).on('error', (err) => {
+                fs.unlink(dest, () => reject(err));
+            });
+            file.on('error', (err) => {
+                fs.unlink(dest, () => reject(err));
+            });
+        };
+        doRequest(url, maxRedirects);
+    });
+}
+
+
+
 /**
  * @param {string} runtimeName
  * @param {string} downloadPath
@@ -78,59 +130,58 @@ function deleteFile(pathToFile) {
  */
 function installRuntime(runtimeName, downloadPath, fileUrlDir, fileUrlName) {
     return new Promise((resolve, reject) => {
-        try {
-            log2Console('trying to install ' + runtimeName, false);
-            const https = require('https');
-            const fs = require('fs');
-            const path = require('path');
-            const tar = require('tar');
+    
+        log2Console('trying to download ' + runtimeName + ' to ' + downloadPath + ' from ' + fileUrlDir + '/' + fileUrlName, false);
+        
+        
+        const path = require('path');
+        const tar = require('tar');
+        const AdmZip = require('adm-zip');
 
-            // URL of the file to download
-            let fileUrl = fileUrlDir + '/' + fileUrlName;
+        // URL of the file to download
+        let fileUrl = fileUrlDir + '/' + fileUrlName;
 
-            // Path to save the downloaded file
-            let pathToDownloadedFile = downloadPath + '/' + fileUrlName;
+        // Path to save the downloaded file
+        let pathToDownloadedFile = downloadPath + '/' + fileUrlName;
 
-            // Download and extract the runtime
-            let file = fs.createWriteStream(pathToDownloadedFile);
-            https.get(fileUrl, function (response) {
-                response.pipe(file);
+        // Usage example:
+        downloadFile(fileUrl, pathToDownloadedFile)
+            .then(() => {
+                log2Console('Runtime ' + runtimeName + ' downloaded successfully', false);
 
-                file.on('finish', function () {
-                    file.close(() => {
-                        log2Console('Runtime ' + runtimeName + ' downloaded successfully', false);
+                    if (path.extname(pathToDownloadedFile) == '.gz') {
+                        log2Console('Trying to unmpack using tar node.js: ' + pathToDownloadedFile, false);
+                        tar.x({
+                            file: pathToDownloadedFile,
+                            cwd: downloadPath
+                        });
+                        // remove the tar.gz file
+                        deleteFile(pathToDownloadedFile);
+                        log2Console('runtime ' + runtimeName + ' installed successfully', false);
+                        resolve('runtime ' + runtimeName + ' installed successfully');
+                    }
+                    else if (path.extname(pathToDownloadedFile) == '.zip') {
+                        log2Console('Trying to unpack file using adm-zip node.js: ' + pathToDownloadedFile, false);
+                        var zip = new AdmZip(pathToDownloadedFile);
+                        zip.extractAllTo(downloadPath, true)
+                        deleteFile(pathToDownloadedFile);
+                        log2Console('runtime ' + runtimeName + ' installed successfully', false);
+                        resolve('runtime ' + runtimeName + ' installed successfully');
+                    }
+                    else {
+                        reject("no decompression algorithm found for downloaded file " + pathToDownloadedFile);
+                    }
 
-                        if (path.extname(pathToDownloadedFile) == '.gz') {
-                            tar.x({
-                                file: pathToDownloadedFile,
-                                cwd: downloadPath
-                            });
-                            // remove the tar.gz file
-                            deleteFile(pathToDownloadedFile);
-                            log2Console('runtime ' + runtimeName + ' installed successfully', false);
-                            resolve('runtime ' + runtimeName + ' installed successfully');
-                        }
-                        else if (path.extname(pathToDownloadedFile) == '.zip') {
-                            const AdmZip = require('adm-zip');
-                            var zip = new AdmZip(pathToDownloadedFile);
-                            zip.extractAllTo(downloadPath, true)
-                            deleteFile(pathToDownloadedFile);
-                            log2Console('runtime ' + runtimeName + ' installed successfully', false);
-                            resolve('runtime ' + runtimeName + ' installed successfully');
-                        }
-                        else {
-                            reject("no decompression algorithm found for downloaded file " + pathToDownloadedFile);
-                        }
-                        return;
-                    });
-                });
-                return;
+            }
+            )
+            .catch(err => {
+                log2Console('Automatic download failed:' + err, true);
+                log2Console('To resolve this issue and finish installing the FPL extension:', false);
+                log2Console('1) Try to manually download the file: ' + fileUrl , false);
+                log2Console('2) Unpack its contents to this folder: ' + downloadPath, false);
+                log2Console('3) Close and open VS Code again.', false);
             });
-        }
-        catch (error) {
-            log2Console(error.message, true);
-            reject(error.message);
-        }
+
     });
 }
 
@@ -208,10 +259,18 @@ typeToIconMap.set('*var','bracket-error');
 typeToIconMap.set('+var','bracket-dot');
 typeToIconMap.set('mpred','symbol-boolean');
 typeToIconMap.set('opred','symbol-boolean');
+typeToIconMap.set('and','symbol-boolean');
+typeToIconMap.set('or','symbol-boolean');
+typeToIconMap.set('xor','symbol-boolean');
+typeToIconMap.set('impl','symbol-boolean');
+typeToIconMap.set('iif','symbol-boolean');
+typeToIconMap.set('not','symbol-boolean');
+typeToIconMap.set('=','symbol-boolean');
+typeToIconMap.set('is','symbol-boolean');
 typeToIconMap.set('mfunc','symbol-interface');
 typeToIconMap.set('ofunc','symbol-interface');
 typeToIconMap.set('ctor','symbol-constructor');
-typeToIconMap.set('cl','symbol-class');
+typeToIconMap.set('def cl','symbol-class');
 typeToIconMap.set('obj','primitive-square');
 typeToIconMap.set('loc','location');
 typeToIconMap.set('thm','layout-panel-justify');
@@ -219,11 +278,13 @@ typeToIconMap.set('lem','layout-panel-center');
 typeToIconMap.set('prop','layout-panel-right');
 typeToIconMap.set('cor','layout-sidebar-right');
 typeToIconMap.set('prf','testing-passed-icon');
-typeToIconMap.set('conj','question');
+typeToIconMap.set('conj','workspace-unknown');
 typeToIconMap.set('ax','layout');
 typeToIconMap.set('inf','symbol-structure');
-typeToIconMap.set('qtr','circuit-board');
+typeToIconMap.set('qtr','symbol-boolean');
+typeToIconMap.set('def pred','symbol-boolean');
 typeToIconMap.set('pred','symbol-boolean');
+typeToIconMap.set('def func','symbol-interface');
 typeToIconMap.set('func','symbol-interface');
 typeToIconMap.set('ref','link');
 typeToIconMap.set('arg','indent');
@@ -233,22 +294,26 @@ typeToIconMap.set('lang','globe');
 typeToIconMap.set('trsl','symbol-text');
 typeToIconMap.set('map','preview');
 typeToIconMap.set('stmt','symbol-event');
+typeToIconMap.set('decr','symbol-event');
 typeToIconMap.set('ass','target');
+typeToIconMap.set('def ext','extensions');
+typeToIconMap.set('inst','output');
+typeToIconMap.set('ind','symbol-numeric');
+typeToIconMap.set('tpl','gear');
+typeToIconMap.set('undef','question');
+
+
 
 
 // A custom TreeItem
 class MyTreeItem extends vscode.TreeItem {
-    constructor(typ, inScope, label, lineNumber, columnNumber, filePath, fplValueType, fplValueRepr, scope = [], valueList = []) {
-        super(label, scope.length > 0 || valueList.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
+    constructor(typ, inScope, label, lineNumber, columnNumber, filePath, fplValueType, fplValueRepr, valuelist = [], scope = [], arglist = []) {
+        super(label, scope.length > 0 || arglist.length > 0 || valuelist.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
         this.typ = typ;
         this.lineNumber = lineNumber;
         this.columnNumber = columnNumber;
         this.filePath = filePath;
-        if (typ == "cl" || typ == "pred" || typ == "func") 
-        {
-            this.label = "def " + typ + ' ' + label;
-        }
-        else if (typ == "mpred") 
+        if (typ == "mpred") 
         {
             this.label = "pred prop " + label;
         }
@@ -272,13 +337,17 @@ class MyTreeItem extends vscode.TreeItem {
         this.tooltip = "n: " + label + "\nt: "+ fplValueType + "\nr: " + fplValueRepr;
         this.scope = scope;
         if (this.typ == "th") log2Console(this.label + " " + scope.length, false);
-        this.valueList = valueList;
+        this.arglist = arglist;
+        this.valuelist = valuelist;
 
-        if (inScope) {
+        if (inScope == 1) {
             this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textPreformat.foreground');
         }
-        else {
+        else if (inScope == 2) {
             this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'focusBorder');
+        }
+        else {
+            this.iconPath = this.getIconPathWithColor(typeToIconMap.get(typ) || 'default-view-icon', 'textSeparator.foreground');
         }
 
         // Set the command to open the file and navigate to the line number
@@ -328,13 +397,16 @@ class FplTheoriesProvider {
             // Handle virtual nodes
             return Promise.resolve(this.parseScope(element.scope));
         } else {
-            // Create virtual child elements for Scope and ValueList if they are not empty
+            // Create virtual child elements for Scope and ArgList if they are not empty
             let children = [];
             if (element.scope && element.scope.length > 0) {
                 children.push(...this.parseScope(element.scope));
             }
-            if (element.valueList && element.valueList.length > 0) {
-                children.push(...this.parseValueList(element.valueList));
+            if (element.arglist && element.arglist.length > 0) {
+                children.push(...this.parseArgList(element.arglist));
+            }
+            if (element.valuelist && element.valuelist.length > 0) {
+                children.push(...this.parseValueList(element.valuelist));
             }
             return Promise.resolve(children);
         }
@@ -343,14 +415,18 @@ class FplTheoriesProvider {
     parseScope(scope) {
         // Convert each item in the scope to a MyTreeItem
 
-        return scope.map(item => new MyTreeItem(item.Type, true, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.Scope, item.ValueList));
+        return scope.map(item => new MyTreeItem(item.Type, 1, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.ValueList, item.Scope, item.ArgList));
+    }
+
+    parseArgList(arglist) {
+        // Convert each item in the arglist to a MyTreeItem
+        return arglist.map(item => new MyTreeItem(item.Type, 2, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.ValueList, item.Scope, item.ArgList));
     }
 
     parseValueList(valueList) {
         // Convert each item in the valueList to a MyTreeItem
-        return valueList.map(item => new MyTreeItem(item.Type, false, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.Scope, item.ValueList));
+        return valueList.map(item => new MyTreeItem(item.Type, 3, item.Name, item.Line, item.Column, item.FilePath, item.FplValueType, item.FplValueRepr, item.ValueList, item.Scope, item.ArgList));
     }
-
 }
 
 

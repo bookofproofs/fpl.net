@@ -6,6 +6,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitter
+open TestSharedConfig
 
 let rec deleteDirectory path =
     if Directory.Exists(path) then
@@ -44,13 +45,15 @@ let deleteFilesWithExtension dir extension =
 let filterByErrorCode (input: Diagnostics) errCode =
     input.Collection |> List.filter (fun d -> d.Code.Code = errCode)
 
+let fplCodeNeedsOnline (fplCode:string) = fplCode.Contains("uses Fpl")
 
 let prepareFplCode (filename: string, fplCode: string, delete: bool) =
     ad.Clear()
     let currDir = Directory.GetCurrentDirectory()
 
     printf "\n"
-    File.WriteAllText(Path.Combine(currDir, filename), fplCode)
+    if fplCode <> "" then 
+        File.WriteAllText(Path.Combine(currDir, filename), fplCode)
     let uri = PathEquivalentUri(Path.Combine(currDir, filename))
 
     let fplLibUrl =
@@ -58,12 +61,13 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
 
     if delete then
         deleteFiles currDir "*.fpl"
-        deleteDirectory (Path.Combine(currDir,"lib"))
-        deleteDirectory (Path.Combine(currDir,"repo"))
+        if not (TestConfig.OfflineMode) then
+            deleteDirectory (Path.Combine(currDir,"lib"))
+            deleteDirectory (Path.Combine(currDir,"repo"))
         None
     else
         let parsedAsts = ParsedAstList()
-        let st = SymbolTable(parsedAsts, true)
+        let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode || not (fplCodeNeedsOnline fplCode))
         FplInterpreter.fplInterpreter st fplCode uri fplLibUrl |> ignore
 
         let syntaxErrorFound =
@@ -71,6 +75,7 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
             |> Seq.exists (fun d -> d.Emitter = DiagnosticEmitter.FplParser)
 
         if syntaxErrorFound then
+            if fplCode <> "" then File.AppendAllText(Path.Combine(currDir, "SyntaxErrorsLog.txt"), $"Syntax errors detected in test {filename}{Environment.NewLine}{fplCode}{Environment.NewLine}------{Environment.NewLine}")
             emitUnexpectedErrorDiagnostics "Syntax error found."
 
         Some(st)
@@ -132,7 +137,7 @@ let loadFplFile (path: string) =
 
     let parsedAsts = ParsedAstList()
     let fplCode = File.ReadAllText(path)
-    let st = SymbolTable(parsedAsts, false)
+    let st = SymbolTable(parsedAsts, true, TestConfig.OfflineMode)
     FplInterpreter.fplInterpreter st fplCode uri fplLibUrl
     Some(st)
 

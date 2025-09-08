@@ -1,4 +1,6 @@
-﻿module FplInterpreterUsesClause
+﻿/// This module handles the the interpretation of uses clauses and implements big parts of self-containment of FPL. 
+
+module FplInterpreterUsesClause
 open System.Text.RegularExpressions
 open System.Net.Http
 open System.IO
@@ -9,18 +11,28 @@ open FplGrammarTypes
 open FplInterpreterTypes
 open ErrDiagnostics
 
+(* MIT License
 
+Copyright (c) 2024+ bookofproofs
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+*)
 
 /// A recursive function evaluating an AST and returning a list of EvalAliasedNamespaceIdentifier records
 /// for each occurrence of the uses clause in the FPL code.
-let rec eval_uses_clause = function 
+let rec eval_uses_clause debugMode = function 
     | Ast.AST ((pos1, pos2), ast) -> 
-        eval_uses_clause ast
-    | Ast.Namespace (asts) -> 
-        let results = asts |> List.collect eval_uses_clause
+        eval_uses_clause debugMode ast
+    | Ast.Namespace (asts) ->
+        let results = asts |> List.collect (eval_uses_clause debugMode)
         results
     | Ast.UsesClause ((pos1, pos2), ast) -> 
-        eval_uses_clause ast
+        eval_uses_clause debugMode ast 
     | Ast.AliasedNamespaceIdentifier ((pos1, pos2), (ast, optAst)) -> 
         let evalAlias = match optAst with
                           | Some (Ast.Alias ((p1, p2), s)) -> 
@@ -46,30 +58,33 @@ let rec eval_uses_clause = function
         match ast with
         | Ast.NamespaceIdentifier ((p1, p2), asts) -> 
             let pascalCaseIdList = asts |> List.collect (function Ast.PascalCaseId s -> [s] | _ -> [])
-            [EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseIdList, evalAlias, p1, p2)]
+            [EvalAliasedNamespaceIdentifier.CreateEani(pascalCaseIdList, evalAlias, p1, p2, debugMode)]
         | _ -> []
     | _ -> []
 
 let private downloadFile url (e:EvalAliasedNamespaceIdentifier) =
-    let client = new HttpClient()
-    try
-        async {
-            let! data = client.GetStringAsync(PathEquivalentUri(url)) |> Async.AwaitTask
-            return data
-        } |> Async.RunSynchronously
-    with
-    | ex -> 
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = e.StartPos
-                Diagnostic.EndPos = e.EndPos
-                Diagnostic.Code = NSP02 (url, ex.Message)
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic 
+    if not (e.DebugMode) then
+        let client = new HttpClient()
+        try
+            async {
+                let! data = client.GetStringAsync(PathEquivalentUri(url)) |> Async.AwaitTask
+                return data
+            } |> Async.RunSynchronously
+        with
+        | ex -> 
+            let diagnostic =
+                { 
+                    Diagnostic.Uri = ad.CurrentUri
+                    Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter 
+                    Diagnostic.Severity = DiagnosticSeverity.Error
+                    Diagnostic.StartPos = e.StartPos
+                    Diagnostic.EndPos = e.EndPos
+                    Diagnostic.Code = NSP02 (url, ex.Message)
+                    Diagnostic.Alternatives = None 
+                }
+            ad.AddDiagnostic diagnostic 
+            ""
+    else 
         ""
 
 let private loadFile fileName (e:EvalAliasedNamespaceIdentifier) =
@@ -110,15 +125,15 @@ let createSubfolder (uri: PathEquivalentUri) subFolder =
         (directoryPath, subDirectoryPath)
 
 
-let downloadLibMap (uri:PathEquivalentUri) (currentWebRepo: string) =
+let downloadLibMap (uri:PathEquivalentUri) (currentWebRepo: string) debugMode =
     let pos = Position("", 0, 1, 1)
-    let libMap = downloadFile (currentWebRepo + "/libmap.txt") (EvalAliasedNamespaceIdentifier.CreateEani("","", pos, pos))
+    let libMap = downloadFile (currentWebRepo + "/libmap.txt") (EvalAliasedNamespaceIdentifier.CreateEani("","", pos, pos, debugMode))
     libMap    
 
 /// Acquires FPL sources that can be found with a single uses clause.
 /// They are searched for in the current directory of the file, in the lib subfolder
 /// as well as in the web resource 
-let acquireSources (uri: PathEquivalentUri) (fplLibUrl: string) =
+let acquireSources (uri: PathEquivalentUri) (fplLibUrl: string) debugMode =
 
     let (_,libDirectoryPath) = createSubfolder uri "lib"
     let (directoryPath,repoDirectoryPath) = createSubfolder uri "repo"
@@ -126,7 +141,7 @@ let acquireSources (uri: PathEquivalentUri) (fplLibUrl: string) =
 
     let fileNamesInCurrDir = Directory.EnumerateFiles(directoryPath, "*.fpl") |> Seq.map (fun path -> PathEquivalentUri.EscapedUri(path)) |> Seq.toList
     let fileNamesInLibSubDir = Directory.EnumerateFiles(libDirectoryPath, "*.fpl") |> Seq.map (fun path -> PathEquivalentUri.EscapedUri(path)) |> Seq.toList
-    let libMap = downloadLibMap uri fplLibUrl
+    let libMap = downloadLibMap uri fplLibUrl debugMode
     let filesToDownload = libMap.Split("\n") 
                            |> Seq.filter(fun s -> s<>"")
                            |> Seq.map (fun s -> PathEquivalentUri.EscapedUri(fplLibUrl + "/" + s))
@@ -381,9 +396,9 @@ let garbageCollector (st:SymbolTable) (uriToBeReset:PathEquivalentUri) =
 /// their namespaces will also be loaded. The result is a list of ParsedAst objects.
 let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl = 
     ad.CurrentUri <- uri
-    let sources = acquireSources uri fplLibUrl
+    let sources = acquireSources uri fplLibUrl st.OfflineMode
     let currentName = addOrUpdateParsedAst input uri st.ParsedAsts
-    emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri))
+    emitDiagnosticsForDuplicateFiles sources (EvalAliasedNamespaceIdentifier.CreateEani(uri, st.OfflineMode))
     let mutable found = true
 
     while found do
@@ -391,7 +406,7 @@ let loadAllUsesClauses (st:SymbolTable) input (uri:PathEquivalentUri) fplLibUrl 
         match loadedParsedAst with
         | Some pa -> 
             // evaluate the EvalAliasedNamespaceIdentifier list of the ast
-            pa.Sorting.EANIList <- eval_uses_clause pa.Parsing.Ast 
+            pa.Sorting.EANIList <- eval_uses_clause st.OfflineMode pa.Parsing.Ast
             pa.Status <- ParsedAstStatus.UsesClausesEvaluated
             findDuplicateAliases pa.Sorting.EANIList |> ignore
             pa.Sorting.EANIList

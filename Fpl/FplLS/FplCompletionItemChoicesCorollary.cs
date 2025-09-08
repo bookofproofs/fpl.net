@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -22,7 +23,7 @@ namespace FplLS
         {
             if (ci.IsShort)
             {
-                TokenAssume = "ass";
+                TokenAssume = literalAss;
                 ci.Detail = "corollary (short)";
                 ci.SortText = "z" + ci.SortText;
             }

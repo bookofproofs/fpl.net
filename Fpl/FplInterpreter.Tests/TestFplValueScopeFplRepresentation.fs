@@ -1,5 +1,6 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open FplGrammarCommons
 open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
@@ -31,6 +32,13 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("pre2")>]
     [<DataRow("fun1")>]
     [<DataRow("fun2")>]
+    [<DataRow("fun3")>]
+    [<DataRow("fun4")>]
+    [<DataRow("fun5")>]
+    [<DataRow("fun6")>]
+    [<DataRow("fun7")>]
+    [<DataRow("fun8")>]
+    [<DataRow("fun9")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
     [<DataRow("loc1")>]
@@ -39,36 +47,43 @@ type TestFplValueScopeFplRepresentation() =
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("FplRepresentation") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
-            | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
-            | "inf1" -> Assert.AreEqual<string>("undetermined", inf1.Type(SignatureType.Repr))
-            | "inf2" -> Assert.AreEqual<string>("undetermined", inf2.Type(SignatureType.Repr))
-            | "axi1" -> Assert.AreEqual<string>("true", axi1.Type(SignatureType.Repr))
-            | "axi2" -> Assert.AreEqual<string>("true", axi2.Type(SignatureType.Repr))
-            | "pst1" -> Assert.AreEqual<string>("true", pst1.Type(SignatureType.Repr))
-            | "pst2" -> Assert.AreEqual<string>("true", pst2.Type(SignatureType.Repr))
-            | "thm1" -> Assert.AreEqual<string>("true", thm1.Type(SignatureType.Repr))
-            | "thm2" -> Assert.AreEqual<string>("true", thm2.Type(SignatureType.Repr))
-            | "pro1" -> Assert.AreEqual<string>("true", pro1.Type(SignatureType.Repr))
-            | "pro2" -> Assert.AreEqual<string>("true", pro2.Type(SignatureType.Repr))
-            | "lem1" -> Assert.AreEqual<string>("true", lem1.Type(SignatureType.Repr))
-            | "lem2" -> Assert.AreEqual<string>("true", lem2.Type(SignatureType.Repr))
-            | "cor1" -> Assert.AreEqual<string>("true", cor1.Type(SignatureType.Repr))
-            | "cor2" -> Assert.AreEqual<string>("true", cor2.Type(SignatureType.Repr))
-            | "con1" -> Assert.AreEqual<string>("true", con1.Type(SignatureType.Repr))
-            | "con2" -> Assert.AreEqual<string>("true", con2.Type(SignatureType.Repr))
-            | "cla1" -> Assert.AreEqual<string>("class SomeClass1", cla1.Type(SignatureType.Repr))
-            | "cla2" -> Assert.AreEqual<string>("class SomeClass2", cla2.Type(SignatureType.Repr))
-            | "pre1" -> Assert.AreEqual<string>("true", pre1.Type(SignatureType.Repr))
-            | "pre2" -> Assert.AreEqual<string>("true", pre2.Type(SignatureType.Repr))
-            | "fun1" -> Assert.AreEqual<string>("intr obj", fun1.Type(SignatureType.Repr))
-            | "fun2" -> Assert.AreEqual<string>("intr obj", fun2.Type(SignatureType.Repr))
-            | "prf1" -> Assert.AreEqual<string>("undetermined", prf1.Type(SignatureType.Repr))
-            | "prf2" -> Assert.AreEqual<string>("undetermined", prf2.Type(SignatureType.Repr))
-            | "loc1" -> Assert.AreEqual<string>("undef", loc1.Type(SignatureType.Repr))
-            | "loc2" -> Assert.AreEqual<string>("undef(undef, undef)", loc2.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
+            | "theory" -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | "inf1" -> Assert.AreEqual<string>(literalUndetermined, inf1.Represent())
+            | "inf2" -> Assert.AreEqual<string>(literalUndetermined, inf2.Represent())
+            | "axi1" -> Assert.AreEqual<string>(literalTrue, axi1.Represent())
+            | "axi2" -> Assert.AreEqual<string>(literalTrue, axi2.Represent())
+            | "pst1" -> Assert.AreEqual<string>(literalTrue, pst1.Represent())
+            | "pst2" -> Assert.AreEqual<string>(literalTrue, pst2.Represent())
+            | "thm1" -> Assert.AreEqual<string>(literalTrue, thm1.Represent())
+            | "thm2" -> Assert.AreEqual<string>(literalTrue, thm2.Represent())
+            | "pro1" -> Assert.AreEqual<string>(literalTrue, pro1.Represent())
+            | "pro2" -> Assert.AreEqual<string>(literalTrue, pro2.Represent())
+            | "lem1" -> Assert.AreEqual<string>(literalTrue, lem1.Represent())
+            | "lem2" -> Assert.AreEqual<string>(literalTrue, lem2.Represent())
+            | "cor1" -> Assert.AreEqual<string>(literalTrue, cor1.Represent())
+            | "cor2" -> Assert.AreEqual<string>(literalTrue, cor2.Represent())
+            | "con1" -> Assert.AreEqual<string>(literalTrue, con1.Represent())
+            | "con2" -> Assert.AreEqual<string>(literalTrue, con2.Represent())
+            | "cla1" -> Assert.AreEqual<string>("dec cl SomeClass1", cla1.Represent())
+            | "cla2" -> Assert.AreEqual<string>("dec cl SomeClass2", cla2.Represent())
+            | "pre1" -> Assert.AreEqual<string>(literalTrue, pre1.Represent())
+            | "pre2" -> Assert.AreEqual<string>(literalTrue, pre2.Represent())
+            | "fun1" -> Assert.AreEqual<string>("dec obj", fun1.Represent())
+            | "fun2" -> Assert.AreEqual<string>("dec obj", fun2.Represent())
+            | "fun3" -> Assert.AreEqual<string>("dec obj", fun3.Represent())
+            | "fun4" -> Assert.AreEqual<string>("dec obj(pred)", fun4.Represent())
+            | "fun5" -> Assert.AreEqual<string>("dec SomeClass1", fun5.Represent())
+            | "fun6" -> Assert.AreEqual<string>("dec SomeClass1", fun6.Represent())
+            | "fun7" -> Assert.AreEqual<string>("dec SomeClass1", fun7.Represent())
+            | "fun8" -> Assert.AreEqual<string>("dec ind", fun8.Represent())
+            | "fun9" -> Assert.AreEqual<string>("dec ind", fun9.Represent())
+            | "prf1" -> Assert.AreEqual<string>(literalUndetermined, prf1.Represent())
+            | "prf2" -> Assert.AreEqual<string>(literalUndetermined, prf2.Represent())
+            | "loc1" -> Assert.AreEqual<string>("not(x)", loc1.Represent())
+            | "loc2" -> Assert.AreEqual<string>("Equal(x, y)", loc2.Represent())
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -87,13 +102,13 @@ type TestFplValueScopeFplRepresentation() =
         match res with
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
-            | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
-            | "block" -> Assert.AreEqual<string>("class TestId", block.Type(SignatureType.Repr))
-            | "t1" -> Assert.AreEqual<string>("obj()", t1.Type(SignatureType.Repr))
-            | "t2" -> Assert.AreEqual<string>("obj(intr obj)", t2.Type(SignatureType.Repr))
-            | "t3" -> Assert.AreEqual<string>("obj(undetermined)", t3.Type(SignatureType.Repr))
-            | "t4" -> Assert.AreEqual<string>("obj(ind)", t4.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
+            | "theory" -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | "block" -> Assert.AreEqual<string>("dec cl TestId", block.Represent())
+            | "t1" -> Assert.AreEqual<string>("TestId()", t1.Represent())
+            | "t2" -> Assert.AreEqual<string>("TestId(obj)", t2.Represent())
+            | "t3" -> Assert.AreEqual<string>("TestId(pred)", t3.Represent())
+            | "t4" -> Assert.AreEqual<string>("TestId(ind)", t4.Represent())
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -128,28 +143,28 @@ type TestFplValueScopeFplRepresentation() =
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
                                 axi1,corAxi1) -> 
                 match var with
-                | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
-                | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
-                | "thm1" -> Assert.AreEqual<string>("true", thm1.Type(SignatureType.Repr))
-                | "proofThm1" -> Assert.AreEqual<string>("undetermined", proofThm1.Type(SignatureType.Repr))
-                | "lem1" -> Assert.AreEqual<string>("true", lem1.Type(SignatureType.Repr))
-                | "proofLem1" -> Assert.AreEqual<string>("undetermined", proofLem1.Type(SignatureType.Repr))
-                | "prp1" -> Assert.AreEqual<string>("true", prp1.Type(SignatureType.Repr))
-                | "proofPrp1" -> Assert.AreEqual<string>("undetermined", proofPrp1.Type(SignatureType.Repr))
-                | "cor1" -> Assert.AreEqual<string>("true", cor1.Type(SignatureType.Repr))
-                | "proofCor1" -> Assert.AreEqual<string>("undetermined", proofCor1.Type(SignatureType.Repr))
-                | "thm2" -> Assert.AreEqual<string>("true", thm2.Type(SignatureType.Repr))
-                | "corThm2" -> Assert.AreEqual<string>("true", corThm2.Type(SignatureType.Repr))
-                | "lem2" -> Assert.AreEqual<string>("true", lem2.Type(SignatureType.Repr))
-                | "corLem2" -> Assert.AreEqual<string>("true", corLem2.Type(SignatureType.Repr))
-                | "prp2" -> Assert.AreEqual<string>("true", prp2.Type(SignatureType.Repr))
-                | "corPrp2" -> Assert.AreEqual<string>("true", corPrp2.Type(SignatureType.Repr))
-                | "cor2" -> Assert.AreEqual<string>("true", cor2.Type(SignatureType.Repr))
-                | "corCor2" -> Assert.AreEqual<string>("true", corCor2.Type(SignatureType.Repr))
-                | "con1" -> Assert.AreEqual<string>("true", con1.Type(SignatureType.Repr))
-                | "corCon1" -> Assert.AreEqual<string>("true", corCon1.Type(SignatureType.Repr))
-                | "axi1" -> Assert.AreEqual<string>("true", axi1.Type(SignatureType.Repr))
-                | "corAxi1"  -> Assert.AreEqual<string>("true", corAxi1.Type(SignatureType.Repr)) 
+                | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
+                | "theory" -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+                | "thm1" -> Assert.AreEqual<string>(literalTrue, thm1.Represent())
+                | "proofThm1" -> Assert.AreEqual<string>(literalTrue, proofThm1.Represent())
+                | "lem1" -> Assert.AreEqual<string>(literalTrue, lem1.Represent())
+                | "proofLem1" -> Assert.AreEqual<string>(literalTrue, proofLem1.Represent())
+                | "prp1" -> Assert.AreEqual<string>(literalTrue, prp1.Represent())
+                | "proofPrp1" -> Assert.AreEqual<string>(literalTrue, proofPrp1.Represent())
+                | "cor1" -> Assert.AreEqual<string>(literalTrue, cor1.Represent())
+                | "proofCor1" -> Assert.AreEqual<string>(literalTrue, proofCor1.Represent())
+                | "thm2" -> Assert.AreEqual<string>(literalTrue, thm2.Represent())
+                | "corThm2" -> Assert.AreEqual<string>(literalTrue, corThm2.Represent())
+                | "lem2" -> Assert.AreEqual<string>(literalTrue, lem2.Represent())
+                | "corLem2" -> Assert.AreEqual<string>(literalTrue, corLem2.Represent())
+                | "prp2" -> Assert.AreEqual<string>(literalTrue, prp2.Represent())
+                | "corPrp2" -> Assert.AreEqual<string>(literalTrue, corPrp2.Represent())
+                | "cor2" -> Assert.AreEqual<string>(literalTrue, cor2.Represent())
+                | "corCor2" -> Assert.AreEqual<string>(literalTrue, corCor2.Represent())
+                | "con1" -> Assert.AreEqual<string>(literalTrue, con1.Represent())
+                | "corCon1" -> Assert.AreEqual<string>(literalTrue, corCon1.Represent())
+                | "axi1" -> Assert.AreEqual<string>(literalTrue, axi1.Represent())
+                | "corAxi1"  -> Assert.AreEqual<string>(literalTrue, corAxi1.Represent()) 
                 | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -176,26 +191,26 @@ type TestFplValueScopeFplRepresentation() =
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("FplRepresentation") 
         match res with
-        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
             t13:FplValue,t14:FplValue) -> 
             match var with 
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
-            | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
-            | "block" -> Assert.AreEqual<string>("undetermined", block.Type(SignatureType.Repr))
-            | "t1" -> Assert.AreEqual<string>("true", t1.Type(SignatureType.Repr))
-            | "t2" -> Assert.AreEqual<string>("true", t2.Type(SignatureType.Repr))
-            | "t3" -> Assert.AreEqual<string>("intr obj", t3.Type(SignatureType.Repr))
-            | "t4" -> Assert.AreEqual<string>("intr obj", t4.Type(SignatureType.Repr))
-            | "t5" -> Assert.AreEqual<string>("ind", t5.Type(SignatureType.Repr))
-            | "t6" -> Assert.AreEqual<string>("ind", t6.Type(SignatureType.Repr))
-            | "t7" -> Assert.AreEqual<string>("undetermined", t7.Type(SignatureType.Repr))
-            | "t8" -> Assert.AreEqual<string>("undetermined", t8.Type(SignatureType.Repr))
-            | "t9" -> Assert.AreEqual<string>("tpl", t9.Type(SignatureType.Repr))
-            | "t10" -> Assert.AreEqual<string>("tpl", t10.Type(SignatureType.Repr))
-            | "t11" -> Assert.AreEqual<string>("", t11.Type(SignatureType.Repr))
-            | "t12" -> Assert.AreEqual<string>("", t12.Type(SignatureType.Repr))
-            | "t13" -> Assert.AreEqual<string>("func", t13.Type(SignatureType.Repr))
-            | "t14" -> Assert.AreEqual<string>("func", t14.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
+            | "theory" -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | "block" -> Assert.AreEqual<string>(literalUndetermined, block.Represent())
+            | "t1" -> Assert.AreEqual<string>(literalTrue, t1.Represent())
+            | "t2" -> Assert.AreEqual<string>(literalTrue, t2.Represent())
+            | "t3" -> Assert.AreEqual<string>("dec obj", t3.Represent())
+            | "t4" -> Assert.AreEqual<string>("dec obj", t4.Represent())
+            | "t5" -> Assert.AreEqual<string>($"dec {literalInd}", t5.Represent())
+            | "t6" -> Assert.AreEqual<string>($"dec {literalInd}", t6.Represent())
+            | "t7" -> Assert.AreEqual<string>($"dec {literalPred}", t7.Represent())
+            | "t8" -> Assert.AreEqual<string>($"dec {literalPred}", t8.Represent())
+            | "t9" -> Assert.AreEqual<string>($"dec {literalTpl}", t9.Represent())
+            | "t10" -> Assert.AreEqual<string>($"dec {literalTpl}", t10.Represent())
+            | "t11" -> Assert.AreEqual<string>($"dec Nat", t11.Represent())
+            | "t12" -> Assert.AreEqual<string>($"dec Nat", t12.Represent())
+            | "t13" -> Assert.AreEqual<string>($"dec {literalFunc}", t13.Represent())
+            | "t14" -> Assert.AreEqual<string>($"dec {literalFunc}", t14.Represent())
             | _ -> Assert.IsTrue(false)
         | _ -> 
             Assert.IsTrue(false)
@@ -236,40 +251,39 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
-            | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
-            | "block" -> Assert.AreEqual<string>("true", block.Type(SignatureType.Repr)); 
-            | "x" -> Assert.AreEqual<string>("undetermined", x.Type(SignatureType.Repr))
-            | "y" -> Assert.AreEqual<string>("undetermined", y.Type(SignatureType.Repr))
-            | "s" -> Assert.AreEqual<string>("undef", s.Type(SignatureType.Repr))
-            | "xu" -> Assert.AreEqual<string>("obj", xu.Type(SignatureType.Repr))
-            | "xv" -> Assert.AreEqual<string>("obj", xv.Type(SignatureType.Repr))
-            | "xw" -> Assert.AreEqual<string>("obj", xw.Type(SignatureType.Repr))
-            | "yu" -> Assert.AreEqual<string>("obj", yu.Type(SignatureType.Repr))
-            | "yv" -> Assert.AreEqual<string>("obj", yv.Type(SignatureType.Repr))
-            | "yw" -> Assert.AreEqual<string>("obj", yw.Type(SignatureType.Repr))
-            | "xua" -> Assert.AreEqual<string>("intr obj", xua.Type(SignatureType.Repr))
-            | "xub" -> Assert.AreEqual<string>("intr obj", xub.Type(SignatureType.Repr))
-            | "xuc" -> Assert.AreEqual<string>("intr obj", xuc.Type(SignatureType.Repr))
-            | "xva" -> Assert.AreEqual<string>("intr obj", xva.Type(SignatureType.Repr))
-            | "xvb" -> Assert.AreEqual<string>("intr obj", xvb.Type(SignatureType.Repr))
-            | "xvc" -> Assert.AreEqual<string>("intr obj", xvc.Type(SignatureType.Repr))
-            | "xwa" -> Assert.AreEqual<string>("intr obj", xwa.Type(SignatureType.Repr))
-            | "xwb" -> Assert.AreEqual<string>("intr obj", xwb.Type(SignatureType.Repr))
-            | "xwc" -> Assert.AreEqual<string>("intr obj", xwc.Type(SignatureType.Repr))
-            | "yua" -> Assert.AreEqual<string>("intr obj", yua.Type(SignatureType.Repr))
-            | "yub" -> Assert.AreEqual<string>("intr obj", yub.Type(SignatureType.Repr))
-            | "yuc" -> Assert.AreEqual<string>("intr obj", yuc.Type(SignatureType.Repr))
-            | "yva" -> Assert.AreEqual<string>("intr obj", yva.Type(SignatureType.Repr))
-            | "yvb" -> Assert.AreEqual<string>("intr obj", yvb.Type(SignatureType.Repr))
-            | "yvc" -> Assert.AreEqual<string>("intr obj", yvc.Type(SignatureType.Repr))
-            | "ywa" -> Assert.AreEqual<string>("intr obj", ywa.Type(SignatureType.Repr))
-            | "ywb" -> Assert.AreEqual<string>("intr obj", ywb.Type(SignatureType.Repr))
-            | "ywc" -> Assert.AreEqual<string>("intr obj", ywc.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
+            | "theory" -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | "block" -> Assert.AreEqual<string>(literalTrue, block.Represent()); 
+            | "x" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Represent())
+            | "y" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Represent())
+            | "s" -> Assert.AreEqual<string>("dec Set", s.Represent())
+            | "xu" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xu.Represent())
+            | "xv" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xv.Represent())
+            | "xw" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xw.Represent())
+            | "yu" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", yu.Represent())
+            | "yv" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", yv.Represent())
+            | "yw" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", yw.Represent())
+            | "xua" -> Assert.AreEqual<string>("dec obj", xua.Represent())
+            | "xub" -> Assert.AreEqual<string>("dec obj", xub.Represent())
+            | "xuc" -> Assert.AreEqual<string>("dec obj", xuc.Represent())
+            | "xva" -> Assert.AreEqual<string>("dec obj", xva.Represent())
+            | "xvb" -> Assert.AreEqual<string>("dec obj", xvb.Represent())
+            | "xvc" -> Assert.AreEqual<string>("dec obj", xvc.Represent())
+            | "xwa" -> Assert.AreEqual<string>("dec obj", xwa.Represent())
+            | "xwb" -> Assert.AreEqual<string>("dec obj", xwb.Represent())
+            | "xwc" -> Assert.AreEqual<string>("dec obj", xwc.Represent())
+            | "yua" -> Assert.AreEqual<string>("dec obj", yua.Represent())
+            | "yub" -> Assert.AreEqual<string>("dec obj", yub.Represent())
+            | "yuc" -> Assert.AreEqual<string>("dec obj", yuc.Represent())
+            | "yva" -> Assert.AreEqual<string>("dec obj", yva.Represent())
+            | "yvb" -> Assert.AreEqual<string>("dec obj", yvb.Represent())
+            | "yvc" -> Assert.AreEqual<string>("dec obj", yvc.Represent())
+            | "ywa" -> Assert.AreEqual<string>("dec obj", ywa.Represent())
+            | "ywb" -> Assert.AreEqual<string>("dec obj", ywb.Represent())
+            | "ywc" -> Assert.AreEqual<string>("dec obj", ywc.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
-
 
     [<DataRow("r")>]
     [<DataRow("theory")>]
@@ -306,35 +320,35 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
-            | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
-            | "block" -> Assert.AreEqual<string>("true", block.Type(SignatureType.Repr)); 
-            | "x" -> Assert.AreEqual<string>("+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj){}", x.Type(SignatureType.Repr))
-            | "y" -> Assert.AreEqual<string>("+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj){}", y.Type(SignatureType.Repr))
-            | "xu" -> Assert.AreEqual<string>("obj", xu.Type(SignatureType.Repr))
-            | "xv" -> Assert.AreEqual<string>("obj", xv.Type(SignatureType.Repr))
-            | "xw" -> Assert.AreEqual<string>("obj", xw.Type(SignatureType.Repr))
-            | "yu" -> Assert.AreEqual<string>("obj", yu.Type(SignatureType.Repr))
-            | "yv" -> Assert.AreEqual<string>("obj", yv.Type(SignatureType.Repr))
-            | "yw" -> Assert.AreEqual<string>("obj", yw.Type(SignatureType.Repr))
-            | "xua" -> Assert.AreEqual<string>("*obj{}", xua.Type(SignatureType.Repr))
-            | "xub" -> Assert.AreEqual<string>("*obj{}", xub.Type(SignatureType.Repr))
-            | "xuc" -> Assert.AreEqual<string>("*obj{}", xuc.Type(SignatureType.Repr))
-            | "xva" -> Assert.AreEqual<string>("*obj{}", xva.Type(SignatureType.Repr))
-            | "xvb" -> Assert.AreEqual<string>("*obj{}", xvb.Type(SignatureType.Repr))
-            | "xvc" -> Assert.AreEqual<string>("*obj{}", xvc.Type(SignatureType.Repr))
-            | "xwa" -> Assert.AreEqual<string>("*obj{}", xwa.Type(SignatureType.Repr))
-            | "xwb" -> Assert.AreEqual<string>("*obj{}", xwb.Type(SignatureType.Repr))
-            | "xwc" -> Assert.AreEqual<string>("*obj{}", xwc.Type(SignatureType.Repr))
-            | "yua" -> Assert.AreEqual<string>("*obj{}", yua.Type(SignatureType.Repr))
-            | "yub" -> Assert.AreEqual<string>("*obj{}", yub.Type(SignatureType.Repr))
-            | "yuc" -> Assert.AreEqual<string>("*obj{}", yuc.Type(SignatureType.Repr))
-            | "yva" -> Assert.AreEqual<string>("*obj{}", yva.Type(SignatureType.Repr))
-            | "yvb" -> Assert.AreEqual<string>("*obj{}", yvb.Type(SignatureType.Repr))
-            | "yvc" -> Assert.AreEqual<string>("*obj{}", yvc.Type(SignatureType.Repr))
-            | "ywa" -> Assert.AreEqual<string>("*obj{}", ywa.Type(SignatureType.Repr))
-            | "ywb" -> Assert.AreEqual<string>("*obj{}", ywb.Type(SignatureType.Repr))
-            | "ywc" -> Assert.AreEqual<string>("*obj{}", ywc.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
+            | "theory" -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | "block" -> Assert.AreEqual<string>(literalTrue, block.Represent()); 
+            | "x" -> Assert.AreEqual<string>("dec +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)[]", x.Represent())
+            | "y" -> Assert.AreEqual<string>("dec +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)[]", y.Represent())
+            | "xu" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", xu.Represent())
+            | "xv" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", xv.Represent())
+            | "xw" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", xw.Represent())
+            | "yu" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", yu.Represent())
+            | "yv" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", yv.Represent())
+            | "yw" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", yw.Represent())
+            | "xua" -> Assert.AreEqual<string>("dec *obj[]", xua.Represent())
+            | "xub" -> Assert.AreEqual<string>("dec *obj[]", xub.Represent())
+            | "xuc" -> Assert.AreEqual<string>("dec *obj[]", xuc.Represent())
+            | "xva" -> Assert.AreEqual<string>("dec *obj[]", xva.Represent())
+            | "xvb" -> Assert.AreEqual<string>("dec *obj[]", xvb.Represent())
+            | "xvc" -> Assert.AreEqual<string>("dec *obj[]", xvc.Represent())
+            | "xwa" -> Assert.AreEqual<string>("dec *obj[]", xwa.Represent())
+            | "xwb" -> Assert.AreEqual<string>("dec *obj[]", xwb.Represent())
+            | "xwc" -> Assert.AreEqual<string>("dec *obj[]", xwc.Represent())
+            | "yua" -> Assert.AreEqual<string>("dec *obj[]", yua.Represent())
+            | "yub" -> Assert.AreEqual<string>("dec *obj[]", yub.Represent())
+            | "yuc" -> Assert.AreEqual<string>("dec *obj[]", yuc.Represent())
+            | "yva" -> Assert.AreEqual<string>("dec *obj[]", yva.Represent())
+            | "yvb" -> Assert.AreEqual<string>("dec *obj[]", yvb.Represent())
+            | "yvc" -> Assert.AreEqual<string>("dec *obj[]", yvc.Represent())
+            | "ywa" -> Assert.AreEqual<string>("dec *obj[]", ywa.Represent())
+            | "ywb" -> Assert.AreEqual<string>("dec *obj[]", ywb.Represent())
+            | "ywc" -> Assert.AreEqual<string>("dec *obj[]", ywc.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -375,35 +389,35 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
-            | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
-            | "block" -> Assert.AreEqual<string>("true", block.Type(SignatureType.Repr)); 
-            | "x" -> Assert.AreEqual<string>("undetermined", x.Type(SignatureType.Repr))
-            | "y" -> Assert.AreEqual<string>("undetermined", y.Type(SignatureType.Repr))
-            | "xu" -> Assert.AreEqual<string>("obj", xu.Type(SignatureType.Repr))
-            | "xv" -> Assert.AreEqual<string>("obj", xv.Type(SignatureType.Repr))
-            | "xw" -> Assert.AreEqual<string>("obj", xw.Type(SignatureType.Repr))
-            | "yu" -> Assert.AreEqual<string>("obj", yu.Type(SignatureType.Repr))
-            | "yv" -> Assert.AreEqual<string>("obj", yv.Type(SignatureType.Repr))
-            | "yw" -> Assert.AreEqual<string>("obj", yw.Type(SignatureType.Repr))
-            | "xua" -> Assert.AreEqual<string>("intr obj", xua.Type(SignatureType.Repr))
-            | "xub" -> Assert.AreEqual<string>("intr obj", xub.Type(SignatureType.Repr))
-            | "xuc" -> Assert.AreEqual<string>("intr obj", xuc.Type(SignatureType.Repr))
-            | "xva" -> Assert.AreEqual<string>("intr obj", xva.Type(SignatureType.Repr))
-            | "xvb" -> Assert.AreEqual<string>("intr obj", xvb.Type(SignatureType.Repr))
-            | "xvc" -> Assert.AreEqual<string>("intr obj", xvc.Type(SignatureType.Repr))
-            | "xwa" -> Assert.AreEqual<string>("intr obj", xwa.Type(SignatureType.Repr))
-            | "xwb" -> Assert.AreEqual<string>("intr obj", xwb.Type(SignatureType.Repr))
-            | "xwc" -> Assert.AreEqual<string>("intr obj", xwc.Type(SignatureType.Repr))
-            | "yua" -> Assert.AreEqual<string>("intr obj", yua.Type(SignatureType.Repr))
-            | "yub" -> Assert.AreEqual<string>("intr obj", yub.Type(SignatureType.Repr))
-            | "yuc" -> Assert.AreEqual<string>("intr obj", yuc.Type(SignatureType.Repr))
-            | "yva" -> Assert.AreEqual<string>("intr obj", yva.Type(SignatureType.Repr))
-            | "yvb" -> Assert.AreEqual<string>("intr obj", yvb.Type(SignatureType.Repr))
-            | "yvc" -> Assert.AreEqual<string>("intr obj", yvc.Type(SignatureType.Repr))
-            | "ywa" -> Assert.AreEqual<string>("intr obj", ywa.Type(SignatureType.Repr))
-            | "ywb" -> Assert.AreEqual<string>("intr obj", ywb.Type(SignatureType.Repr))
-            | "ywc" -> Assert.AreEqual<string>("intr obj", ywc.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
+            | "theory" -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | "block" -> Assert.AreEqual<string>(literalTrue, block.Represent()); 
+            | "x" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Represent())
+            | "y" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Represent())
+            | "xu" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xu.Represent())
+            | "xv" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xv.Represent())
+            | "xw" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", xw.Represent())
+            | "yu" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", yu.Represent())
+            | "yv" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", yv.Represent())
+            | "yw" -> Assert.AreEqual<string>("dec func(obj, obj, obj) -> obj", yw.Represent())
+            | "xua" -> Assert.AreEqual<string>("dec obj", xua.Represent())
+            | "xub" -> Assert.AreEqual<string>("dec obj", xub.Represent())
+            | "xuc" -> Assert.AreEqual<string>("dec obj", xuc.Represent())
+            | "xva" -> Assert.AreEqual<string>("dec obj", xva.Represent())
+            | "xvb" -> Assert.AreEqual<string>("dec obj", xvb.Represent())
+            | "xvc" -> Assert.AreEqual<string>("dec obj", xvc.Represent())
+            | "xwa" -> Assert.AreEqual<string>("dec obj", xwa.Represent())
+            | "xwb" -> Assert.AreEqual<string>("dec obj", xwb.Represent())
+            | "xwc" -> Assert.AreEqual<string>("dec obj", xwc.Represent())
+            | "yua" -> Assert.AreEqual<string>("dec obj", yua.Represent())
+            | "yub" -> Assert.AreEqual<string>("dec obj", yub.Represent())
+            | "yuc" -> Assert.AreEqual<string>("dec obj", yuc.Represent())
+            | "yva" -> Assert.AreEqual<string>("dec obj", yva.Represent())
+            | "yvb" -> Assert.AreEqual<string>("dec obj", yvb.Represent())
+            | "yvc" -> Assert.AreEqual<string>("dec obj", yvc.Represent())
+            | "ywa" -> Assert.AreEqual<string>("dec obj", ywa.Represent())
+            | "ywb" -> Assert.AreEqual<string>("dec obj", ywb.Represent())
+            | "ywc" -> Assert.AreEqual<string>("dec obj", ywc.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -443,51 +457,51 @@ type TestFplValueScopeFplRepresentation() =
         match result with
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
-            | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Repr))
-            | "theory" -> Assert.AreEqual<string>("undef", theory.Type(SignatureType.Repr))
-            | "block" -> Assert.AreEqual<string>("true", block.Type(SignatureType.Repr)); 
-            | "x" -> Assert.AreEqual<string>("+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj){}", x.Type(SignatureType.Repr))
-            | "y" -> Assert.AreEqual<string>("+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj){}", y.Type(SignatureType.Repr))
-            | "xu" -> Assert.AreEqual<string>("obj", xu.Type(SignatureType.Repr))
-            | "xv" -> Assert.AreEqual<string>("obj", xv.Type(SignatureType.Repr))
-            | "xw" -> Assert.AreEqual<string>("obj", xw.Type(SignatureType.Repr))
-            | "yu" -> Assert.AreEqual<string>("obj", yu.Type(SignatureType.Repr))
-            | "yv" -> Assert.AreEqual<string>("obj", yv.Type(SignatureType.Repr))
-            | "yw" -> Assert.AreEqual<string>("obj", yw.Type(SignatureType.Repr))
-            | "xua" -> Assert.AreEqual<string>("*obj{}", xua.Type(SignatureType.Repr))
-            | "xub" -> Assert.AreEqual<string>("*obj{}", xub.Type(SignatureType.Repr))
-            | "xuc" -> Assert.AreEqual<string>("*obj{}", xuc.Type(SignatureType.Repr))
-            | "xva" -> Assert.AreEqual<string>("*obj{}", xva.Type(SignatureType.Repr))
-            | "xvb" -> Assert.AreEqual<string>("*obj{}", xvb.Type(SignatureType.Repr))
-            | "xvc" -> Assert.AreEqual<string>("*obj{}", xvc.Type(SignatureType.Repr))
-            | "xwa" -> Assert.AreEqual<string>("*obj{}", xwa.Type(SignatureType.Repr))
-            | "xwb" -> Assert.AreEqual<string>("*obj{}", xwb.Type(SignatureType.Repr))
-            | "xwc" -> Assert.AreEqual<string>("*obj{}", xwc.Type(SignatureType.Repr))
-            | "yua" -> Assert.AreEqual<string>("*obj{}", yua.Type(SignatureType.Repr))
-            | "yub" -> Assert.AreEqual<string>("*obj{}", yub.Type(SignatureType.Repr))
-            | "yuc" -> Assert.AreEqual<string>("*obj{}", yuc.Type(SignatureType.Repr))
-            | "yva" -> Assert.AreEqual<string>("*obj{}", yva.Type(SignatureType.Repr))
-            | "yvb" -> Assert.AreEqual<string>("*obj{}", yvb.Type(SignatureType.Repr))
-            | "yvc" -> Assert.AreEqual<string>("*obj{}", yvc.Type(SignatureType.Repr))
-            | "ywa" -> Assert.AreEqual<string>("*obj{}", ywa.Type(SignatureType.Repr))
-            | "ywb" -> Assert.AreEqual<string>("*obj{}", ywb.Type(SignatureType.Repr))
-            | "ywc" -> Assert.AreEqual<string>("*obj{}", ywc.Type(SignatureType.Repr))
+            | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
+            | "theory" -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | "block" -> Assert.AreEqual<string>(literalTrue, block.Represent()); 
+            | "x" -> Assert.AreEqual<string>("dec +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)[]", x.Represent())
+            | "y" -> Assert.AreEqual<string>("dec +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)[]", y.Represent())
+            | "xu" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", xu.Represent())
+            | "xv" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", xv.Represent())
+            | "xw" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", xw.Represent())
+            | "yu" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", yu.Represent())
+            | "yv" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", yv.Represent())
+            | "yw" -> Assert.AreEqual<string>("dec func(*obj, *obj, *obj) -> obj", yw.Represent())
+            | "xua" -> Assert.AreEqual<string>("dec *obj[]", xua.Represent())
+            | "xub" -> Assert.AreEqual<string>("dec *obj[]", xub.Represent())
+            | "xuc" -> Assert.AreEqual<string>("dec *obj[]", xuc.Represent())
+            | "xva" -> Assert.AreEqual<string>("dec *obj[]", xva.Represent())
+            | "xvb" -> Assert.AreEqual<string>("dec *obj[]", xvb.Represent())
+            | "xvc" -> Assert.AreEqual<string>("dec *obj[]", xvc.Represent())
+            | "xwa" -> Assert.AreEqual<string>("dec *obj[]", xwa.Represent())
+            | "xwb" -> Assert.AreEqual<string>("dec *obj[]", xwb.Represent())
+            | "xwc" -> Assert.AreEqual<string>("dec *obj[]", xwc.Represent())
+            | "yua" -> Assert.AreEqual<string>("dec *obj[]", yua.Represent())
+            | "yub" -> Assert.AreEqual<string>("dec *obj[]", yub.Represent())
+            | "yuc" -> Assert.AreEqual<string>("dec *obj[]", yuc.Represent())
+            | "yva" -> Assert.AreEqual<string>("dec *obj[]", yva.Represent())
+            | "yvb" -> Assert.AreEqual<string>("dec *obj[]", yvb.Represent())
+            | "yvc" -> Assert.AreEqual<string>("dec *obj[]", yvc.Represent())
+            | "ywa" -> Assert.AreEqual<string>("dec *obj[]", ywa.Represent())
+            | "ywb" -> Assert.AreEqual<string>("dec *obj[]", ywb.Represent())
+            | "ywc" -> Assert.AreEqual<string>("dec *obj[]", ywc.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "true")>]
-    [<DataRow("base2", "false")>]
-    [<DataRow("base3", "undef")>]
-    [<DataRow("base4", "1.")>]
+    [<DataRow("base1", literalTrue)>]
+    [<DataRow("base2", literalFalse)>]
+    [<DataRow("base3", literalUndef)>]
+    [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "bydef Test()")>] 
+    [<DataRow("base7", "Test$1(x)")>] 
     [<DataRow("base8", "Test$1")>]
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base12", "parent")>]
+    [<DataRow("base12", literalParent)>]
     [<DataRow("base13", "@1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "self.x")>]
@@ -537,10 +551,10 @@ type TestFplValueScopeFplRepresentation() =
     [<DataRow("base33", "dec ~p: pred(c: obj); p(c)")>]
     [<DataRow("base34", "is(x, Set)")>]
     [<TestMethod>]
-    member this.TestPredicate(var, varVal) =
+    member this.TestExpression(var, varVal) =
         ad.Clear()
         let fplCode = sprintf "def pred T1() { %s };" varVal
-        let filename = "TestPredicate.fpl"
+        let filename = "TestExpression.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -549,69 +563,69 @@ type TestFplValueScopeFplRepresentation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("true", base1.Type(SignatureType.Repr))
-            | "base2" -> Assert.AreEqual<string>("false", base1.Type(SignatureType.Repr))
-            | "base3" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base4" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base5" -> Assert.AreEqual<string>("undef(undef)", base1.Type(SignatureType.Repr))
-            | "base6" -> Assert.AreEqual<string>("$1", base1.Type(SignatureType.Repr))
-            | "base7" -> Assert.AreEqual<string>("undetermined(undef(undef))", base1.Type(SignatureType.Repr))
-            | "base8" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base9" -> Assert.AreEqual<string>("undetermined(undef)", base1.Type(SignatureType.Repr))
-            | "base10" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base11" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base12" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base13" -> Assert.AreEqual<string>("1", base1.Type(SignatureType.Repr))
-            | "base11a" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base12a" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base10b" -> Assert.AreEqual<string>("undef(undef)", base1.Type(SignatureType.Repr))
-            | "base11b" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base12b" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base13b" -> Assert.AreEqual<string>("1(undef)", base1.Type(SignatureType.Repr))
-            | "base10c" -> Assert.AreEqual<string>("undef(undef, undef)", base1.Type(SignatureType.Repr))
-            | "base11c" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base12c" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base13c" -> Assert.AreEqual<string>("1(undef, undef)", base1.Type(SignatureType.Repr))
-            | "base10d" -> Assert.AreEqual<string>("undef[undef, undef]", base1.Type(SignatureType.Repr))
-            | "base11d" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base12d" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base13d" -> Assert.AreEqual<string>("1[undef]", base1.Type(SignatureType.Repr))
-            | "base10e" -> Assert.AreEqual<string>("undef(undef, undef).undef[undef, undef]", base1.Type(SignatureType.Repr))
-            | "base11e" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base12e" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base13e" -> Assert.AreEqual<string>("1(undef, undef).undef[undef, undef]", base1.Type(SignatureType.Repr))
-            | "base10f" -> Assert.AreEqual<string>("undef[undef, undef].undef", base1.Type(SignatureType.Repr))
-            | "base11f" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base12f" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base13f" -> Assert.AreEqual<string>("1[undef].undef(undef, undef)", base1.Type(SignatureType.Repr))
-            | "base14" -> Assert.AreEqual<string>("undef", base1.Type(SignatureType.Repr))
-            | "base15" -> Assert.AreEqual<string>("-(undef)", base1.Type(SignatureType.Repr))
-            | "base15a" -> Assert.AreEqual<string>("'(undef)", base1.Type(SignatureType.Repr))
-            | "base15b" -> Assert.AreEqual<string>("'(-(undef))", base1.Type(SignatureType.Repr))
-            | "base16" -> Assert.AreEqual<string>("-(*(=(+(undef, undef), 2), undef))", base1.Type(SignatureType.Repr))
-            | "base17" -> Assert.AreEqual<string>("'(*(=(+(undef, undef('(undef))), 2), undef))", base1.Type(SignatureType.Repr))
-            | "base18" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base19" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base20" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base21" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base21a" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base21b" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base22" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base23" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base24" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base25" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base26" -> Assert.AreEqual<string>("false", base1.Type(SignatureType.Repr))
-            | "base27" -> Assert.AreEqual<string>("undef(undef)", base1.Type(SignatureType.Repr))
-            | "base28" -> Assert.AreEqual<string>("undef(undef, undef, undef, undef)", base1.Type(SignatureType.Repr))
-            | "base29" -> Assert.AreEqual<string>("undef(undef, undef, undef)", base1.Type(SignatureType.Repr))
-            | "base30" -> Assert.AreEqual<string>("undef(undef(undef))", base1.Type(SignatureType.Repr))
-            | "base31" -> Assert.AreEqual<string>("undef(undef(undef), undef(undef, undef, undef))", base1.Type(SignatureType.Repr))
-            | "base32" -> Assert.AreEqual<string>("undef(true, undef, false)", base1.Type(SignatureType.Repr))
-            | "base33" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base34" -> Assert.AreEqual<string>("false", base1.Type(SignatureType.Repr))
+            | "base1" -> Assert.AreEqual<string>(literalTrue, base1.Represent())
+            | "base2" -> Assert.AreEqual<string>(literalFalse, base1.Represent())
+            | "base3" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
+            | "base4" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef})", base1.Represent())
+            | "base5" -> Assert.AreEqual<string>($"{literalUndef}()", base1.Represent())
+            | "base6" -> Assert.AreEqual<string>($"$1", base1.Represent())
+            | "base7" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef})", base1.Represent())
+            | "base8" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
+            | "base9" -> Assert.AreEqual<string>($"{literalUndef}()", base1.Represent())
+            | "base10" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
+            | "base11" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
+            | "base12" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
+            | "base13" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base11a" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base12a" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base10b" -> Assert.AreEqual<string>($"{literalUndef}()", base1.Represent())
+            | "base11b" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base12b" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base13b" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base10c" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef})", base1.Represent())
+            | "base11c" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base12c" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base13c" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base10d" -> Assert.AreEqual<string>($"{literalUndef}[{literalUndef}, {literalUndef}]", base1.Represent())
+            | "base11d" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base12d" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base13d" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base10e" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef}).{literalUndef}[{literalUndef}, {literalUndef}]", base1.Represent())
+            | "base11e" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base12e" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base13e" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base10f" -> Assert.AreEqual<string>($"{literalUndef}[{literalUndef}, {literalUndef}].{literalUndef}", base1.Represent())
+            | "base11f" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base12f" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base13f" -> Assert.AreEqual<string>($"{literalUndef}", base1.Represent())
+            | "base14" -> Assert.AreEqual<string>(literalUndef, base1.Represent())
+            | "base15" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef})", base1.Represent())
+            | "base15a" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef})", base1.Represent())
+            | "base15b" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}({literalUndef}))", base1.Represent())
+            | "base16" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}({literalUndef}({literalUndef}({literalUndef}, {literalUndef}), {literalUndef}), {literalUndef}))", base1.Represent())
+            | "base17" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}({literalUndef}({literalUndef}({literalUndef}, {literalUndef}({literalUndef})), {literalUndef}), {literalUndef}))", base1.Represent())
+            | "base18" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base19" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base20" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base21" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base21a" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base21b" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base22" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base23" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base24" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base25" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base26" -> Assert.AreEqual<string>(literalFalse, base1.Represent())
+            | "base27" -> Assert.AreEqual<string>($"{literalUndef}()", base1.Represent())
+            | "base28" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef}, {literalUndef}, {literalUndef})", base1.Represent())
+            | "base29" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}, {literalUndef}, {literalUndef})", base1.Represent())
+            | "base30" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}({literalUndef}))", base1.Represent())
+            | "base31" -> Assert.AreEqual<string>($"{literalUndef}({literalUndef}({literalUndef}), {literalUndef}({literalUndef}, {literalUndef}, {literalUndef}))", base1.Represent())
+            | "base32" -> Assert.AreEqual<string>($"{literalUndef}({literalTrue}, {literalUndef}, {literalFalse})", base1.Represent())
+            | "base33" -> Assert.AreEqual<string>("dec pred(obj)", base1.Represent())
+            | "base34" -> Assert.AreEqual<string>(literalFalse, base1.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -650,19 +664,59 @@ type TestFplValueScopeFplRepresentation() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ValueList[0]
+            let base1 = ctor.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("bas", base1.Type(SignatureType.Repr))
-            | "base2" -> Assert.AreEqual<string>("bas", base1.Type(SignatureType.Repr))
-            | "base3" -> Assert.AreEqual<string>("bas", base1.Type(SignatureType.Repr))
-            | "base4" -> Assert.AreEqual<string>("bas", base1.Type(SignatureType.Repr))
-            | "base5" -> Assert.AreEqual<string>("bas", base1.Type(SignatureType.Repr))
-            | "base6" -> Assert.AreEqual<string>("bas", base1.Type(SignatureType.Repr))
+            | "base1" -> Assert.AreEqual<string>("bas", base1.Represent())
+            | "base2" -> Assert.AreEqual<string>("bas", base1.Represent())
+            | "base3" -> Assert.AreEqual<string>("bas", base1.Represent())
+            | "base4" -> Assert.AreEqual<string>("bas", base1.Represent())
+            | "base5" -> Assert.AreEqual<string>("bas", base1.Represent())
+            | "base6" -> Assert.AreEqual<string>("bas", base1.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
+
+    [<DataRow("base1", """def func T()->obj {intr};""")>]
+    [<DataRow("base2", """def func T()->ind {intr};""")>]
+    [<DataRow("base3", """def func T()->func {intr};""")>]
+    [<DataRow("base4", """def func T()->pred {intr};""")>]
+    [<DataRow("base5", """def cl A:obj {intr} def func T()->A {intr};""")>]
+    [<DataRow("base6", """def func T()->obj(z:ind) {intr};""")>]
+    [<DataRow("base7", """def func T()->pred(z:*obj) {intr};""")>]
+    [<DataRow("base8", """def func T()->func(p:*pred(x:obj))->pred(x:ind) {intr};""")>]
+    [<DataRow("base9", """def func T()->pred(f:+func(x:A)->A) {intr};""")>]
+    [<DataRow("base10", """def cl A:obj {intr} def func T()->A(f:func(x:A)->A) {intr};""")>]
+    [<TestMethod>]
+    member this.TestMapping(var, varVal) =
+        ad.Clear()
+        let fplCode = sprintf "%s;" varVal
+        let filename = "TestMappingRepresentation"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
+            let mapping = base1.ArgList[0]
+            match var with
+            | "base1" -> Assert.AreEqual<string>($"dec {literalObj}", mapping.Represent())
+            | "base2" -> Assert.AreEqual<string>($"dec {literalInd}", mapping.Represent())
+            | "base3" -> Assert.AreEqual<string>($"dec {literalFunc}", mapping.Represent())
+            | "base4" -> Assert.AreEqual<string>($"dec {literalPred}", mapping.Represent())
+            | "base5" -> Assert.AreEqual<string>("dec A", mapping.Represent())
+            | "base6" -> Assert.AreEqual<string>($"dec {literalObj}({literalInd})", mapping.Represent())
+            | "base7" -> Assert.AreEqual<string>($"dec {literalPred}(*{literalObj})", mapping.Represent())
+            | "base8" -> Assert.AreEqual<string>($"dec {literalFunc}(*{literalPred}({literalObj})) -> {literalPred}({literalInd})", mapping.Represent())
+            | "base9" -> Assert.AreEqual<string>($"dec {literalPred}(+{literalFunc}(A) -> A)", mapping.Represent())
+            | "base10" -> Assert.AreEqual<string>($"dec A({literalFunc}(A) -> A)", mapping.Represent())
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base0", "dec ~x,y:pred; del.Equal(x,y)")>]
     [<DataRow("base1", "del.Equal(x,y)")>]
     [<DataRow("base2", "del.C(a,b,c,d)")>]
     [<DataRow("base3", "del.D(self,b,c)")>]
@@ -683,30 +737,33 @@ type TestFplValueScopeFplRepresentation() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let variableStack = new FplVariableStack()
+            pr1.Run variableStack
+            let base1 = pr1.ArgList[0]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("undef(undef, undef)", base1.Type(SignatureType.Repr))
-            | "base2" -> Assert.AreEqual<string>("undef(undef, undef, undef, undef)", base1.Type(SignatureType.Repr))
-            | "base3" -> Assert.AreEqual<string>("undef(undef, undef, undef)", base1.Type(SignatureType.Repr))
-            | "base4" -> Assert.AreEqual<string>("undef(undef(undef))", base1.Type(SignatureType.Repr))
-            | "base5" -> Assert.AreEqual<string>("undef(undef)", base1.Type(SignatureType.Repr))
-            | "base6" -> Assert.AreEqual<string>("undef(undef(undef), undef(undef, undef, undef))", base1.Type(SignatureType.Repr))
-            | "base7" -> Assert.AreEqual<string>("undef(true, undef, false)", base1.Type(SignatureType.Repr))
+            | "base0" -> Assert.AreEqual<string>("undetermined", base1.Represent())
+            | "base1" -> Assert.AreEqual<string>("undef", base1.Represent())
+            | "base2" -> Assert.AreEqual<string>("undef(undef, undef, undef, undef)", base1.Represent())
+            | "base3" -> Assert.AreEqual<string>("undef(undef, undef, undef)", base1.Represent())
+            | "base4" -> Assert.AreEqual<string>("undef(undef(undef))", base1.Represent())
+            | "base5" -> Assert.AreEqual<string>("undef()", base1.Represent())
+            | "base6" -> Assert.AreEqual<string>("undef(undef(undef), undef(undef, undef, undef))", base1.Represent())
+            | "base7" -> Assert.AreEqual<string>("undef(true, undef, false)", base1.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
     [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred infix ">" -1 T1() {intr};""")>]
-    [<DataRow("base3", """def pred postfix "'" T1() {intr};""")>]
-    [<DataRow("base4", """def pred prefix "-" T1() {intr};""")>]
-    [<DataRow("base5", """def cl symbol "∅" T1:obj {intr};""")>]
+    [<DataRow("base2", """def pred T1 infix ">" -1 () {intr};""")>]
+    [<DataRow("base3", """def pred T1 postfix "'" () {intr};""")>]
+    [<DataRow("base4", """def pred T1 prefix "-" () {intr};""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" :obj {intr};""")>]
     [<DataRow("base5a", """def cl T1:obj {intr};""")>]
     [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func infix ">" -1 T1()->obj {intr};""")>]
-    [<DataRow("base8", """def func postfix "'" T1()->obj {intr};""")>]
-    [<DataRow("base9", """def func prefix "-" T1()->obj {intr};""")>]
+    [<DataRow("base7", """def func T1 infix ">" -1 ()->obj {intr};""")>]
+    [<DataRow("base8", """def func T1 postfix "'" ()->obj {intr};""")>]
+    [<DataRow("base9", """def func T1 prefix "-" ()->obj {intr};""")>]
     [<TestMethod>]
     member this.TestFixNotation(var, varVal) =
         ad.Clear()
@@ -719,24 +776,24 @@ type TestFplValueScopeFplRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = 
-                if varVal.Contains "cl" then 
+                if varVal.Contains literalCl then 
                     theory.Scope["T1"]
-                elif varVal.Contains "func" then 
+                elif varVal.Contains literalFunc then 
                     theory.Scope["T1() -> obj"]
                 else 
                     theory.Scope["T1()"]
 
             match var with
-            | "base1" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base2" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base3" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base4" -> Assert.AreEqual<string>("undetermined", base1.Type(SignatureType.Repr))
-            | "base5" -> Assert.AreEqual<string>("class T1", base1.Type(SignatureType.Repr))
-            | "base5a" -> Assert.AreEqual<string>("class T1", base1.Type(SignatureType.Repr))
-            | "base6" -> Assert.AreEqual<string>("intr obj", base1.Type(SignatureType.Repr))
-            | "base7" -> Assert.AreEqual<string>("intr obj", base1.Type(SignatureType.Repr))
-            | "base8" -> Assert.AreEqual<string>("intr obj", base1.Type(SignatureType.Repr))
-            | "base9" -> Assert.AreEqual<string>("intr obj", base1.Type(SignatureType.Repr))
+            | "base1" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base2" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base3" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base4" -> Assert.AreEqual<string>(literalUndetermined, base1.Represent())
+            | "base5" -> Assert.AreEqual<string>("class T1", base1.Represent())
+            | "base5a" -> Assert.AreEqual<string>("class T1", base1.Represent())
+            | "base6" -> Assert.AreEqual<string>("dec obj", base1.Represent())
+            | "base7" -> Assert.AreEqual<string>("dec obj", base1.Represent())
+            | "base8" -> Assert.AreEqual<string>("dec obj", base1.Represent())
+            | "base9" -> Assert.AreEqual<string>("dec obj", base1.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
@@ -765,60 +822,33 @@ type TestFplValueScopeFplRepresentation() =
 
 
             match var with
-            | "varIndUnset" -> Assert.AreEqual<string>("ind", varObj.Type(SignatureType.Repr))
-            | "varIndSet0" -> Assert.AreEqual<string>("$0", varObj.Type(SignatureType.Repr))
-            | "varIndSet1" -> Assert.AreEqual<string>("$1", varObj.Type(SignatureType.Repr))
-            | "varIndSet42" -> Assert.AreEqual<string>("$42", varObj.Type(SignatureType.Repr))
-            | "varIndSet100" -> Assert.AreEqual<string>("$100", varObj.Type(SignatureType.Repr))
-            | "varFuncUnset" -> Assert.AreEqual<string>("func", varObj.Type(SignatureType.Repr))
-            | "varPredUnset" -> Assert.AreEqual<string>("undetermined", varObj.Type(SignatureType.Repr))
+            | "varIndUnset" -> Assert.AreEqual<string>("dec ind", varObj.Represent())
+            | "varIndSet0" -> Assert.AreEqual<string>("$0", varObj.Represent())
+            | "varIndSet1" -> Assert.AreEqual<string>("$1", varObj.Represent())
+            | "varIndSet42" -> Assert.AreEqual<string>("$42", varObj.Represent())
+            | "varIndSet100" -> Assert.AreEqual<string>("$100", varObj.Represent())
+            | "varFuncUnset" -> Assert.AreEqual<string>("dec func", varObj.Represent())
+            | "varPredUnset" -> Assert.AreEqual<string>("dec pred", varObj.Represent())
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("o", "dec obj")>]    // without anything
-    [<DataRow("a", "dec class A")>]    // without constructor, without inheritance, without instantiation
-    [<DataRow("aI1", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (without ())
-    [<DataRow("aI2", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (with ()) -> should also trigger another error
-    [<DataRow("b", "dec class B")>]    // without constructor, with inheritance, without instantiation
-    [<DataRow("bI1", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (without ())
-    [<DataRow("bI2", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (with ()) -> should also trigger another error
-    [<DataRow("c", "dec class C")>]    // with constructor, without inheritance, without instantiation
-    [<DataRow("cI1", "C:obj")>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
-    [<DataRow("cI2", "C:obj")>]  // with constructor, without inheritance, with instantiation (with ())
-    [<DataRow("d", "dec class D")>]    // with constructor, with inheritance, without instantiation
-    [<DataRow("dI1", "D:intr B:intr A")>]  // with constructor, with inheritance, with instantiation (without ())
-    [<DataRow("dI2", "D:intr B:intr A")>]  
+    [<DataRow("o", """def pred T() {dec ~o:obj; true};""", "dec obj")>]    // without anything
+    [<DataRow("a", """def cl A: obj {intr} def pred T() {dec ~a:A; true};""", "dec A")>]    // without constructor, without inheritance, without instantiation
+    [<DataRow("aI1", """def cl A: obj {intr} def pred T() {dec ~aI1:A aI1:=A; true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (without ())
+    [<DataRow("aI2", """def cl A: obj {intr} def pred T() {dec ~aI2:A aI2:=A(); true};""", "intr A:intr obj")>]  // without constructor, without inheritance, with instantiation (with ()) -> should also trigger another error
+    [<DataRow("b", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~b:B; true};""", "dec B")>]    // without constructor, with inheritance, without instantiation
+    [<DataRow("bI1", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~bI1:B bI1:=B; true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (without ())
+    [<DataRow("bI2", """def cl A: obj {intr} def cl B: A {intr} def pred T() {dec ~bI2:B bI2:=B(); true};""", "intr B:intr A:intr obj")>]  // without constructor, with inheritance, with instantiation (with ()) -> should also trigger another error
+    [<DataRow("c", """def cl A: obj {intr} def cl B: A {intr} def cl C: obj {ctor C() {dec base.obj (); self }} def pred T() {dec ~c:C; true};""", "dec C")>]    // with constructor, without inheritance, without instantiation
+    [<DataRow("cI1", """def cl A: obj {intr} def cl B: A {intr} def cl C: obj {ctor C() {dec base.obj (); self }} def pred T() {dec ~cI1:C cI1:=C; true};""", "C:intr obj")>]  // with constructor, without inheritance, with instantiation (without ()) -> should also trigger another error
+    [<DataRow("cI2", """def cl A: obj {intr} def cl B: A {intr} def cl C: obj {ctor C() {dec base.obj (); self }} def pred T() {dec ~cI2:C cI2:=C(); true};""", "C:obj")>]  // with constructor, without inheritance, with instantiation (with ())
+    [<DataRow("d", """def cl A: obj {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); self }} def pred T() {dec ~d:D; true};""", "dec D")>]    // with constructor, with inheritance, without instantiation
+    [<DataRow("dI1", """def cl A: obj {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); self }} def pred T() {dec ~dI1:D dI1:=D; true};""", "D:intr B:intr A:intr obj")>]  // with constructor, with inheritance, with instantiation (without ())
+    [<DataRow("dI2", """def cl A: obj {intr} def cl B: A {intr} def cl D: B {ctor D() {dec base.B(); self }} def pred T() {dec ~dI2:D dI2:=D(); true};""", "D:intr B:intr A")>]  
     [<TestMethod>]
-    member this.TestVariableRepresentationObjects(var, expected:string) =
+    member this.TestVariableRepresentationObjects(var, fplCode:string, expected:string) =
         ad.Clear()
-        let fplCode = sprintf """uses Fpl.Commons
-
-                def cl A: obj {intr}
-                def cl B: A {intr}
-                def cl C: obj {ctor C() {dec base.obj (); self }}
-                def cl D: B {ctor D() {dec base.B(); self }}
-
-                def pred T() 
-                { 
-                    dec ~o:object 
-                    ~a:A 
-                    ~aI1:A aI1:=A 
-                    ~aI2:A aI2:=A() 
-                    ~b:B 
-                    ~bI1:B bI1:=B 
-                    ~bI2:B bI2:=B() 
-                    ~c:C 
-                    ~cI1:C cI1:=C 
-                    ~cI2:C cI2:=C() 
-                    ~d:D 
-                    ~dI1:D dI1:=D 
-                    ~dI2:D dI2:=D() 
-                    ;
-
-                    (a = b = c = d = o)
-                }
-        ;""" 
         let filename = "TestVariableRepresentationObjects"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
@@ -828,7 +858,103 @@ type TestFplValueScopeFplRepresentation() =
             let theory = r.Scope[filename]
             let base1 = theory.Scope["T()"]
             let varObj = base1.Scope[var]
-            Assert.AreEqual<string>(expected, varObj.Type(SignatureType.Repr))
+            Assert.AreEqual<string>(expected, varObj.Represent())
 
+        | None -> 
+            Assert.IsTrue(false)
+
+
+    [<DataRow("base1", "$1",  literalFalse)>]
+    [<DataRow("base2", "$2",  literalTrue)>]
+    [<DataRow("base3", "$3",  literalFalse)>]
+    [<DataRow("base4", "$0",  literalUndef)>]
+    [<DataRow("base5", "$4", literalUndef)>]
+    [<TestMethod>]
+    member this.TestMCaseStatement(var, input, (output:string)) =
+        ad.Clear()
+        let fplCode = sprintf """
+                def pred Equal infix "=" 50 (x,y: tpl)
+                {
+                    del.Equal(x,y)
+                }              
+        
+                def pred Test(x:ind) { dec 
+                ~n:pred
+                n:= mcases
+                (
+                    | (x = $1) : false 
+                    | (x = $2) : true 
+                    | (x = $3) : false 
+                    ? undef  
+                )
+                ;n } def pred T() {Test(%s)};""" input 
+        let filename = "TestMCaseStatementFplRepresentation"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["Test(ind)"]
+            let assignment = pred.ArgList[0]
+            let res = assignment.ArgList[1]
+ 
+            match var with
+            | "base1" -> Assert.AreEqual<string>(output, res.Represent())
+            | "base2" -> Assert.AreEqual<string>(output, res.Represent())
+            | "base3" -> Assert.AreEqual<string>(output, res.Represent())
+            | "base4" -> Assert.AreEqual<string>(output, res.Represent())
+            | "base5" -> Assert.AreEqual<string>(output, res.Represent())
+            | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", "$1",  literalFalse)>]
+    [<DataRow("base2", "$2",  literalTrue)>]
+    [<DataRow("base3", "$3",  literalFalse)>]
+    [<DataRow("base4", "$0",  "")>]
+    [<DataRow("base5", "$4", "")>]
+    [<TestMethod>]
+    member this.TestConditionResultStatement(var, input, (output:string)) =
+        ad.Clear()
+        let fplCode = sprintf """
+                def pred Equal infix "=" 50 (x,y: tpl)
+                {
+                    del.Equal(x,y)
+                }
+                
+                def pred Test(x:ind) { dec 
+                ~n:pred
+                n:= mcases
+                (
+                    | (x = $1) : false 
+                    | (x = $2) : true 
+                    | (x = $3) : false 
+                    ? undef  
+                )
+                ;n } def pred T() {Test(%s)};""" input 
+        let filename = "TestConditionResultStatementFplRepresentation"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["Test(ind)"]
+            let assignment = pred.ArgList[0]
+            let res = assignment.ArgList[1]
+            match var with
+            | "base1" -> 
+                let cr = res.ArgList[0] 
+                Assert.AreEqual<string>(output, cr.Represent())
+            | "base2" -> 
+                let cr = res.ArgList[1] 
+                Assert.AreEqual<string>(output, cr.Represent())
+            | "base3" -> 
+                let cr = res.ArgList[2] 
+                Assert.AreEqual<string>(output, cr.Represent())
+            | "base4" -> () 
+            | "base5" -> ()
+            | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

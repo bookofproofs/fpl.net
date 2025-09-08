@@ -1,4 +1,7 @@
+// Ignore Spelling: Fpl
+
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLSTests
 {
@@ -6,10 +9,10 @@ namespace FplLSTests
     public class TestGetCompletionItemAxioms
     {
 
-        [DataRow("ax")]
-        [DataRow("axiom")]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalAx)]
+        [DataRow(literalAxL)]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesNumber(string choice)
         {
@@ -18,10 +21,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow("ax")]
-        [DataRow("axiom")]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalAx)]
+        [DataRow(literalAxL)]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddAxiomKeywordCounts(string choice)
         {
@@ -35,8 +38,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("ax")]
-        [DataRow("axiom")]
+        [DataRow(literalAx)]
+        [DataRow(literalAxL)]
         [TestMethod]
         public void TestAddChoicesSortText(string choice)
         {
@@ -44,12 +47,12 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("axiom"));
+                Assert.IsTrue(item.SortText.Contains(literalAxL));
             }
         }
 
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddPostulateChoicesSortText(string choice)
         {
@@ -57,14 +60,14 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesAxiom().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.SortText.Contains("postulate"));
+                Assert.IsTrue(item.SortText.Contains(literalPostL));
             }
         }
 
-        [DataRow("ax")]
-        [DataRow("axiom")]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalAx)]
+        [DataRow(literalAxL)]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesLabel(string choice)
         {
@@ -76,10 +79,10 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ax")]
-        [DataRow("axiom")]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalAx)]
+        [DataRow(literalAxL)]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesDetail(string choice)
         {
@@ -91,10 +94,10 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ax")]
-        [DataRow("axiom")]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalAx)]
+        [DataRow(literalAxL)]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestAddAxiomChoicesInsertText(string choice)
         {
@@ -108,10 +111,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(actual.Count, counterSnippets);
         }
 
-        [DataRow("ax")]
-        [DataRow("axiom")]
-        [DataRow("post")]
-        [DataRow("postulate")]
+        [DataRow(literalAx)]
+        [DataRow(literalAxL)]
+        [DataRow(literalPost)]
+        [DataRow(literalPostL)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {

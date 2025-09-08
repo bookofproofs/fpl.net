@@ -1,4 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLS
 {
@@ -12,21 +13,21 @@ namespace FplLS
             // snippets
             switch (defaultCi.Word)
             {
-                case "true":
-                case "false":
-                case "undef":
-                case "undefined":
+                case literalTrue:
+                case literalFalse:
+                case literalUndef:
+                case literalUndefL:
                     // keyword
                     var ciK = defaultCi.Clone(); ciK.Kind = CompletionItemKind.Keyword; ciK.AdjustToKeyword(); ret.Add(ciK);
                     break;
-                case "not":
+                case literalNot:
                     // snippet
                     var ci = defaultCi.Clone(); SetBody(ci, 1); ret.Add(ci);
                     // keyword
                     var ci1 = defaultCi.Clone(); ci1.Kind = CompletionItemKind.Keyword; ci1.AdjustToKeyword(); ret.Add(ci1);
                     break;
-                case "iif":
-                case "impl":
+                case literalIif:
+                case literalImpl:
                     // snippet
                     var ci2 = defaultCi.Clone(); SetBody(ci2, 2); ret.Add(ci2);
                     // keyword
@@ -36,9 +37,9 @@ namespace FplLS
                     // snippet for equality
                     var ciEquals = defaultCi.Clone(); SetBodyEquality(ciEquals); ret.Add(ciEquals);
                     break;
-                case "and":
-                case "or":
-                case "xor":
+                case literalAnd:
+                case literalOr:
+                case literalXor:
                     var ci3 = defaultCi.Clone(); SetBody(ci3, 3); ret.Add(ci3);
                     var ci3K = defaultCi.Clone(); ci3K.Kind = CompletionItemKind.Keyword; ci3K.AdjustToKeyword(); ret.Add(ci3K);
                     break;

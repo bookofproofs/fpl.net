@@ -1,4 +1,7 @@
+// Ignore Spelling: Fpl
+
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplGrammarCommons;
 
 namespace FplLSTests
 {
@@ -6,8 +9,8 @@ namespace FplLSTests
     public class TestGetCompletionItemConstructors
     {
 
-        [DataRow("ctor")]
-        [DataRow("constructor")]
+        [DataRow(literalCtor)]
+        [DataRow(literalCtorL)]
         [TestMethod]
         public void TestAddConstructorChoicesNumber(string choice)
         {
@@ -16,8 +19,8 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow("ctor")]
-        [DataRow("constructor")]
+        [DataRow(literalCtor)]
+        [DataRow(literalCtorL)]
         [TestMethod]
         public void TestAddConstructorKeywordCounts(string choice)
         {
@@ -31,10 +34,10 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("constructor", CompletionItemKind.Property, "constructor01")]
-        [DataRow("ctor", CompletionItemKind.Property, "constructor02")]
-        [DataRow("constructor", CompletionItemKind.Keyword, "zzzconstructor01")]
-        [DataRow("ctor", CompletionItemKind.Keyword, "zzzzconstructor02")]
+        [DataRow(literalCtorL, CompletionItemKind.Property, "constructor01")]
+        [DataRow(literalCtor, CompletionItemKind.Property, "constructor02")]
+        [DataRow(literalCtorL, CompletionItemKind.Keyword, "zzzconstructor01")]
+        [DataRow(literalCtor, CompletionItemKind.Keyword, "zzzzconstructor02")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -49,8 +52,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("constructor")]
-        [DataRow("ctor")]
+        [DataRow(literalCtorL)]
+        [DataRow(literalCtor)]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
         {
@@ -65,8 +68,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("constructor")]
+        [DataRow(literalCtor)]
+        [DataRow(literalCtorL)]
         [TestMethod]
         public void TestAddConstructorChoicesLabel(string choice)
         {
@@ -78,8 +81,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("constructor")]
+        [DataRow(literalCtor)]
+        [DataRow(literalCtorL)]
         [TestMethod]
         public void TestAddConstructorChoicesDetail(string choice)
         {
@@ -91,8 +94,8 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("ctor")]
-        [DataRow("constructor")]
+        [DataRow(literalCtor)]
+        [DataRow(literalCtorL)]
         [TestMethod]
         public void TestAddConstructorChoicesInsertText(string choice)
         {

@@ -1,6 +1,7 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
+open FplGrammarCommons
 open FplInterpreterTypes
 open CommonTestHelpers
 
@@ -31,6 +32,13 @@ type TestFplValueScopeParent() =
     [<DataRow("pre2")>]
     [<DataRow("fun1")>]
     [<DataRow("fun2")>]
+    [<DataRow("fun3")>]
+    [<DataRow("fun4")>]
+    [<DataRow("fun5")>]
+    [<DataRow("fun6")>]
+    [<DataRow("fun7")>]
+    [<DataRow("fun8")>]
+    [<DataRow("fun9")>]
     [<DataRow("prf1")>]
     [<DataRow("prf2")>]
     [<DataRow("loc1")>]
@@ -39,7 +47,7 @@ type TestFplValueScopeParent() =
     member this.TestBlocks(var) =
         let res = CommonFplValueTestCases.ScopeBlocks("Parent") 
         match res with
-        | Some (r:FplValue,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
+        | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
             | "theory" -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
@@ -65,6 +73,13 @@ type TestFplValueScopeParent() =
             | "pre2" -> Assert.AreEqual<FplValue>(theory, pre2.Parent.Value)
             | "fun1" -> Assert.AreEqual<FplValue>(theory, fun1.Parent.Value)
             | "fun2" -> Assert.AreEqual<FplValue>(theory, fun2.Parent.Value)
+            | "fun3" -> Assert.AreEqual<FplValue>(theory, fun3.Parent.Value)
+            | "fun4" -> Assert.AreEqual<FplValue>(theory, fun4.Parent.Value)
+            | "fun5" -> Assert.AreEqual<FplValue>(theory, fun5.Parent.Value)
+            | "fun6" -> Assert.AreEqual<FplValue>(theory, fun6.Parent.Value)
+            | "fun7" -> Assert.AreEqual<FplValue>(theory, fun7.Parent.Value)
+            | "fun8" -> Assert.AreEqual<FplValue>(theory, fun8.Parent.Value)
+            | "fun9" -> Assert.AreEqual<FplValue>(theory, fun9.Parent.Value)
             | "prf1" -> Assert.AreEqual<FplValue>(thm1, prf1.Parent.Value)
             | "prf2" -> Assert.AreEqual<FplValue>(thm2, prf2.Parent.Value)
             | "loc1" -> Assert.AreEqual<FplValue>(theory, loc1.Parent.Value)
@@ -175,7 +190,7 @@ type TestFplValueScopeParent() =
     member this.TestProperties(var) =
         let res = CommonFplValueTestCases.ScopeProperties("Parent") 
         match res with
-        | Some (r:FplValue,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
+        | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue,t5:FplValue,t6:FplValue,t7:FplValue,t8:FplValue,t9:FplValue,t10:FplValue,t11:FplValue,t12:FplValue,
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
@@ -482,18 +497,18 @@ type TestFplValueScopeParent() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base1", "true")>]
-    [<DataRow("base2", "false")>]
-    [<DataRow("base3", "undef")>]
-    [<DataRow("base4", "1.")>]
+    [<DataRow("base1", literalTrue)>]
+    [<DataRow("base2", literalFalse)>]
+    [<DataRow("base3", literalUndef)>]
+    [<DataRow("base4", "-1")>]
     [<DataRow("base5", "del.Test()")>]
     [<DataRow("base6", "$1")>]
-    [<DataRow("base7", "bydef Test()")>] 
+    [<DataRow("base7", "Test$1(x)")>] 
     [<DataRow("base8", "Test$1")>]
     [<DataRow("base9", "Test$1()")>]
     [<DataRow("base10", "Test")>]
     [<DataRow("base11", "v")>]
-    [<DataRow("base12", "parent")>]
+    [<DataRow("base12", literalParent)>]
     [<DataRow("base13", "@1")>]
     [<DataRow("base11a", "v.x")>]
     [<DataRow("base12a", "self.x")>]
@@ -555,7 +570,7 @@ type TestFplValueScopeParent() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<FplValue>(pr1, base1.Parent.Value)
@@ -656,7 +671,7 @@ type TestFplValueScopeParent() =
             let theory = r.Scope[filename]
             let cl = theory.Scope["A"]
             let ctor = cl.Scope["A(T1, func, ind, pred)"]
-            let base1 = ctor.ValueList[0]
+            let base1 = ctor.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<FplValue>(ctor, base1.Parent.Value)
@@ -689,7 +704,7 @@ type TestFplValueScopeParent() =
             let theory = r.Scope[filename]
 
             let pr1 = theory.Scope["T1()"] 
-            let base1 = pr1.ValueList[0]
+            let base1 = pr1.ArgList[0]
 
             match var with
             | "base1" -> Assert.AreEqual<FplValue>(pr1, base1.Parent.Value)
@@ -704,15 +719,15 @@ type TestFplValueScopeParent() =
             Assert.IsTrue(false)
 
     [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred infix ">" -1 T1() {intr};""")>]
-    [<DataRow("base3", """def pred postfix "'" T1() {intr};""")>]
-    [<DataRow("base4", """def pred prefix "-" T1() {intr};""")>]
-    [<DataRow("base5", """def cl symbol "∅" T1:obj {intr};""")>]
+    [<DataRow("base2", """def pred T1 infix ">" -1 () {intr};""")>]
+    [<DataRow("base3", """def pred T1 postfix "'" () {intr};""")>]
+    [<DataRow("base4", """def pred T1 prefix "-" () {intr};""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" :obj {intr};""")>]
     [<DataRow("base5a", """def cl T1:obj {intr};""")>]
     [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func infix ">" -1 T1()->obj {intr};""")>]
-    [<DataRow("base8", """def func postfix "'" T1()->obj {intr};""")>]
-    [<DataRow("base9", """def func prefix "-" T1()->obj {intr};""")>]
+    [<DataRow("base7", """def func T1 infix ">" -1 ()->obj {intr};""")>]
+    [<DataRow("base8", """def func T1 postfix "'" ()->obj {intr};""")>]
+    [<DataRow("base9", """def func T1 prefix "-" ()->obj {intr};""")>]
     [<TestMethod>]
     member this.TestFixNotation(var, varVal) =
         ad.Clear()
@@ -725,9 +740,9 @@ type TestFplValueScopeParent() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = 
-                if varVal.Contains "cl" then 
+                if varVal.Contains literalCl then 
                     theory.Scope["T1"]
-                elif varVal.Contains "func" then 
+                elif varVal.Contains literalFunc then 
                     theory.Scope["T1() -> obj"]
                 else 
                     theory.Scope["T1()"]
@@ -769,7 +784,7 @@ type TestFplValueScopeParent() =
             let r = st.Root
             let theory = r.Scope[filename]
             let base1 = theory.Scope |> Seq.filter (fun kvp -> kvp.Key.StartsWith("T(")) |> Seq.map (fun kvp -> kvp.Value) |> Seq.toList |> List.head
-            let mapping = base1.ValueList[0]
+            let mapping = base1.ArgList[0]
             match var with
             | "base1" -> Assert.AreEqual<FplValue>(base1, mapping.Parent.Value)
             | "base2" -> Assert.AreEqual<FplValue>(base1, mapping.Parent.Value)
@@ -786,10 +801,10 @@ type TestFplValueScopeParent() =
             Assert.IsTrue(false)
 
     [<DataRow("base1", """100. |- trivial""", 0)>]
-    [<DataRow("base2", """100. ExistsByExample(c), 1. |- false""", 2)>]
-    [<DataRow("base3", """100. T1() |- assume not somePremise """, 1)>]
-    [<DataRow("base4", """100. 2., 3., 5. |- iif (a,b)""", 3)>]
-    [<DataRow("base5", """100. |- revoke 3.""", 0)>]
+    [<DataRow("base2", """100. ExistsByExample, 1 |- false""", 2)>]
+    [<DataRow("base3", """100. T1 |- assume not somePremise """, 1)>]
+    [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
+    [<DataRow("base5", """100. |- revoke 3""", 0)>]
     [<TestMethod>]
     member this.TestArgument(var, argExpression, expNumber:int) =
         ad.Clear()
@@ -803,8 +818,8 @@ type TestFplValueScopeParent() =
             let theory = r.Scope[filename]
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
-            let just = arg.ValueList[0]
-            let ainf = arg.ValueList[1]
+            let just = arg.ArgList[0]
+            let ainf = arg.ArgList[1]
             let numbOfJustifications = just.Scope.Count
  
             Assert.AreEqual<int>(expNumber, numbOfJustifications)
@@ -819,7 +834,7 @@ type TestFplValueScopeParent() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", "true", """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base0", literalTrue, """!tex: "1" !eng: literalTrue !ger: "wahr";""")>]
     [<DataRow("base1", "iif(x, y)", """!tex: x "\Leftrightarrow" y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
     [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
     [<DataRow("base3", "and(p, q)", """!tex: p "\wedge" q !eng: p " and " q !ger: p " und " q;""")>]
@@ -878,7 +893,7 @@ type TestFplValueScopeParent() =
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("base0", "true", """!tex: "1" !eng: "true" !ger: "wahr";""")>]
+    [<DataRow("base0", literalTrue, """!tex: "1" !eng: literalTrue !ger: "wahr";""")>]
     [<DataRow("base1", "iif(x, y)", """!tex: x " \Leftrightarrow " y !eng: x " if and only if " y !ger: x " dann und nur dann wenn " y;""")>]
     [<DataRow("base2", "not(x)", """!tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;""")>]
     [<DataRow("base3", "and(p, q)", """!tex: p " \wedge " q !eng: p " and " q !ger: p " und " q;""")>]
@@ -897,7 +912,7 @@ type TestFplValueScopeParent() =
             let theory = r.Scope[filename]
             let pred = theory.Scope[predName]
             let lang = pred.Scope["tex"]
-            let trsl = lang.ValueList[0]
+            let trsl = lang.ArgList[0]
 
             match var with
             | "base0" -> Assert.AreEqual<FplValue>(lang, trsl.Parent.Value)

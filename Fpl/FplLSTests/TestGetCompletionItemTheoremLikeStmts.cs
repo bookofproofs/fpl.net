@@ -1,21 +1,21 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
+using static FplGrammarCommons;
 namespace FplLSTests
 {
     [TestClass]
     public class TestGetCompletionItemTheoremLikeStmts
     {
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
-        [DataRow("thm", "Theorem")]
-        [DataRow("theorem", "Theorem")]
-        [DataRow("lem", "Lemma")]
-        [DataRow("lemma", "Lemma")]
-        [DataRow("conj", "Conjecture")]
-        [DataRow("conjecture", "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
+        [DataRow(literalThm, "Theorem")]
+        [DataRow(literalThmL, "Theorem")]
+        [DataRow(literalLem, "Lemma")]
+        [DataRow(literalLemL, "Lemma")]
+        [DataRow(literalConj, "Conjecture")]
+        [DataRow(literalConjL, "Conjecture")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestAddChoicesNumber(string choice, string l)
         {
@@ -25,16 +25,16 @@ namespace FplLSTests
             Assert.AreEqual<int>(2, actual.Count);
         }
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
-        [DataRow("thm", "Theorem")]
-        [DataRow("theorem", "Theorem")]
-        [DataRow("lem", "Lemma")]
-        [DataRow("lemma", "Lemma")]
-        [DataRow("conj", "Conjecture")]
-        [DataRow("conjecture", "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
+        [DataRow(literalThm, "Theorem")]
+        [DataRow(literalThmL, "Theorem")]
+        [DataRow(literalLem, "Lemma")]
+        [DataRow(literalLemL, "Lemma")]
+        [DataRow(literalConj, "Conjecture")]
+        [DataRow(literalConjL, "Conjecture")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestAddKeywordCounts(string choice, string l)
         {
@@ -48,26 +48,26 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("inference", "Inference", CompletionItemKind.Class, "inference01")]
-        [DataRow("inf", "Inference", CompletionItemKind.Class, "inference02")]
-        [DataRow("inference", "Inference", CompletionItemKind.Keyword, "zzzinference01")]
-        [DataRow("inf", "Inference", CompletionItemKind.Keyword, "zzzzinference02")]
-        [DataRow("theorem", "Theorem", CompletionItemKind.Class, "theorem01")]
-        [DataRow("thm", "Theorem", CompletionItemKind.Class, "theorem02")]
-        [DataRow("theorem", "Theorem", CompletionItemKind.Keyword, "zzztheorem01")]
-        [DataRow("thm", "Theorem", CompletionItemKind.Keyword, "zzzztheorem02")]
-        [DataRow("lemma", "Lemma", CompletionItemKind.Class, "lemma01")]
-        [DataRow("lem", "Lemma", CompletionItemKind.Class, "lemma02")]
-        [DataRow("lemma", "Lemma", CompletionItemKind.Keyword, "zzzlemma01")]
-        [DataRow("lem", "Lemma", CompletionItemKind.Keyword, "zzzzlemma02")]
-        [DataRow("conjecture", "Conjecture", CompletionItemKind.Class, "conjecture01")]
-        [DataRow("conj", "Conjecture", CompletionItemKind.Class, "conjecture02")]
-        [DataRow("conjecture", "Conjecture", CompletionItemKind.Keyword, "zzzconjecture01")]
-        [DataRow("conj", "Conjecture", CompletionItemKind.Keyword, "zzzzconjecture02")]
-        [DataRow("proposition", "Proposition", CompletionItemKind.Class, "proposition01")]
-        [DataRow("prop", "Proposition", CompletionItemKind.Class, "proposition02")]
-        [DataRow("proposition", "Proposition", CompletionItemKind.Keyword, "zzzproposition01")]
-        [DataRow("prop", "Proposition", CompletionItemKind.Keyword, "zzzzproposition02")]
+        [DataRow(literalInfL, "Inference", CompletionItemKind.Class, "inference01")]
+        [DataRow(literalInf, "Inference", CompletionItemKind.Class, "inference02")]
+        [DataRow(literalInfL, "Inference", CompletionItemKind.Keyword, "zzzinference01")]
+        [DataRow(literalInf, "Inference", CompletionItemKind.Keyword, "zzzzinference02")]
+        [DataRow(literalThmL, "Theorem", CompletionItemKind.Class, "theorem01")]
+        [DataRow(literalThm, "Theorem", CompletionItemKind.Class, "theorem02")]
+        [DataRow(literalThmL, "Theorem", CompletionItemKind.Keyword, "zzztheorem01")]
+        [DataRow(literalThm, "Theorem", CompletionItemKind.Keyword, "zzzztheorem02")]
+        [DataRow(literalLemL, "Lemma", CompletionItemKind.Class, "lemma01")]
+        [DataRow(literalLem, "Lemma", CompletionItemKind.Class, "lemma02")]
+        [DataRow(literalLemL, "Lemma", CompletionItemKind.Keyword, "zzzlemma01")]
+        [DataRow(literalLem, "Lemma", CompletionItemKind.Keyword, "zzzzlemma02")]
+        [DataRow(literalConjL, "Conjecture", CompletionItemKind.Class, "conjecture01")]
+        [DataRow(literalConj, "Conjecture", CompletionItemKind.Class, "conjecture02")]
+        [DataRow(literalConjL, "Conjecture", CompletionItemKind.Keyword, "zzzconjecture01")]
+        [DataRow(literalConj, "Conjecture", CompletionItemKind.Keyword, "zzzzconjecture02")]
+        [DataRow(literalPropL, "Proposition", CompletionItemKind.Class, "proposition01")]
+        [DataRow(literalProp, "Proposition", CompletionItemKind.Class, "proposition02")]
+        [DataRow(literalPropL, "Proposition", CompletionItemKind.Keyword, "zzzproposition01")]
+        [DataRow(literalProp, "Proposition", CompletionItemKind.Keyword, "zzzzproposition02")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, string l, CompletionItemKind kind, string expected)
         {
@@ -82,16 +82,16 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
-        [DataRow("thm", "Theorem")]
-        [DataRow("theorem", "Theorem")]
-        [DataRow("lem", "Lemma")]
-        [DataRow("lemma", "Lemma")]
-        [DataRow("conj", "Conjecture")]
-        [DataRow("conjecture", "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
+        [DataRow(literalThm, "Theorem")]
+        [DataRow(literalThmL, "Theorem")]
+        [DataRow(literalLem, "Lemma")]
+        [DataRow(literalLemL, "Lemma")]
+        [DataRow(literalConj, "Conjecture")]
+        [DataRow(literalConjL, "Conjecture")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice, string l)
         {
@@ -106,16 +106,16 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
-        [DataRow("thm", "Theorem")]
-        [DataRow("theorem", "Theorem")]
-        [DataRow("lem", "Lemma")]
-        [DataRow("lemma", "Lemma")]
-        [DataRow("conj", "Conjecture")]
-        [DataRow("conjecture", "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
+        [DataRow(literalThm, "Theorem")]
+        [DataRow(literalThmL, "Theorem")]
+        [DataRow(literalLem, "Lemma")]
+        [DataRow(literalLemL, "Lemma")]
+        [DataRow(literalConj, "Conjecture")]
+        [DataRow(literalConjL, "Conjecture")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestAddChoicesLabel(string choice, string l)
         {
@@ -127,16 +127,16 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
-        [DataRow("thm", "Theorem")]
-        [DataRow("theorem", "Theorem")]
-        [DataRow("lem", "Lemma")]
-        [DataRow("lemma", "Lemma")]
-        [DataRow("conj", "Conjecture")]
-        [DataRow("conjecture", "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
+        [DataRow(literalThm, "Theorem")]
+        [DataRow(literalThmL, "Theorem")]
+        [DataRow(literalLem, "Lemma")]
+        [DataRow(literalLemL, "Lemma")]
+        [DataRow(literalConj, "Conjecture")]
+        [DataRow(literalConjL, "Conjecture")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestAddChoicesDetail(string choice, string l)
         {
@@ -155,16 +155,16 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("inf", "Inference")]
-        [DataRow("inference", "Inference")]
-        [DataRow("thm", "Theorem")]
-        [DataRow("theorem", "Theorem")]
-        [DataRow("lem", "Lemma")]
-        [DataRow("lemma", "Lemma")]
-        [DataRow("conj", "Conjecture")]
-        [DataRow("conjecture", "Conjecture")]
-        [DataRow("prop", "Proposition")]
-        [DataRow("proposition", "Proposition")]
+        [DataRow(literalInf, "Inference")]
+        [DataRow(literalInfL, "Inference")]
+        [DataRow(literalThm, "Theorem")]
+        [DataRow(literalThmL, "Theorem")]
+        [DataRow(literalLem, "Lemma")]
+        [DataRow(literalLemL, "Lemma")]
+        [DataRow(literalConj, "Conjecture")]
+        [DataRow(literalConjL, "Conjecture")]
+        [DataRow(literalProp, "Proposition")]
+        [DataRow(literalPropL, "Proposition")]
         [TestMethod]
         public void TestAddChoicesInsertText(string choice, string l)
         {

@@ -1,21 +1,23 @@
+// Ignore Spelling: Fpl
+
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using static FParsec.ErrorMessage;
+using static FplGrammarCommons;
 
 namespace FplLSTests
 {
     [TestClass]
     public class TestGetCompletionItemPredicate
     {
-        [DataRow("true", 1)]
-        [DataRow("false", 1)]
-        [DataRow("undef", 1)]
-        [DataRow("undefined", 1)]
-        [DataRow("not", 2)]
-        [DataRow("xor", 2)]
-        [DataRow("iif", 2)]
-        [DataRow("impl", 2)]
-        [DataRow("and", 2)]
-        [DataRow("or", 2)]
+        [DataRow(literalTrue, 1)]
+        [DataRow(literalFalse, 1)]
+        [DataRow(literalUndef, 1)]
+        [DataRow(literalUndefL, 1)]
+        [DataRow(literalNot, 2)]
+        [DataRow(literalXor, 2)]
+        [DataRow(literalIif, 2)]
+        [DataRow(literalImpl, 2)]
+        [DataRow(literalAnd, 2)]
+        [DataRow(literalOr, 2)]
         [DataRow("(", 1)]
         [TestMethod]
         public void TestAddPredicateChoicesNumber(string choice, int expected)
@@ -25,16 +27,16 @@ namespace FplLSTests
             Assert.AreEqual<int>(expected, actual.Count);
         }
 
-        [DataRow("true")]
-        [DataRow("false")]
-        [DataRow("undef")]
-        [DataRow("undefined")]
-        [DataRow("not")]
-        [DataRow("xor")]
-        [DataRow("iif")]
-        [DataRow("impl")]
-        [DataRow("and")]
-        [DataRow("or")]
+        [DataRow(literalTrue)]
+        [DataRow(literalFalse)]
+        [DataRow(literalUndef)]
+        [DataRow(literalUndefL)]
+        [DataRow(literalNot)]
+        [DataRow(literalXor)]
+        [DataRow(literalIif)]
+        [DataRow(literalImpl)]
+        [DataRow(literalAnd)]
+        [DataRow(literalOr)]
         [DataRow("(")]
         [TestMethod]
         public void TestAddPredicateKeywordCounts(string choice)
@@ -54,22 +56,22 @@ namespace FplLSTests
             Assert.AreEqual<int>(expected, count);
         }
 
-        [DataRow("true", CompletionItemKind.Keyword, "zzztrue")]
-        [DataRow("false", CompletionItemKind.Keyword, "zzzfalse")]
-        [DataRow("undefined", CompletionItemKind.Keyword, "zzzundefined01")]
-        [DataRow("undef", CompletionItemKind.Keyword, "zzzzundefined02")]
-        [DataRow("not", CompletionItemKind.Operator, "not")]
-        [DataRow("not", CompletionItemKind.Keyword, "zzznot")]
-        [DataRow("xor", CompletionItemKind.Operator, "xor")]
-        [DataRow("xor", CompletionItemKind.Keyword, "zzzxor")]
-        [DataRow("iif", CompletionItemKind.Operator, "iif")]
-        [DataRow("iif", CompletionItemKind.Keyword, "zzziif")]
-        [DataRow("impl", CompletionItemKind.Operator, "impl")]
-        [DataRow("impl", CompletionItemKind.Keyword, "zzzimpl")]
-        [DataRow("and", CompletionItemKind.Operator, "and")]
-        [DataRow("and", CompletionItemKind.Keyword, "zzzand")]
-        [DataRow("or", CompletionItemKind.Operator, "or")]
-        [DataRow("or", CompletionItemKind.Keyword, "zzzor")]
+        [DataRow(literalTrue, CompletionItemKind.Keyword, "zzztrue")]
+        [DataRow(literalFalse, CompletionItemKind.Keyword, "zzzfalse")]
+        [DataRow(literalUndefL, CompletionItemKind.Keyword, "zzzundefined01")]
+        [DataRow(literalUndef, CompletionItemKind.Keyword, "zzzzundefined02")]
+        [DataRow(literalNot, CompletionItemKind.Operator, literalNot)]
+        [DataRow(literalNot, CompletionItemKind.Keyword, "zzznot")]
+        [DataRow(literalXor, CompletionItemKind.Operator, literalXor)]
+        [DataRow(literalXor, CompletionItemKind.Keyword, "zzzxor")]
+        [DataRow(literalIif, CompletionItemKind.Operator, literalIif)]
+        [DataRow(literalIif, CompletionItemKind.Keyword, "zzziif")]
+        [DataRow(literalImpl, CompletionItemKind.Operator, literalImpl)]
+        [DataRow(literalImpl, CompletionItemKind.Keyword, "zzzimpl")]
+        [DataRow(literalAnd, CompletionItemKind.Operator, literalAnd)]
+        [DataRow(literalAnd, CompletionItemKind.Keyword, "zzzand")]
+        [DataRow(literalOr, CompletionItemKind.Operator, literalOr)]
+        [DataRow(literalOr, CompletionItemKind.Keyword, "zzzor")]
         [DataRow("(", CompletionItemKind.Operator, "(")]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind isKeyword, string expected)
@@ -85,16 +87,16 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("true")]
-        [DataRow("false")]
-        [DataRow("undef")]
-        [DataRow("undefined")]
-        [DataRow("not")]
-        [DataRow("xor")]
-        [DataRow("iif")]
-        [DataRow("impl")]
-        [DataRow("and")]
-        [DataRow("or")]
+        [DataRow(literalTrue)]
+        [DataRow(literalFalse)]
+        [DataRow(literalUndef)]
+        [DataRow(literalUndefL)]
+        [DataRow(literalNot)]
+        [DataRow(literalXor)]
+        [DataRow(literalIif)]
+        [DataRow(literalImpl)]
+        [DataRow(literalAnd)]
+        [DataRow(literalOr)]
         [DataRow("(")]
         [TestMethod]
         public void TestInsertTextEndsWithTwoNewLines(string choice)
@@ -110,16 +112,16 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("true")]
-        [DataRow("false")]
-        [DataRow("undef")]
-        [DataRow("undefined")]
-        [DataRow("not")]
-        [DataRow("xor")]
-        [DataRow("iif")]
-        [DataRow("impl")]
-        [DataRow("and")]
-        [DataRow("or")]
+        [DataRow(literalTrue)]
+        [DataRow(literalFalse)]
+        [DataRow(literalUndef)]
+        [DataRow(literalUndefL)]
+        [DataRow(literalNot)]
+        [DataRow(literalXor)]
+        [DataRow(literalIif)]
+        [DataRow(literalImpl)]
+        [DataRow(literalAnd)]
+        [DataRow(literalOr)]
         [DataRow("(")]
         [TestMethod]
         public void TestAddPredicateChoicesLabel(string choice)
@@ -132,16 +134,16 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("true", "predicate (true)")]
-        [DataRow("false", "predicate (false)")]
-        [DataRow("undef", "undefined (short form)")]
-        [DataRow("undefined", "undefined")]
-        [DataRow("not", "predicate (negation)")]
-        [DataRow("xor", "predicate (exclusive or)")]
-        [DataRow("iif", "predicate (equivalence, <=>)")]
-        [DataRow("impl", "predicate (implication, =>)")]
-        [DataRow("and", "predicate (conjunction)")]
-        [DataRow("or", "predicate (disjunction)")]
+        [DataRow(literalTrue, "predicate (true)")]
+        [DataRow(literalFalse, "predicate (false)")]
+        [DataRow(literalUndef, "undefined (short form)")]
+        [DataRow(literalUndefL, literalUndefL)]
+        [DataRow(literalNot, "predicate (negation)")]
+        [DataRow(literalXor, "predicate (exclusive or)")]
+        [DataRow(literalIif, "predicate (equivalence, <=>)")]
+        [DataRow(literalImpl, "predicate (implication, =>)")]
+        [DataRow(literalAnd, "predicate (conjunction)")]
+        [DataRow(literalOr, "predicate (disjunction)")]
         [DataRow("(", "equality")]
         [TestMethod]
         public void TestAddPredicateChoicesDetail(string choice, string l)
@@ -157,16 +159,16 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("true")]
-        [DataRow("false")]
-        [DataRow("undef")]
-        [DataRow("undefined")]
-        [DataRow("not")]
-        [DataRow("xor")]
-        [DataRow("iif")]
-        [DataRow("impl")]
-        [DataRow("and")]
-        [DataRow("or")]
+        [DataRow(literalTrue)]
+        [DataRow(literalFalse)]
+        [DataRow(literalUndef)]
+        [DataRow(literalUndefL)]
+        [DataRow(literalNot)]
+        [DataRow(literalXor)]
+        [DataRow(literalIif)]
+        [DataRow(literalImpl)]
+        [DataRow(literalAnd)]
+        [DataRow(literalOr)]
         [DataRow("(")]
         [TestMethod]
         public void TestAddPredicateChoicesInsertText(string choice)

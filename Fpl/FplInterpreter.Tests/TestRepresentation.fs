@@ -1,6 +1,7 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
+open FplGrammarCommons
 open FplInterpreterTypes
 open CommonTestHelpers
 
@@ -8,20 +9,20 @@ open CommonTestHelpers
 type TestRepresentation() =
 
 
-    [<DataRow("00","false", "false")>]
-    [<DataRow("01","true", "true")>]
-    [<DataRow("02","(x = x)", "true")>]
-    [<DataRow("02a","not(x = x)", "false")>]
-    [<DataRow("03","(x = y)", "false")>]
-    [<DataRow("04","not (x = y)", "true")>]
+    [<DataRow("00",literalFalse, literalFalse)>]
+    [<DataRow("01",literalTrue, literalTrue)>]
+    [<DataRow("02","(x = x)", literalTrue)>]
+    [<DataRow("02a","not(x = x)", literalFalse)>]
+    [<DataRow("03","(x = y)", literalFalse)>]
+    [<DataRow("04","not (x = y)", literalTrue)>]
     [<TestMethod>]
-    member this.TestPredicateRepresentation(var:string, varVal, expected:string) =
+    member this.TestRepresentationPredicate(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.Commons 
             def cl A: obj  {intr} 
             def cl B: obj  {intr} 
             def pred T() { dec ~x,y:obj x:=A() y:=B(); %s };""" varVal
-        let filename = "TestPredicateRepresentation.fpl"
+        let filename = "TestRepresentationPredicate.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -29,17 +30,17 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
-            let predicateValue = pr.ValueList |> Seq.toList |> List.rev |> List.head
-            Assert.AreEqual<string>(expected, predicateValue.Type(SignatureType.Repr))
+            let predicateValue = pr.ArgList |> Seq.toList |> List.rev |> List.head
+            Assert.AreEqual<string>(expected, predicateValue.Represent())
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","n:=Zero()", "Zero()")>]
+    [<DataRow("00","n:=Zero()", "intr Zero:intr Nat:intr obj")>]
     [<TestMethod>]
-    member this.TestAssignmentRepresentation(var:string, varVal, expected:string) =
+    member this.TestRepresentationAssignment(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { dec ~n:Nat %s; true };""" varVal
-        let filename = "TestAssignmentRepresentation.fpl"
+        let filename = "TestRepresentationAssignment.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -47,17 +48,21 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let fn = theory.Scope["T()"] 
-            let assignmentStmt = fn.ValueList[0]
-            Assert.IsTrue(false)
+            let assignmentStmt = fn.ArgList[0]
+            let assignee = assignmentStmt.ArgList[0]
+            let assignedValue = getArgument assignee
+            match assignedValue with 
+            | Some value -> Assert.AreEqual<string>(expected, value.Represent())
+            | None -> Assert.AreEqual<string>(expected, "no value was assigned")
         | None -> 
             Assert.IsTrue(false)
             
     [<DataRow("00","n:=Zero()", "Zero()")>]
     [<TestMethod>]
-    member this.TestReturnRepresentation(var:string, varVal, expected:string) =
+    member this.TestRepresentationReturn(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.PeanoArithmetics def func T()->Nat { dec ~n:Nat %s; return n };""" varVal
-        let filename = "TestReturnRepresentation.fpl"
+        let filename = "TestRepresentationReturn.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -65,17 +70,17 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let fn = theory.Scope["T() -> Nat"] 
-            let retStmt = fn.ValueList[0]
-            Assert.AreEqual<string>(expected, retStmt.Type(SignatureType.Repr))
+            let retStmt = fn.ArgList[0]
+            Assert.AreEqual<string>(expected, retStmt.Represent())
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","(@0 = Zero())", "true")>]
+    [<DataRow("00","(@0 = Zero())", literalTrue)>]
     [<TestMethod>]
-    member this.TestCasesRepresentation(var:string, varVal, expected:string) =
+    member this.TestRepresentationCases(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """uses Fpl.PeanoArithmetics def pred T() { %s };""" varVal
-        let filename = "TestCasesRepresentation.fpl"
+        let filename = "TestRepresentationCases.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -83,22 +88,104 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
-            let base1 = pr.ValueList[0]
-            Assert.AreEqual<string>(expected, base1.Type(SignatureType.Repr))
+            Assert.AreEqual<string>(expected, pr.Represent())
         | None -> 
             Assert.IsTrue(false)
 
-    [<DataRow("00","(@0 = A())", "false")>]
-    [<DataRow("00a","(@1 = A())", "false")>]
-    [<DataRow("00b","(@2 = A())", "true")>]
-    [<DataRow("01","(@0 = B())", "true")>]
-    [<DataRow("01a","(@1 = B())", "false")>]
-    [<DataRow("01b","(@2 = A())", "false")>]
-    [<DataRow("02","(@0 = C())", "false")>]
-    [<DataRow("02a","(@1 = C())", "true")>]
-    [<DataRow("02b","(@2 = C())", "false")>]
+    [<DataRow("($0 = $0)", literalTrue)>]
+    [<DataRow("($1 = $2)", literalFalse)>]
+    [<DataRow("($3 = $3)", literalTrue)>]
+    [<DataRow("(@3 = $3)", literalUndef)>]
+    [<DataRow("(true = false)", literalFalse)>]
+    [<DataRow("(undef = undef)", literalUndef)>]
+    [<DataRow("(true = true)", literalTrue)>]
+    [<DataRow("(true = undef)", literalUndef)>]
+    [<DataRow("(undef = true)", literalUndef)>]
+    [<DataRow("(a = true)", literalUndef)>]
+    [<DataRow("(i = $3)", literalUndetermined)>]
+    [<DataRow("(j = $2)", literalTrue)>]
+    [<DataRow("(k = $2)", literalFalse)>]
+    [<DataRow("(true = a)", literalUndef)>]
+    [<DataRow("($3 = i)", literalUndetermined)>]
+    [<DataRow("($2 = j)", literalTrue)>]
+    [<DataRow("($2 = k)", literalFalse)>]
     [<TestMethod>]
-    member this.TestCasesRepresentation2(var:string, varVal, expected:string) =
+    member this.TestRepresentationEquality(varVal, expected:string) =
+        ad.Clear()
+        let fplCode = sprintf """
+        def pred Equal infix "=" 50 (x,y: tpl)
+        {
+            del.Equal(x,y)
+        } 
+        def pred T() { dec ~i,j,k:ind j:=$2 k:=$3; %s };""" varVal
+        let filename = "TestRepresentationCases.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            Assert.AreEqual<string>(expected, pr.Represent())
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("00","""def pred T() { dec ~v:ind; true };""", "dec ind")>]
+    [<DataRow("00a","""def pred T() { dec ~v:pred; true };""", "dec pred")>]
+    [<DataRow("00b","""def pred T() { dec ~v:obj; true };""", "dec obj")>]
+    [<DataRow("00c","""def pred T() { dec ~v:func; true };""", "dec func")>]
+    [<DataRow("00d","""def pred T() { dec ~v:tpl; true };""", "dec tpl")>]
+    [<DataRow("01a","""def pred T() { dec ~v:tpl(d:ind); true };""", "dec tpl(ind)")>]
+    [<DataRow("01b","""def pred T() { dec ~v:tpl(d:pred(e,f:obj)); true };""", "dec tpl(pred(obj, obj))")>]
+    [<DataRow("01c","""def pred T() { dec ~v:func(d:tpl(e:obj,d,e:ind)) ->tpl1(d:pred(e,f:obj)); true };""", "dec func(tpl(obj, ind, ind)) -> tpl1(pred(obj, obj))")>]
+    [<DataRow("02","""def pred T() { dec ~v:A; true };""", "dec A")>]
+    [<DataRow("02a","""def cl A:obj {intr} def pred T() { dec ~v:A; true };""", "dec A")>]
+    [<TestMethod>]
+    member this.TestRepresentationUnitializedVars(var:string, fplCode, expected:string) =
+        ad.Clear()
+        let filename = "TestRepresentationUnitializedVars.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let v = pr.Scope["v"]
+            Assert.AreEqual<string>(expected, v.Represent())
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("00","""def pred T() { dec ~v:pred v:=true; false};""", literalTrue)>]
+    [<DataRow("01","""def pred T() { dec ~v:pred v:=false; false};""", literalFalse)>]
+    [<TestMethod>]
+    member this.TestRepresentationItializedVars(var:string, fplCode, expected:string) =
+        ad.Clear()
+        let filename = "TestRepresentationUnitializedVars.fpl"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pr = theory.Scope["T()"] 
+            let v = pr.Scope["v"]
+            Assert.AreEqual<string>(expected, v.Represent())
+        | None -> 
+            Assert.IsTrue(false)
+
+
+    [<DataRow("00","(@0 = A())", literalFalse)>]
+    [<DataRow("00a","(@1 = A())", literalFalse)>]
+    [<DataRow("00b","(@2 = A())", literalTrue)>]
+    [<DataRow("01","(@0 = B())", literalTrue)>]
+    [<DataRow("01a","(@1 = B())", literalFalse)>]
+    [<DataRow("01b","(@2 = A())", literalFalse)>]
+    [<DataRow("02","(@0 = C())", literalFalse)>]
+    [<DataRow("02a","(@1 = C())", literalTrue)>]
+    [<DataRow("02b","(@2 = C())", literalFalse)>]
+    [<TestMethod>]
+    member this.TestRepresentationCases2(var:string, varVal, expected:string) =
         ad.Clear()
         let fplCode = sprintf """
             uses Fpl.Commons
@@ -125,7 +212,7 @@ type TestRepresentation() =
         
         
         def pred T() { %s };""" varVal
-        let filename = "TestCasesRepresentation2.fpl"
+        let filename = "TestRepresentationCases2.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
         prepareFplCode(filename, "", false) |> ignore
         match stOption with
@@ -133,8 +220,8 @@ type TestRepresentation() =
             let r = st.Root
             let theory = r.Scope[filename]
             let pr = theory.Scope["T()"] 
-            let base1 = pr.ValueList[0]
-            let result = base1.Type(SignatureType.Repr)
+            let base1 = pr.ArgList[0]
+            let result = base1.Represent()
             printf "Representation: %s\n" (result)
             Assert.AreEqual<string>(expected, result)
         | None -> 

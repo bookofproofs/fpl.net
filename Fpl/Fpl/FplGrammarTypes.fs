@@ -2,6 +2,8 @@
 open System.Collections.Generic
 open FParsec
 
+
+
 /// our FPL grammar needs starting and ending position for each Ast node since we
 /// will need these information for the diagnostics of the interpreter even after the 
 /// parsing was done
@@ -92,7 +94,10 @@ type Ast =
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Positions * (Ast * Ast)
     | ArgumentIdentifier of Positions * string
+    | RefArgumentIdentifier of Positions * string
+    | RefArgumentIdentifierOtherProof of Positions * ((Ast * Ast list) * Ast) 
     | ReferenceToProofOrCorollary of Positions * (Ast * Ast option) 
+    | JustificationItem of Positions * Ast 
     | Justification of Positions * Ast list
     | ArgumentTuple of Positions * Ast list
     | ByDef of Positions * Ast
@@ -116,6 +121,9 @@ type Ast =
     | ConditionFollowedByResult of Positions * (Ast * Ast list)
     | DefaultResult of Positions * Ast list 
     | Cases of Positions * (Ast list * Ast)
+    | ConditionFollowedByMapResult of Positions * (Ast * Ast)
+    | DefaultMapResult of Positions * Ast  
+    | MapCases of Positions * (Ast list * Ast)
     | Assignment of Positions * (Ast * Ast)
     | ForIn of Positions * ((Ast * Ast) * Ast list)
     | Return of Positions * Ast

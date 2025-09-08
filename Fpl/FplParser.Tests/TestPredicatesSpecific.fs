@@ -2,6 +2,7 @@ namespace FplParser.Tests
 
 open FParsec
 open FplParser
+open FplGrammarCommons
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -17,28 +18,28 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPrimePredicate1 () =
-        let result = run (primePredicate .>> eof) """true"""
+        let result = run (primePredicate .>> eof) literalTrue
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPrimePredicate2 () =
-        let result = run (primePredicate .>> eof) """false"""
+        let result = run (primePredicate .>> eof) literalFalse
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPrimePredicate3 () =
-        let result = run (primePredicate .>> eof) """undef"""
+        let result = run (primePredicate .>> eof) literalUndef
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestPrimePredicate4 () =
-        let result = run (primePredicate .>> eof) """undefined"""
+        let result = run (primePredicate .>> eof) literalUndefL
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -59,7 +60,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPrimePredicate7 () =
-        let result = run (primePredicate .>> eof) """parent"""
+        let result = run (primePredicate .>> eof) literalParent
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -116,13 +117,6 @@ type TestPredicatesSpecific () =
     [<TestMethod>]
     member this.TestDisjunctrion4 () =
         let result = run (disjunction .>> eof) """or ( or ( true, or( true, false)), true )"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
-    member this.TestDisjunctrion5 () =
-        let result = run (disjunction .>> eof) """or(1.,2.)"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -233,13 +227,6 @@ type TestPredicatesSpecific () =
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
-    member this.TestPredicateWithArgs3 () =
-        let result = run (predicateWithQualification .>> eof) """ProceedingResults(1.,2.)"""
-        let actual = sprintf "%O" result
-        printf "%O" actual
-        Assert.IsTrue(actual.StartsWith("Success:"))
-
-    [<TestMethod>]
     member this.TestPredicateWithArgs4 () =
         let result = run (predicateWithQualification .>> eof) """Add(result,list[i])"""
         let actual = sprintf "%O" result
@@ -269,7 +256,7 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestPredicateWithArgs3a () =
-        let result = run (predicateWithQualification .>> eof) """x[ProceedingResults(1.,2.)]"""
+        let result = run (predicateWithQualification .>> eof) """x[ProceedingResults(x,y)]"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -532,14 +519,14 @@ type TestPredicatesSpecific () =
 
     [<TestMethod>]
     member this.TestByDef01 () =
-        let result = run (byDefinition .>> eof) """bydef x"""
+        let result = run (byDefinition .>> eof) """bydef A"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestByDef02 () =
-        let result = run (byDefinition .>> eof) """bydef x[y]"""
+        let result = run (byDefinition .>> eof) """bydef Bdd"""
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

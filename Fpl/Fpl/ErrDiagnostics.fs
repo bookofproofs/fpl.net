@@ -122,20 +122,15 @@ type DiagnosticCode =
     | ID019 of string 
     | ID020 of string 
     | ID021 of string 
-    // variable-related error codes
-    | VAR00 
-    | VAR01 of string 
-    | VAR03 of string * string
-    | VAR04 of string 
-    | VAR05 of string 
-    | VAR06 of string * string
-    // signature-related error codes
-    | SIG00 of string * int
-    | SIG01 of string 
-    | SIG02 of string * int * string
-    | SIG03 of string * string 
-    | SIG04 of string * int * string list
-    | SIG05 of string * string
+    | ID022 of string * bool
+    | ID023 of string 
+    // logic-related error codes
+    | LG000 of string * string 
+    | LG001 of string * string * string
+    | LG002 of string * int
+    | LG003 of string * string
+    | LG004 of string
+    | LG005 of string
     // proof-related error codes
     | PR000 of string 
     | PR001 
@@ -143,9 +138,23 @@ type DiagnosticCode =
     | PR003 of string * string
     | PR004 of string * string
     | PR005 of string
-    // logic-related error codes
-    | LG000 of string * string 
-    | LG001 of string * string * string
+    | PR006 
+    | PR007 of string * string
+    | PR008 of string * string * string
+    // signature-related error codes
+    | SIG00 of string * int
+    | SIG01 of string 
+    | SIG02 of string * int * string
+    | SIG03 of string * string 
+    | SIG04 of string * int * string list
+    | SIG05 of string * string
+    // variable-related error codes
+    | VAR00 
+    | VAR01 of string 
+    | VAR03 of string * string
+    | VAR04 of string 
+    | VAR05 of string 
+    | VAR06 of string * string
     member this.Code = 
         match this with
             // parser error messages
@@ -207,20 +216,15 @@ type DiagnosticCode =
             | ID019 _ -> "ID019"
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
-            // variable-related error codes
-            | VAR00 -> "VAR00"
-            | VAR01 _  -> "VAR01"
-            | VAR03 _  -> "VAR03"
-            | VAR04 _  -> "VAR04"
-            | VAR05 _  -> "VAR05"
-            | VAR06 _  -> "VAR06"
-            // signature-related error codes
-            | SIG00 _ -> "SIG00"
-            | SIG01 _ -> "SIG01"
-            | SIG02 _ -> "SIG02"
-            | SIG03 _ -> "SIG03"
-            | SIG04 _ -> "SIG04"
-            | SIG05 _ -> "SIG05"
+            | ID022 _ -> "ID022"
+            | ID023 _ -> "ID023"
+            // logic-related error codes
+            | LG000 _ -> "LG000"
+            | LG001 _ -> "LG001"
+            | LG002 _ -> "LG002"
+            | LG003 _ -> "LG003"
+            | LG004 _ -> "LG004"
+            | LG005 _ -> "LG005"
             // proof-related error codes
             | PR000 _ -> "PR000"
             | PR001 -> "PR001"
@@ -228,9 +232,23 @@ type DiagnosticCode =
             | PR003 _ -> "PR003"
             | PR004 _ -> "PR004"
             | PR005 _ -> "PR005"
-            // logic-related error codes
-            | LG000 _ -> "LG000"
-            | LG001 _ -> "LG001"
+            | PR006 -> "PR006"
+            | PR007 _ -> "PR007"
+            | PR008 _ -> "PR008"
+            // signature-related error codes
+            | SIG00 _ -> "SIG00"
+            | SIG01 _ -> "SIG01"
+            | SIG02 _ -> "SIG02"
+            | SIG03 _ -> "SIG03"
+            | SIG04 _ -> "SIG04"
+            | SIG05 _ -> "SIG05"
+            // variable-related error codes
+            | VAR00 -> "VAR00"
+            | VAR01 _  -> "VAR01"
+            | VAR03 _  -> "VAR03"
+            | VAR04 _  -> "VAR04"
+            | VAR05 _  -> "VAR05"
+            | VAR06 _  -> "VAR06"
     member this.Message = 
         match this with
             // parser error messages
@@ -281,7 +299,7 @@ type DiagnosticCode =
             | ID008 (name, expectedName)  -> sprintf "Misspelled constructor name `%s`, expecting `%s`." name expectedName
             | ID009 name -> sprintf "Circular base type dependency involving `%s`." name
             | ID010 name -> sprintf "The type `%s` could not be found. Are you missing a uses clause?" name
-            | ID011 (name, inheritanceChain) -> sprintf "Inheritance from `%s` can be dropped because of the inheritance chain %s." name inheritanceChain
+            | ID011 (name, inheritanceChain) -> $"Inheritance from `{name}` can be dropped because of the inheritance chain {inheritanceChain}."  
             | ID012 (name, candidates) -> 
                 if candidates.Length > 0 then 
                     sprintf "Base class `%s` not found, candidates are %s." name candidates
@@ -300,13 +318,29 @@ type DiagnosticCode =
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> sprintf "Missing call of base constructor `%s`." name
             | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
-            // variable-related error codes
-            | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
-            | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
-            | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
-            | VAR04 name ->  sprintf $"Declared variable `{name}` not used in this scope."
-            | VAR05 name ->  sprintf $"Bound variable `{name}` not used in this quantor."
-            | VAR06 (name, parentClass) ->  sprintf $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
+            | ID022 (incorrectBlockType, isByDef) -> 
+                if isByDef then 
+                    $"Cannot find a justifying `by definition`, found only {incorrectBlockType}." 
+                else
+                    $"Cannot find a justifying theorem-like statement, found only {incorrectBlockType}." 
+            | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
+            // logic-related error codes
+            | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
+            | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
+            | LG002 (nodeTypeName, times) -> $"Possible infinite recursion detected, `{nodeTypeName}` was called for more than {times} times.`."
+            | LG003 (nodeTypeName, nodeName) -> $"`{nodeTypeName}` evaluates to `false` and cannot be {nodeName}."
+            | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
+            | LG005 name -> $"`Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
+            // proof-related error codes
+            | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
+            | PR001 -> $"Cannot refer to a definition outside a proof."
+            | PR002 -> $"Avoid referencing to proofs directly."
+            | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
+            | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
+            | PR005 name ->  $"Argument identifier `{name}` not declared in this scope."
+            | PR006 -> "Not all arguments of the proof could be verified."
+            | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
+            | PR008 (nodeName, expectedInputArgInference, actualInputArgInference) ->  $"This {nodeName} expects `{expectedInputArgInference}` and could not be applied to the proceeding argument inference which was `{actualInputArgInference}`."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 
@@ -322,16 +356,13 @@ type DiagnosticCode =
                     let errMsg = errorList |> List.mapi (fun i s -> sprintf "%d. %s" (i + 1) s) |> String.concat ", "
                     $"No overload matching `{signature}`. Checked candidates: {errorList}." 
             | SIG05 (assigneeType, assignedType) -> $"Cannot assign type `{assignedType}` to type `{assigneeType}`."
-            // proof-related error codes
-            | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
-            | PR001 -> $"Cannot refer to a definition outside a proof."
-            | PR002 -> $"Avoid referencing to proofs directly."
-            | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
-            | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
-            | PR005 name ->  sprintf $"Argument identifier `{name}` not declared in this scope."
-            // logic-related error codes
-            | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
-            | LG001 (typeOfPredicate,argument,typeOfExpression) -> $"Cannot evaluate `{typeOfPredicate}`; expecting a predicate argument `{argument}`, got `{typeOfExpression}`."
+            // variable-related error codes
+            | VAR00 ->  sprintf "Declaring multiple variadic variables at once may cause ambiguities."
+            | VAR01 name ->  sprintf $"Variable `{name}` not declared in this scope."
+            | VAR03 (identifier, conflict) -> sprintf "Variable `%s` was already declared in the scope of the associated block at %s" identifier conflict
+            | VAR04 name ->  sprintf $"Declared variable `{name}` not used in this scope."
+            | VAR05 name ->  sprintf $"Bound variable `{name}` not used in this quantor."
+            | VAR06 (name, parentClass) ->  sprintf $"Variable `{name}` of the parent class `{parentClass}` will be shadowed by a local variable with the same name in this scope."
 
 /// Computes an MD5 checksum of a string
 let computeMD5Checksum (input: string) =
@@ -495,7 +526,7 @@ let replaceFParsecErrMsgForFplParser (errMsg: string) (choices:string) (pos: Pos
     else
         errMsg
 
-let split = [|" or "; "or" + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
+let split = [|" or "; literalOr + Environment.NewLine ; "or\r" ; "or "; " Other error"; Environment.NewLine + "Other error"; ", "; "," + Environment.NewLine; Environment.NewLine + Environment.NewLine; Environment.NewLine|]
 let groupRegex = "(?<=Expecting: )(.+?)(?=(Expecting|(\n.+)+|$))"
 let retrieveExpectedParserChoices (errMsg:string) =
     // replace accidental new lines injected by FParsec into FPL parser labels that start by "<" and end by ">"
@@ -839,7 +870,7 @@ let preParsePreProcess (input:string) =
 /// The pattern has to start with non-whitespace characters (e.g. keywords or other strings that are distinctive for the language)
 /// we want to provide with emitting error recovery messages
 /// The list will be filtered to include only those matches that really start with that pattern, i.e. are proceeded some whitespace character 
-/// in the remaining source code. For instance, if "for" is the pattern than " for" will match, but "_for" will not.
+/// in the remaining source code. For instance, if literalFor is the pattern than " for" will match, but "_for" will not.
 
 let stringMatches (input: string) (pattern: string) =
     let regex = new Regex(pattern)
@@ -872,3 +903,10 @@ let stringMatches (input: string) (pattern: string) =
                 list.Add(m.Index)
     list.Add(input.Length)
     list
+
+/// A helper function for checking if a string starts with any of some string prefixes.
+let startsWithAny (prefixes:string list) (input:string) = 
+    prefixes |> List.exists input.StartsWith
+
+/// A helper function for checking if a string requires the "an" indefinite article in English.
+let isEnglishAn somString = startsWithAny ["a"; "e"; "i"; "o"; "u"] somString 

@@ -1,5 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-
+using static FplGrammarCommons;
 namespace FplLS
 {
 
@@ -28,10 +28,10 @@ namespace FplLS
             SetSortText(ci,propertyType,isOptional);
             if (ci.IsShort)
             {
-                TokenIntrinsic = "intr";
-                TokenFunction = "func";
-                TokenPredicate = "pred";
-                TokenOptional = "opt";
+                TokenIntrinsic = literalIntr;
+                TokenFunction = literalFunc;
+                TokenPredicate = literalPred;
+                TokenOptional = literalOpt;
                 if (isKeyword)
                 {
                     ci.Label = GetLabelKeyword(ci, propertyType, isOptional);

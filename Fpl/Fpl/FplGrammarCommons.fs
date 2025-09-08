@@ -7,95 +7,277 @@ open FParsec
 
 (* This module contains information needed by both, the error recovery module and the parser *)
 
-(* Fpl Keywords *)
+(* Keyword constants *)
+[<Literal>]
+let literalAlias = "alias"
+[<Literal>]
+let literalAll = "all"
+[<Literal>]
+let literalAnd = "and"
+[<Literal>]
+let literalAss = "ass"
+[<Literal>]
+let literalAssL = "assert"
+[<Literal>]
+let literalAssume = "assume"
+[<Literal>]
+let literalAx = "ax"
+[<Literal>]
+let literalAxL = "axiom"
+[<Literal>]
+let literalBase = "base"
+[<Literal>]
+let literalByDef = "bydef"
+[<Literal>]
+let literalCases = "cases"
+[<Literal>]
+let literalCl = "cl"
+[<Literal>]
+let literalClL = "class"
+[<Literal>]
+let literalCon = "con"
+[<Literal>]
+let literalConj = "conj"
+[<Literal>]
+let literalConjL = "conjecture"
+[<Literal>]
+let literalConL = "conclusion"
+[<Literal>]
+let literalCor = "cor"
+[<Literal>]
+let literalCorL = "corollary"
+[<Literal>]
+let literalCtor = "ctor"
+[<Literal>]
+let literalCtorL = "constructor"
+[<Literal>]
+let literalDec = "dec"
+[<Literal>]
+let literalDecL = "declaration"
+[<Literal>]
+let literalDef = "def"
+[<Literal>]
+let literalDefL = "definition"
+[<Literal>]
+let literalDel = "del"
+[<Literal>]
+let literalDelL = "delegate"
+[<Literal>]
+let literalEx = "ex"
+[<Literal>]
+let literalExN = "exn"
+[<Literal>]
+let literalExt = "ext"
+[<Literal>]
+let literalExtL = "extension"
+[<Literal>]
+let literalFalse = "false"
+[<Literal>]
+let literalFor = "for"
+[<Literal>]
+let literalFunc = "func"
+[<Literal>]
+let literalFuncL = "function"
+[<Literal>]
+let literalIif = "iif"
+[<Literal>]
+let literalImpl = "impl"
+[<Literal>]
+let literalIn = "in"
+[<Literal>]
+let literalInd = "ind"
+[<Literal>]
+let literalIndL = "index"
+[<Literal>]
+let literalInf = "inf"
+[<Literal>]
+let literalInfix = "infix"
+[<Literal>]
+let literalInfL = "inference"
+[<Literal>]
+let literalIntr = "intr"
+[<Literal>]
+let literalIntrL = "intrinsic"
+[<Literal>]
+let literalIs = "is"
+[<Literal>]
+let literalLem = "lem"
+[<Literal>]
+let literalLemL = "lemma"
+[<Literal>]
+let literalLoc = "loc"
+[<Literal>]
+let literalLocL = "localization"
+[<Literal>]
+let literalMapCases = "mcases"
+[<Literal>]
+let literalNot = "not"
+[<Literal>]
+let literalObj = "obj"
+[<Literal>]
+let literalObjL = "object"
+[<Literal>]
+let literalOpt = "opt"
+[<Literal>]
+let literalOptL = "optional"
+[<Literal>]
+let literalOr = "or"
+[<Literal>]
+let literalParent = "parent"
+[<Literal>]
+let literalPost = "post"
+[<Literal>]
+let literalPostFix = "postfix"
+[<Literal>]
+let literalPostL = "postulate"
+[<Literal>]
+let literalPre = "pre"
+[<Literal>]
+let literalPred = "pred"
+[<Literal>]
+let literalPredL = "predicate"
+[<Literal>]
+let literalPrefix = "prefix"
+[<Literal>]
+let literalPreL = "premise"
+[<Literal>]
+let literalPrf = "prf"
+[<Literal>]
+let literalPrfL = "proof"
+[<Literal>]
+let literalProp = "prop"
+[<Literal>]
+let literalPropL = "proposition"
+[<Literal>]
+let literalPrty = "prty"
+[<Literal>]
+let literalPrtyL = "property"
+[<Literal>]
+let literalQed = "qed"
+[<Literal>]
+let literalRet = "ret"
+[<Literal>]
+let literalRetL = "return"
+[<Literal>]
+let literalRev = "rev"
+[<Literal>]
+let literalRevL = "revoke"
+[<Literal>]
+let literalSelf = "self"
+[<Literal>]
+let literalSymbol = "symbol"
+[<Literal>]
+let literalThm = "thm"
+[<Literal>]
+let literalThmL = "theorem"
+[<Literal>]
+let literalTpl = "tpl"
+[<Literal>]
+let literalTplL = "template"
+[<Literal>]
+let literalTrivial = "trivial"
+[<Literal>]
+let literalTrue = "true"
+[<Literal>]
+let literalUndef = "undef"
+[<Literal>]
+let literalUndefL = "undefined"
+[<Literal>]
+let literalUndetermined = "undetermined"
+[<Literal>]
+let literalUses = "uses"
+[<Literal>]
+let literalXor = "xor"
+
 let keyWordSet =
     HashSet<_>(
-        [| "alias"
-           "all"
-           "and"
-           "assert"
-           "ass"
-           "assume"
-           "ax"
-           "axiom"
-           "base"
-           "bydef"
-           "cases"
-           "cl"
-           "class"
-           "conj"
-           "conjecture"
-           "con"
-           "conclusion"
-           "constructor"
-           "cor"
-           "corollary"
-           "ctor"
-           "dec"
-           "declaration"
-           "def"
-           "definition"
-           "del"
-           "delegate"
-           "ext"
-           "extension"
-           "ex"
-           "exn"
-           "false"
-           "for"
-           "func"
-           "function"
-           "iif"
-           "impl"
-           "ind"
-           "index"
-           "infix"
-           "intr"
-           "intrinsic"
-           "inf"
-           "inference"
-           "in"
-           "is"
-           "lem"
-           "lemma"
-           "loc"
-           "localization"
-           "not"
-           "obj"
-           "object"
-           "opt"
-           "optional"
-           "or"
-           "parent"
-           "post"
-           "postfix"
-           "postulate"
-           "pred"
-           "predicate"
-           "pre"
-           "prefix"
-           "premise"
-           "prf"
-           "proof"
-           "prop"
-           "proposition"
-           "prty"
-           "property"
-           "qed"
-           "ret"
-           "return"
-           "rev"
-           "revoke"
-           "self"
-           "symbol"
-           "thm"
-           "theorem"
-           "trivial"
-           "true"
-           "undef"
-           "undefined"
-           "uses"
-           "xor" |]
+        [| literalAlias
+           literalAll
+           literalAnd
+           literalAssL
+           literalAss
+           literalAssume
+           literalAx
+           literalAxL
+           literalBase
+           literalByDef
+           literalCases
+           literalCl
+           literalClL
+           literalConj
+           literalConjL
+           literalCon
+           literalConL
+           literalCtorL
+           literalCor
+           literalCorL
+           literalCtor
+           literalDec
+           literalDecL
+           literalDef
+           literalDefL
+           literalDel
+           literalDelL
+           literalExt
+           literalExtL
+           literalEx
+           literalExN
+           literalFalse
+           literalFor
+           literalFunc
+           literalFuncL
+           literalIif
+           literalImpl
+           literalInd
+           literalIndL
+           literalInfix
+           literalIntr
+           literalIntrL
+           literalInf
+           literalInfL
+           literalIn
+           literalIs
+           literalLem
+           literalLemL
+           literalLoc
+           literalLocL
+           literalMapCases
+           literalNot
+           literalObj
+           literalObjL
+           literalOpt
+           literalOptL
+           literalOr
+           literalParent
+           literalPost
+           literalPostFix
+           literalPostL
+           literalPred
+           literalPredL
+           literalPre
+           literalPrefix
+           literalPreL
+           literalPrf
+           literalPrf
+           literalProp
+           literalPropL
+           literalPrty
+           literalPrtyL
+           literalQed
+           literalRet
+           literalRetL
+           literalRev
+           literalRevL
+           literalSelf
+           literalSymbol
+           literalThm
+           literalThmL
+           literalTrivial
+           literalTrue
+           literalUndef
+           literalUndefL
+           literalUses
+           literalXor |]
     )
 
 /// Replaces in the `input` all regex pattern matches by spaces while preserving the new lines

@@ -2,6 +2,7 @@
 
 open FParsec
 open FplParser
+open FplGrammarCommons
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 
@@ -32,7 +33,7 @@ type TestQualifiersSelf () =
 
     [<TestMethod>]
     member this.TestDottedBothC () =
-        let result = run (predicate .>> eof) """self"""
+        let result = run (predicate .>> eof) literalSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
@@ -88,14 +89,14 @@ type TestQualifiersSelf () =
 
     [<TestMethod>]
     member this.TestCoordsBoth () =
-        let result = run (predicate .>> eof) """self"""
+        let result = run (predicate .>> eof) literalSelf
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
 
     [<TestMethod>]
     member this.TestCoordsBothA () =
-        let result = run (predicate .>> eof) """parent"""
+        let result = run (predicate .>> eof) literalParent
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))

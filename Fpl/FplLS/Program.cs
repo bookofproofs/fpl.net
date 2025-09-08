@@ -1,12 +1,7 @@
-﻿using FplLS;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using OmniSharp.Extensions.JsonRpc;
 using OmniSharp.Extensions.LanguageServer.Server;
-using System;
-using System.Diagnostics;
 using static ErrDiagnostics;
 using static FplInterpreterTypes;
 
@@ -42,7 +37,7 @@ namespace FplLS
         {
             ParsedAstList _parsedAstsList = [];
 
-            var st = new SymbolTable(_parsedAstsList, false);
+            var st = new SymbolTable(_parsedAstsList, false, false);
 
             var server = await LanguageServer.From(options =>
                 options
