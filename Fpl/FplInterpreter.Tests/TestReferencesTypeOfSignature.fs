@@ -253,8 +253,8 @@ type TestReferencesTypeOfSignature() =
     [<DataRow("""proof T$1 {1. |- trivial};""","pred$1")>]
     [<DataRow("""def pred T(p:obj) {true};""","pred(obj)")>]
     [<DataRow("""def pred T() {true};""", "pred()")>]
-    [<DataRow("""inf T(p:obj) {pre: true: con:true};""","pred(obj)")>]
-    [<DataRow("""inf T() {pre: true: con:true};""", "pred()")>]
+    [<DataRow("""inf T(p:obj) {pre: true con:true};""","pred(obj)")>]
+    [<DataRow("""inf T() {pre: true con:true};""", "pred()")>]
     [<TestMethod>]
     member this.TestBlock(varVal, name:string) =
         ad.Clear()
@@ -274,15 +274,15 @@ type TestReferencesTypeOfSignature() =
 
 
     [<DataRow("base1", """def pred T1() {intr};""")>]
-    [<DataRow("base2", """def pred infix ">" -1 T1() {intr};""")>]
-    [<DataRow("base3", """def pred postfix "'" T1() {intr};""")>]
-    [<DataRow("base4", """def pred prefix "-" T1() {intr};""")>]
-    [<DataRow("base5", """def cl symbol "∅" T1:obj {intr};""")>]
+    [<DataRow("base2", """def pred T1 infix ">" -1 () {intr};""")>]
+    [<DataRow("base3", """def pred T1 postfix "'" () {intr};""")>]
+    [<DataRow("base4", """def pred T1 prefix "-" () {intr};""")>]
+    [<DataRow("base5", """def cl T1 symbol "∅" :obj {intr};""")>]
     [<DataRow("base5a", """def cl T1:obj {intr};""")>]
     [<DataRow("base6", """def func T1()->obj {intr};""")>]
-    [<DataRow("base7", """def func infix ">" -1 T1()->obj {intr};""")>]
-    [<DataRow("base8", """def func postfix "'" T1()->obj {intr};""")>]
-    [<DataRow("base9", """def func prefix "-" T1()->obj {intr};""")>]
+    [<DataRow("base7", """def func T1 infix ">" -1 ()->obj {intr};""")>]
+    [<DataRow("base8", """def func T1 postfix "'" ()->obj {intr};""")>]
+    [<DataRow("base9", """def func T1 prefix "-" ()->obj {intr};""")>]
     [<TestMethod>]
     member this.TestFixNotation(var, varVal) =
         ad.Clear()

@@ -400,10 +400,10 @@ type TestInterpreterErrors() =
             runTestHelper "TestPR003.fpl" fplCode code expected
 
     [<DataRow("""proof T$1 { 1. |- trivial qed};""", 0)>]
-    [<DataRow("""proof T$1 { 1. 2., 3. |- trivial qed};""", 0)>]
-    [<DataRow("""proof T$1 { 1. 1., 1. |- trivial qed};""", 1)>]
-    [<DataRow("""proof T$1 { 1. 1., 1., 1. |- trivial qed};""", 2)>]
-    [<DataRow("""proof T$1 { 1. 1., 2., 1. |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. 2, 3 |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. 1, 1 |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. 1, 1, 1 |- trivial qed};""", 2)>]
+    [<DataRow("""proof T$1 { 1. 1, 2, 1 |- trivial qed};""", 1)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR004(fplCode:string, expected:int) =
@@ -415,10 +415,10 @@ type TestInterpreterErrors() =
 
 
     [<DataRow("""proof T$1 { 1. |- trivial qed};""", 0)>]
-    [<DataRow("""proof T$1 { 1. 2., 3. |- trivial qed};""", 2)>]
-    [<DataRow("""proof T$1 { 1. |- trivial 2. 1. |- trivial qed};""", 0)>]
-    [<DataRow("""proof T$1 { 1. |- trivial 2. 1., 1a. |- trivial qed};""", 1)>]
-    [<DataRow("""proof T$1 { 1. 1., 1., 1. |- trivial qed};""", 3)>]
+    [<DataRow("""proof T$1 { 1. 2, 3 |- trivial qed};""", 2)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 2. 1 |- trivial qed};""", 0)>]
+    [<DataRow("""proof T$1 { 1. |- trivial 2. 1, 1a |- trivial qed};""", 1)>]
+    [<DataRow("""proof T$1 { 1. 1, 1, 1 |- trivial qed};""", 3)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR005(fplCode:string, expected:int) =
@@ -1257,6 +1257,7 @@ type TestInterpreterErrors() =
             Assert.AreEqual<string>(expected, result.Head.Message)
 
 
+    /// todo PR000 is no more syntactically possible
     [<DataRow("""def pred T() { 1. };;""", 1)>]
     [<DataRow("""proof T$1 {1. |- trivial };""", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
@@ -1268,6 +1269,7 @@ type TestInterpreterErrors() =
             let code = PR000 ""
             runTestHelper "TestPR000.fpl" fplCode code expected
 
+    /// todo PR001 is no more syntactically possible
     [<DataRow("""def pred T() { bydef A };;""", 1)>]
     [<DataRow("""proof T$1 {1. bydef A |- true qed };""", 0)>]
     [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
@@ -1470,7 +1472,7 @@ type TestInterpreterErrors() =
 
     [<DataRow("01", """thm T() { true } proof T$1 {1. |- trivial};""", 0)>]
     [<DataRow("02a", """thm T() { true } proof T$1 {1. |- true};""", 0)>]
-    [<DataRow("02b", """thm T() { true } proof T$1 {1. 2. |- false};""", 1)>]
+    [<DataRow("02b", """thm T() { true } proof T$1 {1. 2 |- false};""", 1)>]
     [<DataRow("02c", """thm T() { true } proof T$1 {1. B |- true};""", 1)>]
     [<DataRow("02d", """thm T() { true } proof T$1 {1. bydef S |- false};""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
@@ -1500,9 +1502,9 @@ type TestInterpreterErrors() =
             let code = PR007 ("", "") 
             runTestHelper "TestPR007.fpl" fplCode code expected
 
-    [<DataRow("01", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- and (x, impl(x,z)) 2. ModusPonens() |- z };""", 0)>]
-    [<DataRow("01a", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- or (x, z) 2. ModusPonens() |- z };""", 1)>]
-    [<DataRow("01b", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- and (x, impl(y,z)) 2. ModusPonens() |- z };""", 1)>]
+    [<DataRow("01", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- and (x, impl(x,z)) 2. ModusPonens |- z };""", 0)>]
+    [<DataRow("01a", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- or (x, z) 2. ModusPonens |- z };""", 1)>]
+    [<DataRow("01b", """inference ModusPonens() { dec ~p,q: pred; pre: and (p, impl (p,q) ) con: q } theorem T() { true } proof T$1 {1. |- and (x, impl(y,z)) 2. ModusPonens |- z };""", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR008(no:string, fplCode:string, expected) =

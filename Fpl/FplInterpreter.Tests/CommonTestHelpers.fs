@@ -75,6 +75,7 @@ let prepareFplCode (filename: string, fplCode: string, delete: bool) =
             |> Seq.exists (fun d -> d.Emitter = DiagnosticEmitter.FplParser)
 
         if syntaxErrorFound then
+            if fplCode <> "" then File.AppendAllText(Path.Combine(currDir, "SyntaxErrorsLog.txt"), $"Syntax errors detected in test {filename}{Environment.NewLine}{fplCode}{Environment.NewLine}------{Environment.NewLine}")
             emitUnexpectedErrorDiagnostics "Syntax error found."
 
         Some(st)

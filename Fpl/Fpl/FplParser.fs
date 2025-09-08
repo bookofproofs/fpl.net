@@ -364,13 +364,16 @@ primePredicateRef.Value <- choice [
 ]
 
 let argumentIdentifier = positions "ArgumentIdentifier" (regex @"\d+\w*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
+let refArgumentIdentifier = positions "RefArgumentIdentifier" (regex @"\d+\w*") <?> "<refargument identifier>" |>> Ast.RefArgumentIdentifier
+let refArgumentIdentifierOtherProof = positions "RefArgumentIdentifierOtherProof" (predicateIdentifier .>>. dollarDigitList .>>. (IW >>. colon >>. refArgumentIdentifier)) |>> Ast.RefArgumentIdentifierOtherProof
 let byDefinition = positions "ByDef" (keywordBydef >>. choice [attempt referencingIdentifier; predicateIdentifier] ) |>> Ast.ByDef 
 
 let justificationReference = choice [
+    attempt refArgumentIdentifierOtherProof
     attempt referencingIdentifier
     byDefinition
     predicateIdentifier
-    argumentIdentifier
+    refArgumentIdentifier
 ]
 
 let twoPredicatesInParens = (leftParen >>. predicate) .>>. (comma >>. predicate) .>> rightParen 
@@ -517,7 +520,7 @@ let propertyList = opt (many1 (property .>> IW))
 *)
 // justifying proof arguments can be the identifiers of Rules of References, conjectures, theorem-like statements, or axioms
 let keywordRevoke = (skipString literalRevL <|> skipString literalRev) .>> SW 
-let revokeArgument = positions "RevokeArgument" (keywordRevoke >>. argumentIdentifier) |>> Ast.RevokeArgument 
+let revokeArgument = positions "RevokeArgument" (keywordRevoke >>. refArgumentIdentifier) |>> Ast.RevokeArgument 
     
 let keywordAssume = skipString literalAssume <|> skipString literalAss .>> SW 
 let assumeArgument = positions "AssumeArgument" (keywordAssume >>. predicate) |>> Ast.AssumeArgument

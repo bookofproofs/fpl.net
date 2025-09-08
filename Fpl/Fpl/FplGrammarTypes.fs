@@ -94,6 +94,8 @@ type Ast =
     | IsOperator of Positions * (Ast * Ast)
     | Delegate of Positions * (Ast * Ast)
     | ArgumentIdentifier of Positions * string
+    | RefArgumentIdentifier of Positions * string
+    | RefArgumentIdentifierOtherProof of Positions * ((Ast * Ast list) * Ast) 
     | ReferenceToProofOrCorollary of Positions * (Ast * Ast option) 
     | JustificationItem of Positions * Ast 
     | Justification of Positions * Ast list
