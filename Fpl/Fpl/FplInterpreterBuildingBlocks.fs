@@ -600,7 +600,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ByDef")
         let fv = variableStack.PeekEvalStack()
         let fvJi = fv :?> FplJustificationItem
-        fvJi.ByDefMode <- true
+        fvJi.Mode <- JustificationItemType.ByDef
         eval st predicateWithQualificationAst
         emitPR001Diagnostics fv pos1 pos2
         st.EvalPop()
@@ -864,12 +864,21 @@ let rec eval (st: SymbolTable) ast =
         let fvJi = new FplJustificationItem((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fvJi)
         eval st predicateAst 
-        let candidates = findCandidatesByName st fvJi.FplId fvJi.ByDefMode
+        let candidates = findCandidatesByName st fvJi.FplId (fvJi.Mode = JustificationItemType.ByDef)
         match tryFindAssociatedBlockForJustificationItem fvJi candidates with
         | ScopeSearchResult.FoundAssociate potentialCandidate -> 
             fvJi.Scope.TryAdd(fvJi.FplId, potentialCandidate) |> ignore
+            if potentialCandidate.FplId = literalRetL then 
+                // adjust reference type if the found candidate is not an axiom, not a theorem-like statement, but a rule of inference
+                fvJi.Mode <- JustificationItemType.ReferredRuleOfInference
         | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
-            emitID022Diagnostics otherBlock fvJi.ByDefMode fvJi.StartPos fvJi.EndPos
+            let alternative, isByDef = 
+                match fvJi.Mode with 
+                | JustificationItemType.ByDef ->
+                    ("Expected a definition (def class, def predicate, def function).", true) 
+                | _ ->
+                    ("Expected a theorem-like statement (theorem, lemma, proposition, corollary, rule of inference).", false) 
+            emitID022Diagnostics otherBlock alternative isByDef fvJi.StartPos fvJi.EndPos
         | ScopeSearchResult.NotFound ->
             emitID010Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos
         | ScopeSearchResult.FoundMultiple listOfKandidates ->

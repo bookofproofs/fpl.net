@@ -1446,10 +1446,18 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
+type JustificationItemType =
+    | ReferredTheoremLikeStmtOrAxiom
+    | ReferredRuleOfInference
+    | ByDef
+    | LinkToArgumentSameProof
+    | LinkToArgumentOtherProof
+
+
 type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
     inherit FplValue(positions, Some parent)
     let _runOrder = runOrder
-    let mutable _byDefMode = false
+    let mutable _mode = JustificationItemType.ReferredTheoremLikeStmtOrAxiom
 
     override this.Name = "justification item"
     override this.ShortName = "just"
@@ -1475,9 +1483,9 @@ type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
     override this.RunOrder = Some _runOrder
 
     /// Sets or gets the bydef mode of this justification item.
-    member this.ByDefMode 
-        with get () = _byDefMode
-        and set (v) = _byDefMode <- v
+    member this.Mode 
+        with get () = _mode
+        and set (v) = _mode <- v
 
     member this.ParentJustification = this.Parent.Value
 
@@ -1529,6 +1537,7 @@ type FplJustification(positions: Positions, parent: FplValue) =
     member this.GetOrderedJustificationItems =
         this.Scope.Values
             |> Seq.sortBy (fun fv -> fv.RunOrder)
+            |> Seq.map (fun fv -> fv :?> FplJustificationItem)
             |> Seq.toList
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
@@ -1592,7 +1601,11 @@ type FplArgument(positions: Positions, parent: FplValue, runOrder) =
         match justificationOpt, argInferenceOpt with
         | Some justification, Some argInference -> 
             let orderdListJustifications = justification.GetOrderedJustificationItems
-            ()
+            orderdListJustifications
+            |> List.iter (fun fv ->
+                fv.Run variableStack
+            )
+
         | _ -> ()
         (* todo: Enhance variableStack by the context in which this argument is being evaluated
             Here are some preliminary considerations: 
@@ -3528,20 +3541,21 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplJustificationItem) (can
     match candidates.Length with
     | 1 ->  // todo - do not accept non-definitions for by def or definitions for non-bydef 
         let potentialCandidate = candidates.Head
-        match fvJi.ByDefMode, potentialCandidate with
-        | false, :? FplConjecture
-        | false, :? FplProof
-        | false, :? FplPredicate
-        | false, :? FplClass
-        | false, :? FplFunctionalTerm ->
+        match fvJi.Mode, potentialCandidate with
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplConjecture
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplProof
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplPredicate
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplClass
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplFunctionalTerm ->
             ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
-        | true, :? FplAxiom
-        | true, :? FplConjecture
-        | true, :? FplTheorem
-        | true, :? FplCorollary
-        | true, :? FplProposition
-        | true, :? FplLemma
-        | true, :? FplProof ->
+        | JustificationItemType.ByDef, :? FplAxiom
+        | JustificationItemType.ByDef, :? FplRuleOfInference
+        | JustificationItemType.ByDef, :? FplConjecture
+        | JustificationItemType.ByDef, :? FplTheorem
+        | JustificationItemType.ByDef, :? FplCorollary
+        | JustificationItemType.ByDef, :? FplProposition
+        | JustificationItemType.ByDef, :? FplLemma
+        | JustificationItemType.ByDef, :? FplProof ->
             ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
         | _ ->
             ScopeSearchResult.FoundAssociate potentialCandidate    

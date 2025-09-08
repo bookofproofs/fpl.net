@@ -188,7 +188,7 @@ let emitID021Diagnostics identifier pos1 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitID022Diagnostics incorrectBlockType isByDef pos1 pos2 =
+let emitID022Diagnostics incorrectBlockType alternative isByDef pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -197,11 +197,7 @@ let emitID022Diagnostics incorrectBlockType isByDef pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = ID022(incorrectBlockType, isByDef)
-            Diagnostic.Alternatives = 
-                if isByDef then 
-                    Some "Expected a definition (def class, def predicate, def function)." 
-                else
-                    Some "Expected a theorem-like statement (theorem, lemma, proposition, corollary)." 
+            Diagnostic.Alternatives = Some alternative
         }
     ad.AddDiagnostic diagnostic
 
