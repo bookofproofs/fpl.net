@@ -220,7 +220,6 @@ type TestInterpreterErrors() =
         Assert.AreEqual<int>(0, ad.CountDiagnostics)
         this.PrepareTestNSP05CrossCheck(true) |> ignore
 
-
     [<DataRow("theorem SomeTheorem() {true} theorem SomeTheorem() {true} ;", 1)>]
     [<DataRow("theorem SomeTheorem() {true} ;", 0)>]
 

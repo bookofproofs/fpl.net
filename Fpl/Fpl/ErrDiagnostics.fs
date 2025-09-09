@@ -100,7 +100,6 @@ type DiagnosticCode =
     | NSP04 of string 
     | NSP05 of string list * string * string
     // identifier-related error codes
-    | ID000 of string
     | ID001 of string * string
     | ID002 of string * string
     | ID003 of string
@@ -194,7 +193,6 @@ type DiagnosticCode =
             | NSP04 _ -> "NSP04"
             | NSP05 _ -> "NSP05"
             // identifier-related error codes 
-            | ID000 _ -> "ID000"
             | ID001 _ -> "ID001"
             | ID002 _ -> "ID002"
             | ID003 _ -> "ID003"
@@ -288,7 +286,6 @@ type DiagnosticCode =
             | NSP04 path -> sprintf "Circular theory reference detected: `%s`" path
             | NSP05 (pathTypes, theory, chosenSource) -> sprintf "Multiple sources %A for theory %s detected (%s was chosen)." pathTypes theory chosenSource
             // identifier-related error codes 
-            | ID000 identifier -> sprintf "Handling ast type `%s` not yet implemented." identifier
             | ID001 (signature, conflict) -> sprintf "Signature `%s` was already declared at %s." signature conflict
             | ID002 (signature, incorrectBlockType) -> sprintf "Cannot find a block to be associated with the proof %s, found only %s." signature incorrectBlockType
             | ID003 signature -> sprintf "The proof `%s` is missing a block to be associated with." signature 

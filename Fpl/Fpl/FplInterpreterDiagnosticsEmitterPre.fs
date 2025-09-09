@@ -30,20 +30,6 @@ let emitUnexpectedErrorDiagnostics errMsg =
 
     ad.AddDiagnostic(diagnostic)
 
-let emitID000Diagnostics astType =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = Position("", 0, 1, 1)
-            Diagnostic.EndPos = Position("", 0, 1, 1)
-            Diagnostic.Code = ID000 astType
-            Diagnostic.Alternatives = None 
-        }
-
-    ad.AddDiagnostic diagnostic
-
 let emitID001Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 
