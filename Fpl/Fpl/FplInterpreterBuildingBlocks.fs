@@ -848,6 +848,14 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("StatementList")
         asts |> List.map (eval st) |> ignore
         st.EvalPop()
+    | Ast.PremiseList((pos1, pos2), predicateListAsts) ->
+        st.EvalPush("PremiseList")
+        let parent = variableStack.PeekEvalStack()
+        let fv = new FplPremiseList((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder) 
+        variableStack.PushEvalStack(fv)
+        predicateListAsts |> List.map (eval st) |> ignore
+        variableStack.PopEvalStack()
+        st.EvalPop()
     | Ast.DefaultResult((pos1, pos2), asts) ->
         st.EvalPush("DefaultResult")
         asts |> List.map (eval st) |> ignore

@@ -51,6 +51,7 @@ type TestFplBlockType() =
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplPredicate")>]
+    [<DataRow("FplPremiseList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
     [<DataRow("FplQuantor")>]
@@ -194,6 +195,9 @@ type TestFplBlockType() =
         | "FplPredicate" ->
             let x = new FplPredicate(positions, parent, 0)
             Assert.AreEqual<string>("predicate definition", x.Name)
+        | "FplPremiseList" ->
+            let x = new FplPremiseList(positions, parent, 0)
+            Assert.AreEqual<string>("premise", x.Name)
         | "FplProof" ->
             let x = new FplProof(positions, parent, 0)
             Assert.AreEqual<string>("proof", x.Name)
@@ -283,6 +287,7 @@ type TestFplBlockType() =
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplPredicate")>]
+    [<DataRow("FplPremiseList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
     [<DataRow("FplQuantor")>]
@@ -427,6 +432,9 @@ type TestFplBlockType() =
         | "FplPredicate" ->
             let x = new FplPredicate(positions, parent, 0)
             Assert.AreEqual<string>("def pred", x.ShortName)
+        | "FplPremiseList" ->
+            let x = new FplPremiseList(positions, parent, 0)
+            Assert.AreEqual<string>(literalInf, x.ShortName)
         | "FplProof" ->
             let x = new FplProof(positions, parent, 0)
             Assert.AreEqual<string>(literalPrf, x.ShortName)
@@ -516,6 +524,7 @@ type TestFplBlockType() =
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplPredicate")>]
+    [<DataRow("FplPremiseList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
     [<DataRow("FplQuantor")>]
@@ -660,6 +669,9 @@ type TestFplBlockType() =
         | "FplPredicate" ->
             let x = new FplPredicate(positions, parent, 0)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
+        | "FplPremiseList" ->
+            let x = new FplPremiseList(positions, parent, 0)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplProof" ->
             let x = new FplProof(positions, parent, 0)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
@@ -749,6 +761,7 @@ type TestFplBlockType() =
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplPredicate")>]
+    [<DataRow("FplPremiseList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
     [<DataRow("FplQuantor")>]
@@ -893,6 +906,9 @@ type TestFplBlockType() =
         | "FplPredicate" ->
             let x = new FplPredicate(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsSome)
+        | "FplPremiseList" ->
+            let x = new FplPremiseList(positions, parent, 0)
+            Assert.IsTrue(x.RunOrder.IsSome)
         | "FplProof" ->
             let x = new FplProof(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsSome)
@@ -983,6 +999,7 @@ type TestFplBlockType() =
     [<DataRow("FplOptionalFunctionalTerm")>]
     [<DataRow("FplOptionalPredicate")>]
     [<DataRow("FplPredicate")>]
+    [<DataRow("FplPremiseList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
     [<DataRow("FplQuantor")>]
@@ -1128,7 +1145,10 @@ type TestFplBlockType() =
                 x.Run variableStack 
             | "FplPredicate" ->
                 let x = new FplPredicate(positions, parent, 0)
-                x.Run variableStack 
+                x.Run variableStack
+            | "FplPremiseList" ->
+                let x = new FplPremiseList(positions, parent, 0)
+                x.Run variableStack
             | "FplProof" ->
                 let x = new FplProof(positions, parent, 0)
                 x.Run variableStack 

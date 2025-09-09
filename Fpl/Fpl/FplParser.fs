@@ -436,9 +436,9 @@ FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
 The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
 However, there is a syntactical simplification of the signature*)
 let spacesPredicate = IW >>. predicate
-let premise = IW >>. (keywordPremise >>. colon >>. predicate) 
+let premiseList = positions "PremiseList" (IW >>. (keywordPremise >>. colon >>. predicateList)) |>> Ast.PremiseList
 let conclusion = IW >>. (keywordConclusion >>. colon >>. predicate) 
-let premiseConclusionBlock = positions "PremiseConclusionBlock" (leftBrace >>. varDeclOrSpecList .>>. premise .>>. conclusion .>> spacesRightBrace) |>> Ast.PremiseConclusionBlock
+let premiseConclusionBlock = positions "PremiseConclusionBlock" (leftBrace >>. varDeclOrSpecList .>>. premiseList .>>. conclusion .>> spacesRightBrace) |>> Ast.PremiseConclusionBlock
 
 (* FPL building blocks - rules of reference *)
 let keywordInference = (skipString literalInfL <|> skipString literalInf) .>> SW 
@@ -651,7 +651,7 @@ let errInformation = [
     (ASS000, [literalAss], assumeArgument)
     (REV000, [literalRev], revokeArgument)
     (RET000, [literalRet], returnStatement)
-    (PRE000, [literalPre], premise)
+    (PRE000, [literalPre], premiseList)
     (CON000, [literalCon], conclusion)
     (TYD000, ["~"], varDecl)
 ]

@@ -1019,6 +1019,34 @@ type FplGenericObject(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
+type FplPremiseList(positions: Positions, parent: FplValue, runOrder) = 
+    inherit FplValue(positions, Some parent)
+    let _runOrder = runOrder
+    override this.Name = literalPreL
+    override this.ShortName = literalInf
+
+    override this.Clone () =
+        let ret = new FplPremiseList((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        this.ArgList
+        |> Seq.map (fun fv -> fv.Type signatureType)
+        |> String.concat ", "
+
+    override this.Represent() = 
+        this.ArgList
+        |> Seq.map (fun fv -> fv.Represent())
+        |> String.concat ", "
+
+    override this.Run variableStack = 
+        // todo implement run
+        ()
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
+
+    override this.RunOrder = Some _runOrder
 
 type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicateWithExpression(positions, parent)
@@ -1031,6 +1059,7 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
         let ret = new FplRuleOfInference((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
+
     override this.IsFplBlock () = true
     override this.IsBlock () = true    
 
