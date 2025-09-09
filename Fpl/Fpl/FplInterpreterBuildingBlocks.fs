@@ -1172,11 +1172,11 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PopEvalStack()
         st.EvalPop()
     // | ReferencingIdentifier of Positions * (Ast * Ast list)
-    | ReferencingIdentifier((pos1, pos2), (ast1, asts)) ->
+    | ReferencingIdentifier((pos1, pos2), (predicateIdentifierAst, dollarDigitListAsts)) ->
         let parentEvalPath = st.EvalPath()
         st.EvalPush("ReferencingIdentifier")
-        eval st ast1
-        asts |> List.map (eval st) |> ignore
+        eval st predicateIdentifierAst
+        dollarDigitListAsts |> List.map (eval st) |> ignore
         if parentEvalPath.EndsWith(".ReferenceToProof") then
             emitPR002Diagnostics pos1 pos2 // avoid referencing to proofs in general considering it not best practice in mathematics
         st.EvalPop()
@@ -1892,9 +1892,16 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         fv.AuxiliaryInfo <- precedence
         st.EvalPop()
-    | ast1 ->
-        let astType = ast1.GetType().Name
-        emitID000Diagnostics astType
+    // Positions * ((Ast * Ast list) * Ast) 
+    | Ast.RefArgumentIdentifierOtherProof((pos1, pos2), ((predicateIdentifierAst, dollarDigitListAsts), refArgumentIdentifierAst)) ->
+        st.EvalPush("RefArgumentIdentifierOtherProof")
+        let fv = variableStack.PeekEvalStack()
+        let fvJi = fv :?> FplJustificationItem 
+        fvJi.Mode <- JustificationItemType.LinkToArgumentOtherProof
+        eval st predicateIdentifierAst
+        dollarDigitListAsts |> List.map (eval st) |> ignore
+        eval st refArgumentIdentifierAst
+        st.EvalPop()
 
 
 let tryFindParsedAstUsesClausesEvaluated (parsedAsts: List<ParsedAst>) =
