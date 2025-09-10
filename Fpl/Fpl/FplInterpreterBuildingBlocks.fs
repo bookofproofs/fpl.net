@@ -882,7 +882,15 @@ let rec eval (st: SymbolTable) ast =
                 if parts.Length > 0 then parts.[0] else ""
             let name = splitAnyArgumentId fvJi.FplId
             let candidates = findCandidatesByName st name (fvJi.Mode = JustificationItemType.ByDef) true
-            match tryFindAssociatedBlockForJustificationItem fvJi candidates with
+            let adjustCandidates = 
+                match fvJi.Mode, name.Contains("$"), candidates.Length>1 with 
+                | JustificationItemType.LinkToArgumentOtherProof, true, true 
+                | JustificationItemType.ByDef, true, true ->
+                    candidates |> List.filter (fun fv -> fv.FplId = name)
+                | _ ->
+                    candidates
+
+            match tryFindAssociatedBlockForJustificationItem fvJi adjustCandidates with
             | ScopeSearchResult.FoundAssociate potentialCandidate -> 
                 fvJi.Scope.TryAdd(fvJi.FplId, potentialCandidate) |> ignore
                 if potentialCandidate.FplId = literalRetL then 

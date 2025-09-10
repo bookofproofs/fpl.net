@@ -3845,10 +3845,7 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
     )
     |> ignore
 
-    if withCorollariesOrProofs && withClassConstructors && name.Contains("$") then 
-        pm |> Seq.filter (fun fv -> fv.FplId = name) |> Seq.toList
-    else
-        pm |> Seq.toList
+    pm |> Seq.toList
 
 /// Looks for all declared properties or constructors (if any) that start with
 /// the specific name within the building block, whose syntax tree the FplValue `fv` is part of.
