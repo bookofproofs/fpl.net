@@ -422,13 +422,12 @@ type TestInterpreterErrors() =
     [<DataRow("1e", "prop A() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
     [<DataRow("1f", "cor A$1() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
     [<DataRow("1f_", "thm A() {true} cor A$1() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
-    [<DataRow("1g", "proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
-    [<DataRow("1h", "proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
-    [<DataRow("1i", "proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
-    [<DataRow("1g_", "thm A() {true} proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
-    [<DataRow("1h_", "thm A() {true} proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
-    [<DataRow("1i_", "thm A() {true} proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1g", "proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 0)>]
+    [<DataRow("1h", "proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:2 |- trivial };", 0)>]
+    [<DataRow("1g_", "thm A() {true} proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 0)>]
+    [<DataRow("1h_", "thm A() {true} proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:2 |- trivial };", 0)>]
     [<DataRow("1j", "inf A() {pre: true con: true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
     member this.TestPR001(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
