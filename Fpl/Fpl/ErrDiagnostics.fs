@@ -327,7 +327,7 @@ type DiagnosticCode =
             | PR002 incorrectBlockType -> $"Cannot find a justifying theorem-like statement or rule of inference, found {incorrectBlockType} instead." 
             | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
             | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
-            | PR005 name ->  $"Argument identifier `{name}` not declared in this scope."
+            | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
             | PR006 -> "Not all arguments of the proof could be verified."
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
             | PR008 (nodeName, expectedInputArgInference, actualInputArgInference) ->  $"This {nodeName} expects `{expectedInputArgInference}` and could not be applied to the proceeding argument inference which was `{actualInputArgInference}`."
