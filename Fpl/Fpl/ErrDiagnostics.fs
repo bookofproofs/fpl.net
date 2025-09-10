@@ -317,7 +317,7 @@ type DiagnosticCode =
             | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
             | ID022 (incorrectBlockType, modeInt) -> 
                 match modeInt with
-                | 1 -> $"Cannot find a justifying `by definition`, found only {incorrectBlockType}." 
+                | 1 -> "" 
                 | 2 -> $"Cannot find a justifying `other proof argument`, found only {incorrectBlockType}."
                 | _ -> $"Cannot find a justifying theorem-like statement, found only {incorrectBlockType}." 
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
@@ -329,7 +329,7 @@ type DiagnosticCode =
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
             | LG005 name -> $"`Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
             // proof-related error codes
-            | PR000 name -> sprintf "Cannot refer to an argument identifier like `%s` outside a proof." name
+            | PR000 incorrectBlockType -> $"Cannot find justifying `by definition`, found only {incorrectBlockType}."
             | PR001 -> $"Cannot refer to a definition outside a proof."
             | PR002 -> $"Avoid referencing to proofs directly."
             | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict

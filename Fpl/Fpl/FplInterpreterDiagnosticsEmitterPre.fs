@@ -264,6 +264,19 @@ let emitLG005Diagnostics name pos1 pos2 =
 
     ad.AddDiagnostic diagnostic
 
+let emitPR000Diagnostics incorrectBlockType alternative pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR000 incorrectBlockType
+            Diagnostic.Alternatives = Some alternative
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitPR003Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =
         { 

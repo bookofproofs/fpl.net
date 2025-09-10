@@ -391,7 +391,7 @@ let rec eval (st: SymbolTable) ast =
                 let referencedArgument = proof.Scope[s]
                 fv.ArgList.Add(referencedArgument) 
         | _ -> 
-            emitPR000Diagnostics fv 
+            ()
 
         st.EvalPop() 
     | Ast.Prefix((pos1, pos2), symbol) -> 
@@ -884,13 +884,15 @@ let rec eval (st: SymbolTable) ast =
             | ScopeSearchResult.FoundAssociate potentialCandidate -> 
                 fvJi.Scope.TryAdd(fvJi.FplId, potentialCandidate) |> ignore
                 if potentialCandidate.FplId = literalRetL then 
-                    // adjust reference type if the found candidate is not an axiom, not a theorem-like statement, but a rule of inference
+                    // adjust reference type if the found candidate is a rule of inference (from the default ReferredTheoremLikeStmtOrAxiom)
                     fvJi.Mode <- JustificationItemType.ReferredRuleOfInference
             | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
                 let alternative, modeInt = 
                     match fvJi.Mode with 
                     | JustificationItemType.ByDef ->
-                        ("Expected a definition (def class, def predicate, def function).", 1) 
+                        let alternative = "Expected a definition (def class, def predicate, def function)."
+                        emitPR000Diagnostics otherBlock alternative fvJi.StartPos fvJi.EndPos
+                        ("",0)
                     | JustificationItemType.LinkToArgumentOtherProof ->
                         ("Expected another proof, followed by its argument.", 2) 
                     | _ ->
