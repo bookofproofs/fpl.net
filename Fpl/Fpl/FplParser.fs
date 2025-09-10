@@ -366,7 +366,7 @@ primePredicateRef.Value <- choice [
 let argumentIdentifier = positions "ArgumentIdentifier" (regex @"\d+\w*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 let refArgumentIdentifier = positions "RefArgumentIdentifier" (regex @"\d+\w*") <?> "<refargument identifier>" |>> Ast.RefArgumentIdentifier
 let refArgumentIdentifierOtherProof = positions "RefArgumentIdentifierOtherProof" (predicateIdentifier .>>. dollarDigitList .>>. (IW >>. colon >>. refArgumentIdentifier)) |>> Ast.RefArgumentIdentifierOtherProof
-let byDefinition = positions "ByDef" (keywordBydef >>. choice [attempt referencingIdentifier; predicateIdentifier] ) |>> Ast.ByDef 
+let byDefinition = positions "ByDef" (keywordBydef >>. choice [attempt refArgumentIdentifierOtherProof; attempt referencingIdentifier; predicateIdentifier] ) |>> Ast.ByDef 
 
 let justificationReference = choice [
     attempt refArgumentIdentifierOtherProof

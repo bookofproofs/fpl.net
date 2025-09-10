@@ -3814,14 +3814,22 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
                 flattenCorollariesAndProofs fv
             | _ -> ()
         )
-
+    let nameWithoutProofOrCorRef = 
+        if withCorollariesOrProofs && name.Contains("$") then 
+            let parts = name.Split('$')
+            if parts.Length > 0 then 
+                parts.[0] 
+            else 
+                ""
+        else
+            name
 
     st.Root.Scope // iterate all theories
     |> Seq.iter (fun theory ->
         theory.Value.Scope
         // filter only blocks starting with the same FplId as the reference
         |> Seq.map (fun kvp -> kvp.Value)
-        |> Seq.filter (fun fv -> fv.FplId = name)
+        |> Seq.filter (fun fv -> fv.FplId = name || fv.FplId = nameWithoutProofOrCorRef)
         |> Seq.iter (fun (block: FplValue) ->
             pm.Add(block)
 
@@ -3837,8 +3845,10 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
     )
     |> ignore
 
-    pm |> Seq.toList
-
+    if withCorollariesOrProofs && withClassConstructors && name.Contains("$") then 
+        pm |> Seq.filter (fun fv -> fv.FplId = name) |> Seq.toList
+    else
+        pm |> Seq.toList
 
 /// Looks for all declared properties or constructors (if any) that start with
 /// the specific name within the building block, whose syntax tree the FplValue `fv` is part of.

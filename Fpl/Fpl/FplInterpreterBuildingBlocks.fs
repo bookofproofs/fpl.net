@@ -378,7 +378,10 @@ let rec eval (st: SymbolTable) ast =
     | Ast.RefArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("RefArgumentIdentifier")
         let fv = variableStack.PeekEvalStack()
-        fv.FplId <- s
+        fv.FplId <- 
+            match fv.FplId with 
+            | "" -> s
+            | _ -> $"{fv.FplId}:{s}"
         let parent = fv.Parent.Value
         match parent with
         | :? FplArgInference 
@@ -1911,7 +1914,15 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("RefArgumentIdentifierOtherProof")
         let fv = variableStack.PeekEvalStack()
         let fvJi = fv :?> FplJustificationItem 
-        fvJi.Mode <- JustificationItemType.LinkToArgumentOtherProof
+        match fvJi.Mode with 
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom -> 
+            // only the default can be overwritten with LinkToArgumentOtherProof
+            fvJi.Mode <- JustificationItemType.LinkToArgumentOtherProof
+        | _ -> 
+            // all other modes indicate that some proceeding syntax (for instance, bydef keyword) was already parsed.
+            // in this case there is a semantic error that will be catched by some diagnostics, e.g. PR000
+            ()
+
         eval st predicateIdentifierAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
         eval st refArgumentIdentifierAst

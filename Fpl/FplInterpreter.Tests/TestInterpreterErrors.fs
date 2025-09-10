@@ -412,9 +412,9 @@ type TestInterpreterErrors() =
             let code = PR000 ""
             runTestHelper "TestPR000.fpl" fplCode code expected
 
-    [<DataRow("0a", "def cl A:obj {intr} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 0)>]
-    [<DataRow("0b", "def pred A() {intr} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 0)>]
-    [<DataRow("0c", "def func A()->obj {intr} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 0)>]
+    [<DataRow("0a", "def cl A:obj {intr} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("0b", "def pred A() {intr} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("0c", "def func A()->obj {intr} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
     [<DataRow("1a", "ax A() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
     [<DataRow("1b", "conj A() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
     [<DataRow("1c", "thm A() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
