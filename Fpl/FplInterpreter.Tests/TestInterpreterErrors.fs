@@ -402,25 +402,39 @@ type TestInterpreterErrors() =
     [<DataRow("1g_", "thm A() {true} proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. bydef A$1 |- trivial };", 1)>]
     [<DataRow("1h_", "thm A() {true} proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. bydef A$1:2 |- trivial };", 1)>]
     [<DataRow("1i_", "thm A() {true} proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. bydef A$1:1 |- trivial };", 1)>]
+    [<DataRow("1j", "inf A() {pre: true con: true} thm T() {true} proof T$1 {1. bydef A |- trivial };", 1)>]
     [<DataRow("99", "uses Fpl.Commons.Structures ;", 0)>]
     [<TestMethod>]
-    member this.TestPR000(var:string, fplCode:string, expected) =
+    member this.TestPR000(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
             let code = PR000 ""
             runTestHelper "TestPR000.fpl" fplCode code expected
 
-    /// todo PR001 is no more syntactically possible
-    [<DataRow("""def pred T() { bydef A };;""", 1)>]
-    [<DataRow("""proof T$1 {1. bydef A |- true qed };""", 0)>]
-    [<DataRow("uses Fpl.Commons.Structures ;", 0)>]
+    [<DataRow("0a", "def cl A:obj {intr} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 0)>]
+    [<DataRow("0b", "def pred A() {intr} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 0)>]
+    [<DataRow("0c", "def func A()->obj {intr} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 0)>]
+    [<DataRow("1a", "ax A() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1b", "conj A() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1c", "thm A() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1d", "lem A() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1e", "prop A() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1f", "cor A$1() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1f_", "thm A() {true} cor A$1() {true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1g", "proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1h", "proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1i", "proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1g_", "thm A() {true} proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1h_", "thm A() {true} proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1i_", "thm A() {true} proof A$1 {1. |- trivial } thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
+    [<DataRow("1j", "inf A() {pre: true con: true} thm T() {true} proof T$1 {1. A$1:1 |- trivial };", 1)>]
     [<TestMethod>]
-    member this.TestPR001(fplCode:string, expected) =
+    member this.TestPR001(no:string, fplCode:string, expected) =
         if TestConfig.OfflineMode && fplCode.StartsWith("uses Fpl.") then 
             ()
         else
-            let code = PR001 
+            let code = PR001 ""
             runTestHelper "TestPR001.fpl" fplCode code expected
 
     // todo this is now possible
@@ -1016,7 +1030,6 @@ type TestInterpreterErrors() =
             runTestHelper "TestID021.fpl" fplCode code expected
 
 
-    [<DataRow("01j", "inf A() {pre: true con: true} thm T() {true} proof T$1 {1. bydef A |- trivial };", 1, 1)>]
     [<DataRow("02a", "def cl A:obj {intr} thm T() {true} proof T$1 {1. A |- trivial };", 3, 1)>]
     [<DataRow("02b", "def pred A() {intr} thm T() {true} proof T$1 {1. A |- trivial };", 3, 1)>]
     [<DataRow("02c", "def func A()->obj {intr} thm T() {true} proof T$1 {1. A |- trivial };", 3, 1)>]

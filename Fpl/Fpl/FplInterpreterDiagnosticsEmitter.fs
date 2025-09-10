@@ -589,21 +589,6 @@ let rec blocktIsProof (fplValue: FplValue) =
                 blocktIsProof parent
         | None -> false
 
-
-let emitPR001Diagnostics (fplValue: FplValue) pos1 pos2 =
-    if not (blocktIsProof fplValue) then
-        let diagnostic =
-            { 
-                Diagnostic.Uri = ad.CurrentUri
-                Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-                Diagnostic.Severity = DiagnosticSeverity.Error
-                Diagnostic.StartPos = pos1
-                Diagnostic.EndPos = pos2
-                Diagnostic.Code = PR001
-                Diagnostic.Alternatives = None 
-            }
-        ad.AddDiagnostic diagnostic
-
 let emitPR002Diagnostics pos1 pos2 =
     let diagnostic =
         { 

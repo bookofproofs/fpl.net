@@ -132,7 +132,7 @@ type DiagnosticCode =
     | LG005 of string
     // proof-related error codes
     | PR000 of string 
-    | PR001 
+    | PR001 of string
     | PR002 
     | PR003 of string * string
     | PR004 of string * string
@@ -225,7 +225,7 @@ type DiagnosticCode =
             | LG005 _ -> "LG005"
             // proof-related error codes
             | PR000 _ -> "PR000"
-            | PR001 -> "PR001"
+            | PR001 _ -> "PR001"
             | PR002 -> "PR002"
             | PR003 _ -> "PR003"
             | PR004 _ -> "PR004"
@@ -318,7 +318,7 @@ type DiagnosticCode =
             | ID022 (incorrectBlockType, modeInt) -> 
                 match modeInt with
                 | 1 -> "" 
-                | 2 -> $"Cannot find a justifying `other proof argument`, found only {incorrectBlockType}."
+                | 2 -> ""
                 | _ -> $"Cannot find a justifying theorem-like statement, found only {incorrectBlockType}." 
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             // logic-related error codes
@@ -329,8 +329,8 @@ type DiagnosticCode =
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
             | LG005 name -> $"`Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
             // proof-related error codes
-            | PR000 incorrectBlockType -> $"Cannot find justifying `by definition`, found only {incorrectBlockType}."
-            | PR001 -> $"Cannot refer to a definition outside a proof."
+            | PR000 incorrectBlockType -> $"Cannot find a justifying `by definition`, found only {incorrectBlockType}."
+            | PR001 incorrectBlockType -> $"Cannot find a justifying `other proof argument`, found only {incorrectBlockType}."
             | PR002 -> $"Avoid referencing to proofs directly."
             | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
             | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict

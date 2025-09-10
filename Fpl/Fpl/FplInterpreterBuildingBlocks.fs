@@ -600,7 +600,6 @@ let rec eval (st: SymbolTable) ast =
         let fvJi = fv :?> FplJustificationItem
         fvJi.Mode <- JustificationItemType.ByDef
         eval st predicateWithQualificationAst
-        emitPR001Diagnostics fv pos1 pos2
         st.EvalPop()
     | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->
         st.EvalPush("DottedPredicate")
@@ -894,7 +893,9 @@ let rec eval (st: SymbolTable) ast =
                         emitPR000Diagnostics otherBlock alternative fvJi.StartPos fvJi.EndPos
                         ("",0)
                     | JustificationItemType.LinkToArgumentOtherProof ->
-                        ("Expected another proof, followed by its argument.", 2) 
+                        let alternative = "Expected another proof, followed by its argument."
+                        emitPR001Diagnostics otherBlock alternative fvJi.StartPos fvJi.EndPos
+                        ("",0)
                     | _ ->
                         ("Expected a theorem-like statement (theorem, lemma, proposition, corollary) or a rule of inference).", 3) 
                 emitID022Diagnostics otherBlock alternative modeInt fvJi.StartPos fvJi.EndPos
