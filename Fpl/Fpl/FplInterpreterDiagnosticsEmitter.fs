@@ -589,19 +589,6 @@ let rec blocktIsProof (fplValue: FplValue) =
                 blocktIsProof parent
         | None -> false
 
-let emitPR002Diagnostics pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR002
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-
 let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
     let filterByErrorCode (input: Diagnostics) errCode =
         input.Collection |> List.filter (fun d -> d.Code.Code = errCode)

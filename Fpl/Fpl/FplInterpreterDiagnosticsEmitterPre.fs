@@ -173,19 +173,6 @@ let emitID021Diagnostics identifier pos1 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitID022Diagnostics incorrectBlockType alternative (modeInt) pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Error
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID022(incorrectBlockType, modeInt)
-            Diagnostic.Alternatives = Some alternative
-        }
-    ad.AddDiagnostic diagnostic
-
 let emitID023Diagnostics multipleCandidates pos1 pos2 =
     let diagnostic =
         { 
@@ -264,7 +251,7 @@ let emitLG005Diagnostics name pos1 pos2 =
 
     ad.AddDiagnostic diagnostic
 
-let emitPR000Diagnostics incorrectBlockType alternative pos1 pos2 =
+let emitPR000Diagnostics incorrectBlockType pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -273,11 +260,11 @@ let emitPR000Diagnostics incorrectBlockType alternative pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR000 incorrectBlockType
-            Diagnostic.Alternatives = Some alternative
+            Diagnostic.Alternatives = Some "Expected a definition (def class, def predicate, def function)."
         }
     ad.AddDiagnostic diagnostic
 
-let emitPR001Diagnostics incorrectBlockType alternative pos1 pos2 =
+let emitPR001Diagnostics incorrectBlockType pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -286,9 +273,23 @@ let emitPR001Diagnostics incorrectBlockType alternative pos1 pos2 =
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
             Diagnostic.Code = PR001 incorrectBlockType
-            Diagnostic.Alternatives = Some alternative 
+            Diagnostic.Alternatives = Some "Expected another proof, followed by its argument." 
         }
     ad.AddDiagnostic diagnostic
+
+let emitPR002Diagnostics incorrectBlockType pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR002 incorrectBlockType
+            Diagnostic.Alternatives = Some "Expected another proof, followed by its argument." 
+        }
+    ad.AddDiagnostic diagnostic
+
 
 let emitPR003Diagnostics alreadyDeclaredMixedStr qualifiedStartPosConflictStr pos1 pos2 =
     let diagnostic =

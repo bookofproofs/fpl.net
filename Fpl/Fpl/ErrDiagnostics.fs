@@ -121,7 +121,6 @@ type DiagnosticCode =
     | ID019 of string 
     | ID020 of string 
     | ID021 of string 
-    | ID022 of string * int
     | ID023 of string 
     // logic-related error codes
     | LG000 of string * string 
@@ -133,7 +132,7 @@ type DiagnosticCode =
     // proof-related error codes
     | PR000 of string 
     | PR001 of string
-    | PR002 
+    | PR002 of string
     | PR003 of string * string
     | PR004 of string * string
     | PR005 of string
@@ -214,7 +213,6 @@ type DiagnosticCode =
             | ID019 _ -> "ID019"
             | ID020 _ -> "ID020"
             | ID021 _ -> "ID021"
-            | ID022 _ -> "ID022"
             | ID023 _ -> "ID023"
             // logic-related error codes
             | LG000 _ -> "LG000"
@@ -226,7 +224,7 @@ type DiagnosticCode =
             // proof-related error codes
             | PR000 _ -> "PR000"
             | PR001 _ -> "PR001"
-            | PR002 -> "PR002"
+            | PR002 _ -> "PR002"
             | PR003 _ -> "PR003"
             | PR004 _ -> "PR004"
             | PR005 _ -> "PR005"
@@ -315,11 +313,6 @@ type DiagnosticCode =
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> sprintf "Missing call of base constructor `%s`." name
             | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
-            | ID022 (incorrectBlockType, modeInt) -> 
-                match modeInt with
-                | 1 -> "" 
-                | 2 -> ""
-                | _ -> $"Cannot find a justifying theorem-like statement, found only {incorrectBlockType}." 
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."
@@ -329,9 +322,9 @@ type DiagnosticCode =
             | LG004 nodeType -> $"`Parameters not allowed for {nodeType}."
             | LG005 name -> $"`Unnecessary assignment of `{name}` detected (will be implicitely ignored)."
             // proof-related error codes
-            | PR000 incorrectBlockType -> $"Cannot find a justifying `by definition`, found only {incorrectBlockType}."
-            | PR001 incorrectBlockType -> $"Cannot find a justifying `other proof argument`, found only {incorrectBlockType}."
-            | PR002 -> $"Avoid referencing to proofs directly."
+            | PR000 incorrectBlockType -> $"Cannot find a justifying `by definition`, found {incorrectBlockType} instead."
+            | PR001 incorrectBlockType -> $"Cannot find a justifying `other proof argument`, found {incorrectBlockType} instead."
+            | PR002 incorrectBlockType -> $"Cannot find a justifying theorem-like statement or rule of inference, found {incorrectBlockType} instead." 
             | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
             | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
             | PR005 name ->  $"Argument identifier `{name}` not declared in this scope."

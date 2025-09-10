@@ -740,7 +740,6 @@ type TestFplValue() =
     member this.TestTypeSignatureOfFplBlocks(fplCode:string, expectedName:string, expectedType:string) =
         let filename = "TestTypeSignatureOfFplBlocks"
         let result = prepareFplCode(filename + ".fpl", fplCode, false) 
-        checkForUnexpectedErrors PR002
         let block = result.Value.Root.Scope[filename]
         let fplValue = block.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(SignatureType.Type)

@@ -886,19 +886,13 @@ let rec eval (st: SymbolTable) ast =
                     // adjust reference type if the found candidate is a rule of inference (from the default ReferredTheoremLikeStmtOrAxiom)
                     fvJi.Mode <- JustificationItemType.ReferredRuleOfInference
             | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
-                let alternative, modeInt = 
-                    match fvJi.Mode with 
-                    | JustificationItemType.ByDef ->
-                        let alternative = "Expected a definition (def class, def predicate, def function)."
-                        emitPR000Diagnostics otherBlock alternative fvJi.StartPos fvJi.EndPos
-                        ("",0)
-                    | JustificationItemType.LinkToArgumentOtherProof ->
-                        let alternative = "Expected another proof, followed by its argument."
-                        emitPR001Diagnostics otherBlock alternative fvJi.StartPos fvJi.EndPos
-                        ("",0)
-                    | _ ->
-                        ("Expected a theorem-like statement (theorem, lemma, proposition, corollary) or a rule of inference).", 3) 
-                emitID022Diagnostics otherBlock alternative modeInt fvJi.StartPos fvJi.EndPos
+                match fvJi.Mode with 
+                | JustificationItemType.ByDef ->
+                    emitPR000Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
+                | JustificationItemType.LinkToArgumentOtherProof ->
+                    emitPR001Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
+                | _ ->
+                    emitPR002Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
             | ScopeSearchResult.NotFound ->
                 emitID010Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos
             | ScopeSearchResult.FoundMultiple listOfKandidates ->
@@ -1199,8 +1193,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ReferencingIdentifier")
         eval st predicateIdentifierAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
-        if parentEvalPath.EndsWith(".ReferenceToProof") then
-            emitPR002Diagnostics pos1 pos2 // avoid referencing to proofs in general considering it not best practice in mathematics
         st.EvalPop()
     | Ast.ConditionFollowedByResult((pos1, pos2), (ast1, asts)) ->
         st.EvalPush("ConditionFollowedByResult")
