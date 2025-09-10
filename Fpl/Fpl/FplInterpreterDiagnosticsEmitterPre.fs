@@ -1,7 +1,6 @@
 ﻿/// This modulde contains all side-effect functions necessary to emit diagnostics for the FPL language server.
 module FplInterpreterDiagnosticsEmitterPre
 
-open System.Text.RegularExpressions
 open FParsec
 open FplGrammarCommons
 open ErrDiagnostics
@@ -174,7 +173,7 @@ let emitID021Diagnostics identifier pos1 =
         }
     ad.AddDiagnostic diagnostic
 
-let emitID022Diagnostics incorrectBlockType alternative isByDef pos1 pos2 =
+let emitID022Diagnostics incorrectBlockType alternative (modeInt) pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -182,7 +181,7 @@ let emitID022Diagnostics incorrectBlockType alternative isByDef pos1 pos2 =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = ID022(incorrectBlockType, isByDef)
+            Diagnostic.Code = ID022(incorrectBlockType, modeInt)
             Diagnostic.Alternatives = Some alternative
         }
     ad.AddDiagnostic diagnostic

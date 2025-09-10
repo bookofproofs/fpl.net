@@ -1478,7 +1478,7 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
-type JustificationItemType =
+    type JustificationItemType =
     | ReferredTheoremLikeStmtOrAxiom
     | ReferredRuleOfInference
     | ByDef
@@ -3570,8 +3570,9 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplJustificationItem) (can
         else 
             $"'{fv.Type(SignatureType.Name)} which is a {fv.Name}"
     
+
     match candidates.Length with
-    | 1 ->  // todo - do not accept non-definitions for by def or definitions for non-bydef 
+    | 1 ->  // exactly one candidate found
         let potentialCandidate = candidates.Head
         match fvJi.Mode, potentialCandidate with
         | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplConjecture
@@ -3587,16 +3588,29 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplJustificationItem) (can
         | JustificationItemType.ByDef, :? FplCorollary
         | JustificationItemType.ByDef, :? FplProposition
         | JustificationItemType.ByDef, :? FplLemma
-        | JustificationItemType.ByDef, :? FplProof ->
+        | JustificationItemType.ByDef, :? FplProof 
+        
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplAxiom
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplRuleOfInference
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplConjecture
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplTheorem
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplCorollary
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplProposition
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplPredicate 
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplFunctionalTerm
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplClass 
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplLemma ->
             ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
         | _ ->
             ScopeSearchResult.FoundAssociate potentialCandidate    
     | 0 -> ScopeSearchResult.NotFound
-    | _ -> ScopeSearchResult.FoundMultiple(
-                candidates
-                |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
-                |> String.concat ", "
-            )
+    | _ -> 
+        // multiple candidates found
+        ScopeSearchResult.FoundMultiple(
+            candidates
+            |> List.map (fun fv -> sprintf "'%s' %s" fv.Name (fv.Type(SignatureType.Mixed)))
+            |> String.concat ", "
+        )
 
 type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
     let _parsedAsts = parsedAsts
@@ -3787,8 +3801,20 @@ type SymbolTable(parsedAsts: ParsedAstList, debug: bool, offlineMode: bool) =
 
 
 /// Looks for all declared building blocks with a specific name.
-let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors =
+let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors withCorollariesOrProofs =
     let pm = List<FplValue>()
+
+    let rec flattenCorollariesAndProofs (tls:FplValue) =
+        tls.Scope.Values
+        |> Seq.iter (fun fv -> 
+            match fv with
+            | :? FplProof -> pm.Add(fv)
+            | :? FplCorollary -> 
+                pm.Add(fv)
+                flattenCorollariesAndProofs fv
+            | _ -> ()
+        )
+
 
     st.Root.Scope // iterate all theories
     |> Seq.iter (fun theory ->
@@ -3803,7 +3829,12 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
                 block.Scope
                 |> Seq.map (fun kvp -> kvp.Value)
                 |> Seq.filter (fun (fv: FplValue) -> isConstructor fv)
-                |> Seq.iter (fun (fv: FplValue) -> pm.Add(fv))))
+                |> Seq.iter (fun (fv: FplValue) -> pm.Add(fv))
+
+            if withCorollariesOrProofs && (block :? FplGenericTheoremLikeStmt) then 
+                flattenCorollariesAndProofs block
+        )
+    )
     |> ignore
 
     pm |> Seq.toList

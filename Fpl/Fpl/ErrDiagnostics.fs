@@ -121,7 +121,7 @@ type DiagnosticCode =
     | ID019 of string 
     | ID020 of string 
     | ID021 of string 
-    | ID022 of string * bool
+    | ID022 of string * int
     | ID023 of string 
     // logic-related error codes
     | LG000 of string * string 
@@ -315,11 +315,11 @@ type DiagnosticCode =
             | ID019 name -> sprintf "The extension `%s` could not be found. Are you missing a uses clause?" name
             | ID020 name -> sprintf "Missing call of base constructor `%s`." name
             | ID021 name -> sprintf "Duplicate call of base constructor `%s`." name
-            | ID022 (incorrectBlockType, isByDef) -> 
-                if isByDef then 
-                    $"Cannot find a justifying `by definition`, found only {incorrectBlockType}." 
-                else
-                    $"Cannot find a justifying theorem-like statement, found only {incorrectBlockType}." 
+            | ID022 (incorrectBlockType, modeInt) -> 
+                match modeInt with
+                | 1 -> $"Cannot find a justifying `by definition`, found only {incorrectBlockType}." 
+                | 2 -> $"Cannot find a justifying `other proof argument`, found only {incorrectBlockType}."
+                | _ -> $"Cannot find a justifying theorem-like statement, found only {incorrectBlockType}." 
             | ID023 candidates  -> $"Cannot associate a justification with a single block. Found more candidates: {candidates}." 
             // logic-related error codes
             | LG000 (typeOfPredicate,argument) -> $"Cannot evaluate `{typeOfPredicate}`; its argument `{argument}` is a predicate but couldn't be determined."

@@ -714,7 +714,7 @@ let rec eval (st: SymbolTable) ast =
             fvJi.FplId <- identifier
         | _ -> ()
         if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
-            let candidates = findCandidatesByName st identifier false
+            let candidates = findCandidatesByName st identifier false false
             match (fv, candidates.Length) with
             | (:? FplVariable, 0) -> 
                 emitSIG04DiagnosticsForTypes identifier pos1 pos2
@@ -870,26 +870,37 @@ let rec eval (st: SymbolTable) ast =
         let fvJi = new FplJustificationItem((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fvJi)
         eval st predicateAst 
-        let candidates = findCandidatesByName st fvJi.FplId (fvJi.Mode = JustificationItemType.ByDef)
-        match tryFindAssociatedBlockForJustificationItem fvJi candidates with
-        | ScopeSearchResult.FoundAssociate potentialCandidate -> 
-            fvJi.Scope.TryAdd(fvJi.FplId, potentialCandidate) |> ignore
-            if potentialCandidate.FplId = literalRetL then 
-                // adjust reference type if the found candidate is not an axiom, not a theorem-like statement, but a rule of inference
-                fvJi.Mode <- JustificationItemType.ReferredRuleOfInference
-        | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
-            let alternative, isByDef = 
-                match fvJi.Mode with 
-                | JustificationItemType.ByDef ->
-                    ("Expected a definition (def class, def predicate, def function).", true) 
-                | _ ->
-                    ("Expected a theorem-like statement (theorem, lemma, proposition, corollary, rule of inference).", false) 
-            emitID022Diagnostics otherBlock alternative isByDef fvJi.StartPos fvJi.EndPos
-        | ScopeSearchResult.NotFound ->
-            emitID010Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos
-        | ScopeSearchResult.FoundMultiple listOfKandidates ->
-            emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos
-        | _ -> ()
+        match fvJi.Mode with
+        | JustificationItemType.LinkToArgumentSameProof -> ()
+            // here, fvJi.FplId is the name of a proceeding argument in the same proof
+        | _ ->
+            // here, fvJi.FplId starts with a PredicateIdentifier
+            let splitAnyArgumentId (input: string) =
+                let parts = input.Split(':')
+                if parts.Length > 0 then parts.[0] else ""
+            let name = splitAnyArgumentId fvJi.FplId
+            let candidates = findCandidatesByName st name (fvJi.Mode = JustificationItemType.ByDef) true
+            match tryFindAssociatedBlockForJustificationItem fvJi candidates with
+            | ScopeSearchResult.FoundAssociate potentialCandidate -> 
+                fvJi.Scope.TryAdd(fvJi.FplId, potentialCandidate) |> ignore
+                if potentialCandidate.FplId = literalRetL then 
+                    // adjust reference type if the found candidate is not an axiom, not a theorem-like statement, but a rule of inference
+                    fvJi.Mode <- JustificationItemType.ReferredRuleOfInference
+            | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
+                let alternative, modeInt = 
+                    match fvJi.Mode with 
+                    | JustificationItemType.ByDef ->
+                        ("Expected a definition (def class, def predicate, def function).", 1) 
+                    | JustificationItemType.LinkToArgumentOtherProof ->
+                        ("Expected another proof, followed by its argument.", 2) 
+                    | _ ->
+                        ("Expected a theorem-like statement (theorem, lemma, proposition, corollary) or a rule of inference).", 3) 
+                emitID022Diagnostics otherBlock alternative modeInt fvJi.StartPos fvJi.EndPos
+            | ScopeSearchResult.NotFound ->
+                emitID010Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos
+            | ScopeSearchResult.FoundMultiple listOfKandidates ->
+                emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos
+            | _ -> ()
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Justification((pos1, pos2), justificationItemAsts) ->
@@ -972,7 +983,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("PredicateWithOptSpecification")
         let fv = variableStack.PeekEvalStack()
         let searchForCandidatesOfReferenceBlock (refBlock:FplValue) = 
-            let candidatesFromTheory = findCandidatesByName st refBlock.FplId true
+            let candidatesFromTheory = findCandidatesByName st refBlock.FplId true false
             let candidatesFromPropertyScope = findCandidatesByNameInBlock refBlock refBlock.FplId
             let candidatesFromDottedQualification = findCandidatesByNameInDotted refBlock refBlock.FplId
             candidatesFromTheory  
