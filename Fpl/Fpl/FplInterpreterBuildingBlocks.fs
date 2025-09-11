@@ -866,8 +866,17 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvJi)
         eval st predicateAst 
         match fvJi.Mode with
-        | JustificationItemType.LinkToArgumentSameProof -> ()
+        | JustificationItemType.LinkToArgumentSameProof -> 
             // here, fvJi.FplId is the name of a proceeding argument in the same proof
+            let parent = fvJi.ParentJustification
+            let arg = parent.Parent.Value
+            let proof = arg.Parent.Value
+            let refId = $"{fvJi.FplId}."
+            if not (proof.Scope.ContainsKey(refId)) then 
+                emitPR005Diagnostics fvJi.StartPos fvJi.EndPos fvJi.FplId
+            else
+                let referencedArgument = proof.Scope[refId]
+                fvJi.ArgList.Add(referencedArgument) 
         | _ ->
             // here, fvJi.FplId starts with a PredicateIdentifier
             let splitAnyArgumentId (input: string) =
