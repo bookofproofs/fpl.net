@@ -378,17 +378,25 @@ let rec eval (st: SymbolTable) ast =
     | Ast.RefArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("RefArgumentIdentifier")
         let fv = variableStack.PeekEvalStack()
-        let fvJi = fv :?> FplJustificationItem
-        match fvJi.FplId with 
-        | "" -> 
-            fvJi.FplId <- s
-            fvJi.Mode <- JustificationItemType.LinkToArgumentSameProof
-        | _ -> 
-            fvJi.FplId <- $"{fvJi.FplId}:{s}"
-            match fvJi.Mode with 
-            | JustificationItemType.ByDef -> () // already set 
+        match fv.Name with 
+        | "justification item" ->
+            let fvJi = fv :?> FplJustificationItem
+            match fvJi.FplId with 
+            | "" -> 
+                fvJi.FplId <- s
+                fvJi.Mode <- JustificationItemType.LinkToArgumentSameProof
             | _ -> 
-                fvJi.Mode <- JustificationItemType.LinkToArgumentOtherProof
+                fvJi.FplId <- $"{fvJi.FplId}:{s}"
+                match fvJi.Mode with 
+                | JustificationItemType.ByDef -> () // already set 
+                | _ -> 
+                    fvJi.Mode <- JustificationItemType.LinkToArgumentOtherProof
+        | "argument inference" -> 
+            let fvAi = fv :?> FplArgInference
+            let proof = fvAi.ParentArgument.ParentProof
+            if not (proof.HasArgument s) then
+                emitPR005Diagnostics s pos1 pos2
+        | _ -> ()
         st.EvalPop() 
     | Ast.Prefix((pos1, pos2), symbol) -> 
         st.EvalPush("Prefix")
@@ -875,7 +883,7 @@ let rec eval (st: SymbolTable) ast =
                     let parent = fv1.ParentJustification
                     let arg = parent.ParentArgument
                     arg.ParentProof
-            if proof.Scope.ContainsKey(argName) then 
+            if proof.HasArgument argName then 
                 Some proof.Scope[argName]
             else 
                 None

@@ -808,7 +808,6 @@ type TestFplValueScopeQualifiedStartPos() =
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
             let just = arg.ArgList[0]
-            let ainf = arg.ArgList[1]
             let numbOfJustifications = just.Scope.Count
  
             Assert.AreEqual<int>(expNumber, numbOfJustifications)

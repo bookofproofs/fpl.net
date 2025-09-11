@@ -1713,6 +1713,8 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
+    member this.HasArgument argumentId = this.Scope.ContainsKey(argumentId)
+
 
 let isArgument (fv:FplValue) = 
     match fv with
