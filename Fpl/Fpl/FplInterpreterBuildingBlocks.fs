@@ -378,24 +378,17 @@ let rec eval (st: SymbolTable) ast =
     | Ast.RefArgumentIdentifier((pos1, pos2), s) -> 
         st.EvalPush("RefArgumentIdentifier")
         let fv = variableStack.PeekEvalStack()
-        fv.FplId <- 
-            match fv.FplId with 
-            | "" -> s
-            | _ -> $"{fv.FplId}:{s}"
-        let parent = fv.Parent.Value
-        match parent with
-        | :? FplArgInference 
-        | :? FplJustification ->
-            let arg = parent.Parent.Value
-            let proof = arg.Parent.Value
-            if not (proof.Scope.ContainsKey(s)) then 
-                emitPR005Diagnostics fv.StartPos fv.EndPos (fv.Type(SignatureType.Mixed))
-            else
-                let referencedArgument = proof.Scope[s]
-                fv.ArgList.Add(referencedArgument) 
+        let fvJi = fv :?> FplJustificationItem
+        match fvJi.FplId with 
+        | "" -> 
+            fvJi.FplId <- s
+            fvJi.Mode <- JustificationItemType.LinkToArgumentSameProof
         | _ -> 
-            ()
-
+            fvJi.FplId <- $"{fvJi.FplId}:{s}"
+            match fvJi.Mode with 
+            | JustificationItemType.ByDef -> () // already set 
+            | _ -> 
+                fvJi.Mode <- JustificationItemType.LinkToArgumentOtherProof
         st.EvalPop() 
     | Ast.Prefix((pos1, pos2), symbol) -> 
         st.EvalPush("Prefix")
@@ -1923,16 +1916,6 @@ let rec eval (st: SymbolTable) ast =
     | Ast.RefArgumentIdentifierOtherProof((pos1, pos2), ((predicateIdentifierAst, dollarDigitListAsts), refArgumentIdentifierAst)) ->
         st.EvalPush("RefArgumentIdentifierOtherProof")
         let fv = variableStack.PeekEvalStack()
-        let fvJi = fv :?> FplJustificationItem 
-        match fvJi.Mode with 
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom -> 
-            // only the default can be overwritten with LinkToArgumentOtherProof
-            fvJi.Mode <- JustificationItemType.LinkToArgumentOtherProof
-        | _ -> 
-            // all other modes indicate that some proceeding syntax (for instance, bydef keyword) was already parsed.
-            // in this case there is a semantic error that will be catched by some diagnostics, e.g. PR000
-            ()
-
         eval st predicateIdentifierAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
         eval st refArgumentIdentifierAst

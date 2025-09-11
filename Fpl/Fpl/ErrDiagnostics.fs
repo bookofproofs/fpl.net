@@ -136,9 +136,9 @@ type DiagnosticCode =
     | PR003 of string * string
     | PR004 of string * string
     | PR005 of string
-    | PR006 
     | PR007 of string * string
     | PR008 of string * string * string
+    | PR009 
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -228,9 +228,9 @@ type DiagnosticCode =
             | PR003 _ -> "PR003"
             | PR004 _ -> "PR004"
             | PR005 _ -> "PR005"
-            | PR006 -> "PR006"
             | PR007 _ -> "PR007"
             | PR008 _ -> "PR008"
+            | PR009 -> "PR009"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -328,9 +328,9 @@ type DiagnosticCode =
             | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
             | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
             | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
-            | PR006 -> "Not all arguments of the proof could be verified."
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
             | PR008 (nodeName, expectedInputArgInference, actualInputArgInference) ->  $"This {nodeName} expects `{expectedInputArgInference}` and could not be applied to the proceeding argument inference which was `{actualInputArgInference}`."
+            | PR009 -> "Not all arguments of the proof could be verified."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 

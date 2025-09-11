@@ -2979,7 +2979,7 @@ type FplProof(positions: Positions, parent: FplValue, runOrder) =
         )
         |> ignore
         if not allArgumentsEvaluateToTrue then
-            emitPR006Diagnostics this.StartPos this.StartPos
+            emitPR009Diagnostics this.StartPos this.StartPos
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 

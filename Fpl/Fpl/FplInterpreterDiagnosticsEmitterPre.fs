@@ -332,20 +332,6 @@ let emitPR005Diagnostics pos1 pos2 mixedTypeStr =
         }
     ad.AddDiagnostic diagnostic
 
-let emitPR006Diagnostics pos1 pos2 =
-    let diagnostic =
-        { 
-            Diagnostic.Uri = ad.CurrentUri
-            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
-            Diagnostic.Severity = DiagnosticSeverity.Warning
-            Diagnostic.StartPos = pos1
-            Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR006 // not all arguments verifiable
-            Diagnostic.Alternatives = None 
-        }
-    ad.AddDiagnostic diagnostic
-
-
 let emitPR007Diagnostics nodeTypeName nodeName pos1 pos2 = 
         let code = 
             if isEnglishAn nodeName then
@@ -378,6 +364,19 @@ let emitPR008Diagnostics nodeName expectedInput actualInput pos1 pos2 =
             }
         ad.AddDiagnostic diagnostic
 
+let emitPR009Diagnostics pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Warning
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR009 // not all arguments verifiable
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+    
 let emitSIG03Diagnostics errMsg mapTypeStr pos1 pos2 = 
     let diagnostic =
         { 
