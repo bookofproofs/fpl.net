@@ -136,6 +136,7 @@ type DiagnosticCode =
     | PR003 of string * string
     | PR004 of string * string
     | PR005 of string
+    | PR006 of string * string
     | PR007 of string * string
     | PR008 of string * string * string
     | PR009 
@@ -228,6 +229,7 @@ type DiagnosticCode =
             | PR003 _ -> "PR003"
             | PR004 _ -> "PR004"
             | PR005 _ -> "PR005"
+            | PR006 _ -> "PR006"
             | PR007 _ -> "PR007"
             | PR008 _ -> "PR008"
             | PR009 -> "PR009"
@@ -328,6 +330,7 @@ type DiagnosticCode =
             | PR003 (name, conflict) -> sprintf "Argument identifier `%s` was already declared at %s." name conflict
             | PR004 (name, conflict)  -> sprintf "Justification `%s` was already declared at %s." name conflict
             | PR005 name ->  $"Argument identifier `{name}` not declared in this proof."
+            | PR006 (proofName, argumentName)->  $"A proof {proofName} was found, but there ít has no argument with the name `{argumentName}`."
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
             | PR008 (nodeName, expectedInputArgInference, actualInputArgInference) ->  $"This {nodeName} expects `{expectedInputArgInference}` and could not be applied to the proceeding argument inference which was `{actualInputArgInference}`."
             | PR009 -> "Not all arguments of the proof could be verified."

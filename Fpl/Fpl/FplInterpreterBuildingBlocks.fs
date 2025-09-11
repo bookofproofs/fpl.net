@@ -865,24 +865,33 @@ let rec eval (st: SymbolTable) ast =
         let fvJi = new FplJustificationItem((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder)
         variableStack.PushEvalStack(fvJi)
         eval st predicateAst 
+
+        let getArgumentInProof (fv1:FplJustificationItem) argName =
+            let proof = 
+                match fv1.Mode with 
+                | JustificationItemType.LinkToArgumentOtherProof ->
+                    fv1.Scope.Values |> Seq.head :?> FplProof
+                | _ ->
+                    let parent = fv1.ParentJustification
+                    let arg = parent.ParentArgument
+                    arg.ParentProof
+            if proof.Scope.ContainsKey(argName) then 
+                Some proof.Scope[argName]
+            else 
+                None
+
         match fvJi.Mode with
         | JustificationItemType.LinkToArgumentSameProof -> 
             // here, fvJi.FplId is the name of a proceeding argument in the same proof
-            let parent = fvJi.ParentJustification
-            let arg = parent.Parent.Value
-            let proof = arg.Parent.Value
-            let refId = $"{fvJi.FplId}."
-            if not (proof.Scope.ContainsKey(refId)) then 
-                emitPR005Diagnostics fvJi.StartPos fvJi.EndPos fvJi.FplId
-            else
-                let referencedArgument = proof.Scope[refId]
-                fvJi.ArgList.Add(referencedArgument) 
+            match getArgumentInProof fvJi $"{fvJi.FplId}." with
+            | Some argument -> fvJi.ArgList.Add(argument) 
+            | _ -> emitPR005Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos 
         | _ ->
             // here, fvJi.FplId starts with a PredicateIdentifier
-            let splitAnyArgumentId (input: string) =
+            let splitOffAnyArgumentId (input: string) =
                 let parts = input.Split(':')
                 if parts.Length > 0 then parts.[0] else ""
-            let name = splitAnyArgumentId fvJi.FplId
+            let name = splitOffAnyArgumentId fvJi.FplId
             let candidates = findCandidatesByName st name (fvJi.Mode = JustificationItemType.ByDef) true
             let adjustCandidates = 
                 match fvJi.Mode, name.Contains("$"), candidates.Length>1 with 
@@ -900,6 +909,16 @@ let rec eval (st: SymbolTable) ast =
                 if potentialCandidate.FplId = literalRetL then 
                     // adjust reference type if the found candidate is a rule of inference (from the default ReferredTheoremLikeStmtOrAxiom)
                     fvJi.Mode <- JustificationItemType.ReferredRuleOfInference
+                match fvJi.Mode with 
+                | JustificationItemType.LinkToArgumentOtherProof ->
+                    let split = fvJi.FplId.Split(":")
+                    if split.Length > 1 then 
+                        // here, argName is the argument identifier of the other proof
+                        let argName = $"{split.[1]}."
+                        match getArgumentInProof fvJi argName with
+                        | Some argument -> fvJi.ArgList.Add(argument) 
+                        | _ -> emitPR006Diagnostics fvJi.FplId argName fvJi.StartPos fvJi.EndPos 
+                | _ -> ()
             | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
                 match fvJi.Mode with 
                 | JustificationItemType.ByDef ->

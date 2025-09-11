@@ -319,7 +319,7 @@ let emitPR004Diagnostics alreadyDeclaredTypeStr qualifiedStartPosConflictStr pos
 
     ad.AddDiagnostic diagnostic
 
-let emitPR005Diagnostics pos1 pos2 mixedTypeStr =
+let emitPR005Diagnostics argumentName pos1 pos2 =
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -327,7 +327,20 @@ let emitPR005Diagnostics pos1 pos2 mixedTypeStr =
             Diagnostic.Severity = DiagnosticSeverity.Error
             Diagnostic.StartPos = pos1
             Diagnostic.EndPos = pos2
-            Diagnostic.Code = PR005 mixedTypeStr // argument reference not defined
+            Diagnostic.Code = PR005 argumentName // argument reference not defined
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitPR006Diagnostics proofName argumentName pos1 pos2 =
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR006 (proofName, argumentName) // argument in proof not defined
             Diagnostic.Alternatives = None 
         }
     ad.AddDiagnostic diagnostic

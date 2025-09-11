@@ -1519,7 +1519,7 @@ type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
         with get () = _mode
         and set (v) = _mode <- v
 
-    member this.ParentJustification = this.Parent.Value
+    member this.ParentJustification = this.Parent.Value :?> FplJustification
 
     /// Returns Some FPL node that is referenced by this JustificationItem (if it could be found) or None
     member this.ReferencedJustification = 
@@ -1547,7 +1547,7 @@ type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
         else
             None
 
-type FplJustification(positions: Positions, parent: FplValue) =
+and FplJustification(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
     override this.Name = "justification"
@@ -1574,7 +1574,9 @@ type FplJustification(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
-type FplArgInference(positions: Positions, parent: FplValue) =
+    member this.ParentArgument = this.Parent.Value :?> FplArgument
+
+and FplArgInference(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
     override this.Name = "argument inference"
@@ -1595,7 +1597,9 @@ type FplArgInference(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
-type FplArgument(positions: Positions, parent: FplValue, runOrder) =
+    member this.ParentArgument = this.Parent.Value :?> FplArgument
+
+and FplArgument(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericPredicate(positions, parent)
     let _runOrder = runOrder
 
@@ -1656,6 +1660,54 @@ type FplArgument(positions: Positions, parent: FplValue, runOrder) =
                 d) whether or not the justification is a by definition
         *)
 
+
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+
+    override this.RunOrder = Some _runOrder
+
+    member this.ParentProof = this.Parent.Value :?> FplProof
+
+
+and FplProof(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericPredicate(positions, parent)
+    let _runOrder = runOrder
+    
+    override this.Name = literalPrfL
+    override this.ShortName = literalPrf
+
+    override this.Clone () =
+        let ret = new FplProof((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
+        this.AssignParts(ret)
+        ret
+
+    override this.IsFplBlock () = true
+    override this.IsBlock () = true
+    override this.IsProof (): bool = true
+
+    override this.Type signatureType =
+        let head = getFplHead this signatureType
+        head
+
+    override this.Run variableStack = 
+        // tell the parent theorem-like statement that it has a proof
+        let parent = this.Parent.Value 
+        match box parent with 
+        | :? IHaveAProof as parentWithProof ->
+            parentWithProof.HasProof <- true
+        | _ -> ()
+        // evaluate the proof by evaluating all arguments according to their order in the FPL code
+        let mutable allArgumentsEvaluateToTrue = true
+        this.Scope.Values
+        |> Seq.filter (fun fv -> fv.Name = "argument")
+        |> Seq.sortBy (fun fv -> fv.RunOrder)
+        |> Seq.map (fun arg -> 
+            arg.Run variableStack
+            let argRepr = arg.Represent()
+            allArgumentsEvaluateToTrue <- allArgumentsEvaluateToTrue && argRepr = literalTrue 
+        )
+        |> ignore
+        if not allArgumentsEvaluateToTrue then
+            emitPR009Diagnostics this.StartPos this.StartPos
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
@@ -2940,50 +2992,6 @@ let isExtension (fv:FplValue) =
     | :? FplExtension -> true
     | _ -> false
 
-type FplProof(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericPredicate(positions, parent)
-    let _runOrder = runOrder
-    
-    override this.Name = literalPrfL
-    override this.ShortName = literalPrf
-
-    override this.Clone () =
-        let ret = new FplProof((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
-        this.AssignParts(ret)
-        ret
-
-    override this.IsFplBlock () = true
-    override this.IsBlock () = true
-    override this.IsProof (): bool = true
-
-    override this.Type signatureType =
-        let head = getFplHead this signatureType
-        head
-
-    override this.Run variableStack = 
-        // tell the parent theorem-like statement that it has a proof
-        let parent = this.Parent.Value 
-        match box parent with 
-        | :? IHaveAProof as parentWithProof ->
-            parentWithProof.HasProof <- true
-        | _ -> ()
-        // evaluate the proof by evaluating all arguments according to their order in the FPL code
-        let mutable allArgumentsEvaluateToTrue = true
-        this.Scope.Values
-        |> Seq.filter (fun fv -> fv.Name = "argument")
-        |> Seq.sortBy (fun fv -> fv.RunOrder)
-        |> Seq.map (fun arg -> 
-            arg.Run variableStack
-            let argRepr = arg.Represent()
-            allArgumentsEvaluateToTrue <- allArgumentsEvaluateToTrue && argRepr = literalTrue 
-        )
-        |> ignore
-        if not allArgumentsEvaluateToTrue then
-            emitPR009Diagnostics this.StartPos this.StartPos
-
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
-
-    override this.RunOrder = Some _runOrder
 
 type FplIntrinsicInd(positions: Positions, parent: FplValue) as this =
     inherit FplValue(positions, Some parent)
