@@ -445,7 +445,7 @@ type TestInterpreterErrors() =
     [<DataRow("2g", "lem A() {true} thm T() {true} proof T$1 {1. A |- trivial };", 0)>]
     [<DataRow("2h", "prop A() {true} thm T() {true} proof T$1 {1. A |- trivial };", 0)>]
     [<DataRow("2i", "inf A() {pre: true con: true} thm T() {true} proof T$1 {1. A |- trivial };", 0)>]
-    [<DataRow("2j", "cor A$1() {true} thm T() {true} proof T$1 {1. A |- trivial };", 0)>]
+    [<DataRow("2j", "cor A$1() {true} thm T() {true} proof T$1 {1. A |- trivial };", 1)>]
     [<DataRow("2j_", "thm A() {true} cor A$1() {true} thm T() {true} proof T$1 {1. A |- trivial };", 0)>]
     [<DataRow("2k", "proof A$1 {1. |- trivial} thm T() {true} proof T$1 {1. A |- trivial };", 1)>]
     [<DataRow("2k_", "thm A() {true} proof A$1 {1. |- trivial} thm T() {true} proof T$1 {1. A |- trivial };", 0)>]

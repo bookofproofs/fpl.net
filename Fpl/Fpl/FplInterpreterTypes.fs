@@ -3574,32 +3574,34 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplJustificationItem) (can
     match candidates.Length with
     | 1 ->  // exactly one candidate found
         let potentialCandidate = candidates.Head
-        match fvJi.Mode, potentialCandidate with
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplConjecture
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplProof
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplPredicate
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplClass
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplFunctionalTerm ->
+        match fvJi.Mode, potentialCandidate, fvJi.FplId=potentialCandidate.FplId with
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplConjecture , _
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplProof, _
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplPredicate, _
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplClass, _
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplFunctionalTerm, _ ->
             ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
-        | JustificationItemType.ByDef, :? FplAxiom
-        | JustificationItemType.ByDef, :? FplRuleOfInference
-        | JustificationItemType.ByDef, :? FplConjecture
-        | JustificationItemType.ByDef, :? FplTheorem
-        | JustificationItemType.ByDef, :? FplCorollary
-        | JustificationItemType.ByDef, :? FplProposition
-        | JustificationItemType.ByDef, :? FplLemma
-        | JustificationItemType.ByDef, :? FplProof 
+        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, _, false ->
+            ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
+        | JustificationItemType.ByDef, :? FplAxiom, _
+        | JustificationItemType.ByDef, :? FplRuleOfInference, _
+        | JustificationItemType.ByDef, :? FplConjecture, _
+        | JustificationItemType.ByDef, :? FplTheorem, _
+        | JustificationItemType.ByDef, :? FplCorollary, _
+        | JustificationItemType.ByDef, :? FplProposition, _
+        | JustificationItemType.ByDef, :? FplLemma, _
+        | JustificationItemType.ByDef, :? FplProof , _
         
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplAxiom
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplRuleOfInference
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplConjecture
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplTheorem
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplCorollary
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplProposition
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplPredicate 
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplFunctionalTerm
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplClass 
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplLemma ->
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplAxiom, _
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplRuleOfInference, _
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplConjecture, _
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplTheorem, _
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplCorollary, _
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplProposition, _
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplPredicate , _
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplFunctionalTerm, _
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplClass, _
+        | JustificationItemType.LinkToArgumentOtherProof, :? FplLemma, _ ->
             ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
         | _ ->
             ScopeSearchResult.FoundAssociate potentialCandidate    
@@ -3823,13 +3825,18 @@ let findCandidatesByName (st: SymbolTable) (name: string) withClassConstructors 
                 ""
         else
             name
+    let nameWithProofOrCorRef = 
+        if withCorollariesOrProofs && not (name.Contains("$")) then 
+            $"{name}$"
+        else
+            name
 
     st.Root.Scope // iterate all theories
     |> Seq.iter (fun theory ->
         theory.Value.Scope
         // filter only blocks starting with the same FplId as the reference
         |> Seq.map (fun kvp -> kvp.Value)
-        |> Seq.filter (fun fv -> fv.FplId = name || fv.FplId = nameWithoutProofOrCorRef)
+        |> Seq.filter (fun fv -> fv.FplId = name || fv.FplId = nameWithoutProofOrCorRef || fv.FplId.StartsWith(nameWithProofOrCorRef))
         |> Seq.iter (fun (block: FplValue) ->
             pm.Add(block)
 

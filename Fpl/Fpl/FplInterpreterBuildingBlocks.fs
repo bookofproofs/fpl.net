@@ -887,6 +887,8 @@ let rec eval (st: SymbolTable) ast =
                 | JustificationItemType.LinkToArgumentOtherProof, true, true 
                 | JustificationItemType.ByDef, true, true ->
                     candidates |> List.filter (fun fv -> fv.FplId = name)
+                | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, true, true ->
+                    candidates |> List.filter (fun fv -> fv.FplId = name)
                 | _ ->
                     candidates
 
