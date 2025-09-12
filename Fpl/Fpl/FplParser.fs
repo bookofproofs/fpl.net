@@ -161,7 +161,11 @@ let keywordAssert = skipString literalAssL .>> SW
 let keywordUndefined = positions "Undefined" (skipString literalUndefL <|> skipString literalUndef) .>> IW |>> Ast.Undefined
 let keywordTrue = positions "True" (skipString literalTrue) .>> IW  |>> Ast.True  
 let keywordFalse = positions "False" (skipString literalFalse) .>> IW |>>  Ast.False  
-let keywordBydef = positions literalByDef (skipString literalByDef) .>> SW  
+let keywordByDef = pstring literalByDef 
+let keywordByAx = pstring literalByAx 
+let keywordByInf = pstring literalByInf
+let keywordByCor = pstring literalByCor
+let byModifier = choice [keywordByDef; keywordByAx; keywordByInf; keywordByCor] .>> SW 
 let keywordAnd = skipString literalAnd .>> IW 
 let keywordOr = skipString literalOr .>> IW 
 let keywordImpl = skipString literalImpl .>> IW 
@@ -365,14 +369,10 @@ primePredicateRef.Value <- choice [
 
 let argumentIdentifier = positions "ArgumentIdentifier" (regex @"\d+\w*\.") <?> "<argument identifier>" |>> Ast.ArgumentIdentifier
 let refArgumentIdentifier = positions "RefArgumentIdentifier" (regex @"\d+\w*") <?> "<refargument identifier>" |>> Ast.RefArgumentIdentifier
-let refArgumentIdentifierOtherProof = positions "RefArgumentIdentifierOtherProof" (predicateIdentifier .>>. dollarDigitList .>>. (IW >>. colon >>. refArgumentIdentifier)) |>> Ast.RefArgumentIdentifierOtherProof
-let byDefinition = positions "ByDef" (keywordBydef >>. choice [attempt refArgumentIdentifierOtherProof; attempt referencingIdentifier; predicateIdentifier] ) |>> Ast.ByDef 
+let justificationIdentifier = positions "JustificationIdentifier" (opt byModifier .>>. predicateIdentifier .>>. opt dollarDigitList .>>. opt (colon >>. refArgumentIdentifier)) |>> Ast.JustificationIdentifier
 
 let justificationReference = choice [
-    attempt refArgumentIdentifierOtherProof
-    attempt referencingIdentifier
-    byDefinition
-    predicateIdentifier
+    justificationIdentifier
     refArgumentIdentifier
 ]
 

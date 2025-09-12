@@ -378,6 +378,7 @@ let emitPR008Diagnostics nodeName expectedInput actualInput pos1 pos2 =
         ad.AddDiagnostic diagnostic
 
 let emitPR009Diagnostics pos1 pos2 =
+
     let diagnostic =
         { 
             Diagnostic.Uri = ad.CurrentUri
@@ -390,6 +391,84 @@ let emitPR009Diagnostics pos1 pos2 =
         }
     ad.AddDiagnostic diagnostic
     
+let emitPR010Diagnostics keyword exptectedRef pos1 pos2 =
+    let code = 
+        if isEnglishAn exptectedRef then
+            PR010 (keyword, $"an {exptectedRef}")
+        else
+            PR010 (keyword, $"a {exptectedRef}")
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = code 
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitPR011Diagnostics keyword exptectedRef pos1 pos2 =
+    let code = 
+        if isEnglishAn exptectedRef then
+            PR010 (keyword, $"an {exptectedRef}")
+        else
+            PR010 (keyword, $"a {exptectedRef}")
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = code
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitPR012Diagnostics pos1 pos2 =
+
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR012 
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitPR013Diagnostics pos1 pos2 =
+
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Information
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR013 
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
+let emitPR014Diagnostics pos1 pos2 =
+
+    let diagnostic =
+        { 
+            Diagnostic.Uri = ad.CurrentUri
+            Diagnostic.Emitter = DiagnosticEmitter.FplInterpreter
+            Diagnostic.Severity = DiagnosticSeverity.Error
+            Diagnostic.StartPos = pos1
+            Diagnostic.EndPos = pos2
+            Diagnostic.Code = PR014 
+            Diagnostic.Alternatives = None 
+        }
+    ad.AddDiagnostic diagnostic
+
 let emitSIG03Diagnostics errMsg mapTypeStr pos1 pos2 = 
     let diagnostic =
         { 

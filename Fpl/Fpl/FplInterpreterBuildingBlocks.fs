@@ -380,7 +380,7 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         match fv.Name with 
         | "justification item" ->
-            let fvJi = fv :?> FplJustificationItem
+            let fvJi = fv :?> FplGenericJustificationItem
             match fvJi.FplId with 
             | "" -> 
                 fvJi.FplId <- s
@@ -598,13 +598,6 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
         variableStack.PopEvalStack()
         st.EvalPop()
-    | Ast.ByDef((pos1, pos2), predicateWithQualificationAst) ->
-        st.EvalPush("ByDef")
-        let fv = variableStack.PeekEvalStack()
-        let fvJi = fv :?> FplJustificationItem
-        fvJi.Mode <- JustificationItemType.ByDef
-        eval st predicateWithQualificationAst
-        st.EvalPop()
     | Ast.DottedPredicate((pos1, pos2), predicateWithOptSpecificationAst) ->
         st.EvalPush("DottedPredicate")
         let fv = variableStack.PeekEvalStack()
@@ -713,7 +706,7 @@ let rec eval (st: SymbolTable) ast =
             fv.FplId <- fv.FplId + identifier
             fv.TypeId <- fv.TypeId + identifier
             checkID012Diagnostics st fv identifier pos1 pos2
-        | :? FplJustificationItem as fvJi -> 
+        | :? FplGenericJustificationItem as fvJi -> 
             fvJi.FplId <- identifier
         | _ -> ()
         if evalPath.Contains(".NamedVarDecl.") || evalPath.Contains(".VariableType.ClassType.") then 
@@ -867,80 +860,9 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("DefaultMapResult")
         eval st ast1 
         st.EvalPop()
-    | Ast.JustificationItem((pos1, pos2), predicateAst) ->
+    | Ast.JustificationItem((pos1, pos2), justificationReferenceAst) ->
         st.EvalPush("JustificationItem")
-        let fv = variableStack.PeekEvalStack()
-        let fvJi = new FplJustificationItem((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder)
-        variableStack.PushEvalStack(fvJi)
-        eval st predicateAst 
-
-        let getArgumentInProof (fv1:FplJustificationItem) argName =
-            let proof = 
-                match fv1.Mode with 
-                | JustificationItemType.LinkToArgumentOtherProof ->
-                    fv1.Scope.Values |> Seq.head :?> FplProof
-                | _ ->
-                    let parent = fv1.ParentJustification
-                    let arg = parent.ParentArgument
-                    arg.ParentProof
-            if proof.HasArgument argName then 
-                Some proof.Scope[argName]
-            else 
-                None
-
-        match fvJi.Mode with
-        | JustificationItemType.LinkToArgumentSameProof -> 
-            // here, fvJi.FplId is the name of a proceeding argument in the same proof
-            match getArgumentInProof fvJi $"{fvJi.FplId}." with
-            | Some argument -> fvJi.ArgList.Add(argument) 
-            | _ -> emitPR005Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos 
-        | _ ->
-            // here, fvJi.FplId starts with a PredicateIdentifier
-            let splitOffAnyArgumentId (input: string) =
-                let parts = input.Split(':')
-                if parts.Length > 0 then parts.[0] else ""
-            let name = splitOffAnyArgumentId fvJi.FplId
-            let candidates = findCandidatesByName st name (fvJi.Mode = JustificationItemType.ByDef) true
-            let adjustCandidates = 
-                match fvJi.Mode, name.Contains("$"), candidates.Length>1 with 
-                | JustificationItemType.LinkToArgumentOtherProof, true, true 
-                | JustificationItemType.ByDef, true, true ->
-                    candidates |> List.filter (fun fv -> fv.FplId = name)
-                | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, true, true ->
-                    candidates |> List.filter (fun fv -> fv.FplId = name)
-                | _ ->
-                    candidates
-
-            match tryFindAssociatedBlockForJustificationItem fvJi adjustCandidates with
-            | ScopeSearchResult.FoundAssociate potentialCandidate -> 
-                fvJi.Scope.TryAdd(fvJi.FplId, potentialCandidate) |> ignore
-                if potentialCandidate.FplId = literalRetL then 
-                    // adjust reference type if the found candidate is a rule of inference (from the default ReferredTheoremLikeStmtOrAxiom)
-                    fvJi.Mode <- JustificationItemType.ReferredRuleOfInference
-                match fvJi.Mode with 
-                | JustificationItemType.LinkToArgumentOtherProof ->
-                    let split = fvJi.FplId.Split(":")
-                    if split.Length > 1 then 
-                        // here, argName is the argument identifier of the other proof
-                        let argName = $"{split.[1]}."
-                        match getArgumentInProof fvJi argName with
-                        | Some argument -> fvJi.ArgList.Add(argument) 
-                        | _ -> emitPR006Diagnostics fvJi.FplId argName fvJi.StartPos fvJi.EndPos 
-                | _ -> ()
-            | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
-                match fvJi.Mode with 
-                | JustificationItemType.ByDef ->
-                    emitPR000Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
-                | JustificationItemType.LinkToArgumentOtherProof ->
-                    emitPR001Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
-                | _ ->
-                    emitPR002Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
-            | ScopeSearchResult.NotFound ->
-                emitID010Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos
-            | ScopeSearchResult.FoundMultiple listOfKandidates ->
-                emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos
-            | _ -> ()
-        variableStack.PopEvalStack()
+        eval st justificationReferenceAst 
         st.EvalPop()
     | Ast.Justification((pos1, pos2), justificationItemAsts) ->
         st.EvalPush("Justification")
@@ -1949,12 +1871,143 @@ let rec eval (st: SymbolTable) ast =
         fv.AuxiliaryInfo <- precedence
         st.EvalPop()
     // Positions * ((Ast * Ast list) * Ast) 
-    | Ast.RefArgumentIdentifierOtherProof((pos1, pos2), ((predicateIdentifierAst, dollarDigitListAsts), refArgumentIdentifierAst)) ->
-        st.EvalPush("RefArgumentIdentifierOtherProof")
-        let fv = variableStack.PeekEvalStack()
-        eval st predicateIdentifierAst
-        dollarDigitListAsts |> List.map (eval st) |> ignore
-        eval st refArgumentIdentifierAst
+    | Ast.JustificationIdentifier((pos1, pos2), (((byModifierOption, predicateIdentifierAst), dollarDigitListAsts), refArgumentIdentifierAst)) ->
+        st.EvalPush("JustificationIdentifier")
+        let parent = variableStack.PeekEvalStack()
+
+        let getArgumentInProof (fv1:FplGenericJustificationItem) argName =
+            let proof = 
+                match fv1.Mode with 
+                | JustificationItemType.LinkToArgumentOtherProof ->
+                    fv1.Scope.Values |> Seq.head :?> FplProof
+                | _ ->
+                    let parent = fv1.ParentJustification
+                    let arg = parent.ParentArgument
+                    arg.ParentProof
+            if proof.HasArgument argName then 
+                Some proof.Scope[argName]
+            else 
+                None
+
+        let checkDiagnostics (fvJi:FplGenericJustificationItem) candidates = 
+            match tryFindAssociatedBlockForJustificationItem fvJi candidates with
+            | ScopeSearchResult.FoundAssociate potentialCandidate -> 
+                fvJi.Scope.TryAdd(fvJi.FplId, potentialCandidate) |> ignore
+                if potentialCandidate.FplId = literalRetL then 
+                    // adjust reference type if the found candidate is a rule of inference (from the default ReferredTheoremLikeStmtOrAxiom)
+                    fvJi.Mode <- JustificationItemType.ReferredRuleOfInference
+                match fvJi.Mode with 
+                | JustificationItemType.LinkToArgumentOtherProof ->
+                    let split = fvJi.FplId.Split(":")
+                    if split.Length > 1 then 
+                        // here, argName is the argument identifier of the other proof
+                        let argName = $"{split.[1]}."
+                        match getArgumentInProof fvJi argName with
+                        | Some argument -> fvJi.ArgList.Add(argument) 
+                        | _ -> emitPR006Diagnostics fvJi.FplId argName fvJi.StartPos fvJi.EndPos 
+                | _ -> ()
+            | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
+                match fvJi.Mode with 
+                | JustificationItemType.ByDef ->
+                    emitPR000Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
+                | JustificationItemType.LinkToArgumentOtherProof ->
+                    emitPR001Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
+                | _ ->
+                    emitPR002Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
+            | ScopeSearchResult.NotFound ->
+                emitID010Diagnostics fvJi.FplId fvJi.StartPos fvJi.EndPos
+            | ScopeSearchResult.FoundMultiple listOfKandidates ->
+                emitID023Diagnostics listOfKandidates fvJi.StartPos fvJi.EndPos
+            | _ -> ()
+
+
+        match byModifierOption, dollarDigitListAsts, refArgumentIdentifierAst with
+        | Some FplGrammarCommons.literalByAx, Some _, _ -> 
+            // byAx justification cannot be used together with a proof or corollary reference
+            emitPR010Diagnostics literalByAx literalAxL pos1 pos2 
+        | Some FplGrammarCommons.literalByAx, None, Some _ -> 
+            // byAx justification cannot be used together with a proof argument reference 
+            emitPR011Diagnostics literalByAx literalAxL pos1 pos2 
+        | Some FplGrammarCommons.literalByAx, None, None -> 
+            let fvJi = new FplJustificationItemByAx((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            variableStack.PushEvalStack(fvJi)
+            eval st predicateIdentifierAst
+            // check, if indeed the predicateId points to an axiom, if not issue diagnostics
+            let candidates = findCandidatesByName st fvJi.FplId false false
+            checkDiagnostics fvJi candidates
+        | Some FplGrammarCommons.literalByInf, Some _, _ -> 
+            // byInf justification cannot be used together with a proof reference
+            emitPR010Diagnostics literalByInf "rule of inference" pos1 pos2 
+        | Some FplGrammarCommons.literalByInf, None, Some _ -> 
+            // byInf justification cannot be used together with a proof argument reference 
+            emitPR011Diagnostics literalByInf "rule of inference" pos1 pos2 
+        | Some FplGrammarCommons.literalByInf, None, None -> 
+            let fvJi = new FplJustificationItemByAx((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            variableStack.PushEvalStack(fvJi)
+            eval st predicateIdentifierAst
+            // check, if indeed the predicateId points to a rule of inference, if not issue diagnostics
+            let candidates = findCandidatesByName st fvJi.FplId false false
+            checkDiagnostics fvJi candidates
+        | Some FplGrammarCommons.literalByDef, Some _, _ -> 
+            // byDef justification cannot be used together with a proof reference
+            emitPR010Diagnostics literalByDef literalDefL pos1 pos2 
+        | Some FplGrammarCommons.literalByDef, None, Some _ -> 
+            // byDef justification cannot be used together with a proof argument reference 
+            emitPR011Diagnostics literalByDef literalDefL pos1 pos2 
+        | Some FplGrammarCommons.literalByDef, None, None -> 
+            let fvJi = new FplJustificationItemByDef((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            variableStack.PushEvalStack(fvJi)
+            eval st predicateIdentifierAst
+            // check, if indeed the predicateId points to a definition, if not issue diagnostics
+            let candidates = findCandidatesByName st fvJi.FplId true false
+            checkDiagnostics fvJi candidates
+        | Some FplGrammarCommons.literalByCor, Some _, _ -> 
+            let fvJi = new FplJustificationItemByCor((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            variableStack.PushEvalStack(fvJi)
+            eval st predicateIdentifierAst
+            dollarDigitListAsts.Value |> List.map (eval st) |> ignore
+            let candidates = findCandidatesByName st fvJi.FplId false true
+            // check, if indeed the predicateId points to a corollary, if not issue diagnostics
+            checkDiagnostics fvJi candidates
+        | Some FplGrammarCommons.literalByCor, None, _ -> 
+            // byCor justification a reference to a corollary
+            emitPR012Diagnostics pos1 pos2 
+        | Some _, _, _ -> () // does not occur, because the parser byModifier choices between only two keywords literalByAx or literalByDef
+        | None, Some _, None -> 
+            let fvJi = new FplJustificationItemByCor((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            variableStack.PushEvalStack(fvJi)
+            eval st predicateIdentifierAst
+            dollarDigitListAsts.Value |> List.map (eval st) |> ignore
+            let candidates = findCandidatesByName st fvJi.FplId false true
+            // check, if indeed the predicateId points to a corollary, if not issue diagnostics
+            checkDiagnostics fvJi candidates
+            // issue info diagnostics that references to a corollary need the keyword byCor to increase readability
+            emitPR013Diagnostics pos1 pos2
+        | None, Some _, Some _ -> 
+            let fvJi = new FplJustificationItemByProofArgument((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            variableStack.PushEvalStack(fvJi)
+            eval st predicateIdentifierAst
+            dollarDigitListAsts.Value |> List.map (eval st) |> ignore
+            eval st refArgumentIdentifierAst.Value 
+            let splitOffAnyArgumentId (input: string) =
+                let parts = input.Split(':')
+                if parts.Length > 0 then parts.[0] else ""
+            let name = splitOffAnyArgumentId fvJi.FplId
+            let candidates = findCandidatesByName st fvJi.FplId false true |> List.filter (fun fv -> fv.FplId = name)
+            // check, if indeed the predicateId points to another proof, if not issue diagnostics, 
+            // also check if arg exists, if not issue diagnostics
+            checkDiagnostics fvJi candidates
+        | None, None, Some _ ->  
+            // issue diagnostics a theorem-like statement justification cannot be used together with a proof argument reference 
+            emitPR014Diagnostics pos1 pos2 
+        | None, None, None -> 
+            let fvJi = new FplJustificationItemByTheoremLikeStmt((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            variableStack.PushEvalStack(fvJi)
+            eval st predicateIdentifierAst
+            let candidates = findCandidatesByName st fvJi.FplId false false
+            // check if indeed the predicateId points to a theorem-like statement except a corollary, if not issue diagnostics
+            checkDiagnostics fvJi candidates
+        variableStack.PopEvalStack()
         st.EvalPop()
 
 

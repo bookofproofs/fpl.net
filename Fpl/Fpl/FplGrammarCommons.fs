@@ -27,7 +27,13 @@ let literalAxL = "axiom"
 [<Literal>]
 let literalBase = "base"
 [<Literal>]
+let literalByAx = "byax"
+[<Literal>]
 let literalByDef = "bydef"
+[<Literal>]
+let literalByCor = "bycor"
+[<Literal>]
+let literalByInf = "byinf"
 [<Literal>]
 let literalCases = "cases"
 [<Literal>]
@@ -200,7 +206,10 @@ let keyWordSet =
            literalAx
            literalAxL
            literalBase
+           literalByAx
+           literalByCor
            literalByDef
+           literalByInf
            literalCases
            literalCl
            literalClL

@@ -667,9 +667,12 @@ The current FPL parser uses the filename as the namespace's name (without the ex
 As a result, a syntax sugar from this simplification is that every FPL file has to end with a semicolon `;` to tell the parser not to look for any other building blocks in the file. 
 
 
-#### 22) Additional inbuilt-predicate `bydef`
-The additional predicate `bydef <variable>` is an abbreviation for what had to be formulated more complicatedly in second-order logic on a case-by-case basis. In principle, the predicate means to check if the asserted predicates used to define a variable justify an argument in an FPL proof.
-
+#### 22) Justifications of proof arguments
+* The additional keyword `bydef <variable>` is meant to check if the asserted predicates used to define a variable (if any) justify an argument in an FPL proof.
+* Additional keywords `byax <identifier>`, `byinf  <identifier>`, `bycor  <identifier>` are used to further increase the human-readability of the FPL code 
+and to improve diagnostics depending on candidate FPL blocks matching the `<identifier>`.
+* Justifications using simply `<identifier>` (without any keyword) are meant reference theorem-like statements in FPL (i.e., theorems, lemmas, and propositions).
+* A special justification `<identifier><dollarDigits>:<argReference>` is used to refer to arguments of other proofs.
 #### 23) A more stringent usage of qualifiers, coordinates, and ranges
 
 FPL supports the following qualifiers: dotted notation `x.something`, with arguments `x(something)`, with coordinates `x[something]`, and with a range `x[[something,something]]`. 

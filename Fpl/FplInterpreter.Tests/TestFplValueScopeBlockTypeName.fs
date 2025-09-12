@@ -39,7 +39,12 @@ type TestFplBlockType() =
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
-    [<DataRow("FplJustificationItem")>]
+    [<DataRow("FplJustificationItemByAx")>]
+    [<DataRow("FplJustificationItemByCor")>]
+    [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByInf")>]
+    [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
     [<DataRow("FplLocalization")>]
@@ -159,9 +164,24 @@ type TestFplBlockType() =
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
             Assert.AreEqual<string>("justification", x.Name)
-        | "FplJustificationItem" ->
-            let x = new FplJustificationItem(positions, parent, 0)
-            Assert.AreEqual<string>("justification item", x.Name)
+        | "FplJustificationItemByAx" ->
+            let x = new FplJustificationItemByAx(positions, parent, 0)
+            Assert.AreEqual<string>("justification by axiom", x.Name)
+        | "FplJustificationItemByCor" ->
+            let x = new FplJustificationItemByCor(positions, parent, 0)
+            Assert.AreEqual<string>("justification by corollary", x.Name)
+        | "FplJustificationItemByDef" ->
+            let x = new FplJustificationItemByDef(positions, parent, 0)
+            Assert.AreEqual<string>("justification by definition", x.Name)
+        | "FplJustificationItemByInf" ->
+            let x = new FplJustificationItemByInf(positions, parent, 0)
+            Assert.AreEqual<string>("justification by rule of inference", x.Name)
+        | "FplJustificationItemByProofArgument" ->
+            let x = new FplJustificationItemByProofArgument(positions, parent, 0)
+            Assert.AreEqual<string>("justification by argument in another proof", x.Name)
+        | "FplJustificationItemByTheoremLikeStmt" ->
+            let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
+            Assert.AreEqual<string>("justification by theorem-like statement", x.Name)
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
             Assert.AreEqual<string>("language", x.Name)        
@@ -275,7 +295,12 @@ type TestFplBlockType() =
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
-    [<DataRow("FplJustificationItem")>]
+    [<DataRow("FplJustificationItemByAx")>]
+    [<DataRow("FplJustificationItemByCor")>]
+    [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByInf")>]
+    [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
     [<DataRow("FplLocalization")>]
@@ -396,8 +421,23 @@ type TestFplBlockType() =
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
             Assert.AreEqual<string>("just", x.ShortName)
-        | "FplJustificationItem" ->
-            let x = new FplJustificationItem(positions, parent, 0)
+        | "FplJustificationItemByAx" ->
+            let x = new FplJustificationItemByAx(positions, parent, 0)
+            Assert.AreEqual<string>("just", x.ShortName)
+        | "FplJustificationItemByCor" ->
+            let x = new FplJustificationItemByCor(positions, parent, 0)
+            Assert.AreEqual<string>("just", x.ShortName)
+        | "FplJustificationItemByDef" ->
+            let x = new FplJustificationItemByDef(positions, parent, 0)
+            Assert.AreEqual<string>("just", x.ShortName)
+        | "FplJustificationItemByInf" ->
+            let x = new FplJustificationItemByInf(positions, parent, 0)
+            Assert.AreEqual<string>("just", x.ShortName)
+        | "FplJustificationItemByProofArgument" ->
+            let x = new FplJustificationItemByProofArgument(positions, parent, 0)
+            Assert.AreEqual<string>("just", x.ShortName)
+        | "FplJustificationItemByTheoremLikeStmt" ->
+            let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
             Assert.AreEqual<string>("just", x.ShortName)
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
@@ -512,7 +552,12 @@ type TestFplBlockType() =
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
-    [<DataRow("FplJustificationItem")>]
+    [<DataRow("FplJustificationItemByAx")>]
+    [<DataRow("FplJustificationItemByCor")>]
+    [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByInf")>]
+    [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
     [<DataRow("FplLocalization")>]
@@ -633,8 +678,23 @@ type TestFplBlockType() =
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
-        | "FplJustificationItem" ->
-            let x = new FplJustificationItem(positions, parent, 0)
+        | "FplJustificationItemByAx" ->
+            let x = new FplJustificationItemByAx(positions, parent, 0)
+            Assert.AreEqual<string>("", x.FplId)
+        | "FplJustificationItemByCor" ->
+            let x = new FplJustificationItemByCor(positions, parent, 0)
+            Assert.AreEqual<string>("", x.FplId)
+        | "FplJustificationItemByDef" ->
+            let x = new FplJustificationItemByDef(positions, parent, 0)
+            Assert.AreEqual<string>("", x.FplId)
+        | "FplJustificationItemByInf" ->
+            let x = new FplJustificationItemByInf(positions, parent, 0)
+            Assert.AreEqual<string>("", x.FplId)
+        | "FplJustificationItemByProofArgument" ->
+            let x = new FplJustificationItemByProofArgument(positions, parent, 0)
+            Assert.AreEqual<string>("", x.FplId)
+        | "FplJustificationItemByTheoremLikeStmt" ->
+            let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
             Assert.AreEqual<string>("", x.FplId)
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
@@ -749,7 +809,12 @@ type TestFplBlockType() =
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
-    [<DataRow("FplJustificationItem")>]
+    [<DataRow("FplJustificationItemByAx")>]
+    [<DataRow("FplJustificationItemByCor")>]
+    [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByInf")>]
+    [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
     [<DataRow("FplLocalization")>]
@@ -870,8 +935,23 @@ type TestFplBlockType() =
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
-        | "FplJustificationItem" ->
-            let x = new FplJustificationItem(positions, parent, 0)
+        | "FplJustificationItemByAx" ->
+            let x = new FplJustificationItemByAx(positions, parent, 0)
+            Assert.IsTrue(x.RunOrder.IsSome)
+        | "FplJustificationItemByCor" ->
+            let x = new FplJustificationItemByCor(positions, parent, 0)
+            Assert.IsTrue(x.RunOrder.IsSome)
+        | "FplJustificationItemByDef" ->
+            let x = new FplJustificationItemByDef(positions, parent, 0)
+            Assert.IsTrue(x.RunOrder.IsSome)
+        | "FplJustificationItemByInf" ->
+            let x = new FplJustificationItemByInf(positions, parent, 0)
+            Assert.IsTrue(x.RunOrder.IsSome)
+        | "FplJustificationItemByProofArgument" ->
+            let x = new FplJustificationItemByProofArgument(positions, parent, 0)
+            Assert.IsTrue(x.RunOrder.IsSome)
+        | "FplJustificationItemByTheoremLikeStmt" ->
+            let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsSome)
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
@@ -987,7 +1067,12 @@ type TestFplBlockType() =
     [<DataRow("FplIntrinsicUndef")>]
     [<DataRow("FplIsOperator")>]
     [<DataRow("FplJustification")>]
-    [<DataRow("FplJustificationItem")>]
+    [<DataRow("FplJustificationItemByAx")>]
+    [<DataRow("FplJustificationItemByCor")>]
+    [<DataRow("FplJustificationItemByDef")>]
+    [<DataRow("FplJustificationItemByInf")>]
+    [<DataRow("FplJustificationItemByProofArgument")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt")>]
     [<DataRow("FplLanguage")>]
     [<DataRow("FplLemma")>]
     [<DataRow("FplLocalization")>]
@@ -1110,8 +1195,23 @@ type TestFplBlockType() =
             | "FplJustification" ->
                 let x = new FplJustification(positions, parent)
                 x.Run variableStack 
-            | "FplJustificationItem" ->
-                let x = new FplJustificationItem(positions, parent, 0)
+            | "FplJustificationItemByAx" ->
+                let x = new FplJustificationItemByAx(positions, parent, 0)
+                x.Run variableStack 
+            | "FplJustificationItemByCor" ->
+                let x = new FplJustificationItemByCor(positions, parent, 0)
+                x.Run variableStack 
+            | "FplJustificationItemByDef" ->
+                let x = new FplJustificationItemByDef(positions, parent, 0)
+                x.Run variableStack 
+            | "FplJustificationItemByInf" ->
+                let x = new FplJustificationItemByInf(positions, parent, 0)
+                x.Run variableStack 
+            | "FplJustificationItemByProofArgument" ->
+                let x = new FplJustificationItemByProofArgument(positions, parent, 0)
+                x.Run variableStack 
+            | "FplJustificationItemByTheoremLikeStmt" ->
+                let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
                 x.Run variableStack 
             | "FplLanguage" ->
                 let x = new FplLanguage(positions, parent)

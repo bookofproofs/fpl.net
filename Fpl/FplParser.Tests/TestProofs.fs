@@ -193,7 +193,7 @@ type TestProofs () =
     [<DataRow("|- revoke 2")>]
     [<DataRow("bydef A, 1, C |- revoke 2")>]
     [<DataRow("T$1:1 |- revoke 2")>]
-    [<DataRow("T$1:1, T$1 :2, T$1: 3 |- revoke 2")>]
+    [<DataRow("T$1:1, T$1:2, T$1: 3 |- revoke 2")>]
     [<DataRow("|- assume and(a,b)")>]
     [<TestMethod>]
     member this.TestArgument (test:string) =

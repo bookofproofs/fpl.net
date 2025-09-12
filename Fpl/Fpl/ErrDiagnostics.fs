@@ -140,6 +140,11 @@ type DiagnosticCode =
     | PR007 of string * string
     | PR008 of string * string * string
     | PR009 
+    | PR010 of string * string 
+    | PR011 of string * string
+    | PR012 
+    | PR013
+    | PR014
     // signature-related error codes
     | SIG00 of string * int
     | SIG01 of string 
@@ -233,6 +238,11 @@ type DiagnosticCode =
             | PR007 _ -> "PR007"
             | PR008 _ -> "PR008"
             | PR009 -> "PR009"
+            | PR010 _ -> "PR010"
+            | PR011 _ -> "PR011"
+            | PR012 -> "PR012"
+            | PR013 -> "PR013"
+            | PR014 -> "PR014"
             // signature-related error codes
             | SIG00 _ -> "SIG00"
             | SIG01 _ -> "SIG01"
@@ -334,6 +344,11 @@ type DiagnosticCode =
             | PR007 (nodeTypeName, nodeName) ->  $"{nodeTypeName} is {nodeName} and is missing a proof."
             | PR008 (nodeName, expectedInputArgInference, actualInputArgInference) ->  $"This {nodeName} expects `{expectedInputArgInference}` and could not be applied to the proceeding argument inference which was `{actualInputArgInference}`."
             | PR009 -> "Not all arguments of the proof could be verified."
+            | PR010 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expected}, not to a proof or corollary."
+            | PR011 (keyword, expectedRef) -> $"Justification `{keyword}` expects a reference to {expected}, not to an argument in some proof."
+            | PR012 -> $"Justification `{literalByCor}` expects a reference to a corollary."
+            | PR013 -> $"Add the keyword `{literalByCor}` when referencing to corollaries to increase readability."
+            | PR014 -> $"Justification expects a reference to a theorem-like statement without any more specific references."
             // signature-related error codes
             | SIG00 (fixType, arity) -> sprintf $"Illegal arity `{arity}` using `{fixType}` notation."
             | SIG01 symbol -> $"The symbol `{symbol}` was not declared." 

@@ -79,9 +79,13 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
+    [<DataRow(FplGrammarCommons.literalByCor)>]
+    [<DataRow(FplGrammarCommons.literalByDef)>]
+    [<DataRow(FplGrammarCommons.literalByAx)>]
+    [<DataRow(FplGrammarCommons.literalByInf)>]
     [<TestMethod>]
-    member this.TestSpacesBydef () =
-        let result = run (byDefinition .>> eof) """bydefp"""
+    member this.TestSpacesBydef (keyword:string) =
+        let result = run (byModifier .>> eof) $"{keyword}p"
         let actual = sprintf "%O" result
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))

@@ -1066,7 +1066,6 @@ type FplRuleOfInference(positions: Positions, parent: FplValue, runOrder) =
     override this.Run variableStack = 
         // todo implement run
         emitLG004diagnostic this.Name this.Arity this.StartPos this.EndPos
-        ()
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
@@ -1485,8 +1484,8 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
     | LinkToArgumentSameProof
     | LinkToArgumentOtherProof
 
-
-type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
+[<AbstractClass>]
+type FplGenericJustificationItem(positions: Positions, parent: FplValue, runOrder) =
     inherit FplValue(positions, Some parent)
     let _runOrder = runOrder
     let mutable _mode = JustificationItemType.ReferredTheoremLikeStmtOrAxiom
@@ -1494,21 +1493,11 @@ type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
     override this.Name = "justification item"
     override this.ShortName = "just"
 
-    override this.Clone () =
-        let ret = new FplJustificationItem((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
-        this.AssignParts(ret)
-        ret
-
     override this.Type signatureType =
         let head = getFplHead this signatureType
         head
 
     override this.Represent() = this.Type(SignatureType.Name)
-
-    override this.Run variableStack = 
-        // todo implement run
-        ()
-
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
@@ -1547,6 +1536,78 @@ type FplJustificationItem(positions: Positions, parent: FplValue, runOrder) =
         else
             None
 
+and FplJustificationItemByDef(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericJustificationItem(positions, parent, runOrder)
+
+    override this.Name = "justification by definition"
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByDef((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
+and FplJustificationItemByProofArgument(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericJustificationItem(positions, parent, runOrder)
+
+    override this.Name = "justification by argument in another proof"
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByProofArgument((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
+and FplJustificationItemByAx(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericJustificationItem(positions, parent, runOrder)
+
+    override this.Name = "justification by axiom"
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByAx((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
+and FplJustificationItemByInf(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericJustificationItem(positions, parent, runOrder)
+
+    override this.Name = "justification by rule of inference"
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByInf((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
+and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericJustificationItem(positions, parent, runOrder)
+
+    override this.Name = "justification by theorem-like statement"
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByTheoremLikeStmt((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
+and FplJustificationItemByCor(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericJustificationItem(positions, parent, runOrder)
+
+    override this.Name = "justification by corollary"
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByCor((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
 and FplJustification(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
@@ -1569,7 +1630,7 @@ and FplJustification(positions: Positions, parent: FplValue) =
     member this.GetOrderedJustificationItems =
         this.Scope.Values
             |> Seq.sortBy (fun fv -> fv.RunOrder)
-            |> Seq.map (fun fv -> fv :?> FplJustificationItem)
+            |> Seq.map (fun fv -> fv :?> FplGenericJustificationItem)
             |> Seq.toList
 
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
@@ -3573,7 +3634,7 @@ let tryFindAssociatedBlockForCorollary (fplValue: FplValue) =
 
 /// Tries to find a theorem-like statement, an axiom or a corollary
 /// and returns different cases of ScopeSearchResult, depending on different semantical error situations.
-let tryFindAssociatedBlockForJustificationItem (fvJi: FplJustificationItem) (candidates:FplValue list) =
+let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericJustificationItem) (candidates:FplValue list) =
     let nameOfOther (fv:FplValue) =
         if isEnglishAn fv.Name then 
             $"'{fv.Type(SignatureType.Name)} which is an {fv.Name}'"
