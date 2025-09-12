@@ -166,6 +166,7 @@ type Ast =
     | ReferenceToProofOrCorollary of Positions * (Ast * Ast option) 
     | JustificationItem of Positions * Ast 
     | Justification of Positions * Ast list
+    | ByDef of Positions * Ast 
     | JustificationIdentifier of Positions * (((string option * Ast) * Ast list option) * Ast option) 
     | Trivial of Positions * unit
     | Qed of Positions * unit

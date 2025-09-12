@@ -283,3 +283,32 @@ type TestProofs () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
         
+    [<DataRow(FplGrammarCommons.literalByCor, "$1", ":1")>]
+    [<DataRow(FplGrammarCommons.literalByDef, "$1", ":1")>]
+    [<DataRow(FplGrammarCommons.literalByAx, "$1", ":1")>]
+    [<DataRow(FplGrammarCommons.literalByInf, "$1", ":1")>]
+    [<DataRow(FplGrammarCommons.literalByCor, "$1", "")>]
+    [<DataRow(FplGrammarCommons.literalByDef, "$1", "")>]
+    [<DataRow(FplGrammarCommons.literalByAx, "$1", "")>]
+    [<DataRow(FplGrammarCommons.literalByInf, "$1", "")>]
+    [<DataRow(FplGrammarCommons.literalByCor, "", ":1")>]
+    [<DataRow(FplGrammarCommons.literalByDef, "", ":1")>]
+    [<DataRow(FplGrammarCommons.literalByAx, "", ":1")>]
+    [<DataRow(FplGrammarCommons.literalByInf, "", "")>]
+    [<DataRow(FplGrammarCommons.literalByCor, "", "")>]
+    [<DataRow(FplGrammarCommons.literalByDef, "", "")>]
+    [<DataRow(FplGrammarCommons.literalByAx, "", "")>]
+    [<DataRow(FplGrammarCommons.literalByInf, "", "")>]
+    [<TestMethod>]
+    member this.TestJustificationIdentifier (keyword:string, corRef:string, argRef:string) =
+        let result = run (justificationReference .>> eof) $"{keyword} A{corRef}{argRef}"
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
+
+    [<TestMethod>]
+    member this.TestJustificationIdentifierByDef () =
+        let result = run (justificationReference .>> eof) $"bydef x"
+        let actual = sprintf "%O" result
+        printf "%O" actual
+        Assert.IsTrue(actual.StartsWith("Success:"))
