@@ -380,8 +380,13 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         match fv.Name with 
         | "justification by argument in another proof" -> fv.FplId <- $"{fv.FplId}:{s}"
-        | "argument inference" -> 
-            let fvAi = fv :?> FplArgInference
+        | PrimArgInfAssume -> 
+            let fvAi = fv :?> FplArgInferenceAssume
+            let proof = fvAi.ParentArgument.ParentProof
+            if not (proof.HasArgument s) then
+                emitPR005Diagnostics s pos1 pos2
+        | PrimArgInfRevoke -> 
+            let fvAi = fv :?> FplArgInferenceRevoke
             let proof = fvAi.ParentArgument.ParentProof
             if not (proof.HasArgument s) then
                 emitPR005Diagnostics s pos1 pos2
@@ -510,13 +515,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.Trivial((pos1, pos2), _) -> 
         st.EvalPush("Trivial")
         let fv = variableStack.PeekEvalStack()
-        let refBlock = new FplReference((pos1, pos2), fv) 
+        let refBlock = new FplArgInferenceTrivial((pos1, pos2), fv) 
         variableStack.PushEvalStack(refBlock)
-        refBlock.FplId <- literalTrivial
-        refBlock.TypeId <- literalPred
-        let value = new FplIntrinsicPred((pos1, pos2), refBlock) 
-        value.FplId <- literalTrue
-        refBlock.ValueList.Add(value)
         variableStack.PopEvalStack()
         st.EvalPop() 
     | Ast.Qed((pos1, pos2), _) -> 
@@ -607,8 +607,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.AssumeArgument((pos1, pos2), predicateAst) ->
         st.EvalPush("AssumeArgument")
         let fv = variableStack.PeekEvalStack()
-        let argInf = new FplArgInference((pos1, pos2), fv) 
-        argInf.FplId <- literalAssume
+        let argInf = new FplArgInferenceAssume((pos1, pos2), fv) 
         variableStack.PushEvalStack(argInf)
         eval st predicateAst
         variableStack.PopEvalStack()
@@ -616,8 +615,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.RevokeArgument((pos1, pos2), predicateAst) ->
         st.EvalPush("RevokeArgument")
         let fv = variableStack.PeekEvalStack()
-        let argInf = new FplArgInference((pos1, pos2), fv) 
-        argInf.FplId <- literalRevL
+        let argInf = new FplArgInferenceRevoke((pos1, pos2), fv) 
         variableStack.PushEvalStack(argInf)
         eval st predicateAst
         variableStack.PopEvalStack()
@@ -818,12 +816,10 @@ let rec eval (st: SymbolTable) ast =
         let fv = variableStack.PeekEvalStack()
         let stmtList = List<FplValue>()
         varDeclOrStmtAstList 
-        |> List.map(fun subAst -> 
+        |> List.map (fun subAst -> 
             match subAst with 
             | Ast.NamedVarDecl _ -> eval st subAst
             | _ -> 
-                let stmt = new FplStmt((pos1,pos2), fv)
-                variableStack.PushEvalStack(stmt)
                 eval st subAst
                 stmtList.Add(variableStack.Pop())
         ) |> ignore
@@ -1426,23 +1422,21 @@ let rec eval (st: SymbolTable) ast =
     // | Cases of Positions * (Ast list * Ast)
     | Ast.Cases((pos1, pos2), (conditionFollowedByResultListAsts, elseStatementAst)) ->
         st.EvalPush("Cases")
-        let fv = variableStack.PeekEvalStack()
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.FplId <- literalCases
+        let parent = variableStack.PeekEvalStack()
+        let casesStmt = new FplCases((pos1, pos2), parent)
+        variableStack.PushEvalStack(casesStmt) // add cases 
         conditionFollowedByResultListAsts 
         |> List.map (fun caseAst ->
-            let cas = new FplStmt((pos1,pos2), fv)
-            cas.FplId <- "case"
-            variableStack.PushEvalStack(cas)
+            let singleCase = new FplCaseSingle((pos1,pos2), casesStmt)
+            variableStack.PushEvalStack(singleCase) // add single case
             eval st caseAst
-            variableStack.PopEvalStack()
+            variableStack.PopEvalStack() // remove single case 
         ) |> ignore
-        let cas = new FplStmt((pos1,pos2), fv)
-        cas.FplId <- "else"
-        variableStack.PushEvalStack(cas)
+        let elseCase = new FplCaseElse((pos1,pos2), casesStmt)
+        variableStack.PushEvalStack(elseCase) // add else 
         eval st elseStatementAst
-        variableStack.PopEvalStack()
+        variableStack.PopEvalStack() // remove else 
+        variableStack.PopEvalStack() // remove cases
         st.EvalPop()
     | Ast.MapCases((pos1, pos2), (conditionFollowedByResultListAsts, elseStatementAst)) ->
         st.EvalPush("MapCases")
@@ -1579,13 +1573,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(inDomain)
         eval st inDomainAst
         variableStack.PopEvalStack()
-        statementListAst 
-        |> List.map (fun stmtAst ->
-            let stmt = new FplStmt((pos1,pos2), fv)
-            variableStack.PushEvalStack(stmt)
-            eval st stmtAst
-            variableStack.PopEvalStack()
-        ) |> ignore
+        statementListAst |> List.map (fun stmtAst -> eval st stmtAst) |> ignore
         st.EvalPop()
     // | SignatureWithPreConBlock of Ast * ((Ast list option * Ast) * Ast)
     | Ast.PremiseConclusionBlock((pos1, pos2), ((optVarDeclOrSpecList, premiseAst), conclusionAst)) ->
@@ -1809,8 +1797,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.DerivedPredicate ((pos1, pos2),predicateAst) -> 
         st.EvalPush("DerivedPredicate")
         let fv = variableStack.PeekEvalStack()
-        let argInf = new FplArgInference((pos1, pos2), fv) 
-        argInf.FplId <- "derive"
+        let argInf = new FplArgInferenceDerived((pos1, pos2), fv) 
         variableStack.PushEvalStack(argInf)
         eval st predicateAst
         variableStack.PopEvalStack()

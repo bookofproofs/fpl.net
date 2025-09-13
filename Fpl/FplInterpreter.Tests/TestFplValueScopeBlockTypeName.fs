@@ -9,12 +9,17 @@ type TestFplBlockType() =
     let positions = (Position("",0,0,0), Position("",0,0,0))
     let parent = new FplRoot()
 
-    [<DataRow("FplArgInference")>]
+    [<DataRow("FplArgInferenceAssume")>]
+    [<DataRow("FplArgInferenceDerived")>]
+    [<DataRow("FplArgInferenceRevoke")>]
+    [<DataRow("FplArgInferenceTrivial")>]
     [<DataRow("FplArgument")>]
     [<DataRow("FplAssertion")>]
     [<DataRow("FplAssignment")>]
     [<DataRow("FplAxiom")>]
     [<DataRow("FplCases")>]
+    [<DataRow("FplCaseElse")>]
+    [<DataRow("FplCaseSingle")>]
     [<DataRow("FplClass")>]
     [<DataRow("FplConditionResult")>]
     [<DataRow("FplConjecture")>]
@@ -64,7 +69,6 @@ type TestFplBlockType() =
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
     [<DataRow("FplRuleOfInference")>]
-    [<DataRow("FplStmt")>]
     [<DataRow("FplTheorem")>]
     [<DataRow("FplTheory")>]
     [<DataRow("FplTranslation")>]
@@ -74,12 +78,21 @@ type TestFplBlockType() =
     [<TestMethod>]
     member this.TestBlockTypeName(var) =
         match var with
-        | "FplArgInference" ->
-            let x = new FplArgInference(positions, parent)
-            Assert.AreEqual<string>("argument inference", x.Name)
+        | "FplArgInferenceAssume" ->
+            let x = new FplArgInferenceAssume(positions, parent)
+            Assert.AreEqual<string>(PrimArgInfAssume, x.Name)
+        | "FplArgInferenceDerived" ->
+            let x = new FplArgInferenceDerived(positions, parent)
+            Assert.AreEqual<string>(PrimArgInfDerive, x.Name)
+        | "FplArgInferenceRevoke" ->
+            let x = new FplArgInferenceRevoke(positions, parent)
+            Assert.AreEqual<string>(PrimArgInfRevoke, x.Name)
+        | "FplArgInferenceTrivial" ->
+            let x = new FplArgInferenceTrivial(positions, parent)
+            Assert.AreEqual<string>(PrimArgInfTrivial, x.Name)
         | "FplArgument" ->
             let x = new FplArgument(positions, parent, 0)
-            Assert.AreEqual<string>("argument", x.Name)
+            Assert.AreEqual<string>(PrimArgL, x.Name)
         | "FplAssertion" ->
             let x = new FplAssertion(positions, parent)
             Assert.AreEqual<string>("assertion", x.Name)
@@ -92,6 +105,12 @@ type TestFplBlockType() =
         | "FplCases" ->
             let x = new FplCases(positions, parent)
             Assert.AreEqual<string>("cases statement", x.Name)
+        | "FplCaseElse" ->
+            let x = new FplCaseElse(positions, parent)
+            Assert.AreEqual<string>("else case statement", x.Name)
+        | "FplCaseSingle" ->
+            let x = new FplCaseSingle(positions, parent)
+            Assert.AreEqual<string>("single case statement", x.Name)
         | "FplClass" ->
             let x = new FplClass(positions, parent)
             Assert.AreEqual<string>("class definition", x.Name)
@@ -239,9 +258,6 @@ type TestFplBlockType() =
         | "FplRuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent, 0)
             Assert.AreEqual<string>("rule of inference", x.Name)
-        | "FplStmt" ->
-            let x = new FplStmt(positions, parent)
-            Assert.AreEqual<string>("statement", x.Name)
         | "FplTheorem" ->
             let x = new FplTheorem(positions, parent, 0)
             Assert.AreEqual<string>("theorem", x.Name)
@@ -265,12 +281,17 @@ type TestFplBlockType() =
         | _ -> 
             Assert.IsTrue(false)
 
-    [<DataRow("FplArgInference")>]
+    [<DataRow("FplArgInferenceAssume")>]
+    [<DataRow("FplArgInferenceDerived")>]
+    [<DataRow("FplArgInferenceRevoke")>]
+    [<DataRow("FplArgInferenceTrivial")>]
     [<DataRow("FplArgument")>]
     [<DataRow("FplAssertion")>]
     [<DataRow("FplAssignment")>]
     [<DataRow("FplAxiom")>]
     [<DataRow("FplCases")>]
+    [<DataRow("FplCaseElse")>]
+    [<DataRow("FplCaseSingle")>]
     [<DataRow("FplClass")>]
     [<DataRow("FplConditionResult")>]
     [<DataRow("FplConjecture")>]
@@ -320,7 +341,6 @@ type TestFplBlockType() =
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
     [<DataRow("FplRuleOfInference")>]
-    [<DataRow("FplStmt")>]
     [<DataRow("FplTheorem")>]
     [<DataRow("FplTheory")>]
     [<DataRow("FplTranslation")>]
@@ -331,30 +351,45 @@ type TestFplBlockType() =
     [<TestMethod>]
     member this.TestFplBlockTypeShortName(var) =
         match var with
-        | "FplArgInference" ->
-            let x = new FplArgInference(positions, parent)
-            Assert.AreEqual<string>("ainf", x.ShortName)
+        | "FplArgInferenceAssume" ->
+            let x = new FplArgInferenceAssume(positions, parent)
+            Assert.AreEqual<string>(PrimArgInf, x.ShortName)
+        | "FplArgInferenceDerived" ->
+            let x = new FplArgInferenceDerived(positions, parent)
+            Assert.AreEqual<string>(PrimArgInf, x.ShortName)
+        | "FplArgInferenceRevoke" ->
+            let x = new FplArgInferenceRevoke(positions, parent)
+            Assert.AreEqual<string>(PrimArgInf, x.ShortName)
+        | "FplArgInferenceTrivial" ->
+            let x = new FplArgInferenceTrivial(positions, parent)
+            Assert.AreEqual<string>(PrimArgInf, x.ShortName)
         | "FplArgument" ->
             let x = new FplArgument(positions, parent, 0)
-            Assert.AreEqual<string>("arg", x.ShortName)
+            Assert.AreEqual<string>(PrimArg, x.ShortName)
         | "FplAssertion" ->
             let x = new FplAssertion(positions, parent)
             Assert.AreEqual<string>(literalAss, x.ShortName)
         | "FplAssignment" ->
             let x = new FplAssignment(positions, parent)
-            Assert.AreEqual<string>("stmt", x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)
         | "FplAxiom" ->
             let x = new FplAxiom(positions, parent, 0)
             Assert.AreEqual<string>(literalAx, x.ShortName)
         | "FplCases" ->
             let x = new FplCases(positions, parent)
-            Assert.AreEqual<string>("stmt", x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+        | "FplCaseElse" ->
+            let x = new FplCaseElse(positions, parent)
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+        | "FplCaseSingle" ->
+            let x = new FplCaseSingle(positions, parent)
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)
         | "FplClass" ->
             let x = new FplClass(positions, parent)
             Assert.AreEqual<string>("def cl", x.ShortName)
         | "FplConditionResult" ->
             let x = new FplConditionResult(positions, parent)
-            Assert.AreEqual<string>("stmt", x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)
         | "FplConjecture" ->
             let x = new FplConjecture(positions, parent, 0)
             Assert.AreEqual<string>(literalConj, x.ShortName)
@@ -456,7 +491,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("mpred", x.ShortName)
         | "FplMapCases" ->
             let x = new FplMapCases(positions, parent)
-            Assert.AreEqual<string>("stmt", x.ShortName)        
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)        
         | "FplMapping" ->
             let x = new FplMapping(positions, parent)
             Assert.AreEqual<string>("map", x.ShortName)
@@ -489,16 +524,13 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("ref", x.ShortName)
         | "FplReturn" ->
             let x = new FplReturn(positions, parent)
-            Assert.AreEqual<string>("stmt", x.ShortName)
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)
         | "FplRoot" ->
             let x = new FplRoot()
             Assert.AreEqual<string>("root", x.ShortName)
         | "FplRuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent, 0)
             Assert.AreEqual<string>(literalInf, x.ShortName)
-        | "FplStmt" ->
-            let x = new FplStmt(positions, parent)
-            Assert.AreEqual<string>("stmt", x.ShortName)
         | "FplTheorem" ->
             let x = new FplTheorem(positions, parent, 0)
             Assert.AreEqual<string>(literalThm, x.ShortName)
@@ -522,12 +554,17 @@ type TestFplBlockType() =
         | _ -> 
             Assert.IsTrue(false, var)
 
-    [<DataRow("FplArgInference")>]
+    [<DataRow("FplArgInferenceAssume")>]
+    [<DataRow("FplArgInferenceDerived")>]
+    [<DataRow("FplArgInferenceRevoke")>]
+    [<DataRow("FplArgInferenceTrivial")>]
     [<DataRow("FplArgument")>]
     [<DataRow("FplAssertion")>]
     [<DataRow("FplAssignment")>]
     [<DataRow("FplAxiom")>]
     [<DataRow("FplCases")>]
+    [<DataRow("FplCaseElse")>]
+    [<DataRow("FplCaseSingle")>]
     [<DataRow("FplClass")>]
     [<DataRow("FplConditionResult")>]
     [<DataRow("FplConjecture")>]
@@ -577,7 +614,6 @@ type TestFplBlockType() =
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
     [<DataRow("FplRuleOfInference")>]
-    [<DataRow("FplStmt")>]
     [<DataRow("FplTheorem")>]
     [<DataRow("FplTheory")>]
     [<DataRow("FplTranslation")>]
@@ -588,8 +624,17 @@ type TestFplBlockType() =
     [<TestMethod>]
     member this.TestFplBlockTypeFplId(var) =
         match var with
-        | "FplArgInference" ->
-            let x = new FplArgInference(positions, parent)
+        | "FplArgInferenceAssume" ->
+            let x = new FplArgInferenceAssume(positions, parent)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+        | "FplArgInferenceDerived" ->
+            let x = new FplArgInferenceDerived(positions, parent)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+        | "FplArgInferenceRevoke" ->
+            let x = new FplArgInferenceRevoke(positions, parent)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+        | "FplArgInferenceTrivial" ->
+            let x = new FplArgInferenceTrivial(positions, parent)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplArgument" ->
             let x = new FplArgument(positions, parent, 0)
@@ -605,6 +650,12 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplCases" ->
             let x = new FplCases(positions, parent)
+            Assert.AreEqual<string>("", x.FplId)
+        | "FplCaseElse" ->
+            let x = new FplCaseElse(positions, parent)
+            Assert.AreEqual<string>("", x.FplId)
+        | "FplCaseSingle" ->
+            let x = new FplCaseSingle(positions, parent)
             Assert.AreEqual<string>("", x.FplId)
         | "FplClass" ->
             let x = new FplClass(positions, parent)
@@ -753,9 +804,6 @@ type TestFplBlockType() =
         | "FplRuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent, 0)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
-        | "FplStmt" ->
-            let x = new FplStmt(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
         | "FplTheorem" ->
             let x = new FplTheorem(positions, parent, 0)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
@@ -779,12 +827,17 @@ type TestFplBlockType() =
         | _ -> 
             Assert.IsTrue(false, var)
 
-    [<DataRow("FplArgInference")>]
+    [<DataRow("FplArgInferenceAssume")>]
+    [<DataRow("FplArgInferenceDerived")>]
+    [<DataRow("FplArgInferenceRevoke")>]
+    [<DataRow("FplArgInferenceTrivial")>]
     [<DataRow("FplArgument")>]
     [<DataRow("FplAssertion")>]
     [<DataRow("FplAssignment")>]
     [<DataRow("FplAxiom")>]
     [<DataRow("FplCases")>]
+    [<DataRow("FplCaseElse")>]
+    [<DataRow("FplCaseSingle")>]
     [<DataRow("FplClass")>]
     [<DataRow("FplConditionResult")>]
     [<DataRow("FplConjecture")>]
@@ -834,7 +887,6 @@ type TestFplBlockType() =
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
     [<DataRow("FplRuleOfInference")>]
-    [<DataRow("FplStmt")>]
     [<DataRow("FplTheorem")>]
     [<DataRow("FplTheory")>]
     [<DataRow("FplTranslation")>]
@@ -845,8 +897,17 @@ type TestFplBlockType() =
     [<TestMethod>]
     member this.TestFplBlockTypeRunOrder(var) =
         match var with
-        | "FplArgInference" ->
-            let x = new FplArgInference(positions, parent)
+        | "FplArgInferenceAssume" ->
+            let x = new FplArgInferenceAssume(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplArgInferenceDerived" ->
+            let x = new FplArgInferenceDerived(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplArgInferenceRevoke" ->
+            let x = new FplArgInferenceRevoke(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplArgInferenceTrivial" ->
+            let x = new FplArgInferenceTrivial(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplArgument" ->
             let x = new FplArgument(positions, parent, 0)
@@ -862,6 +923,12 @@ type TestFplBlockType() =
             Assert.IsTrue(x.RunOrder.IsSome)
         | "FplCases" ->
             let x = new FplCases(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplCaseElse" ->
+            let x = new FplCaseElse(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplCaseSingle" ->
+            let x = new FplCaseSingle(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplClass" ->
             let x = new FplClass(positions, parent)
@@ -1010,9 +1077,6 @@ type TestFplBlockType() =
         | "FplRuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsSome)
-        | "FplStmt" ->
-            let x = new FplStmt(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
         | "FplTheorem" ->
             let x = new FplTheorem(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsSome)
@@ -1036,13 +1100,17 @@ type TestFplBlockType() =
         | _ -> 
             Assert.IsTrue(false, var)
 
-
-    [<DataRow("FplArgInference")>]
+    [<DataRow("FplArgInferenceAssume")>]
+    [<DataRow("FplArgInferenceDerived")>]
+    [<DataRow("FplArgInferenceRevoke")>]
+    [<DataRow("FplArgInferenceTrivial")>]
     [<DataRow("FplArgument")>]
     [<DataRow("FplAssertion")>]
     [<DataRow("FplAssignment")>]
     [<DataRow("FplAxiom")>]
     [<DataRow("FplCases")>]
+    [<DataRow("FplCaseElse")>]
+    [<DataRow("FplCaseSingle")>]
     [<DataRow("FplClass")>]
     [<DataRow("FplConditionResult")>]
     [<DataRow("FplConjecture")>]
@@ -1092,7 +1160,6 @@ type TestFplBlockType() =
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
     [<DataRow("FplRuleOfInference")>]
-    [<DataRow("FplStmt")>]
     [<DataRow("FplTheorem")>]
     [<DataRow("FplTheory")>]
     [<DataRow("FplTranslation")>]
@@ -1105,8 +1172,17 @@ type TestFplBlockType() =
         try 
             let variableStack = new FplVariableStack()
             match var with
-            | "FplArgInference" ->
-                let x = new FplArgInference(positions, parent)
+            | "FplArgInferenceAssume" ->
+                let x = new FplArgInferenceAssume(positions, parent)
+                x.Run variableStack 
+            | "FplArgInferenceDerived" ->
+                let x = new FplArgInferenceDerived(positions, parent)
+                x.Run variableStack 
+            | "FplArgInferenceRevoke" ->
+                let x = new FplArgInferenceRevoke(positions, parent)
+                x.Run variableStack 
+            | "FplArgInferenceTrivial" ->
+                let x = new FplArgInferenceTrivial(positions, parent)
                 x.Run variableStack 
             | "FplArgument" ->
                 let x = new FplArgument(positions, parent, 0)
@@ -1122,6 +1198,12 @@ type TestFplBlockType() =
                 x.Run variableStack 
             | "FplCases" ->
                 let x = new FplCases(positions, parent)
+                x.Run variableStack 
+            | "FplCaseElse" ->
+                let x = new FplCaseElse(positions, parent)
+                x.Run variableStack 
+            | "FplCaseSingle" ->
+                let x = new FplCaseSingle(positions, parent)
                 x.Run variableStack 
             | "FplClass" ->
                 let x = new FplClass(positions, parent)
@@ -1269,9 +1351,6 @@ type TestFplBlockType() =
                 x.Run variableStack 
             | "FplRuleOfInference" ->
                 let x = new FplRuleOfInference(positions, parent, 0)
-                x.Run variableStack 
-            | "FplStmt" ->
-                let x = new FplStmt(positions, parent)
                 x.Run variableStack 
             | "FplTheorem" ->
                 let x = new FplTheorem(positions, parent, 0)

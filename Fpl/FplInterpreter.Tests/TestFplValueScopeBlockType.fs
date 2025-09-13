@@ -1114,11 +1114,11 @@ type TestFplValueScopeBlockType() =
             let cases = pred.ArgList[0]
  
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplStmt>(cases)
-            | "base2" -> Assert.IsInstanceOfType<FplStmt>(cases)
-            | "base3" -> Assert.IsInstanceOfType<FplStmt>(cases)
-            | "base4" -> Assert.IsInstanceOfType<FplStmt>(cases)
-            | "base5" -> Assert.IsInstanceOfType<FplStmt>(cases)
+            | "base1" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+            | "base2" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+            | "base3" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+            | "base4" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
+            | "base5" -> Assert.IsInstanceOfType<FplGenericStmt>(cases)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)
