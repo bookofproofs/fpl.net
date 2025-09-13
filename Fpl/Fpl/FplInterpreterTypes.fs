@@ -2847,16 +2847,11 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
         
         this.SetValue(newValue)  
 
-type FplQuantor(positions: Positions, parent: FplValue) =
+[<AbstractClass>]
+type FplGenericQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
-    override this.Name = "quantor"
     override this.ShortName = "qtr"
-
-    override this.Clone () =
-        let ret = new FplQuantor((this.StartPos, this.EndPos), this.Parent.Value)
-        this.AssignParts(ret)
-        ret
 
     override this.Type signatureType =
         let head = getFplHead this signatureType
@@ -2871,12 +2866,48 @@ type FplQuantor(positions: Positions, parent: FplValue) =
         | "" -> head
         | _ -> sprintf "%s(%s)" head paramT
 
-    override this.Run _ = 
-        // todo implement quantor run
-        ()
-
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
     
+type FplQuantorAll(positions: Positions, parent: FplValue) =
+    inherit FplGenericQuantor(positions, parent)
+
+    override this.Name = "all quantor"
+
+    override this.Clone () =
+            let ret = new FplQuantorAll((this.StartPos, this.EndPos), this.Parent.Value)
+            this.AssignParts(ret)
+            ret
+
+    override this.Run _ = () // todo implement run
+
+type FplQuantorExists(positions: Positions, parent: FplValue) =
+    inherit FplGenericQuantor(positions, parent)
+
+    override this.Name = "exists quantor"
+
+    override this.Clone () =
+            let ret = new FplQuantorExists((this.StartPos, this.EndPos), this.Parent.Value)
+            this.AssignParts(ret)
+            ret
+
+    override this.Run _ = () // todo implement run
+
+type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
+    inherit FplGenericQuantor(positions, parent)
+
+    do 
+        this.Arity <- 1
+
+
+    override this.Name = "exists n times quantor"
+
+    override this.Clone () =
+            let ret = new FplQuantorExistsN((this.StartPos, this.EndPos), this.Parent.Value)
+            this.AssignParts(ret)
+            ret
+
+    override this.Run _ = () // todo implement run
+
 type FplVariable(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
     let mutable _variadicType = String.Empty // "" = variable, "many" = many, "many1" = many1 
@@ -3534,7 +3565,7 @@ let qualifiedName (fplValue:FplValue)=
             | :? FplLocalization
             | :? FplConstructor
             | _ when fv.IsBlock() -> fv.Type(SignatureType.Mixed)
-            | :? FplQuantor -> fv.Type(SignatureType.Mixed)
+            | :? FplGenericQuantor -> fv.Type(SignatureType.Mixed)
             | _ -> fv.FplId
 
         match fv with
@@ -3606,7 +3637,7 @@ let variableInBlockScopeByName (fplValue: FplValue) name withNestedVariableSearc
                 match fv with
                 | :? FplConstructor
                 | :? FplLocalization
-                | :? FplQuantor
+                | :? FplGenericQuantor
                 | :? FplMandatoryFunctionalTerm
                 | :? FplOptionalFunctionalTerm
                 | :? FplMandatoryPredicate

@@ -56,7 +56,7 @@ let simplifyTriviallyNestedExpressions (rb:FplValue) =
         | :? FplExtensionObj 
         | :? FplIntrinsicUndef 
         | :? FplReference
-        | :? FplQuantor
+        | :? FplGenericQuantor
         | :? FplIntrinsicInd
         | :? FplIntrinsicPred ->
             variableStack.Pop() |> ignore // pop the removable reference block and ignored it
@@ -1188,10 +1188,8 @@ let rec eval (st: SymbolTable) ast =
     | Ast.All((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         st.EvalPush("All")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplQuantor((pos1, pos2), parent)
-        fv.FplId <- literalAll
-        fv.TypeId <- literalPred
-        variableStack.PushEvalStack(fv)
+        let fv = new FplQuantorAll((pos1, pos2), parent)
+        variableStack.PushEvalStack(fv) // add all quantor
         fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
         namedVarDeclAstList
         |> List.map (fun namedVarDeclAst ->
@@ -1201,18 +1199,16 @@ let rec eval (st: SymbolTable) ast =
         let pred = new FplReference((pos1, pos2), fv)
         variableStack.PushEvalStack(pred)
         eval st predicateAst
-        variableStack.PopEvalStack()
+        variableStack.PopEvalStack() 
         emitVAR05diagnostics fv
-        variableStack.PopEvalStack()
+        variableStack.PopEvalStack() // remove all quantor
         emitLG000orLG001Diagnostics fv "all quantor"
         st.EvalPop()
     | Ast.Exists((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         st.EvalPush("Exists")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplQuantor((pos1, pos2), parent)
-        fv.FplId <- literalEx
-        fv.TypeId <- literalPred
-        variableStack.PushEvalStack(fv)
+        let fv = new FplQuantorExists((pos1, pos2), parent)
+        variableStack.PushEvalStack(fv) // add exists quantor
         fv.Arity <- fv.Arity + (namedVarDeclAstList |> List.length)
         namedVarDeclAstList
         |> List.map (fun namedVarDeclAst ->
@@ -1220,22 +1216,19 @@ let rec eval (st: SymbolTable) ast =
         )
         |> ignore
         let pred = new FplReference((pos1, pos2), fv)
-        variableStack.PushEvalStack(pred)
+        variableStack.PushEvalStack(pred) 
         eval st predicateAst
         variableStack.PopEvalStack()
         emitVAR05diagnostics fv
-        variableStack.PopEvalStack()
+        variableStack.PopEvalStack() // remove exists quantor
         emitLG000orLG001Diagnostics fv "exists quantor"
         st.EvalPop()
     // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
     | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclAst), predicateAst)) ->
         st.EvalPush("ExistsN")
         let parent = variableStack.PeekEvalStack()
-        let fv = new FplQuantor((pos1, pos2), parent)
-        fv.FplId <- literalExN
-        fv.TypeId <- literalPred
-        fv.Arity <- 1
-        variableStack.PushEvalStack(fv)
+        let fv = new FplQuantorExistsN((pos1, pos2), parent)
+        variableStack.PushEvalStack(fv) // add exists n quantor
         eval st dollarDigitsAst
         eval st namedVarDeclAst
         let pred = new FplReference((pos1, pos2), fv)
@@ -1243,7 +1236,7 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
         variableStack.PopEvalStack()
         emitVAR05diagnostics fv
-        variableStack.PopEvalStack()
+        variableStack.PopEvalStack() // remove exists n quantor
         emitLG000orLG001Diagnostics fv "exists n times quantor"
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)

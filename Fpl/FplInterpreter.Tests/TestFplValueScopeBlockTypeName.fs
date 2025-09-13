@@ -67,7 +67,9 @@ type TestFplBlockType() =
     [<DataRow("FplPremiseList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantor")>]
+    [<DataRow("FplQuantorAll")>]
+    [<DataRow("FplQuantorExists")>]
+    [<DataRow("FplQuantorExistsN")>]
     [<DataRow("FplReference")>]
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
@@ -255,9 +257,15 @@ type TestFplBlockType() =
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
             Assert.AreEqual<string>("proposition", x.Name)
-        | "FplQuantor" ->
-            let x = new FplQuantor(positions, parent)
-            Assert.AreEqual<string>("quantor", x.Name)
+        | "FplQuantorAll" ->
+            let x = new FplQuantorAll(positions, parent)
+            Assert.AreEqual<string>("all quantor", x.Name)
+        | "FplQuantorExists" ->
+            let x = new FplQuantorExists(positions, parent)
+            Assert.AreEqual<string>("exists quantor", x.Name)
+        | "FplQuantorExistsN" ->
+            let x = new FplQuantorExistsN(positions, parent)
+            Assert.AreEqual<string>("exists n times quantor", x.Name)
         | "FplReference" ->
             let x = new FplReference(positions, parent)
             Assert.AreEqual<string>("reference", x.Name)
@@ -351,7 +359,9 @@ type TestFplBlockType() =
     [<DataRow("FplPremiseList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantor")>]
+    [<DataRow("FplQuantorAll")>]
+    [<DataRow("FplQuantorExists")>]
+    [<DataRow("FplQuantorExistsN")>]
     [<DataRow("FplReference")>]
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
@@ -540,8 +550,14 @@ type TestFplBlockType() =
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
             Assert.AreEqual<string>(literalProp, x.ShortName)
-        | "FplQuantor" ->
-            let x = new FplQuantor(positions, parent)
+        | "FplQuantorAll" ->
+            let x = new FplQuantorAll(positions, parent)
+            Assert.AreEqual<string>("qtr", x.ShortName)
+        | "FplQuantorExists" ->
+            let x = new FplQuantorExists(positions, parent)
+            Assert.AreEqual<string>("qtr", x.ShortName)
+        | "FplQuantorExistsN" ->
+            let x = new FplQuantorExistsN(positions, parent)
             Assert.AreEqual<string>("qtr", x.ShortName)
         | "FplReference" ->
             let x = new FplReference(positions, parent)
@@ -636,7 +652,9 @@ type TestFplBlockType() =
     [<DataRow("FplPremiseList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantor")>]
+    [<DataRow("FplQuantorAll")>]
+    [<DataRow("FplQuantorExists")>]
+    [<DataRow("FplQuantorExistsN")>]
     [<DataRow("FplReference")>]
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
@@ -825,8 +843,14 @@ type TestFplBlockType() =
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
-        | "FplQuantor" ->
-            let x = new FplQuantor(positions, parent)
+        | "FplQuantorAll" ->
+            let x = new FplQuantorAll(positions, parent)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+        | "FplQuantorExists" ->
+            let x = new FplQuantorExists(positions, parent)
+            Assert.AreEqual<string>(literalUndetermined, x.FplId)
+        | "FplQuantorExistsN" ->
+            let x = new FplQuantorExistsN(positions, parent)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
         | "FplReference" ->
             let x = new FplReference(positions, parent)
@@ -921,7 +945,9 @@ type TestFplBlockType() =
     [<DataRow("FplPremiseList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantor")>]
+    [<DataRow("FplQuantorAll")>]
+    [<DataRow("FplQuantorExists")>]
+    [<DataRow("FplQuantorExistsN")>]
     [<DataRow("FplReference")>]
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
@@ -1110,8 +1136,14 @@ type TestFplBlockType() =
         | "FplProposition" ->
             let x = new FplProposition(positions, parent, 0)
             Assert.IsTrue(x.RunOrder.IsSome)
-        | "FplQuantor" ->
-            let x = new FplQuantor(positions, parent)
+        | "FplQuantorAll" ->
+            let x = new FplQuantorAll(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplQuantorExists" ->
+            let x = new FplQuantorExists(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplQuantorExistsN" ->
+            let x = new FplQuantorExistsN(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplReference" ->
             let x = new FplReference(positions, parent)
@@ -1206,7 +1238,9 @@ type TestFplBlockType() =
     [<DataRow("FplPremiseList")>]
     [<DataRow("FplProof")>]
     [<DataRow("FplProposition")>]
-    [<DataRow("FplQuantor")>]
+    [<DataRow("FplQuantorAll")>]
+    [<DataRow("FplQuantorExists")>]
+    [<DataRow("FplQuantorExistsN")>]
     [<DataRow("FplReference")>]
     [<DataRow("FplReturn")>]
     [<DataRow("FplRoot")>]
@@ -1397,8 +1431,14 @@ type TestFplBlockType() =
             | "FplProposition" ->
                 let x = new FplProposition(positions, parent, 0)
                 x.Run variableStack 
-            | "FplQuantor" ->
-                let x = new FplQuantor(positions, parent)
+            | "FplQuantorAll" ->
+                let x = new FplQuantorAll(positions, parent)
+                x.Run variableStack 
+            | "FplQuantorExists" ->
+                let x = new FplQuantorExists(positions, parent)
+                x.Run variableStack 
+            | "FplQuantorExistsN" ->
+                let x = new FplQuantorExistsN(positions, parent)
                 x.Run variableStack 
             | "FplReference" ->
                 let x = new FplReference(positions, parent)
