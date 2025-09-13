@@ -1736,6 +1736,12 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         let head = getFplHead this signatureType
         head
 
+    member this.OrderedArguments =
+        this.Scope.Values
+        |> Seq.filter (fun fv -> fv.Name = "argument")
+        |> Seq.map (fun fv -> fv :?> FplArgument)
+        |> Seq.sortBy (fun fv -> fv.RunOrder)
+
     override this.Run variableStack = 
         // tell the parent theorem-like statement that it has a proof
         let parent = this.Parent.Value 
@@ -1745,15 +1751,12 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
         | _ -> ()
         // evaluate the proof by evaluating all arguments according to their order in the FPL code
         let mutable allArgumentsEvaluateToTrue = true
-        this.Scope.Values
-        |> Seq.filter (fun fv -> fv.Name = "argument")
-        |> Seq.sortBy (fun fv -> fv.RunOrder)
-        |> Seq.map (fun arg -> 
+        this.OrderedArguments
+        |> Seq.iter (fun arg -> 
             arg.Run variableStack
             let argRepr = arg.Represent()
             allArgumentsEvaluateToTrue <- allArgumentsEvaluateToTrue && argRepr = literalTrue 
         )
-        |> ignore
         if not allArgumentsEvaluateToTrue then
             emitPR009Diagnostics this.StartPos this.StartPos
 
@@ -1762,19 +1765,6 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
     override this.RunOrder = Some _runOrder
 
     member this.HasArgument argumentId = this.Scope.ContainsKey(argumentId)
-
-    member this.OrderedArguments =
-        this.Scope.Values
-        |> Seq.filter (fun fv -> fv.Name = "argument")
-        |> Seq.map (fun fv -> fv :?> FplArgument)
-        |> Seq.sortBy (fun fv -> fv.RunOrder)
-        
-
-
-let isArgument (fv:FplValue) = 
-    match fv with
-    | :? FplArgument -> true
-    | _ -> false
 
 let getArgumentInProof (fv1:FplGenericJustificationItem) argName =
     let proof = 
