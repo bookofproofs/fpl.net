@@ -802,7 +802,31 @@ type TestFplValueScopeBlockType() =
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
     [<DataRow("base5", """100. |- revoke 3""", 0)>]
     [<TestMethod>]
-    member this.TestArgument(var, argExpression, expNumber:int) =
+    member this.TestArgumentNumberOfJustifications(var, argExpression, expNumber:int) =
+        ad.Clear()
+        let fplCode = sprintf """proof T$1 { %s };""" argExpression
+        let filename = "TestArgumentNumberOfJustifications"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let proof = theory.Scope["T$1"]
+            let arg = proof.Scope["100."]
+            let just = arg.ArgList[0]
+            let numbOfJustifications = just.Scope.Count
+            Assert.AreEqual<int>(expNumber, numbOfJustifications)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("base1", """100. |- trivial""", 0)>]
+    [<DataRow("base2", """100. ExistsByExample, 1 |- false""", 2)>]
+    [<DataRow("base3", """100. T1 |- assume not somePremise """, 1)>]
+    [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
+    [<DataRow("base5", """100. |- revoke 3""", 0)>]
+    [<TestMethod>]
+    member this.TestArgumentBlockType(var, argExpression, expNumber:int) =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentBlockType"
@@ -815,10 +839,6 @@ type TestFplValueScopeBlockType() =
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
             let just = arg.ArgList[0]
-            let numbOfJustifications = just.Scope.Count
- 
-            Assert.AreEqual<int>(expNumber, numbOfJustifications)
-
             match var with
             | "base1" -> Assert.IsInstanceOfType<FplArgument>(arg)
             | "base2" -> Assert.IsInstanceOfType<FplArgument>(arg)

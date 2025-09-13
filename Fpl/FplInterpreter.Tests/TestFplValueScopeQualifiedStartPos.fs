@@ -795,7 +795,7 @@ type TestFplValueScopeQualifiedStartPos() =
     [<DataRow("base4", """100. 2, 3, 5 |- iif (a,b)""", 3)>]
     [<DataRow("base5", """100. |- revoke 3""", 0)>]
     [<TestMethod>]
-    member this.TestArgument(var, argExpression, expNumber:int) =
+    member this.TestArgumentQualifiedStartPos(var, argExpression, expNumber:int) =
         ad.Clear()
         let fplCode = sprintf """proof T$1 { %s };""" argExpression
         let filename = "TestArgumentQualifiedStartPos"
@@ -808,10 +808,6 @@ type TestFplValueScopeQualifiedStartPos() =
             let proof = theory.Scope["T$1"]
             let arg = proof.Scope["100."]
             let just = arg.ArgList[0]
-            let numbOfJustifications = just.Scope.Count
- 
-            Assert.AreEqual<int>(expNumber, numbOfJustifications)
-
             match var with
             | "base1" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
             | "base2" -> Assert.AreEqual<string>("TestArgumentQualifiedStartPos(Ln: 1, Col: 13)", (arg.QualifiedStartPos).ToString())
