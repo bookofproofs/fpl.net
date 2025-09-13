@@ -1196,10 +1196,7 @@ let rec eval (st: SymbolTable) ast =
             eval st namedVarDeclAst
         )
         |> ignore
-        let pred = new FplReference((pos1, pos2), fv)
-        variableStack.PushEvalStack(pred)
         eval st predicateAst
-        variableStack.PopEvalStack() 
         emitVAR05diagnostics fv
         variableStack.PopEvalStack() // remove all quantor
         emitLG000orLG001Diagnostics fv "all quantor"
@@ -1215,10 +1212,7 @@ let rec eval (st: SymbolTable) ast =
             eval st namedVarDeclAst
         )
         |> ignore
-        let pred = new FplReference((pos1, pos2), fv)
-        variableStack.PushEvalStack(pred) 
         eval st predicateAst
-        variableStack.PopEvalStack()
         emitVAR05diagnostics fv
         variableStack.PopEvalStack() // remove exists quantor
         emitLG000orLG001Diagnostics fv "exists quantor"
@@ -1231,10 +1225,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fv) // add exists n quantor
         eval st dollarDigitsAst
         eval st namedVarDeclAst
-        let pred = new FplReference((pos1, pos2), fv)
-        variableStack.PushEvalStack(pred)
         eval st predicateAst
-        variableStack.PopEvalStack()
         emitVAR05diagnostics fv
         variableStack.PopEvalStack() // remove exists n quantor
         emitLG000orLG001Diagnostics fv "exists n times quantor"
@@ -1460,17 +1451,17 @@ let rec eval (st: SymbolTable) ast =
         variableStack.InSignatureEvaluation <- false
     | Ast.Assignment((pos1, pos2), (predicateWithQualificationAst, predicateAst)) ->
         st.EvalPush("Assignment")
-        let fv = variableStack.Pop()
+        let fv = variableStack.PeekEvalStack()
         let fvNew = new FplAssignment((pos1, pos2), fv.Parent.Value)
-        variableStack.PushEvalStack(fvNew)
+        variableStack.PushEvalStack(fvNew) // add assignment
         let assigneeReference = new FplReference((pos1,pos2), fvNew)
-        variableStack.PushEvalStack(assigneeReference)
+        variableStack.PushEvalStack(assigneeReference) // add assignee
         eval st predicateWithQualificationAst
-        variableStack.PopEvalStack() 
+        variableStack.PopEvalStack() // remove assignee
         let dummyValue = new FplReference((pos1,pos2), fvNew)
-        variableStack.PushEvalStack(dummyValue)
+        variableStack.PushEvalStack(dummyValue) // add value
         eval st predicateAst
-        variableStack.PopEvalStack() 
+        variableStack.PopEvalStack() // remove value
         fvNew.Run variableStack
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
