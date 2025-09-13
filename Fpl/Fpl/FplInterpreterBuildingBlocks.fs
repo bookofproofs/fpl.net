@@ -1561,19 +1561,19 @@ let rec eval (st: SymbolTable) ast =
     // | ForIn of Positions * ((Ast * Ast) * Ast list)
     | Ast.ForIn((pos1, pos2), ((entityAst, inDomainAst), statementListAst)) ->
         st.EvalPush("ForIn")
-        let fv = variableStack.PeekEvalStack()
-        fv.StartPos <- pos1
-        fv.EndPos <- pos2
-        fv.FplId <- literalFor
-        let entity = new FplReference((pos1,pos2), fv)
-        variableStack.PushEvalStack(entity)
+        let parent = variableStack.PeekEvalStack()
+        let forStmt = new FplForInStmt((pos1, pos2), parent)
+        variableStack.PushEvalStack(forStmt) // add ForInStmt
+        let entity = new FplForInStmtEntity((pos1,pos2), forStmt)
+        variableStack.PushEvalStack(entity) // add ForInStmtEntity
         eval st entityAst
-        variableStack.PopEvalStack()
-        let inDomain = new FplReference((pos1,pos2), fv)
-        variableStack.PushEvalStack(inDomain)
+        variableStack.PopEvalStack() // remove ForInStmtEntity
+        let inDomain = new FplForInStmtDomain((pos1,pos2), forStmt)
+        variableStack.PushEvalStack(inDomain) // add ForInStmtDomain
         eval st inDomainAst
-        variableStack.PopEvalStack()
+        variableStack.PopEvalStack() // remove ForInStmtDomain
         statementListAst |> List.map (fun stmtAst -> eval st stmtAst) |> ignore
+        variableStack.PopEvalStack() // remove ForInStmt
         st.EvalPop()
     // | SignatureWithPreConBlock of Ast * ((Ast list option * Ast) * Ast)
     | Ast.PremiseConclusionBlock((pos1, pos2), ((optVarDeclOrSpecList, premiseAst), conclusionAst)) ->

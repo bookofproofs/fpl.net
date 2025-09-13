@@ -33,6 +33,9 @@ type TestFplBlockType() =
     [<DataRow("FplExclusiveOr")>]
     [<DataRow("FplExtension")>]
     [<DataRow("FplExtensionObj")>]
+    [<DataRow("FplForInStmt")>]
+    [<DataRow("FplForInStmtDomain")>]
+    [<DataRow("FplForInStmtEntity")>]
     [<DataRow("FplFunctionalTerm")>]
     [<DataRow("FplImplication")>]
     [<DataRow("FplInstance")>]
@@ -150,6 +153,15 @@ type TestFplBlockType() =
         | "FplExtensionObj" ->
             let x = new FplExtensionObj(positions, parent)
             Assert.AreEqual<string>($"{literalExtL} {literalObjL}", x.Name)
+        | "FplForInStmt" ->
+            let x = new FplForInStmt(positions, parent)
+            Assert.AreEqual<string>("for in statement", x.Name)
+        | "FplForInStmtDomain" ->
+            let x = new FplForInStmtDomain(positions, parent)
+            Assert.AreEqual<string>("for in statement's domain", x.Name)
+        | "FplForInStmtEntity" ->
+            let x = new FplForInStmtEntity(positions, parent)
+            Assert.AreEqual<string>("for in statement's entity", x.Name)
         | "FplFunctionalTerm" ->
             let x = new FplFunctionalTerm(positions, parent, 0)
             Assert.AreEqual<string>("functional term definition", x.Name)
@@ -305,6 +317,9 @@ type TestFplBlockType() =
     [<DataRow("FplExclusiveOr")>]
     [<DataRow("FplExtension")>]
     [<DataRow("FplExtensionObj")>]
+    [<DataRow("FplForInStmt")>]
+    [<DataRow("FplForInStmtDomain")>]
+    [<DataRow("FplForInStmtEntity")>]
     [<DataRow("FplFunctionalTerm")>]
     [<DataRow("FplImplication")>]
     [<DataRow("FplInstance")>]
@@ -423,6 +438,15 @@ type TestFplBlockType() =
         | "FplExtensionObj" ->
             let x = new FplExtensionObj(positions, parent)
             Assert.AreEqual<string>(literalObj, x.ShortName)
+        | "FplForInStmt" ->
+            let x = new FplForInStmt(positions, parent)
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+        | "FplForInStmtDomain" ->
+            let x = new FplForInStmtDomain(positions, parent)
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+        | "FplForInStmtEntity" ->
+            let x = new FplForInStmtEntity(positions, parent)
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)
         | "FplFunctionalTerm" ->
             let x = new FplFunctionalTerm(positions, parent, 0)
             Assert.AreEqual<string>("def func", x.ShortName)
@@ -578,6 +602,9 @@ type TestFplBlockType() =
     [<DataRow("FplExclusiveOr")>]
     [<DataRow("FplExtension")>]
     [<DataRow("FplExtensionObj")>]
+    [<DataRow("FplForInStmt")>]
+    [<DataRow("FplForInStmtDomain")>]
+    [<DataRow("FplForInStmtEntity")>]
     [<DataRow("FplFunctionalTerm")>]
     [<DataRow("FplImplication")>]
     [<DataRow("FplInstance")>]
@@ -695,6 +722,15 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("", x.FplId)
         | "FplExtensionObj" ->
             let x = new FplExtensionObj(positions, parent)
+            Assert.AreEqual<string>("", x.FplId)
+        | "FplForInStmt" ->
+            let x = new FplForInStmt(positions, parent)
+            Assert.AreEqual<string>("", x.FplId)
+        | "FplForInStmtDomain" ->
+            let x = new FplForInStmtDomain(positions, parent)
+            Assert.AreEqual<string>("", x.FplId)
+        | "FplForInStmtEntity" ->
+            let x = new FplForInStmtEntity(positions, parent)
             Assert.AreEqual<string>("", x.FplId)
         | "FplFunctionalTerm" ->
             let x = new FplFunctionalTerm(positions, parent, 0)
@@ -851,6 +887,9 @@ type TestFplBlockType() =
     [<DataRow("FplExclusiveOr")>]
     [<DataRow("FplExtension")>]
     [<DataRow("FplExtensionObj")>]
+    [<DataRow("FplForInStmt")>]
+    [<DataRow("FplForInStmtDomain")>]
+    [<DataRow("FplForInStmtEntity")>]
     [<DataRow("FplFunctionalTerm")>]
     [<DataRow("FplImplication")>]
     [<DataRow("FplInstance")>]
@@ -968,6 +1007,15 @@ type TestFplBlockType() =
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplExtensionObj" ->
             let x = new FplExtensionObj(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplForInStmt" ->
+            let x = new FplForInStmt(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplForInStmtDomain" ->
+            let x = new FplForInStmtDomain(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplForInStmtEntity" ->
+            let x = new FplForInStmtEntity(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplFunctionalTerm" ->
             let x = new FplFunctionalTerm(positions, parent, 0)
@@ -1124,6 +1172,9 @@ type TestFplBlockType() =
     [<DataRow("FplExclusiveOr")>]
     [<DataRow("FplExtension")>]
     [<DataRow("FplExtensionObj")>]
+    [<DataRow("FplForInStmt")>]
+    [<DataRow("FplForInStmtDomain")>]
+    [<DataRow("FplForInStmtEntity")>]
     [<DataRow("FplFunctionalTerm")>]
     [<DataRow("FplImplication")>]
     [<DataRow("FplInstance")>]
@@ -1243,6 +1294,15 @@ type TestFplBlockType() =
                 x.Run variableStack 
             | "FplExtensionObj" ->
                 let x = new FplExtensionObj(positions, parent)
+                x.Run variableStack 
+            | "FplForInStmt" ->
+                let x = new FplForInStmt(positions, parent)
+                x.Run variableStack 
+            | "FplForInStmtDomain" ->
+                let x = new FplForInStmtDomain(positions, parent)
+                x.Run variableStack 
+            | "FplForInStmtEntity" ->
+                let x = new FplForInStmtEntity(positions, parent)
                 x.Run variableStack 
             | "FplFunctionalTerm" ->
                 let x = new FplFunctionalTerm(positions, parent, 0)

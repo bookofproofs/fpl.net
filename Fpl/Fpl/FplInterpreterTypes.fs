@@ -3455,6 +3455,63 @@ type FplCaseElse(positions: Positions, parent: FplValue) =
         // todo implement run
         ()
 
+type FplForInStmt(positions: Positions, parent: FplValue) =
+    inherit FplGenericStmt(positions, parent)
+
+    override this.Name = "for in statement"
+
+    override this.Clone () =
+        let ret = new FplForInStmt((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        getFplHead this signatureType
+
+    override this.Represent () = literalUndef
+
+    override this.Run variableStack = 
+        // todo implement run
+        ()
+
+type FplForInStmtEntity(positions: Positions, parent: FplValue) =
+    inherit FplGenericStmt(positions, parent)
+
+    override this.Name = "for in statement's entity"
+
+    override this.Clone () =
+        let ret = new FplForInStmtEntity((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        getFplHead this signatureType
+
+    override this.Represent () = literalUndef
+
+    override this.Run variableStack = 
+        // todo implement run
+        ()
+
+type FplForInStmtDomain(positions: Positions, parent: FplValue) =
+    inherit FplGenericStmt(positions, parent)
+
+    override this.Name = "for in statement's domain"
+
+    override this.Clone () =
+        let ret = new FplForInStmtDomain((this.StartPos, this.EndPos), this.Parent.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Type signatureType = 
+        getFplHead this signatureType
+
+    override this.Represent () = literalUndef
+
+    override this.Run variableStack = 
+        // todo implement run
+        ()
+
 /// A string representation of an FplValue
 let toString (fplValue:FplValue) = $"{fplValue.ShortName} {fplValue.Type(SignatureType.Name)}"
 
