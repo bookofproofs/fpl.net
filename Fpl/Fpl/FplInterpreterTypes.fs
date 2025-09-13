@@ -1763,6 +1763,13 @@ and FplProof(positions: Positions, parent: FplValue, runOrder) =
 
     member this.HasArgument argumentId = this.Scope.ContainsKey(argumentId)
 
+    member this.OrderedArguments =
+        this.Scope.Values
+        |> Seq.filter (fun fv -> fv.Name = "argument")
+        |> Seq.map (fun fv -> fv :?> FplArgument)
+        |> Seq.sortBy (fun fv -> fv.RunOrder)
+        
+
 
 let isArgument (fv:FplValue) = 
     match fv with

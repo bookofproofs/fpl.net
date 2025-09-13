@@ -1841,15 +1841,16 @@ let rec eval (st: SymbolTable) ast =
         let value = new FplIntrinsicPred((pos1,pos1), fv)
         value.FplId <- literalTrue
         // check if all arguments could be correctly inferred
-        fv.Scope
-        |> Seq.filter (fun kvp -> isArgument kvp.Value)
-        |> Seq.iter (fun kvp -> 
-            let argInference = kvp.Value.ArgList[1]
-            let argInferenceResult = argInference.Represent()
-            match argInferenceResult with
-            | FplGrammarCommons.literalTrue -> ()
-            | _ -> value.FplId <- literalFalse // todo all other arguments that are either undetermined or false should issue an error
-
+        fv.OrderedArguments
+        |> Seq.iter (fun fv1 -> 
+            let argInferenceOpt = fv1.ArgumentInference
+            match argInferenceOpt with
+            | Some argInference ->
+                let argInferenceResult = argInference.Represent()
+                match argInferenceResult with
+                | FplGrammarCommons.literalTrue -> ()
+                | _ -> value.FplId <- literalFalse // todo all other arguments that are either undetermined or false should issue an error
+            | _ -> () // todo argumentinference not found
         )
         fv.ValueList.Add(value)
         variableStack.PopEvalStack()
@@ -1907,6 +1908,7 @@ let rec eval (st: SymbolTable) ast =
             // check, if indeed the predicateId points to an axiom, if not issue diagnostics
             let candidates = findCandidatesByName st fvJi.FplId false false
             checkDiagnostics fvJi candidates
+            variableStack.PopEvalStack()
         | Some FplGrammarCommons.literalByInf, Some _, _ -> 
             // byInf justification cannot be used together with a proof reference
             emitPR010Diagnostics literalByInf "rule of inference" pos1 pos2 
@@ -1920,6 +1922,7 @@ let rec eval (st: SymbolTable) ast =
             // check, if indeed the predicateId points to a rule of inference, if not issue diagnostics
             let candidates = findCandidatesByName st fvJi.FplId false false
             checkDiagnostics fvJi candidates
+            variableStack.PopEvalStack()
         | Some FplGrammarCommons.literalByDef, Some _, _ -> 
             // byDef justification cannot be used together with a proof reference
             emitPR010Diagnostics literalByDef literalDefL pos1 pos2 
@@ -1933,6 +1936,7 @@ let rec eval (st: SymbolTable) ast =
             // check, if indeed the predicateId points to a definition, if not issue diagnostics
             let candidates = findCandidatesByName st fvJi.FplId true false
             checkDiagnostics fvJi candidates
+            variableStack.PopEvalStack()
         | Some FplGrammarCommons.literalByCor, Some _, _ -> 
             let fvJi = new FplJustificationItemByCor((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
             variableStack.PushEvalStack(fvJi)
@@ -1941,6 +1945,7 @@ let rec eval (st: SymbolTable) ast =
             let candidates = findCandidatesByName st fvJi.FplId false true
             // check, if indeed the predicateId points to a corollary, if not issue diagnostics
             checkDiagnostics fvJi candidates
+            variableStack.PopEvalStack()
         | Some FplGrammarCommons.literalByCor, None, _ -> 
             // byCor justification a reference to a corollary
             emitPR012Diagnostics pos1 pos2 
@@ -1955,6 +1960,7 @@ let rec eval (st: SymbolTable) ast =
             checkDiagnostics fvJi candidates
             // issue info diagnostics that references to a corollary need the keyword byCor to increase readability
             emitPR013Diagnostics pos1 pos2
+            variableStack.PopEvalStack()
         | None, Some _, Some _ -> 
             let fvJi = new FplJustificationItemByProofArgument((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
             variableStack.PushEvalStack(fvJi)
@@ -1969,6 +1975,7 @@ let rec eval (st: SymbolTable) ast =
             // check, if indeed the predicateId points to another proof, if not issue diagnostics, 
             // also check if arg exists, if not issue diagnostics
             checkDiagnostics fvJi candidates
+            variableStack.PopEvalStack()
         | None, None, Some _ ->  
             // issue diagnostics a theorem-like statement justification cannot be used together with a proof argument reference 
             emitPR014Diagnostics pos1 pos2 
@@ -1979,7 +1986,7 @@ let rec eval (st: SymbolTable) ast =
             let candidates = findCandidatesByName st fvJi.FplId false false
             // check if indeed the predicateId points to a theorem-like statement except a corollary, if not issue diagnostics
             checkDiagnostics fvJi candidates
-        variableStack.PopEvalStack()
+            variableStack.PopEvalStack()
         st.EvalPop()
 
 
