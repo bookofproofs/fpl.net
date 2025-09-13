@@ -1477,18 +1477,10 @@ type FplConjecture(positions: Positions, parent: FplValue, runOrder) =
 
     override this.RunOrder = Some _runOrder
 
-    type JustificationItemType =
-    | ReferredTheoremLikeStmtOrAxiom
-    | ReferredRuleOfInference
-    | ByDef
-    | LinkToArgumentSameProof
-    | LinkToArgumentOtherProof
-
 [<AbstractClass>]
 type FplGenericJustificationItem(positions: Positions, parent: FplValue, runOrder) =
     inherit FplValue(positions, Some parent)
     let _runOrder = runOrder
-    let mutable _mode = JustificationItemType.ReferredTheoremLikeStmtOrAxiom
 
     override this.Name = "justification item"
     override this.ShortName = "just"
@@ -1502,11 +1494,6 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue, runOrde
     override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
 
     override this.RunOrder = Some _runOrder
-
-    /// Sets or gets the bydef mode of this justification item.
-    member this.Mode 
-        with get () = _mode
-        and set (v) = _mode <- v
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
@@ -1781,6 +1768,20 @@ let isArgument (fv:FplValue) =
     match fv with
     | :? FplArgument -> true
     | _ -> false
+
+let getArgumentInProof (fv1:FplGenericJustificationItem) argName =
+    let proof = 
+        match fv1 with 
+        | :? FplJustificationItemByProofArgument ->
+            fv1.Scope.Values |> Seq.head :?> FplProof
+        | _ ->
+            let parent = fv1.ParentJustification
+            let arg = parent.ParentArgument
+            arg.ParentProof
+    if proof.HasArgument argName then 
+        Some proof.Scope[argName]
+    else 
+        None
 
 type FplLocalization(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
@@ -3645,37 +3646,20 @@ let tryFindAssociatedBlockForJustificationItem (fvJi: FplGenericJustificationIte
     match candidates.Length with
     | 1 ->  // exactly one candidate found
         let potentialCandidate = candidates.Head
-        match fvJi.Mode, potentialCandidate, fvJi.FplId=potentialCandidate.FplId with
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplConjecture , _
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplProof, _
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplPredicate, _
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplClass, _
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, :? FplFunctionalTerm, _ ->
-            ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
-        | JustificationItemType.ReferredTheoremLikeStmtOrAxiom, _, false ->
-            ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
-        | JustificationItemType.ByDef, :? FplAxiom, _
-        | JustificationItemType.ByDef, :? FplRuleOfInference, _
-        | JustificationItemType.ByDef, :? FplConjecture, _
-        | JustificationItemType.ByDef, :? FplTheorem, _
-        | JustificationItemType.ByDef, :? FplCorollary, _
-        | JustificationItemType.ByDef, :? FplProposition, _
-        | JustificationItemType.ByDef, :? FplLemma, _
-        | JustificationItemType.ByDef, :? FplProof , _
-        
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplAxiom, _
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplRuleOfInference, _
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplConjecture, _
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplTheorem, _
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplCorollary, _
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplProposition, _
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplPredicate , _
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplFunctionalTerm, _
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplClass, _
-        | JustificationItemType.LinkToArgumentOtherProof, :? FplLemma, _ ->
-            ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
+        match fvJi, potentialCandidate with
+        | :? FplJustificationItemByProofArgument, :? FplProof
+        | :? FplJustificationItemByDef, :? FplClass
+        | :? FplJustificationItemByDef, :? FplPredicate
+        | :? FplJustificationItemByDef, :? FplFunctionalTerm
+        | :? FplJustificationItemByCor, :? FplCorollary
+        | :? FplJustificationItemByAx, :? FplAxiom
+        | :? FplJustificationItemByInf, :? FplRuleOfInference
+        | :? FplJustificationItemByTheoremLikeStmt, :? FplTheorem 
+        | :? FplJustificationItemByTheoremLikeStmt, :? FplProposition
+        | :? FplJustificationItemByTheoremLikeStmt, :? FplLemma ->
+            ScopeSearchResult.FoundAssociate potentialCandidate
         | _ ->
-            ScopeSearchResult.FoundAssociate potentialCandidate    
+            ScopeSearchResult.FoundIncorrectBlock (nameOfOther potentialCandidate)
     | 0 -> ScopeSearchResult.NotFound
     | _ -> 
         // multiple candidates found

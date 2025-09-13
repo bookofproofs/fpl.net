@@ -379,18 +379,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("RefArgumentIdentifier")
         let fv = variableStack.PeekEvalStack()
         match fv.Name with 
-        | "justification item" ->
-            let fvJi = fv :?> FplGenericJustificationItem
-            match fvJi.FplId with 
-            | "" -> 
-                fvJi.FplId <- s
-                fvJi.Mode <- JustificationItemType.LinkToArgumentSameProof
-            | _ -> 
-                fvJi.FplId <- $"{fvJi.FplId}:{s}"
-                match fvJi.Mode with 
-                | JustificationItemType.ByDef -> () // already set 
-                | _ -> 
-                    fvJi.Mode <- JustificationItemType.LinkToArgumentOtherProof
+        | "justification by argument in another proof" -> fv.FplId <- $"{fv.FplId}:{s}"
         | "argument inference" -> 
             let fvAi = fv :?> FplArgInference
             let proof = fvAi.ParentArgument.ParentProof
@@ -1875,29 +1864,12 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("JustificationIdentifier")
         let parent = variableStack.PeekEvalStack()
 
-        let getArgumentInProof (fv1:FplGenericJustificationItem) argName =
-            let proof = 
-                match fv1.Mode with 
-                | JustificationItemType.LinkToArgumentOtherProof ->
-                    fv1.Scope.Values |> Seq.head :?> FplProof
-                | _ ->
-                    let parent = fv1.ParentJustification
-                    let arg = parent.ParentArgument
-                    arg.ParentProof
-            if proof.HasArgument argName then 
-                Some proof.Scope[argName]
-            else 
-                None
-
         let checkDiagnostics (fvJi:FplGenericJustificationItem) candidates = 
             match tryFindAssociatedBlockForJustificationItem fvJi candidates with
             | ScopeSearchResult.FoundAssociate potentialCandidate -> 
                 fvJi.Scope.TryAdd(fvJi.FplId, potentialCandidate) |> ignore
-                if potentialCandidate.FplId = literalRetL then 
-                    // adjust reference type if the found candidate is a rule of inference (from the default ReferredTheoremLikeStmtOrAxiom)
-                    fvJi.Mode <- JustificationItemType.ReferredRuleOfInference
-                match fvJi.Mode with 
-                | JustificationItemType.LinkToArgumentOtherProof ->
+                match fvJi with 
+                | :? FplJustificationItemByProofArgument ->
                     let split = fvJi.FplId.Split(":")
                     if split.Length > 1 then 
                         // here, argName is the argument identifier of the other proof
@@ -1907,10 +1879,10 @@ let rec eval (st: SymbolTable) ast =
                         | _ -> emitPR006Diagnostics fvJi.FplId argName fvJi.StartPos fvJi.EndPos 
                 | _ -> ()
             | ScopeSearchResult.FoundIncorrectBlock otherBlock ->
-                match fvJi.Mode with 
-                | JustificationItemType.ByDef ->
+                match fvJi with 
+                | :? FplJustificationItemByDef ->
                     emitPR000Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
-                | JustificationItemType.LinkToArgumentOtherProof ->
+                | :? FplJustificationItemByProofArgument ->
                     emitPR001Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
                 | _ ->
                     emitPR002Diagnostics otherBlock fvJi.StartPos fvJi.EndPos
