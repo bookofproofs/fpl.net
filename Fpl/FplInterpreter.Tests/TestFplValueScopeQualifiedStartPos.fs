@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestFplValueScopeQualifiedStartPos() =
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("inf1")>]
     [<DataRow("inf2")>]
     [<DataRow("axi1")>]
@@ -50,7 +50,7 @@ type TestFplValueScopeQualifiedStartPos() =
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
-            | "theory" -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
             | "inf1" -> Assert.IsTrue((inf1.QualifiedStartPos).Contains("Ln: 2, Col: 13)"))
             | "inf2" -> Assert.IsTrue((inf2.QualifiedStartPos).Contains("Ln: 3, Col: 13)"))
             | "axi1" -> Assert.IsTrue((axi1.QualifiedStartPos).Contains("Ln: 4, Col: 13)"))
@@ -90,7 +90,7 @@ type TestFplValueScopeQualifiedStartPos() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -103,7 +103,7 @@ type TestFplValueScopeQualifiedStartPos() =
         | Some (r:FplRoot,theory:FplValue,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
-            | "theory" -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue((block.QualifiedStartPos).Contains("Ln: 2, Col: 13)"))
             | "t1" -> Assert.IsTrue((t1.QualifiedStartPos).Contains("Ln: 4, Col: 13)"))
             | "t2" -> Assert.IsTrue((t2.QualifiedStartPos).Contains("Ln: 5, Col: 13)"))
@@ -114,7 +114,7 @@ type TestFplValueScopeQualifiedStartPos() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("thm1")>]
     [<DataRow("proofThm1")>]
     [<DataRow("lem1")>]
@@ -144,7 +144,7 @@ type TestFplValueScopeQualifiedStartPos() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
-                | "theory" -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
+                | PrimTheory -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
                 | "thm1" -> Assert.IsTrue((thm1.QualifiedStartPos).Contains("Ln: 3, Col: 13)"))
                 | "proofThm1" -> Assert.IsTrue((proofThm1.QualifiedStartPos).Contains("Ln: 4, Col: 13)"))
                 | "lem1" -> Assert.IsTrue((lem1.QualifiedStartPos).Contains("Ln: 6, Col: 13)"))
@@ -170,7 +170,7 @@ type TestFplValueScopeQualifiedStartPos() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -194,7 +194,7 @@ type TestFplValueScopeQualifiedStartPos() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
-            | "theory" -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue((block.QualifiedStartPos).Contains("Ln: 2, Col: 13)"))
             | "t1" -> Assert.IsTrue((t1.QualifiedStartPos).Contains("Ln: 5, Col: 13)"))
             | "t2" -> Assert.IsTrue((t2.QualifiedStartPos).Contains("Ln: 6, Col: 13)"))
@@ -215,7 +215,7 @@ type TestFplValueScopeQualifiedStartPos() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -251,7 +251,7 @@ type TestFplValueScopeQualifiedStartPos() =
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
-            | "theory" -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue((block.QualifiedStartPos).Contains("Ln: 2, Col: 13)")); 
             | "x" -> Assert.IsTrue((x.QualifiedStartPos).Contains("Ln: 4, Col: 18)"))
             | "y" -> Assert.IsTrue((y.QualifiedStartPos).Contains("Ln: 4, Col: 20)"))
@@ -285,7 +285,7 @@ type TestFplValueScopeQualifiedStartPos() =
             Assert.IsTrue(false)
         
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -320,7 +320,7 @@ type TestFplValueScopeQualifiedStartPos() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
-            | "theory" -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue((block.QualifiedStartPos).Contains("Ln: 2, Col: 13)")); 
             | "x" -> Assert.IsTrue((x.QualifiedStartPos).Contains("Ln: 3, Col: 19)"))
             | "y" -> Assert.IsTrue((y.QualifiedStartPos).Contains("Ln: 3, Col: 21)"))
@@ -353,7 +353,7 @@ type TestFplValueScopeQualifiedStartPos() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -388,7 +388,7 @@ type TestFplValueScopeQualifiedStartPos() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
-            | "theory" -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue((block.QualifiedStartPos).Contains("Ln: 2, Col: 13)"))
             | "x" -> Assert.IsTrue((x.QualifiedStartPos).Contains("Ln: 2, Col: 32)"))
             | "y" -> Assert.IsTrue((y.QualifiedStartPos).Contains("Ln: 2, Col: 34)"))
@@ -420,7 +420,7 @@ type TestFplValueScopeQualifiedStartPos() =
         | None -> Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -455,7 +455,7 @@ type TestFplValueScopeQualifiedStartPos() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.QualifiedStartPos)
-            | "theory" -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue((theory.QualifiedStartPos).Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue((block.QualifiedStartPos).Contains("Ln: 2, Col: 13)"))
             | "x" -> Assert.IsTrue((x.QualifiedStartPos).Contains("Ln: 2, Col: 32)"))
             | "y" -> Assert.IsTrue((y.QualifiedStartPos).Contains("Ln: 2, Col: 34)"))

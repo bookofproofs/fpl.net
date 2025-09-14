@@ -590,7 +590,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
         let rec getFullName (fv: FplValue) (first: bool) =
             let fvType = fv.Type(SignatureType.Mixed)
 
-            if fv.ShortName = "root" then ""
+            if fv.ShortName = PrimRoot then ""
             elif first then
                 let starPosWithoutFileName =
                     $"(Ln: {fv.StartPos.Line}, Col: {fv.StartPos.Column})"
@@ -859,7 +859,7 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string, runOrde
     do
         this.FilePath <- Some filePath
 
-    override this.Name = "theory"
+    override this.Name = PrimTheory
     override this.ShortName = "th"
 
     override this.Clone () =
@@ -906,8 +906,8 @@ let isTheory (fv:FplValue) =
 
 type FplRoot() =
     inherit FplValue((Position("", 0, 1, 1), Position("", 0, 1, 1)), None)
-    override this.Name = "root"
-    override this.ShortName = "root"
+    override this.Name = PrimRoot
+    override this.ShortName = PrimRoot
 
     override this.Clone () =
         let ret = new FplRoot()
@@ -3284,7 +3284,7 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
         this.FplId <- $"assign (ln {this.StartPos.Line})"
         this.TypeId <- literalUndef
 
-    override this.Name = $"assignment statement"
+    override this.Name = PrimStmtAssign
 
     override this.Clone () =
         let ret = new FplAssignment((this.StartPos, this.EndPos), this.Parent.Value)

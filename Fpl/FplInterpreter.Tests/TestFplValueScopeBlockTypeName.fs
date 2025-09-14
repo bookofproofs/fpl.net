@@ -103,7 +103,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("assertion", x.Name)
         | "FplAssignment" ->
             let x = new FplAssignment(positions, parent)
-            Assert.AreEqual<string>("assignment statement", x.Name)
+            Assert.AreEqual<string>(PrimStmtAssign, x.Name)
         | "FplAxiom" ->
             let x = new FplAxiom(positions, parent, 0)
             Assert.AreEqual<string>("axiom", x.Name)
@@ -274,7 +274,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>($"{literalRetL} statement", x.Name)
         | "FplRoot" ->
             let x = new FplRoot()
-            Assert.AreEqual<string>("root", x.Name)
+            Assert.AreEqual<string>(PrimRoot, x.Name)
         | "FplRuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent, 0)
             Assert.AreEqual<string>("rule of inference", x.Name)
@@ -283,7 +283,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("theorem", x.Name)
         | "FplTheory" ->
             let x = new FplTheory(positions, parent, "", 0)
-            Assert.AreEqual<string>("theory", x.Name)
+            Assert.AreEqual<string>(PrimTheory, x.Name)
         | "FplTranslation" ->
             let x = new FplTranslation(positions, parent)
             Assert.AreEqual<string>("translation", x.Name)
@@ -567,7 +567,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(PrimStmt, x.ShortName)
         | "FplRoot" ->
             let x = new FplRoot()
-            Assert.AreEqual<string>("root", x.ShortName)
+            Assert.AreEqual<string>(PrimRoot, x.ShortName)
         | "FplRuleOfInference" ->
             let x = new FplRuleOfInference(positions, parent, 0)
             Assert.AreEqual<string>(literalInf, x.ShortName)

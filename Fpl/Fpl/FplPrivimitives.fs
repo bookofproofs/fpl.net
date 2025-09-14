@@ -1310,6 +1310,12 @@ let PrimArgInfTrivial = "trivial argument inference"
 [<Literal>]
 let PrimRefL = "reference"
 [<Literal>]
+let PrimRoot = "root"
+[<Literal>]
 let PrimStmt = "stmt"
 [<Literal>]
 let PrimStmtL = "statement"
+[<Literal>]
+let PrimStmtAssign = "assignment statement"
+[<Literal>]
+let PrimTheory = "theory"

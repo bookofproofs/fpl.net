@@ -10,7 +10,7 @@ open CommonTestHelpers
 type TestFplValueScopeNameEndPos() =
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("inf1")>]
     [<DataRow("inf2")>]
     [<DataRow("axi1")>]
@@ -51,7 +51,7 @@ type TestFplValueScopeNameEndPos() =
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.IsTrue(r.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "theory" -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "inf1" -> Assert.IsTrue(inf1.EndPos.ToString().Contains("Ln: 2, Col: 33)"))
             | "inf2" -> Assert.IsTrue(inf2.EndPos.ToString().Contains("Ln: 3, Col: 33)"))
             | "axi1" -> Assert.IsTrue(axi1.EndPos.ToString().Contains("Ln: 4, Col: 31)"))
@@ -91,7 +91,7 @@ type TestFplValueScopeNameEndPos() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -104,7 +104,7 @@ type TestFplValueScopeNameEndPos() =
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.IsTrue(r.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "theory" -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.EndPos.ToString().Contains("Ln: 2, Col: 22)"))
             | "t1" -> Assert.IsTrue(t1.EndPos.ToString().Contains("Ln: 4, Col: 26)"))
             | "t2" -> Assert.IsTrue(t2.EndPos.ToString().Contains("Ln: 5, Col: 31)"))
@@ -115,7 +115,7 @@ type TestFplValueScopeNameEndPos() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("thm1")>]
     [<DataRow("proofThm1")>]
     [<DataRow("lem1")>]
@@ -145,7 +145,7 @@ type TestFplValueScopeNameEndPos() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.IsTrue(r.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
-                | "theory" -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
+                | PrimTheory -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
                 | "thm1" -> Assert.IsTrue(thm1.EndPos.ToString().Contains("Ln: 3, Col: 35)"))
                 | "proofThm1" -> Assert.IsTrue(proofThm1.EndPos.ToString().Contains("Ln: 4, Col: 33)"))
                 | "lem1" -> Assert.IsTrue(lem1.EndPos.ToString().Contains("Ln: 6, Col: 31)"))
@@ -172,7 +172,7 @@ type TestFplValueScopeNameEndPos() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -196,7 +196,7 @@ type TestFplValueScopeNameEndPos() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.IsTrue(r.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "theory" -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.EndPos.ToString().Contains("Ln: 2, Col: 26)"))
             | "t1" -> Assert.IsTrue(t1.EndPos.ToString().Contains("Ln: 5, Col: 27)"))
             | "t2" -> Assert.IsTrue(t2.EndPos.ToString().Contains("Ln: 6, Col: 31)"))
@@ -217,7 +217,7 @@ type TestFplValueScopeNameEndPos() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -253,7 +253,7 @@ type TestFplValueScopeNameEndPos() =
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsTrue(r.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "theory" -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.EndPos.ToString().Contains("Ln: 2, Col: 33)")); 
             | "x" -> Assert.IsTrue(x.EndPos.ToString().Contains("Ln: 4, Col: 54)"))
             | "y" -> Assert.IsTrue(y.EndPos.ToString().Contains("Ln: 4, Col: 54)"))
@@ -287,7 +287,7 @@ type TestFplValueScopeNameEndPos() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -322,7 +322,7 @@ type TestFplValueScopeNameEndPos() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsTrue(r.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "theory" -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.EndPos.ToString().Contains("Ln: 2, Col: 33)")); 
             | "x" -> Assert.IsTrue(x.EndPos.ToString().Contains("Ln: 3, Col: 57)"))
             | "y" -> Assert.IsTrue(y.EndPos.ToString().Contains("Ln: 3, Col: 57)"))
@@ -355,7 +355,7 @@ type TestFplValueScopeNameEndPos() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -390,7 +390,7 @@ type TestFplValueScopeNameEndPos() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsTrue(r.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "theory" -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.EndPos.ToString().Contains("Ln: 2, Col: 69)")); 
             | "x" -> Assert.IsTrue(x.EndPos.ToString().Contains("Ln: 2, Col: 68)"))
             | "y" -> Assert.IsTrue(y.EndPos.ToString().Contains("Ln: 2, Col: 68)"))
@@ -424,7 +424,7 @@ type TestFplValueScopeNameEndPos() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -459,7 +459,7 @@ type TestFplValueScopeNameEndPos() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.IsTrue(r.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
-            | "theory" -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
+            | PrimTheory -> Assert.IsTrue(theory.EndPos.ToString().Contains("Ln: 1, Col: 1)"))
             | "block" -> Assert.IsTrue(block.EndPos.ToString().Contains("Ln: 2, Col: 71)")); 
             | "x" -> Assert.IsTrue(x.EndPos.ToString().Contains("Ln: 2, Col: 70)"))
             | "y" -> Assert.IsTrue(y.EndPos.ToString().Contains("Ln: 2, Col: 70)"))

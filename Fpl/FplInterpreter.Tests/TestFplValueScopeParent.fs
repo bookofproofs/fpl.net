@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestFplValueScopeParent() =
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("inf1")>]
     [<DataRow("inf2")>]
     [<DataRow("axi1")>]
@@ -50,7 +50,7 @@ type TestFplValueScopeParent() =
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
-            | "theory" -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
+            | PrimTheory -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
             | "inf1" -> Assert.AreEqual<FplValue>(theory, inf1.Parent.Value)
             | "inf2" -> Assert.AreEqual<FplValue>(theory, inf2.Parent.Value)
             | "axi1" -> Assert.AreEqual<FplValue>(theory, axi1.Parent.Value)
@@ -89,7 +89,7 @@ type TestFplValueScopeParent() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -102,7 +102,7 @@ type TestFplValueScopeParent() =
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
-            | "theory" -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
+            | PrimTheory -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
             | "block" -> Assert.AreEqual<FplValue>(theory, block.Parent.Value)
             | "t1" -> Assert.AreEqual<FplValue>(block, t1.Parent.Value)
             | "t2" -> Assert.AreEqual<FplValue>(block, t2.Parent.Value)
@@ -113,7 +113,7 @@ type TestFplValueScopeParent() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("thm1")>]
     [<DataRow("proofThm1")>]
     [<DataRow("lem1")>]
@@ -143,7 +143,7 @@ type TestFplValueScopeParent() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
-                | "theory" -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
+                | PrimTheory -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
                 | "thm1" -> Assert.AreEqual<FplValue>(theory, thm1.Parent.Value)
                 | "proofThm1" -> Assert.AreEqual<FplValue>(thm1, proofThm1.Parent.Value)
                 | "lem1" -> Assert.AreEqual<FplValue>(theory, lem1.Parent.Value)
@@ -170,7 +170,7 @@ type TestFplValueScopeParent() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -194,7 +194,7 @@ type TestFplValueScopeParent() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
-            | "theory" -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
+            | PrimTheory -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
             | "block" -> Assert.AreEqual<FplValue>(theory, block.Parent.Value)
             | "t1" -> Assert.AreEqual<FplValue>(block, t1.Parent.Value)
             | "t2" -> Assert.AreEqual<FplValue>(block, t2.Parent.Value)
@@ -215,7 +215,7 @@ type TestFplValueScopeParent() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -279,7 +279,7 @@ type TestFplValueScopeParent() =
             | "x" -> Assert.AreEqual<FplValue>(block, x.Parent.Value)
             | "s" -> Assert.AreEqual<FplValue>(block, s.Parent.Value)
             | "block" -> Assert.AreEqual<FplValue>(theory, block.Parent.Value)
-            | "theory" -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
+            | PrimTheory -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
             | _ -> 
                 Assert.IsTrue(false)
@@ -288,7 +288,7 @@ type TestFplValueScopeParent() =
 
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -350,7 +350,7 @@ type TestFplValueScopeParent() =
             | "y" -> Assert.AreEqual<FplValue>(block, y.Parent.Value)
             | "x" -> Assert.AreEqual<FplValue>(block, x.Parent.Value)
             | "block" -> Assert.AreEqual<FplValue>(theory, block.Parent.Value)
-            | "theory" -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
+            | PrimTheory -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
             | _ -> 
                 Assert.IsTrue(false)
@@ -358,7 +358,7 @@ type TestFplValueScopeParent() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -420,7 +420,7 @@ type TestFplValueScopeParent() =
             | "y" -> Assert.AreEqual<FplValue>(block, y.Parent.Value)
             | "x" -> Assert.AreEqual<FplValue>(block, x.Parent.Value)
             | "block" -> Assert.AreEqual<FplValue>(theory, block.Parent.Value)
-            | "theory" -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
+            | PrimTheory -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
             | _ -> 
                 Assert.IsTrue(false)
@@ -428,7 +428,7 @@ type TestFplValueScopeParent() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow("theory")>]
+    [<DataRow(PrimTheory)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -490,7 +490,7 @@ type TestFplValueScopeParent() =
             | "y" -> Assert.AreEqual<FplValue>(block, y.Parent.Value)
             | "x" -> Assert.AreEqual<FplValue>(block, x.Parent.Value)
             | "block" -> Assert.AreEqual<FplValue>(theory, block.Parent.Value)
-            | "theory" -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
+            | PrimTheory -> Assert.AreEqual<FplValue>(r, theory.Parent.Value)
             | "r" -> Assert.AreEqual<FplValue option>(None, r.Parent)
             | _ -> 
                 Assert.IsTrue(false)
