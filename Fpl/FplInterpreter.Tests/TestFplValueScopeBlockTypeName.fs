@@ -21,7 +21,6 @@ type TestFplBlockType() =
     [<DataRow("FplCaseElse")>]
     [<DataRow("FplCaseSingle")>]
     [<DataRow("FplClass")>]
-    [<DataRow("FplConditionResult")>]
     [<DataRow("FplConjecture")>]
     [<DataRow("FplConjunction")>]
     [<DataRow("FplConstructor")>]
@@ -59,6 +58,8 @@ type TestFplBlockType() =
     [<DataRow("FplMandatoryFunctionalTerm")>]
     [<DataRow("FplMandatoryPredicate")>]
     [<DataRow("FplMapCases")>]
+    [<DataRow("FplMapCaseElse")>]
+    [<DataRow("FplMapCaseSingle")>]
     [<DataRow("FplMapping")>]
     [<DataRow("FplNegation")>]
     [<DataRow("FplOptionalFunctionalTerm")>]
@@ -100,28 +101,22 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(PrimArgL, x.Name)
         | "FplAssertion" ->
             let x = new FplAssertion(positions, parent)
-            Assert.AreEqual<string>("assertion", x.Name)
+            Assert.AreEqual<string>(PrimAssertion, x.Name)
         | "FplAssignment" ->
             let x = new FplAssignment(positions, parent)
-            Assert.AreEqual<string>(PrimStmtAssign, x.Name)
+            Assert.AreEqual<string>(PrimAssignment, x.Name)
         | "FplAxiom" ->
             let x = new FplAxiom(positions, parent, 0)
-            Assert.AreEqual<string>("axiom", x.Name)
+            Assert.AreEqual<string>(literalAxL, x.Name)
         | "FplCases" ->
             let x = new FplCases(positions, parent)
-            Assert.AreEqual<string>("cases statement", x.Name)
+            Assert.AreEqual<string>(PrimCases, x.Name)
         | "FplCaseElse" ->
             let x = new FplCaseElse(positions, parent)
-            Assert.AreEqual<string>("else case statement", x.Name)
-        | "FplCaseSingle" ->
-            let x = new FplCaseSingle(positions, parent)
-            Assert.AreEqual<string>("single case statement", x.Name)
+            Assert.AreEqual<string>(PrimCaseElse, x.Name)
         | "FplClass" ->
             let x = new FplClass(positions, parent)
-            Assert.AreEqual<string>("class definition", x.Name)
-        | "FplConditionResult" ->
-            let x = new FplConditionResult(positions, parent)
-            Assert.AreEqual<string>("condition result statement", x.Name)
+            Assert.AreEqual<string>(PrimClassL, x.Name)
         | "FplConjecture" ->
             let x = new FplConjecture(positions, parent, 0)
             Assert.AreEqual<string>("conjecture", x.Name)
@@ -136,7 +131,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("corollary", x.Name)
         | "FplDecrement" ->
             let x = new FplDecrement(positions, parent)
-            Assert.AreEqual<string>("decrement statement", x.Name)        
+            Assert.AreEqual<string>(PrimDecrementL, x.Name)        
         | "FplDisjunction" ->
             let x = new FplDisjunction(positions, parent)
             Assert.AreEqual<string>("disjunction", x.Name)        
@@ -166,55 +161,55 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("for in statement's entity", x.Name)
         | "FplFunctionalTerm" ->
             let x = new FplFunctionalTerm(positions, parent, 0)
-            Assert.AreEqual<string>("functional term definition", x.Name)
+            Assert.AreEqual<string>(PrimFuncionalTermL, x.Name)
         | "FplImplication" ->
             let x = new FplImplication(positions, parent)
-            Assert.AreEqual<string>("implication", x.Name)        
+            Assert.AreEqual<string>(PrimImplication, x.Name)        
         | "FplInstance" ->
             let x = new FplInstance(positions, parent)
-            Assert.AreEqual<string>("instance", x.Name)
+            Assert.AreEqual<string>(PrimInstanceL, x.Name)
         | "FplIntrinsicFunc" ->
             let x = new FplIntrinsicFunc(positions, parent)
-            Assert.AreEqual<string>("intrinsic functional term", x.Name)
+            Assert.AreEqual<string>(PrimIntrinsicFunc, x.Name)
         | "FplIntrinsicInd" ->
             let x = new FplIntrinsicInd(positions, parent)
-            Assert.AreEqual<string>("intrinsic index", x.Name)
+            Assert.AreEqual<string>(PrimIntrinsicInd, x.Name)
         | "FplIntrinsicObj" ->
             let x = new FplIntrinsicObj(positions, parent)
-            Assert.AreEqual<string>("intrinsic object", x.Name)
+            Assert.AreEqual<string>(PrimIntrinsicObj, x.Name)
         | "FplIntrinsicPred" ->
             let x = new FplIntrinsicPred(positions, parent)
-            Assert.AreEqual<string>("intrinsic predicate", x.Name)
+            Assert.AreEqual<string>(PrimIntrinsicPred, x.Name)
         | "FplIntrinsicTpl" ->
             let x = new FplIntrinsicTpl(positions, parent)
-            Assert.AreEqual<string>("intrinsic template", x.Name)
+            Assert.AreEqual<string>(PrimIntrinsicTpl, x.Name)
         | "FplIntrinsicUndef" ->
             let x = new FplIntrinsicUndef(positions, parent)
-            Assert.AreEqual<string>("intrinsic undefined", x.Name)
+            Assert.AreEqual<string>(PrimIntrinsicUndef, x.Name)
         | "FplIsOperator" ->
             let x = new FplIsOperator(positions, parent)
-            Assert.AreEqual<string>("is operator", x.Name)        
+            Assert.AreEqual<string>(PrimIsOperator, x.Name)        
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
-            Assert.AreEqual<string>("justification", x.Name)
+            Assert.AreEqual<string>(PrimJustificationL, x.Name)
         | "FplJustificationItemByAx" ->
             let x = new FplJustificationItemByAx(positions, parent, 0)
-            Assert.AreEqual<string>("justification by axiom", x.Name)
+            Assert.AreEqual<string>(PrimJIByAx, x.Name)
         | "FplJustificationItemByCor" ->
             let x = new FplJustificationItemByCor(positions, parent, 0)
-            Assert.AreEqual<string>("justification by corollary", x.Name)
+            Assert.AreEqual<string>(PrimJIByCor, x.Name)
         | "FplJustificationItemByDef" ->
             let x = new FplJustificationItemByDef(positions, parent, 0)
-            Assert.AreEqual<string>("justification by definition", x.Name)
+            Assert.AreEqual<string>(PrimJIByDef, x.Name)
         | "FplJustificationItemByInf" ->
             let x = new FplJustificationItemByInf(positions, parent, 0)
-            Assert.AreEqual<string>("justification by rule of inference", x.Name)
+            Assert.AreEqual<string>(PrimJIByInf, x.Name)
         | "FplJustificationItemByProofArgument" ->
             let x = new FplJustificationItemByProofArgument(positions, parent, 0)
-            Assert.AreEqual<string>("justification by argument in another proof", x.Name)
+            Assert.AreEqual<string>(PrimJIByProofArgument, x.Name)
         | "FplJustificationItemByTheoremLikeStmt" ->
             let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
-            Assert.AreEqual<string>("justification by theorem-like statement", x.Name)
+            Assert.AreEqual<string>(PrimJIByTheoremLikeStmt, x.Name)
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
             Assert.AreEqual<string>("language", x.Name)        
@@ -230,9 +225,15 @@ type TestFplBlockType() =
         | "FplMandatoryPredicate" ->
             let x = new FplMandatoryPredicate(positions, parent)
             Assert.AreEqual<string>("predicate property", x.Name)        
+        | "FplMapCaseElse" ->
+            let x = new FplMapCaseElse(positions, parent)
+            Assert.AreEqual<string>(PrimMapCaseElse, x.Name)        
+        | "FplMapCaseSingle" ->
+            let x = new FplMapCaseSingle(positions, parent)
+            Assert.AreEqual<string>(PrimMapCaseSingle, x.Name)
         | "FplMapCases" ->
             let x = new FplMapCases(positions, parent)
-            Assert.AreEqual<string>($"{literalMapCases} statement", x.Name)        
+            Assert.AreEqual<string>(PrimMapCases, x.Name)        
         | "FplMapping" ->
             let x = new FplMapping(positions, parent)
             Assert.AreEqual<string>("mapping", x.Name)
@@ -313,7 +314,6 @@ type TestFplBlockType() =
     [<DataRow("FplCaseElse")>]
     [<DataRow("FplCaseSingle")>]
     [<DataRow("FplClass")>]
-    [<DataRow("FplConditionResult")>]
     [<DataRow("FplConjecture")>]
     [<DataRow("FplConjunction")>]
     [<DataRow("FplConstructor")>]
@@ -351,6 +351,9 @@ type TestFplBlockType() =
     [<DataRow("FplMandatoryFunctionalTerm")>]
     [<DataRow("FplMandatoryPredicate")>]
     [<DataRow("FplMapCases")>]
+    [<DataRow("FplMapCases")>]
+    [<DataRow("FplMapCaseElse")>]
+    [<DataRow("FplMapCaseSingle")>]
     [<DataRow("FplMapping")>]
     [<DataRow("FplNegation")>]
     [<DataRow("FplOptionalFunctionalTerm")>]
@@ -411,16 +414,13 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(PrimStmt, x.ShortName)
         | "FplClass" ->
             let x = new FplClass(positions, parent)
-            Assert.AreEqual<string>("def cl", x.ShortName)
-        | "FplConditionResult" ->
-            let x = new FplConditionResult(positions, parent)
-            Assert.AreEqual<string>(PrimStmt, x.ShortName)
+            Assert.AreEqual<string>(PrimClass, x.ShortName)
         | "FplConjecture" ->
             let x = new FplConjecture(positions, parent, 0)
             Assert.AreEqual<string>(literalConj, x.ShortName)
         | "FplConjunction" ->
             let x = new FplConjunction(positions, parent)
-            Assert.AreEqual<string>("and", x.ShortName)        
+            Assert.AreEqual<string>(literalAnd, x.ShortName)        
         | "FplConstructor" ->
             let x = new FplConstructor(positions, parent)
             Assert.AreEqual<string>(literalCtor, x.ShortName)
@@ -429,7 +429,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalCor, x.ShortName)
         | "FplDecrement" ->
             let x = new FplDecrement(positions, parent)
-            Assert.AreEqual<string>("decr", x.ShortName)        
+            Assert.AreEqual<string>(PrimDecrement, x.ShortName)        
         | "FplDisjunction" ->
             let x = new FplDisjunction(positions, parent)
             Assert.AreEqual<string>(literalOr, x.ShortName)        
@@ -459,13 +459,13 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(PrimStmt, x.ShortName)
         | "FplFunctionalTerm" ->
             let x = new FplFunctionalTerm(positions, parent, 0)
-            Assert.AreEqual<string>("def func", x.ShortName)
+            Assert.AreEqual<string>(PrimFuncionalTerm, x.ShortName)
         | "FplImplication" ->
             let x = new FplImplication(positions, parent)
             Assert.AreEqual<string>(literalImpl, x.ShortName)        
         | "FplInstance" ->
             let x = new FplInstance(positions, parent)
-            Assert.AreEqual<string>("inst", x.ShortName)
+            Assert.AreEqual<string>(PrimInstance, x.ShortName)
         | "FplIntrinsicFunc" ->
             let x = new FplIntrinsicFunc(positions, parent)
             Assert.AreEqual<string>(literalFunc, x.ShortName)
@@ -489,25 +489,25 @@ type TestFplBlockType() =
             Assert.AreEqual<string>(literalIs, x.ShortName)        
         | "FplJustification" ->
             let x = new FplJustification(positions, parent)
-            Assert.AreEqual<string>("just", x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, x.ShortName)
         | "FplJustificationItemByAx" ->
             let x = new FplJustificationItemByAx(positions, parent, 0)
-            Assert.AreEqual<string>("just", x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, x.ShortName)
         | "FplJustificationItemByCor" ->
             let x = new FplJustificationItemByCor(positions, parent, 0)
-            Assert.AreEqual<string>("just", x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, x.ShortName)
         | "FplJustificationItemByDef" ->
             let x = new FplJustificationItemByDef(positions, parent, 0)
-            Assert.AreEqual<string>("just", x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, x.ShortName)
         | "FplJustificationItemByInf" ->
             let x = new FplJustificationItemByInf(positions, parent, 0)
-            Assert.AreEqual<string>("just", x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, x.ShortName)
         | "FplJustificationItemByProofArgument" ->
             let x = new FplJustificationItemByProofArgument(positions, parent, 0)
-            Assert.AreEqual<string>("just", x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, x.ShortName)
         | "FplJustificationItemByTheoremLikeStmt" ->
             let x = new FplJustificationItemByTheoremLikeStmt(positions, parent, 0)
-            Assert.AreEqual<string>("just", x.ShortName)
+            Assert.AreEqual<string>(PrimJustification, x.ShortName)
         | "FplLanguage" ->
             let x = new FplLanguage(positions, parent)
             Assert.AreEqual<string>("lang", x.ShortName)
@@ -523,6 +523,12 @@ type TestFplBlockType() =
         | "FplMandatoryPredicate" ->
             let x = new FplMandatoryPredicate(positions, parent)
             Assert.AreEqual<string>("mpred", x.ShortName)
+        | "FplMapCaseElse" ->
+            let x = new FplMapCaseElse(positions, parent)
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)        
+        | "FplMapCaseSingle" ->
+            let x = new FplMapCaseSingle(positions, parent)
+            Assert.AreEqual<string>(PrimStmt, x.ShortName)        
         | "FplMapCases" ->
             let x = new FplMapCases(positions, parent)
             Assert.AreEqual<string>(PrimStmt, x.ShortName)        
@@ -606,7 +612,6 @@ type TestFplBlockType() =
     [<DataRow("FplCaseElse")>]
     [<DataRow("FplCaseSingle")>]
     [<DataRow("FplClass")>]
-    [<DataRow("FplConditionResult")>]
     [<DataRow("FplConjecture")>]
     [<DataRow("FplConjunction")>]
     [<DataRow("FplConstructor")>]
@@ -644,6 +649,8 @@ type TestFplBlockType() =
     [<DataRow("FplMandatoryFunctionalTerm")>]
     [<DataRow("FplMandatoryPredicate")>]
     [<DataRow("FplMapCases")>]
+    [<DataRow("FplMapCaseElse")>]
+    [<DataRow("FplMapCaseSingle")>]
     [<DataRow("FplMapping")>]
     [<DataRow("FplNegation")>]
     [<DataRow("FplOptionalFunctionalTerm")>]
@@ -705,9 +712,6 @@ type TestFplBlockType() =
         | "FplClass" ->
             let x = new FplClass(positions, parent)
             Assert.AreEqual<string>(literalObj, x.FplId)
-        | "FplConditionResult" ->
-            let x = new FplConditionResult(positions, parent)
-            Assert.AreEqual<string>("", x.FplId)
         | "FplConjecture" ->
             let x = new FplConjecture(positions, parent, 0)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
@@ -816,6 +820,12 @@ type TestFplBlockType() =
         | "FplMandatoryPredicate" ->
             let x = new FplMandatoryPredicate(positions, parent)
             Assert.AreEqual<string>(literalUndetermined, x.FplId)
+        | "FplMapCaseElse" ->
+            let x = new FplMapCaseElse(positions, parent)
+            Assert.AreEqual<string>("", x.FplId)
+        | "FplMapCaseSingle" ->
+            let x = new FplMapCaseSingle(positions, parent)
+            Assert.AreEqual<string>("", x.FplId)
         | "FplMapCases" ->
             let x = new FplMapCases(positions, parent)
             Assert.AreEqual<string>("", x.FplId)        
@@ -899,7 +909,6 @@ type TestFplBlockType() =
     [<DataRow("FplCaseElse")>]
     [<DataRow("FplCaseSingle")>]
     [<DataRow("FplClass")>]
-    [<DataRow("FplConditionResult")>]
     [<DataRow("FplConjecture")>]
     [<DataRow("FplConjunction")>]
     [<DataRow("FplConstructor")>]
@@ -937,6 +946,8 @@ type TestFplBlockType() =
     [<DataRow("FplMandatoryFunctionalTerm")>]
     [<DataRow("FplMandatoryPredicate")>]
     [<DataRow("FplMapCases")>]
+    [<DataRow("FplMapCaseElse")>]
+    [<DataRow("FplMapCaseSingle")>]
     [<DataRow("FplMapping")>]
     [<DataRow("FplNegation")>]
     [<DataRow("FplOptionalFunctionalTerm")>]
@@ -997,9 +1008,6 @@ type TestFplBlockType() =
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplClass" ->
             let x = new FplClass(positions, parent)
-            Assert.IsTrue(x.RunOrder.IsNone)
-        | "FplConditionResult" ->
-            let x = new FplConditionResult(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
         | "FplConjecture" ->
             let x = new FplConjecture(positions, parent, 0)
@@ -1109,6 +1117,12 @@ type TestFplBlockType() =
         | "FplMandatoryPredicate" ->
             let x = new FplMandatoryPredicate(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplMapCaseElse" ->
+            let x = new FplMapCaseElse(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
+        | "FplMapCaseSingle" ->
+            let x = new FplMapCaseSingle(positions, parent)
+            Assert.IsTrue(x.RunOrder.IsNone)
         | "FplMapCases" ->
             let x = new FplMapCases(positions, parent)
             Assert.IsTrue(x.RunOrder.IsNone)
@@ -1192,7 +1206,6 @@ type TestFplBlockType() =
     [<DataRow("FplCaseElse")>]
     [<DataRow("FplCaseSingle")>]
     [<DataRow("FplClass")>]
-    [<DataRow("FplConditionResult")>]
     [<DataRow("FplConjecture")>]
     [<DataRow("FplConjunction")>]
     [<DataRow("FplConstructor")>]
@@ -1230,6 +1243,8 @@ type TestFplBlockType() =
     [<DataRow("FplMandatoryFunctionalTerm")>]
     [<DataRow("FplMandatoryPredicate")>]
     [<DataRow("FplMapCases")>]
+    [<DataRow("FplMapCaseElse")>]
+    [<DataRow("FplMapCaseSingle")>]
     [<DataRow("FplMapping")>]
     [<DataRow("FplNegation")>]
     [<DataRow("FplOptionalFunctionalTerm")>]
@@ -1292,9 +1307,6 @@ type TestFplBlockType() =
                 x.Run variableStack 
             | "FplClass" ->
                 let x = new FplClass(positions, parent)
-                x.Run variableStack 
-            | "FplConditionResult" ->
-                let x = new FplConditionResult(positions, parent)
                 x.Run variableStack 
             | "FplConjecture" ->
                 let x = new FplConjecture(positions, parent, 0)
@@ -1403,6 +1415,12 @@ type TestFplBlockType() =
                 x.Run variableStack 
             | "FplMandatoryPredicate" ->
                 let x = new FplMandatoryPredicate(positions, parent)
+                x.Run variableStack 
+            | "FplMapCaseElse" ->
+                let x = new FplMapCaseElse(positions, parent)
+                x.Run variableStack 
+            | "FplMapCaseSingle" ->
+                let x = new FplMapCaseSingle(positions, parent)
                 x.Run variableStack 
             | "FplMapCases" ->
                 let x = new FplMapCases(positions, parent)

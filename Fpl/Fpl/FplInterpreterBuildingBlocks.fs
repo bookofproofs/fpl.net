@@ -379,7 +379,7 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("RefArgumentIdentifier")
         let fv = variableStack.PeekEvalStack()
         match fv.Name with 
-        | "justification by argument in another proof" -> fv.FplId <- $"{fv.FplId}:{s}"
+        | PrimJIByProofArgument -> fv.FplId <- $"{fv.FplId}:{s}"
         | PrimArgInfAssume -> 
             let fvAi = fv :?> FplArgInferenceAssume
             let proof = fvAi.ParentArgument.ParentProof
@@ -837,14 +837,6 @@ let rec eval (st: SymbolTable) ast =
         predicateListAsts |> List.map (eval st) |> ignore
         variableStack.PopEvalStack()
         st.EvalPop()
-    | Ast.DefaultResult((pos1, pos2), asts) ->
-        st.EvalPush("DefaultResult")
-        asts |> List.map (eval st) |> ignore
-        st.EvalPop()
-    | Ast.DefaultMapResult((pos1, pos2), ast1) ->
-        st.EvalPush("DefaultMapResult")
-        eval st ast1 
-        st.EvalPop()
     | Ast.JustificationItem((pos1, pos2), justificationReferenceAst) ->
         st.EvalPush("JustificationItem")
         eval st justificationReferenceAst 
@@ -1039,11 +1031,6 @@ let rec eval (st: SymbolTable) ast =
         eval st extensionAssignmentAst
         eval st extensionMappingAst
         st.EvalPop()
-    | Ast.ConditionFollowedByMapResult((pos1, pos2), (ast1, ast2)) ->
-        st.EvalPush("ConditionFollowedByMapResult")
-        eval st ast1
-        eval st ast2 
-        st.EvalPop()
     | Ast.DefinitionExtension((pos1, pos2), ((extensionNameAst,extensionSignatureAst), extensionTermAst)) ->
         st.EvalPush("DefinitionExtension")
         let parent = variableStack.PeekEvalStack()
@@ -1061,7 +1048,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        emitLG000orLG001Diagnostics fvNew "implication"
+        emitLG000orLG001Diagnostics fvNew PrimImplication
         st.EvalPop()
     | Ast.Iif((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Iif")
@@ -1142,11 +1129,6 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPush("ReferencingIdentifier")
         eval st predicateIdentifierAst
         dollarDigitListAsts |> List.map (eval st) |> ignore
-        st.EvalPop()
-    | Ast.ConditionFollowedByResult((pos1, pos2), (ast1, asts)) ->
-        st.EvalPush("ConditionFollowedByResult")
-        eval st ast1
-        asts |> List.map (eval st) |> ignore
         st.EvalPop()
     | Ast.Localization((pos1, pos2), (predicateAst, translationListAsts)) ->
         st.EvalPush("Localization")
@@ -1404,41 +1386,57 @@ let rec eval (st: SymbolTable) ast =
         | _ -> ()
         st.EvalPop()
     // | Cases of Positions * (Ast list * Ast)
-    | Ast.Cases((pos1, pos2), (conditionFollowedByResultListAsts, elseStatementAst)) ->
+    | Ast.Cases((pos1, pos2), (caseSingleListAsts, caseElseAst)) ->
         st.EvalPush("Cases")
         let parent = variableStack.PeekEvalStack()
         let casesStmt = new FplCases((pos1, pos2), parent)
         variableStack.PushEvalStack(casesStmt) // add cases 
-        conditionFollowedByResultListAsts 
-        |> List.map (fun caseAst ->
-            let singleCase = new FplCaseSingle((pos1,pos2), casesStmt)
-            variableStack.PushEvalStack(singleCase) // add single case
-            eval st caseAst
-            variableStack.PopEvalStack() // remove single case 
-        ) |> ignore
-        let elseCase = new FplCaseElse((pos1,pos2), casesStmt)
-        variableStack.PushEvalStack(elseCase) // add else 
-        eval st elseStatementAst
-        variableStack.PopEvalStack() // remove else 
+        caseSingleListAsts |> List.map (fun caseAst -> eval st caseAst) |> ignore
+        eval st caseElseAst
         variableStack.PopEvalStack() // remove cases
         st.EvalPop()
-    | Ast.MapCases((pos1, pos2), (conditionFollowedByResultListAsts, elseStatementAst)) ->
+    | Ast.CaseSingle((pos1, pos2), (predicateAst, statementListAsts)) ->
+        st.EvalPush("CaseSingle")
+        let parent = variableStack.PeekEvalStack()
+        let singleCase = new FplCaseSingle((pos1,pos2), parent)
+        variableStack.PushEvalStack(singleCase) // add single case
+        eval st predicateAst
+        statementListAsts |> List.map (eval st) |> ignore
+        variableStack.PopEvalStack() // remove single case 
+        st.EvalPop()
+    | Ast.CaseElse((pos1, pos2), statementListAsts) ->
+        st.EvalPush("CaseElse")
+        let parent = variableStack.PeekEvalStack()
+        let elseCase = new FplCaseElse((pos1,pos2), parent)
+        variableStack.PushEvalStack(elseCase) // add else 
+        statementListAsts |> List.map (eval st) |> ignore
+        variableStack.PopEvalStack() // remove else 
+        st.EvalPop()
+    | Ast.MapCases((pos1, pos2), (mapCaseSingleAstList, elseStatementAst)) ->
         st.EvalPush("MapCases")
-        let fv = variableStack.Pop()
-        let fvNew = new FplMapCases((pos1, pos2), fv.Parent.Value)
-        variableStack.PushEvalStack(fvNew)
-        conditionFollowedByResultListAsts 
-        |> List.map (fun caseAst ->
-            let cas = new FplConditionResult((pos1,pos2), fvNew)
-            cas.FplId <- "mcase"
-            variableStack.PushEvalStack(cas)
-            eval st caseAst
-            variableStack.PopEvalStack()
-        ) |> ignore
-        let cas = new FplReference((pos1,pos2), fvNew)
-        variableStack.PushEvalStack(cas)
+        let parent = variableStack.PeekEvalStack()
+        let fvNew = new FplMapCases((pos1, pos2), parent)
+        variableStack.PushEvalStack(fvNew) // add mapcases
+        mapCaseSingleAstList |> List.map (fun caseAst -> eval st caseAst) |> ignore
         eval st elseStatementAst
-        variableStack.PopEvalStack()
+        variableStack.PopEvalStack() // remove mapcases
+        st.EvalPop()
+    | Ast.MapCaseSingle((pos1, pos2), (predicateFirstAst, predicateSecondAst)) ->
+        st.EvalPush("MapCaseSingle")
+        let parent = variableStack.PeekEvalStack()
+        let mapCaseSingle = new FplMapCaseSingle((pos1,pos2), parent)
+        variableStack.PushEvalStack(mapCaseSingle) // add mapcase single
+        eval st predicateFirstAst
+        eval st predicateSecondAst 
+        variableStack.PopEvalStack() // remove mapcase single
+        st.EvalPop()
+    | Ast.MapCaseElse((pos1, pos2), predicateAst) ->
+        st.EvalPush("MapCaseElse")
+        let parent = variableStack.PeekEvalStack()
+        let elseCase = new FplMapCaseElse((pos1,pos2), parent)
+        variableStack.PushEvalStack(elseCase) // add mapcase else
+        eval st predicateAst 
+        variableStack.PopEvalStack() // remove mapcase else
         st.EvalPop()
     // | Signature of Positions * (Ast * Ast)
     | Ast.Signature((pos1, pos2), (predicateIdentifierAst, paramTupleAst)) ->

@@ -1294,11 +1294,15 @@ let objectMathSymbols: Parser<string,unit> = fixChar isObject "<object symbol>"
 
 (* Strint primitives *)
 [<Literal>]
+let PrimArgInf = "ainf"
+[<Literal>]
 let PrimArg = "arg"
 [<Literal>]
 let PrimArgL = "argument"
 [<Literal>]
-let PrimArgInf = "ainf"
+let PrimAssertion = "assertion"
+[<Literal>]
+let PrimAssignment = "assignment statement"
 [<Literal>]
 let PrimArgInfAssume = "assume argument inference"
 [<Literal>]
@@ -1308,6 +1312,66 @@ let PrimArgInfRevoke = "revoke argument inference"
 [<Literal>]
 let PrimArgInfTrivial = "trivial argument inference"
 [<Literal>]
+let PrimCases = "cases statement"
+[<Literal>]
+let PrimCaseElse = "else case statement"
+[<Literal>]
+let PrimCaseSingle = "single case statement"
+[<Literal>]
+let PrimClass = "def cl"
+[<Literal>]
+let PrimClassL = "class definition"
+[<Literal>]
+let PrimDecrement = "decr"
+[<Literal>]
+let PrimDecrementL = "decrement statement"
+[<Literal>]
+let PrimFuncionalTerm = "def func"
+[<Literal>]
+let PrimFuncionalTermL = "functional term definition"
+[<Literal>]
+let PrimInstance = "inst" 
+[<Literal>]
+let PrimInstanceL = "instance"
+[<Literal>]
+let PrimIntrinsicFunc = "intrinsic functional term"
+[<Literal>]
+let PrimIntrinsicInd = "intrinsic index"
+[<Literal>]
+let PrimIntrinsicObj = "intrinsic object"
+[<Literal>]
+let PrimIntrinsicPred = "intrinsic predicate"
+[<Literal>]
+let PrimIntrinsicTpl = "intrinsic template"
+[<Literal>]
+let PrimIntrinsicUndef = "intrinsic undefined"
+[<Literal>]
+let PrimIsOperator = "is operator"
+[<Literal>]
+let PrimImplication = "implication"
+[<Literal>]
+let PrimJIByAx = "justification by axiom"
+[<Literal>]
+let PrimJIByCor = "justification by corollary"
+[<Literal>]
+let PrimJIByDef = "justification by definition"
+[<Literal>]
+let PrimJIByInf = "justification by rule of inference"
+[<Literal>]
+let PrimJIByProofArgument = "justification by argument in another proof"
+[<Literal>]
+let PrimJIByTheoremLikeStmt = "justification by theorem-like statement"
+[<Literal>]
+let PrimJustification = "just"
+[<Literal>]
+let PrimJustificationL = "justification"
+[<Literal>]
+let PrimMapCases = "mapcases statement"
+[<Literal>]
+let PrimMapCaseElse = "else mapcase statement"
+[<Literal>]
+let PrimMapCaseSingle = "single mapcase statement"
+[<Literal>]
 let PrimRefL = "reference"
 [<Literal>]
 let PrimRoot = "root"
@@ -1315,7 +1379,5 @@ let PrimRoot = "root"
 let PrimStmt = "stmt"
 [<Literal>]
 let PrimStmtL = "statement"
-[<Literal>]
-let PrimStmtAssign = "assignment statement"
 [<Literal>]
 let PrimTheory = "theory"

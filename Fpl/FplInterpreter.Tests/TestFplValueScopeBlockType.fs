@@ -1070,11 +1070,11 @@ type TestFplValueScopeBlockType() =
             let cr = res.ArgList[0]
  
             match var with
-            | "base1" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
-            | "base2" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
-            | "base3" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
-            | "base4" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
-            | "base5" -> Assert.IsInstanceOfType<FplConditionResult>(cr)
+            | "base1" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
+            | "base2" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
+            | "base3" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
+            | "base4" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
+            | "base5" -> Assert.IsInstanceOfType<FplMapCaseSingle>(cr)
             | _ -> Assert.IsTrue(false)
         | None -> 
             Assert.IsTrue(false)

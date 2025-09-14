@@ -10,7 +10,8 @@ type TestParentsInSymbolTable() =
 
 
     [<DataRow("00", """;""", PrimTheory)>]
-    [<DataRow("01", """def pred T() {dec ~x:pred x:=false; true};""", PrimStmtAssign)>]
+    [<DataRow("01", """def pred T() {dec ~x:pred x:=false; true};""", PrimAssignment)>]
+    [<DataRow("02", """T$1 { 100. ExistsByExample, 1 |- false };""", PrimAssignment)>]
     [<TestMethod>]
     member this.TestParentNodeST(varVal, fplCode, firstTypeNode) =
         ad.Clear()

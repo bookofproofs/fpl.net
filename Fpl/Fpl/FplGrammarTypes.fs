@@ -110,12 +110,12 @@ type Ast =
 
     // Statements
     | Assertion of Positions * Ast
-    | ConditionFollowedByResult of Positions * (Ast * Ast list)
-    | DefaultResult of Positions * Ast list 
     | Cases of Positions * (Ast list * Ast)
-    | ConditionFollowedByMapResult of Positions * (Ast * Ast)
-    | DefaultMapResult of Positions * Ast  
+    | CaseSingle of Positions * (Ast * Ast list)
+    | CaseElse of Positions * Ast list 
     | MapCases of Positions * (Ast list * Ast)
+    | MapCaseSingle of Positions * (Ast * Ast)
+    | MapCaseElse of Positions * Ast  
     | Assignment of Positions * (Ast * Ast)
     | ForIn of Positions * ((Ast * Ast) * Ast list)
     | Return of Positions * Ast

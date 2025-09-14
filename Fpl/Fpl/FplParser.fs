@@ -302,18 +302,15 @@ let spacesRightBrace = (IW .>> rightBrace)
 let keywordReturn = IW >>. (skipString literalRetL <|> skipString literalRet) .>> SW 
 
 
-let defaultResult = positions "DefaultResult" statementList |>> Ast.DefaultResult
-let conditionFollowedByResult = positions "ConditionFollowedByResult" ((case >>. predicate .>> colon) .>>. statementList) |>> Ast.ConditionFollowedByResult
-let conditionFollowedByResultList = many1 (IW >>. conditionFollowedByResult)
-let elseStatement = elseCase >>. IW >>. defaultResult .>> IW
-let casesStatement = positions "Cases" (((keywordCases >>. leftParen >>. IW >>. conditionFollowedByResultList .>>. elseStatement .>> rightParen))) |>> Ast.Cases
+let caseElse = positions "CaseElse" (elseCase >>. IW >>. statementList .>> IW)  |>> Ast.CaseElse
+let caseSingle = positions "CaseSingle" ((case >>. predicate .>> colon) .>>. statementList) |>> Ast.CaseSingle
+let caseSingleList = many1 (IW >>. caseSingle)
+let casesStatement = positions "Cases" (((keywordCases >>. leftParen >>. IW >>. caseSingleList .>>. caseElse .>> rightParen))) |>> Ast.Cases
 
-let defaultMapResult = positions "DefaultMapResult" (IW >>. predicate) |>> Ast.DefaultMapResult
-let conditionFollowedByMapResult = positions "ConditionFollowedByMapResult" ((case >>. predicate .>> colon) .>>. (IW >>. predicate)) |>> Ast.ConditionFollowedByMapResult
-let conditionFollowedByMapResultList = many1 (IW >>. conditionFollowedByMapResult)
-let elseMapStatement = elseCase >>. IW >>. defaultMapResult .>> IW
-let mapCases = positions "MapCases" (((keywordMapCases >>. leftParen >>. IW >>. conditionFollowedByMapResultList .>>. elseMapStatement .>> rightParen))) |>> Ast.MapCases
-
+let mapCaseElse = positions "MapCaseElse" (elseCase >>. IW >>. predicate .>> IW) |>> Ast.MapCaseElse
+let mapCaseSingle = positions "MapCaseSingle" ((case >>. predicate .>> colon) .>>. (IW >>. predicate)) |>> Ast.MapCaseSingle
+let mapCaseSingleList = many1 (IW >>. mapCaseSingle)
+let mapCases = positions "MapCases" (((keywordMapCases >>. leftParen >>. IW >>. mapCaseSingleList .>>. mapCaseElse .>> rightParen))) |>> Ast.MapCases
 
 let assignmentStatement = positions "Assignment" ((predicateWithQualification .>> IW .>> colonEqual) .>>. (predicate <|> mapCases)) |>> Ast.Assignment
 
@@ -648,8 +645,8 @@ let errInformation = [
     (PRD000, [literalAnd; literalOr; literalImpl; literalIif; literalXor; literalNot; literalAll; literalEx; literalIs], compoundPredicate)
     (SMT000, [literalAssL; literalCases; literalBase; literalFor; literalDel], statement)
     (AGI000, ["|-"], argumentInference)
-    (CAS000, ["|"], conditionFollowedByResult)
-    (DCS000, ["?"], elseStatement)
+    (CAS000, ["|"], caseSingle)
+    (DCS000, ["?"], caseElse)
     (ASS000, [literalAss], assumeArgument)
     (REV000, [literalRev], revokeArgument)
     (RET000, [literalRet], returnStatement)
