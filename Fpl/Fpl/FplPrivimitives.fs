@@ -1,4 +1,4 @@
-﻿module FplGrammarCommons
+﻿module FplPrimitives
 
 open System
 open System.Collections.Generic
@@ -1290,3 +1290,26 @@ let postfixMathSymbols: Parser<string,unit> = fixChar isPostfix "<postfix symbol
 let prefixMathSymbols: Parser<string,unit> = fixChar isPrefix "<prefix symbol>"
 
 let objectMathSymbols: Parser<string,unit> = fixChar isObject "<object symbol>"
+
+
+(* Strint primitives *)
+[<Literal>]
+let PrimArg = "arg"
+[<Literal>]
+let PrimArgL = "argument"
+[<Literal>]
+let PrimArgInf = "ainf"
+[<Literal>]
+let PrimArgInfAssume = "assume argument inference"
+[<Literal>]
+let PrimArgInfDerive = "derived argument inference"
+[<Literal>]
+let PrimArgInfRevoke = "revoke argument inference"
+[<Literal>]
+let PrimArgInfTrivial = "trivial argument inference"
+[<Literal>]
+let PrimRefL = "reference"
+[<Literal>]
+let PrimStmt = "stmt"
+[<Literal>]
+let PrimStmtL = "statement"

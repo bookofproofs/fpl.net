@@ -7,7 +7,7 @@ open System.Collections.Generic
 open System.Text
 open System.IO
 open FParsec
-open FplGrammarCommons
+open FplPrimitives
 open FplGrammarTypes
 open FplParser
 open ErrDiagnostics
@@ -24,25 +24,6 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 *)
-(* Strint primitives *)
-[<Literal>]
-let PrimArg = "arg"
-[<Literal>]
-let PrimArgL = "argument"
-[<Literal>]
-let PrimArgInf = "ainf"
-[<Literal>]
-let PrimArgInfAssume = "assume argument inference"
-[<Literal>]
-let PrimArgInfDerive = "derived argument inference"
-[<Literal>]
-let PrimArgInfRevoke = "revoke argument inference"
-[<Literal>]
-let PrimArgInfTrivial = "trivial argument inference"
-[<Literal>]
-let PrimStmt = "stmt"
-[<Literal>]
-let PrimStmtL = "statement"
 
 type EvalAlias =
     { StartPos: Position
@@ -755,9 +736,9 @@ and FplVariableStack() =
             (p.ValueList:List<FplValue>).Clear()
             let valueList = 
                 match ar.Name with 
-                | "reference" when ar.FplId = String.Empty ->
+                | PrimRefL when ar.FplId = String.Empty ->
                     ar.ArgList |> Seq.toList
-                | "reference" when ar.Scope.ContainsKey(ar.FplId) ->
+                | PrimRefL when ar.Scope.ContainsKey(ar.FplId) ->
                     ar.Scope.Values |> Seq.toList
                 | _ -> ar.ValueList |> Seq.toList
                 
@@ -2001,7 +1982,7 @@ type FplIntrinsicUndef(positions: Positions, parent: FplValue) as this =
 type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
-    override this.Name = "reference"
+    override this.Name = PrimRefL
     override this.ShortName = "ref"
 
     override this.Clone () = this // do not clone references to prevent stack overflow 
@@ -2188,10 +2169,10 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
         newValue.FplId <-
             // FPL truth-table
             match (arg1Repr, arg2Repr) with
-            | (FplGrammarCommons.literalFalse, _) 
-            | (_, FplGrammarCommons.literalFalse)  -> 
-                FplGrammarCommons.literalFalse
-            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) -> 
+            | (FplPrimitives.literalFalse, _) 
+            | (_, FplPrimitives.literalFalse)  -> 
+                FplPrimitives.literalFalse
+            | (FplPrimitives.literalTrue, FplPrimitives.literalTrue) -> 
                 literalTrue
             | _ -> literalUndetermined
         this.SetValue(newValue)
@@ -2231,10 +2212,10 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
         newValue.FplId <-
             // FPL truth-table
             match (arg1Repr, arg2Repr) with
-            | (FplGrammarCommons.literalTrue, _) 
-            | (_, FplGrammarCommons.literalTrue) -> 
+            | (FplPrimitives.literalTrue, _) 
+            | (_, FplPrimitives.literalTrue) -> 
                 literalTrue
-            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) -> 
+            | (FplPrimitives.literalFalse, FplPrimitives.literalFalse) -> 
                 literalFalse
             | _ -> 
                 literalUndetermined
@@ -2276,11 +2257,11 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
         newValue.FplId <- 
             // FPL truth-table
             match (arg1Repr, arg2Repr) with
-            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalFalse) 
-            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalTrue) -> 
+            | (FplPrimitives.literalTrue, FplPrimitives.literalFalse) 
+            | (FplPrimitives.literalFalse, FplPrimitives.literalTrue) -> 
                 literalTrue
-            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) 
-            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) -> 
+            | (FplPrimitives.literalTrue, FplPrimitives.literalTrue) 
+            | (FplPrimitives.literalFalse, FplPrimitives.literalFalse) -> 
                 literalFalse
             | _ -> 
                 literalUndetermined
@@ -2318,8 +2299,8 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
         newValue.FplId <- 
             match argRepr with 
             // FPL truth-table
-            | FplGrammarCommons.literalFalse -> literalTrue
-            | FplGrammarCommons.literalTrue -> literalFalse
+            | FplPrimitives.literalFalse -> literalTrue
+            | FplPrimitives.literalTrue -> literalFalse
             | _ -> literalUndetermined  
 
         this.SetValue(newValue)  
@@ -2356,10 +2337,10 @@ type FplImplication(positions: Positions, parent: FplValue) as this =
         newValue.FplId <- 
             match (arg1Repr, arg2Repr) with
             // FPL truth-table
-            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalFalse) -> literalFalse
-            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalTrue) 
-            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) 
-            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) -> literalTrue
+            | (FplPrimitives.literalTrue, FplPrimitives.literalFalse) -> literalFalse
+            | (FplPrimitives.literalFalse, FplPrimitives.literalTrue) 
+            | (FplPrimitives.literalFalse, FplPrimitives.literalFalse) 
+            | (FplPrimitives.literalTrue, FplPrimitives.literalTrue) -> literalTrue
             | _ -> literalUndetermined
         
         this.SetValue(newValue) 
@@ -2398,10 +2379,10 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
         newValue.FplId <- 
             match (arg1Repr, arg2Repr) with
             // FPL truth-table
-            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalTrue) 
-            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalFalse) -> literalTrue
-            | (FplGrammarCommons.literalFalse, FplGrammarCommons.literalTrue) 
-            | (FplGrammarCommons.literalTrue, FplGrammarCommons.literalFalse) -> literalFalse
+            | (FplPrimitives.literalTrue, FplPrimitives.literalTrue) 
+            | (FplPrimitives.literalFalse, FplPrimitives.literalFalse) -> literalTrue
+            | (FplPrimitives.literalFalse, FplPrimitives.literalTrue) 
+            | (FplPrimitives.literalTrue, FplPrimitives.literalFalse) -> literalFalse
             | _ -> literalUndetermined
         
         this.SetValue(newValue)
@@ -2454,25 +2435,25 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
 
         let newValue = new FplIntrinsicUndef((this.StartPos, this.EndPos), this.Parent.Value)
         match a1Repr with
-        | FplGrammarCommons.literalUndef -> 
+        | FplPrimitives.literalUndef -> 
             emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the left argument is undefined." 
             this.SetValue(newValue)
         | _ -> 
             match b1Repr with
-            | FplGrammarCommons.literalUndef -> 
+            | FplPrimitives.literalUndef -> 
                 emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the right argument is undefined." 
                 this.SetValue(newValue)
             | _ -> 
                 let newValue = FplIntrinsicPred((this.StartPos, this.EndPos), this.Parent.Value)
                 match a1Repr with
                 | "dec pred"  
-                | FplGrammarCommons.literalUndetermined -> 
+                | FplPrimitives.literalUndetermined -> 
                     emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the left argument is undetermined." 
                     this.SetValue(newValue)
                 | _ -> 
                     match b1Repr with
                     | "dec pred"  
-                    | FplGrammarCommons.literalUndetermined -> 
+                    | FplPrimitives.literalUndetermined -> 
                         emitID013Diagnostics this.StartPos this.EndPos "Predicate `=` cannot be evaluated because the right argument is undetermined." 
                         this.SetValue(newValue)
                     | _ -> 
@@ -2978,7 +2959,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
                 literalUndef
             else
                 match this.TypeId with
-                | FplGrammarCommons.literalUndef -> literalUndef
+                | FplPrimitives.literalUndef -> literalUndef
                 | _ -> 
                     if this.IsVariadic() then
                         $"dec {this.Type(SignatureType.Type)}[]" 
@@ -2993,7 +2974,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
                 subRepr
             else
                 match this.TypeId with
-                | FplGrammarCommons.literalUndef -> literalUndef
+                | FplPrimitives.literalUndef -> literalUndef
                 | _ -> 
                     if this.IsVariadic() then
                         $"dec {this.Type(SignatureType.Type)}[]" 
@@ -3343,10 +3324,28 @@ type FplAssignment(positions: Positions, parent: FplValue) as this =
             // Issue SIG05 diagnostics if there is (for some reason) no value of the toBeAssignedValue 
             emitSIG05Diagnostics (assignee.Type(SignatureType.Type)) (toBeAssignedValue.Type(SignatureType.Type)) toBeAssignedValue.StartPos toBeAssignedValue.EndPos
 
+    member this.Assignee =
+        if this.ArgList.Count > 0 then 
+            let candidate = this.ArgList[0]
+            if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(candidate.FplId) then 
+                Some candidate.Scope[candidate.FplId]
+            else
+                Some candidate
+        else
+            None
+
+    member this.AssignedValue =
+        if this.ArgList.Count > 1 then 
+            let candidate = this.ArgList[1]
+            if candidate.Name = PrimRefL && candidate.Scope.ContainsKey(candidate.FplId) then 
+                Some candidate.Scope[candidate.FplId]
+            else
+                Some candidate
+        else
+            None
+
     override this.Run variableStack = 
-        let assigneeReferenceOpt = getArgument this.ArgList[0]
-        let assignedValueOpt = getArgument this.ArgList[1]
-        match assigneeReferenceOpt, assignedValueOpt with
+        match this.Assignee, this.AssignedValue with
         | Some assignee, Some assignedValue ->
             let nameAssignee = assignee.Type(SignatureType.Name)
             let nameAssignedValue = assignedValue.Type(SignatureType.Name)

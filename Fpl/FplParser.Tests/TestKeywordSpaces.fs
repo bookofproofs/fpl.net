@@ -1,7 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
-open FplGrammarCommons
+open FplPrimitives
 open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
@@ -79,10 +79,10 @@ type TestKeywordSpaces() =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Failure:") && actual.Contains("Expecting: <significant whitespace>"))
 
-    [<DataRow(FplGrammarCommons.literalByCor)>]
-    [<DataRow(FplGrammarCommons.literalByDef)>]
-    [<DataRow(FplGrammarCommons.literalByAx)>]
-    [<DataRow(FplGrammarCommons.literalByInf)>]
+    [<DataRow(FplPrimitives.literalByCor)>]
+    [<DataRow(FplPrimitives.literalByDef)>]
+    [<DataRow(FplPrimitives.literalByAx)>]
+    [<DataRow(FplPrimitives.literalByInf)>]
     [<TestMethod>]
     member this.TestSpacesBydef (keyword:string) =
         let result = run (byModifier .>> eof) $"{keyword}p"

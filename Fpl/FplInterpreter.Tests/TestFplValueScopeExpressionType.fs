@@ -3,7 +3,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
-open FplGrammarCommons
+open FplPrimitives
 
 [<TestClass>]
 type TestFplValueScopeExpressionType() =

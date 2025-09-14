@@ -1,5 +1,5 @@
 ﻿using OmniSharp.Extensions.LanguageServer.Protocol.Models;
-using static FplGrammarCommons;
+using static FplPrimitives;
 
 namespace FplLS
 {
@@ -40,7 +40,7 @@ namespace FplLS
             var ret = new List<FplCompletionItem>();
             var st = _symbolType;
  
-            foreach (KeyValuePair<char, System.Tuple<int,string,string>> item in FplGrammarCommons.mathSymbols)
+            foreach (KeyValuePair<char, System.Tuple<int,string,string>> item in FplPrimitives.mathSymbols)
             {
 
                 if ((item.Value.Item1 & _bitPattern) == _bitPattern) 

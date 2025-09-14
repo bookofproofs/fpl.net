@@ -1,7 +1,7 @@
 ﻿/// This module contains the FPL parser producing an abstract syntax tree out of a given FPL code 
 module FplParser
 open System.Text.RegularExpressions
-open FplGrammarCommons
+open FplPrimitives
 open FplGrammarTypes
 open ErrDiagnostics
 open FParsec

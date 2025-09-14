@@ -1,6 +1,6 @@
 ﻿namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open FplGrammarCommons
+open FplPrimitives
 open ErrDiagnostics
 open FplInterpreterTypes
 open CommonTestHelpers
@@ -956,5 +956,85 @@ type TestFplValueScopeFplRepresentation() =
             | "base4" -> () 
             | "base5" -> ()
             | _ -> Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("00", "dec ~x:pred x:=false;",  literalFalse)>]
+    [<TestMethod>]
+    member this.TestAssignmentVariableReferenceTheSame(no:string, input, (expected:string)) =
+        ad.Clear()
+        let fplCode = sprintf "def pred T() {%s true};" input
+        let filename = "TestAssignment"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["T()"]
+            let assignPre = pred.ArgList[0]
+            let assign = assignPre :?> FplAssignment
+            let assigneeVariableOpt = assign.Assignee
+            match assigneeVariableOpt with
+            | Some var -> 
+                let xVar = pred.Scope["x"]
+                Assert.AreEqual<bool>(true, LanguagePrimitives.PhysicalEquality xVar var)
+            | None -> 
+                Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("00", "dec ~x:pred x:=false;",  literalFalse)>]
+    [<TestMethod>]
+    member this.TestAssignmentValue(no:string, input, (expected:string)) =
+        ad.Clear()
+        let fplCode = sprintf "def pred T() {%s true};" input
+        let filename = "TestAssignment"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["T()"]
+            let variableStack = new FplVariableStack()
+            let assignPre = pred.ArgList[0]
+            let assign = assignPre :?> FplAssignment
+            assign.Run variableStack
+            let assigneeVariableOpt = assign.Assignee
+            match assigneeVariableOpt with
+            | Some var -> 
+                let actual = var.Represent()
+                Assert.AreEqual<string>(expected, actual)
+            | None -> 
+                Assert.IsTrue(false)
+        | None -> 
+            Assert.IsTrue(false)
+
+    [<DataRow("00", "dec ~x:pred x:=false;",  true)>]
+    [<TestMethod>]
+    member this.TestAssignmentVariableInitialized(no:string, input, (expected:bool)) =
+        ad.Clear()
+        let fplCode = sprintf "def pred T() {%s true};" input
+        let filename = "TestAssignment"
+        let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
+        prepareFplCode(filename, "", false) |> ignore
+        match stOption with
+        | Some st -> 
+            let r = st.Root
+            let theory = r.Scope[filename]
+            let pred = theory.Scope["T()"]
+            let variableStack = new FplVariableStack()
+            let assignPre = pred.ArgList[0]
+            let assign = assignPre :?> FplAssignment
+            assign.Run variableStack
+            let assigneeVariableOpt = assign.Assignee
+            match assigneeVariableOpt with
+            | Some var -> 
+                let actual = var.IsInitializedVariable
+                Assert.AreEqual<bool>(expected, actual)
+            | None -> 
+                Assert.IsTrue(false)
+
         | None -> 
             Assert.IsTrue(false)

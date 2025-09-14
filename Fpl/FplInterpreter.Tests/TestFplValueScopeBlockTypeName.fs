@@ -1,7 +1,7 @@
 namespace FplInterpreter.Tests
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
-open FplGrammarCommons
+open FplPrimitives
 open FplInterpreterTypes
 
 [<TestClass>]
@@ -268,7 +268,7 @@ type TestFplBlockType() =
             Assert.AreEqual<string>("exists n times quantor", x.Name)
         | "FplReference" ->
             let x = new FplReference(positions, parent)
-            Assert.AreEqual<string>("reference", x.Name)
+            Assert.AreEqual<string>(PrimRefL, x.Name)
         | "FplReturn" ->
             let x = new FplReturn(positions, parent)
             Assert.AreEqual<string>($"{literalRetL} statement", x.Name)

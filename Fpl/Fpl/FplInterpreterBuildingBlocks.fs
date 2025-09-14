@@ -19,7 +19,7 @@ open System
 open System.Collections.Generic
 open FParsec
 open ErrDiagnostics
-open FplGrammarCommons
+open FplPrimitives
 open FplGrammarTypes
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitterPre
@@ -330,7 +330,7 @@ let rec eval (st: SymbolTable) ast =
             | _ -> 
                 // otherwise emit variable not declared if this is not a declaration 
                 emitVAR01diagnostics name pos1 pos2
-                if fv.Name = "reference" then 
+                if fv.Name = PrimRefL then 
                     // for references, still add the variable to the scope of the reference. 
                     // It will then be treated as a "variable" that is undefined
                     fv.Scope.Add(name, varValue)
@@ -1462,7 +1462,6 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(dummyValue) // add value
         eval st predicateAst
         variableStack.PopEvalStack() // remove value
-        fvNew.Run variableStack
         st.EvalPop()
     | Ast.PredicateInstance((pos1, pos2), ((optAst, signatureAst), predInstanceBlockAst)) ->
         st.EvalPush("PredicateInstance")
@@ -1819,7 +1818,7 @@ let rec eval (st: SymbolTable) ast =
             | Some argInference ->
                 let argInferenceResult = argInference.Represent()
                 match argInferenceResult with
-                | FplGrammarCommons.literalTrue -> ()
+                | FplPrimitives.literalTrue -> ()
                 | _ -> value.FplId <- literalFalse // todo all other arguments that are either undetermined or false should issue an error
             | _ -> () // todo argumentinference not found
         )
@@ -1866,13 +1865,13 @@ let rec eval (st: SymbolTable) ast =
 
 
         match byModifierOption, dollarDigitListAsts, refArgumentIdentifierAst with
-        | Some FplGrammarCommons.literalByAx, Some _, _ -> 
+        | Some FplPrimitives.literalByAx, Some _, _ -> 
             // byAx justification cannot be used together with a proof or corollary reference
             emitPR010Diagnostics literalByAx literalAxL pos1 pos2 
-        | Some FplGrammarCommons.literalByAx, None, Some _ -> 
+        | Some FplPrimitives.literalByAx, None, Some _ -> 
             // byAx justification cannot be used together with a proof argument reference 
             emitPR011Diagnostics literalByAx literalAxL pos1 pos2 
-        | Some FplGrammarCommons.literalByAx, None, None -> 
+        | Some FplPrimitives.literalByAx, None, None -> 
             let fvJi = new FplJustificationItemByAx((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
@@ -1880,13 +1879,13 @@ let rec eval (st: SymbolTable) ast =
             let candidates = findCandidatesByName st fvJi.FplId false false
             checkDiagnostics fvJi candidates
             variableStack.PopEvalStack()
-        | Some FplGrammarCommons.literalByInf, Some _, _ -> 
+        | Some FplPrimitives.literalByInf, Some _, _ -> 
             // byInf justification cannot be used together with a proof reference
             emitPR010Diagnostics literalByInf "rule of inference" pos1 pos2 
-        | Some FplGrammarCommons.literalByInf, None, Some _ -> 
+        | Some FplPrimitives.literalByInf, None, Some _ -> 
             // byInf justification cannot be used together with a proof argument reference 
             emitPR011Diagnostics literalByInf "rule of inference" pos1 pos2 
-        | Some FplGrammarCommons.literalByInf, None, None -> 
+        | Some FplPrimitives.literalByInf, None, None -> 
             let fvJi = new FplJustificationItemByAx((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
@@ -1894,13 +1893,13 @@ let rec eval (st: SymbolTable) ast =
             let candidates = findCandidatesByName st fvJi.FplId false false
             checkDiagnostics fvJi candidates
             variableStack.PopEvalStack()
-        | Some FplGrammarCommons.literalByDef, Some _, _ -> 
+        | Some FplPrimitives.literalByDef, Some _, _ -> 
             // byDef justification cannot be used together with a proof reference
             emitPR010Diagnostics literalByDef literalDefL pos1 pos2 
-        | Some FplGrammarCommons.literalByDef, None, Some _ -> 
+        | Some FplPrimitives.literalByDef, None, Some _ -> 
             // byDef justification cannot be used together with a proof argument reference 
             emitPR011Diagnostics literalByDef literalDefL pos1 pos2 
-        | Some FplGrammarCommons.literalByDef, None, None -> 
+        | Some FplPrimitives.literalByDef, None, None -> 
             let fvJi = new FplJustificationItemByDef((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
@@ -1908,7 +1907,7 @@ let rec eval (st: SymbolTable) ast =
             let candidates = findCandidatesByName st fvJi.FplId true false
             checkDiagnostics fvJi candidates
             variableStack.PopEvalStack()
-        | Some FplGrammarCommons.literalByCor, Some _, _ -> 
+        | Some FplPrimitives.literalByCor, Some _, _ -> 
             let fvJi = new FplJustificationItemByCor((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
@@ -1917,7 +1916,7 @@ let rec eval (st: SymbolTable) ast =
             // check, if indeed the predicateId points to a corollary, if not issue diagnostics
             checkDiagnostics fvJi candidates
             variableStack.PopEvalStack()
-        | Some FplGrammarCommons.literalByCor, None, _ -> 
+        | Some FplPrimitives.literalByCor, None, _ -> 
             // byCor justification a reference to a corollary
             emitPR012Diagnostics pos1 pos2 
         | Some _, _, _ -> () // does not occur, because the parser byModifier choices between only two keywords literalByAx or literalByDef

@@ -1,7 +1,7 @@
 namespace FplParser.Tests
 
 open FParsec
-open FplGrammarCommons
+open FplPrimitives
 open FplParser
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
@@ -283,22 +283,22 @@ type TestProofs () =
         printf "%O" actual
         Assert.IsTrue(actual.StartsWith("Success:"))
         
-    [<DataRow(FplGrammarCommons.literalByCor, "$1", ":1")>]
-    [<DataRow(FplGrammarCommons.literalByDef, "$1", ":1")>]
-    [<DataRow(FplGrammarCommons.literalByAx, "$1", ":1")>]
-    [<DataRow(FplGrammarCommons.literalByInf, "$1", ":1")>]
-    [<DataRow(FplGrammarCommons.literalByCor, "$1", "")>]
-    [<DataRow(FplGrammarCommons.literalByDef, "$1", "")>]
-    [<DataRow(FplGrammarCommons.literalByAx, "$1", "")>]
-    [<DataRow(FplGrammarCommons.literalByInf, "$1", "")>]
-    [<DataRow(FplGrammarCommons.literalByCor, "", ":1")>]
-    [<DataRow(FplGrammarCommons.literalByDef, "", ":1")>]
-    [<DataRow(FplGrammarCommons.literalByAx, "", ":1")>]
-    [<DataRow(FplGrammarCommons.literalByInf, "", "")>]
-    [<DataRow(FplGrammarCommons.literalByCor, "", "")>]
-    [<DataRow(FplGrammarCommons.literalByDef, "", "")>]
-    [<DataRow(FplGrammarCommons.literalByAx, "", "")>]
-    [<DataRow(FplGrammarCommons.literalByInf, "", "")>]
+    [<DataRow(FplPrimitives.literalByCor, "$1", ":1")>]
+    [<DataRow(FplPrimitives.literalByDef, "$1", ":1")>]
+    [<DataRow(FplPrimitives.literalByAx, "$1", ":1")>]
+    [<DataRow(FplPrimitives.literalByInf, "$1", ":1")>]
+    [<DataRow(FplPrimitives.literalByCor, "$1", "")>]
+    [<DataRow(FplPrimitives.literalByDef, "$1", "")>]
+    [<DataRow(FplPrimitives.literalByAx, "$1", "")>]
+    [<DataRow(FplPrimitives.literalByInf, "$1", "")>]
+    [<DataRow(FplPrimitives.literalByCor, "", ":1")>]
+    [<DataRow(FplPrimitives.literalByDef, "", ":1")>]
+    [<DataRow(FplPrimitives.literalByAx, "", ":1")>]
+    [<DataRow(FplPrimitives.literalByInf, "", "")>]
+    [<DataRow(FplPrimitives.literalByCor, "", "")>]
+    [<DataRow(FplPrimitives.literalByDef, "", "")>]
+    [<DataRow(FplPrimitives.literalByAx, "", "")>]
+    [<DataRow(FplPrimitives.literalByInf, "", "")>]
     [<TestMethod>]
     member this.TestJustificationIdentifier (keyword:string, corRef:string, argRef:string) =
         let result = run (justificationReference .>> eof) $"{keyword} A{corRef}{argRef}"

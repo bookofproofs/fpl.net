@@ -4,7 +4,7 @@ module FplInterpreterDiagnosticsEmitter
 open System.Collections.Generic
 open System.Text.RegularExpressions
 open FParsec
-open FplGrammarCommons
+open FplPrimitives
 open ErrDiagnostics
 open FplInterpreterTypes
 open FplInterpreterDiagnosticsEmitterPre
@@ -636,9 +636,9 @@ let emitLG000orLG001Diagnostics (fplValue: FplValue) typeOfPredicate =
             emitLG000Diagnostics argument
         else
             match repr with
-            | FplGrammarCommons.literalTrue
-            | FplGrammarCommons.literalFalse -> ()
-            | FplGrammarCommons.literalUndetermined -> emitLG000Diagnostics argument 
+            | FplPrimitives.literalTrue
+            | FplPrimitives.literalFalse -> ()
+            | FplPrimitives.literalUndetermined -> emitLG000Diagnostics argument 
             | _ -> emitLG001Diagnostics argument.StartPos argument.EndPos argument
     )
 

@@ -2,7 +2,7 @@
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
-open FplGrammarCommons
+open FplPrimitives
 open FplInterpreterTypes
 open CommonTestHelpers
 
