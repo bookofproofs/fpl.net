@@ -1451,8 +1451,8 @@ let rec eval (st: SymbolTable) ast =
         variableStack.InSignatureEvaluation <- false
     | Ast.Assignment((pos1, pos2), (predicateWithQualificationAst, predicateAst)) ->
         st.EvalPush("Assignment")
-        let fv = variableStack.PeekEvalStack()
-        let fvNew = new FplAssignment((pos1, pos2), fv.Parent.Value)
+        let parent = variableStack.PeekEvalStack()
+        let fvNew = new FplAssignment((pos1, pos2), parent)
         variableStack.PushEvalStack(fvNew) // add assignment
         let assigneeReference = new FplReference((pos1,pos2), fvNew)
         variableStack.PushEvalStack(assigneeReference) // add assignee

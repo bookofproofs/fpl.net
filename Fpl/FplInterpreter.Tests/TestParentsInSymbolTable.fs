@@ -32,6 +32,7 @@ type TestParentsInSymbolTable() =
             let parent = node.Parent.Value 
             match varVal, node, parent with
             | "00", :? FplTheory, :? FplRoot -> ()
+            | "01", :? FplAssignment, :? FplPredicate -> ()
             | _ -> failwith($"unmatched test / node / parent combination {varVal} {node} {parent}")
         | None -> 
             Assert.IsTrue(false)
