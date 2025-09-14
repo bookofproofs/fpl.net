@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestFplValueScopeTypeSignature() =
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("inf1")>]
     [<DataRow("inf2")>]
     [<DataRow("axi1")>]
@@ -50,7 +50,7 @@ type TestFplValueScopeTypeSignature() =
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeBlocksTypeSignature", theory.Type(SignatureType.Type))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeBlocksTypeSignature", theory.Type(SignatureType.Type))
             | "inf1" -> Assert.AreEqual<string>("pred()", inf1.Type(SignatureType.Type))
             | "inf2" -> Assert.AreEqual<string>("pred()", inf2.Type(SignatureType.Type))
             | "axi1" -> Assert.AreEqual<string>("pred()", axi1.Type(SignatureType.Type))
@@ -89,7 +89,7 @@ type TestFplValueScopeTypeSignature() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -102,7 +102,7 @@ type TestFplValueScopeTypeSignature() =
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeConstructorsTypeSignature", theory.Type(SignatureType.Type))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeConstructorsTypeSignature", theory.Type(SignatureType.Type))
             | "block" -> Assert.AreEqual<string>("TestId", block.Type(SignatureType.Type))
             | "t1" -> Assert.AreEqual<string>("TestId()", t1.Type(SignatureType.Type))
             | "t2" -> Assert.AreEqual<string>("TestId(obj)", t2.Type(SignatureType.Type))
@@ -113,7 +113,7 @@ type TestFplValueScopeTypeSignature() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("thm1")>]
     [<DataRow("proofThm1")>]
     [<DataRow("lem1")>]
@@ -143,7 +143,7 @@ type TestFplValueScopeTypeSignature() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
-                | PrimTheory -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesTypeSignature", theory.Type(SignatureType.Type))
+                | PrimTheoryL -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesTypeSignature", theory.Type(SignatureType.Type))
                 | "thm1" -> Assert.AreEqual<string>("pred()", thm1.Type(SignatureType.Type))
                 | "proofThm1" -> Assert.AreEqual<string>("pred$1", proofThm1.Type(SignatureType.Type))
                 | "lem1" -> Assert.AreEqual<string>("pred()", lem1.Type(SignatureType.Type))
@@ -169,7 +169,7 @@ type TestFplValueScopeTypeSignature() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -193,7 +193,7 @@ type TestFplValueScopeTypeSignature() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopePropertiesTypeSignature", theory.Type(SignatureType.Type))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopePropertiesTypeSignature", theory.Type(SignatureType.Type))
             | "block" -> Assert.AreEqual<string>("pred()", block.Type(SignatureType.Type))
             | "t1" -> Assert.AreEqual<string>("pred()", t1.Type(SignatureType.Type))
             | "t2" -> Assert.AreEqual<string>("pred()", t2.Type(SignatureType.Type))
@@ -215,7 +215,7 @@ type TestFplValueScopeTypeSignature() =
 
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -251,7 +251,7 @@ type TestFplValueScopeTypeSignature() =
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeVariablesInBlockTypeSignature", theory.Type(SignatureType.Type))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInBlockTypeSignature", theory.Type(SignatureType.Type))
             | "block" -> Assert.AreEqual<string>("pred()", block.Type(SignatureType.Type)); 
             | "x" -> Assert.AreEqual<string>("pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Type(SignatureType.Type))
             | "y" -> Assert.AreEqual<string>("pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Type(SignatureType.Type))
@@ -285,7 +285,7 @@ type TestFplValueScopeTypeSignature() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -320,7 +320,7 @@ type TestFplValueScopeTypeSignature() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeVariablesInBlockVariadicTypeSignature", theory.Type(SignatureType.Type))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInBlockVariadicTypeSignature", theory.Type(SignatureType.Type))
             | "block" -> Assert.AreEqual<string>("pred()", block.Type(SignatureType.Type)); 
             | "x" -> Assert.AreEqual<string>("+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)", x.Type(SignatureType.Type))
             | "y" -> Assert.AreEqual<string>("+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)", y.Type(SignatureType.Type))
@@ -354,7 +354,7 @@ type TestFplValueScopeTypeSignature() =
 
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -389,7 +389,7 @@ type TestFplValueScopeTypeSignature() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeVariablesInSignatureTypeSignature", theory.Type(SignatureType.Type))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInSignatureTypeSignature", theory.Type(SignatureType.Type))
             | "block" -> Assert.AreEqual<string>("pred(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj))", block.Type(SignatureType.Type))
             | "x" -> Assert.AreEqual<string>("pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Type(SignatureType.Type))
             | "y" -> Assert.AreEqual<string>("pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Type(SignatureType.Type))
@@ -421,7 +421,7 @@ type TestFplValueScopeTypeSignature() =
         | None -> Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -456,7 +456,7 @@ type TestFplValueScopeTypeSignature() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Type))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicTypeSignature", theory.Type(SignatureType.Type))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicTypeSignature", theory.Type(SignatureType.Type))
             | "block" -> Assert.AreEqual<string>("pred(+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj), +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj))", block.Type(SignatureType.Type)); 
             | "x" -> Assert.AreEqual<string>("+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)", x.Type(SignatureType.Type))
             | "y" -> Assert.AreEqual<string>("+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)", y.Type(SignatureType.Type))

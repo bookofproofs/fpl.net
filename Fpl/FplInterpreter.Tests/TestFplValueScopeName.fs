@@ -10,7 +10,7 @@ open CommonTestHelpers
 type TestFplValueScopeName() =
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("inf1")>]
     [<DataRow("inf2")>]
     [<DataRow("axi1")>]
@@ -51,7 +51,7 @@ type TestFplValueScopeName() =
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeBlocksName", theory.Type(SignatureType.Mixed))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeBlocksName", theory.Type(SignatureType.Mixed))
             | "inf1" -> Assert.AreEqual<string>("SomeInference1()", inf1.Type(SignatureType.Mixed))
             | "inf2" -> Assert.AreEqual<string>("SomeInference2()", inf2.Type(SignatureType.Mixed))
             | "axi1" -> Assert.AreEqual<string>("SomeAxiom1()", axi1.Type(SignatureType.Mixed))
@@ -109,7 +109,7 @@ type TestFplValueScopeName() =
 
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -122,7 +122,7 @@ type TestFplValueScopeName() =
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeConstructorsName", theory.Type(SignatureType.Mixed))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeConstructorsName", theory.Type(SignatureType.Mixed))
             | "block" -> Assert.AreEqual<string>("TestId", block.Type(SignatureType.Mixed))
             | "t1" -> Assert.AreEqual<string>("TestId()", t1.Type(SignatureType.Mixed))
             | "t2" -> Assert.AreEqual<string>("TestId(obj)", t2.Type(SignatureType.Mixed))
@@ -133,7 +133,7 @@ type TestFplValueScopeName() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("thm1")>]
     [<DataRow("proofThm1")>]
     [<DataRow("lem1")>]
@@ -163,7 +163,7 @@ type TestFplValueScopeName() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
-                | PrimTheory -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesName", theory.Type(SignatureType.Mixed))
+                | PrimTheoryL -> Assert.AreEqual<string>("TestScopeProofsAndCorollariesName", theory.Type(SignatureType.Mixed))
                 | "thm1" -> Assert.AreEqual<string>("TestTheorem1()", thm1.Type(SignatureType.Mixed))
                 | "proofThm1" -> Assert.AreEqual<string>("TestTheorem1$1", proofThm1.Type(SignatureType.Mixed))
                 | "lem1" -> Assert.AreEqual<string>("TestLemma1()", lem1.Type(SignatureType.Mixed))
@@ -190,7 +190,7 @@ type TestFplValueScopeName() =
 
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -214,7 +214,7 @@ type TestFplValueScopeName() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopePropertiesName", theory.Type(SignatureType.Mixed))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopePropertiesName", theory.Type(SignatureType.Mixed))
             | "block" -> Assert.AreEqual<string>("TestId()", block.Type(SignatureType.Mixed))
             | "t1" -> Assert.AreEqual<string>("T1()", t1.Type(SignatureType.Mixed))
             | "t2" -> Assert.AreEqual<string>("T2()", t2.Type(SignatureType.Mixed))
@@ -235,7 +235,7 @@ type TestFplValueScopeName() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -271,7 +271,7 @@ type TestFplValueScopeName() =
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeVariablesInBlockName", theory.Type(SignatureType.Mixed))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInBlockName", theory.Type(SignatureType.Mixed))
             | "block" -> Assert.AreEqual<string>("pred()", block.Type(SignatureType.Type)); 
             | "x" -> Assert.AreEqual<string>("x(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Type(SignatureType.Mixed))
             | "y" -> Assert.AreEqual<string>("y(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Type(SignatureType.Mixed))
@@ -306,7 +306,7 @@ type TestFplValueScopeName() =
 
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -341,7 +341,7 @@ type TestFplValueScopeName() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeVariablesInBlockVariadicName", theory.Type(SignatureType.Mixed))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInBlockVariadicName", theory.Type(SignatureType.Mixed))
             | "block" -> Assert.AreEqual<string>("TestPredicate()", block.Type(SignatureType.Mixed)); 
             | "x" -> Assert.AreEqual<string>("x(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)", x.Type(SignatureType.Mixed))
             | "y" -> Assert.AreEqual<string>("y(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)", y.Type(SignatureType.Mixed))
@@ -375,7 +375,7 @@ type TestFplValueScopeName() =
 
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -410,7 +410,7 @@ type TestFplValueScopeName() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeVariablesInSignatureName", theory.Type(SignatureType.Mixed))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInSignatureName", theory.Type(SignatureType.Mixed))
             | "block" -> Assert.AreEqual<string>("TestPredicate(pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj), pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj))", block.Type(SignatureType.Mixed)); 
             | "x" -> Assert.AreEqual<string>("x(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Type(SignatureType.Mixed))
             | "y" -> Assert.AreEqual<string>("y(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Type(SignatureType.Mixed))
@@ -443,7 +443,7 @@ type TestFplValueScopeName() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -478,7 +478,7 @@ type TestFplValueScopeName() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>("", r.Type(SignatureType.Mixed))
-            | PrimTheory -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicName", theory.Type(SignatureType.Mixed))
+            | PrimTheoryL -> Assert.AreEqual<string>("TestScopeVariablesInSignatureVariadicName", theory.Type(SignatureType.Mixed))
             | "block" -> Assert.AreEqual<string>("TestPredicate(+pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj), +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj))", block.Type(SignatureType.Mixed)); 
             | "x" -> Assert.AreEqual<string>("x(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)", x.Type(SignatureType.Mixed))
             | "y" -> Assert.AreEqual<string>("y(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)", y.Type(SignatureType.Mixed))

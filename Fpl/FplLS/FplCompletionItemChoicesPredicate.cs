@@ -72,7 +72,7 @@ namespace FplLS
         {
             ci.InsertText = $"( x = y ) ";
             ci.Label = TokenPrefix + ci.InsertText + "...";
-            ci.Detail = "equality";
+            ci.Detail = PrimEqualityL;
             ci.SortText = "(";
             ci.Kind = CompletionItemKind.Operator;
         }

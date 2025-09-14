@@ -570,7 +570,7 @@ let rec eval (st: SymbolTable) ast =
         let fvNew = new FplNegation((pos1, pos2), fv.Parent.Value)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst
-        emitLG000orLG001Diagnostics fvNew "negation"
+        emitLG000orLG001Diagnostics fvNew PrimNegation
         st.EvalPop()
     | Ast.InEntity((pos1, pos2), ast1) ->
         st.EvalPush("InEntity")
@@ -791,7 +791,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        emitLG000orLG001Diagnostics fvNew "conjunction"
+        emitLG000orLG001Diagnostics fvNew PrimConjunction
         st.EvalPop()
     | Ast.Or((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Or")
@@ -800,7 +800,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        emitLG000orLG001Diagnostics fvNew "disjunction"
+        emitLG000orLG001Diagnostics fvNew PrimDisjunction
         st.EvalPop()
     | Ast.Xor((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Xor")
@@ -1057,7 +1057,7 @@ let rec eval (st: SymbolTable) ast =
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
-        emitLG000orLG001Diagnostics fvNew "equivalence"
+        emitLG000orLG001Diagnostics fvNew PrimEquivalence
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
         st.EvalPush("IsOperator")
@@ -1181,7 +1181,7 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
         emitVAR05diagnostics fv
         variableStack.PopEvalStack() // remove all quantor
-        emitLG000orLG001Diagnostics fv "all quantor"
+        emitLG000orLG001Diagnostics fv PrimQuantorAll
         st.EvalPop()
     | Ast.Exists((pos1, pos2), (namedVarDeclAstList, predicateAst)) ->
         st.EvalPush("Exists")
@@ -1197,7 +1197,7 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
         emitVAR05diagnostics fv
         variableStack.PopEvalStack() // remove exists quantor
-        emitLG000orLG001Diagnostics fv "exists quantor"
+        emitLG000orLG001Diagnostics fv PrimQuantorExists
         st.EvalPop()
     // | ExistsN of Positions * ((Ast * (Ast * Ast option)) * Ast)
     | Ast.ExistsN((pos1, pos2), ((dollarDigitsAst, namedVarDeclAst), predicateAst)) ->
@@ -1210,7 +1210,7 @@ let rec eval (st: SymbolTable) ast =
         eval st predicateAst
         emitVAR05diagnostics fv
         variableStack.PopEvalStack() // remove exists n quantor
-        emitLG000orLG001Diagnostics fv "exists n times quantor"
+        emitLG000orLG001Diagnostics fv PrimQuantorExistsN
         st.EvalPop()
     // | FunctionalTermSignature of Positions * (Ast * Ast)
     | Ast.FunctionalTermSignature((pos1, pos2), ((optAst, signatureWithUserDefinedStringAst), mappingAst)) -> 
@@ -1879,10 +1879,10 @@ let rec eval (st: SymbolTable) ast =
             variableStack.PopEvalStack()
         | Some FplPrimitives.literalByInf, Some _, _ -> 
             // byInf justification cannot be used together with a proof reference
-            emitPR010Diagnostics literalByInf "rule of inference" pos1 pos2 
+            emitPR010Diagnostics literalByInf PrimRuleOfInference pos1 pos2 
         | Some FplPrimitives.literalByInf, None, Some _ -> 
             // byInf justification cannot be used together with a proof argument reference 
-            emitPR011Diagnostics literalByInf "rule of inference" pos1 pos2 
+            emitPR011Diagnostics literalByInf PrimRuleOfInference pos1 pos2 
         | Some FplPrimitives.literalByInf, None, None -> 
             let fvJi = new FplJustificationItemByAx((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
             variableStack.PushEvalStack(fvJi)

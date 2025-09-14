@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestFplValueScopeFplRepresentation() =
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("inf1")>]
     [<DataRow("inf2")>]
     [<DataRow("axi1")>]
@@ -50,7 +50,7 @@ type TestFplValueScopeFplRepresentation() =
         | Some (r:FplRoot,theory:FplValue,inf1:FplValue,inf2:FplValue,axi1:FplValue,axi2:FplValue,pst1:FplValue,pst2:FplValue,thm1:FplValue,thm2:FplValue,pro1:FplValue,pro2:FplValue,lem1:FplValue,lem2:FplValue,cor1:FplValue,cor2:FplValue,con1:FplValue,con2:FplValue,cla1:FplValue,cla2:FplValue,pre1:FplValue,pre2:FplValue,fun1:FplValue,fun2:FplValue,fun3:FplValue,fun4:FplValue,fun5:FplValue,fun6:FplValue,fun7:FplValue,fun8:FplValue,fun9:FplValue,prf1:FplValue,prf2:FplValue,loc1:FplValue,loc2:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
-            | PrimTheory -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(literalUndef, theory.Represent())
             | "inf1" -> Assert.AreEqual<string>(literalUndetermined, inf1.Represent())
             | "inf2" -> Assert.AreEqual<string>(literalUndetermined, inf2.Represent())
             | "axi1" -> Assert.AreEqual<string>(literalTrue, axi1.Represent())
@@ -90,7 +90,7 @@ type TestFplValueScopeFplRepresentation() =
 
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -103,7 +103,7 @@ type TestFplValueScopeFplRepresentation() =
         | Some (r,theory,block:FplValue,t1:FplValue,t2:FplValue,t3:FplValue,t4:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
-            | PrimTheory -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(literalUndef, theory.Represent())
             | "block" -> Assert.AreEqual<string>("dec cl TestId", block.Represent())
             | "t1" -> Assert.AreEqual<string>("TestId()", t1.Represent())
             | "t2" -> Assert.AreEqual<string>("TestId(obj)", t2.Represent())
@@ -114,7 +114,7 @@ type TestFplValueScopeFplRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("thm1")>]
     [<DataRow("proofThm1")>]
     [<DataRow("lem1")>]
@@ -144,7 +144,7 @@ type TestFplValueScopeFplRepresentation() =
                                 axi1,corAxi1) -> 
                 match var with
                 | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
-                | PrimTheory -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+                | PrimTheoryL -> Assert.AreEqual<string>(literalUndef, theory.Represent())
                 | "thm1" -> Assert.AreEqual<string>(literalTrue, thm1.Represent())
                 | "proofThm1" -> Assert.AreEqual<string>(literalTrue, proofThm1.Represent())
                 | "lem1" -> Assert.AreEqual<string>(literalTrue, lem1.Represent())
@@ -171,7 +171,7 @@ type TestFplValueScopeFplRepresentation() =
 
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("t1")>]
     [<DataRow("t2")>]
@@ -195,7 +195,7 @@ type TestFplValueScopeFplRepresentation() =
             t13:FplValue,t14:FplValue) -> 
             match var with 
             | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
-            | PrimTheory -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(literalUndef, theory.Represent())
             | "block" -> Assert.AreEqual<string>(literalUndetermined, block.Represent())
             | "t1" -> Assert.AreEqual<string>(literalTrue, t1.Represent())
             | "t2" -> Assert.AreEqual<string>(literalTrue, t2.Represent())
@@ -216,7 +216,7 @@ type TestFplValueScopeFplRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -252,7 +252,7 @@ type TestFplValueScopeFplRepresentation() =
         | Some (r,theory,block,x,y,s,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
-            | PrimTheory -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(literalUndef, theory.Represent())
             | "block" -> Assert.AreEqual<string>(literalTrue, block.Represent()); 
             | "x" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Represent())
             | "y" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Represent())
@@ -286,7 +286,7 @@ type TestFplValueScopeFplRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -321,7 +321,7 @@ type TestFplValueScopeFplRepresentation() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
-            | PrimTheory -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(literalUndef, theory.Represent())
             | "block" -> Assert.AreEqual<string>(literalTrue, block.Represent()); 
             | "x" -> Assert.AreEqual<string>("dec +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)[]", x.Represent())
             | "y" -> Assert.AreEqual<string>("dec +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)[]", y.Represent())
@@ -355,7 +355,7 @@ type TestFplValueScopeFplRepresentation() =
 
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -390,7 +390,7 @@ type TestFplValueScopeFplRepresentation() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
-            | PrimTheory -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(literalUndef, theory.Represent())
             | "block" -> Assert.AreEqual<string>(literalTrue, block.Represent()); 
             | "x" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", x.Represent())
             | "y" -> Assert.AreEqual<string>("dec pred(func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj, func(obj, obj, obj) -> obj)", y.Represent())
@@ -423,7 +423,7 @@ type TestFplValueScopeFplRepresentation() =
             Assert.IsTrue(false)
 
     [<DataRow("r")>]
-    [<DataRow(PrimTheory)>]
+    [<DataRow(PrimTheoryL)>]
     [<DataRow("block")>]
     [<DataRow("x")>]
     [<DataRow("y")>]
@@ -458,7 +458,7 @@ type TestFplValueScopeFplRepresentation() =
         | Some (r,theory,block,x,y,xw,xu,xv,yw,yu,yv,xwa,xwb,xwc,xua,xub,xuc,xva,xvb,xvc,ywa,ywb,ywc,yua,yub,yuc,yva,yvb,yvc) ->
             match var with
             | "r" -> Assert.AreEqual<string>(literalUndef, r.Represent())
-            | PrimTheory -> Assert.AreEqual<string>(literalUndef, theory.Represent())
+            | PrimTheoryL -> Assert.AreEqual<string>(literalUndef, theory.Represent())
             | "block" -> Assert.AreEqual<string>(literalTrue, block.Represent()); 
             | "x" -> Assert.AreEqual<string>("dec +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)[]", x.Represent())
             | "y" -> Assert.AreEqual<string>("dec +pred(func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj, func(*obj, *obj, *obj) -> obj)[]", y.Represent())

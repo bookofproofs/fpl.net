@@ -1,11 +1,12 @@
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using static FplPrimitives;
 
 namespace FplLSTests
 {
     [TestClass]
     public class TestGetCompletionItemVariable
     {
-        [DataRow("variable")]
+        [DataRow(PrimVariableL)]
         [DataRow("variable (got keyword)")]
         [DataRow("variable (got template)")]
         [TestMethod]
@@ -16,7 +17,7 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, actual.Count);
         }
 
-        [DataRow("variable")]
+        [DataRow(PrimVariableL)]
         [DataRow("variable (got keyword)")]
         [DataRow("variable (got template)")]
         [TestMethod]
@@ -32,9 +33,9 @@ namespace FplLSTests
             Assert.AreEqual<int>(1, count);
         }
 
-        [DataRow("variable", CompletionItemKind.Reference, "variable")]
-        [DataRow("variable (got keyword)", CompletionItemKind.Reference, "variable")]
-        [DataRow("variable (got template)", CompletionItemKind.Reference, "variable")]
+        [DataRow(PrimVariableL, CompletionItemKind.Reference, PrimVariableL)]
+        [DataRow("variable (got keyword)", CompletionItemKind.Reference, PrimVariableL)]
+        [DataRow("variable (got template)", CompletionItemKind.Reference, PrimVariableL)]
         [TestMethod]
         public void TestAddChoicesSortText(string choice, CompletionItemKind kind, string expected)
         {
@@ -46,7 +47,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("variable")]
+        [DataRow(PrimVariableL)]
         [DataRow("variable (got keyword)")]
         [DataRow("variable (got template)")]
         [TestMethod]
@@ -63,7 +64,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("variable", "someVar")]
+        [DataRow(PrimVariableL, "someVar")]
         [DataRow("variable (got keyword)", "someVar")]
         [DataRow("variable (got template)", "someVar")]
         [TestMethod]
@@ -77,7 +78,7 @@ namespace FplLSTests
             }
         }
 
-        [DataRow("variable")]
+        [DataRow(PrimVariableL)]
         [DataRow("variable (got keyword)")]
         [DataRow("variable (got template)")]
         [TestMethod]
@@ -87,11 +88,11 @@ namespace FplLSTests
             var actual = new FplCompletionItemChoicesVariable().GetChoices(detailCi);
             foreach (var item in actual)
             {
-                Assert.IsTrue(item.Detail.Contains("variable"));
+                Assert.IsTrue(item.Detail.Contains(PrimVariableL));
             }
         }
 
-        [DataRow("variable", "someVar")]
+        [DataRow(PrimVariableL, "someVar")]
         [DataRow("variable (got keyword)", "someVar")]
         [DataRow("variable (got template)", "someVar")]
         [TestMethod]

@@ -9,7 +9,7 @@ open CommonTestHelpers
 type TestParentsInSymbolTable() =
 
 
-    [<DataRow("00", """;""", PrimTheory)>]
+    [<DataRow("00", """;""", PrimTheoryL)>]
     [<DataRow("01", """def pred T() {dec ~x:pred x:=false; true};""", PrimAssignment)>]
     [<DataRow("02", """T$1 { 100. ExistsByExample, 1 |- false };""", PrimAssignment)>]
     [<TestMethod>]

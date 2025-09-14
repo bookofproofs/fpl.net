@@ -595,11 +595,11 @@ type FplValue(positions: Positions, parent: FplValue option) =
                 let starPosWithoutFileName =
                     $"(Ln: {fv.StartPos.Line}, Col: {fv.StartPos.Column})"
 
-                if fv.ShortName = "th" then
+                if fv.ShortName = PrimTheory then
                     getFullName fv.Parent.Value false + fvType + starPosWithoutFileName
                 else
                     getFullName fv.Parent.Value false + starPosWithoutFileName
-            else if fv.ShortName = "th" then
+            else if fv.ShortName = PrimTheory then
                 getFullName fv.Parent.Value false + fvType
             else
                 getFullName fv.Parent.Value false
@@ -622,16 +622,16 @@ type FplValue(positions: Positions, parent: FplValue option) =
             | PrimJustification -> emitPR004Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
             | _ -> 
                 match this.ShortName with
-                | "lang" -> // language
+                | PrimLanguage -> // language
                     let oldDiagnosticsStopped = ad.DiagnosticsStopped
                     ad.DiagnosticsStopped <- false
                     emitID014Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
                     ad.DiagnosticsStopped <- oldDiagnosticsStopped
                 | PrimArg -> 
                     emitPR003Diagnostics (this.Type(SignatureType.Mixed)) conflict.QualifiedStartPos this.StartPos this.EndPos 
-                | "var" 
-                | "+var" 
-                | "*var" -> // variable
+                | PrimVariable 
+                | PrimVariableMany 
+                | PrimVariableMany1 -> // variable
                     ()
                 | _ ->
                     emitID001Diagnostics (this.Type(SignatureType.Type)) conflict.QualifiedStartPos this.StartPos this.EndPos 
@@ -669,7 +669,7 @@ type FplValue(positions: Positions, parent: FplValue option) =
             if parent.Scope.ContainsKey(name) then
                 let foundConflict = parent.Scope[name]
                 ScopeSearchResult.Found foundConflict
-            else if parent.ShortName = "th" then
+            else if parent.ShortName = PrimTheory then
                 conflictInSiblingTheory parent
             else
                 ScopeSearchResult.NotFound
@@ -858,8 +858,8 @@ type FplTheory(positions: Positions, parent: FplValue, filePath: string, runOrde
     do
         this.FilePath <- Some filePath
 
-    override this.Name = PrimTheory
-    override this.ShortName = "th"
+    override this.Name = PrimTheoryL
+    override this.ShortName = PrimTheory
 
     override this.Clone () =
         let ret = new FplTheory((this.StartPos, this.EndPos), this.Parent.Value, this.FilePath.Value, _runOrder)
@@ -960,7 +960,7 @@ type FplGenericPredicate(positions: Positions, parent: FplValue) as this =
         match nextOpt with 
         | Some next when next.Name = PrimJustificationL -> 
             this.TryAddToParentsScope()
-        | Some next when next.Name = "localization" -> 
+        | Some next when next.Name = literalLocL -> 
             next.FplId <- this.FplId
             next.TypeId <- this.TypeId
             next.EndPos <- this.EndPos
@@ -1248,8 +1248,8 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
     interface ICanBeCalledRecusively with
         member _.CallCounter = _callCounter
 
-    override this.Name = $"{literalPredL} {literalDefL}"
-    override this.ShortName = $"{literalDef} {literalPred}"
+    override this.Name = PrimPredicateL
+    override this.ShortName = PrimPredicate
 
     override this.Clone () =
         let ret = new FplPredicate((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
@@ -1279,8 +1279,8 @@ type FplPredicate(positions: Positions, parent: FplValue, runOrder) =
 type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
 
-    override this.Name = $"{literalPredL} property"
-    override this.ShortName = $"m{literalPred}"
+    override this.Name = PrimMandatoryPredicateL
+    override this.ShortName = PrimMandatoryPredicate
 
     override this.Clone () =
         let ret = new FplMandatoryPredicate((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1299,8 +1299,8 @@ type FplMandatoryPredicate(positions: Positions, parent: FplValue) =
 type FplOptionalPredicate(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicateWithExpression(positions, parent)
 
-    override this.Name = $"{literalOptL} {literalPredL} property"
-    override this.ShortName = $"o{literalPred}"
+    override this.Name = PrimOptionalPredicateL
+    override this.ShortName = PrimOptionalPredicate
 
     override this.Clone () =
         let ret = new FplOptionalPredicate((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1872,8 +1872,8 @@ type FplLocalization(positions: Positions, parent: FplValue) =
 type FplTranslation(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
-    override this.Name = "translation"
-    override this.ShortName = "trsl"
+    override this.Name = PrimTranslationL
+    override this.ShortName = PrimTranslation
 
     override this.Clone () =
         let ret = new FplTranslation((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1902,8 +1902,8 @@ type FplTranslation(positions: Positions, parent: FplValue) =
 type FplLanguage(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
-    override this.Name = "language"
-    override this.ShortName = "lang"
+    override this.Name = PrimLanguageL
+    override this.ShortName = PrimLanguage
 
     override this.Clone () =
         let ret = new FplLanguage((this.StartPos, this.EndPos), this.Parent.Value)
@@ -1981,7 +1981,7 @@ type FplReference(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
     override this.Name = PrimRefL
-    override this.ShortName = "ref"
+    override this.ShortName = PrimRef
 
     override this.Clone () = this // do not clone references to prevent stack overflow 
 
@@ -2113,7 +2113,7 @@ type FplReference(positions: Positions, parent: FplValue) =
 
     override this.EmbedInSymbolTable nextOpt = 
         match nextOpt with 
-        | Some next when next.Name = "localization" -> 
+        | Some next when next.Name = literalLocL -> 
             next.FplId <- this.FplId
             next.TypeId <- this.TypeId
             next.EndPos <- this.EndPos
@@ -2140,7 +2140,7 @@ type FplConjunction(positions: Positions, parent: FplValue) as this =
     do 
         this.FplId <- literalAnd
 
-    override this.Name = "conjunction"
+    override this.Name = PrimConjunction
     override this.ShortName = literalAnd
 
     override this.Clone () =
@@ -2183,7 +2183,7 @@ type FplDisjunction(positions: Positions, parent: FplValue) as this =
     do 
         this.FplId <- literalOr
 
-    override this.Name = "disjunction"
+    override this.Name = PrimDisjunction
     override this.ShortName = literalOr
 
     override this.Clone () =
@@ -2227,7 +2227,7 @@ type FplExclusiveOr(positions: Positions, parent: FplValue) as this =
     do 
         this.FplId <- literalXor
 
-    override this.Name = "exclusive disjunction"
+    override this.Name = PrimExclusiveOr
     override this.ShortName = literalXor
 
     override this.Clone () =
@@ -2273,7 +2273,7 @@ type FplNegation(positions: Positions, parent: FplValue) as this =
     do 
         this.FplId <- literalNot
 
-    override this.Name = "negation"
+    override this.Name = PrimNegation
     override this.ShortName = literalNot
 
     override this.Clone () =
@@ -2350,7 +2350,7 @@ type FplEquivalence(positions: Positions, parent: FplValue) as this =
     do 
         this.FplId <- literalIif
 
-    override this.Name = "equivalence"
+    override this.Name = PrimEquivalence
     override this.ShortName = literalIif
 
     override this.Clone () =
@@ -2393,8 +2393,8 @@ type FplEquality(positions: Positions, parent: FplValue) as this =
         this.FplId <- $"{literalDel}."
         this.TypeId <- literalPred
 
-    override this.Name = "equality"
-    override this.ShortName = "="
+    override this.Name = PrimEqualityL
+    override this.ShortName = PrimEquality
 
     override this.Clone () =
         let ret = new FplEquality((this.StartPos, this.EndPos), this.Parent.Value)
@@ -2474,7 +2474,7 @@ type FplExtensionObj(positions: Positions, parent: FplValue) as this =
         this.TypeId <- literalObj
 
 
-    override this.Name = $"{literalExtL} {literalObjL}"
+    override this.Name = PrimExtensionObj
     override this.ShortName = literalObj
 
     override this.Clone () =
@@ -2646,8 +2646,8 @@ type FplDecrement(positions: Positions, parent: FplValue) as this =
 type FplMapping(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
-    override this.Name = "mapping"
-    override this.ShortName = "map"
+    override this.Name = PrimMappingL
+    override this.ShortName = PrimMapping
 
     override this.Clone () =
         let ret = new FplMapping((this.StartPos, this.EndPos), this.Parent.Value)
@@ -2830,7 +2830,7 @@ type FplIsOperator(positions: Positions, parent: FplValue) as this =
 type FplGenericQuantor(positions: Positions, parent: FplValue) =
     inherit FplGenericPredicate(positions, parent)
 
-    override this.ShortName = "qtr"
+    override this.ShortName = PrimQuantor
 
     override this.Type signatureType =
         let head = getFplHead this signatureType
@@ -2850,7 +2850,7 @@ type FplGenericQuantor(positions: Positions, parent: FplValue) =
 type FplQuantorAll(positions: Positions, parent: FplValue) =
     inherit FplGenericQuantor(positions, parent)
 
-    override this.Name = "all quantor"
+    override this.Name = PrimQuantorAll
 
     override this.Clone () =
             let ret = new FplQuantorAll((this.StartPos, this.EndPos), this.Parent.Value)
@@ -2862,7 +2862,7 @@ type FplQuantorAll(positions: Positions, parent: FplValue) =
 type FplQuantorExists(positions: Positions, parent: FplValue) =
     inherit FplGenericQuantor(positions, parent)
 
-    override this.Name = "exists quantor"
+    override this.Name = PrimQuantorExists
 
     override this.Clone () =
             let ret = new FplQuantorExists((this.StartPos, this.EndPos), this.Parent.Value)
@@ -2878,7 +2878,7 @@ type FplQuantorExistsN(positions: Positions, parent: FplValue) as this =
         this.Arity <- 1
 
 
-    override this.Name = "exists n times quantor"
+    override this.Name = PrimQuantorExistsN
 
     override this.Clone () =
             let ret = new FplQuantorExistsN((this.StartPos, this.EndPos), this.Parent.Value)
@@ -2892,14 +2892,14 @@ type FplVariable(positions: Positions, parent: FplValue) =
     let mutable _variadicType = String.Empty // "" = variable, "many" = many, "many1" = many1 
     override this.Name = 
         match _variadicType with
-        | "many" -> "zero-or-more variable"
-        | "many1"-> "one-or-more variable"
-        | _ -> "variable"
+        | "many" -> PrimVariableManyL
+        | "many1"-> PrimVariableMany1L
+        | _ -> PrimVariableL
     override this.ShortName = 
         match _variadicType with
-        | "many" -> "*var"
-        | "many1"-> "+var"
-        | _ -> "var"
+        | "many" -> PrimVariableMany
+        | "many1"-> PrimVariableMany1
+        | _ -> PrimVariable
 
     member this.SetToMany() = 
         if _variadicType = String.Empty then
@@ -2987,7 +2987,7 @@ type FplVariable(positions: Positions, parent: FplValue) =
             this.TryAddToParentsScope()
         | Some next when next.IsVariable() ->
             this.TryAddToParentsScope()
-        | Some next when next.Name = "mapping" || next.Name = "quantor" ->  
+        | Some next when next.Name = PrimMappingL || next.Name = "quantor" ->  
             this.TryAddToParentsScope()
         | _ ->
             this.TryAddToParentsArgList()
@@ -3068,8 +3068,8 @@ type FplFunctionalTerm(positions: Positions, parent: FplValue, runOrder) =
 type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplGenericFunctionalTerm(positions, parent)
 
-    override this.Name = "functional term property"
-    override this.ShortName = $"m{literalFunc}"
+    override this.Name = PrimMandatoryFunctionalTermL
+    override this.ShortName = PrimMandatoryFunctionalTerm
 
     override this.Clone () =
         let ret = new FplMandatoryFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
@@ -3089,8 +3089,8 @@ type FplMandatoryFunctionalTerm(positions: Positions, parent: FplValue) =
 type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
     inherit FplGenericFunctionalTerm(positions, parent)
 
-    override this.Name = $"{literalOptL} functional term property"
-    override this.ShortName = $"o{literalFunc}"
+    override this.Name = PrimOptionalFunctionalTermL
+    override this.ShortName = PrimOptionalFunctionalTerm
 
     override this.Clone () =
         let ret = new FplOptionalFunctionalTerm((this.StartPos, this.EndPos), this.Parent.Value)
@@ -3110,8 +3110,8 @@ type FplOptionalFunctionalTerm(positions: Positions, parent: FplValue) =
 type FplExtension(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
 
-    override this.Name =  $"{literalExtL} {literalDefL}" 
-    override this.ShortName = $"{literalDef} {literalExt}"
+    override this.Name = PrimExtensionL 
+    override this.ShortName = PrimExtension
 
     override this.Clone () =
         let ret = new FplExtension((this.StartPos, this.EndPos), this.Parent.Value)
@@ -3237,7 +3237,7 @@ type FplReturn(positions: Positions, parent: FplValue) as this =
         this.FplId <- literalRet
         this.TypeId <- literalUndef
 
-    override this.Name = $"{literalRetL} statement"
+    override this.Name = PrimReturn
 
     override this.Clone () =
         let ret = new FplReturn((this.StartPos, this.EndPos), this.Parent.Value)
@@ -3505,7 +3505,7 @@ type FplCaseElse(positions: Positions, parent: FplValue) =
 type FplForInStmt(positions: Positions, parent: FplValue) =
     inherit FplGenericStmt(positions, parent)
 
-    override this.Name = "for in statement"
+    override this.Name = PrimForInStmt
 
     override this.Clone () =
         let ret = new FplForInStmt((this.StartPos, this.EndPos), this.Parent.Value)
@@ -3524,7 +3524,7 @@ type FplForInStmt(positions: Positions, parent: FplValue) =
 type FplForInStmtEntity(positions: Positions, parent: FplValue) =
     inherit FplGenericStmt(positions, parent)
 
-    override this.Name = "for in statement's entity"
+    override this.Name = PrimForInStmtEntity
 
     override this.Clone () =
         let ret = new FplForInStmtEntity((this.StartPos, this.EndPos), this.Parent.Value)
@@ -3543,7 +3543,7 @@ type FplForInStmtEntity(positions: Positions, parent: FplValue) =
 type FplForInStmtDomain(positions: Positions, parent: FplValue) =
     inherit FplGenericStmt(positions, parent)
 
-    override this.Name = "for in statement's domain"
+    override this.Name = PrimForInStmtDomain
 
     override this.Clone () =
         let ret = new FplForInStmtDomain((this.StartPos, this.EndPos), this.Parent.Value)
