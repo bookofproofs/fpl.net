@@ -114,6 +114,9 @@ type TestFplBlockType() =
         | "FplCaseElse" ->
             let x = new FplCaseElse(positions, parent)
             Assert.AreEqual<string>(PrimCaseElse, x.Name)
+        | "FplCaseSingle" ->
+            let x = new FplCaseSingle(positions, parent)
+            Assert.AreEqual<string>(PrimCaseSingle, x.Name)
         | "FplClass" ->
             let x = new FplClass(positions, parent)
             Assert.AreEqual<string>(PrimClassL, x.Name)
