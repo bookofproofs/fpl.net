@@ -1653,89 +1653,109 @@ type SymbolTableStructure() =
         | _ -> ()
 
 
-    [<DataRow("FplArgInferenceAssume", "00", """proof T$1 {1. |- assume 1};""")>]
-    [<DataRow("FplArgInferenceDerived", "00", """proof T$1 {1. |- and(x,y)};""")>]
-    [<DataRow("FplArgInferenceRevoke", "00", """proof T$1 {1. |- revoke 1};""")>]
-    [<DataRow("FplArgInferenceTrivial", "00", """;""")>]
-    [<DataRow("FplArgument", "00", """;""")>]
-    [<DataRow("FplAssertion", "00", """;""")>]
-    [<DataRow("FplAssignment", "00", """def pred T() {dec ~x:pred x:=false; true};""")>]
-    [<DataRow("FplAxiom", "00", """;""")>]
-    [<DataRow("FplCases", "00", """;""")>]
-    [<DataRow("FplCaseElse", "00", """;""")>]
-    [<DataRow("FplCaseSingle", "00", """;""")>]
-    [<DataRow("FplClass", "00", """;""")>]
-    [<DataRow("FplConjecture", "00", """;""")>]
-    [<DataRow("FplConjunction", "00", """;""")>]
-    [<DataRow("FplConstructor", "00", """;""")>]
-    [<DataRow("FplCorollary", "00", """;""")>]
-    [<DataRow("FplDecrement", "00", """;""")>]
-    [<DataRow("FplDisjunction", "00", """;""")>]
-    [<DataRow("FplEquality", "00", """;""")>]
-    [<DataRow("FplEquivalence", "00", """;""")>]
-    [<DataRow("FplExclusiveOr", "00", """;""")>]
-    [<DataRow("FplExtension", "00", """;""")>]
-    [<DataRow("FplExtensionObj", "00", """;""")>]
-    [<DataRow("FplForInStmt", "00", """;""")>]
-    [<DataRow("FplForInStmtDomain", "00", """;""")>]
-    [<DataRow("FplForInStmtEntity", "00", """;""")>]
-    [<DataRow("FplFunctionalTerm", "00", """;""")>]
-    [<DataRow("FplImplication", "00", """;""")>]
-    [<DataRow("FplInstance", "00", """;""")>]
-    [<DataRow("FplIntrinsicFunc", "00", """;""")>]
-    [<DataRow("FplIntrinsicInd", "00", """;""")>]
-    [<DataRow("FplIntrinsicObj", "00", """;""")>]
-    [<DataRow("FplIntrinsicPred", "00", """;""")>]
-    [<DataRow("FplIntrinsicTpl", "00", """;""")>]
-    [<DataRow("FplIntrinsicUndef", "00", """;""")>]
-    [<DataRow("FplIsOperator", "00", """;""")>]
-    [<DataRow("FplJustification", "00", """;""")>]
-    [<DataRow("FplJustificationItemByAx", "00", """;""")>]
-    [<DataRow("FplJustificationItemByCor", "00", """;""")>]
-    [<DataRow("FplJustificationItemByDef", "00", """;""")>]
-    [<DataRow("FplJustificationItemByInf", "00", """inf ExistsByExample() {pre:true con:true} T$1 { 100. ExistsByExample, 1 |- false };""")>]
-    [<DataRow("FplJustificationItemByProofArgument", "00", """;""")>]
-    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00", """;""")>]
-    [<DataRow("FplLanguage", "00", """;""")>]
-    [<DataRow("FplLemma", "00", """lem T() {true};""")>]
-    [<DataRow("FplLemma", "01", """lem T() {dec ~x,y:pred; true};""")>]
-    [<DataRow("FplLocalization", "00", """;""")>]
-    [<DataRow("FplMandatoryFunctionalTerm", "00", """;""")>]
-    [<DataRow("FplMandatoryPredicate", "00", """;""")>]
-    [<DataRow("FplMapCases", "00", """;""")>]
-    [<DataRow("FplMapCaseElse", "00", """;""")>]
-    [<DataRow("FplMapCaseSingle", "00", """;""")>]
-    [<DataRow("FplMapping", "00", """;""")>]
-    [<DataRow("FplNegation", "00", """;""")>]
-    [<DataRow("FplOptionalFunctionalTerm", "00", """;""")>]
-    [<DataRow("FplOptionalPredicate", "00", """;""")>]
-    [<DataRow("FplPredicate", "00", """;""")>]
-    [<DataRow("FplPremiseList", "00", """;""")>]
-    [<DataRow("FplProof", "00", """;""")>]
-    [<DataRow("FplProposition", "00", """prop T() {true};""")>]
-    [<DataRow("FplQuantorAll", "00", """;""")>]
-    [<DataRow("FplQuantorExists", "00", """;""")>]
-    [<DataRow("FplQuantorExistsN", "00", """;""")>]
-    [<DataRow("FplReference", "00", """;""")>]
-    [<DataRow("FplReturn", "00", """;""")>]
-    [<DataRow("FplRoot", "00", """;""")>]
-    [<DataRow("FplRuleOfInference", "00", """;""")>]
-    [<DataRow("FplTheorem", "00", """thm T() {true};""")>]
-    [<DataRow("FplTheory", "00", """;""")>]
-    [<DataRow("FplTranslation", "00", """;""")>]
-    [<DataRow("FplVariable", "00", """;""")>]
-    [<DataRow("FplVariable", "00", """;""")>]
-    [<DataRow("FplVariadicVariableMany", "00", """;""")>]
-    [<DataRow("FplVariadicVariableMany1", "00", """;""")>]
+    [<DataRow("FplArgInferenceAssume", "00", """proof T$1 {1. |- assume 1};""", "")>]
+    [<DataRow("FplArgInferenceDerived", "00", """proof T$1 {1. |- and(x,y)};""", "")>]
+    [<DataRow("FplArgInferenceRevoke", "00", """proof T$1 {1. |- revoke 1};""", "")>]
+    [<DataRow("FplArgInferenceTrivial", "00", """;""", "")>]
+    [<DataRow("FplArgument", "00", """;""", "")>]
+    [<DataRow("FplAssertion", "00", """;""", "")>]
+    [<DataRow("FplAssignment", "00", """def pred T() {dec ~x:pred x:=false; true};""", "")>]
+    [<DataRow("FplAxiom", "00", """ax T() {true};""", "")>]
+    [<DataRow("FplCases", "00", """;""", "")>]
+    [<DataRow("FplCaseElse", "00", """;""", "")>]
+    [<DataRow("FplCaseSingle", "00", """;""", "")>]
+    [<DataRow("FplClass", "00", """def cl A:obj {intr};""", "")>]
+    // base classed not declared
+    [<DataRow("FplClass", "00a", """def cl A:B,C {intr};""", "")>] 
+    // base classed declared
+    [<DataRow("FplClass", "01", """def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {intr};""", "D")>]
+    // one constructor
+    [<DataRow("FplClass", "02", """def cl A:obj { ctor A() {self} };""", "")>]
+    // two constructors
+    [<DataRow("FplClass", "02a", """def cl A:obj { ctor A() {self} ctor A(x,y,z:obj) {self} };""", "")>]
+    // intrinsic (without constructor), but with properties
+    [<DataRow("FplClass", "03", """def cl A:obj { intr prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    // with constructor and properties
+    [<DataRow("FplClass", "04", """def cl A:obj { ctor A() {self} prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplConjecture", "00", """conj T() {true};""", "")>]
+    [<DataRow("FplConjunction", "00", """;""", "")>]
+    [<DataRow("FplConstructor", "00", """;""", "")>]
+    [<DataRow("FplCorollary", "00", """;""", "")>]
+    [<DataRow("FplDecrement", "00", """;""", "")>]
+    [<DataRow("FplDisjunction", "00", """;""", "")>]
+    [<DataRow("FplEquality", "00", """;""", "")>]
+    [<DataRow("FplEquivalence", "00", """;""", "")>]
+    [<DataRow("FplExclusiveOr", "00", """;""", "")>]
+    [<DataRow("FplExtension", "00", """;""", "")>]
+    [<DataRow("FplExtensionObj", "00", """;""", "")>]
+    [<DataRow("FplForInStmt", "00", """;""", "")>]
+    [<DataRow("FplForInStmtDomain", "00", """;""", "")>]
+    [<DataRow("FplForInStmtEntity", "00", """;""", "")>]
+    [<DataRow("FplFunctionalTerm", "00", """;""", "")>]
+    [<DataRow("FplImplication", "00", """;""", "")>]
+    [<DataRow("FplInstance", "00", """;""", "")>]
+    [<DataRow("FplIntrinsicFunc", "00", """;""", "")>]
+    [<DataRow("FplIntrinsicInd", "00", """;""", "")>]
+    [<DataRow("FplIntrinsicObj", "00", """;""", "")>]
+    [<DataRow("FplIntrinsicPred", "00", """;""", "")>]
+    [<DataRow("FplIntrinsicTpl", "00", """;""", "")>]
+    [<DataRow("FplIntrinsicUndef", "00", """;""", "")>]
+    [<DataRow("FplIsOperator", "00", """;""", "")>]
+    [<DataRow("FplJustification", "00", """;""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00", """;""", "")>]
+    [<DataRow("FplJustificationItemByCor", "00", """;""", "")>]
+    [<DataRow("FplJustificationItemByDef", "00", """;""", "")>]
+    [<DataRow("FplJustificationItemByInf", "00", """inf ExistsByExample() {pre:true con:true} T$1 { 100. ExistsByExample, 1 |- false };""", "")>]
+    [<DataRow("FplJustificationItemByProofArgument", "00", """;""", "")>]
+    [<DataRow("FplJustificationItemByTheoremLikeStmt", "00", """;""", "")>]
+    [<DataRow("FplLanguage", "00", """;""", "")>]
+    [<DataRow("FplLemma", "00", """lem T() {true};""", "")>]
+    [<DataRow("FplLemma", "01", """lem T() {dec ~x,y:pred; true};""", "")>]
+    [<DataRow("FplLocalization", "00", """;""", "")>]
+    [<DataRow("FplMandatoryFunctionalTerm", "00", """;""", "")>]
+    [<DataRow("FplMandatoryPredicate", "00", """;""", "")>]
+    [<DataRow("FplMapCases", "00", """;""", "")>]
+    [<DataRow("FplMapCaseElse", "00", """;""", "")>]
+    [<DataRow("FplMapCaseSingle", "00", """;""", "")>]
+    [<DataRow("FplMapping", "00", """;""", "")>]
+    [<DataRow("FplNegation", "00", """;""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "00", """;""", "")>]
+    [<DataRow("FplOptionalPredicate", "00", """;""", "")>]
+    [<DataRow("FplPredicate", "00", """;""", "")>]
+    [<DataRow("FplPremiseList", "00", """;""", "")>]
+    [<DataRow("FplProof", "00", """;""", "")>]
+    [<DataRow("FplProposition", "00", """prop T() {true};""", "")>]
+    [<DataRow("FplQuantorAll", "00", """;""", "")>]
+    [<DataRow("FplQuantorExists", "00", """;""", "")>]
+    [<DataRow("FplQuantorExistsN", "00", """;""", "")>]
+    [<DataRow("FplReference", "00", """;""", "")>]
+    [<DataRow("FplReturn", "00", """;""", "")>]
+    [<DataRow("FplRoot", "00", """;""", "")>]
+    [<DataRow("FplRuleOfInference", "00", """;""", "")>]
+    [<DataRow("FplTheorem", "00", """thm T() {true};""", "")>]
+    [<DataRow("FplTheory", "00", """;""", "")>]
+    [<DataRow("FplTranslation", "00", """;""", "")>]
+    [<DataRow("FplVariable", "00", """;""", "")>]
+    [<DataRow("FplVariable", "00", """;""", "")>]
+    [<DataRow("FplVariadicVariableMany", "00", """;""", "")>]
+    [<DataRow("FplVariadicVariableMany1", "00", """;""", "")>]
     [<TestMethod>]
-    member this.TestStructure(nodeType, varVal, fplCode) =
-        let rec findNamedItem firstTypeNode (root:FplValue) = 
-            if root.Name = firstTypeNode then 
-                Some root
+    member this.TestStructure(nodeType, varVal, fplCode, identifier) =
+        let rec findNamedItem firstTypeNode identifier (root:FplValue) = 
+            if identifier = "" then 
+                if root.Name = firstTypeNode then 
+                    Some root
+                else
+                    match root.Scope.Values |> Seq.tryPick (findNamedItem firstTypeNode identifier) with 
+                    | Some found -> Some found
+                    | _ -> root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier)
             else
-                match root.Scope.Values |> Seq.tryPick (findNamedItem firstTypeNode) with 
-                | Some found -> Some found
-                | _ -> root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode)
+                if root.Name = firstTypeNode && root.FplId = identifier then 
+                    Some root
+                else
+                    match root.Scope.Values |> Seq.tryPick (findNamedItem firstTypeNode identifier) with 
+                    | Some found -> Some found
+                    | _ -> root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier)
         ad.Clear()
         let filename = "TestStructure.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -1743,7 +1763,7 @@ type SymbolTableStructure() =
         match stOption with
         | Some st -> 
             let nodeName = (getName nodeType)
-            let testNodeOpt = findNamedItem nodeName st.Root
+            let testNodeOpt = findNamedItem nodeName identifier st.Root
             match testNodeOpt with 
             | Some (node:FplValue) when node.Parent.IsSome ->
                 let parent = node.Parent.Value 
@@ -1775,6 +1795,69 @@ type SymbolTableStructure() =
                     Assert.AreEqual<int>(1, parent.Scope.Count)
                     Assert.IsInstanceOfType<FplAssignment>(node)
                     Assert.AreEqual<int>(2, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplAxiom", "00" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplAxiom>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplClass", "00" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplClass>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count)
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplClass", "00a" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplClass>(node)
+                    Assert.AreEqual<int>(0, node.ArgList.Count) // base classes are added only if they were previously declared
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplClass", "01" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(4, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplClass>(node)
+                    Assert.AreEqual<int>(3, node.ArgList.Count) // three base classes 
+                    Assert.AreEqual<int>(0, node.Scope.Count)
+                | "FplClass", "02" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplClass>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) 
+                    Assert.AreEqual<int>(1, node.Scope.Count) // constructor
+                | "FplClass", "02a" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplClass>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) 
+                    Assert.AreEqual<int>(2, node.Scope.Count) // 2 constructors
+                | "FplClass", "03" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplClass>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) 
+                    Assert.AreEqual<int>(4, node.Scope.Count) // 4 properties
+                | "FplClass", "04" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplClass>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) 
+                    Assert.AreEqual<int>(5, node.Scope.Count) // 1 constructor + 4 properties
+                | "FplConjecture", "00" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplConjecture>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count)
                     Assert.AreEqual<int>(0, node.Scope.Count)
                 | "FplLemma", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
