@@ -1,5 +1,6 @@
 namespace FplInterpreter.Tests
 open System
+open System.Collections.Generic
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open FParsec
 open ErrDiagnostics
@@ -1725,7 +1726,25 @@ type SymbolTableStructure() =
     // lemma with two variables
     [<DataRow("FplLemma", "01", """lem T() {dec ~x,y:pred; true};""", "")>]
     [<DataRow("FplLocalization", "00", """;""", "")>]
-    [<DataRow("FplMandatoryFunctionalTerm", "00", """;""", "")>]
+    // intrinsic mandatory functional term with predicate parent
+    [<DataRow("FplMandatoryFunctionalTerm", "00",  """def pred T() {intr prty func MandF(x:obj)->obj {intr} };""", "")>]
+    // intrinsic mandatory functional term with functional term parent
+    [<DataRow("FplMandatoryFunctionalTerm", "01",  """def func T()->obj {intr prty func MandF(x:obj)->obj {intr} };""", "")>]
+    // intrinsic mandatory functional term with class parent
+    [<DataRow("FplMandatoryFunctionalTerm", "02",  """def cl T:obj {intr prty func MandF(x:obj)->obj {intr} };""", "")>]
+    // non-intrinsic mandatory functional term with predicate parent
+    [<DataRow("FplMandatoryFunctionalTerm", "03",  """def pred T() {intr prty func MandF(x:obj)->obj {return x} };""", "")>]
+    // non-intrinsic mandatory functional term with functional term parent
+    [<DataRow("FplMandatoryFunctionalTerm", "04",  """def func T()->obj {intr prty func MandF(x:obj)->obj {return x} };""", "")>]
+    // non-intrinsic mandatory functional term with class parent
+    [<DataRow("FplMandatoryFunctionalTerm", "05",  """def cl T:obj {intr prty func MandF(x:obj)->obj {return x} };""", "")>]
+    // non-intrinsic mandatory functional term with predicate parent, shared variables and one statement
+    [<DataRow("FplMandatoryFunctionalTerm", "06",  """def pred T() {dec ~y:obj; true prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    // non-intrinsic mandatory functional term with functional term parent, shared variables and one statement
+    [<DataRow("FplMandatoryFunctionalTerm", "07",  """def func T()->obj {dec ~y:obj; return y prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    // non-intrinsic mandatory functional term with class parent, shared variables and one statement
+    [<DataRow("FplMandatoryFunctionalTerm", "08",  """def cl T:obj {dec ~y:obj; ctor T() {self} prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+
     [<DataRow("FplMandatoryPredicate", "00", """;""", "")>]
     [<DataRow("FplMapCases", "00", """;""", "")>]
     [<DataRow("FplMapCaseElse", "00", """;""", "")>]
@@ -1763,21 +1782,25 @@ type SymbolTableStructure() =
     [<DataRow("FplVariadicVariableMany1", "00", """;""", "")>]
     [<TestMethod>]
     member this.TestStructure(nodeType, varVal, fplCode, identifier) =
-        let rec findNamedItem firstTypeNode identifier (root:FplValue) = 
-            if identifier = "" then 
-                if root.Name = firstTypeNode then 
-                    Some root
-                else
-                    match root.Scope.Values |> Seq.tryPick (findNamedItem firstTypeNode identifier) with 
-                    | Some found -> Some found
-                    | _ -> root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier)
+        let rec findNamedItem firstTypeNode identifier (infiniteLoop:HashSet<obj>) (root:FplValue) = 
+            if infiniteLoop.Contains(root) then
+                None
             else
-                if root.Name = firstTypeNode && root.FplId = identifier then 
-                    Some root
+                infiniteLoop.Add(root) |> ignore
+                if identifier = "" then 
+                    if root.Name = firstTypeNode then 
+                        Some root
+                    else
+                        match root.Scope.Values |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) with 
+                        | Some found -> Some found
+                        | _ -> root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop)
                 else
-                    match root.Scope.Values |> Seq.tryPick (findNamedItem firstTypeNode identifier) with 
-                    | Some found -> Some found
-                    | _ -> root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier)
+                    if root.Name = firstTypeNode && root.FplId = identifier then 
+                        Some root
+                    else
+                        match root.Scope.Values |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop) with 
+                        | Some found -> Some found
+                        | _ -> root.ArgList |> Seq.tryPick (findNamedItem firstTypeNode identifier infiniteLoop)
         ad.Clear()
         let filename = "TestStructure.fpl"
         let stOption = prepareFplCode(filename + ".fpl", fplCode, false) 
@@ -1785,7 +1808,8 @@ type SymbolTableStructure() =
         match stOption with
         | Some st -> 
             let nodeName = (getName nodeType)
-            let testNodeOpt = findNamedItem nodeName identifier st.Root
+            let infiniteLoop = new HashSet<obj>()
+            let testNodeOpt = findNamedItem nodeName identifier infiniteLoop st.Root
             match testNodeOpt with 
             | Some (node:FplValue) when node.Parent.IsSome ->
                 let parent = node.Parent.Value 
@@ -1922,7 +1946,7 @@ type SymbolTableStructure() =
                     Assert.AreEqual<int>(1, parent.Scope.Count)
                     Assert.IsInstanceOfType<FplFunctionalTerm>(node)
                     Assert.AreEqual<int>(4, node.ArgList.Count) // non-intrinsic with mapping, 2 statements, and return statement
-                    Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables, 4 properties
+                    Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
                 | "FplLemma", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
                     Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -1937,6 +1961,69 @@ type SymbolTableStructure() =
                     Assert.IsInstanceOfType<FplLemma>(node)
                     Assert.AreEqual<int>(1, node.ArgList.Count)
                     Assert.AreEqual<int>(2, node.Scope.Count)
+                | "FplMandatoryFunctionalTerm", "00" -> 
+                    Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
+                    Assert.AreEqual<int>(1, node.Scope.Count) // one variable
+                | "FplMandatoryFunctionalTerm", "01" -> 
+                    Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
+                    Assert.AreEqual<int>(1, parent.ArgList.Count) // parent's mapping
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
+                    Assert.AreEqual<int>(1, node.Scope.Count) // one variable
+                | "FplMandatoryFunctionalTerm", "02" -> 
+                    Assert.IsInstanceOfType<FplClass>(parent) // class parent
+                    Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // intrinsic with mapping 
+                    Assert.AreEqual<int>(1, node.Scope.Count) // one variable
+                | "FplMandatoryFunctionalTerm", "03" -> 
+                    Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+                    Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return stmt 
+                    Assert.AreEqual<int>(1, node.Scope.Count) // one variable
+                | "FplMandatoryFunctionalTerm", "04" -> 
+                    Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
+                    Assert.AreEqual<int>(1, parent.ArgList.Count) // parent's mapping
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+                    Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return stmt 
+                    Assert.AreEqual<int>(1, node.Scope.Count) // one variable
+                | "FplMandatoryFunctionalTerm", "05" -> 
+                    Assert.IsInstanceOfType<FplClass>(parent) // class parent
+                    Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
+                    Assert.AreEqual<int>(1, parent.Scope.Count)
+                    Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+                    Assert.AreEqual<int>(2, node.ArgList.Count) // non-intrinsic with mapping and return stmt
+                    Assert.AreEqual<int>(1, node.Scope.Count) // one variable
+                | "FplMandatoryFunctionalTerm", "06" -> 
+                    Assert.IsInstanceOfType<FplPredicate>(parent) // predicate parent
+                    Assert.AreEqual<int>(1, parent.ArgList.Count) // predicate's value
+                    Assert.AreEqual<int>(2, parent.Scope.Count) // variable and property
+                    Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+                    Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with mapping, assignment, and return stmt 
+                    Assert.AreEqual<int>(1, node.Scope.Count) // one variable
+                | "FplMandatoryFunctionalTerm", "07" -> 
+                    Assert.IsInstanceOfType<FplFunctionalTerm>(parent) // functional term parent
+                    Assert.AreEqual<int>(2, parent.ArgList.Count) // parent's mapping, return stmt
+                    Assert.AreEqual<int>(2, parent.Scope.Count) // variable and property
+                    Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+                    Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with mapping, assignment, and return stmt 
+                    Assert.AreEqual<int>(1, node.Scope.Count) // one variable
+                | "FplMandatoryFunctionalTerm", "08" -> 
+                    Assert.IsInstanceOfType<FplClass>(parent) // class parent
+                    Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base class
+                    Assert.AreEqual<int>(3, parent.Scope.Count) // variable, property and constructor
+                    Assert.IsInstanceOfType<FplMandatoryFunctionalTerm>(node)
+                    Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with mapping, assignment, and return stmt
+                    Assert.AreEqual<int>(1, node.Scope.Count) // one variable
                 | "FplPredicate", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
                     Assert.AreEqual<int>(0, parent.ArgList.Count)
@@ -1971,7 +2058,7 @@ type SymbolTableStructure() =
                     Assert.AreEqual<int>(1, parent.Scope.Count)
                     Assert.IsInstanceOfType<FplPredicate>(node)
                     Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with 2 statements
-                    Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables, 4 properties
+                    Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
                 | "FplProposition", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
                     Assert.AreEqual<int>(0, parent.ArgList.Count)
