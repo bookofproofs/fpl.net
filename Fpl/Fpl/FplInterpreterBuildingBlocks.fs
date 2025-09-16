@@ -566,11 +566,12 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Not((pos1, pos2), predicateAst) ->
         st.EvalPush("Not")
-        let fv = variableStack.Pop()
-        let fvNew = new FplNegation((pos1, pos2), fv.Parent.Value)
+        let fv = variableStack.PeekEvalStack()
+        let fvNew = new FplNegation((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst
         emitLG000orLG001Diagnostics fvNew PrimNegation
+        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.InEntity((pos1, pos2), ast1) ->
         st.EvalPush("InEntity")
@@ -786,30 +787,33 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.And((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("And")
-        let fv = variableStack.Pop()
-        let fvNew = new FplConjunction((pos1, pos2), fv.Parent.Value)
+        let fv = variableStack.PeekEvalStack()
+        let fvNew = new FplConjunction((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
         emitLG000orLG001Diagnostics fvNew PrimConjunction
+        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Or((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Or")
-        let fv = variableStack.Pop()
-        let fvNew = new FplDisjunction((pos1, pos2), fv.Parent.Value)
+        let fv = variableStack.PeekEvalStack()
+        let fvNew = new FplDisjunction((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
         emitLG000orLG001Diagnostics fvNew PrimDisjunction
+        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Xor((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Xor")
-        let fv = variableStack.Pop()
-        let fvNew = new FplExclusiveOr((pos1, pos2), fv.Parent.Value)
+        let fv = variableStack.PeekEvalStack()
+        let fvNew = new FplExclusiveOr((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
         emitLG000orLG001Diagnostics fvNew "exclusive-or"
+        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.VarDeclBlock((pos1, pos2), varDeclOrStmtAstList) ->
         st.EvalPush("VarDeclBlock")
