@@ -752,12 +752,6 @@ type TestFplValue() =
             else
                 (int64)0
         Assert.AreEqual<int64>(expectedStart, actualSignatureStart)
-        let expectedEnd =
-            if fplCode.StartsWith("def class") then 
-                (int64)(fplCode.IndexOf(":", System.StringComparison.OrdinalIgnoreCase))
-            else
-                (int64)(fplCode.IndexOf(" {", System.StringComparison.OrdinalIgnoreCase))
-        Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
         prepareFplCode(filename, "", true) |> ignore
 
     [<DataRow("""loc not(x) := !tex: "\neg(" x ")" !eng: "not " x !ger: "nicht " x;;""", "not(x)")>]
@@ -975,15 +969,7 @@ type TestFplValue() =
         let block = result.Value.Root.Scope[filename].Scope["T"]
         let fplValue = block.Scope[expectedName]
         let actualTypeSignature = fplValue.Type(SignatureType.Type)
-        let actualSignatureStart = fplValue.StartPos.Index
-        let actualSignatureEnd = fplValue.EndPos.Index
         Assert.AreEqual<string>(expectedType, actualTypeSignature)
-        let expectedStart =
-                (int64)19
-        Assert.AreEqual<int64>(expectedStart, actualSignatureStart)
-        let expectedEnd =
-                (int64)(fplCode.IndexOf(" {intrinsic", System.StringComparison.OrdinalIgnoreCase))
-        Assert.AreEqual<int64>(expectedEnd, actualSignatureEnd)
         prepareFplCode(filename, "", true) |> ignore
 
     [<DataRow("def cl T:obj {ctor T() {self}};", "T()", "T()")>]

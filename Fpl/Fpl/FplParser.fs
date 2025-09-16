@@ -505,8 +505,7 @@ let definitionProperty = choice [
     predicateInstance
     functionalTermInstance
 ]
-let propertyHeader = IW >>. keywordProperty 
-let property = positions "PropertyBlock" (propertyHeader .>>. definitionProperty) |>> Ast.PropertyBlock
+let property = IW >>. positions "PropertyBlock" (keywordProperty .>>. definitionProperty) |>> Ast.PropertyBlock
 let propertyList = opt (many1 (property .>> IW)) 
 
 (* FPL building blocks - Proofs 
