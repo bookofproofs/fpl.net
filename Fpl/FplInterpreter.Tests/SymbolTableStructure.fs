@@ -1850,7 +1850,25 @@ type SymbolTableStructure() =
     [<DataRow("FplPredicate", "04", """def pred T(x,y:obj) {dec ~z:obj z:=x y:=z; false };""", "")>]
 
     [<DataRow("FplPremiseList", "00", """;""", "")>]
-    [<DataRow("FplProof", "00", """;""", "")>]
+
+    // proof 
+    [<DataRow("FplProof", "00", """proof T$1 {1. |- trivial};""", "")>]
+    // proof with qed
+    [<DataRow("FplProof", "00x", """proof T$1 {1. |- trivial qed};""", "")>]
+    // proof with axiom
+    [<DataRow("FplProof", "00a", """ax T() {true} proof T$1 {1. |- trivial};""", "")>]
+    // proof with conjecture
+    [<DataRow("FplProof", "00b", """conj T() {true} proof T$1 {1. |- trivial};""", "")>]
+    // proof with theorem
+    [<DataRow("FplProof", "01a", """thm T() {true} proof T$1 {1. |- trivial};""", "")>]
+    // proof with conjecture
+    [<DataRow("FplProof", "01b", """lem T() {true} proof T$1 {1. |- trivial};""", "")>]
+    // proof with conjecture
+    [<DataRow("FplProof", "01c", """prop T() {true} proof T$1 {1. |- trivial};""", "")>]
+    // proof with corollary
+    [<DataRow("FplProof", "02", """thm T() {true} cor T$1() {true} proof T$1$1 {1. |- trivial};""", "")>]
+    // proof with two arguments
+    [<DataRow("FplProof", "03", """proof T$1$1 {1. byax A |- trivial 2. |- trivial};""", "")>]
 
     // proposition
     [<DataRow("FplProposition", "00", """prop T() {true};""", "")>]
@@ -2386,6 +2404,65 @@ type SymbolTableStructure() =
                     Assert.IsInstanceOfType<FplPredicate>(node)
                     Assert.AreEqual<int>(3, node.ArgList.Count) // non-intrinsic with 2 statements
                     Assert.AreEqual<int>(3, node.Scope.Count) // 3 variables
+
+                | "FplProof", "00" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) // single proof
+                    Assert.IsInstanceOfType<FplProof>(node)
+                    Assert.AreEqual<int>(0, node.ArgList.Count) 
+                    Assert.AreEqual<int>(1, node.Scope.Count)
+                | "FplProof", "00x" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) // single proof with qed
+                    Assert.IsInstanceOfType<FplProof>(node)
+                    Assert.AreEqual<int>(0, node.ArgList.Count) 
+                    Assert.AreEqual<int>(1, node.Scope.Count)
+                | "FplProof", "00a" 
+                | "FplProof", "00b" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(2, parent.Scope.Count) // proof with wrong parent (axiom or conjecture)
+                    Assert.IsInstanceOfType<FplProof>(node) 
+                    Assert.AreEqual<int>(0, node.ArgList.Count)
+                    Assert.AreEqual<int>(1, node.Scope.Count)
+                | "FplProof", "01a" ->
+                    Assert.IsInstanceOfType<FplTheorem>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) // proof with theorem
+                    Assert.IsInstanceOfType<FplProof>(node)  
+                    Assert.AreEqual<int>(0, node.ArgList.Count)
+                    Assert.AreEqual<int>(1, node.Scope.Count)
+                | "FplProof", "01b" ->
+                    Assert.IsInstanceOfType<FplLemma>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) // proof with lemma
+                    Assert.IsInstanceOfType<FplProof>(node)  
+                    Assert.AreEqual<int>(0, node.ArgList.Count)
+                    Assert.AreEqual<int>(1, node.Scope.Count)
+                | "FplProof", "01c" -> 
+                    Assert.IsInstanceOfType<FplProposition>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) // proof with proposition
+                    Assert.IsInstanceOfType<FplProof>(node)  
+                    Assert.AreEqual<int>(0, node.ArgList.Count)
+                    Assert.AreEqual<int>(1, node.Scope.Count)
+                | "FplProof", "02" -> 
+                    Assert.IsInstanceOfType<FplCorollary>(parent)
+                    Assert.AreEqual<int>(1, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) // proof with proposition
+                    Assert.IsInstanceOfType<FplProof>(node)  
+                    Assert.AreEqual<int>(0, node.ArgList.Count)
+                    Assert.AreEqual<int>(1, node.Scope.Count)
+                | "FplProof", "03" -> 
+                    Assert.IsInstanceOfType<FplTheory>(parent)
+                    Assert.AreEqual<int>(0, parent.ArgList.Count)
+                    Assert.AreEqual<int>(1, parent.Scope.Count) // proof with proposition
+                    Assert.IsInstanceOfType<FplProof>(node)  
+                    Assert.AreEqual<int>(0, node.ArgList.Count)
+                    Assert.AreEqual<int>(2, node.Scope.Count)
+
                 | "FplProposition", "00" -> 
                     Assert.IsInstanceOfType<FplTheory>(parent)
                     Assert.AreEqual<int>(0, parent.ArgList.Count)

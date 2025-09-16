@@ -264,7 +264,7 @@ type TestProofs () =
     member this.TestProof03 () =
         let result = run (proof .>> eof) """prf AddIsUnique$1
         {
-            1. |- assume true
+            1. |- assume and(x,b)
             2. |- trivial
             qed
         }"""
