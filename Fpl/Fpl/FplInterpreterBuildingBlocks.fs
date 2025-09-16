@@ -1047,26 +1047,28 @@ let rec eval (st: SymbolTable) ast =
         st.EvalPop()
     | Ast.Impl((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Impl")
-        let fv = variableStack.Pop()
-        let fvNew = new FplImplication((pos1, pos2), fv.Parent.Value)
+        let fv = variableStack.PeekEvalStack()
+        let fvNew = new FplImplication((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
         emitLG000orLG001Diagnostics fvNew PrimImplication
+        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Iif((pos1, pos2), (predicateAst1, predicateAst2)) ->
         st.EvalPush("Iif")
-        let fv = variableStack.Pop()
-        let fvNew = new FplEquivalence((pos1, pos2), fv.Parent.Value)
+        let fv = variableStack.PeekEvalStack()
+        let fvNew = new FplEquivalence((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         eval st predicateAst1
         eval st predicateAst2
         emitLG000orLG001Diagnostics fvNew PrimEquivalence
+        variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.IsOperator((pos1, pos2), (isOpArgAst, variableTypeAst)) ->
         st.EvalPush("IsOperator")
-        let fv = variableStack.Pop()
-        let fvNew = new FplIsOperator((pos1, pos2), fv.Parent.Value)
+        let fv = variableStack.PeekEvalStack()
+        let fvNew = new FplIsOperator((pos1, pos2), fv)
         variableStack.PushEvalStack(fvNew)
         let operand = new FplReference((pos1, pos2), fvNew) 
         variableStack.PushEvalStack(operand)
@@ -1075,6 +1077,7 @@ let rec eval (st: SymbolTable) ast =
         let typeOfOperand = new FplMapping((pos1, pos2), fvNew) 
         variableStack.PushEvalStack(typeOfOperand)
         eval st variableTypeAst
+        variableStack.PopEvalStack()
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.Delegate((pos1, pos2), (fplDelegateIdentifierAst, argumentTupleAst)) ->
