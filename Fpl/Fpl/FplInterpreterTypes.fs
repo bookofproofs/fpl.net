@@ -1018,14 +1018,14 @@ type FplGenericObject(positions: Positions, parent: FplValue) as this =
 
     override this.RunOrder = None
 
-type FplPremiseList(positions: Positions, parent: FplValue, runOrder) = 
+type FplPredicateList(positions: Positions, parent: FplValue, runOrder) = 
     inherit FplValue(positions, Some parent)
     let _runOrder = runOrder
     override this.Name = literalPreL
     override this.ShortName = literalInf
 
     override this.Clone () =
-        let ret = new FplPremiseList((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
+        let ret = new FplPredicateList((this.StartPos, this.EndPos), this.Parent.Value, _runOrder)
         this.AssignParts(ret)
         ret
 
