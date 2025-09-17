@@ -390,6 +390,11 @@ let rec eval (st: SymbolTable) ast =
             let proof = fvAi.ParentArgument.ParentProof
             if not (proof.HasArgument s) then
                 emitPR005Diagnostics s pos1 pos2
+        | PrimJustificationL -> 
+            let fvAi = new FplJustificationItemByRefArgument((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder)
+            fvAi.FplId <- s
+            variableStack.PushEvalStack(fvAi)
+            variableStack.PopEvalStack()
         | _ -> ()
         st.EvalPop() 
     | Ast.Prefix((pos1, pos2), symbol) -> 
@@ -619,6 +624,14 @@ let rec eval (st: SymbolTable) ast =
         let argInf = new FplArgInferenceRevoke((pos1, pos2), fv) 
         variableStack.PushEvalStack(argInf)
         eval st predicateAst
+        variableStack.PopEvalStack()
+        st.EvalPop()
+    | Ast.ByDef((pos1, pos2), variableAst) ->
+        st.EvalPush("ByDef")
+        let parent = variableStack.PeekEvalStack()
+        let fvJi = new FplJustificationItemByDefVar((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+        variableStack.PushEvalStack(fvJi)
+        eval st variableAst
         variableStack.PopEvalStack()
         st.EvalPop()
     | Ast.VariableType((pos1, pos2), compoundVariableTypeAst) ->

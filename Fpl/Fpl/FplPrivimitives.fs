@@ -1380,9 +1380,13 @@ let PrimJIByCor = "justification by corollary"
 [<Literal>]
 let PrimJIByDef = "justification by definition"
 [<Literal>]
+let PrimJIByDefVar = "justification by variable definition"
+[<Literal>]
 let PrimJIByInf = "justification by rule of inference"
 [<Literal>]
 let PrimJIByProofArgument = "justification by argument in another proof"
+[<Literal>]
+let PrimJIByRefArgument = "justification by argument reference"
 [<Literal>]
 let PrimJIByTheoremLikeStmt = "justification by theorem-like statement"
 [<Literal>]

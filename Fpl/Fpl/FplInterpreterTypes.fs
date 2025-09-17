@@ -1543,6 +1543,30 @@ and FplJustificationItemByDef(positions: Positions, parent: FplValue, runOrder) 
 
     override this.Run variableStack = () // todo implement Run
 
+and FplJustificationItemByDefVar(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericJustificationItem(positions, parent, runOrder)
+
+    override this.Name = PrimJIByDefVar
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByDefVar((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
+and FplJustificationItemByRefArgument(positions: Positions, parent: FplValue, runOrder) =
+    inherit FplGenericJustificationItem(positions, parent, runOrder)
+
+    override this.Name = PrimJIByRefArgument
+
+    override this.Clone () =
+        let ret = new FplJustificationItemByRefArgument((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        this.AssignParts(ret)
+        ret
+
+    override this.Run variableStack = () // todo implement Run
+
 and FplJustificationItemByProofArgument(positions: Positions, parent: FplValue, runOrder) =
     inherit FplGenericJustificationItem(positions, parent, runOrder)
 
