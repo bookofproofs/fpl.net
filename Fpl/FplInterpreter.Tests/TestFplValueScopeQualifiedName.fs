@@ -641,7 +641,7 @@ type TestFplValueScopeQualifiedName() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal

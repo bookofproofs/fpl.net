@@ -1425,15 +1425,15 @@ type SymbolTableStructure() =
     // base classed declared
     [<DataRow("FplClass", "01", """def cl A:obj {intr} def cl B:obj {intr} def cl C:obj {intr} def cl D:A,B,C {intr};""", "D")>]
     // one constructor
-    [<DataRow("FplClass", "02", """def cl A:obj { ctor A() {self} };""", "")>]
+    [<DataRow("FplClass", "02", """def cl A:obj { ctor A() {} };""", "")>]
     // two constructors
-    [<DataRow("FplClass", "02a", """def cl A:obj { ctor A() {self} ctor A(x,y,z:obj) {self} };""", "")>]
+    [<DataRow("FplClass", "02a", """def cl A:obj { ctor A() {} ctor A(x,y,z:obj) {} };""", "")>]
     // intrinsic (without constructor), but with properties
     [<DataRow("FplClass", "03", """def cl A:obj { intr prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
     // with constructor and properties
-    [<DataRow("FplClass", "04", """def cl A:obj { ctor A() {self} prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "04", """def cl A:obj { ctor A() {} prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
     // with variables constructor and properties
-    [<DataRow("FplClass", "05", """def cl A:obj { dec ~x,y:obj; ctor A() {self} prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
+    [<DataRow("FplClass", "05", """def cl A:obj { dec ~x,y:obj; ctor A() {} prty func MandF()->obj {intr} prty func opt OptF()->obj {intr} prty pred MandP() {true} prty pred opt OptP() {true} };""", "")>]
     
     // conjecture
     [<DataRow("FplConjecture", "00", """conj T() {true};""", "")>]
@@ -1441,13 +1441,13 @@ type SymbolTableStructure() =
     [<DataRow("FplConjunction", "00", """;""", "")>]
 
     // one constructor
-    [<DataRow("FplConstructor", "00", """def cl A:obj { ctor A() {self} };""", "")>]
+    [<DataRow("FplConstructor", "00", """def cl A:obj { ctor A() {} };""", "")>]
     // two constructors
-    [<DataRow("FplConstructor", "01", """def cl A:obj { ctor A() {self} ctor A(x,y,z:obj) {self} };""", "A(x, y, z)")>]
+    [<DataRow("FplConstructor", "01", """def cl A:obj { ctor A() {} ctor A(x,y,z:obj) {} };""", "A(x, y, z)")>]
     // one constructor with variables 
-    [<DataRow("FplConstructor", "02", """def cl A:obj { ctor A(x:obj) {dec ~y:obj; self} };""", "")>]
+    [<DataRow("FplConstructor", "02", """def cl A:obj { ctor A(x:obj) {dec ~y:obj; } };""", "")>]
     // with with shared variables and stmts
-    [<DataRow("FplConstructor", "03", """def cl A:obj { dec ~x,y:obj; ctor A(z:obj) {dec z:=x; self} };""", "")>]
+    [<DataRow("FplConstructor", "03", """def cl A:obj { dec ~x,y:obj; ctor A(z:obj) {dec z:=x; } };""", "")>]
 
     [<DataRow("FplCorollary", "00", """;""", "")>]
     [<DataRow("FplDecrement", "00", """;""", "")>]
@@ -1520,7 +1520,7 @@ type SymbolTableStructure() =
     [<DataRow("FplJustificationItemByCor", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByDef", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByDefVar", "00", """;""", "")>]
-    [<DataRow("FplJustificationItemByInf", "00", """inf ExistsByExample() {pre:true con:true} T$1 { 100. ExistsByExample, 1 |- false };""", "")>]
+    [<DataRow("FplJustificationItemByInf", "00", """inf ExistsByExample() {pre:true con:true} proof T$1 { 100. ExistsByExample, 1 |- false };""", "")>]
     [<DataRow("FplJustificationItemByProofArgument", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByRefArgument", "00", """;""", "")>]
     [<DataRow("FplJustificationItemByTheoremLikeStmt", "00", """;""", "")>]
@@ -1552,7 +1552,7 @@ type SymbolTableStructure() =
     // non-intrinsic mandatory functional term with functional term parent, shared variables and one statement
     [<DataRow("FplMandatoryFunctionalTerm", "07",  """def func T()->obj {dec ~y:obj; return y prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
     // non-intrinsic mandatory functional term with class parent, shared variables and one statement
-    [<DataRow("FplMandatoryFunctionalTerm", "08",  """def cl T:obj {dec ~y:obj; ctor T() {self} prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    [<DataRow("FplMandatoryFunctionalTerm", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} prty func MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
 
     // intrinsic optional predicate with predicate parent
     [<DataRow("FplMandatoryPredicate", "00",  """def pred T() {intr prty pred MandF(x:obj) {intr} };""", "")>]
@@ -1571,7 +1571,7 @@ type SymbolTableStructure() =
     // non-intrinsic optional predicate with functional term parent, shared variables and one statement
     [<DataRow("FplMandatoryPredicate", "07",  """def func T()->obj {dec ~y:obj; return y prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
     // non-intrinsic optional predicate with class parent, shared variables and one statement
-    [<DataRow("FplMandatoryPredicate", "08",  """def cl T:obj {dec ~y:obj; ctor T() {self} prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
+    [<DataRow("FplMandatoryPredicate", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} prty pred MandF(x:obj) {dec x:=y; true} };""", "")>]
 
     [<DataRow("FplMapCases", "00", """;""", "")>]
     [<DataRow("FplMapCaseElse", "00", """;""", "")>]
@@ -1596,7 +1596,7 @@ type SymbolTableStructure() =
     // non-intrinsic optional functional term with functional term parent, shared variables and one statement
     [<DataRow("FplOptionalFunctionalTerm", "07",  """def func T()->obj {dec ~y:obj; return y prty func opt MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
     // non-intrinsic optional functional term with class parent, shared variables and one statement
-    [<DataRow("FplOptionalFunctionalTerm", "08",  """def cl T:obj {dec ~y:obj; ctor T() {self} prty func opt MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
+    [<DataRow("FplOptionalFunctionalTerm", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} prty func opt MandF(x:obj)->obj {dec x:=y; return x} };""", "")>]
 
     // intrinsic optional predicate with predicate parent
     [<DataRow("FplOptionalPredicate", "00",  """def pred T() {intr prty pred opt MandF(x:obj) {intr} };""", "")>]
@@ -1615,7 +1615,7 @@ type SymbolTableStructure() =
     // non-intrinsic optional predicate with functional term parent, shared variables and one statement
     [<DataRow("FplOptionalPredicate", "07",  """def func T()->obj {dec ~y:obj; return y prty pred opt MandF(x:obj) {dec x:=y; true} };""", "")>]
     // non-intrinsic optional predicate with class parent, shared variables and one statement
-    [<DataRow("FplOptionalPredicate", "08",  """def cl T:obj {dec ~y:obj; ctor T() {self} prty pred opt MandF(x:obj) {dec x:=y; true} };""", "")>]
+    [<DataRow("FplOptionalPredicate", "08",  """def cl T:obj {dec ~y:obj; ctor T() {} prty pred opt MandF(x:obj) {dec x:=y; true} };""", "")>]
 
     // intrinsic predicate
     [<DataRow("FplPredicate", "00", """def pred T() {intr};""", "")>]
@@ -1809,35 +1809,34 @@ type SymbolTableStructure() =
                     Assert.AreEqual<int>(1, node.ArgList.Count) 
                     Assert.AreEqual<int>(7, node.Scope.Count) // 2 variables + 1 constructor + 4 properties
 
-                // todo: simplify syntax by removing the necessity of providing "self" in the constructor
                 // todo: issue diagnostics if the constructor does nothing
                 | "FplConstructor", "00" -> 
                     Assert.IsInstanceOfType<FplClass>(parent)
                     Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base
                     Assert.AreEqual<int>(1, parent.Scope.Count)
                     Assert.IsInstanceOfType<FplConstructor>(node)
-                    Assert.AreEqual<int>(1, node.ArgList.Count) // only self
+                    Assert.AreEqual<int>(0, node.ArgList.Count) // nothing in constructor
                     Assert.AreEqual<int>(0, node.Scope.Count) 
                 | "FplConstructor", "01" -> 
                     Assert.IsInstanceOfType<FplClass>(parent)
                     Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base
                     Assert.AreEqual<int>(2, parent.Scope.Count)
                     Assert.IsInstanceOfType<FplConstructor>(node)
-                    Assert.AreEqual<int>(1, node.ArgList.Count) // only self
+                    Assert.AreEqual<int>(0, node.ArgList.Count) // nothing in constructor
                     Assert.AreEqual<int>(3, node.Scope.Count) // three variables
                 | "FplConstructor", "02" -> 
                     Assert.IsInstanceOfType<FplClass>(parent)
                     Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base
                     Assert.AreEqual<int>(1, parent.Scope.Count)
                     Assert.IsInstanceOfType<FplConstructor>(node)
-                    Assert.AreEqual<int>(1, node.ArgList.Count) // only self
+                    Assert.AreEqual<int>(0, node.ArgList.Count) // nothing in constructor
                     Assert.AreEqual<int>(2, node.Scope.Count) // two variables
                 | "FplConstructor", "03" -> 
                     Assert.IsInstanceOfType<FplClass>(parent)
                     Assert.AreEqual<int>(1, parent.ArgList.Count) // class's base
                     Assert.AreEqual<int>(3, parent.Scope.Count) // two variables
                     Assert.IsInstanceOfType<FplConstructor>(node)
-                    Assert.AreEqual<int>(2, node.ArgList.Count) // self and assignment
+                    Assert.AreEqual<int>(1, node.ArgList.Count) // assignment
                     Assert.AreEqual<int>(1, node.Scope.Count) // one variable
 
                 | "FplConjecture", "00" -> 

@@ -648,7 +648,7 @@ type TestFplValueScopeTypeSignature() =
                                 dec
                                     %s
                                 ;
-                                self
+                               
                             }
                         }
                         ;""" varVal

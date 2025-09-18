@@ -647,7 +647,7 @@ type TestFplValueScopeQualifiedStartPos() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal

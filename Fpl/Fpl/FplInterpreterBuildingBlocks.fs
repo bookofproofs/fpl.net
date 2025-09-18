@@ -1674,7 +1674,7 @@ let rec eval (st: SymbolTable) ast =
         ) |> ignore 
         st.EvalPop()
     // | Axiom of Constructor * (Ast * (Ast list option * Ast))
-    | Ast.Constructor((pos1, pos2), (signatureAst, (optVarDeclOrSpecListAst, keywordSelfAst))) ->
+    | Ast.Constructor((pos1, pos2), (signatureAst, optVarDeclOrSpecListAst)) ->
         st.EvalPush("Constructor")
         let parent = variableStack.PeekEvalStack()
         let fv = new FplConstructor((pos1, pos2), parent)
@@ -1704,7 +1704,6 @@ let rec eval (st: SymbolTable) ast =
 
         let rb = new FplReference((pos1, pos2), fv)
         variableStack.PushEvalStack(rb)
-        eval st keywordSelfAst
         variableStack.PopEvalStack()
         emitVAR04diagnostics fv
         variableStack.PopEvalStack()

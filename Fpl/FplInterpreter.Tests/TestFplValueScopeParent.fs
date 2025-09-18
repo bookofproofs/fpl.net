@@ -658,7 +658,7 @@ type TestFplValueScopeParent() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal

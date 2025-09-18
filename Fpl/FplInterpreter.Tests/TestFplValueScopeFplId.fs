@@ -655,7 +655,7 @@ type TestFplValueScopeFplId() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal

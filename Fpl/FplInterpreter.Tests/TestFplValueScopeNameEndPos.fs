@@ -652,7 +652,7 @@ type TestFplValueScopeNameEndPos() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal

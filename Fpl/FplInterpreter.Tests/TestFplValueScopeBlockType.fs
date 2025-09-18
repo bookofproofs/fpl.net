@@ -653,7 +653,7 @@ type TestFplValueScopeBlockType() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal

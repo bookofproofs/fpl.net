@@ -651,7 +651,7 @@ type TestFplValueScopeFplRepresentation() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal

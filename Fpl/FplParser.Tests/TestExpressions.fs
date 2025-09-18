@@ -277,7 +277,7 @@ type TestExpressions () =
                 is (x,Nat)
             }
 
-            def cl T27:obj {ctor T27() {dec base.C(a, b, c, d); self} }
+            def cl T27:obj {ctor T27() {dec base.C(a, b, c, d); } }
             ; 
         """
         let actual = sprintf "%O" result

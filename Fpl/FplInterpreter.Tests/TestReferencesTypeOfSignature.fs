@@ -176,7 +176,7 @@ type TestReferencesTypeOfSignature() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal

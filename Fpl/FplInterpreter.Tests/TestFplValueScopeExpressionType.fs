@@ -651,7 +651,7 @@ type TestFplValueScopeExpressionType() =
                                 dec
                                     %s
                                 ;
-                                self
+                                
                             }
                         }
                         ;""" varVal

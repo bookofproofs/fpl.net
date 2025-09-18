@@ -141,7 +141,7 @@ type Ast =
     | SignatureWithUserDefinedString of Positions * ((Ast * Ast option) * Ast)
     | Axiom of Positions * (Ast * (Ast list option * Ast))
     | ParentConstructorCall of Positions * (Ast * Ast)
-    | Constructor of Positions * (Ast * (Ast list option * Ast)) 
+    | Constructor of Positions * (Ast * (Ast list option)) 
     | Property of Positions * unit
     | Optional of Positions * unit
     | PredicateInstance of Positions * ((Ast option * Ast) * Ast) 
