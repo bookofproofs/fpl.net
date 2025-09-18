@@ -414,26 +414,26 @@ type CommonFplValueTestCases =
                         | Some st -> 
                             let r = st.Root
                             let theory = CommonFplValueTestCases.getScopedElement r filename subtype
-                            let thm1 = CommonFplValueTestCases.getScopedElement theory "TestTheorem1()" subtype
+                            let thm1 = CommonFplValueTestCases.getScopedElement theory "TestTheorem1" subtype
                             let proofThm1 = CommonFplValueTestCases.getScopedElement thm1 "TestTheorem1$1" subtype
-                            let lem1 = CommonFplValueTestCases.getScopedElement theory "TestLemma1()" subtype
+                            let lem1 = CommonFplValueTestCases.getScopedElement theory "TestLemma1" subtype
                             let proofLem1 = CommonFplValueTestCases.getScopedElement lem1 "TestLemma1$1" subtype
-                            let prp1 = CommonFplValueTestCases.getScopedElement theory "TestProposition1()" subtype
+                            let prp1 = CommonFplValueTestCases.getScopedElement theory "TestProposition1" subtype
                             let proofPrp1 = CommonFplValueTestCases.getScopedElement prp1 "TestProposition1$1" subtype
-                            let cor1 = CommonFplValueTestCases.getScopedElement theory "TestCorollary1$2()" subtype
+                            let cor1 = CommonFplValueTestCases.getScopedElement theory "TestCorollary1$2" subtype
                             let proofCor1 = CommonFplValueTestCases.getScopedElement cor1 "TestCorollary1$2$1" subtype
-                            let thm2 = CommonFplValueTestCases.getScopedElement theory "TestTheorem2()" subtype
-                            let corThm2 = CommonFplValueTestCases.getScopedElement thm2 "TestTheorem2$1()" subtype
-                            let lem2 = CommonFplValueTestCases.getScopedElement theory "TestLemma2()" subtype
-                            let corLem2 = CommonFplValueTestCases.getScopedElement lem2 "TestLemma2$1()" subtype
-                            let prp2 = CommonFplValueTestCases.getScopedElement theory "TestProposition2()" subtype
-                            let corPrp2 = CommonFplValueTestCases.getScopedElement prp2 "TestProposition2$1()" subtype
-                            let cor2 = CommonFplValueTestCases.getScopedElement theory "TestCorollary2$2()" subtype
-                            let corCor2 = CommonFplValueTestCases.getScopedElement cor2 "TestCorollary2$2$1()" subtype
-                            let con1 = CommonFplValueTestCases.getScopedElement theory "TestConjecture()" subtype
-                            let corCon1 = CommonFplValueTestCases.getScopedElement con1 "TestConjecture$1()" subtype
-                            let axi1 = CommonFplValueTestCases.getScopedElement theory "TestAxiom()" subtype
-                            let corAxi1 = CommonFplValueTestCases.getScopedElement axi1 "TestAxiom$1()" subtype
+                            let thm2 = CommonFplValueTestCases.getScopedElement theory "TestTheorem2" subtype
+                            let corThm2 = CommonFplValueTestCases.getScopedElement thm2 "TestTheorem2$1" subtype
+                            let lem2 = CommonFplValueTestCases.getScopedElement theory "TestLemma2" subtype
+                            let corLem2 = CommonFplValueTestCases.getScopedElement lem2 "TestLemma2$1" subtype
+                            let prp2 = CommonFplValueTestCases.getScopedElement theory "TestProposition2" subtype
+                            let corPrp2 = CommonFplValueTestCases.getScopedElement prp2 "TestProposition2$1" subtype
+                            let cor2 = CommonFplValueTestCases.getScopedElement theory "TestCorollary2$2" subtype
+                            let corCor2 = CommonFplValueTestCases.getScopedElement cor2 "TestCorollary2$2$1" subtype
+                            let con1 = CommonFplValueTestCases.getScopedElement theory "TestConjecture" subtype
+                            let corCon1 = CommonFplValueTestCases.getScopedElement con1 "TestConjecture$1" subtype
+                            let axi1 = CommonFplValueTestCases.getScopedElement theory "TestAxiom" subtype
+                            let corAxi1 = CommonFplValueTestCases.getScopedElement axi1 "TestAxiom$1" subtype
                             Some (r,theory,thm1,proofThm1,lem1,proofLem1,prp1,proofPrp1,cor1,proofCor1,thm2,
                                 corThm2,lem2,corLem2,prp2,corPrp2,cor2,corCor2,con1,corCon1,
                                 axi1,corAxi1)
