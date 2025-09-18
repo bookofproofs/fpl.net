@@ -1,5 +1,5 @@
 
-inf ModusPonens()
+inf ModusPonens
 {
     dec ~p,q: pred;
 
@@ -9,7 +9,7 @@ inf ModusPonens()
         q
 }
 
-inf ModusTollens()
+inf ModusTollens
 {
     dec ~p,q: pred;
 
@@ -19,7 +19,7 @@ inf ModusTollens()
         not (p)
 }
 
-inf HypotheticalSyllogism()
+inf HypotheticalSyllogism
 {
     dec ~p,q,r: pred;
     premise:
@@ -28,7 +28,7 @@ inf HypotheticalSyllogism()
         impl(p,r)
 }
 
-inf DisjunctiveSyllogism()
+inf DisjunctiveSyllogism
 {
     dec ~p,q: pred;
     premise:
@@ -37,7 +37,7 @@ inf DisjunctiveSyllogism()
         q
 }
 
-inf ExistsByExample()
+inf ExistsByExample
 {
     dec ~p: pred(c: obj);
     premise:  

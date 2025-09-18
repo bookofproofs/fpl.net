@@ -1629,12 +1629,14 @@ let rec eval (st: SymbolTable) ast =
         emitVAR04diagnostics fv
         variableStack.PopEvalStack()
         st.EvalPop()
-    // | Corollary of Positions * ((Ast * Ast) * (Ast list option * Ast))
-    | Ast.CorollarySignature(referencingIdentifierAst, paramTupleAst) ->
+    | Ast.SimpleSignature((pos1, pos2), pascalCaseIdAst) ->
+        st.EvalPush("SimpleSignature")
+        eval st pascalCaseIdAst
+        st.EvalPop()
+    | Ast.CorollarySignature(referencingIdentifierAst) ->
         st.EvalPush("CorollarySignature")
         variableStack.InSignatureEvaluation <- true
         eval st referencingIdentifierAst
-        eval st paramTupleAst
         variableStack.InSignatureEvaluation <- false
         st.EvalPop()
     | Ast.Corollary((pos1, pos2), (corollarySignatureAst, (optVarDeclOrSpecList, predicateAst))) ->

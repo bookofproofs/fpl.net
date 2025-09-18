@@ -1506,13 +1506,13 @@ type SymbolTableStructure() =
     // byax without reference
     [<DataRow("FplJustificationItemByAx", "00", """proof T$1 {1. byax A |- trivial};""", "")>]
     // byax with reference to an axiom
-    [<DataRow("FplJustificationItemByAx", "00a", """ax A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00a", """ax A {true} proof T$1 {1. byax A |- trivial};""", "")>]
     // byax with reference to a non-axiom
-    [<DataRow("FplJustificationItemByAx", "00b", """inf A() {pre:true con:true} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00b", """thm A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00c", """prop A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00d", """lem A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
-    [<DataRow("FplJustificationItemByAx", "00e", """conj A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00b", """inf A {pre:true con:true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00b", """thm A {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00c", """prop A {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00d", """lem A {true} proof T$1 {1. byax A |- trivial};""", "")>]
+    [<DataRow("FplJustificationItemByAx", "00e", """conj A {true} proof T$1 {1. byax A |- trivial};""", "")>]
     [<DataRow("FplJustificationItemByAx", "00f", """def pred A() {true} proof T$1 {1. byax A |- trivial};""", "")>]
     [<DataRow("FplJustificationItemByAx", "00g", """def func A()->pred {intr} proof T$1 {1. byax A |- trivial};""", "")>]
     [<DataRow("FplJustificationItemByAx", "00h", """def cl A:obj {intr} proof T$1 {1. byax A |- trivial};""", "")>]
@@ -1529,9 +1529,9 @@ type SymbolTableStructure() =
     [<DataRow("FplLanguage", "00", """;""", "")>]
 
     // lemma 
-    [<DataRow("FplLemma", "00", """lem T() {true};""", "")>]
+    [<DataRow("FplLemma", "00", """lem T {true};""", "")>]
     // lemma with two variables
-    [<DataRow("FplLemma", "01", """lem T() {dec ~x,y:pred; true};""", "")>]
+    [<DataRow("FplLemma", "01", """lem T {dec ~x,y:pred; true};""", "")>]
 
     [<DataRow("FplLocalization", "00", """;""", "")>]
 
@@ -1635,17 +1635,17 @@ type SymbolTableStructure() =
     // proof with qed
     [<DataRow("FplProof", "00x", """proof T$1 {1. |- trivial qed};""", "")>]
     // proof with axiom
-    [<DataRow("FplProof", "00a", """ax T() {true} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "00a", """ax T {true} proof T$1 {1. |- trivial};""", "")>]
     // proof with conjecture
-    [<DataRow("FplProof", "00b", """conj T() {true} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "00b", """conj T {true} proof T$1 {1. |- trivial};""", "")>]
     // proof with theorem
-    [<DataRow("FplProof", "01a", """thm T() {true} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "01a", """thm T {true} proof T$1 {1. |- trivial};""", "")>]
     // proof with conjecture
-    [<DataRow("FplProof", "01b", """lem T() {true} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "01b", """lem T {true} proof T$1 {1. |- trivial};""", "")>]
     // proof with conjecture
-    [<DataRow("FplProof", "01c", """prop T() {true} proof T$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "01c", """prop T {true} proof T$1 {1. |- trivial};""", "")>]
     // proof with corollary
-    [<DataRow("FplProof", "02", """thm T() {true} cor T$1() {true} proof T$1$1 {1. |- trivial};""", "")>]
+    [<DataRow("FplProof", "02", """thm T {true} cor T$1() {true} proof T$1$1 {1. |- trivial};""", "")>]
     // proof with two arguments
     [<DataRow("FplProof", "03", """proof T$1$1 {1. byax A |- trivial 2. |- trivial};""", "")>]
 
@@ -1665,7 +1665,7 @@ type SymbolTableStructure() =
     [<DataRow("FplRuleOfInference", "01", """inf T() {pre:true, true, true con:false};""", "")>]
 
     // theorem
-    [<DataRow("FplTheorem", "00", """thm T() {true};""", "")>]
+    [<DataRow("FplTheorem", "00", """thm T {true};""", "")>]
 
     [<DataRow("FplTheory", "00", """;""", "")>]
     [<DataRow("FplTranslation", "00", """;""", "")>]

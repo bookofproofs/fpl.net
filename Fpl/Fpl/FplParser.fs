@@ -270,7 +270,8 @@ let namedVariableDeclaration = positions "NamedVarDecl" (variableList .>>. varDe
 namedVariableDeclarationListRef.Value <- sepBy namedVariableDeclaration comma
 
 paramTupleRef.Value <- positions "ParamTuple" ((leftParen >>. IW >>. namedVariableDeclarationList) .>> (IW .>> rightParen)) |>> Ast.ParamTuple
-let signature = positions "Signature" ((predicateIdentifier .>> IW) .>>. paramTuple) .>> IW |>> Ast.Signature
+let simpleSignature = positions "SimpleSignature" (pascalCaseId) .>> IW |>> Ast.SimpleSignature
+let signature = positions "Signature" (simpleSignature .>>. paramTuple) .>> IW |>> Ast.Signature
 let localizationString = positions "LocalizationString" (regex "[^\"\n]*") <?> "<language-specific string>" |>> Ast.LocalizationString
 
 let keywordSymbol = pstring literalSymbol .>> IW
@@ -289,7 +290,7 @@ let userDefinedPostfix = positions "Postfix" (keywordPostfix >>. postfixString) 
 let userDefinedPrefix = positions "Prefix" (keywordPrefix >>. prefixString) .>> IW |>> Ast.Prefix
 let userDefinedSymbol = opt (choice [userDefinedPrefix; userDefinedInfix; userDefinedPostfix ])
 
-let signatureWithUserDefinedString = positions "SignatureWithUserDefinedString" (predicateIdentifier .>> IW .>>. userDefinedSymbol .>>. paramTuple) .>> IW |>> Ast.SignatureWithUserDefinedString
+let signatureWithUserDefinedString = positions "SignatureWithUserDefinedString" (simpleSignature .>>. userDefinedSymbol .>>. paramTuple) .>> IW |>> Ast.SignatureWithUserDefinedString
 (* Statements *)
 let argumentTuple = positions "ArgumentTuple" ((leftParen >>. predicateList) .>> (IW .>> rightParen)) |>> Ast.ArgumentTuple 
 
@@ -320,8 +321,7 @@ let entityInDomain = ( entity .>> IW .>>. inEntity ) .>> IW
 let forInBody = (entityInDomain .>> IW) .>>. (leftBrace >>. IW >>. statementList) .>> (IW >>. rightBrace)
 let forStatement = positions "ForIn" (keywordFor >>. forInBody) |>> Ast.ForIn
 
-//// Difference of assertion to an axiom: axiom's is followed by a signature of a predicate (i.e. with possible parameters),
-//// not by a predicate (i.e. with possible arguments)
+//// Difference of assertion to an axiom: axiom is named predicate, while an assertion uses a predicated to assert it.
 //// Difference of assertion to a mandatory property: a mandatory property introduces a completely new identifier inside
 //// the scope of a definition. An assertion uses a predicate referring to existing identifiers in the whole theory
 //// Difference of assertion to assume: the latter will be used only in the scope of proofs
@@ -430,10 +430,6 @@ let varDecl = tilde >>. namedVariableDeclaration
 let varDeclBlock = positions "VarDeclBlock" (IW >>. keywordDeclaration >>. (many ((varDecl <|> statement) .>> IW)) .>> semiColon) .>> IW |>> Ast.VarDeclBlock 
 
 let varDeclOrSpecList = opt (many1 (varDeclBlock)) 
-(*To simplify the syntax definition, we do not define separate
-FplPremiseConclusionBlocks for rules of inference and theorem-like blocks.
-The first have a simplified, PL0 semantics, the latter have a more complex, predicative semantics.
-However, there is a syntactical simplification of the signature*)
 let spacesPredicate = IW >>. predicate
 let premiseList = positions "PremiseList" (IW >>. (keywordPremise >>. colon >>. predicateList)) |>> Ast.PremiseList
 let conclusion = IW >>. (keywordConclusion >>. colon >>. predicate) 
@@ -441,7 +437,7 @@ let premiseConclusionBlock = positions "PremiseConclusionBlock" (leftBrace >>. v
 
 (* FPL building blocks - rules of reference *)
 let keywordInference = (skipString literalInfL <|> skipString literalInf) .>> SW 
-let ruleOfInference = positions "RuleOfInference" (keywordInference >>. signature .>>. premiseConclusionBlock) |>> Ast.RuleOfInference
+let ruleOfInference = positions "RuleOfInference" (keywordInference >>. simpleSignature .>>. premiseConclusionBlock) |>> Ast.RuleOfInference
 
 (* FPL building blocks - Theorem-like statements and conjectures *)
 let keywordTheorem = (skipString literalThmL <|> skipString literalThm) .>> SW
@@ -451,14 +447,14 @@ let keywordCorollary = (skipString literalCorL <|> skipString literalCor) .>> SW
 let keywordConjecture = (skipString literalConjL <|> skipString literalConj) .>> SW
 
 let theoremLikeBlock = leftBrace >>. varDeclOrSpecList .>>. spacesPredicate .>> spacesRightBrace
-let signatureWithTheoremLikeBlock = signature .>>. theoremLikeBlock
+let signatureWithTheoremLikeBlock = simpleSignature .>>. theoremLikeBlock
 
 let theorem = positions "Theorem" (keywordTheorem >>. signatureWithTheoremLikeBlock) |>> Ast.Theorem
 let lemma = positions "Lemma" (keywordLemma >>. signatureWithTheoremLikeBlock) |>> Ast.Lemma
 let proposition = positions "Proposition" (keywordProposition >>. signatureWithTheoremLikeBlock) |>> Ast.Proposition
 let conjecture = positions "Conjecture" (keywordConjecture >>. signatureWithTheoremLikeBlock) |>> Ast.Conjecture
 
-let corollarySignature = referencingIdentifier .>>. paramTuple .>> IW |>> Ast.CorollarySignature
+let corollarySignature = referencingIdentifier .>> IW |>> Ast.CorollarySignature
 let corollary = positions "Corollary" (keywordCorollary >>. corollarySignature .>>. theoremLikeBlock) |>> Ast.Corollary
 
 (* FPL building blocks - Axioms *)

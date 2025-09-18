@@ -357,7 +357,7 @@ type TestErrDiagnostics() =
         ad.Clear()
         let input = """
     inf 
-        D() { pre: true con: true }
+        D { pre: true con: true }
         y
 ;"""
         let result = fplParser input
@@ -567,7 +567,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseAxiom006Diag () =
         ad.Clear()
         let input = """
-        ax T () 
+        ax T 
         {
             true
         }
@@ -584,7 +584,7 @@ type TestErrDiagnostics() =
     member this.TestTryParseAxiom007Diag () =
         ad.Clear()
         let input = """
-        ax T () 
+        ax T 
         {
             intrinsic
         }

@@ -132,10 +132,11 @@ type Ast =
     | Lemma of Positions * (Ast *(Ast list option * Ast))
     | Proposition of Positions * (Ast *(Ast list option * Ast))
     | Corollary of Positions * (Ast * (Ast list option * Ast))
-    | CorollarySignature of (Ast * Ast)
+    | CorollarySignature of Ast
     | Conjecture of Positions * (Ast *(Ast list option * Ast))
     | NamedVarDecl of Positions * ((Ast list * Ast) * Ast) 
     | ParamTuple of Positions * Ast list
+    | SimpleSignature of Positions * Ast 
     | Signature of Positions * (Ast * Ast)
     | Mapping of Positions * Ast
     | SignatureWithUserDefinedString of Positions * ((Ast * Ast option) * Ast)

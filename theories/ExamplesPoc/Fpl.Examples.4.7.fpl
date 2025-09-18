@@ -1,4 +1,4 @@
-inference ModusPonens()
+inference ModusPonens
 {
     dec
         ~p,q: pred
@@ -10,7 +10,7 @@ inference ModusPonens()
 }
 
 
-inference ExistsByExample()
+inference ExistsByExample
 {
     dec
         ~p: pred(c: obj, other:* obj)
@@ -41,7 +41,7 @@ def pred Greater infix ">" 5 (x,y: obj)
     intr
 }
 
-axiom GreaterAB()
+axiom GreaterAB
 {
     dec
         ~a: A
@@ -50,7 +50,7 @@ axiom GreaterAB()
     (a > b)
 }
 
-axiom GreaterBC()
+axiom GreaterBC
 {
     dec
         ~b: B
@@ -59,7 +59,7 @@ axiom GreaterBC()
     (b > c)
 }
 
-axiom GreaterTransitive()
+axiom GreaterTransitive
 {
     dec
         ~x,y,z: obj
@@ -74,7 +74,7 @@ axiom GreaterTransitive()
     )
 }
 
-lemma Example4()
+lemma Example4
 {
     dec
         ~y,z: obj

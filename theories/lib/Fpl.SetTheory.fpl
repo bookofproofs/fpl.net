@@ -20,7 +20,7 @@ def pred IsEmpty(x: Set)
 }
 
 // existence of an empty set
-axiom EmptySetExists()
+axiom EmptySetExists
 {
     ex x:Set
     {
@@ -37,7 +37,7 @@ def class EmptySet: Set
             base.Set()
             assert IsEmpty(self) 
         ;
-        self
+        
     }
 }
 
@@ -59,12 +59,12 @@ def class Subset: Set
             base.Set()
             assert IsSubset(self, superSet)
         ;
-        self
+        
     }
 }
 
 // extensionality
-axiom Extensionality()
+axiom Extensionality
 {
     all x,y:Set
     {
@@ -94,7 +94,7 @@ def class SetRoster: Set
                 assert In(elem, self)
             }
         ;
-        self
+        
     }
 
 }
@@ -119,12 +119,12 @@ def class SetBuilder: Set
                 )
             }
         ;
-        self
+        
     }
 }
 
 // Schema of separation axioms
-axiom SchemaSeparation()
+axiom SchemaSeparation
 {
     all p:pred, x:Set
     {
@@ -138,7 +138,7 @@ axiom SchemaSeparation()
 
 
 // For any two sets $x,y$ there exists a set $z$ containing them as elements.
-axiom Pairing()
+axiom Pairing
 {
     all x,y:Set
     {
@@ -161,7 +161,7 @@ axiom Pairing()
 }
 
 // for every set x there is a set containing all elements of the elements of x
-axiom Union()
+axiom Union
 {
     all x:Set
     {
@@ -198,7 +198,7 @@ def func PowerSet(x: Set) -> Set
 }
 
 // for every set x there is a set y containing all subsets of x as its elements
-axiom PowerSetExistsForAllSets()
+axiom PowerSetExistsForAllSets
 {
     all x:Set
     {
