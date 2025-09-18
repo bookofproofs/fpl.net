@@ -1487,9 +1487,8 @@ type FplGenericArgInference(positions: Positions, parent: FplValue) =
     override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
 [<AbstractClass>]
-type FplGenericJustificationItem(positions: Positions, parent: FplValue, runOrder) =
+type FplGenericJustificationItem(positions: Positions, parent: FplValue) =
     inherit FplValue(positions, Some parent)
-    let _runOrder = runOrder
 
     override this.ShortName = PrimJustification
 
@@ -1499,9 +1498,9 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue, runOrde
 
     override this.Represent() = this.Type(SignatureType.Name)
 
-    override this.EmbedInSymbolTable _ = this.TryAddToParentsScope() 
+    override this.EmbedInSymbolTable _ = this.TryAddToParentsArgList() 
 
-    override this.RunOrder = Some _runOrder
+    override this.RunOrder = None
 
     member this.ParentJustification = this.Parent.Value :?> FplJustification
 
@@ -1531,97 +1530,97 @@ type FplGenericJustificationItem(positions: Positions, parent: FplValue, runOrde
         else
             None
 
-and FplJustificationItemByDef(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericJustificationItem(positions, parent, runOrder)
+and FplJustificationItemByDef(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByDef
 
     override this.Clone () =
-        let ret = new FplJustificationItemByDef((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        let ret = new FplJustificationItemByDef((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
     override this.Run variableStack = () // todo implement Run
 
-and FplJustificationItemByDefVar(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericJustificationItem(positions, parent, runOrder)
+and FplJustificationItemByDefVar(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByDefVar
 
     override this.Clone () =
-        let ret = new FplJustificationItemByDefVar((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        let ret = new FplJustificationItemByDefVar((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
     override this.Run variableStack = () // todo implement Run
 
-and FplJustificationItemByRefArgument(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericJustificationItem(positions, parent, runOrder)
+and FplJustificationItemByRefArgument(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByRefArgument
 
     override this.Clone () =
-        let ret = new FplJustificationItemByRefArgument((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        let ret = new FplJustificationItemByRefArgument((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
     override this.Run variableStack = () // todo implement Run
 
-and FplJustificationItemByProofArgument(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericJustificationItem(positions, parent, runOrder)
+and FplJustificationItemByProofArgument(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByProofArgument
 
     override this.Clone () =
-        let ret = new FplJustificationItemByProofArgument((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        let ret = new FplJustificationItemByProofArgument((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
     override this.Run variableStack = () // todo implement Run
 
-and FplJustificationItemByAx(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericJustificationItem(positions, parent, runOrder)
+and FplJustificationItemByAx(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByAx
 
     override this.Clone () =
-        let ret = new FplJustificationItemByAx((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        let ret = new FplJustificationItemByAx((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
     override this.Run variableStack = () // todo implement Run
 
-and FplJustificationItemByInf(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericJustificationItem(positions, parent, runOrder)
+and FplJustificationItemByInf(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByInf
 
     override this.Clone () =
-        let ret = new FplJustificationItemByInf((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        let ret = new FplJustificationItemByInf((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
     override this.Run variableStack = () // todo implement Run
 
-and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericJustificationItem(positions, parent, runOrder)
+and FplJustificationItemByTheoremLikeStmt(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByTheoremLikeStmt
 
     override this.Clone () =
-        let ret = new FplJustificationItemByTheoremLikeStmt((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        let ret = new FplJustificationItemByTheoremLikeStmt((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 
     override this.Run variableStack = () // todo implement Run
 
-and FplJustificationItemByCor(positions: Positions, parent: FplValue, runOrder) =
-    inherit FplGenericJustificationItem(positions, parent, runOrder)
+and FplJustificationItemByCor(positions: Positions, parent: FplValue) =
+    inherit FplGenericJustificationItem(positions, parent)
 
     override this.Name = PrimJIByCor
 
     override this.Clone () =
-        let ret = new FplJustificationItemByCor((this.StartPos, this.EndPos), this.Parent.Value, base.RunOrder.Value)
+        let ret = new FplJustificationItemByCor((this.StartPos, this.EndPos), this.Parent.Value)
         this.AssignParts(ret)
         ret
 

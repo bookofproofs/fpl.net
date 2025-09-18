@@ -391,7 +391,7 @@ let rec eval (st: SymbolTable) ast =
             if not (proof.HasArgument s) then
                 emitPR005Diagnostics s pos1 pos2
         | PrimJustificationL -> 
-            let fvAi = new FplJustificationItemByRefArgument((pos1, pos2), fv, variableStack.GetNextAvailableFplBlockRunOrder)
+            let fvAi = new FplJustificationItemByRefArgument((pos1, pos2), fv)
             fvAi.FplId <- s
             variableStack.PushEvalStack(fvAi)
             variableStack.PopEvalStack()
@@ -629,7 +629,7 @@ let rec eval (st: SymbolTable) ast =
     | Ast.ByDef((pos1, pos2), variableAst) ->
         st.EvalPush("ByDef")
         let parent = variableStack.PeekEvalStack()
-        let fvJi = new FplJustificationItemByDefVar((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+        let fvJi = new FplJustificationItemByDefVar((pos1, pos2), parent)
         variableStack.PushEvalStack(fvJi)
         eval st variableAst
         variableStack.PopEvalStack()
@@ -1883,7 +1883,7 @@ let rec eval (st: SymbolTable) ast =
             // byAx justification cannot be used together with a proof argument reference 
             emitPR011Diagnostics literalByAx literalAxL pos1 pos2 
         | Some FplPrimitives.literalByAx, None, None -> 
-            let fvJi = new FplJustificationItemByAx((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            let fvJi = new FplJustificationItemByAx((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to an axiom, if not issue diagnostics
@@ -1897,7 +1897,7 @@ let rec eval (st: SymbolTable) ast =
             // byInf justification cannot be used together with a proof argument reference 
             emitPR011Diagnostics literalByInf PrimRuleOfInference pos1 pos2 
         | Some FplPrimitives.literalByInf, None, None -> 
-            let fvJi = new FplJustificationItemByAx((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            let fvJi = new FplJustificationItemByAx((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to a rule of inference, if not issue diagnostics
@@ -1911,7 +1911,7 @@ let rec eval (st: SymbolTable) ast =
             // byDef justification cannot be used together with a proof argument reference 
             emitPR011Diagnostics literalByDef literalDefL pos1 pos2 
         | Some FplPrimitives.literalByDef, None, None -> 
-            let fvJi = new FplJustificationItemByDef((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            let fvJi = new FplJustificationItemByDef((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             // check, if indeed the predicateId points to a definition, if not issue diagnostics
@@ -1919,7 +1919,7 @@ let rec eval (st: SymbolTable) ast =
             checkDiagnostics fvJi candidates
             variableStack.PopEvalStack()
         | Some FplPrimitives.literalByCor, Some _, _ -> 
-            let fvJi = new FplJustificationItemByCor((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            let fvJi = new FplJustificationItemByCor((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             dollarDigitListAsts.Value |> List.map (eval st) |> ignore
@@ -1932,7 +1932,7 @@ let rec eval (st: SymbolTable) ast =
             emitPR012Diagnostics pos1 pos2 
         | Some _, _, _ -> () // does not occur, because the parser byModifier choices between only two keywords literalByAx or literalByDef
         | None, Some _, None -> 
-            let fvJi = new FplJustificationItemByCor((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            let fvJi = new FplJustificationItemByCor((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             dollarDigitListAsts.Value |> List.map (eval st) |> ignore
@@ -1943,7 +1943,7 @@ let rec eval (st: SymbolTable) ast =
             emitPR013Diagnostics pos1 pos2
             variableStack.PopEvalStack()
         | None, Some _, Some _ -> 
-            let fvJi = new FplJustificationItemByProofArgument((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            let fvJi = new FplJustificationItemByProofArgument((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             dollarDigitListAsts.Value |> List.map (eval st) |> ignore
@@ -1961,7 +1961,7 @@ let rec eval (st: SymbolTable) ast =
             // issue diagnostics a theorem-like statement justification cannot be used together with a proof argument reference 
             emitPR014Diagnostics pos1 pos2 
         | None, None, None -> 
-            let fvJi = new FplJustificationItemByTheoremLikeStmt((pos1, pos2), parent, variableStack.GetNextAvailableFplBlockRunOrder)
+            let fvJi = new FplJustificationItemByTheoremLikeStmt((pos1, pos2), parent)
             variableStack.PushEvalStack(fvJi)
             eval st predicateIdentifierAst
             let candidates = findCandidatesByName st fvJi.FplId false false
